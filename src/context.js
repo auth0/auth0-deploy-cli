@@ -4,6 +4,7 @@ import * as path from 'path';
 import logger from './logger';
 import { constants, unifyDatabases, unifyScripts } from 'auth0-source-control-extension-tools';
 
+
 Promise.promisifyAll(fs);
 
 const isPage = (file) => {
@@ -94,6 +95,89 @@ const getRules = (dirPath) => {
         processRule(ruleName, rules[ruleName]), { concurrency: 2 }));
 };
 
+/*
+ * Process a single database script.
+ */
+const processDatabaseScript = (databaseName, scripts) => {
+    const database = {
+        name: databaseName,
+        scripts: []
+    };
+
+    const files = [];
+    scripts.forEach(script => {
+        files.push(fs.readFileAsync(script.scriptFileName, 'utf8').then(
+            (contents) => {
+                database.scripts.push({
+                    name: script.name,
+                    scriptFile: contents
+                });
+            }));
+    });
+
+    return Promise.all(files)
+        .then(() => database);
+};
+
+/*
+ * Get the details of a database file script.
+ */
+const getDatabaseScriptDetails = (filename) => {
+    const parts = filename.split('/');
+    while (parts.length > 3) {
+        parts.shift();
+    }
+    logger.debug("Found "+filename+" it has these parts: "+JSON.stringify(parts));
+    if (parts.length === 3 &&
+            parts[0] === constants.DATABASE_CONNECTIONS_DIRECTORY &&
+            /\.js$/i.test(parts[2])) {
+        const scriptName = path.parse(parts[2]).name;
+        if (constants.DATABASE_SCRIPTS.indexOf(scriptName) > -1) {
+            return {
+                database: parts[1],
+                name: path.parse(scriptName).name
+            };
+        }
+    }
+
+    return null;
+};
+
+
+/*
+ * Get all database scripts.
+ */
+const getDatabaseScripts = (dirPath) => {
+    const databases = {};
+    const directory = [];
+
+    // Determine if we have the script, the metadata or both.
+    directory.push(
+        fs.readdirAsync(dirPath).then((dirs) => {
+            const filePromises = [];
+            dirs.forEach((dirName) => {
+                var fullDir = path.join(dirPath,dirName);
+                logger.debug("Looking for database-connections in :"+fullDir);
+                filePromises.push(
+                    fs.readdirAsync(fullDir).then((files) => {
+                        files.forEach(function (fileName) {
+                            const fullFileName = path.join(fullDir,fileName);
+                            const script = getDatabaseScriptDetails(fullFileName);
+                            if (script) {
+                                databases[script.database] = databases[script.database] || [];
+                                script.scriptFileName = fullFileName;
+                                databases[script.database].push(script);
+                            }
+                        });
+                    }));
+            });
+            return Promise.all(filePromises);
+        }));
+
+    return Promise.all(directory).then( () => Promise.map(Object.keys(databases), (databaseName) =>
+            processDatabaseScript(databaseName, databases[databaseName]),
+        { concurrency: 2 }));
+};
 
 /*
  * Process a single page script.
@@ -182,7 +266,7 @@ const getChanges = (filePath) => {
         var promises = {
             rules: getRules(path.join(fullPath,constants.RULES_DIRECTORY)),
             pages: getPages(path.join(fullPath,constants.PAGES_DIRECTORY)),
-            databases: getDatabaseConnections((path.join(fullPath,constants.DATABASE_CONNECTIONS_DIRECTORY)))
+            databases: getDatabaseScripts((path.join(fullPath,constants.DATABASE_CONNECTIONS_DIRECTORY)))
         };
 
         return Promise.props(promises)

@@ -34,15 +34,13 @@ _bluebird2.default.promisifyAll(fs);
 
 var isPage = function isPage(file) {
     var directory = path.basename(path.dirname(file));
-    _logger2.default.debug("checking if " + directory + ", " + file + " matches " + _auth0SourceControlExtensionTools.constants.PAGES_DIRECTORY + ", and " + _auth0SourceControlExtensionTools.constants.PAGE_NAMES);
-    var dirIndex = file.indexOf(_auth0SourceControlExtensionTools.constants.PAGES_DIRECTORY + '/');
     var nameIndex = _auth0SourceControlExtensionTools.constants.PAGE_NAMES.indexOf(file.split('/').pop());
-    _logger2.default.debug("dirIndex: " + dirIndex + ", nameIndex: " + nameIndex);
+    _logger2.default.debug("directory: " + directory + ", nameIndex: " + nameIndex);
     return directory === _auth0SourceControlExtensionTools.constants.PAGES_DIRECTORY && nameIndex >= 0;
 };
 
 /*
- * Download a single rule with its metadata.
+ * Process a single rule with its metadata.
  */
 var processRule = function processRule(ruleName, rule) {
     var currentRule = {
@@ -118,6 +116,87 @@ var getRules = function getRules(dirPath) {
     return _bluebird2.default.all(files).then(function () {
         return _bluebird2.default.map(Object.keys(rules), function (ruleName) {
             return processRule(ruleName, rules[ruleName]);
+        }, { concurrency: 2 });
+    });
+};
+
+/*
+ * Process a single database script.
+ */
+var processDatabaseScript = function processDatabaseScript(databaseName, scripts) {
+    var database = {
+        name: databaseName,
+        scripts: []
+    };
+
+    var files = [];
+    scripts.forEach(function (script) {
+        files.push(fs.readFileAsync(script.scriptFileName, 'utf8').then(function (contents) {
+            database.scripts.push({
+                name: script.name,
+                scriptFile: contents
+            });
+        }));
+    });
+
+    return _bluebird2.default.all(files).then(function () {
+        return database;
+    });
+};
+
+/*
+ * Get the details of a database file script.
+ */
+var getDatabaseScriptDetails = function getDatabaseScriptDetails(filename) {
+    var parts = filename.split('/');
+    while (parts.length > 3) {
+        parts.shift();
+    }
+    _logger2.default.debug("Found " + filename + " it has these parts: " + JSON.stringify(parts));
+    if (parts.length === 3 && parts[0] === _auth0SourceControlExtensionTools.constants.DATABASE_CONNECTIONS_DIRECTORY && /\.js$/i.test(parts[2])) {
+        var scriptName = path.parse(parts[2]).name;
+        if (_auth0SourceControlExtensionTools.constants.DATABASE_SCRIPTS.indexOf(scriptName) > -1) {
+            return {
+                database: parts[1],
+                name: path.parse(scriptName).name
+            };
+        }
+    }
+
+    return null;
+};
+
+/*
+ * Get all database scripts.
+ */
+var getDatabaseScripts = function getDatabaseScripts(dirPath) {
+    var databases = {};
+    var directory = [];
+
+    // Determine if we have the script, the metadata or both.
+    directory.push(fs.readdirAsync(dirPath).then(function (dirs) {
+        var filePromises = [];
+        dirs.forEach(function (dirName) {
+            var fullDir = path.join(dirPath, dirName);
+            _logger2.default.debug("Looking for database-connections in :" + fullDir);
+            filePromises.push(fs.readdirAsync(fullDir).then(function (files) {
+                files.forEach(function (fileName) {
+                    var fullFileName = path.join(fullDir, fileName);
+                    var script = getDatabaseScriptDetails(fullFileName);
+                    if (script) {
+                        databases[script.database] = databases[script.database] || [];
+                        script.scriptFileName = fullFileName;
+                        databases[script.database].push(script);
+                    }
+                });
+            }));
+        });
+        return _bluebird2.default.all(filePromises);
+    }));
+
+    return _bluebird2.default.all(directory).then(function () {
+        return _bluebird2.default.map(Object.keys(databases), function (databaseName) {
+            return processDatabaseScript(databaseName, databases[databaseName]);
         }, { concurrency: 2 });
     });
 };
@@ -208,14 +287,15 @@ var getChanges = function getChanges(filePath) {
         _logger2.default.debug("Processing " + filePath + " as directory " + fullPath);
 
         var promises = {
-            rules: getRules(path.join(fullPath, "rules")),
-            pages: getPages(path.join(fullPath, "pages"))
+            rules: getRules(path.join(fullPath, _auth0SourceControlExtensionTools.constants.RULES_DIRECTORY)),
+            pages: getPages(path.join(fullPath, _auth0SourceControlExtensionTools.constants.PAGES_DIRECTORY)),
+            databases: getDatabaseScripts(path.join(fullPath, _auth0SourceControlExtensionTools.constants.DATABASE_CONNECTIONS_DIRECTORY))
         };
 
         return _bluebird2.default.props(promises).then(function (result) {
             return {
                 rules: (0, _auth0SourceControlExtensionTools.unifyScripts)(result.rules),
-                //databases: unifyDatabases(result.databases),
+                databases: (0, _auth0SourceControlExtensionTools.unifyDatabases)(result.databases),
                 pages: (0, _auth0SourceControlExtensionTools.unifyScripts)(result.pages)
             };
         });
