@@ -7,7 +7,7 @@
     "a0deploy": "./index.js"
   },
   "scripts": {
-    "build": "mkdir -p es5 && babel src -d es5",
+    "build": "babel src -d es5",
     "prepublish": "npm run build",
     "test": "./node_modules/.bin/mocha --reporter spec"
   },
