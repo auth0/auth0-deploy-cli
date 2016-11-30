@@ -114,7 +114,7 @@ var client = managementApi.getClient({
     clientId: config('AUTH0_CLIENT_ID'),
     clientSecret: config('AUTH0_CLIENT_SECRET')
 }).then(function(auth0) {
-    tools.deploy(progress, context, auth0, new Storage(stateFileName), config, {});
+    tools.deploy(progress, context, auth0, new Storage(stateFileName), config, {}, config('AUTH0_CLIENT_ID'));
 }).catch(function(err) {
     console.error("Got this error: "+JSON.stringify(err));
 });

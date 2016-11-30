@@ -2,7 +2,7 @@ import Promise from 'bluebird';
 import * as fs from 'fs';
 import * as path from 'path';
 import logger from './logger';
-import { constants, unifyDatabases, unifyScripts } from 'auth0-source-control-extension-tools';
+import {constants, unifyDatabases, unifyScripts} from 'auth0-source-control-extension-tools';
 
 
 Promise.promisifyAll(fs);
@@ -10,8 +10,8 @@ Promise.promisifyAll(fs);
 const isPage = (file) => {
     var directory = path.basename(path.dirname(file));
     var nameIndex = constants.PAGE_NAMES.indexOf(file.split('/').pop());
-    logger.debug("directory: " + directory + ", nameIndex: "+nameIndex);
-    return  directory === constants.PAGES_DIRECTORY && nameIndex >= 0;
+    logger.debug("directory: " + directory + ", nameIndex: " + nameIndex);
+    return directory === constants.PAGES_DIRECTORY && nameIndex >= 0;
 }
 
 /*
@@ -59,7 +59,7 @@ const getRules = (dirPath) => {
         fs.accessSync(dirPath, fs.F_OK);
         // file  exists, also make sure it is a directory
         if (fs.lstatSync(dirPath).isDirectory()) {
-            logger.debug("Looking for rules in "+dirPath);
+            logger.debug("Looking for rules in " + dirPath);
             /* Grab the files and loop through them */
             files.push(fs.readdirAsync(dirPath).then((files) => {
                 files.forEach(fileName => {
@@ -70,17 +70,17 @@ const getRules = (dirPath) => {
 
                     if (ext === '.js') {
                         rules[ruleName].script = true;
-                        rules[ruleName].scriptFileName = path.join(dirPath,fileName);
+                        rules[ruleName].scriptFileName = path.join(dirPath, fileName);
                     } else if (ext === '.json') {
                         rules[ruleName].metadata = true;
-                        rules[ruleName].metadataFileName = path.join(dirPath,fileName);
+                        rules[ruleName].metadataFileName = path.join(dirPath, fileName);
                     }
                 })
             })
-            .catch(function(e) {
-                logger.error("Couldn't process "+dirPath+" because: ");
-                logger.error(e);
-            }));
+                .catch(function (e) {
+                    logger.error("Couldn't process " + dirPath + " because: ");
+                    logger.error(e);
+                }));
         }
     } catch (e) {
         /* Rules must not exist.
@@ -92,7 +92,68 @@ const getRules = (dirPath) => {
 
     // Download all rules.
     return Promise.all(files).then(() => Promise.map(Object.keys(rules), (ruleName) =>
-        processRule(ruleName, rules[ruleName]), { concurrency: 2 }));
+        processRule(ruleName, rules[ruleName]), {concurrency: 2}));
+};
+
+/*
+ * Process a single database script.
+ */
+const processClientConfig = (clientName, clientFiles) => {
+    const client = {
+        name: clientName,
+    };
+
+    const attributeNames = [ { name: 'scriptFileName', content: 'scriptFile' }, { name: 'metaFileName', content: 'metaFile' } ];
+
+    const filePromises = [];
+    attributeNames.forEach(function(names) {
+        if (names.name in clientFiles) {
+            filePromises.push(fs.readFileAsync(clientFiles[names.name], 'utf8').then(
+                (contents) => {
+                    client[names.content] = contents;
+                }));
+        }
+    });
+
+    return Promise.all(filePromises)
+        .then(() => client);
+};
+
+/*
+ * Get all database scripts.
+ */
+const getClientConfigs = (dirPath) => {
+    const clients = {};
+
+    // Determine if we have the script, the metadata or both.
+    return fs.readdirAsync(dirPath).then((files) => {
+        files.forEach(function (fileName) {
+            logger.debug("Found client file: " + fileName);
+            /* check for meta/config pairs */
+            const fullFileName = path.join(dirPath, fileName);
+            let clientName = path.parse(fileName).name;
+            let meta = false;
+
+            /* check for meta files */
+            if (clientName.endsWith('.meta')) {
+                clientName = path.parse(clientName).name;
+                meta = true;
+            }
+
+            /* Initialize object if needed */
+            clients[clientName] = clients[clientName] || {};
+
+            if (meta) {
+                clients[clientName].metaFileName = fullFileName;
+            } else {
+                clients[clientName].scriptFileName = fullFileName;
+            }
+        });
+    })
+        .then(() => Promise.map(Object.keys(clients),
+            (clientName) =>
+                processClientConfig(clientName, clients[clientName]),
+            {concurrency: 2}));
 };
 
 /*
@@ -127,10 +188,10 @@ const getDatabaseScriptDetails = (filename) => {
     while (parts.length > 3) {
         parts.shift();
     }
-    logger.debug("Found "+filename+" it has these parts: "+JSON.stringify(parts));
+    logger.debug("Found " + filename + " it has these parts: " + JSON.stringify(parts));
     if (parts.length === 3 &&
-            parts[0] === constants.DATABASE_CONNECTIONS_DIRECTORY &&
-            /\.js$/i.test(parts[2])) {
+        parts[0] === constants.DATABASE_CONNECTIONS_DIRECTORY &&
+        /\.js$/i.test(parts[2])) {
         const scriptName = path.parse(parts[2]).name;
         if (constants.DATABASE_SCRIPTS.indexOf(scriptName) > -1) {
             return {
@@ -149,34 +210,31 @@ const getDatabaseScriptDetails = (filename) => {
  */
 const getDatabaseScripts = (dirPath) => {
     const databases = {};
-    const directory = [];
 
     // Determine if we have the script, the metadata or both.
-    directory.push(
-        fs.readdirAsync(dirPath).then((dirs) => {
-            const filePromises = [];
-            dirs.forEach((dirName) => {
-                var fullDir = path.join(dirPath,dirName);
-                logger.debug("Looking for database-connections in :"+fullDir);
-                filePromises.push(
-                    fs.readdirAsync(fullDir).then((files) => {
-                        files.forEach(function (fileName) {
-                            const fullFileName = path.join(fullDir,fileName);
-                            const script = getDatabaseScriptDetails(fullFileName);
-                            if (script) {
-                                databases[script.database] = databases[script.database] || [];
-                                script.scriptFileName = fullFileName;
-                                databases[script.database].push(script);
-                            }
-                        });
-                    }));
-            });
-            return Promise.all(filePromises);
-        }));
-
-    return Promise.all(directory).then( () => Promise.map(Object.keys(databases), (databaseName) =>
+    return fs.readdirAsync(dirPath).then((dirs) => {
+        const filePromises = [];
+        dirs.forEach((dirName) => {
+            var fullDir = path.join(dirPath, dirName);
+            logger.debug("Looking for database-connections in :" + fullDir);
+            filePromises.push(
+                fs.readdirAsync(fullDir).then((files) => {
+                    files.forEach(function (fileName) {
+                        const fullFileName = path.join(fullDir, fileName);
+                        const script = getDatabaseScriptDetails(fullFileName);
+                        if (script) {
+                            databases[script.database] = databases[script.database] || [];
+                            script.scriptFileName = fullFileName;
+                            databases[script.database].push(script);
+                        }
+                    });
+                }));
+        });
+        return Promise.all(filePromises);
+    })
+        .then(() => Promise.map(Object.keys(databases), (databaseName) =>
             processDatabaseScript(databaseName, databases[databaseName]),
-        { concurrency: 2 }));
+        {concurrency: 2}));
 };
 
 /*
@@ -223,7 +281,7 @@ const getPages = (dirPath) => {
                 fs.readdirAsync(dirPath).then((files) => {
                     files.forEach(fileName => {
                         /* Process File */
-                        const fullFileName = path.join(dirPath,fileName);
+                        const fullFileName = path.join(dirPath, fileName);
                         if (isPage(fullFileName)) {
                             const pageName = path.parse(fileName).name;
                             const ext = path.parse(fileName).ext;
@@ -235,25 +293,25 @@ const getPages = (dirPath) => {
                                 pages[pageName].metaFileName = fullFileName;
                             }
                         } else {
-                            logger.warn("Skipping file that is not a page: " +fullFileName);
+                            logger.warn("Skipping file that is not a page: " + fullFileName);
                         }
                     });
                 })
-                .catch(function(e) {
-                    logger.error("Couldn't process directory,"+dirPath+" , because: "+JSON.stringify(e));
-                }));
+                    .catch(function (e) {
+                        logger.error("Couldn't process directory," + dirPath + " , because: " + JSON.stringify(e));
+                    }));
         } else {
-            logger.error("Can't process pages file that is not a directory: "+dirPath);
+            logger.error("Can't process pages file that is not a directory: " + dirPath);
         }
     } catch (e) {
         /* Pages must not exist.
          * TODO should probably check for NOENT here instead of just failing silently
          */
-        logger.debug("Processing pages: "+JSON.stringify(e));
+        logger.debug("Processing pages: " + JSON.stringify(e));
     }
 
     return Promise.all(files).then(() => Promise.map(Object.keys(pages), (pageName) =>
-        processPage(pageName, pages[pageName]), { concurrency: 2 }));
+        processPage(pageName, pages[pageName]), {concurrency: 2}));
 };
 
 const getChanges = (filePath) => {
@@ -261,25 +319,27 @@ const getChanges = (filePath) => {
     var lstat = fs.lstatSync(fullPath);
     if (lstat.isDirectory()) {
         /* If this is a directory, look for each file in the directory */
-        logger.debug("Processing "+filePath+" as directory "+fullPath);
+        logger.debug("Processing " + filePath + " as directory " + fullPath);
 
         var promises = {
-            rules: getRules(path.join(fullPath,constants.RULES_DIRECTORY)),
-            pages: getPages(path.join(fullPath,constants.PAGES_DIRECTORY)),
-            databases: getDatabaseScripts((path.join(fullPath,constants.DATABASE_CONNECTIONS_DIRECTORY)))
+            rules: getRules(path.join(fullPath, constants.RULES_DIRECTORY)),
+            pages: getPages(path.join(fullPath, constants.PAGES_DIRECTORY)),
+            databases: getDatabaseScripts((path.join(fullPath, constants.DATABASE_CONNECTIONS_DIRECTORY))),
+            clients: getClientConfigs((path.join(fullPath, constants.CLIENTS_DIRECTORY)))
         };
 
         return Promise.props(promises)
             .then((result) => ({
                 rules: unifyScripts(result.rules),
                 databases: unifyDatabases(result.databases),
-                pages: unifyScripts(result.pages)
+                pages: unifyScripts(result.pages),
+                clients: unifyScripts(result.clients)
             }));
     } else if (lstat.isFile()) {
         /* If it is a file, parse it */
         return JSON.parse(fs.readFileSync(fullPath));
     } else {
-        throw new Error("Not sure what to do with, "+fullPath+", it is not a file or directory...");
+        throw new Error("Not sure what to do with, " + fullPath + ", it is not a file or directory...");
     }
 }
 
@@ -298,6 +358,7 @@ export default class {
                     me.pages = data.pages || {};
                     me.rules = data.rules || {};
                     me.databases = data.databases || [];
-                });
+                    me.clients = data.clients || {};
+               });
     }
 }
