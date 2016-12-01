@@ -127,7 +127,7 @@ var client = managementApi.getClient({
     clientId: config('AUTH0_CLIENT_ID'),
     clientSecret: config('AUTH0_CLIENT_SECRET')
 }).then(function (auth0) {
-    tools.deploy(progress, context, auth0, new _storage2.default(stateFileName), config, {}, config('AUTH0_CLIENT_ID'));
+    tools.deploy(progress, context, auth0, new _storage2.default(stateFileName), config, {});
 }).catch(function (err) {
     console.error("Got this error: " + JSON.stringify(err));
 });

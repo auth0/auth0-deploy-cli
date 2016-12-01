@@ -105,11 +105,11 @@ var getRules = function getRules(dirPath) {
             }));
         }
     } catch (e) {
-        /* Rules must not exist.
-         * TODO should probably check for NOENT here instead of just failing silently
-         */
-        _logger2.default.debug(dirPath + " does not exist, no rules found!");
-        _logger2.default.debug(e);
+        if (e.code === "ENOENT") {
+            _logger2.default.debug("No rules configured");
+        } else {
+            return _bluebird2.default.reject(e);
+        }
     }
 
     // Download all rules.
@@ -128,7 +128,7 @@ var processClientConfig = function processClientConfig(clientName, clientFiles) 
         name: clientName
     };
 
-    var attributeNames = [{ name: 'scriptFileName', content: 'scriptFile' }, { name: 'metaFileName', content: 'metaFile' }];
+    var attributeNames = [{ name: 'configFileName', content: 'configFile' }, { name: 'metadataFileName', content: 'metadataFile' }];
 
     var filePromises = [];
     attributeNames.forEach(function (names) {
@@ -151,34 +151,45 @@ var getClientConfigs = function getClientConfigs(dirPath) {
     var clients = {};
 
     // Determine if we have the script, the metadata or both.
-    return fs.readdirAsync(dirPath).then(function (files) {
-        files.forEach(function (fileName) {
-            _logger2.default.debug("Found client file: " + fileName);
-            /* check for meta/config pairs */
-            var fullFileName = path.join(dirPath, fileName);
-            var clientName = path.parse(fileName).name;
-            var meta = false;
+    try {
+        fs.accessSync(dirPath, fs.F_OK);
+        return fs.readdirAsync(dirPath).then(function (files) {
+            files.forEach(function (fileName) {
+                _logger2.default.debug("Found client file: " + fileName);
+                /* check for meta/config pairs */
+                var fullFileName = path.join(dirPath, fileName);
+                var clientName = path.parse(fileName).name;
+                var meta = false;
 
-            /* check for meta files */
-            if (clientName.endsWith('.meta')) {
-                clientName = path.parse(clientName).name;
-                meta = true;
-            }
+                /* check for meta files */
+                if (clientName.endsWith('.meta')) {
+                    clientName = path.parse(clientName).name;
+                    meta = true;
+                }
 
-            /* Initialize object if needed */
-            clients[clientName] = clients[clientName] || {};
+                /* Initialize object if needed */
+                clients[clientName] = clients[clientName] || {};
 
-            if (meta) {
-                clients[clientName].metaFileName = fullFileName;
-            } else {
-                clients[clientName].scriptFileName = fullFileName;
-            }
+                if (meta) {
+                    clients[clientName].metadataFileName = fullFileName;
+                } else {
+                    clients[clientName].configFileName = fullFileName;
+                }
+            });
+        }).then(function () {
+            return _bluebird2.default.map(Object.keys(clients), function (clientName) {
+                return processClientConfig(clientName, clients[clientName]);
+            }, { concurrency: 2 });
         });
-    }).then(function () {
-        return _bluebird2.default.map(Object.keys(clients), function (clientName) {
-            return processClientConfig(clientName, clients[clientName]);
-        }, { concurrency: 2 });
-    });
+    } catch (e) {
+        if (e.code === "ENOENT") {
+            _logger2.default.debug("No clients configured");
+        } else {
+            return _bluebird2.default.reject(e);
+        }
+    }
+
+    return _bluebird2.default.resolve();
 };
 
 /*
@@ -234,29 +245,41 @@ var getDatabaseScripts = function getDatabaseScripts(dirPath) {
     var databases = {};
 
     // Determine if we have the script, the metadata or both.
-    return fs.readdirAsync(dirPath).then(function (dirs) {
-        var filePromises = [];
-        dirs.forEach(function (dirName) {
-            var fullDir = path.join(dirPath, dirName);
-            _logger2.default.debug("Looking for database-connections in :" + fullDir);
-            filePromises.push(fs.readdirAsync(fullDir).then(function (files) {
-                files.forEach(function (fileName) {
-                    var fullFileName = path.join(fullDir, fileName);
-                    var script = getDatabaseScriptDetails(fullFileName);
-                    if (script) {
-                        databases[script.database] = databases[script.database] || [];
-                        script.scriptFileName = fullFileName;
-                        databases[script.database].push(script);
-                    }
-                });
-            }));
+    try {
+        fs.accessSync(dirPath, fs.F_OK);
+
+        return fs.readdirAsync(dirPath).then(function (dirs) {
+            var filePromises = [];
+            dirs.forEach(function (dirName) {
+                var fullDir = path.join(dirPath, dirName);
+                _logger2.default.debug("Looking for database-connections in :" + fullDir);
+                filePromises.push(fs.readdirAsync(fullDir).then(function (files) {
+                    files.forEach(function (fileName) {
+                        var fullFileName = path.join(fullDir, fileName);
+                        var script = getDatabaseScriptDetails(fullFileName);
+                        if (script) {
+                            databases[script.database] = databases[script.database] || [];
+                            script.scriptFileName = fullFileName;
+                            databases[script.database].push(script);
+                        }
+                    });
+                }));
+            });
+            return _bluebird2.default.all(filePromises);
+        }).then(function () {
+            return _bluebird2.default.map(Object.keys(databases), function (databaseName) {
+                return processDatabaseScript(databaseName, databases[databaseName]);
+            }, { concurrency: 2 });
         });
-        return _bluebird2.default.all(filePromises);
-    }).then(function () {
-        return _bluebird2.default.map(Object.keys(databases), function (databaseName) {
-            return processDatabaseScript(databaseName, databases[databaseName]);
-        }, { concurrency: 2 });
-    });
+    } catch (e) {
+        if (e.code === "ENOENT") {
+            _logger2.default.debug("No database scripts configured");
+        } else {
+            return _bluebird2.default.reject(e);
+        }
+    }
+
+    return _bluebird2.default.resolve();
 };
 
 /*
@@ -324,10 +347,11 @@ var getPages = function getPages(dirPath) {
             _logger2.default.error("Can't process pages file that is not a directory: " + dirPath);
         }
     } catch (e) {
-        /* Pages must not exist.
-         * TODO should probably check for NOENT here instead of just failing silently
-         */
-        _logger2.default.debug("Processing pages: " + JSON.stringify(e));
+        if (e.code === "ENOENT") {
+            _logger2.default.debug("No pages configured");
+        } else {
+            return _bluebird2.default.reject(e);
+        }
     }
 
     return _bluebird2.default.all(files).then(function () {
@@ -356,7 +380,7 @@ var getChanges = function getChanges(filePath) {
                 rules: (0, _auth0SourceControlExtensionTools.unifyScripts)(result.rules),
                 databases: (0, _auth0SourceControlExtensionTools.unifyDatabases)(result.databases),
                 pages: (0, _auth0SourceControlExtensionTools.unifyScripts)(result.pages),
-                clients: (0, _auth0SourceControlExtensionTools.unifyScripts)(result.clients)
+                clients: (0, _auth0SourceControlExtensionTools.unifyConfigs)(result.clients)
             };
         });
     } else if (lstat.isFile()) {

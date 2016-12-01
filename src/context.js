@@ -2,7 +2,7 @@ import Promise from 'bluebird';
 import * as fs from 'fs';
 import * as path from 'path';
 import logger from './logger';
-import {constants, unifyDatabases, unifyScripts} from 'auth0-source-control-extension-tools';
+import {constants, unifyDatabases, unifyScripts, unifyConfigs} from 'auth0-source-control-extension-tools';
 
 
 Promise.promisifyAll(fs);
@@ -83,11 +83,11 @@ const getRules = (dirPath) => {
                 }));
         }
     } catch (e) {
-        /* Rules must not exist.
-         * TODO should probably check for NOENT here instead of just failing silently
-         */
-        logger.debug(dirPath + " does not exist, no rules found!");
-        logger.debug(e);
+        if (e.code === "ENOENT") {
+            logger.debug("No rules configured");
+        } else {
+            return Promise.reject(e);
+        }
     }
 
     // Download all rules.
@@ -103,7 +103,7 @@ const processClientConfig = (clientName, clientFiles) => {
         name: clientName,
     };
 
-    const attributeNames = [ { name: 'scriptFileName', content: 'scriptFile' }, { name: 'metaFileName', content: 'metaFile' } ];
+    const attributeNames = [ { name: 'configFileName', content: 'configFile' }, { name: 'metadataFileName', content: 'metadataFile' } ];
 
     const filePromises = [];
     attributeNames.forEach(function(names) {
@@ -126,34 +126,45 @@ const getClientConfigs = (dirPath) => {
     const clients = {};
 
     // Determine if we have the script, the metadata or both.
-    return fs.readdirAsync(dirPath).then((files) => {
-        files.forEach(function (fileName) {
-            logger.debug("Found client file: " + fileName);
-            /* check for meta/config pairs */
-            const fullFileName = path.join(dirPath, fileName);
-            let clientName = path.parse(fileName).name;
-            let meta = false;
+    try {
+        fs.accessSync(dirPath, fs.F_OK);
+        return fs.readdirAsync(dirPath).then((files) => {
+            files.forEach(function (fileName) {
+                logger.debug("Found client file: " + fileName);
+                /* check for meta/config pairs */
+                const fullFileName = path.join(dirPath, fileName);
+                let clientName = path.parse(fileName).name;
+                let meta = false;
 
-            /* check for meta files */
-            if (clientName.endsWith('.meta')) {
-                clientName = path.parse(clientName).name;
-                meta = true;
-            }
+                /* check for meta files */
+                if (clientName.endsWith('.meta')) {
+                    clientName = path.parse(clientName).name;
+                    meta = true;
+                }
 
-            /* Initialize object if needed */
-            clients[clientName] = clients[clientName] || {};
+                /* Initialize object if needed */
+                clients[clientName] = clients[clientName] || {};
 
-            if (meta) {
-                clients[clientName].metaFileName = fullFileName;
-            } else {
-                clients[clientName].scriptFileName = fullFileName;
-            }
-        });
-    })
-        .then(() => Promise.map(Object.keys(clients),
-            (clientName) =>
-                processClientConfig(clientName, clients[clientName]),
-            {concurrency: 2}));
+                if (meta) {
+                    clients[clientName].metadataFileName = fullFileName;
+                } else {
+                    clients[clientName].configFileName = fullFileName;
+                }
+            });
+        })
+            .then(() => Promise.map(Object.keys(clients),
+                (clientName) =>
+                    processClientConfig(clientName, clients[clientName]),
+                {concurrency: 2}));
+    } catch(e) {
+        if (e.code === "ENOENT") {
+            logger.debug("No clients configured");
+        } else {
+            return Promise.reject(e);
+        }
+    }
+
+    return Promise.resolve();
 };
 
 /*
@@ -212,29 +223,41 @@ const getDatabaseScripts = (dirPath) => {
     const databases = {};
 
     // Determine if we have the script, the metadata or both.
-    return fs.readdirAsync(dirPath).then((dirs) => {
-        const filePromises = [];
-        dirs.forEach((dirName) => {
-            var fullDir = path.join(dirPath, dirName);
-            logger.debug("Looking for database-connections in :" + fullDir);
-            filePromises.push(
-                fs.readdirAsync(fullDir).then((files) => {
-                    files.forEach(function (fileName) {
-                        const fullFileName = path.join(fullDir, fileName);
-                        const script = getDatabaseScriptDetails(fullFileName);
-                        if (script) {
-                            databases[script.database] = databases[script.database] || [];
-                            script.scriptFileName = fullFileName;
-                            databases[script.database].push(script);
-                        }
-                    });
-                }));
-        });
-        return Promise.all(filePromises);
-    })
-        .then(() => Promise.map(Object.keys(databases), (databaseName) =>
-            processDatabaseScript(databaseName, databases[databaseName]),
-        {concurrency: 2}));
+    try {
+        fs.accessSync(dirPath, fs.F_OK);
+
+        return fs.readdirAsync(dirPath).then((dirs) => {
+            const filePromises = [];
+            dirs.forEach((dirName) => {
+                var fullDir = path.join(dirPath, dirName);
+                logger.debug("Looking for database-connections in :" + fullDir);
+                filePromises.push(
+                    fs.readdirAsync(fullDir).then((files) => {
+                        files.forEach(function (fileName) {
+                            const fullFileName = path.join(fullDir, fileName);
+                            const script = getDatabaseScriptDetails(fullFileName);
+                            if (script) {
+                                databases[script.database] = databases[script.database] || [];
+                                script.scriptFileName = fullFileName;
+                                databases[script.database].push(script);
+                            }
+                        });
+                    }));
+            });
+            return Promise.all(filePromises);
+        })
+            .then(() => Promise.map(Object.keys(databases), (databaseName) =>
+                    processDatabaseScript(databaseName, databases[databaseName]),
+                {concurrency: 2}));
+    } catch(e) {
+        if (e.code === "ENOENT") {
+            logger.debug("No database scripts configured");
+        } else {
+            return Promise.reject(e);
+        }
+    }
+
+    return Promise.resolve();
 };
 
 /*
@@ -304,10 +327,11 @@ const getPages = (dirPath) => {
             logger.error("Can't process pages file that is not a directory: " + dirPath);
         }
     } catch (e) {
-        /* Pages must not exist.
-         * TODO should probably check for NOENT here instead of just failing silently
-         */
-        logger.debug("Processing pages: " + JSON.stringify(e));
+        if (e.code === "ENOENT") {
+            logger.debug("No pages configured");
+        } else {
+            return Promise.reject(e);
+        }
     }
 
     return Promise.all(files).then(() => Promise.map(Object.keys(pages), (pageName) =>
@@ -333,7 +357,7 @@ const getChanges = (filePath) => {
                 rules: unifyScripts(result.rules),
                 databases: unifyDatabases(result.databases),
                 pages: unifyScripts(result.pages),
-                clients: unifyScripts(result.clients)
+                clients: unifyConfigs(result.clients)
             }));
     } else if (lstat.isFile()) {
         /* If it is a file, parse it */
