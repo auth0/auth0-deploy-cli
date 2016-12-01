@@ -116,5 +116,6 @@ var client = managementApi.getClient({
 }).then(function(auth0) {
     tools.deploy(progress, context, auth0, new Storage(stateFileName), config, {});
 }).catch(function(err) {
-    console.error("Got this error: "+JSON.stringify(err));
+    console.error("Got this error: "+JSON.stringify(err) + ", message: " + err.message);
+    console.error("stack: "+err.stack);
 });
