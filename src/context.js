@@ -98,67 +98,67 @@ const getRules = (dirPath) => {
 /*
  * Process a single database script.
  */
-const processClientConfig = (clientName, clientFiles) => {
-    const client = {
-        name: clientName,
+const processConfigurableConfig = (configurableName, configurableFiles) => {
+    const configurable = {
+        name: configurableName,
     };
 
     const attributeNames = [ { name: 'configFileName', content: 'configFile' }, { name: 'metadataFileName', content: 'metadataFile' } ];
 
     const filePromises = [];
     attributeNames.forEach(function(names) {
-        if (names.name in clientFiles) {
-            filePromises.push(fs.readFileAsync(clientFiles[names.name], 'utf8').then(
+        if (names.name in configurableFiles) {
+            filePromises.push(fs.readFileAsync(configurableFiles[names.name], 'utf8').then(
                 (contents) => {
-                    client[names.content] = contents;
+                    configurable[names.content] = contents;
                 }));
         }
     });
 
     return Promise.all(filePromises)
-        .then(() => client);
+        .then(() => configurable);
 };
 
 /*
- * Get all database scripts.
+ * Get all configurable items.
  */
-const getClientConfigs = (dirPath) => {
-    const clients = {};
+const getConfigurableConfigs = (dirPath, type) => {
+    const configurables = {};
 
     // Determine if we have the script, the metadata or both.
     try {
         fs.accessSync(dirPath, fs.F_OK);
         return fs.readdirAsync(dirPath).then((files) => {
             files.forEach(function (fileName) {
-                logger.debug("Found client file: " + fileName);
+                logger.debug("Found " + type + " file: " + fileName);
                 /* check for meta/config pairs */
                 const fullFileName = path.join(dirPath, fileName);
-                let clientName = path.parse(fileName).name;
+                let configurableName = path.parse(fileName).name;
                 let meta = false;
 
                 /* check for meta files */
-                if (clientName.endsWith('.meta')) {
-                    clientName = path.parse(clientName).name;
+                if (configurableName.endsWith('.meta')) {
+                    configurableName = path.parse(configurableName).name;
                     meta = true;
                 }
 
                 /* Initialize object if needed */
-                clients[clientName] = clients[clientName] || {};
+                configurables[configurableName] = configurables[configurableName] || {};
 
                 if (meta) {
-                    clients[clientName].metadataFileName = fullFileName;
+                    configurables[configurableName].metadataFileName = fullFileName;
                 } else {
-                    clients[clientName].configFileName = fullFileName;
+                    configurables[configurableName].configFileName = fullFileName;
                 }
             });
         })
-            .then(() => Promise.map(Object.keys(clients),
-                (clientName) =>
-                    processClientConfig(clientName, clients[clientName]),
+            .then(() => Promise.map(Object.keys(configurables),
+                (configurableName) =>
+                    processConfigurableConfig(configurableName, configurables[configurableName]),
                 {concurrency: 2}));
     } catch(e) {
         if (e.code === "ENOENT") {
-            logger.debug("No clients configured");
+            logger.debug("No " + type + "s configured");
         } else {
             return Promise.reject(e);
         }
@@ -349,7 +349,8 @@ const getChanges = (filePath) => {
             rules: getRules(path.join(fullPath, constants.RULES_DIRECTORY)),
             pages: getPages(path.join(fullPath, constants.PAGES_DIRECTORY)),
             databases: getDatabaseScripts((path.join(fullPath, constants.DATABASE_CONNECTIONS_DIRECTORY))),
-            clients: getClientConfigs((path.join(fullPath, constants.CLIENTS_DIRECTORY)))
+            clients: getConfigurableConfigs((path.join(fullPath, constants.CLIENTS_DIRECTORY)), 'client'),
+            resourceServers: getConfigurableConfigs((path.join(fullPath, constants.RESOURCE_SERVERS_DIRECTORY)), 'resource server')
         };
 
         return Promise.props(promises)
@@ -357,7 +358,8 @@ const getChanges = (filePath) => {
                 rules: unifyScripts(result.rules),
                 databases: unifyDatabases(result.databases),
                 pages: unifyScripts(result.pages),
-                clients: unifyConfigs(result.clients)
+                clients: unifyConfigs(result.clients),
+                resourceServers: unifyConfigs(result.resourceServers)
             }));
     } else if (lstat.isFile()) {
         /* If it is a file, parse it */
@@ -383,6 +385,7 @@ export default class {
                     me.rules = data.rules || {};
                     me.databases = data.databases || [];
                     me.clients = data.clients || {};
+                    me.resourceServers = data.resourceServers || {};
                });
     }
 }

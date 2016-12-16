@@ -123,67 +123,67 @@ var getRules = function getRules(dirPath) {
 /*
  * Process a single database script.
  */
-var processClientConfig = function processClientConfig(clientName, clientFiles) {
-    var client = {
-        name: clientName
+var processConfigurableConfig = function processConfigurableConfig(configurableName, configurableFiles) {
+    var configurable = {
+        name: configurableName
     };
 
     var attributeNames = [{ name: 'configFileName', content: 'configFile' }, { name: 'metadataFileName', content: 'metadataFile' }];
 
     var filePromises = [];
     attributeNames.forEach(function (names) {
-        if (names.name in clientFiles) {
-            filePromises.push(fs.readFileAsync(clientFiles[names.name], 'utf8').then(function (contents) {
-                client[names.content] = contents;
+        if (names.name in configurableFiles) {
+            filePromises.push(fs.readFileAsync(configurableFiles[names.name], 'utf8').then(function (contents) {
+                configurable[names.content] = contents;
             }));
         }
     });
 
     return _bluebird2.default.all(filePromises).then(function () {
-        return client;
+        return configurable;
     });
 };
 
 /*
- * Get all database scripts.
+ * Get all configurable items.
  */
-var getClientConfigs = function getClientConfigs(dirPath) {
-    var clients = {};
+var getConfigurableConfigs = function getConfigurableConfigs(dirPath, type) {
+    var configurables = {};
 
     // Determine if we have the script, the metadata or both.
     try {
         fs.accessSync(dirPath, fs.F_OK);
         return fs.readdirAsync(dirPath).then(function (files) {
             files.forEach(function (fileName) {
-                _logger2.default.debug("Found client file: " + fileName);
+                _logger2.default.debug("Found " + type + " file: " + fileName);
                 /* check for meta/config pairs */
                 var fullFileName = path.join(dirPath, fileName);
-                var clientName = path.parse(fileName).name;
+                var configurableName = path.parse(fileName).name;
                 var meta = false;
 
                 /* check for meta files */
-                if (clientName.endsWith('.meta')) {
-                    clientName = path.parse(clientName).name;
+                if (configurableName.endsWith('.meta')) {
+                    configurableName = path.parse(configurableName).name;
                     meta = true;
                 }
 
                 /* Initialize object if needed */
-                clients[clientName] = clients[clientName] || {};
+                configurables[configurableName] = configurables[configurableName] || {};
 
                 if (meta) {
-                    clients[clientName].metadataFileName = fullFileName;
+                    configurables[configurableName].metadataFileName = fullFileName;
                 } else {
-                    clients[clientName].configFileName = fullFileName;
+                    configurables[configurableName].configFileName = fullFileName;
                 }
             });
         }).then(function () {
-            return _bluebird2.default.map(Object.keys(clients), function (clientName) {
-                return processClientConfig(clientName, clients[clientName]);
+            return _bluebird2.default.map(Object.keys(configurables), function (configurableName) {
+                return processConfigurableConfig(configurableName, configurables[configurableName]);
             }, { concurrency: 2 });
         });
     } catch (e) {
         if (e.code === "ENOENT") {
-            _logger2.default.debug("No clients configured");
+            _logger2.default.debug("No " + type + "s configured");
         } else {
             return _bluebird2.default.reject(e);
         }
@@ -372,7 +372,8 @@ var getChanges = function getChanges(filePath) {
             rules: getRules(path.join(fullPath, _auth0SourceControlExtensionTools.constants.RULES_DIRECTORY)),
             pages: getPages(path.join(fullPath, _auth0SourceControlExtensionTools.constants.PAGES_DIRECTORY)),
             databases: getDatabaseScripts(path.join(fullPath, _auth0SourceControlExtensionTools.constants.DATABASE_CONNECTIONS_DIRECTORY)),
-            clients: getClientConfigs(path.join(fullPath, _auth0SourceControlExtensionTools.constants.CLIENTS_DIRECTORY))
+            clients: getConfigurableConfigs(path.join(fullPath, _auth0SourceControlExtensionTools.constants.CLIENTS_DIRECTORY), 'client'),
+            resourceServers: getConfigurableConfigs(path.join(fullPath, _auth0SourceControlExtensionTools.constants.RESOURCE_SERVERS_DIRECTORY), 'resource server')
         };
 
         return _bluebird2.default.props(promises).then(function (result) {
@@ -380,7 +381,8 @@ var getChanges = function getChanges(filePath) {
                 rules: (0, _auth0SourceControlExtensionTools.unifyScripts)(result.rules),
                 databases: (0, _auth0SourceControlExtensionTools.unifyDatabases)(result.databases),
                 pages: (0, _auth0SourceControlExtensionTools.unifyScripts)(result.pages),
-                clients: (0, _auth0SourceControlExtensionTools.unifyConfigs)(result.clients)
+                clients: (0, _auth0SourceControlExtensionTools.unifyConfigs)(result.clients),
+                resourceServers: (0, _auth0SourceControlExtensionTools.unifyConfigs)(result.resourceServers)
             };
         });
     } else if (lstat.isFile()) {
@@ -410,6 +412,7 @@ var _class = function () {
                 me.rules = data.rules || {};
                 me.databases = data.databases || [];
                 me.clients = data.clients || {};
+                me.resourceServers = data.resourceServers || {};
             });
         }
     }]);
