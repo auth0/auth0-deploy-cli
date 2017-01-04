@@ -4,4 +4,4 @@
  * Created by mostekcm on 11/2/16.
  */
 
-require('./es5/index');
+require('./lib/index');
