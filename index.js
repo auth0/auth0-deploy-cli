@@ -4,4 +4,6 @@
  * Created by mostekcm on 11/2/16.
  */
 
-require('./lib/index');
+var path = require('path');
+
+require(path.join(path.join(__dirname,'lib'),'index'));
