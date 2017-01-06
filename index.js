@@ -6,4 +6,4 @@
 
 var path = require('path');
 
-require(path.join(path.join(__dirname,'lib'),'index'));
+require(path.join(path.join(__dirname, 'lib'), 'index'));
