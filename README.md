@@ -166,6 +166,37 @@ a0deploy [ options ]
     -s,--state_file <state file>    A file for persisting state between runs.  Default: ./local/state    
 ```
 
+## Recommended Approach/Best Practices
+The recommended approach for utilizing this CLI is to incorporate it into your build system.  Create a repository to store your deploy configuration, then create a set of configuration files for each environment.  On your continuous integration server, have a deploy build for each environemnt.  This deploy build should update a local copy of the deploy configuration repository, then run the CLI to deploy it to that environment.  Read on for more detailed information.
+
+### Auth0 Tenant layout
+The recommended approach is to have a different Auth0 tenant/account for each environment.  For example: fabrikam-dev, fabrikam-uat, fabrikam-staging, and fabrikam-prod.
+
+### Your Deploy Configuration Repository
+Your configuration repository should contain the files as described in the `Organize Your Repository` section above.
+
+You should have a branch for each tenant/account.  This allows you to make changes to dev, but not deploy them until you merge.  With this setup, you can have each environment have a CI task that automatically deploys the changes to its target environment when the branch is updated with the latest.
+
+So your flow would be as follows:
+dev changes are tested, then merged to uat, once tested they are merged to staging, once staging is tested they are merged to prod.
+
+You may want to set your prod to only deploy when triggered manually.
+
+### Your CI server configuration
+Your CI server should have a different deploy task and config.json for each environment.  Since each tenant/account will need to have the auth0-deploy-cli-extension installed in it with a different domain, client ID, and secret, this has to happen anyway and will avoid accidentally deploying to the wrong environment.
+
+The deploy task should follow these steps:
+
+ 1.  Update the local repo to the latest. (each environment should have its own copy of the repo set to its own branch)
+ 1.  If there are changes, call a0deploy
+ 1.  Run a suite of tests to confirm configuration is working
+ 1.  Optional:  merge to next branch
+
+### Use keyword mappings to handle differences between the environments
+You should not have to store differences between environments in the Deploy Configuration Repository.  Use the keyword mappings to allow the repository to be environment agnostic, and instead store the differences in the separate config.json files for each environment that are stored on the CI server.
+
+## Other Helpful Topics
+
 ### To test locally
 
 Clone the github repo and install globally
