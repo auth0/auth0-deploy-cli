@@ -39,54 +39,11 @@ You must create a client in your service account that has access to the manageme
   * delete:rules
   
 #### Client Creation Steps
-Coming soon there will be an Auth0 extension you can use to initialize your environment.  In the meantime, you can do it manually by following these steps:
+Use the [Auth0 Deploy CLI Extension](https://github.com/auth0-extensions/auth0-deploy-cli-extension/blob/master/README.md) to Create a client.  At the bottom of the README are instructions for doing this by hand instead.
 
- 1.  log into your dashboard
- 1.  click the clients tab
- 1.  click the "New Client" button
-     1.  Name it something like "Deploy Client"
-     1.  Select Non-Interactive as the client type
-     1.  Click Create
- 1.  If you haven't already enabled API's, you may have to toggle the switch to enable API's
- 1.  Use the "Select an API" dropdown to choose: "Auth0 Management API"
- 1.  Click the Settings tab
- 1.  Copy the client ID, you'll need it for a couple steps down
- 1.  Click the "Documentation->Management API" link from the top menu
- 1.  Using the left navigation click "Client Grants" then "Create a client grant"
- 1.  Click the "create:client_grants" scope to create the token
- 1.  In the Body section put the following:
- 
-         {
-           "client_id": "<your client ID copied above>",
-           "audience": "https://<your domain: (e.g. fabrikam-dev.auth0.com)>/api/v2/",
-           "scope": [
-             "read:client_grants",
-             "create:client_grants",
-             "delete:client_grants",
-             "update:client_grants",
-             "read:clients",
-             "update:clients",
-             "delete:clients",
-             "create:clients",
-             "read:connections",
-             "update:connections",
-             "read:resource_servers",
-             "update:resource_servers",
-             "delete:resource_servers",
-             "create:resource_servers",
-             "read:rules",
-             "update:rules",
-             "delete:rules",
-             "create:rules",
-             "read:tenant_settings",
-             "update:tenant_settings"
-           ]
-         }
-
-  1.  Click the "Try" button
   
 #### Create Your Config File
-The config file will use the client ID and secret from your newly created client.  You can place this anywhere on the filesystem.  Here is the example:
+The config file will need the client ID and secret from your newly created client (the client is named `auth0-deploy-cli-extension` if you used the extension).  You can place this anywhere on the filesystem.  Here is the example:
 
 ```json
 {
@@ -218,6 +175,53 @@ cd auth0-deploy-cli
 npm install
 npm run test
 ```
+
+### To Create Client by Hand
+
+ 1.  log into your dashboard
+ 1.  click the clients tab
+ 1.  click the "New Client" button
+     1.  Name it something like "Deploy Client"
+     1.  Select Non-Interactive as the client type
+     1.  Click Create
+ 1.  If you haven't already enabled API's, you may have to toggle the switch to enable API's
+ 1.  Use the "Select an API" dropdown to choose: "Auth0 Management API"
+ 1.  Click the Settings tab
+ 1.  Copy the client ID, you'll need it for a couple steps down
+ 1.  Click the "Documentation->Management API" link from the top menu
+ 1.  Using the left navigation click "Client Grants" then "Create a client grant"
+ 1.  Click the "create:client_grants" scope to create the token
+ 1.  In the Body section put the following:
+ 
+         {
+           "client_id": "<your client ID copied above>",
+           "audience": "https://<your domain: (e.g. fabrikam-dev.auth0.com)>/api/v2/",
+           "scope": [
+             "read:client_grants",
+             "create:client_grants",
+             "delete:client_grants",
+             "update:client_grants",
+             "read:clients",
+             "update:clients",
+             "delete:clients",
+             "create:clients",
+             "read:connections",
+             "update:connections",
+             "read:resource_servers",
+             "update:resource_servers",
+             "delete:resource_servers",
+             "create:resource_servers",
+             "read:rules",
+             "update:rules",
+             "delete:rules",
+             "create:rules",
+             "read:tenant_settings",
+             "update:tenant_settings"
+           ]
+         }
+
+ 1.  Click the "Try" button
+
 
 ##Known issues
 See https://github.com/auth0/auth0-deploy-cli/issues
