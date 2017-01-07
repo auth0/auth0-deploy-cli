@@ -1,6 +1,6 @@
 {
   "name": "auth0-deploy-cli",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A command line tool for deploying updates to your Auth0 tenant",
   "main": "index.js",
   "bin": {
@@ -25,6 +25,7 @@
   "bugs": {
     "url": "https://github.com/auth0/auth0-deploy-cli/issues"
   },
+  "readme": "README.md",
   "homepage": "https://github.com/auth0/auth0-deploy-cli#readme",
   "dependencies": {
     "auth0": "^2.5.0",
