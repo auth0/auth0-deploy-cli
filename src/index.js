@@ -1,5 +1,8 @@
 #! /usr/bin/env node
 
+import moment from 'moment';
+import username from 'username';
+import os from 'os';
 import Context from './context';
 import Storage from './storage';
 import logger from './logger';
@@ -89,21 +92,23 @@ const config = require('auth0-extension-tools').config();
 
 config.setProvider(key => nconf.get(key));
 
-/* Execute the deploy */
-const progress = {
-  id: 'someid',
-  user: 'someuser',
-  sha: 'some sha',
-  branch: 'some branch',
-  repository: 'some repo'
-};
+username().then((userName) => {
+  /* Execute the deploy */
+  const progress = {
+    id: userName,
+    user: userName,
+    sha: moment().format(),
+    branch: os.hostname(),
+    repository: 'Auth0 Deploy CLI'
+  };
 
-managementApi.getClient({
-  domain: config('AUTH0_DOMAIN'),
-  clientId: config('AUTH0_CLIENT_ID'),
-  clientSecret: config('AUTH0_CLIENT_SECRET')
-}).then(function(auth0) {
-  tools.deploy(progress, context, auth0, new Storage(stateFileName), config, {});
+  return managementApi.getClient({
+    domain: config('AUTH0_DOMAIN'),
+    clientId: config('AUTH0_CLIENT_ID'),
+    clientSecret: config('AUTH0_CLIENT_SECRET')
+  }).then(function(auth0) {
+    tools.deploy(progress, context, auth0, new Storage(stateFileName), config, { repository: 'Tool', id: 'Username', branch: 'Host', sha: 'Date/Time' });
+  });
 }).catch(function(err) {
   logger.error('Got this error: ' + JSON.stringify(err) + ', message: ' + err.message);
   logger.error('stack: ' + err.stack);
