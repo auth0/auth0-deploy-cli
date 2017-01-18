@@ -1,7 +1,7 @@
 import Promise from 'bluebird';
 import * as fs from 'fs';
 import * as path from 'path';
-import { constants, unifyDatabases, unifyScripts, unifyConfigs } from 'auth0-source-control-extension-tools';
+import { constants, unifyDatabases, unifyScripts } from 'auth0-source-control-extension-tools';
 import logger from './logger';
 
 Promise.promisifyAll(fs);
@@ -327,7 +327,7 @@ const getPages = (dirPath) => {
     });
 };
 
-const getChanges = (filePath) => {
+const getChanges = (filePath, mappings) => {
   var fullPath = path.resolve(filePath);
   var lstat = null;
   var promises = {};
@@ -352,11 +352,11 @@ const getChanges = (filePath) => {
 
     return Promise.props(promises)
       .then(result => ({
-        rules: unifyScripts(result.rules),
-        databases: unifyDatabases(result.databases),
-        pages: unifyScripts(result.pages),
-        clients: unifyConfigs(result.clients),
-        resourceServers: unifyConfigs(result.resourceServers)
+        rules: unifyScripts(result.rules, mappings),
+        databases: unifyDatabases(result.databases, mappings),
+        pages: unifyScripts(result.pages, mappings),
+        clients: unifyScripts(result.clients, mappings),
+        resourceServers: unifyScripts(result.resourceServers, mappings)
       }));
   } else if (lstat.isFile()) {
     /* If it is a file, parse it */
@@ -367,14 +367,15 @@ const getChanges = (filePath) => {
 };
 
 export default class {
-  constructor(fileName) {
+  constructor(fileName, mappings) {
     this.fileName = fileName;
+    this.mappings = mappings;
   }
 
   init() {
     var me = this;
     /* First parse the input file */
-    return getChanges(me.fileName)
+    return getChanges(me.fileName, me.mappings)
       .then(
         /* Map just the data that is in the config file */
         (data) => {

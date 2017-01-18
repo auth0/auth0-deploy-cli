@@ -141,7 +141,7 @@ describe('#context', () => {
           scripts: {
             login: {
               name: 'login',
-              scriptFile: 'function login() { }'
+              scriptFile: 'function login() { var hello = @@hello@@; }'
             },
             create: {
               name: 'create',
@@ -180,10 +180,11 @@ describe('#context', () => {
       const dbDir = path.join(repoDir, constants.DATABASE_CONNECTIONS_DIRECTORY);
       target.forEach(data => createDbDir(dbDir, data));
 
-      const context = new Context(repoDir);
+      const context = new Context(repoDir, { hello: 'goodbye' });
       context.init()
         .then(() => {
           check(done, function() {
+            target[0].scripts.login.scriptFile = 'function login() { var hello = "goodbye"; }';
             expect(context.databases).to.deep.equal(target);
           });
         });
@@ -261,7 +262,7 @@ describe('#context', () => {
           name: 'guardian_multifactor'
         },
         password_reset: {
-          htmlFile: '<html>this is pwd reset 2</html>',
+          htmlFile: '<html>this is pwd reset 2: @@val@@</html>',
           metadata: true,
           metadataFile: '{ "enabled": false }',
           name: 'password_reset'
@@ -277,10 +278,11 @@ describe('#context', () => {
       const dir = path.join(repoDir, constants.PAGES_DIRECTORY);
       createPagesDir(dir, target);
 
-      const context = new Context(repoDir);
+      const context = new Context(repoDir, { val: 'someval' });
       context.init()
         .then(() => {
           check(done, function() {
+            target.password_reset.htmlFile = '<html>this is pwd reset 2: "someval"</html>';
             expect(context.pages).to.deep.equal(target);
           });
         });
@@ -352,7 +354,7 @@ describe('#context', () => {
             name: 'someClient'
           },
           someClient2: {
-            configFile: '{ "someKey": "someVal" }',
+            configFile: '{ "someKey": @@somekey@@ }',
             metadataFile: '{ "someMetaKey": "someMetaVal" }',
             name: 'someClient2'
           }
@@ -369,10 +371,11 @@ describe('#context', () => {
       const repoDir = path.join(testDataDir, 'configurables1');
       createConfigurablesDir(repoDir, target);
 
-      const context = new Context(repoDir);
+      const context = new Context(repoDir, { somekey: 'someVal' });
       context.init()
         .then(() => {
           check(done, function() {
+            target.clients.someClient2.configFile = '{ "someKey": "someVal" }';
             expect(context.clients).to.deep.equal(target.clients);
             expect(context.resourceServers).to.deep.equal(target['resource-servers']);
           });
@@ -436,7 +439,7 @@ describe('#context', () => {
       const target = {
         someRule: {
           script: true,
-          scriptFile: 'function someRule() { }',
+          scriptFile: 'function someRule() { var hello = @@hello@@; }',
           metadata: false,
           name: 'someRule'
         },
@@ -453,10 +456,11 @@ describe('#context', () => {
       const dir = path.join(repoDir, constants.RULES_DIRECTORY);
       createRulesDir(dir, target);
 
-      const context = new Context(repoDir);
+      const context = new Context(repoDir, { hello: 'goodbye' });
       context.init()
         .then(() => {
           check(done, function() {
+            target.someRule.scriptFile = 'function someRule() { var hello = "goodbye"; }';
             expect(context.rules).to.deep.equal(target);
           });
         });
