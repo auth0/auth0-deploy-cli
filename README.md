@@ -40,7 +40,6 @@ You must create a client in your service account that has access to the manageme
   
 #### Client Creation Steps
 Use the [Auth0 Deploy CLI Extension](https://github.com/auth0-extensions/auth0-deploy-cli-extension/blob/master/README.md) to Create a client.  At the bottom of the README are instructions for doing this by hand instead.
-
   
 #### Create Your Config File
 The config file will need the client ID and secret from your newly created client (the client is named `auth0-deploy-cli-extension` if you used the extension).  You can place this anywhere on the filesystem.  Here is the example:
@@ -93,7 +92,9 @@ Prod Config .json:
 ```
 
 #### Organize your repository
-There is more extensive documentation online for how the files are expected to be laid out to work with the source control configuration utilities [here](https://auth0.com/docs/extensions/github-deploy)
+There is more extensive documentation online for how the files are expected to be laid out to work with the source control configuration utilities [here](https://auth0.com/docs/extensions/github-deploy).  
+
+If you already have an existing tenant, you can dump your configuration in the right format using the [auth0-dump-config](https://github.com/xurei/auth0-dump-config).
 
 Here is a simple overview:
 
