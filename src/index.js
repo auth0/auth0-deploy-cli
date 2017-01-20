@@ -106,10 +106,20 @@ username().then((userName) => {
     domain: config('AUTH0_DOMAIN'),
     clientId: config('AUTH0_CLIENT_ID'),
     clientSecret: config('AUTH0_CLIENT_SECRET')
-  }).then(function(auth0) {
-    tools.deploy(progress, context, auth0, new Storage(stateFileName), config, { repository: 'Tool', id: 'Username', branch: 'Host', sha: 'Date/Time' });
-  });
+  })
+    .then(function(auth0) {
+      return tools.deploy(progress, context, auth0, new Storage(stateFileName), config, {
+        repository: 'Tool',
+        id: 'Username',
+        branch: 'Host',
+        sha: 'Date/Time'
+      });
+    })
+    .catch(function(err) {
+      return Promise.reject(err);
+    });
 }).catch(function(err) {
-  logger.error('Got this error: ' + JSON.stringify(err) + ', message: ' + err.message);
-  logger.error('stack: ' + err.stack);
+  logger.error('Exiting due to error: ' + err.message);
+  logger.error(err.stack);
+  process.exit(-1);
 });
