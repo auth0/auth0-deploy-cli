@@ -108,16 +108,27 @@ username().then((userName) => {
     clientSecret: config('AUTH0_CLIENT_SECRET')
   })
     .then(function(auth0) {
-      return tools.deploy(progress, context, auth0, new Storage(stateFileName), config, {
-        repository: 'Tool',
-        id: 'Username',
-        branch: 'Host',
-        sha: 'Date/Time'
-      });
+      /* Before running deploy, let's copy excluded rules to storage */
+      const storage = new Storage(stateFileName);
+      return storage.read()
+        .then((data) => {
+          data.excluded_rules = config('AUTH0_EXCLUDED_RULES') || [];
+          storage.write(data);
+
+          return tools.deploy(progress, context, auth0, storage, config, {
+            repository: 'Tool',
+            id: 'Username',
+            branch: 'Host',
+            sha: 'Date/Time'
+          });
+        })
+        .catch(function(err) {
+          throw err;
+        });
     })
     .catch(function(err) {
-      return Promise.reject(err);
-    });
+      throw err;
+    })
 }).catch(function(err) {
   logger.error('Exiting due to error: ' + err.message);
   logger.error(err.stack);

@@ -56,7 +56,11 @@ The config file will need the client ID and secret from your newly created clien
       "https://somedomain.com"
     ],
     "YOUR_STRING_KEY": "some environment specific string"
-  }
+  },
+  "AUTH0_EXCLUDED_RULES": [
+    "rule-1-name",
+    "rule-2-name"
+  ]
 }
 ```
 
@@ -90,6 +94,9 @@ Prod Config .json:
     ...
   }
 ```
+
+##### AUTH0_EXCLUDED_RULES
+This is a list of rule names that should be ignored by the deploy CLI.  It will not delete, update or create rules that match those names.
 
 #### Organize your repository
 There is more extensive documentation online for how the files are expected to be laid out to work with the source control configuration utilities [here](https://auth0.com/docs/extensions/github-deploy).  
