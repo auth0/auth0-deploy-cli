@@ -207,7 +207,9 @@ describe('#context', () => {
 
       const repoDir = path.join(testDataDir, 'connections2');
       const dbDir = path.join(repoDir, constants.DATABASE_CONNECTIONS_DIRECTORY);
+      const db2Dir = path.join(dbDir, 'db1');
       target.forEach(data => createDbDir(dbDir, data));
+      writeStringToFile(path.join(db2Dir, 'junk.json'), 'junk');
       delete target[0].scripts.createBad;
 
       const context = new Context(repoDir);

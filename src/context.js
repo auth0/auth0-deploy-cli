@@ -203,7 +203,7 @@ const getDatabaseScriptDetails = (filename) => {
   const firstDirname = path.dirname(filename);
   const thisConnectionDir = path.basename(firstDirname);
   const allConnectionsDir = path.basename(path.dirname(firstDirname));
-  logger.debug('Found filname: ' + filename + ', base: ' + baseFileName +
+  logger.debug('Found filename: ' + filename + ', base: ' + baseFileName +
                ', thisConn: ' + thisConnectionDir + ', allConn: ' + allConnectionsDir);
   if (allConnectionsDir === constants.DATABASE_CONNECTIONS_DIRECTORY &&
     /\.js$/i.test(baseFileName)) {
@@ -216,6 +216,8 @@ const getDatabaseScriptDetails = (filename) => {
     }
 
     logger.warn('Skipping bad database script file: ' + filename + ' because: not a valid DB script: ' + scriptName);
+  } else {
+    logger.warn('Skipping bad database script file: ' + filename + ' because: bad database dirname: ' + allConnectionsDir + ', or basename: ' + baseFileName);
   }
 
   return null;
