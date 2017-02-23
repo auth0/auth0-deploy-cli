@@ -128,7 +128,7 @@ username().then((userName) => {
     })
     .catch(function(err) {
       throw err;
-    })
+    });
 }).catch(function(err) {
   logger.error('Exiting due to error: ' + err.message);
   logger.error(err.stack);

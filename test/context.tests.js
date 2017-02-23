@@ -35,7 +35,7 @@ const writeStringToFile = (fileName, contents) => {
 
 describe('#context', () => {
   const localDir = 'local';
-  const testDataDir = path.join(localDir, 'testData');
+  const testDataDir = path.resolve(localDir, 'testData');
 
   beforeEach(() => {
     logger.transports.console.level = 'debug';
@@ -44,7 +44,7 @@ describe('#context', () => {
   describe('#context validation', () => {
     it('should do nothing on empty repo', (done) => {
       /* Create empty directory */
-      const dir = path.join(testDataDir, 'empty');
+      const dir = path.resolve(testDataDir, 'empty');
       cleanThenMkdir(dir);
 
       const context = new Context(dir);
@@ -61,15 +61,14 @@ describe('#context', () => {
     });
 
     it('should error on bad directory', (done) => {
-      const dir = path.join(testDataDir, 'doesNotExist');
+      const dir = path.resolve(testDataDir, 'doesNotExist');
 
       const context = new Context(dir);
       context.init()
         .catch((err) => {
           check(done, function() {
-            expect(err.message).to.equal('Can\'t process' +
-              ' /work/auth0/auth0-deploy-cli/local/testData/doesNotExist because: ENOENT: no such file or directory,' +
-              ' lstat \'/work/auth0/auth0-deploy-cli/local/testData/doesNotExist\'');
+            expect(err.message).to.equal('Can\'t process ' + dir + ' because: ENOENT: no such file or directory,' +
+              ' lstat \'' + dir + '\'');
           });
         });
     });
@@ -89,8 +88,8 @@ describe('#context', () => {
         ]
       };
 
-      const dir = path.join(testDataDir, 'asFile');
-      const file = path.join(dir, 'asFile.json');
+      const dir = path.resolve(testDataDir, 'asFile');
+      const file = path.resolve(dir, 'asFile.json');
       cleanThenMkdir(dir);
       writeStringToFile(file, JSON.stringify(target));
 
@@ -104,7 +103,7 @@ describe('#context', () => {
     });
 
     it('should error on symlink', (done) => {
-      const dir = path.join(testDataDir, 'badSymlink');
+      const dir = path.resolve(testDataDir, 'badSymlink');
       const file = path.join(dir, 'badSymLink');
       const link = path.join(dir, 'link');
       try {
@@ -120,7 +119,7 @@ describe('#context', () => {
       context.init()
         .catch((err) => {
           check(done, function() {
-            expect(err.message).to.equal('Not sure what to do with, /work/auth0/auth0-deploy-cli/local/testData/badSymlink/link, it is not a file or directory...');
+            expect(err.message).to.equal('Not sure what to do with, ' + link + ', it is not a file or directory...');
           });
         });
     });
@@ -128,7 +127,7 @@ describe('#context', () => {
 
   describe('#context connections', () => {
     const createDbDir = (databaseDir, data) => {
-      const dbDir = path.join(databaseDir, data.name);
+      const dbDir = path.resolve(databaseDir, data.name);
       cleanThenMkdir(dbDir);
 
       Object.keys(data.scripts).forEach(scriptName => writeStringToFile(path.join(dbDir, scriptName + '.js'), data.scripts[scriptName].scriptFile));
@@ -233,7 +232,7 @@ describe('#context', () => {
             expect(err.message).to.equal('Couldn\'t process' +
               ' database scripts directory because: ENOTDIR:' +
               ' not a directory, scandir' +
-              ' \'/work/auth0/auth0-deploy-cli/local/testData/connections3/database-connections\'');
+              ' \'' + dir + '\'');
           });
         });
     });
@@ -243,8 +242,8 @@ describe('#context', () => {
     const createPagesDir = (pagesDir, target) => {
       cleanThenMkdir(pagesDir);
       Object.keys(target).forEach((scriptName) => {
-        writeStringToFile(path.join(pagesDir, scriptName + '.html'), target[scriptName].htmlFile);
-        if (target[scriptName].metadata) writeStringToFile(path.join(pagesDir, scriptName + '.json'), target[scriptName].metadataFile);
+        writeStringToFile(path.resolve(pagesDir, scriptName + '.html'), target[scriptName].htmlFile);
+        if (target[scriptName].metadata) writeStringToFile(path.resolve(pagesDir, scriptName + '.json'), target[scriptName].metadataFile);
       });
     };
 
@@ -328,7 +327,7 @@ describe('#context', () => {
           check(done, function() {
             expect(err.message).to.equal('Couldn\'t process' +
               ' pages directory because: ENOTDIR:' +
-              ' not a directory, scandir \'/work/auth0/auth0-deploy-cli/local/testData/pages3/pages\'');
+              ' not a directory, scandir \'' + dir + '\'');
           });
         });
     });
@@ -337,7 +336,7 @@ describe('#context', () => {
   describe('#context configurables', () => {
     const createConfigurablesDir = (repoDir, target) => {
       Object.keys(target).forEach((type) => {
-        const configDir = path.join(repoDir, type);
+        const configDir = path.resolve(repoDir, type);
         cleanThenMkdir(configDir);
         Object.keys(target[type]).forEach((name) => {
           writeStringToFile(path.join(configDir, name + '.json'), target[type][name].configFile);
@@ -420,7 +419,7 @@ describe('#context', () => {
           check(done, function() {
             expect(err.message).to.equal('Couldn\'t process' +
               ' client directory because: ENOTDIR:' +
-              ' not a directory, scandir \'/work/auth0/auth0-deploy-cli/local/testData/configurables3/clients\'');
+              ' not a directory, scandir \'' + dir + '\'');
           });
         });
     });
@@ -430,8 +429,8 @@ describe('#context', () => {
     const createRulesDir = (dir, target) => {
       cleanThenMkdir(dir);
       Object.keys(target).forEach((scriptName) => {
-        writeStringToFile(path.join(dir, scriptName + '.js'), target[scriptName].scriptFile);
-        if (target[scriptName].metadata) writeStringToFile(path.join(dir, scriptName + '.json'), target[scriptName].metadataFile);
+        writeStringToFile(path.resolve(dir, scriptName + '.js'), target[scriptName].scriptFile);
+        if (target[scriptName].metadata) writeStringToFile(path.resolve(dir, scriptName + '.json'), target[scriptName].metadataFile);
       });
     };
 
@@ -504,7 +503,7 @@ describe('#context', () => {
           check(done, function() {
             expect(err.message).to.equal('Couldn\'t process' +
               ' the rules directory because: ENOTDIR:' +
-              ' not a directory, scandir \'/work/auth0/auth0-deploy-cli/local/testData/rules3/rules\'');
+              ' not a directory, scandir \'' + dir + '\'');
           });
         });
     });

@@ -8,7 +8,8 @@ Promise.promisifyAll(fs);
 
 const isPage = (file) => {
   var directory = path.basename(path.dirname(file));
-  var nameIndex = constants.PAGE_NAMES.indexOf(file.split('/').pop());
+  var fileName = path.basename(file);
+  var nameIndex = constants.PAGE_NAMES.indexOf(fileName);
   logger.debug('directory: ' + directory + ', nameIndex: ' + nameIndex);
   return directory === constants.PAGES_DIRECTORY && nameIndex >= 0;
 };
@@ -198,18 +199,18 @@ const processDatabaseScript = (databaseName, scripts) => {
  * Get the details of a database file script.
  */
 const getDatabaseScriptDetails = (filename) => {
-  const parts = filename.split('/');
-  while (parts.length > 3) {
-    parts.shift();
-  }
-  logger.debug('Found ' + filename + ' it has these parts: ' + JSON.stringify(parts));
-  if (parts.length === 3 &&
-    parts[0] === constants.DATABASE_CONNECTIONS_DIRECTORY &&
-    /\.js$/i.test(parts[2])) {
-    const scriptName = path.parse(parts[2]).name;
+  const baseFileName = path.basename(filename);
+  const firstDirname = path.dirname(filename);
+  const thisConnectionDir = path.basename(firstDirname);
+  const allConnectionsDir = path.basename(path.dirname(firstDirname));
+  logger.debug('Found filname: ' + filename + ', base: ' + baseFileName +
+               ', thisConn: ' + thisConnectionDir + ', allConn: ' + allConnectionsDir);
+  if (allConnectionsDir === constants.DATABASE_CONNECTIONS_DIRECTORY &&
+    /\.js$/i.test(baseFileName)) {
+    const scriptName = path.parse(baseFileName).name;
     if (constants.DATABASE_SCRIPTS.indexOf(scriptName) > -1) {
       return {
-        database: parts[1],
+        database: thisConnectionDir,
         name: path.parse(scriptName).name
       };
     }
