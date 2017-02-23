@@ -214,6 +214,8 @@ const getDatabaseScriptDetails = (filename) => {
         name: path.parse(scriptName).name
       };
     }
+
+    logger.warn('Skipping bad database script file: ' + filename + ' because: not a valid DB script: ' + scriptName);
   }
 
   return null;
