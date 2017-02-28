@@ -86,7 +86,9 @@ logger.info('input_file: %s', JSON.stringify(context));
 /* Prepare configuration by initializing nconf, then passing that as the provider to the config object */
 const nconf = require('nconf');
 
-nconf.file(program.config_file);
+/* Favor command line arguments first then fallback on config file */
+nconf.argv()
+     .file(program.config_file);
 
 const config = require('auth0-extension-tools').config();
 
