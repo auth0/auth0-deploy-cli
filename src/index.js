@@ -49,7 +49,9 @@ program
   .option('-i,--input_file <input file>', 'The updates to deploy.  Either a JSON file, or directory that contains' +
     ' the correct file layout.  See README and online for more info.', checkFileExists)
   .option('-c,--config_file <config file>', 'The JSON configuration file.', checkFileExists)
-  .option('-s,--state_file <state file>', 'A file for persisting state between runs.  Default: ./local/state', checkFileExists);
+  .option('-s,--state_file <state file>', 'A file for persisting state between runs.  Default: ./local/state', checkFileExists)
+  .option('-x,--secret <secret>', 'The client secret, this allows you to encrypt the secret in your build' +
+  ' configuration instead of storing it in a config file');
 
 /* Add extra help for JSON */
 program.on('--help', function() {
@@ -86,9 +88,17 @@ logger.info('input_file: %s', JSON.stringify(context));
 /* Prepare configuration by initializing nconf, then passing that as the provider to the config object */
 const nconf = require('nconf');
 
-/* Favor command line arguments first then fallback on config file */
-nconf.argv()
-     .file(program.config_file);
+/* Allow passed in secret to override the configured one */
+if (program.secret) {
+  nconf.overrides({
+    AUTH0_CLIENT_SECRET: program.secret
+  });
+}
+
+/* Allow environment variables to override the configuration file */
+nconf
+  .env()
+  .file(program.config_file);
 
 const config = require('auth0-extension-tools').config();
 
