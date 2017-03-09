@@ -172,6 +172,11 @@ a0deploy [ options ]
     -i,--input_file <input file>    The updates to deploy.  See JSON Format for more information.
     -c,--config_file <config file>  The JSON configuration file.  See JSON Format for more information.
     -s,--state_file <state file>    A file for persisting state between runs.  Default: ./local/state    
+    -x,--secret <the client secret> This allows you to create a configuration file that does not include a secret
+                                    and instead store that secret encrypted in your build system and pass it on the
+                                    command line.  Please beware that this may log that secret somewhere, so you may
+                                    need to cleanse your logs.  You can also set the AUTH0_CLIENT_SECRET in the 
+                                    environment.
 ```
 
 ## Recommended Approach/Best Practices
