@@ -1,4 +1,4 @@
-#Auth0 Deploy CLI
+# Auth0 Deploy CLI
 
 There are a few good extensions that you can use to deploy updates automatically.  This tool utilizes that same code base to allow anyone to pass json to this tool and deploy to your tenant.  This allows you to call this from any tool that can call node.  The intention is to allow deploy from any source code repository and incorporate in any build script.
 
