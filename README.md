@@ -267,8 +267,8 @@ npm run test
  1.  Click the "Try" button
 
 
-##Known issues
+## Known issues
 See https://github.com/auth0/auth0-deploy-cli/issues
 
-##License
+## License
 MIT
