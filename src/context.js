@@ -377,8 +377,10 @@ export default class {
     this.mappings = mappings;
   }
 
-  init() {
+  init(progress) {
     var me = this;
+    /* If mappings weren't provided, fall back to the ones provided to init() */
+    me.mappings = me.mappings || (progress && progress.mappings);
     /* First parse the input file */
     return getChanges(me.fileName, me.mappings)
       .then(
