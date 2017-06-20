@@ -246,7 +246,8 @@ const getDatabaseScripts = (dirPath) => {
               databases[script.database].push(script);
             }
           });
-        }));
+        })
+          .catch(err => logger.warn(`Skipping bad database scripts directory ${fullDir} because: ${err.message}`)));
     });
     return Promise.all(filePromises);
   })

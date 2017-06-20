@@ -161,22 +161,22 @@ See Rules configuration [here](https://auth0.com/docs/extensions/github-deploy#d
 NOTE: There is not currently a way to mark rules as manual yet, that will become part of the configuration file in the future.
 
 ##### Custom Pages
-See Custom Pages configuration [here](https://auth0.com/docs/extensions/github-deploy#deploy-pages)
+See Custom Pages configuration [here](https://auth0.com/docs/extensions/github-deploy#deploy-hosted-pages)
 
 #### Command Line Options
 
 ```
 a0deploy [ options ]
-    -h, --help                      output usage information
-    -v,--verbose                    Dump extra debug information.
-    -i,--input_file <input file>    The updates to deploy.  See JSON Format for more information.
-    -c,--config_file <config file>  The JSON configuration file.  See JSON Format for more information.
-    -s,--state_file <state file>    A file for persisting state between runs.  Default: ./local/state    
-    -x,--secret <the client secret> This allows you to create a configuration file that does not include a secret
-                                    and instead store that secret encrypted in your build system and pass it on the
-                                    command line.  Please beware that this may log that secret somewhere, so you may
-                                    need to cleanse your logs.  You can also set the AUTH0_CLIENT_SECRET in the 
-                                    environment.
+    -h, --help                       output usage information
+    -v,--verbose                     Dump extra debug information.
+    -i,--input_dir <input directory> The directory where you checked out the repository.  See 'Organize your repository'.
+    -c,--config_file <config file>   The JSON configuration file.  See JSON Format for more information.
+    -s,--state_file <state file>     A file for persisting state between runs.  Default: ./local/state    
+    -x,--secret <the client secret>  This allows you to create a configuration file that does not include a secret
+                                     and instead store that secret encrypted in your build system and pass it on the
+                                     command line.  Please beware that this may log that secret somewhere, so you may
+                                     need to cleanse your logs.  You can also set the AUTH0_CLIENT_SECRET in the 
+                                     environment.
 ```
 
 ## Recommended Approach/Best Practices

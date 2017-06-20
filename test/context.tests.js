@@ -221,6 +221,34 @@ describe('#context', () => {
         });
     });
 
+    it('should ignore bad connections directory', (done) => {
+      const target = [
+        {
+          name: 'db1',
+          scripts: {
+            login: {
+              name: 'login',
+              scriptFile: 'function login() { }'
+            }
+          }
+        }
+      ];
+
+      const repoDir = path.join(testDataDir, 'connections2');
+      const dbDir = path.join(repoDir, constants.DATABASE_CONNECTIONS_DIRECTORY);
+      target.forEach(data => createDbDir(dbDir, data));
+      writeStringToFile(path.join(dbDir, '.DSStore'), 'junk');
+
+      const context = new Context(repoDir);
+      context.init()
+        .then(() => {
+          check(done, function() {
+            expect(context.databases).to.deep.equal(target);
+          });
+        });
+    });
+
+
     it('should ignore bad scripts directory', (done) => {
       const repoDir = path.join(testDataDir, 'connections3');
       cleanThenMkdir(repoDir);
