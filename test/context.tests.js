@@ -279,8 +279,8 @@ describe('#context', () => {
       const dir = path.join(repoDir, constants.PAGES_DIRECTORY);
       createPagesDir(dir, target);
 
-      const context = new Context(repoDir, { val: 'someval' });
-      context.init()
+      const context = new Context(repoDir);
+      context.init({ mappings: { val: 'someval' } })
         .then(() => {
           check(done, function() {
             target.password_reset.htmlFile = '<html>this is pwd reset 2: "someval"</html>';
