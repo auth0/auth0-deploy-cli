@@ -10,7 +10,9 @@ import logger from './logger';
 /**
  * Created by mostekcm on 11/2/16.
  */
-
+const superagent = require('superagent');
+const HttpProxyAgent = require('http-proxy-agent');
+const HttpsProxyAgent = require('https-proxy-agent');
 var program = require('commander');
 var tools = require('auth0-source-control-extension-tools');
 var fs = require('fs');
@@ -50,6 +52,7 @@ program
     ' the correct file layout.  See README and online for more info.', checkFileExists)
   .option('-c,--config_file <config file>', 'The JSON configuration file.', checkFileExists)
   .option('-s,--state_file <state file>', 'A file for persisting state between runs.  Default: ./local/state', checkFileExists)
+  .option('-p,--proxy_url <proxy_url>', 'A url for proxying requests, only set this if you are behind a proxy.')
   .option('-x,--secret <secret>', 'The client secret, this allows you to encrypt the secret in your build' +
   ' configuration instead of storing it in a config file');
 
@@ -77,6 +80,7 @@ const stateFileName = program.state_file ? program.state_file : './local/state';
 logger.info('input_file: %s', JSON.stringify(program.input_file));
 logger.info('config_file: %s', JSON.stringify(program.config_file));
 logger.info('state_file: %s', JSON.stringify(program.state_file));
+logger.info('proxy_url: %s', JSON.stringify(program.proxy_url));
 
 /* Grab data from file */
 const context = new Context(program.input_file);
@@ -103,6 +107,18 @@ nconf
 const config = require('auth0-extension-tools').config();
 
 config.setProvider(key => nconf.get(key));
+
+/* Monkey Patch the superagent for proxy use */
+if (program.proxy_url) {
+  const proxyAgent = new HttpProxyAgent(program.proxy_url);
+  const proxyAgentSsl = new HttpsProxyAgent(program.proxy_url);
+  const OrigRequest = superagent.Request;
+  superagent.Request = function RequestWithAgent(method, url) {
+    const req = new OrigRequest(method, url);
+    if (url.startsWith('https')) return req.agent(proxyAgentSsl);
+    return req.agent(proxyAgent);
+  };
+}
 
 username().then((userName) => {
   /* Execute the deploy */
