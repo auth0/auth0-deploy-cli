@@ -248,7 +248,6 @@ describe('#context', () => {
         });
     });
 
-
     it('should ignore bad scripts directory', (done) => {
       const repoDir = path.join(testDataDir, 'connections3');
       cleanThenMkdir(repoDir);
@@ -291,13 +290,13 @@ describe('#context', () => {
           name: 'guardian_multifactor'
         },
         password_reset: {
-          htmlFile: '<html>this is pwd reset 2: @@val@@</html>',
+          htmlFile: '<html>this is pwd reset 2: ##val##</html>',
           metadata: true,
           metadataFile: '{ "enabled": false }',
           name: 'password_reset'
         },
         error_page: {
-          htmlFile: '<html>this is error page</html>',
+          htmlFile: '<html>this is error page @@jsonVal@@</html>',
           metadata: false,
           name: 'error_page'
         }
@@ -308,10 +307,16 @@ describe('#context', () => {
       createPagesDir(dir, target);
 
       const context = new Context(repoDir);
-      context.init({ mappings: { val: 'someval' } })
+      context.init({
+        mappings: {
+          val: 'someval',
+          jsonVal: [ 'val1', 'val2' ]
+        }
+      })
         .then(() => {
           check(done, function() {
-            target.password_reset.htmlFile = '<html>this is pwd reset 2: "someval"</html>';
+            target.password_reset.htmlFile = '<html>this is pwd reset 2: someval</html>';
+            target.error_page.htmlFile = '<html>this is error page ["val1","val2"]</html>';
             expect(context.pages).to.deep.equal(target);
           });
         });

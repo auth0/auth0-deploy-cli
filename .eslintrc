@@ -4,9 +4,6 @@
     "plugin:import/errors",
     "plugin:import/warnings"
   ],
-  "ecmaFeatures": {
-    "modules": true
-  },
   "parserOptions": {
     "ecmaVersion": 4,
     "sourceType": "module"
