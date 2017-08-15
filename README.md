@@ -65,12 +65,17 @@ The config file will need the client ID and secret from your newly created clien
 ```
 
 ##### AUTH0_KEYWORD_REPLACE_MAPPINGS
-The mappings are there so that you can use the same configuration file for all of your environments (e.g. dev, uat, staging, and prod) without having to have different versions of the files for each environment.  The mappings allow you to replace certain values in your configuration repo with envrionment specic values.  For example, you could specify a different JWT timeout in your dev environment then prod for testing:
+The mappings are there so that you can use the same configuration file for all of your environments (e.g. dev, uat, staging, and prod) without having to have different versions of the files for each environment.  The mappings allow you to replace certain values in your configuration repo with envrionment specic values.  There are two ways to use the keyword mappings.  You can either wrap the key in `@@key@@` or `##key##`.  If you use the `@` symbols, it will do a JSON.stringify on your value before replacing it.  So if it is a string it will add quotes, if it is an array or object it will add braces.  If you use the `#` symbol instead, till just do a literal replacement.  It will not add quotes or brackets.
+
+For example, you could specify a different JWT timeout in your dev environment then prod for testing and a different environment URL:
 
 Client .json:
 ```
 {
   ... 
+  "callbacks": [
+    "##ENVIRONMENT_URL##/auth/callback"
+  ],
   "jwt_configuration": {
     "lifetime_in_seconds": @@JWT_TIMEOUT@@,
     "secret_encoded": true
@@ -82,6 +87,7 @@ Client .json:
 Dev Config .json:
 ```
   "AUTH0_KEYWORD_REPLACE_MAPPINGS": {
+    "ENVIRONMENT_URL": "http://dev.fabrikam.com",
     "JWT_TIMEOUT": 120,
     ...
   }
@@ -90,6 +96,7 @@ Dev Config .json:
 Prod Config .json:
 ```
   "AUTH0_KEYWORD_REPLACE_MAPPINGS": {
+    "ENVIRONMENT_URL": "http://fabrikam.com",
     "JWT_TIMEOUT": 3600,
     ...
   }
