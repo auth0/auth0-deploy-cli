@@ -178,6 +178,7 @@ a0deploy [ options ]
     -v,--verbose                     Dump extra debug information.
     -i,--input_dir <input directory> The directory where you checked out the repository.  See 'Organize your repository'.
     -c,--config_file <config file>   The JSON configuration file.  See JSON Format for more information.
+    -p,--proxy <proxy>               The proxy URL if behind a proxied firewall.  e.g. http://192.168.2.24:8080
     -s,--state_file <state file>     A file for persisting state between runs.  Default: ./local/state    
     -x,--secret <the client secret>  This allows you to create a configuration file that does not include a secret
                                      and instead store that secret encrypted in your build system and pass it on the
