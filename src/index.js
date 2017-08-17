@@ -16,7 +16,8 @@ const HttpsProxyAgent = require('https-proxy-agent');
 var program = require('commander');
 var tools = require('auth0-source-control-extension-tools');
 var fs = require('fs');
-const managementApi = require('auth0-extension-tools').managementApi;
+const AuthenticationClient = require('auth0').AuthenticationClient;
+const ManagementClient = require('auth0').ManagementClient;
 
 /**
  * Simple function for dumping help info
@@ -54,7 +55,7 @@ program
   .option('-s,--state_file <state file>', 'A file for persisting state between runs.  Default: ./local/state', checkFileExists)
   .option('-p,--proxy_url <proxy_url>', 'A url for proxying requests, only set this if you are behind a proxy.')
   .option('-x,--secret <secret>', 'The client secret, this allows you to encrypt the secret in your build' +
-  ' configuration instead of storing it in a config file');
+    ' configuration instead of storing it in a config file');
 
 /* Add extra help for JSON */
 program.on('--help', function() {
@@ -115,6 +116,7 @@ if (program.proxy_url) {
   const OrigRequest = superagent.Request;
   superagent.Request = function RequestWithAgent(method, url) {
     const req = new OrigRequest(method, url);
+    logger.debug(`Setting proxy for ${method} to ${url}`);
     if (url.startsWith('https')) return req.agent(proxyAgentSsl);
     return req.agent(proxyAgent);
   };
@@ -130,12 +132,20 @@ username().then((userName) => {
     repository: 'Auth0 Deploy CLI'
   };
 
-  return managementApi.getClient({
+  const authClient = new AuthenticationClient({
     domain: config('AUTH0_DOMAIN'),
     clientId: config('AUTH0_CLIENT_ID'),
     clientSecret: config('AUTH0_CLIENT_SECRET')
+  });
+
+  return authClient.clientCredentialsGrant({
+    audience: `https://${config('AUTH0_DOMAIN')}/api/v2/`
   })
-    .then(function(auth0) {
+    .then(function(response) {
+      const mgmtClient = new ManagementClient({
+        domain: config('AUTH0_DOMAIN'),
+        token: response.access_token
+      });
       /* Before running deploy, let's copy excluded rules to storage */
       const storage = new Storage(stateFileName);
       return storage.read()
@@ -143,7 +153,7 @@ username().then((userName) => {
           data.excluded_rules = config('AUTH0_EXCLUDED_RULES') || [];
           storage.write(data);
 
-          return tools.deploy(progress, context, auth0, storage, config, {
+          return tools.deploy(progress, context, mgmtClient, storage, config, {
             repository: 'Tool',
             id: 'Username',
             branch: 'Host',
@@ -153,12 +163,9 @@ username().then((userName) => {
         .catch(function(err) {
           throw err;
         });
-    })
-    .catch(function(err) {
-      throw err;
     });
 }).catch(function(err) {
-  logger.error('Exiting due to error: ' + err.message);
+  logger.error('Exiting due to error: ' + JSON.stringify(err.message));
   logger.error(err.stack);
   process.exit(-1);
 });
