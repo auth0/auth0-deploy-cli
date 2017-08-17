@@ -29,6 +29,7 @@
   "homepage": "https://github.com/auth0/auth0-deploy-cli#readme",
   "dependencies": {
     "auth0": "^2.7.0",
+    "auth0-extension-tools": "^1.2.1",
     "auth0-source-control-extension-tools": "^2.4.4",
     "babel-cli": "^6.18.0",
     "babel-preset-es2015": "^6.18.0",
