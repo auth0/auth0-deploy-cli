@@ -173,18 +173,17 @@ See Custom Pages configuration [here](https://auth0.com/docs/extensions/github-d
 #### Command Line Options
 
 ```
-a0deploy [ options ]
-    -h, --help                       output usage information
-    -v,--verbose                     Dump extra debug information.
-    -i,--input_dir <input directory> The directory where you checked out the repository.  See 'Organize your repository'.
-    -c,--config_file <config file>   The JSON configuration file.  See JSON Format for more information.
-    -p,--proxy <proxy>               The proxy URL if behind a proxied firewall.  e.g. http://192.168.2.24:8080
-    -s,--state_file <state file>     A file for persisting state between runs.  Default: ./local/state    
-    -x,--secret <the client secret>  This allows you to create a configuration file that does not include a secret
-                                     and instead store that secret encrypted in your build system and pass it on the
-                                     command line.  Please beware that this may log that secret somewhere, so you may
-                                     need to cleanse your logs.  You can also set the AUTH0_CLIENT_SECRET in the 
-                                     environment.
+a0deploy [options]
+
+  Options:
+
+    -v,--verbose                    Dump extra debug information.
+    -i,--input_file <input file>    The updates to deploy.  Either a JSON file, or directory that contains the correct file layout.  See README and online for more info.
+    -c,--config_file <config file>  The JSON configuration file.
+    -s,--state_file <state file>    A file for persisting state between runs.  Default: ./local/state
+    -p,--proxy_url <proxy_url>      A url for proxying requests, only set this if you are behind a proxy.
+    -x,--secret <secret>            The client secret, this allows you to encrypt the secret in your build configuration instead of storing it in a config file
+    -h, --help                      output usage information
 ```
 
 ## Recommended Approach/Best Practices
