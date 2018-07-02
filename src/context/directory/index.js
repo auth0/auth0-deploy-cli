@@ -2,7 +2,7 @@ import Promise from 'bluebird';
 import * as fs from 'fs';
 import * as path from 'path';
 import { constants, unifyDatabases, unifyScripts } from 'auth0-source-control-extension-tools';
-import logger from './logger';
+import { logger } from 'src/logger';
 
 Promise.promisifyAll(fs);
 
@@ -27,20 +27,17 @@ const processRule = (ruleName, rule) => {
   const fileProcesses = [];
 
   if (rule.script) {
-    fileProcesses.push(fs.readFileAsync(rule.scriptFileName, 'utf8').then(
-      (contents) => {
-        currentRule.script = true;
-        currentRule.scriptFile = contents;
-      }
-    ));
+    fileProcesses.push(fs.readFileAsync(rule.scriptFileName, 'utf8').then((contents) => {
+      currentRule.script = true;
+      currentRule.scriptFile = contents;
+    }));
   }
 
   if (rule.metadata) {
-    fileProcesses.push(fs.readFileAsync(rule.metadataFileName, 'utf8').then(
-      (contents) => {
-        currentRule.metadata = true;
-        currentRule.metadataFile = contents;
-      }));
+    fileProcesses.push(fs.readFileAsync(rule.metadataFileName, 'utf8').then((contents) => {
+      currentRule.metadata = true;
+      currentRule.metadataFile = contents;
+    }));
   }
 
   return new Promise.all(fileProcesses)
@@ -76,8 +73,10 @@ const getRules = (dirPath) => {
         }
       });
     })
-    .then(() => Promise.map(Object.keys(rules),
-      ruleName => processRule(ruleName, rules[ruleName]), { concurrency: 2 }))
+    .then(() => Promise.map(
+      Object.keys(rules),
+      ruleName => processRule(ruleName, rules[ruleName]), { concurrency: 2 }
+    ))
     .catch((e) => {
       if (e.code === 'ENOENT') {
         logger.info('No rules configured');
@@ -110,10 +109,9 @@ const processConfigurableConfig = (configurableName, configurableFiles) => {
   const filePromises = [];
   attributeNames.forEach(function(names) {
     if (names.name in configurableFiles) {
-      filePromises.push(fs.readFileAsync(configurableFiles[names.name], 'utf8').then(
-        (contents) => {
-          configurable[names.content] = contents;
-        }));
+      filePromises.push(fs.readFileAsync(configurableFiles[names.name], 'utf8').then((contents) => {
+        configurable[names.content] = contents;
+      }));
     }
   });
 
@@ -157,10 +155,11 @@ const getConfigurableConfigs = (dirPath, type) => {
       }
     });
   })
-    .then(() => Promise.map(Object.keys(configurables),
-      configurableName =>
-        processConfigurableConfig(configurableName, configurables[configurableName]),
-      { concurrency: 2 }))
+    .then(() => Promise.map(
+      Object.keys(configurables),
+      configurableName => processConfigurableConfig(configurableName, configurables[configurableName]),
+      { concurrency: 2 }
+    ))
     .catch((e) => {
       if (e.code === 'ENOENT') {
         logger.info('No ' + type + 's configured');
@@ -182,13 +181,12 @@ const processDatabaseScript = (databaseName, scripts) => {
 
   const files = [];
   scripts.forEach((script) => {
-    files.push(fs.readFileAsync(script.scriptFileName, 'utf8').then(
-      (contents) => {
-        database.scripts.push({
-          name: script.name,
-          scriptFile: contents
-        });
-      }));
+    files.push(fs.readFileAsync(script.scriptFileName, 'utf8').then((contents) => {
+      database.scripts.push({
+        name: script.name,
+        scriptFile: contents
+      });
+    }));
   });
 
   return Promise.all(files)
@@ -203,10 +201,10 @@ const getDatabaseScriptDetails = (filename) => {
   const firstDirname = path.dirname(filename);
   const thisConnectionDir = path.basename(firstDirname);
   const allConnectionsDir = path.basename(path.dirname(firstDirname));
-  logger.debug('Found filename: ' + filename + ', base: ' + baseFileName +
-               ', thisConn: ' + thisConnectionDir + ', allConn: ' + allConnectionsDir);
-  if (allConnectionsDir === constants.DATABASE_CONNECTIONS_DIRECTORY &&
-    /\.js$/i.test(baseFileName)) {
+  logger.debug('Found filename: ' + filename + ', base: ' + baseFileName
+    + ', thisConn: ' + thisConnectionDir + ', allConn: ' + allConnectionsDir);
+  if (allConnectionsDir === constants.DATABASE_CONNECTIONS_DIRECTORY
+    && /\.js$/i.test(baseFileName)) {
     const scriptName = path.parse(baseFileName).name;
     if (constants.DATABASE_SCRIPTS.indexOf(scriptName) > -1) {
       return {
@@ -235,25 +233,26 @@ const getDatabaseScripts = (dirPath) => {
     dirs.forEach((dirName) => {
       var fullDir = path.join(dirPath, dirName);
       logger.info('Looking for database-connections in :' + fullDir);
-      filePromises.push(
-        fs.readdirAsync(fullDir).then((files) => {
-          files.forEach(function(fileName) {
-            const fullFileName = path.join(fullDir, fileName);
-            const script = getDatabaseScriptDetails(fullFileName);
-            if (script) {
-              databases[script.database] = databases[script.database] || [];
-              script.scriptFileName = fullFileName;
-              databases[script.database].push(script);
-            }
-          });
-        })
-          .catch(err => logger.warn(`Skipping bad database scripts directory ${fullDir} because: ${err.message}`)));
+      filePromises.push(fs.readdirAsync(fullDir).then((files) => {
+        files.forEach(function(fileName) {
+          const fullFileName = path.join(fullDir, fileName);
+          const script = getDatabaseScriptDetails(fullFileName);
+          if (script) {
+            databases[script.database] = databases[script.database] || [];
+            script.scriptFileName = fullFileName;
+            databases[script.database].push(script);
+          }
+        });
+      })
+        .catch(err => logger.warn(`Skipping bad database scripts directory ${fullDir} because: ${err.message}`)));
     });
     return Promise.all(filePromises);
   })
-    .then(() => Promise.map(Object.keys(databases),
+    .then(() => Promise.map(
+      Object.keys(databases),
       databaseName => processDatabaseScript(databaseName, databases[databaseName]),
-      { concurrency: 2 }))
+      { concurrency: 2 }
+    ))
     .catch(function(e) {
       if (e.code === 'ENOENT') {
         logger.info('No database scripts configured');
@@ -276,18 +275,16 @@ const processPage = (pageName, page) => {
   };
 
   if (page.fileName) {
-    fileProcesses.push(fs.readFileAsync(page.fileName, 'utf8').then(
-      (contents) => {
-        currentPage.htmlFile = contents;
-      }));
+    fileProcesses.push(fs.readFileAsync(page.fileName, 'utf8').then((contents) => {
+      currentPage.htmlFile = contents;
+    }));
   }
 
   if (page.metaFileName) {
-    fileProcesses.push(fs.readFileAsync(page.metaFileName, 'utf8').then(
-      (contents) => {
-        currentPage.metadata = true;
-        currentPage.metadataFile = contents;
-      }));
+    fileProcesses.push(fs.readFileAsync(page.metaFileName, 'utf8').then((contents) => {
+      currentPage.metadata = true;
+      currentPage.metadataFile = contents;
+    }));
   }
 
   return Promise.all(fileProcesses).then(() => currentPage);
@@ -320,8 +317,10 @@ const getPages = (dirPath) => {
         }
       });
     })
-    .then(() => Promise.map(Object.keys(pages),
-      pageName => processPage(pageName, pages[pageName]), { concurrency: 2 }))
+    .then(() => Promise.map(
+      Object.keys(pages),
+      pageName => processPage(pageName, pages[pageName]), { concurrency: 2 }
+    ))
     .catch(function(e) {
       if (e.code === 'ENOENT') {
         logger.info('No pages configured');
@@ -357,14 +356,23 @@ const getChanges = (filePath, mappings) => {
     };
 
     return Promise.props(promises)
-      .then(result => ({
-        rules: unifyScripts(result.rules, mappings),
-        databases: unifyDatabases(result.databases, mappings),
-        pages: unifyScripts(result.pages, mappings),
-        clients: unifyScripts(result.clients, mappings),
-        resourceServers: unifyScripts(result.resourceServers, mappings)
-      }));
-  } else if (lstat.isFile()) {
+      .then((result) => {
+        const a = {
+          rules: unifyScripts(result.rules, mappings),
+          databases: unifyDatabases(result.databases, mappings),
+          pages: unifyScripts(result.pages, mappings),
+          clients: unifyScripts(result.clients, mappings),
+          resourceServers: unifyScripts(result.resourceServers, mappings)
+        };
+        return {
+          rules: unifyScripts(result.rules, mappings),
+          databases: unifyDatabases(result.databases, mappings),
+          pages: unifyScripts(result.pages, mappings),
+          clients: unifyScripts(result.clients, mappings),
+          resourceServers: unifyScripts(result.resourceServers, mappings)
+        };
+      });
+  } if (lstat.isFile()) {
     /* If it is a file, parse it */
     return Promise.resolve(JSON.parse(fs.readFileSync(fullPath)));
   }

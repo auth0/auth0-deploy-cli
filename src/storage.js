@@ -6,9 +6,9 @@ export default class {
   }
 
   read() {
-    var me = this;
-    return new Promise(function(resolve) {
-      var data = me.local.get('context') || {};
+    const me = this;
+    return new Promise((resolve) => {
+      const data = me.local.get('context') || {};
       resolve(data);
     });
   }

@@ -1,16 +1,17 @@
 {
   "extends": [
-    "airbnb/base",
+    "airbnb-base",
     "plugin:import/errors",
     "plugin:import/warnings"
   ],
-  "parserOptions": {
-    "ecmaVersion": 4,
-    "sourceType": "module"
-  },
   "env": {
     "node": true,
     "mocha": true
+  },
+  "settings": {
+    "import/resolver": {
+      "babel-module": {}
+    }
   },
   "rules": {
     "max-len": 0,

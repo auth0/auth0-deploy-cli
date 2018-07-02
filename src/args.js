@@ -25,7 +25,7 @@ export default yargs
     alias: 's',
     describe: 'A file for persisting state between runs.  Default: ./local/state.',
     type: 'string',
-    default: './local/state',
+    default: './local/state'
   })
   .option('proxy_url', {
     alias: 'p',
@@ -39,4 +39,4 @@ export default yargs
   })
   .example('$0 -c config.yml -i tenant.yaml', 'Deploy Auth0 via YAML')
   .example('$0 -c config.yml -i path/to/files', 'Deploy Auth0 via Path')
-  .epilogue('See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.')
+  .epilogue('See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.');

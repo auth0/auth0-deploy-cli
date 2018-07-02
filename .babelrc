@@ -1,5 +1,18 @@
 {
+  "comments": false,
   "presets": [
-    "es2015"
+    "node8"
+  ],
+  "plugins": [
+    "transform-decorators-legacy",
+    "dynamic-import-node",
+    [
+      "module-resolver",
+      {
+        "root": [
+          "./"
+        ]
+      }
+    ]
   ]
 }
