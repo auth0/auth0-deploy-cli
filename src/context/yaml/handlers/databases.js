@@ -1,6 +1,5 @@
 import { loadFile } from 'src/utils';
-
-const supportedScripts = [ 'login', 'create', 'delete', 'change_email', 'get_user' ];
+import { constants } from 'auth0-source-control-extension-tools';
 
 export const schema = {
   type: 'array',
@@ -11,9 +10,8 @@ export const schema = {
       scripts: {
         type: 'object',
         properties: {
-          ...supportedScripts.reduce((o, script) => ({ ...o, [script]: { type: 'string' } }), {})
+          ...constants.DATABASE_SCRIPTS.reduce((o, script) => ({ ...o, [script]: { type: 'string' } }), {})
         },
-        // TODO: add others
         require: [ 'login', 'get_user' ]
       }
     },
