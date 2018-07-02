@@ -26,8 +26,8 @@ export function groupFiles(folder) {
       .filter(f => isFile(f));
     return files.reduce((map, fileName) => {
       const { name } = path.parse(fileName);
-      map[ name ] = map[ name ] || [];
-      map[ name ].push(path.join(folder, fileName));
+      map[name] = map[name] || [];
+      map[name].push(path.join(folder, fileName));
       return map;
     }, {});
   } catch (err) {
@@ -45,13 +45,13 @@ export function keywordReplace(input, mappings) {
     Object.keys(mappings)
       .forEach((key) => {
         const re = new RegExp(`##${key}##`, 'g');
-        updated = updated.replace(re, mappings[ key ]);
+        updated = updated.replace(re, mappings[key]);
       });
 
     Object.keys(mappings)
       .forEach((key) => {
         const re = new RegExp(`@@${key}@@`, 'g');
-        updated = updated.replace(re, JSON.stringify(mappings[ key ]));
+        updated = updated.replace(re, JSON.stringify(mappings[key]));
       });
   }
   return updated;
