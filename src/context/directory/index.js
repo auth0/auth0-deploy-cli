@@ -24,7 +24,6 @@ export default class {
       Object.values(handlers)
         .forEach((handler) => {
           const parsed = handler(this.filePath, this.mappings);
-          // TODO: Maybe a better way to handle this..
           Object.entries(parsed)
             .forEach(([ k, v ]) => {
               this[k] = v;

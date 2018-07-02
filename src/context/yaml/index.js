@@ -49,7 +49,6 @@ export default class {
         }
         if (handler.parse) {
           const parsed = handler.parse(data);
-          // TODO: Maybe a better way to handle this..
           Object.entries(parsed).forEach(([ k, v ]) => {
             this[k] = v;
           });
