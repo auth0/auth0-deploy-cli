@@ -32,9 +32,10 @@ function pageConfig(name, config) {
       name,
       metadata: true,
       metadataFile: JSON.stringify({ enabled: page.enabled }),
-      htmlFile: loadFile(page.html)
+      htmlFile: loadFile(page.html, process.env)
     };
   }
+  return null;
 }
 
 

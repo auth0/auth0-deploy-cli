@@ -15,7 +15,7 @@ import args from 'src/args';
 import Storage from 'src/storage';
 import setupContext from 'src/context';
 
-export default async function deploy(params) {
+export async function deploy(params) {
   const {
     input_file: inputFile,
     config_file: configFile,
@@ -58,7 +58,7 @@ export default async function deploy(params) {
   }
 
   // Setup Context depending on directory or YAML
-  const context = setupContext(inputFile);
+  const context = setupContext(inputFile, config('mappings') || []);
 
   // Execute deploy
   const userName = await username();

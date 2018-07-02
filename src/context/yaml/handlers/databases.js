@@ -13,6 +13,7 @@ export const schema = {
         properties: {
           ...supportedScripts.reduce((o, script) => ({ ...o, [script]: { type: 'string' } }), {})
         },
+        // TODO: add others
         require: [ 'login', 'get_user' ]
       }
     },
@@ -25,7 +26,7 @@ function formatScripts(scripts) {
   return Object.entries(scripts).reduce((o, [ name, file ]) => ({
     ...o,
     [name]: {
-      scriptFile: loadFile(file)
+      scriptFile: loadFile(file, process.env)
     }
   }), {});
 }

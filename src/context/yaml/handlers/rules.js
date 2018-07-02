@@ -67,7 +67,7 @@ export const schema = {
 export function parse(config) {
   const rules = config.rules.map((rule) => {
     // First check if metadata is string, then load json
-    const script = loadFile(rule.script);
+    const script = loadFile(rule.script, process.env);
     const metadata = {
       name: rule.name,
       order: rule.order,
