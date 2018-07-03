@@ -6,23 +6,23 @@ import { expect } from 'chai';
 import Context from 'src/context/directory';
 import { cleanThenMkdir, writeStringToFile, testDataDir } from 'test/utils';
 
-describe('#context rules', () => {
-  const createRulesDir = (dir, target) => {
-    cleanThenMkdir(dir);
-    Object.keys(target).forEach((scriptName) => {
+function createRulesDir(dir, target) {
+  cleanThenMkdir(dir);
+  Object.keys(target).forEach((scriptName) => {
+    writeStringToFile(
+      path.resolve(dir, scriptName + '.js'),
+      target[scriptName].scriptFile
+    );
+    if (target[scriptName].metadata) {
       writeStringToFile(
-        path.resolve(dir, scriptName + '.js'),
-        target[scriptName].scriptFile
+        path.resolve(dir, scriptName + '.json'),
+        target[scriptName].metadataFile
       );
-      if (target[scriptName].metadata) {
-        writeStringToFile(
-          path.resolve(dir, scriptName + '.json'),
-          target[scriptName].metadataFile
-        );
-      }
-    });
-  };
+    }
+  });
+}
 
+describe('#context directory rules', () => {
   it('should process rules', async () => {
     const target = {
       someRule: {
@@ -39,7 +39,7 @@ describe('#context rules', () => {
       }
     };
 
-    const repoDir = path.join(testDataDir, 'rules1');
+    const repoDir = path.join(testDataDir, 'directory', 'rules1');
     const dir = path.join(repoDir, constants.RULES_DIRECTORY);
     createRulesDir(dir, target);
 
@@ -58,7 +58,7 @@ describe('#context rules', () => {
       }
     };
 
-    const repoDir = path.join(testDataDir, 'rules2');
+    const repoDir = path.join(testDataDir, 'directory', 'rules2');
     const dir = path.join(repoDir, constants.RULES_DIRECTORY);
     createRulesDir(dir, target);
 
@@ -71,7 +71,7 @@ describe('#context rules', () => {
   });
 
   it('should ignore bad rules directory', async () => {
-    const repoDir = path.join(testDataDir, 'rules3');
+    const repoDir = path.join(testDataDir, 'directory', 'rules3');
     cleanThenMkdir(repoDir);
     const dir = path.join(repoDir, constants.RULES_DIRECTORY);
     writeStringToFile(dir, 'junk');

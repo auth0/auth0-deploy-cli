@@ -7,7 +7,7 @@ import Context from 'src/context/directory';
 import { cleanThenMkdir, writeStringToFile, testDataDir, createDir } from 'test/utils';
 
 
-describe('#context clients', () => {
+describe('#context directory clients', () => {
   it('should process clients', async () => {
     const target = {
       clients: {
@@ -24,7 +24,7 @@ describe('#context clients', () => {
       }
     };
 
-    const repoDir = path.join(testDataDir, 'clients1');
+    const repoDir = path.join(testDataDir, 'directory', 'clients1');
     createDir(repoDir, target);
 
     const context = new Context(repoDir, { somekey: 'someVal' });
@@ -43,7 +43,7 @@ describe('#context clients', () => {
       }
     };
 
-    const repoDir = path.join(testDataDir, 'clients2');
+    const repoDir = path.join(testDataDir, 'directory', 'clients2');
     createDir(repoDir, target);
 
     const dir = path.join(repoDir, constants.CLIENTS_DIRECTORY);
@@ -56,7 +56,7 @@ describe('#context clients', () => {
   });
 
   it('should ignore bad pages directory', async () => {
-    const repoDir = path.join(testDataDir, 'clients3');
+    const repoDir = path.join(testDataDir, 'directory', 'clients3');
     cleanThenMkdir(repoDir);
     const dir = path.join(repoDir, constants.CLIENTS_DIRECTORY);
     writeStringToFile(dir, 'junk');

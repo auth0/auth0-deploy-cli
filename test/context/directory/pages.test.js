@@ -5,7 +5,7 @@ import { constants } from 'auth0-source-control-extension-tools';
 import Context from 'src/context/directory';
 import { cleanThenMkdir, testDataDir, writeStringToFile } from 'test/utils';
 
-describe('#context pages', () => {
+describe('#context directory pages', () => {
   const createPagesDir = (pagesDir, target) => {
     cleanThenMkdir(pagesDir);
     Object.keys(target).forEach((scriptName) => {
@@ -46,7 +46,7 @@ describe('#context pages', () => {
       }
     };
 
-    const repoDir = path.join(testDataDir, 'pages1');
+    const repoDir = path.join(testDataDir, 'directory', 'pages1');
     const dir = path.join(repoDir, constants.PAGES_DIRECTORY);
     createPagesDir(dir, target);
 
@@ -78,7 +78,7 @@ describe('#context pages', () => {
       }
     };
 
-    const repoDir = path.join(testDataDir, 'pages2');
+    const repoDir = path.join(testDataDir, 'directory', 'pages2');
     const dir = path.join(repoDir, constants.PAGES_DIRECTORY);
     createPagesDir(dir, target);
     delete target.guardian_multifactor2;
@@ -89,7 +89,7 @@ describe('#context pages', () => {
   });
 
   it('should ignore bad pages directory', async () => {
-    const repoDir = path.join(testDataDir, 'pages3');
+    const repoDir = path.join(testDataDir, 'directory', 'pages3');
     cleanThenMkdir(repoDir);
     const dir = path.join(repoDir, constants.PAGES_DIRECTORY);
     writeStringToFile(dir, 'junk');

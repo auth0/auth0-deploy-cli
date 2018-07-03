@@ -7,7 +7,7 @@ import Context from 'src/context/directory';
 import { cleanThenMkdir, writeStringToFile, testDataDir, createDir } from 'test/utils';
 
 
-describe('#context resource servers', () => {
+describe('#context directory resource servers', () => {
   it('should process resource servers', async () => {
     const target = {
       'resource-servers': {
@@ -20,7 +20,7 @@ describe('#context resource servers', () => {
       }
     };
 
-    const repoDir = path.join(testDataDir, 'resources1');
+    const repoDir = path.join(testDataDir, 'directory', 'resources1');
     createDir(repoDir, target);
 
     const context = new Context(repoDir, { somekey: 'someVal' });
@@ -40,7 +40,7 @@ describe('#context resource servers', () => {
       }
     };
 
-    const repoDir = path.join(testDataDir, 'resources2');
+    const repoDir = path.join(testDataDir, 'directory', 'resources2');
     createDir(repoDir, target);
 
     const dir = path.join(repoDir, constants.RESOURCE_SERVERS_DIRECTORY);
@@ -53,7 +53,7 @@ describe('#context resource servers', () => {
   });
 
   it('should ignore bad configurables directory', async () => {
-    const repoDir = path.join(testDataDir, 'configurables3');
+    const repoDir = path.join(testDataDir, 'directory', 'configurables3');
     cleanThenMkdir(repoDir);
     const dir = path.join(repoDir, constants.CLIENTS_DIRECTORY);
     writeStringToFile(dir, 'junk');

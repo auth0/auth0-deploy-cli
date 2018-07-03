@@ -6,10 +6,10 @@ import Context from 'src/context/directory';
 import { cleanThenMkdir, testDataDir } from 'test/utils';
 
 
-describe('#context validation', () => {
+describe('#context directory validation', () => {
   it('should do nothing on empty repo', async () => {
     /* Create empty directory */
-    const dir = path.resolve(testDataDir, 'empty');
+    const dir = path.resolve(testDataDir, 'directory', 'empty');
     cleanThenMkdir(dir);
 
     const context = new Context(dir);
@@ -23,7 +23,7 @@ describe('#context validation', () => {
   });
 
   it('should error on bad directory', async () => {
-    const dir = path.resolve(testDataDir, 'doesNotExist');
+    const dir = path.resolve(testDataDir, 'directory', 'doesNotExist');
     const context = new Context(dir);
     const errorMessage = `Not sure what to do with, ${dir} as it is not a directory...`;
     await expect(context.init())
@@ -32,7 +32,7 @@ describe('#context validation', () => {
   });
 
   it('should error on symlink', async () => {
-    const dir = path.resolve(testDataDir, 'badSymlink');
+    const dir = path.resolve(testDataDir, 'directory', 'badSymlink');
     const file = path.join(dir, 'badSymLink');
     const link = path.join(dir, 'link');
     try {

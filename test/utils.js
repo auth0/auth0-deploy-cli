@@ -20,7 +20,6 @@ export function cleanThenMkdir(dir) {
   } catch (err) {
     logger.error(err);
   }
-
   mkdirp.sync(dir);
 }
 
@@ -28,6 +27,7 @@ export function writeStringToFile(fileName, contents) {
   const fileFd = fs.openSync(fileName, 'w');
   fs.writeSync(fileFd, contents);
   fs.closeSync(fileFd);
+  return fileName;
 }
 
 
@@ -35,15 +35,15 @@ export function createDir(repoDir, target) {
   Object.keys(target).forEach((type) => {
     const configDir = path.resolve(repoDir, type);
     cleanThenMkdir(configDir);
-    Object.keys(target[type]).forEach((name) => {
+    Object.keys(target[ type ]).forEach((name) => {
       writeStringToFile(
         path.join(configDir, name + '.json'),
-        target[type][name].configFile
+        target[ type ][ name ].configFile
       );
-      if (target[type][name].metadataFile) {
+      if (target[ type ][ name ].metadataFile) {
         writeStringToFile(
           path.join(configDir, name + '.meta.json'),
-          target[type][name].metadataFile
+          target[ type ][ name ].metadataFile
         );
       }
     });

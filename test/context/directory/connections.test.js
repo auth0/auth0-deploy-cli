@@ -18,7 +18,7 @@ function createDbDir(databaseDir, data) {
 }
 
 
-describe('#context connections', () => {
+describe('#context directory connections', () => {
   it('should process database connections', async () => {
     const target = [
       {
@@ -54,7 +54,7 @@ describe('#context connections', () => {
       }
     ];
 
-    const repoDir = path.join(testDataDir, 'connections1');
+    const repoDir = path.join(testDataDir, 'directory', 'connections1');
     const dbDir = path.join(
       repoDir,
       constants.DATABASE_CONNECTIONS_DIRECTORY
@@ -83,7 +83,7 @@ describe('#context connections', () => {
       }
     ];
 
-    const repoDir = path.join(testDataDir, 'connections2');
+    const repoDir = path.join(testDataDir, 'directory', 'connections2');
     const dbDir = path.join(
       repoDir,
       constants.DATABASE_CONNECTIONS_DIRECTORY
@@ -110,7 +110,7 @@ describe('#context connections', () => {
       }
     ];
 
-    const repoDir = path.join(testDataDir, 'connections2');
+    const repoDir = path.join(testDataDir, 'directory', 'connections2');
     const dbDir = path.join(
       repoDir,
       constants.DATABASE_CONNECTIONS_DIRECTORY
@@ -124,7 +124,7 @@ describe('#context connections', () => {
   });
 
   it('should ignore bad scripts directory', async () => {
-    const repoDir = path.join(testDataDir, 'connections3');
+    const repoDir = path.join(testDataDir, 'directory', 'connections3');
     cleanThenMkdir(repoDir);
     const dir = path.join(repoDir, constants.DATABASE_CONNECTIONS_DIRECTORY);
     writeStringToFile(dir, 'junk');
