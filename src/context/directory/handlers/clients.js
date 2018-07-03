@@ -1,10 +1,11 @@
 import path from 'path';
 import { unifyScripts, constants } from 'auth0-source-control-extension-tools';
 
-import { groupFiles, parseFileGroup } from 'src/utils';
+import { groupFiles, parseFileGroup, existsMustBeDir } from 'src/utils';
 
 export default function parse(folder, mappings) {
   const clientsFolder = path.join(folder, constants.CLIENTS_DIRECTORY);
+  existsMustBeDir(clientsFolder);
   const filesGrouped = groupFiles(clientsFolder);
 
   const clients = Object.entries(filesGrouped)

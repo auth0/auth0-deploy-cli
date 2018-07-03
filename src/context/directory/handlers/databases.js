@@ -3,7 +3,7 @@ import fs from 'fs';
 import { constants } from 'auth0-source-control-extension-tools';
 
 import { logger } from 'src/logger';
-import { loadFile, isDirectory, isFile } from 'src/utils';
+import { loadFile, isDirectory, isFile, existsMustBeDir } from 'src/utils';
 
 
 function isScript(name) {
@@ -34,6 +34,9 @@ function getDatabase(folder, mappings) {
 
 export default function parse(folder, mappings) {
   const databaseFolder = path.join(folder, constants.DATABASE_CONNECTIONS_DIRECTORY);
+
+  existsMustBeDir(databaseFolder);
+
   let folders = [];
 
   try {

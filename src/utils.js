@@ -23,11 +23,16 @@ export function isFile(f) {
 export function groupFiles(folder) {
   try {
     const files = fs.readdirSync(folder)
+      .map(f => path.join(folder, f))
       .filter(f => isFile(f));
     return files.reduce((map, fileName) => {
-      const { name } = path.parse(fileName);
+      let { name } = path.parse(fileName);
+
+      // check for meta files
+      if (name.endsWith('.meta')) name = name.replace('.meta', '');
+
       map[name] = map[name] || [];
-      map[name].push(path.join(folder, fileName));
+      map[name].push(fileName);
       return map;
     }, {});
   } catch (err) {
@@ -74,8 +79,11 @@ export function parseFileGroup(name, files, mappings) {
 
   files.forEach((file) => {
     const content = loadFile(file, mappings);
-    const { ext } = path.parse(file);
-    if (ext === '.json') {
+    const { name: fileName, ext: fileExt } = path.parse(file);
+    if (fileName.endsWith('.meta')) {
+      item.metadata = true;
+      item.metadataFile = content;
+    } else if (fileExt === '.json') {
       item.configFile = content;
     } else {
       logger.warn('Skipping non-metadata file: ' + file);
@@ -83,4 +91,13 @@ export function parseFileGroup(name, files, mappings) {
   });
 
   return item;
+}
+
+
+export function existsMustBeDir(folder) {
+  if (fs.existsSync(folder)) {
+    if (!isDirectory(folder)) {
+      throw new Error(`Expected ${folder} to be a folder but got a file?`);
+    }
+  }
 }

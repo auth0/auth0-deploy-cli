@@ -84,7 +84,6 @@ export async function deploy(params) {
   });
 
   // Before running deploy, let's copy excluded rules to storage
-  // TODO: Look at this as it's more for directory context support
   const storage = new Storage(stateFile);
   const data = await storage.read();
   data.excluded_rules = config('AUTH0_EXCLUDED_RULES') || [];

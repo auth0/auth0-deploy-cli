@@ -31,7 +31,7 @@ export default class {
         });
       return;
     }
-    throw new Error(`Not sure what to do with, ${this.fullPath} as it is not a directory...`);
+    throw new Error(`Not sure what to do with, ${this.filePath} as it is not a directory...`);
   }
 
   async init(progress) {

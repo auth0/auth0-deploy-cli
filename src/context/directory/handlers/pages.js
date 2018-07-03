@@ -2,7 +2,7 @@ import path from 'path';
 import { unifyScripts, constants } from 'auth0-source-control-extension-tools';
 
 import { logger } from 'src/logger';
-import { loadFile, groupFiles } from 'src/utils';
+import { loadFile, groupFiles, existsMustBeDir } from 'src/utils';
 
 
 function isPage(filePath) {
@@ -17,8 +17,8 @@ function parseFileGroup(name, files, mappings) {
       const content = loadFile(file, mappings);
       const { ext } = path.parse(file);
       if (ext === '.json') {
-        page.metadataFile = true;
-        page.metadata = content;
+        page.metadata = true;
+        page.metadataFile = content;
       } else {
         page.htmlFile = content;
       }
@@ -32,6 +32,7 @@ function parseFileGroup(name, files, mappings) {
 
 export default function parse(folder, mappings) {
   const pagesFolder = path.join(folder, constants.PAGES_DIRECTORY);
+  existsMustBeDir(pagesFolder);
   const filesGrouped = groupFiles(pagesFolder);
 
   const pages = Object.entries(filesGrouped)
