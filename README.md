@@ -1,7 +1,23 @@
 # Auth0 Deploy CLI
 
-There are a few good extensions that you can use to deploy updates automatically.  This tool utilizes that same code base to allow anyone to pass json to this tool and deploy to your tenant.  This allows you to call this from any tool that can call node.  The intention is to allow deploy from any source code repository and incorporate in any build script.
+Auth0 supports continuous integration and deployment (CI/CD) and automation practices through our [source control extensions](https://auth0.com/docs/extensions#deploy-hosted-pages-rules-and-database-connections-scripts-from-external-repositories) and integration into existing CI/CD pipelines by using this **auth0-deploy-cli** tool.
 
+Supported Features
+
+- Deployable Auth0 Objects
+  - Tenant Settings
+  - Rules (Including Secrets/Settings)
+  - Connections
+  - Custom Databases
+  - Clients / Applications
+  - Resource Servers (API's)
+  - Pages
+  - Email Templates and Provider 
+- Configuration options
+  - Defined Directory Structure
+  - YAML Configuration
+  - Programmatically
+- Environment Variable Replacements
 
 ## Install
 
@@ -11,10 +27,11 @@ There are a few good extensions that you can use to deploy updates automatically
 npm i -g auth0-deploy-cli
 ```
 
-## Usage
+## Pre-requisites
 
-### Create a client in your Auth0 Account
-You must create a client in your service account that has access to the management API with the following scopes before you can configure the a0deploy CLI.
+For this tool to function it must be authorized to the Auth0 Management API. You can do this by creating an application in your Auth0 service that has access to the management API with the following scopes before.
+
+Use the [Auth0 Deploy CLI Extension](https://github.com/auth0-extensions/auth0-deploy-cli-extension/blob/master/README.md) to create the application. At the bottom of the README are instructions for doing this by hand instead.
 
 #### Scopes
   * read:tenant_settings
@@ -38,162 +55,87 @@ You must create a client in your service account that has access to the manageme
   * update:rules
   * delete:rules
   
-#### Client Creation Steps
-Use the [Auth0 Deploy CLI Extension](https://github.com/auth0-extensions/auth0-deploy-cli-extension/blob/master/README.md) to Create a client.  At the bottom of the README are instructions for doing this by hand instead.
-  
-#### Create Your Config File
-The config file will need the client ID and secret from your newly created client (the client is named `auth0-deploy-cli-extension` if you used the extension).  You can place this anywhere on the filesystem.  Here is the example:
 
-```json
-{
-  "SLACK_INCOMING_WEBHOOK_URL": "<your webhook URL from slack, just leave this out if you are not using slack>",
-  "AUTH0_DOMAIN": "<your auth0 domain (e.g. fabrikam-dev.auth0.com) >",
-  "AUTH0_CLIENT_SECRET": "<your deploy client secret>",
-  "AUTH0_CLIENT_ID": "<your deploy client ID>",
-  "AUTH0_KEYWORD_REPLACE_MAPPINGS": {
-    "YOUR_ARRAY_KEY": [
-      "http://localhost:8080",
-      "https://somedomain.com"
-    ],
-    "YOUR_STRING_KEY": "some environment specific string"
-  },
-  "AUTH0_EXCLUDED_RULES": [
-    "rule-1-name",
-    "rule-2-name"
-  ]
-}
-```
+# Usage
 
-##### AUTH0_KEYWORD_REPLACE_MAPPINGS
-The mappings are there so that you can use the same configuration file for all of your environments (e.g. dev, uat, staging, and prod) without having to have different versions of the files for each environment.  The mappings allow you to replace certain values in your configuration repo with envrionment specic values.  There are two ways to use the keyword mappings.  You can either wrap the key in `@@key@@` or `##key##`.  If you use the `@` symbols, it will do a JSON.stringify on your value before replacing it.  So if it is a string it will add quotes, if it is an array or object it will add braces.  If you use the `#` symbol instead, till just do a literal replacement.  It will not add quotes or brackets.
+This tool supports multiple methods to deploy auth0 configuration objects.
 
-For example, you could specify a different JWT timeout in your dev environment then prod for testing and a different environment URL:
+### Option 1 - Predefined Directory Structure
 
-Client .json:
-```
-{
-  ... 
-  "callbacks": [
-    "##ENVIRONMENT_URL##/auth/callback"
-  ],
-  "jwt_configuration": {
-    "lifetime_in_seconds": @@JWT_TIMEOUT@@,
-    "secret_encoded": true
-  }
-  ...
-}
-```
+Please refer to [Directory README](examples/directory/README.md) for usage instructions and examples.
 
-Dev Config .json:
-```
-  "AUTH0_KEYWORD_REPLACE_MAPPINGS": {
-    "ENVIRONMENT_URL": "http://dev.fabrikam.com",
-    "JWT_TIMEOUT": 120,
-    ...
-  }
-```
+### Option 2 - YAML configuration file
 
-Prod Config .json:
-```
-  "AUTH0_KEYWORD_REPLACE_MAPPINGS": {
-    "ENVIRONMENT_URL": "http://fabrikam.com",
-    "JWT_TIMEOUT": 3600,
-    ...
-  }
-```
+Please refer to [YAML README](examples/yaml/README.md) for usage instructions and examples.
 
-##### AUTH0_EXCLUDED_RULES
-This is a list of rule names that should be ignored by the deploy CLI.  It will not delete, update or create rules that match those names.
 
-#### Organize your repository
-There is more extensive documentation online for how the files are expected to be laid out to work with the source control configuration utilities [here](https://auth0.com/docs/extensions/github-deploy).  
+### Option 3 - Called Programmatically
 
-If you already have an existing tenant, you can dump your configuration in the right format using the [auth0-dump-config](https://github.com/xurei/auth0-dump-config).
-
-Here is a simple overview:
+The tool can be called programmatically. Please see below for an example.
 
 ```
-repository => 
-  clients
-    client1-name.json
-    client1-name.meta.json # if specifying client grants
-    my-other-client-name.json
-  resource-servers
-    resource server 1.json
-    some other resource server.json
-  database-connections
-    my-connection-name
-      get_user.js
-      login.js
-  rules
-    rule1.js
-    rule1.json
-    rule2.js
-  pages
-    login.html
-    login.json
-    password_reset.html
-    password_reset.json
-```
+import { deploy } from 'auth0-deploy-cli';
 
-##### Clients
-The name of the file is the name of the client that is created or updated.
+const config = {
+  AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
+  AUTH0_CLIENT_SECRET: process.env.AUTH0_CLIENT_ID,
+  AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_SECRET
+};
 
-In the .json file you can put the same json you would put when using the Management API for creating clients.  It will only try to keep the fields specified inline with what is configured already.  If a client doesn't exist yet, it will create it.  
+deploy({
+  input_file: 'path/to/yaml/or/directory',
+  state_file: '.local/state',
+  config
+})
+  .then(() => console.log('yey deploy was successful'))
+  .catch(err => console.log(`Oh no, something went wrong. Error: ${err}`));
 
-To specify client grants, you must specify the following in the metadata file.  (e.g. client1-name.meta.json)
 
 ```
-{
-  "grants": {
-    "Resource server audience": [
-      "scope1",
-      "scope2"
-    ]
-  }
-}
-```
 
-##### Resource servers
-The name of the file is the name of the resource server that is created or updated.
+## CLI Options
 
-In the .json file you can put the same json you would put when using the Management API for creating resource servers.  It will only try to keep the fields specified inline with what is configured already.  If a resource server doesn't exist yet, it will create it.
+The following options are supported by the cli.
 
-##### Database Connections
-See Database Connection configuration [here](https://auth0.com/docs/extensions/github-deploy#deploy-database-connection-scripts)
-
-##### Rules
-See Rules configuration [here](https://auth0.com/docs/extensions/github-deploy#deploy-rules)
-
-NOTE: There is not currently a way to mark rules as manual yet, that will become part of the configuration file in the future.
-
-##### Custom Pages
-See Custom Pages configuration [here](https://auth0.com/docs/extensions/github-deploy#deploy-hosted-pages)
-
-#### Command Line Options
+`a0deploy --help`
 
 ```
-a0deploy [options]
+Auth0 Deploy CLI
 
-  Options:
+Options:
+  --help             Show help                                         [boolean]
+  --version          Show version number                               [boolean]
+  --verbose, -v      Dump extra debug information.     [string] [default: false]
+  --input_file, -i   The updates to deploy. Either a JSON file, or directory
+                     that contains the correct file layout. See README and
+                     online for more info.                   [string] [required]
+  --config_file, -c  The JSON configuration file.            [string] [required]
+  --state_file, -s   A file for persisting state between runs.  Default:
+                     ./local/state.          [string] [default: "./local/state"]
+  --proxy_url, -p    A url for proxying requests, only set this if you are
+                     behind a proxy.                                    [string]
+  --secret, -x       The client secret, this allows you to encrypt the secret in
+                     your build configuration instead of storing it in a config
+                     file                                               [string]
 
-    -v,--verbose                    Dump extra debug information.
-    -i,--input_file <input file>    The updates to deploy.  Either a JSON file, or directory that contains the correct file layout.  See README and online for more info.
-    -c,--config_file <config file>  The JSON configuration file.
-    -s,--state_file <state file>    A file for persisting state between runs.  Default: ./local/state
-    -p,--proxy_url <proxy_url>      A url for proxying requests, only set this if you are behind a proxy.
-    -x,--secret <secret>            The client secret, this allows you to encrypt the secret in your build configuration instead of storing it in a config file
-    -h, --help                      output usage information
+Examples:
+  index.js -c config.yml -i tenant.yaml    Deploy Auth0 via YAML
+  index.js -c config.yml -i path/to/files  Deploy Auth0 via Path
+
+See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.
+
+Missing required arguments: input_file, config_file                   output usage information
 ```
 
-## Recommended Approach/Best Practices
-The recommended approach for utilizing this CLI is to incorporate it into your build system.  Create a repository to store your deploy configuration, then create a set of configuration files for each environment.  On your continuous integration server, have a deploy build for each environemnt.  This deploy build should update a local copy of the deploy configuration repository, then run the CLI to deploy it to that environment.  Read on for more detailed information.
+
+# Recommended Approach/Best Practices
+The recommended approach for utilizing this CLI is to incorporate it into your existing build processes. Create a repository to store your deploy configuration, then create a set of configuration files for each environment. On your continuous integration server, have a deploy build for each environment.  This deploy build should update a local copy of the deploy configuration repository, then run the CLI to deploy it to that environment.  Read on for more detailed information.
 
 ### Auth0 Tenant layout
 The recommended approach is to have a different Auth0 tenant/account for each environment.  For example: fabrikam-dev, fabrikam-uat, fabrikam-staging, and fabrikam-prod.
 
 ### Your Deploy Configuration Repository
-Your configuration repository should contain the files as described in the `Organize Your Repository` section above.
+Your configuration repository should contain the files as described in the selected option ([Directory](examples/directory/README.md) or [YAML](examples/yaml/README.md)
 
 You should have a branch for each tenant/account.  This allows you to make changes to dev, but not deploy them until you merge.  With this setup, you can have each environment have a CI task that automatically deploys the changes to its target environment when the branch is updated with the latest.
 
@@ -203,7 +145,7 @@ dev changes are tested, then merged to uat, once tested they are merged to stagi
 You may want to set your prod to only deploy when triggered manually.
 
 ### Your CI server configuration
-Your CI server should have a different deploy task and config.json for each environment.  Since each tenant/account will need to have the auth0-deploy-cli-extension installed in it with a different domain, client ID, and secret, this has to happen anyway and will avoid accidentally deploying to the wrong environment.
+Your CI server should have a different deploy task and config for each environment.  Since each tenant/account will need to have the auth0-deploy-cli-extension installed in it with a different domain, client ID, and secret, this has to happen anyway and will avoid accidentally deploying to the wrong environment.
 
 The deploy task should follow these steps:
 
@@ -215,7 +157,7 @@ The deploy task should follow these steps:
 ### Use keyword mappings to handle differences between the environments
 You should not have to store differences between environments in the Deploy Configuration Repository.  Use the keyword mappings to allow the repository to be environment agnostic, and instead store the differences in the separate config.json files for each environment that are stored on the CI server.
 
-## Other Helpful Topics
+# Other Helpful Topics
 
 ### To test locally
 
@@ -227,7 +169,7 @@ npm install
 npm run test
 ```
 
-### To Create Client by Hand
+## To Create Client by Hand
 
  1.  log into your dashboard
  1.  click the clients tab

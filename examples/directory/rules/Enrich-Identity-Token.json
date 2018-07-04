@@ -1,0 +1,6 @@
+{
+	"enabled": true,
+	"name": "Enrich-Identity-Token",
+	"order": 1,
+	"stage": "login_success"
+}
