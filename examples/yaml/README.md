@@ -1,40 +1,14 @@
 # Auth0 Deploy CLI via Directory Structure
 
-This README will document how to use the Directory Option of the Auth0-deploy-cli tool. Please refer to the [../../README.md](README.md) for more information on the Auth0 Deploy CLI.
+This README will document how to use the YAML Option of the Auth0-deploy-cli tool. Please refer to the [../../README.md](README.md) for more information on the Auth0 Deploy CLI.
 
-# Organize your repository
-There is more extensive documentation online for how the files are expected to be laid out to work with the source control configuration utilities [here](https://auth0.com/docs/extensions/github-deploy).  
+# Overview
+The YAML option supports configuring Auth0 tenant's via a YAML file.
 
-If you already have an existing tenant, you can dump your configuration in the right format using the [auth0-dump-config](https://github.com/xurei/auth0-dump-config).
-
-Here is a simple overview:
-
-```
-repository => 
-  clients
-    client1-name.json
-    client1-name.meta.json # if specifying client grants
-    my-other-client-name.json
-  resource-servers
-    resource server 1.json
-    some other resource server.json
-  database-connections
-    my-connection-name
-      get_user.js
-      login.js
-  rules
-    rule1.js
-    rule1.json
-    rule2.js
-  pages
-    login.html
-    login.json
-    password_reset.html
-    password_reset.json
-```
+For more information on YAML please refer to [http://yaml.org/](http://yaml.org/)
 
 ## Example
-Included in this directory is an example structure.
+Please refer to [tenant.yml](tenant.yml) for an example configuration.
 
 ###Instructions
 
@@ -67,11 +41,7 @@ Here is the example of a config.json:
       "https://somedomain.com"
     ],
     "YOUR_STRING_KEY": "some environment specific string"
-  },
-  "AUTH0_EXCLUDED_RULES": [
-    "rule-1-name",
-    "rule-2-name"
-  ]
+  }
 }
 ```
 
@@ -114,40 +84,3 @@ Prod Config .json:
     ...
   }
 ```
-
-## AUTH0_EXCLUDED_RULES
-This is a list of rule names that should be ignored by the deploy CLI.  It will not delete, update or create rules that match those names.
-
-## Clients
-The name of the file is the name of the client that is created or updated.
-
-In the .json file you can put the same json you would put when using the Management API for creating clients.  It will only try to keep the fields specified inline with what is configured already.  If a client doesn't exist yet, it will create it.  
-
-To specify client grants, you must specify the following in the metadata file.  (e.g. client1-name.meta.json)
-
-```
-{
-  "grants": {
-    "Resource server audience": [
-      "scope1",
-      "scope2"
-    ]
-  }
-}
-```
-
-## Resource servers
-The name of the file is the name of the resource server that is created or updated.
-
-In the .json file you can put the same json you would put when using the Management API for creating resource servers.  It will only try to keep the fields specified inline with what is configured already.  If a resource server doesn't exist yet, it will create it.
-
-## Database Connections
-See Database Connection configuration [here](https://auth0.com/docs/extensions/github-deploy#deploy-database-connection-scripts)
-
-## Rules
-See Rules configuration [here](https://auth0.com/docs/extensions/github-deploy#deploy-rules)
-
-NOTE: There is not currently a way to mark rules as manual yet, that will become part of the configuration file in the future.
-
-## Custom Pages
-See Custom Pages configuration [here](https://auth0.com/docs/extensions/github-deploy#deploy-hosted-pages)

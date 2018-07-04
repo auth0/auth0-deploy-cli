@@ -1,0 +1,86 @@
+# Auth0-Deploy-CLI Tenant YAML Configuration
+
+pages:
+  login:
+    html: "pages/login.html"
+  password_reset:
+    html: "pages/password_reset.html"
+  guardian_multifactor:
+    html: "pages/mfa.html"
+    enabled: false
+  error:
+    html: "pages/error.html"
+
+
+clients:
+  -
+    name: "Travel SPA"
+    app_type: "spa"
+    # Add other client settings (https://auth0.com/docs/api/management/v2#!/Clients/post_clients)
+
+
+databases:
+  - name: "users"
+    options:
+      enabledDatabaseCustomization: true
+    scripts:
+      login: "db/users/login.js"
+      create: "db/users/create.js"
+      delete: "db/users/delete.js"
+      get_user: "db/users/get_user.js"
+      change_email: "db/users/change_email.js"
+      change_password: "db/users/change_password.js"
+      verify: "db/users/verify.js"
+
+connections:
+  # Create the users connection for the users database above
+  - name: "users"
+    strategy: "auth0"
+    realms:
+      - "users"
+
+  - name: "hooli-waad"
+    strategy: "waad"
+    options:
+      tenant_domain: @@AZUREAD_HOOLI_TENANT@@
+      client_id: @@AZUREAD_HOOLI_CLIENT_ID@@
+      client_secret: @@AZUREAD_HOOLI_CLIENT_SECRET@@
+      domain: @@AZUREAD_HOOLI_TENANT@@
+      waad_protocol: 'openid-connect'
+      api_enable_users: true
+      basic_profile: true
+      ext_profile: true
+      ext_groups: true
+    # Add other connection settings (https://auth0.com/docs/api/management/v2#!/Connections/post_connections)
+
+
+rules:
+  # List of rules to exclude from being deleted/cleaned up on deploy
+  exclude:
+    - "Multifactor-Guardian-Do-Not-Rename"
+
+  # Key/Value pairs for Rule configuration settings
+  settings:
+    - key: "FULLCONTACT_API_KEY"
+      value: @@FULLCONTACT_API_KEY@@
+    - key: "FULLCONTACT_API_KEY"
+      value: @@FULLCONTACT_API_KEY@@
+
+  rules:
+    - name: "Common-Functions"
+      order: 10
+      script: "rules/enrich_tokens.js"
+
+
+
+resourceServers:
+  -
+    name: "My API"
+    identifier: "https://##ENV##myapp.com/api/v1"
+    scopes:
+      - name: "update:account"
+        description: "update account"
+      - name: "read:account"
+        description: "read account"
+    # Add other resource server settings (https://auth0.com/docs/api/management/v2#!/Resource_Servers/post_resource_servers)
+

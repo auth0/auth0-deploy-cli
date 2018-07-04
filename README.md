@@ -109,7 +109,7 @@ Options:
   --input_file, -i   The updates to deploy. Either a JSON file, or directory
                      that contains the correct file layout. See README and
                      online for more info.                   [string] [required]
-  --config_file, -c  The JSON configuration file.            [string] [required]
+  --config_file, -c  The JSON configuration file.                       [string]
   --state_file, -s   A file for persisting state between runs.  Default:
                      ./local/state.          [string] [default: "./local/state"]
   --proxy_url, -p    A url for proxying requests, only set this if you are
@@ -117,6 +117,8 @@ Options:
   --secret, -x       The client secret, this allows you to encrypt the secret in
                      your build configuration instead of storing it in a config
                      file                                               [string]
+  --env, -e          Override the mappings in config with process.env
+                     environment variables.             [string] [default: true]
 
 Examples:
   index.js -c config.yml -i tenant.yaml    Deploy Auth0 via YAML
@@ -124,7 +126,7 @@ Examples:
 
 See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.
 
-Missing required arguments: input_file, config_file                   output usage information
+Missing required argument: input_file
 ```
 
 

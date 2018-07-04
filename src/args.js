@@ -18,8 +18,7 @@ export default yargs
   .option('config_file', {
     alias: 'c',
     describe: 'The JSON configuration file.',
-    type: 'string',
-    demandOption: true
+    type: 'string'
   })
   .option('state_file', {
     alias: 's',
@@ -44,6 +43,6 @@ export default yargs
     boolean: true,
     default: true
   })
-  .example('$0 -c config.yml -i tenant.yaml', 'Deploy Auth0 via YAML')
+  .example('$0 -i tenant.yaml', 'Deploy Auth0 via YAML')
   .example('$0 -c config.yml -i path/to/files', 'Deploy Auth0 via Path')
   .epilogue('See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.');

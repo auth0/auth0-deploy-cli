@@ -1,6 +1,6 @@
 {
     "name": "My API",
-    "identifier": "https://##ENV##.myapp.com/api/v1",
+    "identifier": "https://##ENV##myapp.com/api/v1",
     "allow_offline_access": false,
     "skip_consent_for_verifiable_first_party_clients": true,
     "token_lifetime": 86400,

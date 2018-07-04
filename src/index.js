@@ -31,9 +31,11 @@ export async function deploy(params) {
     nconf.overrides({ AUTH0_CLIENT_SECRET: secret });
   }
 
-  nconf
-    .env()
-    .file(configFile);
+  if (configFile) {
+    nconf
+      .env()
+      .file(configFile);
+  }
 
   // Allow environment variables to override the configuration file
   if (env) {
@@ -42,6 +44,13 @@ export async function deploy(params) {
   }
   const config = extTools.config();
   config.setProvider(key => nconf.get(key));
+
+  // Validate config
+  const required = [ 'AUTH0_DOMAIN', 'AUTH0_CLIENT_ID', 'AUTH0_CLIENT_SECRET' ];
+  const errors = required.filter(r => !config(r));
+  if (errors.length > 0) {
+    throw new Error(`The following parameters were missing. Please add them to your config.json or as an environment variable. ${JSON.stringify(errors)}`);
+  }
 
   // Monkey Patch the superagent for proxy use
   if (proxyURL) {
@@ -56,7 +65,12 @@ export async function deploy(params) {
     };
   }
 
-  const context = setupContext(inputFile, config('mappings'));
+  let mappings = config('mappings') || {};
+  if (env) {
+    mappings = Object.assign(mappings, process.env);
+  }
+
+  const context = setupContext(inputFile, mappings);
 
   // Execute deploy
   const userName = await username();
