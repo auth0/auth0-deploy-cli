@@ -27,36 +27,9 @@ const clientSchema = {
     addons: { type: 'object' },
     token_endpoint_auth_method: { type: 'string' },
     client_metadata: {}
-    // TODO: Sort out schema for rest
-    /*
-    jwt_configuration: {
-      lifetime_in_seconds: 36000,
-      secret_encoded: true,
-      scopes: {},
-      alg: 'HS256'
-    },
-    signing_keys: [
-      'object'
-    ],
-    encryption_key: {
-      pub: '',
-      cert: '',
-      subject: ''
-    },
-    mobile: {
-      android: {
-        app_package_name: 'com.example',
-        sha256_cert_fingerprints: [
-          'D8:A0:83:...'
-        ]
-      },
-      ios: {
-        team_id: '9JA89QQLNQ',
-        app_bundle_identifier: 'com.my.bundle.id'
-      }
-    }
-    */
-  }
+  },
+  // Allow additional param as there are too many to deal with right now. Perhaps Auth0 needs a schema validation endpoint/api?
+  additionalProperties: true
 };
 
 

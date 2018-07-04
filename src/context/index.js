@@ -1,5 +1,5 @@
 import path from 'path';
-import YamlContext from './yaml';
+import YAMLContext from './yaml';
 import DirectoryContext from './directory';
 
 import { isFile, isDirectory } from '../utils';
@@ -12,7 +12,7 @@ export default function(filePath, mappings) {
   if (isFile(filePath)) {
     const ext = path.extname(filePath, mappings);
     if (ext === '.yaml' || ext === '.yml') {
-      return new YamlContext(filePath, mappings);
+      return new YAMLContext(filePath, mappings);
     }
   }
 

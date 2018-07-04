@@ -48,7 +48,7 @@ export default class {
           throw new Error(`Unable to load or find object handler ${key}`);
         }
         if (handler.parse) {
-          const parsed = handler.parse(data);
+          const parsed = handler.parse(data, this.mappings);
           Object.entries(parsed).forEach(([ k, v ]) => {
             this[k] = v;
           });
