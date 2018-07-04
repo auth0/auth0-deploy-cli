@@ -21,7 +21,7 @@ export async function deploy(params) {
     config_file: configFile,
     state_file: stateFile,
     proxy_url: proxyURL,
-    config: configJSON,
+    env,
     secret
   } = params;
 
@@ -31,16 +31,15 @@ export async function deploy(params) {
     nconf.overrides({ AUTH0_CLIENT_SECRET: secret });
   }
 
-  // Allow environment variables to override the configuration file
-  if (configJSON) {
-    nconf
-      .env(configJSON);
-  } else {
-    nconf
-      .env()
-      .file(configFile);
-  }
+  nconf
+    .env()
+    .file(configFile);
 
+  // Allow environment variables to override the configuration file
+  if (env) {
+    nconf
+      .env(process.env);
+  }
   const config = extTools.config();
   config.setProvider(key => nconf.get(key));
 
@@ -57,8 +56,7 @@ export async function deploy(params) {
     };
   }
 
-  // Setup Context depending on directory or YAML
-  const context = setupContext(inputFile, config('mappings') || process.env);
+  const context = setupContext(inputFile, config('mappings'));
 
   // Execute deploy
   const userName = await username();

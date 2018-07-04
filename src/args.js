@@ -37,6 +37,13 @@ export default yargs
     describe: 'The client secret, this allows you to encrypt the secret in your build configuration instead of storing it in a config file',
     type: 'string'
   })
+  .option('env', {
+    alias: 'e',
+    describe: 'Override the mappings in config with process.env environment variables.',
+    type: 'string',
+    boolean: true,
+    default: true
+  })
   .example('$0 -c config.yml -i tenant.yaml', 'Deploy Auth0 via YAML')
   .example('$0 -c config.yml -i path/to/files', 'Deploy Auth0 via Path')
   .epilogue('See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.');
