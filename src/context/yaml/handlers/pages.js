@@ -25,22 +25,22 @@ export const schema = {
   }
 };
 
-function pageConfig(name, config) {
+function pageConfig(name, config, mappings) {
   const page = config[name];
   if (page) {
     return {
       name,
       metadata: true,
       metadataFile: JSON.stringify({ enabled: page.enabled }),
-      htmlFile: loadFile(page.html, process.env)
+      htmlFile: loadFile(page.html, mappings)
     };
   }
   return null;
 }
 
 
-export function parse(config) {
-  const pages = supportedPages.map(name => pageConfig(name, config)).filter(p => p);
+export function parse(config, mappings) {
+  const pages = supportedPages.map(name => pageConfig(name, config, mappings)).filter(p => p);
   return {
     pages: unifyScripts(pages, {})
   };

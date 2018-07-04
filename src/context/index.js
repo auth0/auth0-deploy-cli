@@ -12,7 +12,7 @@ export default function(filePath, mappings) {
   if (isFile(filePath)) {
     const ext = path.extname(filePath, mappings);
     if (ext === '.yaml' || ext === '.yml') {
-      return new YamlContext(filePath);
+      return new YamlContext(filePath, mappings);
     }
   }
 

@@ -65,7 +65,10 @@ export const schema = {
 
 
 export function parse(config) {
-  const rules = config.rules.map((rule) => {
+  const rulesConfig = config.rules || [];
+  const settingsConfig = config.settings || [];
+
+  const rules = rulesConfig.map((rule) => {
     // First check if metadata is string, then load json
     const script = loadFile(rule.script, process.env);
     const metadata = {
@@ -84,14 +87,14 @@ export function parse(config) {
     };
   });
 
-  const ruleConfigs = config.settings.map(rule => ({
+  const ruleConfigs = settingsConfig.map(rule => ({
     configFile: JSON.stringify(rule),
     name: rule.key
   }));
 
   return {
     rules: unifyScripts(rules, {}),
-    excluded_rules: config.exclude,
+    excluded_rules: config.exclude || [],
     ruleConfigs: unifyScripts(ruleConfigs, {})
   };
 }

@@ -10,9 +10,10 @@ import handlers from 'src/context/yaml/handlers';
 
 
 export default class {
-  constructor(configFile) {
+  constructor(configFile, mappings) {
     this.configFile = configFile;
     this.config = {};
+    this.mappings = mappings;
     this.clients = {};
     this.databases = [];
     this.connections = [];
@@ -20,7 +21,6 @@ export default class {
     this.resourceServers = {};
     this.rules = {};
     this.excluded_rules = [];
-    this.loadConfig();
   }
 
   validate() {
@@ -36,7 +36,7 @@ export default class {
       const fPath = path.resolve(this.configFile);
       logger.debug(`Loading YAML from ${fPath}`);
 
-      this.config = yaml.safeLoad(keywordReplace(fs.readFileSync(fPath, 'utf8'), process.env));
+      this.config = yaml.safeLoad(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)) || {};
 
       // Validate schema
       this.validate();
@@ -60,9 +60,7 @@ export default class {
     }
   }
 
-  /* eslint class-methods-use-this: ["error", { "exceptMethods": ["init"] }] */
   async init() {
-    // This is to support auth0-deploy-cli.
-    // Nothing needs to be done as the config is loaded in the constructor.
+    this.loadConfig();
   }
 }

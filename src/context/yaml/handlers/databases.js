@@ -20,20 +20,20 @@ export const schema = {
 };
 
 
-function formatScripts(scripts) {
+function formatScripts(scripts, mappings) {
   return Object.entries(scripts).reduce((o, [ name, file ]) => ({
     ...o,
     [name]: {
-      scriptFile: loadFile(file, process.env)
+      scriptFile: loadFile(file, mappings)
     }
   }), {});
 }
 
-export function parse(config) {
+export function parse(config, mappings) {
   return {
     databases: config.map(database => ({
       ...database,
-      scripts: formatScripts(database.scripts)
+      scripts: formatScripts(database.scripts, mappings)
     }))
   };
 }

@@ -58,7 +58,7 @@ export async function deploy(params) {
   }
 
   // Setup Context depending on directory or YAML
-  const context = setupContext(inputFile, config('mappings') || []);
+  const context = setupContext(inputFile, config('mappings') || process.env);
 
   // Execute deploy
   const userName = await username();
