@@ -5,23 +5,24 @@ import { constants } from 'auth0-source-control-extension-tools';
 import Context from 'src/context/directory';
 import { cleanThenMkdir, testDataDir, writeStringToFile } from 'test/utils';
 
-describe('#context directory pages', () => {
-  const createPagesDir = (pagesDir, target) => {
-    cleanThenMkdir(pagesDir);
-    Object.keys(target).forEach((scriptName) => {
+function createPagesDir(pagesDir, target) {
+  cleanThenMkdir(pagesDir);
+  Object.keys(target).forEach((scriptName) => {
+    writeStringToFile(
+      path.resolve(pagesDir, scriptName + '.html'),
+      target[scriptName].htmlFile
+    );
+    if (target[scriptName].metadata) {
       writeStringToFile(
-        path.resolve(pagesDir, scriptName + '.html'),
-        target[scriptName].htmlFile
+        path.resolve(pagesDir, scriptName + '.json'),
+        target[scriptName].metadataFile
       );
-      if (target[scriptName].metadata) {
-        writeStringToFile(
-          path.resolve(pagesDir, scriptName + '.json'),
-          target[scriptName].metadataFile
-        );
-      }
-    });
-  };
+    }
+  });
+}
 
+
+describe('#context directory pages', () => {
   it('should process pages', async () => {
     const target = {
       login: {
