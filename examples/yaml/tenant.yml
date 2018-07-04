@@ -14,7 +14,7 @@ pages:
 
 clients:
   -
-    name: "Travel SPA"
+    name: "My SPA"
     app_type: "spa"
     # Add other client settings (https://auth0.com/docs/api/management/v2#!/Clients/post_clients)
 

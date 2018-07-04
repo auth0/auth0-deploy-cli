@@ -1,6 +1,6 @@
 # Auth0 Deploy CLI via Directory Structure
 
-This README will document how to use the Directory Option of the Auth0-deploy-cli tool. Please refer to the [../../README.md](README.md) for more information on the Auth0 Deploy CLI.
+This README will document how to use the Directory Option of the Auth0-deploy-cli tool. Please refer to the [README.md](README.md) for more information on the Auth0 Deploy CLI.
 
 # Organize your repository
 There is more extensive documentation online for how the files are expected to be laid out to work with the source control configuration utilities [here](https://auth0.com/docs/extensions/github-deploy).  
