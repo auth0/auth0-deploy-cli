@@ -33,6 +33,16 @@ repository =>
     password_reset.json
 ```
 
+## Example
+Included in this directory is an example structure.
+
+###Instructions
+
+1. Copy config.json.example and fill out details
+2. Run deploy
+```
+a0deploy -i . -c config.json
+```
 
 # Usage
 
