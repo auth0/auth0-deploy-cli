@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { logger } from 'src/logger';
+import { loadFile } from 'auth0-source-control-extension-tools';
 
 export function isDirectory(f) {
   try {
@@ -41,35 +42,12 @@ export function groupFiles(folder) {
 }
 
 
-export function keywordReplace(input, mappings) {
-  // Use this approach for string replacement vs es6 literals
-  // as using that might cause issues with rules which are in JS
-  let updated = input;
-
-  if (mappings && Object.keys(mappings).length > 0) {
-    Object.keys(mappings)
-      .forEach((key) => {
-        const re = new RegExp(`##${key}##`, 'g');
-        updated = updated.replace(re, mappings[key]);
-      });
-
-    Object.keys(mappings)
-      .forEach((key) => {
-        const re = new RegExp(`@@${key}@@`, 'g');
-        updated = updated.replace(re, JSON.stringify(mappings[key]));
-      });
-  }
-  return updated;
-}
-
-
-export function loadFile(file, mappings) {
-  const f = path.resolve(file);
+export function loadJSON(file, mappings) {
   try {
-    fs.accessSync(f, fs.F_OK);
-    return keywordReplace(fs.readFileSync(f, 'utf8'), mappings);
-  } catch (error) {
-    throw new Error(`Unable to load file ${f} due to ${error}`);
+    const content = loadFile(file, mappings);
+    return JSON.parse(content);
+  } catch (e) {
+    throw new Error(`Error parsing JSON from metadata file: ${file}, because: ${e.message}`);
   }
 }
 
@@ -78,13 +56,9 @@ export function parseFileGroup(name, files, mappings) {
   const item = { name };
 
   files.forEach((file) => {
-    const content = loadFile(file, mappings);
     const { name: fileName, ext: fileExt } = path.parse(file);
-    if (fileName.endsWith('.meta')) {
-      item.metadata = true;
-      item.metadataFile = content;
-    } else if (fileExt === '.json') {
-      item.configFile = content;
+    if (fileExt === '.json' || fileName.endsWith('.meta')) {
+      Object.assign(item, loadJSON(file, mappings));
     } else {
       logger.warn('Skipping non-metadata file: ' + file);
     }
@@ -100,4 +74,15 @@ export function existsMustBeDir(folder) {
       throw new Error(`Expected ${folder} to be a folder but got a file?`);
     }
   }
+}
+
+
+export function loadFilesByKey(item, baseDir, keys, mappings) {
+  const newItem = { ...item };
+  keys.forEach((key) => {
+    if (item[key]) {
+      newItem[key] = loadFile(path.join(baseDir, item[key]), mappings);
+    }
+  });
+  return newItem;
 }

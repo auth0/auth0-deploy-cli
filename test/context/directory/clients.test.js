@@ -30,7 +30,7 @@ describe('#context directory clients', () => {
     const context = new Context(repoDir, { somekey: 'someVal' });
     await context.init();
     target.clients.someClient2.configFile = '{ "someKey": "someVal" }';
-    expect(context.clients).to.deep.equal(target.clients);
+    expect(context.assets.clients).to.deep.equal(target.clients);
   });
 
   it('should ignore bad config file', async () => {
@@ -52,7 +52,7 @@ describe('#context directory clients', () => {
 
     const context = new Context(repoDir);
     await context.init();
-    expect(context.clients).to.deep.equal(target.clients);
+    expect(context.assets.clients).to.deep.equal(target.clients);
   });
 
   it('should ignore bad pages directory', async () => {

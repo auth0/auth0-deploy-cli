@@ -1,10 +1,18 @@
 {
   "comments": false,
   "presets": [
-    "node8"
+    [
+      "env",
+      {
+        "targets": {
+          "node": "8"
+        }
+      }
+    ]
   ],
   "plugins": [
     "transform-decorators-legacy",
+    "transform-object-rest-spread",
     "dynamic-import-node",
     [
       "module-resolver",

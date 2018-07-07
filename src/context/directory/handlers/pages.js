@@ -1,8 +1,8 @@
 import path from 'path';
-import { unifyScripts, constants } from 'auth0-source-control-extension-tools';
+import { constants, loadFile } from 'auth0-source-control-extension-tools';
 
 import { logger } from 'src/logger';
-import { loadFile, groupFiles, existsMustBeDir } from 'src/utils';
+import { groupFiles, existsMustBeDir, loadJSON } from 'src/utils';
 
 
 function isPage(filePath) {
@@ -17,10 +17,9 @@ function parseFileGroup(name, files, mappings) {
       const content = loadFile(file, mappings);
       const { ext } = path.parse(file);
       if (ext === '.json') {
-        page.metadata = true;
-        page.metadataFile = content;
+        Object.assign(page, loadJSON(file, mappings));
       } else {
-        page.htmlFile = content;
+        page.html = content;
       }
     } else {
       logger.warn('Skipping file that is not a page: ' + file);
@@ -40,6 +39,6 @@ export default function parse(folder, mappings) {
     .filter(p => Object.keys(p).length > 1); // Filter out invalid pages that have only name key set
 
   return {
-    pages: unifyScripts(pages, {})
+    pages
   };
 }

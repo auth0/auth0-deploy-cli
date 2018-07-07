@@ -1,39 +1,21 @@
-import { loadFile } from 'src/utils';
-import { constants } from 'auth0-source-control-extension-tools';
-
-export const schema = {
-  type: 'array',
-  items: {
-    type: 'object',
-    properties: {
-      name: { type: 'string' },
-      scripts: {
-        type: 'object',
-        properties: {
-          ...constants.DATABASE_SCRIPTS.reduce((o, script) => ({ ...o, [script]: { type: 'string' } }), {})
-        },
-        require: [ 'login', 'get_user' ]
-      }
-    },
-    require: [ 'name', 'scripts', 'import_mode' ]
-  }
-};
+import path from 'path';
+import { loadFile } from 'auth0-source-control-extension-tools';
 
 
-function formatScripts(scripts, mappings) {
-  return Object.entries(scripts).reduce((o, [ name, file ]) => ({
-    ...o,
-    [name]: {
-      scriptFile: loadFile(file, mappings)
-    }
-  }), {});
-}
-
-export function parse(config, mappings) {
+export default function parse(context) {
+  // Load the script file for custom db
   return {
-    databases: config.map(database => ({
-      ...database,
-      scripts: formatScripts(database.scripts, mappings)
-    }))
+    databases: [
+      ...context.assets.databases.map(database => ({
+        ...database,
+        options: {
+          ...database.options,
+          customScripts: Object.entries(database.options.customScripts || {}).reduce((scripts, [ name, script ]) => ({
+            ...scripts,
+            [name]: loadFile(path.join(context.configPath, script), context.mappings)
+          }), {})
+        }
+      }))
+    ]
   };
 }

@@ -1,9 +1,9 @@
 import path from 'path';
 import fs from 'fs';
-import { constants } from 'auth0-source-control-extension-tools';
+import { constants, loadFile } from 'auth0-source-control-extension-tools';
 
 import { logger } from 'src/logger';
-import { loadFile, isDirectory, isFile, existsMustBeDir } from 'src/utils';
+import { isDirectory, isFile, existsMustBeDir } from 'src/utils';
 
 
 function isScript(name) {
@@ -11,7 +11,7 @@ function isScript(name) {
 }
 
 function getDatabase(folder, mappings) {
-  const database = { name: path.basename(folder), scripts: {} };
+  const database = { name: path.basename(folder), customScripts: {} };
 
   const files = fs.readdirSync(folder)
     .map(f => path.join(folder, f))
@@ -26,7 +26,7 @@ function getDatabase(folder, mappings) {
     }
 
     const content = loadFile(file, mappings);
-    database.scripts[script] = { scriptFile: content };
+    database.customScripts[script] = content;
   });
 
   return database;

@@ -25,23 +25,24 @@ export async function deploy(params) {
     secret
   } = params;
 
+  nconf
+    .env();
+
+  if (configFile) {
+    nconf.file(configFile);
+  }
+
   // Prepare configuration by initializing nconf, then passing that as the provider to the config object
   // Allow passed in secret to override the configured one
   if (secret) {
     nconf.overrides({ AUTH0_CLIENT_SECRET: secret });
   }
 
-  if (configFile) {
-    nconf
-      .env()
-      .file(configFile);
+  if (env) {
+    const mappings = nconf.get('AUTH0_KEYWORD_REPLACE_MAPPINGS');
+    nconf.set('AUTH0_KEYWORD_REPLACE_MAPPINGS', Object.assign(mappings, process.env));
   }
 
-  // Allow environment variables to override the configuration file
-  if (env) {
-    nconf
-      .env(process.env);
-  }
   const config = extTools.config();
   config.setProvider(key => nconf.get(key));
 
@@ -65,11 +66,7 @@ export async function deploy(params) {
     };
   }
 
-  let mappings = config('mappings') || {};
-  if (env) {
-    mappings = Object.assign(mappings, process.env);
-  }
-
+  const mappings = config('AUTH0_KEYWORD_REPLACE_MAPPINGS') || {};
   const context = setupContext(inputFile, mappings);
 
   // Execute deploy
@@ -100,6 +97,7 @@ export async function deploy(params) {
   const data = await storage.read();
   data.excluded_rules = config('AUTH0_EXCLUDED_RULES') || [];
   await storage.write(data);
+  context.assets.excluded_rules = data.excluded_rules;
 
   return tools.deploy(progress, context, mgmtClient, storage, config, {
     repository: 'Tool',

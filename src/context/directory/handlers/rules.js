@@ -1,22 +1,19 @@
 import path from 'path';
-import { unifyScripts, constants } from 'auth0-source-control-extension-tools';
+import { constants, loadFile } from 'auth0-source-control-extension-tools';
 
 import { logger } from 'src/logger';
-import { loadFile, groupFiles, existsMustBeDir } from 'src/utils';
+import { groupFiles, existsMustBeDir, loadJSON } from 'src/utils';
 
 
 function parseFileGroup(name, files, mappings) {
   const rule = { name };
 
   files.forEach((file) => {
-    const content = loadFile(file, mappings);
     const { ext } = path.parse(file);
     if (ext === '.json') {
-      rule.metadataFile = content;
-      rule.metadata = true;
+      Object.assign(rule, loadJSON(file, mappings));
     } else if (ext === '.js') {
-      rule.script = true;
-      rule.scriptFile = content;
+      rule.script = loadFile(file, mappings);
     } else {
       logger.warn('Skipping non-rules file: ' + file);
     }
@@ -35,6 +32,8 @@ export default function parse(folder, mappings) {
     .filter(p => Object.keys(p).length > 1); // Filter out invalid rules that have only name key set
 
   return {
-    rules: unifyScripts(rules, {})
+    rules: {
+      rules
+    }
   };
 }

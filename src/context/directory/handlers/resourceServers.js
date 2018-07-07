@@ -1,5 +1,5 @@
 import path from 'path';
-import { unifyScripts, constants } from 'auth0-source-control-extension-tools';
+import { constants } from 'auth0-source-control-extension-tools';
 
 import { existsMustBeDir, groupFiles, parseFileGroup } from 'src/utils';
 
@@ -13,6 +13,6 @@ export default function parse(folder, mappings) {
     .filter(p => Object.keys(p).length > 1); // Filter out invalid clients that have only name key set
 
   return {
-    resourceServers: unifyScripts(resources, {})
+    resourceServers: resources
   };
 }

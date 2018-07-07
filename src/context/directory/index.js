@@ -7,13 +7,16 @@ export default class {
   constructor(filePath, mappings) {
     this.filePath = path.resolve(filePath);
     this.mappings = mappings;
-    this.clients = {};
-    this.databases = [];
-    this.connections = [];
-    this.pages = {};
-    this.resourceServers = {};
-    this.rules = {};
-    this.excluded_rules = [];
+    this.assets = {
+      clients: [],
+      databases: [],
+      connections: [],
+      pages: [],
+      resourceServers: [],
+      rules: [],
+      rulesConfigs: [],
+      excluded_rules: []
+    };
   }
 
   async load() {
@@ -26,7 +29,7 @@ export default class {
           const parsed = handler(this.filePath, this.mappings);
           Object.entries(parsed)
             .forEach(([ k, v ]) => {
-              this[k] = v;
+              this.assets[ k ] = v;
             });
         });
       return;

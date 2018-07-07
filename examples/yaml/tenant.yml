@@ -1,14 +1,18 @@
 # Auth0-Deploy-CLI Tenant YAML Configuration
 
+
 pages:
-  login:
+  - name: "login"
     html: "pages/login.html"
-  password_reset:
+
+  - name: "password_reset"
     html: "pages/password_reset.html"
-  guardian_multifactor:
+
+  - name: "guardian_multifactor"
     html: "pages/mfa.html"
     enabled: false
-  error:
+
+  - name: "error_page"
     html: "pages/error.html"
 
 
@@ -21,31 +25,29 @@ clients:
 
 databases:
   - name: "users"
+    enabled_clients:
+      - "My SPA"
     options:
       enabledDatabaseCustomization: true
-    scripts:
-      login: "db/users/login.js"
-      create: "db/users/create.js"
-      delete: "db/users/delete.js"
-      get_user: "db/users/get_user.js"
-      change_email: "db/users/change_email.js"
-      change_password: "db/users/change_password.js"
-      verify: "db/users/verify.js"
+      customScripts:
+        login: "db/users/login.js"
+        create: "db/users/create.js"
+        delete: "db/users/delete.js"
+        get_user: "db/users/get_user.js"
+        change_email: "db/users/change_email.js"
+        change_password: "db/users/change_password.js"
+        verify: "db/users/verify.js"
 
 connections:
-  # Create the users connection for the users database above
-  - name: "users"
-    strategy: "auth0"
-    realms:
-      - "users"
-
-  - name: "hooli-waad"
+  - name: "myad-waad"
     strategy: "waad"
+    enabled_clients:
+      - "My SPA"
     options:
-      tenant_domain: @@AZUREAD_HOOLI_TENANT@@
-      client_id: @@AZUREAD_HOOLI_CLIENT_ID@@
-      client_secret: @@AZUREAD_HOOLI_CLIENT_SECRET@@
-      domain: @@AZUREAD_HOOLI_TENANT@@
+      tenant_domain: 'some.company'
+      client_id: 'some_client_id'
+      client_secret: 'some_client_secret'
+      domain: 'some.company'
       waad_protocol: 'openid-connect'
       api_enable_users: true
       basic_profile: true
@@ -55,32 +57,26 @@ connections:
 
 
 rules:
-  # List of rules to exclude from being deleted/cleaned up on deploy
-  exclude:
-    - "Multifactor-Guardian-Do-Not-Rename"
-
-  # Key/Value pairs for Rule configuration settings
-  settings:
-    - key: "FULLCONTACT_API_KEY"
-      value: @@FULLCONTACT_API_KEY@@
-    - key: "FULLCONTACT_API_KEY"
-      value: @@FULLCONTACT_API_KEY@@
-
   rules:
     - name: "Common-Functions"
       order: 10
       script: "rules/enrich_tokens.js"
 
 
+rulesConfigs:
+  # Key/Value pairs for Rule configuration settings
+  - key: "SOME_SECRET"
+    value: 'some_key'
+
 
 resourceServers:
   -
     name: "My API"
-    identifier: "https://##ENV##myapp.com/api/v1"
+    identifier: "https://##ENV##.myapp.com/api/v1"
     scopes:
-      - name: "update:account"
+      - value: "update:account"
         description: "update account"
-      - name: "read:account"
+      - value: "read:account"
         description: "read account"
     # Add other resource server settings (https://auth0.com/docs/api/management/v2#!/Resource_Servers/post_resource_servers)
 
