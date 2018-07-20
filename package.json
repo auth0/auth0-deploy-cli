@@ -29,9 +29,9 @@
   "homepage": "https://github.com/auth0/auth0-deploy-cli#readme",
   "dependencies": {
     "ajv": "^6.5.2",
-    "auth0": "dctoon/node-auth0#add-rules-configs",
+    "auth0": "auth0/node-auth0#master",
     "auth0-extension-tools": "^1.2.1",
-    "auth0-source-control-extension-tools": "file:../auth0-source-control-extension-tools",
+    "auth0-source-control-extension-tools": "stevezau/auth0-source-control-extension-tools#improve_automation",
     "http-proxy-agent": "^2.0.0",
     "https-proxy-agent": "^2.0.0",
     "js-yaml": "^3.12.0",
