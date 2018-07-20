@@ -13,14 +13,6 @@
   "plugins": [
     "transform-decorators-legacy",
     "transform-object-rest-spread",
-    "dynamic-import-node",
-    [
-      "module-resolver",
-      {
-        "root": [
-          "./"
-        ]
-      }
-    ]
+    "dynamic-import-node"
   ]
 }

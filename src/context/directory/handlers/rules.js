@@ -1,8 +1,8 @@
 import path from 'path';
 import { constants, loadFile } from 'auth0-source-control-extension-tools';
 
-import { logger } from 'src/logger';
-import { groupFiles, existsMustBeDir, loadJSON } from 'src/utils';
+import { logger } from '../../../logger';
+import { groupFiles, existsMustBeDir, loadJSON } from '../../../utils';
 
 
 function parseFileGroup(name, files, mappings) {

@@ -1,7 +1,7 @@
 import path from 'path';
 import { constants } from 'auth0-source-control-extension-tools';
 
-import { existsMustBeDir, groupFiles, parseFileGroup } from 'src/utils';
+import { existsMustBeDir, groupFiles, parseFileGroup } from '../../../utils';
 
 export default function parse(folder, mappings) {
   const resourceFolder = path.join(folder, constants.RESOURCE_SERVERS_DIRECTORY);

@@ -3,13 +3,13 @@ import yaml from 'js-yaml';
 import path from 'path';
 import { keywordReplace } from 'auth0-source-control-extension-tools';
 
-import { logger } from 'src/logger';
-import handlers from 'src/context/yaml/handlers';
+import { logger } from '../../logger';
+import handlers from '../../context/yaml/handlers';
 
 export default class {
-  constructor(configFile, mappings) {
-    this.configFile = configFile;
-    this.configPath = path.dirname(configFile);
+  constructor(config, mappings) {
+    this.config = config;
+    this.basePath = (typeof config === 'object') ? process.cwd() : path.dirname(config);
     this.mappings = mappings;
     this.assets = {
       clients: [],
@@ -19,29 +19,35 @@ export default class {
       resourceServers: [],
       rules: [],
       rulesConfigs: [],
-      excluded_rules: []
+      excluded_rules: [],
+      tenant: {}
     };
   }
 
   loadConfig() {
-    try {
-      const fPath = path.resolve(this.configFile);
-      logger.debug(`Loading YAML from ${fPath}`);
-      this.assets = yaml.safeLoad(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings));
-
-      // Allow handlers to process the assets such as loading files etc
-      Object.values(handlers)
-        .forEach((handler) => {
-          const parsed = handler(this);
-          Object.entries(parsed)
-            .forEach(([ k, v ]) => {
-              this.assets[k] = v;
-            });
-        });
-    } catch (e) {
-      logger.error(e.stack);
-      throw new Error(`Problem loading ${this.configFile}\n${e}`);
+    // Allow to send object/json directly
+    if (typeof this.config === 'object') {
+      this.assets = this.config;
+    } else {
+      try {
+        const fPath = path.resolve(this.config);
+        logger.debug(`Loading YAML from ${fPath}`);
+        this.assets = yaml.safeLoad(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings));
+      } catch (e) {
+        logger.error(e.stack);
+        throw new Error(`Problem loading ${this.configFile}\n${e}`);
+      }
     }
+
+    // Allow handlers to process the assets such as loading files etc
+    Object.values(handlers)
+      .forEach((handler) => {
+        const parsed = handler(this);
+        Object.entries(parsed)
+          .forEach(([ k, v ]) => {
+            this.assets[k] = v;
+          });
+      });
   }
 
   async init() {

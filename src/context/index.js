@@ -5,6 +5,10 @@ import DirectoryContext from './directory';
 import { isDirectory } from '../utils';
 
 export default function(filePath, mappings) {
+  if (typeof filePath === 'object') {
+    return new YAMLContext(filePath, mappings);
+  }
+
   if (isDirectory(filePath)) {
     return new DirectoryContext(filePath, mappings);
   }

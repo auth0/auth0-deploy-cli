@@ -1,7 +1,8 @@
 import * as path from 'path';
-import { logger } from 'src/logger';
-import { isDirectory } from 'src/utils';
-import handlers from 'src/context/directory/handlers';
+
+import { logger } from '../../logger';
+import { isDirectory } from '../../utils';
+import handlers from '../../context/directory/handlers';
 
 export default class {
   constructor(filePath, mappings) {

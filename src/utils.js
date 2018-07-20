@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import { logger } from 'src/logger';
 import { loadFile } from 'auth0-source-control-extension-tools';
+
+import { logger } from './logger';
 
 export function isDirectory(f) {
   try {

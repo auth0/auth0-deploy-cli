@@ -2,8 +2,8 @@ import path from 'path';
 import fs from 'fs';
 import { constants, loadFile } from 'auth0-source-control-extension-tools';
 
-import { logger } from 'src/logger';
-import { isDirectory, isFile, existsMustBeDir } from 'src/utils';
+import { logger } from '../../../logger';
+import { isDirectory, isFile, existsMustBeDir } from '../../../utils';
 
 
 function isScript(name) {

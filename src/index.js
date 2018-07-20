@@ -10,10 +10,10 @@ import extTools from 'auth0-extension-tools';
 import { ManagementClient, AuthenticationClient } from 'auth0';
 import tools from 'auth0-source-control-extension-tools';
 
-import { logger } from 'src/logger';
-import args from 'src/args';
-import Storage from 'src/storage';
-import setupContext from 'src/context';
+import { logger } from './logger';
+import args from './args';
+import Storage from './storage';
+import setupContext from './context';
 
 export async function deploy(params) {
   const {
@@ -25,8 +25,7 @@ export async function deploy(params) {
     secret
   } = params;
 
-  nconf
-    .env();
+  nconf.env().use('memory');
 
   if (configFile) {
     nconf.file(configFile);
@@ -39,7 +38,7 @@ export async function deploy(params) {
   }
 
   if (env) {
-    const mappings = nconf.get('AUTH0_KEYWORD_REPLACE_MAPPINGS');
+    const mappings = nconf.get('AUTH0_KEYWORD_REPLACE_MAPPINGS') || {};
     nconf.set('AUTH0_KEYWORD_REPLACE_MAPPINGS', Object.assign(mappings, process.env));
   }
 

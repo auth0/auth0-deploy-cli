@@ -1,12 +1,14 @@
-import { loadFilesByKey } from 'src/utils';
+import { loadFilesByKey } from '../../../utils';
 
 
 export default function parse(context) {
   // Load the script file for each rule
 
+  const rules = context.assets.rules || [];
+
   return {
     rules: [
-      ...context.assets.rules.rules.map(rule => loadFilesByKey(rule, context.configPath, [ 'script' ], context.mappings))
+      ...rules.map(rule => loadFilesByKey(rule, context.basePath, [ 'script' ], context.mappings))
     ]
   };
 }
