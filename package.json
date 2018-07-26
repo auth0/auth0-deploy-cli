@@ -29,7 +29,7 @@
   "homepage": "https://github.com/auth0/auth0-deploy-cli#readme",
   "dependencies": {
     "ajv": "^6.5.2",
-    "auth0": "auth0/node-auth0#master",
+    "auth0": "^2.11.0",
     "auth0-extension-tools": "^1.2.1",
     "auth0-source-control-extension-tools": "stevezau/auth0-source-control-extension-tools#improve_automation",
     "http-proxy-agent": "^2.0.0",
