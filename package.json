@@ -2,7 +2,7 @@
   "name": "auth0-deploy-cli",
   "version": "2.0.0",
   "description": "A command line tool for deploying updates to your Auth0 tenant",
-  "main": "src/index.js",
+  "main": "lib/index.js",
   "bin": {
     "a0deploy": "lib/index.js"
   },
