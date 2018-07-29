@@ -18,6 +18,7 @@ import setupContext from './context';
 export async function deploy(params) {
   const {
     input_file: inputFile,
+    base_path: basePath,
     config_file: configFile,
     state_file: stateFile,
     proxy_url: proxyURL,
@@ -66,7 +67,7 @@ export async function deploy(params) {
   }
 
   const mappings = config('AUTH0_KEYWORD_REPLACE_MAPPINGS') || {};
-  const context = setupContext(inputFile, mappings);
+  const context = setupContext(inputFile, mappings, basePath);
 
   // Execute deploy
   const userName = await username();

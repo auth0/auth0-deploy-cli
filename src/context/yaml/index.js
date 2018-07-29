@@ -7,9 +7,8 @@ import { logger } from '../../logger';
 import handlers from '../../context/yaml/handlers';
 
 export default class {
-  constructor(config, mappings) {
+  constructor(config, mappings, basePath) {
     this.config = config;
-    this.basePath = (typeof config === 'object') ? process.cwd() : path.dirname(config);
     this.mappings = mappings;
     this.assets = {
       clients: [],
@@ -22,6 +21,11 @@ export default class {
       excluded_rules: [],
       tenant: {}
     };
+    if (basePath) {
+      this.basePath = basePath;
+    } else {
+      this.basePath = (typeof config === 'object') ? process.cwd() : path.dirname(config);
+    }
   }
 
   loadConfig() {
