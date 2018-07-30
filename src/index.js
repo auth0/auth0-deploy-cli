@@ -1,7 +1,4 @@
 #!/usr/bin/env node
-import os from 'os';
-import username from 'username';
-import moment from 'moment/moment';
 import nconf from 'nconf';
 import HttpsProxyAgent from 'https-proxy-agent';
 import HttpProxyAgent from 'http-proxy-agent';
@@ -12,7 +9,6 @@ import tools from 'auth0-source-control-extension-tools';
 
 import { logger } from './logger';
 import args from './args';
-import Storage from './storage';
 import setupContext from './context';
 
 export async function deploy(params) {
@@ -20,7 +16,6 @@ export async function deploy(params) {
     input_file: inputFile,
     base_path: basePath,
     config_file: configFile,
-    state_file: stateFile,
     proxy_url: proxyURL,
     env,
     secret
@@ -69,17 +64,6 @@ export async function deploy(params) {
   const mappings = config('AUTH0_KEYWORD_REPLACE_MAPPINGS') || {};
   const context = setupContext(inputFile, mappings, basePath);
 
-  // Execute deploy
-  const userName = await username();
-  const progress = {
-    id: userName,
-    user: userName,
-    sha: moment()
-      .format(),
-    branch: os.hostname(),
-    repository: 'Auth0 Deploy CLI'
-  };
-
   const authClient = new AuthenticationClient({
     domain: config('AUTH0_DOMAIN'),
     clientId: config('AUTH0_CLIENT_ID'),
@@ -92,19 +76,10 @@ export async function deploy(params) {
     token: clientCredentials.access_token
   });
 
-  // Before running deploy, let's copy excluded rules to storage
-  const storage = new Storage(stateFile);
-  const data = await storage.read();
-  data.excluded_rules = config('AUTH0_EXCLUDED_RULES') || [];
-  await storage.write(data);
-  context.assets.excluded_rules = data.excluded_rules;
+  // Before running deploy, get excluded rules
+  context.assets.excluded_rules = config('AUTH0_EXCLUDED_RULES') || [];
 
-  return tools.deploy(progress, context, mgmtClient, storage, config, {
-    repository: 'Tool',
-    id: 'Username',
-    branch: 'Host',
-    sha: 'Date/Time'
-  });
+  return tools.deploy(context, mgmtClient, config);
 }
 
 export async function run() {
