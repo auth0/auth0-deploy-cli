@@ -62,7 +62,6 @@ export async function deploy(params) {
   }
 
   const mappings = config('AUTH0_KEYWORD_REPLACE_MAPPINGS') || {};
-  const context = setupContext(inputFile, mappings, basePath);
 
   const authClient = new AuthenticationClient({
     domain: config('AUTH0_DOMAIN'),
@@ -76,10 +75,14 @@ export async function deploy(params) {
     token: clientCredentials.access_token
   });
 
-  // Before running deploy, get excluded rules
-  context.assets.excluded_rules = config('AUTH0_EXCLUDED_RULES') || [];
+  // Setup context and load
+  const context = setupContext(inputFile, mappings, basePath);
+  await context.load();
 
-  return tools.deploy(context, mgmtClient, config);
+  // Before running deploy, get excluded rules
+  context.assets.excludedRules = config('AUTH0_EXCLUDED_RULES') || [];
+
+  return tools.deploy(context.assets, mgmtClient, config);
 }
 
 export async function run() {

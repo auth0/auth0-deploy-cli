@@ -18,7 +18,7 @@ export default class {
       resourceServers: [],
       rules: [],
       rulesConfigs: [],
-      excluded_rules: [],
+      excludedRules: [],
       tenant: {}
     };
     if (basePath) {
@@ -28,7 +28,7 @@ export default class {
     }
   }
 
-  loadConfig() {
+  async load() {
     // Allow to send object/json directly
     if (typeof this.config === 'object') {
       this.assets = this.config;
@@ -52,9 +52,5 @@ export default class {
             this.assets[k] = v;
           });
       });
-  }
-
-  async init() {
-    this.loadConfig();
   }
 }

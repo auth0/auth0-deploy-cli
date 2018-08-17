@@ -16,7 +16,7 @@ export default class {
       resourceServers: [],
       rules: [],
       rulesConfigs: [],
-      excluded_rules: []
+      excludedRules: []
     };
   }
 
@@ -30,17 +30,11 @@ export default class {
           const parsed = handler(this.filePath, this.mappings);
           Object.entries(parsed)
             .forEach(([ k, v ]) => {
-              this.assets[ k ] = v;
+              this.assets[k] = v;
             });
         });
       return;
     }
     throw new Error(`Not sure what to do with, ${this.filePath} as it is not a directory...`);
-  }
-
-  async init(progress) {
-    /* If mappings weren't provided, fall back to the ones provided to init() */
-    this.mappings = this.mappings || (progress && progress.mappings);
-    return this.load();
   }
 }
