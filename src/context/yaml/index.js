@@ -10,17 +10,7 @@ export default class {
   constructor(config, mappings, basePath) {
     this.config = config;
     this.mappings = mappings;
-    this.assets = {
-      clients: [],
-      databases: [],
-      connections: [],
-      pages: [],
-      resourceServers: [],
-      rules: [],
-      rulesConfigs: [],
-      excludedRules: [],
-      tenant: {}
-    };
+    this.assets = {};
     if (basePath) {
       this.basePath = basePath;
     } else {

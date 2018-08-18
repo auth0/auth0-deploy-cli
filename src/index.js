@@ -80,7 +80,10 @@ export async function deploy(params) {
   await context.load();
 
   // Before running deploy, get excluded rules
-  context.assets.excludedRules = config('AUTH0_EXCLUDED_RULES') || [];
+  context.assets.exclude = {
+    rules: config('AUTH0_EXCLUDED_RULES') || [],
+    resourceServers: config('AUTH0_EXCLUDED_RESOURCE_SERVERS') || []
+  };
 
   return tools.deploy(context.assets, mgmtClient, config);
 }
