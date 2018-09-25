@@ -469,6 +469,24 @@ describe('#context', () => {
       });
     };
 
+    const createRuleConfigsDir = (dir, target) => {
+      cleanThenMkdir(dir);
+      const content = typeof target === 'string' ? target : JSON.stringify(target);
+      writeStringToFile(path.resolve(dir, 'config.json'), content);
+    };
+
+    const createRulesDirWithTrivialRule = (dir) => {
+      const target = {
+        someRule: {
+          script: true,
+          scriptFile: 'function someRule(user, context, callback) { callback(null, user, context); }',
+          metadata: false,
+          name: 'someRule'
+        }
+      };
+      createRulesDir(dir, target);
+    };
+
     it('should process rules', (done) => {
       const target = {
         someRule: {
@@ -539,6 +557,85 @@ describe('#context', () => {
             expect(err.message).to.equal('Couldn\'t process' +
               ' the rules directory because: ENOTDIR:' +
               ' not a directory, scandir \'' + dir + '\'');
+          });
+        });
+    });
+
+    it('should process rule configs', (done) => {
+      const configOnDisk = {
+        CUSTOM_RULES_CONFIG_KEY: 'CUSTOM_RULES_CONFIG_VALUE',
+        ANOTHER_CONFIG_KEY: 'ANOTHER_CONFIG_VALUE'
+      };
+
+      const expectedConfigPassedOn = {
+        CUSTOM_RULES_CONFIG_KEY: {
+          name: 'CUSTOM_RULES_CONFIG_KEY',
+          configFile: JSON.stringify({ value: 'CUSTOM_RULES_CONFIG_VALUE' })
+        },
+        ANOTHER_CONFIG_KEY: {
+          name: 'ANOTHER_CONFIG_KEY',
+          configFile: JSON.stringify({ value: 'ANOTHER_CONFIG_VALUE' })
+        }
+      };
+
+      const repoDir = path.join(testDataDir, 'ruleConfigs1');
+      const dir = path.join(repoDir, constants.RULES_CONFIGS_DIRECTORY);
+      createRuleConfigsDir(dir, configOnDisk);
+      createRulesDirWithTrivialRule(path.join(repoDir, constants.RULES_DIRECTORY));
+
+      const context = new Context(repoDir, {});
+      context.init()
+        .then(() => {
+          check(done, function() {
+            expect(context.ruleConfigs).to.deep.equal(expectedConfigPassedOn);
+          });
+        });
+    });
+
+    it('should ignore bad rules configs directory', (done) => {
+      const repoDir = path.join(testDataDir, 'ruleConfigs2');
+      cleanThenMkdir(repoDir);
+      const dir = path.join(repoDir, constants.RULES_CONFIGS_DIRECTORY);
+      writeStringToFile(dir, 'junk');
+
+      const context = new Context(repoDir);
+      context.init()
+        .catch((err) => {
+          check(done, function() {
+            expect(err.message).to.equal('Couldn\'t process' +
+              ' the rules configs directory because: ENOTDIR:' +
+              ' not a directory, scandir \'' + dir + '\'');
+          });
+        });
+    });
+
+    it('should ignore a rules config file with the wrong structure', (done) => {
+      const repoDir = path.join(testDataDir, 'ruleConfigs3');
+      const dir = path.join(repoDir, constants.RULES_CONFIGS_DIRECTORY);
+      createRuleConfigsDir(dir, [ 'arrays are not okay' ]);
+
+      const context = new Context(repoDir);
+      context.init()
+        .catch((err) => {
+          check(done, function() {
+            expect(err.message).to.equal('Couldn\'t process' +
+              ' the rules configs file because: Invalid format for config.json');
+          });
+        });
+    });
+
+    it('should ignore a non-JSON config file', (done) => {
+      const repoDir = path.join(testDataDir, 'ruleConfigs3');
+      const dir = path.join(repoDir, constants.RULES_CONFIGS_DIRECTORY);
+      createRuleConfigsDir(dir, 'non-JSON files are not okay');
+
+      const context = new Context(repoDir);
+      context.init()
+        .catch((err) => {
+          check(done, function() {
+            expect(err.message).to.equal('Couldn\'t process' +
+              ' the rules configs file because: config.json is not a JSON document:' +
+              ' Unexpected token o in JSON at position 1');
           });
         });
     });

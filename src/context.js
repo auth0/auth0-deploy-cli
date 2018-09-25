@@ -47,6 +47,50 @@ const processRule = (ruleName, rule) => {
     .then(() => currentRule);
 };
 
+const getRuleConfigs = (dirPath) => {
+  const ruleConfigsFileName = 'config.json';
+  return fs.readdirAsync(dirPath)
+    .catch((e) => {
+      if (e.code === 'ENOENT') {
+        logger.info('No rules configs directory present');
+        return Promise.resolve([]);
+      }
+      return Promise.reject(new Error('Couldn\'t process the rules configs directory because: ' + e.message));
+    })
+    .then(() => {
+      const configFilePath = path.join(dirPath, ruleConfigsFileName);
+      return fs.readFileAsync(configFilePath)
+        .then((contents) => {
+          try {
+            const json = JSON.parse(contents);
+            if (typeof json !== 'object' || Array.isArray(json)) {
+              return Promise.reject(new Error('Invalid format for ' + ruleConfigsFileName));
+            }
+            return json;
+          } catch (e) {
+            return Promise.reject(new Error('config.json is not a JSON document: ' + e.message));
+          }
+        })
+        .then((json) => {
+          const wrappedJson = {};
+          Object.keys(json).forEach((key) => {
+            wrappedJson[key] = {
+              name: key,
+              configFile: JSON.stringify({ value: json[key] })
+            };
+          });
+          return wrappedJson;
+        })
+        .catch((e) => {
+          if (e.code === 'ENOENT') {
+            logger.info('No rules configs file present');
+            return Promise.resolve({});
+          }
+          return Promise.reject(new Error('Couldn\'t process the rules configs file because: ' + e.message));
+        });
+    });
+};
+
 /*
  * Determine if we have the script, the metadata or both.
  */
@@ -349,6 +393,7 @@ const getChanges = (filePath, mappings) => {
     logger.info('Processing ' + filePath + ' as directory ' + fullPath);
 
     promises = {
+      ruleConfigs: getRuleConfigs(path.join(fullPath, constants.RULES_CONFIGS_DIRECTORY)),
       rules: getRules(path.join(fullPath, constants.RULES_DIRECTORY)),
       pages: getPages(path.join(fullPath, constants.PAGES_DIRECTORY)),
       databases: getDatabaseScripts((path.join(fullPath, constants.DATABASE_CONNECTIONS_DIRECTORY))),
@@ -358,6 +403,7 @@ const getChanges = (filePath, mappings) => {
 
     return Promise.props(promises)
       .then(result => ({
+        ruleConfigs: result.ruleConfigs,
         rules: unifyScripts(result.rules, mappings),
         databases: unifyDatabases(result.databases, mappings),
         pages: unifyScripts(result.pages, mappings),
@@ -389,6 +435,7 @@ export default class {
         (data) => {
           me.pages = data.pages || {};
           me.rules = data.rules || {};
+          me.ruleConfigs = data.ruleConfigs || {};
           me.databases = data.databases || [];
           me.clients = data.clients || {};
           me.resourceServers = data.resourceServers || {};
