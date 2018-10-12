@@ -2,7 +2,7 @@ import winston from 'winston';
 
 winston.emitErrs = true;
 
-export const logger = new winston.Logger({
+const log = new winston.Logger({
   transports: [
     new winston.transports.Console({
       timestamp: true,
@@ -16,8 +16,4 @@ export const logger = new winston.Logger({
 });
 
 
-export const stream = {
-  write: (message) => {
-    logger.info(message.replace(/\n$/, ''));
-  }
-};
+export default log;

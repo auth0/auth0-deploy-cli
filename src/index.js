@@ -1,103 +1,41 @@
 #!/usr/bin/env node
-import nconf from 'nconf';
-import HttpsProxyAgent from 'https-proxy-agent';
-import HttpProxyAgent from 'http-proxy-agent';
-import superagent from 'superagent';
-import extTools from 'auth0-extension-tools';
-import { ManagementClient, AuthenticationClient } from 'auth0';
-import tools from 'auth0-source-control-extension-tools';
-
-import { logger } from './logger';
 import args from './args';
-import setupContext from './context';
+import commands from './commands';
+import log from './logger';
 
-export async function deploy(params) {
-  const {
-    input_file: inputFile,
-    base_path: basePath,
-    config_file: configFile,
-    proxy_url: proxyURL,
-    env,
-    secret
-  } = params;
+// Load cli params
+const params = args.argv;
 
-  nconf.env().use('memory');
+log.debug('Starting Auth0 Deploy CLI Tool');
 
-  if (configFile) {
-    nconf.file(configFile);
+// Set log level
+log.transports.console.level = params.level;
+log.debug(`Setting log to level ${params.level}`);
+
+async function run() {
+  // Run command
+  const cmd = commands[params._[0]];
+
+  // TODO: Prob a native/better way to enforce command choices in yargs.
+  if (!cmd) {
+    log.error(`Command ${params._[0]} not supported\n`);
+    args.showHelp();
+    process.exit(1);
   }
 
-  // Prepare configuration by initializing nconf, then passing that as the provider to the config object
-  // Allow passed in secret to override the configured one
-  if (secret) {
-    nconf.overrides({ AUTH0_CLIENT_SECRET: secret });
-  }
+  log.debug(`Start command ${params._[0]}`);
+  await cmd(params);
+  log.debug(`Finished command ${params._[0]}`);
+}
 
-  if (env) {
-    const mappings = nconf.get('AUTH0_KEYWORD_REPLACE_MAPPINGS') || {};
-    nconf.set('AUTH0_KEYWORD_REPLACE_MAPPINGS', Object.assign(mappings, process.env));
-  }
-
-  const config = extTools.config();
-  config.setProvider(key => nconf.get(key));
-
-  // Validate config
-  const required = [ 'AUTH0_DOMAIN', 'AUTH0_CLIENT_ID', 'AUTH0_CLIENT_SECRET' ];
-  const errors = required.filter(r => !config(r));
-  if (errors.length > 0) {
-    throw new Error(`The following parameters were missing. Please add them to your config.json or as an environment variable. ${JSON.stringify(errors)}`);
-  }
-
-  // Monkey Patch the superagent for proxy use
-  if (proxyURL) {
-    const proxyAgent = new HttpProxyAgent(proxyURL);
-    const proxyAgentSsl = new HttpsProxyAgent(proxyURL);
-    const OrigRequest = superagent.Request;
-    superagent.Request = function RequestWithAgent(method, url) {
-      const req = new OrigRequest(method, url);
-      logger.debug(`Setting proxy for ${method} to ${url}`);
-      if (url.startsWith('https')) return req.agent(proxyAgentSsl);
-      return req.agent(proxyAgent);
-    };
-  }
-
-  const mappings = config('AUTH0_KEYWORD_REPLACE_MAPPINGS') || {};
-
-  const authClient = new AuthenticationClient({
-    domain: config('AUTH0_DOMAIN'),
-    clientId: config('AUTH0_CLIENT_ID'),
-    clientSecret: config('AUTH0_CLIENT_SECRET')
+run()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    log.error('We received an error :(');
+    if (error.stack) {
+      log.error(error.stack);
+    } else if (error.message) {
+      log.error(JSON.stringify(error.message));
+    }
+    process.exit(1);
   });
-
-  const clientCredentials = await authClient.clientCredentialsGrant({ audience: `https://${config('AUTH0_DOMAIN')}/api/v2/` });
-  const mgmtClient = new ManagementClient({
-    domain: config('AUTH0_DOMAIN'),
-    token: clientCredentials.access_token
-  });
-
-  // Setup context and load
-  const context = setupContext(inputFile, mappings, basePath);
-  await context.load();
-
-  // Before running deploy, get excluded rules
-  context.assets.exclude = {
-    rules: config('AUTH0_EXCLUDED_RULES') || [],
-    resourceServers: config('AUTH0_EXCLUDED_RESOURCE_SERVERS') || []
-  };
-
-  return tools.deploy(context.assets, mgmtClient, config);
-}
-
-export async function run() {
-  try {
-    await deploy(args.argv);
-  } catch (err) {
-    logger.error(err);
-  }
-}
-
-// Only run if from command line
-if (require.main === module) {
-  run()
-    .catch(err => `Unknown error ${err}`);
-}
