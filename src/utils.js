@@ -1,8 +1,8 @@
-import fs from 'fs';
+import fs from 'fs-extra';
 import path from 'path';
 import { loadFile } from 'auth0-source-control-extension-tools';
 
-import { logger } from './logger';
+import log from './logger';
 
 export function isDirectory(f) {
   try {
@@ -61,7 +61,7 @@ export function parseFileGroup(name, files, mappings) {
     if (fileExt === '.json' || fileName.endsWith('.meta')) {
       Object.assign(item, loadJSON(file, mappings));
     } else {
-      logger.warn('Skipping non-metadata file: ' + file);
+      log.warn('Skipping non-metadata file: ' + file);
     }
   });
 

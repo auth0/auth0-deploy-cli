@@ -39,7 +39,24 @@ export default yargs
       type: 'string'
     }
   })
-  .command('dump', 'Dump Configuration (YET TO BE IMPLEMENTED)', {})
+  .command('dump', 'Dump Configuration', {
+    output_file: {
+      alias: 'o',
+      describe: 'The output file or directory. Will dump YAML if .yaml file else will dump to directory structure',
+      type: 'string',
+      demandOption: true
+    },
+    config_file: {
+      alias: 'c',
+      describe: 'The JSON configuration file.',
+      type: 'string'
+    },
+    secret: {
+      alias: 'x',
+      describe: 'The client secret, this allows you to encrypt the secret in your build configuration instead of storing it in a config file',
+      type: 'string'
+    }
+  })
   .example('$0 deploy -i tenant.yaml', 'Deploy Auth0 via YAML')
   .example('$0 deploy -c config.yml -i path/to/files', 'Deploy Auth0 via Path')
   .epilogue('See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.');

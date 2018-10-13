@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+import HttpsProxyAgent from 'https-proxy-agent';
+import HttpProxyAgent from 'http-proxy-agent';
+import superagent from 'superagent';
+
 import args from './args';
 import commands from './commands';
 import log from './logger';
@@ -21,6 +25,20 @@ async function run() {
     log.error(`Command ${params._[0]} not supported\n`);
     args.showHelp();
     process.exit(1);
+  }
+
+  // Monkey Patch the superagent for proxy use
+  const proxy = args.proxy_url;
+  if (proxy) {
+    const proxyAgent = new HttpProxyAgent(proxy);
+    const proxyAgentSsl = new HttpsProxyAgent(proxy);
+    const OrigRequest = superagent.Request;
+    superagent.Request = function RequestWithAgent(method, url) {
+      const req = new OrigRequest(method, url);
+      log.debug(`Setting proxy for ${method} to ${url}`);
+      if (url.startsWith('https')) return req.agent(proxyAgentSsl);
+      return req.agent(proxyAgent);
+    };
   }
 
   log.debug(`Start command ${params._[0]}`);

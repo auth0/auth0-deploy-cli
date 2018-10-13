@@ -1,13 +1,9 @@
 #!/usr/bin/env node
 import nconf from 'nconf';
-import HttpsProxyAgent from 'https-proxy-agent';
-import HttpProxyAgent from 'http-proxy-agent';
-import superagent from 'superagent';
 import extTools from 'auth0-extension-tools';
 import { ManagementClient, AuthenticationClient } from 'auth0';
 import tools from 'auth0-source-control-extension-tools';
 
-import log from '../logger';
 import setupContext from '../context';
 
 export default async function deploy(params) {
@@ -15,7 +11,6 @@ export default async function deploy(params) {
     input_file: inputFile,
     base_path: basePath,
     config_file: configFile,
-    proxy_url: proxyURL,
     env,
     secret
   } = params;
@@ -45,19 +40,6 @@ export default async function deploy(params) {
   const errors = required.filter(r => !config(r));
   if (errors.length > 0) {
     throw new Error(`The following parameters were missing. Please add them to your config.json or as an environment variable. ${JSON.stringify(errors)}`);
-  }
-
-  // Monkey Patch the superagent for proxy use
-  if (proxyURL) {
-    const proxyAgent = new HttpProxyAgent(proxyURL);
-    const proxyAgentSsl = new HttpsProxyAgent(proxyURL);
-    const OrigRequest = superagent.Request;
-    superagent.Request = function RequestWithAgent(method, url) {
-      const req = new OrigRequest(method, url);
-      log.debug(`Setting proxy for ${method} to ${url}`);
-      if (url.startsWith('https')) return req.agent(proxyAgentSsl);
-      return req.agent(proxyAgent);
-    };
   }
 
   const mappings = config('AUTH0_KEYWORD_REPLACE_MAPPINGS') || {};
