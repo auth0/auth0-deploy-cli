@@ -4,18 +4,18 @@ const filterKeys = [
   'error_page'
 ];
 
-async function parse() {
-  // nothing to do
-  return {};
+async function parse(context) {
+  // nothing to do, set default if empty
+  return { tenant: context.assets.tenant || {} };
 }
 
 async function dump(mgmtClient) {
-  const tenantSettings = await mgmtClient.tenant.getSettings();
+  const tenant = await mgmtClient.tenant.getSettings();
   filterKeys.forEach((key) => {
-    if (tenantSettings[key]) delete tenantSettings[key];
+    if (tenant[key]) delete tenant[key];
   });
 
-  return { tenantSettings };
+  return { tenant };
 }
 
 

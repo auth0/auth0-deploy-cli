@@ -1,8 +1,8 @@
 import { constants } from 'auth0-source-control-extension-tools';
 
-async function parse() {
-  // nothing to do
-  return {};
+async function parse(context) {
+  // nothing to do, set default if empty
+  return { resourceServers: context.assets.resourceServers || [] };
 }
 
 async function dump(mgmtClient) {

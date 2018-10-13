@@ -1,7 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
 
-import { loadFilesByKey } from '../../../utils';
 import log from '../../../logger';
 
 export const pageNameMap = {
@@ -18,7 +17,10 @@ async function parse(context) {
 
   return {
     pages: [
-      ...pages.map(page => loadFilesByKey(page, context.basePath, [ 'html' ], context.mappings))
+      ...pages.map(page => ({
+        ...page,
+        html: context.loadFile(page.html)
+      }))
     ]
   };
 }

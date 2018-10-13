@@ -1,7 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
 
-import { loadFilesByKey } from '../../../utils';
 import log from '../../../logger';
 
 async function parse(context) {
@@ -10,7 +9,10 @@ async function parse(context) {
 
   return {
     rules: [
-      ...rules.map(rule => loadFilesByKey(rule, context.basePath, [ 'script' ], context.mappings))
+      ...rules.map(rule => ({
+        ...rule,
+        script: context.loadFile(rule.script)
+      }))
     ]
   };
 }

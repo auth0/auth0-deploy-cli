@@ -1,21 +1,32 @@
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import path from 'path';
-import { keywordReplace } from 'auth0-source-control-extension-tools';
+import { loadFile, keywordReplace, Auth0 } from 'auth0-source-control-extension-tools';
 
 import log from '../../logger';
-import handlers from '../../context/yaml/handlers';
+import { isFile } from '../../utils';
+import handlers from './handlers';
 
 export default class {
-  constructor(config, mappings, basePath) {
+  constructor(config, mappings, basePath, mgmtClient) {
     this.config = config;
     this.mappings = mappings;
     this.assets = {};
+    this.mockMgmtClient = mgmtClient;
     if (basePath) {
       this.basePath = basePath;
     } else {
       this.basePath = (typeof config === 'object') ? process.cwd() : path.dirname(config);
     }
+  }
+
+  loadFile(f) {
+    let toLoad = path.join(this.basePath, f);
+    if (!isFile(toLoad)) {
+      // try load not relative to yaml file
+      toLoad = f;
+    }
+    return loadFile(toLoad, this.mappings);
   }
 
   async load() {
@@ -26,12 +37,16 @@ export default class {
       try {
         const fPath = path.resolve(this.config);
         log.debug(`Loading YAML from ${fPath}`);
-        this.assets = yaml.safeLoad(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings));
-      } catch (e) {
-        log.error(e.stack);
-        throw new Error(`Problem loading ${this.configFile}\n${e}`);
+        this.assets = yaml.safeLoad(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)) || {};
+      } catch (err) {
+        log.error(err.stack);
+        throw new Error(`Problem loading ${this.configFile}\n${err}`);
       }
     }
+
+    // Run initial schema check to ensure valid YAML
+    const auth0 = new Auth0(this.mockMgmtClient, this.assets, this.config);
+    await auth0.validate('validate');
 
     // Allow handlers to process the assets such as loading files etc
     await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {
@@ -42,15 +57,16 @@ export default class {
             this.assets[k] = v;
           });
       } catch (err) {
-        throw new Error(`Problem deploying ${name} due to ${err}`);
+        log.error(err.stack);
+        throw new Error(`Problem deploying ${name}`);
       }
     }));
   }
 
-  async dump(mgmtClient) {
+  async dump() {
     await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {
       try {
-        const dumped = await handler.dump(mgmtClient, this);
+        const dumped = await handler.dump(this.mockMgmtClient, this);
         if (dumped) {
           log.info(`Dumping ${name}`);
           Object.entries(dumped)
@@ -59,7 +75,8 @@ export default class {
             });
         }
       } catch (err) {
-        throw new Error(`Problem dumping ${name} due to ${err}`);
+        log.error(err.stack);
+        throw new Error(`Problem dumping ${name}`);
       }
     }));
 

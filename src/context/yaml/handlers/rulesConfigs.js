@@ -1,7 +1,7 @@
 
-async function parse() {
-  // nothing to do
-  return {};
+async function parse(context) {
+  // nothing to do, set default if empty
+  return { rulesConfigs: context.assets.rulesConfigs || [] };
 }
 
 async function dump(mgmtClient) {

@@ -1,7 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
 
-import { loadFile } from 'auth0-source-control-extension-tools';
 import log from '../../../logger';
 
 
@@ -16,7 +15,7 @@ async function parse(context) {
           ...database.options,
           customScripts: Object.entries(database.options.customScripts || {}).reduce((scripts, [ name, script ]) => ({
             ...scripts,
-            [name]: loadFile(path.join(context.basePath, script), context.mappings)
+            [name]: context.loadFile(script)
           }), {})
         }
       }))

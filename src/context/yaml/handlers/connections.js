@@ -1,6 +1,6 @@
-async function parse() {
-  // nothing to do
-  return {};
+async function parse(context) {
+  // nothing to do, set default if empty
+  return { connections: context.assets.connections || [] };
 }
 
 async function dump(mgmtClient) {

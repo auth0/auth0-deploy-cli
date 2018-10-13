@@ -1,7 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
 
-import { loadFilesByKey } from '../../../utils';
 import log from '../../../logger';
 
 const templateNames = [
@@ -22,7 +21,10 @@ async function parse(context) {
   const emailTemplates = context.assets.emailTemplates || [];
   return {
     emailTemplates: [
-      ...emailTemplates.map(et => loadFilesByKey(et, context.basePath, [ 'body' ], context.mappings))
+      ...emailTemplates.map(et => ({
+        ...et,
+        body: context.loadFile(et.body)
+      }))
     ]
   };
 }
