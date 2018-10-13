@@ -51,10 +51,10 @@ connections:
     enabled_clients:
       - "My SPA"
     options:
-      tenant_domain: 'some.company'
+      tenant_domain: 'office.com'
       client_id: 'some_client_id'
       client_secret: 'some_client_secret'
-      domain: 'some.company'
+      domain: 'office.com'
       waad_protocol: 'openid-connect'
       api_enable_users: true
       basic_profile: true
