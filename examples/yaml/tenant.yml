@@ -12,11 +12,11 @@ pages:
     html: "pages/password_reset.html"
 
   - name: "guardian_multifactor"
-    html: "pages/mfa.html"
+    html: "pages/guardian_multifactor.html"
     enabled: false
 
   - name: "error_page"
-    html: "pages/error.html"
+    html: "pages/error_page.html"
 
 
 clients:
@@ -37,13 +37,13 @@ databases:
     options:
       enabledDatabaseCustomization: true
       customScripts:
-        login: "db/users/login.js"
-        create: "db/users/create.js"
-        delete: "db/users/delete.js"
-        get_user: "db/users/get_user.js"
-        change_email: "db/users/change_email.js"
-        change_password: "db/users/change_password.js"
-        verify: "db/users/verify.js"
+        login: "databases/users/login.js"
+        create: "databases/users/create.js"
+        delete: "databases/users/delete.js"
+        get_user: "databases/users/get_user.js"
+        change_email: "databases/users/change_email.js"
+        change_password: "databases/users/change_password.js"
+        verify: "databases/users/verify.js"
 
 connections:
   - name: "myad-waad"
@@ -93,8 +93,8 @@ emailProvider:
   credentials:
     smtp_host: "smtp.mailtrap.io"
     smtp_port: 2525
-    smtp_user: "aaaaa"
-    smtp_pass: "bah"
+    smtp_user: "smtp_user"
+    smtp_pass: "smtp_secret_password"
 
 
 emailTemplates:
