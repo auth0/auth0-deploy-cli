@@ -57,7 +57,7 @@ export default async function deploy(params) {
   });
 
   // Setup context and load
-  const context = setupContext(inputFile, mappings, basePath);
+  const context = setupContext(inputFile, mappings, basePath, mgmtClient);
   await context.load();
 
   // Before running deploy, get excluded rules

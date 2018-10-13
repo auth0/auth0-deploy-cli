@@ -76,14 +76,3 @@ export function existsMustBeDir(folder) {
     }
   }
 }
-
-
-export function loadFilesByKey(item, baseDir, keys, mappings) {
-  const newItem = { ...item };
-  keys.forEach((key) => {
-    if (item[key]) {
-      newItem[key] = loadFile(path.join(baseDir, item[key]), mappings);
-    }
-  });
-  return newItem;
-}
