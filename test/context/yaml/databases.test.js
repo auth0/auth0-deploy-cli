@@ -1,8 +1,11 @@
 import path from 'path';
 import { expect } from 'chai';
 
-import Context from 'src/context/yaml';
-import { writeStringToFile, testDataDir, cleanThenMkdir } from 'test/utils';
+import Context from '../../../src/context/yaml';
+import {
+  cleanThenMkdir, testDataDir, writeStringToFile, mockMgmtClient
+} from '../../utils';
+
 
 describe('#context YAML databases', () => {
   it('should process database', async () => {
@@ -14,57 +17,44 @@ describe('#context YAML databases', () => {
 
     const yaml = `
     databases:
-      - name: "db1"
+      - name: "users"
         options:
           enabledDatabaseCustomization: true
-        scripts:
-          login: ${scriptFile}
-          create: ${scriptFile}
-          delete: ${scriptFile}
-          change_email: ${scriptFile}
-          get_user: ${scriptFile}
-          verify: ${scriptFile}
+          customScripts:
+            login: ${scriptFile}
+            create: ${scriptFile}
+            delete: ${scriptFile}
+            get_user: ${scriptFile}
+            change_email: ${scriptFile}
+            change_password: ${scriptFile}
+            verify: ${scriptFile}
     `;
+
+    const scriptValidate = 'function login() { var env1 = "env2"; }';
 
     const target = [
       {
-        name: 'db1',
+        name: 'users',
         options: {
+          customScripts: {
+            change_email: scriptValidate,
+            change_password: scriptValidate,
+            create: scriptValidate,
+            delete: scriptValidate,
+            get_user: scriptValidate,
+            login: scriptValidate,
+            verify: scriptValidate
+          },
           enabledDatabaseCustomization: true
         },
-        scripts: {
-          login: {
-            scriptFile: ''
-          },
-          create: {
-            scriptFile: 'function create() { }'
-          },
-          delete: {
-            scriptFile: 'function delete() { }'
-          },
-          verify: {
-            scriptFile: 'function delete() { }'
-          },
-          change_email: {
-            scriptFile: 'function change_email() { }'
-          },
-          get_user: {
-            scriptFile: 'function get_user() { }'
-          }
-        }
+        strategy: 'auth0'
       }
     ];
 
     const yamlFile = writeStringToFile(path.join(dir, 'databases.yaml'), yaml);
-    const context = new Context(yamlFile, { val1: 'env1', val2: 'env2' });
-    await context.init();
-    const scriptValidate = 'function login() { var env1 = "env2"; }';
-    target[0].scripts.login.scriptFile = scriptValidate;
-    target[0].scripts.create.scriptFile = scriptValidate;
-    target[0].scripts.delete.scriptFile = scriptValidate;
-    target[0].scripts.change_email.scriptFile = scriptValidate;
-    target[0].scripts.get_user.scriptFile = scriptValidate;
-    target[0].scripts.verify.scriptFile = scriptValidate;
-    expect(context.databases).to.deep.equal(target);
+    const context = new Context(yamlFile, { val1: 'env1', val2: 'env2' }, null, mockMgmtClient());
+    await context.load();
+
+    expect(context.assets.databases).to.deep.equal(target);
   });
 });

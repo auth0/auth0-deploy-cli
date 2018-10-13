@@ -1,8 +1,11 @@
 import path from 'path';
 import { expect } from 'chai';
 
-import Context from 'src/context/yaml';
-import { writeStringToFile, testDataDir, cleanThenMkdir } from 'test/utils';
+import Context from '../../../src/context/yaml';
+import {
+  cleanThenMkdir, testDataDir, writeStringToFile, mockMgmtClient
+} from '../../utils';
+
 
 describe('#context rules', () => {
   it('should process rules', async () => {
@@ -14,50 +17,25 @@ describe('#context rules', () => {
 
     const yaml = `
     rules:
-      rules:
-        - name: "someRule"
-          order: 10
-          script: "${scriptFile}"
-          enabled: false
+      - name: "someRule"
+        order: 10
+        script: "${scriptFile}"
+        enabled: false
     `;
     const yamlFile = writeStringToFile(path.join(dir, 'rule1.yaml'), yaml);
 
-    const target = {
-      someRule: {
-        script: true,
-        scriptFile: scriptContext,
+    const target = [
+      {
+        enabled: false,
         name: 'someRule',
-        metadata: true,
-        metadataFile: '{"name":"someRule","order":10,"stage":"login_success","enabled":false}'
+        order: 10,
+        script: 'function someRule() { var hello = "test"; }',
+        stage: 'login_success'
       }
-    };
+    ];
 
-    const context = new Context(yamlFile);
-    await context.init();
-    expect(context.rules).to.deep.equal(target);
-  });
-
-  it('should process rule settings', async () => {
-    const dir = path.join(testDataDir, 'yaml', 'rules2');
-    cleanThenMkdir(dir);
-
-    const yaml = `
-    rules:
-      settings:
-        - key: "some"
-          value: "secret"
-    `;
-    const yamlFile = writeStringToFile(path.join(dir, 'rule2.js'), yaml);
-
-    const target = {
-      some: {
-        name: 'some',
-        configFile: '{"key":"some","value":"secret"}'
-      }
-    };
-
-    const context = new Context(yamlFile);
-    await context.init();
-    expect(context.ruleConfigs).to.deep.equal(target);
+    const context = new Context(yamlFile, { hello: 'test' }, null, mockMgmtClient());
+    await context.load();
+    expect(context.assets.rules).to.deep.equal(target);
   });
 });

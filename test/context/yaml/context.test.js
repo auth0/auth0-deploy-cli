@@ -1,8 +1,10 @@
 import path from 'path';
 import { expect } from 'chai';
 
-import Context from 'src/context/yaml';
-import { cleanThenMkdir, testDataDir, writeStringToFile } from 'test/utils';
+import Context from '../../../src/context/yaml';
+import {
+  cleanThenMkdir, testDataDir, writeStringToFile, mockMgmtClient
+} from '../../utils';
 
 
 describe('#context YAML validation', () => {
@@ -13,14 +15,14 @@ describe('#context YAML validation', () => {
     const yaml = path.join(dir, 'empty.yaml');
     writeStringToFile(yaml, '');
 
-    const context = new Context(yaml);
-    await context.init();
+    const context = new Context(yaml, {}, '', mockMgmtClient());
+    await context.load();
 
-    expect(context.rules).to.deep.equal({});
-    expect(context.databases).to.deep.equal([]);
-    expect(context.pages).to.deep.equal({});
-    expect(context.clients).to.deep.equal({});
-    expect(context.resourceServers).to.deep.equal({});
+    expect(context.assets.rules).to.deep.equal([]);
+    expect(context.assets.databases).to.deep.equal([]);
+    expect(context.assets.pages).to.deep.equal([]);
+    expect(context.assets.clients).to.deep.equal([]);
+    expect(context.assets.resourceServers).to.deep.equal([]);
   });
 
   it('should error invalid schema', async () => {
@@ -29,13 +31,33 @@ describe('#context YAML validation', () => {
     const yaml = path.join(dir, 'invalid.yaml');
     writeStringToFile(yaml, 'invalid');
 
-    const context = new Context(yaml);
-    await expect(context.init()).to.be.eventually.rejectedWith(Error);
+    const context = new Context(yaml, {}, null, mockMgmtClient());
+    await expect(context.load()).to.be.eventually.rejectedWith(Error);
   });
 
   it('should error on bad file', async () => {
     const yaml = path.resolve(testDataDir, 'yaml', 'notexist.yml');
-    const context = new Context(yaml);
-    await expect(context.init()).to.be.eventually.rejectedWith(Error);
+    const context = new Context(yaml, {}, null, mockMgmtClient());
+    await expect(context.load()).to.be.eventually.rejectedWith(Error);
+  });
+
+  it('should load relative file', async () => {
+    const dir = path.resolve(testDataDir, 'yaml', 'script');
+    cleanThenMkdir(dir);
+    const script = path.join(dir, 'script.js');
+    writeStringToFile(script, '// empty');
+
+    const context = new Context({}, {}, null, mockMgmtClient());
+    expect(context.loadFile(script.replace(context.basePath, '.'))).to.equal('// empty');
+  });
+
+  it('should load full path file', async () => {
+    const dir = path.resolve(testDataDir, 'yaml', 'script');
+    cleanThenMkdir(dir);
+    const script = path.join(dir, 'script.js');
+    writeStringToFile(script, '// empty');
+
+    const context = new Context({}, {}, null, mockMgmtClient());
+    expect(context.loadFile(script)).to.equal('// empty');
   });
 });

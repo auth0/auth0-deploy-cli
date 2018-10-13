@@ -1,8 +1,10 @@
 import path from 'path';
 import { expect } from 'chai';
 
-import Context from 'src/context/yaml';
-import { cleanThenMkdir, testDataDir, writeStringToFile } from 'test/utils';
+import Context from '../../../src/context/yaml';
+import {
+  cleanThenMkdir, testDataDir, writeStringToFile, mockMgmtClient
+} from '../../utils';
 
 
 describe('#context YAML clients', () => {
@@ -20,21 +22,15 @@ describe('#context YAML clients', () => {
         app_type: "##appType##"
     `;
 
-    const target = {
-      someClient: {
-        configFile: '{"name":"someClient","app_type":"spa"}',
-        name: 'someClient'
-      },
-      someClient2: {
-        configFile: '{"name":"someClient2","app_type":"spa"}',
-        name: 'someClient2'
-      }
-    };
+    const target = [
+      { app_type: 'spa', name: 'someClient' },
+      { app_type: 'spa', name: 'someClient2' }
+    ];
 
     const yamlFile = writeStringToFile(path.join(dir, 'clients1.yaml'), yaml);
-    const context = new Context(yamlFile, { appType: 'spa' });
-    await context.init();
+    const context = new Context(yamlFile, { appType: 'spa' }, null, mockMgmtClient());
+    await context.load();
 
-    expect(context.clients).to.deep.equal(target);
+    expect(context.assets.clients).to.deep.equal(target);
   });
 });

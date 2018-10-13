@@ -1,8 +1,11 @@
 import path from 'path';
 import { expect } from 'chai';
 
-import Context from 'src/context/yaml';
-import { cleanThenMkdir, testDataDir, writeStringToFile } from 'test/utils';
+import Context from '../../../src/context/yaml';
+import {
+  cleanThenMkdir, testDataDir, writeStringToFile, mockMgmtClient
+} from '../../utils';
+
 
 function createPagesDir(pagesDir, target) {
   cleanThenMkdir(pagesDir);
@@ -30,56 +33,46 @@ describe('#context YAML pages', () => {
 
     const yaml = `
     pages:
-      login:
+      - name: "login"
         html: "${htmlFile}"
-      guardian_multifactor:
+    
+      - name: "password_reset"
+        html: "${htmlFile}"
+    
+      - name: "guardian_multifactor"
+        html: "${htmlFile}"
         enabled: false
-        html: "${htmlFile}"
-      password_reset:
-        enabled: true
-        html: "${htmlFile}"
-      error_page:
-        enabled: true
+    
+      - name: "error_page"
         html: "${htmlFile}"
     `;
 
-    const target = {
-      login: {
-        htmlFile: htmlContext,
-        name: 'login',
-        metadata: true,
-        metadataFile: '{"enabled":true}'
+    const htmlValidation = '<html>this is a env1 "env2"</html>';
+    const target = [
+      {
+        html: htmlValidation,
+        name: 'login'
       },
-      guardian_multifactor: {
-        htmlFile: htmlContext,
-        metadata: true,
-        metadataFile: '{"enabled":false}',
-        name: 'guardian_multifactor'
-      },
-      password_reset: {
-        htmlFile: htmlContext,
-        metadata: true,
-        metadataFile: '{"enabled":true}',
+      {
+        html: htmlValidation,
         name: 'password_reset'
       },
-      error_page: {
-        htmlFile: htmlContext,
-        metadata: true,
-        metadataFile: '{"enabled":true}',
+      {
+        enabled: false,
+        html: htmlValidation,
+        name: 'guardian_multifactor'
+      },
+      {
+        html: htmlValidation,
         name: 'error_page'
       }
-    };
+    ];
     createPagesDir(dir, target);
     const yamlFile = writeStringToFile(path.join(dir, 'rule1.yaml'), yaml);
 
-    const context = new Context(yamlFile, { val1: 'env1', val2: 'env2' });
-    await context.init();
+    const context = new Context(yamlFile, { val1: 'env1', val2: 'env2' }, null, mockMgmtClient());
+    await context.load();
 
-    const htmlValidation = '<html>this is a env1 "env2"</html>';
-    target.login.htmlFile = htmlValidation;
-    target.guardian_multifactor.htmlFile = htmlValidation;
-    target.password_reset.htmlFile = htmlValidation;
-    target.error_page.htmlFile = htmlValidation;
-    expect(context.pages).to.deep.equal(target);
+    expect(context.assets.pages).to.deep.equal(target);
   });
 });

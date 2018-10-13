@@ -4,21 +4,29 @@ import path from 'path';
 import mkdirp from 'mkdirp';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { logger } from 'src/logger';
+import log from '../src/logger';
 
-logger.transports.console.level = 'debug';
+log.transports.console.level = 'debug';
 
 chai.use(chaiAsPromised);
 
 export const localDir = 'local';
 export const testDataDir = path.resolve(localDir, 'testData');
 
+export function mockMgmtClient() {
+  // Fake Mgmt Client. Bit hacky but good enough for now.
+  return {
+    rules: {
+      getAll: () => []
+    }
+  };
+}
 
 export function cleanThenMkdir(dir) {
   try {
     rmdirSync(dir);
   } catch (err) {
-    logger.error(err);
+    log.error(err);
   }
   mkdirp.sync(dir);
 }

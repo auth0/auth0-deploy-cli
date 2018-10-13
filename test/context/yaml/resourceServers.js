@@ -1,8 +1,10 @@
 import path from 'path';
 import { expect } from 'chai';
 
-import Context from 'src/context/yaml';
-import { writeStringToFile, testDataDir, cleanThenMkdir } from 'test/utils';
+import Context from '../../../src/context/yaml';
+import {
+  cleanThenMkdir, testDataDir, writeStringToFile, mockMgmtClient
+} from '../../utils';
 
 
 describe('#context YAML resource servers', () => {
@@ -24,18 +26,31 @@ describe('#context YAML resource servers', () => {
             description: "admin access"
     `;
 
-    const target = {
-      'my resource': {
-        configFile: '{"name":"my resource","identifier":"http://myapi.com/api","scopes":[{"value":"update:account","description":"update account"},{"value":"read:account","description":"read account"},{"value":"admin","description":"admin access"}]}',
-        name: 'my resource'
+    const target = [
+      {
+        identifier: 'http://myapi.com/api',
+        name: 'my resource',
+        scopes: [
+          {
+            description: 'update account',
+            name: 'update:account'
+          },
+          {
+            description: 'read account',
+            name: 'read:account'
+          },
+          {
+            description: 'admin access',
+            name: 'admin'
+          }
+        ]
       }
-    };
+    ];
 
     const yamlFile = writeStringToFile(path.join(dir, 'resources1.yaml'), yaml);
-    const context = new Context(yamlFile, { name: 'my resource', identifier: 'http://myapi.com/api' });
-    await context.init();
+    const context = new Context(yamlFile, { name: 'my resource', identifier: 'http://myapi.com/api' }, null, mockMgmtClient());
+    await context.load();
 
-    expect(context.resourceServers).to.deep.equal(target);
+    expect(context.assets.resourceServers).to.deep.equal(target);
   });
 });
-
