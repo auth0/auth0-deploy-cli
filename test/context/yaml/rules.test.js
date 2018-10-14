@@ -34,8 +34,10 @@ describe('#context rules', () => {
       }
     ];
 
-    const context = new Context(yamlFile, { hello: 'test' }, null, mockMgmtClient());
+    const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { hello: 'test' } };
+    const context = new Context(config, mockMgmtClient());
     await context.load();
+
     expect(context.assets.rules).to.deep.equal(target);
   });
 });

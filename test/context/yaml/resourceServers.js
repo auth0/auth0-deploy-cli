@@ -48,7 +48,9 @@ describe('#context YAML resource servers', () => {
     ];
 
     const yamlFile = writeStringToFile(path.join(dir, 'resources1.yaml'), yaml);
-    const context = new Context(yamlFile, { name: 'my resource', identifier: 'http://myapi.com/api' }, null, mockMgmtClient());
+
+    const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { name: 'my resource', identifier: 'http://myapi.com/api' } };
+    const context = new Context(config, mockMgmtClient());
     await context.load();
 
     expect(context.assets.resourceServers).to.deep.equal(target);

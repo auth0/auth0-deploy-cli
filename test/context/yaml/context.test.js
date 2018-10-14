@@ -15,7 +15,8 @@ describe('#context YAML validation', () => {
     const yaml = path.join(dir, 'empty.yaml');
     writeStringToFile(yaml, '');
 
-    const context = new Context(yaml, {}, '', mockMgmtClient());
+    const config = { AUTH0_INPUT_FILE: yaml };
+    const context = new Context(config, mockMgmtClient());
     await context.load();
 
     expect(context.assets.rules).to.deep.equal([]);
@@ -31,13 +32,15 @@ describe('#context YAML validation', () => {
     const yaml = path.join(dir, 'invalid.yaml');
     writeStringToFile(yaml, 'invalid');
 
-    const context = new Context(yaml, {}, null, mockMgmtClient());
+    const config = { AUTH0_INPUT_FILE: yaml };
+    const context = new Context(config, mockMgmtClient());
     await expect(context.load()).to.be.eventually.rejectedWith(Error);
   });
 
   it('should error on bad file', async () => {
     const yaml = path.resolve(testDataDir, 'yaml', 'notexist.yml');
-    const context = new Context(yaml, {}, null, mockMgmtClient());
+    const config = { AUTH0_INPUT_FILE: yaml };
+    const context = new Context(config, mockMgmtClient());
     await expect(context.load()).to.be.eventually.rejectedWith(Error);
   });
 
@@ -47,7 +50,8 @@ describe('#context YAML validation', () => {
     const script = path.join(dir, 'script.js');
     writeStringToFile(script, '// empty');
 
-    const context = new Context({}, {}, null, mockMgmtClient());
+    const config = { AUTH0_INPUT_FILE: '' };
+    const context = new Context(config, mockMgmtClient());
     expect(context.loadFile(script.replace(context.basePath, '.'))).to.equal('// empty');
   });
 
@@ -57,7 +61,8 @@ describe('#context YAML validation', () => {
     const script = path.join(dir, 'script.js');
     writeStringToFile(script, '// empty');
 
-    const context = new Context({}, {}, null, mockMgmtClient());
+    const config = { AUTH0_INPUT_FILE: '' };
+    const context = new Context(config, mockMgmtClient());
     expect(context.loadFile(script)).to.equal('// empty');
   });
 });

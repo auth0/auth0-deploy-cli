@@ -14,6 +14,10 @@ log.debug('Starting Auth0 Deploy CLI Tool');
 
 // Set log level
 log.transports.console.level = params.level;
+if (params.level && params.level.toLowerCase() === 'debug') {
+  // Set for auth0-source-control-ext-tools
+  process.env.AUTH0_DEBUG = 'true';
+}
 log.debug(`Setting log to level ${params.level}`);
 
 async function run() {
@@ -52,7 +56,8 @@ run()
     log.error('We received an error :(');
     if (error.stack) {
       log.error(error.stack);
-    } else if (error.message) {
+    }
+    if (error.message) {
       log.error(JSON.stringify(error.message));
     }
     process.exit(1);

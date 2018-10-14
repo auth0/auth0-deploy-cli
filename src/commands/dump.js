@@ -1,8 +1,4 @@
-#!/usr/bin/env node
 import nconf from 'nconf';
-import extTools from 'auth0-extension-tools';
-import { ManagementClient, AuthenticationClient } from 'auth0';
-import { pagedClient } from 'auth0-source-control-extension-tools';
 
 import setupContext from '../context';
 
@@ -11,6 +7,7 @@ export default async function deploy(params) {
     output_file: outputFile,
     base_path: basePath,
     config_file: configFile,
+    strip,
     secret
   } = params;
 
@@ -26,29 +23,14 @@ export default async function deploy(params) {
     nconf.overrides({ AUTH0_CLIENT_SECRET: secret });
   }
 
-  const config = extTools.config();
-  config.setProvider(key => nconf.get(key));
-
-  // Validate config
-  const required = [ 'AUTH0_DOMAIN', 'AUTH0_CLIENT_ID', 'AUTH0_CLIENT_SECRET' ];
-  const errors = required.filter(r => !config(r));
-  if (errors.length > 0) {
-    throw new Error(`The following parameters were missing. Please add them to your config.json or as an environment variable. ${JSON.stringify(errors)}`);
-  }
-
-  const authClient = new AuthenticationClient({
-    domain: config('AUTH0_DOMAIN'),
-    clientId: config('AUTH0_CLIENT_ID'),
-    clientSecret: config('AUTH0_CLIENT_SECRET')
-  });
-
-  const clientCredentials = await authClient.clientCredentialsGrant({ audience: `https://${config('AUTH0_DOMAIN')}/api/v2/` });
-  const mgmtClient = new ManagementClient({
-    domain: config('AUTH0_DOMAIN'),
-    token: clientCredentials.access_token
+  nconf.overrides({
+    AUTH0_INPUT_FILE: outputFile,
+    AUTH0_BASE_PATH: basePath,
+    AUTH0_CONFIG_FILE: configFile,
+    AUTH0_STRIP_IDENTIFIERS: strip
   });
 
   // Setup context and load
-  const context = setupContext(outputFile, {}, basePath);
-  await context.dump(pagedClient(mgmtClient));
+  const context = await setupContext(nconf.get());
+  await context.dump();
 }

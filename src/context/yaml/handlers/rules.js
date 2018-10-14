@@ -18,8 +18,8 @@ async function parse(context) {
 }
 
 
-async function dump(mgmtClient, context) {
-  let rules = await mgmtClient.rules.getAll({ paginate: true }) || [];
+async function dump(context) {
+  let rules = context.assets.rules || [];
 
   if (rules.length > 0) {
     // Create Rules folder

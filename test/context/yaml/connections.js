@@ -46,8 +46,11 @@ describe('#context YAML connections', () => {
       }
     ];
 
+
     const yamlFile = writeStringToFile(path.join(dir, 'connections.yaml'), yaml);
-    const context = new Context(yamlFile, { name: 'test-waad', domain: 'mydomain.com' }, null, mockMgmtClient());
+
+    const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { name: 'test-waad', domain: 'mydomain.com' } };
+    const context = new Context(config, mockMgmtClient());
     await context.load();
 
     expect(context.assets.connections).to.deep.equal(target);

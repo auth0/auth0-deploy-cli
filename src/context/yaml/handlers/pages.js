@@ -26,32 +26,8 @@ async function parse(context) {
 }
 
 
-async function dump(mgmtClient, context) {
-  let pages = [];
-
-  // Login page is handled via the global client
-  const globalClient = await mgmtClient.clients.getAll({ is_global: true });
-  if (!globalClient[0]) {
-    throw new Error('Unable to find global client id when trying to dump the login page');
-  }
-
-  pages.push({
-    name: 'login',
-    enabled: globalClient[0].custom_login_page_on,
-    html: globalClient[0].custom_login_page
-  });
-
-  const tenantSettings = await mgmtClient.tenant.getSettings();
-
-  Object.entries(pageNameMap).forEach(([ key, name ]) => {
-    const page = tenantSettings[key];
-    if (tenantSettings[key]) {
-      pages.push({
-        ...page,
-        name
-      });
-    }
-  });
+async function dump(context) {
+  let pages = context.assets.pages || [];
 
   if (pages.length > 0) {
     // Create Pages folder

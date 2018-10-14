@@ -23,8 +23,8 @@ async function parse(context) {
   };
 }
 
-async function dump(mgmtClient, context) {
-  let databases = await mgmtClient.connections.getAll({ strategy: 'auth0', paginate: true }) || [];
+async function dump(context) {
+  let databases = context.assets.databases || [];
 
   const hasCustomScripts = databases.some(d => d.options && d.options.customScripts);
 

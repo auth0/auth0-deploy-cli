@@ -4,8 +4,8 @@ async function parse(context) {
   return { rulesConfigs: context.assets.rulesConfigs || [] };
 }
 
-async function dump(mgmtClient) {
-  const rulesConfigs = await mgmtClient.rulesConfigs.getAll({ paginate: true });
+async function dump(context) {
+  const rulesConfigs = context.assets.rulesConfigs || [];
   return {
     rulesConfigs: rulesConfigs.map(r => ({
       ...r,

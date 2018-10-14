@@ -3,18 +3,6 @@ import path from 'path';
 
 import log from '../../../logger';
 
-const templateNames = [
-  'verify_email',
-  'reset_email',
-  'welcome_email',
-  'blocked_account',
-  'stolen_credentials',
-  'enrollment_email',
-  'mfa_oob_code',
-  'change_password',
-  'password_reset'
-];
-
 async function parse(context) {
   // Load the HTML file for each page
 
@@ -29,20 +17,8 @@ async function parse(context) {
   };
 }
 
-async function dump(mgmtClient, context) {
-  let emailTemplates = [];
-
-  await Promise.all(templateNames.map(async (name) => {
-    try {
-      const template = await mgmtClient.emailTemplates.get({ name });
-      emailTemplates.push(template);
-    } catch (err) {
-      // Ignore if not found, else throw error
-      if (err.statusCode !== 404) {
-        throw err;
-      }
-    }
-  }));
+async function dump(context) {
+  let emailTemplates = context.assets.emailTemplates || [];
 
   if (emailTemplates.length > 0) {
     // Create Templates folder
@@ -56,7 +32,6 @@ async function dump(mgmtClient, context) {
       return { ...template, body: templateFile };
     });
   }
-
 
   return { emailTemplates };
 }

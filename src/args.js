@@ -51,6 +51,12 @@ export default yargs
       describe: 'The JSON configuration file.',
       type: 'string'
     },
+    strip: {
+      alias: 's',
+      describe: 'Strip the identifier field for each object type.',
+      type: 'boolean',
+      default: false
+    },
     secret: {
       alias: 'x',
       describe: 'The client secret, this allows you to encrypt the secret in your build configuration instead of storing it in a config file',

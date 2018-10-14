@@ -70,7 +70,8 @@ describe('#context YAML pages', () => {
     createPagesDir(dir, target);
     const yamlFile = writeStringToFile(path.join(dir, 'rule1.yaml'), yaml);
 
-    const context = new Context(yamlFile, { val1: 'env1', val2: 'env2' }, null, mockMgmtClient());
+    const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { val1: 'env1', val2: 'env2' } };
+    const context = new Context(config, mockMgmtClient());
     await context.load();
 
     expect(context.assets.pages).to.deep.equal(target);

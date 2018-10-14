@@ -28,7 +28,10 @@ describe('#context YAML clients', () => {
     ];
 
     const yamlFile = writeStringToFile(path.join(dir, 'clients1.yaml'), yaml);
-    const context = new Context(yamlFile, { appType: 'spa' }, null, mockMgmtClient());
+
+
+    const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { appType: 'spa' } };
+    const context = new Context(config, mockMgmtClient());
     await context.load();
 
     expect(context.assets.clients).to.deep.equal(target);

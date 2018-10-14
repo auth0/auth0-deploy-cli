@@ -76,3 +76,32 @@ export function existsMustBeDir(folder) {
     }
   }
 }
+
+export function toConfigFn(data) {
+  return key => data[key];
+}
+
+
+export function stripIdentifers(auth0, assets) {
+  const updated = { ...assets };
+
+  // Some of the object identifiers are required to preform updates.
+  // Don't strip these object id's
+  const ignore = [ 'rulesConfigs', 'emailTemplates' ];
+
+  // Optionally Strip identifiers
+  auth0.handlers.forEach((h) => {
+    if (ignore.includes(h.type)) return;
+    const exist = updated[h.type];
+    // All objects with the identifier field is an array. This could change in future.
+    if (Array.isArray(exist)) {
+      updated[h.type] = exist.map((o) => {
+        const newObj = { ...o };
+        delete newObj[h.id];
+        return newObj;
+      });
+    }
+  });
+
+  return updated;
+}

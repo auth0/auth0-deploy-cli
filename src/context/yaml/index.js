@@ -4,19 +4,28 @@ import path from 'path';
 import { loadFile, keywordReplace, Auth0 } from 'auth0-source-control-extension-tools';
 
 import log from '../../logger';
-import { isFile } from '../../utils';
+import { isFile, toConfigFn, stripIdentifers } from '../../utils';
 import handlers from './handlers';
+import cleanAssets from '../../readonly';
 
 export default class {
-  constructor(config, mappings, basePath, mgmtClient) {
+  constructor(config, mgmtClient) {
+    this.configFile = config.AUTH0_INPUT_FILE;
     this.config = config;
-    this.mappings = mappings;
-    this.assets = {};
-    this.mockMgmtClient = mgmtClient;
-    if (basePath) {
-      this.basePath = basePath;
-    } else {
-      this.basePath = (typeof config === 'object') ? process.cwd() : path.dirname(config);
+    this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS;
+    this.mgmtClient = mgmtClient;
+
+    // Get excluded rules
+    this.assets = {
+      exclude: {
+        rules: config.AUTH0_EXCLUDED_RULES || [],
+        resourceServers: config.AUTH0_EXCLUDED_RESOURCE_SERVERS || []
+      }
+    };
+
+    const basePath = config.AUTH0_BASE_PATH;
+    if (!basePath) {
+      this.basePath = (typeof configFile === 'object') ? process.cwd() : path.dirname(this.configFile);
     }
   }
 
@@ -31,11 +40,11 @@ export default class {
 
   async load() {
     // Allow to send object/json directly
-    if (typeof this.config === 'object') {
-      this.assets = this.config;
+    if (typeof this.configFile === 'object') {
+      this.assets = this.configFile;
     } else {
       try {
-        const fPath = path.resolve(this.config);
+        const fPath = path.resolve(this.configFile);
         log.debug(`Loading YAML from ${fPath}`);
         this.assets = yaml.safeLoad(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)) || {};
       } catch (err) {
@@ -45,7 +54,7 @@ export default class {
     }
 
     // Run initial schema check to ensure valid YAML
-    const auth0 = new Auth0(this.mockMgmtClient, this.assets, this.config);
+    const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
     await auth0.validate('validate');
 
     // Allow handlers to process the assets such as loading files etc
@@ -64,9 +73,13 @@ export default class {
   }
 
   async dump() {
+    const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
+    await auth0.loadAll();
+    this.assets = auth0.assets;
+
     await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {
       try {
-        const dumped = await handler.dump(this.mockMgmtClient, this);
+        const dumped = await handler.dump(this);
         if (dumped) {
           log.info(`Dumping ${name}`);
           Object.entries(dumped)
@@ -80,9 +93,20 @@ export default class {
       }
     }));
 
+    // Clean known read only fields
+    let cleaned = cleanAssets(this.assets);
+
+    // Delete exclude as it's not part of the auth0 tenant config
+    delete cleaned.exclude;
+
+    // Optionally Strip identifiers
+    if (this.config.AUTH0_STRIP_IDENTIFIERS) {
+      cleaned = stripIdentifers(auth0, cleaned);
+    }
+
     // Write YAML File
-    const raw = yaml.dump(this.assets);
-    log.info(`Writing ${this.config}`);
-    fs.writeFileSync(this.config, raw);
+    const raw = yaml.dump(cleaned);
+    log.info(`Writing ${this.configFile}`);
+    fs.writeFileSync(this.configFile, raw);
   }
 }
