@@ -19,10 +19,17 @@ export default async function deploy(params) {
     nconf.file(configFile);
   }
 
+  const overrides = {
+    AUTH0_INPUT_FILE: inputFile,
+    AUTH0_BASE_PATH: basePath,
+    AUTH0_CONFIG_FILE: configFile,
+    AUTH0_KEYWORD_REPLACE_MAPPINGS: {}
+  };
+
   // Prepare configuration by initializing nconf, then passing that as the provider to the config object
   // Allow passed in secret to override the configured one
   if (secret) {
-    nconf.overrides({ AUTH0_CLIENT_SECRET: secret });
+    overrides.AUTH0_CLIENT_SECRET = secret;
   }
 
   if (env) {
@@ -30,12 +37,7 @@ export default async function deploy(params) {
     nconf.set('AUTH0_KEYWORD_REPLACE_MAPPINGS', Object.assign(mappings, process.env));
   }
 
-  nconf.overrides({
-    AUTH0_INPUT_FILE: inputFile,
-    AUTH0_BASE_PATH: basePath,
-    AUTH0_CONFIG_FILE: configFile,
-    AUTH0_KEYWORD_REPLACE_MAPPINGS: {}
-  });
+  nconf.overrides(overrides);
 
   // Setup context and load
   const context = await setupContext(nconf.get());
