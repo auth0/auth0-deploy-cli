@@ -74,6 +74,7 @@ export default class {
 
   async dump() {
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
+    log.info('Loading Auth0 Tenant Data');
     await auth0.loadAll();
     this.assets = auth0.assets;
 

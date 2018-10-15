@@ -24,33 +24,30 @@ async function parse(context) {
 }
 
 async function dump(context) {
-  let databases = context.assets.databases || [];
+  const databases = [ ...context.assets.databases || [] ];
 
-  const hasCustomScripts = databases.some(d => d.options && d.options.customScripts);
+  return {
+    databases: [
+      ...databases.map(database => ({
+        ...database,
+        options: {
+          ...database.options,
+          customScripts: Object.entries(database.options.customScripts || {}).reduce((scripts, [ name, script ]) => {
+            // Create Database folder
+            const dbFolder = path.join(context.basePath, 'databases', database.name);
+            fs.ensureDirSync(dbFolder);
 
-  if (hasCustomScripts) {
-    // Create Scripts
-    databases = databases.map((db) => {
-      const updated = { ...db };
-      if (db.options && db.options.customScripts) {
-        // Create Database folder
-        const dbFolder = path.join(context.basePath, 'databases', db.name);
-        fs.ensureDirSync(dbFolder);
-
-        // Dump custom scripts to file
-        updated.options.customScripts = Object.entries(updated.options.customScripts).reduce((scripts, [ name, script ]) => {
-          const scriptFile = path.join(dbFolder, `${name}.js`);
-          log.info(`Writing ${scriptFile}`);
-          fs.writeFileSync(scriptFile, script);
-          scripts[name] = scriptFile;
-          return scripts;
-        }, {});
-      }
-      return updated;
-    });
-  }
-
-  return { databases };
+            // Dump custom script to file
+            const scriptFile = path.join(dbFolder, `${name}.js`);
+            log.info(`Writing ${scriptFile}`);
+            fs.writeFileSync(scriptFile, script);
+            scripts[name] = `./${name}.js`;
+            return scripts;
+          }, {})
+        }
+      }))
+    ]
+  };
 }
 
 

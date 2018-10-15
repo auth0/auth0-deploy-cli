@@ -1,56 +1,100 @@
 import path from 'path';
-import fs from 'fs';
+import fs from 'fs-extra';
 import { constants, loadFile } from 'auth0-source-control-extension-tools';
 
-import { logger } from '../../../logger';
-import { isDirectory, isFile, existsMustBeDir } from '../../../utils';
+import log from '../../../logger';
+import { isDirectory, existsMustBeDir, loadJSON, getFiles } from '../../../utils';
 
-
-function isScript(name) {
-  return constants.DATABASE_SCRIPTS.includes(name);
-}
 
 function getDatabase(folder, mappings) {
-  const database = { name: path.basename(folder), customScripts: {} };
+  const metaFile = path.join(folder, 'database.json');
+  let metaData = {};
 
-  const files = fs.readdirSync(folder)
-    .map(f => path.join(folder, f))
-    .filter(f => isFile(f));
+  // First load database.json
+  try {
+    metaData = loadJSON(metaFile, mappings);
+  } catch (err) {
+    log.warn(`Skipping database folder ${folder} as cannot find or read ${metaFile}`);
+    return {};
+  }
 
-  files.forEach((file) => {
-    const { name: script, ext } = path.parse(file);
+  if (!metaData) {
+    log.warn(`Skipping database folder ${folder} as ${metaFile} is empty`);
+    return {};
+  }
 
-    if (!isScript(script) || ext !== '.js') {
-      logger.warn('Skipping file that is not a script: ' + file);
-      return;
+  const database = {
+    ...metaData,
+    options: {
+      ...metaData.options,
+      customScripts: metaData.customScripts || {}
     }
+  };
 
-    const content = loadFile(file, mappings);
-    database.customScripts[script] = content;
+  getFiles(folder, [ '.js' ]).forEach((file) => {
+    const { name } = path.parse(file);
+    if (!constants.DATABASE_SCRIPTS.includes(name)) {
+      log.warn('Skipping invalid database script file: ' + file);
+    } else {
+      database.options.customScripts[name] = loadFile(file, mappings);
+    }
   });
 
   return database;
 }
 
-export default function parse(folder, mappings) {
-  const databaseFolder = path.join(folder, constants.DATABASE_CONNECTIONS_DIRECTORY);
+function parse(context) {
+  const databaseFolder = path.join(context.filePath, constants.DATABASE_CONNECTIONS_DIRECTORY);
+  if (!existsMustBeDir(databaseFolder)) return { databases: [] }; // Skip
 
-  existsMustBeDir(databaseFolder);
+  const folders = fs.readdirSync(databaseFolder)
+    .map(f => path.join(databaseFolder, f))
+    .filter(f => isDirectory(f));
 
-  let folders = [];
-
-  try {
-    folders = fs.readdirSync(databaseFolder)
-      .map(f => path.join(databaseFolder, f))
-      .filter(f => isDirectory(f));
-  } catch (err) {
-    return {};
-  }
-
-  const databases = folders.map(f => getDatabase(f, mappings))
+  const databases = folders.map(f => getDatabase(f, context.mappings))
     .filter(p => Object.keys(p).length > 1);
 
   return {
     databases
   };
 }
+
+async function dump(context) {
+  const { databases } = context.assets;
+
+  if (!databases) return; // Skip, nothing to dump
+
+  const databasesFolder = path.join(context.filePath, constants.DATABASE_CONNECTIONS_DIRECTORY);
+  fs.ensureDirSync(databasesFolder);
+
+  databases.forEach((database) => {
+    const formatted = {
+      ...database,
+      options: {
+        ...database.options,
+        customScripts: Object.entries(database.options.customScripts || {}).reduce((scripts, [ name, script ]) => {
+          // Create Database folder
+          const dbFolder = path.join(context.filePath, constants.DATABASE_CONNECTIONS_DIRECTORY, database.name);
+          fs.ensureDirSync(dbFolder);
+
+          // Dump custom script to file
+          const scriptFile = path.join(dbFolder, `${name}.js`);
+          log.info(`Writing ${scriptFile}`);
+          fs.writeFileSync(scriptFile, script);
+          scripts[name] = `./${name}.js`;
+          return scripts;
+        }, {})
+      }
+    };
+
+    const databaseFile = path.join(databasesFolder, database.name, 'database.json');
+    log.info(`Writing ${databaseFile}`);
+    fs.writeFileSync(databaseFile, JSON.stringify(formatted, null, 2));
+  });
+}
+
+
+export default {
+  parse,
+  dump
+};

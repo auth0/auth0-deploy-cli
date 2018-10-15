@@ -40,10 +40,17 @@ export default yargs
     }
   })
   .command('dump', 'Dump Configuration', {
-    output_file: {
+    output_folder: {
       alias: 'o',
-      describe: 'The output file or directory. Will dump YAML if .yaml file else will dump to directory structure',
+      describe: 'The output directory.',
       type: 'string',
+      demandOption: true
+    },
+    format: {
+      alias: 'f',
+      describe: 'The output format.',
+      type: 'string',
+      choices: [ 'yaml', 'directory' ],
       demandOption: true
     },
     config_file: {

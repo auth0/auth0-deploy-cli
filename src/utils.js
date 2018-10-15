@@ -2,8 +2,6 @@ import fs from 'fs-extra';
 import path from 'path';
 import { loadFile } from 'auth0-source-control-extension-tools';
 
-import log from './logger';
-
 export function isDirectory(f) {
   try {
     return fs.statSync(path.resolve(f))
@@ -22,26 +20,14 @@ export function isFile(f) {
   }
 }
 
-export function groupFiles(folder) {
-  try {
-    const files = fs.readdirSync(folder)
+export function getFiles(folder, exts) {
+  if (isDirectory(folder)) {
+    return fs.readdirSync(folder)
       .map(f => path.join(folder, f))
-      .filter(f => isFile(f));
-    return files.reduce((map, fileName) => {
-      let { name } = path.parse(fileName);
-
-      // check for meta files
-      if (name.endsWith('.meta')) name = name.replace('.meta', '');
-
-      map[name] = map[name] || [];
-      map[name].push(fileName);
-      return map;
-    }, {});
-  } catch (err) {
-    return {};
+      .filter(f => isFile(f) && exts.includes(path.extname(f)));
   }
+  return [];
 }
-
 
 export function loadJSON(file, mappings) {
   try {
@@ -53,28 +39,14 @@ export function loadJSON(file, mappings) {
 }
 
 
-export function parseFileGroup(name, files, mappings) {
-  const item = { name };
-
-  files.forEach((file) => {
-    const { name: fileName, ext: fileExt } = path.parse(file);
-    if (fileExt === '.json' || fileName.endsWith('.meta')) {
-      Object.assign(item, loadJSON(file, mappings));
-    } else {
-      log.warn('Skipping non-metadata file: ' + file);
-    }
-  });
-
-  return item;
-}
-
-
 export function existsMustBeDir(folder) {
   if (fs.existsSync(folder)) {
     if (!isDirectory(folder)) {
       throw new Error(`Expected ${folder} to be a folder but got a file?`);
     }
+    return true;
   }
+  return false;
 }
 
 export function toConfigFn(data) {
@@ -87,7 +59,7 @@ export function stripIdentifers(auth0, assets) {
 
   // Some of the object identifiers are required to preform updates.
   // Don't strip these object id's
-  const ignore = [ 'rulesConfigs', 'emailTemplates' ];
+  const ignore = [ 'rulesConfigs', 'emailTemplates', 'clientGrants' ];
 
   // Optionally Strip identifiers
   auth0.handlers.forEach((h) => {

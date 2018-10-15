@@ -1,13 +1,26 @@
 import pages from './pages';
 import rules from './rules';
 import clients from './clients';
-import resourceServers from './resourceServers';
+import tenant from './tenant';
+import emailProvider from './emailProvider';
+import connections from './connections';
 import databases from './databases';
+import emailTemplates from './emailTemplates';
+import clientGrants from './clientGrants';
+import rulesConfigs from './rulesConfigs';
+import resourceServers from './resourceServers';
+
 
 export default {
   rules,
+  rulesConfigs,
   pages,
-  clients,
+  databases,
+  clientGrants,
   resourceServers,
-  databases
+  clients,
+  connections,
+  tenant,
+  emailProvider,
+  emailTemplates
 };

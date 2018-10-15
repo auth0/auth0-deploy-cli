@@ -1,4 +1,5 @@
-import fs from 'fs';
+import yaml from 'js-yaml';
+import fs from 'fs-extra';
 import rmdirSync from 'rmdir-sync';
 import path from 'path';
 import mkdirp from 'mkdirp';
@@ -16,9 +17,7 @@ export const testDataDir = path.resolve(localDir, 'testData');
 export function mockMgmtClient() {
   // Fake Mgmt Client. Bit hacky but good enough for now.
   return {
-    rules: {
-      getAll: () => []
-    }
+    rules: { getAll: () => [] }
   };
 }
 
@@ -31,29 +30,18 @@ export function cleanThenMkdir(dir) {
   mkdirp.sync(dir);
 }
 
-export function writeStringToFile(fileName, contents) {
-  const fileFd = fs.openSync(fileName, 'w');
-  fs.writeSync(fileFd, contents);
-  fs.closeSync(fileFd);
-  return fileName;
-}
 
-
-export function createDir(repoDir, target) {
-  Object.keys(target).forEach((type) => {
+export function createDir(repoDir, files) {
+  Object.keys(files).forEach((type) => {
     const configDir = path.resolve(repoDir, type);
     cleanThenMkdir(configDir);
-    Object.keys(target[type]).forEach((name) => {
-      writeStringToFile(
-        path.join(configDir, name + '.json'),
-        target[type][name].configFile
-      );
-      if (target[type][name].metadataFile) {
-        writeStringToFile(
-          path.join(configDir, name + '.meta.json'),
-          target[type][name].metadataFile
-        );
-      }
+    Object.entries(files[type]).forEach(([ name, content ]) => {
+      fs.writeFileSync(path.join(configDir, name), content);
     });
   });
+}
+
+export function loadYAML(f) {
+  const data = fs.readFileSync(f);
+  return yaml.safeLoad(data, this.mappings);
 }

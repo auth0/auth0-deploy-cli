@@ -1,13 +1,13 @@
+import fs from 'fs-extra';
 import path from 'path';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/yaml';
-import {
-  cleanThenMkdir, testDataDir, writeStringToFile, mockMgmtClient
-} from '../../utils';
+import handler from '../../../src/context/yaml/handlers/emailProvider';
+import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
 
-describe('#context email provider', () => {
+describe('#YAML context email provider', () => {
   it('should process email provider', async () => {
     const dir = path.join(testDataDir, 'yaml', 'emailProvider');
     cleanThenMkdir(dir);
@@ -22,7 +22,8 @@ describe('#context email provider', () => {
         smtp_user: "smtp_user"
         smtp_pass: "smtp_secret_password"
     `;
-    const yamlFile = writeStringToFile(path.join(dir, 'config.yaml'), yaml);
+    const yamlFile = path.join(dir, 'config.yaml');
+    fs.writeFileSync(yamlFile, yaml);
 
     const target = {
       credentials: {
@@ -39,5 +40,23 @@ describe('#context email provider', () => {
     const context = new Context(config, mockMgmtClient());
     await context.load();
     expect(context.assets.emailProvider).to.deep.equal(target);
+  });
+
+  it('should dump email provider', async () => {
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+    const emailProvider = {
+      credentials: {
+        smtp_host: 'smtp.mailtrap.io',
+        smtp_pass: 'smtp_secret_password',
+        smtp_port: 2525,
+        smtp_user: 'smtp_user'
+      },
+      enabled: true,
+      name: 'smtp'
+    };
+    context.assets.emailProvider = emailProvider;
+
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({ emailProvider });
   });
 });

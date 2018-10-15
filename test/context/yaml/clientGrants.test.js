@@ -1,14 +1,14 @@
+import fs from 'fs-extra';
 import path from 'path';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/yaml';
-import {
-  cleanThenMkdir, testDataDir, writeStringToFile, mockMgmtClient
-} from '../../utils';
+import handler from '../../../src/context/yaml/handlers/clientGrants';
+import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
 
-describe('#context client grants', () => {
-  it('should process rules configs', async () => {
+describe('#YAML context client grants', () => {
+  it('should process client grants', async () => {
     const dir = path.join(testDataDir, 'yaml', 'clientGrants');
     cleanThenMkdir(dir);
 
@@ -19,7 +19,8 @@ describe('#context client grants', () => {
         scope:
           - "update:account"
     `;
-    const yamlFile = writeStringToFile(path.join(dir, 'config.yaml'), yaml);
+    const yamlFile = path.join(dir, 'config.yaml');
+    fs.writeFileSync(yamlFile, yaml);
 
     const target = [
       {
@@ -35,5 +36,16 @@ describe('#context client grants', () => {
     const context = new Context(config, mockMgmtClient());
     await context.load();
     expect(context.assets.clientGrants).to.deep.equal(target);
+  });
+
+  it('should dump client grants', async () => {
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+    const clientGrants = [
+      { audience: 'https://test.myapp.com/api/v1', client_id: 'My M2M', scope: [ 'update:account' ] }
+    ];
+    context.assets.clientGrants = clientGrants;
+
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({ clientGrants });
   });
 });

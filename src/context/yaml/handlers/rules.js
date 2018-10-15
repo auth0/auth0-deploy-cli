@@ -19,7 +19,7 @@ async function parse(context) {
 
 
 async function dump(context) {
-  let rules = context.assets.rules || [];
+  let rules = [ ...context.assets.rules || [] ];
 
   if (rules.length > 0) {
     // Create Rules folder
@@ -31,7 +31,7 @@ async function dump(context) {
       const scriptFile = path.join(rulesFolder, `${rule.name}.js`);
       log.info(`Writing ${scriptFile}`);
       fs.writeFileSync(scriptFile, rule.script);
-      return { ...rule, script: scriptFile };
+      return { ...rule, script: `./${rule.name}.js` };
     });
   }
 

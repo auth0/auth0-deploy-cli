@@ -1,19 +1,18 @@
+import fs from 'fs-extra';
 import path from 'path';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/yaml';
-import {
-  cleanThenMkdir, testDataDir, writeStringToFile, mockMgmtClient
-} from '../../utils';
+import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
 
-describe('#context YAML validation', () => {
+describe('#YAML context validation', () => {
   it('should do nothing on empty yaml', async () => {
     /* Create empty directory */
     const dir = path.resolve(testDataDir, 'yaml', 'empty');
     cleanThenMkdir(dir);
     const yaml = path.join(dir, 'empty.yaml');
-    writeStringToFile(yaml, '');
+    fs.writeFileSync(yaml, '');
 
     const config = { AUTH0_INPUT_FILE: yaml };
     const context = new Context(config, mockMgmtClient());
@@ -30,7 +29,7 @@ describe('#context YAML validation', () => {
     const dir = path.resolve(testDataDir, 'yaml', 'invalid');
     cleanThenMkdir(dir);
     const yaml = path.join(dir, 'invalid.yaml');
-    writeStringToFile(yaml, 'invalid');
+    fs.writeFileSync(yaml, 'invalid');
 
     const config = { AUTH0_INPUT_FILE: yaml };
     const context = new Context(config, mockMgmtClient());
@@ -48,7 +47,7 @@ describe('#context YAML validation', () => {
     const dir = path.resolve(testDataDir, 'yaml', 'script');
     cleanThenMkdir(dir);
     const script = path.join(dir, 'script.js');
-    writeStringToFile(script, '// empty');
+    fs.writeFileSync(script, '// empty');
 
     const config = { AUTH0_INPUT_FILE: '' };
     const context = new Context(config, mockMgmtClient());
@@ -59,7 +58,7 @@ describe('#context YAML validation', () => {
     const dir = path.resolve(testDataDir, 'yaml', 'script');
     cleanThenMkdir(dir);
     const script = path.join(dir, 'script.js');
-    writeStringToFile(script, '// empty');
+    fs.writeFileSync(script, '// empty');
 
     const config = { AUTH0_INPUT_FILE: '' };
     const context = new Context(config, mockMgmtClient());

@@ -1,68 +1,87 @@
+import fs from 'fs-extra';
 import { constants } from 'auth0-source-control-extension-tools';
 
 import path from 'path';
 import { expect } from 'chai';
 
-import Context from 'src/context/directory';
-import { cleanThenMkdir, writeStringToFile, testDataDir, createDir } from 'test/utils';
+import Context from '../../../src/context/directory';
+import handler from '../../../src/context/directory/handlers/resourceServers';
+import { loadJSON } from '../../../src/utils';
+import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
 
 
-describe('#context directory resource servers', () => {
-  it('should process resource servers', async () => {
-    const target = {
-      'resource-servers': {
-        resourceName: {
-          configFile: '{ "some1Key": "some1Val" }',
-          metadata: true,
-          metadataFile: '{ "some1MetaKey": "som1eMetaVal" }',
-          name: 'resourceName'
-        }
-      }
-    };
+const resourceServers = {
+  'myapi.json': '{ "name": "My API", "identifier": "https://##ENV##.myapp.com/api/v1", "scopes": [ { "value": "update:account", "description": "update account" }, { "value": "read:account", "description": "read account" } ] }'
+};
 
-    const repoDir = path.join(testDataDir, 'directory', 'resources1');
-    createDir(repoDir, target);
+const resourceServersTarget = [
+  {
+    identifier: 'https://##ENV##.myapp.com/api/v1',
+    name: 'My API',
+    scopes: [ { description: 'update account', value: 'update:account' }, { description: 'read account', value: 'read:account' } ]
+  }
+];
 
-    const context = new Context(repoDir, { somekey: 'someVal' });
-    await context.init();
-    expect(context.resourceServers).to.deep.equal(target['resource-servers']);
+describe('#directory context resourceServers', () => {
+  it('should process resourceServers', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'resourceServers1');
+    createDir(repoDir, { [constants.RESOURCE_SERVERS_DIRECTORY]: resourceServers });
+
+    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
+    const context = new Context(config, mockMgmtClient());
+    await context.load();
+
+    expect(context.assets.resourceServers).to.deep.equal(resourceServersTarget);
   });
 
-  it('should ignore bad config file', async () => {
-    const target = {
-      'resource-servers': {
-        resourceName: {
-          configFile: '{ "some1Key": "some1Val" }',
-          metadata: true,
-          metadataFile: '{ "some1MetaKey": "som1eMetaVal" }',
-          name: 'resourceName'
-        }
-      }
+  it('should ignore unknown file', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'resourceServers2');
+    const invalid = {
+      ...resourceServers,
+      'README.md': 'something'
     };
+    createDir(repoDir, { [constants.RESOURCE_SERVERS_DIRECTORY]: invalid });
+    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
+    const context = new Context(config, mockMgmtClient());
+    await context.load();
 
-    const repoDir = path.join(testDataDir, 'directory', 'resources2');
-    createDir(repoDir, target);
-
-    const dir = path.join(repoDir, constants.RESOURCE_SERVERS_DIRECTORY);
-    const file = path.join(dir, 'README.md');
-    writeStringToFile(file, 'something');
-
-    const context = new Context(repoDir);
-    await context.init();
-    expect(context.resourceServers).to.deep.equal(target['resource-servers']);
+    expect(context.assets.resourceServers).to.deep.equal(resourceServersTarget);
   });
 
-  it('should ignore bad configurables directory', async () => {
-    const repoDir = path.join(testDataDir, 'directory', 'configurables3');
+  it('should ignore bad resourceServers directory', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'resourceServers3');
     cleanThenMkdir(repoDir);
-    const dir = path.join(repoDir, constants.CLIENTS_DIRECTORY);
-    writeStringToFile(dir, 'junk');
+    const dir = path.join(repoDir, constants.RESOURCE_SERVERS_DIRECTORY);
+    fs.writeFileSync(dir, 'junk');
 
-    const context = new Context(repoDir);
+    const config = { AUTH0_INPUT_FILE: repoDir };
+    const context = new Context(config, mockMgmtClient());
+
     const errorMessage = `Expected ${dir} to be a folder but got a file?`;
-    await expect(context.init())
+    await expect(context.load())
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
   });
-});
 
+  it('should dump resource servers', async () => {
+    const dir = path.join(testDataDir, 'directory', 'resourceServersDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.resourceServers = [
+      {
+        identifier: 'http://myapi.com/api',
+        name: 'my resource',
+        scopes: [
+          { description: 'update account', name: 'update:account' },
+          { description: 'read account', name: 'read:account' },
+          { description: 'admin access', name: 'admin' }
+        ]
+      }
+    ];
+
+    await handler.dump(context);
+    const resourceServersFolder = path.join(dir, constants.RESOURCE_SERVERS_DIRECTORY);
+    expect(loadJSON(path.join(resourceServersFolder, 'my resource.json'))).to.deep.equal(context.assets.resourceServers[0]);
+  });
+});

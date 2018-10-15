@@ -1,13 +1,13 @@
+import fs from 'fs-extra';
 import path from 'path';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/yaml';
-import {
-  cleanThenMkdir, testDataDir, writeStringToFile, mockMgmtClient
-} from '../../utils';
+import handler from '../../../src/context/yaml/handlers/connections';
+import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
 
-describe('#context YAML connections', () => {
+describe('#YAML context connections', () => {
   it('should process connections', async () => {
     const dir = path.join(testDataDir, 'yaml', 'connections1');
     cleanThenMkdir(dir);
@@ -47,12 +47,24 @@ describe('#context YAML connections', () => {
     ];
 
 
-    const yamlFile = writeStringToFile(path.join(dir, 'connections.yaml'), yaml);
+    const yamlFile = path.join(dir, 'connections.yaml');
+    fs.writeFileSync(yamlFile, yaml);
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { name: 'test-waad', domain: 'mydomain.com' } };
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
     expect(context.assets.connections).to.deep.equal(target);
+  });
+
+  it('should dump connections', async () => {
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+    const connections = [
+      { name: 'test-waad', strategy: 'waad' }
+    ];
+    context.assets.connections = connections;
+
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({ connections });
   });
 });

@@ -1,6 +1,9 @@
 import path from 'path';
 import nconf from 'nconf';
+import mkdirp from 'mkdirp';
 
+import log from '../logger';
+import { isDirectory } from '../utils';
 import setupContext from '../context';
 
 export default async function deploy(params) {
@@ -29,6 +32,12 @@ export default async function deploy(params) {
   // Allow passed in secret to override the configured one
   if (secret) {
     overrides.AUTH0_CLIENT_SECRET = secret;
+  }
+
+  // Check output folder
+  if (!isDirectory(outputFolder)) {
+    log.info(`Creating ${outputFolder}`);
+    mkdirp.sync(outputFolder);
   }
 
   if (params.format === 'yaml') {

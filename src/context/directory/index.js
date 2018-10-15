@@ -1,33 +1,45 @@
 import * as path from 'path';
+import { loadFile, Auth0 } from 'auth0-source-control-extension-tools';
 
-import { logger } from '../../logger';
-import { isDirectory } from '../../utils';
-import handlers from '../../context/directory/handlers';
+import cleanAssets from '../../readonly';
+import log from '../../logger';
+import handlers from './handlers';
+import { isDirectory, isFile, stripIdentifers, toConfigFn } from '../../utils';
 
 export default class {
-  constructor(filePath, mappings) {
-    this.filePath = path.resolve(filePath);
-    this.mappings = mappings;
+  constructor(config, mgmtClient) {
+    this.filePath = config.AUTH0_INPUT_FILE;
+    this.config = config;
+    this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS;
+    this.mgmtClient = mgmtClient;
+
+    // Get excluded rules
     this.assets = {
-      clients: [],
-      databases: [],
-      connections: [],
-      pages: [],
-      resourceServers: [],
-      rules: [],
-      rulesConfigs: [],
-      excludedRules: []
+      exclude: {
+        rules: config.AUTH0_EXCLUDED_RULES || [],
+        resourceServers: config.AUTH0_EXCLUDED_RESOURCE_SERVERS || []
+      }
     };
+  }
+
+  loadFile(f, folder) {
+    const basePath = path.join(this.filePath, folder);
+    let toLoad = path.join(basePath, f);
+    if (!isFile(toLoad)) {
+      // try load not relative to yaml file
+      toLoad = f;
+    }
+    return loadFile(toLoad, this.mappings);
   }
 
   async load() {
     if (isDirectory(this.filePath)) {
       /* If this is a directory, look for each file in the directory */
-      logger.info(`Processing directory ${this.filePath}`);
+      log.info(`Processing directory ${this.filePath}`);
 
       Object.values(handlers)
         .forEach((handler) => {
-          const parsed = handler(this.filePath, this.mappings);
+          const parsed = handler.parse(this);
           Object.entries(parsed)
             .forEach(([ k, v ]) => {
               this.assets[k] = v;
@@ -36,5 +48,32 @@ export default class {
       return;
     }
     throw new Error(`Not sure what to do with, ${this.filePath} as it is not a directory...`);
+  }
+
+  async dump() {
+    const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
+    log.info('Loading Auth0 Tenant Data');
+    await auth0.loadAll();
+    this.assets = auth0.assets;
+
+    // Clean known read only fields
+    this.assets = cleanAssets(this.assets);
+
+    // Optionally Strip identifiers
+    if (this.config.AUTH0_STRIP_IDENTIFIERS) {
+      this.assets = stripIdentifers(auth0, this.assets);
+    }
+
+    await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {
+      try {
+        const dumped = await handler.dump(this);
+        if (dumped) {
+          log.info(`Dumping ${name}`);
+        }
+      } catch (err) {
+        log.error(err.stack);
+        throw new Error(`Problem dumping ${name}`);
+      }
+    }));
   }
 }

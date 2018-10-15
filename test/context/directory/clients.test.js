@@ -1,71 +1,88 @@
+import fs from 'fs-extra';
 import { constants } from 'auth0-source-control-extension-tools';
 
 import path from 'path';
 import { expect } from 'chai';
 
-import Context from 'src/context/directory';
-import { cleanThenMkdir, writeStringToFile, testDataDir, createDir } from 'test/utils';
+import Context from '../../../src/context/directory';
+import handler from '../../../src/context/directory/handlers/clients';
+import { loadJSON } from '../../../src/utils';
+import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
 
 
-describe('#context directory clients', () => {
+describe('#directory context clients', () => {
   it('should process clients', async () => {
-    const target = {
-      clients: {
-        someClient: {
-          configFile: '{ "someKey": "someVal" }',
-          name: 'someClient'
-        },
-        someClient2: {
-          configFile: '{ "someKey": @@somekey@@ }',
-          metadata: true,
-          metadataFile: '{ "someMetaKey": "someMetaVal" }',
-          name: 'someClient2'
-        }
+    const files = {
+      [constants.CLIENTS_DIRECTORY]: {
+        'someClient.json': '{ "app_type": @@appType@@, "name": "someClient" }',
+        'someClient2.json': '{ "app_type": @@appType@@, "name": "someClient2" }'
       }
     };
 
     const repoDir = path.join(testDataDir, 'directory', 'clients1');
-    createDir(repoDir, target);
+    createDir(repoDir, files);
 
-    const context = new Context(repoDir, { somekey: 'someVal' });
-    await context.init();
-    target.clients.someClient2.configFile = '{ "someKey": "someVal" }';
-    expect(context.assets.clients).to.deep.equal(target.clients);
+    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { appType: 'spa' } };
+    const context = new Context(config, mockMgmtClient());
+    await context.load();
+
+    const target = [
+      { app_type: 'spa', name: 'someClient' },
+      { app_type: 'spa', name: 'someClient2' }
+    ];
+    expect(context.assets.clients).to.deep.equal(target);
   });
 
-  it('should ignore bad config file', async () => {
-    const target = {
-      clients: {
-        someClient: {
-          configFile: '{ "someKey": "someVal" }',
-          name: 'someClient'
-        }
+  it('should ignore unknown file', async () => {
+    const files = {
+      [constants.CLIENTS_DIRECTORY]: {
+        'someClient.json': '{ "app_type": @@appType@@, "name": "someClient" }',
+        'README.md': 'something'
       }
     };
 
     const repoDir = path.join(testDataDir, 'directory', 'clients2');
-    createDir(repoDir, target);
+    createDir(repoDir, files);
 
-    const dir = path.join(repoDir, constants.CLIENTS_DIRECTORY);
-    const file = path.join(dir, 'README.md');
-    writeStringToFile(file, 'something');
+    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { appType: 'spa' } };
+    const context = new Context(config, mockMgmtClient());
+    await context.load();
 
-    const context = new Context(repoDir);
-    await context.init();
-    expect(context.assets.clients).to.deep.equal(target.clients);
+    const target = [
+      { app_type: 'spa', name: 'someClient' }
+    ];
+
+    expect(context.assets.clients).to.deep.equal(target);
   });
 
-  it('should ignore bad pages directory', async () => {
+  it('should ignore bad clients directory', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'clients3');
     cleanThenMkdir(repoDir);
     const dir = path.join(repoDir, constants.CLIENTS_DIRECTORY);
-    writeStringToFile(dir, 'junk');
+    fs.writeFileSync(dir, 'junk');
 
-    const context = new Context(repoDir);
+    const config = { AUTH0_INPUT_FILE: repoDir };
+    const context = new Context(config, mockMgmtClient());
+
     const errorMessage = `Expected ${dir} to be a folder but got a file?`;
-    await expect(context.init())
+    await expect(context.load())
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
   });
-});
 
+  it('should dump clients', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientsDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.clients = [
+      { app_type: 'spa', name: 'someClient' },
+      { app_type: 'spa', name: 'someClient2' }
+    ];
+
+    await handler.dump(context);
+    const clientFolder = path.join(dir, constants.CLIENTS_DIRECTORY);
+    expect(loadJSON(path.join(clientFolder, 'someClient.json'))).to.deep.equal(context.assets.clients[0]);
+    expect(loadJSON(path.join(clientFolder, 'someClient2.json'))).to.deep.equal(context.assets.clients[1]);
+  });
+});

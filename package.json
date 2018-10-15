@@ -7,7 +7,7 @@
     "a0deploy": "lib/index.js"
   },
   "scripts": {
-    "lint:js": "eslint --ignore-path .gitignore --ignore-pattern webpack .",
+    "lint:js": "eslint --ignore-path .eslintignore --ignore-pattern webpack .",
     "test": "npm run test:pre && cross-env NODE_ENV=test nyc mocha --recursive --require babel-register test",
     "test:watch": "cross-env NODE_ENV=test mocha --recursive --require babel-register test --watch",
     "test:pre": "npm run test:clean && npm run lint:js",
@@ -31,8 +31,9 @@
     "ajv": "^6.5.2",
     "auth0": "^2.11.0",
     "auth0-extension-tools": "^1.2.1",
-    "auth0-source-control-extension-tools": "^3.0.0",
+    "auth0-source-control-extension-tools": "file:///../auth0-source-control-extension-tools",
     "es6-template-strings": "^2.0.1",
+    "dot-prop": "^4.2.0",
     "fs-extra": "^7.0.0",
     "http-proxy-agent": "^2.0.0",
     "https-proxy-agent": "^2.0.0",

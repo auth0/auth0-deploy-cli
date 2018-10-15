@@ -18,7 +18,7 @@ async function parse(context) {
 }
 
 async function dump(context) {
-  let emailTemplates = context.assets.emailTemplates || [];
+  let emailTemplates = [ ...context.assets.emailTemplates || [] ];
 
   if (emailTemplates.length > 0) {
     // Create Templates folder
@@ -29,7 +29,7 @@ async function dump(context) {
       const templateFile = path.join(templatesFolder, `${template.template}.html`);
       log.info(`Writing ${templateFile}`);
       fs.writeFileSync(templateFile, template.body);
-      return { ...template, body: templateFile };
+      return { ...template, body: `./${template.template}.html` };
     });
   }
 

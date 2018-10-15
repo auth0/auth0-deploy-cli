@@ -1,104 +1,100 @@
+import fs from 'fs-extra';
 import path from 'path';
 import { expect } from 'chai';
 import { constants } from 'auth0-source-control-extension-tools';
 
-import Context from 'src/context/directory';
-import { cleanThenMkdir, testDataDir, writeStringToFile } from 'test/utils';
-
-function createPagesDir(pagesDir, target) {
-  cleanThenMkdir(pagesDir);
-  Object.keys(target).forEach((scriptName) => {
-    writeStringToFile(
-      path.resolve(pagesDir, scriptName + '.html'),
-      target[scriptName].htmlFile
-    );
-    if (target[scriptName].metadata) {
-      writeStringToFile(
-        path.resolve(pagesDir, scriptName + '.json'),
-        target[scriptName].metadataFile
-      );
-    }
-  });
-}
+import Context from '../../../src/context/directory';
+import handler from '../../../src/context/directory/handlers/pages';
+import { loadJSON } from '../../../src/utils';
+import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
 
 
-describe('#context directory pages', () => {
+const pages = {
+  'login.json': '{ "name": "login", "enabled": true }',
+  'login.html': '<html>this is a page env ##env##</html>',
+  'guardian_multifactor.json': '{ "name": "guardian_multifactor", "enabled": true }',
+  'guardian_multifactor.html': '<html>this is a page env ##env##</html>',
+  'password_reset.json': '{ "name": "password_reset", "enabled": true }',
+  'password_reset.html': '<html>this is a page env ##env##</html>',
+  'error_page.json': '{ "name": "error_page", "enabled": false }',
+  'error_page.html': '<html>this is a page env ##env##</html>'
+};
+
+const pagesTarget = [
+  { enabled: false, html: '<html>this is a page env test</html>', name: 'error_page' },
+  { enabled: true, html: '<html>this is a page env test</html>', name: 'guardian_multifactor' },
+  { enabled: true, html: '<html>this is a page env test</html>', name: 'login' },
+  { enabled: true, html: '<html>this is a page env test</html>', name: 'password_reset' }
+];
+
+describe('#directory context pages', () => {
   it('should process pages', async () => {
-    const target = {
-      login: {
-        htmlFile: '<html>this is login</html>',
-        name: 'login'
-      },
-      guardian_multifactor: {
-        htmlFile: '<html>this is guardian</html>',
-        metadata: true,
-        metadataFile: '{ "enabled": "foo" }',
-        name: 'guardian_multifactor'
-      },
-      password_reset: {
-        htmlFile: '<html>this is pwd reset 2: ##val##</html>',
-        metadata: true,
-        metadataFile: '{ "enabled": false }',
-        name: 'password_reset'
-      },
-      error_page: {
-        htmlFile: '<html>this is error page @@jsonVal@@</html>',
-        name: 'error_page'
-      }
-    };
-
     const repoDir = path.join(testDataDir, 'directory', 'pages1');
-    const dir = path.join(repoDir, constants.PAGES_DIRECTORY);
-    createPagesDir(dir, target);
+    createDir(repoDir, { [constants.PAGES_DIRECTORY]: pages });
 
-    const context = new Context(repoDir);
-    await context.init({
-      mappings: {
-        val: 'someval',
-        jsonVal: [ 'val1', 'val2' ]
-      }
-    });
+    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
+    const context = new Context(config, mockMgmtClient());
+    await context.load();
 
-    target.password_reset.htmlFile =
-      '<html>this is pwd reset 2: someval</html>';
-    target.error_page.htmlFile =
-      '<html>this is error page ["val1","val2"]</html>';
-    expect(context.pages).to.deep.equal(target);
+    expect(context.assets.pages).to.deep.equal(pagesTarget);
   });
 
-  it('should ignore bad pagename', async () => {
-    const target = {
-      login: {
-        htmlFile: '<html>this is login</html>',
-        name: 'login'
-      },
-      guardian_multifactor2: {
-        htmlFile: '<html>this is guardian</html>',
-        metadata: true,
-        metadataFile: '{ "enabled": "foo" }'
-      }
-    };
-
+  it('should ignore unknown file', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'pages2');
-    const dir = path.join(repoDir, constants.PAGES_DIRECTORY);
-    createPagesDir(dir, target);
-    delete target.guardian_multifactor2;
+    const invalidFile = {
+      ...pages,
+      'README.md': 'something'
+    };
+    createDir(repoDir, { [constants.PAGES_DIRECTORY]: invalidFile });
 
-    const context = new Context(repoDir);
-    await context.init();
-    expect(context.pages).to.deep.equal(target);
+    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
+    const context = new Context(config, mockMgmtClient());
+    await context.load();
+
+    expect(context.assets.pages).to.deep.equal(pagesTarget);
   });
 
   it('should ignore bad pages directory', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'pages3');
     cleanThenMkdir(repoDir);
     const dir = path.join(repoDir, constants.PAGES_DIRECTORY);
-    writeStringToFile(dir, 'junk');
+    fs.writeFileSync(dir, 'junk');
 
-    const context = new Context(repoDir);
+    const context = new Context({ AUTH0_INPUT_FILE: repoDir });
     const errorMessage = `Expected ${dir} to be a folder but got a file?`;
-    await expect(context.init())
+    await expect(context.load())
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
+  });
+
+  it('should dump pages', async () => {
+    const dir = path.join(testDataDir, 'directory', 'pagesDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    const htmlValidation = '<html>this is a env1 "env2"</html>';
+
+    context.assets.pages = [
+      { html: htmlValidation, name: 'login' },
+      { html: htmlValidation, name: 'password_reset' },
+      { enabled: false, html: htmlValidation, name: 'guardian_multifactor' },
+      { html: htmlValidation, name: 'error_page' }
+    ];
+
+    await handler.dump(context);
+
+    const pagesFolder = path.join(dir, constants.PAGES_DIRECTORY);
+
+    expect(loadJSON(path.join(pagesFolder, 'login.json'))).to.deep.equal({ html: './login.html', name: 'login' });
+    expect(fs.readFileSync(path.join(pagesFolder, 'login.html'), 'utf8')).to.deep.equal(htmlValidation);
+
+    expect(loadJSON(path.join(pagesFolder, 'password_reset.json'))).to.deep.equal({ html: './password_reset.html', name: 'password_reset' });
+    expect(fs.readFileSync(path.join(pagesFolder, 'password_reset.html'), 'utf8')).to.deep.equal(htmlValidation);
+
+    expect(loadJSON(path.join(pagesFolder, 'guardian_multifactor.json'))).to.deep.equal({ html: './guardian_multifactor.html', name: 'guardian_multifactor', enabled: false });
+    expect(fs.readFileSync(path.join(pagesFolder, 'guardian_multifactor.html'), 'utf8')).to.deep.equal(htmlValidation);
+
+    expect(loadJSON(path.join(pagesFolder, 'error_page.json'))).to.deep.equal({ html: './error_page.html', name: 'error_page' });
+    expect(fs.readFileSync(path.join(pagesFolder, 'error_page.html'), 'utf8')).to.deep.equal(htmlValidation);
   });
 });
