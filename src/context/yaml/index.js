@@ -4,7 +4,7 @@ import path from 'path';
 import { loadFile, keywordReplace, Auth0 } from 'auth0-source-control-extension-tools';
 
 import log from '../../logger';
-import { isFile, toConfigFn, stripIdentifers } from '../../utils';
+import { isFile, toConfigFn, stripIdentifiers } from '../../utils';
 import handlers from './handlers';
 import cleanAssets from '../../readonly';
 
@@ -75,8 +75,12 @@ export default class {
   async dump() {
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
     log.info('Loading Auth0 Tenant Data');
-    await auth0.loadAll();
-    this.assets = auth0.assets;
+    try {
+      await auth0.loadAll();
+      this.assets = auth0.assets;
+    } catch (err) {
+      throw new Error(`Problem loading tenant data from Auth0 ${err}`);
+    }
 
     await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {
       try {
@@ -102,7 +106,7 @@ export default class {
 
     // Optionally Strip identifiers
     if (this.config.AUTH0_STRIP_IDENTIFIERS) {
-      cleaned = stripIdentifers(auth0, cleaned);
+      cleaned = stripIdentifiers(auth0, cleaned);
     }
 
     // Write YAML File

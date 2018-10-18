@@ -54,7 +54,7 @@ export function toConfigFn(data) {
 }
 
 
-export function stripIdentifers(auth0, assets) {
+export function stripIdentifiers(auth0, assets) {
   const updated = { ...assets };
 
   // Some of the object identifiers are required to preform updates.

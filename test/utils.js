@@ -1,4 +1,3 @@
-import yaml from 'js-yaml';
 import fs from 'fs-extra';
 import rmdirSync from 'rmdir-sync';
 import path from 'path';
@@ -17,7 +16,33 @@ export const testDataDir = path.resolve(localDir, 'testData');
 export function mockMgmtClient() {
   // Fake Mgmt Client. Bit hacky but good enough for now.
   return {
-    rules: { getAll: () => [] }
+    rules: { getAll: () => [] },
+    databases: { getAll: () => [] },
+    connections: { getAll: () => [] },
+    resourceServers: { getAll: () => [] },
+    rulesConfigs: { getAll: () => [] },
+    emailProvider: { get: () => {} },
+    clientGrants: { getAll: () => [] },
+    emailTemplates: {
+      get: template => ({
+        template: template.name,
+        enabled: true,
+        body: 'fake template'
+      })
+    },
+    clients: {
+      getAll: () => [
+        {
+          name: 'Global Client', client_id: 'FMfcgxvzLDvPsgpRFKkLVrnKqGgkHhQV', custom_login_page_on: true, custom_login_page: '<html>page</html>'
+        }
+      ]
+    },
+    tenant: {
+      getSettings: () => ({
+        friendly_name: 'Test',
+        default_directory: 'users'
+      })
+    }
   };
 }
 
@@ -39,9 +64,4 @@ export function createDir(repoDir, files) {
       fs.writeFileSync(path.join(configDir, name), content);
     });
   });
-}
-
-export function loadYAML(f) {
-  const data = fs.readFileSync(f);
-  return yaml.safeLoad(data, this.mappings);
 }

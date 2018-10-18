@@ -4,7 +4,7 @@ import { loadFile, Auth0 } from 'auth0-source-control-extension-tools';
 import cleanAssets from '../../readonly';
 import log from '../../logger';
 import handlers from './handlers';
-import { isDirectory, isFile, stripIdentifers, toConfigFn } from '../../utils';
+import { isDirectory, isFile, stripIdentifiers, toConfigFn } from '../../utils';
 
 export default class {
   constructor(config, mgmtClient) {
@@ -61,7 +61,7 @@ export default class {
 
     // Optionally Strip identifiers
     if (this.config.AUTH0_STRIP_IDENTIFIERS) {
-      this.assets = stripIdentifers(auth0, this.assets);
+      this.assets = stripIdentifiers(auth0, this.assets);
     }
 
     await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {
