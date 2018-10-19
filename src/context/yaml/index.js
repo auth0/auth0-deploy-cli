@@ -23,8 +23,8 @@ export default class {
       }
     };
 
-    const basePath = config.AUTH0_BASE_PATH;
-    if (!basePath) {
+    this.basePath = config.AUTH0_BASE_PATH;
+    if (!this.basePath) {
       this.basePath = (typeof configFile === 'object') ? process.cwd() : path.dirname(this.configFile);
     }
   }
