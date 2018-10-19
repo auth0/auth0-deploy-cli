@@ -50,15 +50,27 @@ async function run() {
   log.debug(`Finished command ${params._[0]}`);
 }
 
-run()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    log.error('We received an error :(');
-    if (error.stack) {
-      log.error(error.stack);
-    }
-    if (error.message) {
-      log.error(JSON.stringify(error.message));
-    }
-    process.exit(1);
-  });
+// Only run if from command line
+if (require.main === module) {
+  run()
+    .then(() => process.exit(0))
+    .catch((error) => {
+      log.error('We received an error :(');
+      if (error.stack) {
+        log.error(error.stack);
+      }
+      if (error.message) {
+        log.error(JSON.stringify(error.message));
+      }
+      process.exit(1);
+    });
+}
+
+
+// Export commands to be used programmatically
+export const deploy = commands.import;
+export const dump = commands.export;
+export default {
+  deploy: commands.import,
+  dump: commands.export
+};
