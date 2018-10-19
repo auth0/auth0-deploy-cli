@@ -9,6 +9,7 @@ export default async function deploy(params) {
     input_file: inputFile,
     base_path: basePath,
     config_file: configFile,
+    config: configObj,
     env,
     secret
   } = params;
@@ -23,7 +24,8 @@ export default async function deploy(params) {
     AUTH0_INPUT_FILE: inputFile,
     AUTH0_BASE_PATH: basePath,
     AUTH0_CONFIG_FILE: configFile,
-    AUTH0_KEYWORD_REPLACE_MAPPINGS: {}
+    AUTH0_KEYWORD_REPLACE_MAPPINGS: {},
+    ...configObj || {}
   };
 
   // Prepare configuration by initializing nconf, then passing that as the provider to the config object
