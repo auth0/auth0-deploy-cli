@@ -29,7 +29,7 @@ async function dump(context) {
       const templateFile = path.join(templatesFolder, `${template.template}.html`);
       log.info(`Writing ${templateFile}`);
       fs.writeFileSync(templateFile, template.body);
-      return { ...template, body: `./${template.template}.html` };
+      return { ...template, body: `./emailTemplates/${template.template}.html` };
     });
   }
 

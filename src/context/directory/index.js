@@ -66,13 +66,13 @@ export default class {
 
     await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {
       try {
-        const dumped = await handler.dump(this);
-        if (dumped) {
-          log.info(`Dumping ${name}`);
+        const data = await handler.dump(this);
+        if (data) {
+          log.info(`Exporting ${name}`);
         }
       } catch (err) {
         log.error(err.stack);
-        throw new Error(`Problem dumping ${name}`);
+        throw new Error(`Problem exporting ${name}`);
       }
     }));
   }

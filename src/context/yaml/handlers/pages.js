@@ -34,7 +34,7 @@ async function dump(context) {
       fs.writeFileSync(htmlFile, page.html);
       return {
         ...page,
-        html: `./${page.name}.html`
+        html: `./pages/${page.name}.html`
       };
     });
   }

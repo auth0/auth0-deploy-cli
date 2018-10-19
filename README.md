@@ -1,10 +1,10 @@
 # Auth0 Deploy CLI
 
-Auth0 supports continuous integration and deployment (CI/CD) and automation practices through our [source control extensions](https://auth0.com/docs/extensions#deploy-hosted-pages-rules-and-database-connections-scripts-from-external-repositories) and integration into existing CI/CD pipelines by using this **auth0-deploy-cli** tool.
+Auth0 supports continuous integration and deployment (CI/CD) through our [source control extensions](https://auth0.com/docs/extensions#deploy-hosted-pages-rules-and-database-connections-scripts-from-external-repositories) and integration into existing CI/CD pipelines by using this **auth0-deploy-cli** tool.
 
 Supported Features
 
-- Deployable Auth0 Objects
+- Supported Auth0 Objects
   - Tenant Settings
   - Rules (Including Secrets/Settings)
   - Connections
@@ -102,31 +102,22 @@ The following options are supported by the cli.
 ```
 Auth0 Deploy CLI
 
+Commands:
+  index.js deploy  Deploy Configuration
+  index.js dump    Dump Configuration
+
 Options:
-  --help             Show help                                         [boolean]
-  --version          Show version number                               [boolean]
-  --verbose, -v      Dump extra debug information.     [string] [default: false]
-  --input_file, -i   The updates to deploy. Either a JSON file, or directory
-                     that contains the correct file layout. See README and
-                     online for more info.                   [string] [required]
-  --config_file, -c  The JSON configuration file.                       [string]
-  --state_file, -s   A file for persisting state between runs.  Default:
-                     ./local/state.          [string] [default: "./local/state"]
-  --proxy_url, -p    A url for proxying requests, only set this if you are
-                     behind a proxy.                                    [string]
-  --secret, -x       The client secret, this allows you to encrypt the secret in
-                     your build configuration instead of storing it in a config
-                     file                                               [string]
-  --env, -e          Override the mappings in config with process.env
-                     environment variables.             [string] [default: true]
+  --help           Show help                                           [boolean]
+  --version        Show version number                                 [boolean]
+  --verbose, -v    Dump extra debug information.       [string] [default: false]
+  --proxy_url, -p  A url for proxying requests, only set this if you are behind
+                   a proxy.                                             [string]
 
 Examples:
-  index.js -c config.yml -i tenant.yaml    Deploy Auth0 via YAML
-  index.js -c config.yml -i path/to/files  Deploy Auth0 via Path
+  a0tool deploy -i tenant.yaml            Deploy Auth0 via YAML
+  index.js deploy -c config.yml -i          Deploy Auth0 via Path path/to/files
 
 See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.
-
-Missing required argument: input_file
 ```
 
 

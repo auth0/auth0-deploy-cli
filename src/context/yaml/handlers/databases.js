@@ -41,7 +41,7 @@ async function dump(context) {
             const scriptFile = path.join(dbFolder, `${name}.js`);
             log.info(`Writing ${scriptFile}`);
             fs.writeFileSync(scriptFile, script);
-            scripts[name] = `./${name}.js`;
+            scripts[name] = `./databases/${database.name}/${name}.js`;
             return scripts;
           }, {})
         }

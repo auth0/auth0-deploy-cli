@@ -14,7 +14,7 @@ export default yargs
     describe: 'A url for proxying requests, only set this if you are behind a proxy.',
     type: 'string'
   })
-  .command('deploy', 'Deploy Configuration', {
+  .command('import', 'Deploy Configuration', {
     input_file: {
       alias: 'i',
       describe: 'The updates to deploy. Either a JSON file, or directory that contains the correct file layout. See README and online for more info.',
@@ -39,7 +39,7 @@ export default yargs
       type: 'string'
     }
   })
-  .command('dump', 'Dump Configuration', {
+  .command('export', 'Export Auth0 Tenant Configuration', {
     output_folder: {
       alias: 'o',
       describe: 'The output directory.',
@@ -70,6 +70,8 @@ export default yargs
       type: 'string'
     }
   })
-  .example('$0 deploy -i tenant.yaml', 'Deploy Auth0 via YAML')
-  .example('$0 deploy -c config.yml -i path/to/files', 'Deploy Auth0 via Path')
+  .example('$0 import -c config.yml -i tenant.yaml', 'Deploy Auth0 via YAML')
+  .example('$0 import -c config.yml -i path/to/files', 'Deploy Auth0 via Path')
+  .example('$0 export -c config.yml -o path/to/export/folder', 'Dump Auth0 config to folder in YAML format')
+  .example('$0 export -c config.yml -o path/to/export/folder', 'Dump Auth0 config to folder in directory format')
   .epilogue('See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.');

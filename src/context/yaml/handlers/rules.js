@@ -31,7 +31,7 @@ async function dump(context) {
       const scriptFile = path.join(rulesFolder, `${rule.name}.js`);
       log.info(`Writing ${scriptFile}`);
       fs.writeFileSync(scriptFile, rule.script);
-      return { ...rule, script: `./${rule.name}.js` };
+      return { ...rule, script: `./rules/${rule.name}.js` };
     });
   }
 

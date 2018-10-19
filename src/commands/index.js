@@ -1,7 +1,7 @@
-import deploy from './deploy';
-import dump from './dump';
+import importCMD from './import';
+import exportCMD from './export';
 
 export default {
-  deploy,
-  dump
+  import: importCMD,
+  export: exportCMD
 };
