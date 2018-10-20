@@ -32,7 +32,7 @@ async function dump(context) {
     const ruleConfigFile = path.join(ruleConfigsFolder, `${rulesConfig.key}.json`);
     log.info(`Writing ${ruleConfigFile}`);
     fs.writeFileSync(ruleConfigFile, JSON.stringify({
-      value: 'so,',
+      value: '******',
       ...rulesConfig
     }, null, 2));
   });
