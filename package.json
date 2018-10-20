@@ -6,9 +6,6 @@
   "bin": {
     "a0deploy": "lib/index.js"
   },
-  "engines" : {
-    "node" : ">=8.0.0"
-  },
   "scripts": {
     "lint:js": "eslint --ignore-path .eslintignore --ignore-pattern webpack .",
     "test": "npm run test:pre && cross-env NODE_ENV=test nyc mocha --recursive --require babel-register test",
@@ -23,7 +20,7 @@
     "type": "git",
     "url": "git+https://github.com/auth0/auth0-deploy-cli.git"
   },
-  "author": "mostekcm",
+  "author": "auth0",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/auth0/auth0-deploy-cli/issues"
