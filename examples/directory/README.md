@@ -3,37 +3,63 @@
 This README will document how to use the Directory Option of the Auth0-deploy-cli tool. Please refer to the [README.md](README.md) for more information on the Auth0 Deploy CLI.
 
 # Organize your repository
-There is more extensive documentation online for how the files are expected to be laid out to work with the source control configuration utilities [here](https://auth0.com/docs/extensions/github-deploy).  
+The directory option supports exporting and importing the Auth0 tenant configuration into a pre-defined directory structure.
 
-If you already have an existing tenant, you can dump your configuration in the right format using the [auth0-dump-config](https://github.com/xurei/auth0-dump-config).
+There is more extensive documentation online for how the files are expected to be laid out to work with the source control configuration utilities [here](https://auth0.com/docs/extensions/github-deploy).  
 
 Here is a simple overview:
 
 ```
 repository => 
   clients
-    client1-name.json
-    client1-name.meta.json # if specifying client grants
-    my-other-client-name.json
-  resource-servers
-    resource server 1.json
-    some other resource server.json
+    client1.json
+    client2.json
+  connections
+    conneciton1.json
   database-connections
-    my-connection-name
+    connection1
+      database.json
+      create.js
+      delete.js
       get_user.js
       login.js
-  rules
-    rule1.js
-    rule1.json
-    rule2.js
+      verify.js
+  emails
+    provider.json
+    verify_email.json
+    verify_email.html
+    welcome_emai.json
+    welcome_emai.html
+  grants
+    grant1.json
+  pages
+    login.html
+    login.json
   pages
     login.html
     login.json
     password_reset.html
     password_reset.json
+  resource-servers
+    resource server 1.json
+    some other resource server.json
+  rules
+    rule1.js
+    rule1.json
+  rules-configs
+    env_param1.json
+    some_secret1.json
 ```
 
-## Example
+## Example Export
+You can export your current tenant configuration. For example the following command will export your tenant configuration.
+
+NOTE: The option --strip is used to remove the identifier fields from the Auth0 objects. This means when importing into another Auth0 Tenant new id's are generated otherwise the import will fail as the tool cannot find the existing objects by their id.
+
+`a0deploy -c config.json --strip -f directory -o path/to/export`
+
+
+## Example Import
 Included in this directory is an example structure.
 
 ###Instructions
@@ -41,7 +67,7 @@ Included in this directory is an example structure.
 1. Copy config.json.example and fill out details
 2. Run deploy
 ```
-a0deploy -i . -c config.json
+a0deploy import -c config.json -i .
 ```
 
 # Usage
@@ -57,7 +83,6 @@ Here is the example of a config.json:
 
 ```json
 {
-  "SLACK_INCOMING_WEBHOOK_URL": "<your webhook URL from slack, just leave this out if you are not using slack>",
   "AUTH0_DOMAIN": "<your auth0 domain (e.g. fabrikam-dev.auth0.com) >",
   "AUTH0_CLIENT_SECRET": "<your deploy client secret>",
   "AUTH0_CLIENT_ID": "<your deploy client ID>",
@@ -82,7 +107,7 @@ NOTE: By default the tool will also merge in your current environment variables 
 
 For example, you could specify a different JWT timeout in your dev environment then prod for testing and a different environment URL:
 
-Client .json:
+Client.json:
 ```
 {
   ... 
@@ -97,7 +122,7 @@ Client .json:
 }
 ```
 
-Dev Config .json:
+Dev Config.json:
 ```
   "AUTH0_KEYWORD_REPLACE_MAPPINGS": {
     "ENVIRONMENT_URL": "http://dev.fabrikam.com",
@@ -106,7 +131,7 @@ Dev Config .json:
   }
 ```
 
-Prod Config .json:
+Prod Config.json:
 ```
   "AUTH0_KEYWORD_REPLACE_MAPPINGS": {
     "ENVIRONMENT_URL": "http://fabrikam.com",

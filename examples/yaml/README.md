@@ -3,11 +3,18 @@
 This README will document how to use the YAML Option of the Auth0-deploy-cli tool. Please refer to the [README.md](README.md) for more information on the Auth0 Deploy CLI.
 
 # Overview
-The YAML option supports configuring Auth0 tenant's via a YAML file.
+The YAML option supports exporting and importing the Auth0 tenant configuration via a YAML file.
 
 For more information on YAML please refer to [http://yaml.org/](http://yaml.org/)
 
-## Example
+## Example Export
+You can export your current tenant configuration. For example the following command will export your tenant configuration.
+
+NOTE: The option --strip is used to remove the identifier fields from the Auth0 objects. This means when importing into another Auth0 Tenant new id's are generated otherwise the import will fail as the tool cannot find the existing objects by their id.
+
+`a0deploy -c config.json --strip -f yaml -o path/to/export`
+
+## Example Import
 Please refer to [tenant.yml](tenant.yml) for an example configuration.
 
 ###Instructions
@@ -15,7 +22,7 @@ Please refer to [tenant.yml](tenant.yml) for an example configuration.
 1. Copy config.json.example and fill out details
 2. Run deploy
 ```
-a0deploy -i . -c config.json
+a0deploy import -c config.json -i tenant.yaml
 ```
 
 # Usage
@@ -31,7 +38,6 @@ Here is the example of a config.json:
 
 ```json
 {
-  "SLACK_INCOMING_WEBHOOK_URL": "<your webhook URL from slack, just leave this out if you are not using slack>",
   "AUTH0_DOMAIN": "<your auth0 domain (e.g. fabrikam-dev.auth0.com) >",
   "AUTH0_CLIENT_SECRET": "<your deploy client secret>",
   "AUTH0_CLIENT_ID": "<your deploy client ID>",

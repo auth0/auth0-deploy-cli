@@ -1,0 +1,8 @@
+{
+  "template": "mfa_oob_code",
+  "from": "",
+  "subject": "",
+  "syntax": "liquid",
+  "body": "./mfa_oob_code.html",
+  "enabled": true
+}

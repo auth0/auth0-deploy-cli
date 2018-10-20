@@ -72,7 +72,7 @@ export default yargs
   })
   .example('$0 import -c config.yml -i tenant.yaml', 'Deploy Auth0 via YAML')
   .example('$0 import -c config.yml -i path/to/files', 'Deploy Auth0 via Path')
-  .example('$0 export -c config.yml -o path/to/export/folder', 'Dump Auth0 config to folder in YAML format')
-  .example('$0 export -c config.yml -o path/to/export/folder', 'Dump Auth0 config to folder in directory format')
+  .example('$0 -c config.json --strip -f yaml -o path/to/export', 'Dump Auth0 config to folder in YAML format')
+  .example('$0 -c config.json --strip -f directory -o path/to/export', 'Dump Auth0 config to folder in directory format')
   .epilogue('See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.')
   .wrap(null);

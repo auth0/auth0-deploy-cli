@@ -1,9 +1,10 @@
 # Auth0 Deploy CLI
 
-Auth0 supports continuous integration and deployment (CI/CD) through our [source control extensions](https://auth0.com/docs/extensions#deploy-hosted-pages-rules-and-database-connections-scripts-from-external-repositories) and integration into existing CI/CD pipelines by using this **auth0-deploy-cli** tool.
+Auth0 supports continuous integration and deployment (CI/CD) of Auth0 Tenants through our [source control extensions](https://auth0.com/docs/extensions#deploy-hosted-pages-rules-and-database-connections-scripts-from-external-repositories) and integration into existing CI/CD pipelines by using this **auth0-deploy-cli** tool.
+
+The `auth0-deploy-cli` tool supports the importing and exporting of Auth0 Tenant configuration data.
 
 Supported Features
-
 - Supported Auth0 Objects
   - Tenant Settings
   - Rules (Including Secrets/Settings)
@@ -18,6 +19,12 @@ Supported Features
   - YAML Configuration
   - Programmatically
 - Environment Variable Replacements
+
+# UPGRADING FROM v1 to v2
+The `auth0-deploy-cli` was completly rewritten from version 1 to version 2 which means it is not backwards compatible. Please consider the following when upgrading
+
+- The directory structure and format has changed to allow for additional object types
+- The command line parameters have changed to allow for additional options such as export.
 
 ## Install
 
@@ -58,7 +65,7 @@ Use the [Auth0 Deploy CLI Extension](https://github.com/auth0-extensions/auth0-d
 
 # Usage
 
-This tool supports multiple methods to deploy auth0 configuration objects.
+This tool supports multiple methods to import and export Auth0 configuration objects.
 
 ### Option 1 - Predefined Directory Structure
 
@@ -74,7 +81,7 @@ Please refer to [YAML README](examples/yaml/README.md) for usage instructions an
 The tool can be called programmatically. Please see below for an example.
 
 ```
-import { deploy } from 'auth0-deploy-cli';
+import { deploy, dump } from 'auth0-deploy-cli';
 
 const config = {
   AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
@@ -82,10 +89,28 @@ const config = {
   AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_SECRET
 };
 
+
+// Export Tenant Config
 deploy({
-  input_file: 'path/to/yaml/or/directory',
-  state_file: '.local/state',
-  config
+  output_folder: 'path/to/yaml/or/directory',   // Input file for directory, change to .yaml for YAML
+  base_path: basePath,                          // Allow to override basepath, if not take from input_file
+  config_file: configFile,                      // Option to a config json
+  config: configObj,                            // Option to sent in json as object
+  strip,                                        // Strip the identifier field for each object type
+  secret                                        // Optionally pass in auth0 client secret seperate from config
+})
+  .then(() => console.log('yey deploy was successful'))
+  .catch(err => console.log(`Oh no, something went wrong. Error: ${err}`));
+
+
+// Import tenant config
+dump({
+  input_file: 'path/to/yaml/or/directory',  // Input file for directory, change to .yaml for YAML
+  base_path: basePath,                      // Allow to override basepath, if not take from input_file
+  config_file: configFile,                  // Option to a config json
+  config: configObj,                        // Option to sent in json as object
+  env,                                      // Allow env variable mappings from process.env
+  secret                                    // Optionally pass in auth0 client secret seperate from config
 })
   .then(() => console.log('yey deploy was successful'))
   .catch(err => console.log(`Oh no, something went wrong. Error: ${err}`));
@@ -103,19 +128,20 @@ The following options are supported by the cli.
 Auth0 Deploy CLI
 
 Commands:
-  index.js deploy  Deploy Configuration
-  index.js dump    Dump Configuration
+  a0deploy import  Deploy Configuration
+  a0deploy export  Export Auth0 Tenant Configuration
 
 Options:
-  --help           Show help                                           [boolean]
-  --version        Show version number                                 [boolean]
-  --verbose, -v    Dump extra debug information.       [string] [default: false]
-  --proxy_url, -p  A url for proxying requests, only set this if you are behind
-                   a proxy.                                             [string]
+  --help           Show help  [boolean]
+  --version        Show version number  [boolean]
+  --verbose, -v    Dump extra debug information.  [string] [default: false]
+  --proxy_url, -p  A url for proxying requests, only set this if you are behind a proxy.  [string]
 
 Examples:
-  a0tool deploy -i tenant.yaml            Deploy Auth0 via YAML
-  index.js deploy -c config.yml -i          Deploy Auth0 via Path path/to/files
+  a0deploy import -c config.yml -i tenant.yaml                    Deploy Auth0 via YAML
+  a0deploy import -c config.yml -i path/to/files                  Deploy Auth0 via Path
+  a0deploy -c config.json --strip -f yaml -o path/to/export       Dump Auth0 config to folder in YAML format
+  a0deploy -c config.json --strip -f directory -o path/to/export  Dump Auth0 config to folder in directory format
 
 See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.
 ```
