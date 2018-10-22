@@ -32,7 +32,7 @@ describe('#context defaults', () => {
   it('should set emailProvider defaults for mandrill', async () => {
     expect(emailProviderDefaults({ name: 'mandrill' })).to.deep.equal({
       credentials: {
-        api_key: 'YOUR_API_KEY'
+        api_key: 'YOUR_MANDRILL_API_KEY'
       },
       name: 'mandrill'
     });
@@ -41,7 +41,7 @@ describe('#context defaults', () => {
   it('should set emailProvider defaults for sendgrid', async () => {
     expect(emailProviderDefaults({ name: 'sendgrid' })).to.deep.equal({
       credentials: {
-        api_key: 'YOUR_API_KEY'
+        api_key: 'YOUR_SENDGRID_API_KEY'
       },
       name: 'sendgrid'
     });
@@ -50,7 +50,7 @@ describe('#context defaults', () => {
   it('should set emailProvider defaults for sparkpost', async () => {
     expect(emailProviderDefaults({ name: 'sparkpost' })).to.deep.equal({
       credentials: {
-        api_key: 'YOUR_API_KEY'
+        api_key: 'YOUR_SPARKPOST_API_KEY'
       },
       name: 'sparkpost'
     });

@@ -9,7 +9,7 @@ export function emailProviderDefaults(emailProvider) {  // eslint-disable-line
 
   if (apiKeyProviders.includes(name)) {
     updated.credentials = {
-      api_key: 'YOUR_API_KEY',
+      api_key: `YOUR_${name.toUpperCase()}_API_KEY`,
       ...updated.credentials || {}
     };
   }

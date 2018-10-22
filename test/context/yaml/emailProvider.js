@@ -44,19 +44,23 @@ describe('#YAML context email provider', () => {
 
   it('should dump email provider', async () => {
     const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
-    const emailProvider = {
-      credentials: {
-        smtp_host: 'smtp.mailtrap.io',
-        smtp_pass: 'smtp_secret_password',
-        smtp_port: 2525,
-        smtp_user: 'smtp_user'
-      },
+    context.assets.emailProvider = {
       enabled: true,
       name: 'smtp'
     };
-    context.assets.emailProvider = emailProvider;
 
     const dumped = await handler.dump(context);
-    expect(dumped).to.deep.equal({ emailProvider });
+    expect(dumped).to.deep.equal({
+      emailProvider: {
+        credentials: {
+          smtp_host: 'YOUR_SMTP_HOST',
+          smtp_pass: 'YOUR_SMTP_PASS',
+          smtp_port: 'YOUR_SMTP_PORT',
+          smtp_user: 'YOUR_SMTP_USER'
+        },
+        enabled: true,
+        name: 'smtp'
+      }
+    });
   });
 });

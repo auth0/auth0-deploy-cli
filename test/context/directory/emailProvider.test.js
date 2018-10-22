@@ -8,37 +8,25 @@ import { testDataDir, createDir, mockMgmtClient, cleanThenMkdir } from '../../ut
 import handler from '../../../src/context/directory/handlers/emailProvider';
 import { loadJSON } from '../../../src/utils';
 
-const emailProviderTest = {
-  'provider.json': `{
-    "name": "smtp",
-    "enabled": true,
-    "credentials": {
-      "smtp_host": "##env##.smtpserver.com",
-      "smtp_port": 2525,
-      "smtp_user": "smtp_user",
-      "smtp_pass": "smtp_secret_password"
-    }
-  }`
-};
-
-const emailProviderTarget = {
-  credentials: {
-    smtp_host: 'test.smtpserver.com', smtp_pass: 'smtp_secret_password', smtp_port: 2525, smtp_user: 'smtp_user'
-  },
-  enabled: true,
-  name: 'smtp'
-};
-
 describe('#directory context email provider', () => {
   it('should process emailProvider', async () => {
-    const repoDir = path.join(testDataDir, 'directory', 'emailProvider');
+    const emailProviderTest = {
+      'provider.json': `{
+        "name": "smtp",
+        "enabled": true
+      }`
+
+    }; const repoDir = path.join(testDataDir, 'directory', 'emailProvider');
     createDir(repoDir, { [constants.EMAIL_TEMPLATES_DIRECTORY]: emailProviderTest });
 
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
-    expect(context.assets.emailProvider).to.deep.equal(emailProviderTarget);
+    expect(context.assets.emailProvider).to.deep.equal({
+      enabled: true,
+      name: 'smtp'
+    });
   });
 
   it('should dump email provider', async () => {
@@ -47,18 +35,21 @@ describe('#directory context email provider', () => {
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
     context.assets.emailProvider = {
-      credentials: {
-        smtp_host: 'smtp.mailtrap.io',
-        smtp_pass: 'smtp_secret_password',
-        smtp_port: 2525,
-        smtp_user: 'smtp_user'
-      },
       enabled: true,
       name: 'smtp'
     };
 
     await handler.dump(context);
     const emailTemplateFolder = path.join(dir, constants.EMAIL_TEMPLATES_DIRECTORY);
-    expect(loadJSON(path.join(emailTemplateFolder, 'provider.json'))).to.deep.equal(context.assets.emailProvider);
+    expect(loadJSON(path.join(emailTemplateFolder, 'provider.json'))).to.deep.equal({
+      credentials: {
+        smtp_host: 'YOUR_SMTP_HOST',
+        smtp_pass: 'YOUR_SMTP_PASS',
+        smtp_port: 'YOUR_SMTP_PORT',
+        smtp_user: 'YOUR_SMTP_USER'
+      },
+      enabled: true,
+      name: 'smtp'
+    });
   });
 });
