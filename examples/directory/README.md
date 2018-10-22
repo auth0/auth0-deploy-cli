@@ -56,7 +56,7 @@ You can export your current tenant configuration. For example the following comm
 
 NOTE: The option --strip is used to remove the identifier fields from the Auth0 objects. This means when importing into another Auth0 Tenant new id's are generated otherwise the import will fail as the tool cannot find the existing objects by their id.
 
-`a0deploy -c config.json --strip -f directory -o path/to/export`
+`a0deploy export -c config.json --strip -f directory -o path/to/export`
 
 
 ## Example Import
