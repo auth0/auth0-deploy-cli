@@ -58,6 +58,7 @@ NOTE: The option --strip is used to remove the identifier fields from the Auth0 
 
 `a0deploy export -c config.json --strip -f directory -o path/to/export`
 
+NOTE: Some of the settings cannot be exported for example emailProvider credentials, rulesConfigs values and others. After export you may need to update the configuration files if you experience schema errors on import.
 
 ## Example Import
 Included in this directory is an example structure.
