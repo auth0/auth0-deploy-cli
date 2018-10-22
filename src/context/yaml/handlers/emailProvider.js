@@ -1,3 +1,4 @@
+import { emailProviderDefaults } from '../../defaults';
 
 async function parse(context) {
   // nothing to do, set default if empty
@@ -7,9 +8,15 @@ async function parse(context) {
 }
 
 async function dump(context) {
-  // nothing to do, set default if empty
+  let { emailProvider } = context.assets;
+
+  // Add placeholder for credentials as they cannot be exported
+  if (emailProvider) {
+    emailProvider = emailProviderDefaults(emailProvider);
+  }
+
   return {
-    emailProvider: { ...context.assets.emailProvider || {} }
+    emailProvider: emailProvider || {}
   };
 }
 
