@@ -51,4 +51,5 @@ export default async function deploy(params) {
   // Setup context and load
   const context = await setupContext(nconf.get());
   await context.dump();
+  log.info('Export Successful');
 }
