@@ -139,6 +139,7 @@ describe('#directory context databases', () => {
     context.assets.databases = [
       {
         name: 'users',
+        enabled_clients: [],
         options: {
           customScripts: {
             change_email: scriptValidate,
@@ -159,6 +160,7 @@ describe('#directory context databases', () => {
     const scripsFolder = path.join(dir, constants.DATABASE_CONNECTIONS_DIRECTORY, 'users');
     expect(loadJSON(path.join(scripsFolder, 'database.json'))).to.deep.equal({
       name: 'users',
+      enabled_clients: [],
       options: {
         customScripts: {
           change_email: './change_email.js',

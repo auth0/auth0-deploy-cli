@@ -24,12 +24,25 @@ async function parse(context) {
 }
 
 async function dump(context) {
-  const databases = [ ...context.assets.databases || [] ];
+  const { databases } = context.assets;
+
+  // Nothing to do
+  if (!databases) return {};
+
+  const clients = context.assets.clients || [];
 
   return {
     databases: [
       ...databases.map(database => ({
         ...database,
+        // Convert enabled_clients from id to name
+        enabled_clients: [
+          ...(database.enabled_clients || []).map((clientId) => {
+            const found = clients.find(c => c.client_id === clientId);
+            if (found) return found.name;
+            return clientId;
+          })
+        ],
         options: {
           ...database.options,
           customScripts: Object.entries(database.options.customScripts || {}).reduce((scripts, [ name, script ]) => {

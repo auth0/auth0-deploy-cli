@@ -21,16 +21,29 @@ function parse(context) {
 
 async function dump(context) {
   const { connections } = context.assets;
+  const clients = context.assets.clients || [];
 
   if (!connections) return; // Skip, nothing to dump
 
   const connectionsFolder = path.join(context.filePath, constants.CONNECTIONS_DIRECTORY);
   fs.ensureDirSync(connectionsFolder);
 
+  // Convert enabled_clients from id to name
   connections.forEach((connection) => {
-    const connectionFile = path.join(connectionsFolder, `${connection.name}.json`);
+    const dumpedConnection = {
+      ...connection,
+      enabled_clients: [
+        ...(connection.enabled_clients || []).map((clientId) => {
+          const found = clients.find(c => c.client_id === clientId);
+          if (found) return found.name;
+          return clientId;
+        })
+      ]
+    };
+
+    const connectionFile = path.join(connectionsFolder, `${dumpedConnection.name}.json`);
     log.info(`Writing ${connectionFile}`);
-    fs.writeFileSync(connectionFile, JSON.stringify(connection, null, 2));
+    fs.writeFileSync(connectionFile, JSON.stringify(dumpedConnection, null, 2));
   });
 }
 

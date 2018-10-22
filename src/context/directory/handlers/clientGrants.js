@@ -22,16 +22,22 @@ function parse(context) {
 
 async function dump(context) {
   const { clientGrants } = context.assets;
+  const clients = context.assets.clients || [];
 
   if (!clientGrants) return; // Skip, nothing to dump
 
   const grantsFolder = path.join(context.filePath, constants.CLIENTS_GRANTS_DIRECTORY);
   fs.ensureDirSync(grantsFolder);
 
+  // Convert client_id to the client name for readability
   clientGrants.forEach((grant) => {
-    const grantFile = path.join(grantsFolder, `${grant.id}.json`);
+    const dumpGrant = { ...grant };
+    const found = clients.find(c => c.client_id === dumpGrant.client_id);
+    if (found) dumpGrant.client_id = found.name;
+
+    const grantFile = path.join(grantsFolder, `${dumpGrant.id}.json`);
     log.info(`Writing ${grantFile}`);
-    fs.writeFileSync(grantFile, JSON.stringify(grant, null, 2));
+    fs.writeFileSync(grantFile, JSON.stringify(dumpGrant, null, 2));
   });
 }
 

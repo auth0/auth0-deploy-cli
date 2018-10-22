@@ -71,6 +71,7 @@ describe('#YAML context databases', () => {
     context.assets.databases = [
       {
         name: 'users',
+        enabled_clients: [],
         options: {
           customScripts: {
             change_email: scriptValidate,
@@ -92,6 +93,7 @@ describe('#YAML context databases', () => {
       databases: [
         {
           name: 'users',
+          enabled_clients: [],
           options: {
             customScripts: {
               change_email: './databases/users/change_email.js',

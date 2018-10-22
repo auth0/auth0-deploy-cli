@@ -64,12 +64,20 @@ async function dump(context) {
 
   if (!databases) return; // Skip, nothing to dump
 
+  const clients = context.assets.clients || [];
   const databasesFolder = path.join(context.filePath, constants.DATABASE_CONNECTIONS_DIRECTORY);
   fs.ensureDirSync(databasesFolder);
 
   databases.forEach((database) => {
     const formatted = {
       ...database,
+      enabled_clients: [
+        ...(database.enabled_clients || []).map((clientId) => {
+          const found = clients.find(c => c.client_id === clientId);
+          if (found) return found.name;
+          return clientId;
+        })
+      ],
       options: {
         ...database.options,
         customScripts: Object.entries(database.options.customScripts || {}).reduce((scripts, [ name, script ]) => {

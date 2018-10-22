@@ -78,8 +78,12 @@ describe('#directory context connections', () => {
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
     context.assets.connections = [
-      { name: 'myad-waad', strategy: 'waad', var: 'something' },
-      { name: 'facebook', strategy: 'facebook', var: 'something' }
+      {
+        name: 'myad-waad', strategy: 'waad', var: 'something', enabled_clients: []
+      },
+      {
+        name: 'facebook', strategy: 'facebook', var: 'something', enabled_clients: []
+      }
     ];
 
     await handler.dump(context);

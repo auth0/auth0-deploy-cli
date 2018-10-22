@@ -60,7 +60,7 @@ describe('#YAML context connections', () => {
   it('should dump connections', async () => {
     const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
     const connections = [
-      { name: 'test-waad', strategy: 'waad' }
+      { name: 'test-waad', strategy: 'waad', enabled_clients: [] }
     ];
     context.assets.connections = connections;
 
