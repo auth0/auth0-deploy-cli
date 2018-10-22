@@ -94,13 +94,13 @@ describe('#YAML context databases', () => {
           name: 'users',
           options: {
             customScripts: {
-              change_email: './change_email.js',
-              change_password: './change_password.js',
-              create: './create.js',
-              delete: './delete.js',
-              get_user: './get_user.js',
-              login: './login.js',
-              verify: './verify.js'
+              change_email: './databases/users/change_email.js',
+              change_password: './databases/users/change_password.js',
+              create: './databases/users/create.js',
+              delete: './databases/users/delete.js',
+              get_user: './databases/users/get_user.js',
+              login: './databases/users/login.js',
+              verify: './databases/users/verify.js'
             },
             enabledDatabaseCustomization: true
           },

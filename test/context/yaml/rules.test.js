@@ -66,7 +66,7 @@ describe('#YAML context rules', () => {
           enabled: false,
           name: 'someRule',
           order: 10,
-          script: './someRule.js',
+          script: './rules/someRule.js',
           stage: 'login_success'
         }
       ]

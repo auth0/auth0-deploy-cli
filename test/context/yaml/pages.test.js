@@ -95,10 +95,10 @@ describe('#YAML context pages', () => {
     const dumped = await handler.dump(context);
     expect(dumped).to.deep.equal({
       pages: [
-        { html: './login.html', name: 'login' },
-        { html: './password_reset.html', name: 'password_reset' },
-        { enabled: false, html: './guardian_multifactor.html', name: 'guardian_multifactor' },
-        { html: './error_page.html', name: 'error_page' }
+        { html: './pages/login.html', name: 'login' },
+        { html: './pages/password_reset.html', name: 'password_reset' },
+        { enabled: false, html: './pages/guardian_multifactor.html', name: 'guardian_multifactor' },
+        { html: './pages/error_page.html', name: 'error_page' }
       ]
     });
 

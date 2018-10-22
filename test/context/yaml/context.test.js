@@ -77,30 +77,36 @@ describe('#YAML context validation', () => {
       clientGrants: [],
       clients: [
         {
-          client_id: 'FMfcgxvzLDvPsgpRFKkLVrnKqGgkHhQV', custom_login_page: '<html>page</html>', custom_login_page_on: true, name: 'Global Client'
+          client_id: 'FMfcgxvzLDvPsgpRFKkLVrnKqGgkHhQV',
+          custom_login_page: '<html>page</html>',
+          custom_login_page_on: true,
+          name: 'Global Client'
         }
       ],
       connections: [],
       databases: [],
       emailProvider: {},
       emailTemplates: [
-        { body: './verify_email.html', enabled: true, template: 'verify_email' },
-        { body: './reset_email.html', enabled: true, template: 'reset_email' },
-        { body: './welcome_email.html', enabled: true, template: 'welcome_email' },
-        { body: './blocked_account.html', enabled: true, template: 'blocked_account' },
-        { body: './stolen_credentials.html', enabled: true, template: 'stolen_credentials' },
-        { body: './enrollment_email.html', enabled: true, template: 'enrollment_email' },
-        { body: './mfa_oob_code.html', enabled: true, template: 'mfa_oob_code' },
-        { body: './change_password.html', enabled: true, template: 'change_password' },
-        { body: './password_reset.html', enabled: true, template: 'password_reset' }
+        { body: './emailTemplates/verify_email.html', enabled: true, template: 'verify_email' },
+        { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
+        { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' },
+        { body: './emailTemplates/blocked_account.html', enabled: true, template: 'blocked_account' },
+        { body: './emailTemplates/stolen_credentials.html', enabled: true, template: 'stolen_credentials' },
+        { body: './emailTemplates/enrollment_email.html', enabled: true, template: 'enrollment_email' },
+        { body: './emailTemplates/mfa_oob_code.html', enabled: true, template: 'mfa_oob_code' },
+        { body: './emailTemplates/change_password.html', enabled: true, template: 'change_password' },
+        { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' }
       ],
       pages: [
-        { enabled: true, html: './login.html', name: 'login' }
+        { enabled: true, html: './pages/login.html', name: 'login' }
       ],
       resourceServers: [],
       rules: [],
       rulesConfigs: [],
-      tenant: { default_directory: 'users', friendly_name: 'Test' }
+      tenant: {
+        default_directory: 'users',
+        friendly_name: 'Test'
+      }
     });
   });
 });

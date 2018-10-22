@@ -31,8 +31,6 @@ export default class {
 
   loadFile(f) {
     let toLoad = path.join(this.basePath, f);
-    const p = path;
-    const a = fs;
     if (!isFile(toLoad)) {
       // try load not relative to yaml file
       toLoad = f;

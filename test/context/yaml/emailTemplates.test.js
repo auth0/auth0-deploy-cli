@@ -88,7 +88,7 @@ describe('#YAML context email templates', () => {
     expect(dumped).to.deep.equal({
       emailTemplates: [
         {
-          body: './verify_email.html',
+          body: './emailTemplates/verify_email.html',
           enabled: true,
           from: 'test@email.com',
           subject: 'something',
@@ -96,7 +96,7 @@ describe('#YAML context email templates', () => {
           template: 'verify_email'
         },
         {
-          body: './welcome_email.html',
+          body: './emailTemplates/welcome_email.html',
           enabled: true,
           from: 'test@email.com',
           subject: 'something',
