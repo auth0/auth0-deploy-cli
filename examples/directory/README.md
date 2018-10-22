@@ -95,6 +95,8 @@ Here is the example of a config.json:
     ],
     "YOUR_STRING_KEY": "some environment specific string"
   },
+  "AUTH0_ALLOW_CONNECTION_DELETE": false,
+  "AUTH0_ALLOW_CLIENT_DELETE": false,
   "AUTH0_EXCLUDED_RULES": [
     "rule-1-name",
     "rule-2-name"

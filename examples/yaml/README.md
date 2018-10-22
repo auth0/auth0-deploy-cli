@@ -48,6 +48,8 @@ Here is the example of a config.json:
       "http://localhost:8080",
       "https://somedomain.com"
     ],
+    "AUTH0_ALLOW_CONNECTION_DELETE": false,
+    "AUTH0_ALLOW_CLIENT_DELETE": false,
     "YOUR_STRING_KEY": "some environment specific string"
   }
 }
