@@ -69,6 +69,9 @@ async function dump(context) {
   fs.ensureDirSync(databasesFolder);
 
   databases.forEach((database) => {
+    const dbFolder = path.join(databasesFolder, database.name);
+    fs.ensureDirSync(dbFolder);
+
     const formatted = {
       ...database,
       enabled_clients: [
@@ -81,10 +84,6 @@ async function dump(context) {
       options: {
         ...database.options,
         customScripts: Object.entries(database.options.customScripts || {}).reduce((scripts, [ name, script ]) => {
-          // Create Database folder
-          const dbFolder = path.join(context.filePath, constants.DATABASE_CONNECTIONS_DIRECTORY, database.name);
-          fs.ensureDirSync(dbFolder);
-
           // Dump custom script to file
           const scriptFile = path.join(dbFolder, `${name}.js`);
           log.info(`Writing ${scriptFile}`);
@@ -95,7 +94,7 @@ async function dump(context) {
       }
     };
 
-    const databaseFile = path.join(databasesFolder, database.name, 'database.json');
+    const databaseFile = path.join(dbFolder, 'database.json');
     log.info(`Writing ${databaseFile}`);
     fs.writeFileSync(databaseFile, JSON.stringify(formatted, null, 2));
   });
