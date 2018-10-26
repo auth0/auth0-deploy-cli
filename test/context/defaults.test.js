@@ -8,10 +8,10 @@ describe('#context defaults', () => {
     it('should set emailProvider defaults for smtp', async () => {
       expect(emailProviderDefaults({ name: 'smtp' })).to.deep.equal({
         credentials: {
-          smtp_host: 'YOUR_SMTP_HOST',
-          smtp_pass: 'YOUR_SMTP_PASS',
-          smtp_port: 'YOUR_SMTP_PORT',
-          smtp_user: 'YOUR_SMTP_USER'
+          smtp_host: 'your.smtp.host.com',
+          smtp_port: 25,
+          smtp_user: 'YOUR_SMTP_USER',
+          smtp_pass: 'YOUR_SMTP_PASS'
         },
         name: 'smtp'
       });

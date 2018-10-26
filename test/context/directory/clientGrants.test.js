@@ -101,13 +101,11 @@ describe('#directory context clientGrants', () => {
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
     context.assets.clientGrants = [
-      {
-        id: 'test', audience: 'https://test.myapp.com/api/v1', client_id: 'My M2M', scope: [ 'update:account' ]
-      }
+      { audience: 'https://test.myapp.com/api/v1', client_id: 'My M2M', scope: [ 'update:account' ] }
     ];
 
     await handler.dump(context);
     const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
-    expect(loadJSON(path.join(clientGrantsFolder, 'test.json'))).to.deep.equal(context.assets.clientGrants[0]);
+    expect(loadJSON(path.join(clientGrantsFolder, 'My M2M (https---test.myapp.com-api-v1).json'))).to.deep.equal(context.assets.clientGrants[0]);
   });
 });

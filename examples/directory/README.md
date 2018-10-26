@@ -5,17 +5,17 @@ This README will document how to use the Directory Option of the Auth0-deploy-cl
 # Organize your repository
 The directory option supports exporting and importing the Auth0 tenant configuration into a pre-defined directory structure.
 
-There is more extensive documentation online for how the files are expected to be laid out to work with the source control configuration utilities [here](https://auth0.com/docs/extensions/github-deploy).  
+There is more extensive documentation online for how the files are expected to be laid out to work with the source control configuration utilities [here](https://auth0.com/docs/extensions/github-deploy).
 
 Here is a simple overview:
 
 ```
-repository => 
+repository =>
   clients
     client1.json
     client2.json
   connections
-    conneciton1.json
+    connection1.json
   database-connections
     connection1
       database.json
@@ -28,24 +28,22 @@ repository =>
     provider.json
     verify_email.json
     verify_email.html
-    welcome_emai.json
-    welcome_emai.html
+    welcome_email.json
+    welcome_email.html
   grants
     grant1.json
-  pages
-    login.html
-    login.json
   pages
     login.html
     login.json
     password_reset.html
     password_reset.json
   resource-servers
-    resource server 1.json
-    some other resource server.json
+    resource_server1.json
+    resource_server2.json
   rules
     rule1.js
     rule1.json
+    rule2.js
   rules-configs
     env_param1.json
     some_secret1.json
@@ -113,7 +111,7 @@ For example, you could specify a different JWT timeout in your dev environment t
 Client.json:
 ```
 {
-  ... 
+  ...
   "callbacks": [
     "##ENVIRONMENT_URL##/auth/callback"
   ],
