@@ -1,0 +1,8 @@
+{
+  "template": "enrollment_email",
+  "from": "",
+  "subject": "",
+  "syntax": "liquid",
+  "body": "./enrollment_email.html",
+  "enabled": true
+}

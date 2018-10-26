@@ -1,0 +1,7 @@
+{
+	"enabled": true,
+	"name": "Enrich-Identity-Token",
+	"order": 1,
+	"stage": "login_success",
+  "script": "./Enrich-Identity-Token.js"
+}

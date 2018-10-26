@@ -1,0 +1,20 @@
+{
+  "options": {
+    "requires_username": false,
+    "strategy_version": 2,
+    "enabledDatabaseCustomization": true,
+    "customScripts": {
+      "login": "./login.js",
+      "get_user": "./get_user.js"
+    },
+    "import_mode": true
+  },
+  "strategy": "auth0",
+  "name": "users",
+  "realms": [
+    "users"
+  ],
+  "enabled_clients": [
+    "My SPA"
+  ]
+}

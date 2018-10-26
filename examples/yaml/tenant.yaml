@@ -1,0 +1,120 @@
+# Auth0-Deploy-CLI Tenant YAML Configuration
+
+tenant:
+  # Any tenant settings can go here https://auth0.com/docs/api/management/v2#!/Tenants/get_settings
+  friendly_name: 'Steve Demo'
+
+pages:
+  - name: "login"
+    html: "pages/login.html"
+
+  - name: "password_reset"
+    html: "pages/password_reset.html"
+
+  - name: "guardian_multifactor"
+    html: "pages/guardian_multifactor.html"
+    enabled: false
+
+  - name: "error_page"
+    html: "pages/error_page.html"
+
+
+clients:
+  -
+    name: "My SPA"
+    app_type: "spa"
+    # Add other client settings https://auth0.com/docs/api/management/v2#!/Clients/post_clients
+  -
+    name: "My M2M"
+    app_type: "non_interactive"
+    # Add other client settings https://auth0.com/docs/api/management/v2#!/Clients/post_clients
+
+
+databases:
+  - name: "users"
+    enabled_clients:
+      - "My SPA"
+    options:
+      enabledDatabaseCustomization: true
+      customScripts:
+        login: "databases/users/login.js"
+        create: "databases/users/create.js"
+        delete: "databases/users/delete.js"
+        get_user: "databases/users/get_user.js"
+        change_email: "databases/users/change_email.js"
+        change_password: "databases/users/change_password.js"
+        verify: "databases/users/verify.js"
+
+connections:
+  - name: "myad-waad"
+    strategy: "waad"
+    enabled_clients:
+      - "My SPA"
+    options:
+      tenant_domain: 'office.com'
+      client_id: 'some_client_id'
+      client_secret: 'some_client_secret'
+      domain: 'office.com'
+      waad_protocol: 'openid-connect'
+      api_enable_users: true
+      basic_profile: true
+      ext_profile: true
+      ext_groups: true
+    # Add other connection settings (https://auth0.com/docs/api/management/v2#!/Connections/post_connections)
+
+
+rules:
+  - name: "Common-Functions"
+    order: 10
+    script: "rules/enrich_tokens.js"
+
+
+rulesConfigs:
+  # Key/Value pairs for Rule configuration settings
+  - key: "SOME_SECRET"
+    value: 'some_key'
+
+
+resourceServers:
+  -
+    name: "My API"
+    identifier: "https://##ENV##.myapp.com/api/v1"
+    scopes:
+      - value: "update:account"
+        description: "update account"
+      - value: "read:account"
+        description: "read account"
+    # Add other resource server settings (https://auth0.com/docs/api/management/v2#!/Resource_Servers/post_resource_servers)
+
+
+emailProvider:
+  name: "smtp"
+  enabled: true
+  credentials:
+    smtp_host: "smtp.mailtrap.io"
+    smtp_port: 2525
+    smtp_user: "smtp_user"
+    smtp_pass: "smtp_secret_password"
+
+
+emailTemplates:
+  - template: "verify_email"
+    enabled: true
+    syntax: "liquid"
+    from: "test@email.com"
+    subject: "something"
+    body: "emails/change_email.html"
+
+  - template: "welcome_email"
+    enabled: true
+    syntax: "liquid"
+    from: "test@email.com"
+    subject: "something"
+    body: "emails/change_email.html"
+
+
+clientGrants:
+  - client_id: "My M2M"
+    audience: "https://##ENV##.myapp.com/api/v1"
+    scope:
+      - "update:account"

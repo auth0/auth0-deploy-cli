@@ -3,3 +3,5 @@ local/
 node_modules/
 lib/
 /npm-debug.log
+config.json
+.env

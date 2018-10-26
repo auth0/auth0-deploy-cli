@@ -1,0 +1,10 @@
+{
+	"name": "smtp",
+	"enabled": true,
+	"credentials": {
+		"smtp_host": "smtp.server.com",
+		"smtp_port": 25,
+		"smtp_user": "smtp_user",
+		"smtp_pass": "smtp_secret_password"
+	}
+}
