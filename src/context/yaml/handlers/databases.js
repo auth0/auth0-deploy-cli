@@ -29,7 +29,7 @@ async function dump(context) {
   // Nothing to do
   if (!databases) return {};
 
-  const clients = context.assets.clients || [];
+  const clients = context.assets.clientsOrig || [];
 
   return {
     databases: [

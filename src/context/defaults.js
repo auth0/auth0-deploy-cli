@@ -16,8 +16,8 @@ export function emailProviderDefaults(emailProvider) {  // eslint-disable-line
 
   if (name === 'smtp') {
     updated.credentials = {
-      smtp_host: 'YOUR_SMTP_HOST',
-      smtp_port: 'YOUR_SMTP_PORT',
+      smtp_host: 'your.smtp.host.com',
+      smtp_port: 25,
       smtp_user: 'YOUR_SMTP_USER',
       smtp_pass: 'YOUR_SMTP_PASS',
       ...updated.credentials || {}

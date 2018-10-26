@@ -12,7 +12,7 @@ async function dump(context) {
   // Nothing to do
   if (!clientGrants) return {};
 
-  const clients = context.assets.clients || [];
+  const clients = context.assets.clientsOrig || [];
 
   // Convert client_id to the client name for readability
   return {

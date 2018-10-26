@@ -11,7 +11,7 @@ async function dump(context) {
   // Nothing to do
   if (!connections) return {};
 
-  const clients = context.assets.clients || [];
+  const clients = context.assets.clientsOrig || [];
 
   // nothing to do, set default if empty
   return {

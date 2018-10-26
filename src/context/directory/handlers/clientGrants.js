@@ -22,7 +22,7 @@ function parse(context) {
 
 async function dump(context) {
   const { clientGrants } = context.assets;
-  const clients = context.assets.clients || [];
+  const clients = context.assets.clientsOrig || [];
 
   if (!clientGrants) return; // Skip, nothing to dump
 
@@ -35,7 +35,8 @@ async function dump(context) {
     const found = clients.find(c => c.client_id === dumpGrant.client_id);
     if (found) dumpGrant.client_id = found.name;
 
-    const grantFile = path.join(grantsFolder, `${dumpGrant.id}.json`);
+    const name = `${dumpGrant.client_id} (${dumpGrant.audience})`.replace(/[/\\?%*:|"<>]/g, '-');
+    const grantFile = path.join(grantsFolder, `${name}.json`);
     log.info(`Writing ${grantFile}`);
     fs.writeFileSync(grantFile, JSON.stringify(dumpGrant, null, 2));
   });

@@ -64,7 +64,7 @@ async function dump(context) {
 
   if (!databases) return; // Skip, nothing to dump
 
-  const clients = context.assets.clients || [];
+  const clients = context.assets.clientsOrig || [];
   const databasesFolder = path.join(context.filePath, constants.DATABASE_CONNECTIONS_DIRECTORY);
   fs.ensureDirSync(databasesFolder);
 

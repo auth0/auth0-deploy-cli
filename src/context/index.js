@@ -52,5 +52,5 @@ export default async function(config) {
     return new YAMLContext(config, mgmtClient);
   }
 
-  throw new Error(`Unable to determine context processor to load for file ${inputFile}`);
+  throw new Error(`Unable to determine context processor to load for file ${inputFile}, does it exist? `);
 }

@@ -21,7 +21,7 @@ function parse(context) {
 
 async function dump(context) {
   const { connections } = context.assets;
-  const clients = context.assets.clients || [];
+  const clients = context.assets.clientsOrig || [];
 
   if (!connections) return; // Skip, nothing to dump
 
