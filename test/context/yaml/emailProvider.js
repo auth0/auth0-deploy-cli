@@ -28,9 +28,9 @@ describe('#YAML context email provider', () => {
     const target = {
       credentials: {
         smtp_host: 'smtp.mailtrap.io',
-        smtp_pass: 'smtp_secret_password',
         smtp_port: 2525,
-        smtp_user: 'smtp_user'
+        smtp_user: 'smtp_user',
+        smtp_pass: 'smtp_secret_password'
       },
       enabled: true,
       name: 'smtp'
@@ -53,10 +53,10 @@ describe('#YAML context email provider', () => {
     expect(dumped).to.deep.equal({
       emailProvider: {
         credentials: {
-          smtp_host: 'YOUR_SMTP_HOST',
-          smtp_pass: 'YOUR_SMTP_PASS',
-          smtp_port: 'YOUR_SMTP_PORT',
-          smtp_user: 'YOUR_SMTP_USER'
+          smtp_host: 'your.smtp.host.com',
+          smtp_port: 25,
+          smtp_user: 'YOUR_SMTP_USER',
+          smtp_pass: 'YOUR_SMTP_PASS'
         },
         enabled: true,
         name: 'smtp'

@@ -43,9 +43,9 @@ describe('#directory context email provider', () => {
     const emailTemplateFolder = path.join(dir, constants.EMAIL_TEMPLATES_DIRECTORY);
     expect(loadJSON(path.join(emailTemplateFolder, 'provider.json'))).to.deep.equal({
       credentials: {
-        smtp_host: 'YOUR_SMTP_HOST',
+        smtp_host: 'your.smtp.host.com',
+        smtp_port: 25,
         smtp_pass: 'YOUR_SMTP_PASS',
-        smtp_port: 'YOUR_SMTP_PORT',
         smtp_user: 'YOUR_SMTP_USER'
       },
       enabled: true,

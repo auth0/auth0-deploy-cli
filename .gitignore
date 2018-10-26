@@ -1,4 +1,5 @@
 .nyc_output/
+coverage/
 local/
 node_modules/
 lib/
