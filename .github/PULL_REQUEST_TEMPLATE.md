@@ -12,7 +12,7 @@ If there were visual changes to the application with this change, please include
   
 ## 🔗 References
   
-> Include at at least one link to an explanation + requirements for this change, and more if at all possible. Typically this is a Jira/GitHub Issue, but could also be links to Zendesk tickets, RFCs, rollout plan or Slack conversations (for Slack conversations, make sure you provide a summary of the conversation under “Changes”).
+> Include at least one link to an explanation + requirements for this change, and more if at all possible. Typically this is a Jira/GitHub Issue, but could also be links to Zendesk tickets, RFCs, rollout plan or Slack conversations (for Slack conversations, make sure you provide a summary of the conversation under “Changes”).
   
 ## 🎯 Testing
   

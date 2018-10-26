@@ -150,9 +150,8 @@ Examples:
 See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.
 ```
 
-
 # Recommended Approach/Best Practices
-The recommended approach for utilizing this CLI is to incorporate it into your existing build processes. Create a repository to store your deploy configuration, then create a set of configuration files for each environment. On your continuous integration server, have a deploy build for each environment.  This deploy build should update a local copy of the deploy configuration repository, then run the CLI to deploy it to that environment.  Read on for more detailed information.
+The recommended approach for utilizing this CLI is to incorporate it into your build system.  Create a repository to store your deploy configuration, then create a set of configuration files for each environment.  On your continuous integration server, have a deploy build for each environment.  This deploy build should update a local copy of the deploy configuration repository, then run the CLI to deploy it to that environment.  Read on for more detailed information.
 
 ### Auth0 Tenant layout
 The recommended approach is to have a different Auth0 tenant/account for each environment.  For example: fabrikam-dev, fabrikam-uat, fabrikam-staging, and fabrikam-prod.
@@ -184,7 +183,7 @@ You should not have to store differences between environments in the Deploy Conf
 
 ### To test locally
 
-Clone the github repo and install globally
+Clone the GitHub repo and install globally
 ```
 git clone git@github.com:auth0/auth0-deploy-cli
 cd auth0-deploy-cli
