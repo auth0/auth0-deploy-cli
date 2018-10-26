@@ -14,11 +14,11 @@ log.debug('Starting Auth0 Deploy CLI Tool');
 
 // Set log level
 log.transports.console.level = params.level;
-if (params.level && params.level.toLowerCase() === 'debug') {
+if (params.debug) {
+  log.transports.console.level = 'debug';
   // Set for auth0-source-control-ext-tools
   process.env.AUTH0_DEBUG = 'true';
 }
-log.debug(`Setting log to level ${params.level}`);
 
 async function run() {
   // Run command
@@ -55,7 +55,11 @@ if (require.main === module) {
   run()
     .then(() => process.exit(0))
     .catch((error) => {
-      log.error(`Problem running command ${params._[0]}`);
+      if (error.type || error.stage) {
+        log.error(`Problem running command ${params._[0]} during stage ${error.stage} when processing type ${error.type}`);
+      } else {
+        log.error(`Problem running command ${params._[0]}`);
+      }
 
       const msg = error.message || error.toString();
       log.error(msg);
