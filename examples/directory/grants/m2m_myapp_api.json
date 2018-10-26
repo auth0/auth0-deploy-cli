@@ -1,0 +1,7 @@
+{
+  "client_id": "My M2M",
+  "audience": "https://##ENV##.myapp.com/api/v1",
+  "scope": [
+    "update:account"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "template": "reset_email",
+  "from": "",
+  "subject": "",
+  "resultUrl": "",
+  "syntax": "liquid",
+  "body": "./reset_email.html",
+  "urlLifetimeInSeconds": 432000,
+  "enabled": true
+}
