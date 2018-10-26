@@ -75,7 +75,7 @@ export default class {
           log.info(`Exporting ${name}`);
         }
       } catch (err) {
-        log.error(err.stack);
+        log.debug(err.stack);
         throw new Error(`Problem exporting ${name}`);
       }
     }));

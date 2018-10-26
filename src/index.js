@@ -55,12 +55,13 @@ if (require.main === module) {
   run()
     .then(() => process.exit(0))
     .catch((error) => {
-      log.error('We received an error :(');
-      if (error.stack) {
-        log.error(error.stack);
-      }
-      if (error.message) {
-        log.error(JSON.stringify(error.message));
+      log.error(`Problem running command ${params._[0]}`);
+
+      const msg = error.message || error.toString();
+      log.error(msg);
+
+      if (process.env.AUTH0_DEBUG === 'true') {
+        log.debug(error.stack);
       }
       process.exit(1);
     });

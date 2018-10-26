@@ -48,7 +48,7 @@ export default class {
         log.debug(`Loading YAML from ${fPath}`);
         this.assets = yaml.safeLoad(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)) || {};
       } catch (err) {
-        log.error(err.stack);
+        log.debug(err.stack);
         throw new Error(`Problem loading ${this.configFile}\n${err}`);
       }
     }
@@ -66,7 +66,7 @@ export default class {
             this.assets[k] = v;
           });
       } catch (err) {
-        log.error(err.stack);
+        log.debug(err.stack);
         throw new Error(`Problem deploying ${name}`);
       }
     }));
@@ -93,7 +93,7 @@ export default class {
             });
         }
       } catch (err) {
-        log.error(err.stack);
+        log.debug(err.stack);
         throw new Error(`Problem exporting ${name}`);
       }
     }));
