@@ -20,6 +20,9 @@ Supported Features
   - Programmatically
 - Environment Variable Replacements
 
+# WARNING
+This tool can be destructive to your Auth0 tenant. Please ensure you have read the documentation and tested the tool on a development tenant before using in production.
+
 # UPGRADING FROM v1 to v2
 The `auth0-deploy-cli` was completly rewritten from version 1 to version 2 which means it is not backwards compatible. Please consider the following when upgrading
 
@@ -86,7 +89,8 @@ import { deploy, dump } from 'auth0-deploy-cli';
 const config = {
   AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
   AUTH0_CLIENT_SECRET: process.env.AUTH0_CLIENT_ID,
-  AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_SECRET
+  AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_SECRET,
+  AUTH0_ALLOW_DELETE: false
 };
 
 

@@ -95,8 +95,7 @@ Here is the example of a config.json:
     ],
     "YOUR_STRING_KEY": "some environment specific string"
   },
-  "AUTH0_ALLOW_CONNECTION_DELETE": false,
-  "AUTH0_ALLOW_CLIENT_DELETE": false,
+  "AUTH0_ALLOW_DELETE": false,
   "AUTH0_EXCLUDED_RULES": [
     "rule-1-name",
     "rule-2-name"
@@ -143,40 +142,3 @@ Prod Config.json:
     ...
   }
 ```
-
-## AUTH0_EXCLUDED_RULES
-This is a list of rule names that should be ignored by the deploy CLI.  It will not delete, update or create rules that match those names.
-
-## Clients
-The name of the file is the name of the client that is created or updated.
-
-In the .json file you can put the same json you would put when using the Management API for creating clients.  It will only try to keep the fields specified inline with what is configured already.  If a client doesn't exist yet, it will create it.  
-
-To specify client grants, you must specify the following in the metadata file.  (e.g. client1-name.meta.json)
-
-```
-{
-  "grants": {
-    "Resource server audience": [
-      "scope1",
-      "scope2"
-    ]
-  }
-}
-```
-
-## Resource servers
-The name of the file is the name of the resource server that is created or updated.
-
-In the .json file you can put the same json you would put when using the Management API for creating resource servers.  It will only try to keep the fields specified inline with what is configured already.  If a resource server doesn't exist yet, it will create it.
-
-## Database Connections
-See Database Connection configuration [here](https://auth0.com/docs/extensions/github-deploy#deploy-database-connection-scripts)
-
-## Rules
-See Rules configuration [here](https://auth0.com/docs/extensions/github-deploy#deploy-rules)
-
-NOTE: There is not currently a way to mark rules as manual yet, that will become part of the configuration file in the future.
-
-## Custom Pages
-See Custom Pages configuration [here](https://auth0.com/docs/extensions/github-deploy#deploy-hosted-pages)
