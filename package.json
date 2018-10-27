@@ -1,6 +1,6 @@
 {
   "name": "auth0-deploy-cli",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "A command line tool for deploying updates to your Auth0 tenant",
   "main": "lib/index.js",
   "bin": {
@@ -10,7 +10,7 @@
     "lint:js": "eslint --ignore-path .eslintignore --ignore-pattern webpack .",
     "pretest": "npm run lint:js && rimraf ./.nyc_output",
     "test": "cross-env NODE_ENV=test nyc mocha --recursive --require babel-register test",
-    "build": "babel src -d lib",
+    "build": "rimraf ./lib && babel src -d lib",
     "prepare": "npm run build",
     "release": "git tag $npm_package_version && git push --tags && npm publish"
   },
