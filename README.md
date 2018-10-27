@@ -267,6 +267,3 @@ See https://github.com/auth0/auth0-deploy-cli/issues
 
 ## License
 MIT
-
-
-
