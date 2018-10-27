@@ -33,7 +33,7 @@ The `auth0-deploy-cli` was completly rewritten from version 1 to version 2 which
 
 ### General Install
 
-```
+```bash
 npm i -g auth0-deploy-cli
 ```
 
@@ -103,7 +103,7 @@ Please refer to [YAML README](examples/yaml/README.md) for usage instructions an
 
 The tool can be called programmatically. Please see below for an example.
 
-```
+```js
 import { deploy, dump } from 'auth0-deploy-cli';
 
 const config = {
@@ -204,7 +204,7 @@ You should not have to store differences between environments in the Deploy Conf
 ### To test locally
 
 Clone the GitHub repo and install globally
-```
+```bash
 git clone git@github.com:auth0/auth0-deploy-cli
 cd auth0-deploy-cli
 npm install
@@ -223,6 +223,34 @@ npm run test
  1.  Select the [scopes](#scopes) defined in the [section](#scopes) above
  1.  Click Authorize
  
+ ```json
+ {
+   "client_id": "<your client ID copied above>",
+   "audience": "https://<your domain: (e.g. fabrikam-dev.auth0.com)>/api/v2/",
+   "scope": [
+     "read:client_grants",
+     "create:client_grants",
+     "delete:client_grants",
+     "update:client_grants",
+     "read:clients",
+     "update:clients",
+     "delete:clients",
+     "create:clients",
+     "read:connections",
+     "update:connections",
+     "read:resource_servers",
+     "update:resource_servers",
+     "delete:resource_servers",
+     "create:resource_servers",
+     "read:rules",
+     "update:rules",
+     "delete:rules",
+     "create:rules",
+     "read:tenant_settings",
+     "update:tenant_settings"
+   ]
+ }
+ ```
 
 ## Known issues
 See https://github.com/auth0/auth0-deploy-cli/issues
