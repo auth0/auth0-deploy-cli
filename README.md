@@ -44,26 +44,46 @@ For this tool to function it must be authorized to the Auth0 Management API. You
 Use the [Auth0 Deploy CLI Extension](https://github.com/auth0-extensions/auth0-deploy-cli-extension/blob/master/README.md) to create the application. At the bottom of the README are instructions for doing this by hand instead.
 
 #### Scopes
-  * read:tenant_settings
-  * update:tenant_settings
-  * create:client_grants
   * read:client_grants
-  * update:client_grants
+  * create:client_grants
   * delete:client_grants
-  * create:clients
+  * update:client_grants
   * read:clients
   * update:clients
   * delete:clients
+  * create:clients
+  * read:client_keys
+  * update:client_keys
+  * delete:client_keys
+  * create:client_keys
   * read:connections
   * update:connections
-  * create:resource_servers
+  * delete:connections
+  * create:connections
   * read:resource_servers
   * update:resource_servers
   * delete:resource_servers
+  * create:resource_servers
   * read:rules
-  * create:rules
   * update:rules
   * delete:rules
+  * create:rules
+  * read:rules_configs
+  * update:rules_configs
+  * delete:rules_configs
+  * read:email_provider
+  * update:email_provider
+  * delete:email_provider
+  * create:email_provider
+  * read:tenant_settings
+  * update:tenant_settings
+  * read:grants
+  * delete:grants
+  * read:guardian_factors
+  * update:guardian_factors
+  * read:email_templates
+  * create:email_templates
+  * update:email_templates
   
 
 # Usage
@@ -191,76 +211,18 @@ npm install
 npm run test
 ```
 
-## To Create Client by Hand
+## To Create Client Application by Hand
 
  1.  log into your dashboard
- 1.  click the clients tab
- 1.  click the "New Client" button
+ 1.  click the applications tab
+ 1.  click the "Create Application" button
      1.  Name it something like "Deploy Client"
-     1.  Select Non-Interactive as the client type
+     1.  Select Machine-to-Machine as the application type
      1.  Click Create
- 1.  If you haven't already enabled API's, you may have to toggle the switch to enable API's
  1.  Use the "Select an API" dropdown to choose: "Auth0 Management API"
- 1.  Click the Settings tab
- 1.  Copy the client ID, you'll need it for a couple steps down
- 1.  Click the "Documentation->Management API" link from the top menu
- 1.  Using the left navigation click "Client Grants" then "Create a client grant"
- 1.  Click the "create:client_grants" scope to create the token
- 1.  In the Body section put the following:
+ 1.  Select the [scopes](#scopes) defined in the [section](#scopes) above
+ 1.  Click Authorize
  
-         {
-           "client_id": "<your client ID copied above>",
-           "audience": "https://<your domain: (e.g. fabrikam-dev.auth0.com)>/api/v2/",
-           "scope": [
-              "read:client_grants",
-              "create:client_grants",
-              "delete:client_grants",
-              "update:client_grants",
-              "read:users",
-              "update:users",
-              "delete:users",
-              "create:users",
-              "read:clients",
-              "update:clients",
-              "delete:clients",
-              "create:clients",
-              "read:client_keys",
-              "update:client_keys",
-              "delete:client_keys",
-              "create:client_keys",
-              "read:connections",
-              "update:connections",
-              "delete:connections",
-              "create:connections",
-              "read:resource_servers",
-              "update:resource_servers",
-              "delete:resource_servers",
-              "create:resource_servers",
-              "read:rules",
-              "update:rules",
-              "delete:rules",
-              "create:rules",
-              "read:rules_configs",
-              "update:rules_configs",
-              "delete:rules_configs",
-              "read:email_provider",
-              "update:email_provider",
-              "delete:email_provider",
-              "create:email_provider",
-              "read:tenant_settings",
-              "update:tenant_settings",
-              "read:grants",
-              "delete:grants",
-              "read:guardian_factors",
-              "update:guardian_factors",
-              "read:email_templates",
-              "create:email_templates",
-              "update:email_templates"
-           ]
-         }
-
- 1.  Click the "Try" button
-
 
 ## Known issues
 See https://github.com/auth0/auth0-deploy-cli/issues
