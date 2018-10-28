@@ -24,9 +24,9 @@ Supported Features
 This tool can be destructive to your Auth0 tenant. Please ensure you have read the documentation and tested the tool on a development tenant before using in production.
 
 # UPGRADING FROM v1 to v2
-The `auth0-deploy-cli` was completly rewritten from version 1 to version 2 which means it is not backwards compatible. Please consider the following when upgrading
+The `auth0-deploy-cli` was completly rewritten from version 1 to version 2 which means it is not backwards compatible. Please consider the following when upgrading:
 
-- The directory structure and format has changed to allow for additional object types
+- The directory structure and format has changed to allow for additional object types.
 - The command line parameters have changed to allow for additional options such as export.
 
 ## Install
