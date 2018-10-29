@@ -17,7 +17,7 @@ You can export your current tenant configuration. For example the following comm
 > NOTE: Some of the settings cannot be exported for example emailProvider credentials, rulesConfigs values and others. After export you may need to update the `tenant.yaml` values if you experience schema errors on import.
 
 ## Example Import
-Please refer to [tenant.yml](tenant.yml) for an example configuration.
+Please refer to [tenant.yml](tenant.yaml) for an example configuration.
 
 ###Instructions
 
