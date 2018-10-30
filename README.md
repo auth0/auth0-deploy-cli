@@ -24,7 +24,7 @@ Supported Features
 This tool can be destructive to your Auth0 tenant. Please ensure you have read the documentation and tested the tool on a development tenant before using in production.
 
 # UPGRADING FROM v1 to v2
-The `auth0-deploy-cli` was completly rewritten from version 1 to version 2 which means it is not backwards compatible. Please consider the following when upgrading:
+The `auth0-deploy-cli` was completely rewritten from version 1 to version 2 which means it is not backwards compatible. Please consider the following when upgrading:
 
 - The directory structure and format has changed to allow for additional object types.
 - The command line parameters have changed to allow for additional options such as export.
@@ -177,7 +177,7 @@ The recommended approach for utilizing this CLI is to incorporate it into your b
 The recommended approach is to have a different Auth0 tenant/account for each environment.  For example: fabrikam-dev, fabrikam-uat, fabrikam-staging, and fabrikam-prod.
 
 ### Your Deploy Configuration Repository
-Your configuration repository should contain the files as described in the selected option ([Directory](examples/directory/README.md) or [YAML](examples/yaml/README.md)
+Your configuration repository should contain the files as described in the selected option ([Directory](examples/directory/README.md) or [YAML](examples/yaml/README.md))
 
 You should have a branch for each tenant/account.  This allows you to make changes to dev, but not deploy them until you merge.  With this setup, you can have each environment have a CI task that automatically deploys the changes to its target environment when the branch is updated with the latest.
 
