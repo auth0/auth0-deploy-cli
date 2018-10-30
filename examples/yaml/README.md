@@ -23,7 +23,7 @@ Please refer to [tenant.yml](tenant.yml) for an example configuration.
 
 1. Copy config.json.example and fill out details
 2. Run deploy
-```
+```bash
 a0deploy import -c config.json -i tenant.yaml
 ```
 
@@ -62,7 +62,7 @@ The mappings are there so that you can use the same configuration file for all o
 For example, you could specify a different JWT timeout in your dev environment then prod for testing and a different environment URL:
 
 Client .json:
-```
+```json
 {
   ... 
   "callbacks": [
@@ -77,7 +77,7 @@ Client .json:
 ```
 
 Dev Config .json:
-```
+```json
   "AUTH0_KEYWORD_REPLACE_MAPPINGS": {
     "ENVIRONMENT_URL": "http://dev.fabrikam.com",
     "JWT_TIMEOUT": 120,
@@ -86,7 +86,7 @@ Dev Config .json:
 ```
 
 Prod Config .json:
-```
+```json
   "AUTH0_KEYWORD_REPLACE_MAPPINGS": {
     "ENVIRONMENT_URL": "http://fabrikam.com",
     "JWT_TIMEOUT": 3600,
