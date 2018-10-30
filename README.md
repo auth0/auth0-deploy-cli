@@ -23,13 +23,35 @@ Supported Features
 # WARNING
 This tool can be destructive to your Auth0 tenant. Please ensure you have read the documentation and tested the tool on a development tenant before using in production.
 
-# UPGRADING FROM v1 to v2
-The `auth0-deploy-cli` was completly rewritten from version 1 to version 2 which means it is not backwards compatible. Please consider the following when upgrading:
+# What's new in version 2
+The `auth0-deploy-cli` tool was refactored bringing the following updates.
+
+- Added YAML support
+- Added support for export (deprecation of separate auth0 dump tool)
+- Delete support - The tool will, if configured via `AUTH0_ALLOW_DELETE`, delete objects if does not exist within the deploy configuration.
+- Support for additional Auth0 objects
+  - Connections including Social, Enterprise and Passwordless configurations.
+  - Improved support for database connections and associated configuration.
+  - Email Templates
+  - Email Provider
+  - Client Grants
+  - Rule Configs
+  - Better support for pages
+  - Tenant level settings
+- Added support to be called programmatically
+- Improved logging
+- To simplify the tool the slack hook was removed. You can invoke the tool programmatically to support calling your own hooks
+- Support referencing clients by their name vs client_id ()automatic mapping during export/import) 
+- Simplified to support future Auth0 object types
+
+
+### UPGRADING FROM v1 to v2
+The `auth0-deploy-cli` was completely rewritten from version 1 to version 2 which means it is not backwards compatible. Please consider the following when upgrading:
 
 - The directory structure and format has changed to allow for additional object types.
 - The command line parameters have changed to allow for additional options such as export.
 
-## Install
+# Install
 
 ### General Install
 
@@ -37,7 +59,7 @@ The `auth0-deploy-cli` was completly rewritten from version 1 to version 2 which
 npm i -g auth0-deploy-cli
 ```
 
-## Pre-requisites
+### Pre-requisites
 
 For this tool to function it must be authorized to the Auth0 Management API. You can do this by creating an application in your Auth0 service that has access to the management API with the following scopes before.
 
@@ -138,9 +160,12 @@ dump({
 })
   .then(() => console.log('yey deploy was successful'))
   .catch(err => console.log(`Oh no, something went wrong. Error: ${err}`));
-
-
 ```
+
+## Troubleshooting
+The `auth0-deploy-cli` tool leverages the [Auth0 Management API](https://auth0.com/docs/api/management/v2) passing through objects for creates, updates and deletions.
+
+You may experience `Bad Request` and `Payload validation` errors. These errors are returned from the Auth0 Management API. They usually mean the object has attributes which are not writable or no longer available (legacy). This can happen when exporting from an older Auth0 tenant and importing into a newly created tenant. In this scenario you may need to tweak your configuration to support the new object format.
 
 ## CLI Options
 
@@ -177,7 +202,7 @@ The recommended approach for utilizing this CLI is to incorporate it into your b
 The recommended approach is to have a different Auth0 tenant/account for each environment.  For example: fabrikam-dev, fabrikam-uat, fabrikam-staging, and fabrikam-prod.
 
 ### Your Deploy Configuration Repository
-Your configuration repository should contain the files as described in the selected option ([Directory](examples/directory/README.md) or [YAML](examples/yaml/README.md)
+Your configuration repository should contain the files as described in the selected option ([Directory](examples/directory/README.md) or [YAML](examples/yaml/README.md))
 
 You should have a branch for each tenant/account.  This allows you to make changes to dev, but not deploy them until you merge.  With this setup, you can have each environment have a CI task that automatically deploys the changes to its target environment when the branch is updated with the latest.
 
@@ -222,35 +247,7 @@ npm run test
  1.  Use the "Select an API" dropdown to choose: "Auth0 Management API"
  1.  Select the [scopes](#scopes) defined in the [section](#scopes) above
  1.  Click Authorize
- 
- ```json
- {
-   "client_id": "<your client ID copied above>",
-   "audience": "https://<your domain: (e.g. fabrikam-dev.auth0.com)>/api/v2/",
-   "scope": [
-     "read:client_grants",
-     "create:client_grants",
-     "delete:client_grants",
-     "update:client_grants",
-     "read:clients",
-     "update:clients",
-     "delete:clients",
-     "create:clients",
-     "read:connections",
-     "update:connections",
-     "read:resource_servers",
-     "update:resource_servers",
-     "delete:resource_servers",
-     "create:resource_servers",
-     "read:rules",
-     "update:rules",
-     "delete:rules",
-     "create:rules",
-     "read:tenant_settings",
-     "update:tenant_settings"
-   ]
- }
- ```
+
 
 ## Known issues
 See https://github.com/auth0/auth0-deploy-cli/issues
