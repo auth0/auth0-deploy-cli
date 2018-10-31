@@ -187,10 +187,10 @@ Options:
   --proxy_url, -p  A url for proxying requests, only set this if you are behind a proxy.  [string]
 
 Examples:
-  a0deploy import -c config.yml -i tenant.yaml                    Deploy Auth0 via YAML
-  a0deploy import -c config.yml -i path/to/files                  Deploy Auth0 via Path
-  a0deploy -c config.json --strip -f yaml -o path/to/export       Dump Auth0 config to folder in YAML format
-  a0deploy -c config.json --strip -f directory -o path/to/export  Dump Auth0 config to folder in directory format
+  a0deploy export -c config.json --strip -f yaml -o path/to/export       Dump Auth0 config to folder in YAML format
+  a0deploy export -c config.json --strip -f directory -o path/to/export  Dump Auth0 config to folder in directory format
+  a0deploy import -c config.json -i tenant.yaml                          Deploy Auth0 via YAML
+  a0deploy import -c config.json -i path/to/files                        Deploy Auth0 via Path
 
 See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.
 ```
