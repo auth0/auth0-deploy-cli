@@ -16,7 +16,8 @@ const readOnly = {
     'signing_keys',
     'global',
     'tenant',
-    'custom_login_page_preview'
+    'custom_login_page_preview',
+    'config_route'
   ]
 };
 
