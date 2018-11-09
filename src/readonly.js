@@ -4,7 +4,7 @@ import dotProp from 'dot-prop';
 const readOnly = {
   connections: [
     'provisioning_ticket_url',
-    'realms'
+    'realms',
   ],
   tenant: [
     'sandbox_versions_available',
@@ -16,7 +16,8 @@ const readOnly = {
     'signing_keys',
     'global',
     'tenant',
-    'custom_login_page_preview'
+    'custom_login_page_preview',
+    'config_route'
   ]
 };
 
