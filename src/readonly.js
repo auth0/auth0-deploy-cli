@@ -2,6 +2,9 @@ import dotProp from 'dot-prop';
 
 // Filter out known read only fields during dump
 const readOnly = {
+  guardianFactors: [
+    'trial_expired'
+  ],
   connections: [
     'provisioning_ticket_url',
     'realms'

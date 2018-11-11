@@ -1,0 +1,7 @@
+{
+  "name": "sms",
+  "provider": "twilio",
+  "auth_token": "test",
+  "sid": "test",
+  "messaging_service_sid": "test"
+}

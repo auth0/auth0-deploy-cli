@@ -14,6 +14,7 @@ Supported Features
   - Resource Servers (API's)
   - Pages
   - Email Templates and Provider 
+  - Guardian Settings
 - Configuration options
   - Defined Directory Structure
   - YAML Configuration
@@ -36,6 +37,7 @@ The `auth0-deploy-cli` tool was refactored bringing the following updates.
   - Email Provider
   - Client Grants
   - Rule Configs
+  - Guardian config
   - Better support for pages
   - Tenant level settings
 - Added support to be called programmatically

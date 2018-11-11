@@ -2,7 +2,7 @@
 
 tenant:
   # Any tenant settings can go here https://auth0.com/docs/api/management/v2#!/Tenants/get_settings
-  friendly_name: 'Steve Demo'
+  friendly_name: 'Auth0 Deploy Example'
 
 pages:
   - name: "login"
@@ -118,3 +118,30 @@ clientGrants:
     audience: "https://##ENV##.myapp.com/api/v1"
     scope:
       - "update:account"
+
+
+guardianFactors:
+  - name: sms
+    enabled: true
+  - name: push-notification
+    enabled: true
+  - name: otp
+    enabled: true
+  - name: email
+    enabled: false
+  - name: duo
+    enabled: false
+
+guardianFactorProviders:
+  - name: sms
+    provider: twilio
+    auth_token: "some_token"
+    sid: "some_sid"
+    messaging_service_sid: "some_message_sid"
+
+guardianFactorTemplates:
+  - name: sms
+    enrollment_message: >-
+      {{code}} is your verification code for {{tenant.friendly_name}}. Please
+      enter this code to verify your enrollment.
+    verification_message: '{{code}} is your verification code for {{tenant.friendly_name}}'

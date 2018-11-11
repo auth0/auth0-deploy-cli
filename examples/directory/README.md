@@ -47,6 +47,16 @@ repository =>
   rules-configs
     env_param1.json
     some_secret1.json
+  guardian
+    factors
+      sms.json
+      email.json
+      otp.json
+      push-notification.json
+    provider
+      sms-twilio.json
+    templates
+      sms.json
 ```
 
 ## Example Export
