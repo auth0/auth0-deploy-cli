@@ -13,7 +13,8 @@ Supported Features
   - Clients / Applications
   - Resource Servers (API's)
   - Pages
-  - Email Templates and Provider
+  - Email Templates and Provider 
+  - Guardian Settings
 - Configuration options
   - Defined Directory Structure
   - YAML Configuration
@@ -36,12 +37,13 @@ The `auth0-deploy-cli` tool was refactored bringing the following updates.
   - Email Provider
   - Client Grants
   - Rule Configs
+  - Guardian config
   - Better support for pages
   - Tenant level settings
 - Added support to be called programmatically
 - Improved logging
 - To simplify the tool the slack hook was removed. You can invoke the tool programmatically to support calling your own hooks
-- Support referencing clients by their name vs client_id ()automatic mapping during export/import)
+- Support referencing clients by their name vs client_id (automatic mapping during export/import)
 - Simplified to support future Auth0 object types
 
 

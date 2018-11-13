@@ -9,6 +9,9 @@ import emailTemplates from './emailTemplates';
 import clientGrants from './clientGrants';
 import rulesConfigs from './rulesConfigs';
 import resourceServers from './resourceServers';
+import guardianFactors from './guardianFactors';
+import guardianFactorProviders from './guardianFactorProviders';
+import guardianFactorTemplates from './guardianFactorTemplates';
 
 export default {
   rules,
@@ -21,5 +24,8 @@ export default {
   connections,
   tenant,
   emailProvider,
-  emailTemplates
+  emailTemplates,
+  guardianFactors,
+  guardianFactorProviders,
+  guardianFactorTemplates
 };

@@ -23,6 +23,11 @@ export function mockMgmtClient() {
     rulesConfigs: { getAll: () => [] },
     emailProvider: { get: () => {} },
     clientGrants: { getAll: () => [] },
+    guardian: {
+      getFactors: () => [],
+      getFactorProvider: () => [],
+      getFactorTemplates: () => []
+    },
     emailTemplates: {
       get: template => ({
         template: template.name,

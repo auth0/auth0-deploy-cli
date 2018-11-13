@@ -100,6 +100,9 @@ describe('#YAML context validation', () => {
       pages: [
         { enabled: true, html: './pages/login.html', name: 'login' }
       ],
+      guardianFactors: [],
+      guardianFactorProviders: [],
+      guardianFactorTemplates: [],
       resourceServers: [],
       rules: [],
       rulesConfigs: [],
