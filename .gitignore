@@ -6,3 +6,4 @@ lib/
 /npm-debug.log
 config.json
 .env
+.idea
