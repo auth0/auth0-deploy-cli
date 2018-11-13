@@ -43,7 +43,7 @@ The `auth0-deploy-cli` tool was refactored bringing the following updates.
 - Added support to be called programmatically
 - Improved logging
 - To simplify the tool the slack hook was removed. You can invoke the tool programmatically to support calling your own hooks
-- Support referencing clients by their name vs client_id ()automatic mapping during export/import) 
+- Support referencing clients by their name vs client_id (automatic mapping during export/import)
 - Simplified to support future Auth0 object types
 
 
@@ -108,7 +108,7 @@ Use the [Auth0 Deploy CLI Extension](https://github.com/auth0-extensions/auth0-d
   * read:email_templates
   * create:email_templates
   * update:email_templates
-  
+
 
 # Usage
 
@@ -167,7 +167,7 @@ dump({
 ## Troubleshooting
 The `auth0-deploy-cli` tool leverages the [Auth0 Management API](https://auth0.com/docs/api/management/v2) passing through objects for creates, updates and deletions.
 
-You may experience `Bad Request` and `Payload validation` errors. These errors are returned from the Auth0 Management API. They usually mean the object has attributes which are not writable or no longer available (legacy). This can happen when exporting from an older Auth0 tenant and importing into a newly created tenant. In this scenario you may need to tweak your configuration to support the new object format.
+You may experience `Bad Request` and `Payload validation` errors. These errors are returned from the Auth0 Management API, and usually mean the object has attributes which are not writable or no longer available (legacy). This can happen when exporting from an older Auth0 tenant and importing into a newly created tenant. In this scenario you may need to update your configuration to support the new object format. See #45 for a potential fix.
 
 ## CLI Options
 
@@ -189,10 +189,10 @@ Options:
   --proxy_url, -p  A url for proxying requests, only set this if you are behind a proxy.  [string]
 
 Examples:
-  a0deploy import -c config.yml -i tenant.yaml                    Deploy Auth0 via YAML
-  a0deploy import -c config.yml -i path/to/files                  Deploy Auth0 via Path
-  a0deploy -c config.json --strip -f yaml -o path/to/export       Dump Auth0 config to folder in YAML format
-  a0deploy -c config.json --strip -f directory -o path/to/export  Dump Auth0 config to folder in directory format
+  a0deploy export -c config.json --strip -f yaml -o path/to/export       Dump Auth0 config to folder in YAML format
+  a0deploy export -c config.json --strip -f directory -o path/to/export  Dump Auth0 config to folder in directory format
+  a0deploy import -c config.json -i tenant.yaml                          Deploy Auth0 via YAML
+  a0deploy import -c config.json -i path/to/files                        Deploy Auth0 via Path
 
 See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.
 ```
@@ -214,7 +214,7 @@ dev changes are tested, then merged to uat, once tested they are merged to stagi
 You may want to set your prod to only deploy when triggered manually.
 
 ### Your CI server configuration
-Your CI server should have a different deploy task and config for each environment.  Since each tenant/account will need to have the auth0-deploy-cli-extension installed in it with a different domain, client ID, and secret, this has to happen anyway and will avoid accidentally deploying to the wrong environment.
+Your CI server should have a different deploy task and config for each environment. Since each tenant/account will need to have the [auth0-deploy-cli-extension]() installed in it with a different domain, client ID, and secret, this has to happen anyway and will avoid accidentally deploying to the wrong environment.
 
 The deploy task should follow these steps:
 
