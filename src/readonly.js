@@ -20,7 +20,8 @@ const readOnly = {
     'global',
     'tenant',
     'custom_login_page_preview',
-    'config_route'
+    'config_route',
+    'owners'
   ]
 };
 
