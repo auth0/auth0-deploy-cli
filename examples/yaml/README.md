@@ -1,4 +1,4 @@
-# Auth0 Deploy CLI via Directory Structure
+# Auth0 Deploy CLI using YAML
 
 This README will document how to use the YAML Option of the Auth0-deploy-cli tool. Please refer to the [README.md](README.md) for more information on the Auth0 Deploy CLI.
 
