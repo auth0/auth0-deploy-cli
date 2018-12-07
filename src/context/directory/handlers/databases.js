@@ -27,7 +27,10 @@ function getDatabase(folder, mappings) {
     ...metaData,
     options: {
       ...metaData.options,
-      customScripts: metaData.customScripts || {}
+      // customScripts option only written if there are scripts
+      ...(metaData.customScripts && {
+        customScripts: metaData.customScripts
+      })
     }
   };
 
@@ -83,14 +86,17 @@ async function dump(context) {
       ],
       options: {
         ...database.options,
-        customScripts: Object.entries(database.options.customScripts || {}).reduce((scripts, [ name, script ]) => {
-          // Dump custom script to file
-          const scriptFile = path.join(dbFolder, `${name}.js`);
-          log.info(`Writing ${scriptFile}`);
-          fs.writeFileSync(scriptFile, script);
-          scripts[name] = `./${name}.js`;
-          return scripts;
-        }, {})
+        // customScripts option only written if there are scripts
+        ...(database.options.customScripts && {
+          customScripts: Object.entries(database.options.customScripts).reduce((scripts, [ name, script ]) => {
+            // Dump custom script to file
+            const scriptFile = path.join(dbFolder, `${name}.js`);
+            log.info(`Writing ${scriptFile}`);
+            fs.writeFileSync(scriptFile, script);
+            scripts[name] = `./${name}.js`;
+            return scripts;
+          }, {})
+        })
       }
     };
 
