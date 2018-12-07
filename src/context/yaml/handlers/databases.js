@@ -13,10 +13,13 @@ async function parse(context) {
         ...database,
         options: {
           ...database.options,
-          customScripts: Object.entries(database.options.customScripts || {}).reduce((scripts, [ name, script ]) => ({
-            ...scripts,
-            [name]: context.loadFile(script)
-          }), {})
+          // customScripts option only written if there are scripts
+          ...(database.options.customScripts && {
+            customScripts: Object.entries(database.options.customScripts).reduce((scripts, [ name, script ]) => ({
+              ...scripts,
+              [name]: context.loadFile(script)
+            }), {})
+          })
         }
       }))
     ]
@@ -45,18 +48,21 @@ async function dump(context) {
         ],
         options: {
           ...database.options,
-          customScripts: Object.entries(database.options.customScripts || {}).reduce((scripts, [ name, script ]) => {
-            // Create Database folder
-            const dbFolder = path.join(context.basePath, 'databases', database.name);
-            fs.ensureDirSync(dbFolder);
+          // customScripts option only written if there are scripts
+          ...(database.options.customScripts && {
+            customScripts: Object.entries(database.options.customScripts).reduce((scripts, [ name, script ]) => {
+              // Create Database folder
+              const dbFolder = path.join(context.basePath, 'databases', database.name);
+              fs.ensureDirSync(dbFolder);
 
-            // Dump custom script to file
-            const scriptFile = path.join(dbFolder, `${name}.js`);
-            log.info(`Writing ${scriptFile}`);
-            fs.writeFileSync(scriptFile, script);
-            scripts[name] = `./databases/${database.name}/${name}.js`;
-            return scripts;
-          }, {})
+              // Dump custom script to file
+              const scriptFile = path.join(dbFolder, `${name}.js`);
+              log.info(`Writing ${scriptFile}`);
+              fs.writeFileSync(scriptFile, script);
+              scripts[name] = `./databases/${database.name}/${name}.js`;
+              return scripts;
+            }, {})
+          })
         }
       }))
     ]
