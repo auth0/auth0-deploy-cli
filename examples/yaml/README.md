@@ -43,12 +43,12 @@ Here is the example of a config.json:
   "AUTH0_DOMAIN": "<your auth0 domain (e.g. fabrikam-dev.auth0.com) >",
   "AUTH0_CLIENT_SECRET": "<your deploy client secret>",
   "AUTH0_CLIENT_ID": "<your deploy client ID>",
+  "AUTH0_ALLOW_DELETE": false,
   "AUTH0_KEYWORD_REPLACE_MAPPINGS": {
     "YOUR_ARRAY_KEY": [
       "http://localhost:8080",
       "https://somedomain.com"
     ],
-    "AUTH0_ALLOW_DELETE": false,
     "YOUR_STRING_KEY": "some environment specific string"
   }
 }
