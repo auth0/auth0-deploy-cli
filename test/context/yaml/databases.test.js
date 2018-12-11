@@ -6,14 +6,47 @@ import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/databases';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
-
 describe('#YAML context databases', () => {
-  it('should process database', async () => {
-    const dir = path.join(testDataDir, 'yaml', 'databases');
-    cleanThenMkdir(dir);
+  const dbDir = path.join(testDataDir, 'yaml', 'databases');
+  const scriptContent = 'function login() { var ##val1## = @@val2@@; }';
+  const scriptFile = path.join(dbDir, 'script.js');
+  const scriptValidate = 'function login() { var env1 = "env2"; }';
+  const yamlFile = path.join(dbDir, 'databases.yaml');
+  const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { val1: 'env1', val2: 'env2' } };
 
-    const scriptContent = 'function login() { var ##val1## = @@val2@@; }';
-    const scriptFile = path.join(dir, 'script.js');
+  it('should process normal database', async () => {
+    cleanThenMkdir(dbDir);
+
+    fs.writeFileSync(scriptFile, scriptContent);
+
+    const yaml = `
+    databases:
+      - name: "users"
+        options:
+          requires_username: true
+    `;
+
+    const target = [
+      {
+        name: 'users',
+        options: {
+          requires_username: true
+        },
+        strategy: 'auth0'
+      }
+    ];
+
+    fs.writeFileSync(yamlFile, yaml);
+
+    const context = new Context(config, mockMgmtClient());
+    await context.load();
+
+    expect(context.assets.databases).to.deep.equal(target);
+  });
+
+  it('should process custom database', async () => {
+    cleanThenMkdir(dbDir);
+
     fs.writeFileSync(scriptFile, scriptContent);
 
     const yaml = `
@@ -30,8 +63,6 @@ describe('#YAML context databases', () => {
             change_password: ${scriptFile}
             verify: ${scriptFile}
     `;
-
-    const scriptValidate = 'function login() { var env1 = "env2"; }';
 
     const target = [
       {
@@ -52,22 +83,50 @@ describe('#YAML context databases', () => {
       }
     ];
 
-    const yamlFile = path.join(dir, 'databases.yaml');
     fs.writeFileSync(yamlFile, yaml);
 
-    const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { val1: 'env1', val2: 'env2' } };
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
     expect(context.assets.databases).to.deep.equal(target);
   });
 
-  it('should dump databases', async () => {
-    const dir = path.join(testDataDir, 'yaml', 'databasesDump');
-    cleanThenMkdir(dir);
-    const context = new Context({ AUTH0_INPUT_FILE: path.join(dir, 'tennat.yaml') }, mockMgmtClient());
+  const dbDumpDir = path.join(testDataDir, 'yaml', 'databasesDump');
 
-    const scriptValidate = 'function login() { var env1 = "env2"; }';
+  it('should dump normal databases', async () => {
+    cleanThenMkdir(dbDumpDir);
+    const context = new Context({ AUTH0_INPUT_FILE: path.join(dbDumpDir, 'tennat.yaml') }, mockMgmtClient());
+
+    context.assets.databases = [
+      {
+        name: 'users',
+        enabled_clients: [],
+        options: {
+          requires_username: true
+        },
+        strategy: 'auth0'
+      }
+    ];
+
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({
+      databases: [
+        {
+          name: 'users',
+          enabled_clients: [],
+          options: {
+            requires_username: true
+          },
+          strategy: 'auth0'
+        }
+      ]
+    });
+  });
+
+  it('should dump custom databases', async () => {
+    cleanThenMkdir(dbDumpDir);
+    const context = new Context({ AUTH0_INPUT_FILE: path.join(dbDumpDir, 'tennat.yaml') }, mockMgmtClient());
+
     context.assets.databases = [
       {
         name: 'users',
@@ -111,7 +170,7 @@ describe('#YAML context databases', () => {
       ]
     });
 
-    const scripsFolder = path.join(dir, 'databases', 'users');
+    const scripsFolder = path.join(dbDumpDir, 'databases', 'users');
     expect(fs.readFileSync(path.join(scripsFolder, 'change_email.js'), 'utf8')).to.deep.equal(scriptValidate);
     expect(fs.readFileSync(path.join(scripsFolder, 'change_password.js'), 'utf8')).to.deep.equal(scriptValidate);
     expect(fs.readFileSync(path.join(scripsFolder, 'create.js'), 'utf8')).to.deep.equal(scriptValidate);
