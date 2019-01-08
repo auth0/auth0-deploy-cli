@@ -11,7 +11,7 @@ Supported Features
   - Connections
   - Custom Databases
   - Clients / Applications
-  - Resource Servers (API's)
+  - Resource Servers (APIs)
   - Pages
   - Email Templates and Provider 
   - Guardian Settings
