@@ -23,6 +23,7 @@ describe('#YAML context databases', () => {
     databases:
       - name: "users"
         options:
+          import_mode: true
           requires_username: true
     `;
 
@@ -30,6 +31,7 @@ describe('#YAML context databases', () => {
       {
         name: 'users',
         options: {
+          import_mode: true,
           requires_username: true
         },
         strategy: 'auth0'
@@ -53,6 +55,7 @@ describe('#YAML context databases', () => {
     databases:
       - name: "users"
         options:
+          import_mode: true
           enabledDatabaseCustomization: true
           customScripts:
             login: ${scriptFile}
@@ -68,6 +71,7 @@ describe('#YAML context databases', () => {
       {
         name: 'users',
         options: {
+          import_mode: true,
           customScripts: {
             change_email: scriptValidate,
             change_password: scriptValidate,
@@ -102,6 +106,7 @@ describe('#YAML context databases', () => {
         name: 'users',
         enabled_clients: [],
         options: {
+          import_mode: true,
           requires_username: true
         },
         strategy: 'auth0'
@@ -115,6 +120,7 @@ describe('#YAML context databases', () => {
           name: 'users',
           enabled_clients: [],
           options: {
+            import_mode: true,
             requires_username: true
           },
           strategy: 'auth0'
@@ -132,6 +138,7 @@ describe('#YAML context databases', () => {
         name: 'users',
         enabled_clients: [],
         options: {
+          import_mode: true,
           customScripts: {
             change_email: scriptValidate,
             change_password: scriptValidate,
@@ -154,6 +161,7 @@ describe('#YAML context databases', () => {
           name: 'users',
           enabled_clients: [],
           options: {
+            import_mode: true,
             customScripts: {
               change_email: './databases/users/change_email.js',
               change_password: './databases/users/change_password.js',

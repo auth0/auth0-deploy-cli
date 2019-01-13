@@ -14,7 +14,8 @@ describe('#YAML context client grants', () => {
 
     const yaml = `
     clientGrants:
-      - client_id: "My M2M"
+      - client_id: "my_client_id"
+        name: "My M2M"
         audience: "https://##ENV##.myapp.com/api/v1"
         scope:
           - "update:account"
@@ -25,7 +26,8 @@ describe('#YAML context client grants', () => {
     const target = [
       {
         audience: 'https://test.myapp.com/api/v1',
-        client_id: 'My M2M',
+        client_id: 'my_client_id',
+        name: 'My M2M',
         scope: [
           'update:account'
         ]

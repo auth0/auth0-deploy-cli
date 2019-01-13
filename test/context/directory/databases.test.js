@@ -13,8 +13,10 @@ describe('#directory context databases', () => {
   const normalUsersDB = {
     'database.json': `
       {
-        "name": "users","enabled_clients": ["My SPA"],
+        "name": "users",
+        "enabled_clients": ["My SPA"],
         "options": {
+          "import_mode": true,
           "requires_username": true
         }
       }
@@ -37,6 +39,7 @@ describe('#directory context databases', () => {
         ],
         name: 'users',
         options: {
+          import_mode: true,
           requires_username: true
         }
       }
