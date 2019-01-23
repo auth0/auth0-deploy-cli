@@ -72,7 +72,7 @@ You can export your current tenant configuration. For example the following comm
 ## Example Import
 Included in this directory is an example structure.
 
-###Instructions
+### Instructions
 
 1. Copy config.json.example and fill out details
 2. Run deploy
