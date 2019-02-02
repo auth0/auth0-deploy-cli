@@ -34,7 +34,6 @@ async function run() {
   // Monkey Patch the superagent for proxy use
   const proxy = params.proxy_url;
   if (proxy) {
-    log.info(`PROXY: ${proxy}`)
     const proxyAgent = new HttpProxyAgent(proxy);
     const proxyAgentSsl = new HttpsProxyAgent(proxy);
     const OrigRequest = superagent.Request;
