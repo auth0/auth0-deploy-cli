@@ -32,14 +32,14 @@ async function run() {
   }
 
   // Monkey Patch the superagent for proxy use
-  const proxy = args.proxy_url;
+  const proxy = params.proxy_url;
   if (proxy) {
     const proxyAgent = new HttpProxyAgent(proxy);
     const proxyAgentSsl = new HttpsProxyAgent(proxy);
     const OrigRequest = superagent.Request;
     superagent.Request = function RequestWithAgent(method, url) {
       const req = new OrigRequest(method, url);
-      log.debug(`Setting proxy for ${method} to ${url}`);
+      log.info(`Setting proxy for ${method} to ${url}`);
       if (url.startsWith('https')) return req.agent(proxyAgentSsl);
       return req.agent(proxyAgent);
     };
