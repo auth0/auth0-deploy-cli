@@ -1,7 +1,7 @@
 async function parse(context) {
   // nothing to do, set default if empty
   return {
-    resourceServers: [ ...context.assets.resourceServers || [] ]
+    resourceServers: context.assets.resourceServers
   };
 }
 

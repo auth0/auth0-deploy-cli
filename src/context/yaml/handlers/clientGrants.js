@@ -2,7 +2,7 @@
 async function parse(context) {
   // nothing to do, set default empty
   return {
-    clientGrants: [ ...context.assets.clientGrants || [] ]
+    clientGrants: context.assets.clientGrants
   };
 }
 

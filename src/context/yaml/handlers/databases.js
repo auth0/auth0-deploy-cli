@@ -6,10 +6,11 @@ import log from '../../../logger';
 
 async function parse(context) {
   // Load the script file for custom db
-  const databases = context.assets.databases || [];
+  if (!context.assets.databases) return {};
+
   return {
     databases: [
-      ...databases.map(database => ({
+      ...context.assets.databases.map(database => ({
         ...database,
         options: {
           ...database.options,
