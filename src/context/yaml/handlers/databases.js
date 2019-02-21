@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 
+import { sanitize } from '../../../utils';
 import log from '../../../logger';
 
 
@@ -52,14 +53,15 @@ async function dump(context) {
           ...(database.options.customScripts && {
             customScripts: Object.entries(database.options.customScripts).reduce((scripts, [ name, script ]) => {
               // Create Database folder
-              const dbFolder = path.join(context.basePath, 'databases', database.name);
+              const dbFolder = path.join(context.basePath, 'databases', sanitize(database.name));
               fs.ensureDirSync(dbFolder);
 
               // Dump custom script to file
-              const scriptFile = path.join(dbFolder, `${name}.js`);
+              const scriptName = sanitize(name);
+              const scriptFile = path.join(dbFolder, `${scriptName}.js`);
               log.info(`Writing ${scriptFile}`);
               fs.writeFileSync(scriptFile, script);
-              scripts[name] = `./databases/${database.name}/${name}.js`;
+              scripts[name] = `./databases/${database.name}/${scriptName}.js`;
               return scripts;
             }, {})
           })

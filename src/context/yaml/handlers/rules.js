@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 
+import { sanitize } from '../../../utils';
 import log from '../../../logger';
 
 async function parse(context) {
@@ -28,10 +29,11 @@ async function dump(context) {
 
     rules = rules.map((rule) => {
       // Dump rule to file
-      const scriptFile = path.join(rulesFolder, `${rule.name}.js`);
+      const scriptName = sanitize(`${rule.name}.js`);
+      const scriptFile = path.join(rulesFolder, scriptName);
       log.info(`Writing ${scriptFile}`);
       fs.writeFileSync(scriptFile, rule.script);
-      return { ...rule, script: `./rules/${rule.name}.js` };
+      return { ...rule, script: `./rules/${scriptName}` };
     });
   }
 

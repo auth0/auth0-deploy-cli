@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { constants } from 'auth0-source-control-extension-tools';
 
-import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
+import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
 import log from '../../../logger';
 
 function parse(context) {
@@ -29,7 +29,7 @@ async function dump(context) {
   fs.ensureDirSync(ruleConfigsFolder);
 
   rulesConfigs.forEach((rulesConfig) => {
-    const ruleConfigFile = path.join(ruleConfigsFolder, `${rulesConfig.key}.json`);
+    const ruleConfigFile = path.join(ruleConfigsFolder, sanitize(`${rulesConfig.key}.json`));
     log.info(`Writing ${ruleConfigFile}`);
     fs.writeFileSync(ruleConfigFile, JSON.stringify({
       value: '******',
