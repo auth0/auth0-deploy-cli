@@ -33,9 +33,10 @@ function deleteKeys(obj, keys) {
 
 export default function cleanAssets(assets, ignoredProps) {
   const cleaned = { ...assets };
-
   if (typeof ignoredProps === 'object') {
-    Object.entries(ignoredProps).forEach(([ name, fields ]) => readOnly[name].concat[fields]);
+    Object.entries(ignoredProps).forEach(([ name, fields ]) => {
+      readOnly[name] = (readOnly[name] || []).concat(fields);
+    });
   }
 
   Object.entries(readOnly).forEach(([ name, fields ]) => {

@@ -112,4 +112,56 @@ describe('#YAML context validation', () => {
       }
     });
   });
+
+  it('should dump tenant.yaml with IGNORED_PROPERTIES', async () => {
+    const dir = path.resolve(testDataDir, 'yaml', 'dump');
+    cleanThenMkdir(dir);
+    const tenantFile = path.join(dir, 'tenant.yml');
+    const config = {
+      AUTH0_INPUT_FILE: tenantFile,
+      IGNORED_PROPERTIES: {
+        clients: [ 'client_id' ],
+        tenant: [ 'friendly_name' ]
+      }
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.dump();
+    const yaml = jsYaml.safeLoad(fs.readFileSync(tenantFile));
+    expect(yaml).to.deep.equal({
+      clientGrants: [],
+      clients: [
+        {
+          custom_login_page: '<html>page</html>',
+          custom_login_page_on: true,
+          name: 'Global Client'
+        }
+      ],
+      connections: [],
+      databases: [],
+      emailProvider: {},
+      emailTemplates: [
+        { body: './emailTemplates/verify_email.html', enabled: true, template: 'verify_email' },
+        { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
+        { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' },
+        { body: './emailTemplates/blocked_account.html', enabled: true, template: 'blocked_account' },
+        { body: './emailTemplates/stolen_credentials.html', enabled: true, template: 'stolen_credentials' },
+        { body: './emailTemplates/enrollment_email.html', enabled: true, template: 'enrollment_email' },
+        { body: './emailTemplates/mfa_oob_code.html', enabled: true, template: 'mfa_oob_code' },
+        { body: './emailTemplates/change_password.html', enabled: true, template: 'change_password' },
+        { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' }
+      ],
+      pages: [
+        { enabled: true, html: './pages/login.html', name: 'login' }
+      ],
+      guardianFactors: [],
+      guardianFactorProviders: [],
+      guardianFactorTemplates: [],
+      resourceServers: [],
+      rules: [],
+      rulesConfigs: [],
+      tenant: {
+        default_directory: 'users'
+      }
+    });
+  });
 });
