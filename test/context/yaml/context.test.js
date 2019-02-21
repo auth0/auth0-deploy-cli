@@ -23,6 +23,9 @@ describe('#YAML context validation', () => {
     expect(context.assets.pages).to.deep.equal(undefined);
     expect(context.assets.clients).to.deep.equal(undefined);
     expect(context.assets.resourceServers).to.deep.equal(undefined);
+    expect(context.assets.clientGrants).to.deep.equal(undefined);
+    expect(context.assets.connections).to.deep.equal(undefined);
+    expect(context.assets.rulesConfigs).to.deep.equal(undefined);
   });
 
   it('should error invalid schema', async () => {
