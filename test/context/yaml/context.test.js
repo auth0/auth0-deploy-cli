@@ -18,11 +18,11 @@ describe('#YAML context validation', () => {
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
-    expect(context.assets.rules).to.deep.equal([]);
-    expect(context.assets.databases).to.deep.equal([]);
-    expect(context.assets.pages).to.deep.equal([]);
-    expect(context.assets.clients).to.deep.equal([]);
-    expect(context.assets.resourceServers).to.deep.equal([]);
+    expect(context.assets.rules).to.deep.equal(undefined);
+    expect(context.assets.databases).to.deep.equal(undefined);
+    expect(context.assets.pages).to.deep.equal(undefined);
+    expect(context.assets.clients).to.deep.equal(undefined);
+    expect(context.assets.resourceServers).to.deep.equal(undefined);
   });
 
   it('should error invalid schema', async () => {
