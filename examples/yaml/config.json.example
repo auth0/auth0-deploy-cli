@@ -10,5 +10,10 @@
   "AUTH0_EXCLUDED_RULES": [
     "rule-1-name",
     "rule-2-name"
-  ]
+  ],
+  "IGNORED_PROPERTIES": {
+    "clients": [
+      "client_secret"
+    ]
+  }
 }
