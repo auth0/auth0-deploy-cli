@@ -99,7 +99,7 @@ export default class {
     }));
 
     // Clean known read only fields
-    let cleaned = cleanAssets(this.assets);
+    let cleaned = cleanAssets(this.assets, this.config.IGNORED_PROPERTIES);
 
     // Delete exclude as it's not part of the auth0 tenant config
     delete cleaned.exclude;

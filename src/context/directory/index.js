@@ -57,7 +57,7 @@ export default class {
     this.assets = auth0.assets;
 
     // Clean known read only fields
-    this.assets = cleanAssets(this.assets);
+    this.assets = cleanAssets(this.assets, this.config.IGNORED_PROPERTIES);
 
     // Copy clients to be used by handlers which require converting client_id to the name
     // Must copy as the client_id will be stripped if AUTH0_STRIP_IDENTIFIERS is true
