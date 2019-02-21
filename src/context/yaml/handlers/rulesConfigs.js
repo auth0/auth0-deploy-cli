@@ -2,7 +2,7 @@
 async function parse(context) {
   // nothing to do, set default if empty
   return {
-    rulesConfigs: [ ...context.assets.rulesConfigs || [] ]
+    rulesConfigs: context.assets.rulesConfigs
   };
 }
 

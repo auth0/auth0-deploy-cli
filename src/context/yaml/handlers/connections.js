@@ -1,7 +1,7 @@
 async function parse(context) {
   // nothing to do, set default if empty
   return {
-    connections: [ ...context.assets.connections || [] ]
+    connections: context.assets.connections
   };
 }
 

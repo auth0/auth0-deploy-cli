@@ -5,11 +5,11 @@ import log from '../../../logger';
 
 async function parse(context) {
   // Load the script file for each rule
-  const rules = context.assets.rules || [];
+  if (!context.assets.rules) return {};
 
   return {
     rules: [
-      ...rules.map(rule => ({
+      ...context.assets.rules.map(rule => ({
         ...rule,
         script: context.loadFile(rule.script)
       }))

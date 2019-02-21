@@ -6,11 +6,11 @@ import log from '../../../logger';
 async function parse(context) {
   // Load the HTML file for each page
 
-  const pages = context.assets.pages || [];
+  if (!context.assets.pages) return {};
 
   return {
     pages: [
-      ...pages.map(page => ({
+      ...context.assets.pages.map(page => ({
         ...page,
         html: context.loadFile(page.html)
       }))
