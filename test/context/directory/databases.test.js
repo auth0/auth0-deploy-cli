@@ -262,7 +262,7 @@ describe('#directory context databases', () => {
         enabled_clients: [],
         options: {
           customScripts: {
-            change_email: scriptValidate,
+            change_email: scriptValidate
           },
           enabledDatabaseCustomization: true
         },
