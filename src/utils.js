@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
+import sanitizeName from 'sanitize-filename';
 import { loadFile } from 'auth0-source-control-extension-tools';
 
 export function isDirectory(f) {
@@ -82,4 +83,9 @@ export function stripIdentifiers(auth0, assets) {
   });
 
   return updated;
+}
+
+
+export function sanitize(str) {
+  return sanitizeName(str, { replacement: '-' });
 }

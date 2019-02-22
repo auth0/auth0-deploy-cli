@@ -85,4 +85,20 @@ describe('#directory context clients', () => {
     expect(loadJSON(path.join(clientFolder, 'someClient.json'))).to.deep.equal(context.assets.clients[0]);
     expect(loadJSON(path.join(clientFolder, 'someClient2.json'))).to.deep.equal(context.assets.clients[1]);
   });
+
+  it('should dump clients sanitized', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientsDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.clients = [
+      { app_type: 'spa', name: 'someClient-test' },
+      { app_type: 'spa', name: 'someClient2/aa' }
+    ];
+
+    await handler.dump(context);
+    const clientFolder = path.join(dir, constants.CLIENTS_DIRECTORY);
+    expect(loadJSON(path.join(clientFolder, 'someClient-test.json'))).to.deep.equal(context.assets.clients[0]);
+    expect(loadJSON(path.join(clientFolder, 'someClient2-aa.json'))).to.deep.equal(context.assets.clients[1]);
+  });
 });

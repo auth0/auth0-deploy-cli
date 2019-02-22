@@ -89,4 +89,34 @@ describe('#directory context rules', () => {
     });
     expect(fs.readFileSync(path.join(rulesFolder, 'someRule.js'), 'utf8')).to.deep.equal(scriptValidation);
   });
+
+  it('should dump rules sanitized', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'rulesDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    const scriptValidation = 'function someRule() { var hello = "test"; }';
+
+    context.assets.rules = [
+      {
+        enabled: false,
+        name: 'some/Rule',
+        order: 10,
+        script: scriptValidation,
+        stage: 'login_success'
+      }
+    ];
+
+    await handler.dump(context);
+
+    const rulesFolder = path.join(dir, constants.RULES_DIRECTORY);
+
+    expect(loadJSON(path.join(rulesFolder, 'some-Rule.json'))).to.deep.equal({
+      enabled: false,
+      name: 'some/Rule',
+      order: 10,
+      script: './some-Rule.js',
+      stage: 'login_success'
+    });
+    expect(fs.readFileSync(path.join(rulesFolder, 'some-Rule.js'), 'utf8')).to.deep.equal(scriptValidation);
+  });
 });

@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import { constants, loadFile } from 'auth0-source-control-extension-tools';
 
 import log from '../../../logger';
-import { isDirectory, existsMustBeDir, loadJSON, getFiles } from '../../../utils';
+import { isDirectory, existsMustBeDir, loadJSON, getFiles, sanitize } from '../../../utils';
 
 
 function getDatabase(folder, mappings) {
@@ -72,7 +72,7 @@ async function dump(context) {
   fs.ensureDirSync(databasesFolder);
 
   databases.forEach((database) => {
-    const dbFolder = path.join(databasesFolder, database.name);
+    const dbFolder = path.join(databasesFolder, sanitize(database.name));
     fs.ensureDirSync(dbFolder);
 
     const formatted = {
@@ -90,10 +90,11 @@ async function dump(context) {
         ...(database.options.customScripts && {
           customScripts: Object.entries(database.options.customScripts).reduce((scripts, [ name, script ]) => {
             // Dump custom script to file
-            const scriptFile = path.join(dbFolder, `${name}.js`);
+            const scriptName = sanitize(`${name}.js`);
+            const scriptFile = path.join(dbFolder, scriptName);
             log.info(`Writing ${scriptFile}`);
             fs.writeFileSync(scriptFile, script);
-            scripts[name] = `./${name}.js`;
+            scripts[name] = `./${scriptName}`;
             return scripts;
           }, {})
         })

@@ -250,4 +250,40 @@ describe('#directory context databases', () => {
     expect(fs.readFileSync(path.join(scripsFolder, 'login.js'), 'utf8')).to.deep.equal(scriptValidate);
     expect(fs.readFileSync(path.join(scripsFolder, 'verify.js'), 'utf8')).to.deep.equal(scriptValidate);
   });
+
+  it('should dump custom databases sanitized', async () => {
+    cleanThenMkdir(dbDumpDir);
+    const context = new Context({ AUTH0_INPUT_FILE: dbDumpDir }, mockMgmtClient());
+
+    const scriptValidate = 'function login() { var env1 = "env2"; }';
+    context.assets.databases = [
+      {
+        name: 'users/test',
+        enabled_clients: [],
+        options: {
+          customScripts: {
+            change_email: scriptValidate
+          },
+          enabledDatabaseCustomization: true
+        },
+        strategy: 'auth0'
+      }
+    ];
+
+    await handler.dump(context);
+    const scripsFolder = path.join(dbDumpDir, constants.DATABASE_CONNECTIONS_DIRECTORY, 'users-test');
+    expect(loadJSON(path.join(scripsFolder, 'database.json'))).to.deep.equal({
+      name: 'users/test',
+      enabled_clients: [],
+      options: {
+        customScripts: {
+          change_email: './change_email.js'
+        },
+        enabledDatabaseCustomization: true
+      },
+      strategy: 'auth0'
+    });
+
+    expect(fs.readFileSync(path.join(scripsFolder, 'change_email.js'), 'utf8')).to.deep.equal(scriptValidate);
+  });
 });

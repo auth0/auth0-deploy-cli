@@ -3,7 +3,7 @@ import path from 'path';
 import { constants } from 'auth0-source-control-extension-tools';
 
 import log from '../../../logger';
-import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
+import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
 
 function parse(context) {
   const connectionsFolder = path.join(context.filePath, constants.CONNECTIONS_DIRECTORY);
@@ -41,7 +41,7 @@ async function dump(context) {
       ]
     };
 
-    const connectionFile = path.join(connectionsFolder, `${dumpedConnection.name}.json`);
+    const connectionFile = path.join(connectionsFolder, sanitize(`${dumpedConnection.name}.json`));
     log.info(`Writing ${connectionFile}`);
     fs.writeFileSync(connectionFile, JSON.stringify(dumpedConnection, null, 2));
   });

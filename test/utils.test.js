@@ -4,7 +4,16 @@ import { expect } from 'chai';
 import { Auth0 } from 'auth0-source-control-extension-tools';
 
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from './utils';
-import { isFile, isDirectory, getFiles, loadJSON, existsMustBeDir, toConfigFn, stripIdentifiers } from '../src/utils';
+import {
+  isFile,
+  isDirectory,
+  getFiles,
+  loadJSON,
+  existsMustBeDir,
+  toConfigFn,
+  stripIdentifiers,
+  sanitize
+} from '../src/utils';
 
 describe('#utils', function() {
   it('should check if directory exist', () => {
@@ -69,6 +78,10 @@ describe('#utils', function() {
   it('should return config fn', () => {
     const config = toConfigFn({ test: 'data' });
     expect(config('test')).to.equal('data');
+  });
+
+  it('should sanitized str for path/file', () => {
+    expect(sanitize('test/some*/crazy//[path]')).to.equal('test-some--crazy--[path]');
   });
 
   it('should strip identifiers', () => {

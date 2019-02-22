@@ -3,7 +3,7 @@ import path from 'path';
 import { constants } from 'auth0-source-control-extension-tools';
 
 import log from '../../../logger';
-import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
+import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
 
 
 function parse(context) {
@@ -36,14 +36,15 @@ async function dump(context) {
   fs.ensureDirSync(rulesFolder);
   rules.forEach((rule) => {
     // Dump script to file
-    const ruleJS = path.join(rulesFolder, `${rule.name}.js`);
+    const name = sanitize(rule.name);
+    const ruleJS = path.join(rulesFolder, `${name}.js`);
     log.info(`Writing ${ruleJS}`);
     fs.writeFileSync(ruleJS, rule.script);
 
     // Dump template metadata
-    const ruleFile = path.join(rulesFolder, `${rule.name}.json`);
+    const ruleFile = path.join(rulesFolder, `${name}.json`);
     log.info(`Writing ${ruleFile}`);
-    fs.writeFileSync(ruleFile, JSON.stringify({ ...rule, script: `./${rule.name}.js` }, null, 2));
+    fs.writeFileSync(ruleFile, JSON.stringify({ ...rule, script: `./${name}.js` }, null, 2));
   });
 }
 

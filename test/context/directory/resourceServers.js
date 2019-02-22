@@ -84,4 +84,26 @@ describe('#directory context resourceServers', () => {
     const resourceServersFolder = path.join(dir, constants.RESOURCE_SERVERS_DIRECTORY);
     expect(loadJSON(path.join(resourceServersFolder, 'my resource.json'))).to.deep.equal(context.assets.resourceServers[0]);
   });
+
+  it('should dump resource servers sanitized', async () => {
+    const dir = path.join(testDataDir, 'directory', 'resourceServersDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.resourceServers = [
+      {
+        identifier: 'http://myapi.com/api',
+        name: 'my/test/ resource',
+        scopes: [
+          { description: 'update account', name: 'update:account' },
+          { description: 'read account', name: 'read:account' },
+          { description: 'admin access', name: 'admin' }
+        ]
+      }
+    ];
+
+    await handler.dump(context);
+    const resourceServersFolder = path.join(dir, constants.RESOURCE_SERVERS_DIRECTORY);
+    expect(loadJSON(path.join(resourceServersFolder, 'my-test- resource.json'))).to.deep.equal(context.assets.resourceServers[0]);
+  });
 });
