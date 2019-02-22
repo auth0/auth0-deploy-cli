@@ -58,20 +58,20 @@ export default yargs
       describe: 'The JSON configuration file.',
       type: 'string'
     },
-    strip: {
-      alias: 's',
-      describe: 'Strip the identifier field for each object type.',
-      type: 'boolean',
-      default: false
-    },
     secret: {
       alias: 'x',
       describe: 'The client secret, this allows you to encrypt the secret in your build configuration instead of storing it in a config file',
       type: 'string'
+    },
+    export_ids: {
+      alias: 'e',
+      describe: 'Export identifier field for each object type.',
+      type: 'boolean',
+      default: false
     }
   })
-  .example('$0 export -c config.json --strip -f yaml -o path/to/export', 'Dump Auth0 config to folder in YAML format')
-  .example('$0 export -c config.json --strip -f directory -o path/to/export', 'Dump Auth0 config to folder in directory format')
+  .example('$0 export -c config.json -f yaml -o path/to/export', 'Dump Auth0 config to folder in YAML format')
+  .example('$0 export -c config.json -f directory -o path/to/export', 'Dump Auth0 config to folder in directory format')
   .example('$0 import -c config.json -i tenant.yaml', 'Deploy Auth0 via YAML')
   .example('$0 import -c config.json -i path/to/files', 'Deploy Auth0 via Path')
   .epilogue('See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.')

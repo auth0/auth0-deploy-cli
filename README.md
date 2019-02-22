@@ -144,7 +144,7 @@ dump({
   base_path: basePath,                          // Allow to override basepath, if not take from input_file
   config_file: configFile,                      // Option to a config json
   config: configObj,                            // Option to sent in json as object
-  strip,                                        // Strip the identifier field for each object type
+  export_ids: exportIds,                        // Export the identifier field for each object type
   secret                                        // Optionally pass in auth0 client secret seperate from config
 })
   .then(() => console.log('yey export was successful'))
@@ -189,8 +189,8 @@ Options:
   --proxy_url, -p  A url for proxying requests, only set this if you are behind a proxy.  [string]
 
 Examples:
-  a0deploy export -c config.json --strip -f yaml -o path/to/export       Dump Auth0 config to folder in YAML format
-  a0deploy export -c config.json --strip -f directory -o path/to/export  Dump Auth0 config to folder in directory format
+  a0deploy export -c config.json -f yaml -o path/to/export               Dump Auth0 config to folder in YAML format
+  a0deploy export -c config.json -f directory -o path/to/export          Dump Auth0 config to folder in directory format
   a0deploy import -c config.json -i tenant.yaml                          Deploy Auth0 via YAML
   a0deploy import -c config.json -i path/to/files                        Deploy Auth0 via Path
 
