@@ -53,7 +53,8 @@ async function dump(context) {
           ...(database.options.customScripts && {
             customScripts: Object.entries(database.options.customScripts).reduce((scripts, [ name, script ]) => {
               // Create Database folder
-              const dbFolder = path.join(context.basePath, 'databases', sanitize(database.name));
+              const dbName = sanitize(database.name);
+              const dbFolder = path.join(context.basePath, 'databases', sanitize(dbName));
               fs.ensureDirSync(dbFolder);
 
               // Dump custom script to file
@@ -61,7 +62,7 @@ async function dump(context) {
               const scriptFile = path.join(dbFolder, `${scriptName}.js`);
               log.info(`Writing ${scriptFile}`);
               fs.writeFileSync(scriptFile, script);
-              scripts[name] = `./databases/${database.name}/${scriptName}.js`;
+              scripts[name] = `./databases/${dbName}/${scriptName}.js`;
               return scripts;
             }, {})
           })

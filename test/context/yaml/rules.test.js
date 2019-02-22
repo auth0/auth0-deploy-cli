@@ -75,4 +75,37 @@ describe('#YAML context rules', () => {
     const rulesFolder = path.join(dir, 'rules');
     expect(fs.readFileSync(path.join(rulesFolder, 'someRule.js'), 'utf8')).to.deep.equal(scriptValidation);
   });
+
+  it('should dump rules sanitized', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'rulesDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: path.join(dir, 'tennat.yaml') }, mockMgmtClient());
+    const scriptValidation = 'function someRule() { var hello = "test"; }';
+
+    context.assets.rules = [
+      {
+        enabled: false,
+        name: 'someRule / test',
+        order: 10,
+        script: scriptValidation,
+        stage: 'login_success'
+      }
+    ];
+
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({
+      rules: [
+        {
+          enabled: false,
+          name: 'someRule / test',
+          order: 10,
+          script: './rules/someRule - test.js',
+          stage: 'login_success'
+        }
+      ]
+    });
+
+    const rulesFolder = path.join(dir, 'rules');
+    expect(fs.readFileSync(path.join(rulesFolder, 'someRule - test.js'), 'utf8')).to.deep.equal(scriptValidation);
+  });
 });

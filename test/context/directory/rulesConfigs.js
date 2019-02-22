@@ -83,4 +83,18 @@ describe('#directory context rulesConfigs', () => {
     const rulesConfigsFolder = path.join(dir, constants.RULES_CONFIGS_DIRECTORY);
     expect(loadJSON(path.join(rulesConfigsFolder, 'SOME_SECRET.json'))).to.deep.equal(context.assets.rulesConfigs[0]);
   });
+
+  it('should dump rules configs sanitized', async () => {
+    const dir = path.join(testDataDir, 'directory', 'rulesConfigsDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.rulesConfigs = [
+      { key: 'SOME_SECRET/test', value: 'some_key' }
+    ];
+
+    await handler.dump(context);
+    const rulesConfigsFolder = path.join(dir, constants.RULES_CONFIGS_DIRECTORY);
+    expect(loadJSON(path.join(rulesConfigsFolder, 'SOME_SECRET-test.json'))).to.deep.equal(context.assets.rulesConfigs[0]);
+  });
 });

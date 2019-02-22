@@ -44,7 +44,7 @@ async function dump(context) {
     // Dump template metadata
     const ruleFile = path.join(rulesFolder, `${name}.json`);
     log.info(`Writing ${ruleFile}`);
-    fs.writeFileSync(ruleFile, JSON.stringify({ ...rule, script: `./${rule.name}.js` }, null, 2));
+    fs.writeFileSync(ruleFile, JSON.stringify({ ...rule, script: `./${name}.js` }, null, 2));
   });
 }
 

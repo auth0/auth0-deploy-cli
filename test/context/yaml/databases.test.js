@@ -187,4 +187,45 @@ describe('#YAML context databases', () => {
     expect(fs.readFileSync(path.join(scripsFolder, 'login.js'), 'utf8')).to.deep.equal(scriptValidate);
     expect(fs.readFileSync(path.join(scripsFolder, 'verify.js'), 'utf8')).to.deep.equal(scriptValidate);
   });
+
+  it('should dump custom databases sanitized', async () => {
+    cleanThenMkdir(dbDumpDir);
+    const context = new Context({ AUTH0_INPUT_FILE: path.join(dbDumpDir, 'tennat.yaml') }, mockMgmtClient());
+
+    context.assets.databases = [
+      {
+        name: 'users/test',
+        enabled_clients: [],
+        options: {
+          import_mode: true,
+          customScripts: {
+            change_email: scriptValidate
+          },
+          enabledDatabaseCustomization: true
+        },
+        strategy: 'auth0'
+      }
+    ];
+
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({
+      databases: [
+        {
+          name: 'users/test',
+          enabled_clients: [],
+          options: {
+            import_mode: true,
+            customScripts: {
+              change_email: './databases/users-test/change_email.js'
+            },
+            enabledDatabaseCustomization: true
+          },
+          strategy: 'auth0'
+        }
+      ]
+    });
+
+    const scripsFolder = path.join(dbDumpDir, 'databases', 'users-test');
+    expect(fs.readFileSync(path.join(scripsFolder, 'change_email.js'), 'utf8')).to.deep.equal(scriptValidate);
+  });
 });
