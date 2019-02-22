@@ -12,7 +12,6 @@ export default async function deploy(params) {
     base_path: basePath,
     config_file: configFile,
     config: configObj,
-    export_ids: exportIds,
     secret
   } = params;
 
@@ -26,7 +25,6 @@ export default async function deploy(params) {
     AUTH0_INPUT_FILE: outputFolder,
     AUTH0_BASE_PATH: basePath,
     AUTH0_CONFIG_FILE: configFile,
-    AUTH0_EXPORT_IDENTIFIERS: exportIds,
     ...configObj || {}
   };
 
