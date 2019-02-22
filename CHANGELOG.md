@@ -6,7 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.3.0] - 2019-02-21
 ### Changed
-- Empty arrays in the `tenant.yaml` (`clients: []`) will now lead to deleting all relevant records form the tenant.
+- Empty arrays in the `tenant.yaml` (`clients: []`) will now lead to deleting all relevant records from the tenant. #89
+- Update environment variable explanation in READMEs. #90
+- Sanitize file and folder names. #92
+
+## [2.2.5] - 2018-02-04
+### Changed
+- Fix for using the wrong proxy reference. #80
+
+## [2.2.4] - 2018-01-17
+### Changed
+- Fix various schema validation issues. auth0-extensions/auth0-source-control-extension-tools PRs #52 thru #57
+
+### Added
+- Added 'name' prop to pages examples #76
 
 ## [2.2.0] - 2018-11-28
 ### Changed
