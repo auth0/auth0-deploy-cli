@@ -10,14 +10,16 @@ const tenantTest = {
   'tenant.json': `{
     "friendly_name": "Auth0 ##env##",
     "default_directory": "users",
-    "idle_session_lifetime": 72
+    "session_lifetime": 1.48394893,
+    "idle_session_lifetime": 123.4
   }`
 };
 
 const tenantTarget = {
   friendly_name: 'Auth0 test',
   default_directory: 'users',
-  idle_session_lifetime: 72
+  session_lifetime_in_minutes: 89,
+  idle_session_lifetime_in_minutes: 7404
 };
 
 describe('#directory context tenant', () => {
@@ -44,6 +46,8 @@ describe('#directory context tenant', () => {
     };
 
     await handler.dump(context);
-    expect(loadJSON(path.join(dir, 'tenant.json'))).to.deep.equal(context.assets.tenant);
+    const dumped = loadJSON(path.join(dir, 'tenant.json'));
+
+    expect(dumped).to.deep.equal(context.assets.tenant);
   });
 });

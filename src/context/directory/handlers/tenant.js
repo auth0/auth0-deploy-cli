@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 
 import log from '../../../logger';
-import { existsMustBeDir, isFile, loadJSON } from '../../../utils';
+import { existsMustBeDir, isFile, loadJSON, hoursAsInteger } from '../../../utils';
 
 function parse(context) {
   const baseFolder = path.join(context.filePath);
@@ -11,9 +11,21 @@ function parse(context) {
   const tenantFile = path.join(baseFolder, 'tenant.json');
 
   if (isFile(tenantFile)) {
+    /* eslint-disable camelcase */
+    const {
+      session_lifetime,
+      idle_session_lifetime,
+      ...tenant
+    } = loadJSON(tenantFile, context.mappings);
+
     return {
-      tenant: loadJSON(tenantFile, context.mappings)
+      tenant: Object.assign(
+        tenant,
+        session_lifetime && hoursAsInteger('session_lifetime', session_lifetime),
+        idle_session_lifetime && hoursAsInteger('idle_session_lifetime', idle_session_lifetime)
+      )
     };
+    /* eslint-enable camelcase */
   }
 
   return {};
