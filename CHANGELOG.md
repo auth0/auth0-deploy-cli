@@ -12,14 +12,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - `--strip` option has been removed from `export` command. Now IDs will be stripped by default, but you can use `AUTH0_EXPORT_IDENTIFIERS: true` to prevent.
 
-## [2.3.0] - 2019-02-22
+## [2.3.1] - 2019-02-27
+### Changed
+- convert non-integer `session_lifetime` to minutes #95
+- update `auth0-source-control-extension-tools`
+  - Fix email provider export
+  - Process empty arrays of databases
+
+## [2.3.0] - 2019-02-21
 ### Changed
 - Empty arrays in the `tenant.yaml` (`clients: []`) will now lead to deleting all relevant records from the tenant. #89
 - Update environment variable explanation in READMEs. #90
 - Sanitize file and folder names. #92
-
-### Fixed
-- Email provider export issue
 
 ## [2.2.5] - 2019-02-04
 ### Changed

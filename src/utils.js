@@ -89,3 +89,9 @@ export function stripIdentifiers(auth0, assets) {
 export function sanitize(str) {
   return sanitizeName(str, { replacement: '-' });
 }
+
+
+export function hoursAsInteger(property, hours) {
+  if (Number.isInteger(hours)) return { [property]: hours };
+  return { [`${property}_in_minutes`]: Math.round(hours * 60) };
+}

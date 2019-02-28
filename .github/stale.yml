@@ -1,0 +1,2 @@
+# Configuration for https://github.com/auth0/.github/
+_extends: .github
