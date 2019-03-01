@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.2] - Unreleased
+### Changed
+- set `enable_sso` and `sandbox_version` as readonly properties
+- alias `export = dump` and `import = deploy` for programmatic usage
+
 ## [2.3.1] - 2019-02-27
 ### Changed
 - convert non-integer `session_lifetime` to minutes #95
