@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.0.0] - Unreleased
+## [3.0.1] - 2019-03-04
+### Fixed
+- fix readonly `flags.enable_sso`
+
+## [3.0.0] - 2019-03-04
 ### Added
 - `INCLUDED_PROPS` option has been added to the config. It allows user to export properties which are excluded by default (like `client_secret`).
 - `EXCLUDED_PROPS` option has been added to the config. It allows user to exclude any unwanted properties from exported objects.
@@ -12,7 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - `--strip` option has been removed from `export` command. Now IDs will be stripped by default, but you can use `AUTH0_EXPORT_IDENTIFIERS: true` to prevent.
 
-## [2.3.2] - Unreleased
+## [2.3.3] - 2019-03-04
+### Fixed
+- backport readonly `flags.enable_sso`
+
+## [2.3.2] - 2019-03-02
 ### Changed
 - set `enable_sso` and `sandbox_version` as readonly properties
 - alias `export = dump` and `import = deploy` for programmatic usage
