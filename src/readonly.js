@@ -10,10 +10,10 @@ const readOnly = {
     'realms'
   ],
   tenant: [
-    'enable_sso',
     'sandbox_version',
     'sandbox_versions_available',
     'flags.allow_changing_enable_sso',
+    'flags.enable_sso',
     'flags.disable_impersonation'
   ],
   clients: [
