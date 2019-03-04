@@ -132,8 +132,9 @@ import { deploy, dump } from 'auth0-deploy-cli';
 
 const config = {
   AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
-  AUTH0_CLIENT_SECRET: process.env.AUTH0_CLIENT_ID,
-  AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_SECRET,
+  AUTH0_CLIENT_SECRET: process.env.AUTH0_CLIENT_SECRET,
+  AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
+  AUTH0_EXPORT_IDENTIFIERS: false,
   AUTH0_ALLOW_DELETE: false
 };
 
@@ -144,6 +145,7 @@ dump({
   base_path: basePath,                          // Allow to override basepath, if not take from input_file
   config_file: configFile,                      // Option to a config json
   config: configObj,                            // Option to sent in json as object
+  export_ids: exportIds,                        // Export the identifier field for each object type
   secret                                        // Optionally pass in auth0 client secret seperate from config
 })
   .then(() => console.log('yey export was successful'))

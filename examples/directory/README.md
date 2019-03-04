@@ -64,7 +64,7 @@ You can export your current tenant configuration. For example the following comm
 
 `a0deploy export -c config.json -f directory -o path/to/export`
 
-> NOTE: The config value `AUTH0_EXPORT_IDENTIFIERS: true` can be used to export the identifier fields to the Auth0 objects. This means you won't be able to import these objects as the tool cannot find the existing objects by their id.
+> NOTE: The config value `AUTH0_EXPORT_IDENTIFIERS: true` (or `--export_ids` option) can be used to export the identifier fields to the Auth0 objects. This means you won't be able to import these objects as the tool cannot find the existing objects by their id.
 
 > NOTE: Some of the settings cannot be exported for example emailProvider credentials, rulesConfigs values and others. After export you may need to update the `tenant.yaml` values if you experience schema errors on import.
 
