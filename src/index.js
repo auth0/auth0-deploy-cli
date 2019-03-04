@@ -77,9 +77,9 @@ if (require.main === module) {
 
 
 // Export commands to be used programmatically
-export const deploy = commands.import;
-export const dump = commands.export;
-export default {
+module.exports = {
   deploy: commands.import,
-  dump: commands.export
+  dump: commands.export,
+  import: commands.import,
+  export: commands.export
 };
