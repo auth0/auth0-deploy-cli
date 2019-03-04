@@ -99,13 +99,13 @@ export default class {
     }));
 
     // Clean known read only fields
-    let cleaned = cleanAssets(this.assets);
+    let cleaned = cleanAssets(this.assets, this.config);
 
     // Delete exclude as it's not part of the auth0 tenant config
     delete cleaned.exclude;
 
     // Optionally Strip identifiers
-    if (this.config.AUTH0_STRIP_IDENTIFIERS) {
+    if (!this.config.AUTH0_EXPORT_IDENTIFIERS) {
       cleaned = stripIdentifiers(auth0, cleaned);
     }
 

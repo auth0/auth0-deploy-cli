@@ -10,9 +10,9 @@ For more information on YAML please refer to [http://yaml.org/](http://yaml.org/
 ## Example Export
 You can export your current tenant configuration. For example the following command will export your tenant configuration.
 
-`a0deploy export -c config.json --strip -f yaml -o path/to/export`
+`a0deploy export -c config.json -f yaml -o path/to/export`
 
-> NOTE: The option --strip is used to remove the identifier fields from the Auth0 objects. This means when importing into another Auth0 Tenant new id's are generated otherwise the import will fail as the tool cannot find the existing objects by their id.
+> NOTE: The config value `AUTH0_EXPORT_IDENTIFIERS: true` (or `--export_ids` option) can be used to export the identifier fields to the Auth0 objects. This means you won't be able to import these objects as the tool cannot find the existing objects by their id.
 
 > NOTE: Some of the settings cannot be exported for example emailProvider credentials, rulesConfigs values and others. After export you may need to update the `tenant.yaml` values if you experience schema errors on import.
 
@@ -50,6 +50,12 @@ Here is the example of a config.json:
       "https://somedomain.com"
     ],
     "YOUR_STRING_KEY": "some environment specific string"
+  },
+  "INCLUDED_PROPS": {
+    "clients": [ "client_secret" ]
+  },
+  "EXCLUDED_PROPS": {
+    "connections": [ "options.client_secret" ]
   }
 }
 ```
@@ -59,7 +65,7 @@ The `auth0-deploy-cli` supports environment variables replacements, also known a
 
 Environment variables can be set on the terminal and within the `config.json`. At run time the variables defined in your terminal and `config.json` will be merged. You can disable this via the command line with the `--no-env` option. The terminal variables will take priority over `config.json`
 
-There are two ways to use the keyword mappings in your Auth0 Tenant configuration files. You can inject values using `@@key@@` or `##key##`. 
+There are two ways to use the keyword mappings in your Auth0 Tenant configuration files. You can inject values using `@@key@@` or `##key##`.
 
 If you use the `@` symbols, it will do a JSON.stringify on your value before replacing it. So if it is a string it will add quotes, if it is an array or object it will add braces.
 

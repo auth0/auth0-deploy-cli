@@ -13,7 +13,7 @@ Supported Features
   - Clients / Applications
   - Resource Servers (APIs)
   - Pages
-  - Email Templates and Provider 
+  - Email Templates and Provider
   - Guardian Settings
 - Configuration options
   - Defined Directory Structure
@@ -132,8 +132,9 @@ import { deploy, dump } from 'auth0-deploy-cli';
 
 const config = {
   AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
-  AUTH0_CLIENT_SECRET: process.env.AUTH0_CLIENT_ID,
-  AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_SECRET,
+  AUTH0_CLIENT_SECRET: process.env.AUTH0_CLIENT_SECRET,
+  AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
+  AUTH0_EXPORT_IDENTIFIERS: false,
   AUTH0_ALLOW_DELETE: false
 };
 
@@ -144,7 +145,7 @@ dump({
   base_path: basePath,                          // Allow to override basepath, if not take from input_file
   config_file: configFile,                      // Option to a config json
   config: configObj,                            // Option to sent in json as object
-  strip,                                        // Strip the identifier field for each object type
+  export_ids: exportIds,                        // Export the identifier field for each object type
   secret                                        // Optionally pass in auth0 client secret seperate from config
 })
   .then(() => console.log('yey export was successful'))
@@ -189,8 +190,8 @@ Options:
   --proxy_url, -p  A url for proxying requests, only set this if you are behind a proxy.  [string]
 
 Examples:
-  a0deploy export -c config.json --strip -f yaml -o path/to/export       Dump Auth0 config to folder in YAML format
-  a0deploy export -c config.json --strip -f directory -o path/to/export  Dump Auth0 config to folder in directory format
+  a0deploy export -c config.json -f yaml -o path/to/export               Dump Auth0 config to folder in YAML format
+  a0deploy export -c config.json -f directory -o path/to/export          Dump Auth0 config to folder in directory format
   a0deploy import -c config.json -i tenant.yaml                          Deploy Auth0 via YAML
   a0deploy import -c config.json -i path/to/files                        Deploy Auth0 via Path
 
@@ -221,7 +222,7 @@ The deploy task should follow these steps:
  1.  Update the local repo to the latest. (each environment should have its own copy of the repo set to its own branch)
  1.  If there are changes, call a0deploy
  1.  Run a suite of tests to confirm configuration is working
- 1.  Optional:  merge to next branch
+ 1.  Optional: merge to next branch
 
 ### Use keyword mappings to handle differences between the environments
 You should not have to store differences between environments in the Deploy Configuration Repository.  Use the keyword mappings to allow the repository to be environment agnostic, and instead store the differences in the separate config.json files for each environment that are stored on the CI server.

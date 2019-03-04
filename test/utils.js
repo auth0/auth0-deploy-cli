@@ -38,7 +38,7 @@ export function mockMgmtClient() {
     clients: {
       getAll: () => [
         {
-          name: 'Global Client', client_id: 'FMfcgxvzLDvPsgpRFKkLVrnKqGgkHhQV', custom_login_page_on: true, custom_login_page: '<html>page</html>'
+          name: 'Global Client', client_id: 'FMfcgxvzLDvPsgpRFKkLVrnKqGgkHhQV', client_secret: 'dummy_client_secret', custom_login_page_on: true, custom_login_page: '<html>page</html>'
         }
       ]
     },

@@ -12,7 +12,7 @@ export default async function deploy(params) {
     base_path: basePath,
     config_file: configFile,
     config: configObj,
-    strip,
+    export_ids: exportIds,
     secret
   } = params;
 
@@ -26,7 +26,6 @@ export default async function deploy(params) {
     AUTH0_INPUT_FILE: outputFolder,
     AUTH0_BASE_PATH: basePath,
     AUTH0_CONFIG_FILE: configFile,
-    AUTH0_STRIP_IDENTIFIERS: strip,
     ...configObj || {}
   };
 
@@ -34,6 +33,11 @@ export default async function deploy(params) {
   // Allow passed in secret to override the configured one
   if (secret) {
     overrides.AUTH0_CLIENT_SECRET = secret;
+  }
+
+  // Allow passed in export_ids to override the configured one
+  if (exportIds) {
+    overrides.AUTH0_EXPORT_IDENTIFIERS = exportIds;
   }
 
   // Check output folder
