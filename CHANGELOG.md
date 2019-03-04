@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - `--strip` option has been removed from `export` command. Now IDs will be stripped by default, but you can use `AUTH0_EXPORT_IDENTIFIERS: true` to prevent.
 
+## [2.3.2] - Unreleased
+### Changed
+- set `enable_sso` and `sandbox_version` as readonly properties
+- alias `export = dump` and `import = deploy` for programmatic usage
+
 ## [2.3.1] - 2019-02-27
 ### Changed
 - convert non-integer `session_lifetime` to minutes #95
