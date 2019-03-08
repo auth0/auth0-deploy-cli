@@ -124,9 +124,9 @@ Environment variables can be set on the terminal and within the `config.json`. A
 
 There are two ways to use the keyword mappings in your Auth0 Tenant configuration files. You can inject values using `@@key@@` or `##key##`.
 
-If you use the `@` symbols, it will do a JSON.stringify on your value before replacing it. So if it is a string it will add quotes, if it is an array or object it will add braces.
+Use the `@` symbols to inject the full, literal value regardless of type (string, number, object, array).
 
-If you use the `#` symbol instead, it will do a literal replacement. It will not add quotes or brackets.
+Use the `#` symbols for string interpolation.
 
 For example, you could specify a different JWT timeout in your dev environment then prod for testing and a different environment URL:
 
