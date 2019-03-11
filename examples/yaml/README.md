@@ -56,7 +56,10 @@ Here is the example of a config.json:
   },
   "EXCLUDED_PROPS": {
     "connections": [ "options.client_secret" ]
-  }
+  },
+  "AUTH0_EXCLUDED_RULES": [ "auth0-account-link-extension" ],
+  "AUTH0_EXCLUDED_CLIENTS": [ "auth0-account-link" ],
+  "AUTH0_EXCLUDED_RESOURCE_SERVERS": [ "SSO Dashboard API" ]
 }
 ```
 

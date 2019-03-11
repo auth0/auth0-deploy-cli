@@ -104,16 +104,15 @@ Here is the example of a config.json:
     "YOUR_STRING_KEY": "some environment specific string"
   },
   "AUTH0_ALLOW_DELETE": false,
-  "AUTH0_EXCLUDED_RULES": [
-    "rule-1-name",
-    "rule-2-name"
-  ],
   "INCLUDED_PROPS": {
     "clients": [ "client_secret" ]
   },
   "EXCLUDED_PROPS": {
     "connections": [ "options.client_secret" ]
-  }
+  },
+  "AUTH0_EXCLUDED_RULES": [ "auth0-account-link-extension" ],
+  "AUTH0_EXCLUDED_CLIENTS": [ "auth0-account-link" ],
+  "AUTH0_EXCLUDED_RESOURCE_SERVERS": [ "SSO Dashboard API" ]
 }
 ```
 
