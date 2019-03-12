@@ -46,4 +46,18 @@ describe('#YAML context tenant settings', () => {
     const dumped = await handler.dump(context);
     expect(dumped).to.deep.equal({ tenant });
   });
+
+  it('should dump tenant without flags', async () => {
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+    const tenant = {
+      friendly_name: 'Test'
+    };
+    context.assets.tenant = {
+      friendly_name: 'Test',
+      flags: {}
+    };
+
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({ tenant });
+  });
 });
