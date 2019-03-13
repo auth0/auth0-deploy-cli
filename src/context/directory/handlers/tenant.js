@@ -37,6 +37,11 @@ async function dump(context) {
 
   if (!tenant) return; // Skip, nothing to dump
 
+  // remove empty 'flags'
+  if (tenant.flags && !Object.keys(tenant.flags).length) {
+    delete tenant.flags;
+  }
+
   const tenantFile = path.join(context.filePath, 'tenant.json');
   log.info(`Writing ${tenantFile}`);
   fs.writeFileSync(tenantFile, JSON.stringify(tenant, null, 2));
