@@ -22,10 +22,14 @@ async function parse(context) {
 }
 
 async function dump(context) {
-  // nothing to do, set default if empty
-  return {
-    tenant: { ...context.assets.tenant || {} }
-  };
+  const tenant = { ...context.assets.tenant || {} };
+
+  // remove empty 'flags'
+  if (tenant.flags && !Object.keys(tenant.flags).length) {
+    delete tenant.flags;
+  }
+
+  return { tenant };
 }
 
 

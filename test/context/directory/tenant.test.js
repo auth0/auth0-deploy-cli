@@ -50,4 +50,22 @@ describe('#directory context tenant', () => {
 
     expect(dumped).to.deep.equal(context.assets.tenant);
   });
+
+  it('should dump tenant without flags', async () => {
+    const dir = path.join(testDataDir, 'directory', 'tenantDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    const tenant = {
+      friendly_name: 'Test'
+    };
+    context.assets.tenant = {
+      friendly_name: 'Test',
+      flags: {}
+    };
+
+    await handler.dump(context);
+    const dumped = loadJSON(path.join(dir, 'tenant.json'));
+
+    expect(dumped).to.deep.equal(tenant);
+  });
 });
