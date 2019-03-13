@@ -4,17 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.2] - 2019-03-12
+### Fixed
+- Remove empty `flags` property from tenant settings #104
+
 ## [3.0.1] - 2019-03-04
 ### Fixed
 - fix readonly `flags.enable_sso`
 
 ## [3.0.0] - 2019-03-04
 ### Added
-- `INCLUDED_PROPS` option has been added to the config. It allows user to export properties which are excluded by default (like `client_secret`).
-- `EXCLUDED_PROPS` option has been added to the config. It allows user to exclude any unwanted properties from exported objects.
+Options added to the config:
+- `INCLUDED_PROPS` - enables export of properties that are excluded by default (e.g. `client_secret`)
+- `EXCLUDED_PROPS` - provides ability to exclude any unwanted properties from exported objects
 
 ### Changed
-- `--strip` option has been removed from `export` command. Now IDs will be stripped by default, but you can use `AUTH0_EXPORT_IDENTIFIERS: true` to prevent.
+- `--strip` option has been removed from `export` command. Now **IDs will be stripped by default**. `AUTH0_EXPORT_IDENTIFIERS: true` or `--export_ids` can be used to override.
 
 ## [2.3.3] - 2019-03-04
 ### Fixed
