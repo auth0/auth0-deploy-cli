@@ -19,6 +19,7 @@ export default class {
     this.assets = {
       exclude: {
         rules: config.AUTH0_EXCLUDED_RULES || [],
+        clients: config.AUTH0_EXCLUDED_CLIENTS || [],
         resourceServers: config.AUTH0_EXCLUDED_RESOURCE_SERVERS || []
       }
     };
