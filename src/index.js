@@ -68,7 +68,7 @@ if (require.main === module) {
         log.debug(error.stack);
       }
 
-      if (msg.includes('Payload validation error')) {
+      if (typeof msg === 'string' && msg.includes('Payload validation error')) {
         log.info('Please see https://github.com/auth0/auth0-deploy-cli#troubleshooting for common issues');
       }
       process.exit(1);
