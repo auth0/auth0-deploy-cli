@@ -121,3 +121,23 @@ export function formatResults(item) {
 
   return result;
 }
+
+
+export function recordsSorter(a, b) {
+  const importantFields = [
+    'name',
+    'key',
+    'client_id',
+    'template'
+  ];
+
+  for (let i = 0; i < importantFields.length; i += 1) {
+    const key = importantFields[i];
+
+    if (a[key] && b[key]) {
+      return a[key] > b[key] ? 1 : -1;
+    }
+  }
+
+  return 0;
+}
