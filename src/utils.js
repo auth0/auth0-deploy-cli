@@ -95,3 +95,29 @@ export function hoursAsInteger(property, hours) {
   if (Number.isInteger(hours)) return { [property]: hours };
   return { [`${property}_in_minutes`]: Math.round(hours * 60) };
 }
+
+
+export function formatResults(item) {
+  const importantFields = {
+    name: null,
+    client_id: null,
+    audience: null,
+    template: null,
+    identifier: null,
+    strategy: null,
+    script: null,
+    stage: null,
+    id: null
+  };
+  const result = { ...importantFields };
+
+  Object.entries(item).sort().forEach(([ key, value ]) => {
+    result[key] = value;
+  });
+
+  Object.keys(importantFields).forEach((key) => {
+    if (result[key] === null) delete result[key];
+  });
+
+  return result;
+}
