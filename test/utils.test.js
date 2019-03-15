@@ -13,7 +13,9 @@ import {
   toConfigFn,
   stripIdentifiers,
   sanitize,
-  hoursAsInteger
+  hoursAsInteger,
+  formatResults,
+  recordsSorter
 } from '../src/utils';
 
 describe('#utils', function() {
@@ -116,5 +118,51 @@ describe('#utils', function() {
     expect(hoursAsInteger('test', 1.23)).to.deep.equal({
       test_in_minutes: 74
     });
+  });
+
+  it('should format object', () => {
+    const result = formatResults({
+      b: 'Bravo',
+      id: 'Id',
+      d: 'Delta',
+      identifier: 'Identifier',
+      c: 'Charlie',
+      name: 'Name',
+      a: 'Alpha'
+    });
+    expect(Object.keys(result)).to.deep.equal([ 'name', 'identifier', 'id', 'a', 'b', 'c', 'd' ]);
+    expect(result).to.deep.equal({
+      name: 'Name',
+      identifier: 'Identifier',
+      id: 'Id',
+      a: 'Alpha',
+      b: 'Bravo',
+      c: 'Charlie',
+      d: 'Delta'
+    });
+  });
+
+  it('should sort records by name or template', () => {
+    const name = [
+      { name: 'b', id: 0 },
+      { name: 'a', id: 1 },
+      { name: 'c', id: 2 }
+    ];
+    const template = [
+      { template: 'b', id: 0 },
+      { template: 'a', id: 1 },
+      { template: 'c', id: 2 }
+    ];
+
+    expect(name.sort(recordsSorter)).to.deep.equal([
+      { name: 'a', id: 1 },
+      { name: 'b', id: 0 },
+      { name: 'c', id: 2 }
+    ]);
+    expect(template.sort(recordsSorter)).to.deep.equal([
+      { template: 'a', id: 1 },
+      { template: 'b', id: 0 },
+      { template: 'c', id: 2 }
+    ]);
   });
 });
