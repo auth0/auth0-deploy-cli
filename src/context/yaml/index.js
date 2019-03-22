@@ -4,7 +4,7 @@ import path from 'path';
 import { loadFile, keywordReplace, Auth0 } from 'auth0-source-control-extension-tools';
 
 import log from '../../logger';
-import { isFile, toConfigFn, stripIdentifiers } from '../../utils';
+import { isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter } from '../../utils';
 import handlers from './handlers';
 import cleanAssets from '../../readonly';
 
@@ -90,7 +90,7 @@ export default class {
           log.info(`Exporting ${name}`);
           Object.entries(data)
             .forEach(([ k, v ]) => {
-              this.assets[k] = v;
+              this.assets[k] = Array.isArray(v) ? v.map(formatResults).sort(recordsSorter) : formatResults(v);
             });
         }
       } catch (err) {
