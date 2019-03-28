@@ -11,7 +11,8 @@ const tenantTest = {
     "friendly_name": "Auth0 ##env##",
     "default_directory": "users",
     "session_lifetime": 1.48394893,
-    "idle_session_lifetime": 123.4
+    "idle_session_lifetime": 123.4,
+    "flags": {}
   }`
 };
 
