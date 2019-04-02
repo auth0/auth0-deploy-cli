@@ -39,10 +39,6 @@ describe('#YAML context rules configs', () => {
     context.assets.rulesConfigs = rulesConfigs;
 
     const dumped = await handler.dump(context);
-    expect(dumped).to.deep.equal({
-      rulesConfigs: [
-        { key: 'SOME_SECRET', value: '*******' }
-      ]
-    });
+    expect(dumped).to.deep.equal({ rulesConfigs: [] });
   });
 });

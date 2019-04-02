@@ -1,9 +1,7 @@
-import fs from 'fs-extra';
 import path from 'path';
 import { constants } from 'auth0-source-control-extension-tools';
 
-import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
-import log from '../../../logger';
+import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
 
 function parse(context) {
   const rulesConfigsFolder = path.join(context.filePath, constants.RULES_CONFIGS_DIRECTORY);
@@ -20,22 +18,9 @@ function parse(context) {
 }
 
 
-async function dump(context) {
-  const { rulesConfigs } = context.assets;
-
-  if (!rulesConfigs) return; // Skip, nothing to dump
-
-  const ruleConfigsFolder = path.join(context.filePath, constants.RULES_CONFIGS_DIRECTORY);
-  fs.ensureDirSync(ruleConfigsFolder);
-
-  rulesConfigs.forEach((rulesConfig) => {
-    const ruleConfigFile = path.join(ruleConfigsFolder, sanitize(`${rulesConfig.key}.json`));
-    log.info(`Writing ${ruleConfigFile}`);
-    fs.writeFileSync(ruleConfigFile, JSON.stringify({
-      value: '******',
-      ...rulesConfig
-    }, null, 2));
-  });
+async function dump() {
+  // do not export rulesConfigs as its values cannot be extracted
+  return null;
 }
 
 

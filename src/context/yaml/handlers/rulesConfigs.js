@@ -6,13 +6,10 @@ async function parse(context) {
   };
 }
 
-async function dump(context) {
-  const rulesConfigs = context.assets.rulesConfigs || [];
+async function dump() {
+  // do not export rulesConfigs as its values cannot be extracted
   return {
-    rulesConfigs: rulesConfigs.map(r => ({
-      ...r,
-      value: '*******'
-    }))
+    rulesConfigs: []
   };
 }
 
