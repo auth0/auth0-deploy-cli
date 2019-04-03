@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 
 import log from '../../../logger';
-import { existsMustBeDir, isFile, loadJSON, hoursAsInteger } from '../../../utils';
+import { existsMustBeDir, isFile, loadJSON, hoursAsInteger, clearTenantFlags } from '../../../utils';
 
 function parse(context) {
   const baseFolder = path.join(context.filePath);
@@ -17,6 +17,8 @@ function parse(context) {
       idle_session_lifetime,
       ...tenant
     } = loadJSON(tenantFile, context.mappings);
+
+    clearTenantFlags(tenant);
 
     return {
       tenant: Object.assign(
@@ -37,10 +39,7 @@ async function dump(context) {
 
   if (!tenant) return; // Skip, nothing to dump
 
-  // remove empty 'flags'
-  if (tenant.flags && !Object.keys(tenant.flags).length) {
-    delete tenant.flags;
-  }
+  clearTenantFlags(tenant);
 
   const tenantFile = path.join(context.filePath, 'tenant.json');
   log.info(`Writing ${tenantFile}`);

@@ -1,4 +1,4 @@
-import { hoursAsInteger } from '../../../utils';
+import { hoursAsInteger, clearTenantFlags } from '../../../utils';
 
 async function parse(context) {
   // Nothing to do
@@ -10,6 +10,8 @@ async function parse(context) {
     idle_session_lifetime,
     ...tenant
   } = context.assets.tenant;
+
+  clearTenantFlags(tenant);
 
   return {
     tenant: Object.assign(
@@ -24,10 +26,7 @@ async function parse(context) {
 async function dump(context) {
   const tenant = { ...context.assets.tenant || {} };
 
-  // remove empty 'flags'
-  if (tenant.flags && !Object.keys(tenant.flags).length) {
-    delete tenant.flags;
-  }
+  clearTenantFlags(tenant);
 
   return { tenant };
 }
