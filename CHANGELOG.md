@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Secrets (`rules configs` and databases `options.configuration`) can no longer be exported
 
+## [3.1.3] - 2019-04-03
+### Added
+- Clearing empty tenant flags on `import`
+
 ## [3.1.2] - 2019-03-22
 ### Added
 - Consistent property sorting for yaml dump #108 #61 #82

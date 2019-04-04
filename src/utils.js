@@ -141,3 +141,10 @@ export function recordsSorter(a, b) {
 
   return 0;
 }
+
+
+export function clearTenantFlags(tenant) {
+  if (tenant.flags && !Object.keys(tenant.flags).length) {
+    delete tenant.flags;
+  }
+}
