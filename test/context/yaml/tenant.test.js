@@ -18,6 +18,7 @@ describe('#YAML context tenant settings', () => {
       default_directory: "users"
       session_lifetime: 1.48394893
       idle_session_lifetime: 123.4
+      flags: {}
     `;
     const yamlFile = path.join(dir, 'config.yaml');
     fs.writeFileSync(yamlFile, yaml);
