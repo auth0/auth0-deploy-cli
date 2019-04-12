@@ -36,7 +36,7 @@ The `auth0-deploy-cli` tool was refactored bringing the following updates.
   - Email Templates
   - Email Provider
   - Client Grants
-  - Rule Configs
+  - Rule Configs (import only)
   - Guardian config
   - Better support for pages
   - Tenant level settings
