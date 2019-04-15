@@ -9,6 +9,9 @@ const readOnly = {
     'provisioning_ticket_url',
     'realms'
   ],
+  databases: [
+    'options.configuration'
+  ],
   tenant: [
     'sandbox_version',
     'sandbox_versions_available',

@@ -6,7 +6,6 @@ import { expect } from 'chai';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/rulesConfigs';
-import { loadJSON } from '../../../src/utils';
 import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
 
 
@@ -70,7 +69,7 @@ describe('#directory context rulesConfigs', () => {
       .and.have.property('message', errorMessage);
   });
 
-  it('should dump rules configs', async () => {
+  it('should not dump rules configs', async () => {
     const dir = path.join(testDataDir, 'directory', 'rulesConfigsDump');
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
@@ -81,20 +80,7 @@ describe('#directory context rulesConfigs', () => {
 
     await handler.dump(context);
     const rulesConfigsFolder = path.join(dir, constants.RULES_CONFIGS_DIRECTORY);
-    expect(loadJSON(path.join(rulesConfigsFolder, 'SOME_SECRET.json'))).to.deep.equal(context.assets.rulesConfigs[0]);
-  });
-
-  it('should dump rules configs sanitized', async () => {
-    const dir = path.join(testDataDir, 'directory', 'rulesConfigsDump');
-    cleanThenMkdir(dir);
-    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
-
-    context.assets.rulesConfigs = [
-      { key: 'SOME_SECRET/test', value: 'some_key' }
-    ];
-
-    await handler.dump(context);
-    const rulesConfigsFolder = path.join(dir, constants.RULES_CONFIGS_DIRECTORY);
-    expect(loadJSON(path.join(rulesConfigsFolder, 'SOME_SECRET-test.json'))).to.deep.equal(context.assets.rulesConfigs[0]);
+    const exists = await fs.pathExists(path.join(rulesConfigsFolder, 'SOME_SECRET.json'));
+    expect(exists).to.equal(false);
   });
 });
