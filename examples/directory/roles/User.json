@@ -1,0 +1,10 @@
+{
+    "name": "User",
+    "description": "App User",
+    "permissions": [
+      {
+        "permission_name": "read:messages",
+        "resource_server_identifier": "https://##ENV##.myapp.com/api/v1"
+      }
+    ]
+  }

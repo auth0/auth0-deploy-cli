@@ -145,3 +145,18 @@ guardianFactorTemplates:
       {{code}} is your verification code for {{tenant.friendly_name}}. Please
       enter this code to verify your enrollment.
     verification_message: '{{code}} is your verification code for {{tenant.friendly_name}}'
+
+roles:
+  - name: Admin
+    description: App Admin
+    permissions:
+      - permission_name: 'update:account'
+        resource_server_identifier: 'https://##ENV##.myapp.com/api/v1'
+      - permission_name: 'read:account'
+        resource_server_identifier: 'https://##ENV##.myapp.com/api/v1'
+  - name: User
+    description: App User
+    permissions:
+      - permission_name: 'read:account'
+        resource_server_identifier: 'https://##ENV##.myapp.com/api/v1'
+

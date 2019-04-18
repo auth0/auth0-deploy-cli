@@ -1,0 +1,14 @@
+{
+  "name": "Admin",
+  "description": "App Admin",
+  "permissions": [
+    {
+      "permission_name": "write:messages",
+      "resource_server_identifier": "https://##ENV##.myapp.com/api/v1"
+    },
+    {
+      "permission_name": "read:messages",
+      "resource_server_identifier": "https://##ENV##.myapp.com/api/v1"
+    }
+  ]
+}
