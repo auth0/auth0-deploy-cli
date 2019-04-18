@@ -50,7 +50,7 @@ describe('#YAML context roles', () => {
     const yamlFile = path.join(dir, 'roles.yaml');
     fs.writeFileSync(yamlFile, yaml);
 
-    const config = { AUTH0_INPUT_FILE: yamlFile};
+    const config = { AUTH0_INPUT_FILE: yamlFile };
     const context = new Context(config, mockMgmtClient());
     await context.load();
     expect(context.assets.roles).to.deep.equal(target);
@@ -76,7 +76,7 @@ describe('#YAML context roles', () => {
             permission_name: 'read:data', resource_server_identifier: 'urn:ref'
           }
         ]
-      }      
+      }
     ];
     context.assets.roles = roles;
 

@@ -13,6 +13,7 @@ import guardianFactors from './guardianFactors';
 import guardianFactorProviders from './guardianFactorProviders';
 import guardianFactorTemplates from './guardianFactorTemplates';
 import roles from './roles';
+
 export default {
   rules,
   rulesConfigs,

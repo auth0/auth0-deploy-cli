@@ -108,6 +108,17 @@ describe('#YAML context validation', () => {
       resourceServers: [],
       rules: [],
       rulesConfigs: [],
+      roles: [
+        {
+          name: 'App Admin',
+          description: 'Admin of app',
+          permissions: [
+            {
+              permission_name: 'create:data', resource_server_identifier: 'urn:ref'
+            }
+          ]
+        }
+      ],
       tenant: {
         default_directory: 'users',
         friendly_name: 'Test'
@@ -159,6 +170,17 @@ describe('#YAML context validation', () => {
       resourceServers: [],
       rules: [],
       rulesConfigs: [],
+      roles: [
+        {
+          name: 'App Admin',
+          description: 'Admin of app',
+          permissions: [
+            {
+              permission_name: 'create:data', resource_server_identifier: 'urn:ref'
+            }
+          ]
+        }
+      ],
       tenant: {
         default_directory: 'users',
         friendly_name: 'Test'
