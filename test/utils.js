@@ -42,6 +42,26 @@ export function mockMgmtClient() {
         }
       ]
     },
+    roles: {
+      getAll: () => [
+        {
+          name: 'App Admin',
+          description: 'Admin of app',
+          permissions: [
+            {
+              permission_name: 'create:data', resource_server_identifier: 'urn:ref'
+            }
+          ]
+        }
+      ],
+      permissions: {
+        get: () => [
+          {
+            permission_name: 'create:data', resource_server_identifier: 'urn:ref'
+          }
+        ]
+      }
+    },
     tenant: {
       getSettings: () => ({
         friendly_name: 'Test',
