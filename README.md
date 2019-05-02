@@ -108,6 +108,7 @@ Use the [Auth0 Deploy CLI Extension](https://github.com/auth0-extensions/auth0-d
   * read:email_templates
   * create:email_templates
   * update:email_templates
+  * read:roles
 
 
 # Usage
