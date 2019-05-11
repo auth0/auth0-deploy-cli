@@ -16,11 +16,26 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-          - npm-dependencies-{{ checksum "package-lock.json" }}
-          # fallback to using the latest cache if no exact match is found
-          - npm-dependencies-
+            - npm-dependencies-{{ checksum "package-lock.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - npm-dependencies-
+
+      - run:
+          name: Install FOSSA
+          command: |
+            curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install.sh | bash
 
       - run: npm install
+
+      - run:
+          name: FOSSA Init
+          command: fossa init
+      - run:
+          name: FOSSA Analyze
+          command: fossa analyze
+      - run:
+          name: FOSSA Test
+          command: fossa test
 
       - save_cache:
           name: Save npm packages to cache
