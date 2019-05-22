@@ -1,3 +1,4 @@
+import { clearClientArrays } from '../../../utils';
 
 async function parse(context) {
   // nothing to do, set default empty
@@ -7,9 +8,9 @@ async function parse(context) {
 }
 
 async function dump(context) {
-  // nothing to do, set default empty
+  const clients = context.assets.clients || [];
   return {
-    clients: [ ...context.assets.clients || [] ]
+    clients: clients.map(clearClientArrays)
   };
 }
 
