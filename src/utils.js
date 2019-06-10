@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import sanitizeName from 'sanitize-filename';
 import { loadFile } from 'auth0-source-control-extension-tools';
+import dotProp from 'dot-prop';
 
 export function isDirectory(f) {
   try {
@@ -146,5 +147,12 @@ export function recordsSorter(a, b) {
 export function clearTenantFlags(tenant) {
   if (tenant.flags && !Object.keys(tenant.flags).length) {
     delete tenant.flags;
+  }
+}
+
+
+export function ensureProp(obj, props, value = '') {
+  if (!dotProp.has(obj, props)) {
+    dotProp.set(obj, props, value);
   }
 }

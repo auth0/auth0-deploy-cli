@@ -1,9 +1,9 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { constants } from 'auth0-source-control-extension-tools';
+import { constants, loadFile } from 'auth0-source-control-extension-tools';
 
 import log from '../../../logger';
-import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
+import { isFile, getFiles, existsMustBeDir, loadJSON, sanitize, ensureProp } from '../../../utils';
 
 function parse(context) {
   const connectionsFolder = path.join(context.filePath, constants.CONNECTIONS_DIRECTORY);
@@ -11,7 +11,21 @@ function parse(context) {
 
   const foundFiles = getFiles(connectionsFolder, [ '.json' ]);
 
-  const connections = foundFiles.map(f => loadJSON(f, context.mappings))
+  const connections = foundFiles
+    .map((f) => {
+      const connection = loadJSON(f, context.mappings);
+
+      if (connection.strategy === 'email') {
+        ensureProp(connection, 'options.email.body');
+        const htmlFileName = path.join(connectionsFolder, connection.options.email.body);
+
+        if (isFile(htmlFileName)) {
+          connection.options.email.body = loadFile(htmlFileName);
+        }
+      }
+
+      return connection;
+    })
     .filter(p => Object.keys(p).length > 0); // Filter out empty connections
 
   return {
@@ -41,7 +55,20 @@ async function dump(context) {
       ]
     };
 
-    const connectionFile = path.join(connectionsFolder, sanitize(`${dumpedConnection.name}.json`));
+    const connectionName = sanitize(dumpedConnection.name);
+
+    if (dumpedConnection.strategy === 'email') {
+      ensureProp(dumpedConnection, 'options.email.body');
+      const html = dumpedConnection.options.email.body;
+      const emailConnectionHtml = path.join(connectionsFolder, `${connectionName}.html`);
+
+      log.info(`Writing ${emailConnectionHtml}`);
+      fs.writeFileSync(emailConnectionHtml, html);
+
+      dumpedConnection.options.email.body = `./${connectionName}.html`;
+    }
+
+    const connectionFile = path.join(connectionsFolder, `${connectionName}.json`);
     log.info(`Writing ${connectionFile}`);
     fs.writeFileSync(connectionFile, JSON.stringify(dumpedConnection, null, 2));
   });
