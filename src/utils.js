@@ -148,3 +148,15 @@ export function clearTenantFlags(tenant) {
     delete tenant.flags;
   }
 }
+
+
+export function clearClientArrays(client) {
+  const propsToClear = [ 'allowed_clients', 'allowed_logout_urls', 'allowed_origins', 'callbacks' ];
+  Object.keys(client).forEach((prop) => {
+    if (propsToClear.indexOf(prop) >= 0 && !client[prop]) {
+      client[prop] = [];
+    }
+  });
+
+  return client;
+}

@@ -15,7 +15,8 @@ import {
   sanitize,
   hoursAsInteger,
   formatResults,
-  recordsSorter
+  recordsSorter,
+  clearClientArrays
 } from '../src/utils';
 
 describe('#utils', function() {
@@ -164,5 +165,41 @@ describe('#utils', function() {
       { template: 'b', id: 0 },
       { template: 'c', id: 2 }
     ]);
+  });
+
+  it('should clear clients arrays', () => {
+    const client = {
+      name: 'Default App',
+      callbacks: null,
+      allowed_clients: null,
+      allowed_logout_urls: null,
+      is_first_party: true,
+      oidc_conformant: false,
+      allowed_origins: null
+    };
+
+    expect(clearClientArrays(client)).to.deep.equal({
+      name: 'Default App',
+      callbacks: [],
+      allowed_clients: [],
+      allowed_logout_urls: [],
+      is_first_party: true,
+      oidc_conformant: false,
+      allowed_origins: []
+    });
+  });
+
+  it('should not touch correct client arrays', () => {
+    const client = {
+      name: 'Default App',
+      callbacks: [ 'callback' ],
+      allowed_clients: [],
+      allowed_logout_urls: [ 'url', 'url' ],
+      is_first_party: true,
+      oidc_conformant: false,
+      allowed_origins: [ 'origin' ]
+    };
+
+    expect(clearClientArrays(client)).to.deep.equal(client);
   });
 });
