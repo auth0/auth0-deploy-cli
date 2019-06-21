@@ -42,7 +42,15 @@ export default async function deploy(params) {
   nconf.overrides(overrides);
 
   // Setup context and load
-  const context = await setupContext(nconf.get());
+  const context = await setupContext(function parseMappings(obj) {
+    if (typeof obj.AUTH0_KEYWORD_REPLACE_MAPPINGS === 'string') {
+      try {
+        obj.AUTH0_KEYWORD_REPLACE_MAPPINGS = JSON.parse(obj.AUTH0_KEYWORD_REPLACE_MAPPINGS);
+      } catch (err) {}
+    }
+    return obj
+  }(nconf.get()));
+
   await context.load();
 
   const config = extTools.config();
