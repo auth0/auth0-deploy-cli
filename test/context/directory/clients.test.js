@@ -15,7 +15,9 @@ describe('#directory context clients', () => {
     const files = {
       [constants.CLIENTS_DIRECTORY]: {
         'someClient.json': '{ "app_type": @@appType@@, "name": "someClient" }',
-        'someClient2.json': '{ "app_type": @@appType@@, "name": "someClient2" }'
+        'someClient2.json': '{ "app_type": @@appType@@, "name": "someClient2" }',
+        'customLoginClient.json': '{ "app_type": @@appType@@, "name": "customLoginClient", "custom_login_page": "./customLoginClient_custom_login_page.html" }',
+        'customLoginClient_custom_login_page.html': 'html code'
       }
     };
 
@@ -27,6 +29,7 @@ describe('#directory context clients', () => {
     await context.load();
 
     const target = [
+      { app_type: 'spa', name: 'customLoginClient', custom_login_page: 'html code' },
       { app_type: 'spa', name: 'someClient' },
       { app_type: 'spa', name: 'someClient2' }
     ];
@@ -77,13 +80,18 @@ describe('#directory context clients', () => {
 
     context.assets.clients = [
       { app_type: 'spa', name: 'someClient' },
-      { app_type: 'spa', name: 'someClient2' }
+      { app_type: 'spa', name: 'someClient2' },
+      { app_type: 'spa', name: 'customLoginClient', custom_login_page: 'html code' }
     ];
+
+    const customLoginClientTarget = { app_type: 'spa', name: 'customLoginClient', custom_login_page: './customLoginClient_custom_login_page.html' };
 
     await handler.dump(context);
     const clientFolder = path.join(dir, constants.CLIENTS_DIRECTORY);
     expect(loadJSON(path.join(clientFolder, 'someClient.json'))).to.deep.equal(context.assets.clients[0]);
     expect(loadJSON(path.join(clientFolder, 'someClient2.json'))).to.deep.equal(context.assets.clients[1]);
+    expect(loadJSON(path.join(clientFolder, 'customLoginClient.json'))).to.deep.equal(customLoginClientTarget);
+    expect(fs.readFileSync(path.join(clientFolder, 'customLoginClient_custom_login_page.html'), 'utf8')).to.equal('html code');
   });
 
   it('should dump clients sanitized', async () => {

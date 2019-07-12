@@ -80,7 +80,7 @@ describe('#YAML context validation', () => {
       clientGrants: [],
       clients: [
         {
-          custom_login_page: '<html>page</html>',
+          custom_login_page: './Global Client_custom_login_page.html',
           custom_login_page_on: true,
           name: 'Global Client'
         }
@@ -142,7 +142,7 @@ describe('#YAML context validation', () => {
       clientGrants: [],
       clients: [
         {
-          custom_login_page: '<html>page</html>',
+          custom_login_page: './Global Client_custom_login_page.html',
           custom_login_page_on: true,
           client_secret: 'dummy_client_secret'
         }
