@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import { constants, loadFile } from 'auth0-source-control-extension-tools';
 
 import log from '../../../logger';
-import { isFile, sanitize } from '../../../utils';
+import { isFile, sanitize, clearClientArrays } from '../../../utils';
 
 async function parse(context) {
   // Load the HTML file for custom_login_page
@@ -50,7 +50,7 @@ async function dump(context) {
         client.custom_login_page = `./${clientName}_custom_login_page.html`;
       }
 
-      return client;
+      return clearClientArrays(client);
     }) ]
   };
 }
