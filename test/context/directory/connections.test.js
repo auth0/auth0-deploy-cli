@@ -15,7 +15,9 @@ describe('#directory context connections', () => {
     const files = {
       [constants.CONNECTIONS_DIRECTORY]: {
         'azuread.json': '{ "name": "myad-waad", "strategy": "waad", "var": @@var@@ }',
-        'facebook.json': '{  "name": "facebook", "strategy": "facebook", "var": @@var@@ }'
+        'facebook.json': '{  "name": "facebook", "strategy": "facebook", "var": @@var@@ }',
+        'email.json': '{  "name": "email", "strategy": "email", "var": @@var@@, "options": { "email": { "body": "./email.html" } } }',
+        'email.html': 'html code'
       }
     };
 
@@ -28,6 +30,12 @@ describe('#directory context connections', () => {
 
     const target = [
       { name: 'myad-waad', strategy: 'waad', var: 'something' },
+      {
+        name: 'email',
+        strategy: 'email',
+        var: 'something',
+        options: { email: { body: 'html code' } }
+      },
       { name: 'facebook', strategy: 'facebook', var: 'something' }
     ];
 
@@ -83,13 +91,28 @@ describe('#directory context connections', () => {
       },
       {
         name: 'facebook', strategy: 'facebook', var: 'something', enabled_clients: []
+      },
+      {
+        name: 'email',
+        strategy: 'email',
+        enabled_clients: [],
+        options: { email: { body: 'html code' } }
       }
     ];
 
+    const emailTarget = {
+      name: 'email',
+      strategy: 'email',
+      enabled_clients: [],
+      options: { email: { body: './email.html' } }
+    };
+
     await handler.dump(context);
-    const clientFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
-    expect(loadJSON(path.join(clientFolder, 'myad-waad.json'))).to.deep.equal(context.assets.connections[0]);
-    expect(loadJSON(path.join(clientFolder, 'facebook.json'))).to.deep.equal(context.assets.connections[1]);
+    const connectionsFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
+    expect(loadJSON(path.join(connectionsFolder, 'myad-waad.json'))).to.deep.equal(context.assets.connections[0]);
+    expect(loadJSON(path.join(connectionsFolder, 'facebook.json'))).to.deep.equal(context.assets.connections[1]);
+    expect(loadJSON(path.join(connectionsFolder, 'email.json'))).to.deep.equal(emailTarget);
+    expect(fs.readFileSync(path.join(connectionsFolder, 'email.html'), 'utf8')).to.deep.equal('html code');
   });
 
   it('should dump connections sanitized', async () => {

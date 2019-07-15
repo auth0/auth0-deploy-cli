@@ -21,11 +21,16 @@ describe('#YAML context connections', () => {
           client_id: "my_client_id"
           client_secret: "my_secret"
           domain: somedomain.com
-          waad_protocol: 'openid-connect'
+          waad_protocol: "openid-connect"
           api_enable_users: true
           basic_profile: true
           ext_profile: true
           ext_groups: true
+      - name: "email"
+        strategy: "email"
+        options:
+          email:
+            body: "./email.html"
     `;
 
     const target = [
@@ -43,12 +48,24 @@ describe('#YAML context connections', () => {
           waad_protocol: 'openid-connect'
         },
         strategy: 'waad'
+      },
+      {
+        name: 'email',
+        options: {
+          email: {
+            body: 'html code'
+          }
+        },
+        strategy: 'email'
       }
     ];
 
 
     const yamlFile = path.join(dir, 'connections.yaml');
+    const connectionsPath = path.join(dir, 'connections');
     fs.writeFileSync(yamlFile, yaml);
+    fs.ensureDirSync(connectionsPath);
+    fs.writeFileSync(path.join(connectionsPath, 'email.html'), 'html code');
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { name: 'test-waad', domain: 'mydomain.com' } };
     const context = new Context(config, mockMgmtClient());
@@ -58,13 +75,35 @@ describe('#YAML context connections', () => {
   });
 
   it('should dump connections', async () => {
-    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+    const dir = path.join(testDataDir, 'yaml', 'connectionsDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: path.join(dir, './test.yml') }, mockMgmtClient());
     const connections = [
-      { name: 'test-waad', strategy: 'waad', enabled_clients: [] }
+      { name: 'test-waad', strategy: 'waad', enabled_clients: [] },
+      {
+        name: 'email',
+        strategy: 'email',
+        enabled_clients: [],
+        options: { email: { body: 'html code' } }
+      }
     ];
+
+    const target = [
+      { name: 'test-waad', strategy: 'waad', enabled_clients: [] },
+      {
+        name: 'email',
+        strategy: 'email',
+        enabled_clients: [],
+        options: { email: { body: './email.html' } }
+      }
+    ];
+
     context.assets.connections = connections;
 
     const dumped = await handler.dump(context);
-    expect(dumped).to.deep.equal({ connections });
+    expect(dumped).to.deep.equal({ connections: target });
+
+    const templatesFolder = path.join(dir, 'connections');
+    expect(fs.readFileSync(path.join(templatesFolder, 'email.html'), 'utf8')).to.deep.equal('html code');
   });
 });
