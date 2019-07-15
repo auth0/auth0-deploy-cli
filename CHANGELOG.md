@@ -4,10 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [3.4.0] - 2019-07-15
 ### Added
-- Possibility to load email template for passwordless email connection from external html file #124
-- Possibility to load custom_login_page template for client from external html file #138
+- Load email template for passwordless email connection from external html file #124
+- Load custom_login_page template for client from external html file #138
+
+## [3.3.2] - 2019-07-11
+### Updated
+- pin minor version of source-control-tools@~3.4.1
 
 ## [3.3.1] - 2019-06-13
 ### Fixed
