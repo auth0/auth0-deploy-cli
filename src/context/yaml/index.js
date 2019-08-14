@@ -16,7 +16,7 @@ export default class {
     this.mgmtClient = mgmtClient;
 
     // Get excluded rules
-    this.assets = config.exclude || {
+    this.assets = {
       exclude: {
         rules: config.AUTH0_EXCLUDED_RULES || [],
         clients: config.AUTH0_EXCLUDED_CLIENTS || [],
