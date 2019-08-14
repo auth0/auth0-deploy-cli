@@ -77,6 +77,7 @@ describe('#YAML context validation', () => {
     await context.dump();
     const yaml = jsYaml.safeLoad(fs.readFileSync(tenantFile));
     expect(yaml).to.deep.equal({
+      branding: {},
       clientGrants: [],
       clients: [
         {
@@ -105,6 +106,7 @@ describe('#YAML context validation', () => {
       guardianFactors: [],
       guardianFactorProviders: [],
       guardianFactorTemplates: [],
+      prompts: {},
       resourceServers: [],
       rules: [],
       rulesConfigs: [],
@@ -139,6 +141,7 @@ describe('#YAML context validation', () => {
     await context.dump();
     const yaml = jsYaml.safeLoad(fs.readFileSync(tenantFile));
     expect(yaml).to.deep.equal({
+      branding: {},
       clientGrants: [],
       clients: [
         {
@@ -167,6 +170,7 @@ describe('#YAML context validation', () => {
       guardianFactors: [],
       guardianFactorProviders: [],
       guardianFactorTemplates: [],
+      prompts: {},
       resourceServers: [],
       rules: [],
       rulesConfigs: [],
