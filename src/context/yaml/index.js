@@ -20,6 +20,8 @@ export default class {
       exclude: {
         rules: config.AUTH0_EXCLUDED_RULES || [],
         clients: config.AUTH0_EXCLUDED_CLIENTS || [],
+        databases: config.AUTH0_EXCLUDED_DATABASES || [],
+        connections: config.AUTH0_EXCLUDED_CONNECTIONS || [],
         resourceServers: config.AUTH0_EXCLUDED_RESOURCE_SERVERS || []
       }
     };
@@ -47,7 +49,7 @@ export default class {
       try {
         const fPath = path.resolve(this.configFile);
         log.debug(`Loading YAML from ${fPath}`);
-        this.assets = yaml.safeLoad(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)) || {};
+        Object.assign(this.assets, yaml.safeLoad(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)) || {});
       } catch (err) {
         log.debug(err.stack);
         throw new Error(`Problem loading ${this.configFile}\n${err}`);

@@ -28,6 +28,32 @@ describe('#YAML context validation', () => {
     expect(context.assets.rulesConfigs).to.deep.equal(undefined);
   });
 
+  it('should load excludes', async () => {
+    /* Create empty directory */
+    const dir = path.resolve(testDataDir, 'yaml', 'empty');
+    cleanThenMkdir(dir);
+    const yaml = path.join(dir, 'empty.yaml');
+    fs.writeFileSync(yaml, '');
+
+    const config = {
+      AUTH0_INPUT_FILE: yaml,
+      AUTH0_EXCLUDED_RULES: [ 'rule' ],
+      AUTH0_EXCLUDED_CLIENTS: [ 'client' ],
+      AUTH0_EXCLUDED_DATABASES: [ 'db' ],
+      AUTH0_EXCLUDED_CONNECTIONS: [ 'conn' ],
+      AUTH0_EXCLUDED_RESOURCE_SERVERS: [ 'api' ]
+    };
+
+    const context = new Context(config, mockMgmtClient());
+    await context.load();
+
+    expect(context.assets.exclude.rules).to.deep.equal([ 'rule' ]);
+    expect(context.assets.exclude.clients).to.deep.equal([ 'client' ]);
+    expect(context.assets.exclude.databases).to.deep.equal([ 'db' ]);
+    expect(context.assets.exclude.connections).to.deep.equal([ 'conn' ]);
+    expect(context.assets.exclude.resourceServers).to.deep.equal([ 'api' ]);
+  });
+
   it('should error invalid schema', async () => {
     const dir = path.resolve(testDataDir, 'yaml', 'invalid');
     cleanThenMkdir(dir);
@@ -77,6 +103,7 @@ describe('#YAML context validation', () => {
     await context.dump();
     const yaml = jsYaml.safeLoad(fs.readFileSync(tenantFile));
     expect(yaml).to.deep.equal({
+      branding: {},
       clientGrants: [],
       clients: [
         {
@@ -105,6 +132,7 @@ describe('#YAML context validation', () => {
       guardianFactors: [],
       guardianFactorProviders: [],
       guardianFactorTemplates: [],
+      prompts: {},
       resourceServers: [],
       rules: [],
       rulesConfigs: [],
@@ -139,6 +167,7 @@ describe('#YAML context validation', () => {
     await context.dump();
     const yaml = jsYaml.safeLoad(fs.readFileSync(tenantFile));
     expect(yaml).to.deep.equal({
+      branding: {},
       clientGrants: [],
       clients: [
         {
@@ -167,6 +196,7 @@ describe('#YAML context validation', () => {
       guardianFactors: [],
       guardianFactorProviders: [],
       guardianFactorTemplates: [],
+      prompts: {},
       resourceServers: [],
       rules: [],
       rulesConfigs: [],
