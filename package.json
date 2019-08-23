@@ -27,7 +27,7 @@
   "homepage": "https://github.com/auth0/auth0-deploy-cli#readme",
   "dependencies": {
     "ajv": "^6.5.2",
-    "auth0": "https://tmp-hooks-client.s3-us-west-1.amazonaws.com/auth0-2.18.0.tgz",
+    "auth0-ext-alpha": "^2.19.0",
     "auth0-extension-tools": "^1.2.1",
     "auth0-source-control-extension-tools": "https://tmp-hooks-client.s3-us-west-1.amazonaws.com/auth0-source-control-extension-tools-3.5.0.tgz",
     "dot-prop": "^4.2.0",
