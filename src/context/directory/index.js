@@ -18,6 +18,8 @@ export default class {
       exclude: {
         rules: config.AUTH0_EXCLUDED_RULES || [],
         clients: config.AUTH0_EXCLUDED_CLIENTS || [],
+        databases: config.AUTH0_EXCLUDED_DATABASES || [],
+        connections: config.AUTH0_EXCLUDED_CONNECTIONS || [],
         resourceServers: config.AUTH0_EXCLUDED_RESOURCE_SERVERS || []
       }
     };
