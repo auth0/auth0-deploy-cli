@@ -22,11 +22,7 @@ export default async function(config) {
   }
 
   if (errors.length > 0) {
-    throw new Error(
-      `The following parameters were missing. Please add them to your config.json or as an environment variable. ${JSON.stringify(
-        errors
-      )}`
-    );
+    throw new Error(`The following parameters were missing. Please add them to your config.json or as an environment variable. ${JSON.stringify(errors)}`);
   }
 
   let accessToken = config.AUTH0_ACCESS_TOKEN;
@@ -64,7 +60,5 @@ export default async function(config) {
     return new YAMLContext(config, mgmtClient);
   }
 
-  throw new Error(
-    `Unable to determine context processor to load for file ${inputFile}, does it exist? `
-  );
+  throw new Error(`Unable to determine context processor to load for file ${inputFile}, does it exist? `);
 }
