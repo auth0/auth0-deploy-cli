@@ -1,9 +1,9 @@
 import path from 'path';
 import fs from 'fs-extra';
+import { constants } from 'auth0-source-control-extension-tools';
 
 import { sanitize } from '../../../utils';
 import log from '../../../logger';
-import { constants } from 'auth0-source-control-extension-tools';
 
 async function parse(context) {
   // Load the script file for each hook
@@ -13,7 +13,7 @@ async function parse(context) {
     hooks: [
       ...context.assets.hooks.map((hook) => {
         if (hook.code) {
-            hook.code = context.loadFile(hook.code, constants.HOOKS_DIRECTORY);
+          hook.code = context.loadFile(hook.code, constants.HOOKS_DIRECTORY);
         }
         return { ...hook };
       })
@@ -31,10 +31,13 @@ async function dump(context) {
     fs.ensureDirSync(hooksFolder);
 
     hooks = hooks.map((hook) => {
-      if (hook.code) {
-        hook.code = context.loadFile(hook.code, constants.HOOKS_DIRECTORY);
-      }
-      return hook;
+      // Dump hook code to file
+      const scriptName = sanitize(`${hook.name}.js`);
+      const scriptFile = path.join(hooksFolder, scriptName);
+      log.info(`Writing ${scriptFile}`);
+      fs.writeFileSync(scriptFile, hook.code);
+
+      return { ...hook, code: `./hooks/${scriptName}` };
     });
   }
 

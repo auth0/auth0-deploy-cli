@@ -1,7 +1,9 @@
+import fs from 'fs-extra';
 import path from 'path';
 import { constants } from 'auth0-source-control-extension-tools';
 
-import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
+import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
+import log from '../../../logger';
 
 
 function parse(context) {
@@ -23,6 +25,29 @@ function parse(context) {
   };
 }
 
+async function dump(context) {
+  const hooks = [ ...context.assets.hooks || [] ];
+
+  if (!hooks) return; // Skip, nothing to dump
+
+  // Create Hooks folder
+  const hooksFolder = path.join(context.filePath, constants.HOOKS_DIRECTORY);
+  fs.ensureDirSync(hooksFolder);
+  hooks.forEach((hook) => {
+    // Dump script to file
+    const name = sanitize(hook.name);
+    const hookCode = path.join(hooksFolder, `${name}.js`);
+    log.info(`Writing ${hookCode}`);
+    fs.writeFileSync(hookCode, hook.code);
+
+    // Dump template metadata
+    const hookFile = path.join(hooksFolder, `${name}.json`);
+    log.info(`Writing ${hookFile}`);
+    fs.writeFileSync(hookFile, JSON.stringify({ ...hook, code: `./${name}.js` }, null, 2));
+  });
+}
+
 export default {
-  parse
+  parse,
+  dump
 };
