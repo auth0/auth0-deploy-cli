@@ -71,7 +71,6 @@
     "supertest": "^2.0.1"
   },
   "bundledDependencies": [
-    "auth0-ext-alpha",
     "auth0-source-control-extension-tools"
   ]
 }
