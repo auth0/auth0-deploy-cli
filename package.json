@@ -27,9 +27,9 @@
   "homepage": "https://github.com/auth0/auth0-deploy-cli#readme",
   "dependencies": {
     "ajv": "^6.5.2",
-    "auth0-ext-alpha": "^2.19.2",
+    "auth0": "auth0-extensions/node-auth0#v3.0.1",
     "auth0-extension-tools": "^1.2.1",
-    "auth0-source-control-extension-tools": "^3.5.3",
+    "auth0-source-control-extension-tools": "zxan1285/auth0-source-control-extension-tools#hooks",
     "dot-prop": "^4.2.0",
     "es6-template-strings": "^2.0.1",
     "fs-extra": "^7.0.0",

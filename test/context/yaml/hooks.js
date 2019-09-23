@@ -30,7 +30,7 @@ describe('#YAML context hooks', () => {
         active: false,
         name: 'someHook',
         dependencies: {},
-        secrets: [],
+        secrets: {},
         code: 'function someHook() { var hello = "test"; }',
         triggerId: 'credentials-exchange'
       }

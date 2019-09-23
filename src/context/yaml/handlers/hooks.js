@@ -32,12 +32,12 @@ async function dump(context) {
 
     hooks = hooks.map((hook) => {
       // Dump hook code to file
-      const scriptName = sanitize(`${hook.name}.js`);
-      const scriptFile = path.join(hooksFolder, scriptName);
-      log.info(`Writing ${scriptFile}`);
-      fs.writeFileSync(scriptFile, hook.code);
+      const codeName = sanitize(`${hook.name}.js`);
+      const codeFile = path.join(hooksFolder, codeName);
+      log.info(`Writing ${codeFile}`);
+      fs.writeFileSync(codeFile, hook.code);
 
-      return { ...hook, code: `./hooks/${scriptName}` };
+      return { ...hook, code: `./hooks/${codeName}` };
     });
   }
 
