@@ -2,13 +2,6 @@ import yargs from 'yargs';
 
 export default yargs
   .usage('Auth0 Deploy CLI')
-  .option('verbose', {
-    alias: 'v',
-    describe: 'Dump extra debug information.',
-    type: 'string',
-    boolean: true,
-    default: false
-  })
   .option('proxy_url', {
     alias: 'p',
     describe: 'A url for proxying requests, only set this if you are behind a proxy.',
