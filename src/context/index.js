@@ -1,5 +1,5 @@
 import path from 'path';
-import { AuthenticationClient, ManagementClient } from 'auth0-ext-alpha';
+import { AuthenticationClient, ManagementClient } from 'auth0';
 import YAMLContext from './yaml';
 import DirectoryContext from './directory';
 
