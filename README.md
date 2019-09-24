@@ -33,7 +33,7 @@ This tool can be destructive to your Auth0 tenant. Please ensure you have read t
 
 This version of the CLI will communicate directly to webtask. Your webtask authorization token will be required, it should be treated with care as with your auth0 client secrets. Please note this will be **temporary** and the official release will consume the Hooks Management API endpoint.
 
-Installation: `npm install auth0/auth0-deploy-cli#v4.0.0-dev.2 -g`
+Installation: `npm install auth0/auth0-deploy-cli#v4.0.0-dev.3 -g`
 
 Confirm you have this version installed by running:
 
