@@ -7,6 +7,12 @@ export default yargs
     describe: 'A url for proxying requests, only set this if you are behind a proxy.',
     type: 'string'
   })
+  .option('debug', {
+    describe: 'Dump extra debug information.',
+    type: 'string',
+    boolean: true,
+    default: false
+  })
   .command('import', 'Deploy Configuration', {
     input_file: {
       alias: 'i',

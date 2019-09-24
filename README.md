@@ -248,6 +248,7 @@ Options:
   --help           Show help  [boolean]
   --version        Show version number  [boolean]
   --proxy_url, -p  A url for proxying requests, only set this if you are behind a proxy.  [string]
+  --debug          Dump extra debug information.  [string] [default: false]
 
 Examples:
   a0deploy export -c config.json -f yaml -o path/to/export               Dump Auth0 config to folder in YAML format
