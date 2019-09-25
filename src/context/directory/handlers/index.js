@@ -1,5 +1,6 @@
 import pages from './pages';
 import rules from './rules';
+import hooks from './hooks';
 import clients from './clients';
 import tenant from './tenant';
 import emailProvider from './emailProvider';
@@ -17,6 +18,7 @@ import roles from './roles';
 export default {
   rules,
   rulesConfigs,
+  hooks,
   pages,
   databases,
   clientGrants,

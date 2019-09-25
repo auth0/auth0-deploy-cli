@@ -9,6 +9,12 @@ export default async function(config) {
   // Validate config
   const errors = [];
 
+  if (!config.WEBTASK_API_TOKEN) errors.push('WEBTASK_API_TOKEN');
+  if (!config.WEBTASK_API_URL) errors.push('WEBTASK_API_URL');
+
+  process.env.WEBTASK_API_TOKEN = config.WEBTASK_API_TOKEN;
+  process.env.WEBTASK_API_URL = config.WEBTASK_API_URL;
+
   if (!config.AUTH0_DOMAIN) errors.push('AUTH0_DOMAIN');
   if (!config.AUTH0_ACCESS_TOKEN) {
     if (!config.AUTH0_CLIENT_ID) errors.push('AUTH0_CLIENT_ID');
@@ -28,7 +34,9 @@ export default async function(config) {
       clientSecret: config.AUTH0_CLIENT_SECRET
     });
 
-    const clientCredentials = await authClient.clientCredentialsGrant({ audience: `https://${config.AUTH0_DOMAIN}/api/v2/` });
+    const clientCredentials = await authClient.clientCredentialsGrant({
+      audience: `https://${config.AUTH0_DOMAIN}/api/v2/`
+    });
     accessToken = clientCredentials.access_token;
   }
 
