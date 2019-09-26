@@ -10,9 +10,7 @@ import { cleanThenMkdir, testDataDir } from '../utils';
 const config = {
   AUTH0_INPUT_FILE: path.resolve(testDataDir, 'notexist'),
   AUTH0_DOMAIN: 'tenant.auth0.com',
-  AUTH0_ACCESS_TOKEN: 'fake',
-  WEBTASK_API_TOKEN: 'eyJhbGciOiJIUzI1NiIsImtpZCI6InN0LTAifQ.eyJqdGkiOiIxMjM0NSIsImlhdCI6OTk5NDcyNDIxNCwidGVuIjoidGVzdCJ9.rnwU_CxGV2CrlV5c6N0ESvM6W1P-gCWjXLxU9nst-dE',
-  WEBTASK_API_URL: 'https://wt.example.com'
+  AUTH0_ACCESS_TOKEN: 'fake'
 };
 
 describe('#context loader validation', async () => {
