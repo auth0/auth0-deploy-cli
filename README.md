@@ -187,7 +187,7 @@ Commands:
 Options:
   --help           Show help  [boolean]
   --version        Show version number  [boolean]
-  --verbose, -v    Dump extra debug information.  [string] [default: false]
+  --debug, -d    Dump extra debug information.  [string] [default: false]
   --proxy_url, -p  A url for proxying requests, only set this if you are behind a proxy.  [string]
 
 Examples:
