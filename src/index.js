@@ -2,6 +2,7 @@
 import HttpsProxyAgent from 'https-proxy-agent';
 import HttpProxyAgent from 'http-proxy-agent';
 import superagent from 'superagent';
+import { argv } from 'yargs';
 
 import args from './args';
 import commands from './commands';
@@ -14,7 +15,7 @@ log.debug('Starting Auth0 Deploy CLI Tool');
 
 // Set log level
 log.transports.console.level = params.level;
-if (params.debug) {
+if (argv.debug) {
   log.transports.console.level = 'debug';
   // Set for auth0-source-control-ext-tools
   process.env.AUTH0_DEBUG = 'true';
