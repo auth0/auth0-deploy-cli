@@ -63,11 +63,11 @@ There are 2 new configuration properties that should be added to your `config.js
 
 | Features | Available | Notes                                                                                                                                                                                    |
 | -------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Import   | -         | Partial Implementation, both YAML and directory supported.                                                                                                                               |
+| Import   | -         | Both YAML and directory supported.                                                                                                                               |
 | - Create | y         | Every execution of import will create a new hook. Only a single hook per trigger is supported. This will require to manually remove the hook from the dashboard UI to re-run the import. |
-| - Delete | n         |                                                                                                                                                                                          |
-| - Update | n         |                                                                                                                                                                                          |
-| Export   | n         |                                                                                                                                                                                          |
+| - Delete | y         |                                                                                                                                                                                          |
+| - Update | y         |                                                                                                                                                                                          |
+| Export   | y         |                                                                                                                                                                                          |
 
 ## Hook Model
 
