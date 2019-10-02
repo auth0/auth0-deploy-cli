@@ -17,7 +17,6 @@ export function mockMgmtClient() {
   // Fake Mgmt Client. Bit hacky but good enough for now.
   return {
     rules: { getAll: () => [] },
-    hooks: { getAll: () => [] },
     databases: { getAll: () => [] },
     connections: { getAll: () => [] },
     resourceServers: { getAll: () => [] },
