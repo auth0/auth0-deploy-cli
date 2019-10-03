@@ -3,15 +3,12 @@
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
 version: 2
-
-defaults: &defaults
-  working_directory: ~/repo
-  docker:
-    - image: circleci/node:8.12
-
 jobs:
-  test:
-    <<: *defaults
+  build:
+    docker:
+      - image: circleci/node:8.12
+
+    working_directory: ~/repo
 
     steps:
       - checkout
@@ -48,39 +45,3 @@ jobs:
 
       # run tests!
       - run: npm test
-      - persist_to_workspace:
-          root: ~/repo
-          paths: .
-  deploy:
-      <<: *defaults
-      steps:
-        - attach_workspace:
-            at: ~/repo
-        - run:
-            name: Authenticate with registry
-            command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
-        - run:
-            name: Publish package
-            command: npm publish
-workflows: 
-  version: 2
-  test:
-    jobs:
-      - test
-  test_and_deploy:
-    jobs:
-      - test:
-          # only runs when commit with tag in /^v.*/ pattern
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              only: master
-      - deploy:
-          requires:
-            - test
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/

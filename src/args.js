@@ -2,10 +2,11 @@ import yargs from 'yargs';
 
 export default yargs
   .usage('Auth0 Deploy CLI')
-  .option('debug', {
-    alias: 'd',
+  .option('verbose', {
+    alias: 'v',
     describe: 'Dump extra debug information.',
-    type: 'boolean',
+    type: 'string',
+    boolean: true,
     default: false
   })
   .option('proxy_url', {

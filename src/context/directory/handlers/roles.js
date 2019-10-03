@@ -32,12 +32,6 @@ async function dump(context) {
   roles.forEach((role) => {
     const roleFile = path.join(rolesFolder, sanitize(`${role.name}.json`));
     log.info(`Writing ${roleFile}`);
-
-    // remove empty description
-    if (role.description === null) {
-      delete role.description;
-    }
-
     fs.writeFileSync(roleFile, JSON.stringify(role, null, 2));
   });
 }
