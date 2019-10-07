@@ -23,7 +23,7 @@ async function parse(context) {
           const htmlFileName = path.join(connectionsFolder, connection.options.email.body);
 
           if (isFile(htmlFileName)) {
-            connection.options.email.body = loadFile(htmlFileName);
+            connection.options.email.body = loadFile(htmlFileName, context.mappings);
           }
         }
 
