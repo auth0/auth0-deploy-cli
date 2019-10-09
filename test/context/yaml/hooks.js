@@ -51,7 +51,13 @@ describe('#YAML context hooks', () => {
 
     context.assets.hooks = [
       {
+        id: '1',
         name: 'someHook',
+        code: codeValidation,
+        triggerId: 'credentials-exchange'
+      },
+      {
+        id: 'unnamedHook',
         code: codeValidation,
         triggerId: 'credentials-exchange'
       }
@@ -61,8 +67,15 @@ describe('#YAML context hooks', () => {
     expect(dumped).to.deep.equal({
       hooks: [
         {
+          id: '1',
           name: 'someHook',
           code: './hooks/someHook.js',
+          triggerId: 'credentials-exchange'
+        },
+        {
+          id: 'unnamedHook',
+          name: 'unnamedHook',
+          code: './hooks/unnamedHook.js',
           triggerId: 'credentials-exchange'
         }
       ]

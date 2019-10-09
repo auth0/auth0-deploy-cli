@@ -32,6 +32,8 @@ async function dump(context) {
 
     hooks = hooks.map((hook) => {
       // Dump hook code to file
+      // For cases when hook does not have `meta['hook-name']`
+      hook.name = hook.name || hook.id;
       const codeName = sanitize(`${hook.name}.js`);
       const codeFile = path.join(hooksFolder, codeName);
       log.info(`Writing ${codeFile}`);

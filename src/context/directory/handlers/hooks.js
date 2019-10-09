@@ -35,6 +35,8 @@ async function dump(context) {
   fs.ensureDirSync(hooksFolder);
   hooks.forEach((hook) => {
     // Dump script to file
+    // For cases when hook does not have `meta['hook-name']`
+    hook.name = hook.name || hook.id;
     const name = sanitize(hook.name);
     const hookCode = path.join(hooksFolder, `${name}.js`);
     log.info(`Writing ${hookCode}`);
