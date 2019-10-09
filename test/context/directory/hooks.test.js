@@ -77,7 +77,13 @@ describe('#directory context hooks', () => {
 
     context.assets.hooks = [
       {
+        id: '1',
         name: 'someHook',
+        code: codeValidation,
+        triggerId: 'credentials-exchange'
+      },
+      {
+        id: 'unnamedHook',
         code: codeValidation,
         triggerId: 'credentials-exchange'
       }
@@ -88,11 +94,19 @@ describe('#directory context hooks', () => {
     const hooksFolder = path.join(dir, constants.HOOKS_DIRECTORY);
 
     expect(loadJSON(path.join(hooksFolder, 'someHook.json'))).to.deep.equal({
+      id: '1',
       name: 'someHook',
       code: './someHook.js',
       triggerId: 'credentials-exchange'
     });
+    expect(loadJSON(path.join(hooksFolder, 'unnamedHook.json'))).to.deep.equal({
+      id: 'unnamedHook',
+      name: 'unnamedHook',
+      code: './unnamedHook.js',
+      triggerId: 'credentials-exchange'
+    });
     expect(fs.readFileSync(path.join(hooksFolder, 'someHook.js'), 'utf8')).to.deep.equal(codeValidation);
+    expect(fs.readFileSync(path.join(hooksFolder, 'unnamedHook.js'), 'utf8')).to.deep.equal(codeValidation);
   });
 
   it('should dump hooks sanitized', async () => {
