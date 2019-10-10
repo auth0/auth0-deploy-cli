@@ -33,7 +33,9 @@ This tool can be destructive to your Auth0 tenant. Please ensure you have read t
 
 This version of the CLI will communicate directly to webtask. Your webtask authorization token will be required, it should be treated with care as with your other auth0 client secrets. Please note this will be **temporary** and the official release will consume the Hooks Management API endpoint.
 
-Installation: `npm install auth0-deploy-cli@4.0.0-dev.5 -g`
+Installation: `npm install auth0-deploy-cli@dev -g`
+
+This should install the latest developer version of the CLI.
 
 Confirm you have this version installed by running:
 
@@ -63,10 +65,10 @@ There are 2 new configuration properties that should be added to your `config.js
 
 | Features | Available | Notes                                                                                                                                                                                    |
 | -------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Import   | y        | Both YAML and directory supported.                                                                                                                               |
-| Create | y         | Every execution of import will create a new hook. Only a single hook per trigger is supported. This will require to manually remove the hook from the dashboard UI to re-run the import. |
-| Delete | y         |                                                                                                                                                                                          |
-| Update | y         |                                                                                                                                                                                          |
+| Import   | y         | Both YAML and directory supported.                                                                                                                                                       |
+| Create   | y         | Every execution of import will create a new hook. Only a single hook per trigger is supported. This will require to manually remove the hook from the dashboard UI to re-run the import. |
+| Delete   | y         |                                                                                                                                                                                          |
+| Update   | y         |                                                                                                                                                                                          |
 | Export   | y         |                                                                                                                                                                                          |
 
 ## Hook Model
