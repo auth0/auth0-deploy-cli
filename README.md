@@ -25,30 +25,21 @@ Supported Features
 
 # WARNING
 
-This tool can be destructive to your Auth0 tenant. Please ensure you have read the documentation and tested the tool on a development tenant before using in production.
-
-# Hooks beta Support
-
 :warning: This is a development version and should not be used in production.
 
-This version of the CLI will communicate directly to webtask. Your webtask authorization token will be required, it should be treated with care as with your other auth0 client secrets. Please note this will be **temporary** and the official release will consume the Hooks Management API endpoint.
+This tool can be destructive to your Auth0 tenant. Please ensure you have read the documentation and tested the tool on a development tenant before using in production.
 
-Installation: `npm install auth0-deploy-cli@dev -g`
+# Install
 
-This should install the latest developer version of the CLI.
+### General Install
 
-Confirm you have this version installed by running:
-
-```
-> a0deploy --version
-4.0.0-dev.*
+```bash
+npm install auth0-deploy-cli@dev -g
 ```
 
-Version should be 4.0 dev.
+### Configuration
 
-## Configuration
-
-There are 2 new configuration properties that should be added to your `config.json` file, please note this is also temporary and will not be required in the release:
+There are 2 new configuration properties that should be added to your `config.json` file, please note this is also temporary and will not be required in the full release, see [Hooks Support](#Hooks-beta-Support):
 
 - **WEBTASK_API_TOKEN** - The authorization token for your tenant that will be used to communicate with webtask. You may grab this token from executing the following code in your developer console while on https://manage.auth0.com
 
@@ -61,75 +52,19 @@ There are 2 new configuration properties that should be added to your `config.js
   - EU: `https://sandbox8-eu.it.auth0.com`
   - AU: `https://sandbox8-au.it.auth0.com`
 
-## Available features
-
-| Features | Available | Notes                                                                                                                                                                                    |
-| -------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Import   | y         | Both YAML and directory supported.                                                                                                                                                       |
-| Create   | y         | Every execution of import will create a new hook. Only a single hook per trigger is supported. This will require to manually remove the hook from the dashboard UI to re-run the import. |
-| Delete   | y         |                                                                                                                                                                                          |
-| Update   | y         |                                                                                                                                                                                          |
-| Export   | y         |                                                                                                                                                                                          |
-
-## Hook Model
-
-| Property     | Type               | Description                                                                                                | Example                                                                     |
-| ------------ | ------------------ | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| id           | string (ulid)      | Identifier representing the hook. The type of uuid will be a ULID.                                         | 01ARZ3NDEKTSV4RRFFQ69G5FAV                                                  |
-| name         | string             | Name of the hook.                                                                                          | my-hook                                                                     |
-| triggerId    | string             | The id of the trigger the hook will be executed as during the some workflow.                               | `credentials-exchange`, `pre-user-registration` or `post-user-registration` |
-| code         | string             | The code that will be executed when the hook is triggered.                                                 | `/** Your code here **/`                                                    |
-| secrets      | dictionary<string> | A list of key-value that contains a mapping of secrets that will be injected in the code during execution. | `{ 'api-key': 'your-api-key' }`                                             |
-| dependencies | dictionary<string> | A list of key-value that contains required npm modules and the version.                                    | `{ 'bcrypt': '3.0.6' }`                                                     |
-| active       | boolean            | Will determine if the hook should be active or not. Only one hook for a trigger can be active at a time.   | true                                                                        |
-
-## Examples
-
-Please see the `/examples/` directory on the the [hooks-beta](https://github.com/auth0/auth0-deploy-cli/tree/hooks-beta) branch.
-
-# What's new in version 2
-
-The `auth0-deploy-cli` tool was refactored bringing the following updates.
-
-- Added YAML support
-- Added support for export (deprecation of separate auth0 dump tool)
-- Delete support - The tool will, if configured via `AUTH0_ALLOW_DELETE`, delete objects if does not exist within the deploy configuration.
-- Support for additional Auth0 objects
-  - Connections including Social, Enterprise and Passwordless configurations.
-  - Improved support for database connections and associated configuration.
-  - Email Templates
-  - Email Provider
-  - Client Grants
-  - Rule Configs (import only)
-  - Guardian config
-  - Better support for pages
-  - Tenant level settings
-- Added support to be called programmatically
-- Improved logging
-- To simplify the tool the slack hook was removed. You can invoke the tool programmatically to support calling your own hooks
-- Support referencing clients by their name vs client_id (automatic mapping during export/import)
-- Simplified to support future Auth0 object types
-
-### UPGRADING FROM v1 to v2
-
-The `auth0-deploy-cli` was completely rewritten from version 1 to version 2 which means it is not backwards compatible. Please consider the following when upgrading:
-
-- The directory structure and format has changed to allow for additional object types.
-- The command line parameters have changed to allow for additional options such as export.
-
-# Install
-
-### General Install
-
-```bash
-npm i -g auth0-deploy-cli
-```
-
-### Pre-requisites
+## Pre-requisites
 
 For this tool to function it must be authorized to the Auth0 Management API. You can do this by creating an application in your Auth0 service that has access to the management API with the following scopes before.
 
 Use the [Auth0 Deploy CLI Extension](https://github.com/auth0-extensions/auth0-deploy-cli-extension/blob/master/README.md) to create the application. At the bottom of the README are instructions for doing this by hand instead.
+
+In the event that the extension did not create the right scopes, confirm the following:
+
+1. Navigate to your application that was created for the deploy cli, typically named `auth0-deploy-cli-extension`.
+2. Ensure the Application type is **Machine to Machine**.
+3. Refresh the page and a _APIs_ tab should appear on the client.
+4. On the APIs tab, on **Auth0 Management API** click the drop down (right arrow) to show the list of permissions.
+5. Ensure the following scopes below are selected:
 
 #### Scopes
 
@@ -174,6 +109,30 @@ Use the [Auth0 Deploy CLI Extension](https://github.com/auth0-extensions/auth0-d
 - create:email_templates
 - update:email_templates
 - read:roles
+- read:prompts
+- update:prompts
+- read:branding
+- update:branding
+
+# Hooks beta Support
+
+This version of the CLI will communicate directly to webtask. Your webtask authorization token will be required, it should be treated with care as with your other auth0 client secrets. Please note this will be **temporary** and the official release will consume the Hooks Management API endpoint.
+
+## Hook Model
+
+| Property     | Type               | Description                                                                                                | Example                                                                     |
+| ------------ | ------------------ | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| id           | string (ulid)      | Identifier representing the hook. The type of uuid will be a ULID.                                         | 01ARZ3NDEKTSV4RRFFQ69G5FAV                                                  |
+| name         | string             | Name of the hook.                                                                                          | my-hook                                                                     |
+| triggerId    | string             | The id of the trigger the hook will be executed as during the some workflow.                               | `credentials-exchange`, `pre-user-registration` or `post-user-registration` |
+| code         | string             | The code that will be executed when the hook is triggered.                                                 | `/** Your code here **/`                                                    |
+| secrets      | dictionary<string> | A list of key-value that contains a mapping of secrets that will be injected in the code during execution. | `{ 'api-key': 'your-api-key' }`                                             |
+| dependencies | dictionary<string> | A list of key-value that contains required npm modules and the version.                                    | `{ 'bcrypt': '3.0.6' }`                                                     |
+| active       | boolean            | Will determine if the hook should be active or not. Only one hook for a trigger can be active at a time.   | true                                                                        |
+
+## Examples
+
+Please see the `/examples/` directory on the the [hooks-beta](https://github.com/auth0/auth0-deploy-cli/tree/hooks-beta) branch.
 
 # Usage
 
