@@ -10,20 +10,20 @@ import { loadJSON } from '../../../src/utils';
 import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
 
 const hooks = {
-  'somehook.js': 'function someHook() { var hello = @@hello@@; }',
-  'somehook.json': '{ "name": "somehook", "active": true, "code": "somehook.js", "triggerId": "credentials-exchange" }',
-  'otherhook.js': 'function someHook() { var hello = @@hello@@; }',
-  'otherhook.json': '{ "name": "otherhook", "code": "otherhook.js", "triggerId": "credentials-exchange" }'
+  'some-hook.js': 'function someHook() { var hello = @@hello@@; }',
+  'some-hook.json': '{ "name": "Some Hook", "active": true, "code": "some-hook.js", "triggerId": "credentials-exchange" }',
+  'other-hook.js': 'function someHook() { var hello = @@hello@@; }',
+  'other-hook.json': '{ "name": "Other Hook", "code": "other-hook.js", "triggerId": "credentials-exchange" }'
 };
 
 const hooksTarget = [
   {
-    name: 'otherhook',
+    name: 'other-hook',
     code: 'function someHook() { var hello = "goodbye"; }',
     triggerId: 'credentials-exchange'
   },
   {
-    name: 'somehook',
+    name: 'some-hook',
     active: true,
     code: 'function someHook() { var hello = "goodbye"; }',
     triggerId: 'credentials-exchange'

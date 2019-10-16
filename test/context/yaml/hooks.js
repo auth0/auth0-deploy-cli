@@ -18,7 +18,7 @@ describe('#YAML context hooks', () => {
 
     const yaml = `
     hooks:
-      - name: "someHook"
+      - name: "Some Hook"
         code: "${codeFile}"
         triggerId: "credentials-exchange"
     `;
@@ -28,7 +28,7 @@ describe('#YAML context hooks', () => {
     const target = [
       {
         active: false,
-        name: 'someHook',
+        name: 'some-hook',
         dependencies: {},
         secrets: {},
         code: 'function someHook() { var hello = "test"; }',
