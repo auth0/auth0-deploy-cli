@@ -15,6 +15,9 @@ async function parse(context) {
         if (hook.code) {
           hook.code = context.loadFile(hook.code, constants.HOOKS_DIRECTORY);
         }
+
+        hook.name = hook.name.toLowerCase().replace(/\s/g, '-');
+
         return { ...hook };
       })
     ]
