@@ -2,8 +2,8 @@ import yargs from 'yargs';
 
 export default yargs
   .usage('Auth0 Deploy CLI')
-  .option('verbose', {
-    alias: 'v',
+  .option('debug', {
+    alias: 'd',
     describe: 'Dump extra debug information.',
     type: 'string',
     boolean: true,
