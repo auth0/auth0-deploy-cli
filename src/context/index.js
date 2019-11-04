@@ -34,7 +34,8 @@ export default async function(config) {
 
   const mgmtClient = new ManagementClient({
     domain: config.AUTH0_DOMAIN,
-    token: accessToken
+    token: accessToken,
+    retry: { maxRetries: config.AUTH0_API_MAX_RETRIES || 10 }
   });
 
   const inputFile = config.AUTH0_INPUT_FILE;
