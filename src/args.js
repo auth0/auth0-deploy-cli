@@ -70,7 +70,7 @@ export default yargs
       default: false
     }
   })
-.command('deploy', 'Deploy Configuration', {
+  .command('deploy', 'Deploy Configuration', {
     input_file: {
       alias: 'i',
       describe: 'The updates to deploy. Either a JSON file, or directory that contains the correct file layout. See README and online for more info.',
@@ -95,7 +95,7 @@ export default yargs
       type: 'string'
     }
   })
-.command('dump', 'Dump Auth0 Tenant Configuration', {
+  .command('dump', 'Dump Auth0 Tenant Configuration', {
     output_folder: {
       alias: 'o',
       describe: 'The output directory.',
