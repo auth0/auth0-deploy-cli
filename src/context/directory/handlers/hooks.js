@@ -14,8 +14,8 @@ function parse(context) {
 
   const hooks = files.map((f) => {
     const hook = { ...loadJSON(f, context.mappings) };
-    if (hook.code) {
-      hook.code = context.loadFile(hook.code, constants.HOOKS_DIRECTORY);
+    if (hook.script) {
+      hook.script = context.loadFile(hook.script, constants.HOOKS_DIRECTORY);
     }
 
     hook.name = hook.name.toLowerCase().replace(/\s/g, '-');
@@ -43,12 +43,12 @@ async function dump(context) {
     const name = sanitize(hook.name);
     const hookCode = path.join(hooksFolder, `${name}.js`);
     log.info(`Writing ${hookCode}`);
-    fs.writeFileSync(hookCode, hook.code);
+    fs.writeFileSync(hookCode, hook.script);
 
     // Dump template metadata
     const hookFile = path.join(hooksFolder, `${name}.json`);
     log.info(`Writing ${hookFile}`);
-    fs.writeFileSync(hookFile, JSON.stringify({ ...hook, code: `./${name}.js` }, null, 2));
+    fs.writeFileSync(hookFile, JSON.stringify({ ...hook, script: `./${name}.js` }, null, 2));
   });
 }
 
