@@ -11,21 +11,21 @@ import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../ut
 
 const hooks = {
   'some-hook.js': 'function someHook() { var hello = @@hello@@; }',
-  'some-hook.json': '{ "name": "Some Hook", "active": true, "code": "some-hook.js", "triggerId": "credentials-exchange" }',
+  'some-hook.json': '{ "name": "Some Hook", "enabled": true, "script": "some-hook.js", "triggerId": "credentials-exchange" }',
   'other-hook.js': 'function someHook() { var hello = @@hello@@; }',
-  'other-hook.json': '{ "name": "Other Hook", "code": "other-hook.js", "triggerId": "credentials-exchange" }'
+  'other-hook.json': '{ "name": "Other Hook", "script": "other-hook.js", "triggerId": "credentials-exchange" }'
 };
 
 const hooksTarget = [
   {
     name: 'other-hook',
-    code: 'function someHook() { var hello = "goodbye"; }',
+    script: 'function someHook() { var hello = "goodbye"; }',
     triggerId: 'credentials-exchange'
   },
   {
     name: 'some-hook',
-    active: true,
-    code: 'function someHook() { var hello = "goodbye"; }',
+    enabled: true,
+    script: 'function someHook() { var hello = "goodbye"; }',
     triggerId: 'credentials-exchange'
   }
 ];
@@ -79,12 +79,12 @@ describe('#directory context hooks', () => {
       {
         id: '1',
         name: 'someHook',
-        code: codeValidation,
+        script: codeValidation,
         triggerId: 'credentials-exchange'
       },
       {
         id: 'unnamedHook',
-        code: codeValidation,
+        script: codeValidation,
         triggerId: 'credentials-exchange'
       }
     ];
@@ -96,13 +96,13 @@ describe('#directory context hooks', () => {
     expect(loadJSON(path.join(hooksFolder, 'someHook.json'))).to.deep.equal({
       id: '1',
       name: 'someHook',
-      code: './someHook.js',
+      script: './someHook.js',
       triggerId: 'credentials-exchange'
     });
     expect(loadJSON(path.join(hooksFolder, 'unnamedHook.json'))).to.deep.equal({
       id: 'unnamedHook',
       name: 'unnamedHook',
-      code: './unnamedHook.js',
+      script: './unnamedHook.js',
       triggerId: 'credentials-exchange'
     });
     expect(fs.readFileSync(path.join(hooksFolder, 'someHook.js'), 'utf8')).to.deep.equal(codeValidation);
@@ -118,7 +118,7 @@ describe('#directory context hooks', () => {
     context.assets.hooks = [
       {
         name: 'some/Hook',
-        code: codeValidation,
+        script: codeValidation,
         triggerId: 'credentials-exchange'
       }
     ];
@@ -129,7 +129,7 @@ describe('#directory context hooks', () => {
 
     expect(loadJSON(path.join(hooksFolder, 'some-Hook.json'))).to.deep.equal({
       name: 'some/Hook',
-      code: './some-Hook.js',
+      script: './some-Hook.js',
       triggerId: 'credentials-exchange'
     });
     expect(fs.readFileSync(path.join(hooksFolder, 'some-Hook.js'), 'utf8')).to.deep.equal(codeValidation);

@@ -19,7 +19,7 @@ describe('#YAML context hooks', () => {
     const yaml = `
     hooks:
       - name: "Some Hook"
-        code: "${codeFile}"
+        script: "${codeFile}"
         triggerId: "credentials-exchange"
     `;
     const yamlFile = path.join(dir, 'hook1.yaml');
@@ -27,11 +27,11 @@ describe('#YAML context hooks', () => {
 
     const target = [
       {
-        active: false,
+        enabled: false,
         name: 'some-hook',
         dependencies: {},
         secrets: {},
-        code: 'function someHook() { var hello = "test"; }',
+        script: 'function someHook() { var hello = "test"; }',
         triggerId: 'credentials-exchange'
       }
     ];
@@ -53,12 +53,12 @@ describe('#YAML context hooks', () => {
       {
         id: '1',
         name: 'someHook',
-        code: codeValidation,
+        script: codeValidation,
         triggerId: 'credentials-exchange'
       },
       {
         id: 'unnamedHook',
-        code: codeValidation,
+        script: codeValidation,
         triggerId: 'credentials-exchange'
       }
     ];
@@ -69,13 +69,13 @@ describe('#YAML context hooks', () => {
         {
           id: '1',
           name: 'someHook',
-          code: './hooks/someHook.js',
+          script: './hooks/someHook.js',
           triggerId: 'credentials-exchange'
         },
         {
           id: 'unnamedHook',
           name: 'unnamedHook',
-          code: './hooks/unnamedHook.js',
+          script: './hooks/unnamedHook.js',
           triggerId: 'credentials-exchange'
         }
       ]
@@ -94,7 +94,7 @@ describe('#YAML context hooks', () => {
     context.assets.hooks = [
       {
         name: 'someHook / test',
-        code: codeValidation,
+        script: codeValidation,
         triggerId: 'credentials-exchange'
       }
     ];
@@ -104,7 +104,7 @@ describe('#YAML context hooks', () => {
       hooks: [
         {
           name: 'someHook / test',
-          code: './hooks/someHook - test.js',
+          script: './hooks/someHook - test.js',
           triggerId: 'credentials-exchange'
         }
       ]

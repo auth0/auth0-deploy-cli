@@ -12,8 +12,8 @@ async function parse(context) {
   return {
     hooks: [
       ...context.assets.hooks.map((hook) => {
-        if (hook.code) {
-          hook.code = context.loadFile(hook.code, constants.HOOKS_DIRECTORY);
+        if (hook.script) {
+          hook.script = context.loadFile(hook.script, constants.HOOKS_DIRECTORY);
         }
 
         hook.name = hook.name.toLowerCase().replace(/\s/g, '-');
@@ -40,9 +40,9 @@ async function dump(context) {
       const codeName = sanitize(`${hook.name}.js`);
       const codeFile = path.join(hooksFolder, codeName);
       log.info(`Writing ${codeFile}`);
-      fs.writeFileSync(codeFile, hook.code);
+      fs.writeFileSync(codeFile, hook.script);
 
-      return { ...hook, code: `./hooks/${codeName}` };
+      return { ...hook, script: `./hooks/${codeName}` };
     });
   }
 
