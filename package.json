@@ -1,6 +1,6 @@
 {
   "name": "auth0-deploy-cli",
-  "version": "4.0.0-dev.18",
+  "version": "4.0.0-beta.19",
   "description": "A command line tool for deploying updates to your Auth0 tenant",
   "main": "lib/index.js",
   "bin": {
