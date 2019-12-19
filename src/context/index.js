@@ -4,6 +4,18 @@ import YAMLContext from './yaml';
 import DirectoryContext from './directory';
 
 import { isDirectory } from '../utils';
+import log from '../logger';
+
+const nonPrimitiveProps = [
+  'AUTH0_KEYWORD_REPLACE_MAPPINGS',
+  'AUTH0_EXCLUDED_RULES',
+  'AUTH0_EXCLUDED_CLIENTS',
+  'AUTH0_EXCLUDED_DATABASES',
+  'AUTH0_EXCLUDED_CONNECTIONS',
+  'AUTH0_EXCLUDED_RESOURCE_SERVERS',
+  'EXCLUDED_PROPS',
+  'INCLUDED_PROPS'
+];
 
 export default async function(config) {
   // Validate config
@@ -39,6 +51,25 @@ export default async function(config) {
   });
 
   const inputFile = config.AUTH0_INPUT_FILE;
+
+  const ensureObject = (key, value) => {
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch (e) {
+        log.debug(`Cannot convert config.${key} to an object. Error: ${e.message}`);
+        return value;
+      }
+    }
+
+    return value;
+  };
+
+  nonPrimitiveProps.forEach((key) => {
+    if (config[key]) {
+      config[key] = ensureObject(key, config[key]);
+    }
+  });
 
   if (typeof inputFile === 'object') {
     return new YAMLContext(config, mgmtClient);
