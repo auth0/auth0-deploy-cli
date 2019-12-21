@@ -29,7 +29,7 @@ Supported Features
 
 This tool can be destructive to your Auth0 tenant. Please ensure you have read the documentation and tested the tool on a development tenant before using in production.
 
-# ⚠️ Migrating to beta 
+# ⚠️ Migrating 
 
 This release provides extensive support for Auth0 Hooks. There are several important changes that have occured due to the existence of new hooks endpoints in the Auth0 Management API. Review the changes below before working with this release:
 
@@ -50,7 +50,7 @@ Secret values will not be populated when running `deploy-cli import` anymore. In
 ### General Install
 
 ```bash
-npm install auth0-deploy-cli@beta -g
+npm install auth0-deploy-cli@dev -g
 ```
 
 ### Configuration
