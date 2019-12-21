@@ -29,12 +29,28 @@ Supported Features
 
 This tool can be destructive to your Auth0 tenant. Please ensure you have read the documentation and tested the tool on a development tenant before using in production.
 
+# ⚠️ Migrating to beta 
+
+This release provides extensive support for Auth0 Hooks. There are several important changes that have occured due to the existence of new hooks endpoints in the Auth0 Management API. Review the changes below before working with this release:
+
+### Underlying API change
+The `deploy-cli` now accesses new Hooks API endpoints that are not yet publicly available. If you plan to use this branch, contact Auth0 and request to enable the `api2_enable_hooks` flag on your tenant. 
+
+### Hooks property name changes
+| Old property name | New property name |
+|-------------------|-------------------|
+| hook.code         | hook.script       |
+| hook.active       | hook.enabled      |
+
+### Changes to working with secrets
+Secret values will not be populated when running `deploy-cli import` anymore. Instead, secrets are now populated with the value `_VALUE_NOT_SHOWN_`. If you plan to run tenant imports and exports using CI, the recommended action is to implement a task in your CI process to replace `_VALUE_NOT_SHOWN_` with the secrets your deployment requires before running the export task. 
+
 # Install
 
 ### General Install
 
 ```bash
-npm install auth0-deploy-cli@dev -g
+npm install auth0-deploy-cli@beta -g
 ```
 
 ### Configuration
@@ -92,6 +108,10 @@ In the event that the extension did not create the right scopes, confirm the fol
 - update:rules
 - delete:rules
 - create:rules
+- read:hooks
+- update:hooks
+- delete:hooks
+- create:hooks
 - read:rules_configs
 - update:rules_configs
 - delete:rules_configs
