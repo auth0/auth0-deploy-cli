@@ -1,6 +1,7 @@
 import yargs from 'yargs';
 
 export default yargs
+  .demandCommand(1, 'A command is required')
   .usage('Auth0 Deploy CLI')
   .option('debug', {
     alias: 'd',
