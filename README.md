@@ -45,6 +45,10 @@ The `deploy-cli` now accesses new Hooks API endpoints that are not yet publicly 
 ### Changes to working with secrets
 Secret values will not be populated when running `deploy-cli import` anymore. Instead, secrets are now populated with the value `_VALUE_NOT_SHOWN_`. If you plan to run tenant imports and exports using CI, the recommended action is to implement a task in your CI process to replace `_VALUE_NOT_SHOWN_` with the secrets your deployment requires before running the export task. 
 
+### Scope changes
+This release requires that you grant additional scopes to the `deploy-cli-extension`. Refer to the [pre-requisites](#Pre-requisites) section below to add the new hooks-related scopes (`create:hooks`, `read:hooks`, `update:hooks`, `delete:hooks`).
+
+
 # Install
 
 ### General Install
