@@ -88,6 +88,21 @@ describe('#directory context roles', () => {
     expect(context.assets.roles).to.deep.equal(target);
   });
 
+  it('should ignore objects', async () => {
+    const dir = path.join(testDataDir, 'directory', 'rolesDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    // API will return an empty object if there are no roles
+    context.assets.roles = {};
+
+    await handler.dump(context);
+
+    // folder should not be there
+    const roleFolder = path.join(dir, constants.ROLES_DIRECTORY);
+    expect(fs.existsSync(roleFolder)).is.equal(false);
+  });
+
   it('should ignore bad roles directory', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'roles3');
     cleanThenMkdir(repoDir);
