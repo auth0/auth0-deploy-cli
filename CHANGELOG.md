@@ -4,6 +4,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2019-11-04
+### Added
+- Add support for Hooks and Hook Secrets
+- Update `auth0`, `auth0-extension-tools`, `auth0-source-control-extension-tools`, and `js-yaml`
+
+## [3.6.7] - 2020-01-08
+### Fixed
+- Fixed a crash when no roles are present in a tenant during an export
+
+## [3.6.5] - 2019-12-19
+### Added
+- Add readonly flag `remove_stale_idp_attributes`
+
+## [3.6.4] - 2019-12-04
+### Updated
+- Update `https-proxy-agent` and `js-yaml`
+
+## [3.6.3] - 2019-11-04
+### Added
+- Add `AUTH0_API_MAX_RETRIES` support
+
+## [3.6.2] - 2019-10-18
+### Fixed
+- Fix mapping for passwordless email connection template
+
+## [3.6.1] - 2019-09-27
+### Removed
+- Removed `--verbose` option
+
+## [3.6.0] - 2019-08-26
+### Updated
+- Update `auth0-extension-tools`
+### Fixed
+- Clear empty descriptions on roles
+
 ## [3.5.0] - 2019-08-14
 ### Added
 - Ability to exclude connections and databases (AUTH0_EXCLUDED_CONNECTIONS & AUTH0_EXCLUDED_DATABASES)
