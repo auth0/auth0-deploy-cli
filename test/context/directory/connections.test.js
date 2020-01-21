@@ -17,14 +17,14 @@ describe('#directory context connections', () => {
         'azuread.json': '{ "name": "myad-waad", "strategy": "waad", "var": @@var@@ }',
         'facebook.json': '{  "name": "facebook", "strategy": "facebook", "var": @@var@@ }',
         'email.json': '{  "name": "email", "strategy": "email", "var": @@var@@, "options": { "email": { "body": "./email.html" } } }',
-        'email.html': 'html code'
+        'email.html': 'html code with ##secret##'
       }
     };
 
     const repoDir = path.join(testDataDir, 'directory', 'connections1');
     createDir(repoDir, files);
 
-    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { var: 'something' } };
+    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { secret: 'test secret', var: 'something' } };
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
@@ -34,7 +34,7 @@ describe('#directory context connections', () => {
         name: 'email',
         strategy: 'email',
         var: 'something',
-        options: { email: { body: 'html code' } }
+        options: { email: { body: 'html code with test secret' } }
       },
       { name: 'facebook', strategy: 'facebook', var: 'something' }
     ];

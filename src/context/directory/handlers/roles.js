@@ -24,7 +24,9 @@ function parse(context) {
 
 async function dump(context) {
   const { roles } = context.assets;
-  if (!roles) return; // Skip, nothing to dump
+
+  // API returns an empty object if no grants are present
+  if (!roles || roles.constructor === Object) return; // Skip, nothing to dump
 
   const rolesFolder = path.join(context.filePath, constants.ROLES_DIRECTORY);
   fs.ensureDirSync(rolesFolder);

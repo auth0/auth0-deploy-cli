@@ -53,7 +53,7 @@ describe('#YAML context connections', () => {
         name: 'email',
         options: {
           email: {
-            body: 'html code'
+            body: 'html code with test secret'
           }
         },
         strategy: 'email'
@@ -65,9 +65,9 @@ describe('#YAML context connections', () => {
     const connectionsPath = path.join(dir, 'connections');
     fs.writeFileSync(yamlFile, yaml);
     fs.ensureDirSync(connectionsPath);
-    fs.writeFileSync(path.join(connectionsPath, 'email.html'), 'html code');
+    fs.writeFileSync(path.join(connectionsPath, 'email.html'), 'html code with ##secret##');
 
-    const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { name: 'test-waad', domain: 'mydomain.com' } };
+    const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { secret: 'test secret', name: 'test-waad', domain: 'mydomain.com' } };
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
