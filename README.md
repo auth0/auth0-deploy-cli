@@ -23,9 +23,11 @@ Supported Features
   - Programmatically
 - Environment Variable Replacements
 
-# WARNING # ⚠️ Migrating
+# ⚠️ WARNING
 
 This tool can be destructive to your Auth0 tenant. Please ensure you have read the documentation and tested the tool on a development tenant before using in production.
+
+# Migrating
 
 Check our migration guides to see if you need to do anything when upgrading [here](https://github.com/auth0/auth0-deploy-cli/wiki/Migrating).
 
