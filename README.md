@@ -43,21 +43,6 @@ The `auth0-deploy-cli` will now support the Auth0 `Hook` object.
 npm install auth0-deploy-cli@dev -g
 ```
 
-### Configuration
-
-There are 2 new configuration properties that should be added to your `config.json` file, please note this is also temporary and will not be required in the full release, see [Hooks Support](#Hooks-beta-Support):
-
-- **WEBTASK_API_TOKEN** - The authorization token for your tenant that will be used to communicate with webtask. You may grab this token from executing the following code in your developer console while on https://manage.auth0.com
-
-  ```
-  fetch('https://manage.auth0.com/api/tenant/params/sandbox').then(res => res.json()).then(js => console.log(js.sandbox.token))
-  ```
-
-- **WEBTASK_API_URL** - The value for this depends on the region of your tenant:
-  - US: `https://sandbox8-us.it.auth0.com`
-  - EU: `https://sandbox8-eu.it.auth0.com`
-  - AU: `https://sandbox8-au.it.auth0.com`
-
 ## Pre-requisites
 
 For this tool to function it must be authorized to the Auth0 Management API. You can do this by creating an application in your Auth0 service that has access to the management API with the following scopes before.
