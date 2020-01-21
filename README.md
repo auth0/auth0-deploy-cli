@@ -9,7 +9,7 @@ Supported Features
 - Supported Auth0 Objects
   - Tenant Settings
   - Rules (Including Secrets/Settings)
-  - Hooks (beta)
+  - Hooks
   - Connections
   - Custom Databases
   - Clients / Applications
@@ -23,31 +23,9 @@ Supported Features
   - Programmatically
 - Environment Variable Replacements
 
-# WARNING
+# ⚠️ Migrating
 
-:warning: This is a development version and should not be used in production.
-
-This tool can be destructive to your Auth0 tenant. Please ensure you have read the documentation and tested the tool on a development tenant before using in production.
-
-# ⚠️ Migrating 
-
-This release provides extensive support for Auth0 Hooks. There are several important changes that have occured due to the existence of new hooks endpoints in the Auth0 Management API. Review the changes below before working with this release:
-
-### Underlying API change
-The `deploy-cli` now accesses new Hooks API endpoints that are not yet publicly available. If you plan to use this branch, contact Auth0 and request to enable the `api2_enable_hooks` flag on your tenant. 
-
-### Hooks property name changes
-| Old property name | New property name |
-|-------------------|-------------------|
-| hook.code         | hook.script       |
-| hook.active       | hook.enabled      |
-
-### Changes to working with secrets
-Secret values will not be populated when running `deploy-cli import` anymore. Instead, secrets are now populated with the value `_VALUE_NOT_SHOWN_`. If you plan to run tenant imports and exports using CI, the recommended action is to implement a task in your CI process to replace `_VALUE_NOT_SHOWN_` with the secrets your deployment requires before running the export task. 
-
-### Scope changes
-This release requires that you grant additional scopes to the `deploy-cli-extension`. Refer to the [pre-requisites](#Pre-requisites) section below to add the new hooks-related scopes (`create:hooks`, `read:hooks`, `update:hooks`, `delete:hooks`).
-
+Check our migration guides to see if you need to do anything when upgrading [here](https://github.com/auth0/auth0-deploy-cli/wiki/Migrating).
 
 # Install
 
@@ -137,22 +115,7 @@ In the event that the extension did not create the right scopes, confirm the fol
 - update:prompts
 - read:branding
 - update:branding
-
-# Hooks beta Support
-
-This version of the CLI will communicate directly to webtask. Your webtask authorization token will be required, it should be treated with care as with your other auth0 client secrets. Please note this will be **temporary** and the official release will consume the Hooks Management API endpoint.
-
-## Hook Model
-
-| Property     | Type               | Description                                                                                                | Example                                                                     |
-| ------------ | ------------------ | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| id           | string (ulid)      | Identifier representing the hook. The type of uuid will be a ULID.                                         | 01ARZ3NDEKTSV4RRFFQ69G5FAV                                                  |
-| name         | string             | Name of the hook.                                                                                          | my-hook                                                                     |
-| triggerId    | string             | The id of the trigger the hook will be executed as during the some workflow.                               | `credentials-exchange`, `pre-user-registration` or `post-user-registration` |
-| script         | string             | The code that will be executed when the hook is triggered.                                                 | `/** Your code here **/`                                                    |
-| secrets      | dictionary<string> | A list of key-value that contains a mapping of secrets that will be injected in the code during execution. | `{ 'api-key': 'your-api-key' }`                                             |
-| dependencies | dictionary<string> | A list of key-value that contains required npm modules and the version.                                    | `{ 'bcrypt': '3.0.6' }`                                                     |
-| enabled       | boolean            | Will determine if the hook should be enabled or not. Only one hook for a trigger can be enabled at a time.   | true                                                                        |
+  |
 
 ## Examples
 
