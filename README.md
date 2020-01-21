@@ -149,10 +149,10 @@ This version of the CLI will communicate directly to webtask. Your webtask autho
 | id           | string (ulid)      | Identifier representing the hook. The type of uuid will be a ULID.                                         | 01ARZ3NDEKTSV4RRFFQ69G5FAV                                                  |
 | name         | string             | Name of the hook.                                                                                          | my-hook                                                                     |
 | triggerId    | string             | The id of the trigger the hook will be executed as during the some workflow.                               | `credentials-exchange`, `pre-user-registration` or `post-user-registration` |
-| code         | string             | The code that will be executed when the hook is triggered.                                                 | `/** Your code here **/`                                                    |
+| script         | string             | The code that will be executed when the hook is triggered.                                                 | `/** Your code here **/`                                                    |
 | secrets      | dictionary<string> | A list of key-value that contains a mapping of secrets that will be injected in the code during execution. | `{ 'api-key': 'your-api-key' }`                                             |
 | dependencies | dictionary<string> | A list of key-value that contains required npm modules and the version.                                    | `{ 'bcrypt': '3.0.6' }`                                                     |
-| active       | boolean            | Will determine if the hook should be active or not. Only one hook for a trigger can be active at a time.   | true                                                                        |
+| enabled       | boolean            | Will determine if the hook should be enabled or not. Only one hook for a trigger can be enabled at a time.   | true                                                                        |
 
 ## Examples
 

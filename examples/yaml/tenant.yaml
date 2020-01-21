@@ -76,12 +76,12 @@ rulesConfigs:
 hooks:
   - name: "Client Credentials Exchange"
     triggerId: "credentials-exchange"
-    active: true
+    enabled: true
     secrets:
-      - api-key: "my custom api key"
-    dependencies": 
-      - bcrype: "3.0.6"
-    code: "hooks/client-credentials-exchange.js"
+      api-key: "my custom api key"
+    dependencies: 
+      bcrypt: "3.0.6"
+    script: "hooks/client-credentials-exchange.js"
 
 
 resourceServers:
