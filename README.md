@@ -25,7 +25,7 @@ Supported Features
 
 # ⚠️ WARNING
 
-This tool can be destructive to your Auth0 tenant. Please ensure you have read the documentation and tested the tool on a development tenant before using in production.
+This tool can be destructive to your Auth0 tenant. Please ensure you have read the documentation and tested the tool on a development tenant before using it in production.
 
 # Migrating
 
@@ -45,69 +45,69 @@ npm install auth0-deploy-cli@dev -g
 
 ## Pre-requisites
 
-For this tool to function it must be authorized to the Auth0 Management API. You can do this by creating an application in your Auth0 service that has access to the management API with the following scopes before.
+For this tool to function, it must be authorized to the Auth0 Management API. You can do this by creating an application in your Auth0 service that has access to the management API with the following scopes before.
 
 Use the [Auth0 Deploy CLI Extension](https://github.com/auth0-extensions/auth0-deploy-cli-extension/blob/master/README.md) to create the application. At the bottom of the README are instructions for doing this by hand instead.
 
-In the event that the extension did not create the right scopes, confirm the following:
+If the extension did not create the right scopes, confirm the following:
 
 1. Navigate to your application that was created for the deploy cli, typically named `auth0-deploy-cli-extension`.
 2. Ensure the Application type is **Machine to Machine**.
-3. Refresh the page and a _APIs_ tab should appear on the client.
-4. On the APIs tab, on **Auth0 Management API** click the drop down (right arrow) to show the list of permissions.
+3. Refresh the page and an _APIs_ tab should appear on the client.
+4. On the APIs tab, on **Auth0 Management API** click the drop-down (right arrow) to show the list of permissions.
 5. Ensure the following scopes below are selected:
 
 #### Scopes
 
-* read:client_grants
-* create:client_grants
-* delete:client_grants
-* update:client_grants
-* read:clients
-* update:clients
-* delete:clients
-* create:clients
-* read:client_keys
-* update:client_keys
-* delete:client_keys
-* create:client_keys
-* read:connections
-* update:connections
-* delete:connections
-* create:connections
-* read:resource_servers
-* update:resource_servers
-* delete:resource_servers
-* create:resource_servers
-* read:rules
-* update:rules
-* delete:rules
-* create:rules
-* read:hooks
-* update:hooks
-* delete:hooks
-* create:hooks
-* read:rules_configs
-* update:rules_configs
-* delete:rules_configs
-* read:email_provider
-* update:email_provider
-* delete:email_provider
-* create:email_provider
-* read:tenant_settings
-* update:tenant_settings
-* read:grants
-* delete:grants
-* read:guardian_factors
-* update:guardian_factors
-* read:email_templates
-* create:email_templates
-* update:email_templates
-* read:roles
-* read:prompts
-* update:prompts
-* read:branding
-* update:branding
+- read:client_grants
+- create:client_grants
+- delete:client_grants
+- update:client_grants
+- read:clients
+- update:clients
+- delete:clients
+- create:clients
+- read:client_keys
+- update:client_keys
+- delete:client_keys
+- create:client_keys
+- read:connections
+- update:connections
+- delete:connections
+- create:connections
+- read:resource_servers
+- update:resource_servers
+- delete:resource_servers
+- create:resource_servers
+- read:rules
+- update:rules
+- delete:rules
+- create:rules
+- read:hooks
+- update:hooks
+- delete:hooks
+- create:hooks
+- read:rules_configs
+- update:rules_configs
+- delete:rules_configs
+- read:email_provider
+- update:email_provider
+- delete:email_provider
+- create:email_provider
+- read:tenant_settings
+- update:tenant_settings
+- read:grants
+- delete:grants
+- read:guardian_factors
+- update:guardian_factors
+- read:email_templates
+- create:email_templates
+- update:email_templates
+- read:roles
+- read:prompts
+- update:prompts
+- read:branding
+- update:branding
   |
 
 ## Examples
@@ -171,7 +171,7 @@ deploy({
 
 The `auth0-deploy-cli` tool leverages the [Auth0 Management API](https://auth0.com/docs/api/management/v2) passing through objects for creates, updates and deletions.
 
-You may experience `Bad Request` and `Payload validation` errors. These errors are returned from the Auth0 Management API, and usually mean the object has attributes which are not writable or no longer available (legacy). This can happen when exporting from an older Auth0 tenant and importing into a newly created tenant. In this scenario you may need to update your configuration to support the new object format. See #45 for a potential fix.
+You may experience `Bad Request` and `Payload validation` errors. These errors are returned from the Auth0 Management API, and usually mean the object has attributes which are not writable or no longer available (legacy). This can happen when exporting from an older Auth0 tenant and importing into a newly created tenant. In this scenario, you may need to update your configuration to support the new object format. See #45 for a potential fix.
 
 ## CLI Options
 
@@ -183,20 +183,20 @@ The following options are supported by the cli.
 Auth0 Deploy CLI
 
 Commands:
-  a0deploy import  Deploy Configuration
-  a0deploy export  Export Auth0 Tenant Configuration
+ a0deploy import     Deploy Configuration
+ a0deploy export     Export Auth0 Tenant Configuration
 
 Options:
-  --help           Show help  [boolean]
-  --version        Show version number  [boolean]
-  --debug, -d    Dump extra debug information.  [string] [default: false]
-  --proxy_url, -p  A url for proxying requests, only set this if you are behind a proxy.  [string]
+ --help               Show help  [boolean]
+ --version            Show version number  [boolean]
+ --debug, -d          Dump extra debug information.  [string] [default: false]
+ --proxy_url, -p      A url for proxying requests, only set this if you are behind a proxy. [string]
 
 Examples:
-  a0deploy export -c config.json -f yaml -o path/to/export               Dump Auth0 config to folder in YAML format
-  a0deploy export -c config.json -f directory -o path/to/export          Dump Auth0 config to folder in directory format
-  a0deploy import -c config.json -i tenant.yaml                          Deploy Auth0 via YAML
-  a0deploy import -c config.json -i path/to/files                        Deploy Auth0 via Path
+ a0deploy export -c config.json -f yaml -o path/to/export       Dump Auth0 config to folder in YAML format
+ a0deploy export -c config.json -f directory -o path/to/export  Dump Auth0 config to folder in directory format
+ a0deploy import -c config.json -i tenant.yaml                  Deploy Auth0 via YAML
+ a0deploy import -c config.json -i path/to/files                Deploy Auth0 via Path
 
 See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.
 ```
@@ -216,7 +216,7 @@ Your configuration repository should contain the files as described in the selec
 You should have a branch for each tenant/account. This allows you to make changes to dev, but not deploy them until you merge. With this setup, you can have each environment have a CI task that automatically deploys the changes to its target environment when the branch is updated with the latest.
 
 So your flow would be as follows:
-dev changes are tested, then merged to uat, once tested they are merged to staging, once staging is tested they are merged to prod.
+dev changes are tested, then merged to UAT, once tested they are merged to staging, once staging is tested they are merged to prod.
 
 You may want to set your prod to only deploy when triggered manually.
 
@@ -226,10 +226,10 @@ Your CI server should have a different deploy task and config for each environme
 
 The deploy task should follow these steps:
 
-1.  Update the local repo to the latest. (each environment should have its own copy of the repo set to its own branch)
-1.  If there are changes, call a0deploy
-1.  Run a suite of tests to confirm configuration is working
-1.  Optional: merge to next branch
+1. Update the local repo to the latest. (each environment should have its own copy of the repo set to its own branch)
+1. If there are changes, call a0deploy
+1. Run a suite of tests to confirm configuration is working
+1. Optional: merge to next branch
 
 ### Use keyword mappings to handle differences between the environments
 
@@ -250,15 +250,15 @@ npm run test
 
 ## To Create Client Application by Hand
 
-1.  log into your dashboard
-1.  click the applications tab
-1.  click the "Create Application" button
-    1.  Name it something like "Deploy Client"
-    1.  Select Machine-to-Machine as the application type
-    1.  Click Create
-1.  Use the "Select an API" dropdown to choose: "Auth0 Management API"
-1.  Select the [scopes](#scopes) defined in the [section](#scopes) above
-1.  Click Authorize
+1. log into your dashboard
+1. click the applications tab
+1. click the "Create Application" button
+   1. Name it something like "Deploy Client"
+   1. Select Machine-to-Machine as the application type
+   1. Click Create
+1. Use the "Select an API" dropdown to choose: "Auth0 Management API"
+1. Select the [scopes](#scopes) defined in the [section](#scopes) above
+1. Click Authorize
 
 ## Known issues
 
