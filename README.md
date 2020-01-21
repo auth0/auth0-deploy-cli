@@ -23,9 +23,15 @@ Supported Features
   - Programmatically
 - Environment Variable Replacements
 
-# ⚠️ Migrating
+# WARNING # ⚠️ Migrating
+
+This tool can be destructive to your Auth0 tenant. Please ensure you have read the documentation and tested the tool on a development tenant before using in production.
 
 Check our migration guides to see if you need to do anything when upgrading [here](https://github.com/auth0/auth0-deploy-cli/wiki/Migrating).
+
+# What's new in version 4
+
+The `auth0-deploy-cli` will now support the Auth0 `Hook` object.
 
 # Install
 
