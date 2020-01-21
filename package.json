@@ -28,7 +28,7 @@
   "dependencies": {
     "ajv": "^6.5.2",
     "auth0": "astanciu/node-auth0#hooksapi",
-    "auth0-extension-tools": "^1.2.1",
+    "auth0-extension-tools": "^1.4.4",
     "auth0-source-control-extension-tools": "^4.0.0-dev.6",
     "dot-prop": "^4.2.0",
     "es6-template-strings": "^2.0.1",
