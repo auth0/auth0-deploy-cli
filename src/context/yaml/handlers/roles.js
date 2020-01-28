@@ -6,7 +6,7 @@ async function parse(context) {
 }
 
 async function dump(context) {
-  // nothing to do, set default empty
+  // remove empty descriptions
   return {
     roles: [
       ...(context.assets.roles || []).map((role) => {
