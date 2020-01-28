@@ -8,7 +8,15 @@ async function parse(context) {
 async function dump(context) {
   // nothing to do, set default empty
   return {
-    roles: [ ...context.assets.roles || [] ]
+    roles: [
+      ...(context.assets.roles || []).map((role) => {
+        if (role.description === null) {
+          delete role.description;
+        }
+
+        return role;
+      })
+    ]
   };
 }
 
