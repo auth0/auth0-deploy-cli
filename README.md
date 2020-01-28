@@ -40,7 +40,7 @@ The `auth0-deploy-cli` will now support the Auth0 `Hook` object.
 ### General Install
 
 ```bash
-npm install auth0-deploy-cli@dev -g
+npm i -g auth0-deploy-cli
 ```
 
 ## Pre-requisites
