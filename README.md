@@ -112,10 +112,6 @@ If the extension did not create the right scopes, confirm the following:
 - read:branding
 - update:branding
 
-## Examples
-
-Please see the `/examples/` directory on the the [hooks-beta](https://github.com/auth0/auth0-deploy-cli/tree/hooks-beta) branch.
-
 # Usage
 
 This tool supports multiple methods to import and export Auth0 configuration objects.
