@@ -104,11 +104,13 @@ If the extension did not create the right scopes, confirm the following:
 - create:email_templates
 - update:email_templates
 - read:roles
+- update:roles
+- delete:roles
+- create:roles
 - read:prompts
 - update:prompts
 - read:branding
 - update:branding
-  |
 
 ## Examples
 
