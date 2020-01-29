@@ -31,6 +31,8 @@ function parse(context) {
 async function dump(context) {
   const hooks = [ ...context.assets.hooks || [] ];
 
+  if (hooks.length < 1) return;
+
   // Create Hooks folder
   const hooksFolder = path.join(context.filePath, constants.HOOKS_DIRECTORY);
   fs.ensureDirSync(hooksFolder);
