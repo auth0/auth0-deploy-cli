@@ -5,7 +5,6 @@ import { constants } from 'auth0-source-control-extension-tools';
 import log from '../../../logger';
 import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
 
-
 function parse(context) {
   const rolesFolder = path.join(context.filePath, constants.ROLES_DIRECTORY);
   if (!existsMustBeDir(rolesFolder)) return { roles: [] }; // Skip
@@ -43,7 +42,6 @@ async function dump(context) {
     fs.writeFileSync(roleFile, JSON.stringify(role, null, 2));
   });
 }
-
 
 export default {
   parse,

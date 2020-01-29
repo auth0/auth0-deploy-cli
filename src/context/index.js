@@ -40,7 +40,9 @@ export default async function(config) {
       clientSecret: config.AUTH0_CLIENT_SECRET
     });
 
-    const clientCredentials = await authClient.clientCredentialsGrant({ audience: `https://${config.AUTH0_DOMAIN}/api/v2/` });
+    const clientCredentials = await authClient.clientCredentialsGrant({
+      audience: `https://${config.AUTH0_DOMAIN}/api/v2/`
+    });
     accessToken = clientCredentials.access_token;
   }
 

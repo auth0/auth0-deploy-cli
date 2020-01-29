@@ -68,11 +68,20 @@ rules:
     order: 10
     script: "rules/enrich_tokens.js"
 
-
 rulesConfigs:
   # Key/Value pairs for Rule configuration settings
   - key: "SOME_SECRET"
     value: 'some_key'
+
+hooks:
+  - name: "Client Credentials Exchange"
+    triggerId: "credentials-exchange"
+    enabled: true
+    secrets:
+      api-key: "my custom api key"
+    dependencies: 
+      bcrypt: "3.0.6"
+    script: "hooks/client-credentials-exchange.js"
 
 
 resourceServers:
