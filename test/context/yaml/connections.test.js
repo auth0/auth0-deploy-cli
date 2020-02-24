@@ -79,21 +79,19 @@ describe('#YAML context connections', () => {
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: path.join(dir, './test.yml') }, mockMgmtClient());
     const connections = [
-      { name: 'test-waad', strategy: 'waad', enabled_clients: [] },
+      { name: 'test-waad', strategy: 'waad' },
       {
         name: 'email',
         strategy: 'email',
-        enabled_clients: [],
         options: { email: { body: 'html code' } }
       }
     ];
 
     const target = [
-      { name: 'test-waad', strategy: 'waad', enabled_clients: [] },
+      { name: 'test-waad', strategy: 'waad' },
       {
         name: 'email',
         strategy: 'email',
-        enabled_clients: [],
         options: { email: { body: './email.html' } }
       }
     ];

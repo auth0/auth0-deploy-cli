@@ -41,19 +41,18 @@ async function dump(context) {
 
   const clients = context.assets.clients || [];
 
-  // nothing to do, set default if empty
   return {
     connections: connections.map((connection) => {
-      const dumpedConnection = {
-        ...connection,
-        enabled_clients: [
-          ...(connection.enabled_clients || []).map((clientId) => {
-            const found = clients.find(c => c.client_id === clientId);
-            if (found) return found.name;
-            return clientId;
-          })
-        ]
-      };
+      const enabledClients = (connection.enabled_clients || []).map((clientId) => {
+        const found = clients.find(c => c.client_id === clientId);
+        if (found) return found.name;
+        return clientId;
+      });
+
+      const dumpedConnection = Object.assign(
+        connection,
+        enabledClients.length === 0 ? null : { enabled_clients: enabledClients }
+      );
 
       if (dumpedConnection.strategy === 'email') {
         ensureProp(connection, 'options.email.body');
