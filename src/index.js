@@ -24,13 +24,6 @@ async function run() {
   // Run command
   const cmd = commands[params._[0]];
 
-  // TODO: Prob a native/better way to enforce command choices in yargs.
-  if (!cmd) {
-    log.error(`Command ${params._[0]} not supported\n`);
-    args.showHelp();
-    process.exit(1);
-  }
-
   // Monkey Patch the superagent for proxy use
   const proxy = params.proxy_url;
   if (proxy) {
