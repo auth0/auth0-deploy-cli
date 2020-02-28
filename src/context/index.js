@@ -4,6 +4,7 @@ import YAMLContext from './yaml';
 import DirectoryContext from './directory';
 
 import { isDirectory } from '../utils';
+import { version as packageVersion } from '../../package.json';
 import log from '../logger';
 
 const nonPrimitiveProps = [
@@ -49,7 +50,10 @@ export default async function(config) {
   const mgmtClient = new ManagementClient({
     domain: config.AUTH0_DOMAIN,
     token: accessToken,
-    retry: { maxRetries: config.AUTH0_API_MAX_RETRIES || 10 }
+    retry: { maxRetries: config.AUTH0_API_MAX_RETRIES || 10 },
+    headers: {
+      'User-agent': `deploy-cli/${packageVersion} (node.js/${process.version.replace('v', '')})`
+    }
   });
 
   const inputFile = config.AUTH0_INPUT_FILE;

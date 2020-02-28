@@ -41,4 +41,21 @@ describe('#context loader validation', async () => {
     const loaded2 = await context({ ...config, AUTH0_INPUT_FILE: yml });
     expect(loaded2).to.be.an.instanceof(yamlContext);
   });
+
+  it('should include the deploy cli version in the user agent header', async () => {
+    /* Create empty directory */
+    const dir = path.resolve(testDataDir, 'context');
+    cleanThenMkdir(dir);
+
+    const yaml = path.join(dir, 'empty.yaml');
+    fs.writeFileSync(yaml, '');
+
+    const loaded = await context({ ...config, AUTH0_INPUT_FILE: yaml });
+    expect(loaded).to.be.an.instanceof(yamlContext);
+
+    const userAgent = loaded.mgmtClient.rules.resource.restClient.restClient.options.headers['User-agent'];
+
+    expect(userAgent).to.contain('deploy-cli');
+    expect(userAgent).to.contain('node.js');
+  });
 });
