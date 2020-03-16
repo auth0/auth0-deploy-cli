@@ -31,6 +31,16 @@ describe('#YAML context connections', () => {
         options:
           email:
             body: "./email.html"
+      - name: "someSamlConnection"
+        strategy: "samlp"
+        enabled_clients:
+          - "client1"
+        options:
+          passwordPolicy: "testPolicy"
+          idpinitiated:
+            client_id: "idp-one"
+            client_protocol: samlp
+            client_authorizequery: ""
     `;
 
     const target = [
@@ -57,6 +67,19 @@ describe('#YAML context connections', () => {
           }
         },
         strategy: 'email'
+      },
+      {
+        name: 'someSamlConnection',
+        strategy: 'samlp',
+        enabled_clients: [ 'client1' ],
+        options: {
+          passwordPolicy: 'testPolicy',
+          idpinitiated: {
+            client_id: 'idp-one',
+            client_protocol: 'samlp',
+            client_authorizequery: ''
+          }
+        }
       }
     ];
 
@@ -85,6 +108,32 @@ describe('#YAML context connections', () => {
         strategy: 'email',
         enabled_clients: [],
         options: { email: { body: 'html code' } }
+      },
+      {
+        name: 'someSamlConnection',
+        strategy: 'samlp',
+        enabled_clients: [ 'client1-id' ],
+        options: {
+          passwordPolicy: 'testPolicy',
+          idpinitiated: {
+            client_id: 'client-idp-one-id',
+            client_protocol: 'samlp',
+            client_authorizequery: ''
+          }
+        }
+      },
+      {
+        name: 'someSamlConnectionNoClientFound',
+        strategy: 'samlp',
+        enabled_clients: [ 'client2-id' ],
+        options: {
+          passwordPolicy: 'testPolicy',
+          idpinitiated: {
+            client_id: 'client-idp-two-id',
+            client_protocol: 'samlp',
+            client_authorizequery: ''
+          }
+        }
       }
     ];
 
@@ -95,9 +144,41 @@ describe('#YAML context connections', () => {
         strategy: 'email',
         enabled_clients: [],
         options: { email: { body: './email.html' } }
+      },
+      {
+        name: 'someSamlConnection',
+        strategy: 'samlp',
+        enabled_clients: [ 'client1' ],
+        options: {
+          passwordPolicy: 'testPolicy',
+          idpinitiated: {
+            client_id: 'client-idp-one-name',
+            client_protocol: 'samlp',
+            client_authorizequery: ''
+          }
+        }
+      },
+      {
+        name: 'someSamlConnectionNoClientFound',
+        strategy: 'samlp',
+        enabled_clients: [ 'client2-id' ],
+        options: {
+          passwordPolicy: 'testPolicy',
+          idpinitiated: {
+            client_id: 'client-idp-two-id',
+            client_protocol: 'samlp',
+            client_authorizequery: ''
+          }
+        }
       }
     ];
 
+    const clients = [
+      { name: 'client-idp-one-name', app_type: 'spa', client_id: 'client-idp-one-id' },
+      { name: 'client1', app_type: 'spa', client_id: 'client1-id' }
+    ];
+
+    context.assets.clients = clients;
     context.assets.connections = connections;
 
     const dumped = await handler.dump(context);
