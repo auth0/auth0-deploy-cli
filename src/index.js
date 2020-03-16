@@ -7,72 +7,73 @@ import args from './args';
 import commands from './commands';
 import log from './logger';
 
-// Load cli params
-const params = args.argv;
 
-log.debug('Starting Auth0 Deploy CLI Tool');
+async function run(params) {
+ // Run command
+ const cmd = commands[params._[0]];
 
-// Set log level
-log.transports.console.level = params.level;
-if (params.debug) {
-  log.transports.console.level = 'debug';
-  // Set for auth0-source-control-ext-tools
-  process.env.AUTH0_DEBUG = 'true';
-}
+ // Monkey Patch the superagent for proxy use
+ const proxy = params.proxy_url;
+ if (proxy) {
+ const proxyAgent = new HttpProxyAgent(proxy);
+ const proxyAgentSsl = new HttpsProxyAgent(proxy);
+ const OrigRequest = superagent.Request;
+ superagent.Request = function RequestWithAgent(method, url) {
+ const req = new OrigRequest(method, url);
+ log.info(`Setting proxy for ${method} to ${url}`);
+ if (url.startsWith('https')) return req.agent(proxyAgentSsl);
+ return req.agent(proxyAgent);
+ };
+ }
 
-async function run() {
-  // Run command
-  const cmd = commands[params._[0]];
-
-  // Monkey Patch the superagent for proxy use
-  const proxy = params.proxy_url;
-  if (proxy) {
-    const proxyAgent = new HttpProxyAgent(proxy);
-    const proxyAgentSsl = new HttpsProxyAgent(proxy);
-    const OrigRequest = superagent.Request;
-    superagent.Request = function RequestWithAgent(method, url) {
-      const req = new OrigRequest(method, url);
-      log.info(`Setting proxy for ${method} to ${url}`);
-      if (url.startsWith('https')) return req.agent(proxyAgentSsl);
-      return req.agent(proxyAgent);
-    };
-  }
-
-  log.debug(`Start command ${params._[0]}`);
-  await cmd(params);
-  log.debug(`Finished command ${params._[0]}`);
+ log.debug(`Start command ${params._[0]}`);
+ await cmd(params);
+ log.debug(`Finished command ${params._[0]}`);
 }
 
 // Only run if from command line
 if (require.main === module) {
-  run()
-    .then(() => process.exit(0))
-    .catch((error) => {
-      if (error.type || error.stage) {
-        log.error(`Problem running command ${params._[0]} during stage ${error.stage} when processing type ${error.type}`);
-      } else {
-        log.error(`Problem running command ${params._[0]}`);
-      }
+ // Load cli params
+ const params = args.argv;
 
-      const msg = error.message || error.toString();
-      log.error(msg);
+ log.debug('Starting Auth0 Deploy CLI Tool');
 
-      if (process.env.AUTH0_DEBUG === 'true') {
-        log.debug(error.stack);
-      }
+ // Set log level
+ log.transports.console.level = params.level;
+ if (params.debug) {
+ log.transports.console.level = 'debug';
+ // Set for auth0-source-control-ext-tools
+ process.env.AUTH0_DEBUG = 'true';
+ }
 
-      if (typeof msg === 'string' && msg.includes('Payload validation error')) {
-        log.info('Please see https://github.com/auth0/auth0-deploy-cli#troubleshooting for common issues');
-      }
-      process.exit(1);
-    });
+ run(params)
+ .then(() => process.exit(0))
+ .catch((error) => {
+ if (error.type || error.stage) {
+ log.error(`Problem running command ${params._[0]} during stage ${error.stage} when processing type ${error.type}`);
+ } else {
+ log.error(`Problem running command ${params._[0]}`);
+ }
+
+ const msg = error.message || error.toString();
+ log.error(msg);
+
+ if (process.env.AUTH0_DEBUG === 'true') {
+ log.debug(error.stack);
+ }
+
+ if (typeof msg === 'string' && msg.includes('Payload validation error')) {
+ log.info('Please see https://github.com/auth0/auth0-deploy-cli#troubleshooting for common issues');
+ }
+ process.exit(1);
+ });
 }
 
 
 // Export commands to be used programmatically
 module.exports = {
-  deploy: commands.import,
-  dump: commands.export,
-  import: commands.import,
-  export: commands.export
+ deploy: commands.import,
+ dump: commands.export,
+ import: commands.import,
+ export: commands.export
 };
