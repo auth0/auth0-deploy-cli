@@ -2,7 +2,7 @@
 export function emailProviderDefaults(emailProvider) {  // eslint-disable-line
   const updated = { ...emailProvider };
 
-  const apiKeyProviders = [ 'mandrill', 'sendgrid', 'sparkpost' ];
+  const apiKeyProviders = [ 'mailgun', 'mandrill', 'sendgrid', 'sparkpost' ];
 
   // Add placeholder for credentials as they cannot be exported
   const { name } = updated;
