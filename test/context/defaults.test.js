@@ -29,6 +29,15 @@ describe('#context defaults', () => {
     });
   });
 
+  it('should set emailProvider defaults for mailgun', async () => {
+    expect(emailProviderDefaults({ name: 'mailgun' })).to.deep.equal({
+      credentials: {
+        api_key: 'YOUR_MAILGUN_API_KEY'
+      },
+      name: 'mailgun'
+    });
+  });
+
   it('should set emailProvider defaults for mandrill', async () => {
     expect(emailProviderDefaults({ name: 'mandrill' })).to.deep.equal({
       credentials: {
