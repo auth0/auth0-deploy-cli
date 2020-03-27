@@ -4,17 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [4.0.2] - 2019-02-28
+## [4.1.0] - 2020-03-28
+- When exporting a mailgun email provider, a placholder api key will be included in the export..
+
+## [4.0.3] - 2020-03-18
+- Programmatic usage will not complain about args. #215
+
+## [4.0.2] - 2020-02-28
 - Included Deploy CLI version number in User-Agent header.
 - If no command line arguments are passed, the usage statement will be printed.
 
-## [4.0.1] - 2019-02-05
+## [4.0.1] - 2020-02-05
 ### Fixed
 - Fixed import and export errors when roles and hooks are not available
 ### Updated
 - Update `auth0-source-control-extension-tools`
 
-## [4.0.0] - 2019-11-04
+## [4.0.0] - 2020-01-29
 ### Added
 - Add support for Hooks and Hook Secrets
 - Update `auth0`, `auth0-extension-tools`, `auth0-source-control-extension-tools`, and `js-yaml`
