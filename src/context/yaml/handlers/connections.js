@@ -33,8 +33,33 @@ async function parse(context) {
   };
 }
 
+const convertClientIdToName = (clientId, clients) => {
+  const found = clients.find(c => c.client_id === clientId);
+  return (found && found.name) || clientId;
+};
+
+const getFormattedOptions = (connection, clients) => {
+  try {
+    return {
+      options: {
+        ...connection.options,
+        idpinitiated: {
+          ...connection.options.idpinitiated,
+          client_id: convertClientIdToName(
+            connection.options.idpinitiated.client_id,
+            clients
+          )
+        }
+      }
+    };
+  } catch (e) {
+    return {};
+  }
+};
+
 async function dump(context) {
   const { connections } = context.assets;
+
 
   // Nothing to do
   if (!connections) return {};
@@ -46,12 +71,9 @@ async function dump(context) {
     connections: connections.map((connection) => {
       const dumpedConnection = {
         ...connection,
+        ...getFormattedOptions(connection, clients),
         enabled_clients: [
-          ...(connection.enabled_clients || []).map((clientId) => {
-            const found = clients.find(c => c.client_id === clientId);
-            if (found) return found.name;
-            return clientId;
-          })
+          ...(connection.enabled_clients || []).map(clientNameOrId => convertClientIdToName(clientNameOrId, clients))
         ]
       };
 
