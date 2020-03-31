@@ -42,6 +42,31 @@ describe('#directory context connections', () => {
     expect(context.assets.connections).to.deep.equal(target);
   });
 
+
+  it('should process a custom connections directory', async () => {
+    const customConnectionDirectory = 'connections-custom';
+
+    const files = {
+      [customConnectionDirectory]: {
+        'a-connection.json': '{ "name": "A Connection" }'
+      }
+    };
+
+    const repoDir = path.join(testDataDir, 'directory', 'connections1');
+    createDir(repoDir, files);
+
+    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_CONNECTIONS_DIRECTORY: customConnectionDirectory };
+    const context = new Context(config, mockMgmtClient());
+    await context.load();
+
+    const target = [
+      { name: 'A Connection' }
+    ];
+
+    expect(context.assets.connections).to.deep.equal(target);
+  });
+
+
   it('should ignore unknown file', async () => {
     const files = {
       [constants.CONNECTIONS_DIRECTORY]: {
