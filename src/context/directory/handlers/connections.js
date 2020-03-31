@@ -6,7 +6,8 @@ import log from '../../../logger';
 import { isFile, getFiles, existsMustBeDir, loadJSON, sanitize, ensureProp } from '../../../utils';
 
 function parse(context) {
-  const connectionsFolder = path.join(context.filePath, constants.CONNECTIONS_DIRECTORY);
+  const connectionDirectory = context.config.AUTH0_CONNECTIONS_DIRECTORY || constants.CONNECTIONS_DIRECTORY;
+  const connectionsFolder = path.join(context.filePath, connectionDirectory);
   if (!existsMustBeDir(connectionsFolder)) return { connections: [] }; // Skip
 
   const foundFiles = getFiles(connectionsFolder, [ '.json' ]);
