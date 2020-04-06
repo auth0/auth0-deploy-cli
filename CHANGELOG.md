@@ -6,9 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.2.1] - 2020-04-06
 ### Fixed
-- Fixed rules' reorder to avoid order colisions
-### Updated
-- Update `auth0-source-control-extension-tools`
+- Fixed rules' reorder to avoid order collisions by updating `auth0-source-control-extension-tools`
 
 ## [4.2.0] - 2020-03-28
 - When importing SAML database connections, support client name in the `options.idpinitiated.client_id` property.
