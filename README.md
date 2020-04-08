@@ -233,6 +233,12 @@ The deploy task should follow these steps:
 
 You should not have to store differences between environments in the Deploy Configuration Repository. Use the keyword mappings to allow the repository to be environment agnostic, and instead store the differences in the separate config.json files for each environment that are stored on the CI server.
 
+### Make sure to use unique application names
+
+When exporting certain configurations like the applications enabled for a certain connection or the IdP-Initiated settings for a SAML connection, the CLI tool will convert client IDs into client names and convert those client names back into client IDs when importing configurations. Because of this, it's importanting that you keep your application names unique.
+
+This mapping to client names helps to make a tenant configuration independent of the actual client IDs assigned on a deploy.
+
 # Other Helpful Topics
 
 ### To test locally
