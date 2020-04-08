@@ -2,7 +2,7 @@
   "template": "verify_email",
   "from": "",
   "subject": "",
-  "resultUrl": "http://steve.a0demo.s3-website-ap-southeast-2.amazonaws.com/verified.html",
+  "resultUrl": "",
   "body": "./verify_email.html",
   "urlLifetimeInSeconds": 432000,
   "syntax": "liquid",
