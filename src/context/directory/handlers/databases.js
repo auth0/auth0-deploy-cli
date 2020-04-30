@@ -48,7 +48,7 @@ function getDatabase(folder, mappings) {
 
 function parse(context) {
   const databaseFolder = path.join(context.filePath, constants.DATABASE_CONNECTIONS_DIRECTORY);
-  if (!existsMustBeDir(databaseFolder)) return { databases: [] }; // Skip
+  if (!existsMustBeDir(databaseFolder)) return { databases: undefined }; // Skip
 
   const folders = fs.readdirSync(databaseFolder)
     .map(f => path.join(databaseFolder, f))

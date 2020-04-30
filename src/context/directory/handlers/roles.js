@@ -7,7 +7,7 @@ import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
 
 function parse(context) {
   const rolesFolder = path.join(context.filePath, constants.ROLES_DIRECTORY);
-  if (!existsMustBeDir(rolesFolder)) return { roles: [] }; // Skip
+  if (!existsMustBeDir(rolesFolder)) return { roles: undefined }; // Skip
 
   const files = getFiles(rolesFolder, [ '.json' ]);
 

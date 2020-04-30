@@ -8,7 +8,7 @@ import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
 
 function parse(context) {
   const rulesFolder = path.join(context.filePath, constants.RULES_DIRECTORY);
-  if (!existsMustBeDir(rulesFolder)) return { rules: [] }; // Skip
+  if (!existsMustBeDir(rulesFolder)) return { rules: undefined }; // Skip
 
   const files = getFiles(rulesFolder, [ '.json' ]);
 
