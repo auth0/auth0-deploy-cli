@@ -12,7 +12,8 @@
     "test": "cross-env NODE_ENV=test nyc mocha --recursive --require babel-register test",
     "build": "rimraf ./lib && babel src -d lib",
     "prepare": "npm run build",
-    "release": "git tag $npm_package_version && git push --tags && npm publish"
+    "preversion": "kacl prerelease",
+    "version": "kacl release"
   },
   "repository": {
     "type": "git",
