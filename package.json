@@ -7,7 +7,7 @@
     "a0deploy": "lib/index.js"
   },
   "scripts": {
-    "lint:js": "eslint --ignore-path .eslintignore --ignore-pattern webpack .",
+    "lint": "eslint --ignore-path .eslintignore --ignore-pattern webpack . && kacl lint",
     "pretest": "npm run lint:js && rimraf ./.nyc_output",
     "test": "cross-env NODE_ENV=test nyc mocha --recursive --require babel-register test",
     "build": "rimraf ./lib && babel src -d lib",
@@ -46,6 +46,7 @@
     "yargs": "^14.2.1"
   },
   "devDependencies": {
+    "@brightcove/kacl": "^0.1.8",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.3",

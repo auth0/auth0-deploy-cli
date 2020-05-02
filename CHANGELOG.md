@@ -9,23 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed rules' reorder to avoid order collisions by updating `auth0-source-control-extension-tools`
 
 ## [4.2.0] - 2020-03-28
+### Fixed
 - When importing SAML database connections, support client name in the `options.idpinitiated.client_id` property.
 - When exporting SAML database connections, convert client ID to client name.
 
 ## [4.1.0] - 2020-03-28
+### Fixed
 - When exporting a mailgun email provider, a placholder api key will be included in the export..
 
 ## [4.0.3] - 2020-03-18
+### Fixed
 - Programmatic usage will not complain about args. #215
 
 ## [4.0.2] - 2020-02-28
+### Added
 - Included Deploy CLI version number in User-Agent header.
 - If no command line arguments are passed, the usage statement will be printed.
 
 ## [4.0.1] - 2020-02-05
 ### Fixed
 - Fixed import and export errors when roles and hooks are not available
-### Updated
+### Changed
 - Update `auth0-source-control-extension-tools`
 
 ## [4.0.0] - 2020-01-29
@@ -42,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add readonly flag `remove_stale_idp_attributes`
 
 ## [3.6.4] - 2019-12-04
-### Updated
+### Changed
 - Update `https-proxy-agent` and `js-yaml`
 
 ## [3.6.3] - 2019-11-04
@@ -58,7 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed `--verbose` option
 
 ## [3.6.0] - 2019-08-26
-### Updated
+### Changed
 - Update `auth0-extension-tools`
 ### Fixed
 - Clear empty descriptions on roles
@@ -75,7 +79,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Load custom_login_page template for client from external html file #138
 
 ## [3.3.2] - 2019-07-11
-### Updated
+### Changed
 - pin minor version of source-control-tools@~3.4.1
 
 ## [3.3.1] - 2019-06-13
@@ -116,9 +120,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.0] - 2019-03-04
 ### Added
-Options added to the config:
-- `INCLUDED_PROPS` - enables export of properties that are excluded by default (e.g. `client_secret`)
-- `EXCLUDED_PROPS` - provides ability to exclude any unwanted properties from exported objects
+- Options added to the config:
+  - `INCLUDED_PROPS` - enables export of properties that are excluded by default (e.g. `client_secret`)
+  - `EXCLUDED_PROPS` - provides ability to exclude any unwanted properties from exported objects
 
 ### Changed
 - `--strip` option has been removed from `export` command. Now **IDs will be stripped by default**. `AUTH0_EXPORT_IDENTIFIERS: true` or `--export_ids` can be used to override.
