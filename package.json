@@ -8,7 +8,7 @@
   },
   "scripts": {
     "lint": "eslint --ignore-path .eslintignore --ignore-pattern webpack . && kacl lint",
-    "pretest": "npm run lint:js && rimraf ./.nyc_output",
+    "pretest": "rimraf ./.nyc_output",
     "test": "cross-env NODE_ENV=test nyc mocha --recursive --require babel-register test",
     "build": "rimraf ./lib && babel src -d lib",
     "prepare": "npm run build",
