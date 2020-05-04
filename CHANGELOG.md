@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [unreleased]
+### Added
+- Support for phone message hook added.
+
 ## [4.2.1] - 2020-04-06
 ### Fixed
 - Fixed rules' reorder to avoid order collisions by updating `auth0-source-control-extension-tools`
