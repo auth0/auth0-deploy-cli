@@ -1,18 +1,19 @@
 {
   "name": "auth0-deploy-cli",
-  "version": "4.2.1",
+  "version": "4.2.2",
   "description": "A command line tool for deploying updates to your Auth0 tenant",
   "main": "lib/index.js",
   "bin": {
     "a0deploy": "lib/index.js"
   },
   "scripts": {
-    "lint:js": "eslint --ignore-path .eslintignore --ignore-pattern webpack .",
-    "pretest": "npm run lint:js && rimraf ./.nyc_output",
+    "lint": "eslint --ignore-path .eslintignore --ignore-pattern webpack . && kacl lint",
+    "pretest": "rimraf ./.nyc_output",
     "test": "cross-env NODE_ENV=test nyc mocha --recursive --require babel-register test",
     "build": "rimraf ./lib && babel src -d lib",
     "prepare": "npm run build",
-    "release": "git tag $npm_package_version && git push --tags && npm publish"
+    "preversion": "kacl prerelease",
+    "version": "kacl release"
   },
   "repository": {
     "type": "git",
@@ -29,7 +30,7 @@
     "ajv": "^6.5.2",
     "auth0": "^2.23.0",
     "auth0-extension-tools": "^1.4.4",
-    "auth0-source-control-extension-tools": "^4.0.5",
+    "auth0-source-control-extension-tools": "^4.0.7",
     "dot-prop": "^4.2.0",
     "es6-template-strings": "^2.0.1",
     "fs-extra": "^7.0.0",
@@ -46,6 +47,7 @@
     "yargs": "^14.2.1"
   },
   "devDependencies": {
+    "@brightcove/kacl": "^0.1.8",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.3",
