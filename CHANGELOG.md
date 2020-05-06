@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.2.2] - 2020-05-04
 ### Added
 - Support for phone message hook added.
+- Configurable connections directory with `AUTH0_CONNECTIONS_DIRECTORY`.
+### Removed
+- Remove data from verify email example to prevent copy and paste misuse.
 
 ## [4.2.1] - 2020-04-06
 ### Fixed
