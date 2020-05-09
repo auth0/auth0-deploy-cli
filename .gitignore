@@ -8,3 +8,4 @@ config.json
 .env
 .idea
 .npmrc
+yarn-error.log

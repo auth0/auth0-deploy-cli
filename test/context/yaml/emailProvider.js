@@ -63,4 +63,21 @@ describe('#YAML context email provider', () => {
       }
     });
   });
+
+  it('should dump email provider without defaults when excluded', async () => {
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+    context.assets.emailProvider = {
+      enabled: true,
+      name: 'smtp'
+    };
+
+    context.assets.exclude.defaults = [ 'emailProvider' ];
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({
+      emailProvider: {
+        enabled: true,
+        name: 'smtp'
+      }
+    });
+  });
 });
