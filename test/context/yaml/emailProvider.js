@@ -53,10 +53,10 @@ describe('#YAML context email provider', () => {
     expect(dumped).to.deep.equal({
       emailProvider: {
         credentials: {
-          smtp_host: 'your.smtp.host.com',
-          smtp_port: 25,
-          smtp_user: 'YOUR_SMTP_USER',
-          smtp_pass: 'YOUR_SMTP_PASS'
+          smtp_host: '##SMTP_HOSTNAME##',
+          smtp_pass: '##SMTP_PASS##',
+          smtp_port: '##SMTP_PORT##',
+          smtp_user: '##SMTP_USER##'
         },
         enabled: true,
         name: 'smtp'

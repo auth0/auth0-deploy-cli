@@ -9,26 +9,26 @@ export function emailProviderDefaults(emailProvider) {  // eslint-disable-line
 
   if (apiKeyProviders.includes(name)) {
     updated.credentials = {
-      api_key: `YOUR_${name.toUpperCase()}_API_KEY`,
+      api_key: `##${name.toUpperCase()}_API_KEY##`,
       ...updated.credentials || {}
     };
   }
 
   if (name === 'smtp') {
     updated.credentials = {
-      smtp_host: 'your.smtp.host.com',
-      smtp_port: 25,
-      smtp_user: 'YOUR_SMTP_USER',
-      smtp_pass: 'YOUR_SMTP_PASS',
+      smtp_host: '##SMTP_HOSTNAME##',
+      smtp_port: '##SMTP_PORT##',
+      smtp_user: '##SMTP_USER##',
+      smtp_pass: '##SMTP_PASS##',
       ...updated.credentials || {}
     };
   }
 
   if (name === 'ses') {
     updated.credentials = {
-      accessKeyId: 'YOUR_ACCESS_KEY_ID',
-      secretAccessKey: 'YOUR_ACCESS_SECRET_KEY',
-      region: 'YOUR_SMTP_USER',
+      accessKeyId: '##SES_ACCESS_KEY_ID##',
+      secretAccessKey: '##SES_ACCESS_SECRET_KEY##',
+      region: '##SES_AWS_REGION##',
       ...updated.credentials || {}
     };
   }
