@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- Allow exluding default values for emailProvider with `AUTH0_EXCLUDED_DEFAULTS`
+- Allow excluding default values for emailProvider with `AUTH0_EXCLUDED_DEFAULTS`
 
 ## [4.2.2] - 2020-05-04
 ### Added
