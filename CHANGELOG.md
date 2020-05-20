@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.3.1] - 2020-05-20
+### Fixed
+- Fixed broken mkdirp package dependency
+
 ## [4.3.0] - 2020-05-18
 ### Removed
 - Removed several unused dependencies:
@@ -205,7 +209,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#138]: https://github.com/auth0/auth0-deploy-cli/issues/138
 [#215]: https://github.com/auth0/auth0-deploy-cli/issues/215
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v4.3.0...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v4.3.1...HEAD
+[4.3.1]: https://github.com/auth0/auth0-deploy-cli/compare/v4.3.0...v4.3.1
 [4.3.0]: https://github.com/auth0/auth0-deploy-cli/compare/v4.2.2...v4.3.0
 [4.2.2]: https://github.com/auth0/auth0-deploy-cli/compare/v4.2.1...v4.2.2
 [4.2.1]: https://github.com/auth0/auth0-deploy-cli/compare/v4.2.0...v4.2.1
