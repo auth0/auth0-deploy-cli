@@ -35,6 +35,7 @@
     "http-proxy-agent": "^2.0.0",
     "https-proxy-agent": "^2.2.3",
     "js-yaml": "^3.13.1",
+    "mkdirp": "^0.5.1",
     "nconf": "^0.8.4",
     "sanitize-filename": "^1.6.1",
     "superagent": "^3.5.2",
@@ -60,7 +61,6 @@
     "eslint-import-resolver-babel-module": "^4.0.0",
     "eslint-import-resolver-webpack": "^0.10.0",
     "eslint-plugin-import": "^2.12.0",
-    "mkdirp": "^0.5.1",
     "mocha": "^5.2.0",
     "nyc": "^10.0.0",
     "rmdir-sync": "^1.0.1"
