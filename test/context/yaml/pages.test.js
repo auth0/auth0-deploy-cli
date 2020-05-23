@@ -12,7 +12,7 @@ function createPagesDir(pagesDir, target) {
   Object.keys(target).forEach((scriptName) => {
     fs.writeFileSync(
       path.resolve(pagesDir, scriptName + '.html'),
-      target[scriptName].htmlFile
+      target[scriptName].html
     );
     if (target[scriptName].metadata) {
       fs.writeFileSync(
