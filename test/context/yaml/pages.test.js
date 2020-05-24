@@ -36,14 +36,14 @@ describe('#YAML context pages', () => {
     pages:
       - name: "login"
         html: "${htmlFile}"
-    
+
       - name: "password_reset"
         html: "${htmlFile}"
-    
+
       - name: "guardian_multifactor"
         html: "${htmlFile}"
         enabled: false
-    
+
       - name: "error_page"
         html: "${htmlFile}"
     `;
