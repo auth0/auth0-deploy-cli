@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Allow excluding default values for emailProvider with `AUTH0_EXCLUDED_DEFAULTS`
 
+### Changed
+- Updated dependencies and deprecated support for Node versions earlier than 8 via babel@7 and dot-prop@5.
+
 ## [4.3.1] - 2020-05-20
 ### Fixed
 - Fixed broken mkdirp package dependency

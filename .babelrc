@@ -11,8 +11,7 @@
     ]
   ],
   "plugins": [
-    "transform-decorators-legacy",
-    "transform-object-rest-spread",
+    ["@babel/plugin-proposal-decorators", { "legacy": true }],
     "dynamic-import-node"
   ]
 }
