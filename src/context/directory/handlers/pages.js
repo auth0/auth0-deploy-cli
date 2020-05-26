@@ -8,7 +8,7 @@ import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
 
 function parse(context) {
   const pagesFolder = path.join(context.filePath, constants.PAGES_DIRECTORY);
-  if (!existsMustBeDir(pagesFolder)) return { pages: [] }; // Skip
+  if (!existsMustBeDir(pagesFolder)) return { pages: undefined }; // Skip
 
   const files = getFiles(pagesFolder, [ '.json', '.html' ]);
 

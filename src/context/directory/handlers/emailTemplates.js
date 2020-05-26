@@ -8,7 +8,7 @@ import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
 
 function parse(context) {
   const emailsFolder = path.join(context.filePath, constants.EMAIL_TEMPLATES_DIRECTORY);
-  if (!existsMustBeDir(emailsFolder)) return { emailTemplates: [] }; // Skip
+  if (!existsMustBeDir(emailsFolder)) return { emailTemplates: undefined }; // Skip
 
   const files = getFiles(emailsFolder, [ '.json', '.html' ]).filter(f => path.basename(f) !== 'provider.json');
 

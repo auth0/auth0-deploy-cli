@@ -15,11 +15,11 @@ describe('#directory context validation', () => {
     const context = new Context({ AUTH0_INPUT_FILE: dir });
     await context.load();
 
-    expect(context.assets.rules).to.deep.equal([]);
-    expect(context.assets.databases).to.deep.equal([]);
-    expect(context.assets.pages).to.deep.equal([]);
-    expect(context.assets.clients).to.deep.equal([]);
-    expect(context.assets.resourceServers).to.deep.equal([]);
+    Object.entries(context.assets).forEach(([ k, v ]) => {
+      if (typeof v === 'undefined') delete context.assets[k];
+    });
+
+    expect(context.assets).to.have.all.keys('exclude');
   });
 
   it('should load excludes', async () => {

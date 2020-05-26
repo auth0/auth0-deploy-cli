@@ -8,7 +8,7 @@ import log from '../../../logger';
 
 function parse(context) {
   const hooksFolder = path.join(context.filePath, constants.HOOKS_DIRECTORY);
-  if (!existsMustBeDir(hooksFolder)) return { hooks: [] }; // Skip
+  if (!existsMustBeDir(hooksFolder)) return { hooks: undefined }; // Skip
 
   const files = getFiles(hooksFolder, [ '.json' ]);
 

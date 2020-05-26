@@ -7,7 +7,7 @@ import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
 
 function parse(context) {
   const factorsFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY, constants.GUARDIAN_FACTORS_DIRECTORY);
-  if (!existsMustBeDir(factorsFolder)) return { guardianFactors: [] }; // Skip
+  if (!existsMustBeDir(factorsFolder)) return { guardianFactors: undefined }; // Skip
 
   const foundFiles = getFiles(factorsFolder, [ '.json' ]);
 

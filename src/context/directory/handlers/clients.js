@@ -7,7 +7,7 @@ import { isFile, getFiles, existsMustBeDir, loadJSON, sanitize, clearClientArray
 
 function parse(context) {
   const clientsFolder = path.join(context.filePath, constants.CLIENTS_DIRECTORY);
-  if (!existsMustBeDir(clientsFolder)) return { clients: [] }; // Skip
+  if (!existsMustBeDir(clientsFolder)) return { clients: undefined }; // Skip
 
   const foundFiles = getFiles(clientsFolder, [ '.json' ]);
 

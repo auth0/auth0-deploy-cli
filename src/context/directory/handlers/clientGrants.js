@@ -7,7 +7,7 @@ import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
 
 function parse(context) {
   const grantsFolder = path.join(context.filePath, constants.CLIENTS_GRANTS_DIRECTORY);
-  if (!existsMustBeDir(grantsFolder)) return { clientGrants: [] }; // Skip
+  if (!existsMustBeDir(grantsFolder)) return { clientGrants: undefined }; // Skip
 
   const foundFiles = getFiles(grantsFolder, [ '.json' ]);
 
