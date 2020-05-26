@@ -96,7 +96,7 @@ describe('#YAML context validation', () => {
     expect(context.loadFile(script)).to.equal('// empty');
   });
 
-  it('should dump tenant.yaml', async () => {
+  it('should dump tenant.yaml with defaults', async () => {
     const dir = path.resolve(testDataDir, 'yaml', 'dump');
     cleanThenMkdir(dir);
     const tenantFile = path.join(dir, 'tenant.yml');
@@ -116,7 +116,16 @@ describe('#YAML context validation', () => {
       ],
       connections: [],
       databases: [],
-      emailProvider: {},
+      emailProvider: {
+        enabled: true,
+        name: 'smtp',
+        credentials: {
+          smtp_host: '##SMTP_HOSTNAME##',
+          smtp_pass: '##SMTP_PASS##',
+          smtp_port: '##SMTP_PORT##',
+          smtp_user: '##SMTP_USER##'
+        }
+      },
       emailTemplates: [
         { body: './emailTemplates/blocked_account.html', enabled: true, template: 'blocked_account' },
         { body: './emailTemplates/change_password.html', enabled: true, template: 'change_password' },
@@ -157,14 +166,78 @@ describe('#YAML context validation', () => {
     });
   });
 
-  it('should dump tenant.yaml with INCLUDED and EXCLUDED props', async () => {
+  it('should dump tenant.yaml without defaults', async () => {
+    const dir = path.resolve(testDataDir, 'yaml', 'dump');
+    cleanThenMkdir(dir);
+    const tenantFile = path.join(dir, 'tenant.yml');
+    const config = { AUTH0_INPUT_FILE: tenantFile, AUTH0_EXCLUDED_DEFAULTS: [ 'emailProvider' ] };
+    const context = new Context(config, mockMgmtClient());
+    await context.dump();
+    const yaml = jsYaml.safeLoad(fs.readFileSync(tenantFile));
+    expect(yaml).to.deep.equal({
+      branding: {},
+      clientGrants: [],
+      clients: [
+        {
+          custom_login_page: './Global Client_custom_login_page.html',
+          custom_login_page_on: true,
+          name: 'Global Client'
+        }
+      ],
+      connections: [],
+      databases: [],
+      emailProvider: {
+        enabled: true,
+        name: 'smtp'
+      },
+      emailTemplates: [
+        { body: './emailTemplates/blocked_account.html', enabled: true, template: 'blocked_account' },
+        { body: './emailTemplates/change_password.html', enabled: true, template: 'change_password' },
+        { body: './emailTemplates/enrollment_email.html', enabled: true, template: 'enrollment_email' },
+        { body: './emailTemplates/mfa_oob_code.html', enabled: true, template: 'mfa_oob_code' },
+        { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' },
+        { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
+        { body: './emailTemplates/stolen_credentials.html', enabled: true, template: 'stolen_credentials' },
+        { body: './emailTemplates/verify_email.html', enabled: true, template: 'verify_email' },
+        { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' }
+      ],
+      pages: [
+        { enabled: true, html: './pages/login.html', name: 'login' }
+      ],
+      guardianFactors: [],
+      guardianFactorProviders: [],
+      guardianFactorTemplates: [],
+      prompts: {},
+      resourceServers: [],
+      rules: [],
+      hooks: [],
+      rulesConfigs: [],
+      roles: [
+        {
+          name: 'App Admin',
+          description: 'Admin of app',
+          permissions: [
+            {
+              permission_name: 'create:data', resource_server_identifier: 'urn:ref'
+            }
+          ]
+        }
+      ],
+      tenant: {
+        default_directory: 'users',
+        friendly_name: 'Test'
+      }
+    });
+  });
+
+  it('should dump tenant.yaml with INCLUDED and EXCLUDED props including defaults', async () => {
     const dir = path.resolve(testDataDir, 'yaml', 'dump');
     cleanThenMkdir(dir);
     const tenantFile = path.join(dir, 'tenant.yml');
     const config = {
       AUTH0_INPUT_FILE: tenantFile,
       INCLUDED_PROPS: { clients: [ 'client_secret' ] },
-      EXCLUDED_PROPS: { clients: [ 'name' ] }
+      EXCLUDED_PROPS: { clients: [ 'name' ], emailProvider: [ 'credentials' ] }
     };
     const context = new Context(config, mockMgmtClient());
     await context.dump();
@@ -181,7 +254,10 @@ describe('#YAML context validation', () => {
       ],
       connections: [],
       databases: [],
-      emailProvider: {},
+      emailProvider: {
+        enabled: true,
+        name: 'smtp'
+      },
       emailTemplates: [
         { body: './emailTemplates/blocked_account.html', enabled: true, template: 'blocked_account' },
         { body: './emailTemplates/change_password.html', enabled: true, template: 'change_password' },
