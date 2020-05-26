@@ -12,7 +12,7 @@ function createPagesDir(pagesDir, target) {
   Object.keys(target).forEach((scriptName) => {
     fs.writeFileSync(
       path.resolve(pagesDir, scriptName + '.html'),
-      target[scriptName].htmlFile
+      target[scriptName].html
     );
     if (target[scriptName].metadata) {
       fs.writeFileSync(
@@ -36,14 +36,14 @@ describe('#YAML context pages', () => {
     pages:
       - name: "login"
         html: "${htmlFile}"
-    
+
       - name: "password_reset"
         html: "${htmlFile}"
-    
+
       - name: "guardian_multifactor"
         html: "${htmlFile}"
         enabled: false
-    
+
       - name: "error_page"
         html: "${htmlFile}"
     `;
