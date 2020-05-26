@@ -22,7 +22,12 @@ export function mockMgmtClient() {
     connections: { getAll: () => [] },
     resourceServers: { getAll: () => [] },
     rulesConfigs: { getAll: () => [] },
-    emailProvider: { get: () => {} },
+    emailProvider: {
+      get: () => ({
+        name: 'smtp',
+        enabled: true
+      })
+    },
     clientGrants: { getAll: () => [] },
     guardian: {
       getFactors: () => [],
