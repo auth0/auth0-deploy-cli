@@ -33,7 +33,8 @@ describe('#directory context validation', () => {
       AUTH0_EXCLUDED_CLIENTS: [ 'client' ],
       AUTH0_EXCLUDED_DATABASES: [ 'db' ],
       AUTH0_EXCLUDED_CONNECTIONS: [ 'conn' ],
-      AUTH0_EXCLUDED_RESOURCE_SERVERS: [ 'api' ]
+      AUTH0_EXCLUDED_RESOURCE_SERVERS: [ 'api' ],
+      AUTH0_EXCLUDED_DEFAULTS: [ 'emailProvider' ]
     };
     const context = new Context(config);
     await context.load();
@@ -43,6 +44,7 @@ describe('#directory context validation', () => {
     expect(context.assets.exclude.databases).to.deep.equal([ 'db' ]);
     expect(context.assets.exclude.connections).to.deep.equal([ 'conn' ]);
     expect(context.assets.exclude.resourceServers).to.deep.equal([ 'api' ]);
+    expect(context.assets.exclude.defaults).to.deep.equal([ 'emailProvider' ]);
   });
 
   it('should error on bad directory', async () => {

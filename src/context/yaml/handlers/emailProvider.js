@@ -10,8 +10,9 @@ async function parse(context) {
 async function dump(context) {
   let { emailProvider } = context.assets;
 
-  // Add placeholder for credentials as they cannot be exported
-  if (emailProvider) {
+  const excludedDefaults = context.assets.exclude.defaults || [];
+  if (emailProvider && !excludedDefaults.includes('emailProvider')) {
+    // Add placeholder for credentials as they cannot be exported
     emailProvider = emailProviderDefaults(emailProvider);
   }
 

@@ -43,11 +43,30 @@ describe('#directory context email provider', () => {
     const emailTemplateFolder = path.join(dir, constants.EMAIL_TEMPLATES_DIRECTORY);
     expect(loadJSON(path.join(emailTemplateFolder, 'provider.json'))).to.deep.equal({
       credentials: {
-        smtp_host: 'your.smtp.host.com',
-        smtp_port: 25,
-        smtp_pass: 'YOUR_SMTP_PASS',
-        smtp_user: 'YOUR_SMTP_USER'
+        smtp_host: '##SMTP_HOSTNAME##',
+        smtp_pass: '##SMTP_PASS##',
+        smtp_port: '##SMTP_PORT##',
+        smtp_user: '##SMTP_USER##'
       },
+      enabled: true,
+      name: 'smtp'
+    });
+  });
+
+  it('should dump email provider without defaults when excluded', async () => {
+    const dir = path.join(testDataDir, 'directory', 'emailProviderDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.exclude.defaults = [ 'emailProvider' ];
+    context.assets.emailProvider = {
+      enabled: true,
+      name: 'smtp'
+    };
+
+    await handler.dump(context);
+    const emailTemplateFolder = path.join(dir, constants.EMAIL_TEMPLATES_DIRECTORY);
+    expect(loadJSON(path.join(emailTemplateFolder, 'provider.json'))).to.deep.equal({
       enabled: true,
       name: 'smtp'
     });

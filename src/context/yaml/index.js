@@ -22,7 +22,8 @@ export default class {
         clients: config.AUTH0_EXCLUDED_CLIENTS || [],
         databases: config.AUTH0_EXCLUDED_DATABASES || [],
         connections: config.AUTH0_EXCLUDED_CONNECTIONS || [],
-        resourceServers: config.AUTH0_EXCLUDED_RESOURCE_SERVERS || []
+        resourceServers: config.AUTH0_EXCLUDED_RESOURCE_SERVERS || [],
+        defaults: config.AUTH0_EXCLUDED_DEFAULTS || []
       }
     };
 
