@@ -28,6 +28,10 @@ async function dump(context) {
     fs.ensureDirSync(pagesFolder);
 
     pages = pages.map((page) => {
+      if (page.name === 'error_page' && page.html === undefined) {
+        return page;
+      }
+
       // Dump html to file
       const htmlFile = path.join(pagesFolder, `${page.name}.html`);
       log.info(`Writing ${htmlFile}`);

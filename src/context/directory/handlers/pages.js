@@ -50,15 +50,20 @@ async function dump(context) {
   fs.ensureDirSync(pagesFolder);
 
   pages.forEach((page) => {
-    // Dump template html to file
-    const htmlFile = path.join(pagesFolder, `${page.name}.html`);
-    log.info(`Writing ${htmlFile}`);
-    fs.writeFileSync(htmlFile, page.html);
+    var metadata = { ...page };
+
+    if (page.name !== 'error_page' || page.html !== undefined) {
+      // Dump template html to file
+      const htmlFile = path.join(pagesFolder, `${page.name}.html`);
+      log.info(`Writing ${htmlFile}`);
+      fs.writeFileSync(htmlFile, page.html);
+      metadata.html = `./${page.name}.html`;
+    }
 
     // Dump page metadata
     const pageFile = path.join(pagesFolder, `${page.name}.json`);
     log.info(`Writing ${pageFile}`);
-    fs.writeFileSync(pageFile, JSON.stringify({ ...page, html: `./${page.name}.html` }, null, 2));
+    fs.writeFileSync(pageFile, JSON.stringify(metadata), null, 2);
   });
 }
 

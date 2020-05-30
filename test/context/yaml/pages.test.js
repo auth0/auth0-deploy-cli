@@ -32,6 +32,7 @@ describe('#YAML context pages', () => {
     const htmlFile = path.join(testDataDir, 'page.html');
     fs.writeFileSync(htmlFile, htmlContext);
 
+    const errorPageUrl = 'https://example.com';
     const yaml = `
     pages:
       - name: "login"
@@ -46,6 +47,8 @@ describe('#YAML context pages', () => {
 
       - name: "error_page"
         html: "${htmlFile}"
+        url: "${errorPageUrl}"
+        show_log_link: false
     `;
 
     const htmlValidation = '<html>this is a env1 "env2"</html>';
@@ -65,7 +68,9 @@ describe('#YAML context pages', () => {
       },
       {
         html: htmlValidation,
-        name: 'error_page'
+        name: 'error_page',
+        url: errorPageUrl,
+        show_log_link: false
       }
     ];
     createPagesDir(dir, target);
@@ -84,12 +89,18 @@ describe('#YAML context pages', () => {
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: path.join(dir, 'tennat.yaml') }, mockMgmtClient());
     const htmlValidation = '<html>this is a env1 "env2"</html>';
+    const errorPageUrl = 'https://example.com';
 
     context.assets.pages = [
       { html: htmlValidation, name: 'login' },
       { html: htmlValidation, name: 'password_reset' },
       { enabled: false, html: htmlValidation, name: 'guardian_multifactor' },
-      { html: htmlValidation, name: 'error_page' }
+      {
+        html: htmlValidation,
+        name: 'error_page',
+        url: errorPageUrl,
+        show_log_link: false
+      }
     ];
 
     const dumped = await handler.dump(context);
@@ -98,7 +109,12 @@ describe('#YAML context pages', () => {
         { html: './pages/login.html', name: 'login' },
         { html: './pages/password_reset.html', name: 'password_reset' },
         { enabled: false, html: './pages/guardian_multifactor.html', name: 'guardian_multifactor' },
-        { html: './pages/error_page.html', name: 'error_page' }
+        {
+          html: './pages/error_page.html',
+          name: 'error_page',
+          url: errorPageUrl,
+          show_log_link: false
+        }
       ]
     });
 
@@ -106,6 +122,67 @@ describe('#YAML context pages', () => {
     expect(fs.readFileSync(path.join(pagesFolder, 'login.html'), 'utf8')).to.deep.equal(htmlValidation);
     expect(fs.readFileSync(path.join(pagesFolder, 'password_reset.html'), 'utf8')).to.deep.equal(htmlValidation);
     expect(fs.readFileSync(path.join(pagesFolder, 'guardian_multifactor.html'), 'utf8')).to.deep.equal(htmlValidation);
+    expect(fs.readFileSync(path.join(pagesFolder, 'error_page.html'), 'utf8')).to.deep.equal(htmlValidation);
+  });
+
+  it('should dump error_page with html undefined', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'pagesDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: path.join(dir, 'tennat.yaml') }, mockMgmtClient());
+    const errorPageUrl = 'https://example.com';
+
+    context.assets.pages = [
+      {
+        name: 'error_page',
+        url: errorPageUrl,
+        show_log_link: false
+      }
+    ];
+
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({
+      pages: [
+        {
+          name: 'error_page',
+          url: errorPageUrl,
+          show_log_link: false
+        }
+      ]
+    });
+
+    const pagesFolder = path.join(dir, 'pages');
+    expect(fs.existsSync(path.join(pagesFolder, 'error_page.html'))).to.equal(false);
+  });
+
+  it('should dump error_page with empty html', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'pagesDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: path.join(dir, 'tennat.yaml') }, mockMgmtClient());
+    const htmlValidation = '';
+    const errorPageUrl = 'https://example.com';
+
+    context.assets.pages = [
+      {
+        html: htmlValidation,
+        name: 'error_page',
+        url: errorPageUrl,
+        show_log_link: false
+      }
+    ];
+
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({
+      pages: [
+        {
+          html: './pages/error_page.html',
+          name: 'error_page',
+          url: errorPageUrl,
+          show_log_link: false
+        }
+      ]
+    });
+
+    const pagesFolder = path.join(dir, 'pages');
     expect(fs.readFileSync(path.join(pagesFolder, 'error_page.html'), 'utf8')).to.deep.equal(htmlValidation);
   });
 });
