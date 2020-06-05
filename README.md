@@ -31,10 +31,6 @@ This tool can be destructive to your Auth0 tenant. Please ensure you have read t
 
 Check our migration guides to see if you need to do anything when upgrading [here](https://github.com/auth0/auth0-deploy-cli/wiki/Migrating).
 
-# What's new in version 4
-
-The `auth0-deploy-cli` will now support the Auth0 `Hook` object.
-
 # Install
 
 ### General Install
@@ -44,6 +40,8 @@ npm i -g auth0-deploy-cli
 ```
 
 ## Pre-requisites
+
+⚠️ Node.js version 8 or later is required to run this tool since v5.0.0.
 
 For this tool to function, it must be authorized to the Auth0 Management API. You can do this by creating an application in your Auth0 service that has access to the management API with the following scopes before.
 
