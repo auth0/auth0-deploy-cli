@@ -50,7 +50,7 @@ jobs:
 
 workflows:
   version: 2
-  test_and_deploy:
+  test:
     jobs:
       - test:
           name: test_node8
@@ -61,6 +61,16 @@ workflows:
       - test:
           name: test_node14
           v: "14"
+  test_and_deploy:
+    jobs:
+      - test:
+          name: test_node12
+          v: "12"
+          filters:
+            branches:
+              only: master
+            tags:
+              only: /^v.*/
       - deploy:
           v: "12"
           requires:
