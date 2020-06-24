@@ -57,6 +57,7 @@ repository =>
       sms-twilio.json
     templates
       sms.json
+    policies.json
 ```
 
 ## Example Export

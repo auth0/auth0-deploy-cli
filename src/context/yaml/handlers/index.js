@@ -13,6 +13,7 @@ import resourceServers from './resourceServers';
 import guardianFactors from './guardianFactors';
 import guardianFactorProviders from './guardianFactorProviders';
 import guardianFactorTemplates from './guardianFactorTemplates';
+import guardianPolicies from './guardianPolicies';
 import roles from './roles';
 
 export default {
@@ -31,5 +32,6 @@ export default {
   guardianFactors,
   guardianFactorProviders,
   guardianFactorTemplates,
+  guardianPolicies,
   roles
 };
