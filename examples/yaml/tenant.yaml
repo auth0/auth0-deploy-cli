@@ -155,6 +155,11 @@ guardianFactorTemplates:
       enter this code to verify your enrollment.
     verification_message: '{{code}} is your verification code for {{tenant.friendly_name}}'
 
+guardianPhoneFactorMessageTypes:
+  message_types:
+    - sms
+    - voice
+
 guardianPolicies:
   policies:
     - all-applications
