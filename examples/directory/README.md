@@ -58,6 +58,7 @@ repository =>
     templates
       sms.json
     phoneFactorMessageTypes.json
+    phoneFactorSelectedProvider.json
     policies.json
 ```
 

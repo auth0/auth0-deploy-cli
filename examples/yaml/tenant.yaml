@@ -160,6 +160,9 @@ guardianPhoneFactorMessageTypes:
     - sms
     - voice
 
+guardianPhoneFactorSelectedProvider:
+  provider: twilio
+
 guardianPolicies:
   policies:
     - all-applications
