@@ -73,6 +73,11 @@ export function mockMgmtClient() {
         friendly_name: 'Test',
         default_directory: 'users'
       })
+    },
+    migrations: {
+      getMigrations: () => ({
+        migration_flag: true
+      })
     }
   };
 }

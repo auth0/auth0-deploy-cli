@@ -14,6 +14,7 @@ import guardianFactors from './guardianFactors';
 import guardianFactorProviders from './guardianFactorProviders';
 import guardianFactorTemplates from './guardianFactorTemplates';
 import roles from './roles';
+import migrations from './migrations';
 
 export default {
   rules,
@@ -31,5 +32,6 @@ export default {
   guardianFactors,
   guardianFactorProviders,
   guardianFactorTemplates,
-  roles
+  roles,
+  migrations
 };
