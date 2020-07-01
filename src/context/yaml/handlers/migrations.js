@@ -3,12 +3,10 @@ async function parse(context) {
   return { migrations };
 }
 
-
 async function dump(context) {
-  const { migrations  } = context.assets;
-  if (!migrations) { return {}; }
+  const { migrations } = context.assets;
 
-  return { migrations };
+  return { migrations: migrations || {} };
 }
 
 
