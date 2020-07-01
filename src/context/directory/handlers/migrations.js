@@ -16,7 +16,7 @@ function parse(context) {
     const migrations = loadJSON(migrationsFile, context.mappings);
 
     return { migrations };
-  };
+  }
 
   return {};
 }
