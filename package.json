@@ -27,9 +27,9 @@
   "readme": "README.md",
   "homepage": "https://github.com/auth0/auth0-deploy-cli#readme",
   "dependencies": {
-    "auth0": "^2.23.0",
+    "auth0": "^2.27.0",
     "auth0-extension-tools": "^1.4.4",
-    "auth0-source-control-extension-tools": "^4.0.7",
+    "auth0-source-control-extension-tools": "~4.1.1",
     "dot-prop": "^5.2.0",
     "fs-extra": "^7.0.0",
     "http-proxy-agent": "^2.0.0",
