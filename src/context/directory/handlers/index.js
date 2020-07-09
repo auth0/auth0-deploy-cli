@@ -13,6 +13,9 @@ import resourceServers from './resourceServers';
 import guardianFactors from './guardianFactors';
 import guardianFactorProviders from './guardianFactorProviders';
 import guardianFactorTemplates from './guardianFactorTemplates';
+import guardianPhoneFactorMessageTypes from './guardianPhoneFactorMessageTypes';
+import guardianPhoneFactorSelectedProvider from './guardianPhoneFactorSelectedProvider';
+import guardianPolicies from './guardianPolicies';
 import roles from './roles';
 import migrations from './migrations';
 
@@ -32,6 +35,9 @@ export default {
   guardianFactors,
   guardianFactorProviders,
   guardianFactorTemplates,
-  roles,
   migrations
+  guardianPhoneFactorMessageTypes,
+  guardianPhoneFactorSelectedProvider,
+  guardianPolicies,
+  roles
 };

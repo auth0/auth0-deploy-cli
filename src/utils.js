@@ -59,7 +59,7 @@ export function toConfigFn(data) {
 export function stripIdentifiers(auth0, assets) {
   const updated = { ...assets };
 
-  // Some of the object identifiers are required to preform updates.
+  // Some of the object identifiers are required to perform updates.
   // Don't strip these object id's
   const ignore = [
     'rulesConfigs',
@@ -99,6 +99,9 @@ export function hoursAsInteger(property, hours) {
 
 
 export function formatResults(item) {
+  if (typeof item !== 'object') {
+    return item;
+  }
   const importantFields = {
     name: null,
     client_id: null,

@@ -98,6 +98,8 @@ If the extension did not create the right scopes, confirm the following:
 - delete:grants
 - read:guardian_factors
 - update:guardian_factors
+- read:mfa_policies
+- update:mfa_policies
 - read:email_templates
 - create:email_templates
 - update:email_templates

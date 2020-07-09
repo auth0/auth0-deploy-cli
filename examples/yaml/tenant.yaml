@@ -79,7 +79,7 @@ hooks:
     enabled: true
     secrets:
       api-key: "my custom api key"
-    dependencies: 
+    dependencies:
       bcrypt: "3.0.6"
     script: "hooks/client-credentials-exchange.js"
 
@@ -154,6 +154,18 @@ guardianFactorTemplates:
       {{code}} is your verification code for {{tenant.friendly_name}}. Please
       enter this code to verify your enrollment.
     verification_message: '{{code}} is your verification code for {{tenant.friendly_name}}'
+
+guardianPhoneFactorMessageTypes:
+  message_types:
+    - sms
+    - voice
+
+guardianPhoneFactorSelectedProvider:
+  provider: twilio
+
+guardianPolicies:
+  policies:
+    - all-applications
 
 roles:
   - name: Admin

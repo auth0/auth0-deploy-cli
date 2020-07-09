@@ -143,6 +143,11 @@ describe('#utils', function() {
     });
   });
 
+  it('should not format result for string', () => {
+    const result = formatResults('abc');
+    expect(result).to.deep.equal('abc');
+  });
+
   it('should sort records by name or template', () => {
     const name = [
       { name: 'b', id: 0 },
