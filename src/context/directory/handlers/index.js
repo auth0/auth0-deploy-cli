@@ -35,7 +35,7 @@ export default {
   guardianFactors,
   guardianFactorProviders,
   guardianFactorTemplates,
-  migrations
+  migrations,
   guardianPhoneFactorMessageTypes,
   guardianPhoneFactorSelectedProvider,
   guardianPolicies,
