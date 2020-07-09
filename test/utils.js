@@ -32,7 +32,10 @@ export function mockMgmtClient() {
     guardian: {
       getFactors: () => [],
       getFactorProvider: () => [],
-      getFactorTemplates: () => []
+      getFactorTemplates: () => [],
+      getPhoneFactorMessageTypes: () => ({ message_types: [ 'sms' ] }),
+      getPhoneFactorSelectedProvider: () => ({ provider: 'twilio' }),
+      getPolicies: () => []
     },
     emailTemplates: {
       get: template => ({
