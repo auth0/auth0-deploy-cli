@@ -33,6 +33,10 @@ export default async function(config) {
     throw new Error(`The following parameters were missing. Please add them to your config.json or as an environment variable. ${JSON.stringify(errors)}`);
   }
 
+  if (config.AUTH0_DOMAIN.startsWith('http') || !config.AUTH0_DOMAIN.endsWith('auth0.com')) {
+    throw new Error("The AUTH0_DOMAIN in config.json needs to match your tenant's domain. This should be in the format '{TENANT NAME}.[us?|eu|au].auth0.com' and can be found in the Domain setting of the Application created for the deploy-cli.");
+  }
+
   let accessToken = config.AUTH0_ACCESS_TOKEN;
 
   if (!accessToken) {
