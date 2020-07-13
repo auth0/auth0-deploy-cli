@@ -18,6 +18,14 @@ describe('#context loader validation', async () => {
     expect(async () => context(config).to.throw(Error));
   });
 
+  it('should error on misconfigured AUTH0_DOMAIN in config file', async () => {
+    const dir = path.resolve(testDataDir, 'context');
+    cleanThenMkdir(dir);
+
+    await expect(context({ ...config, AUTH0_INPUT_FILE: dir, AUTH0_DOMAIN: 'https://tenant.auth0.com' })).to.be.eventually.rejectedWith(Error);
+    await expect(context({ ...config, AUTH0_INPUT_FILE: dir, AUTH0_DOMAIN: 'tenant.auth0.com/api/v2' })).to.be.eventually.rejectedWith(Error);
+  });
+
   it('should load directory context', async () => {
     /* Create empty directory */
     const dir = path.resolve(testDataDir, 'context');
