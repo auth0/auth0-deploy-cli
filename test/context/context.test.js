@@ -15,7 +15,7 @@ const config = {
 
 describe('#context loader validation', async () => {
   it('should error on bad file', async () => {
-    expect(async () => context(config).to.throw(Error));
+    await expect(context(config)).to.be.eventually.rejectedWith(Error);
   });
 
   it('should error on misconfigured AUTH0_DOMAIN in config file', async () => {
