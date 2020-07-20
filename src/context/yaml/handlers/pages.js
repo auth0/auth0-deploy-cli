@@ -12,7 +12,7 @@ async function parse(context) {
     pages: [
       ...context.assets.pages.map(page => ({
         ...page,
-        html: context.loadFile(page.html)
+        html: page.html ? context.loadFile(page.html) : undefined
       }))
     ]
   };
