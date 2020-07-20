@@ -200,7 +200,7 @@ describe('#YAML context pages', () => {
       {
         name: 'error_page',
         url: errorPageUrl,
-        html: undefined
+        html: ''
       }
     ];
     createPagesDir(dir, target);
