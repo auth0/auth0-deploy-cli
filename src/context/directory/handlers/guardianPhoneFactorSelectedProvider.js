@@ -1,9 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { constants } from 'auth0-source-control-extension-tools';
-
-import log from '../../../logger';
-import { existsMustBeDir, loadJSON, isFile } from '../../../utils';
+import { existsMustBeDir, dumpJSON, loadJSON, isFile } from '../../../utils';
 
 function parse(context) {
   const guardianFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY);
@@ -30,8 +28,7 @@ async function dump(context) {
   fs.ensureDirSync(guardianFolder);
 
   const file = path.join(guardianFolder, 'phoneFactorSelectedProvider.json');
-  log.info(`Writing ${file}`);
-  fs.writeFileSync(file, JSON.stringify(guardianPhoneFactorSelectedProvider, null, 2));
+  dumpJSON(file, guardianPhoneFactorSelectedProvider);
 }
 
 

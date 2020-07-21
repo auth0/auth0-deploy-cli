@@ -3,7 +3,7 @@ import path from 'path';
 import { constants } from 'auth0-source-control-extension-tools';
 
 import log from '../../../logger';
-import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
+import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
 
 function parse(context) {
   const rolesFolder = path.join(context.filePath, constants.ROLES_DIRECTORY);
@@ -39,7 +39,7 @@ async function dump(context) {
       delete role.description;
     }
 
-    fs.writeFileSync(roleFile, JSON.stringify(role, null, 2));
+    dumpJSON(roleFile, role);
   });
 }
 

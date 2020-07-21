@@ -2,8 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { constants } from 'auth0-source-control-extension-tools';
 
-import log from '../../../logger';
-import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
+import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
 
 function parse(context) {
   const grantsFolder = path.join(context.filePath, constants.CLIENTS_GRANTS_DIRECTORY);
@@ -37,8 +36,7 @@ async function dump(context) {
 
     const name = sanitize(`${dumpGrant.client_id} (${dumpGrant.audience})`);
     const grantFile = path.join(grantsFolder, `${name}.json`);
-    log.info(`Writing ${grantFile}`);
-    fs.writeFileSync(grantFile, JSON.stringify(dumpGrant, null, 2));
+    dumpJSON(grantFile, dumpGrant);
   });
 }
 

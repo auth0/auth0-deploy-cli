@@ -3,7 +3,7 @@ import path from 'path';
 import { constants } from 'auth0-source-control-extension-tools';
 
 import log from '../../../logger';
-import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
+import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
 
 
 function parse(context) {
@@ -43,8 +43,7 @@ async function dump(context) {
 
     // Dump template metadata
     const ruleFile = path.join(rulesFolder, `${name}.json`);
-    log.info(`Writing ${ruleFile}`);
-    fs.writeFileSync(ruleFile, JSON.stringify({ ...rule, script: `./${name}.js` }, null, 2));
+    dumpJSON(ruleFile, { ...rule, script: `./${name}.js` });
   });
 }
 

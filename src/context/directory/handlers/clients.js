@@ -3,7 +3,7 @@ import path from 'path';
 import { constants, loadFile } from 'auth0-source-control-extension-tools';
 
 import log from '../../../logger';
-import { isFile, getFiles, existsMustBeDir, loadJSON, sanitize, clearClientArrays } from '../../../utils';
+import { isFile, getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize, clearClientArrays } from '../../../utils';
 
 function parse(context) {
   const clientsFolder = path.join(context.filePath, constants.CLIENTS_DIRECTORY);
@@ -54,9 +54,7 @@ async function dump(context) {
 
       client.custom_login_page = `./${clientName}_custom_login_page.html`;
     }
-
-    log.info(`Writing ${clientFile}`);
-    fs.writeFileSync(clientFile, JSON.stringify(clearClientArrays(client), null, 2));
+    dumpJSON(clientFile, clearClientArrays(client));
   });
 }
 
