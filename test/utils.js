@@ -52,17 +52,19 @@ export function mockMgmtClient() {
       ]
     },
     roles: {
-      getAll: () => [
+      getAll: () => (
         {
-          name: 'App Admin',
-          description: 'Admin of app',
-          permissions: [
+          roles: [
             {
-              permission_name: 'create:data', resource_server_identifier: 'urn:ref'
+              name: 'App Admin',
+              id: 'myRoleId',
+              description: 'Admin of app'
             }
-          ]
+          ],
+          total: 1,
+          limit: 50
         }
-      ],
+      ),
       permissions: {
         get: () => [
           {
