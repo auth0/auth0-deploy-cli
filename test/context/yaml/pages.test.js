@@ -185,4 +185,32 @@ describe('#YAML context pages', () => {
     const pagesFolder = path.join(dir, 'pages');
     expect(fs.readFileSync(path.join(pagesFolder, 'error_page.html'), 'utf8')).to.deep.equal(htmlValidation);
   });
+
+  it('should process error_pages without html field', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'pages1');
+    cleanThenMkdir(dir);
+
+    const errorPageUrl = 'https://example.com';
+    const yaml = `
+    pages:
+      - name: "error_page"
+        url: "${errorPageUrl}"
+    `;
+    const target = [
+      {
+        name: 'error_page',
+        url: errorPageUrl,
+        html: ''
+      }
+    ];
+    createPagesDir(dir, target);
+    const yamlFile = path.join(dir, 'rule1.yaml');
+    fs.writeFileSync(yamlFile, yaml);
+
+    const config = { AUTH0_INPUT_FILE: yamlFile };
+    const context = new Context(config, mockMgmtClient());
+    await context.load();
+
+    expect(context.assets.pages).to.deep.equal(target);
+  });
 });
