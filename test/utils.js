@@ -16,19 +16,19 @@ export const testDataDir = path.resolve(localDir, 'testData');
 export function mockMgmtClient() {
   // Fake Mgmt Client. Bit hacky but good enough for now.
   return {
-    rules: { getAll: () => [] },
+    rules: { getAll: () => ({ rules: [] }) },
     hooks: { getAll: () => [] },
-    databases: { getAll: () => [] },
-    connections: { getAll: () => [] },
-    resourceServers: { getAll: () => [] },
-    rulesConfigs: { getAll: () => [] },
+    databases: { getAll: () => ({ databases: [] }) },
+    connections: { getAll: () => ({ connections: [] }) },
+    resourceServers: { getAll: () => ({ resourceServers: [] }) },
+    rulesConfigs: { getAll: () => ({ rulesConfigs: [] }) },
     emailProvider: {
       get: () => ({
         name: 'smtp',
         enabled: true
       })
     },
-    clientGrants: { getAll: () => [] },
+    clientGrants: { getAll: () => ({ clientGrants: [] }) },
     guardian: {
       getFactors: () => [],
       getFactorProvider: () => [],
@@ -45,11 +45,19 @@ export function mockMgmtClient() {
       })
     },
     clients: {
-      getAll: () => [
-        {
+      getAll: (params) => {
+        const client = {
           name: 'Global Client', client_id: 'FMfcgxvzLDvPsgpRFKkLVrnKqGgkHhQV', client_secret: 'dummy_client_secret', custom_login_page_on: true, custom_login_page: '<html>page</html>'
+        };
+
+        if (params.per_page) {
+          return {
+            clients: [ client ]
+          };
         }
-      ]
+
+        return [ client ];
+      }
     },
     roles: {
       getAll: () => (
