@@ -40,6 +40,7 @@ if (require.main === module) {
     log.transports.console.level = 'debug';
     // Set for auth0-source-control-ext-tools
     process.env.AUTH0_DEBUG = 'true';
+    process.env.AUTH0_LOG = 'debug';
   }
 
   run(params)
