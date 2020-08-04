@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [5.1.3] - 2020-08-04
 ### Fixed
 - Many entities were not being fetched via the Paging API properly.
 
@@ -15,15 +17,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Guardian Policies
   - Guardian Phone factor selected provider
   - Guardian Phone factor message types
-- Adds support for Migrations 
-
+- Adds support for Migrations
 
 ## [5.0.0] - 2020-06-04
-### Changed
-- [**Breaking**] Updated dependencies and deprecated support for Node versions earlier than 8 via babel@7 and dot-prop@5 [#242]
-
 ### Added
 - Allow excluding default values for emailProvider with `AUTH0_EXCLUDED_DEFAULTS` [#236]
+
+### Changed
+- [**Breaking**] Updated dependencies and deprecated support for Node versions earlier than 8 via babel@7 and dot-prop@5 [#242]
 
 ### Fixed
 - pages: fix error when dumping error_page without html property [#247]
@@ -35,17 +36,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.3.0] - 2020-05-18
 ### Removed
 - Removed several unused dependencies:
-
-    - ajv
-    - e6-template-strings
-    - node-storage
-    - readline
-    - xregexp
+  
+  - ajv
+  - e6-template-strings
+  - node-storage
+  - readline
+  - xregexp
 
 ## [4.2.2] - 2020-05-04
 ### Added
 - Support for phone message hook added.
 - Configurable connections directory with `AUTH0_CONNECTIONS_DIRECTORY`.
+
 ### Removed
 - Remove data from verify email example to prevent copy and paste misuse.
 
@@ -229,12 +231,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#124]: https://github.com/auth0/auth0-deploy-cli/issues/124
 [#138]: https://github.com/auth0/auth0-deploy-cli/issues/138
 [#215]: https://github.com/auth0/auth0-deploy-cli/issues/215
+[#236]: https://github.com/auth0/auth0-deploy-cli/issues/236
+[#242]: https://github.com/auth0/auth0-deploy-cli/issues/242
+[#247]: https://github.com/auth0/auth0-deploy-cli/issues/247
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.2...HEAD
-[5.1.2]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.2...v5.1.1
-[5.1.1]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.1...v5.1.0
-[5.1.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.0...v5.0.0
-[5.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.0.0...v4.3.1
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.3...HEAD
+[5.1.3]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.0...v5.1.3
+[5.1.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.0.0...v5.1.0
+[5.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v4.3.1...v5.0.0
 [4.3.1]: https://github.com/auth0/auth0-deploy-cli/compare/v4.3.0...v4.3.1
 [4.3.0]: https://github.com/auth0/auth0-deploy-cli/compare/v4.2.2...v4.3.0
 [4.2.2]: https://github.com/auth0/auth0-deploy-cli/compare/v4.2.1...v4.2.2
