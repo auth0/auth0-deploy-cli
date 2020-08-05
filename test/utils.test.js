@@ -16,7 +16,8 @@ import {
   hoursAsInteger,
   formatResults,
   recordsSorter,
-  clearClientArrays
+  clearClientArrays,
+  convertToHCL
 } from '../src/utils';
 
 describe('#utils', function() {
@@ -206,5 +207,34 @@ describe('#utils', function() {
     };
 
     expect(clearClientArrays(client)).to.deep.equal(client);
+  });
+
+  it('should convert to hcl', () => {
+    const tenant = {
+      friendly_name: 'Auth0 Test',
+      default_directory: 'users',
+      session_lifetime: 1.48394893,
+      idle_session_lifetime: 123.4,
+      flags: { universal_login: true },
+      allowed_logout_urls: [
+        'http://mysite/logout',
+        'http://myothersite/logout'
+      ]
+    };
+
+    const hclString = `  friendly_name = "Auth0 Test"
+  default_directory = "users"
+  session_lifetime = 1.48394893
+  idle_session_lifetime = 123.4
+  flags {
+    universal_login = true
+  }
+  allowed_logout_urls [
+    "http://mysite/logout",
+    "http://myothersite/logout"
+  ]
+`;
+
+    expect(convertToHCL(tenant)).to.deep.equal(hclString);
   });
 });

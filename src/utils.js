@@ -6,8 +6,7 @@ import dotProp from 'dot-prop';
 
 export function isDirectory(f) {
   try {
-    return fs.statSync(path.resolve(f))
-      .isDirectory();
+    return fs.statSync(path.resolve(f)).isDirectory();
   } catch (err) {
     return false;
   }
@@ -15,8 +14,7 @@ export function isDirectory(f) {
 
 export function isFile(f) {
   try {
-    return fs.statSync(path.resolve(f))
-      .isFile();
+    return fs.statSync(path.resolve(f)).isFile();
   } catch (err) {
     return false;
   }
@@ -24,7 +22,8 @@ export function isFile(f) {
 
 export function getFiles(folder, exts) {
   if (isDirectory(folder)) {
-    return fs.readdirSync(folder)
+    return fs
+      .readdirSync(folder)
       .map(f => path.join(folder, f))
       .filter(f => isFile(f) && exts.includes(path.extname(f)));
   }
@@ -40,7 +39,6 @@ export function loadJSON(file, mappings) {
   }
 }
 
-
 export function existsMustBeDir(folder) {
   if (fs.existsSync(folder)) {
     if (!isDirectory(folder)) {
@@ -54,7 +52,6 @@ export function existsMustBeDir(folder) {
 export function toConfigFn(data) {
   return key => data[key];
 }
-
 
 export function stripIdentifiers(auth0, assets) {
   const updated = { ...assets };
@@ -86,17 +83,14 @@ export function stripIdentifiers(auth0, assets) {
   return updated;
 }
 
-
 export function sanitize(str) {
   return sanitizeName(str, { replacement: '-' });
 }
-
 
 export function hoursAsInteger(property, hours) {
   if (Number.isInteger(hours)) return { [property]: hours };
   return { [`${property}_in_minutes`]: Math.round(hours * 60) };
 }
-
 
 export function formatResults(item) {
   if (typeof item !== 'object') {
@@ -115,9 +109,11 @@ export function formatResults(item) {
   };
   const result = { ...importantFields };
 
-  Object.entries(item).sort().forEach(([ key, value ]) => {
-    result[key] = value;
-  });
+  Object.entries(item)
+    .sort()
+    .forEach(([ key, value ]) => {
+      result[key] = value;
+    });
 
   Object.keys(importantFields).forEach((key) => {
     if (result[key] === null) delete result[key];
@@ -126,14 +122,8 @@ export function formatResults(item) {
   return result;
 }
 
-
 export function recordsSorter(a, b) {
-  const importantFields = [
-    'name',
-    'key',
-    'client_id',
-    'template'
-  ];
+  const importantFields = [ 'name', 'key', 'client_id', 'template' ];
 
   for (let i = 0; i < importantFields.length; i += 1) {
     const key = importantFields[i];
@@ -146,13 +136,11 @@ export function recordsSorter(a, b) {
   return 0;
 }
 
-
 export function clearTenantFlags(tenant) {
   if (tenant.flags && !Object.keys(tenant.flags).length) {
     delete tenant.flags;
   }
 }
-
 
 export function ensureProp(obj, props, value = '') {
   if (!dotProp.has(obj, props)) {
@@ -160,9 +148,13 @@ export function ensureProp(obj, props, value = '') {
   }
 }
 
-
 export function clearClientArrays(client) {
-  const propsToClear = [ 'allowed_clients', 'allowed_logout_urls', 'allowed_origins', 'callbacks' ];
+  const propsToClear = [
+    'allowed_clients',
+    'allowed_logout_urls',
+    'allowed_origins',
+    'callbacks'
+  ];
   Object.keys(client).forEach((prop) => {
     if (propsToClear.indexOf(prop) >= 0 && !client[prop]) {
       client[prop] = [];
@@ -170,4 +162,24 @@ export function clearClientArrays(client) {
   });
 
   return client;
+}
+
+export function convertToHCL(obj) {
+  let hclString = '';
+  Object.keys(obj).forEach((key) => {
+    if (Array.isArray(obj[key])) {
+      hclString += `  ${key} [\n  ${obj[key]
+        .map(o => `  "${o}"`)
+        .join(',\n  ')}\n  ]\n`;
+    } else if (typeof obj[key] === 'object') {
+      hclString += `  ${key} {\n  ${convertToHCL(obj[key])}  }\n`;
+    } else if (typeof obj[key] === 'string') {
+      hclString += `  ${key} = "${obj[key]}"\n`;
+    } else if (!Number.isNaN(obj[key])) {
+      hclString += `  ${key} = ${obj[key]}\n`;
+    } else {
+      hclString += `  ${key} = "${obj[key]}"\n`;
+    }
+  });
+  return hclString;
 }

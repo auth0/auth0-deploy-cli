@@ -12,11 +12,11 @@ async function dump(context) {
   return {
     type: 'auth0-tenant',
     name: 'tenant',
-    content: tenant,
+    content: tenant
   };
 }
 
 export default {
   parse,
-  dump,
+  dump
 };

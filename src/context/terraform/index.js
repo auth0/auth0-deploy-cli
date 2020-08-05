@@ -3,13 +3,20 @@ import { Auth0 } from 'auth0-source-control-extension-tools';
 import { writeFileSync } from 'fs-extra';
 
 import log from '../../logger';
-import { toConfigFn, stripIdentifiers, isDirectory } from '../../utils';
+import {
+  toConfigFn,
+  stripIdentifiers,
+  isDirectory,
+  convertToHCL
+} from '../../utils';
 import handlers from './handlers';
 import cleanAssets from '../../readonly';
 
-
 function formatTF(data) {
-  return JSON.stringify(data);
+  return `resource "${data.type}" "${data.name}" {
+  ${convertToHCL(data.content)}
+}
+`;
 }
 export default class {
   constructor(config, mgmtClient) {
@@ -36,21 +43,23 @@ export default class {
       /* If this is a directory, look for each file in the directory */
       log.info(`Processing terraform directory ${this.filePath}`);
 
-      Object.values(handlers)
-        .forEach((handler) => {
-          const parsed = handler.parse(this);
-          Object.entries(parsed)
-            .forEach(([ k, v ]) => {
-              this.assets[k] = v;
-            });
+      Object.values(handlers).forEach((handler) => {
+        const parsed = handler.parse(this);
+        Object.entries(parsed).forEach(([ k, v ]) => {
+          this.assets[k] = v;
         });
+      });
       return;
     }
     throw new Error(`Not sure what to do with, ${this.filePath} as it is not a directory...`);
   }
 
   async dump() {
-    const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
+    const auth0 = new Auth0(
+      this.mgmtClient,
+      this.assets,
+      toConfigFn(this.config)
+    );
     log.info('Loading Auth0 Tenant Data');
     await auth0.loadAll();
     this.assets = auth0.assets;
@@ -81,4 +90,3 @@ export default class {
     }));
   }
 }
-
