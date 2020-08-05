@@ -83,7 +83,7 @@ export default async function(config) {
     return new YAMLContext(config, mgmtClient);
   }
 
-  if (isDirectory(inputFile)) {
+  if (isDirectory(inputFile) && config.AUTH0_CONTEXT_TYPE === 'directory') {
     return new DirectoryContext(config, mgmtClient);
   }
 
@@ -91,7 +91,7 @@ export default async function(config) {
   if (ext === '.yaml' || ext === '.yml') {
     return new YAMLContext(config, mgmtClient);
   }
-  if (ext === '.tf') {
+  if (config.AUTH0_CONTEXT_TYPE === 'tf') {
     return new TFContext(config, mgmtClient);
   }
 

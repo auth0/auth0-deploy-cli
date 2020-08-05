@@ -26,6 +26,7 @@ export default async function deploy(params) {
     AUTH0_INPUT_FILE: outputFolder,
     AUTH0_BASE_PATH: basePath,
     AUTH0_CONFIG_FILE: configFile,
+    AUTH0_CONTEXT_TYPE: params.format,
     ...configObj || {}
   };
 
@@ -41,16 +42,13 @@ export default async function deploy(params) {
   }
 
   // Check output folder
-  if (!isDirectory(outputFolder)) {
+  if (!isDirectory(outputFolder) || params.format === 'tf') {
     log.info(`Creating ${outputFolder}`);
     mkdirp.sync(outputFolder);
   }
 
   if (params.format === 'yaml') {
     overrides.AUTH0_INPUT_FILE = path.join(outputFolder, 'tenant.yaml');
-  }
-  if (params.format === 'tf') {
-    overrides.AUTH0_INPUT_FILE = path.join(outputFolder, 'tenant.tf');
   }
 
   nconf.overrides(overrides);

@@ -1,14 +1,19 @@
 import path from 'path';
 import { Auth0 } from 'auth0-source-control-extension-tools';
+import { writeFileSync } from 'fs-extra';
 
 import log from '../../logger';
 import { toConfigFn, stripIdentifiers, isDirectory } from '../../utils';
 import handlers from './handlers';
 import cleanAssets from '../../readonly';
 
+
+function formatTF(data) {
+  return JSON.stringify(data);
+}
 export default class {
   constructor(config, mgmtClient) {
-    this.configFile = config.AUTH0_INPUT_FILE;
+    this.filePath = config.AUTH0_INPUT_FILE;
     this.config = config;
     this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS;
     this.mgmtClient = mgmtClient;
@@ -24,11 +29,6 @@ export default class {
         defaults: config.AUTH0_EXCLUDED_DEFAULTS || []
       }
     };
-
-    this.basePath = config.AUTH0_BASE_PATH;
-    if (!this.basePath) {
-      this.basePath = (typeof configFile === 'object') ? process.cwd() : path.dirname(this.configFile);
-    }
   }
 
   async load() {
@@ -70,6 +70,7 @@ export default class {
     await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {
       try {
         const data = await handler.dump(this);
+        writeFileSync(path.join(this.filePath, `${name}.tf`), formatTF(data));
         if (data) {
           log.info(`Exporting ${name}`);
         }
@@ -80,3 +81,4 @@ export default class {
     }));
   }
 }
+
