@@ -49,6 +49,9 @@ export default async function deploy(params) {
   if (params.format === 'yaml') {
     overrides.AUTH0_INPUT_FILE = path.join(outputFolder, 'tenant.yaml');
   }
+  if (params.format === 'tf') {
+    overrides.AUTH0_INPUT_FILE = path.join(outputFolder, 'tenant.yaml');
+  }
 
   nconf.overrides(overrides);
 

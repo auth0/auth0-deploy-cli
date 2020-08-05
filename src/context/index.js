@@ -90,6 +90,9 @@ export default async function(config) {
   if (ext === '.yaml' || ext === '.yml') {
     return new YAMLContext(config, mgmtClient);
   }
+  if (ext === '.tf') {
+    return new TFContext(config, mgmtClient);
+  }
 
   throw new Error(`Unable to determine context processor to load for file ${inputFile}, does it exist? `);
 }

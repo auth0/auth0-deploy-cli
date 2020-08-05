@@ -51,7 +51,7 @@ export default yargs
       alias: 'f',
       describe: 'The output format.',
       type: 'string',
-      choices: [ 'yaml', 'directory' ],
+      choices: [ 'yaml', 'directory', 'tf' ],
       demandOption: true
     },
     config_file: {
