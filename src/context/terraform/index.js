@@ -1,10 +1,8 @@
-import fs from 'fs-extra';
-import yaml from 'js-yaml';
 import path from 'path';
-import { loadFile, keywordReplace, Auth0 } from 'auth0-source-control-extension-tools';
+import { Auth0 } from 'auth0-source-control-extension-tools';
 
 import log from '../../logger';
-import { isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter } from '../../utils';
+import { toConfigFn, stripIdentifiers, isDirectory } from '../../utils';
 import handlers from './handlers';
 import cleanAssets from '../../readonly';
 
@@ -33,57 +31,40 @@ export default class {
     }
   }
 
-  loadFile(f) {
-    let toLoad = path.join(this.basePath, f);
-    if (!isFile(toLoad)) {
-      // try load not relative to yaml file
-      toLoad = f;
-    }
-    return loadFile(path.resolve(toLoad), this.mappings);
-  }
-
   async load() {
-    // Allow to send object/json directly
-    if (typeof this.configFile === 'object') {
-      this.assets = this.configFile;
-    } else {
-      try {
-        const fPath = path.resolve(this.configFile);
-        log.debug(`Loading YAML from ${fPath}`);
-        Object.assign(this.assets, yaml.safeLoad(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)) || {});
-      } catch (err) {
-        log.debug(err.stack);
-        throw new Error(`Problem loading ${this.configFile}\n${err}`);
-      }
+    if (isDirectory(this.filePath)) {
+      /* If this is a directory, look for each file in the directory */
+      log.info(`Processing terraform directory ${this.filePath}`);
+
+      Object.values(handlers)
+        .forEach((handler) => {
+          const parsed = handler.parse(this);
+          Object.entries(parsed)
+            .forEach(([ k, v ]) => {
+              this.assets[k] = v;
+            });
+        });
+      return;
     }
-
-    // Run initial schema check to ensure valid YAML
-    const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
-    await auth0.validate('validate');
-
-    // Allow handlers to process the assets such as loading files etc
-    await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {
-      try {
-        const parsed = await handler.parse(this);
-        Object.entries(parsed)
-          .forEach(([ k, v ]) => {
-            this.assets[k] = v;
-          });
-      } catch (err) {
-        log.debug(err.stack);
-        throw new Error(`Problem deploying ${name}`);
-      }
-    }));
+    throw new Error(`Not sure what to do with, ${this.filePath} as it is not a directory...`);
   }
 
   async dump() {
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
     log.info('Loading Auth0 Tenant Data');
-    try {
-      await auth0.loadAll();
-      this.assets = auth0.assets;
-    } catch (err) {
-      throw new Error(`Problem loading tenant data from Auth0 ${err}`);
+    await auth0.loadAll();
+    this.assets = auth0.assets;
+
+    // Clean known read only fields
+    this.assets = cleanAssets(this.assets, this.config);
+
+    // Copy clients to be used by handlers which require converting client_id to the name
+    // Must copy as the client_id will be stripped if AUTH0_EXPORT_IDENTIFIERS is false
+    this.assets.clientsOrig = [ ...this.assets.clients ];
+
+    // Optionally Strip identifiers
+    if (!this.config.AUTH0_EXPORT_IDENTIFIERS) {
+      this.assets = stripIdentifiers(auth0, this.assets);
     }
 
     await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {
@@ -91,31 +72,11 @@ export default class {
         const data = await handler.dump(this);
         if (data) {
           log.info(`Exporting ${name}`);
-          Object.entries(data)
-            .forEach(([ k, v ]) => {
-              this.assets[k] = Array.isArray(v) ? v.map(formatResults).sort(recordsSorter) : formatResults(v);
-            });
         }
       } catch (err) {
         log.debug(err.stack);
         throw new Error(`Problem exporting ${name}`);
       }
     }));
-
-    // Clean known read only fields
-    let cleaned = cleanAssets(this.assets, this.config);
-
-    // Delete exclude as it's not part of the auth0 tenant config
-    delete cleaned.exclude;
-
-    // Optionally Strip identifiers
-    if (!this.config.AUTH0_EXPORT_IDENTIFIERS) {
-      cleaned = stripIdentifiers(auth0, cleaned);
-    }
-
-    // Write YAML File
-    const raw = yaml.dump(cleaned);
-    log.info(`Writing ${this.configFile}`);
-    fs.writeFileSync(this.configFile, raw);
   }
 }
