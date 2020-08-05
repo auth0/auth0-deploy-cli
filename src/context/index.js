@@ -1,6 +1,7 @@
 import path from 'path';
 import { AuthenticationClient, ManagementClient } from 'auth0';
 import YAMLContext from './yaml';
+import TFContext from './terraform';
 import DirectoryContext from './directory';
 
 import { isDirectory } from '../utils';
