@@ -27,7 +27,7 @@
         "-f",
         "yaml",
         "-o",
-        "export/bittrd-test"
+        "local/bittrd-test"
       ],
       "sourceMaps": true,
       "outFiles": [
@@ -57,7 +57,7 @@
         "-f",
         "tf",
         "-o",
-        "export/bittrd-test"
+        "local/bittrd-test"
       ],
       "sourceMaps": true,
       "outFiles": [
