@@ -163,23 +163,3 @@ export function clearClientArrays(client) {
 
   return client;
 }
-
-export function convertToHCL(obj) {
-  let hclString = '';
-  Object.keys(obj).forEach((key) => {
-    if (Array.isArray(obj[key])) {
-      hclString += `  ${key} [\n  ${obj[key]
-        .map(o => `  "${o}"`)
-        .join(',\n  ')}\n  ]\n`;
-    } else if (typeof obj[key] === 'object') {
-      hclString += `  ${key} {\n  ${convertToHCL(obj[key])}  }\n`;
-    } else if (typeof obj[key] === 'string') {
-      hclString += `  ${key} = "${obj[key]}"\n`;
-    } else if (!Number.isNaN(obj[key])) {
-      hclString += `  ${key} = ${obj[key]}\n`;
-    } else {
-      hclString += `  ${key} = "${obj[key]}"\n`;
-    }
-  });
-  return hclString;
-}
