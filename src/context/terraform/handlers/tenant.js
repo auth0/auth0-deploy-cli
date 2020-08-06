@@ -10,7 +10,7 @@ async function dump(context) {
   clearTenantFlags(tenant);
 
   return {
-    type: 'auth0-tenant',
+    type: 'auth0_tenant',
     name: 'tenant',
     content: tenant
   };
