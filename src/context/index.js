@@ -83,16 +83,16 @@ export default async function(config) {
     return new YAMLContext(config, mgmtClient);
   }
 
-  if (isDirectory(inputFile) && config.AUTH0_CONTEXT_TYPE === 'directory') {
+  if (isDirectory(inputFile)) {
+    if (config.AUTH0_CONTEXT_TYPE === 'tf') {
+      return new TFContext(config, mgmtClient);
+    }
     return new DirectoryContext(config, mgmtClient);
   }
 
   const ext = path.extname(inputFile);
   if (ext === '.yaml' || ext === '.yml') {
     return new YAMLContext(config, mgmtClient);
-  }
-  if (config.AUTH0_CONTEXT_TYPE === 'tf') {
-    return new TFContext(config, mgmtClient);
   }
 
   throw new Error(`Unable to determine context processor to load for file ${inputFile}, does it exist? `);
