@@ -72,7 +72,10 @@ export default class {
     if (!this.config.AUTH0_EXPORT_IDENTIFIERS) {
       this.assets = stripIdentifiers(auth0, this.assets);
     }
-
+    writeFileSync(path.join(this.filePath, 'provider.tf'), `provider "auth0" {
+  version = "> 0.8"
+  domain  = "${this.config.AUTH0_DOMAIN}"
+}`);
     await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {
       try {
         const data = await handler.dump(this);

@@ -1,5 +1,10 @@
-function wrapIfNeeded(value) {
+function handleRawValue(value) {
   if (typeof value === 'string') {
+    if (value.indexOf('\n') !== -1) {
+      return `<<EOT
+${value}
+EOT`;
+    }
     return `"${value}"`;
   }
   return value;
@@ -13,7 +18,7 @@ function formatHCLContent(content, tabs) {
     if (Array.isArray(value)) {
       if (value.length > 0 && typeof value[0] !== 'object') {
         return `${indent(tabs)}${key} = [
-${indent(tabs + 1)}${value.map(arrVal => wrapIfNeeded(arrVal)).join(`${indent(tabs + 1)}\n`)}
+${indent(tabs + 1)}${value.map(arrVal => handleRawValue(arrVal)).join(`${indent(tabs + 1)}\n`)}
 ${indent(tabs)}]`;
       }
       return value.map(subContent => `${indent(tabs)}${key} {
@@ -24,7 +29,7 @@ ${indent(tabs)}}`).join('\n');
 ${formatHCLContent(value, tabs + 1)}
 ${indent(tabs)}}`;
     }
-    return `${indent(tabs)}${key} = ${wrapIfNeeded(value)}`;
+    return `${indent(tabs)}${key} = ${handleRawValue(value)}`;
   }).join('\n');
 }
 

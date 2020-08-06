@@ -51,4 +51,30 @@ describe('HCL formatter tests', () => {
   }
 }`);
   });
+  it('rule HCL', () => {
+    var result = fromJSON({
+      type: 'auth0_rule',
+      name: 'Empty rule',
+      content: {
+        name: 'Empty rule',
+        script: `function (user, context, callback) {
+  // TODO: implement your rule
+  return callback(null, user, context);
+}`,
+        order: 1,
+        enabled: true
+      }
+    });
+    assert.equal(result, `resource auth0_rule "Empty_rule" {
+  name = "Empty rule"
+  script = <<EOT
+function (user, context, callback) {
+  // TODO: implement your rule
+  return callback(null, user, context);
+}
+EOT
+  order = 1
+  enabled = true
+}`);
+  });
 });
