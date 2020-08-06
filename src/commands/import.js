@@ -4,7 +4,7 @@ import tools from 'auth0-source-control-extension-tools';
 import log from '../logger';
 import setupContext from '../context';
 
-export default async function deploy(params) {
+export async function getImportContext(params) {
   const {
     input_file: inputFile,
     base_path: basePath,
@@ -25,7 +25,7 @@ export default async function deploy(params) {
     AUTH0_BASE_PATH: basePath,
     AUTH0_CONFIG_FILE: configFile,
     AUTH0_KEYWORD_REPLACE_MAPPINGS: {},
-    ...configObj || {}
+    ...(configObj || {})
   };
 
   // Prepare configuration by initializing nconf, then passing that as the provider to the config object
@@ -36,7 +36,10 @@ export default async function deploy(params) {
 
   if (env) {
     const mappings = nconf.get('AUTH0_KEYWORD_REPLACE_MAPPINGS') || {};
-    nconf.set('AUTH0_KEYWORD_REPLACE_MAPPINGS', Object.assign(mappings, process.env));
+    nconf.set(
+      'AUTH0_KEYWORD_REPLACE_MAPPINGS',
+      Object.assign(mappings, process.env)
+    );
   }
 
   nconf.overrides(overrides);
@@ -44,7 +47,11 @@ export default async function deploy(params) {
   // Setup context and load
   const context = await setupContext(nconf.get());
   await context.load();
+  return context;
+}
 
+export default async function deploy(params) {
+  const context = await getImportContext(params);
   const config = extTools.config();
   config.setProvider(key => nconf.get(key));
 
