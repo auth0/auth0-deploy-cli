@@ -4,6 +4,7 @@ import rulesConfigs from './rulesConfigs';
 import roles from './roles';
 import resourceServers from './resourceServers';
 import hooks from './hooks';
+import email from './email';
 
 export default {
   tenant,
@@ -11,5 +12,6 @@ export default {
   rules,
   rulesConfigs,
   resourceServers,
-  hooks
+  hooks,
+  email
 };
