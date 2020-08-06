@@ -6,17 +6,14 @@ import log from '../../logger';
 import {
   toConfigFn,
   stripIdentifiers,
-  isDirectory,
-  convertToHCL
+  isDirectory
 } from '../../utils';
 import handlers from './handlers';
 import cleanAssets from '../../readonly';
+import fromJSON from './formatter';
 
 function formatTF(data) {
-  return `resource "${data.type}" "${data.name}" {
-  ${convertToHCL(data.content)}
-}
-`;
+  return (Array.isArray(data) ? data : [ data ]).map(item => fromJSON(item)).join('\n');
 }
 export default class {
   constructor(config, mgmtClient) {

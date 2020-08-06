@@ -11,7 +11,7 @@ async function dump(context) {
       description: role.description,
       permissions: (role.permissions || []).map(permission => ({
         resource_server_identifier: permission.resource_server_identifier,
-        name: permission.name
+        name: permission.permission_name
       }))
     }
   }));
