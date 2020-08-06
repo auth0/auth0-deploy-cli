@@ -1,40 +1,81 @@
+/* eslint-disable no-use-before-define */
 function handleRawValue(value) {
-  if (typeof value === 'string') {
-    if (value.indexOf('\n') !== -1) {
-      return `<<EOT
+  if (typeof value !== 'string') {
+    return value;
+  }
+  // multi-line
+  if (value.indexOf('\n') > -1) {
+    return `<<EOT
 ${value}
 EOT`;
-    }
-    return `"${value}"`;
   }
-  return value;
+  return `"${value}"`;
 }
+
 function indent(tabs) {
   return '  '.repeat(tabs);
 }
+
+function formatObject(key, value, tabs) {
+  const ind = indent(tabs);
+
+  // Empty Object
+  if (Object.keys(value).length === 0) {
+    return `${ind}${key} {}`;
+  }
+
+  // Recursively process Object
+  return `${ind}${key} {
+${formatHCLContent(value, tabs + 1)}
+${ind}}`;
+}
+
+function formatArray(key, value, tabs) {
+  const ind = indent(tabs);
+
+  // Empty Array
+  if (!value.length) return `${ind}${key} = []`;
+
+  // Array of Objects
+  if (typeof value[0] === 'object') {
+    return value
+      .map(subContent => formatObject(key, subContent, tabs))
+      .join('\n');
+  }
+
+  // Array of Other
+  const ind1 = indent(tabs + 1);
+  return `${ind}${key} = [
+${ind1}${value.map(handleRawValue).join(`,\n${ind1}`)}
+${ind}]`;
+}
+
+function formatOther(key, value, tabs) {
+  return `${indent(tabs)}${key} = ${handleRawValue(value)}`;
+}
+
 function formatHCLContent(content, tabs) {
   return Object.keys(content).map((key) => {
     const value = content[key];
+
+    // Array
     if (Array.isArray(value)) {
-      if (value.length > 0 && typeof value[0] !== 'object') {
-        return `${indent(tabs)}${key} = [
-${indent(tabs + 1)}${value.map(arrVal => handleRawValue(arrVal)).join(`${indent(tabs + 1)}\n`)}
-${indent(tabs)}]`;
-      }
-      return value.map(subContent => `${indent(tabs)}${key} {
-${formatHCLContent(subContent, tabs + 1)}
-${indent(tabs)}}`).join('\n');
-    } else if (typeof value === 'object') {
-      return `${indent(tabs)}${key} {
-${formatHCLContent(value, tabs + 1)}
-${indent(tabs)}}`;
+      return formatArray(key, value, tabs);
     }
-    return `${indent(tabs)}${key} = ${handleRawValue(value)}`;
+
+    // Object
+    if (typeof value === 'object') {
+      return formatObject(key, value, tabs);
+    }
+
+    // Other - String, Number, Boolean
+    return formatOther(key, value, tabs);
   }).join('\n');
 }
 
 export default function(jsonObject) {
-  return `resource ${jsonObject.type} "${jsonObject.name.replace(/[^A-Z,^a-z,^0-9,^_,^-]/g, '_')}" {
+  const resourceName = jsonObject.name.replace(/[^A-Z,^a-z,^0-9,^_,^-]/g, '_');
+  return `resource ${jsonObject.type} "${resourceName}" {
 ${formatHCLContent(jsonObject.content, 1)}
 }`;
 }

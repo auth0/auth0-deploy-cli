@@ -33,24 +33,38 @@ describe('HCL formatter tests', () => {
   }
 }`);
   });
+
   it('tenant HCL', () => {
     var result = fromJSON({
       type: 'auth0_tenant',
       name: 'test-tenant',
       content: {
         enabled_locales: [ 'en' ],
-        flags: { disable_clickjack_protection_headers: false }
+        idle_session_lifetime: 123.4,
+        flags: { disable_clickjack_protection_headers: false },
+        empty: {},
+        allowed_logout_urls: [
+          'http://mysite/logout',
+          'http://myothersite/logout'
+        ]
       }
     });
     assert.equal(result, `resource auth0_tenant "test-tenant" {
   enabled_locales = [
     "en"
   ]
+  idle_session_lifetime = 123.4
   flags {
     disable_clickjack_protection_headers = false
   }
+  empty {}
+  allowed_logout_urls = [
+    "http://mysite/logout",
+    "http://myothersite/logout"
+  ]
 }`);
   });
+
   it('rule HCL', () => {
     var result = fromJSON({
       type: 'auth0_rule',

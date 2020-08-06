@@ -40,7 +40,6 @@ describe('#utils', function() {
     expect(isFile(fileNotExist)).is.equal(false);
   });
 
-
   it('should get files', () => {
     const dir = path.join(testDataDir, 'utils', 'getfiles');
     cleanThenMkdir(dir);
@@ -62,14 +61,16 @@ describe('#utils', function() {
     const dir = path.join(testDataDir, 'utils', 'json');
     cleanThenMkdir(dir);
     const file = path.join(dir, 'test1.json');
-    fs.writeFileSync(file, '{"test": "123", "env1": @@env1@@, "env2": "##env2##"}');
+    fs.writeFileSync(
+      file,
+      '{"test": "123", "env1": @@env1@@, "env2": "##env2##"}'
+    );
     expect(loadJSON(file, { env1: 'test1', env2: 'test2' })).to.deep.equal({
       env1: 'test1',
       env2: 'test2',
       test: '123'
     });
   });
-
 
   it('exist must be dir', () => {
     const dirExist = path.join(testDataDir, 'utils', 'existmustbedir');
@@ -131,7 +132,15 @@ describe('#utils', function() {
       name: 'Name',
       a: 'Alpha'
     });
-    expect(Object.keys(result)).to.deep.equal([ 'name', 'identifier', 'id', 'a', 'b', 'c', 'd' ]);
+    expect(Object.keys(result)).to.deep.equal([
+      'name',
+      'identifier',
+      'id',
+      'a',
+      'b',
+      'c',
+      'd'
+    ]);
     expect(result).to.deep.equal({
       name: 'Name',
       identifier: 'Identifier',
