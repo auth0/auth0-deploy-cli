@@ -51,15 +51,19 @@ export default class {
     throw new Error(`Not sure what to do with, ${this.filePath} as it is not a directory...`);
   }
 
-  async dump() {
+  async dump(assets) {
     const auth0 = new Auth0(
       this.mgmtClient,
       this.assets,
       toConfigFn(this.config)
     );
-    log.info('Loading Auth0 Tenant Data');
-    await auth0.loadAll();
-    this.assets = auth0.assets;
+    if (!assets) {
+      log.info('Loading Auth0 Tenant Data');
+      await auth0.loadAll();
+      this.assets = auth0.assets;
+    } else {
+      this.assets = { ...assets, ...this.assets };
+    }
 
     // Clean known read only fields
     this.assets = cleanAssets(this.assets, this.config);

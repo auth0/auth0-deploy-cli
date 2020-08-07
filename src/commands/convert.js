@@ -1,10 +1,6 @@
-import nconf from 'nconf';
-
 import log from '../logger';
-import getImportContext from './import';
-import getExportContext from './export';
-import { isDirectory } from '../utils';
-import setupContext from '../context';
+import { getImportContext } from './import';
+import { getExportContext } from './export';
 
 export default async function convert(params) {
   const importContext = await getImportContext(params);
