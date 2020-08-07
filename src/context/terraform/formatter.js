@@ -1,5 +1,7 @@
-import { tfNameSantizer } from '../../utils';
 /* eslint-disable no-use-before-define */
+
+import { tfNameSantizer } from '../../utils';
+
 function handleRawValue(value) {
   if (typeof value !== 'string') {
     return value;
@@ -19,6 +21,8 @@ EOT`;
 function indent(tabs) {
   return '  '.repeat(tabs);
 }
+
+const isNil = value => value === null || value === undefined;
 
 function formatObject(key, value, tabs) {
   const ind = indent(tabs);
@@ -63,9 +67,7 @@ function formatHCLContent(content, tabs) {
     const value = content[key];
 
     // undefined
-    if (!value) {
-      return null;
-    }
+    if (isNil(value)) return value;
 
     // Array
     if (Array.isArray(value)) {
@@ -79,7 +81,7 @@ function formatHCLContent(content, tabs) {
 
     // Other - String, Number, Boolean
     return formatOther(key, value, tabs);
-  }).filter(x => x !== null && x !== undefined).join('\n');
+  }).filter(x => !isNil(x)).join('\n');
 }
 
 export default function(jsonObject) {
