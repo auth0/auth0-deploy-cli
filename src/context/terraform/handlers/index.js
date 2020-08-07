@@ -1,4 +1,6 @@
+import client from './client';
 import clientGrants from './clientGrants';
+import connection from './connection';
 import email from './email';
 import emailTemplates from './emailTemplates';
 import hooks from './hooks';
@@ -7,12 +9,11 @@ import roles from './roles';
 import rules from './rules';
 import rulesConfigs from './rulesConfigs';
 import tenant from './tenant';
-import client from './client';
-import connection from './connection';
 
 export default {
   client,
   clientGrants,
+  connection,
   email,
   emailTemplates,
   hooks,
@@ -20,6 +21,5 @@ export default {
   roles,
   rules,
   rulesConfigs,
-  tenant,
-  connection
+  tenant
 };
