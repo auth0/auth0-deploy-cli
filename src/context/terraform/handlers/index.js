@@ -1,19 +1,21 @@
-import tenant from './tenant';
-import rules from './rules';
-import rulesConfigs from './rulesConfigs';
-import roles from './roles';
-import resourceServers from './resourceServers';
-import hooks from './hooks';
+import clientGrants from './clientGrants';
 import email from './email';
 import emailTemplates from './emailTemplates';
+import hooks from './hooks';
+import resourceServers from './resourceServers';
+import roles from './roles';
+import rules from './rules';
+import rulesConfigs from './rulesConfigs';
+import tenant from './tenant';
 
 export default {
-  tenant,
+  clientGrants,
+  email,
+  emailTemplates,
+  hooks,
+  resourceServers,
   roles,
   rules,
   rulesConfigs,
-  resourceServers,
-  hooks,
-  email,
-  emailTemplates
+  tenant
 };

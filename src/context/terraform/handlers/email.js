@@ -7,18 +7,18 @@ function parse(context) {
 async function dump(context) {
   let { emailProvider } = context.assets;
 
-  if (!emailProvider) return; // Skip, nothing to dump
+  if (!emailProvider) return null; // Skip, nothing to dump
 
   const excludedDefaults = context.assets.exclude.defaults || [];
   if (!excludedDefaults.includes('emailProvider')) {
     // Add placeholder for credentials as they cannot be exported
     emailProvider = emailProviderDefaults(emailProvider);
   }
-  return ({
+  return {
     type: 'auth0_email',
     name: emailProvider.name,
     content: emailProvider
-  });
+  };
 }
 
 
