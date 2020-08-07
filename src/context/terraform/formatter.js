@@ -82,7 +82,7 @@ function formatHCLContent(content, tabs) {
   }).filter(x => x !== null && x !== undefined).join('\n');
 }
 
-export default function (jsonObject) {
+export default function(jsonObject) {
   const resourceName = tfNameSantizer(jsonObject.name);
   return `resource ${jsonObject.type} "${resourceName}" {
 ${formatHCLContent(jsonObject.content, 1)}

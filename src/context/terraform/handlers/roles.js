@@ -1,7 +1,3 @@
-async function parse(context) {
-  throw new Error('Not Implemented' + context);
-}
-
 async function dump(context) {
   return (context.assets.roles || []).map(role => ({
     type: 'auth0_role',
@@ -19,6 +15,5 @@ async function dump(context) {
 
 
 export default {
-  parse,
   dump
 };

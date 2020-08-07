@@ -1,9 +1,5 @@
 import { tfNameSantizer } from '../../../utils';
 
-async function parse(context) {
-  throw new Error('Not Implemented ' + context);
-}
-
 
 async function dump(context) {
   const clients = context.assets.clientsOrig || [];
@@ -23,6 +19,5 @@ async function dump(context) {
 
 
 export default {
-  parse,
   dump
 };

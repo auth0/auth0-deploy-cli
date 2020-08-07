@@ -1,8 +1,5 @@
 import { emailProviderDefaults } from '../../defaults';
 
-function parse(context) {
-  throw new Error('Not Implemented ' + context);
-}
 
 async function dump(context) {
   let { emailProvider } = context.assets;
@@ -23,6 +20,5 @@ async function dump(context) {
 
 
 export default {
-  parse,
   dump
 };

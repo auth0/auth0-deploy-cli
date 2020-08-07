@@ -1,8 +1,5 @@
 import { clearTenantFlags } from '../../../utils';
 
-async function parse(context) {
-  throw new Error('Not Implemented ' + context);
-}
 
 async function dump(context) {
   const tenant = { ...(context.assets.tenant || {}) };
@@ -17,6 +14,5 @@ async function dump(context) {
 }
 
 export default {
-  parse,
   dump
 };

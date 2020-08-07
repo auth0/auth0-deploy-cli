@@ -1,7 +1,3 @@
-async function parse(context) {
-  throw new Error('Not Implemented' + context);
-}
-
 async function dump(context) {
   return (context.assets.clients || []).map(client => ({
     type: 'auth0_client',
@@ -40,6 +36,5 @@ async function dump(context) {
 
 
 export default {
-  parse,
   dump
 };

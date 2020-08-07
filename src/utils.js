@@ -164,11 +164,11 @@ export function clearClientArrays(client) {
   return client;
 }
 
-export function tfNameSantizer(name) {
-  return trim(name.replace(/[^A-Z,^a-z,^0-9,^_,^-]/g, '_').replace(/__/g, '_'), '_');
-}
 function trim(s, c) {
   if (c === ']') c = '\\]';
   if (c === '\\') c = '\\\\';
   return s.replace(new RegExp('^[' + c + ']+|[' + c + ']+$', 'g'), '');
+}
+export function tfNameSantizer(name) {
+  return trim(name.replace(/[^A-Z,^a-z,^0-9,^_,^-]/g, '_').replace(/__/g, '_'), '_');
 }

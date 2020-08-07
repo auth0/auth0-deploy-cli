@@ -1,7 +1,3 @@
-async function parse(context) {
-  throw new Error('Not Implemented' + context);
-}
-
 async function dump(context) {
   return (context.assets.connections || []).map(connection => ({
     type: 'auth0_connection',
@@ -83,6 +79,5 @@ async function dump(context) {
 
 
 export default {
-  parse,
   dump
 };

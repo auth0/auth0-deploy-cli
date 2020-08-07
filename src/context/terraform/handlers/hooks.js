@@ -1,7 +1,3 @@
-function parse(context) {
-  throw new Error('Not Implemented' + context);
-}
-
 async function dump(context) {
   return (context.assets.hooks || []).map(hook => ({
     type: 'auth0_hook',
@@ -18,6 +14,5 @@ async function dump(context) {
 }
 
 export default {
-  parse,
   dump
 };

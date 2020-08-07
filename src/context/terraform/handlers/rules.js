@@ -1,7 +1,3 @@
-async function parse(context) {
-  throw new Error('Not Implemented' + context);
-}
-
 async function dump(context) {
   return (context.assets.rules || []).map(rule => ({
     type: 'auth0_rule',
@@ -16,6 +12,5 @@ async function dump(context) {
 }
 
 export default {
-  parse,
   dump
 };

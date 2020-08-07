@@ -1,7 +1,3 @@
-async function parse(context) {
-  throw new Error('Not Implemented' + context);
-}
-
 async function dump(context) {
   // nothing to do, set default if empty
   return (context.assets.resourceServers || []).map(resourceServer => ({
@@ -12,6 +8,5 @@ async function dump(context) {
 }
 
 export default {
-  parse,
   dump
 };

@@ -5,8 +5,7 @@ import { writeFileSync } from 'fs-extra';
 import log from '../../logger';
 import {
   toConfigFn,
-  stripIdentifiers,
-  isDirectory
+  stripIdentifiers
 } from '../../utils';
 import handlers from './handlers';
 import cleanAssets from '../../readonly';
@@ -36,19 +35,8 @@ export default class {
   }
 
   async load() {
-    if (isDirectory(this.filePath)) {
-      /* If this is a directory, look for each file in the directory */
-      log.info(`Processing terraform directory ${this.filePath}`);
-
-      Object.values(handlers).forEach((handler) => {
-        const parsed = handler.parse(this);
-        Object.entries(parsed).forEach(([ k, v ]) => {
-          this.assets[k] = v;
-        });
-      });
-      return;
-    }
-    throw new Error(`Not sure what to do with, ${this.filePath} as it is not a directory...`);
+    log.info(`Processing terraform directory ${this.filePath}`);
+    throw new Error('Import is not supported for the Terraform format. Please use terraform-provider-auth0.');
   }
 
   async dump(assets) {

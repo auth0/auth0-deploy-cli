@@ -1,8 +1,3 @@
-
-function parse(context) {
-  throw new Error('Not Implemented ' + context);
-}
-
 async function dump(context) {
   return (context.assets.emailTemplates || []).map((emailTemplate, i) => ({
     type: 'auth0_email_template',
@@ -12,6 +7,5 @@ async function dump(context) {
 }
 
 export default {
-  parse,
   dump
 };
