@@ -7,7 +7,7 @@ function parse(context) {
 async function dump(context) {
   let { emailProvider } = context.assets;
 
-  if (!emailProvider) return null; // Skip, nothing to dump
+  if (!emailProvider || !emailProvider.name) return null; // Skip, nothing to dump
 
   const excludedDefaults = context.assets.exclude.defaults || [];
   if (!excludedDefaults.includes('emailProvider')) {

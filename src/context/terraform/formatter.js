@@ -1,3 +1,4 @@
+import { tfNameSantizer } from '../../utils';
 /* eslint-disable no-use-before-define */
 function handleRawValue(value) {
   if (typeof value !== 'string') {
@@ -8,6 +9,9 @@ function handleRawValue(value) {
     return `<<EOT
 ${value}
 EOT`;
+  }
+  if (value.startsWith('${') && value.endsWith('}')) {
+    return value.substring(2, value.length - 1);
   }
   return `"${value}"`;
 }
@@ -58,6 +62,11 @@ function formatHCLContent(content, tabs) {
   return Object.keys(content).map((key) => {
     const value = content[key];
 
+    // undefined
+    if (value === undefined) {
+      return null;
+    }
+
     // Array
     if (Array.isArray(value)) {
       return formatArray(key, value, tabs);
@@ -70,11 +79,11 @@ function formatHCLContent(content, tabs) {
 
     // Other - String, Number, Boolean
     return formatOther(key, value, tabs);
-  }).join('\n');
+  }).filter(x => x !== null && x !== undefined).join('\n');
 }
 
 export default function(jsonObject) {
-  const resourceName = jsonObject.name.replace(/[^A-Z,^a-z,^0-9,^_,^-]/g, '_');
+  const resourceName = tfNameSantizer(jsonObject.name);
   return `resource ${jsonObject.type} "${resourceName}" {
 ${formatHCLContent(jsonObject.content, 1)}
 }`;

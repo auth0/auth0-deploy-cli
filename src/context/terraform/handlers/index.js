@@ -7,8 +7,10 @@ import roles from './roles';
 import rules from './rules';
 import rulesConfigs from './rulesConfigs';
 import tenant from './tenant';
+import client from './client';
 
 export default {
+  client,
   clientGrants,
   email,
   emailTemplates,

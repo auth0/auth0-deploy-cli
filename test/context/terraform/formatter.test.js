@@ -39,6 +39,9 @@ describe('HCL formatter tests', () => {
       type: 'auth0_tenant',
       name: 'test-tenant',
       content: {
+        undefined_field: undefined,
+        // eslint-disable-next-line no-template-curly-in-string
+        terraform_var: '${auth0_role.fake_role.id}',
         enabled_locales: [ 'en' ],
         idle_session_lifetime: 123.4,
         flags: { disable_clickjack_protection_headers: false },
@@ -50,6 +53,7 @@ describe('HCL formatter tests', () => {
       }
     });
     assert.equal(result, `resource auth0_tenant "test-tenant" {
+  terraform_var = auth0_role.fake_role.id
   enabled_locales = [
     "en"
   ]

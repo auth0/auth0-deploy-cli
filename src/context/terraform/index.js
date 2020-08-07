@@ -79,9 +79,9 @@ export default class {
     await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {
       try {
         const data = await handler.dump(this);
-        writeFileSync(path.join(this.filePath, `${name}.tf`), formatTF(data));
         if (data) {
           log.info(`Exporting ${name}`);
+          writeFileSync(path.join(this.filePath, `${name}.tf`), formatTF(data));
         }
       } catch (err) {
         log.debug(err.stack);

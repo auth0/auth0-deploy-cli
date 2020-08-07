@@ -4,9 +4,7 @@ async function parse(context) {
 
 async function dump() {
   // do not export rulesConfigs as its values cannot be extracted
-  return {
-    rulesConfigs: []
-  };
+  return null;
 }
 
 export default {
