@@ -8,6 +8,7 @@ import rules from './rules';
 import rulesConfigs from './rulesConfigs';
 import tenant from './tenant';
 import client from './client';
+import connection from './connection';
 
 export default {
   client,
@@ -19,5 +20,6 @@ export default {
   roles,
   rules,
   rulesConfigs,
-  tenant
+  tenant,
+  connection
 };
