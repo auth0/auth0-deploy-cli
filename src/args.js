@@ -6,8 +6,7 @@ export default yargs
   .option('debug', {
     alias: 'd',
     describe: 'Dump extra debug information.',
-    type: 'string',
-    boolean: true,
+    type: 'boolean',
     default: false
   })
   .option('proxy_url', {
