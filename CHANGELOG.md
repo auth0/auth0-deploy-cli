@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- The --proxy_url option should work properly now. (Although only on Node >= 10).
+
+## [5.1.4] - 2020-08-12
+### Fixed
+- Connections disabled when the client is added AUTH0_EXCLUDED_CLIENTS list.
+
+## [5.1.3] - 2020-08-04
+### Fixed
+- Many entities were not being fetched via the Paging API properly.
+
 ## [5.1.3] - 2020-08-04
 ### Fixed
 - Many entities were not being fetched via the Paging API properly.
@@ -235,7 +246,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#242]: https://github.com/auth0/auth0-deploy-cli/issues/242
 [#247]: https://github.com/auth0/auth0-deploy-cli/issues/247
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.3...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.4...HEAD
+[5.1.4]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.3...v5.1.4
 [5.1.3]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.0...v5.1.3
 [5.1.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.0.0...v5.1.0
 [5.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v4.3.1...v5.0.0
