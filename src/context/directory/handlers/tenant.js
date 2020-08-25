@@ -1,8 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
-
-import log from '../../../logger';
-import { existsMustBeDir, isFile, loadJSON, hoursAsInteger, clearTenantFlags } from '../../../utils';
+import { existsMustBeDir, isFile, dumpJSON, loadJSON, hoursAsInteger, clearTenantFlags } from '../../../utils';
 
 function parse(context) {
   const baseFolder = path.join(context.filePath);
@@ -42,8 +39,7 @@ async function dump(context) {
   clearTenantFlags(tenant);
 
   const tenantFile = path.join(context.filePath, 'tenant.json');
-  log.info(`Writing ${tenantFile}`);
-  fs.writeFileSync(tenantFile, JSON.stringify(tenant, null, 2));
+  dumpJSON(tenantFile, tenant);
 }
 
 

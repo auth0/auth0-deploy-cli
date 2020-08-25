@@ -2,8 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { constants } from 'auth0-source-control-extension-tools';
 
-import log from '../../../logger';
-import { existsMustBeDir, isFile, loadJSON } from '../../../utils';
+import { existsMustBeDir, isFile, dumpJSON, loadJSON } from '../../../utils';
 import { emailProviderDefaults } from '../../defaults';
 
 function parse(context) {
@@ -37,8 +36,7 @@ async function dump(context) {
   fs.ensureDirSync(emailsFolder);
 
   const emailProviderFile = path.join(emailsFolder, 'provider.json');
-  log.info(`Writing ${emailProviderFile}`);
-  fs.writeFileSync(emailProviderFile, JSON.stringify(emailProvider, null, 2));
+  dumpJSON(emailProviderFile, emailProvider);
 }
 
 

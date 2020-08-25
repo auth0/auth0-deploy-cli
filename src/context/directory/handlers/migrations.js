@@ -1,8 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
-
-import log from '../../../logger';
-import { existsMustBeDir, isFile, loadJSON } from '../../../utils';
+import { existsMustBeDir, isFile, dumpJSON, loadJSON } from '../../../utils';
 
 
 function parse(context) {
@@ -28,8 +25,7 @@ async function dump(context) {
   if (!migrations || Object.keys(migrations).length === 0) return; // Skip, nothing to dump
 
   const migrationsFile = path.join(context.filePath, 'migrations.json');
-  log.info(`Writing ${migrationsFile}`);
-  fs.writeFileSync(migrationsFile, JSON.stringify(migrations, null, 2));
+  dumpJSON(migrationsFile, migrations);
 }
 
 

@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import { constants, loadFile } from 'auth0-source-control-extension-tools';
 
 import log from '../../../logger';
-import { isDirectory, existsMustBeDir, loadJSON, getFiles, sanitize } from '../../../utils';
+import { isDirectory, existsMustBeDir, dumpJSON, loadJSON, getFiles, sanitize } from '../../../utils';
 
 
 function getDatabase(folder, mappings) {
@@ -102,8 +102,7 @@ async function dump(context) {
     };
 
     const databaseFile = path.join(dbFolder, 'database.json');
-    log.info(`Writing ${databaseFile}`);
-    fs.writeFileSync(databaseFile, JSON.stringify(formatted, null, 2));
+    dumpJSON(databaseFile, formatted);
   });
 }
 

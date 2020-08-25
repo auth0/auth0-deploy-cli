@@ -2,8 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { constants } from 'auth0-source-control-extension-tools';
 
-import log from '../../../logger';
-import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
+import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
 
 function parse(context) {
   const factorProvidersFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY, constants.GUARDIAN_PROVIDERS_DIRECTORY);
@@ -30,8 +29,7 @@ async function dump(context) {
 
   guardianFactorProviders.forEach((factorProvider) => {
     const factorProviderFile = path.join(factorProvidersFolder, `${factorProvider.name}-${factorProvider.provider}.json`);
-    log.info(`Writing ${factorProviderFile}`);
-    fs.writeFileSync(factorProviderFile, JSON.stringify(factorProvider, null, 2));
+    dumpJSON(factorProviderFile, factorProvider);
   });
 }
 

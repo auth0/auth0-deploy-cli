@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { constants } from 'auth0-source-control-extension-tools';
 
-import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
+import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
 import log from '../../../logger';
 
 
@@ -47,8 +47,7 @@ async function dump(context) {
 
     // Dump template metadata
     const hookFile = path.join(hooksFolder, `${name}.json`);
-    log.info(`Writing ${hookFile}`);
-    fs.writeFileSync(hookFile, JSON.stringify({ ...hook, script: `./${name}.js` }, null, 2));
+    dumpJSON(hookFile, { ...hook, script: `./${name}.js` });
   });
 }
 

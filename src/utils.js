@@ -3,6 +3,7 @@ import path from 'path';
 import sanitizeName from 'sanitize-filename';
 import { loadFile } from 'auth0-source-control-extension-tools';
 import dotProp from 'dot-prop';
+import log from './logger';
 
 export function isDirectory(f) {
   try {
@@ -40,6 +41,18 @@ export function loadJSON(file, mappings) {
   }
 }
 
+export function dumpJSON(file, mappings) {
+  try {
+    log.info(`Writing ${file}`);
+    const jsonBody = JSON.stringify(mappings, null, 2);
+    fs.writeFileSync(
+      file,
+      jsonBody.endsWith('\n') ? jsonBody : `${jsonBody}\n`
+    );
+  } catch (e) {
+    throw new Error(`Error writing JSON to metadata file: ${file}, because: ${e.message}`);
+  }
+}
 
 export function existsMustBeDir(folder) {
   if (fs.existsSync(folder)) {

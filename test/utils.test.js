@@ -5,18 +5,19 @@ import { Auth0 } from 'auth0-source-control-extension-tools';
 
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from './utils';
 import {
-  isFile,
-  isDirectory,
-  getFiles,
-  loadJSON,
+  clearClientArrays,
+  dumpJSON,
   existsMustBeDir,
-  toConfigFn,
-  stripIdentifiers,
-  sanitize,
-  hoursAsInteger,
   formatResults,
+  getFiles,
+  hoursAsInteger,
+  isDirectory,
+  isFile,
+  loadJSON,
   recordsSorter,
-  clearClientArrays
+  sanitize,
+  stripIdentifiers,
+  toConfigFn
 } from '../src/utils';
 
 describe('#utils', function() {
@@ -39,7 +40,6 @@ describe('#utils', function() {
     expect(isFile(fileExist)).is.equal(true);
     expect(isFile(fileNotExist)).is.equal(false);
   });
-
 
   it('should get files', () => {
     const dir = path.join(testDataDir, 'utils', 'getfiles');
@@ -69,7 +69,6 @@ describe('#utils', function() {
       test: '123'
     });
   });
-
 
   it('exist must be dir', () => {
     const dirExist = path.join(testDataDir, 'utils', 'existmustbedir');
@@ -206,5 +205,30 @@ describe('#utils', function() {
     };
 
     expect(clearClientArrays(client)).to.deep.equal(client);
+  });
+
+  describe('dumpJSON', () => {
+    const dir = path.join(testDataDir, 'utils', 'json');
+    cleanThenMkdir(dir);
+    const file = path.join(dir, 'test1.json');
+    const testObject = {
+      env1: 'test1',
+      env2: 'test2',
+      test: '123'
+    };
+    dumpJSON(file, testObject);
+    const testFileContents = fs.readFileSync(file, { encoding: 'utf8' });
+
+    it('should dump JSON with the contents of passed object', () => {
+      expect(JSON.parse(testFileContents)).deep.equal(testObject);
+    });
+    it('should dump json with trailing newline', () => {
+      expect(testFileContents).match(/\n$/g);
+    });
+    it('should throw an error if a path is not writable', () => {
+      expect(() => {
+        dumpJSON('http://notavalidfilepath', testObject);
+      }).throws(/Error writing JSON.*/);
+    });
   });
 });
