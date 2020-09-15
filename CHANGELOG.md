@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.1.6] - 2020-09-15
+### Fixed
+- Add new line support to JSON files generated in directory dumps
+- Move write file method to common util
+- Update `auth0-source-control-extension-tools`
+
 ## [5.1.5] - 2020-08-13
 ### Fixed
 - The --proxy_url option should work properly now. (Although only on Node >= 10).
