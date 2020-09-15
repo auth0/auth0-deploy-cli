@@ -88,7 +88,9 @@ async function dump(context) {
         ...database.options,
         // customScripts option only written if there are scripts
         ...(database.options.customScripts && {
-          customScripts: Object.entries(database.options.customScripts).reduce((scripts, [ name, script ]) => {
+          customScripts: Object.entries(database.options.customScripts).sort(
+            (entry1, entry2) => entry1[0] === entry2[0] ? 0 : (entry1 > entry2 ? 1 : -1)
+          ).reduce((scripts, [ name, script ]) => {
             // Dump custom script to file
             const scriptName = sanitize(`${name}.js`);
             const scriptFile = path.join(dbFolder, scriptName);
