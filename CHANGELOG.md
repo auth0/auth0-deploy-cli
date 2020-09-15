@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.1.6] - 2020-09-15
 ### Fixed
 - Add new line support to JSON files generated in directory dumps
 - Move write file method to common util
@@ -252,7 +253,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#242]: https://github.com/auth0/auth0-deploy-cli/issues/242
 [#247]: https://github.com/auth0/auth0-deploy-cli/issues/247
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.5...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.6...HEAD
+[5.1.6]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.5...v5.1.6
 [5.1.5]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.4...v5.1.5
 [5.1.4]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.3...v5.1.4
 [5.1.3]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.3...v5.1.3
