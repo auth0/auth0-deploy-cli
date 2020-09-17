@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [5.2.0] - 2020-09-17
 ### Fixed
 - Always sort custom database scripts alphabetically
 
@@ -255,7 +257,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#242]: https://github.com/auth0/auth0-deploy-cli/issues/242
 [#247]: https://github.com/auth0/auth0-deploy-cli/issues/247
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.6...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.2.0...HEAD
+[5.2.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.6...v5.2.0
 [5.1.6]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.5...v5.1.6
 [5.1.5]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.4...v5.1.5
 [5.1.4]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.3...v5.1.4
