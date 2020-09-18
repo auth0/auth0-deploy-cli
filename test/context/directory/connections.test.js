@@ -169,6 +169,6 @@ describe('#directory context connections', () => {
 
     await handler.dump(context);
     const clientFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
-    expect(loadJSON(path.join(clientFolder, 'my-ad-waad.json')).enabled_clients).to.deep.equal(['client1', 'client2', 'client3']);
+    expect(loadJSON(path.join(clientFolder, 'my-ad-waad.json')).enabled_clients).to.deep.equal([ 'client1', 'client2', 'client3' ]);
   });
 });

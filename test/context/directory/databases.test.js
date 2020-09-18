@@ -204,7 +204,7 @@ describe('#directory context databases', () => {
     context.assets.databases = [
       {
         name: 'users',
-        enabled_clients: ['client2', 'client1', 'client3'],
+        enabled_clients: [ 'client2', 'client1', 'client3' ],
         options: {
           requires_username: true
         },
@@ -214,7 +214,7 @@ describe('#directory context databases', () => {
 
     await handler.dump(context);
     const scripsFolder = path.join(dbDumpDir, constants.DATABASE_CONNECTIONS_DIRECTORY, 'users');
-    expect(loadJSON(path.join(scripsFolder, 'database.json')).enabled_clients).to.deep.equal(['client1','client2','client3']);
+    expect(loadJSON(path.join(scripsFolder, 'database.json')).enabled_clients).to.deep.equal([ 'client1', 'client2', 'client3' ]);
   });
 
   it('should dump custom databases', async () => {
