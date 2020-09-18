@@ -155,4 +155,20 @@ describe('#directory context connections', () => {
     const clientFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
     expect(loadJSON(path.join(clientFolder, 'my-ad-waad.json'))).to.deep.equal(context.assets.connections[0]);
   });
+
+  it('should dum connections with enabled_clients sorted', async () => {
+    const dir = path.join(testDataDir, 'directory', 'connectionsDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.connections = [
+      {
+        name: 'my/ad-waad', strategy: 'waad', var: 'something', enabled_clients: [ 'client2', 'client3', 'client1' ]
+      }
+    ];
+
+    await handler.dump(context);
+    const clientFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
+    expect(loadJSON(path.join(clientFolder, 'my-ad-waad.json')).enabled_clients).to.deep.equal(['client1', 'client2', 'client3']);
+  });
 });

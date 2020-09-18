@@ -52,7 +52,7 @@ async function dump(context) {
             if (found) return found.name;
             return clientId;
           })
-        ],
+        ].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())),
         options: {
           ...database.options,
           // customScripts option only written if there are scripts

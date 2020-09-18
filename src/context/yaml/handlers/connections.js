@@ -74,7 +74,7 @@ async function dump(context) {
         ...getFormattedOptions(connection, clients),
         enabled_clients: [
           ...(connection.enabled_clients || []).map(clientNameOrId => convertClientIdToName(clientNameOrId, clients))
-        ]
+        ].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
       };
 
       if (dumpedConnection.strategy === 'email') {

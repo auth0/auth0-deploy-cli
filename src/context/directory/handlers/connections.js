@@ -53,7 +53,7 @@ async function dump(context) {
           if (found) return found.name;
           return clientId;
         })
-      ]
+      ].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
     };
 
     const connectionName = sanitize(dumpedConnection.name);
