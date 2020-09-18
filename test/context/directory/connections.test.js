@@ -156,7 +156,7 @@ describe('#directory context connections', () => {
     expect(loadJSON(path.join(clientFolder, 'my-ad-waad.json'))).to.deep.equal(context.assets.connections[0]);
   });
 
-  it('should dum connections with enabled_clients sorted', async () => {
+  it('should dump connections with enabled_clients sorted', async () => {
     const dir = path.join(testDataDir, 'directory', 'connectionsDump');
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
