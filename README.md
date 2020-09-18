@@ -23,9 +23,10 @@ Supported Features
   - Programmatically
 - Environment Variable Replacements
 
-# ⚠️ WARNING
+# Before you begin
 
-This tool can be destructive to your Auth0 tenant. Please ensure you have read the documentation and tested the tool on a development tenant before using it in production.
+- This tool can be destructive to your Auth0 tenant. Please ensure you have read the documentation and tested the tool on a development tenant before using it in production.
+- Entities created using this tool may share user data with or receive user data from 3rd parties. Please see the [documentation for the individual Management endpoints](https://auth0.com/docs/api/management/v2) for details.
 
 # Migrating
 
