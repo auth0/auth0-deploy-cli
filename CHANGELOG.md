@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.2.1] - 2020-09-23
+### Fixed
+- Issue with client grants deleted when using AUTH0_EXCLUDED_CLIENTS
+
 ## [5.2.0] - 2020-09-17
 ### Fixed
 - Always sort custom database scripts alphabetically
@@ -257,7 +261,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#242]: https://github.com/auth0/auth0-deploy-cli/issues/242
 [#247]: https://github.com/auth0/auth0-deploy-cli/issues/247
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.2.0...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.2.1...HEAD
+[5.2.1]: https://github.com/auth0/auth0-deploy-cli/compare/v5.2.0...v5.2.1
 [5.2.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.6...v5.2.0
 [5.1.6]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.5...v5.1.6
 [5.1.5]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.4...v5.1.5
