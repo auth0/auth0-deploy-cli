@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import { constants, loadFile } from 'auth0-source-control-extension-tools';
 
 import log from '../../../logger';
-import { isDirectory, existsMustBeDir, loadJSON, getFiles, sanitize } from '../../../utils';
+import { isDirectory, existsMustBeDir, dumpJSON, loadJSON, getFiles, sanitize } from '../../../utils';
 
 
 function getDatabase(folder, mappings) {
@@ -75,6 +75,11 @@ async function dump(context) {
     const dbFolder = path.join(databasesFolder, sanitize(database.name));
     fs.ensureDirSync(dbFolder);
 
+    const sortCustomScripts = ([ name1 ], [ name2 ]) => {
+      if (name1 === name2) return 0;
+      return name1 > name2 ? 1 : -1;
+    };
+
     const formatted = {
       ...database,
       enabled_clients: [
@@ -83,12 +88,12 @@ async function dump(context) {
           if (found) return found.name;
           return clientId;
         })
-      ],
+      ].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())),
       options: {
         ...database.options,
         // customScripts option only written if there are scripts
         ...(database.options.customScripts && {
-          customScripts: Object.entries(database.options.customScripts).reduce((scripts, [ name, script ]) => {
+          customScripts: Object.entries(database.options.customScripts).sort(sortCustomScripts).reduce((scripts, [ name, script ]) => {
             // Dump custom script to file
             const scriptName = sanitize(`${name}.js`);
             const scriptFile = path.join(dbFolder, scriptName);
@@ -102,8 +107,7 @@ async function dump(context) {
     };
 
     const databaseFile = path.join(dbFolder, 'database.json');
-    log.info(`Writing ${databaseFile}`);
-    fs.writeFileSync(databaseFile, JSON.stringify(formatted, null, 2));
+    dumpJSON(databaseFile, formatted);
   });
 }
 

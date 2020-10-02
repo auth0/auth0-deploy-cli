@@ -1,7 +1,5 @@
 #!/usr/bin/env node
-import HttpsProxyAgent from 'https-proxy-agent';
-import HttpProxyAgent from 'http-proxy-agent';
-import superagent from 'superagent';
+import { bootstrap } from 'global-agent';
 
 import args from './args';
 import commands from './commands';
@@ -10,19 +8,18 @@ import log from './logger';
 async function run(params) {
   // Run command
   const cmd = commands[params._[0]];
-
-  // Monkey Patch the superagent for proxy use
   const proxy = params.proxy_url;
+
   if (proxy) {
-    const proxyAgent = new HttpProxyAgent(proxy);
-    const proxyAgentSsl = new HttpsProxyAgent(proxy);
-    const OrigRequest = superagent.Request;
-    superagent.Request = function RequestWithAgent(method, url) {
-      const req = new OrigRequest(method, url);
-      log.info(`Setting proxy for ${method} to ${url}`);
-      if (url.startsWith('https')) return req.agent(proxyAgentSsl);
-      return req.agent(proxyAgent);
-    };
+    const MAJOR_NODEJS_VERSION = parseInt(process.version.slice(1).split('.')[0], 10);
+
+    if (MAJOR_NODEJS_VERSION < 10) {
+      // `global-agent` works with Node.js v10 and above.
+      throw new Error('The --proxy_url option is only supported on Node >= 10');
+    }
+
+    process.env.GLOBAL_AGENT_HTTP_PROXY = proxy;
+    bootstrap();
   }
 
   log.debug(`Start command ${params._[0]}`);
@@ -43,6 +40,7 @@ if (require.main === module) {
     log.transports.console.level = 'debug';
     // Set for auth0-source-control-ext-tools
     process.env.AUTH0_DEBUG = 'true';
+    process.env.AUTH0_LOG = 'debug';
   }
 
   run(params)

@@ -3,7 +3,7 @@ import path from 'path';
 import { constants, loadFile } from 'auth0-source-control-extension-tools';
 
 import log from '../../../logger';
-import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
+import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
 
 
 function parse(context) {
@@ -62,8 +62,7 @@ async function dump(context) {
 
     // Dump page metadata
     const pageFile = path.join(pagesFolder, `${page.name}.json`);
-    log.info(`Writing ${pageFile}`);
-    fs.writeFileSync(pageFile, JSON.stringify(metadata), null, 2);
+    dumpJSON(pageFile, metadata);
   });
 }
 

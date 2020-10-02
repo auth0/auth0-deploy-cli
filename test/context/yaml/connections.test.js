@@ -134,6 +134,19 @@ describe('#YAML context connections', () => {
             client_authorizequery: ''
           }
         }
+      },
+      {
+        name: 'someSamlConnectionWithMultipleEnabledClients',
+        strategy: 'samlp',
+        enabled_clients: [ 'client3', 'client2', 'client1' ],
+        options: {
+          passwordPolicy: 'testPolicy',
+          idpinitiated: {
+            client_id: 'client-idp-three-id',
+            client_protocol: 'samlp',
+            client_authorizequery: ''
+          }
+        }
       }
     ];
 
@@ -166,6 +179,19 @@ describe('#YAML context connections', () => {
           passwordPolicy: 'testPolicy',
           idpinitiated: {
             client_id: 'client-idp-two-id',
+            client_protocol: 'samlp',
+            client_authorizequery: ''
+          }
+        }
+      },
+      {
+        name: 'someSamlConnectionWithMultipleEnabledClients',
+        strategy: 'samlp',
+        enabled_clients: [ 'client1', 'client2', 'client3' ],
+        options: {
+          passwordPolicy: 'testPolicy',
+          idpinitiated: {
+            client_id: 'client-idp-three-id',
             client_protocol: 'samlp',
             client_authorizequery: ''
           }

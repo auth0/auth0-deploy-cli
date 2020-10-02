@@ -3,7 +3,7 @@ import path from 'path';
 import { constants, loadFile } from 'auth0-source-control-extension-tools';
 
 import log from '../../../logger';
-import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
+import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
 
 
 function parse(context) {
@@ -57,8 +57,7 @@ async function dump(context) {
 
     // Dump template metadata
     const templateFile = path.join(templatesFolder, `${template.template}.json`);
-    log.info(`Writing ${templateFile}`);
-    fs.writeFileSync(templateFile, JSON.stringify({ ...template, body: `./${template.template}.html` }, null, 2));
+    dumpJSON(templateFile, { ...template, body: `./${template.template}.html` });
   });
 }
 
