@@ -42,5 +42,13 @@
       "anonymous": "never",
       "named": "never"
     }]
-  }
+  },
+  "overrides": [
+    {
+        "files": "test/utils.js",
+        "rules": {
+            "no-unused-expressions": "off"
+        }
+    }
+]
 }
