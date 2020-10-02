@@ -13,7 +13,7 @@ describe('#directory context guardian policies provider', () => {
     const guardianPoliciesTest = {
       'policies.json': `{
         "policies": [
-          "all-application"
+          "all-applications"
         ]
       }`
     };
@@ -25,7 +25,7 @@ describe('#directory context guardian policies provider', () => {
     await context.load();
 
     expect(context.assets.guardianPolicies).to.deep.equal({
-      policies: [ 'all-application' ]
+      policies: [ 'all-applications' ]
     });
   });
 
@@ -35,13 +35,13 @@ describe('#directory context guardian policies provider', () => {
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
     context.assets.guardianPolicies = {
-      policies: [ 'all-application' ]
+      policies: [ 'all-applications' ]
     };
 
     await handler.dump(context);
     const guardianFolder = path.join(dir, constants.GUARDIAN_DIRECTORY);
     expect(loadJSON(path.join(guardianFolder, 'policies.json'))).to.deep.equal({
-      policies: [ 'all-application' ]
+      policies: [ 'all-applications' ]
     });
   });
 });
