@@ -66,11 +66,11 @@ if (require.main === module) {
     });
 }
 
-
 // Export commands to be used programmatically
 module.exports = {
   deploy: commands.import,
   dump: commands.export,
   import: commands.import,
-  export: commands.export
+  export: commands.export,
+  convert: commands.convert
 };
