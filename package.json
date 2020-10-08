@@ -13,7 +13,8 @@
     "build": "rimraf ./lib && babel src -d lib",
     "prepare": "npm run build",
     "preversion": "kacl prerelease",
-    "version": "kacl release && git add CHANGELOG.md"
+    "version": "kacl release && git add CHANGELOG.md",
+    "precommit": "npm run lint && npm run test"
   },
   "repository": {
     "type": "git",
