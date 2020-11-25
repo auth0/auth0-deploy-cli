@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.3.1] - 2020-11-16
+### Fixed
+- Fix report error exporting hooks by bumping auth0-source-control-extension-tools@4.1.12 [#289]
+- Add MFA factor webauthn-roaming support by bumping auth0-source-control-extension-tools@4.1.12 [#289]
+
+## [5.3.0] - 2020-11-05
+### Fixed
+- Fix the structure of the example policies.json, and correct the guardianPolicies test to use `all-applications` instead of `all-application` [#278]
+- Fix pagination for specific API calls by bumping auth0-source-control-extension-tools@4.1.9 [#287]
+
+### Changed
+- Return database `enabled_clients` in deterministic order [#281]
+
 ## [5.2.1] - 2020-09-23
 ### Fixed
 - Issue with client grants deleted when using AUTH0_EXCLUDED_CLIENTS
