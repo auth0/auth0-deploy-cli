@@ -3,7 +3,15 @@ import fs from 'fs-extra';
 import { constants, loadFile } from 'auth0-source-control-extension-tools';
 
 import log from '../../../logger';
-import { isDirectory, existsMustBeDir, dumpJSON, loadJSON, getFiles, sanitize } from '../../../utils';
+import {
+  isDirectory,
+  existsMustBeDir,
+  dumpJSON,
+  loadJSON,
+  getFiles,
+  sanitize,
+  mapClientID2NameSorted
+} from '../../../utils';
 
 
 function getDatabase(folder, mappings) {
@@ -67,7 +75,6 @@ async function dump(context) {
 
   if (!databases) return; // Skip, nothing to dump
 
-  const clients = context.assets.clientsOrig || [];
   const databasesFolder = path.join(context.filePath, constants.DATABASE_CONNECTIONS_DIRECTORY);
   fs.ensureDirSync(databasesFolder);
 
@@ -82,13 +89,7 @@ async function dump(context) {
 
     const formatted = {
       ...database,
-      enabled_clients: [
-        ...(database.enabled_clients || []).map((clientId) => {
-          const found = clients.find(c => c.client_id === clientId);
-          if (found) return found.name;
-          return clientId;
-        })
-      ].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())),
+      enabled_clients: mapClientID2NameSorted(database.enabled_clients, context.assets.clientsOrig),
       options: {
         ...database.options,
         // customScripts option only written if there are scripts

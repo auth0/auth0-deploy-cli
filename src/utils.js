@@ -184,3 +184,15 @@ export function clearClientArrays(client) {
 
   return client;
 }
+
+export function convertClientIdToName(clientId, knownClients) {
+  const clients = knownClients || [];
+  const found = clients.find(c => c.client_id === clientId);
+  return (found && found.name) || clientId;
+}
+
+export function mapClientID2NameSorted(enabledClients, knownClients) {
+  return [
+    ...(enabledClients || []).map(clientId => convertClientIdToName(clientId, knownClients))
+  ].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+}

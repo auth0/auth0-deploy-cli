@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 
-import { sanitize } from '../../../utils';
+import { mapClientID2NameSorted, sanitize } from '../../../utils';
 import log from '../../../logger';
 
 
@@ -39,20 +39,11 @@ async function dump(context) {
     return name1 > name2 ? 1 : -1;
   };
 
-  const clients = context.assets.clients || [];
-
   return {
     databases: [
       ...databases.map(database => ({
         ...database,
-        // Convert enabled_clients from id to name
-        enabled_clients: [
-          ...(database.enabled_clients || []).map((clientId) => {
-            const found = clients.find(c => c.client_id === clientId);
-            if (found) return found.name;
-            return clientId;
-          })
-        ].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())),
+        enabled_clients: mapClientID2NameSorted(database.enabled_clients, context.assets.clients),
         options: {
           ...database.options,
           // customScripts option only written if there are scripts
