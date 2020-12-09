@@ -229,7 +229,7 @@ describe('#utils', function() {
 
     const testFileContents = fs.readFileSync(file, { encoding: 'utf8' });
 
-    it('should dump JSON with the contents of passed object', () => {``
+    it('should dump JSON with the contents of passed object', () => {
       expect(JSON.parse(testFileContents)).deep.equal(testObject);
     });
     it('should dump json with trailing newline', () => {
