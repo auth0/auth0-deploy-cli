@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Adds support for Actions.
 
+## [5.3.1] - 2020-11-16
+### Fixed
+- Fix report error exporting hooks by bumping auth0-source-control-extension-tools@4.1.12 [#289]
+- Add MFA factor webauthn-roaming support by bumping auth0-source-control-extension-tools@4.1.12 [#289]
+
 ## [5.3.0] - 2020-11-05
 ### Changed
 - Return database `enabled_clients` in deterministic order [#281]
