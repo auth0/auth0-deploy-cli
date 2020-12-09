@@ -7,16 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.4.0] - 2020-12-09
 ### Added
 - Adds support for Actions.
 
 ## [5.3.0] - 2020-11-05
+### Changed
+- Return database `enabled_clients` in deterministic order [#281]
+
 ### Fixed
 - Fix the structure of the example policies.json, and correct the guardianPolicies test to use `all-applications` instead of `all-application` [#278]
 - Fix pagination for specific API calls by bumping auth0-source-control-extension-tools@4.1.9 [#287]
-
-### Changed
-- Return database `enabled_clients` in deterministic order [#281]
 
 ## [5.2.1] - 2020-09-23
 ### Fixed
@@ -271,8 +272,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#236]: https://github.com/auth0/auth0-deploy-cli/issues/236
 [#242]: https://github.com/auth0/auth0-deploy-cli/issues/242
 [#247]: https://github.com/auth0/auth0-deploy-cli/issues/247
+[#278]: https://github.com/auth0/auth0-deploy-cli/issues/278
+[#281]: https://github.com/auth0/auth0-deploy-cli/issues/281
+[#287]: https://github.com/auth0/auth0-deploy-cli/issues/287
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.2.1...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.4.0...HEAD
+[5.4.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.3.0...v5.4.0
+[5.3.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.2.1...v5.3.0
 [5.2.1]: https://github.com/auth0/auth0-deploy-cli/compare/v5.2.0...v5.2.1
 [5.2.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.6...v5.2.0
 [5.1.6]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.5...v5.1.6
