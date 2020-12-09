@@ -208,7 +208,6 @@ describe('#utils', function() {
   });
 
   describe('dumpJSON', () => {
-    console.log('----------- should not come here')
     const dir = path.join(testDataDir, 'utils', 'json');
     cleanThenMkdir(dir);
     const file = path.join(dir, 'test1.json');
