@@ -21,7 +21,6 @@ import migrations from './migrations';
 import actions from './actions';
 
 export default {
-  actions,
   rules,
   hooks,
   rulesConfigs,
@@ -41,5 +40,6 @@ export default {
   migrations,
   guardianPhoneFactorMessageTypes,
   guardianPhoneFactorSelectedProvider,
-  guardianPolicies
+  guardianPolicies,
+  actions
 };
