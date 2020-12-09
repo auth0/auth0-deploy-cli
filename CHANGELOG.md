@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Adds support for Actions.
+
 ## [5.3.0] - 2020-11-05
 ### Fixed
 - Fix the structure of the example policies.json, and correct the guardianPolicies test to use `all-applications` instead of `all-application` [#278]
