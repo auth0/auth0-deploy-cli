@@ -34,7 +34,7 @@ const actions = {
       "created_at": "2020-12-02T13:11:52.694151416Z",
       "updated_at": "2020-12-02T13:11:57.132608884Z"
     },
-    "flows": []
+    "bindings": []
   }`
 };
 
@@ -62,7 +62,7 @@ const actionsTarget = [
       secrets: [],
       runtime: 'node12'
     },
-    flows: []
+    bindings: []
   }
 ];
 
@@ -154,7 +154,7 @@ describe.only('#directory context actions', () => {
         secrets: [],
         runtime: 'node12'
       },
-      flows: []
+      bindings: []
     });
     expect(fs.readFileSync(path.join(actionsFolder, 'action-one.js'), 'utf8')).to.deep.equal(codeValidation);
   });

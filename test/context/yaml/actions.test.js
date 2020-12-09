@@ -27,7 +27,7 @@ describe.only('#YAML context actions', () => {
               version: 4.17.20
           secrets: []
           runtime: node12
-        flows: []
+        bindings: []
         supported_triggers:
           - id: post-login
             version: v1
@@ -55,7 +55,7 @@ describe.only('#YAML context actions', () => {
           secrets: [],
           runtime: 'node12'
         },
-        flows: []
+        bindings: []
       }
     ];
 
@@ -126,7 +126,7 @@ describe.only('#YAML context actions', () => {
             secrets: [],
             runtime: 'node12'
           },
-          flows: []
+          bindings: []
         }
       ]
     });
