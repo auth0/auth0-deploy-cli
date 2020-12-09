@@ -67,7 +67,7 @@ const actionsTarget = [
 ];
 
 
-describe.only('#directory context actions', () => {
+describe('#directory context actions', () => {
   it('should process actions', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'test1');
     const dir = path.join(repoDir);

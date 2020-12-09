@@ -7,7 +7,7 @@ import handler from '../../../src/context/yaml/handlers/actions';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
 
-describe.only('#YAML context actions', () => {
+describe('#YAML context actions', () => {
   it('should process actions', async () => {
     const dir = path.join(testDataDir, 'yaml', 'action-one');
     cleanThenMkdir(dir);
