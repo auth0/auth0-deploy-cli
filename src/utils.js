@@ -4,6 +4,7 @@ import sanitizeName from 'sanitize-filename';
 import { loadFile } from 'auth0-source-control-extension-tools';
 import dotProp from 'dot-prop';
 import log from './logger';
+import context from './context';
 
 export function isDirectory(f) {
   try {
@@ -41,10 +42,19 @@ export function loadJSON(file, mappings) {
   }
 }
 
-export function dumpJSON(file, mappings) {
+export function dumpJSON(file, mappings, persistMappings) {
   try {
     log.info(`Writing ${file}`);
-    const jsonBody = JSON.stringify(mappings, null, 2);
+    let jsonBody = JSON.stringify(mappings, null, 2);
+
+    // merge both config if PERSIST_MAPPINGS=true
+    if (persistMappings && fs.existsSync(file)) {
+      const currentConfig = fs.readJSONSync(file);
+      const newConfig = JSON.parse(jsonBody);
+      jsonBody = { ...currentConfig, ...newConfig };
+      jsonBody = JSON.stringify(jsonBody, null, 2);
+    }
+
     fs.writeFileSync(
       file,
       jsonBody.endsWith('\n') ? jsonBody : `${jsonBody}\n`

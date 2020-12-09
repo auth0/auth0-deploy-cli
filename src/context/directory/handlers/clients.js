@@ -54,7 +54,7 @@ async function dump(context) {
 
       client.custom_login_page = `./${clientName}_custom_login_page.html`;
     }
-    dumpJSON(clientFile, clearClientArrays(client));
+    dumpJSON(clientFile, clearClientArrays(client), context.config.PERSIST_MAPPINGS);
   });
 }
 

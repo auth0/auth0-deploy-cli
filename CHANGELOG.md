@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+PERSIST_MAPPINGS: New Config option. This option will persist your mapping when you try sync your local repo with tenant config. Option is only supported for format directory. User will have to add the properties defined in mapping to `EXCLUDED_PROPS` else it will be overriden.
+
+eg:
+If I have configuration with mappings `@@APP_CALLBACKS@@` below should be recommended config:
+
+```json
+"PERSIST_MAPPINGS": true
+"EXCLUDED_PROPS": {
+  "clients": ["callbacks", "...other_props"]
+}
+```
 
 ## [5.3.1] - 2020-11-16
 ### Fixed
@@ -75,7 +86,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.3.0] - 2020-05-18
 ### Removed
 - Removed several unused dependencies:
-  
+
   - ajv
   - e6-template-strings
   - node-storage

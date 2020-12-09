@@ -208,18 +208,29 @@ describe('#utils', function() {
   });
 
   describe('dumpJSON', () => {
+    console.log('----------- should not come here')
     const dir = path.join(testDataDir, 'utils', 'json');
     cleanThenMkdir(dir);
     const file = path.join(dir, 'test1.json');
+    const mapfile = path.join(dir, 'testmapping1.json');
     const testObject = {
       env1: 'test1',
       env2: 'test2',
       test: '123'
     };
+
+    const testObject2 = {
+      env1: 'mapping1',
+      env2: 'mapping2',
+      test: '123',
+      callbacks: '@@APP_CALLBACKS@@'
+    };
+
     dumpJSON(file, testObject);
+
     const testFileContents = fs.readFileSync(file, { encoding: 'utf8' });
 
-    it('should dump JSON with the contents of passed object', () => {
+    it('should dump JSON with the contents of passed object', () => {``
       expect(JSON.parse(testFileContents)).deep.equal(testObject);
     });
     it('should dump json with trailing newline', () => {
@@ -229,6 +240,18 @@ describe('#utils', function() {
       expect(() => {
         dumpJSON('http://notavalidfilepath', testObject);
       }).throws(/Error writing JSON.*/);
+    });
+
+    it('should persist mappings when reexported config', () => {
+      fs.writeJSONSync(mapfile, testObject2);
+      dumpJSON(mapfile, { env1: 'updatedenv1' }, true);
+      const updatedContents = fs.readJSONSync(mapfile);
+      expect(updatedContents).deep.equals({
+        env1: 'updatedenv1',
+        env2: 'mapping2',
+        test: '123',
+        callbacks: '@@APP_CALLBACKS@@'
+      });
     });
   });
 });
