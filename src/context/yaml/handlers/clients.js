@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { constants, loadFile } from 'auth0-source-control-extension-tools';
+import { constants } from 'auth0-source-control-extension-tools';
 
 import log from '../../../logger';
 import { isFile, sanitize, clearClientArrays } from '../../../utils';
@@ -22,7 +22,7 @@ async function parse(context) {
           const htmlFileName = path.join(clientsFolder, client.custom_login_page);
 
           if (isFile(htmlFileName)) {
-            client.custom_login_page = loadFile(htmlFileName);
+            client.custom_login_page = context.loadFile(htmlFileName);
           }
         }
 

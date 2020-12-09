@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { constants, loadFile } from 'auth0-source-control-extension-tools';
+import { constants } from 'auth0-source-control-extension-tools';
 
 import log from '../../../logger';
 import { isFile, sanitize, ensureProp } from '../../../utils';
@@ -23,7 +23,7 @@ async function parse(context) {
           const htmlFileName = path.join(connectionsFolder, connection.options.email.body);
 
           if (isFile(htmlFileName)) {
-            connection.options.email.body = loadFile(htmlFileName, context.mappings);
+            connection.options.email.body = context.loadFile(htmlFileName);
           }
         }
 
