@@ -1,6 +1,7 @@
 import path from 'path';
 import { AuthenticationClient, ManagementClient } from 'auth0';
 import YAMLContext from './yaml';
+import TFContext from './terraform';
 import DirectoryContext from './directory';
 
 import { isDirectory } from '../utils';
@@ -83,6 +84,9 @@ export default async function(config) {
   }
 
   if (isDirectory(inputFile)) {
+    if (config.AUTH0_CONTEXT_TYPE === 'tf') {
+      return new TFContext(config, mgmtClient);
+    }
     return new DirectoryContext(config, mgmtClient);
   }
 

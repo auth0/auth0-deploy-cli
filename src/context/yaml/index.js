@@ -76,14 +76,18 @@ export default class {
     }));
   }
 
-  async dump() {
+  async dump(assets) {
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
-    log.info('Loading Auth0 Tenant Data');
-    try {
-      await auth0.loadAll();
-      this.assets = auth0.assets;
-    } catch (err) {
-      throw new Error(`Problem loading tenant data from Auth0 ${err}`);
+    if (!assets) {
+      log.info('Loading Auth0 Tenant Data');
+      try {
+        await auth0.loadAll();
+        this.assets = auth0.assets;
+      } catch (err) {
+        throw new Error(`Problem loading tenant data from Auth0 ${err}`);
+      }
+    } else {
+      this.assets = { ...assets, ...this.assets };
     }
 
     await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {

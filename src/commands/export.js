@@ -6,7 +6,7 @@ import log from '../logger';
 import { isDirectory } from '../utils';
 import setupContext from '../context';
 
-export default async function deploy(params) {
+export async function getExportContext(params) {
   const {
     output_folder: outputFolder,
     base_path: basePath,
@@ -26,6 +26,7 @@ export default async function deploy(params) {
     AUTH0_INPUT_FILE: outputFolder,
     AUTH0_BASE_PATH: basePath,
     AUTH0_CONFIG_FILE: configFile,
+    AUTH0_CONTEXT_TYPE: params.format,
     ...configObj || {}
   };
 
@@ -41,7 +42,7 @@ export default async function deploy(params) {
   }
 
   // Check output folder
-  if (!isDirectory(outputFolder)) {
+  if (!isDirectory(outputFolder) || params.format === 'tf') {
     log.info(`Creating ${outputFolder}`);
     mkdirp.sync(outputFolder);
   }
@@ -54,6 +55,11 @@ export default async function deploy(params) {
 
   // Setup context and load
   const context = await setupContext(nconf.get());
+  return context;
+}
+
+export default async function dump(params) {
+  const context = await getExportContext(params);
   await context.dump();
   log.info('Export Successful');
 }

@@ -7,7 +7,7 @@
     "a0deploy": "lib/index.js"
   },
   "scripts": {
-    "lint": "eslint --ignore-path .eslintignore --ignore-pattern webpack . && kacl lint",
+    "lint": "eslint --fix --ignore-path .eslintignore --ignore-pattern webpack . && kacl lint",
     "pretest": "rimraf ./.nyc_output",
     "test": "cross-env NODE_ENV=test nyc mocha --recursive --require @babel/register test",
     "build": "rimraf ./lib && babel src -d lib",

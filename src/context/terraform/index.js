@@ -1,11 +1,19 @@
-import * as path from 'path';
-import { loadFile, Auth0 } from 'auth0-source-control-extension-tools';
+import path from 'path';
+import { Auth0 } from 'auth0-source-control-extension-tools';
+import { writeFileSync } from 'fs-extra';
 
-import cleanAssets from '../../readonly';
 import log from '../../logger';
+import {
+  toConfigFn,
+  stripIdentifiers
+} from '../../utils';
 import handlers from './handlers';
-import { isDirectory, isFile, stripIdentifiers, toConfigFn } from '../../utils';
+import cleanAssets from '../../readonly';
+import fromJSON from './formatter';
 
+function formatTF(data) {
+  return (Array.isArray(data) ? data : [ data ]).map(item => fromJSON(item)).join('\n');
+}
 export default class {
   constructor(config, mgmtClient) {
     this.filePath = config.AUTH0_INPUT_FILE;
@@ -26,36 +34,17 @@ export default class {
     };
   }
 
-  loadFile(f, folder) {
-    const basePath = path.join(this.filePath, folder);
-    let toLoad = path.join(basePath, f);
-    if (!isFile(toLoad)) {
-      // try load not relative to yaml file
-      toLoad = f;
-    }
-    return loadFile(toLoad, this.mappings);
-  }
-
   async load() {
-    if (isDirectory(this.filePath)) {
-      /* If this is a directory, look for each file in the directory */
-      log.info(`Processing directory ${this.filePath}`);
-
-      Object.values(handlers)
-        .forEach((handler) => {
-          const parsed = handler.parse(this);
-          Object.entries(parsed)
-            .forEach(([ k, v ]) => {
-              this.assets[k] = v;
-            });
-        });
-      return;
-    }
-    throw new Error(`Not sure what to do with, ${this.filePath} as it is not a directory...`);
+    log.info(`Processing terraform directory ${this.filePath}`);
+    throw new Error('Import is not supported for the Terraform format. Please use terraform-provider-auth0.');
   }
 
   async dump(assets) {
-    const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
+    const auth0 = new Auth0(
+      this.mgmtClient,
+      this.assets,
+      toConfigFn(this.config)
+    );
     if (!assets) {
       log.info('Loading Auth0 Tenant Data');
       await auth0.loadAll();
@@ -75,12 +64,16 @@ export default class {
     if (!this.config.AUTH0_EXPORT_IDENTIFIERS) {
       this.assets = stripIdentifiers(auth0, this.assets);
     }
-
+    writeFileSync(path.join(this.filePath, 'provider.tf'), `provider "auth0" {
+  version = "> 0.8"
+  domain  = "${this.config.AUTH0_DOMAIN}"
+}`);
     await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {
       try {
         const data = await handler.dump(this);
         if (data) {
           log.info(`Exporting ${name}`);
+          writeFileSync(path.join(this.filePath, `${name}.tf`), formatTF(data));
         }
       } catch (err) {
         log.debug(err.stack);

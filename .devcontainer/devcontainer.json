@@ -1,0 +1,14 @@
+{
+  "name": "Node.js 12",
+  "dockerFile": "Dockerfile",
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash"
+  },
+  "extensions": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "eamodio.gitlens",
+    "hbenl.vscode-test-explorer",
+    "hbenl.vscode-mocha-test-adapter"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "[javascript]": {
+    "editor.formatOnSave": true,
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  },
+  "mochaExplorer.require": "@babel/register"
+}
