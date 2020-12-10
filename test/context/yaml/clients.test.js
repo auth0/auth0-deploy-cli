@@ -29,14 +29,14 @@ describe('#YAML context clients', () => {
     const target = [
       { app_type: 'spa', name: 'someClient' },
       { app_type: 'spa', name: 'someClient2' },
-      { app_type: 'spa', name: 'customLoginClient', custom_login_page: 'html code' }
+      { app_type: 'spa', name: 'customLoginClient', custom_login_page: 'html code spa "spa"' }
     ];
 
     const yamlFile = path.join(dir, 'clients1.yaml');
     const clientsPath = path.join(dir, 'clients');
     fs.writeFileSync(yamlFile, yaml);
     fs.ensureDirSync(clientsPath);
-    fs.writeFileSync(path.join(clientsPath, 'customLoginClient_custom_login_page.html'), 'html code');
+    fs.writeFileSync(path.join(clientsPath, 'customLoginClient_custom_login_page.html'), 'html code ##appType## @@appType@@');
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { appType: 'spa' } };
     const context = new Context(config, mockMgmtClient());
