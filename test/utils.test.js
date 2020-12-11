@@ -250,9 +250,11 @@ describe('#utils', function() {
       expect(convertClientIdToName('not_found_id', knownClients)).equal('not_found_id');
     });
 
-    it('should return client id if known clients are undefined or empty', () => {
+    it('should return client id if known clients are undefined or empty or an object', () => {
       expect(convertClientIdToName('not_found_id', undefined)).equal('not_found_id');
+      expect(convertClientIdToName('not_found_id', null)).equal('not_found_id');
       expect(convertClientIdToName('not_found_id', [])).equal('not_found_id');
+      expect(convertClientIdToName('not_found_id', {})).equal('not_found_id');
     });
 
     it('should return client name if found', () => {
@@ -265,6 +267,17 @@ describe('#utils', function() {
         [ 'client_id_B', 'client_id_A', 'not_found_id' ],
         knownClients
       )).deep.equal([ 'client_A', 'client_B', 'not_found_id' ]);
+    });
+
+    it('should return sorted list even knownClient are invalid', () => {
+      expect(mapClientID2NameSorted(
+        [ 'client_id_B', 'client_id_A', 'not_found_id' ],
+        null
+      )).deep.equal([ 'client_id_A', 'client_id_B', 'not_found_id' ]);
+    });
+
+    it('should return empty list upon invalid input', () => {
+      expect(mapClientID2NameSorted(null, null)).deep.equal([]);
     });
   });
 });
