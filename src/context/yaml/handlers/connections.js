@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import { constants } from 'auth0-source-control-extension-tools';
 
 import log from '../../../logger';
-import { isFile, sanitize, ensureProp } from '../../../utils';
+import { isFile, sanitize, ensureProp, convertClientIdToName, mapClientID2NameSorted } from '../../../utils';
 
 async function parse(context) {
   // Load the HTML file for email connections
@@ -33,11 +33,6 @@ async function parse(context) {
   };
 }
 
-const convertClientIdToName = (clientId, clients) => {
-  const found = clients.find(c => c.client_id === clientId);
-  return (found && found.name) || clientId;
-};
-
 const getFormattedOptions = (connection, clients) => {
   try {
     return {
@@ -60,21 +55,16 @@ const getFormattedOptions = (connection, clients) => {
 async function dump(context) {
   const { connections } = context.assets;
 
-
   // Nothing to do
   if (!connections) return {};
-
-  const clients = context.assets.clients || [];
 
   // nothing to do, set default if empty
   return {
     connections: connections.map((connection) => {
       const dumpedConnection = {
         ...connection,
-        ...getFormattedOptions(connection, clients),
-        enabled_clients: [
-          ...(connection.enabled_clients || []).map(clientNameOrId => convertClientIdToName(clientNameOrId, clients))
-        ].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+        ...getFormattedOptions(connection, context.assets.clients),
+        enabled_clients: mapClientID2NameSorted(connection.enabled_clients, context.assets.clients)
       };
 
       if (dumpedConnection.strategy === 'email') {
