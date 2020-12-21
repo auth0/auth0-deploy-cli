@@ -181,3 +181,15 @@ roles:
       - permission_name: 'read:account'
         resource_server_identifier: 'https://##ENV##.myapp.com/api/v1'
 
+actions:
+  - name: action-example
+    current_version:
+      code: ./actions/action-example.js
+      dependencies: []
+      secrets: []
+      runtime: node12
+    supported_triggers:
+      - id: post-login
+        version: v1
+    bindings:
+      - trigger_id: post-login
