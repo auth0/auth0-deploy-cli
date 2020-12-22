@@ -18,6 +18,9 @@ export function mockMgmtClient() {
   return {
     rules: { getAll: () => ({ rules: [] }) },
     hooks: { getAll: () => [] },
+    actions: { getAll: () => ({ actions: [] }) },
+    actionVersion: { getAll: ({ versions: [] }) },
+    actionBindings: { getAll: ({ bindings: [] }) },
     databases: { getAll: () => ({ databases: [] }) },
     connections: { getAll: () => ({ connections: [] }) },
     resourceServers: { getAll: () => ({ resourceServers: [] }) },

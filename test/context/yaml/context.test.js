@@ -151,6 +151,7 @@ describe('#YAML context validation', () => {
       resourceServers: [],
       rules: [],
       hooks: [],
+      actions: [],
       rulesConfigs: [],
       roles: [
         {
@@ -219,6 +220,7 @@ describe('#YAML context validation', () => {
       resourceServers: [],
       rules: [],
       hooks: [],
+      actions: [],
       rulesConfigs: [],
       roles: [
         {
@@ -291,6 +293,7 @@ describe('#YAML context validation', () => {
       resourceServers: [],
       rules: [],
       hooks: [],
+      actions: [],
       rulesConfigs: [],
       roles: [
         {

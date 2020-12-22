@@ -1,0 +1,20 @@
+{
+  "name": "action-example",
+  "supported_triggers": [
+    {
+      "id": "post-login",
+      "version": "v1"
+    }
+  ],
+  "current_version": {
+    "code": "./action-example.js",
+    "dependencies": [],
+    "secrets": [],
+    "runtime": "node12"
+  },
+  "bindings": [
+    {
+      "trigger_id": "post-login"
+    }
+  ]
+}
