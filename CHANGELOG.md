@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Adds support for Actions.
 
+## [5.3.2] - 2020-12-17
+### Fixed
+- Fix keyword mapping in client page templates [ESD-10528] [#291]
+
+
 ## [5.3.1] - 2020-11-16
 ### Fixed
 - Fix report error exporting hooks by bumping auth0-source-control-extension-tools@4.1.12 [#289]
@@ -280,9 +285,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#278]: https://github.com/auth0/auth0-deploy-cli/issues/278
 [#281]: https://github.com/auth0/auth0-deploy-cli/issues/281
 [#287]: https://github.com/auth0/auth0-deploy-cli/issues/287
+[#289]: https://github.com/auth0/auth0-deploy-cli/issues/289
+[#291]: https://github.com/auth0/auth0-deploy-cli/issues/291
 
 [Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.4.0...HEAD
 [5.4.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.3.0...v5.4.0
+[5.3.2]: https://github.com/auth0/auth0-deploy-cli/compare/v5.3.1...v5.3.2
+[5.3.1]: https://github.com/auth0/auth0-deploy-cli/compare/v5.3.0...v5.3.1
 [5.3.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.2.1...v5.3.0
 [5.2.1]: https://github.com/auth0/auth0-deploy-cli/compare/v5.2.0...v5.2.1
 [5.2.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.6...v5.2.0

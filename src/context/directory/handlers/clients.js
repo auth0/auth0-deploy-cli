@@ -19,7 +19,7 @@ function parse(context) {
         const htmlFileName = path.join(clientsFolder, client.custom_login_page);
 
         if (isFile(htmlFileName)) {
-          client.custom_login_page = loadFile(htmlFileName);
+          client.custom_login_page = loadFile(htmlFileName, context.mappings);
         }
       }
 

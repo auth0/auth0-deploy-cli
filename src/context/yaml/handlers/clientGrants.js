@@ -1,3 +1,4 @@
+import { convertClientIdToName } from '../../../utils';
 
 async function parse(context) {
   // nothing to do, set default empty
@@ -12,14 +13,11 @@ async function dump(context) {
   // Nothing to do
   if (!clientGrants) return {};
 
-  const clients = context.assets.clients || [];
-
   // Convert client_id to the client name for readability
   return {
     clientGrants: clientGrants.map((grant) => {
       const dumpGrant = { ...grant };
-      const found = clients.find(c => c.client_id === dumpGrant.client_id);
-      if (found) dumpGrant.client_id = found.name;
+      dumpGrant.client_id = convertClientIdToName(dumpGrant.client_id, context.assets.clients);
       return dumpGrant;
     })
   };

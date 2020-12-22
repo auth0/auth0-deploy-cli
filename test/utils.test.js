@@ -6,6 +6,7 @@ import { Auth0 } from 'auth0-source-control-extension-tools';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from './utils';
 import {
   clearClientArrays,
+  convertClientIdToName,
   dumpJSON,
   existsMustBeDir,
   formatResults,
@@ -14,6 +15,7 @@ import {
   isDirectory,
   isFile,
   loadJSON,
+  mapClientID2NameSorted,
   recordsSorter,
   sanitize,
   stripIdentifiers,
@@ -229,6 +231,53 @@ describe('#utils', function() {
       expect(() => {
         dumpJSON('http://notavalidfilepath', testObject);
       }).throws(/Error writing JSON.*/);
+    });
+  });
+
+  describe('Client ID to Name conversions', () => {
+    const knownClients = [
+      {
+        client_id: 'client_id_B',
+        name: 'client_B'
+      },
+      {
+        client_id: 'client_id_A',
+        name: 'client_A'
+      }
+    ];
+
+    it('should return client id if not found', () => {
+      expect(convertClientIdToName('not_found_id', knownClients)).equal('not_found_id');
+    });
+
+    it('should return client id if known clients are undefined or empty or an object', () => {
+      expect(convertClientIdToName('not_found_id', undefined)).equal('not_found_id');
+      expect(convertClientIdToName('not_found_id', null)).equal('not_found_id');
+      expect(convertClientIdToName('not_found_id', [])).equal('not_found_id');
+      expect(convertClientIdToName('not_found_id', {})).equal('not_found_id');
+    });
+
+    it('should return client name if found', () => {
+      expect(convertClientIdToName('client_id_B', knownClients)).equal('client_B');
+      expect(convertClientIdToName('client_id_A', knownClients)).equal('client_A');
+    });
+
+    it('should return sorted list', () => {
+      expect(mapClientID2NameSorted(
+        [ 'client_id_B', 'client_id_A', 'not_found_id' ],
+        knownClients
+      )).deep.equal([ 'client_A', 'client_B', 'not_found_id' ]);
+    });
+
+    it('should return sorted list even knownClient are invalid', () => {
+      expect(mapClientID2NameSorted(
+        [ 'client_id_B', 'client_id_A', 'not_found_id' ],
+        null
+      )).deep.equal([ 'client_id_A', 'client_id_B', 'not_found_id' ]);
+    });
+
+    it('should return empty list upon invalid input', () => {
+      expect(mapClientID2NameSorted(null, null)).deep.equal([]);
     });
   });
 });
