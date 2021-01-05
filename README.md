@@ -40,6 +40,8 @@ Check our migration guides to see if you need to do anything when upgrading [her
 npm i -g auth0-deploy-cli
 ```
 
+⚠️ In your CI/CD scripts, lock down the version so the deployment setup is idempotent. Eg. `npm i -g auth0-deploy-cli@6.0.0`
+
 ## Pre-requisites
 
 ⚠️ Node.js version 8 or later is required to run this tool since v5.0.0.
