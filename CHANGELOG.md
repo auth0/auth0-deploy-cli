@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [6.0.0-beta.0] - 2021-01-15
+## [6.0.1-beta.0] - 2021-01-15
 ### Changed
 - Cleanup versioning for actions beta.
 
