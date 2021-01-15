@@ -75,7 +75,6 @@ export function stripIdentifiers(auth0, assets) {
   // Some of the object identifiers are required to perform updates.
   // Don't strip these object id's
   const ignore = [
-    'actions',
     'rulesConfigs',
     'emailTemplates',
     'guardianFactors',
