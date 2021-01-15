@@ -1,6 +1,6 @@
 {
   "name": "auth0-deploy-cli",
-  "version": "6.0.1",
+  "version": "6.0.0-beta.0",
   "description": "A command line tool for deploying updates to your Auth0 tenant",
   "main": "lib/index.js",
   "bin": {
@@ -46,7 +46,7 @@
     "@babel/plugin-proposal-decorators": "^7.8.3",
     "@babel/preset-env": "^7.9.6",
     "@babel/register": "^7.9.0",
-    "@brightcove/kacl": "^0.1.8",
+    "@brightcove/kacl": "^0.1.11",
     "babel-eslint": "^10.0.0",
     "babel-plugin-dynamic-import-node": "^2.3.3",
     "babel-plugin-module-resolver": "^4.0.0",
