@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fix keyword mapping in client page templates [ESD-10528] [#291]
 
+
 ## [5.3.1] - 2020-11-16
 ### Fixed
 - Fix report error exporting hooks by bumping auth0-source-control-extension-tools@4.1.12 [#289]

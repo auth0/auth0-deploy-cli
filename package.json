@@ -27,9 +27,9 @@
   "readme": "README.md",
   "homepage": "https://github.com/auth0/auth0-deploy-cli#readme",
   "dependencies": {
-    "auth0": "^2.27.0",
+    "auth0": "git://github.com/auth0/node-auth0.git#actionsManager",
     "auth0-extension-tools": "^1.4.4",
-    "auth0-source-control-extension-tools": "^4.1.12",
+    "auth0-source-control-extension-tools": "^5.0.0",
     "dot-prop": "^5.2.0",
     "fs-extra": "^7.0.0",
     "global-agent": "^2.1.12",
