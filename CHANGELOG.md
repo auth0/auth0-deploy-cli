@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [5.4.0] - 2021-01-28
 ### Added
 - Add support for `verify_email_by_code` email template [#309]
 
@@ -284,8 +286,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#287]: https://github.com/auth0/auth0-deploy-cli/issues/287
 [#289]: https://github.com/auth0/auth0-deploy-cli/issues/289
 [#291]: https://github.com/auth0/auth0-deploy-cli/issues/291
+[#309]: https://github.com/auth0/auth0-deploy-cli/issues/309
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.3.2...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.4.0...HEAD
+[5.4.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.3.2...v5.4.0
 [5.3.2]: https://github.com/auth0/auth0-deploy-cli/compare/v5.3.1...v5.3.2
 [5.3.1]: https://github.com/auth0/auth0-deploy-cli/compare/v5.3.0...v5.3.1
 [5.3.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.2.1...v5.3.0
