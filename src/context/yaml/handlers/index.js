@@ -17,6 +17,7 @@ import guardianPhoneFactorMessageTypes from './guardianPhoneFactorMessageTypes';
 import guardianPhoneFactorSelectedProvider from './guardianPhoneFactorSelectedProvider';
 import guardianPolicies from './guardianPolicies';
 import roles from './roles';
+import organizations from './organizations';
 import migrations from './migrations';
 import actions from './actions';
 
@@ -41,5 +42,6 @@ export default {
   guardianPhoneFactorMessageTypes,
   guardianPhoneFactorSelectedProvider,
   guardianPolicies,
-  actions
+  actions,
+  organizations
 };
