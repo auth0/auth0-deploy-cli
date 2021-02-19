@@ -7,6 +7,7 @@
     "a0deploy": "lib/index.js"
   },
   "scripts": {
+    "lint:fix": "eslint --fix --ignore-path .eslintignore --ignore-pattern webpack . && kacl lint",
     "lint": "eslint --ignore-path .eslintignore --ignore-pattern webpack . && kacl lint",
     "pretest": "rimraf ./.nyc_output",
     "test": "cross-env NODE_ENV=test nyc mocha --recursive --require @babel/register test",
@@ -27,9 +28,9 @@
   "readme": "README.md",
   "homepage": "https://github.com/auth0/auth0-deploy-cli#readme",
   "dependencies": {
-    "auth0": "^2.27.0",
+    "auth0": "^2.34.0",
     "auth0-extension-tools": "^1.4.4",
-    "auth0-source-control-extension-tools": "~4.4.3",
+    "auth0-source-control-extension-tools": "^5.4.0",
     "dot-prop": "^5.2.0",
     "fs-extra": "^7.0.0",
     "global-agent": "^2.1.12",
