@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.5.1] - 2021-03-03
+### Fixed
+- Fix issues with retrieving more than 50 roles
+
 ## [5.5.0] - 2021-01-28
 ### Added
 - Add support for `verify_email_by_code` email template [#309]
@@ -288,7 +292,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#291]: https://github.com/auth0/auth0-deploy-cli/issues/291
 [#309]: https://github.com/auth0/auth0-deploy-cli/issues/309
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.0...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.1...HEAD
+[5.5.1]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.0...v5.5.1
 [5.5.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.3.2...v5.5.0
 [5.3.2]: https://github.com/auth0/auth0-deploy-cli/compare/v5.3.1...v5.3.2
 [5.3.1]: https://github.com/auth0/auth0-deploy-cli/compare/v5.3.0...v5.3.1
