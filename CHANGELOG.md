@@ -6,7 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-
+### Fixed 
+- Fix issues with retrieving more than 50 roles 
 ## [5.5.0] - 2021-01-28
 ### Added
 - Add support for `verify_email_by_code` email template [#309]
