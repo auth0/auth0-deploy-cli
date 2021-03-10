@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.0.1-beta.2] - 2021-03-10
 ### Added
 - Support for webauthn-platform guardian factor
 
@@ -300,7 +302,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#289]: https://github.com/auth0/auth0-deploy-cli/issues/289
 [#291]: https://github.com/auth0/auth0-deploy-cli/issues/291
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.1-beta.1...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.1-beta.2...HEAD
+[6.0.1-beta.2]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.1-beta.1...v6.0.1-beta.2
 [6.0.1-beta.1]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.1-beta.0...v6.0.1-beta.1
 [6.0.1-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.0...v6.0.1-beta.0
 [6.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.3.2...v6.0.0
