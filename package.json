@@ -1,6 +1,6 @@
 {
   "name": "auth0-deploy-cli",
-  "version": "5.5.1",
+  "version": "5.5.2",
   "description": "A command line tool for deploying updates to your Auth0 tenant",
   "main": "lib/index.js",
   "bin": {
@@ -29,7 +29,7 @@
   "dependencies": {
     "auth0": "^2.27.0",
     "auth0-extension-tools": "^1.4.4",
-    "auth0-source-control-extension-tools": "~4.4.0",
+    "auth0-source-control-extension-tools": "^4.4.1",
     "dot-prop": "^5.2.0",
     "fs-extra": "^7.0.0",
     "global-agent": "^2.1.12",
