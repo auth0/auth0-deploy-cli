@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.1-beta.1] - 2021-03-10
+### Fixed
+- Fix pagination when computing changes
+
 ## [6.0.1-beta.0] - 2021-01-15
 ### Changed
 - Cleanup versioning for actions beta.
@@ -18,7 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [5.3.2] - 2020-12-17
 ### Fixed
 - Fix keyword mapping in client page templates [ESD-10528] [#291]
-
 
 ## [5.3.1] - 2020-11-16
 ### Fixed
@@ -292,8 +295,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#289]: https://github.com/auth0/auth0-deploy-cli/issues/289
 [#291]: https://github.com/auth0/auth0-deploy-cli/issues/291
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.2-beta.0...HEAD
-[6.0.2-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.0...v6.0.2-beta.0
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.1-beta.1...HEAD
+[6.0.1-beta.1]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.1-beta.0...v6.0.1-beta.1
+[6.0.1-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.0...v6.0.1-beta.0
 [6.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.3.2...v6.0.0
 [5.3.2]: https://github.com/auth0/auth0-deploy-cli/compare/v5.3.1...v5.3.2
 [5.3.1]: https://github.com/auth0/auth0-deploy-cli/compare/v5.3.0...v5.3.1
