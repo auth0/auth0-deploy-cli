@@ -74,11 +74,17 @@ export function mockMgmtClient() {
         }
       ),
       permissions: {
-        get: () => [
+        getAll: () => (
           {
-            permission_name: 'create:data', resource_server_identifier: 'urn:ref'
+            permissions: [
+              {
+                permission_name: 'create:data', resource_server_identifier: 'urn:ref'
+              }
+            ],
+            total: 1,
+            limit: 50
           }
-        ]
+        )
       }
     },
     tenant: {
