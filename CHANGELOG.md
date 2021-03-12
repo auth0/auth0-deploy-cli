@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.5.4] - 2021-03-12
+### Fixed
+- Remove limit on permissions in roles
+
 ## [5.5.3] - 2021-03-10
 ### Added
 - Add webauthn platform as a supported factor
@@ -300,7 +304,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#291]: https://github.com/auth0/auth0-deploy-cli/issues/291
 [#309]: https://github.com/auth0/auth0-deploy-cli/issues/309
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.3...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.4...HEAD
+[5.5.4]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.3...v5.5.4
 [5.5.3]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.2...v5.5.3
 [5.5.2]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.1...v5.5.2
 [5.5.1]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.0...v5.5.1
