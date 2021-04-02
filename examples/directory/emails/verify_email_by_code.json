@@ -1,0 +1,8 @@
+{
+  "template": "verify_email_by_code",
+  "from": "",
+  "subject": "",
+  "syntax": "liquid",
+  "body": "./verify_email_by_code.html",
+  "enabled": true
+}
