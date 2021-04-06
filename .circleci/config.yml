@@ -58,9 +58,6 @@ workflows:
       - test:
           name: test_node14
           v: "14"
-      - test:
-          name: test_node15
-          v: "15"
   test_and_deploy:
     jobs:
       - test:
