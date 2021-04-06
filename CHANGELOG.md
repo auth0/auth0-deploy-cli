@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.1.0-beta.0] - 2021-04-06
 ### Added
 - Support for organizations
 
@@ -333,14 +335,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#291]: https://github.com/auth0/auth0-deploy-cli/issues/291
 [#309]: https://github.com/auth0/auth0-deploy-cli/issues/309
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.1-beta.3...beta
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v6.1.0-beta.0...HEAD
+[6.1.0-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.1-beta.3...v6.1.0-beta.0
 [6.0.1-beta.3]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.1-beta.2...v6.0.1-beta.3
 [6.0.1-beta.2]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.1-beta.1...v6.0.1-beta.2
 [6.0.1-beta.1]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.1-beta.0...v6.0.1-beta.1
 [6.0.1-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.0...v6.0.1-beta.0
-[6.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.3.2...v6.0.0
-
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.5...HEAD
+[6.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.5...v6.0.0
 [5.5.5]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.4...v5.5.5
 [5.5.4]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.3...v5.5.4
 [5.5.3]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.2...v5.5.3
