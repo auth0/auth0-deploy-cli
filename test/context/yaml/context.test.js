@@ -127,20 +127,64 @@ describe('#YAML context validation', () => {
         }
       },
       emailTemplates: [
-        { body: './emailTemplates/blocked_account.html', enabled: true, template: 'blocked_account' },
-        { body: './emailTemplates/change_password.html', enabled: true, template: 'change_password' },
-        { body: './emailTemplates/enrollment_email.html', enabled: true, template: 'enrollment_email' },
-        { body: './emailTemplates/mfa_oob_code.html', enabled: true, template: 'mfa_oob_code' },
-        { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' },
-        { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
-        { body: './emailTemplates/stolen_credentials.html', enabled: true, template: 'stolen_credentials' },
-        { body: './emailTemplates/verify_email.html', enabled: true, template: 'verify_email' },
-        { body: './emailTemplates/verify_email_by_code.html', enabled: true, template: 'verify_email_by_code' },
-        { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' }
+        {
+          body: './emailTemplates/blocked_account.html',
+          enabled: true,
+          template: 'blocked_account'
+        },
+        {
+          body: './emailTemplates/change_password.html',
+          enabled: true,
+          template: 'change_password'
+        },
+        {
+          body: './emailTemplates/enrollment_email.html',
+          enabled: true,
+          template: 'enrollment_email'
+        },
+        {
+          body: './emailTemplates/mfa_oob_code.html',
+          enabled: true,
+          template: 'mfa_oob_code'
+        },
+        {
+          body: './emailTemplates/password_reset.html',
+          enabled: true,
+          template: 'password_reset'
+        },
+        {
+          body: './emailTemplates/reset_email.html',
+          enabled: true,
+          template: 'reset_email'
+        },
+        {
+          body: './emailTemplates/stolen_credentials.html',
+          enabled: true,
+          template: 'stolen_credentials'
+        },
+        {
+          body: './emailTemplates/user_invitation.html',
+          enabled: true,
+          template: 'user_invitation'
+        },
+        {
+          body: './emailTemplates/verify_email.html',
+          enabled: true,
+          template: 'verify_email'
+        },
+        {
+          body: './emailTemplates/verify_email_by_code.html',
+          enabled: true,
+          template: 'verify_email_by_code'
+        },
+        {
+          body: './emailTemplates/welcome_email.html',
+          enabled: true,
+          template: 'welcome_email'
+        }
       ],
-      pages: [
-        { enabled: true, html: './pages/login.html', name: 'login' }
-      ],
+      organizations: [],
+      pages: [ { enabled: true, html: './pages/login.html', name: 'login' } ],
       guardianFactors: [],
       guardianFactorProviders: [],
       guardianFactorTemplates: [],
@@ -160,7 +204,8 @@ describe('#YAML context validation', () => {
           description: 'Admin of app',
           permissions: [
             {
-              permission_name: 'create:data', resource_server_identifier: 'urn:ref'
+              permission_name: 'create:data',
+              resource_server_identifier: 'urn:ref'
             }
           ]
         }
@@ -176,7 +221,10 @@ describe('#YAML context validation', () => {
     const dir = path.resolve(testDataDir, 'yaml', 'dump');
     cleanThenMkdir(dir);
     const tenantFile = path.join(dir, 'tenant.yml');
-    const config = { AUTH0_INPUT_FILE: tenantFile, AUTH0_EXCLUDED_DEFAULTS: [ 'emailProvider' ] };
+    const config = {
+      AUTH0_INPUT_FILE: tenantFile,
+      AUTH0_EXCLUDED_DEFAULTS: [ 'emailProvider' ]
+    };
     const context = new Context(config, mockMgmtClient());
     await context.dump();
     const yaml = jsYaml.safeLoad(fs.readFileSync(tenantFile));
@@ -197,20 +245,64 @@ describe('#YAML context validation', () => {
         name: 'smtp'
       },
       emailTemplates: [
-        { body: './emailTemplates/blocked_account.html', enabled: true, template: 'blocked_account' },
-        { body: './emailTemplates/change_password.html', enabled: true, template: 'change_password' },
-        { body: './emailTemplates/enrollment_email.html', enabled: true, template: 'enrollment_email' },
-        { body: './emailTemplates/mfa_oob_code.html', enabled: true, template: 'mfa_oob_code' },
-        { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' },
-        { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
-        { body: './emailTemplates/stolen_credentials.html', enabled: true, template: 'stolen_credentials' },
-        { body: './emailTemplates/verify_email.html', enabled: true, template: 'verify_email' },
-        { body: './emailTemplates/verify_email_by_code.html', enabled: true, template: 'verify_email_by_code' },
-        { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' }
+        {
+          body: './emailTemplates/blocked_account.html',
+          enabled: true,
+          template: 'blocked_account'
+        },
+        {
+          body: './emailTemplates/change_password.html',
+          enabled: true,
+          template: 'change_password'
+        },
+        {
+          body: './emailTemplates/enrollment_email.html',
+          enabled: true,
+          template: 'enrollment_email'
+        },
+        {
+          body: './emailTemplates/mfa_oob_code.html',
+          enabled: true,
+          template: 'mfa_oob_code'
+        },
+        {
+          body: './emailTemplates/password_reset.html',
+          enabled: true,
+          template: 'password_reset'
+        },
+        {
+          body: './emailTemplates/reset_email.html',
+          enabled: true,
+          template: 'reset_email'
+        },
+        {
+          body: './emailTemplates/stolen_credentials.html',
+          enabled: true,
+          template: 'stolen_credentials'
+        },
+        {
+          body: './emailTemplates/user_invitation.html',
+          enabled: true,
+          template: 'user_invitation'
+        },
+        {
+          body: './emailTemplates/verify_email.html',
+          enabled: true,
+          template: 'verify_email'
+        },
+        {
+          body: './emailTemplates/verify_email_by_code.html',
+          enabled: true,
+          template: 'verify_email_by_code'
+        },
+        {
+          body: './emailTemplates/welcome_email.html',
+          enabled: true,
+          template: 'welcome_email'
+        }
       ],
-      pages: [
-        { enabled: true, html: './pages/login.html', name: 'login' }
-      ],
+      organizations: [],
+      pages: [ { enabled: true, html: './pages/login.html', name: 'login' } ],
       guardianFactors: [],
       guardianFactorProviders: [],
       guardianFactorTemplates: [],
@@ -230,7 +322,8 @@ describe('#YAML context validation', () => {
           description: 'Admin of app',
           permissions: [
             {
-              permission_name: 'create:data', resource_server_identifier: 'urn:ref'
+              permission_name: 'create:data',
+              resource_server_identifier: 'urn:ref'
             }
           ]
         }
@@ -271,20 +364,64 @@ describe('#YAML context validation', () => {
         name: 'smtp'
       },
       emailTemplates: [
-        { body: './emailTemplates/blocked_account.html', enabled: true, template: 'blocked_account' },
-        { body: './emailTemplates/change_password.html', enabled: true, template: 'change_password' },
-        { body: './emailTemplates/enrollment_email.html', enabled: true, template: 'enrollment_email' },
-        { body: './emailTemplates/mfa_oob_code.html', enabled: true, template: 'mfa_oob_code' },
-        { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' },
-        { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
-        { body: './emailTemplates/stolen_credentials.html', enabled: true, template: 'stolen_credentials' },
-        { body: './emailTemplates/verify_email.html', enabled: true, template: 'verify_email' },
-        { body: './emailTemplates/verify_email_by_code.html', enabled: true, template: 'verify_email_by_code' },
-        { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' }
+        {
+          body: './emailTemplates/blocked_account.html',
+          enabled: true,
+          template: 'blocked_account'
+        },
+        {
+          body: './emailTemplates/change_password.html',
+          enabled: true,
+          template: 'change_password'
+        },
+        {
+          body: './emailTemplates/enrollment_email.html',
+          enabled: true,
+          template: 'enrollment_email'
+        },
+        {
+          body: './emailTemplates/mfa_oob_code.html',
+          enabled: true,
+          template: 'mfa_oob_code'
+        },
+        {
+          body: './emailTemplates/password_reset.html',
+          enabled: true,
+          template: 'password_reset'
+        },
+        {
+          body: './emailTemplates/reset_email.html',
+          enabled: true,
+          template: 'reset_email'
+        },
+        {
+          body: './emailTemplates/stolen_credentials.html',
+          enabled: true,
+          template: 'stolen_credentials'
+        },
+        {
+          body: './emailTemplates/user_invitation.html',
+          enabled: true,
+          template: 'user_invitation'
+        },
+        {
+          body: './emailTemplates/verify_email.html',
+          enabled: true,
+          template: 'verify_email'
+        },
+        {
+          body: './emailTemplates/verify_email_by_code.html',
+          enabled: true,
+          template: 'verify_email_by_code'
+        },
+        {
+          body: './emailTemplates/welcome_email.html',
+          enabled: true,
+          template: 'welcome_email'
+        }
       ],
-      pages: [
-        { enabled: true, html: './pages/login.html', name: 'login' }
-      ],
+      organizations: [],
+      pages: [ { enabled: true, html: './pages/login.html', name: 'login' } ],
       guardianFactors: [],
       guardianFactorProviders: [],
       guardianFactorTemplates: [],
@@ -304,7 +441,8 @@ describe('#YAML context validation', () => {
           description: 'Admin of app',
           permissions: [
             {
-              permission_name: 'create:data', resource_server_identifier: 'urn:ref'
+              permission_name: 'create:data',
+              resource_server_identifier: 'urn:ref'
             }
           ]
         }

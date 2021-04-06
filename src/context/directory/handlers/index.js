@@ -19,6 +19,7 @@ import guardianPolicies from './guardianPolicies';
 import roles from './roles';
 import migrations from './migrations';
 import actions from './actions';
+import organizations from './organizations';
 
 export default {
   rules,
@@ -41,5 +42,6 @@ export default {
   guardianPhoneFactorSelectedProvider,
   guardianPolicies,
   roles,
-  actions
+  actions,
+  organizations
 };
