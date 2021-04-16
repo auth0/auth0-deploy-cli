@@ -27,22 +27,22 @@ describe('#YAML context triggers', () => {
     const yamlFile = path.join(dir, 'triggers.yaml');
     fs.writeFileSync(yamlFile, yaml);
 
-    const target = 
+    const target =
       {
-        "post-login": [
+        'post-login': [
           {
-            "action_name": "test-action",
-            "display_name": "display-name"
+            action_name: 'test-action',
+            display_name: 'display-name'
           }
         ],
-        "credentials-exchange": [],
-        "pre-user-registration": [],
-        "post-user-registration": [],
-        "post-change-password": [],
-        "send-phone-message": []
+        'credentials-exchange': [],
+        'pre-user-registration': [],
+        'post-user-registration': [],
+        'post-change-password': [],
+        'send-phone-message': []
       };
 
-    const config = { AUTH0_INPUT_FILE: yamlFile};
+    const config = { AUTH0_INPUT_FILE: yamlFile };
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
@@ -54,35 +54,35 @@ describe('#YAML context triggers', () => {
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') }, mockMgmtClient());
 
-    context.assets.triggers = 
+    context.assets.triggers =
       {
-        "post-login": [
+        'post-login': [
           {
-            "action_name": "test-action",
-            "display_name": "display-name"
+            action_name: 'test-action',
+            display_name: 'display-name'
           }
         ],
-        "credentials-exchange": [],
-        "pre-user-registration": [],
-        "post-user-registration": [],
-        "post-change-password": [],
-        "send-phone-message": []
+        'credentials-exchange': [],
+        'pre-user-registration': [],
+        'post-user-registration': [],
+        'post-change-password': [],
+        'send-phone-message': []
       };
 
     const dumped = await handler.dump(context);
     expect(dumped).to.deep.equal({
       triggers: {
-        "post-login": [
+        'post-login': [
           {
-            "action_name": "test-action",
-            "display_name": "display-name"
+            action_name: 'test-action',
+            display_name: 'display-name'
           }
         ],
-        "credentials-exchange": [],
-        "pre-user-registration": [],
-        "post-user-registration": [],
-        "post-change-password": [],
-        "send-phone-message": []
+        'credentials-exchange': [],
+        'pre-user-registration': [],
+        'post-user-registration': [],
+        'post-change-password': [],
+        'send-phone-message': []
       }
     });
   });

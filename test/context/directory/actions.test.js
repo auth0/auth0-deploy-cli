@@ -160,7 +160,7 @@ describe('#directory context actions', () => {
 
     expect(loadJSON(path.join(actionsFolder, 'action-one.json'))).to.deep.equal({
       name: 'action-one',
-      code: path.join(context.filePath,'/actions/action-one/code.js'),
+      code: path.join(context.filePath, '/actions/action-one/code.js'),
       dependencies: [
         {
           name: 'lodash',
@@ -176,7 +176,7 @@ describe('#directory context actions', () => {
         }
       ],
       current_version: {
-        code: path.join(context.filePath,'/actions/action-one/current_version.js'),
+        code: path.join(context.filePath, '/actions/action-one/current_version.js'),
         status: 'built',
         number: 1,
         created_at: '2020-12-02T13:11:52.694151416Z',
@@ -191,7 +191,7 @@ describe('#directory context actions', () => {
         runtime: 'node12'
       }
     });
-    expect(fs.readFileSync(path.join(actionsFolder,'code.js'), 'utf8')).to.deep.equal(codeValidation);
-    expect(fs.readFileSync(path.join(actionsFolder,'current_version.js'), 'utf8')).to.deep.equal(codeValidation);
+    expect(fs.readFileSync(path.join(actionsFolder, 'code.js'), 'utf8')).to.deep.equal(codeValidation);
+    expect(fs.readFileSync(path.join(actionsFolder, 'current_version.js'), 'utf8')).to.deep.equal(codeValidation);
   });
 });

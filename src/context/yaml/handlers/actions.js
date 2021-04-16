@@ -19,7 +19,7 @@ function parseCurrentVersion(context, version) {
 
 function parseCode(context, code) {
   if (code) {
-    return  context.loadFile(code, constants.ACTIONS_DIRECTORY);
+    return context.loadFile(code, constants.ACTIONS_DIRECTORY);
   }
 }
 
@@ -54,7 +54,7 @@ function mapCurrentVersion(basePath, action) {
   );
   fs.ensureDirSync(actionVersionsFolder);
 
-  const codeFile = path.join(actionVersionsFolder, `current_version.js`);
+  const codeFile = path.join(actionVersionsFolder, 'current_version.js');
   log.info(`Writing ${codeFile}`);
   fs.writeFileSync(codeFile, version.code);
 
@@ -71,7 +71,7 @@ function mapCurrentVersion(basePath, action) {
 }
 
 function mapActionCode(basePath, action) {
-  const code = action.code;
+  const { code } = action;
 
   if (!code) {
     return '';
@@ -85,7 +85,7 @@ function mapActionCode(basePath, action) {
   );
   fs.ensureDirSync(actionVersionsFolder);
 
-  const codeFile = path.join(actionVersionsFolder, `code.js`);
+  const codeFile = path.join(actionVersionsFolder, 'code.js');
   log.info(`Writing ${codeFile}`);
   fs.writeFileSync(codeFile, code);
 
@@ -105,7 +105,7 @@ async function dump(context) {
       runtime: action.runtime,
       secrets: action.secrets || [],
       supported_triggers: action.supported_triggers,
-      current_version: mapCurrentVersion(context.basePath, action),
+      current_version: mapCurrentVersion(context.basePath, action)
     //  bindings: action.bindings.map(binding => ({ trigger_id: binding.trigger_id }))
     }))
   };

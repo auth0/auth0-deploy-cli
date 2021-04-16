@@ -29,17 +29,17 @@ const actionFiles = {
 };
 
 const triggersTarget = {
-  "post-login": [
+  'post-login': [
     {
-      "action_name": "test-action",
-      "display_name": "display-name"
+      action_name: 'test-action',
+      display_name: 'display-name'
     }
   ],
-  "credentials-exchange": [],
-  "pre-user-registration": [],
-  "post-user-registration": [],
-  "post-change-password": [],
-  "send-phone-message": []
+  'credentials-exchange': [],
+  'pre-user-registration': [],
+  'post-user-registration': [],
+  'post-change-password': [],
+  'send-phone-message': []
 };
 
 
@@ -47,7 +47,7 @@ describe('#directory context triggers', () => {
   it('should process triggers', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'test1');
     createDir(repoDir, actionFiles);
-    const config = { AUTH0_INPUT_FILE: repoDir};
+    const config = { AUTH0_INPUT_FILE: repoDir };
     const context = new Context(config, mockMgmtClient());
     await context.load();
     expect(context.assets.triggers).to.deep.equal(triggersTarget);
@@ -78,17 +78,17 @@ describe('#directory context triggers', () => {
     const triggersFolder = path.join(dir, constants.TRIGGERS_DIRECTORY);
 
     expect(loadJSON(path.join(triggersFolder, 'triggers.json'))).to.deep.equal({
-      "post-login": [
+      'post-login': [
         {
-          "action_name": "test-action",
-          "display_name": "display-name"
+          action_name: 'test-action',
+          display_name: 'display-name'
         }
       ],
-      "credentials-exchange": [],
-      "pre-user-registration": [],
-      "post-user-registration": [],
-      "post-change-password": [],
-      "send-phone-message": []
+      'credentials-exchange': [],
+      'pre-user-registration': [],
+      'post-user-registration': [],
+      'post-change-password': [],
+      'send-phone-message': []
     });
   });
 });

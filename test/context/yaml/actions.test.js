@@ -44,7 +44,7 @@ describe('#YAML context actions', () => {
     const target = [
       {
         name: 'action-one',
-        code:'/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log("test-action"); return {}; };',
+        code: '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log("test-action"); return {}; };',
         runtime: 'node12',
         status: 'built',
         supported_triggers: [
@@ -156,7 +156,7 @@ describe('#YAML context actions', () => {
       ]
     });
 
-    const actionsFolder = path.join(dir, 'actions','action-one');
+    const actionsFolder = path.join(dir, 'actions', 'action-one');
     expect(fs.readFileSync(path.join(actionsFolder, 'current_version.js'), 'utf8')).to.deep.equal(codeValidation);
     expect(fs.readFileSync(path.join(actionsFolder, 'code.js'), 'utf8')).to.deep.equal(codeValidation);
   });

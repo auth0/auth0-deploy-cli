@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 import fs from 'fs-extra';
 import path from 'path';
 import { constants } from 'auth0-source-control-extension-tools';
@@ -12,9 +13,9 @@ function parse(context) {
   const files = getFiles(actionsFolder, [ '.json' ]);
   const actions = files.map((file) => {
     const action = { ...loadJSON(file, context.mappings) };
-    const actionFolder = path.join(constants.ACTIONS_DIRECTORY, `${action.name}`)
+    const actionFolder = path.join(constants.ACTIONS_DIRECTORY, `${action.name}`);
     action.code = context.loadFile(action.code, actionFolder);
-    if(action.current_version && JSON.stringify(action.current_version) !== JSON.stringify({})){
+    if (action.current_version && JSON.stringify(action.current_version) !== JSON.stringify({})) {
       action.current_version.code = context.loadFile(action.current_version.code, constants.ACTIONS_DIRECTORY);
     }
     return action;
@@ -35,7 +36,7 @@ function mapCurrentVersion(filePath, action) {
   const actionVersionsFolder = path.join(filePath, constants.ACTIONS_DIRECTORY, `${actionName}`);
   fs.ensureDirSync(actionVersionsFolder);
 
-  const codeFile = path.join(actionVersionsFolder,`current_version.js`);
+  const codeFile = path.join(actionVersionsFolder, 'current_version.js');
   log.info(`Writing ${codeFile}`);
   fs.writeFileSync(codeFile, version.code);
 
@@ -52,17 +53,17 @@ function mapCurrentVersion(filePath, action) {
 }
 
 function mapActionCode(filePath, action) {
-  const code = action.code;
+  const { code } = action;
 
   if (!code) {
-    return "";
+    return '';
   }
 
   const actionName = sanitize(action.name);
   const actionFolder = path.join(filePath, constants.ACTIONS_DIRECTORY, `${actionName}`);
   fs.ensureDirSync(actionFolder);
 
-  const codeFile = path.join(actionFolder,`code.js`);
+  const codeFile = path.join(actionFolder, 'code.js');
   log.info(`Writing ${codeFile}`);
   fs.writeFileSync(codeFile, code);
 
@@ -92,7 +93,7 @@ async function dump(context) {
   actions.forEach((action) => {
     // Dump template metadata
     const name = sanitize(action.name);
-    const actionFile = path.join(actionsFolder, name ,`${name}.json`);
+    const actionFile = path.join(actionsFolder, name, `${name}.json`);
     log.info(`Writing ${actionFile}`);
     fs.writeFileSync(actionFile, JSON.stringify(mapToAction(context.filePath, action), null, 2));
   });

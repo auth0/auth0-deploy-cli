@@ -316,7 +316,7 @@ describe('#YAML context validation', () => {
       rules: [],
       hooks: [],
       actions: [],
-      triggers:[],
+      triggers: [],
       rulesConfigs: [],
       roles: [
         {
@@ -436,7 +436,7 @@ describe('#YAML context validation', () => {
       rules: [],
       hooks: [],
       actions: [],
-      triggers:[],
+      triggers: [],
       rulesConfigs: [],
       roles: [
         {

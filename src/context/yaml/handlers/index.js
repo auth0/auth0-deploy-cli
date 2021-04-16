@@ -45,5 +45,5 @@ export default {
   guardianPolicies,
   actions,
   organizations,
-  triggers,
+  triggers
 };
