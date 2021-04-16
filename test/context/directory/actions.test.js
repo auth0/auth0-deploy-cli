@@ -9,20 +9,14 @@ import handler from '../../../src/context/directory/handlers/actions';
 import { loadJSON } from '../../../src/utils';
 import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
 
-const actions = {
-  'action-one.js': '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log(@@replace@@); return {}; };',
-  'action-one.json': `{
-    "name": "action-one",
-    "supported_triggers": [
-      {
-        "id": "post-login",
-        "version": "v1"
-      }
-    ],
-    "current_version": {
-      "status": "built",
-      "code": "./action-one.js",
-      "number": 1,
+
+const actionFiles = {
+  [constants.ACTIONS_DIRECTORY]: {
+    'current_version.js': '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log(@@replace@@); return {}; };',
+    'code.js': '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log(@@replace@@); return {}; };',
+    'action-one.json': `{
+      "name": "action-one",
+      "code": "./local/testData/directory/test1/actions/code.js",
       "dependencies": [
         {
           "name": "lodash",
@@ -31,16 +25,45 @@ const actions = {
       ],
       "secrets": [],
       "runtime": "node12",
-      "created_at": "2020-12-02T13:11:52.694151416Z",
-      "updated_at": "2020-12-02T13:11:57.132608884Z"
-    },
-    "bindings": []
-  }`
+      "status": "built",
+      "supported_triggers": [
+        {
+          "id": "post-login",
+          "version": "v1"
+        }
+      ],
+      "current_version": {
+        "status": "built",
+        "code": "./local/testData/directory/test1/actions/current_version.js",
+        "number": 1,
+        "dependencies": [
+          {
+            "name": "lodash",
+            "version": "4.17.20"
+          }
+        ],
+        "secrets": [],
+        "runtime": "node12",
+        "created_at": "2020-12-02T13:11:52.694151416Z",
+        "updated_at": "2020-12-02T13:11:57.132608884Z"
+      }
+    }`
+  }
 };
 
 const actionsTarget = [
   {
     name: 'action-one',
+    code: '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log("test-action"); return {}; };',
+    status: 'built',
+    dependencies: [
+      {
+        name: 'lodash',
+        version: '4.17.20'
+      }
+    ],
+    secrets: [],
+    runtime: 'node12',
     supported_triggers: [
       {
         id: 'post-login',
@@ -61,8 +84,7 @@ const actionsTarget = [
       ],
       secrets: [],
       runtime: 'node12'
-    },
-    bindings: []
+    }
   }
 ];
 
@@ -70,13 +92,10 @@ const actionsTarget = [
 describe('#directory context actions', () => {
   it('should process actions', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'test1');
-    const dir = path.join(repoDir);
-    createDir(dir, { [constants.ACTIONS_DIRECTORY]: actions });
-
+    createDir(repoDir, actionFiles);
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { replace: 'test-action' } };
     const context = new Context(config, mockMgmtClient());
     await context.load();
-
     expect(context.assets.actions).to.deep.equal(actionsTarget);
   });
 
@@ -94,7 +113,7 @@ describe('#directory context actions', () => {
   });
 
   it('should dump actions', async () => {
-    const dir = path.join(testDataDir, 'yaml', 'test3');
+    const dir = path.join(testDataDir, 'directory', 'test3');
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
     const codeValidation = '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log("test-action"); return {}; };';
@@ -102,6 +121,15 @@ describe('#directory context actions', () => {
     context.assets.actions = [
       {
         name: 'action-one',
+        code: codeValidation,
+        dependencies: [
+          {
+            name: 'lodash',
+            version: '4.17.20'
+          }
+        ],
+        secrets: [],
+        runtime: 'node12',
         supported_triggers: [
           {
             id: 'post-login',
@@ -122,17 +150,25 @@ describe('#directory context actions', () => {
           ],
           secrets: [],
           runtime: 'node12'
-        },
-        bindings: []
+        }
       }
     ];
 
     await handler.dump(context);
 
-    const actionsFolder = path.join(dir, constants.ACTIONS_DIRECTORY);
+    const actionsFolder = path.join(dir, constants.ACTIONS_DIRECTORY, 'action-one');
 
     expect(loadJSON(path.join(actionsFolder, 'action-one.json'))).to.deep.equal({
       name: 'action-one',
+      code: path.join(context.filePath,'/actions/action-one/code.js'),
+      dependencies: [
+        {
+          name: 'lodash',
+          version: '4.17.20'
+        }
+      ],
+      secrets: [],
+      runtime: 'node12',
       supported_triggers: [
         {
           id: 'post-login',
@@ -140,7 +176,7 @@ describe('#directory context actions', () => {
         }
       ],
       current_version: {
-        code: './action-one.js',
+        code: path.join(context.filePath,'/actions/action-one/current_version.js'),
         status: 'built',
         number: 1,
         created_at: '2020-12-02T13:11:52.694151416Z',
@@ -153,9 +189,9 @@ describe('#directory context actions', () => {
         ],
         secrets: [],
         runtime: 'node12'
-      },
-      bindings: []
+      }
     });
-    expect(fs.readFileSync(path.join(actionsFolder, 'action-one.js'), 'utf8')).to.deep.equal(codeValidation);
+    expect(fs.readFileSync(path.join(actionsFolder,'code.js'), 'utf8')).to.deep.equal(codeValidation);
+    expect(fs.readFileSync(path.join(actionsFolder,'current_version.js'), 'utf8')).to.deep.equal(codeValidation);
   });
 });
