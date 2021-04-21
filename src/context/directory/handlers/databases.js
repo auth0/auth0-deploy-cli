@@ -89,7 +89,7 @@ async function dump(context) {
 
     const formatted = {
       ...database,
-      enabled_clients: mapClientID2NameSorted(database.enabled_clients, context.assets.clientsOrig),
+      ...(database.enabled_clients && { enabled_clients: mapClientID2NameSorted(database.enabled_clients, context.assets.clientsOrig) }),
       options: {
         ...database.options,
         // customScripts option only written if there are scripts

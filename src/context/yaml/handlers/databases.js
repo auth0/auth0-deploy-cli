@@ -43,7 +43,7 @@ async function dump(context) {
     databases: [
       ...databases.map(database => ({
         ...database,
-        enabled_clients: mapClientID2NameSorted(database.enabled_clients, context.assets.clients),
+        ...(database.enabled_clients && { enabled_clients: mapClientID2NameSorted(database.enabled_clients, context.assets.clients) }),
         options: {
           ...database.options,
           // customScripts option only written if there are scripts
