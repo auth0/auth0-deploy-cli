@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [5.5.6] - 2021-04-21
 ### Fixed
 - Fix EXCLUDE_PROPS behaviour for connections and databases.
 
@@ -310,7 +312,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#291]: https://github.com/auth0/auth0-deploy-cli/issues/291
 [#309]: https://github.com/auth0/auth0-deploy-cli/issues/309
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.5...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.6...HEAD
+[5.5.6]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.5...v5.5.6
 [5.5.5]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.4...v5.5.5
 [5.5.4]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.3...v5.5.4
 [5.5.3]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.2...v5.5.3
