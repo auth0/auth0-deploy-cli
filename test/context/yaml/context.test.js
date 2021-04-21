@@ -134,6 +134,7 @@ describe('#YAML context validation', () => {
         { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' },
         { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
         { body: './emailTemplates/stolen_credentials.html', enabled: true, template: 'stolen_credentials' },
+        { body: './emailTemplates/user_invitation.html', enabled: true, template: 'user_invitation' },
         { body: './emailTemplates/verify_email.html', enabled: true, template: 'verify_email' },
         { body: './emailTemplates/verify_email_by_code.html', enabled: true, template: 'verify_email_by_code' },
         { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' }
@@ -203,6 +204,7 @@ describe('#YAML context validation', () => {
         { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' },
         { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
         { body: './emailTemplates/stolen_credentials.html', enabled: true, template: 'stolen_credentials' },
+        { body: './emailTemplates/user_invitation.html', enabled: true, template: 'user_invitation' },
         { body: './emailTemplates/verify_email.html', enabled: true, template: 'verify_email' },
         { body: './emailTemplates/verify_email_by_code.html', enabled: true, template: 'verify_email_by_code' },
         { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' }
@@ -276,6 +278,7 @@ describe('#YAML context validation', () => {
         { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' },
         { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
         { body: './emailTemplates/stolen_credentials.html', enabled: true, template: 'stolen_credentials' },
+        { body: './emailTemplates/user_invitation.html', enabled: true, template: 'user_invitation' },
         { body: './emailTemplates/verify_email.html', enabled: true, template: 'verify_email' },
         { body: './emailTemplates/verify_email_by_code.html', enabled: true, template: 'verify_email_by_code' },
         { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' }
