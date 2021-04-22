@@ -6,6 +6,9 @@ import { sanitize } from '../../../utils';
 import log from '../../../logger';
 
 function parseCurrentVersion(context, version) {
+  if (!version){
+    return;
+  }
   const isEmpty = !Object.values(version).some(x => (x !== null && x !== ''));
   if (!isEmpty) {
     return {
@@ -39,6 +42,13 @@ async function parse(context) {
   return actions;
 }
 
+function mapSecrets(secrets){
+  if(secrets && secrets.length > 0){
+    return secrets.map(secret => ({name:secret.name, value: secret.value}))
+  }
+  return [];
+}
+
 function mapCurrentVersion(basePath, action) {
   const version = action.current_version;
 
@@ -62,11 +72,9 @@ function mapCurrentVersion(basePath, action) {
     status: version.status,
     code: `./${constants.ACTIONS_DIRECTORY}/${actionName}/current_version.js`,
     number: version.number,
-    dependencies: version.dependencies || [],
-    secrets: version.secrets || [],
-    runtime: version.runtime,
-    created_at: version.created_at,
-    updated_at: version.updated_at
+    ...(version.dependencies && {dependencies: version.dependencies}),
+    ...(version.secrets && {secrets: mapSecrets(version.secrets)}),
+    runtime: version.runtime
   };
 }
 
@@ -103,10 +111,9 @@ async function dump(context) {
       dependencies: action.dependencies || [],
       status: action.status,
       runtime: action.runtime,
-      secrets: action.secrets || [],
+      secrets:  mapSecrets(action.secrets),
       supported_triggers: action.supported_triggers,
       current_version: mapCurrentVersion(context.basePath, action)
-    //  bindings: action.bindings.map(binding => ({ trigger_id: binding.trigger_id }))
     }))
   };
 }

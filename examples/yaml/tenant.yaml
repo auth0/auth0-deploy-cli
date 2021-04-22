@@ -183,13 +183,36 @@ roles:
 
 actions:
   - name: action-example
+    code: ./actions/action-example/code.js
     current_version:
-      code: ./actions/action-example.js
-      dependencies: []
-      secrets: []
+      status: built
+      code: ./actions/action-example/current_version.js
+      number: 1
+      dependencies:
+        - name: lodash
+          version: 4.17.21
+      secrets:
+        - name: MY_SECRET
+          value: _VALUE_NOT_SHOWN_
       runtime: node12
+    dependencies:
+      - name: lodash
+        version: 4.17.21
+    runtime: node12
+    secrets:
+      - name: MY_SECRET
+        value: _VALUE_NOT_SHOWN_
+    status: built
     supported_triggers:
       - id: post-login
         version: v1
-    bindings:
-      - trigger_id: post-login
+
+triggers:
+  credentials-exchange: []
+  post-change-password: []
+  post-login:
+    - action_name: action-example
+      display_name: action-example-display-name
+  post-user-registration: []
+  pre-user-registration: []
+  send-phone-message: []

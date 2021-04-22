@@ -43,9 +43,7 @@ const actionFiles = {
           }
         ],
         "secrets": [],
-        "runtime": "node12",
-        "created_at": "2020-12-02T13:11:52.694151416Z",
-        "updated_at": "2020-12-02T13:11:57.132608884Z"
+        "runtime": "node12"
       }
     }`
   }
@@ -73,8 +71,6 @@ const actionsTarget = [
     current_version: {
       status: 'built',
       number: 1,
-      created_at: '2020-12-02T13:11:52.694151416Z',
-      updated_at: '2020-12-02T13:11:57.132608884Z',
       code: '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log("test-action"); return {}; };',
       dependencies: [
         {
@@ -113,6 +109,7 @@ describe('#directory context actions', () => {
   });
 
   it('should dump actions', async () => {
+    const actionName =  'action-one'
     const dir = path.join(testDataDir, 'directory', 'test3');
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
@@ -120,7 +117,7 @@ describe('#directory context actions', () => {
 
     context.assets.actions = [
       {
-        name: 'action-one',
+        name: actionName,
         code: codeValidation,
         dependencies: [
           {
@@ -139,8 +136,6 @@ describe('#directory context actions', () => {
         current_version: {
           status: 'built',
           number: 1,
-          created_at: '2020-12-02T13:11:52.694151416Z',
-          updated_at: '2020-12-02T13:11:57.132608884Z',
           code: codeValidation,
           dependencies: [
             {
@@ -156,10 +151,10 @@ describe('#directory context actions', () => {
 
     await handler.dump(context);
 
-    const actionsFolder = path.join(dir, constants.ACTIONS_DIRECTORY, 'action-one');
+    const actionsFolder = path.join(dir, constants.ACTIONS_DIRECTORY);
 
     expect(loadJSON(path.join(actionsFolder, 'action-one.json'))).to.deep.equal({
-      name: 'action-one',
+      name: actionName,
       code: path.join(context.filePath, '/actions/action-one/code.js'),
       dependencies: [
         {
@@ -179,8 +174,6 @@ describe('#directory context actions', () => {
         code: path.join(context.filePath, '/actions/action-one/current_version.js'),
         status: 'built',
         number: 1,
-        created_at: '2020-12-02T13:11:52.694151416Z',
-        updated_at: '2020-12-02T13:11:57.132608884Z',
         dependencies: [
           {
             name: 'lodash',
@@ -191,7 +184,7 @@ describe('#directory context actions', () => {
         runtime: 'node12'
       }
     });
-    expect(fs.readFileSync(path.join(actionsFolder, 'code.js'), 'utf8')).to.deep.equal(codeValidation);
-    expect(fs.readFileSync(path.join(actionsFolder, 'current_version.js'), 'utf8')).to.deep.equal(codeValidation);
+    expect(fs.readFileSync(path.join(actionsFolder,actionName, 'code.js'), 'utf8')).to.deep.equal(codeValidation);
+    expect(fs.readFileSync(path.join(actionsFolder,actionName, 'current_version.js'), 'utf8')).to.deep.equal(codeValidation);
   });
 });

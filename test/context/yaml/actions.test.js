@@ -101,8 +101,6 @@ describe('#YAML context actions', () => {
         current_version: {
           status: 'built',
           number: 1,
-          created_at: '2020-12-02T13:11:52.694151416Z',
-          updated_at: '2020-12-02T13:11:57.132608884Z',
           code: codeValidation,
           dependencies: [
             {
@@ -141,8 +139,6 @@ describe('#YAML context actions', () => {
             code: './actions/action-one/current_version.js',
             status: 'built',
             number: 1,
-            created_at: '2020-12-02T13:11:52.694151416Z',
-            updated_at: '2020-12-02T13:11:57.132608884Z',
             dependencies: [
               {
                 name: 'lodash',
