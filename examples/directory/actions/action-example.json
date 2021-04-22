@@ -1,5 +1,20 @@
 {
   "name": "action-example",
+  "code": "directory/actions/action-example/code.js",
+  "status": "built",
+  "dependencies": [
+    {
+      "name": "lodash",
+      "version": "4.17.21"
+    }
+  ],
+  "secrets": [
+    {
+      "name": "MY_SECRET",
+      "value": "_VALUE_NOT_SHOWN_"
+    }
+  ],
+  "runtime": "node12",
   "supported_triggers": [
     {
       "id": "post-login",
@@ -7,14 +22,21 @@
     }
   ],
   "current_version": {
-    "code": "./action-example.js",
-    "dependencies": [],
-    "secrets": [],
+    "status": "built",
+    "code": "directory/actions/action-example/current_version.js",
+    "number": 1,
+    "dependencies": [
+      {
+        "name": "lodash",
+        "version": "4.17.21"
+      }
+    ],
+    "secrets": [
+      {
+        "name": "MY_SECRET",
+        "value": "_VALUE_NOT_SHOWN_"
+      }
+    ],
     "runtime": "node12"
-  },
-  "bindings": [
-    {
-      "trigger_id": "post-login"
-    }
-  ]
+  }
 }

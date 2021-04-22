@@ -13,21 +13,27 @@ describe('#YAML context actions', () => {
     cleanThenMkdir(dir);
 
     const codeContext = '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log(@@replace@@); return {}; };';
-    const codeFile = path.join(dir, 'action-one.js');
+    const currentVersionFile = path.join(dir, 'current_version.js');
+    fs.writeFileSync(currentVersionFile, codeContext);
+
+    const codeFile = path.join(dir, 'code.js');
     fs.writeFileSync(codeFile, codeContext);
+
 
     const yaml = `
     actions:
       - name: action-one
+        code: "${currentVersionFile}"
+        runtime: node12
+        status: built
         current_version:
           status: built
-          code: "${codeFile}"
+          code: "${currentVersionFile}"
           dependencies:
             - name: lodash
               version: 4.17.20
           secrets: []
           runtime: node12
-        bindings: []
         supported_triggers:
           - id: post-login
             version: v1
@@ -38,6 +44,9 @@ describe('#YAML context actions', () => {
     const target = [
       {
         name: 'action-one',
+        code: '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log("test-action"); return {}; };',
+        runtime: 'node12',
+        status: 'built',
         supported_triggers: [
           {
             id: 'post-login',
@@ -54,8 +63,7 @@ describe('#YAML context actions', () => {
           ],
           secrets: [],
           runtime: 'node12'
-        },
-        bindings: []
+        }
       }
     ];
 
@@ -75,6 +83,15 @@ describe('#YAML context actions', () => {
     context.assets.actions = [
       {
         name: 'action-one',
+        code: codeValidation,
+        status: 'built',
+        runtime: 'node12',
+        dependencies: [
+          {
+            name: 'lodash',
+            version: '4.17.20'
+          }
+        ],
         supported_triggers: [
           {
             id: 'post-login',
@@ -84,8 +101,6 @@ describe('#YAML context actions', () => {
         current_version: {
           status: 'built',
           number: 1,
-          created_at: '2020-12-02T13:11:52.694151416Z',
-          updated_at: '2020-12-02T13:11:57.132608884Z',
           code: codeValidation,
           dependencies: [
             {
@@ -95,8 +110,7 @@ describe('#YAML context actions', () => {
           ],
           secrets: [],
           runtime: 'node12'
-        },
-        bindings: []
+        }
       }
     ];
 
@@ -105,6 +119,16 @@ describe('#YAML context actions', () => {
       actions: [
         {
           name: 'action-one',
+          code: './actions/action-one/code.js',
+          status: 'built',
+          runtime: 'node12',
+          secrets: [],
+          dependencies: [
+            {
+              name: 'lodash',
+              version: '4.17.20'
+            }
+          ],
           supported_triggers: [
             {
               id: 'post-login',
@@ -112,11 +136,9 @@ describe('#YAML context actions', () => {
             }
           ],
           current_version: {
-            code: './actions/action-one.js',
+            code: './actions/action-one/current_version.js',
             status: 'built',
             number: 1,
-            created_at: '2020-12-02T13:11:52.694151416Z',
-            updated_at: '2020-12-02T13:11:57.132608884Z',
             dependencies: [
               {
                 name: 'lodash',
@@ -125,13 +147,13 @@ describe('#YAML context actions', () => {
             ],
             secrets: [],
             runtime: 'node12'
-          },
-          bindings: []
+          }
         }
       ]
     });
 
-    const actionsFolder = path.join(dir, 'actions');
-    expect(fs.readFileSync(path.join(actionsFolder, 'action-one.js'), 'utf8')).to.deep.equal(codeValidation);
+    const actionsFolder = path.join(dir, 'actions', 'action-one');
+    expect(fs.readFileSync(path.join(actionsFolder, 'current_version.js'), 'utf8')).to.deep.equal(codeValidation);
+    expect(fs.readFileSync(path.join(actionsFolder, 'code.js'), 'utf8')).to.deep.equal(codeValidation);
   });
 });

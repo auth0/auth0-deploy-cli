@@ -20,6 +20,7 @@ import roles from './roles';
 import migrations from './migrations';
 import actions from './actions';
 import organizations from './organizations';
+import triggers from './triggers';
 
 export default {
   rules,
@@ -43,5 +44,6 @@ export default {
   guardianPolicies,
   roles,
   actions,
-  organizations
+  organizations,
+  triggers
 };
