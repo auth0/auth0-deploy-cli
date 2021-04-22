@@ -14,7 +14,7 @@ function parse(context) {
   const actions = files.map((file) => {
     const action = { ...loadJSON(file, context.mappings) };
     const actionFolder = path.join(constants.ACTIONS_DIRECTORY, `${action.name}`);
-    if(action.code){
+    if (action.code) {
       action.code = context.loadFile(action.code, actionFolder);
     }
     if (action.current_version && JSON.stringify(action.current_version) !== JSON.stringify({})) {
@@ -27,9 +27,9 @@ function parse(context) {
   };
 }
 
-function mapSecrets(secrets){
-  if(secrets && secrets.length > 0){
-    return secrets.map(secret => ({name:secret.name, value: secret.value}))
+function mapSecrets(secrets) {
+  if (secrets && secrets.length > 0) {
+    return secrets.map(secret => ({ name: secret.name, value: secret.value }));
   }
   return [];
 }
@@ -55,7 +55,7 @@ function mapCurrentVersion(filePath, action) {
     number: version.number,
     dependencies: version.dependencies || [],
     secrets: mapSecrets(version.secrets),
-    runtime: version.runtime,
+    runtime: version.runtime
   };
 }
 

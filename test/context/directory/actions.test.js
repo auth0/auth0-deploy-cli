@@ -109,7 +109,7 @@ describe('#directory context actions', () => {
   });
 
   it('should dump actions', async () => {
-    const actionName =  'action-one'
+    const actionName = 'action-one';
     const dir = path.join(testDataDir, 'directory', 'test3');
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
@@ -184,7 +184,7 @@ describe('#directory context actions', () => {
         runtime: 'node12'
       }
     });
-    expect(fs.readFileSync(path.join(actionsFolder,actionName, 'code.js'), 'utf8')).to.deep.equal(codeValidation);
-    expect(fs.readFileSync(path.join(actionsFolder,actionName, 'current_version.js'), 'utf8')).to.deep.equal(codeValidation);
+    expect(fs.readFileSync(path.join(actionsFolder, actionName, 'code.js'), 'utf8')).to.deep.equal(codeValidation);
+    expect(fs.readFileSync(path.join(actionsFolder, actionName, 'current_version.js'), 'utf8')).to.deep.equal(codeValidation);
   });
 });

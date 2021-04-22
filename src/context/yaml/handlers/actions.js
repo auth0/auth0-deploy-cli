@@ -6,7 +6,7 @@ import { sanitize } from '../../../utils';
 import log from '../../../logger';
 
 function parseCurrentVersion(context, version) {
-  if (!version){
+  if (!version) {
     return;
   }
   const isEmpty = !Object.values(version).some(x => (x !== null && x !== ''));
@@ -42,9 +42,9 @@ async function parse(context) {
   return actions;
 }
 
-function mapSecrets(secrets){
-  if(secrets && secrets.length > 0){
-    return secrets.map(secret => ({name:secret.name, value: secret.value}))
+function mapSecrets(secrets) {
+  if (secrets && secrets.length > 0) {
+    return secrets.map(secret => ({ name: secret.name, value: secret.value }));
   }
   return [];
 }
@@ -72,8 +72,8 @@ function mapCurrentVersion(basePath, action) {
     status: version.status,
     code: `./${constants.ACTIONS_DIRECTORY}/${actionName}/current_version.js`,
     number: version.number,
-    ...(version.dependencies && {dependencies: version.dependencies}),
-    ...(version.secrets && {secrets: mapSecrets(version.secrets)}),
+    ...(version.dependencies && { dependencies: version.dependencies }),
+    ...(version.secrets && { secrets: mapSecrets(version.secrets) }),
     runtime: version.runtime
   };
 }
@@ -111,7 +111,7 @@ async function dump(context) {
       dependencies: action.dependencies || [],
       status: action.status,
       runtime: action.runtime,
-      secrets:  mapSecrets(action.secrets),
+      secrets: mapSecrets(action.secrets),
       supported_triggers: action.supported_triggers,
       current_version: mapCurrentVersion(context.basePath, action)
     }))
