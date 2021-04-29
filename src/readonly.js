@@ -1,5 +1,5 @@
 import dotProp from 'dot-prop';
-
+import _ from 'lodash';
 // Filter out known read only fields during dump
 const readOnly = {
   guardianFactors: [
@@ -78,5 +78,5 @@ export default function cleanAssets(assets, config) {
     }
   });
 
-  return cleaned;
+  return _.pickBy(cleaned, _.identity);
 }

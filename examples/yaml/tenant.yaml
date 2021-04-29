@@ -184,21 +184,10 @@ roles:
 actions:
   - name: action-example
     code: ./actions/action-example/code.js
-    current_version:
-      status: built
-      code: ./actions/action-example/current_version.js
-      number: 1
-      dependencies:
-        - name: lodash
-          version: 4.17.21
-      secrets:
-        - name: MY_SECRET
-          value: _VALUE_NOT_SHOWN_
-      runtime: node12
     dependencies:
       - name: lodash
         version: 4.17.21
-    runtime: node12
+    deployed: true
     secrets:
       - name: MY_SECRET
         value: _VALUE_NOT_SHOWN_

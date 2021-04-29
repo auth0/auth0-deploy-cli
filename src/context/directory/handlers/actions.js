@@ -17,9 +17,6 @@ function parse(context) {
     if (action.code) {
       action.code = context.loadFile(action.code, actionFolder);
     }
-    if (action.current_version && JSON.stringify(action.current_version) !== JSON.stringify({})) {
-      action.current_version.code = context.loadFile(action.current_version.code, constants.ACTIONS_DIRECTORY);
-    }
     return action;
   });
   return {
@@ -32,31 +29,6 @@ function mapSecrets(secrets) {
     return secrets.map(secret => ({ name: secret.name, value: secret.value }));
   }
   return [];
-}
-
-function mapCurrentVersion(filePath, action) {
-  const version = action.current_version;
-
-  if (!version) {
-    return;
-  }
-
-  const actionName = sanitize(action.name);
-  const actionVersionsFolder = path.join(filePath, constants.ACTIONS_DIRECTORY, `${actionName}`);
-  fs.ensureDirSync(actionVersionsFolder);
-
-  const codeFile = path.join(actionVersionsFolder, 'current_version.js');
-  log.info(`Writing ${codeFile}`);
-  fs.writeFileSync(codeFile, version.code);
-
-  return {
-    status: version.status,
-    code: `${codeFile}`,
-    number: version.number,
-    dependencies: version.dependencies || [],
-    secrets: mapSecrets(version.secrets),
-    runtime: version.runtime
-  };
 }
 
 function mapActionCode(filePath, action) {
@@ -80,13 +52,14 @@ function mapActionCode(filePath, action) {
 function mapToAction(filePath, action) {
   return {
     name: action.name,
+    required_configuration: action.required_configuration,
+    required_secrets: action.required_secrets,
     code: mapActionCode(filePath, action),
     status: action.status,
     dependencies: action.dependencies || [],
     secrets: mapSecrets(action.secrets),
-    runtime: action.runtime,
     supported_triggers: action.supported_triggers,
-    current_version: mapCurrentVersion(filePath, action)
+    deployed: action.deployed
   };
 }
 

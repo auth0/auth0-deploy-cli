@@ -13,9 +13,6 @@ describe('#YAML context actions', () => {
     cleanThenMkdir(dir);
 
     const codeContext = '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log(@@replace@@); return {}; };';
-    const currentVersionFile = path.join(dir, 'current_version.js');
-    fs.writeFileSync(currentVersionFile, codeContext);
-
     const codeFile = path.join(dir, 'code.js');
     fs.writeFileSync(codeFile, codeContext);
 
@@ -23,17 +20,15 @@ describe('#YAML context actions', () => {
     const yaml = `
     actions:
       - name: action-one
-        code: "${currentVersionFile}"
-        runtime: node12
+        code: "${codeFile}"
+        dependencies:
+          - name: lodash
+            version: 4.17.21
+        deployed: true
+        required_configuration: []
+        required_secrets: []
+        secrets: []
         status: built
-        current_version:
-          status: built
-          code: "${currentVersionFile}"
-          dependencies:
-            - name: lodash
-              version: 4.17.20
-          secrets: []
-          runtime: node12
         supported_triggers:
           - id: post-login
             version: v1
@@ -45,7 +40,6 @@ describe('#YAML context actions', () => {
       {
         name: 'action-one',
         code: '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log("test-action"); return {}; };',
-        runtime: 'node12',
         status: 'built',
         supported_triggers: [
           {
@@ -53,24 +47,20 @@ describe('#YAML context actions', () => {
             version: 'v1'
           }
         ],
-        current_version: {
-          code: '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log("test-action"); return {}; };',
-          dependencies: [
-            {
-              name: 'lodash',
-              version: '4.17.20'
-            }
-          ],
-          secrets: [],
-          runtime: 'node12'
-        }
+        dependencies: [ {
+          "name": "lodash",
+          "version": "4.17.21"
+        }],
+        secrets: [],
+        deployed: true,
+        required_configuration: [],
+        required_secrets: []
       }
     ];
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { replace: 'test-action' } };
     const context = new Context(config, mockMgmtClient());
     await context.load();
-
     expect(context.assets.actions).to.deep.equal(target);
   });
 
@@ -85,7 +75,6 @@ describe('#YAML context actions', () => {
         name: 'action-one',
         code: codeValidation,
         status: 'built',
-        runtime: 'node12',
         dependencies: [
           {
             name: 'lodash',
@@ -98,19 +87,10 @@ describe('#YAML context actions', () => {
             version: 'v1'
           }
         ],
-        current_version: {
-          status: 'built',
-          number: 1,
-          code: codeValidation,
-          dependencies: [
-            {
-              name: 'lodash',
-              version: '4.17.20'
-            }
-          ],
-          secrets: [],
-          runtime: 'node12'
-        }
+        secrets: [],
+        deployed: true,
+        required_configuration: [],
+        required_secrets: [],
       }
     ];
 
@@ -121,8 +101,6 @@ describe('#YAML context actions', () => {
           name: 'action-one',
           code: './actions/action-one/code.js',
           status: 'built',
-          runtime: 'node12',
-          secrets: [],
           dependencies: [
             {
               name: 'lodash',
@@ -135,25 +113,15 @@ describe('#YAML context actions', () => {
               version: 'v1'
             }
           ],
-          current_version: {
-            code: './actions/action-one/current_version.js',
-            status: 'built',
-            number: 1,
-            dependencies: [
-              {
-                name: 'lodash',
-                version: '4.17.20'
-              }
-            ],
-            secrets: [],
-            runtime: 'node12'
-          }
+          secrets: [],
+          deployed: true,
+          required_configuration: [],
+          required_secrets: [],
         }
       ]
     });
 
     const actionsFolder = path.join(dir, 'actions', 'action-one');
-    expect(fs.readFileSync(path.join(actionsFolder, 'current_version.js'), 'utf8')).to.deep.equal(codeValidation);
     expect(fs.readFileSync(path.join(actionsFolder, 'code.js'), 'utf8')).to.deep.equal(codeValidation);
   });
 });

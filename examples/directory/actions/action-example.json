@@ -14,29 +14,11 @@
       "value": "_VALUE_NOT_SHOWN_"
     }
   ],
-  "runtime": "node12",
   "supported_triggers": [
     {
       "id": "post-login",
       "version": "v1"
     }
   ],
-  "current_version": {
-    "status": "built",
-    "code": "directory/actions/action-example/current_version.js",
-    "number": 1,
-    "dependencies": [
-      {
-        "name": "lodash",
-        "version": "4.17.21"
-      }
-    ],
-    "secrets": [
-      {
-        "name": "MY_SECRET",
-        "value": "_VALUE_NOT_SHOWN_"
-      }
-    ],
-    "runtime": "node12"
-  }
+  "deployed": true
 }
