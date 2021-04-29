@@ -48,9 +48,9 @@ describe('#YAML context actions', () => {
           }
         ],
         dependencies: [ {
-          "name": "lodash",
-          "version": "4.17.21"
-        }],
+          name: 'lodash',
+          version: '4.17.21'
+        } ],
         secrets: [],
         deployed: true,
         required_configuration: [],
@@ -90,7 +90,7 @@ describe('#YAML context actions', () => {
         secrets: [],
         deployed: true,
         required_configuration: [],
-        required_secrets: [],
+        required_secrets: []
       }
     ];
 
@@ -116,7 +116,7 @@ describe('#YAML context actions', () => {
           secrets: [],
           deployed: true,
           required_configuration: [],
-          required_secrets: [],
+          required_secrets: []
         }
       ]
     });
