@@ -25,8 +25,6 @@ describe('#YAML context actions', () => {
           - name: lodash
             version: 4.17.21
         deployed: true
-        required_configuration: []
-        required_secrets: []
         secrets: []
         status: built
         supported_triggers:
@@ -52,9 +50,7 @@ describe('#YAML context actions', () => {
           version: '4.17.21'
         } ],
         secrets: [],
-        deployed: true,
-        required_configuration: [],
-        required_secrets: []
+        deployed: true
       }
     ];
 
@@ -88,9 +84,7 @@ describe('#YAML context actions', () => {
           }
         ],
         secrets: [],
-        deployed: true,
-        required_configuration: [],
-        required_secrets: []
+        deployed: true
       }
     ];
 
@@ -114,9 +108,7 @@ describe('#YAML context actions', () => {
             }
           ],
           secrets: [],
-          deployed: true,
-          required_configuration: [],
-          required_secrets: []
+          deployed: true
         }
       ]
     });

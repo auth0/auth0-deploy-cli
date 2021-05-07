@@ -52,8 +52,6 @@ function mapActionCode(filePath, action) {
 function mapToAction(filePath, action) {
   return {
     name: action.name,
-    required_configuration: action.required_configuration,
-    required_secrets: action.required_secrets,
     code: mapActionCode(filePath, action),
     status: action.status,
     dependencies: action.dependencies || [],

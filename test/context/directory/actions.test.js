@@ -30,9 +30,7 @@ const actionFiles = {
           "version": "v1"
         }
       ],
-      "deployed": true,
-      "required_configuration": [],
-      "required_secrets": []
+      "deployed": true
     }`
   }
 };
@@ -55,9 +53,7 @@ const actionsTarget = [
         version: 'v1'
       }
     ],
-    deployed: true,
-    required_configuration: [],
-    required_secrets: []
+    deployed: true
   }
 ];
 
@@ -109,8 +105,6 @@ describe('#directory context actions', () => {
             version: 'v1'
           }
         ],
-        required_configuration: [],
-        required_secrets: [],
         deployed: true,
         status: 'build'
       }
@@ -136,8 +130,6 @@ describe('#directory context actions', () => {
           version: 'v1'
         }
       ],
-      required_configuration: [],
-      required_secrets: [],
       deployed: true,
       status: 'build'
     });

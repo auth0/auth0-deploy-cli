@@ -61,8 +61,6 @@ async function dump(context) {
   return {
     actions: actions.map(action => ({
       name: action.name,
-      required_configuration: action.required_configuration,
-      required_secrets: action.required_secrets,
       deployed: action.deployed,
       code: mapActionCode(context.basePath, action),
       dependencies: action.dependencies || [],
