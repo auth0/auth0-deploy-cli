@@ -12,7 +12,6 @@ import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../ut
 
 const actionFiles = {
   [constants.ACTIONS_DIRECTORY]: {
-    'current_version.js': '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log(@@replace@@); return {}; };',
     'code.js': '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log(@@replace@@); return {}; };',
     'action-one.json': `{
       "name": "action-one",
@@ -24,7 +23,6 @@ const actionFiles = {
         }
       ],
       "secrets": [],
-      "runtime": "node12",
       "status": "built",
       "supported_triggers": [
         {
@@ -32,19 +30,7 @@ const actionFiles = {
           "version": "v1"
         }
       ],
-      "current_version": {
-        "status": "built",
-        "code": "./local/testData/directory/test1/actions/current_version.js",
-        "number": 1,
-        "dependencies": [
-          {
-            "name": "lodash",
-            "version": "4.17.20"
-          }
-        ],
-        "secrets": [],
-        "runtime": "node12"
-      }
+      "deployed": true
     }`
   }
 };
@@ -61,26 +47,13 @@ const actionsTarget = [
       }
     ],
     secrets: [],
-    runtime: 'node12',
     supported_triggers: [
       {
         id: 'post-login',
         version: 'v1'
       }
     ],
-    current_version: {
-      status: 'built',
-      number: 1,
-      code: '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log("test-action"); return {}; };',
-      dependencies: [
-        {
-          name: 'lodash',
-          version: '4.17.20'
-        }
-      ],
-      secrets: [],
-      runtime: 'node12'
-    }
+    deployed: true
   }
 ];
 
@@ -126,26 +99,14 @@ describe('#directory context actions', () => {
           }
         ],
         secrets: [],
-        runtime: 'node12',
         supported_triggers: [
           {
             id: 'post-login',
             version: 'v1'
           }
         ],
-        current_version: {
-          status: 'built',
-          number: 1,
-          code: codeValidation,
-          dependencies: [
-            {
-              name: 'lodash',
-              version: '4.17.20'
-            }
-          ],
-          secrets: [],
-          runtime: 'node12'
-        }
+        deployed: true,
+        status: 'build'
       }
     ];
 
@@ -163,28 +124,15 @@ describe('#directory context actions', () => {
         }
       ],
       secrets: [],
-      runtime: 'node12',
       supported_triggers: [
         {
           id: 'post-login',
           version: 'v1'
         }
       ],
-      current_version: {
-        code: path.join(context.filePath, '/actions/action-one/current_version.js'),
-        status: 'built',
-        number: 1,
-        dependencies: [
-          {
-            name: 'lodash',
-            version: '4.17.20'
-          }
-        ],
-        secrets: [],
-        runtime: 'node12'
-      }
+      deployed: true,
+      status: 'build'
     });
     expect(fs.readFileSync(path.join(actionsFolder, actionName, 'code.js'), 'utf8')).to.deep.equal(codeValidation);
-    expect(fs.readFileSync(path.join(actionsFolder, actionName, 'current_version.js'), 'utf8')).to.deep.equal(codeValidation);
   });
 });
