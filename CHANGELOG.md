@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.3.1-beta.0] - 2021-05-11
+### Changed
+- Actions and Triggers will not be synchronized if Actions is not enabled.
+
 ## [6.3.0-beta.0] - 2021-04-29
 ### Changed
 - Remove current_version from actions.
@@ -343,7 +347,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#291]: https://github.com/auth0/auth0-deploy-cli/issues/291
 [#309]: https://github.com/auth0/auth0-deploy-cli/issues/309
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v6.3.0-beta.0...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v6.3.1-beta.0...HEAD
+[6.3.1-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.3.0-beta.0...v6.3.1-beta.0
 [6.3.0-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.2.0-beta.0...v6.3.0-beta.0
 [6.2.0-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.1.0-beta.0...v6.2.0-beta.0
 [6.1.0-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.1-beta.3...v6.1.0-beta.0
