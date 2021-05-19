@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.3.2-beta.0] - 2021-05-19
 ### Added
 - MFA-1174 Support Recovery Codes by bumping auth0-source-control-extension-tools@5.8.1
 
@@ -349,7 +351,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#291]: https://github.com/auth0/auth0-deploy-cli/issues/291
 [#309]: https://github.com/auth0/auth0-deploy-cli/issues/309
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v6.3.1-beta.0...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v6.3.2-beta.0...HEAD
+[6.3.2-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.3.1-beta.0...v6.3.2-beta.0
 [6.3.1-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.3.0-beta.0...v6.3.1-beta.0
 [6.3.0-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.2.0-beta.0...v6.3.0-beta.0
 [6.2.0-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.1.0-beta.0...v6.2.0-beta.0
