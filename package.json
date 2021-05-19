@@ -30,7 +30,7 @@
   "dependencies": {
     "auth0": "git://github.com/auth0/node-auth0.git#actionsManager",
     "auth0-extension-tools": "^1.4.4",
-    "auth0-source-control-extension-tools": "^5.8.0",
+    "auth0-source-control-extension-tools": "^5.8.1",
     "dot-prop": "^5.2.0",
     "fs-extra": "^7.0.0",
     "global-agent": "^2.1.12",
