@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.5.7] - 2021-05-19
+### Added
+- Add Support Recovery Codes by bumping auth0-source-control-extension-tools@4.7.2
+
 ## [5.5.6] - 2021-04-21
 ### Fixed
 - Fix EXCLUDE_PROPS behaviour for connections and databases.
@@ -312,7 +316,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#291]: https://github.com/auth0/auth0-deploy-cli/issues/291
 [#309]: https://github.com/auth0/auth0-deploy-cli/issues/309
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.6...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.7...HEAD
+[5.5.7]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.6...v5.5.7
 [5.5.6]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.5...v5.5.6
 [5.5.5]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.4...v5.5.5
 [5.5.4]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.3...v5.5.4
