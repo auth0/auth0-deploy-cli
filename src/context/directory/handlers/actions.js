@@ -1,11 +1,12 @@
 /* eslint-disable consistent-return */
 import fs from 'fs-extra';
 import path from 'path';
-import { constants } from 'auth0-source-control-extension-tools';
+import { constants } from '../../../tools';
 
-import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
+import {
+  getFiles, existsMustBeDir, loadJSON, sanitize
+} from '../../../utils';
 import log from '../../../logger';
-
 
 function parse(context) {
   const actionsFolder = path.join(context.filePath, constants.ACTIONS_DIRECTORY);
@@ -26,7 +27,7 @@ function parse(context) {
 
 function mapSecrets(secrets) {
   if (secrets && secrets.length > 0) {
-    return secrets.map(secret => ({ name: secret.name, value: secret.value }));
+    return secrets.map((secret) => ({ name: secret.name, value: secret.value }));
   }
   return [];
 }

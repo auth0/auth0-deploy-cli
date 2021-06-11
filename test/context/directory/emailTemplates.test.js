@@ -1,14 +1,15 @@
 import fs from 'fs-extra';
-import { constants } from 'auth0-source-control-extension-tools';
 
 import path from 'path';
 import { expect } from 'chai';
+import { constants } from '../../../src/tools';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/emailTemplates';
 import { loadJSON } from '../../../src/utils';
-import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
-
+import {
+  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
+} from '../../utils';
 
 const emailTemplates = {
   'provider.json': '{"name": "smtp"}',
@@ -108,7 +109,6 @@ describe('#directory context email templates', () => {
       template: 'verify_email'
     });
     expect(fs.readFileSync(path.join(emailTemplateFolder, 'verify_email.html'), 'utf8')).to.deep.equal('<html>test</html>');
-
 
     expect(loadJSON(path.join(emailTemplateFolder, 'welcome_email.json'))).to.deep.equal({
       body: './welcome_email.html',

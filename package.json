@@ -28,9 +28,8 @@
   "readme": "README.md",
   "homepage": "https://github.com/auth0/auth0-deploy-cli#readme",
   "dependencies": {
+    "ajv": "^6.12.6",
     "auth0": "git://github.com/auth0/node-auth0.git#actionsManager",
-    "auth0-extension-tools": "^1.4.4",
-    "auth0-source-control-extension-tools": "^5.8.1",
     "dot-prop": "^5.2.0",
     "fs-extra": "^7.0.0",
     "global-agent": "^2.1.12",
@@ -38,13 +37,15 @@
     "lodash": "^4.17.20",
     "mkdirp": "^0.5.1",
     "nconf": "^0.8.4",
+    "promise-pool-executor": "^1.1.1",
     "sanitize-filename": "^1.6.1",
     "winston": "^2.3.0",
     "yargs": "^15.3.1"
   },
   "devDependencies": {
-    "@babel/cli": "^7.8.4",
+    "@babel/cli": "^7.14.5",
     "@babel/core": "^7.9.6",
+    "@babel/eslint-parser": "^7.14.5",
     "@babel/plugin-proposal-decorators": "^7.8.3",
     "@babel/preset-env": "^7.9.6",
     "@babel/register": "^7.9.0",
@@ -52,15 +53,17 @@
     "babel-eslint": "^10.0.0",
     "babel-plugin-dynamic-import-node": "^2.3.3",
     "babel-plugin-module-resolver": "^4.0.0",
+    "babel-preset-env": "^1.7.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "cross-env": "^3.1.4",
-    "eslint": "^4.19.1",
-    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint": "^7.28.0",
+    "eslint-config-airbnb-base": "^14.2.1",
     "eslint-import-resolver-babel-module": "^5.1.2",
     "eslint-plugin-import": "^2.20.2",
     "mocha": "^7.2.0",
     "nyc": "^15.0.1",
+    "rimraf": "^3.0.2",
     "rmdir-sync": "^1.0.1"
   }
 }

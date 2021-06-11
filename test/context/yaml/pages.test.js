@@ -6,7 +6,6 @@ import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/pages';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
-
 function createPagesDir(pagesDir, target) {
   cleanThenMkdir(pagesDir);
   Object.keys(target).forEach((scriptName) => {

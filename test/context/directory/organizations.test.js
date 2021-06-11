@@ -6,8 +6,9 @@ import { expect } from 'chai';
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/organizations';
 import { loadJSON } from '../../../src/utils';
-import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
-
+import {
+  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
+} from '../../utils';
 
 describe('#directory context organizations', () => {
   it('should process organizations', async () => {

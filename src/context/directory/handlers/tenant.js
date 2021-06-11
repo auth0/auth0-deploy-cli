@@ -1,5 +1,7 @@
 import path from 'path';
-import { existsMustBeDir, isFile, dumpJSON, loadJSON, hoursAsInteger, clearTenantFlags } from '../../../utils';
+import {
+  existsMustBeDir, isFile, dumpJSON, loadJSON, hoursAsInteger, clearTenantFlags
+} from '../../../utils';
 
 function parse(context) {
   const baseFolder = path.join(context.filePath);
@@ -30,7 +32,6 @@ function parse(context) {
   return {};
 }
 
-
 async function dump(context) {
   const { tenant } = context.assets;
 
@@ -41,7 +42,6 @@ async function dump(context) {
   const tenantFile = path.join(context.filePath, 'tenant.json');
   dumpJSON(tenantFile, tenant);
 }
-
 
 export default {
   parse,

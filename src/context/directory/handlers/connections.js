@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { constants, loadFile } from 'auth0-source-control-extension-tools';
+import { constants, loadFile } from '../../../tools';
 
 import log from '../../../logger';
 import {
@@ -36,7 +36,7 @@ function parse(context) {
 
       return connection;
     })
-    .filter(p => Object.keys(p).length > 0); // Filter out empty connections
+    .filter((p) => Object.keys(p).length > 0); // Filter out empty connections
 
   return {
     connections
@@ -55,7 +55,7 @@ async function dump(context) {
   connections.forEach((connection) => {
     const dumpedConnection = {
       ...connection,
-      enabled_clients: mapClientID2NameSorted(connection.enabled_clients, context.assets.clientsOrig)
+      ...(connection.enabled_clients && { enabled_clients: mapClientID2NameSorted(connection.enabled_clients, context.assets.clientsOrig) })
     };
 
     const connectionName = sanitize(dumpedConnection.name);
@@ -75,7 +75,6 @@ async function dump(context) {
     dumpJSON(connectionFile, dumpedConnection);
   });
 }
-
 
 export default {
   parse,

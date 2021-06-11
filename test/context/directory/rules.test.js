@@ -1,13 +1,15 @@
 import fs from 'fs-extra';
-import { constants } from 'auth0-source-control-extension-tools';
 
 import path from 'path';
 import { expect } from 'chai';
+import { constants } from '../../../src/tools';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/rules';
 import { loadJSON } from '../../../src/utils';
-import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
+import {
+  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
+} from '../../utils';
 
 const rules = {
   'somerule.js': 'function someRule() { var hello = @@hello@@; }',
@@ -20,7 +22,6 @@ const rulesTarget = [
   { enabled: 'foo', name: 'otherrule', script: 'function someRule() { var hello = "goodbye"; }' },
   { enabled: 'foo', name: 'somerule', script: 'function someRule() { var hello = "goodbye"; }' }
 ];
-
 
 describe('#directory context rules', () => {
   it('should process rules', async () => {

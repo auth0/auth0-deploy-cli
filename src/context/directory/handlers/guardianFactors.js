@@ -1,8 +1,10 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { constants } from 'auth0-source-control-extension-tools';
+import { constants } from '../../../tools';
 
-import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
+import {
+  getFiles, existsMustBeDir, dumpJSON, loadJSON
+} from '../../../utils';
 
 function parse(context) {
   const factorsFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY, constants.GUARDIAN_FACTORS_DIRECTORY);
@@ -10,14 +12,13 @@ function parse(context) {
 
   const foundFiles = getFiles(factorsFolder, [ '.json' ]);
 
-  const guardianFactors = foundFiles.map(f => loadJSON(f, context.mappings))
-    .filter(p => Object.keys(p).length > 0); // Filter out empty guardianFactors
+  const guardianFactors = foundFiles.map((f) => loadJSON(f, context.mappings))
+    .filter((p) => Object.keys(p).length > 0); // Filter out empty guardianFactors
 
   return {
     guardianFactors
   };
 }
-
 
 async function dump(context) {
   const { guardianFactors } = context.assets;
@@ -32,7 +33,6 @@ async function dump(context) {
     dumpJSON(factorFile, factor);
   });
 }
-
 
 export default {
   parse,

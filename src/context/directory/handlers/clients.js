@@ -1,9 +1,11 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { constants, loadFile } from 'auth0-source-control-extension-tools';
+import { constants, loadFile } from '../../../tools';
 
 import log from '../../../logger';
-import { isFile, getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize, clearClientArrays } from '../../../utils';
+import {
+  isFile, getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize, clearClientArrays
+} from '../../../utils';
 
 function parse(context) {
   const clientsFolder = path.join(context.filePath, constants.CLIENTS_DIRECTORY);
@@ -25,13 +27,12 @@ function parse(context) {
 
       return client;
     })
-    .filter(p => Object.keys(p).length > 0); // Filter out empty clients
+    .filter((p) => Object.keys(p).length > 0); // Filter out empty clients
 
   return {
     clients
   };
 }
-
 
 async function dump(context) {
   const { clients } = context.assets;
@@ -57,7 +58,6 @@ async function dump(context) {
     dumpJSON(clientFile, clearClientArrays(client));
   });
 }
-
 
 export default {
   parse,

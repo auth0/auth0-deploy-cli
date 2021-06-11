@@ -6,7 +6,6 @@ import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/actions';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
-
 describe('#YAML context actions', () => {
   it('should process actions', async () => {
     const dir = path.join(testDataDir, 'yaml', 'action-one');
@@ -15,7 +14,6 @@ describe('#YAML context actions', () => {
     const codeContext = '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log(@@replace@@); return {}; };';
     const codeFile = path.join(dir, 'code.js');
     fs.writeFileSync(codeFile, codeContext);
-
 
     const yaml = `
     actions:

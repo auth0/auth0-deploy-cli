@@ -9,7 +9,6 @@ async function dump(context) {
   return { migrations: migrations || {} };
 }
 
-
 export default {
   parse,
   dump

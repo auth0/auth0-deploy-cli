@@ -1,6 +1,6 @@
 import nconf from 'nconf';
-import extTools from 'auth0-extension-tools';
-import tools from 'auth0-source-control-extension-tools';
+import configFactory from '../configFactory';
+import { deploy as toolsDeploy } from '../tools';
 import log from '../logger';
 import setupContext from '../context';
 
@@ -45,10 +45,10 @@ export default async function deploy(params) {
   const context = await setupContext(nconf.get());
   await context.load();
 
-  const config = extTools.config();
-  config.setProvider(key => nconf.get(key));
+  const config = configFactory();
+  config.setProvider((key) => nconf.get(key));
 
-  await tools.deploy(context.assets, context.mgmtClient, config);
+  await toolsDeploy(context.assets, context.mgmtClient, config);
 
   log.info('Import Successful');
 }

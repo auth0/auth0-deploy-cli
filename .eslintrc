@@ -1,4 +1,5 @@
 {
+  "parser": "@babel/eslint-parser",
   "extends": [
     "airbnb-base",
     "plugin:import/errors",
@@ -17,6 +18,7 @@
     "max-len": 0,
     "react/display-name": 0,
     "array-bracket-spacing": [2, "always"],
+    "class-methods-use-this": 0,
     "comma-dangle": [2, "never"],
     "eol-last": 2,
     "indent": [2, 2, {
@@ -29,8 +31,10 @@
     "prefer-template": 0,
     "func-names": 0,
     "new-cap": 0,
+    "no-await-in-loop": 0,
     "no-param-reassign": 0,
     "no-multiple-empty-lines": 2,
+    "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
     "no-unused-vars": 2,
     "no-var": 0,
     "object-curly-spacing": [2, "always"],

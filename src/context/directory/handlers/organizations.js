@@ -2,7 +2,9 @@ import fs from 'fs-extra';
 import path from 'path';
 
 import log from '../../../logger';
-import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
+import {
+  getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize
+} from '../../../utils';
 
 function parse(context) {
   const organizationsFolder = path.join(context.filePath, 'organizations');

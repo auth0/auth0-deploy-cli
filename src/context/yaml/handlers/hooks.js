@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { constants } from 'auth0-source-control-extension-tools';
+import { constants } from '../../../tools';
 
 import { sanitize } from '../../../utils';
 import log from '../../../logger';
@@ -23,7 +23,6 @@ async function parse(context) {
     ]
   };
 }
-
 
 async function dump(context) {
   let hooks = [ ...context.assets.hooks || [] ];
@@ -48,7 +47,6 @@ async function dump(context) {
 
   return { hooks };
 }
-
 
 export default {
   parse,

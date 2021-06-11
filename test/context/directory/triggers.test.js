@@ -1,14 +1,15 @@
 import fs from 'fs-extra';
-import { constants } from 'auth0-source-control-extension-tools';
 
 import path from 'path';
 import { expect } from 'chai';
+import { constants } from '../../../src/tools';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/triggers';
 import { loadJSON } from '../../../src/utils';
-import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
-
+import {
+  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
+} from '../../utils';
 
 const actionFiles = {
   [constants.TRIGGERS_DIRECTORY]: {
@@ -41,7 +42,6 @@ const triggersTarget = {
   'post-change-password': [],
   'send-phone-message': []
 };
-
 
 describe('#directory context triggers', () => {
   it('should process triggers', async () => {

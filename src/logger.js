@@ -15,5 +15,4 @@ const log = new winston.Logger({
   exitOnError: false
 });
 
-
 export default log;

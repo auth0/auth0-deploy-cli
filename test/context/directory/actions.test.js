@@ -1,14 +1,15 @@
 import fs from 'fs-extra';
-import { constants } from 'auth0-source-control-extension-tools';
 
 import path from 'path';
 import { expect } from 'chai';
+import { constants } from '../../../src/tools';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/actions';
 import { loadJSON } from '../../../src/utils';
-import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
-
+import {
+  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
+} from '../../utils';
 
 const actionFiles = {
   [constants.ACTIONS_DIRECTORY]: {
@@ -56,7 +57,6 @@ const actionsTarget = [
     deployed: true
   }
 ];
-
 
 describe('#directory context actions', () => {
   it('should process actions', async () => {

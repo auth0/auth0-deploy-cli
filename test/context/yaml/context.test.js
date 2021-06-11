@@ -127,61 +127,17 @@ describe('#YAML context validation', () => {
         }
       },
       emailTemplates: [
-        {
-          body: './emailTemplates/blocked_account.html',
-          enabled: true,
-          template: 'blocked_account'
-        },
-        {
-          body: './emailTemplates/change_password.html',
-          enabled: true,
-          template: 'change_password'
-        },
-        {
-          body: './emailTemplates/enrollment_email.html',
-          enabled: true,
-          template: 'enrollment_email'
-        },
-        {
-          body: './emailTemplates/mfa_oob_code.html',
-          enabled: true,
-          template: 'mfa_oob_code'
-        },
-        {
-          body: './emailTemplates/password_reset.html',
-          enabled: true,
-          template: 'password_reset'
-        },
-        {
-          body: './emailTemplates/reset_email.html',
-          enabled: true,
-          template: 'reset_email'
-        },
-        {
-          body: './emailTemplates/stolen_credentials.html',
-          enabled: true,
-          template: 'stolen_credentials'
-        },
-        {
-          body: './emailTemplates/user_invitation.html',
-          enabled: true,
-          template: 'user_invitation'
-        },
-        {
-          body: './emailTemplates/verify_email.html',
-          enabled: true,
-          template: 'verify_email'
-        },
-        {
-          body: './emailTemplates/verify_email_by_code.html',
-          enabled: true,
-          template: 'verify_email_by_code'
-        },
-        {
-          body: './emailTemplates/welcome_email.html',
-          enabled: true,
-          template: 'welcome_email'
-        }
+        { body: './emailTemplates/blocked_account.html', enabled: true, template: 'blocked_account' },
+        { body: './emailTemplates/change_password.html', enabled: true, template: 'change_password' },
+        { body: './emailTemplates/enrollment_email.html', enabled: true, template: 'enrollment_email' },
+        { body: './emailTemplates/mfa_oob_code.html', enabled: true, template: 'mfa_oob_code' },
+        { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' },
+        { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
+        { body: './emailTemplates/stolen_credentials.html', enabled: true, template: 'stolen_credentials' },
+        { body: './emailTemplates/user_invitation.html', enabled: true, template: 'user_invitation' },
+        { body: './emailTemplates/verify_email.html', enabled: true, template: 'verify_email' },
+        { body: './emailTemplates/verify_email_by_code.html', enabled: true, template: 'verify_email_by_code' },
+        { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' }
       ],
       organizations: [],
       pages: [ { enabled: true, html: './pages/login.html', name: 'login' } ],
@@ -246,61 +202,17 @@ describe('#YAML context validation', () => {
         name: 'smtp'
       },
       emailTemplates: [
-        {
-          body: './emailTemplates/blocked_account.html',
-          enabled: true,
-          template: 'blocked_account'
-        },
-        {
-          body: './emailTemplates/change_password.html',
-          enabled: true,
-          template: 'change_password'
-        },
-        {
-          body: './emailTemplates/enrollment_email.html',
-          enabled: true,
-          template: 'enrollment_email'
-        },
-        {
-          body: './emailTemplates/mfa_oob_code.html',
-          enabled: true,
-          template: 'mfa_oob_code'
-        },
-        {
-          body: './emailTemplates/password_reset.html',
-          enabled: true,
-          template: 'password_reset'
-        },
-        {
-          body: './emailTemplates/reset_email.html',
-          enabled: true,
-          template: 'reset_email'
-        },
-        {
-          body: './emailTemplates/stolen_credentials.html',
-          enabled: true,
-          template: 'stolen_credentials'
-        },
-        {
-          body: './emailTemplates/user_invitation.html',
-          enabled: true,
-          template: 'user_invitation'
-        },
-        {
-          body: './emailTemplates/verify_email.html',
-          enabled: true,
-          template: 'verify_email'
-        },
-        {
-          body: './emailTemplates/verify_email_by_code.html',
-          enabled: true,
-          template: 'verify_email_by_code'
-        },
-        {
-          body: './emailTemplates/welcome_email.html',
-          enabled: true,
-          template: 'welcome_email'
-        }
+        { body: './emailTemplates/blocked_account.html', enabled: true, template: 'blocked_account' },
+        { body: './emailTemplates/change_password.html', enabled: true, template: 'change_password' },
+        { body: './emailTemplates/enrollment_email.html', enabled: true, template: 'enrollment_email' },
+        { body: './emailTemplates/mfa_oob_code.html', enabled: true, template: 'mfa_oob_code' },
+        { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' },
+        { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
+        { body: './emailTemplates/stolen_credentials.html', enabled: true, template: 'stolen_credentials' },
+        { body: './emailTemplates/user_invitation.html', enabled: true, template: 'user_invitation' },
+        { body: './emailTemplates/verify_email.html', enabled: true, template: 'verify_email' },
+        { body: './emailTemplates/verify_email_by_code.html', enabled: true, template: 'verify_email_by_code' },
+        { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' }
       ],
       organizations: [],
       pages: [ { enabled: true, html: './pages/login.html', name: 'login' } ],
@@ -366,61 +278,17 @@ describe('#YAML context validation', () => {
         name: 'smtp'
       },
       emailTemplates: [
-        {
-          body: './emailTemplates/blocked_account.html',
-          enabled: true,
-          template: 'blocked_account'
-        },
-        {
-          body: './emailTemplates/change_password.html',
-          enabled: true,
-          template: 'change_password'
-        },
-        {
-          body: './emailTemplates/enrollment_email.html',
-          enabled: true,
-          template: 'enrollment_email'
-        },
-        {
-          body: './emailTemplates/mfa_oob_code.html',
-          enabled: true,
-          template: 'mfa_oob_code'
-        },
-        {
-          body: './emailTemplates/password_reset.html',
-          enabled: true,
-          template: 'password_reset'
-        },
-        {
-          body: './emailTemplates/reset_email.html',
-          enabled: true,
-          template: 'reset_email'
-        },
-        {
-          body: './emailTemplates/stolen_credentials.html',
-          enabled: true,
-          template: 'stolen_credentials'
-        },
-        {
-          body: './emailTemplates/user_invitation.html',
-          enabled: true,
-          template: 'user_invitation'
-        },
-        {
-          body: './emailTemplates/verify_email.html',
-          enabled: true,
-          template: 'verify_email'
-        },
-        {
-          body: './emailTemplates/verify_email_by_code.html',
-          enabled: true,
-          template: 'verify_email_by_code'
-        },
-        {
-          body: './emailTemplates/welcome_email.html',
-          enabled: true,
-          template: 'welcome_email'
-        }
+        { body: './emailTemplates/blocked_account.html', enabled: true, template: 'blocked_account' },
+        { body: './emailTemplates/change_password.html', enabled: true, template: 'change_password' },
+        { body: './emailTemplates/enrollment_email.html', enabled: true, template: 'enrollment_email' },
+        { body: './emailTemplates/mfa_oob_code.html', enabled: true, template: 'mfa_oob_code' },
+        { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' },
+        { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
+        { body: './emailTemplates/stolen_credentials.html', enabled: true, template: 'stolen_credentials' },
+        { body: './emailTemplates/user_invitation.html', enabled: true, template: 'user_invitation' },
+        { body: './emailTemplates/verify_email.html', enabled: true, template: 'verify_email' },
+        { body: './emailTemplates/verify_email_by_code.html', enabled: true, template: 'verify_email_by_code' },
+        { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' }
       ],
       organizations: [],
       pages: [ { enabled: true, html: './pages/login.html', name: 'login' } ],
