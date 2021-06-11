@@ -6,8 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Added
+- MFA-1174 Support Recovery Codes
+- Support for organizations
+- Prompt link to Auth0 Docs upon insufficient scope
+
+### Changed
+- Removed dependency on `auth0-source-control-extension-tools`, the package is not part of `auth0-deploy-cli`
+- Removed dependency on `auth-extension-tools`
+
 ### Fixed
-- Fix issue with ManagementClient retries not enabled as intended 
+- Upstream node registry
+
+### Security
+- Security fixes from dependencies
+
+### Deprecated
+- Dropped Node.js 8 support
+
+## [6.0.0] - 2020-12-28
+
+### Deprecated
+- This release has been withdrawn
 
 ## [5.5.7] - 2021-05-19
 ### Added
@@ -16,49 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [5.5.6] - 2021-04-21
 ### Fixed
 - Fix EXCLUDE_PROPS behaviour for connections and databases.
-
-## [6.3.2-beta.0] - 2021-05-19
-### Added
-- MFA-1174 Support Recovery Codes by bumping auth0-source-control-extension-tools@5.8.1
-
-## [6.3.1-beta.0] - 2021-05-11
-### Changed
-- Actions and Triggers will not be synchronized if Actions is not enabled.
-
-## [6.3.0-beta.0] - 2021-04-29
-### Changed
-- Remove current_version from actions.
-
-## [6.2.0-beta.0] - 2021-04-22
-### Changed
-- Update actions handlers.
-
-## [6.1.0-beta.0] - 2021-04-06
-### Added
-- Support for organizations
-
-## [6.0.1-beta.3] - 2021-03-12
-### Fixed
-- Remove limit on permissions in roles
-
-## [6.0.1-beta.2] - 2021-03-10
-### Added
-- Support for webauthn-platform guardian factor
-
-### Fixed
-- Remove 50 max roles limit
-
-## [6.0.1-beta.1] - 2021-03-10
-### Fixed
-- Fix pagination when computing changes
-
-## [6.0.1-beta.0] - 2021-01-15
-### Changed
-- Cleanup versioning for actions beta.
-
-## [6.0.0] - 2020-12-28
-### Added
-- Add support for Actions Beta.
 
 ## [5.5.5] - 2021-03-26
 ### Fixed
