@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.0.0] - 2021-06-11
 ### Added
 - MFA-1174 Support Recovery Codes
 - Support for organizations
@@ -16,17 +17,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed dependency on `auth0-source-control-extension-tools`, the package is not part of `auth0-deploy-cli`
 - Removed dependency on `auth-extension-tools`
 
+### Deprecated
+- Dropped Node.js 8 support
+
 ### Fixed
 - Upstream node registry
 
 ### Security
 - Security fixes from dependencies
 
-### Deprecated
-- Dropped Node.js 8 support
-
 ## [6.0.0] - 2020-12-28
-
 ### Deprecated
 - This release has been withdrawn
 
@@ -339,17 +339,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#291]: https://github.com/auth0/auth0-deploy-cli/issues/291
 [#309]: https://github.com/auth0/auth0-deploy-cli/issues/309
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v6.3.2-beta.0...HEAD
-[6.3.2-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.3.1-beta.0...v6.3.2-beta.0
-[6.3.1-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.3.0-beta.0...v6.3.1-beta.0
-[6.3.0-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.2.0-beta.0...v6.3.0-beta.0
-[6.2.0-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.1.0-beta.0...v6.2.0-beta.0
-[6.1.0-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.1-beta.3...v6.1.0-beta.0
-[6.0.1-beta.3]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.1-beta.2...v6.0.1-beta.3
-[6.0.1-beta.2]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.1-beta.1...v6.0.1-beta.2
-[6.0.1-beta.1]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.1-beta.0...v6.0.1-beta.1
-[6.0.1-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.0...v6.0.1-beta.0
-[6.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.5...v6.0.0
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.0.0...HEAD
+[7.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.7...v7.0.0
 [5.5.7]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.6...v5.5.7
 [5.5.6]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.5...v5.5.6
 [5.5.5]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.4...v5.5.5
