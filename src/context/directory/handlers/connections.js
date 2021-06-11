@@ -55,7 +55,7 @@ async function dump(context) {
   connections.forEach((connection) => {
     const dumpedConnection = {
       ...connection,
-      enabled_clients: mapClientID2NameSorted(connection.enabled_clients, context.assets.clientsOrig)
+      ...(connection.enabled_clients && { enabled_clients: mapClientID2NameSorted(connection.enabled_clients, context.assets.clientsOrig) })
     };
 
     const connectionName = sanitize(dumpedConnection.name);

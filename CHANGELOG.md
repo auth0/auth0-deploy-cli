@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Fix issue with ManagementClient retries not enabled as intended 
+
+## [5.5.7] - 2021-05-19
+### Added
+- Add Support Recovery Codes by bumping auth0-source-control-extension-tools@4.7.2
+
+## [5.5.6] - 2021-04-21
+### Fixed
+- Fix EXCLUDE_PROPS behaviour for connections and databases.
 
 ## [6.3.2-beta.0] - 2021-05-19
 ### Added
@@ -362,6 +372,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [6.0.1-beta.1]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.1-beta.0...v6.0.1-beta.1
 [6.0.1-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.0...v6.0.1-beta.0
 [6.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.5...v6.0.0
+[5.5.7]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.6...v5.5.7
+[5.5.6]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.5...v5.5.6
 [5.5.5]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.4...v5.5.5
 [5.5.4]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.3...v5.5.4
 [5.5.3]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.2...v5.5.3

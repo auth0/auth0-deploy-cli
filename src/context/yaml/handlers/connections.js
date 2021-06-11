@@ -64,7 +64,7 @@ async function dump(context) {
       const dumpedConnection = {
         ...connection,
         ...getFormattedOptions(connection, context.assets.clients),
-        enabled_clients: mapClientID2NameSorted(connection.enabled_clients, context.assets.clients)
+        ...(connection.enabled_clients && { enabled_clients: mapClientID2NameSorted(connection.enabled_clients, context.assets.clients) })
       };
 
       if (dumpedConnection.strategy === 'email') {
