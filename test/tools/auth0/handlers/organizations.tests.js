@@ -129,7 +129,7 @@ describe('#organizations handler', () => {
           addEnabledConnection: (org, connection) => {
             expect(org.id).to.equal('fake');
             expect(connection).to.be.an('object');
-            expect(connection.connection_id).to.equal('123');
+            expect(connection.connection_id).to.equal('con_123');
             expect(connection.assign_membership_on_login).to.equal(true);
             return Promise.resolve(connection);
           }
@@ -382,7 +382,7 @@ describe('#organizations handler', () => {
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
             expect(data).to.be.an('object');
-            expect(data.connection_id).to.equal('con_789');
+            expect(data.connection_id).to.equal('con_123');
             expect(data.assign_membership_on_login).to.equal(false);
             return Promise.resolve(data);
           }
