@@ -85,7 +85,9 @@ export default class {
       await auth0.loadAll();
       this.assets = auth0.assets;
     } catch (err) {
-      throw new Error(`Problem loading tenant data from Auth0 ${err}`);
+      const docUrl = 'https://auth0.com/docs/deploy/deploy-cli-tool/create-and-configure-the-deploy-cli-application#modify-deploy-cli-application-scopes';
+      const extraMessage = err.message.startsWith('Insufficient scope') ? `\nSee ${docUrl} for more information` : '';
+      throw new Error(`Problem loading tenant data from Auth0 ${err}${extraMessage}`);
     }
 
     await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {
