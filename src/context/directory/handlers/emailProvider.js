@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { constants } from 'auth0-source-control-extension-tools';
+import { constants } from '../../../tools';
 
 import { existsMustBeDir, isFile, dumpJSON, loadJSON } from '../../../utils';
 import { emailProviderDefaults } from '../../defaults';

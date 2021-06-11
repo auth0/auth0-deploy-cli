@@ -1,4 +1,4 @@
-import { constants } from 'auth0-source-control-extension-tools';
+import { constants } from '../../../src/tools';
 
 import path from 'path';
 import { expect } from 'chai';

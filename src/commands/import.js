@@ -1,6 +1,6 @@
 import nconf from 'nconf';
 import extTools from 'auth0-extension-tools';
-import tools from 'auth0-source-control-extension-tools';
+import tools from '../tools';
 import log from '../logger';
 import setupContext from '../context';
 

@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import path from 'path';
-import { loadFile, keywordReplace, Auth0 } from 'auth0-source-control-extension-tools';
+import { loadFile, keywordReplace, Auth0 } from '../../tools';
 
 import log from '../../logger';
 import { isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter } from '../../utils';

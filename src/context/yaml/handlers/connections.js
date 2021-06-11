@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { constants } from 'auth0-source-control-extension-tools';
+import { constants } from '../../../tools';
 
 import log from '../../../logger';
 import { isFile, sanitize, ensureProp, convertClientIdToName, mapClientID2NameSorted } from '../../../utils';

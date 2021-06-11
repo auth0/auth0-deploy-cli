@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import sanitizeName from 'sanitize-filename';
-import { loadFile } from 'auth0-source-control-extension-tools';
+import { loadFile } from './tools';
 import dotProp from 'dot-prop';
 import log from './logger';
 

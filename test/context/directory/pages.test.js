@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { expect } from 'chai';
-import { constants } from 'auth0-source-control-extension-tools';
+import { constants } from '../../../src/tools';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/pages';
