@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Fixed
-- Fix issue with ManagementClient retries not enabled as intended 
+- Fix issue with ManagementClient retries not enabled as intended
+- Bump auth0-source-control-extension-tools for security fixes
+- npm audit fix updates to dependencies
 
 ## [5.5.7] - 2021-05-19
 ### Added
