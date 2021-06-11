@@ -6,7 +6,6 @@ import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/migrations';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
-
 describe('#YAML context migrations', () => {
   it('should process migrationss', async () => {
     const dir = path.join(testDataDir, 'yaml', 'migrations');

@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
 import path from 'path';
 import sanitizeName from 'sanitize-filename';
-import { loadFile } from './tools';
 import dotProp from 'dot-prop';
+import { loadFile } from './tools';
 import log from './logger';
 
 export function isDirectory(f) {
@@ -26,8 +26,8 @@ export function isFile(f) {
 export function getFiles(folder, exts) {
   if (isDirectory(folder)) {
     return fs.readdirSync(folder)
-      .map(f => path.join(folder, f))
-      .filter(f => isFile(f) && exts.includes(path.extname(f)));
+      .map((f) => path.join(folder, f))
+      .filter((f) => isFile(f) && exts.includes(path.extname(f)));
   }
   return [];
 }
@@ -65,9 +65,8 @@ export function existsMustBeDir(folder) {
 }
 
 export function toConfigFn(data) {
-  return key => data[key];
+  return (key) => data[key];
 }
-
 
 export function stripIdentifiers(auth0, assets) {
   const updated = { ...assets };
@@ -100,17 +99,14 @@ export function stripIdentifiers(auth0, assets) {
   return updated;
 }
 
-
 export function sanitize(str) {
   return sanitizeName(str, { replacement: '-' });
 }
-
 
 export function hoursAsInteger(property, hours) {
   if (Number.isInteger(hours)) return { [property]: hours };
   return { [`${property}_in_minutes`]: Math.round(hours * 60) };
 }
-
 
 export function formatResults(item) {
   if (typeof item !== 'object') {
@@ -140,7 +136,6 @@ export function formatResults(item) {
   return result;
 }
 
-
 export function recordsSorter(a, b) {
   const importantFields = [
     'name',
@@ -160,20 +155,17 @@ export function recordsSorter(a, b) {
   return 0;
 }
 
-
 export function clearTenantFlags(tenant) {
   if (tenant.flags && !Object.keys(tenant.flags).length) {
     delete tenant.flags;
   }
 }
 
-
 export function ensureProp(obj, props, value = '') {
   if (!dotProp.has(obj, props)) {
     dotProp.set(obj, props, value);
   }
 }
-
 
 export function clearClientArrays(client) {
   const propsToClear = [ 'allowed_clients', 'allowed_logout_urls', 'allowed_origins', 'callbacks' ];
@@ -188,7 +180,7 @@ export function clearClientArrays(client) {
 
 export function convertClientIdToName(clientId, knownClients = []) {
   try {
-    const found = knownClients.find(c => c.client_id === clientId);
+    const found = knownClients.find((c) => c.client_id === clientId);
     return (found && found.name) || clientId;
   } catch (e) {
     return clientId;
@@ -197,6 +189,6 @@ export function convertClientIdToName(clientId, knownClients = []) {
 
 export function mapClientID2NameSorted(enabledClients, knownClients) {
   return [
-    ...(enabledClients || []).map(clientId => convertClientIdToName(clientId, knownClients))
+    ...(enabledClients || []).map((clientId) => convertClientIdToName(clientId, knownClients))
   ].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 }

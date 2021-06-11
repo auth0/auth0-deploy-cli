@@ -24,7 +24,6 @@ async function parse(context) {
   };
 }
 
-
 async function dump(context) {
   let hooks = [ ...context.assets.hooks || [] ];
 
@@ -48,7 +47,6 @@ async function dump(context) {
 
   return { hooks };
 }
-
 
 export default {
   parse,

@@ -1,14 +1,15 @@
 import fs from 'fs-extra';
-import { constants } from '../../../src/tools';
 
 import path from 'path';
 import { expect } from 'chai';
+import { constants } from '../../../src/tools';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/resourceServers';
 import { loadJSON } from '../../../src/utils';
-import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
-
+import {
+  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
+} from '../../utils';
 
 const resourceServers = {
   'myapi.json': '{ "name": "My API", "identifier": "https://##ENV##.myapp.com/api/v1", "scopes": [ { "value": "update:account", "description": "update account" }, { "value": "read:account", "description": "read account" } ] }'

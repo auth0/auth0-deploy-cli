@@ -1,14 +1,15 @@
 import fs from 'fs-extra';
-import { constants } from '../../../src/tools';
 
 import path from 'path';
 import { expect } from 'chai';
+import { constants } from '../../../src/tools';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/connections';
 import { loadJSON } from '../../../src/utils';
-import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
-
+import {
+  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
+} from '../../utils';
 
 describe('#directory context connections', () => {
   it('should process connections', async () => {
@@ -42,7 +43,6 @@ describe('#directory context connections', () => {
     expect(context.assets.connections).to.deep.equal(target);
   });
 
-
   it('should process a custom connections directory', async () => {
     const customConnectionDirectory = 'connections-custom';
 
@@ -65,7 +65,6 @@ describe('#directory context connections', () => {
 
     expect(context.assets.connections).to.deep.equal(target);
   });
-
 
   it('should ignore unknown file', async () => {
     const files = {
@@ -103,7 +102,6 @@ describe('#directory context connections', () => {
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
   });
-
 
   it('should dump connections', async () => {
     const dir = path.join(testDataDir, 'directory', 'connectionsDump');

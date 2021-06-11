@@ -6,7 +6,6 @@ import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/guardianFactorTemplates';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
-
 describe('#YAML context guardian factors templates provider', () => {
   it('should process guardian factor templates', async () => {
     const dir = path.join(testDataDir, 'yaml', 'guardianFactorTemplates');

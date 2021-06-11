@@ -5,7 +5,6 @@ import { constants } from '../../../tools';
 import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
 import log from '../../../logger';
 
-
 function parse(context) {
   const triggersFolder = path.join(context.filePath, constants.TRIGGERS_DIRECTORY);
 
@@ -17,7 +16,6 @@ function parse(context) {
 
   return { triggers };
 }
-
 
 async function dump(context) {
   const { triggers } = context.assets;

@@ -3,8 +3,9 @@ import path from 'path';
 import { constants } from '../../../tools';
 
 import log from '../../../logger';
-import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
-
+import {
+  getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize
+} from '../../../utils';
 
 function parse(context) {
   const rulesFolder = path.join(context.filePath, constants.RULES_DIRECTORY);
@@ -24,7 +25,6 @@ function parse(context) {
     rules
   };
 }
-
 
 async function dump(context) {
   const rules = [ ...context.assets.rules || [] ];
@@ -46,7 +46,6 @@ async function dump(context) {
     dumpJSON(ruleFile, { ...rule, script: `./${name}.js` });
   });
 }
-
 
 export default {
   parse,

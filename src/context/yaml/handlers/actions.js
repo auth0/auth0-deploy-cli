@@ -16,7 +16,7 @@ async function parse(context) {
   if (!context.assets.actions) return [];
   const actions = {
     actions: [
-      ...context.assets.actions.map(action => ({
+      ...context.assets.actions.map((action) => ({
         ...action,
         code: parseCode(context, action.code)
       }))
@@ -27,7 +27,7 @@ async function parse(context) {
 
 function mapSecrets(secrets) {
   if (secrets && secrets.length > 0) {
-    return secrets.map(secret => ({ name: secret.name, value: secret.value }));
+    return secrets.map((secret) => ({ name: secret.name, value: secret.value }));
   }
   return [];
 }
@@ -59,7 +59,7 @@ async function dump(context) {
   // Nothing to do
   if (!actions) return;
   return {
-    actions: actions.map(action => ({
+    actions: actions.map((action) => ({
       name: action.name,
       deployed: action.deployed,
       code: mapActionCode(context.basePath, action),

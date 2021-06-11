@@ -5,7 +5,6 @@ import { expect } from 'chai';
 import Context from '../../../src/context/directory';
 import { cleanThenMkdir, testDataDir } from '../../utils';
 
-
 describe('#directory context validation', () => {
   it('should do nothing on empty repo', async () => {
     /* Create empty directory */

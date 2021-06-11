@@ -3,14 +3,15 @@ import path from 'path';
 import { constants, loadFile } from '../../../tools';
 
 import log from '../../../logger';
-import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
-
+import {
+  getFiles, existsMustBeDir, dumpJSON, loadJSON
+} from '../../../utils';
 
 function parse(context) {
   const emailsFolder = path.join(context.filePath, constants.EMAIL_TEMPLATES_DIRECTORY);
   if (!existsMustBeDir(emailsFolder)) return { emailTemplates: undefined }; // Skip
 
-  const files = getFiles(emailsFolder, [ '.json', '.html' ]).filter(f => path.basename(f) !== 'provider.json');
+  const files = getFiles(emailsFolder, [ '.json', '.html' ]).filter((f) => path.basename(f) !== 'provider.json');
 
   const sorted = {};
 
@@ -40,7 +41,6 @@ function parse(context) {
   };
 }
 
-
 async function dump(context) {
   const emailTemplates = [ ...context.assets.emailTemplates || [] ];
 
@@ -60,7 +60,6 @@ async function dump(context) {
     dumpJSON(templateFile, { ...template, body: `./${template.template}.html` });
   });
 }
-
 
 export default {
   parse,

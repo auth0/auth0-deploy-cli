@@ -6,7 +6,6 @@ import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/roles';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
-
 describe('#YAML context roles', () => {
   it('should process roles', async () => {
     const dir = path.join(testDataDir, 'yaml', 'clients');

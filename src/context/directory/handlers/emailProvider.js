@@ -2,7 +2,9 @@ import fs from 'fs-extra';
 import path from 'path';
 import { constants } from '../../../tools';
 
-import { existsMustBeDir, isFile, dumpJSON, loadJSON } from '../../../utils';
+import {
+  existsMustBeDir, isFile, dumpJSON, loadJSON
+} from '../../../utils';
 import { emailProviderDefaults } from '../../defaults';
 
 function parse(context) {
@@ -19,7 +21,6 @@ function parse(context) {
 
   return {};
 }
-
 
 async function dump(context) {
   let { emailProvider } = context.assets;
@@ -38,7 +39,6 @@ async function dump(context) {
   const emailProviderFile = path.join(emailsFolder, 'provider.json');
   dumpJSON(emailProviderFile, emailProvider);
 }
-
 
 export default {
   parse,

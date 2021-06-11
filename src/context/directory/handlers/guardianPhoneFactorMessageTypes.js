@@ -1,7 +1,9 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { constants } from '../../../tools';
-import { existsMustBeDir, dumpJSON, loadJSON, isFile } from '../../../utils';
+import {
+  existsMustBeDir, dumpJSON, loadJSON, isFile
+} from '../../../utils';
 
 function parse(context) {
   const guardianFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY);
@@ -18,7 +20,6 @@ function parse(context) {
   return {};
 }
 
-
 async function dump(context) {
   const { guardianPhoneFactorMessageTypes } = context.assets;
 
@@ -30,7 +31,6 @@ async function dump(context) {
   const file = path.join(guardianFolder, 'phoneFactorMessageTypes.json');
   dumpJSON(file, guardianPhoneFactorMessageTypes);
 }
-
 
 export default {
   parse,

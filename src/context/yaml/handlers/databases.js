@@ -4,14 +4,13 @@ import path from 'path';
 import { mapClientID2NameSorted, sanitize } from '../../../utils';
 import log from '../../../logger';
 
-
 async function parse(context) {
   // Load the script file for custom db
   if (!context.assets.databases) return {};
 
   return {
     databases: [
-      ...context.assets.databases.map(database => ({
+      ...context.assets.databases.map((database) => ({
         ...database,
         options: {
           ...database.options,
@@ -41,7 +40,7 @@ async function dump(context) {
 
   return {
     databases: [
-      ...databases.map(database => ({
+      ...databases.map((database) => ({
         ...database,
         ...(database.enabled_clients && { enabled_clients: mapClientID2NameSorted(database.enabled_clients, context.assets.clients) }),
         options: {
@@ -68,7 +67,6 @@ async function dump(context) {
     ]
   };
 }
-
 
 export default {
   parse,

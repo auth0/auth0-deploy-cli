@@ -13,7 +13,6 @@ import {
   mapClientID2NameSorted
 } from '../../../utils';
 
-
 function getDatabase(folder, mappings) {
   const metaFile = path.join(folder, 'database.json');
   let metaData = {};
@@ -59,11 +58,11 @@ function parse(context) {
   if (!existsMustBeDir(databaseFolder)) return { databases: undefined }; // Skip
 
   const folders = fs.readdirSync(databaseFolder)
-    .map(f => path.join(databaseFolder, f))
-    .filter(f => isDirectory(f));
+    .map((f) => path.join(databaseFolder, f))
+    .filter((f) => isDirectory(f));
 
-  const databases = folders.map(f => getDatabase(f, context.mappings))
-    .filter(p => Object.keys(p).length > 1);
+  const databases = folders.map((f) => getDatabase(f, context.mappings))
+    .filter((p) => Object.keys(p).length > 1);
 
   return {
     databases
@@ -111,7 +110,6 @@ async function dump(context) {
     dumpJSON(databaseFile, formatted);
   });
 }
-
 
 export default {
   parse,

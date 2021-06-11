@@ -2,9 +2,10 @@ import fs from 'fs-extra';
 import path from 'path';
 import { constants } from '../../../tools';
 
-import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
+import {
+  getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize
+} from '../../../utils';
 import log from '../../../logger';
-
 
 function parse(context) {
   const hooksFolder = path.join(context.filePath, constants.HOOKS_DIRECTORY);

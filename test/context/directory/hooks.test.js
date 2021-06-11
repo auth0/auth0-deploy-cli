@@ -1,13 +1,15 @@
 import fs from 'fs-extra';
-import { constants } from '../../../src/tools';
 
 import path from 'path';
 import { expect } from 'chai';
+import { constants } from '../../../src/tools';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/hooks';
 import { loadJSON } from '../../../src/utils';
-import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
+import {
+  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
+} from '../../utils';
 
 const hooks = {
   'some-hook.js': 'function someHook() { var hello = @@hello@@; }',
@@ -29,7 +31,6 @@ const hooksTarget = [
     triggerId: 'credentials-exchange'
   }
 ];
-
 
 describe('#directory context hooks', () => {
   it('should process hooks', async () => {

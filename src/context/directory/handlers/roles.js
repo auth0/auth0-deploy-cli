@@ -3,7 +3,9 @@ import path from 'path';
 import { constants } from '../../../tools';
 
 import log from '../../../logger';
-import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
+import {
+  getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize
+} from '../../../utils';
 
 function parse(context) {
   const rolesFolder = path.join(context.filePath, constants.ROLES_DIRECTORY);

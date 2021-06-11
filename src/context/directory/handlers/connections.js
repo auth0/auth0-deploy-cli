@@ -36,7 +36,7 @@ function parse(context) {
 
       return connection;
     })
-    .filter(p => Object.keys(p).length > 0); // Filter out empty connections
+    .filter((p) => Object.keys(p).length > 0); // Filter out empty connections
 
   return {
     connections
@@ -75,7 +75,6 @@ async function dump(context) {
     dumpJSON(connectionFile, dumpedConnection);
   });
 }
-
 
 export default {
   parse,

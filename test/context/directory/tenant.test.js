@@ -2,7 +2,9 @@ import path from 'path';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/directory';
-import { testDataDir, createDir, mockMgmtClient, cleanThenMkdir } from '../../utils';
+import {
+  testDataDir, createDir, mockMgmtClient, cleanThenMkdir
+} from '../../utils';
 import handler from '../../../src/context/directory/handlers/tenant';
 import { loadJSON } from '../../../src/utils';
 

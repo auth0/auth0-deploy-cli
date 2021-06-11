@@ -6,7 +6,6 @@ import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/hooks';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
-
 describe('#YAML context hooks', () => {
   it('should process hooks', async () => {
     const dir = path.join(testDataDir, 'yaml', 'hooks1');

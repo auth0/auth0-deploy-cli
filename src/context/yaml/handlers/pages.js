@@ -10,14 +10,13 @@ async function parse(context) {
 
   return {
     pages: [
-      ...context.assets.pages.map(page => ({
+      ...context.assets.pages.map((page) => ({
         ...page,
         html: page.html ? context.loadFile(page.html) : ''
       }))
     ]
   };
 }
-
 
 async function dump(context) {
   let pages = [ ...context.assets.pages || [] ];
@@ -45,7 +44,6 @@ async function dump(context) {
 
   return { pages };
 }
-
 
 export default {
   parse,
