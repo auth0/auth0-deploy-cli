@@ -6,8 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [5.6.0] - 2021-06-11
 ### Fixed
-- Fix issue with ManagementClient retries not enabled as intended 
+- Fix issue with ManagementClient retries not enabled as intended
+- Bump auth0-source-control-extension-tools for security fixes
+- npm audit fix updates to dependencies
 
 ## [5.5.7] - 2021-05-19
 ### Added
@@ -318,7 +322,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#291]: https://github.com/auth0/auth0-deploy-cli/issues/291
 [#309]: https://github.com/auth0/auth0-deploy-cli/issues/309
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.7...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.6.0...HEAD
+[5.6.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.7...v5.6.0
 [5.5.7]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.6...v5.5.7
 [5.5.6]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.5...v5.5.6
 [5.5.5]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.4...v5.5.5
