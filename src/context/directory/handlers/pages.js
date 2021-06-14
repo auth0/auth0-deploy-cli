@@ -1,10 +1,11 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { constants, loadFile } from 'auth0-source-control-extension-tools';
+import { constants, loadFile } from '../../../tools';
 
 import log from '../../../logger';
-import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
-
+import {
+  getFiles, existsMustBeDir, dumpJSON, loadJSON
+} from '../../../utils';
 
 function parse(context) {
   const pagesFolder = path.join(context.filePath, constants.PAGES_DIRECTORY);
@@ -65,7 +66,6 @@ async function dump(context) {
     dumpJSON(pageFile, metadata);
   });
 }
-
 
 export default {
   parse,

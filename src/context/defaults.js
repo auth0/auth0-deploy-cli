@@ -1,4 +1,3 @@
-
 export function emailProviderDefaults(emailProvider) {  // eslint-disable-line
   const updated = { ...emailProvider };
 

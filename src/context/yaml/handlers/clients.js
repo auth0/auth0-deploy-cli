@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { constants } from 'auth0-source-control-extension-tools';
+import { constants } from '../../../tools';
 
 import log from '../../../logger';
 import { isFile, sanitize, clearClientArrays } from '../../../utils';
@@ -54,7 +54,6 @@ async function dump(context) {
     }) ]
   };
 }
-
 
 export default {
   parse,

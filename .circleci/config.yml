@@ -9,9 +9,9 @@ jobs:
     parameters:
       v:
         type: string
-        default: "12"
+        default: "lts"
     docker:
-      - image: circleci/node:<< parameters.v >>
+      - image: cimg/node:<< parameters.v >>
     working_directory: ~/repo
     steps:
       - checkout
@@ -19,12 +19,12 @@ jobs:
           keys:
             - v<< parameters.v >>-npm-deps-{{ checksum "package-lock.json" }}
             - v<< parameters.v >>-npm-deps-
-      - run: npm install
-      - run: npm run lint
+      - run: npm ci
       - save_cache:
           key: v<< parameters.v >>-npm-deps-{{ checksum "package-lock.json" }}
           paths:
             - node_modules
+      - run: npm run lint
       - run: npm test
       - persist_to_workspace:
           root: ~/repo
@@ -34,9 +34,9 @@ jobs:
     parameters:
       v:
         type: string
-        default: "12"
+        default: "lts"
     docker:
-      - image: circleci/node:<< parameters.v >>
+      - image: cimg/node:<< parameters.v >>
     working_directory: ~/repo
     steps:
       - attach_workspace:
@@ -46,35 +46,32 @@ jobs:
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
       - run:
           name: Publish package
-          command: npm publish
+          command: npm publish --tag beta
 
 workflows:
   version: 2
   test:
     jobs:
       - test:
-          name: test_node8
-          v: "8"
+          name: test_lts
+          v: "lts"
       - test:
-          name: test_node12
-          v: "12"
-      - test:
-          name: test_node14
-          v: "14"
+          name: test_current
+          v: "current"
   test_and_deploy:
     jobs:
       - test:
-          name: test_node12
-          v: "12"
+          name: test_lts
+          v: "lts"
           filters:
             branches:
               only: master
             tags:
               only: /^v.*/
       - deploy:
-          v: "12"
+          v: "lts"
           requires:
-            - test_node12
+            - test_lts
           filters:
             branches:
               ignore: /.*/

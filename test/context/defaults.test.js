@@ -2,7 +2,6 @@ import { expect } from 'chai';
 
 import { emailProviderDefaults } from '../../src/context/defaults';
 
-
 describe('#context defaults', () => {
   describe('emailProvider defaults', () => {
     it('should set emailProvider defaults for smtp', async () => {

@@ -6,8 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.0.0] - 2021-06-11
+### Added
+- MFA-1174 Support Recovery Codes
+- Support for organizations
+- Prompt link to Auth0 Docs upon insufficient scope
+
+### Changed
+- Removed dependency on `auth0-source-control-extension-tools`, the package is not part of `auth0-deploy-cli`
+- Removed dependency on `auth-extension-tools`
+
+### Deprecated
+- Dropped Node.js 8 support
+
 ### Fixed
-- Fix issue with ManagementClient retries not enabled as intended 
+- Upstream node registry
+
+### Security
+- Security fixes from dependencies
+
+## [6.0.0] - 2020-12-28
+### Deprecated
+- This release has been withdrawn
 
 ## [5.5.7] - 2021-05-19
 ### Added
@@ -318,7 +339,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#291]: https://github.com/auth0/auth0-deploy-cli/issues/291
 [#309]: https://github.com/auth0/auth0-deploy-cli/issues/309
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.7...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.0.0...HEAD
+[7.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.7...v7.0.0
 [5.5.7]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.6...v5.5.7
 [5.5.6]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.5...v5.5.6
 [5.5.5]: https://github.com/auth0/auth0-deploy-cli/compare/v5.5.4...v5.5.5

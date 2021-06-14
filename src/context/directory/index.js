@@ -1,10 +1,12 @@
 import * as path from 'path';
-import { loadFile, Auth0 } from 'auth0-source-control-extension-tools';
+import { loadFile, Auth0 } from '../../tools';
 
 import cleanAssets from '../../readonly';
 import log from '../../logger';
 import handlers from './handlers';
-import { isDirectory, isFile, stripIdentifiers, toConfigFn } from '../../utils';
+import {
+  isDirectory, isFile, stripIdentifiers, toConfigFn
+} from '../../utils';
 
 export default class {
   constructor(config, mgmtClient) {

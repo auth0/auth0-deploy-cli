@@ -6,7 +6,6 @@ import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/clientGrants';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
-
 describe('#YAML context client grants', () => {
   it('should process client grants', async () => {
     const dir = path.join(testDataDir, 'yaml', 'clientGrants');

@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { constants, loadFile } from 'auth0-source-control-extension-tools';
+import { constants, loadFile } from '../../../tools';
 
 import log from '../../../logger';
 import {
@@ -12,7 +12,6 @@ import {
   sanitize,
   mapClientID2NameSorted
 } from '../../../utils';
-
 
 function getDatabase(folder, mappings) {
   const metaFile = path.join(folder, 'database.json');
@@ -59,11 +58,11 @@ function parse(context) {
   if (!existsMustBeDir(databaseFolder)) return { databases: undefined }; // Skip
 
   const folders = fs.readdirSync(databaseFolder)
-    .map(f => path.join(databaseFolder, f))
-    .filter(f => isDirectory(f));
+    .map((f) => path.join(databaseFolder, f))
+    .filter((f) => isDirectory(f));
 
-  const databases = folders.map(f => getDatabase(f, context.mappings))
-    .filter(p => Object.keys(p).length > 1);
+  const databases = folders.map((f) => getDatabase(f, context.mappings))
+    .filter((p) => Object.keys(p).length > 1);
 
   return {
     databases
@@ -111,7 +110,6 @@ async function dump(context) {
     dumpJSON(databaseFile, formatted);
   });
 }
-
 
 export default {
   parse,

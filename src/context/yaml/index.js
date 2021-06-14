@@ -1,10 +1,12 @@
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import path from 'path';
-import { loadFile, keywordReplace, Auth0 } from 'auth0-source-control-extension-tools';
+import { loadFile, keywordReplace, Auth0 } from '../../tools';
 
 import log from '../../logger';
-import { isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter } from '../../utils';
+import {
+  isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter
+} from '../../utils';
 import handlers from './handlers';
 import cleanAssets from '../../readonly';
 
@@ -83,7 +85,9 @@ export default class {
       await auth0.loadAll();
       this.assets = auth0.assets;
     } catch (err) {
-      throw new Error(`Problem loading tenant data from Auth0 ${err}`);
+      const docUrl = 'https://auth0.com/docs/deploy/deploy-cli-tool/create-and-configure-the-deploy-cli-application#modify-deploy-cli-application-scopes';
+      const extraMessage = err.message.startsWith('Insufficient scope') ? `\nSee ${docUrl} for more information` : '';
+      throw new Error(`Problem loading tenant data from Auth0 ${err}${extraMessage}`);
     }
 
     await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {

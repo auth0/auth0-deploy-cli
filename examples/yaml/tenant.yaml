@@ -181,3 +181,27 @@ roles:
       - permission_name: 'read:account'
         resource_server_identifier: 'https://##ENV##.myapp.com/api/v1'
 
+actions:
+  - name: action-example
+    code: ./actions/action-example/code.js
+    dependencies:
+      - name: lodash
+        version: 4.17.21
+    deployed: true
+    secrets:
+      - name: MY_SECRET
+        value: _VALUE_NOT_SHOWN_
+    status: built
+    supported_triggers:
+      - id: post-login
+        version: v1
+
+triggers:
+  credentials-exchange: []
+  post-change-password: []
+  post-login:
+    - action_name: action-example
+      display_name: action-example-display-name
+  post-user-registration: []
+  pre-user-registration: []
+  send-phone-message: []

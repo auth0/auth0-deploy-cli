@@ -1,8 +1,10 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { constants } from 'auth0-source-control-extension-tools';
+import { constants } from '../../../tools';
 
-import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize, convertClientIdToName } from '../../../utils';
+import {
+  getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize, convertClientIdToName
+} from '../../../utils';
 
 function parse(context) {
   const grantsFolder = path.join(context.filePath, constants.CLIENTS_GRANTS_DIRECTORY);
@@ -10,14 +12,13 @@ function parse(context) {
 
   const foundFiles = getFiles(grantsFolder, [ '.json' ]);
 
-  const clientGrants = foundFiles.map(f => loadJSON(f, context.mappings))
-    .filter(p => Object.keys(p).length > 0); // Filter out empty grants
+  const clientGrants = foundFiles.map((f) => loadJSON(f, context.mappings))
+    .filter((p) => Object.keys(p).length > 0); // Filter out empty grants
 
   return {
     clientGrants
   };
 }
-
 
 async function dump(context) {
   const { clientGrants } = context.assets;
@@ -37,7 +38,6 @@ async function dump(context) {
     dumpJSON(grantFile, dumpGrant);
   });
 }
-
 
 export default {
   parse,

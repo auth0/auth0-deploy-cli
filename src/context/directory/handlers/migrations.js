@@ -1,6 +1,7 @@
 import path from 'path';
-import { existsMustBeDir, isFile, dumpJSON, loadJSON } from '../../../utils';
-
+import {
+  existsMustBeDir, isFile, dumpJSON, loadJSON
+} from '../../../utils';
 
 function parse(context) {
   const baseFolder = path.join(context.filePath);
@@ -18,7 +19,6 @@ function parse(context) {
   return {};
 }
 
-
 async function dump(context) {
   const { migrations } = context.assets;
 
@@ -27,7 +27,6 @@ async function dump(context) {
   const migrationsFile = path.join(context.filePath, 'migrations.json');
   dumpJSON(migrationsFile, migrations);
 }
-
 
 export default {
   parse,

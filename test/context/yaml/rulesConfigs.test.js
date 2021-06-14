@@ -6,7 +6,6 @@ import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/rulesConfigs';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
-
 describe('#YAML context rules configs', () => {
   it('should process rules configs', async () => {
     const dir = path.join(testDataDir, 'yaml', 'rulesConfigs');

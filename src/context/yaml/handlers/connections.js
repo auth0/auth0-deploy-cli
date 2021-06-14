@@ -1,9 +1,11 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { constants } from 'auth0-source-control-extension-tools';
+import { constants } from '../../../tools';
 
 import log from '../../../logger';
-import { isFile, sanitize, ensureProp, convertClientIdToName, mapClientID2NameSorted } from '../../../utils';
+import {
+  isFile, sanitize, ensureProp, convertClientIdToName, mapClientID2NameSorted
+} from '../../../utils';
 
 async function parse(context) {
   // Load the HTML file for email connections
@@ -85,7 +87,6 @@ async function dump(context) {
     })
   };
 }
-
 
 export default {
   parse,

@@ -18,6 +18,7 @@ export function mockMgmtClient() {
   return {
     rules: { getAll: () => ({ rules: [] }) },
     hooks: { getAll: () => [] },
+    actions: { getAll: () => ({ actions: [] }) },
     databases: { getAll: () => ({ databases: [] }) },
     connections: { getAll: () => ({ connections: [] }) },
     resourceServers: { getAll: () => ({ resourceServers: [] }) },
@@ -38,7 +39,7 @@ export function mockMgmtClient() {
       getPolicies: () => []
     },
     emailTemplates: {
-      get: template => ({
+      get: (template) => ({
         template: template.name,
         enabled: true,
         body: 'fake template'
@@ -109,7 +110,6 @@ export function cleanThenMkdir(dir) {
   }
   mkdirp.sync(dir);
 }
-
 
 export function createDir(repoDir, files) {
   Object.keys(files).forEach((type) => {

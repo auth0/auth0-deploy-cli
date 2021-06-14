@@ -60,6 +60,13 @@ repository =>
     phoneFactorMessageTypes.json
     phoneFactorSelectedProvider.json
     policies.json
+  actions
+    action1
+      code.js
+      current_version.js
+    action1.json
+  triggers
+    triggers.json
 ```
 
 ## Example Export

@@ -139,9 +139,8 @@ describe('#YAML context validation', () => {
         { body: './emailTemplates/verify_email_by_code.html', enabled: true, template: 'verify_email_by_code' },
         { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' }
       ],
-      pages: [
-        { enabled: true, html: './pages/login.html', name: 'login' }
-      ],
+      organizations: [],
+      pages: [ { enabled: true, html: './pages/login.html', name: 'login' } ],
       guardianFactors: [],
       guardianFactorProviders: [],
       guardianFactorTemplates: [],
@@ -153,6 +152,8 @@ describe('#YAML context validation', () => {
       resourceServers: [],
       rules: [],
       hooks: [],
+      actions: [],
+      triggers: [],
       rulesConfigs: [],
       roles: [
         {
@@ -160,7 +161,8 @@ describe('#YAML context validation', () => {
           description: 'Admin of app',
           permissions: [
             {
-              permission_name: 'create:data', resource_server_identifier: 'urn:ref'
+              permission_name: 'create:data',
+              resource_server_identifier: 'urn:ref'
             }
           ]
         }
@@ -176,7 +178,10 @@ describe('#YAML context validation', () => {
     const dir = path.resolve(testDataDir, 'yaml', 'dump');
     cleanThenMkdir(dir);
     const tenantFile = path.join(dir, 'tenant.yml');
-    const config = { AUTH0_INPUT_FILE: tenantFile, AUTH0_EXCLUDED_DEFAULTS: [ 'emailProvider' ] };
+    const config = {
+      AUTH0_INPUT_FILE: tenantFile,
+      AUTH0_EXCLUDED_DEFAULTS: [ 'emailProvider' ]
+    };
     const context = new Context(config, mockMgmtClient());
     await context.dump();
     const yaml = jsYaml.safeLoad(fs.readFileSync(tenantFile));
@@ -209,9 +214,8 @@ describe('#YAML context validation', () => {
         { body: './emailTemplates/verify_email_by_code.html', enabled: true, template: 'verify_email_by_code' },
         { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' }
       ],
-      pages: [
-        { enabled: true, html: './pages/login.html', name: 'login' }
-      ],
+      organizations: [],
+      pages: [ { enabled: true, html: './pages/login.html', name: 'login' } ],
       guardianFactors: [],
       guardianFactorProviders: [],
       guardianFactorTemplates: [],
@@ -223,6 +227,8 @@ describe('#YAML context validation', () => {
       resourceServers: [],
       rules: [],
       hooks: [],
+      actions: [],
+      triggers: [],
       rulesConfigs: [],
       roles: [
         {
@@ -230,7 +236,8 @@ describe('#YAML context validation', () => {
           description: 'Admin of app',
           permissions: [
             {
-              permission_name: 'create:data', resource_server_identifier: 'urn:ref'
+              permission_name: 'create:data',
+              resource_server_identifier: 'urn:ref'
             }
           ]
         }
@@ -283,9 +290,8 @@ describe('#YAML context validation', () => {
         { body: './emailTemplates/verify_email_by_code.html', enabled: true, template: 'verify_email_by_code' },
         { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' }
       ],
-      pages: [
-        { enabled: true, html: './pages/login.html', name: 'login' }
-      ],
+      organizations: [],
+      pages: [ { enabled: true, html: './pages/login.html', name: 'login' } ],
       guardianFactors: [],
       guardianFactorProviders: [],
       guardianFactorTemplates: [],
@@ -297,6 +303,8 @@ describe('#YAML context validation', () => {
       resourceServers: [],
       rules: [],
       hooks: [],
+      actions: [],
+      triggers: [],
       rulesConfigs: [],
       roles: [
         {
@@ -304,7 +312,8 @@ describe('#YAML context validation', () => {
           description: 'Admin of app',
           permissions: [
             {
-              permission_name: 'create:data', resource_server_identifier: 'urn:ref'
+              permission_name: 'create:data',
+              resource_server_identifier: 'urn:ref'
             }
           ]
         }

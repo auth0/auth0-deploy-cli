@@ -6,7 +6,6 @@ import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/guardianPhoneFactorMessageTypes';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
-
 describe('#YAML context guardian phone factor message types provider', () => {
   it('should process guardian phone factor message types', async () => {
     const dir = path.join(testDataDir, 'yaml', 'guardianPhoneFactorMessageTypes');

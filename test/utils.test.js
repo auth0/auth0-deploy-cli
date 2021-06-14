@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { expect } from 'chai';
-import { Auth0 } from 'auth0-source-control-extension-tools';
+import { Auth0 } from '../src/tools';
 
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from './utils';
 import {

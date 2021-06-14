@@ -1,0 +1,18 @@
+{
+  "post-login": [
+    {
+      "action_name": "action-example",
+      "display_name": "action-example"
+    }
+  ],
+  "credentials-exchange": [],
+  "pre-user-registration": [],
+  "post-user-registration": [],
+  "post-change-password": [],
+  "send-phone-message": [
+    {
+      "action_name": "ldoorz",
+      "display_name": "ldoorz"
+    }
+  ]
+}

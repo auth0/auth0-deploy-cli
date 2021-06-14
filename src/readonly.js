@@ -1,5 +1,5 @@
 import dotProp from 'dot-prop';
-
+import _ from 'lodash';
 // Filter out known read only fields during dump
 const readOnly = {
   guardianFactors: [
@@ -41,7 +41,7 @@ function getExcludedFields(config) {
 
   Object.entries(excluded).forEach(([ name, fields ]) => {
     // Do not allow same field to be included and excluded at the same time
-    const intersections = fields.filter(field => included[name] && included[name].includes(field));
+    const intersections = fields.filter((field) => included[name] && included[name].includes(field));
     if (intersections.length > 0) {
       throw new Error(`EXCLUDED_PROPS should NOT have any intersections with INCLUDED_PROPS. Intersections found: ${name}: ${intersections.join(', ')}`);
     }
@@ -50,7 +50,7 @@ function getExcludedFields(config) {
 
   Object.entries(included).forEach(([ name, fields ]) => {
     if (strippedFields[name]) {
-      strippedFields[name] = strippedFields[name].filter(field => !fields.includes(field));
+      strippedFields[name] = strippedFields[name].filter((field) => !fields.includes(field));
     }
   });
 
@@ -59,7 +59,7 @@ function getExcludedFields(config) {
 
 function deleteKeys(obj, keys) {
   const newObj = { ...obj };
-  keys.forEach(k => dotProp.delete(newObj, k));
+  keys.forEach((k) => dotProp.delete(newObj, k));
   return newObj;
 }
 
@@ -72,11 +72,11 @@ export default function cleanAssets(assets, config) {
     if (!obj) return;
 
     if (Array.isArray(obj)) {
-      cleaned[name] = obj.map(o => deleteKeys(o, fields));
+      cleaned[name] = obj.map((o) => deleteKeys(o, fields));
     } else {
       cleaned[name] = deleteKeys(cleaned[name], fields);
     }
   });
 
-  return cleaned;
+  return _.pickBy(cleaned, _.identity);
 }

@@ -6,7 +6,6 @@ import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/connections';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
-
 describe('#YAML context connections', () => {
   it('should process connections', async () => {
     const dir = path.join(testDataDir, 'yaml', 'connections1');
@@ -82,7 +81,6 @@ describe('#YAML context connections', () => {
         }
       }
     ];
-
 
     const yamlFile = path.join(dir, 'connections.yaml');
     const connectionsPath = path.join(dir, 'connections');
