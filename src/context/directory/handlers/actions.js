@@ -58,7 +58,7 @@ function mapToAction(filePath, action) {
     dependencies: action.dependencies || [],
     secrets: mapSecrets(action.secrets),
     supported_triggers: action.supported_triggers,
-    deployed: action.deployed
+    deployed: action.deployed || action.all_changes_deployed
   };
 }
 
