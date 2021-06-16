@@ -1,4 +1,4 @@
-import { ValidationError } from 'auth0-extension-tools';
+import ValidationError from '../../ValidationError';
 import {
   dumpJSON, calcChanges, stripFields, duplicateItems
 } from '../../utils';
