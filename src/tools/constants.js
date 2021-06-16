@@ -109,6 +109,15 @@ constants.EMAIL_TEMPLATES_TYPES = [
   'user_invitation'
 ];
 
+constants.ACTIONS_TRIGGERS = [
+  'post-login',
+  'credentials-exchange',
+  'pre-user-registration',
+  'post-user-registration',
+  'post-change-password',
+  'send-phone-message'
+];
+
 constants.GUARDIAN_DIRECTORY = 'guardian';
 constants.GUARDIAN_FACTORS_DIRECTORY = 'factors';
 constants.GUARDIAN_PROVIDERS_DIRECTORY = 'providers';

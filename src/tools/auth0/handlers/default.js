@@ -1,4 +1,4 @@
-import ValidationError from '../../ValidationError';
+import { ValidationError } from 'auth0-extension-tools';
 
 import log from '../../logger';
 import {
@@ -38,8 +38,11 @@ export default class DefaultHandler {
   }
 
   getClientFN(fn) {
-    const client = Reflect.get(this.client, this.type);
-    return Reflect.get(client, fn).bind(client);
+    if (typeof fn === 'string') {
+      const client = Reflect.get(this.client, this.type);
+      return Reflect.get(client, fn).bind(client);
+    }
+    return fn;
   }
 
   didDelete(item) {

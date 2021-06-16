@@ -40,7 +40,7 @@ export default class PageHandler extends DefaultHandler {
   }
 
   async updateLoginPage(page) {
-    const globalClient = await this.client.clients.getAll({ is_global: true, paginate: true });
+    const globalClient = await this.client.clients.getAll({ is_global: true, paginate: true, include_totals: true });
 
     if (!globalClient[0]) {
       throw new Error('Unable to find global client id when trying to update the login page');
@@ -85,7 +85,7 @@ export default class PageHandler extends DefaultHandler {
     const pages = [];
 
     // Login page is handled via the global client
-    const globalClient = await this.client.clients.getAll({ is_global: true, paginate: true });
+    const globalClient = await this.client.clients.getAll({ is_global: true, paginate: true, include_totals: true });
     if (!globalClient[0]) {
       throw new Error('Unable to find global client id when trying to dump the login page');
     }
