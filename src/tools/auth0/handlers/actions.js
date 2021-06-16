@@ -48,7 +48,8 @@ export const schema = {
           }
         }
       },
-      deployed: { type: 'boolean' }
+      deployed: { type: 'boolean' },
+      status: { type: 'string' }
     }
   }
 };
@@ -67,7 +68,8 @@ export default class ActionHandler extends DefaultHandler {
         delete: (action) => this.deleteAction(action)
       },
       stripUpdateFields: [
-        'deployed'
+        'deployed',
+        'status'
       ]
     });
   }
