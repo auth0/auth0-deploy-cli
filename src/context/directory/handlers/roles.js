@@ -1,14 +1,15 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { constants } from 'auth0-source-control-extension-tools';
+import { constants } from '../../../tools';
 
 import log from '../../../logger';
-import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
-
+import {
+  getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize
+} from '../../../utils';
 
 function parse(context) {
   const rolesFolder = path.join(context.filePath, constants.ROLES_DIRECTORY);
-  if (!existsMustBeDir(rolesFolder)) return { roles: [] }; // Skip
+  if (!existsMustBeDir(rolesFolder)) return { roles: undefined }; // Skip
 
   const files = getFiles(rolesFolder, [ '.json' ]);
 
@@ -24,7 +25,9 @@ function parse(context) {
 
 async function dump(context) {
   const { roles } = context.assets;
-  if (!roles) return; // Skip, nothing to dump
+
+  // API returns an empty object if no grants are present
+  if (!roles || roles.constructor === Object) return; // Skip, nothing to dump
 
   const rolesFolder = path.join(context.filePath, constants.ROLES_DIRECTORY);
   fs.ensureDirSync(rolesFolder);
@@ -32,10 +35,15 @@ async function dump(context) {
   roles.forEach((role) => {
     const roleFile = path.join(rolesFolder, sanitize(`${role.name}.json`));
     log.info(`Writing ${roleFile}`);
-    fs.writeFileSync(roleFile, JSON.stringify(role, null, 2));
+
+    // remove empty description
+    if (role.description === null) {
+      delete role.description;
+    }
+
+    dumpJSON(roleFile, role);
   });
 }
-
 
 export default {
   parse,

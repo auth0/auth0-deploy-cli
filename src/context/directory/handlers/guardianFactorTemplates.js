@@ -1,24 +1,24 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { constants } from 'auth0-source-control-extension-tools';
+import { constants } from '../../../tools';
 
-import log from '../../../logger';
-import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
+import {
+  getFiles, existsMustBeDir, dumpJSON, loadJSON
+} from '../../../utils';
 
 function parse(context) {
   const factorTemplatesFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY, constants.GUARDIAN_TEMPLATES_DIRECTORY);
-  if (!existsMustBeDir(factorTemplatesFolder)) return { guardianFactorTemplates: [] }; // Skip
+  if (!existsMustBeDir(factorTemplatesFolder)) return { guardianFactorTemplates: undefined }; // Skip
 
   const foundFiles = getFiles(factorTemplatesFolder, [ '.json' ]);
 
-  const guardianFactorTemplates = foundFiles.map(f => loadJSON(f, context.mappings))
-    .filter(p => Object.keys(p).length > 0); // Filter out empty guardianFactorTemplates
+  const guardianFactorTemplates = foundFiles.map((f) => loadJSON(f, context.mappings))
+    .filter((p) => Object.keys(p).length > 0); // Filter out empty guardianFactorTemplates
 
   return {
     guardianFactorTemplates
   };
 }
-
 
 async function dump(context) {
   const { guardianFactorTemplates } = context.assets;
@@ -30,11 +30,9 @@ async function dump(context) {
 
   guardianFactorTemplates.forEach((factorTemplates) => {
     const factorTemplatesFile = path.join(factorTemplatesFolder, `${factorTemplates.name}.json`);
-    log.info(`Writing ${factorTemplatesFile}`);
-    fs.writeFileSync(factorTemplatesFile, JSON.stringify(factorTemplates, null, 2));
+    dumpJSON(factorTemplatesFile, factorTemplates);
   });
 }
-
 
 export default {
   parse,

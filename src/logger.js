@@ -6,7 +6,7 @@ const log = new winston.Logger({
   transports: [
     new winston.transports.Console({
       timestamp: true,
-      level: 'info',
+      level: process.env.AUTH0_LOG || 'info',
       handleExceptions: true,
       json: false,
       colorize: true
@@ -14,6 +14,5 @@ const log = new winston.Logger({
   ],
   exitOnError: false
 });
-
 
 export default log;

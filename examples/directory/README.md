@@ -57,6 +57,16 @@ repository =>
       sms-twilio.json
     templates
       sms.json
+    phoneFactorMessageTypes.json
+    phoneFactorSelectedProvider.json
+    policies.json
+  actions
+    action1
+      code.js
+      current_version.js
+    action1.json
+  triggers
+    triggers.json
 ```
 
 ## Example Export
@@ -112,7 +122,8 @@ Here is the example of a config.json:
   },
   "AUTH0_EXCLUDED_RULES": [ "auth0-account-link-extension" ],
   "AUTH0_EXCLUDED_CLIENTS": [ "auth0-account-link" ],
-  "AUTH0_EXCLUDED_RESOURCE_SERVERS": [ "SSO Dashboard API" ]
+  "AUTH0_EXCLUDED_RESOURCE_SERVERS": [ "SSO Dashboard API" ],
+  "AUTH0_EXCLUDED_DEFAULTS": ["emailProvider"]
 }
 ```
 

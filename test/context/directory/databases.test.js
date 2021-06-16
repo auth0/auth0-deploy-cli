@@ -1,13 +1,15 @@
 import fs from 'fs-extra';
-import { constants } from 'auth0-source-control-extension-tools';
 
 import path from 'path';
 import { expect } from 'chai';
+import { constants } from '../../../src/tools';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/databases';
 import { loadJSON } from '../../../src/utils';
-import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
+import {
+  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
+} from '../../utils';
 
 describe('#directory context databases', () => {
   const normalUsersDB = {
@@ -195,6 +197,26 @@ describe('#directory context databases', () => {
       },
       strategy: 'auth0'
     });
+  });
+
+  it('should dump normal databases with enabled_clients sorted', async () => {
+    cleanThenMkdir(dbDumpDir);
+    const context = new Context({ AUTH0_INPUT_FILE: dbDumpDir }, mockMgmtClient());
+
+    context.assets.databases = [
+      {
+        name: 'users',
+        enabled_clients: [ 'client2', 'client1', 'client3' ],
+        options: {
+          requires_username: true
+        },
+        strategy: 'auth0'
+      }
+    ];
+
+    await handler.dump(context);
+    const scripsFolder = path.join(dbDumpDir, constants.DATABASE_CONNECTIONS_DIRECTORY, 'users');
+    expect(loadJSON(path.join(scripsFolder, 'database.json')).enabled_clients).to.deep.equal([ 'client1', 'client2', 'client3' ]);
   });
 
   it('should dump custom databases', async () => {

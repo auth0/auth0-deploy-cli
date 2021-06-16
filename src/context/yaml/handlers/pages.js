@@ -10,14 +10,13 @@ async function parse(context) {
 
   return {
     pages: [
-      ...context.assets.pages.map(page => ({
+      ...context.assets.pages.map((page) => ({
         ...page,
-        html: context.loadFile(page.html)
+        html: page.html ? context.loadFile(page.html) : ''
       }))
     ]
   };
 }
-
 
 async function dump(context) {
   let pages = [ ...context.assets.pages || [] ];
@@ -28,6 +27,10 @@ async function dump(context) {
     fs.ensureDirSync(pagesFolder);
 
     pages = pages.map((page) => {
+      if (page.name === 'error_page' && page.html === undefined) {
+        return page;
+      }
+
       // Dump html to file
       const htmlFile = path.join(pagesFolder, `${page.name}.html`);
       log.info(`Writing ${htmlFile}`);
@@ -41,7 +44,6 @@ async function dump(context) {
 
   return { pages };
 }
-
 
 export default {
   parse,

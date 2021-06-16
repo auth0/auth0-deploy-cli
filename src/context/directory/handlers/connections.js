@@ -1,13 +1,23 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { constants, loadFile } from 'auth0-source-control-extension-tools';
+import { constants, loadFile } from '../../../tools';
 
 import log from '../../../logger';
-import { isFile, getFiles, existsMustBeDir, loadJSON, sanitize, ensureProp } from '../../../utils';
+import {
+  isFile,
+  getFiles,
+  existsMustBeDir,
+  dumpJSON,
+  loadJSON,
+  sanitize,
+  ensureProp,
+  mapClientID2NameSorted
+} from '../../../utils';
 
 function parse(context) {
-  const connectionsFolder = path.join(context.filePath, constants.CONNECTIONS_DIRECTORY);
-  if (!existsMustBeDir(connectionsFolder)) return { connections: [] }; // Skip
+  const connectionDirectory = context.config.AUTH0_CONNECTIONS_DIRECTORY || constants.CONNECTIONS_DIRECTORY;
+  const connectionsFolder = path.join(context.filePath, connectionDirectory);
+  if (!existsMustBeDir(connectionsFolder)) return { connections: undefined }; // Skip
 
   const foundFiles = getFiles(connectionsFolder, [ '.json' ]);
 
@@ -20,13 +30,13 @@ function parse(context) {
         const htmlFileName = path.join(connectionsFolder, connection.options.email.body);
 
         if (isFile(htmlFileName)) {
-          connection.options.email.body = loadFile(htmlFileName);
+          connection.options.email.body = loadFile(htmlFileName, context.mappings);
         }
       }
 
       return connection;
     })
-    .filter(p => Object.keys(p).length > 0); // Filter out empty connections
+    .filter((p) => Object.keys(p).length > 0); // Filter out empty connections
 
   return {
     connections
@@ -35,7 +45,6 @@ function parse(context) {
 
 async function dump(context) {
   const { connections } = context.assets;
-  const clients = context.assets.clientsOrig || [];
 
   if (!connections) return; // Skip, nothing to dump
 
@@ -46,13 +55,7 @@ async function dump(context) {
   connections.forEach((connection) => {
     const dumpedConnection = {
       ...connection,
-      enabled_clients: [
-        ...(connection.enabled_clients || []).map((clientId) => {
-          const found = clients.find(c => c.client_id === clientId);
-          if (found) return found.name;
-          return clientId;
-        })
-      ]
+      ...(connection.enabled_clients && { enabled_clients: mapClientID2NameSorted(connection.enabled_clients, context.assets.clientsOrig) })
     };
 
     const connectionName = sanitize(dumpedConnection.name);
@@ -69,11 +72,9 @@ async function dump(context) {
     }
 
     const connectionFile = path.join(connectionsFolder, `${connectionName}.json`);
-    log.info(`Writing ${connectionFile}`);
-    fs.writeFileSync(connectionFile, JSON.stringify(dumpedConnection, null, 2));
+    dumpJSON(connectionFile, dumpedConnection);
   });
 }
-
 
 export default {
   parse,

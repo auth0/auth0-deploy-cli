@@ -31,7 +31,6 @@ async function dump(context) {
   return { tenant };
 }
 
-
 export default {
   parse,
   dump

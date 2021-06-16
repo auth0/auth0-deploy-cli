@@ -6,7 +6,6 @@ import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/emailTemplates';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
-
 describe('#YAML context email templates', () => {
   it('should process email provider', async () => {
     const dir = path.join(testDataDir, 'yaml', 'emailTemplates');

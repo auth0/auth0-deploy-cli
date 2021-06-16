@@ -195,7 +195,7 @@ describe('#YAML context databases', () => {
     context.assets.databases = [
       {
         name: 'users/test',
-        enabled_clients: [],
+        enabled_clients: [ 'client3', 'client2', 'client1' ],
         options: {
           import_mode: true,
           customScripts: {
@@ -212,7 +212,7 @@ describe('#YAML context databases', () => {
       databases: [
         {
           name: 'users/test',
-          enabled_clients: [],
+          enabled_clients: [ 'client1', 'client2', 'client3' ],
           options: {
             import_mode: true,
             customScripts: {

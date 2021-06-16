@@ -1,9 +1,11 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { constants, loadFile } from 'auth0-source-control-extension-tools';
+import { constants } from '../../../tools';
 
 import log from '../../../logger';
-import { isFile, sanitize, ensureProp } from '../../../utils';
+import {
+  isFile, sanitize, ensureProp, convertClientIdToName, mapClientID2NameSorted
+} from '../../../utils';
 
 async function parse(context) {
   // Load the HTML file for email connections
@@ -23,7 +25,7 @@ async function parse(context) {
           const htmlFileName = path.join(connectionsFolder, connection.options.email.body);
 
           if (isFile(htmlFileName)) {
-            connection.options.email.body = loadFile(htmlFileName);
+            connection.options.email.body = context.loadFile(htmlFileName);
           }
         }
 
@@ -33,26 +35,38 @@ async function parse(context) {
   };
 }
 
+const getFormattedOptions = (connection, clients) => {
+  try {
+    return {
+      options: {
+        ...connection.options,
+        idpinitiated: {
+          ...connection.options.idpinitiated,
+          client_id: convertClientIdToName(
+            connection.options.idpinitiated.client_id,
+            clients
+          )
+        }
+      }
+    };
+  } catch (e) {
+    return {};
+  }
+};
+
 async function dump(context) {
   const { connections } = context.assets;
 
   // Nothing to do
   if (!connections) return {};
 
-  const clients = context.assets.clients || [];
-
   // nothing to do, set default if empty
   return {
     connections: connections.map((connection) => {
       const dumpedConnection = {
         ...connection,
-        enabled_clients: [
-          ...(connection.enabled_clients || []).map((clientId) => {
-            const found = clients.find(c => c.client_id === clientId);
-            if (found) return found.name;
-            return clientId;
-          })
-        ]
+        ...getFormattedOptions(connection, context.assets.clients),
+        ...(connection.enabled_clients && { enabled_clients: mapClientID2NameSorted(connection.enabled_clients, context.assets.clients) })
       };
 
       if (dumpedConnection.strategy === 'email') {
@@ -73,7 +87,6 @@ async function dump(context) {
     })
   };
 }
-
 
 export default {
   parse,

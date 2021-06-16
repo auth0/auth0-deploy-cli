@@ -2,46 +2,78 @@
 #
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
-version: 2
+version: 2.1
+
 jobs:
-  build:
+  test:
+    parameters:
+      v:
+        type: string
+        default: "lts"
     docker:
-      - image: circleci/node:8.12
-
+      - image: cimg/node:<< parameters.v >>
     working_directory: ~/repo
-
     steps:
       - checkout
-
-      # Download and cache dependencies
       - restore_cache:
           keys:
-            - npm-dependencies-{{ checksum "package-lock.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - npm-dependencies-
-
-      - run:
-          name: Install FOSSA
-          command: |
-            curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install.sh | bash
-
-      - run: npm install
-
-      - run:
-          name: FOSSA Init
-          command: fossa init
-      - run:
-          name: FOSSA Analyze
-          command: fossa analyze
-      - run:
-          name: FOSSA Test
-          command: fossa test
-
+            - v<< parameters.v >>-npm-deps-{{ checksum "package-lock.json" }}
+            - v<< parameters.v >>-npm-deps-
+      - run: npm ci
       - save_cache:
-          name: Save npm packages to cache
-          key: npm-dependencies-{{ checksum "package-lock.json" }}
+          key: v<< parameters.v >>-npm-deps-{{ checksum "package-lock.json" }}
           paths:
-            - ./node_modules
-
-      # run tests!
+            - node_modules
+      - run: npm run lint
       - run: npm test
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .
+
+  deploy:
+    parameters:
+      v:
+        type: string
+        default: "lts"
+    docker:
+      - image: cimg/node:<< parameters.v >>
+    working_directory: ~/repo
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Authenticate with registry
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
+      - run:
+          name: Publish package
+          command: npm publish
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test:
+          name: test_lts
+          v: "lts"
+      - test:
+          name: test_current
+          v: "current"
+  test_and_deploy:
+    jobs:
+      - test:
+          name: test_lts
+          v: "lts"
+          filters:
+            branches:
+              only: master
+            tags:
+              only: /^v.*/
+      - deploy:
+          v: "lts"
+          requires:
+            - test_lts
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/

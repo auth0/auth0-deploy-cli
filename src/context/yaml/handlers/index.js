@@ -1,5 +1,6 @@
 import pages from './pages';
 import rules from './rules';
+import hooks from './hooks';
 import clients from './clients';
 import tenant from './tenant';
 import emailProvider from './emailProvider';
@@ -12,10 +13,18 @@ import resourceServers from './resourceServers';
 import guardianFactors from './guardianFactors';
 import guardianFactorProviders from './guardianFactorProviders';
 import guardianFactorTemplates from './guardianFactorTemplates';
+import guardianPhoneFactorMessageTypes from './guardianPhoneFactorMessageTypes';
+import guardianPhoneFactorSelectedProvider from './guardianPhoneFactorSelectedProvider';
+import guardianPolicies from './guardianPolicies';
 import roles from './roles';
+import organizations from './organizations';
+import migrations from './migrations';
+import actions from './actions';
+import triggers from './triggers';
 
 export default {
   rules,
+  hooks,
   rulesConfigs,
   pages,
   databases,
@@ -29,5 +38,12 @@ export default {
   guardianFactors,
   guardianFactorProviders,
   guardianFactorTemplates,
-  roles
+  roles,
+  migrations,
+  guardianPhoneFactorMessageTypes,
+  guardianPhoneFactorSelectedProvider,
+  guardianPolicies,
+  actions,
+  organizations,
+  triggers
 };

@@ -3,5 +3,7 @@ import exportCMD from './export';
 
 export default {
   import: importCMD,
-  export: exportCMD
+  export: exportCMD,
+  deploy: importCMD,
+  dump: exportCMD
 };

@@ -9,7 +9,7 @@ async function parse(context) {
   const emailTemplates = context.assets.emailTemplates || [];
   return {
     emailTemplates: [
-      ...emailTemplates.map(et => ({
+      ...emailTemplates.map((et) => ({
         ...et,
         body: context.loadFile(et.body)
       }))
@@ -35,7 +35,6 @@ async function dump(context) {
 
   return { emailTemplates };
 }
-
 
 export default {
   parse,

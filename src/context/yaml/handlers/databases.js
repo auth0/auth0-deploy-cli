@@ -1,9 +1,8 @@
 import fs from 'fs-extra';
 import path from 'path';
 
-import { sanitize } from '../../../utils';
+import { mapClientID2NameSorted, sanitize } from '../../../utils';
 import log from '../../../logger';
-
 
 async function parse(context) {
   // Load the script file for custom db
@@ -11,7 +10,7 @@ async function parse(context) {
 
   return {
     databases: [
-      ...context.assets.databases.map(database => ({
+      ...context.assets.databases.map((database) => ({
         ...database,
         options: {
           ...database.options,
@@ -34,25 +33,21 @@ async function dump(context) {
   // Nothing to do
   if (!databases) return {};
 
-  const clients = context.assets.clients || [];
+  const sortCustomScripts = ([ name1 ], [ name2 ]) => {
+    if (name1 === name2) return 0;
+    return name1 > name2 ? 1 : -1;
+  };
 
   return {
     databases: [
-      ...databases.map(database => ({
+      ...databases.map((database) => ({
         ...database,
-        // Convert enabled_clients from id to name
-        enabled_clients: [
-          ...(database.enabled_clients || []).map((clientId) => {
-            const found = clients.find(c => c.client_id === clientId);
-            if (found) return found.name;
-            return clientId;
-          })
-        ],
+        ...(database.enabled_clients && { enabled_clients: mapClientID2NameSorted(database.enabled_clients, context.assets.clients) }),
         options: {
           ...database.options,
           // customScripts option only written if there are scripts
           ...(database.options.customScripts && {
-            customScripts: Object.entries(database.options.customScripts).reduce((scripts, [ name, script ]) => {
+            customScripts: Object.entries(database.options.customScripts).sort(sortCustomScripts).reduce((scripts, [ name, script ]) => {
               // Create Database folder
               const dbName = sanitize(database.name);
               const dbFolder = path.join(context.basePath, 'databases', sanitize(dbName));
@@ -72,7 +67,6 @@ async function dump(context) {
     ]
   };
 }
-
 
 export default {
   parse,

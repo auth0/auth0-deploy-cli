@@ -1,13 +1,15 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { constants, loadFile } from 'auth0-source-control-extension-tools';
+import { constants, loadFile } from '../../../tools';
 
 import log from '../../../logger';
-import { isFile, getFiles, existsMustBeDir, loadJSON, sanitize, clearClientArrays } from '../../../utils';
+import {
+  isFile, getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize, clearClientArrays
+} from '../../../utils';
 
 function parse(context) {
   const clientsFolder = path.join(context.filePath, constants.CLIENTS_DIRECTORY);
-  if (!existsMustBeDir(clientsFolder)) return { clients: [] }; // Skip
+  if (!existsMustBeDir(clientsFolder)) return { clients: undefined }; // Skip
 
   const foundFiles = getFiles(clientsFolder, [ '.json' ]);
 
@@ -19,19 +21,18 @@ function parse(context) {
         const htmlFileName = path.join(clientsFolder, client.custom_login_page);
 
         if (isFile(htmlFileName)) {
-          client.custom_login_page = loadFile(htmlFileName);
+          client.custom_login_page = loadFile(htmlFileName, context.mappings);
         }
       }
 
       return client;
     })
-    .filter(p => Object.keys(p).length > 0); // Filter out empty clients
+    .filter((p) => Object.keys(p).length > 0); // Filter out empty clients
 
   return {
     clients
   };
 }
-
 
 async function dump(context) {
   const { clients } = context.assets;
@@ -54,12 +55,9 @@ async function dump(context) {
 
       client.custom_login_page = `./${clientName}_custom_login_page.html`;
     }
-
-    log.info(`Writing ${clientFile}`);
-    fs.writeFileSync(clientFile, JSON.stringify(clearClientArrays(client), null, 2));
+    dumpJSON(clientFile, clearClientArrays(client));
   });
 }
-
 
 export default {
   parse,

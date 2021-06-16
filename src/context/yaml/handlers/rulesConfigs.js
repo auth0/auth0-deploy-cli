@@ -1,4 +1,3 @@
-
 async function parse(context) {
   // nothing to do, set default if empty
   return {
@@ -12,7 +11,6 @@ async function dump() {
     rulesConfigs: []
   };
 }
-
 
 export default {
   parse,

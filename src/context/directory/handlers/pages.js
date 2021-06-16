@@ -1,14 +1,15 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { constants, loadFile } from 'auth0-source-control-extension-tools';
+import { constants, loadFile } from '../../../tools';
 
 import log from '../../../logger';
-import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
-
+import {
+  getFiles, existsMustBeDir, dumpJSON, loadJSON
+} from '../../../utils';
 
 function parse(context) {
   const pagesFolder = path.join(context.filePath, constants.PAGES_DIRECTORY);
-  if (!existsMustBeDir(pagesFolder)) return { pages: [] }; // Skip
+  if (!existsMustBeDir(pagesFolder)) return { pages: undefined }; // Skip
 
   const files = getFiles(pagesFolder, [ '.json', '.html' ]);
 
@@ -50,18 +51,21 @@ async function dump(context) {
   fs.ensureDirSync(pagesFolder);
 
   pages.forEach((page) => {
-    // Dump template html to file
-    const htmlFile = path.join(pagesFolder, `${page.name}.html`);
-    log.info(`Writing ${htmlFile}`);
-    fs.writeFileSync(htmlFile, page.html);
+    var metadata = { ...page };
+
+    if (page.name !== 'error_page' || page.html !== undefined) {
+      // Dump template html to file
+      const htmlFile = path.join(pagesFolder, `${page.name}.html`);
+      log.info(`Writing ${htmlFile}`);
+      fs.writeFileSync(htmlFile, page.html);
+      metadata.html = `./${page.name}.html`;
+    }
 
     // Dump page metadata
     const pageFile = path.join(pagesFolder, `${page.name}.json`);
-    log.info(`Writing ${pageFile}`);
-    fs.writeFileSync(pageFile, JSON.stringify({ ...page, html: `./${page.name}.html` }, null, 2));
+    dumpJSON(pageFile, metadata);
   });
 }
-
 
 export default {
   parse,

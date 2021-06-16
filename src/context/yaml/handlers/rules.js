@@ -10,14 +10,13 @@ async function parse(context) {
 
   return {
     rules: [
-      ...context.assets.rules.map(rule => ({
+      ...context.assets.rules.map((rule) => ({
         ...rule,
         script: context.loadFile(rule.script)
       }))
     ]
   };
 }
-
 
 async function dump(context) {
   let rules = [ ...context.assets.rules || [] ];
@@ -39,7 +38,6 @@ async function dump(context) {
 
   return { rules };
 }
-
 
 export default {
   parse,

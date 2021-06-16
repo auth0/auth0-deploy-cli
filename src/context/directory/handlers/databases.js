@@ -1,10 +1,17 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { constants, loadFile } from 'auth0-source-control-extension-tools';
+import { constants, loadFile } from '../../../tools';
 
 import log from '../../../logger';
-import { isDirectory, existsMustBeDir, loadJSON, getFiles, sanitize } from '../../../utils';
-
+import {
+  isDirectory,
+  existsMustBeDir,
+  dumpJSON,
+  loadJSON,
+  getFiles,
+  sanitize,
+  mapClientID2NameSorted
+} from '../../../utils';
 
 function getDatabase(folder, mappings) {
   const metaFile = path.join(folder, 'database.json');
@@ -48,14 +55,14 @@ function getDatabase(folder, mappings) {
 
 function parse(context) {
   const databaseFolder = path.join(context.filePath, constants.DATABASE_CONNECTIONS_DIRECTORY);
-  if (!existsMustBeDir(databaseFolder)) return { databases: [] }; // Skip
+  if (!existsMustBeDir(databaseFolder)) return { databases: undefined }; // Skip
 
   const folders = fs.readdirSync(databaseFolder)
-    .map(f => path.join(databaseFolder, f))
-    .filter(f => isDirectory(f));
+    .map((f) => path.join(databaseFolder, f))
+    .filter((f) => isDirectory(f));
 
-  const databases = folders.map(f => getDatabase(f, context.mappings))
-    .filter(p => Object.keys(p).length > 1);
+  const databases = folders.map((f) => getDatabase(f, context.mappings))
+    .filter((p) => Object.keys(p).length > 1);
 
   return {
     databases
@@ -67,7 +74,6 @@ async function dump(context) {
 
   if (!databases) return; // Skip, nothing to dump
 
-  const clients = context.assets.clientsOrig || [];
   const databasesFolder = path.join(context.filePath, constants.DATABASE_CONNECTIONS_DIRECTORY);
   fs.ensureDirSync(databasesFolder);
 
@@ -75,20 +81,19 @@ async function dump(context) {
     const dbFolder = path.join(databasesFolder, sanitize(database.name));
     fs.ensureDirSync(dbFolder);
 
+    const sortCustomScripts = ([ name1 ], [ name2 ]) => {
+      if (name1 === name2) return 0;
+      return name1 > name2 ? 1 : -1;
+    };
+
     const formatted = {
       ...database,
-      enabled_clients: [
-        ...(database.enabled_clients || []).map((clientId) => {
-          const found = clients.find(c => c.client_id === clientId);
-          if (found) return found.name;
-          return clientId;
-        })
-      ],
+      ...(database.enabled_clients && { enabled_clients: mapClientID2NameSorted(database.enabled_clients, context.assets.clientsOrig) }),
       options: {
         ...database.options,
         // customScripts option only written if there are scripts
         ...(database.options.customScripts && {
-          customScripts: Object.entries(database.options.customScripts).reduce((scripts, [ name, script ]) => {
+          customScripts: Object.entries(database.options.customScripts).sort(sortCustomScripts).reduce((scripts, [ name, script ]) => {
             // Dump custom script to file
             const scriptName = sanitize(`${name}.js`);
             const scriptFile = path.join(dbFolder, scriptName);
@@ -102,11 +107,9 @@ async function dump(context) {
     };
 
     const databaseFile = path.join(dbFolder, 'database.json');
-    log.info(`Writing ${databaseFile}`);
-    fs.writeFileSync(databaseFile, JSON.stringify(formatted, null, 2));
+    dumpJSON(databaseFile, formatted);
   });
 }
-
 
 export default {
   parse,

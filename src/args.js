@@ -1,12 +1,12 @@
 import yargs from 'yargs';
 
 export default yargs
+  .demandCommand(1, 'A command is required')
   .usage('Auth0 Deploy CLI')
-  .option('verbose', {
-    alias: 'v',
+  .option('debug', {
+    alias: 'd',
     describe: 'Dump extra debug information.',
-    type: 'string',
-    boolean: true,
+    type: 'boolean',
     default: false
   })
   .option('proxy_url', {
@@ -14,7 +14,7 @@ export default yargs
     describe: 'A url for proxying requests, only set this if you are behind a proxy.',
     type: 'string'
   })
-  .command('import', 'Deploy Configuration', {
+  .command([ 'import', 'deploy' ], 'Deploy Configuration', {
     input_file: {
       alias: 'i',
       describe: 'The updates to deploy. Either a JSON file, or directory that contains the correct file layout. See README and online for more info.',
@@ -39,7 +39,7 @@ export default yargs
       type: 'string'
     }
   })
-  .command('export', 'Export Auth0 Tenant Configuration', {
+  .command([ 'export', 'dump' ], 'Export Auth0 Tenant Configuration', {
     output_folder: {
       alias: 'o',
       describe: 'The output directory.',
@@ -74,5 +74,9 @@ export default yargs
   .example('$0 export -c config.json -f directory -o path/to/export', 'Dump Auth0 config to folder in directory format')
   .example('$0 import -c config.json -i tenant.yaml', 'Deploy Auth0 via YAML')
   .example('$0 import -c config.json -i path/to/files', 'Deploy Auth0 via Path')
+  .example('$0 dump -c config.json -f yaml -o path/to/export', 'Dump Auth0 config to folder in YAML format')
+  .example('$0 dump -c config.json -f directory -o path/to/export', 'Dump Auth0 config to folder in directory format')
+  .example('$0 deploy -c config.json -i tenant.yaml', 'Deploy Auth0 via YAML')
+  .example('$0 deploy -c config.json -i path/to/files', 'Deploy Auth0 via Path')
   .epilogue('See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.')
   .wrap(null);

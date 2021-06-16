@@ -1,22 +1,25 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { expect } from 'chai';
-import { Auth0 } from 'auth0-source-control-extension-tools';
+import { Auth0 } from '../src/tools';
 
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from './utils';
 import {
-  isFile,
-  isDirectory,
-  getFiles,
-  loadJSON,
+  clearClientArrays,
+  convertClientIdToName,
+  dumpJSON,
   existsMustBeDir,
-  toConfigFn,
-  stripIdentifiers,
-  sanitize,
-  hoursAsInteger,
   formatResults,
+  getFiles,
+  hoursAsInteger,
+  isDirectory,
+  isFile,
+  loadJSON,
+  mapClientID2NameSorted,
   recordsSorter,
-  clearClientArrays
+  sanitize,
+  stripIdentifiers,
+  toConfigFn
 } from '../src/utils';
 
 describe('#utils', function() {
@@ -39,7 +42,6 @@ describe('#utils', function() {
     expect(isFile(fileExist)).is.equal(true);
     expect(isFile(fileNotExist)).is.equal(false);
   });
-
 
   it('should get files', () => {
     const dir = path.join(testDataDir, 'utils', 'getfiles');
@@ -69,7 +71,6 @@ describe('#utils', function() {
       test: '123'
     });
   });
-
 
   it('exist must be dir', () => {
     const dirExist = path.join(testDataDir, 'utils', 'existmustbedir');
@@ -143,6 +144,11 @@ describe('#utils', function() {
     });
   });
 
+  it('should not format result for string', () => {
+    const result = formatResults('abc');
+    expect(result).to.deep.equal('abc');
+  });
+
   it('should sort records by name or template', () => {
     const name = [
       { name: 'b', id: 0 },
@@ -201,5 +207,77 @@ describe('#utils', function() {
     };
 
     expect(clearClientArrays(client)).to.deep.equal(client);
+  });
+
+  describe('dumpJSON', () => {
+    const dir = path.join(testDataDir, 'utils', 'json');
+    cleanThenMkdir(dir);
+    const file = path.join(dir, 'test1.json');
+    const testObject = {
+      env1: 'test1',
+      env2: 'test2',
+      test: '123'
+    };
+    dumpJSON(file, testObject);
+    const testFileContents = fs.readFileSync(file, { encoding: 'utf8' });
+
+    it('should dump JSON with the contents of passed object', () => {
+      expect(JSON.parse(testFileContents)).deep.equal(testObject);
+    });
+    it('should dump json with trailing newline', () => {
+      expect(testFileContents).match(/\n$/g);
+    });
+    it('should throw an error if a path is not writable', () => {
+      expect(() => {
+        dumpJSON('http://notavalidfilepath', testObject);
+      }).throws(/Error writing JSON.*/);
+    });
+  });
+
+  describe('Client ID to Name conversions', () => {
+    const knownClients = [
+      {
+        client_id: 'client_id_B',
+        name: 'client_B'
+      },
+      {
+        client_id: 'client_id_A',
+        name: 'client_A'
+      }
+    ];
+
+    it('should return client id if not found', () => {
+      expect(convertClientIdToName('not_found_id', knownClients)).equal('not_found_id');
+    });
+
+    it('should return client id if known clients are undefined or empty or an object', () => {
+      expect(convertClientIdToName('not_found_id', undefined)).equal('not_found_id');
+      expect(convertClientIdToName('not_found_id', null)).equal('not_found_id');
+      expect(convertClientIdToName('not_found_id', [])).equal('not_found_id');
+      expect(convertClientIdToName('not_found_id', {})).equal('not_found_id');
+    });
+
+    it('should return client name if found', () => {
+      expect(convertClientIdToName('client_id_B', knownClients)).equal('client_B');
+      expect(convertClientIdToName('client_id_A', knownClients)).equal('client_A');
+    });
+
+    it('should return sorted list', () => {
+      expect(mapClientID2NameSorted(
+        [ 'client_id_B', 'client_id_A', 'not_found_id' ],
+        knownClients
+      )).deep.equal([ 'client_A', 'client_B', 'not_found_id' ]);
+    });
+
+    it('should return sorted list even knownClient are invalid', () => {
+      expect(mapClientID2NameSorted(
+        [ 'client_id_B', 'client_id_A', 'not_found_id' ],
+        null
+      )).deep.equal([ 'client_id_A', 'client_id_B', 'not_found_id' ]);
+    });
+
+    it('should return empty list upon invalid input', () => {
+      expect(mapClientID2NameSorted(null, null)).deep.equal([]);
+    });
   });
 });

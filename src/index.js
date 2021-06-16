@@ -1,48 +1,25 @@
 #!/usr/bin/env node
-import HttpsProxyAgent from 'https-proxy-agent';
-import HttpProxyAgent from 'http-proxy-agent';
-import superagent from 'superagent';
+import { bootstrap } from 'global-agent';
 
 import args from './args';
 import commands from './commands';
 import log from './logger';
 
-// Load cli params
-const params = args.argv;
-
-log.debug('Starting Auth0 Deploy CLI Tool');
-
-// Set log level
-log.transports.console.level = params.level;
-if (params.debug) {
-  log.transports.console.level = 'debug';
-  // Set for auth0-source-control-ext-tools
-  process.env.AUTH0_DEBUG = 'true';
-}
-
-async function run() {
+async function run(params) {
   // Run command
   const cmd = commands[params._[0]];
-
-  // TODO: Prob a native/better way to enforce command choices in yargs.
-  if (!cmd) {
-    log.error(`Command ${params._[0]} not supported\n`);
-    args.showHelp();
-    process.exit(1);
-  }
-
-  // Monkey Patch the superagent for proxy use
   const proxy = params.proxy_url;
+
   if (proxy) {
-    const proxyAgent = new HttpProxyAgent(proxy);
-    const proxyAgentSsl = new HttpsProxyAgent(proxy);
-    const OrigRequest = superagent.Request;
-    superagent.Request = function RequestWithAgent(method, url) {
-      const req = new OrigRequest(method, url);
-      log.info(`Setting proxy for ${method} to ${url}`);
-      if (url.startsWith('https')) return req.agent(proxyAgentSsl);
-      return req.agent(proxyAgent);
-    };
+    const MAJOR_NODEJS_VERSION = parseInt(process.version.slice(1).split('.')[0], 10);
+
+    if (MAJOR_NODEJS_VERSION < 10) {
+      // `global-agent` works with Node.js v10 and above.
+      throw new Error('The --proxy_url option is only supported on Node >= 10');
+    }
+
+    process.env.GLOBAL_AGENT_HTTP_PROXY = proxy;
+    bootstrap();
   }
 
   log.debug(`Start command ${params._[0]}`);
@@ -52,7 +29,21 @@ async function run() {
 
 // Only run if from command line
 if (require.main === module) {
-  run()
+  // Load cli params
+  const params = args.argv;
+
+  log.debug('Starting Auth0 Deploy CLI Tool');
+
+  // Set log level
+  log.transports.console.level = params.level;
+  if (params.debug) {
+    log.transports.console.level = 'debug';
+    // Set for tools
+    process.env.AUTH0_DEBUG = 'true';
+    process.env.AUTH0_LOG = 'debug';
+  }
+
+  run(params)
     .then(() => process.exit(0))
     .catch((error) => {
       if (error.type || error.stage) {
@@ -74,7 +65,6 @@ if (require.main === module) {
       process.exit(1);
     });
 }
-
 
 // Export commands to be used programmatically
 module.exports = {

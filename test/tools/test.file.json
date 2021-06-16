@@ -1,0 +1,11 @@
+{
+  "a": 1,
+  "string_key": @@string@@,
+  "array_key": @@array@@,
+  "object_key": @@object@@,
+  "int_key": @@int@@,
+  "simple_string_key": "Some ##string##",
+  "simple_array_key": "Some'##array##",
+  "simple_object_key": "Some ##object##",
+  "simple_int_key": ##int##
+}

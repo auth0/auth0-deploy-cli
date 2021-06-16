@@ -1,10 +1,12 @@
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import path from 'path';
-import { loadFile, keywordReplace, Auth0 } from 'auth0-source-control-extension-tools';
+import { loadFile, keywordReplace, Auth0 } from '../../tools';
 
 import log from '../../logger';
-import { isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter } from '../../utils';
+import {
+  isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter
+} from '../../utils';
 import handlers from './handlers';
 import cleanAssets from '../../readonly';
 
@@ -20,7 +22,10 @@ export default class {
       exclude: {
         rules: config.AUTH0_EXCLUDED_RULES || [],
         clients: config.AUTH0_EXCLUDED_CLIENTS || [],
-        resourceServers: config.AUTH0_EXCLUDED_RESOURCE_SERVERS || []
+        databases: config.AUTH0_EXCLUDED_DATABASES || [],
+        connections: config.AUTH0_EXCLUDED_CONNECTIONS || [],
+        resourceServers: config.AUTH0_EXCLUDED_RESOURCE_SERVERS || [],
+        defaults: config.AUTH0_EXCLUDED_DEFAULTS || []
       }
     };
 
@@ -47,7 +52,7 @@ export default class {
       try {
         const fPath = path.resolve(this.configFile);
         log.debug(`Loading YAML from ${fPath}`);
-        this.assets = yaml.safeLoad(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)) || {};
+        Object.assign(this.assets, yaml.safeLoad(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)) || {});
       } catch (err) {
         log.debug(err.stack);
         throw new Error(`Problem loading ${this.configFile}\n${err}`);
@@ -80,7 +85,9 @@ export default class {
       await auth0.loadAll();
       this.assets = auth0.assets;
     } catch (err) {
-      throw new Error(`Problem loading tenant data from Auth0 ${err}`);
+      const docUrl = 'https://auth0.com/docs/deploy/deploy-cli-tool/create-and-configure-the-deploy-cli-application#modify-deploy-cli-application-scopes';
+      const extraMessage = err.message.startsWith('Insufficient scope') ? `\nSee ${docUrl} for more information` : '';
+      throw new Error(`Problem loading tenant data from Auth0 ${err}${extraMessage}`);
     }
 
     await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {

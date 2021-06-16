@@ -12,7 +12,6 @@ async function dump(context) {
   };
 }
 
-
 export default {
   parse,
   dump

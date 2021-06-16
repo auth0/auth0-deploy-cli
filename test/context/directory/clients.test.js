@@ -1,14 +1,15 @@
 import fs from 'fs-extra';
-import { constants } from 'auth0-source-control-extension-tools';
 
 import path from 'path';
 import { expect } from 'chai';
+import { constants } from '../../../src/tools';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/clients';
 import { loadJSON } from '../../../src/utils';
-import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
-
+import {
+  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
+} from '../../utils';
 
 describe('#directory context clients', () => {
   it('should process clients', async () => {
@@ -17,7 +18,7 @@ describe('#directory context clients', () => {
         'someClient.json': '{ "app_type": @@appType@@, "name": "someClient" }',
         'someClient2.json': '{ "app_type": @@appType@@, "name": "someClient2" }',
         'customLoginClient.json': '{ "app_type": @@appType@@, "name": "customLoginClient", "custom_login_page": "./customLoginClient_custom_login_page.html" }',
-        'customLoginClient_custom_login_page.html': 'html code'
+        'customLoginClient_custom_login_page.html': 'html code ##appType## @@appType@@'
       }
     };
 
@@ -29,7 +30,7 @@ describe('#directory context clients', () => {
     await context.load();
 
     const target = [
-      { app_type: 'spa', name: 'customLoginClient', custom_login_page: 'html code' },
+      { app_type: 'spa', name: 'customLoginClient', custom_login_page: 'html code spa "spa"' },
       { app_type: 'spa', name: 'someClient' },
       { app_type: 'spa', name: 'someClient2' }
     ];

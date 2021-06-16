@@ -5,7 +5,6 @@ import { expect } from 'chai';
 import Context from '../../../src/context/directory';
 import { cleanThenMkdir, testDataDir } from '../../utils';
 
-
 describe('#directory context validation', () => {
   it('should do nothing on empty repo', async () => {
     /* Create empty directory */
@@ -15,11 +14,36 @@ describe('#directory context validation', () => {
     const context = new Context({ AUTH0_INPUT_FILE: dir });
     await context.load();
 
-    expect(context.assets.rules).to.deep.equal([]);
-    expect(context.assets.databases).to.deep.equal([]);
-    expect(context.assets.pages).to.deep.equal([]);
-    expect(context.assets.clients).to.deep.equal([]);
-    expect(context.assets.resourceServers).to.deep.equal([]);
+    Object.entries(context.assets).forEach(([ k, v ]) => {
+      if (typeof v === 'undefined') delete context.assets[k];
+    });
+
+    expect(context.assets).to.have.all.keys('exclude');
+  });
+
+  it('should load excludes', async () => {
+    /* Create empty directory */
+    const dir = path.resolve(testDataDir, 'directory', 'empty');
+    cleanThenMkdir(dir);
+
+    const config = {
+      AUTH0_INPUT_FILE: dir,
+      AUTH0_EXCLUDED_RULES: [ 'rule' ],
+      AUTH0_EXCLUDED_CLIENTS: [ 'client' ],
+      AUTH0_EXCLUDED_DATABASES: [ 'db' ],
+      AUTH0_EXCLUDED_CONNECTIONS: [ 'conn' ],
+      AUTH0_EXCLUDED_RESOURCE_SERVERS: [ 'api' ],
+      AUTH0_EXCLUDED_DEFAULTS: [ 'emailProvider' ]
+    };
+    const context = new Context(config);
+    await context.load();
+
+    expect(context.assets.exclude.rules).to.deep.equal([ 'rule' ]);
+    expect(context.assets.exclude.clients).to.deep.equal([ 'client' ]);
+    expect(context.assets.exclude.databases).to.deep.equal([ 'db' ]);
+    expect(context.assets.exclude.connections).to.deep.equal([ 'conn' ]);
+    expect(context.assets.exclude.resourceServers).to.deep.equal([ 'api' ]);
+    expect(context.assets.exclude.defaults).to.deep.equal([ 'emailProvider' ]);
   });
 
   it('should error on bad directory', async () => {

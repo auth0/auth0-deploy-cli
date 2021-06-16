@@ -68,11 +68,20 @@ rules:
     order: 10
     script: "rules/enrich_tokens.js"
 
-
 rulesConfigs:
   # Key/Value pairs for Rule configuration settings
   - key: "SOME_SECRET"
     value: 'some_key'
+
+hooks:
+  - name: "Client Credentials Exchange"
+    triggerId: "credentials-exchange"
+    enabled: true
+    secrets:
+      api-key: "my custom api key"
+    dependencies:
+      bcrypt: "3.0.6"
+    script: "hooks/client-credentials-exchange.js"
 
 
 resourceServers:
@@ -146,6 +155,18 @@ guardianFactorTemplates:
       enter this code to verify your enrollment.
     verification_message: '{{code}} is your verification code for {{tenant.friendly_name}}'
 
+guardianPhoneFactorMessageTypes:
+  message_types:
+    - sms
+    - voice
+
+guardianPhoneFactorSelectedProvider:
+  provider: twilio
+
+guardianPolicies:
+  policies:
+    - all-applications
+
 roles:
   - name: Admin
     description: App Admin
@@ -160,3 +181,27 @@ roles:
       - permission_name: 'read:account'
         resource_server_identifier: 'https://##ENV##.myapp.com/api/v1'
 
+actions:
+  - name: action-example
+    code: ./actions/action-example/code.js
+    dependencies:
+      - name: lodash
+        version: 4.17.21
+    deployed: true
+    secrets:
+      - name: MY_SECRET
+        value: _VALUE_NOT_SHOWN_
+    status: built
+    supported_triggers:
+      - id: post-login
+        version: v1
+
+triggers:
+  credentials-exchange: []
+  post-change-password: []
+  post-login:
+    - action_name: action-example
+      display_name: action-example-display-name
+  post-user-registration: []
+  pre-user-registration: []
+  send-phone-message: []
