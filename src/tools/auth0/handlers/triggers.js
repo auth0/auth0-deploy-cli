@@ -46,7 +46,7 @@ export default class TriggersHandler extends DefaultHandler {
         if (err.statusCode === 404 || err.statusCode === 501) {
           return [];
         }
-        throw err;
+        return  err;
       }
     }, {});
     return this.existing;
