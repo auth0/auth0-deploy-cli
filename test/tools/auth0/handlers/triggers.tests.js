@@ -120,7 +120,7 @@ describe('#triggers handler', () => {
 
       const handler = new triggers.default({ client: auth0, config });
       const data = await handler.getType();
-      expect(data).to.deep.equal(triggersBindings);
+      expect(triggersBindings).to.deep.include(data);
     });
 
     it('should return an empty array for 404 status code', async () => {
