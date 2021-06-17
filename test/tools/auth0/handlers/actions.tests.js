@@ -139,7 +139,7 @@ describe('#actions handler', () => {
           getAll: () => {
             if (!auth0.getAllCalled) {
               auth0.getAllCalled = true;
-              return Promise.resolve( [] );
+              return Promise.resolve([]);
             }
 
             return Promise.resolve({
@@ -196,7 +196,7 @@ describe('#actions handler', () => {
 
       const auth0 = {
         actions: {
-          getAll: () => actionsData,
+          getAll: () => actionsData
         }
       };
 

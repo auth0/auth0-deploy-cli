@@ -30,7 +30,7 @@ export default class TriggersHandler extends DefaultHandler {
   async getType() {
     if (this.existing) return this.existing;
 
-    if (!this.client.actions || typeof this.client.actions.getAllTriggers !== 'function' || typeof this.client.actions.getTriggerBindings !== 'function') {
+    if (!this.client.actions || typeof this.client.actions.getTriggerBindings !== 'function') {
       return [];
     }
 
@@ -43,7 +43,7 @@ export default class TriggersHandler extends DefaultHandler {
         }));
         return triggers;
       }, {});
-  
+
       return this.existing;
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 501) {

@@ -157,7 +157,7 @@ export default class ActionHandler extends DefaultHandler {
 
   async getType() {
     if (this.existing) return this.existing;
-    
+
     if (!this.client.actions || typeof this.client.actions.getAll !== 'function') {
       return [];
     }

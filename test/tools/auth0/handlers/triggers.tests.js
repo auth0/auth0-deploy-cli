@@ -65,7 +65,7 @@ describe('#triggers handler', () => {
       const handler = new triggers.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [ { triggers: triggers } ]);
+      await stageFn.apply(handler, [ { triggers: triggersBindings } ]);
     });
 
     it('should get all triggers', async () => {
@@ -82,15 +82,6 @@ describe('#triggers handler', () => {
 
       const auth0 = {
         actions: {
-          getAllTriggers: () => Promise.resolve([
-              { id: 'post-login' },
-              { id: 'credentials-exchange' },
-              { id: 'pre-user-registration' },
-              { id: 'post-user-registration' },
-              { id: 'post-change-password' },
-              { id: 'send-phone-message' }
-            ]
-          ),
           getTriggerBindings: (params) => {
             let res = {};
             switch (params.trigger_id) {
