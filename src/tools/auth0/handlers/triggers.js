@@ -34,22 +34,22 @@ export default class TriggersHandler extends DefaultHandler {
       return [];
     }
 
-    try {
-      this.existing = await constants.ACTIONS_TRIGGERS.reduce(async (triggers, name) => {
+    this.existing = await constants.ACTIONS_TRIGGERS.reduce(async (triggers, name) => {
+      try {
         const { bindings } = await this.client.actions.getTriggerBindings({ paginate: true, trigger_id: name });
         triggers[name] = bindings.map((binding) => ({
           action_name: binding.action.name,
           display_name: binding.display_name
         }));
         return triggers;
-      }, {});
-      return this.existing;
-    } catch (err) {
-      if (err.statusCode === 404 || err.statusCode === 501) {
-        return [];
+      } catch (err) {
+        if (err.statusCode === 404 || err.statusCode === 501) {
+          return [];
+        }
+        throw err;
       }
-      throw err;
-    }
+    }, {});
+    return this.existing;
   }
 
   @order('80')
