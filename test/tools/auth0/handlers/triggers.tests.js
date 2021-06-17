@@ -41,7 +41,7 @@ describe('#triggers handler', () => {
   });
 
   describe('#triggers process', () => {
-    it('should bind a  trigger', async () => {
+    it('should bind a trigger', async () => {
       const triggersBindings = {
         'post-login': [
           { action_name: 'action-one', display_name: 'dysplay-name' }
@@ -82,8 +82,7 @@ describe('#triggers handler', () => {
 
       const auth0 = {
         actions: {
-          getAllTriggers: () => Promise.resolve({
-            triggers: [
+          getAllTriggers: () => Promise.resolve([
               { id: 'post-login' },
               { id: 'credentials-exchange' },
               { id: 'pre-user-registration' },
@@ -91,7 +90,7 @@ describe('#triggers handler', () => {
               { id: 'post-change-password' },
               { id: 'send-phone-message' }
             ]
-          }),
+          ),
           getTriggerBindings: (params) => {
             let res = {};
             switch (params.trigger_id) {

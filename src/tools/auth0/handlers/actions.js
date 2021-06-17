@@ -86,6 +86,9 @@ export default class ActionHandler extends DefaultHandler {
   }
 
   async deleteAction(action) {
+    if (!this.client.actions || typeof this.client.actions.delete !== 'function') {
+      return [];
+    }
     return this.client.actions.delete({ id: action.id, force: true });
   }
 
@@ -154,10 +157,21 @@ export default class ActionHandler extends DefaultHandler {
 
   async getType() {
     if (this.existing) return this.existing;
+    
+    if (!this.client.actions || typeof this.client.actions.getAll !== 'function') {
+      return [];
+    }
     // Actions API does not support include_totals param like the other paginate API's.
     // So we set it to false otherwise it will fail with "Additional properties not allowed: include_totals"
-    this.existing = await this.client.actions.getAll({ paginate: true });
-    return this.existing;
+    try {
+      this.existing = await this.client.actions.getAll({ paginate: true });
+      return this.existing;
+    } catch (err) {
+      if (err.statusCode === 403 || err.statusCode === 404 || err.statusCode === 501) {
+        return [];
+      }
+      throw err;
+    }
   }
 
   @order('60')

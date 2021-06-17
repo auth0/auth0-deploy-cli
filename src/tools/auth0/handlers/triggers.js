@@ -30,16 +30,27 @@ export default class TriggersHandler extends DefaultHandler {
   async getType() {
     if (this.existing) return this.existing;
 
-    this.existing = await constants.ACTIONS_TRIGGERS.reduce(async (triggers, name) => {
-      const bindings = await this.client.actions.getTriggerBindings({ paginate: true, trigger_id: name });
-      triggers[name] = bindings.map((binding) => ({
-        action_name: binding.action.name,
-        display_name: binding.display_name
-      }));
-      return triggers;
-    }, {});
+    if (!this.client.actions || typeof this.client.actions.getAllTriggers !== 'function' || typeof this.client.actions.getTriggerBindings !== 'function') {
+      return [];
+    }
 
-    return this.existing;
+    try {
+      this.existing = await constants.ACTIONS_TRIGGERS.reduce(async (triggers, name) => {
+        const bindings = await this.client.actions.getTriggerBindings({ paginate: true, trigger_id: name });
+        triggers[name] = bindings.map((binding) => ({
+          action_name: binding.action.name,
+          display_name: binding.display_name
+        }));
+        return triggers;
+      }, {});
+  
+      return this.existing;
+    } catch (err) {
+      if (err.statusCode === 404 || err.statusCode === 501) {
+        return [];
+      }
+      throw err;
+    }
   }
 
   @order('80')

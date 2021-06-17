@@ -92,13 +92,7 @@ describe('#actions handler', () => {
               id: 'post-login',
               version: 'v1'
             }
-          ],
-          deployed_version: {
-            code: "/** @type {PostLoginAction} */\nmodule.exports = async (event, context) => {\n    console.log('new version');\n    return {};\n  };\n  ",
-            dependencies: [],
-            secrets: [],
-            runtime: 'node12'
-          }
+          ]
         }
       ];
 
@@ -124,13 +118,7 @@ describe('#actions handler', () => {
             id: 'post-login',
             version: 'v1'
           }
-        ],
-        deployed_version: {
-          code: 'some code',
-          dependencies: [],
-          secrets: [],
-          runtime: 'node12'
-        }
+        ]
       };
 
       const auth0 = {
@@ -151,7 +139,7 @@ describe('#actions handler', () => {
           getAll: () => {
             if (!auth0.getAllCalled) {
               auth0.getAllCalled = true;
-              return Promise.resolve({ actions: [] });
+              return Promise.resolve( [] );
             }
 
             return Promise.resolve({
@@ -202,29 +190,22 @@ describe('#actions handler', () => {
               version: 'v1'
             }
           ],
-          deployed_version: { id: version.id }
+          deployed: true
         }
       ];
 
       const auth0 = {
         actions: {
-          getAll: () => Promise.resolve({ actions: actionsData }),
-          getVersions: (params) => {
-            expect(params.action_id).to.equal('action-id-1');
-            expect(params.version_id).to.equal('version-id');
-            return Promise.resolve(version);
-          }
+          getAll: () => actionsData,
         }
       };
 
       const handler = new actions.default({ client: auth0, config });
       const data = await handler.getType();
-      expect(data).to.deep.equal([
-        { ...actionsData[0], deployed: true, deployed_version: version }
-      ]);
+      expect(data).to.deep.include({ ...actionsData[0], deployed: true });
     });
 
-    it('should return an null for 501 status code', async () => {
+    it('should return an empty array for 501 status code', async () => {
       const auth0 = {
         actions: {
           getAll: () => {
@@ -238,10 +219,10 @@ describe('#actions handler', () => {
 
       const handler = new actions.default({ client: auth0, config });
       const data = await handler.getType();
-      expect(data).to.deep.equal(null);
+      expect(data).to.deep.equal([]);
     });
 
-    it('should return an null for 404 status code', async () => {
+    it('should return an empty array for 404 status code', async () => {
       const auth0 = {
         actions: {
           getAll: () => {
@@ -255,7 +236,7 @@ describe('#actions handler', () => {
 
       const handler = new actions.default({ client: auth0, config });
       const data = await handler.getType();
-      expect(data).to.deep.equal(null);
+      expect(data).to.deep.equal([]);
     });
 
     it('should return an empty array when the feature flag is disabled', async () => {
@@ -312,8 +293,8 @@ describe('#actions handler', () => {
             expect(data.id).to.equal('action-1');
             return Promise.resolve(data);
           },
-          getAll: () => Promise.resolve({
-            actions: [
+          getAll: () => Promise.resolve(
+            [
               {
                 id: 'action-1',
                 name: 'action-test',
@@ -325,7 +306,7 @@ describe('#actions handler', () => {
                 ]
               }
             ]
-          }),
+          ),
           getVersion: () => Promise.resolve({
             action: {},
             code: "/** @type {PostLoginAction} */\nmodule.exports = async (event, context) => {\n    console.log('new version');\n    return {};\n  };\n  ",
@@ -346,7 +327,7 @@ describe('#actions handler', () => {
       const handler = new actions.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [ { action: [] } ]);
+      await stageFn.apply(handler, [ { actions: [] } ]);
     });
   });
 });
