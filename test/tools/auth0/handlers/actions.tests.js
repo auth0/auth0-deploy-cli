@@ -167,15 +167,6 @@ describe('#actions handler', () => {
     it('should get actions', async () => {
       const code = 'action-code';
 
-      const version = {
-        code: code,
-        dependencies: [],
-        id: 'version-id',
-        runtime: 'node12',
-        secrets: [],
-        status: 'build'
-      };
-
       const actionsData = [
         {
           id: 'action-id-1',
