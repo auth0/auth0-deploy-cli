@@ -4,6 +4,7 @@ import { bootstrap } from 'global-agent';
 import args from './args';
 import commands from './commands';
 import log from './logger';
+import tools from './tools';
 
 async function run(params) {
   // Run command
@@ -71,5 +72,6 @@ module.exports = {
   deploy: commands.import,
   dump: commands.export,
   import: commands.import,
-  export: commands.export
+  export: commands.export,
+  tools: tools
 };
