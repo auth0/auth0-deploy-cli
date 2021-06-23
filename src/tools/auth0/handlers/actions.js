@@ -1,6 +1,6 @@
+import _ from 'lodash';
 import DefaultHandler, { order } from './default';
 import log from '../../logger';
-import _ from 'lodash';
 import { areArraysEquals } from '../../utils';
 
 const MAX_ACTION_DEPLOY_RETRY = 60;

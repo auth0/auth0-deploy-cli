@@ -1,7 +1,7 @@
+import _ from 'lodash';
 import DefaultHandler, { order } from './default';
 import constants from '../../constants';
 import log from '../../logger';
-import _ from 'lodash';
 
 export const schema = {
   type: 'object',
@@ -82,7 +82,6 @@ export default class TriggersHandler extends DefaultHandler {
 
       throw err;
     }
-
   }
 
   @order('80')
