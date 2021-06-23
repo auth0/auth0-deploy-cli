@@ -161,7 +161,7 @@ describe('#triggers handler', () => {
 
       const handler = new triggers.default({ client: auth0, config });
       const data = await handler.getType();
-      expect(data).to.deep.equal([]);
+      expect(data).to.deep.equal({});
     });
 
     it('should throw an error for all other failed requests', async () => {
