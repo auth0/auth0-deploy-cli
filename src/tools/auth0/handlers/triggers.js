@@ -1,5 +1,7 @@
 import DefaultHandler, { order } from './default';
 import constants from '../../constants';
+import log from '../../logger';
+import _ from 'lodash';
 
 export const schema = {
   type: 'object',
@@ -18,6 +20,13 @@ export const schema = {
   }
 };
 
+function isActionsDisabled(err) {
+  const errorBody = _.get(err, 'originalError.response.body') || {};
+
+  return (
+    err.statusCode === 403 && errorBody.errorCode === 'feature_not_enabled'
+  );
+}
 export default class TriggersHandler extends DefaultHandler {
   constructor(options) {
     super({
@@ -28,28 +37,52 @@ export default class TriggersHandler extends DefaultHandler {
   }
 
   async getType() {
-    if (this.existing) return this.existing;
+    if (this.existing) {
+      return this.existing;
+    }
 
-    if (!this.client.actions || typeof this.client.actions.getTriggerBindings !== 'function') {
+    // in case client version does not support actions
+    if (
+      !this.client.actions
+      || typeof this.client.actions.getAllTriggers !== 'function'
+    ) {
       return [];
     }
 
-    this.existing = await constants.ACTIONS_TRIGGERS.reduce(async (triggers, name) => {
-      try {
-        const { bindings } = await this.client.actions.getTriggerBindings({ paginate: true, trigger_id: name });
-        triggers[name] = bindings.map((binding) => ({
-          action_name: binding.action.name,
-          display_name: binding.display_name
-        }));
-        return triggers;
-      } catch (err) {
-        if (err.statusCode === 404 || err.statusCode === 501) {
-          return [];
+    const triggerBindings = {};
+
+    try {
+      const res = await this.client.actions.getAllTriggers();
+      const triggers = _(res.triggers).map('id').uniq().value();
+
+      for (let i = 0; i < triggers.length; i++) {
+        const triggerId = triggers[i];
+        const { bindings } = await this.client.actions.getTriggerBindings({
+          trigger_id: triggerId
+        });
+        if (bindings.length > 0) {
+          triggerBindings[triggerId] = bindings.map((binding) => ({
+            action_name: binding.action.name,
+            display_name: binding.display_name
+          }));
         }
-        return err;
       }
-    }, {});
-    return this.existing;
+
+      this.existing = triggerBindings;
+      return this.existing;
+    } catch (err) {
+      if (err.statusCode === 404 || err.statusCode === 501) {
+        return [];
+      }
+
+      if (isActionsDisabled(err)) {
+        log.info('Skipping triggers because Actions is not enabled.');
+        return {};
+      }
+
+      throw err;
+    }
+
   }
 
   @order('80')
