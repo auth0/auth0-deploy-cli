@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
-- Bump auth0@2.35.0
+- Actions refactoring and fixes [#356]
+- Bump auth0@2.35.1
 
 ## [7.0.0] - 2021-06-11
 ### Added
