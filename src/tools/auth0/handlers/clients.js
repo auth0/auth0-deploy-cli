@@ -69,7 +69,7 @@ export default class ClientHandler extends DefaultHandler {
     if (this.existing) {
       return this.existing;
     }
-    this.existing = await this.client.clients.getAll({ paginate: true, is_global: false });
+    this.existing = await this.client.clients.getAll({ paginate: true, include_totals: true, is_global: false });
     return this.existing;
   }
 }

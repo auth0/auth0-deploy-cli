@@ -33,7 +33,7 @@ function pagedManager(client, manager) {
 
             // Create new args and inject the properties we require for pagination automation
             const newArgs = [ ...args ];
-            newArgs[0] = { ...newArgs[0], include_totals: true, page: 0 };
+            newArgs[0] = { ...newArgs[0], page: 0 };
 
             // Grab data we need from the request then delete the keys as they are only needed for this automation function to work
             const perPage = newArgs[0].per_page || MAX_PAGE_SIZE;

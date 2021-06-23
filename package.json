@@ -1,6 +1,6 @@
 {
   "name": "auth0-deploy-cli",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "description": "A command line tool for deploying updates to your Auth0 tenant",
   "main": "lib/index.js",
   "bin": {
@@ -29,7 +29,7 @@
   "homepage": "https://github.com/auth0/auth0-deploy-cli#readme",
   "dependencies": {
     "ajv": "^6.12.6",
-    "auth0": "^2.35.0",
+    "auth0": "^2.35.1",
     "dot-prop": "^5.2.0",
     "fs-extra": "^7.0.0",
     "global-agent": "^2.1.12",

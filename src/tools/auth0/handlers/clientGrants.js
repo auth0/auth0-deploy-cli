@@ -37,7 +37,7 @@ export default class ClientHandler extends DefaultHandler {
     if (this.existing) {
       return this.existing;
     }
-    this.existing = await this.client.clientGrants.getAll({ paginate: true });
+    this.existing = await this.client.clientGrants.getAll({ paginate: true, include_totals: true });
 
     // Always filter out the client we are using to access Auth0 Management API
     // As it could cause problems if the grants are deleted or updated etc
@@ -56,7 +56,7 @@ export default class ClientHandler extends DefaultHandler {
     // Do nothing if not set
     if (!clientGrants) return;
 
-    const clients = await this.client.clients.getAll({ paginate: true });
+    const clients = await this.client.clients.getAll({ paginate: true, include_totals: true });
     const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
     const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
 

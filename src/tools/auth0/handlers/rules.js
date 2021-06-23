@@ -58,7 +58,7 @@ export default class RulesHandler extends DefaultHandler {
 
   async getType() {
     if (this.existing) return this.existing;
-    this.existing = await this.client.rules.getAll({ paginate: true });
+    this.existing = await this.client.rules.getAll({ paginate: true, include_totals: true });
     return this.existing;
   }
 

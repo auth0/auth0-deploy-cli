@@ -48,7 +48,7 @@ export default class ResourceServersHandler extends DefaultHandler {
 
   async getType() {
     if (this.existing) return this.existing;
-    const resourceServers = await this.client.resourceServers.getAll({ paginate: true });
+    const resourceServers = await this.client.resourceServers.getAll({ paginate: true, include_totals: true });
     return resourceServers.filter((rs) => rs.name !== constants.RESOURCE_SERVERS_MANAGEMENT_API_NAME);
   }
 

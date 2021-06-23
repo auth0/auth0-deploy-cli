@@ -143,7 +143,7 @@ export default class OrganizationsHandler extends DefaultHandler {
     }
 
     try {
-      const organizations = await this.client.organizations.getAll({ paginate: true });
+      const organizations = await this.client.organizations.getAll({ paginate: true, include_totals: true });
       for (let index = 0; index < organizations.length; index++) {
         const connections = await this.client.organizations.connections.get({ id: organizations[index].id });
         organizations[index].connections = connections;
@@ -166,7 +166,7 @@ export default class OrganizationsHandler extends DefaultHandler {
     if (!organizations) return;
     // Gets organizations from destination tenant
     const existing = await this.getType();
-    const existingConnections = await this.client.connections.getAll({ paginate: true });
+    const existingConnections = await this.client.connections.getAll({ paginate: true, include_totals: true });
 
     // We need to get the connection ids for the names configured so we can link them together
     organizations.forEach((org) => {

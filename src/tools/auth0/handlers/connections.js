@@ -51,7 +51,7 @@ export default class ConnectionsHandler extends DefaultHandler {
 
   async getType() {
     if (this.existing) return this.existing;
-    const connections = await this.client.connections.getAll({ paginate: true });
+    const connections = await this.client.connections.getAll({ paginate: true, include_totals: true });
     // Filter out database connections
     this.existing = connections.filter((c) => c.strategy !== 'auth0');
 
@@ -65,8 +65,8 @@ export default class ConnectionsHandler extends DefaultHandler {
     if (!connections) return {};
 
     // Convert enabled_clients by name to the id
-    const clients = await this.client.clients.getAll({ paginate: true });
-    const existingConnections = await this.client.connections.getAll({ paginate: true });
+    const clients = await this.client.clients.getAll({ paginate: true, include_totals: true });
+    const existingConnections = await this.client.connections.getAll({ paginate: true, include_totals: true });
     const formatted = assets.connections.map((connection) => (
       {
         ...connection,

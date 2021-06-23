@@ -145,7 +145,7 @@ export default class HooksHandler extends DefaultHandler {
     }
 
     try {
-      const hooks = await this.client.hooks.getAll();
+      const hooks = await this.client.hooks.getAll({ paginate: true, include_totals: true });
 
       // hooks.getAll does not return code and secrets, we have to fetch hooks one-by-one
       this.existing = await Promise.all(hooks.map((hook) => this.client.hooks.get({ id: hook.id })

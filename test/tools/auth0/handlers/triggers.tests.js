@@ -41,7 +41,7 @@ describe('#triggers handler', () => {
   });
 
   describe('#triggers process', () => {
-    it('should bind a  trigger', async () => {
+    it('should bind a trigger', async () => {
       const triggersBindings = {
         'post-login': [
           { action_name: 'action-one', display_name: 'dysplay-name' }
@@ -65,7 +65,7 @@ describe('#triggers handler', () => {
       const handler = new triggers.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [ { triggers: triggers } ]);
+      await stageFn.apply(handler, [ { triggers: triggersBindings } ]);
     });
 
     it('should get all triggers', async () => {
@@ -82,16 +82,6 @@ describe('#triggers handler', () => {
 
       const auth0 = {
         actions: {
-          getAllTriggers: () => Promise.resolve({
-            triggers: [
-              { id: 'post-login' },
-              { id: 'credentials-exchange' },
-              { id: 'pre-user-registration' },
-              { id: 'post-user-registration' },
-              { id: 'post-change-password' },
-              { id: 'send-phone-message' }
-            ]
-          }),
           getTriggerBindings: (params) => {
             let res = {};
             switch (params.trigger_id) {
@@ -130,7 +120,7 @@ describe('#triggers handler', () => {
 
       const handler = new triggers.default({ client: auth0, config });
       const data = await handler.getType();
-      expect(data).to.deep.equal(triggersBindings);
+      expect(triggersBindings).to.deep.include(data);
     });
 
     it('should return an empty array for 404 status code', async () => {
@@ -171,7 +161,7 @@ describe('#triggers handler', () => {
 
       const handler = new triggers.default({ client: auth0, config });
       const data = await handler.getType();
-      expect(data).to.deep.equal([]);
+      expect(data).to.deep.equal({});
     });
 
     it('should throw an error for all other failed requests', async () => {

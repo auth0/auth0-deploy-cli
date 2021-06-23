@@ -54,7 +54,7 @@ export default class DatabaseHandler extends DefaultHandler {
 
   async getType() {
     if (this.existing) return this.existing;
-    this.existing = this.client.connections.getAll({ strategy: 'auth0', paginate: true });
+    this.existing = this.client.connections.getAll({ strategy: 'auth0', paginate: true, include_totals: true });
 
     return this.existing;
   }
@@ -66,8 +66,8 @@ export default class DatabaseHandler extends DefaultHandler {
     if (!databases) return {};
 
     // Convert enabled_clients by name to the id
-    const clients = await this.client.clients.getAll({ paginate: true });
-    const existingDatabasesConecctions = await this.client.connections.getAll({ strategy: 'auth0', paginate: true });
+    const clients = await this.client.clients.getAll({ paginate: true, include_totals: true });
+    const existingDatabasesConecctions = await this.client.connections.getAll({ strategy: 'auth0', paginate: true, include_totals: true });
     const formatted = databases.map((db) => {
       if (db.enabled_clients) {
         return {
