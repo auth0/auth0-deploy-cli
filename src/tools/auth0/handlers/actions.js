@@ -1,5 +1,6 @@
 import DefaultHandler, { order } from './default';
 import log from '../../logger';
+import _ from 'lodash';
 import { areArraysEquals } from '../../utils';
 
 const MAX_ACTION_DEPLOY_RETRY = 60;
@@ -58,6 +59,14 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function isActionsDisabled(err) {
+  const errorBody = _.get(err, 'originalError.response.body') || {};
+
+  return (
+    err.statusCode === 403 && errorBody.errorCode === 'feature_not_enabled'
+  );
+}
+
 export default class ActionHandler extends DefaultHandler {
   constructor(options) {
     super({
@@ -78,6 +87,7 @@ export default class ActionHandler extends DefaultHandler {
     // Strip the deployed flag
     const addAction = { ...action };
     delete addAction.deployed;
+    delete addAction.status;
     const createdAction = await this.client.actions.create(addAction);
 
     // Add the action id so we can deploy it later
@@ -170,6 +180,12 @@ export default class ActionHandler extends DefaultHandler {
       if (err.statusCode === 403 || err.statusCode === 404 || err.statusCode === 501) {
         return [];
       }
+
+      if (isActionsDisabled(err)) {
+        log.info('Skipping actions because it is not enabled.');
+        return [];
+      }
+
       throw err;
     }
   }
