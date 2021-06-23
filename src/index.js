@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { bootstrap } from 'global-agent';
 
-import args from './args';
+import { getParams } from './args';
 import commands from './commands';
 import log from './logger';
 import tools from './tools';
@@ -31,7 +31,7 @@ async function run(params) {
 // Only run if from command line
 if (require.main === module) {
   // Load cli params
-  const params = args.argv;
+  const params = getParams();
 
   log.debug('Starting Auth0 Deploy CLI Tool');
 
