@@ -192,9 +192,13 @@ export default class ActionHandler extends DefaultHandler {
 
   @order('60')
   async processChanges(assets) {
-    const changes = await this.calcChanges(assets);
-    await super.processChanges(assets, changes);
+    const { actions } = assets;
 
+    // Do nothing if not set
+    if (!actions) return;
+    const changes = await this.calcChanges(assets);
+
+    await super.processChanges(assets, changes);
     // Deploy actions
     const deployActions = [];
     deployActions.push(...changes.create.filter((action) => action.deployed));
