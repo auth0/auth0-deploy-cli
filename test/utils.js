@@ -94,6 +94,12 @@ export function mockMgmtClient() {
         default_directory: 'users'
       })
     },
+    prompts: {
+      getSettings: () => ({
+        universal_login_experience: 'classic',
+        identifier_first: false
+      })
+    },
     migrations: {
       getMigrations: () => ({
         migration_flag: true
