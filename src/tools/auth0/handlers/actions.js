@@ -14,6 +14,7 @@ export const schema = {
     additionalProperties: false,
     properties: {
       code: { type: 'string', default: '' },
+      runtime: { type: 'string' },
       dependencies: {
         type: 'array',
         items: {
@@ -151,6 +152,10 @@ export default class ActionHandler extends DefaultHandler {
       // name or secrets modifications are not supported yet
       if (action.code !== found.code) {
         actionChanges.code = action.code;
+      }
+
+      if (action.runtime !== found.runtime) {
+        actionChanges.runtime = action.runtime;
       }
 
       if (!areArraysEquals(action.dependencies, found.dependencies)) {
