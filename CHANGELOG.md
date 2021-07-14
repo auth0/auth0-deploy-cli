@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.2.0] - 2021-07-14
+### Added
+- Add runtime property for actions [#364]
+
 ## [7.1.1] - 2021-06-23
 ### Added
 - Export tools module
@@ -353,8 +357,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#309]: https://github.com/auth0/auth0-deploy-cli/issues/309
 [#356]: https://github.com/auth0/auth0-deploy-cli/issues/356
 [#361]: https://github.com/auth0/auth0-deploy-cli/issues/361
+[#364]: https://github.com/auth0/auth0-deploy-cli/issues/364
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.1.1...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.2.0...HEAD
+[7.2.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.1.1...v7.2.0
 [7.1.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.1.0...v7.1.1
 [7.1.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.0.0...v7.1.0
 [7.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v6.0.0...v7.0.0
