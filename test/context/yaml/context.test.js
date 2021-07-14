@@ -148,7 +148,10 @@ describe('#YAML context validation', () => {
       guardianPhoneFactorMessageTypes: { message_types: [ 'sms' ] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
-      prompts: {},
+      prompts: {
+        universal_login_experience: 'classic',
+        identifier_first: false
+      },
       resourceServers: [],
       rules: [],
       hooks: [],
@@ -223,7 +226,10 @@ describe('#YAML context validation', () => {
       guardianPhoneFactorMessageTypes: { message_types: [ 'sms' ] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
-      prompts: {},
+      prompts: {
+        universal_login_experience: 'classic',
+        identifier_first: false
+      },
       resourceServers: [],
       rules: [],
       hooks: [],
@@ -299,7 +305,10 @@ describe('#YAML context validation', () => {
       guardianPhoneFactorMessageTypes: { message_types: [ 'sms' ] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
-      prompts: {},
+      prompts: {
+        universal_login_experience: 'classic',
+        identifier_first: false
+      },
       resourceServers: [],
       rules: [],
       hooks: [],
