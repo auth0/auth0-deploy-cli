@@ -54,6 +54,7 @@ function mapToAction(filePath, action) {
   return {
     name: action.name,
     code: mapActionCode(filePath, action),
+    runtime: action.runtime,
     status: action.status,
     dependencies: action.dependencies || [],
     secrets: mapSecrets(action.secrets),

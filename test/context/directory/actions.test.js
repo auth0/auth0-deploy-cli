@@ -17,6 +17,7 @@ const actionFiles = {
     'action-one.json': `{
       "name": "action-one",
       "code": "./local/testData/directory/test1/actions/code.js",
+      "runtime": "node12",
       "dependencies": [
         {
           "name": "lodash",
@@ -40,6 +41,7 @@ const actionsTarget = [
   {
     name: 'action-one',
     code: '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log("test-action"); return {}; };',
+    runtime: 'node12',
     status: 'built',
     dependencies: [
       {
@@ -92,6 +94,7 @@ describe('#directory context actions', () => {
       {
         name: actionName,
         code: codeValidation,
+        runtime: 'node12',
         dependencies: [
           {
             name: 'lodash',
@@ -117,6 +120,7 @@ describe('#directory context actions', () => {
     expect(loadJSON(path.join(actionsFolder, 'action-one.json'))).to.deep.equal({
       name: actionName,
       code: path.join(context.filePath, '/actions/action-one/code.js'),
+      runtime: 'node12',
       dependencies: [
         {
           name: 'lodash',

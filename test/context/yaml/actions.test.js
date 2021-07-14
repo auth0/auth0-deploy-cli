@@ -19,6 +19,7 @@ describe('#YAML context actions', () => {
     actions:
       - name: action-one
         code: "${codeFile}"
+        runtime: node12
         dependencies:
           - name: lodash
             version: 4.17.21
@@ -36,6 +37,7 @@ describe('#YAML context actions', () => {
       {
         name: 'action-one',
         code: '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log("test-action"); return {}; };',
+        runtime: 'node12',
         status: 'built',
         supported_triggers: [
           {
@@ -68,6 +70,7 @@ describe('#YAML context actions', () => {
       {
         name: 'action-one',
         code: codeValidation,
+        runtime: 'node12',
         status: 'built',
         dependencies: [
           {
@@ -92,6 +95,7 @@ describe('#YAML context actions', () => {
         {
           name: 'action-one',
           code: './actions/action-one/code.js',
+          runtime: 'node12',
           status: 'built',
           dependencies: [
             {

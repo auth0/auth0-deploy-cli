@@ -63,6 +63,7 @@ async function dump(context) {
       name: action.name,
       deployed: action.deployed || action.all_changes_deployed,
       code: mapActionCode(context.basePath, action),
+      runtime: action.runtime,
       dependencies: action.dependencies || [],
       status: action.status,
       secrets: mapSecrets(action.secrets),
