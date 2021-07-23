@@ -42,7 +42,7 @@ function getDatabase(folder, mappings) {
 
   // If any customScripts configured then load content of files
   if (database.options.customScripts) {
-    Object.entries(database.options.customScripts).forEach(([name, script]) => {
+    Object.entries(database.options.customScripts).forEach(([ name, script ]) => {
       if (!constants.DATABASE_SCRIPTS.includes(name)) {
         // skip invalid keys in customScripts object
         log.warn('Skipping invalid database configuration: ' + name);
@@ -50,9 +50,9 @@ function getDatabase(folder, mappings) {
         database.options.customScripts[name] = loadFile(
           path.join(folder, script),
           mappings
-        )
+        );
       }
-    })
+    });
   }
 
   return database;
