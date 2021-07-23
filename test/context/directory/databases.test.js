@@ -85,13 +85,13 @@ describe('#directory context databases', () => {
         "options": {
           "enabledDatabaseCustomization": true,
           "customScripts": {
-            "login": "./login.js",
+            "login": "./custom-login.js",
             "create": "./create.js",
-            "delete": "databases/users/delete.js",
-            "get_user": "databases/users/get_user.js",
-            "change_email": "databases/users/change_email.js",
-            "change_password": "databases/users/change_password.js",
-            "verify": "databases/users/verify.js"
+            "delete": "./delete.js",
+            "get_user": "./get_user.js",
+            "change_email": "./change_email.js",
+            "change_password": "./change_password.js",
+            "verify": "./verify.js"
           }
         }
       }
@@ -101,7 +101,7 @@ describe('#directory context databases', () => {
     'create.js': 'function test(email, callback) {var env = @@env@@};',
     'delete.js': 'function test(email, callback) {var env = @@env@@};',
     'get_user.js': 'function test(email, callback) {var env = @@env@@};',
-    'login.js': 'function test(email, callback) {var env = @@env@@};',
+    'custom-login.js': 'function test(email, callback) {var env = @@env@@};',
     'verify.js': 'function test(email, callback) {var env = @@env@@};'
   };
 
