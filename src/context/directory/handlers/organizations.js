@@ -43,9 +43,9 @@ async function dump(context) {
 
         return {
           name,
-          ...c
+          ...c,
           connection_id: undefined,
-          connection: undefined,
+          connection: undefined
         };
       });
     }
