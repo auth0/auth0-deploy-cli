@@ -41,12 +41,15 @@ async function dump(context) {
         // connection is a computed field
         const name = c.connection && c.connection.name;
 
-        return {
+        const conn = {
           name,
-          ...c,
-          connection_id: undefined,
-          connection: undefined
+          ...c
         };
+
+        delete conn.connection_id;
+        delete conn.connection;
+
+        return conn;
       });
     }
 
