@@ -40,12 +40,12 @@ async function dump(context) {
       organization.connections = organization.connections.map((c) => {
         // connection is a computed field
         const name = c.connection && c.connection.name;
-        delete c.connection_id;
-        delete c.connection;
 
         return {
           name,
           ...c
+          connection_id: undefined,
+          connection: undefined,
         };
       });
     }
