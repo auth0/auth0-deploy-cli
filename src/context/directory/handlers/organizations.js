@@ -35,6 +35,24 @@ async function dump(context) {
   organizations.forEach((organization) => {
     const organizationFile = path.join(organizationsFolder, sanitize(`${organization.name}.json`));
     log.info(`Writing ${organizationFile}`);
+
+    if (organization.connections.length > 0) {
+      organization.connections = organization.connections.map((c) => {
+        // connection is a computed field
+        const name = c.connection && c.connection.name;
+
+        const conn = {
+          name,
+          ...c
+        };
+
+        delete conn.connection_id;
+        delete conn.connection;
+
+        return conn;
+      });
+    }
+
     dumpJSON(organizationFile, organization);
   });
 }

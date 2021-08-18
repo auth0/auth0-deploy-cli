@@ -14,8 +14,8 @@ describe('#directory context organizations', () => {
   it('should process organizations', async () => {
     const files = {
       organizations: {
-        'acme.json': '{ "name": "acme", "display_name": "acme", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "connection_id": "con_123", "assign_membership_on_login": false }]}',
-        'contoso.json': '{ "name": "contoso", "display_name": "contoso", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "connection_id": "con_123", "assign_membership_on_login": false }]}'
+        'acme.json': '{ "name": "acme", "display_name": "acme", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "name": "google", "assign_membership_on_login": false }]}',
+        'contoso.json': '{ "name": "contoso", "display_name": "contoso", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "name": "google", "assign_membership_on_login": false }]}'
       }
     };
 
@@ -37,7 +37,7 @@ describe('#directory context organizations', () => {
           }
         },
         connections: [ {
-          connection_id: 'con_123',
+          name: 'google',
           assign_membership_on_login: false
         } ]
       },
@@ -51,7 +51,7 @@ describe('#directory context organizations', () => {
           }
         },
         connections: [ {
-          connection_id: 'con_123',
+          name: 'google',
           assign_membership_on_login: false
         } ]
       }
@@ -106,7 +106,7 @@ describe('#directory context organizations', () => {
           }
         },
         connections: [ {
-          connection_id: 'con_123',
+          name: 'google',
           assign_membership_on_login: false
         } ]
       },
@@ -120,7 +120,7 @@ describe('#directory context organizations', () => {
           }
         },
         connections: [ {
-          connection_id: 'con_123',
+          name: 'google',
           assign_membership_on_login: false
         } ]
       }
