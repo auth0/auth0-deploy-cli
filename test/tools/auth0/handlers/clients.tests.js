@@ -108,11 +108,24 @@ describe('#clients handler', () => {
             expect(params.client_id).to.equal('client1');
             expect(data).to.be.an('object');
             expect(data.description).to.equal('new description');
+            expect(data.client_metadata).to.be.an('object');
+            expect(data.client_metadata.should_be_removed).to.equal(null);
+            expect(data.client_metadata.should_be_changed).to.equal('was_changed');
+            expect(data.client_metadata.should_be_added).to.equal('was_added');
+            expect(data.client_metadata.should_be_preserved).to.equal('should_be_preserved');
 
             return Promise.resolve(data);
           },
           delete: () => Promise.resolve([]),
-          getAll: () => [ { client_id: 'client1', name: 'someClient' } ]
+          getAll: () => [ {
+            client_id: 'client1',
+            name: 'someClient',
+            client_metadata: {
+              should_be_removed: 'should_be_removed',
+              should_be_changed: 'should_be_changed',
+              should_be_preserved: 'should_be_preserved'
+            }
+          } ]
         },
         pool
       };
@@ -120,7 +133,17 @@ describe('#clients handler', () => {
       const handler = new clients.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [ { clients: [ { name: 'someClient', description: 'new description' } ] } ]);
+      await stageFn.apply(handler, [ {
+        clients: [ {
+          name: 'someClient',
+          description: 'new description',
+          client_metadata: {
+            should_be_added: 'was_added',
+            should_be_changed: 'was_changed',
+            should_be_preserved: 'should_be_preserved'
+          }
+        } ]
+      } ]);
     });
 
     it('should delete client and create another one instead', async () => {
