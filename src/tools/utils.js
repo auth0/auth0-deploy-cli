@@ -62,7 +62,7 @@ export function dumpJSON(obj, spacing = 0) {
   return JSON.stringify(obj, null, spacing);
 }
 
-export function calcChanges(assets, existing, identifiers = [ 'id', 'name' ]) {
+export function calcChanges(assets, existing, identifiers = [ 'id', 'name' ], objectFields = []) {
   // Calculate the changes required between two sets of assets.
   const update = [];
   let del = [ ...existing ];
@@ -108,7 +108,13 @@ export function calcChanges(assets, existing, identifiers = [ 'id', 'name' ]) {
               if (found[i]) obj[i] = found[i];
               return obj;
             }, {}),
-            ...asset
+            // If we have any object fields, we need to make sure that they get
+            // special treatment. When different metadata objects are passed to APIv2
+            // properties must explicitly be marked for deletion by indicating a `null`
+            // value.
+            ...(objectFields.length
+              ? processChangedObjectFields(asset, found, objectFields)
+              : asset),
           });
         }
       }
@@ -150,6 +156,36 @@ export function calcChanges(assets, existing, identifiers = [ 'id', 'name' ]) {
     conflicts,
     create
   };
+}
+
+function processChangedObjectFields(desiredAssetState, currentAssetState, objectFields = []) {
+  const desiredAssetStateWithChanges = { ...desiredAssetState };
+
+  for (const fieldName of objectFields) {
+    if (desiredAssetState[fieldName]) {
+      // Both the current and desired state have the object field. Here's where we need to map
+      // to the APIv2 protocol of setting `null` values for deleted fields.
+      // For new and modified properties of the object field, we can just pass them through to
+      // APIv2.
+      if (currentAssetState[fieldName]) {
+        for (const currentObjectFieldPropertyName of Object.keys(currentAssetState[fieldName])) {
+          if (desiredAssetState[fieldName][currentObjectFieldPropertyName] === undefined) {
+            desiredAssetStateWithChanges[fieldName][currentObjectFieldPropertyName] = null;
+          }
+        }
+      }
+    } else {
+      // If the desired state does not have the object field and the current state does, we
+      // should mark *all* properties for deletion by specifying an empty object.
+      //
+      // See: https://auth0.com/docs/users/metadata/manage-metadata-api#delete-user-metadata
+      if (currentAssetState[fieldName]) {
+        desiredAssetStateWithChanges[fieldName] = {};
+      }
+    }
+  }
+
+  return desiredAssetStateWithChanges;
 }
 
 export function stripFields(obj, fields) {

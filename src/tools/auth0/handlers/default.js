@@ -20,6 +20,7 @@ export default class DefaultHandler {
     this.client = options.client;
     this.existing = null;
     this.identifiers = options.identifiers || [ 'id', 'name' ];
+    this.objectFields = options.objectFields || [];
     this.stripUpdateFields = [
       ...options.stripUpdateFields || [],
       this.id
@@ -82,7 +83,7 @@ export default class DefaultHandler {
     const existing = await this.getType();
 
     // Figure out what needs to be updated vs created
-    return calcChanges(typeAssets, existing, this.identifiers);
+    return calcChanges(typeAssets, existing, this.identifiers, this.objectFields);
   }
 
   async validate(assets) {
