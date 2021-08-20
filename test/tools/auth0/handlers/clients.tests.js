@@ -112,7 +112,10 @@ describe('#clients handler', () => {
             return Promise.resolve(data);
           },
           delete: () => Promise.resolve([]),
-          getAll: () => [ { client_id: 'client1', name: 'someClient' } ]
+          getAll: () => [ {
+            client_id: 'client1',
+            name: 'someClient'
+          } ]
         },
         pool
       };
@@ -120,7 +123,12 @@ describe('#clients handler', () => {
       const handler = new clients.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [ { clients: [ { name: 'someClient', description: 'new description' } ] } ]);
+      await stageFn.apply(handler, [ {
+        clients: [ {
+          name: 'someClient',
+          description: 'new description'
+        } ]
+      } ]);
     });
 
     it('should delete client and create another one instead', async () => {

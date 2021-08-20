@@ -181,7 +181,7 @@ export default class OrganizationsHandler extends DefaultHandler {
       }).filter((connection) => !!connection.connection_id);
     });
 
-    const changes = calcChanges(organizations, existing, [ 'id', 'name' ]);
+    const changes = calcChanges(this, organizations, existing, [ 'id', 'name' ]);
 
     log.debug(`Start processChanges for organizations [delete:${changes.del.length}] [update:${changes.update.length}], [create:${changes.create.length}]`);
 

@@ -1,6 +1,8 @@
 import path from 'path';
 import { expect } from 'chai';
 import * as utils from '../../src/tools/utils';
+import DefaultHandler from '../../src/tools/auth0/handlers/default';
+import configFactory from '../../src/configFactory';
 
 const mappings = {
   string: 'some string',
@@ -113,6 +115,23 @@ describe('#utils', function() {
 });
 
 describe('#utils calcChanges', () => {
+  class MockHandler extends DefaultHandler {
+    constructor(settings = {}) {
+      const config = configFactory(() => undefined);
+      // eslint-disable-next-line no-restricted-syntax
+      for (const key of Object.keys(settings)) {
+        config.setValue(key, settings[key]);
+      }
+
+      super({
+        config,
+        type: 'mock'
+      });
+    }
+  }
+
+  const mockHandler = new MockHandler();
+
   it('should calc create', () => {
     const existing = [ { name: 'Name1', id: 'id1' } ];
     const assets = [
@@ -120,7 +139,7 @@ describe('#utils calcChanges', () => {
       { name: 'Create1', id: 'Create1' }
     ];
 
-    const { create } = utils.calcChanges(assets, existing, [ 'id', 'name' ]);
+    const { create } = utils.calcChanges(mockHandler, assets, existing, [ 'id', 'name' ]);
 
     expect(create).to.have.length(1);
     expect(create).to.deep.include({ name: 'Create1', id: 'Create1' });
@@ -133,7 +152,7 @@ describe('#utils calcChanges', () => {
       { client_id: 'create1', audience: 'create1', id: 'create1' }
     ];
 
-    const { create } = utils.calcChanges(assets, existing, [ 'id', [ 'client_id', 'audience' ] ]);
+    const { create } = utils.calcChanges(mockHandler, assets, existing, [ 'id', [ 'client_id', 'audience' ] ]);
 
     expect(create).to.have.length(1);
     expect(create).to.deep.include({ client_id: 'create1', audience: 'create1', id: 'create1' });
@@ -146,7 +165,7 @@ describe('#utils calcChanges', () => {
     ];
     const assets = [ { name: 'Name1', id: 'id1' } ];
 
-    const { del } = utils.calcChanges(assets, existing, [ 'id', 'name' ]);
+    const { del } = utils.calcChanges(mockHandler, assets, existing, [ 'id', 'name' ]);
 
     expect(del).to.have.length(1);
     expect(del).to.deep.include({ name: 'Delete1', id: 'Delete1' });
@@ -159,10 +178,136 @@ describe('#utils calcChanges', () => {
     ];
     const assets = [ { name: 'Name1', id: 'id1' } ];
 
-    const { update } = utils.calcChanges(assets, existing, [ 'id', 'name' ]);
+    const { update } = utils.calcChanges(mockHandler, assets, existing, [ 'id', 'name' ]);
 
     expect(update).to.have.length(1);
     expect(update).to.deep.include({ name: 'Name1', id: 'id1' });
+  });
+
+  it('should skip deletion of dropped keys in objectFields when ALLOW_DELETE is not enabled', () => {
+    const existing = [
+      {
+        id: 'id3',
+        metadata: {
+          should_be_preserved: 'should_be_preserved',
+          should_be_changed: 'should_be_changed',
+          should_be_removed: 'should_be_removed'
+        }
+      }
+    ];
+    const assets = [
+      {
+        id: 'id3',
+        metadata: {
+          should_be_preserved: 'should_be_preserved',
+          should_be_changed: 'was_changed',
+          should_be_added: 'was_added'
+        }
+      }
+    ];
+
+    const { update: updateWithoutAllowDelete } = utils.calcChanges(
+      mockHandler,
+      assets,
+      existing,
+      [ 'id' ],
+      [ 'metadata' ],
+      false
+    );
+
+    expect(updateWithoutAllowDelete).to.have.length(1);
+    expect(updateWithoutAllowDelete).to.deep.include({
+      id: 'id3',
+      metadata: {
+        should_be_preserved: 'should_be_preserved',
+        should_be_changed: 'was_changed',
+        should_be_added: 'was_added'
+      }
+    });
+
+    const { update: updateWithAllowDelete } = utils.calcChanges(
+      mockHandler,
+      assets,
+      existing,
+      [ 'id' ],
+      [ 'metadata' ],
+      true
+    );
+
+    expect(updateWithAllowDelete).to.have.length(1);
+    expect(updateWithAllowDelete).to.deep.include({
+      id: 'id3',
+      metadata: {
+        should_be_preserved: 'should_be_preserved',
+        should_be_changed: 'was_changed',
+        should_be_removed: null,
+        should_be_added: 'was_added'
+      }
+    });
+  });
+
+  it('should skip emptying objectFields when ALLOW_DELETE is not enabled', () => {
+    const existing = [
+      {
+        id: 'id1',
+        metadata: {
+          should_be_removed: 'should_be_removed'
+        }
+      },
+      {
+        id: 'id2',
+        metadata: {
+          should_be_removed: 'should_be_removed'
+        }
+      }
+    ];
+    const assets = [
+      {
+        id: 'id1',
+        // An empty objectField should signal deletion
+        metadata: {}
+      },
+      {
+        id: 'id2'
+        // A missing objectField should also signal deletion
+      }
+    ];
+
+    const { update: updateWithoutAllowDelete } = utils.calcChanges(
+      mockHandler,
+      assets,
+      existing,
+      [ 'id' ],
+      [ 'metadata' ],
+      false
+    );
+
+    expect(updateWithoutAllowDelete).to.have.length(2);
+    expect(updateWithoutAllowDelete).to.deep.include({
+      id: 'id1'
+    });
+    expect(updateWithoutAllowDelete).to.deep.include({
+      id: 'id2'
+    });
+
+    const { update: updateWithAllowDelete } = utils.calcChanges(
+      mockHandler,
+      assets,
+      existing,
+      [ 'id' ],
+      [ 'metadata' ],
+      true
+    );
+
+    expect(updateWithAllowDelete).to.have.length(2);
+    expect(updateWithAllowDelete).to.deep.include({
+      id: 'id1',
+      metadata: {}
+    });
+    expect(updateWithAllowDelete).to.deep.include({
+      id: 'id2',
+      metadata: {}
+    });
   });
 
   it('should calc update grouped identifiers', () => {
@@ -172,7 +317,7 @@ describe('#utils calcChanges', () => {
     ];
     const assets = [ { client_id: 'client1', audience: 'audience1', id: 'id3' } ];
 
-    const { update } = utils.calcChanges(assets, existing, [ 'id', [ 'client_id', 'audience' ] ]);
+    const { update } = utils.calcChanges(mockHandler, assets, existing, [ 'id', [ 'client_id', 'audience' ] ]);
 
     expect(update).to.have.length(1);
     expect(update).to.deep.include({ client_id: 'client1', audience: 'audience1', id: 'id3' });

@@ -66,7 +66,7 @@ export default class ResourceServersHandler extends DefaultHandler {
     resourceServers = resourceServers.filter((r) => !excluded.includes(r.name));
     existing = existing.filter((r) => !excluded.includes(r.name));
 
-    return calcChanges(resourceServers, existing, [ 'id', 'identifier' ]);
+    return calcChanges(this, resourceServers, existing, [ 'id', 'identifier' ]);
   }
 
   async validate(assets) {

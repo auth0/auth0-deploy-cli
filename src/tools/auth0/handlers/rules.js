@@ -82,7 +82,7 @@ export default class RulesHandler extends DefaultHandler {
     // Figure out what needs to be updated vs created
     const {
       del, update, create, conflicts
-    } = calcChanges(rules, existing, [ 'id', 'name' ]);
+    } = calcChanges(this, rules, existing, [ 'id', 'name' ]);
 
     // Figure out the rules that need to be re-ordered
     const futureRules = [ ...create, ...update ];

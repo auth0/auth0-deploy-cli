@@ -18,6 +18,7 @@ export default class ClientHandler extends DefaultHandler {
       type: 'clients',
       id: 'client_id',
       identifiers: [ 'client_id', 'name' ],
+      objectFields: [ 'client_metadata' ],
       stripUpdateFields: [
         // Fields not allowed during updates
         'callback_url_template', 'signing_keys', 'global', 'tenant', 'jwt_configuration.secret_encoded'
