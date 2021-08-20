@@ -153,7 +153,7 @@ export default class RoleHandler extends DefaultHandler {
     if (!roles) return;
     // Gets roles from destination tenant
     const existing = await this.getType();
-    const changes = calcChanges(roles, existing, [ 'id', 'name' ]);
+    const changes = calcChanges(this, roles, existing, [ 'id', 'name' ]);
     log.debug(`Start processChanges for roles [delete:${changes.del.length}] [update:${changes.update.length}], [create:${changes.create.length}]`);
     const myChanges = [ { del: changes.del }, { create: changes.create }, { update: changes.update } ];
     await Promise.all(myChanges.map(async (change) => {

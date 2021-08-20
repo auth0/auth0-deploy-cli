@@ -62,40 +62,71 @@ export function dumpJSON(obj, spacing = 0) {
   return JSON.stringify(obj, null, spacing);
 }
 
-function processChangedObjectFields(desiredAssetState, currentAssetState, objectFields = []) {
+/**
+ * @template T
+ * @param {typeof import('./auth0/handlers/default').default} assetType
+ * @param {T} desiredAssetState
+ * @param {T} currentAssetState
+ * @param {string[]} [objectFields=[]]
+ * @param {boolean} [allowDelete=false]
+ * @returns T
+ */
+function processChangedObjectFields(assetType, desiredAssetState, currentAssetState, objectFields = [], allowDelete = false) {
   const desiredAssetStateWithChanges = { ...desiredAssetState };
 
   // eslint-disable-next-line no-restricted-syntax
   for (const fieldName of objectFields) {
-    if (desiredAssetState[fieldName]) {
+    // A desired state that omits the objectField OR that has it as an empty object should
+    // signal that all fields should be removed (subject to ALLOW_DELETE).
+    if (desiredAssetState[fieldName] && Object.keys(desiredAssetState[fieldName]).length) {
       // Both the current and desired state have the object field. Here's where we need to map
       // to the APIv2 protocol of setting `null` values for deleted fields.
       // For new and modified properties of the object field, we can just pass them through to
       // APIv2.
       if (currentAssetState[fieldName]) {
         // eslint-disable-next-line no-restricted-syntax
-        for (const currentObjectFieldPropertyName of Object.keys(currentAssetState[fieldName])) {
+        for (const currentObjectFieldPropertyName of Object.keys(
+          currentAssetState[fieldName]
+        )) {
           if (desiredAssetState[fieldName][currentObjectFieldPropertyName] === undefined) {
-            desiredAssetStateWithChanges[fieldName][currentObjectFieldPropertyName] = null;
+            if (allowDelete) {
+              desiredAssetStateWithChanges[fieldName][
+                currentObjectFieldPropertyName
+              ] = null;
+            } else {
+              log.warn(
+                `Detected that the ${fieldName} of the following ${
+                  assetType.name
+                } should be deleted. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config\n${assetType.objString(
+                  currentAssetState
+                )}`
+              );
+            }
           }
         }
       }
-    } else {
+    } else if (allowDelete) {
       // If the desired state does not have the object field and the current state does, we
       // should mark *all* properties for deletion by specifying an empty object.
       //
       // See: https://auth0.com/docs/users/metadata/manage-metadata-api#delete-user-metadata
-      // eslint-disable-next-line no-lonely-if
-      if (currentAssetState[fieldName]) {
-        desiredAssetStateWithChanges[fieldName] = {};
-      }
+      desiredAssetStateWithChanges[fieldName] = {};
+    } else {
+      delete desiredAssetStateWithChanges[fieldName];
+      log.warn(
+        `Detected that the ${fieldName} of the following ${
+          assetType.name
+        } should be emptied. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config\n${assetType.objString(
+          currentAssetState
+        )}`
+      );
     }
   }
 
   return desiredAssetStateWithChanges;
 }
 
-export function calcChanges(assets, existing, identifiers = [ 'id', 'name' ], objectFields = []) {
+export function calcChanges(assetType, assets, existing, identifiers = [ 'id', 'name' ], objectFields = [], allowDelete = false) {
   // Calculate the changes required between two sets of assets.
   const update = [];
   let del = [ ...existing ];
@@ -146,7 +177,7 @@ export function calcChanges(assets, existing, identifiers = [ 'id', 'name' ], ob
             // properties must explicitly be marked for deletion by indicating a `null`
             // value.
             ...(objectFields.length
-              ? processChangedObjectFields(asset, found, objectFields)
+              ? processChangedObjectFields(assetType, asset, found, objectFields, allowDelete)
               : asset)
           });
         }

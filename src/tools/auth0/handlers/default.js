@@ -83,7 +83,7 @@ export default class DefaultHandler {
     const existing = await this.getType();
 
     // Figure out what needs to be updated vs created
-    return calcChanges(typeAssets, existing, this.identifiers, this.objectFields);
+    return calcChanges(this, typeAssets, existing, this.identifiers, this.objectFields);
   }
 
   async validate(assets) {
