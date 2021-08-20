@@ -65,6 +65,7 @@ export function dumpJSON(obj, spacing = 0) {
 function processChangedObjectFields(desiredAssetState, currentAssetState, objectFields = []) {
   const desiredAssetStateWithChanges = { ...desiredAssetState };
 
+  // eslint-disable-next-line no-restricted-syntax
   for (const fieldName of objectFields) {
     if (desiredAssetState[fieldName]) {
       // Both the current and desired state have the object field. Here's where we need to map
@@ -72,6 +73,7 @@ function processChangedObjectFields(desiredAssetState, currentAssetState, object
       // For new and modified properties of the object field, we can just pass them through to
       // APIv2.
       if (currentAssetState[fieldName]) {
+        // eslint-disable-next-line no-restricted-syntax
         for (const currentObjectFieldPropertyName of Object.keys(currentAssetState[fieldName])) {
           if (desiredAssetState[fieldName][currentObjectFieldPropertyName] === undefined) {
             desiredAssetStateWithChanges[fieldName][currentObjectFieldPropertyName] = null;
@@ -83,6 +85,7 @@ function processChangedObjectFields(desiredAssetState, currentAssetState, object
       // should mark *all* properties for deletion by specifying an empty object.
       //
       // See: https://auth0.com/docs/users/metadata/manage-metadata-api#delete-user-metadata
+      // eslint-disable-next-line no-lonely-if
       if (currentAssetState[fieldName]) {
         desiredAssetStateWithChanges[fieldName] = {};
       }
