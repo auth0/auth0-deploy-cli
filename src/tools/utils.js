@@ -64,14 +64,14 @@ export function dumpJSON(obj, spacing = 0) {
 
 /**
  * @template T
- * @param {typeof import('./auth0/handlers/default').default} assetType
+ * @param {typeof import('./auth0/handlers/default').default} handler
  * @param {T} desiredAssetState
  * @param {T} currentAssetState
  * @param {string[]} [objectFields=[]]
  * @param {boolean} [allowDelete=false]
  * @returns T
  */
-function processChangedObjectFields(assetType, desiredAssetState, currentAssetState, objectFields = [], allowDelete = false) {
+function processChangedObjectFields(handler, desiredAssetState, currentAssetState, objectFields = [], allowDelete = false) {
   const desiredAssetStateWithChanges = { ...desiredAssetState };
 
   // eslint-disable-next-line no-restricted-syntax
@@ -96,8 +96,8 @@ function processChangedObjectFields(assetType, desiredAssetState, currentAssetSt
             } else {
               log.warn(
                 `Detected that the ${fieldName} of the following ${
-                  assetType.name
-                } should be deleted. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config\n${assetType.objString(
+                  handler.name
+                } should be deleted. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config\n${handler.objString(
                   currentAssetState
                 )}`
               );
@@ -115,8 +115,8 @@ function processChangedObjectFields(assetType, desiredAssetState, currentAssetSt
       delete desiredAssetStateWithChanges[fieldName];
       log.warn(
         `Detected that the ${fieldName} of the following ${
-          assetType.name
-        } should be emptied. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config\n${assetType.objString(
+          handler.name
+        } should be emptied. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config\n${handler.objString(
           currentAssetState
         )}`
       );
