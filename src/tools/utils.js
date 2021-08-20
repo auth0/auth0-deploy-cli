@@ -126,7 +126,7 @@ function processChangedObjectFields(handler, desiredAssetState, currentAssetStat
   return desiredAssetStateWithChanges;
 }
 
-export function calcChanges(assetType, assets, existing, identifiers = [ 'id', 'name' ], objectFields = [], allowDelete = false) {
+export function calcChanges(handler, assets, existing, identifiers = [ 'id', 'name' ], objectFields = [], allowDelete = false) {
   // Calculate the changes required between two sets of assets.
   const update = [];
   let del = [ ...existing ];
@@ -177,7 +177,7 @@ export function calcChanges(assetType, assets, existing, identifiers = [ 'id', '
             // properties must explicitly be marked for deletion by indicating a `null`
             // value.
             ...(objectFields.length
-              ? processChangedObjectFields(assetType, asset, found, objectFields, allowDelete)
+              ? processChangedObjectFields(handler, asset, found, objectFields, allowDelete)
               : asset)
           });
         }
