@@ -103,7 +103,7 @@ describe('#YAML context validation', () => {
     const config = { AUTH0_INPUT_FILE: tenantFile };
     const context = new Context(config, mockMgmtClient());
     await context.dump();
-    const yaml = jsYaml.safeLoad(fs.readFileSync(tenantFile));
+    const yaml = jsYaml.load(fs.readFileSync(tenantFile));
     expect(yaml).to.deep.equal({
       branding: {},
       clientGrants: [],
@@ -184,7 +184,7 @@ describe('#YAML context validation', () => {
     };
     const context = new Context(config, mockMgmtClient());
     await context.dump();
-    const yaml = jsYaml.safeLoad(fs.readFileSync(tenantFile));
+    const yaml = jsYaml.load(fs.readFileSync(tenantFile));
     expect(yaml).to.deep.equal({
       branding: {},
       clientGrants: [],
@@ -260,7 +260,7 @@ describe('#YAML context validation', () => {
     };
     const context = new Context(config, mockMgmtClient());
     await context.dump();
-    const yaml = jsYaml.safeLoad(fs.readFileSync(tenantFile));
+    const yaml = jsYaml.load(fs.readFileSync(tenantFile));
     expect(yaml).to.deep.equal({
       branding: {},
       clientGrants: [],

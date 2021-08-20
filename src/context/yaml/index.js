@@ -52,7 +52,7 @@ export default class {
       try {
         const fPath = path.resolve(this.configFile);
         log.debug(`Loading YAML from ${fPath}`);
-        Object.assign(this.assets, yaml.safeLoad(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)) || {});
+        Object.assign(this.assets, yaml.load(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)) || {});
       } catch (err) {
         log.debug(err.stack);
         throw new Error(`Problem loading ${this.configFile}\n${err}`);
