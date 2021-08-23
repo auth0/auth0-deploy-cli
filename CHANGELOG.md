@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.2.1] - 2021-08-23
+### Fixed
+- [IDS-3074] Updated structure when dumping orgs (#369)
+  
+  Fixes an issue when exporting organizations as a directory, connections are not structured in the right way, causing the import to remove any connection on the organizations.
+- [DXEX-1721] Fix client metadata property deletion
+  
+  Fixes an inconsistency between how we calculate changes on deep metadata-like objects and with how APIv2 expects such changes to be expressed when a property is deleted.
+- Bump js-yaml from 3.x to 4.x and move to kacl (#371)
+  
+  This PR bumps js-yaml from 3.x to 4.x in accordance with its migration guide. This bump means that we're able to use the default safe behaviour for both exports and imports.
+  
+  Notably, this means that we won't end up with values like !<tag:yaml.org,2002:js/undefined> '' that are not at all human friendly and were problematic when we used the .safeLoad functionality.
+
 ## [7.2.0] - 2021-07-14
 ### Added
 - Add runtime property for actions [#364]
@@ -359,7 +373,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#361]: https://github.com/auth0/auth0-deploy-cli/issues/361
 [#364]: https://github.com/auth0/auth0-deploy-cli/issues/364
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.2.0...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.2.1...HEAD
+[7.2.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.2.0...v7.2.1
 [7.2.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.1.1...v7.2.0
 [7.1.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.1.0...v7.1.1
 [7.1.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.0.0...v7.1.0
