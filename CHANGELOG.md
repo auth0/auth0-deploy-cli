@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.3.0] - 2021-09-20
+### Added
+- Allow set of AUTH0_AUDIENCE for custom domain [#379] (credit @AliBazzi)
+
+### Fixed
+- Load file configured in customScripts for DB Connections [#367] (credit @skukx)
+
+### Security
+- Security fixes from dependencies
+
 ## [7.2.1] - 2021-08-23
 ### Fixed
 - [IDS-3074] Updated structure when dumping orgs (#369)
@@ -372,8 +382,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#356]: https://github.com/auth0/auth0-deploy-cli/issues/356
 [#361]: https://github.com/auth0/auth0-deploy-cli/issues/361
 [#364]: https://github.com/auth0/auth0-deploy-cli/issues/364
+[#367]: https://github.com/auth0/auth0-deploy-cli/issues/367
+[#379]: https://github.com/auth0/auth0-deploy-cli/issues/379
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.2.1...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.0...HEAD
+[7.3.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.2.1...v7.3.0
 [7.2.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.2.0...v7.2.1
 [7.2.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.1.1...v7.2.0
 [7.1.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.1.0...v7.1.1
