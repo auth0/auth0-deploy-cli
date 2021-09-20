@@ -8,7 +8,6 @@ import {
   existsMustBeDir,
   dumpJSON,
   loadJSON,
-  getFiles,
   sanitize,
   mapClientID2NameSorted
 } from '../../../utils';
@@ -41,14 +40,20 @@ function getDatabase(folder, mappings) {
     }
   };
 
-  getFiles(folder, [ '.js' ]).forEach((file) => {
-    const { name } = path.parse(file);
-    if (!constants.DATABASE_SCRIPTS.includes(name)) {
-      log.warn('Skipping invalid database script file: ' + file);
-    } else {
-      database.options.customScripts[name] = loadFile(file, mappings);
-    }
-  });
+  // If any customScripts configured then load content of files
+  if (database.options.customScripts) {
+    Object.entries(database.options.customScripts).forEach(([ name, script ]) => {
+      if (!constants.DATABASE_SCRIPTS.includes(name)) {
+        // skip invalid keys in customScripts object
+        log.warn('Skipping invalid database configuration: ' + name);
+      } else {
+        database.options.customScripts[name] = loadFile(
+          path.join(folder, script),
+          mappings
+        );
+      }
+    });
+  }
 
   return database;
 }
