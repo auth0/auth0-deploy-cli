@@ -43,7 +43,7 @@ export default async function(config) {
     });
 
     const clientCredentials = await authClient.clientCredentialsGrant({
-      audience: config.AUTH0_AUDIENCE ?? `https://${config.AUTH0_DOMAIN}/api/v2/`
+      audience: config.AUTH0_AUDIENCE ? config.AUTH0_AUDIENCE : `https://${config.AUTH0_DOMAIN}/api/v2/`
     });
     accessToken = clientCredentials.access_token;
   }
