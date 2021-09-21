@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.3.1] - 2021-09-21
+### Fixed
+- Error when authenticating with AUTH0_CLIENT_ID and AUTH0_CLIENT_SECRET with Node.js prior to v14
+
 ## [7.3.0] - 2021-09-20
 ### Added
 - Allow set of AUTH0_AUDIENCE for custom domain [#379] (credit @AliBazzi)
@@ -385,7 +389,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#367]: https://github.com/auth0/auth0-deploy-cli/issues/367
 [#379]: https://github.com/auth0/auth0-deploy-cli/issues/379
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.0...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.1...HEAD
+[7.3.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.0...v7.3.1
 [7.3.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.2.1...v7.3.0
 [7.2.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.2.0...v7.2.1
 [7.2.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.1.1...v7.2.0
