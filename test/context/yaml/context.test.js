@@ -26,6 +26,7 @@ describe('#YAML context validation', () => {
     expect(context.assets.clientGrants).to.deep.equal(undefined);
     expect(context.assets.connections).to.deep.equal(undefined);
     expect(context.assets.rulesConfigs).to.deep.equal(undefined);
+    expect(context.assets.organizations).to.deep.equal(undefined);
   });
 
   it('should load excludes', async () => {
