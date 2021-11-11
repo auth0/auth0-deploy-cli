@@ -1,10 +1,8 @@
 async function parse(context) {
   const { organizations } = context.assets;
 
-  if (!organizations) return {};
-
   return {
-    organizations: organizations || []
+    organizations: organizations
   };
 }
 
