@@ -150,7 +150,7 @@ export default class HooksHandler extends DefaultHandler {
       // hooks.getAll does not return code and secrets, we have to fetch hooks one-by-one
       this.existing = await Promise.all(hooks.map((hook) => this.client.hooks.get({ id: hook.id })
         .then((hookWithCode) => this.client.hooks.getSecrets({ id: hook.id })
-          .then((secrets) => ({ ...hookWithCode, secrets })))));
+          .then((secrets) => ({ name: hook.id, ...hookWithCode, secrets })))));
 
       return this.existing;
     } catch (err) {
