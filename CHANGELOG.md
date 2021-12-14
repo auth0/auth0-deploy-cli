@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.3.2] - 2021-12-14
 ### Security
 - Fixes dependency security issues
 
@@ -391,7 +393,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#367]: https://github.com/auth0/auth0-deploy-cli/issues/367
 [#379]: https://github.com/auth0/auth0-deploy-cli/issues/379
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.1...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.2...HEAD
+[7.3.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.1...v7.3.2
 [7.3.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.0...v7.3.1
 [7.3.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.2.1...v7.3.0
 [7.2.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.2.0...v7.2.1
