@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.3.3] - 2022-01-26
+### Fixed
+- Fix pagination [#400]
+
+### Security
+- Security fixes from dependencies
+
 ## [7.3.2] - 2021-12-14
 ### Security
 - Fixes dependency security issues
@@ -392,8 +399,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#364]: https://github.com/auth0/auth0-deploy-cli/issues/364
 [#367]: https://github.com/auth0/auth0-deploy-cli/issues/367
 [#379]: https://github.com/auth0/auth0-deploy-cli/issues/379
+[#400]: https://github.com/auth0/auth0-deploy-cli/issues/400
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.2...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.3...HEAD
+[7.3.3]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.2...v7.3.3
 [7.3.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.1...v7.3.2
 [7.3.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.0...v7.3.1
 [7.3.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.2.1...v7.3.0
