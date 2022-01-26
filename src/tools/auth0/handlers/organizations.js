@@ -143,7 +143,7 @@ export default class OrganizationsHandler extends DefaultHandler {
     }
 
     try {
-      const organizations = await this.client.organizations.getAll({ paginate: true, include_totals: true });
+      const organizations = await this.client.organizations.getAll({ checkpoint: true, include_totals: true });
       for (let index = 0; index < organizations.length; index++) {
         const connections = await this.client.organizations.connections.get({ id: organizations[index].id });
         organizations[index].connections = connections;
