@@ -47,12 +47,10 @@ function checkpointPaginator(client, target, name) {
         })
         .promise();
 
-      const entities = getEntity(rsp);
-
-      if (entities.length === 0) {
+      data.push(...getEntity(rsp));
+      if (!rsp.next) {
         done = true;
       } else {
-        data.push(...entities);
         newArgs.from = rsp.next;
       }
     }
