@@ -49,7 +49,7 @@ function checkpointPaginator(client, target, name) {
 
       const entities = getEntity(rsp);
 
-      if (entities.length === 0) {
+      if (entities.length === 0 || !rsp.next) {
         done = true;
       } else {
         data.push(...entities);
