@@ -31,7 +31,7 @@ function checkpointPaginator(client, target, name) {
     const { total } = await client.pool
       .addSingleTask({
         data: newArgs,
-        generator: target[name]
+        generator: (requestArgs) => target[name](requestArgs)
       })
       .promise();
 
@@ -43,7 +43,7 @@ function checkpointPaginator(client, target, name) {
       const rsp = await client.pool
         .addSingleTask({
           data: newArgs,
-          generator: target[name]
+          generator: (requestArgs) => target[name](requestArgs)
         })
         .promise();
 
