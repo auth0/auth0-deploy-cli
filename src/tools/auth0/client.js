@@ -22,7 +22,7 @@ function getEntity(rsp) {
 
 function checkpointPaginator(client, target, name) {
   return async function(...args) {
-    const data = [];
+    const data = {};
 
     // remove the _checkpoint_ flag
     const { checkpoint, ...newArgs } = _.cloneDeep(args[0]);
@@ -47,7 +47,10 @@ function checkpointPaginator(client, target, name) {
         })
         .promise();
 
-      data.push(...getEntity(rsp));
+      for (const entity of getEntity(rsp)) {
+        data[entity.id] = entity;
+      }
+
       if (!rsp.next) {
         done = true;
       } else {
@@ -55,11 +58,13 @@ function checkpointPaginator(client, target, name) {
       }
     }
 
-    if (data.length !== total) {
+    const dedupedData = Object.values(data);
+
+    if (dedupedData.length !== total) {
       throw new Error('Fail to load data from tenant');
     }
 
-    return data;
+    return dedupedData;
   };
 }
 
