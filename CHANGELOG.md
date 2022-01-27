@@ -409,8 +409,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#379]: https://github.com/auth0/auth0-deploy-cli/issues/379
 [#400]: https://github.com/auth0/auth0-deploy-cli/issues/400
 [#401]: https://github.com/auth0/auth0-deploy-cli/issues/401
+[#403]: https://github.com/auth0/auth0-deploy-cli/issues/403
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.4...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.5...HEAD
+[7.3.5]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.4...v7.3.5
 [7.3.4]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.3...v7.3.4
 [7.3.3]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.2...v7.3.3
 [7.3.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.1...v7.3.2
