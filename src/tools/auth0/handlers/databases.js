@@ -48,8 +48,7 @@ export default class DatabaseHandler extends DefaultHandler {
           return this.client.connections.update(params, payload);
         });
     }
-
-    return Reflect.get(this.client.connections, fn, this.client.connections);
+    return Reflect.get(this.client.connections, fn).bind(this.client.connections);
   }
 
   async getType() {

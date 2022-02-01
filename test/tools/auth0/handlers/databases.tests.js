@@ -53,7 +53,8 @@ describe('#databases handler', () => {
     it('should create database', async () => {
       const auth0 = {
         connections: {
-          create: (data) => {
+          create: function(data) {
+            expect(this).not.to.be.an('undefined');
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someDatabase');
             return Promise.resolve(data);
