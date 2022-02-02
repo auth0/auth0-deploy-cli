@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.3.6] - 2022-02-02
 ### Fixed
 - Fix errors caused by incompatibilities introduced by new versions of Auth0 SDK [#406]
 
@@ -412,8 +414,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#400]: https://github.com/auth0/auth0-deploy-cli/issues/400
 [#401]: https://github.com/auth0/auth0-deploy-cli/issues/401
 [#403]: https://github.com/auth0/auth0-deploy-cli/issues/403
+[#406]: https://github.com/auth0/auth0-deploy-cli/issues/406
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.5...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.6...HEAD
+[7.3.6]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.5...v7.3.6
 [7.3.5]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.4...v7.3.5
 [7.3.4]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.3...v7.3.4
 [7.3.3]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.2...v7.3.3
