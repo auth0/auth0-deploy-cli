@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Fix errors caused by incompatibilities introduced by new versions of Auth0 SDK [#406]
 
 ## [7.3.5] - 2022-01-27
 ### Fixed
