@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.3.7] - 2022-02-03
+### Fixed
+- Expose errors that may be silently missed in Actions [#408]
+
 ## [7.3.6] - 2022-02-02
 ### Fixed
 - Fix errors caused by incompatibilities introduced by new versions of Auth0 SDK [#406]
@@ -415,8 +419,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#401]: https://github.com/auth0/auth0-deploy-cli/issues/401
 [#403]: https://github.com/auth0/auth0-deploy-cli/issues/403
 [#406]: https://github.com/auth0/auth0-deploy-cli/issues/406
+[#408]: https://github.com/auth0/auth0-deploy-cli/issues/408
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.6...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.7...HEAD
+[7.3.7]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.6...v7.3.7
 [7.3.6]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.5...v7.3.6
 [7.3.5]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.4...v7.3.5
 [7.3.4]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.3...v7.3.4

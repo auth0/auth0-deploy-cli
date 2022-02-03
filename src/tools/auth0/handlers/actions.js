@@ -140,6 +140,8 @@ export default class ActionHandler extends DefaultHandler {
         await sleep(1000);
         action.retry_count += 1;
         await this.deployAction(action);
+      } else {
+        throw err;
       }
     }
   }
