@@ -33,6 +33,7 @@
     "dot-prop": "^5.2.0",
     "fs-extra": "^7.0.0",
     "global-agent": "^2.1.12",
+    "husky": "^7.0.4",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.20",
     "mkdirp": "^0.5.1",
