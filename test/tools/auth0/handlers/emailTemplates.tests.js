@@ -10,8 +10,12 @@ describe('#emailTemplates handler', () => {
     it('should update email template', async () => {
       const auth0 = {
         emailTemplates: {
-          create: (data) => Promise.resolve(data),
-          update: (params, data) => {
+          create: function(data){
+            expect(this).to.not.be.undefined 
+            return Promise.resolve(data)
+          },
+          update: function(params,data){
+            expect(this).to.not.be.undefined;
             expect(params).to.be.an('object');
             expect(data).to.be.an('object');
             expect(params.name).to.equal('verify_email');
@@ -53,7 +57,8 @@ describe('#emailTemplates handler', () => {
     it('should create email template', async () => {
       const auth0 = {
         emailTemplates: {
-          create: (data) => {
+          create: function(data){
+            expect(this).to.not.be.undefined
             expect(data).to.be.an('object');
             expect(data.template).to.equal('verify_email');
             expect(data.body).to.equal('body');

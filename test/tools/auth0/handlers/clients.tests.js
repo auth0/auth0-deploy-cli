@@ -58,7 +58,8 @@ describe('#clients handler', () => {
     it('should create client', async () => {
       const auth0 = {
         clients: {
-          create: (data) => {
+          create: function(data){
+            expect(this).to.not.be.undefined
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someClient');
             return Promise.resolve(data);
@@ -98,12 +99,14 @@ describe('#clients handler', () => {
     it('should update client', async () => {
       const auth0 = {
         clients: {
-          create: (data) => {
+          create: function(data){
+            expect(this).to.not.be.undefined
             expect(data).to.be.an('array');
             expect(data.length).to.equal(0);
             return Promise.resolve(data);
           },
-          update: (params, data) => {
+          update: function(params,data){
+            expect(this).to.not.be.undefined;
             expect(params).to.be.an('object');
             expect(params.client_id).to.equal('client1');
             expect(data).to.be.an('object');
@@ -134,13 +137,15 @@ describe('#clients handler', () => {
     it('should delete client and create another one instead', async () => {
       const auth0 = {
         clients: {
-          create: (data) => {
+          create: function(data){
+            expect(this).to.not.be.undefined
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someClient');
             return Promise.resolve(data);
           },
           update: () => Promise.resolve([]),
-          delete: (params) => {
+          delete: function(params){
+            expect(this).to.not.be.undefined;
             expect(params).to.be.an('object');
             expect(params.client_id).to.equal('client1');
             return Promise.resolve([]);
@@ -163,7 +168,8 @@ describe('#clients handler', () => {
         clients: {
           create: () => Promise.resolve([]),
           update: () => Promise.resolve([]),
-          delete: (params) => {
+          delete: function(params){
+            expect(this).to.not.be.undefined;
             expect(params).to.be.an('object');
             expect(params.client_id).to.equal('client1');
             removed = true;
@@ -187,7 +193,8 @@ describe('#clients handler', () => {
         clients: {
           create: () => Promise.resolve([]),
           update: () => Promise.resolve([]),
-          delete: (params) => {
+          delete: function(params){
+            expect(this).to.not.be.undefined;
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },
@@ -214,7 +221,8 @@ describe('#clients handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },
-          delete: (params) => {
+          delete: function(params){
+            expect(this).to.not.be.undefined;
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },
@@ -255,7 +263,8 @@ describe('#clients handler', () => {
         clients: {
           create: () => Promise.resolve([]),
           update: () => Promise.resolve([]),
-          delete: (params) => {
+          delete: function(params){
+            expect(this).to.not.be.undefined;
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },

@@ -40,8 +40,8 @@ export default class DefaultHandler {
 
   getClientFN(fn) {
     if (typeof fn === 'string') {
-      const client = Reflect.get(this.client, this.type);
-      return Reflect.get(client, fn).bind(client);
+      const client = this.client[this.type]
+      return client[fn].bind(client);
     }
     return fn;
   }
