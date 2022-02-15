@@ -49,7 +49,7 @@ export default class DatabaseHandler extends DefaultHandler {
         });
     }
 
-    return this.client.connections[fn].bind(this.client.connections)
+    return this.client.connections[fn].bind(this.client.connections);
   }
 
   async getType() {

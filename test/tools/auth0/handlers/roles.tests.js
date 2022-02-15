@@ -58,8 +58,8 @@ describe('#roles handler', () => {
     it('should create role', async () => {
       const auth0 = {
         roles: {
-          create: function(data){
-            expect(this).to.not.be.undefined
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('myRole');
             expect(data.description).to.equal('myDescription');
@@ -193,14 +193,14 @@ describe('#roles handler', () => {
     it('should update role', async () => {
       const auth0 = {
         roles: {
-          create: function(data){
-            expect(this).to.not.be.undefined
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.length).to.equal(0);
             return Promise.resolve(data);
           },
-          update: function(params,data){
-            expect(this).to.not.be.undefined;
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('myRoleId');
             expect(data).to.be.an('object');
@@ -229,8 +229,8 @@ describe('#roles handler', () => {
               expect(data.permissions).to.be.an('Array');
               return Promise.resolve(data);
             },
-            delete: function(params,data){
-              expect(this).to.not.be.undefined;
+            delete: function(params, data) {
+              (() => expect(this).to.not.be.undefined)();
               expect(params).to.be.an('object');
               expect(params.id).to.equal('myRoleId');
               expect(data.permissions).to.be.an('Array');

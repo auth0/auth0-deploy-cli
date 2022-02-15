@@ -11,7 +11,7 @@ const pool = {
 };
 
 describe('#clientGrants handler', () => {
-  const config = function (key) {
+  const config = function(key) {
     return config.data && config.data[key];
   };
 
@@ -34,7 +34,7 @@ describe('#clientGrants handler', () => {
       ];
 
       try {
-        await stageFn.apply(handler, [{ clientGrants: data }]);
+        await stageFn.apply(handler, [ { clientGrants: data } ]);
       } catch (err) {
         expect(err).to.be.an('object');
         expect(err.message).to.include('Names must be unique');
@@ -50,7 +50,7 @@ describe('#clientGrants handler', () => {
         }
       ];
 
-      await stageFn.apply(handler, [{ clientGrants: data }]);
+      await stageFn.apply(handler, [ { clientGrants: data } ]);
     });
   });
 
@@ -58,8 +58,8 @@ describe('#clientGrants handler', () => {
     it('should create client grants', async () => {
       const auth0 = {
         clientGrants: {
-          create: function (data) {
-            expect(this).to.not.be.undefined;
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someClientGrant');
             return Promise.resolve(data);
@@ -82,7 +82,7 @@ describe('#clientGrants handler', () => {
         }
       ];
 
-      await stageFn.apply(handler, [{ clientGrants: data }]);
+      await stageFn.apply(handler, [ { clientGrants: data } ]);
     });
 
     it('should get client grants', async () => {
@@ -97,7 +97,7 @@ describe('#clientGrants handler', () => {
       };
       const auth0 = {
         clientGrants: {
-          getAll: () => [clientGrant]
+          getAll: () => [ clientGrant ]
         },
         clients: {
           getAll: () => [
@@ -109,14 +109,14 @@ describe('#clientGrants handler', () => {
 
       const handler = new clientGrants.default({ client: auth0, config });
       const data = await handler.getType();
-      expect(data).to.deep.equal([clientGrant]);
+      expect(data).to.deep.equal([ clientGrant ]);
     });
 
     it('should convert client_name to client_id', async () => {
       const auth0 = {
         clientGrants: {
-          create: function (data) {
-            expect(this).to.not.be.undefined
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someClientGrant');
             expect(data.client_id).to.equal('client_id');
@@ -127,7 +127,7 @@ describe('#clientGrants handler', () => {
           getAll: () => []
         },
         clients: {
-          getAll: () => [{ client_id: 'client_id', name: 'client_name' }]
+          getAll: () => [ { client_id: 'client_id', name: 'client_name' } ]
         },
         pool
       };
@@ -141,20 +141,20 @@ describe('#clientGrants handler', () => {
         }
       ];
 
-      await stageFn.apply(handler, [{ clientGrants: data }]);
+      await stageFn.apply(handler, [ { clientGrants: data } ]);
     });
 
     it('should update client grant', async () => {
       const auth0 = {
         clientGrants: {
-          create: function (data) {
-            expect(this).to.not.be.undefined;
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data).to.equal({});
             return Promise.resolve(data);
           },
-          update: function(params,data){
-            expect(this).to.not.be.undefined;
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('cg1');
             expect(data).to.be.an('object');
@@ -164,7 +164,7 @@ describe('#clientGrants handler', () => {
             return Promise.resolve(data);
           },
           delete: () => Promise.resolve([]),
-          getAll: () => [{ id: 'cg1', client_id: 'client1', audience: 'audience' }]
+          getAll: () => [ { id: 'cg1', client_id: 'client1', audience: 'audience' } ]
         },
         clients: {
           getAll: () => []
@@ -178,32 +178,32 @@ describe('#clientGrants handler', () => {
         {
           client_id: 'client1',
           audience: 'audience',
-          scope: ['read:messages']
+          scope: [ 'read:messages' ]
         }
       ];
 
-      await stageFn.apply(handler, [{ clientGrants: data }]);
+      await stageFn.apply(handler, [ { clientGrants: data } ]);
     });
 
     it('should delete client grant and create another one instead', async () => {
       const auth0 = {
         clientGrants: {
-          create: function (data) {
-            expect(this).to.not.be.undefined;
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someClientGrant');
             expect(data.client_id).to.equal('client2');
             return Promise.resolve(data);
           },
           update: () => Promise.resolve([]),
-          delete: function(params){
-            expect(this).to.not.be.undefined;
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('cg1');
 
             return Promise.resolve([]);
           },
-          getAll: () => [{ id: 'cg1', client_id: 'client1', audience: 'audience1' }]
+          getAll: () => [ { id: 'cg1', client_id: 'client1', audience: 'audience1' } ]
         },
         clients: {
           getAll: () => []
@@ -221,7 +221,7 @@ describe('#clientGrants handler', () => {
         }
       ];
 
-      await stageFn.apply(handler, [{ clientGrants: data }]);
+      await stageFn.apply(handler, [ { clientGrants: data } ]);
     });
 
     it('should not delete nor create client grant for own client', async () => {
@@ -237,13 +237,13 @@ describe('#clientGrants handler', () => {
 
             return Promise.resolve([]);
           },
-          delete: function(params){
-            expect(this).to.not.be.undefined;
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
 
             return Promise.resolve([]);
           },
-          getAll: () => [{ id: 'id', client_id: 'client_id', audience: 'audience' }]
+          getAll: () => [ { id: 'id', client_id: 'client_id', audience: 'audience' } ]
         },
         clients: {
           getAll: () => []
@@ -261,7 +261,7 @@ describe('#clientGrants handler', () => {
         }
       ];
 
-      await stageFn.apply(handler, [{ clientGrants: data }]);
+      await stageFn.apply(handler, [ { clientGrants: data } ]);
     });
 
     it('should delete all client grants', async () => {
@@ -270,14 +270,14 @@ describe('#clientGrants handler', () => {
         clientGrants: {
           create: () => Promise.resolve([]),
           update: () => Promise.resolve([]),
-          delete: function(params){
-            expect(this).to.not.be.undefined;
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('cg1');
             removed = true;
             return Promise.resolve([]);
           },
-          getAll: () => [{ id: 'cg1', client_id: 'client1', audience: 'audience1' }]
+          getAll: () => [ { id: 'cg1', client_id: 'client1', audience: 'audience1' } ]
         },
         clients: {
           getAll: () => []
@@ -288,7 +288,7 @@ describe('#clientGrants handler', () => {
       const handler = new clientGrants.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [{ clientGrants: [] }]);
+      await stageFn.apply(handler, [ { clientGrants: [] } ]);
       expect(removed).to.equal(true);
     });
 
@@ -301,13 +301,13 @@ describe('#clientGrants handler', () => {
         clientGrants: {
           create: () => Promise.resolve([]),
           update: () => Promise.resolve([]),
-          delete: function(params){
-            expect(this).to.not.be.undefined;
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
 
             return Promise.resolve([]);
           },
-          getAll: () => [{ id: 'cg1', client_id: 'client1', audience: 'audience1' }]
+          getAll: () => [ { id: 'cg1', client_id: 'client1', audience: 'audience1' } ]
         },
         clients: {
           getAll: () => []
@@ -318,7 +318,7 @@ describe('#clientGrants handler', () => {
       const handler = new clientGrants.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [{ clientGrants: [] }]);
+      await stageFn.apply(handler, [ { clientGrants: [] } ]);
     });
 
     it('should not touch client grants of excluded clients', async () => {
@@ -338,8 +338,8 @@ describe('#clientGrants handler', () => {
 
             return Promise.resolve([]);
           },
-          delete: function(params){
-            expect(this).to.not.be.undefined;
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
 
             return Promise.resolve([]);
@@ -370,10 +370,10 @@ describe('#clientGrants handler', () => {
             audience: 'audience3'
           }
         ],
-        exclude: { clients: ['client_delete', 'client_update', 'client_create'] }
+        exclude: { clients: [ 'client_delete', 'client_update', 'client_create' ] }
       };
 
-      await stageFn.apply(handler, [assets]);
+      await stageFn.apply(handler, [ assets ]);
     });
   });
   it('should not delete client grants of excluded clients with multiple instances', async () => {
@@ -394,8 +394,8 @@ describe('#clientGrants handler', () => {
 
           return Promise.resolve([]);
         },
-        delete: function(params){
-            expect(this).to.not.be.undefined;
+        delete: function(params) {
+          (() => expect(this).to.not.be.undefined)();
           expect(params).to.be.an('undefined');
 
           return Promise.resolve([]);
@@ -481,9 +481,9 @@ describe('#clientGrants handler', () => {
           audience: 'https://example.com'
         }
       ],
-      exclude: { clients: ['foo_client'] }
+      exclude: { clients: [ 'foo_client' ] }
     };
 
-    await stageFn.apply(handler, [assets]);
+    await stageFn.apply(handler, [ assets ]);
   });
 });

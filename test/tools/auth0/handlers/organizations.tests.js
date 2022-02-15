@@ -115,8 +115,8 @@ describe('#organizations handler', () => {
     it('should create organization', async () => {
       const auth0 = {
         organizations: {
-          create: function(data){
-            expect(this).to.not.be.undefined
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('acme');
             expect(data.display_name).to.equal('Acme');
@@ -297,8 +297,8 @@ describe('#organizations handler', () => {
       const auth0 = {
         organizations: {
           create: () => Promise.resolve([]),
-          update: function(params,data){
-            expect(this).to.not.be.undefined;
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
             expect(data.display_name).to.equal('Acme 2');
@@ -369,8 +369,8 @@ describe('#organizations handler', () => {
       const auth0 = {
         organizations: {
           create: () => Promise.resolve([]),
-          update: function(params,data){
-            expect(this).to.not.be.undefined;
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
             expect(data.display_name).to.equal('Acme 2');
@@ -423,8 +423,8 @@ describe('#organizations handler', () => {
       const auth0 = {
         organizations: {
           create: () => Promise.resolve([]),
-          update: function(params,data){
-            expect(this).to.not.be.undefined;
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
             expect(data.display_name).to.equal('Acme 2');
@@ -472,8 +472,8 @@ describe('#organizations handler', () => {
       const auth0 = {
         organizations: {
           create: () => Promise.resolve([]),
-          update: function(params,data){
-            expect(this).to.not.be.undefined;
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
             expect(data.display_name).to.equal('Acme 2');

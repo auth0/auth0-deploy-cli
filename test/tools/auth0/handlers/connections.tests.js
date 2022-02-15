@@ -58,8 +58,8 @@ describe('#connections handler', () => {
     it('should create connection', async () => {
       const auth0 = {
         connections: {
-          create: function(data){
-            expect(this).to.not.be.undefined
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someConnection');
             return Promise.resolve(data);
@@ -106,13 +106,13 @@ describe('#connections handler', () => {
     it('should update connection', async () => {
       const auth0 = {
         connections: {
-          create: function(data){
-            expect(this).to.not.be.undefined
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
             return Promise.resolve(data);
           },
-          update: function(params,data){
-            expect(this).to.not.be.undefined;
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
@@ -150,8 +150,8 @@ describe('#connections handler', () => {
     it('should convert client name with ID in idpinitiated.client_id', async () => {
       const auth0 = {
         connections: {
-          create: function(data){
-            expect(this).to.not.be.undefined
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.deep.equal({
               enabled_clients: [ 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' ],
               name: 'someConnection-2',
@@ -167,8 +167,8 @@ describe('#connections handler', () => {
             });
             return Promise.resolve(data);
           },
-          update: function(params,data){
-            expect(this).to.not.be.undefined;
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
@@ -236,8 +236,8 @@ describe('#connections handler', () => {
     it('should keep client ID in idpinitiated.client_id', async () => {
       const auth0 = {
         connections: {
-          create: function(data){
-            expect(this).to.not.be.undefined
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.deep.equal({
               enabled_clients: [ 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' ],
               name: 'someConnection-2',
@@ -253,8 +253,8 @@ describe('#connections handler', () => {
             });
             return Promise.resolve(data);
           },
-          update: function(params,data){
-            expect(this).to.not.be.undefined;
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
@@ -324,13 +324,13 @@ describe('#connections handler', () => {
     it('should handle excluded clients properly', async () => {
       const auth0 = {
         connections: {
-          create: function(data){
-            expect(this).to.not.be.undefined
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
             return Promise.resolve(data);
           },
-          update: function(params,data){
-            expect(this).to.not.be.undefined;
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
@@ -374,15 +374,15 @@ describe('#connections handler', () => {
     it('should delete connection and create another one instead', async () => {
       const auth0 = {
         connections: {
-          create: function(data){
-            expect(this).to.not.be.undefined
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someConnection');
             return Promise.resolve(data);
           },
           update: () => Promise.resolve([]),
-          delete: function(params){
-            expect(this).to.not.be.undefined;
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
 
@@ -414,8 +414,8 @@ describe('#connections handler', () => {
         connections: {
           create: () => Promise.resolve([]),
           update: () => Promise.resolve([]),
-          delete: function(params){
-            expect(this).to.not.be.undefined;
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             removed = true;
@@ -440,13 +440,13 @@ describe('#connections handler', () => {
       config.data.AUTH0_ALLOW_DELETE = false;
       const auth0 = {
         connections: {
-          create: function(data){
-            expect(this).to.not.be.undefined;
-            return Promise.resolve(data) 
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
+            return Promise.resolve(data);
           },
           update: () => Promise.resolve([]),
-          delete: function(params){
-            expect(this).to.not.be.undefined;
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },
@@ -478,8 +478,8 @@ describe('#connections handler', () => {
         connections: {
           create: () => Promise.resolve(),
           update: () => Promise.resolve([]),
-          delete: function(params){
-            expect(this).to.not.be.undefined;
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },
@@ -512,8 +512,8 @@ describe('#connections handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },
-          delete: function(params){
-            expect(this).to.not.be.undefined;
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },

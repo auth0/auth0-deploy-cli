@@ -40,7 +40,7 @@ export default class DefaultHandler {
 
   getClientFN(fn) {
     if (typeof fn === 'string') {
-      const client = this.client[this.type]
+      const client = this.client[this.type];
       return client[fn].bind(client);
     }
     return fn;
