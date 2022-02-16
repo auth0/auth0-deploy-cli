@@ -74,7 +74,8 @@ describe('#resourceServers handler', () => {
     it('should create resource server', async () => {
       const auth0 = {
         resourceServers: {
-          create: (data) => {
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someAPI');
             return Promise.resolve(data);
@@ -111,7 +112,7 @@ describe('#resourceServers handler', () => {
       const auth0 = {
         resourceServers: {
           create: () => Promise.resolve([]),
-          update: (params, data) => {
+          update: function(params, data) {
             expect(params).to.be.an('object');
             expect(data).to.be.an('object');
             expect(params.id).to.equal('rs1');
@@ -133,14 +134,16 @@ describe('#resourceServers handler', () => {
     it('should create new resource server with same name but different identifier', async () => {
       const auth0 = {
         resourceServers: {
-          create: (data) => {
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someAPI');
             expect(data.scope).to.equal('new:scope');
             expect(data.identifier).to.equal('another-api');
             return Promise.resolve(data);
           },
-          update: (params, data) => {
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be('undefined');
             expect(data).to.be('undefined');
             return Promise.resolve(data);
@@ -234,7 +237,8 @@ describe('#resourceServers handler', () => {
       const auth0 = {
         resourceServers: {
           create: () => Promise.resolve([]),
-          update: (data) => {
+          update: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
             return Promise.resolve(data);
           },

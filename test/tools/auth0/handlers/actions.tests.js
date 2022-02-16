@@ -127,7 +127,8 @@ describe('#actions handler', () => {
             expect(params.id).to.equal(actionId);
             return Promise.resolve({ ...action, id: actionId });
           },
-          create: (data) => {
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('action-test');
             expect(data.supported_triggers[0].id).to.equal('post-login');

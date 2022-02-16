@@ -58,7 +58,8 @@ describe('#clientGrants handler', () => {
     it('should create client grants', async () => {
       const auth0 = {
         clientGrants: {
-          create: (data) => {
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someClientGrant');
             return Promise.resolve(data);
@@ -114,7 +115,8 @@ describe('#clientGrants handler', () => {
     it('should convert client_name to client_id', async () => {
       const auth0 = {
         clientGrants: {
-          create: (data) => {
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someClientGrant');
             expect(data.client_id).to.equal('client_id');
@@ -145,12 +147,14 @@ describe('#clientGrants handler', () => {
     it('should update client grant', async () => {
       const auth0 = {
         clientGrants: {
-          create: (data) => {
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data).to.equal({});
             return Promise.resolve(data);
           },
-          update: (params, data) => {
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('cg1');
             expect(data).to.be.an('object');
@@ -184,14 +188,16 @@ describe('#clientGrants handler', () => {
     it('should delete client grant and create another one instead', async () => {
       const auth0 = {
         clientGrants: {
-          create: (data) => {
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someClientGrant');
             expect(data.client_id).to.equal('client2');
             return Promise.resolve(data);
           },
           update: () => Promise.resolve([]),
-          delete: (params) => {
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('cg1');
 
@@ -231,7 +237,8 @@ describe('#clientGrants handler', () => {
 
             return Promise.resolve([]);
           },
-          delete: (params) => {
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
 
             return Promise.resolve([]);
@@ -263,7 +270,8 @@ describe('#clientGrants handler', () => {
         clientGrants: {
           create: () => Promise.resolve([]),
           update: () => Promise.resolve([]),
-          delete: (params) => {
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('cg1');
             removed = true;
@@ -293,7 +301,8 @@ describe('#clientGrants handler', () => {
         clientGrants: {
           create: () => Promise.resolve([]),
           update: () => Promise.resolve([]),
-          delete: (params) => {
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
 
             return Promise.resolve([]);
@@ -329,7 +338,8 @@ describe('#clientGrants handler', () => {
 
             return Promise.resolve([]);
           },
-          delete: (params) => {
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
 
             return Promise.resolve([]);
@@ -384,7 +394,8 @@ describe('#clientGrants handler', () => {
 
           return Promise.resolve([]);
         },
-        delete: (params) => {
+        delete: function(params) {
+          (() => expect(this).to.not.be.undefined)();
           expect(params).to.be.an('undefined');
 
           return Promise.resolve([]);

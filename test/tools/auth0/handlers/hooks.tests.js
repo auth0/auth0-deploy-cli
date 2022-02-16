@@ -161,7 +161,8 @@ describe('#hooks handler', () => {
             expect(params.id).to.equal(hookId);
             return Promise.resolve({ ...hook, id: hookId, secrets: undefined });
           },
-          create: (data) => {
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('Hook');
             expect(data.code).to.equal('code');
@@ -278,7 +279,8 @@ describe('#hooks handler', () => {
       const auth0 = {
         hooks: {
           create: () => Promise.resolve([]),
-          update: (params, data) => {
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(data).to.be.an('object');
             expect(params.id).to.equal('1');
@@ -347,11 +349,13 @@ describe('#hooks handler', () => {
     it.skip('should not touch excluded hooks', async () => {
       const auth0 = {
         hooks: {
-          create: (data) => {
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
             return Promise.resolve(data);
           },
-          update: (data) => {
+          update: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
             return Promise.resolve(data);
           },
@@ -414,7 +418,8 @@ describe('#hooks handler', () => {
       const auth0 = {
         hooks: {
           create: () => Promise.resolve([]),
-          update: (params, data) => {
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(data).to.be.an('object');
             expect(params.id).to.equal(hook.id);
@@ -488,7 +493,8 @@ describe('#hooks handler', () => {
       const auth0 = {
         hooks: {
           create: () => Promise.resolve([]),
-          update: (params, data) => {
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(data).to.be.an('object');
             expect(params.id).to.equal(hook.id);

@@ -200,7 +200,8 @@ describe('#rules handler', () => {
     it('should create rule', async () => {
       const auth0 = {
         rules: {
-          create: (data) => {
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someRule');
             expect(data.script).to.equal('rule_script');
@@ -244,7 +245,8 @@ describe('#rules handler', () => {
       const auth0 = {
         rules: {
           create: () => Promise.resolve([]),
-          update: (params, data) => {
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(data).to.be.an('object');
             expect(params.id).to.equal('rule1');
@@ -339,11 +341,13 @@ describe('#rules handler', () => {
     it('should not touch excluded rules', async () => {
       const auth0 = {
         rules: {
-          create: (data) => {
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
             return Promise.resolve(data);
           },
-          update: (data) => {
+          update: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
             return Promise.resolve(data);
           },

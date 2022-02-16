@@ -53,7 +53,8 @@ describe('#databases handler', () => {
     it('should create database', async () => {
       const auth0 = {
         connections: {
-          create: (data) => {
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someDatabase');
             return Promise.resolve(data);
@@ -78,14 +79,20 @@ describe('#databases handler', () => {
       const clientId = 'rFeR6vyzQcDEgSUsASPeF4tXr3xbZhxE';
       const auth0 = {
         connections: {
-          getAll: () => [
-            { strategy: 'auth0', name: 'db', enabled_clients: [ clientId ] }
-          ]
+          getAll: function() {
+            (() => expect(this).to.not.be.undefined)();
+            return [
+              { strategy: 'auth0', name: 'db', enabled_clients: [ clientId ] }
+            ];
+          }
         },
         clients: {
-          getAll: () => [
-            { name: 'test client', client_id: clientId }
-          ]
+          getAll: function() {
+            (() => expect(this).to.not.be.undefined)();
+            return [
+              { name: 'test client', client_id: clientId }
+            ];
+          }
         },
         pool
       };
@@ -98,16 +105,19 @@ describe('#databases handler', () => {
     it('should update database', async () => {
       const auth0 = {
         connections: {
-          get: (params) => {
+          get: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             return Promise.resolve({ options: { someOldOption: true } });
           },
-          create: (data) => {
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
             return Promise.resolve(data);
           },
-          update: (params, data) => {
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
@@ -150,11 +160,13 @@ describe('#databases handler', () => {
             expect(params.id).to.equal('con1');
             return Promise.resolve({ options: { someOldOption: true } });
           },
-          create: (data) => {
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
             return Promise.resolve(data);
           },
-          update: (params, data) => {
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
@@ -201,11 +213,13 @@ describe('#databases handler', () => {
             expect(params.id).to.equal('con1');
             return Promise.resolve({});
           },
-          create: (data) => {
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
             return Promise.resolve(data);
           },
-          update: (params, data) => {
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
@@ -239,13 +253,15 @@ describe('#databases handler', () => {
     it('should delete database and create another one instead', async () => {
       const auth0 = {
         connections: {
-          create: (data) => {
+          create: function(data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someDatabase');
             return Promise.resolve(data);
           },
           update: () => Promise.resolve([]),
-          delete: (params) => {
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
 
@@ -277,7 +293,8 @@ describe('#databases handler', () => {
         connections: {
           create: () => Promise.resolve([]),
           update: () => Promise.resolve([]),
-          delete: (params) => {
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             removed = true;
@@ -304,7 +321,8 @@ describe('#databases handler', () => {
         connections: {
           create: (data) => Promise.resolve(data),
           update: () => Promise.resolve([]),
-          delete: (params) => {
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },
@@ -336,7 +354,8 @@ describe('#databases handler', () => {
         connections: {
           create: () => Promise.resolve(),
           update: () => Promise.resolve([]),
-          delete: (params) => {
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },
@@ -369,7 +388,8 @@ describe('#databases handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },
-          delete: (params) => {
+          delete: function(params) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },

@@ -6,7 +6,8 @@ describe('#pages handler', () => {
     it('should update login page', async () => {
       const auth0 = {
         clients: {
-          update: (params, data) => {
+          update: function(params, data) {
+            (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(data).to.be.an('object');
             expect(params.client_id).to.equal('global1');
