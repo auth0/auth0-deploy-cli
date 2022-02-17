@@ -72,12 +72,12 @@ export function dumpJSON(obj, spacing = 0) {
  * @returns T
  */
 export function processChangedObjectFields({
-  handler, desiredAssetState, currentAssetState, objectFields = [], allowDelete = false
+  handler, desiredAssetState, currentAssetState, allowDelete = false
 }) {
   const desiredAssetStateWithChanges = { ...desiredAssetState };
 
   // eslint-disable-next-line no-restricted-syntax
-  for (const fieldName of objectFields) {
+  for (const fieldName of handler.objectFields) {
     const areDesiredStateAndCurrentStateEmpty = Object.keys(desiredAssetState[fieldName] || {}).length === 0 && Object.keys(currentAssetState[fieldName] || {}).length === 0;
     if (areDesiredStateAndCurrentStateEmpty) {
       // If both the desired state and current state for a given object is empty, it is a no-op and can skip
@@ -136,7 +136,7 @@ export function processChangedObjectFields({
   return desiredAssetStateWithChanges;
 }
 
-export function calcChanges(handler, assets, existing, identifiers = [ 'id', 'name' ], objectFields = [], allowDelete = false) {
+export function calcChanges(handler, assets, existing, identifiers = [ 'id', 'name' ], allowDelete = false) {
   // Calculate the changes required between two sets of assets.
   const update = [];
   let del = [ ...existing ];
@@ -186,9 +186,9 @@ export function calcChanges(handler, assets, existing, identifiers = [ 'id', 'na
             // special treatment. When different metadata objects are passed to APIv2
             // properties must explicitly be marked for deletion by indicating a `null`
             // value.
-            ...(objectFields.length
+            ...(handler.objectFields.length
               ? processChangedObjectFields({
-                handler, asset, found, objectFields, allowDelete
+                handler, desiredAssetState: asset, currentAssetState: found, allowDelete
               })
               : asset)
           });
