@@ -11,6 +11,7 @@
     "lint": "eslint --ignore-path .eslintignore --ignore-pattern webpack . && kacl lint",
     "pretest": "rimraf ./.nyc_output",
     "test": "cross-env NODE_ENV=test nyc mocha --recursive --require @babel/register test",
+    "test:single": "npx mocha --require @babel/register",
     "build": "rimraf ./lib && babel src -d lib",
     "prepare": "npm run build",
     "preversion": "kacl prerelease",

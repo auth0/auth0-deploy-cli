@@ -71,7 +71,9 @@ export function dumpJSON(obj, spacing = 0) {
  * @param {boolean} [allowDelete=false]
  * @returns T
  */
-function processChangedObjectFields(handler, desiredAssetState, currentAssetState, objectFields = [], allowDelete = false) {
+export function processChangedObjectFields({
+  handler, desiredAssetState, currentAssetState, objectFields = [], allowDelete = false
+}) {
   const desiredAssetStateWithChanges = { ...desiredAssetState };
 
   // eslint-disable-next-line no-restricted-syntax
@@ -185,7 +187,9 @@ export function calcChanges(handler, assets, existing, identifiers = [ 'id', 'na
             // properties must explicitly be marked for deletion by indicating a `null`
             // value.
             ...(objectFields.length
-              ? processChangedObjectFields(handler, asset, found, objectFields, allowDelete)
+              ? processChangedObjectFields({
+                handler, asset, found, objectFields, allowDelete
+              })
               : asset)
           });
         }
