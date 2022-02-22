@@ -132,6 +132,12 @@ describe('#utils calcChanges', () => {
 
   const mockHandler = new MockHandler();
 
+  const mockHandlerWithObjectFields = (() => {
+    const handler = new MockHandler();
+    handler.objectFields = [ 'metadata' ];
+    return handler;
+  })();
+
   it('should calc create', () => {
     const existing = [ { name: 'Name1', id: 'id1' } ];
     const assets = [
@@ -207,11 +213,10 @@ describe('#utils calcChanges', () => {
     ];
 
     const { update: updateWithoutAllowDelete } = utils.calcChanges(
-      mockHandler,
+      mockHandlerWithObjectFields,
       assets,
       existing,
       [ 'id' ],
-      [ 'metadata' ],
       false
     );
 
@@ -226,11 +231,10 @@ describe('#utils calcChanges', () => {
     });
 
     const { update: updateWithAllowDelete } = utils.calcChanges(
-      mockHandler,
+      mockHandlerWithObjectFields,
       assets,
       existing,
       [ 'id' ],
-      [ 'metadata' ],
       true
     );
 
@@ -274,11 +278,10 @@ describe('#utils calcChanges', () => {
     ];
 
     const { update: updateWithoutAllowDelete } = utils.calcChanges(
-      mockHandler,
+      mockHandlerWithObjectFields,
       assets,
       existing,
       [ 'id' ],
-      [ 'metadata' ],
       false
     );
 
@@ -291,11 +294,10 @@ describe('#utils calcChanges', () => {
     });
 
     const { update: updateWithAllowDelete } = utils.calcChanges(
-      mockHandler,
+      mockHandlerWithObjectFields,
       assets,
       existing,
       [ 'id' ],
-      [ 'metadata' ],
       true
     );
 
@@ -342,5 +344,98 @@ describe('#utils calcChanges', () => {
       update: [ { name: 'update' } ],
       conflicts: [ { name: 'conflicts' } ]
     });
+  });
+});
+
+describe('#utils processChangedObjectFields', () => {
+  // export function processChangedObjectFields(handler, desiredAssetState, currentAssetState, objectFields = [], allowDelete = false) {
+
+  const handler = {
+    objectFields: [
+      'client_metadata'
+    ],
+    objString: () => { }
+  };
+
+  it('should propose no changes if object field of current and desired states are both empty', () => {
+    const desiredObjectFieldState = utils.processChangedObjectFields({
+      handler, currentAssetState: {}, desiredAssetState: {}, allowDelete: false
+    });
+    expect(desiredObjectFieldState).to.deep.equal({});
+
+    const desiredObjectFieldStateWithDelete = utils.processChangedObjectFields({
+      handler, currentAssetState: {}, desiredAssetState: {}, allowDelete: true
+    });
+    expect(desiredObjectFieldStateWithDelete).to.deep.equal({});
+  });
+
+  it('should propose no change if object field exists in both current and desired states', () => {
+    const currentAssetState = {
+      client_metadata: {
+        foo: 'bar'
+      }
+    };
+
+    const desiredAssetState = {
+      client_metadata: {
+        foo: 'bar'
+      }
+    };
+
+    const desiredObjectFieldState = utils.processChangedObjectFields({
+      handler, currentAssetState, desiredAssetState, allowDelete: false
+    });
+    expect(desiredObjectFieldState).to.deep.equal(desiredAssetState);
+  });
+
+  it('should propose no change if object field exists in current state but not in the desired state and not allowing deletes', () => {
+    const currentAssetState = {
+      client_metadata: {
+        foo: 'bar'
+      }
+    };
+
+    const desiredAssetState = {
+      client_metadata: {}
+    };
+
+    const desiredObjectFieldState = utils.processChangedObjectFields({
+      handler, currentAssetState, desiredAssetState, allowDelete: false
+    });
+    expect(desiredObjectFieldState).to.deep.equal({});
+  });
+
+  it('should propose to delete the object field if exists in current state but not in the desired state and are allowing deletes', () => {
+    const currentAssetState = {
+      client_metadata: {
+        foo: 'bar'
+      }
+    };
+
+    const desiredAssetState = {
+      client_metadata: {}
+    };
+
+    const desiredObjectFieldState = utils.processChangedObjectFields({
+      handler, currentAssetState, desiredAssetState, allowDelete: true
+    });
+    expect(desiredObjectFieldState).to.deep.equal({ client_metadata: {} });
+  });
+
+  it('should propose no change if object field exists in desired state but not in the current state and not allowing deletes', () => {
+    const currentAssetState = {
+      client_metadata: {}
+    };
+
+    const desiredAssetState = {
+      client_metadata: {
+        foo: 'bar'
+      }
+    };
+
+    const desiredObjectFieldState = utils.processChangedObjectFields({
+      handler, currentAssetState, desiredAssetState, allowDelete: false
+    });
+    expect(desiredObjectFieldState).to.deep.equal(desiredAssetState);
   });
 });

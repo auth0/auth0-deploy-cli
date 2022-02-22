@@ -71,11 +71,20 @@ export function dumpJSON(obj, spacing = 0) {
  * @param {boolean} [allowDelete=false]
  * @returns T
  */
-function processChangedObjectFields(handler, desiredAssetState, currentAssetState, objectFields = [], allowDelete = false) {
+export function processChangedObjectFields({
+  handler, desiredAssetState, currentAssetState, allowDelete = false
+}) {
   const desiredAssetStateWithChanges = { ...desiredAssetState };
 
   // eslint-disable-next-line no-restricted-syntax
-  for (const fieldName of objectFields) {
+  for (const fieldName of handler.objectFields) {
+    const areDesiredStateAndCurrentStateEmpty = Object.keys(desiredAssetState[fieldName] || {}).length === 0 && Object.keys(currentAssetState[fieldName] || {}).length === 0;
+    if (areDesiredStateAndCurrentStateEmpty) {
+      // If both the desired state and current state for a given object is empty, it is a no-op and can skip
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
     // A desired state that omits the objectField OR that has it as an empty object should
     // signal that all fields should be removed (subject to ALLOW_DELETE).
     if (desiredAssetState[fieldName] && Object.keys(desiredAssetState[fieldName]).length) {
@@ -88,15 +97,17 @@ function processChangedObjectFields(handler, desiredAssetState, currentAssetStat
         for (const currentObjectFieldPropertyName of Object.keys(
           currentAssetState[fieldName]
         )) {
+          // Loop through each object property that exists currently
           if (desiredAssetState[fieldName][currentObjectFieldPropertyName] === undefined) {
+            // If the object has a property that exists now but doesn't exist in the proposed state
             if (allowDelete) {
               desiredAssetStateWithChanges[fieldName][
                 currentObjectFieldPropertyName
               ] = null;
             } else {
+              // If deletes aren't allowed, do outright delete the property within the object
               log.warn(
-                `Detected that the ${fieldName} of the following ${
-                  handler.name
+                `Detected that the ${fieldName} of the following ${handler.name || handler.id || ''
                 } should be deleted. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config\n${handler.objString(
                   currentAssetState
                 )}`
@@ -114,8 +125,7 @@ function processChangedObjectFields(handler, desiredAssetState, currentAssetStat
     } else {
       delete desiredAssetStateWithChanges[fieldName];
       log.warn(
-        `Detected that the ${fieldName} of the following ${
-          handler.name
+        `Detected that the ${fieldName} of the following ${handler.name || handler.id || ''
         } should be emptied. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config\n${handler.objString(
           currentAssetState
         )}`
@@ -126,7 +136,7 @@ function processChangedObjectFields(handler, desiredAssetState, currentAssetStat
   return desiredAssetStateWithChanges;
 }
 
-export function calcChanges(handler, assets, existing, identifiers = [ 'id', 'name' ], objectFields = [], allowDelete = false) {
+export function calcChanges(handler, assets, existing, identifiers = [ 'id', 'name' ], allowDelete = false) {
   // Calculate the changes required between two sets of assets.
   const update = [];
   let del = [ ...existing ];
@@ -176,8 +186,10 @@ export function calcChanges(handler, assets, existing, identifiers = [ 'id', 'na
             // special treatment. When different metadata objects are passed to APIv2
             // properties must explicitly be marked for deletion by indicating a `null`
             // value.
-            ...(objectFields.length
-              ? processChangedObjectFields(handler, asset, found, objectFields, allowDelete)
+            ...(handler.objectFields.length
+              ? processChangedObjectFields({
+                handler, desiredAssetState: asset, currentAssetState: found, allowDelete
+              })
               : asset)
           });
         }
