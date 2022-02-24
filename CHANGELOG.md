@@ -6,13 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.4.0] - 2022-02-24
 ### Added
 - Allowing @@ array variable replacement to work when wrapped in quotes [#421]
+
 ### Fixed
 - Eliminated benign `client_metadata` warnings on import [#416]
 - Fixing request abstraction from losing function scope, enabling Auth0 Node SDK updates [#412]
+
 ### Security
-- Updating Auth0 Node SDK to 2.40.0 which fixes minor dependency vulnerability 
+- Updating Auth0 Node SDK to 2.40.0 which fixes minor dependency vulnerability
+
 ## [7.3.7] - 2022-02-03
 ### Fixed
 - Expose errors that may be silently missed in Actions [#408]
@@ -426,8 +431,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#403]: https://github.com/auth0/auth0-deploy-cli/issues/403
 [#406]: https://github.com/auth0/auth0-deploy-cli/issues/406
 [#408]: https://github.com/auth0/auth0-deploy-cli/issues/408
+[#412]: https://github.com/auth0/auth0-deploy-cli/issues/412
+[#416]: https://github.com/auth0/auth0-deploy-cli/issues/416
+[#421]: https://github.com/auth0/auth0-deploy-cli/issues/421
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.7...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.4.0...HEAD
+[7.4.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.7...v7.4.0
 [7.3.7]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.6...v7.3.7
 [7.3.6]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.5...v7.3.6
 [7.3.5]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.4...v7.3.5
