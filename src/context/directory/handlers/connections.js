@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { constants, loadFile } from '../../../tools';
+import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
 import log from '../../../logger';
 import {
@@ -30,7 +30,7 @@ function parse(context) {
         const htmlFileName = path.join(connectionsFolder, connection.options.email.body);
 
         if (isFile(htmlFileName)) {
-          connection.options.email.body = loadFile(htmlFileName, context.mappings);
+          connection.options.email.body = loadFileAndReplaceKeywords(htmlFileName, context.mappings);
         }
       }
 

@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { constants, loadFile } from '../../../tools';
+import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
 import log from '../../../logger';
 import {
@@ -31,7 +31,7 @@ function parse(context) {
     } else {
       pages.push({
         ...loadJSON(data.meta, context.mappings),
-        html: loadFile(data.html, context.mappings)
+        html: loadFileAndReplaceKeywords(data.html, context.mappings)
       });
     }
   });

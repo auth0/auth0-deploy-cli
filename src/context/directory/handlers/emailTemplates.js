@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { constants, loadFile } from '../../../tools';
+import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
 import log from '../../../logger';
 import {
@@ -31,7 +31,7 @@ function parse(context) {
     } else {
       emailTemplates.push({
         ...loadJSON(data.meta, context.mappings),
-        body: loadFile(data.html, context.mappings)
+        body: loadFileAndReplaceKeywords(data.html, context.mappings)
       });
     }
   });

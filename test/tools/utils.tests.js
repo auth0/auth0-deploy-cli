@@ -38,13 +38,13 @@ const expectations = {
 describe('#utils', function() {
   it('should load file', () => {
     const file = path.resolve(__dirname, 'test.file.json');
-    const loaded = utils.loadFile(file, mappings);
+    const loaded = utils.loadFileAndReplaceKeywords(file, mappings);
     expect(JSON.parse(loaded)).to.deep.equal(expectations);
   });
 
   it('should throw error if cannot load file', () => {
     expect(function() {
-      utils.loadFile('notexist.json', mappings);
+      utils.loadFileAndReplaceKeywords('notexist.json', mappings);
     }).to.throw(/Unable to load file.*/);
   });
 
