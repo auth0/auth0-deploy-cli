@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Eliminated benign `client_metadata` warnings on import [#416]
 - Fixing request abstraction from losing function scope, enabling Auth0 Node SDK updates [#412]
+### Security
+- Updating Auth0 Node SDK to 2.40.0 which fixes minor dependency vulnerability 
 ## [7.3.7] - 2022-02-03
 ### Fixed
 - Expose errors that may be silently missed in Actions [#408]
