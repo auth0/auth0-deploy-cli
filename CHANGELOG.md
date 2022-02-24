@@ -7,12 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [7.3.8] - 2022-02-24
+## [7.4.0] - 2022-02-24
+
+### Added
+- Allowing @@ array variable replacement to work when wrapped in quotes [#421]
 ### Fixed
 - Eliminated benign `client_metadata` warnings on import [#416]
-- Allowing @@ array variable replacement to work when wrapped in quotes [#421]
 - Fixing request abstraction from losing function scope, enabling Auth0 Node SDK updates [#412]
-
 ## [7.3.7] - 2022-02-03
 ### Fixed
 - Expose errors that may be silently missed in Actions [#408]
