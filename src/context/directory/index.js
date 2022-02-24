@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { loadFile, Auth0 } from '../../tools';
+import { loadFileAndReplaceKeywords, Auth0 } from '../../tools';
 
 import cleanAssets from '../../readonly';
 import log from '../../logger';
@@ -35,7 +35,7 @@ export default class {
       // try load not relative to yaml file
       toLoad = f;
     }
-    return loadFile(toLoad, this.mappings);
+    return loadFileAndReplaceKeywords(toLoad, this.mappings);
   }
 
   async load() {

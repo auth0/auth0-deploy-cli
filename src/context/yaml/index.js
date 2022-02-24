@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import path from 'path';
-import { loadFile, keywordReplace, Auth0 } from '../../tools';
+import { loadFileAndReplaceKeywords, keywordReplace, Auth0 } from '../../tools';
 
 import log from '../../logger';
 import {
@@ -41,7 +41,7 @@ export default class {
       // try load not relative to yaml file
       toLoad = f;
     }
-    return loadFile(path.resolve(toLoad), this.mappings);
+    return loadFileAndReplaceKeywords(path.resolve(toLoad), this.mappings);
   }
 
   async load() {

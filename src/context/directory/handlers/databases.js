@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { constants, loadFile } from '../../../tools';
+import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
 import log from '../../../logger';
 import {
@@ -47,7 +47,7 @@ function getDatabase(folder, mappings) {
         // skip invalid keys in customScripts object
         log.warn('Skipping invalid database configuration: ' + name);
       } else {
-        database.options.customScripts[name] = loadFile(
+        database.options.customScripts[name] = loadFileAndReplaceKeywords(
           path.join(folder, script),
           mappings
         );

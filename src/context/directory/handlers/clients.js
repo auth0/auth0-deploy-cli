@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { constants, loadFile } from '../../../tools';
+import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
 import log from '../../../logger';
 import {
@@ -21,7 +21,7 @@ function parse(context) {
         const htmlFileName = path.join(clientsFolder, client.custom_login_page);
 
         if (isFile(htmlFileName)) {
-          client.custom_login_page = loadFile(htmlFileName, context.mappings);
+          client.custom_login_page = loadFileAndReplaceKeywords(htmlFileName, context.mappings);
         }
       }
 

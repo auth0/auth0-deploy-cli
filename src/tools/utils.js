@@ -4,18 +4,32 @@ import dotProp from 'dot-prop';
 import _ from 'lodash';
 import log from './logger';
 
+export function keywordArrayReplace(input, mappings) {
+  Object.keys(mappings).forEach(function(key) {
+    // Matching against two sets of patterns because a developer may provide their array replacement keyword with or without wrapping quotes. It is not obvious to the developer which to do depending if they're operating in YAML or JSON.
+    const pattern = `@@${key}@@`;
+    const patternWithQuotes = `"${pattern}"`;
+
+    const regex = new RegExp(`${patternWithQuotes}|${pattern}`, 'g');
+    input = input.replace(regex, JSON.stringify(mappings[key]));
+  });
+  return input;
+}
+
+export function keywordStringReplace(input, mappings) {
+  Object.keys(mappings).forEach(function(key) {
+    const regex = new RegExp(`##${key}##`, 'g');
+    input = input.replace(regex, mappings[key]);
+  });
+  return input;
+}
+
 export function keywordReplace(input, mappings) {
   // Replace keywords with mappings within input.
   if (mappings && Object.keys(mappings).length > 0) {
-    Object.keys(mappings).forEach(function(key) {
-      const re = new RegExp(`##${key}##`, 'g');
-      input = input.replace(re, mappings[key]);
-    });
+    input = keywordStringReplace(input, mappings);
 
-    Object.keys(mappings).forEach(function(key) {
-      const re = new RegExp(`@@${key}@@`, 'g');
-      input = input.replace(re, JSON.stringify(mappings[key]));
-    });
+    input = keywordArrayReplace(input, mappings);
   }
   return input;
 }
@@ -39,7 +53,7 @@ export function convertClientNamesToIds(names, clients) {
   return [ ...unresolved, ...result ];
 }
 
-export function loadFile(file, mappings) {
+export function loadFileAndReplaceKeywords(file, mappings) {
   // Load file and replace keyword mappings
   const f = path.resolve(file);
   try {

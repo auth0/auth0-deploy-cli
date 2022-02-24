@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import sanitizeName from 'sanitize-filename';
 import dotProp from 'dot-prop';
-import { loadFile } from './tools';
+import { loadFileAndReplaceKeywords } from './tools';
 import log from './logger';
 
 export function isDirectory(f) {
@@ -34,7 +34,7 @@ export function getFiles(folder, exts) {
 
 export function loadJSON(file, mappings) {
   try {
-    const content = loadFile(file, mappings);
+    const content = loadFileAndReplaceKeywords(file, mappings);
     return JSON.parse(content);
   } catch (e) {
     throw new Error(`Error parsing JSON from metadata file: ${file}, because: ${e.message}`);
