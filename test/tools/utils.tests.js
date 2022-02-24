@@ -439,3 +439,98 @@ describe('#utils processChangedObjectFields', () => {
     expect(desiredObjectFieldState).to.deep.equal(desiredAssetState);
   });
 });
+
+describe('#keywordReplacement', () => {
+  it('should replace string keywords and array keywords in a JSON file', () => {
+    const mapping = {
+      ARRAY_REPLACEMENT: [ 'foo', 'bar' ],
+      STRING_REPLACEMENT: 'baz',
+      OTHER_REPLACEMENT: 'lol'
+    };
+    const inputJSON = '{ "arrayReplaceNoQuotes": @@ARRAY_REPLACEMENT@@, "arrayReplaceWithQuotes": "@@ARRAY_REPLACEMENT@@", "stringReplace": "##STRING_REPLACEMENT##", "noReplace": "OTHER_REPLACEMENT" }';
+    const output = utils.keywordReplace(inputJSON, mapping);
+
+    expect(() => JSON.parse(output)).to.not.throw();
+
+    expect(output).to.equal(`{ "arrayReplaceNoQuotes": ${JSON.stringify(mapping.ARRAY_REPLACEMENT)}, "arrayReplaceWithQuotes": ${JSON.stringify(mapping.ARRAY_REPLACEMENT)}, "stringReplace": "${mapping.STRING_REPLACEMENT}", "noReplace": "OTHER_REPLACEMENT" }`);
+  });
+
+  it('should replace keywords in YAML file', () => {
+    const mapping = {
+      ARRAY_REPLACEMENT: [ 'foo', 'bar' ],
+      STRING_REPLACEMENT: 'baz',
+      OTHER_REPLACEMENT: 'lol'
+    };
+
+    const inputYAML = `
+    ---
+    stringReplaceNoQuotes: ##STRING_REPLACEMENT##
+    stringReplaceWithQuotes: "##STRING_REPLACEMENT##"
+    arrayReplace: @@ARRAY_REPLACEMENT@@
+    arrayReplaceWithQuotes: "@@ARRAY_REPLACEMENT@@"
+    noReplace: OTHER_REPLACEMENT
+    `;
+
+    const output = utils.keywordReplace(inputYAML, mapping);
+
+    const expectedOutputYAML = `
+    ---
+    stringReplaceNoQuotes: ${mapping.STRING_REPLACEMENT}
+    stringReplaceWithQuotes: "${mapping.STRING_REPLACEMENT}"
+    arrayReplace: ["foo","bar"]
+    arrayReplaceWithQuotes: ["foo","bar"]
+    noReplace: OTHER_REPLACEMENT
+    `;
+
+    expect(output).to.equal(expectedOutputYAML);
+  });
+
+  describe('#keywordStringReplace', () => {
+    const mapping = {
+      STRING_REPLACEMENT: 'foo',
+      OTHER_REPLACEMENT: 'bar'
+    };
+
+    it('should not replace values not wrapped in ##', () => {
+      const input = '{ "foo": STRING_REPLACEMENT, "bar": "STRING_REPLACEMENT" }';
+      const output = utils.keywordStringReplace(input, mapping);
+      expect(output).to.equal(input);
+    });
+
+    it('should replace ## wrapped values', () => {
+      const output = utils.keywordStringReplace('{ "foo": "##STRING_REPLACEMENT##", "bar": "OTHER_REPLACEMENT" }', mapping);
+      expect(output).to.equal(`{ "foo": "${mapping.STRING_REPLACEMENT}", "bar": "OTHER_REPLACEMENT" }`);
+    });
+
+    it('should replace ## wrapped values and maintain quotes', () => {
+      const output = utils.keywordStringReplace('{ "foo": ##STRING_REPLACEMENT##, "bar": "OTHER_REPLACEMENT" }', mapping);
+      expect(output).to.equal(`{ "foo": ${mapping.STRING_REPLACEMENT}, "bar": "OTHER_REPLACEMENT" }`);
+    });
+  });
+
+  describe('#keywordArrayReplace', () => {
+    const mapping = {
+      ARRAY_REPLACEMENT: [ 'foo', 'bar' ],
+      OTHER_REPLACEMENT: 'baz'
+    };
+
+    it('should not replace values not wrapped in @@', () => {
+      const input = '{ "foo": ARRAY_REPLACEMENT, "bar": "ARRAY_REPLACEMENT" }';
+      const output = utils.keywordArrayReplace(input, mapping);
+      expect(output).to.equal(input);
+    });
+
+    it('should replace @@ wrapped values', () => {
+      const output = utils.keywordArrayReplace('{ "foo": @@ARRAY_REPLACEMENT@@, "bar": "OTHER_REPLACEMENT" }', mapping);
+      const parsedOutput = JSON.parse(output);
+      expect(parsedOutput).to.deep.equal({ foo: mapping.ARRAY_REPLACEMENT, bar: 'OTHER_REPLACEMENT' });
+    });
+
+    it('should replace @@ wrapped values, even when wrapped with quotes', () => {
+      const inputWrappedInQuotes = '{ "foo": "@@ARRAY_REPLACEMENT@@", "bar": "OTHER_REPLACEMENT"}';
+      const output = utils.keywordArrayReplace(inputWrappedInQuotes, mapping);
+      const parsedOutput = JSON.parse(output);
+      expect(parsedOutput).to.deep.equal({ foo: mapping.ARRAY_REPLACEMENT, bar: 'OTHER_REPLACEMENT' });
+    });
+  });
+});
