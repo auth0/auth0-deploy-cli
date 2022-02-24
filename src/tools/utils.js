@@ -53,7 +53,7 @@ export function convertClientNamesToIds(names, clients) {
   return [ ...unresolved, ...result ];
 }
 
-export function loadFile(file, mappings) {
+export function loadFileAndReplaceKeywords(file, mappings) {
   // Load file and replace keyword mappings
   const f = path.resolve(file);
   try {
