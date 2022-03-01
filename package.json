@@ -29,7 +29,6 @@
   "readme": "README.md",
   "homepage": "https://github.com/auth0/auth0-deploy-cli#readme",
   "dependencies": {
-    "@types/nconf": "^0.10.1",
     "ajv": "^6.12.6",
     "auth0": "^2.40.0",
     "dot-prop": "^5.2.0",
