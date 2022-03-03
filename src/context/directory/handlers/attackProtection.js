@@ -3,20 +3,33 @@ import path from 'path';
 import { constants } from '../../../tools';
 import { dumpJSON, existsMustBeDir, loadJSON } from '../../../utils';
 
-function parse(context) {
-  const attackProtectionFolder = path.join(context.filePath, constants.ATTACK_PROTECTION_DIRECTORY);
+function attackProtectionFiles(filePath) {
+  const directory = path.join(filePath, constants.ATTACK_PROTECTION_DIRECTORY);
 
-  if (!existsMustBeDir(attackProtectionFolder)) {
+  return {
+    directory: directory,
+    breachedPasswordDetection: path.join(directory, 'breached-password-detection.json'),
+    bruteForceProtection: path.join(directory, 'brute-force-protection.json'),
+    suspiciousIpThrottling: path.join(directory, 'suspicious-ip-throttling.json')
+  };
+}
+
+function parse(context) {
+  const files = attackProtectionFiles(context.filePath);
+
+  if (!existsMustBeDir(files.directory)) {
     return {
-      breachedPasswordDetection: undefined,
-      bruteForceProtection: undefined,
-      suspiciousIpThrottling: undefined
+      attackProtection: {
+        breachedPasswordDetection: {},
+        bruteForceProtection: {},
+        suspiciousIpThrottling: {}
+      }
     };
   }
 
-  const breachedPasswordDetection = loadJSON(path.join(attackProtectionFolder, 'breached-password-detection.json'));
-  const bruteForceProtection = loadJSON(path.join(attackProtectionFolder, 'brute-force-protection.json'));
-  const suspiciousIpThrottling = loadJSON(path.join(attackProtectionFolder, 'suspicious-ip-throttling.json'));
+  const breachedPasswordDetection = loadJSON(files.breachedPasswordDetection);
+  const bruteForceProtection = loadJSON(files.bruteForceProtection);
+  const suspiciousIpThrottling = loadJSON(files.suspiciousIpThrottling);
 
   return {
     attackProtection: {
@@ -30,17 +43,12 @@ function parse(context) {
 async function dump(context) {
   const { attackProtection } = context.assets;
 
-  // Create Attack Protection folder
-  const attackProtectionFolder = path.join(context.filePath, constants.ATTACK_PROTECTION_DIRECTORY);
-  fs.ensureDirSync(attackProtectionFolder);
+  const files = attackProtectionFiles(context.filePath);
+  fs.ensureDirSync(files.directory);
 
-  const breachedPasswordDetectionFile = path.join(attackProtectionFolder, 'breached-password-detection.json');
-  const bruteForceProtectionFile = path.join(attackProtectionFolder, 'brute-force-protection.json');
-  const suspiciousIpThrottlingFile = path.join(attackProtectionFolder, 'suspicious-ip-throttling.json');
-
-  dumpJSON(breachedPasswordDetectionFile, attackProtection.breachedPasswordDetection);
-  dumpJSON(bruteForceProtectionFile, attackProtection.bruteForceProtection);
-  dumpJSON(suspiciousIpThrottlingFile, attackProtection.suspiciousIpThrottling);
+  dumpJSON(files.breachedPasswordDetection, attackProtection.breachedPasswordDetection);
+  dumpJSON(files.bruteForceProtection, attackProtection.bruteForceProtection);
+  dumpJSON(files.suspiciousIpThrottling, attackProtection.suspiciousIpThrottling);
 }
 
 export default {
