@@ -98,6 +98,11 @@ export function mockMgmtClient() {
       getMigrations: () => ({
         migration_flag: true
       })
+    },
+    attackProtection: {
+      getBreachedPasswordDetectionConfig: () => ({}),
+      getBruteForceConfig: () => ({}),
+      getSuspiciousIpThrottlingConfig: () => ({})
     }
   };
 }
