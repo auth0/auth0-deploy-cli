@@ -1,7 +1,19 @@
 import DefaultHandler from './default';
 
 export const schema = {
-  type: 'object'
+  type: 'object',
+  properties: {
+    breachedPasswordDetection: {
+      type: 'object'
+    },
+    bruteForceProtection: {
+      type: 'object'
+    },
+    suspiciousIpThrottling: {
+      type: 'object'
+    }
+  },
+  additionalProperties: false
 };
 
 export default class AttackProtectionHandler extends DefaultHandler {
@@ -31,14 +43,16 @@ export default class AttackProtectionHandler extends DefaultHandler {
       return this.existing;
     }
 
-    const breachedPasswordDetection = await this.client.attackProtection.getBreachedPasswordDetectionConfig();
-    const bruteForceProtection = await this.client.attackProtection.getBruteForceConfig();
-    const suspiciousIpThrottling = await this.client.attackProtection.getSuspiciousIpThrottlingConfig();
+    const [ breachedPasswordDetection, bruteForceProtection, suspiciousIpThrottling ] = await Promise.all([
+      this.client.attackProtection.getBreachedPasswordDetectionConfig(),
+      this.client.attackProtection.getBruteForceConfig(),
+      this.client.attackProtection.getSuspiciousIpThrottlingConfig()
+    ]);
 
     this.existing = {
-      breachedPasswordDetection: breachedPasswordDetection,
-      bruteForceProtection: bruteForceProtection,
-      suspiciousIpThrottling: suspiciousIpThrottling
+      breachedPasswordDetection,
+      bruteForceProtection,
+      suspiciousIpThrottling
     };
 
     return this.existing;
@@ -51,14 +65,14 @@ export default class AttackProtectionHandler extends DefaultHandler {
       return;
     }
 
-    await this.client.attackProtection
-      .updateBreachedPasswordDetectionConfig({}, attackProtection.breachedPasswordDetection);
-
-    await this.client.attackProtection
-      .updateSuspiciousIpThrottlingConfig({}, attackProtection.suspiciousIpThrottling);
-
-    await this.client.attackProtection
-      .updateBruteForceConfig({}, attackProtection.bruteForceProtection);
+    Promise.all([
+      this.client.attackProtection
+        .updateBreachedPasswordDetectionConfig({}, attackProtection.breachedPasswordDetection),
+      this.client.attackProtection
+        .updateSuspiciousIpThrottlingConfig({}, attackProtection.suspiciousIpThrottling),
+      this.client.attackProtection
+        .updateBruteForceConfig({}, attackProtection.bruteForceProtection)
+    ]);
 
     this.updated += 1;
     this.didUpdate(attackProtection);
