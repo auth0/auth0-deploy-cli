@@ -19,11 +19,7 @@ function parse(context) {
 
   if (!existsMustBeDir(files.directory)) {
     return {
-      attackProtection: {
-        breachedPasswordDetection: {},
-        bruteForceProtection: {},
-        suspiciousIpThrottling: {}
-      }
+      attackProtection: undefined
     };
   }
 
