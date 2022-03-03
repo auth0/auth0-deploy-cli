@@ -172,4 +172,6 @@ constants.CONNECTIONS_ID_NAME = 'id';
 constants.CONCURRENT_CALLS = 5;
 constants.ROLES_DIRECTORY = 'roles';
 
+constants.ATTACK_PROTECTION_DIRECTORY = 'attack-protection';
+
 export default constants;

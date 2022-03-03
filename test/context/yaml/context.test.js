@@ -170,6 +170,11 @@ describe('#YAML context validation', () => {
       tenant: {
         default_directory: 'users',
         friendly_name: 'Test'
+      },
+      attackProtection: {
+        breachedPasswordDetection: {},
+        bruteForceProtection: {},
+        suspiciousIpThrottling: {}
       }
     });
   });
@@ -245,6 +250,11 @@ describe('#YAML context validation', () => {
       tenant: {
         default_directory: 'users',
         friendly_name: 'Test'
+      },
+      attackProtection: {
+        breachedPasswordDetection: {},
+        bruteForceProtection: {},
+        suspiciousIpThrottling: {}
       }
     });
   });
@@ -321,6 +331,11 @@ describe('#YAML context validation', () => {
       tenant: {
         default_directory: 'users',
         friendly_name: 'Test'
+      },
+      attackProtection: {
+        breachedPasswordDetection: {},
+        bruteForceProtection: {},
+        suspiciousIpThrottling: {}
       }
     });
   });

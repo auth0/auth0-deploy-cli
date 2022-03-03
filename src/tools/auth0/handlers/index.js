@@ -23,6 +23,7 @@ import * as migrations from './migrations';
 import * as actions from './actions';
 import * as triggers from './triggers';
 import * as organizations from './organizations';
+import * as attackProtection from './attackProtection';
 
 export {
   rules,
@@ -49,5 +50,6 @@ export {
   migrations,
   actions,
   triggers,
-  organizations
+  organizations,
+  attackProtection
 };
