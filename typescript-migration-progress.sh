@@ -5,10 +5,10 @@
 
 echo "- - - - - Typescript Migration - - - - - -"
 
-locJs=$((find ./src -name "*.js" -print0 | xargs -0 cat) | wc -l | xargs)
-locTs=$((find ./src -name "*.ts" -print0 | xargs -0 cat) | wc -l | xargs)
+locJs=$( (find ./src -name "*.js" -print0 | xargs -0 cat) | wc -l | xargs)
+locTs=$( (find ./src -name "*.ts" -print0 | xargs -0 cat) | wc -l | xargs)
 totalLoc=$(expr ${locJs} + ${locTs})
-percentLocMigrated=$(expr $(expr ${locTs} \* 100) / ${totalLoc})
+percentLocMigrated=$(expr $(${locTs} \* 100 | bc) / ${totalLoc})
 
 echo "${locTs} of ${totalLoc} (${percentLocMigrated}%) lines of code migrated to Typescript"
 
