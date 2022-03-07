@@ -49,6 +49,8 @@ jobs:
           command: npm publish
   
   ts_migration_progress:
+    machine:
+      -image: ubuntu-2004:202111-02
     steps:
       - run :
           name: Typescript Migration Progress
