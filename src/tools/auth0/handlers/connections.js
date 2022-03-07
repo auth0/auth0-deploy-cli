@@ -1,6 +1,7 @@
 import dotProp from 'dot-prop';
 import DefaultHandler, { order } from './default';
 import { filterExcluded, convertClientNameToId, getEnabledClients } from '../../utils';
+import _ from 'lodash'
 
 export const schema = {
   type: 'array',
@@ -14,7 +15,7 @@ export const schema = {
       realms: { type: 'array', items: { type: 'string' } },
       metadata: { type: 'object' }
     },
-    required: [ 'name', 'strategy' ]
+    required: ['name', 'strategy']
   }
 };
 
@@ -32,13 +33,15 @@ export const addExcludedConnectionPropertiesToChanges = ({
   const excludedFields = config()?.EXCLUDED_PROPS?.connections || [];
   if (excludedFields.length === 0) return proposedChanges;
 
-  const newProposedUpdates = proposedChanges.update.map((proposedConnection) => {
-    const currConnection = existingConnections.find(({ id }) => id === proposedConnection.id);
-
-    if (currConnection === undefined) return proposedConnection;
-
+  const existingConnectionsMap = _.keyBy(existingConnections, 'id');
+  const excludedOptions = excludedFields.filter(
     // Only include fields that pertain to options
-    const currentExcludedPropertyValues = excludedFields.filter((excludedField) => excludedField.indexOf('options') === 0).reduce((agg, excludedField) => {
+    (excludedField) => excludedField.startsWith('options')
+  )
+
+  const newProposedUpdates = proposedChanges.update.map((proposedConnection) => {
+    const currConnection = existingConnectionsMap[proposedConnection.id];
+    const currentExcludedPropertyValues = excludedOptions.reduce((agg, excludedField) => {
       if (!dotProp.has(currConnection, excludedField)) return agg;
 
       const currentExcludedFieldValue = dotProp.get(currConnection, excludedField);
@@ -67,7 +70,7 @@ export default class ConnectionsHandler extends DefaultHandler {
     super({
       ...config,
       type: 'connections',
-      stripUpdateFields: [ 'strategy', 'name' ]
+      stripUpdateFields: ['strategy', 'name']
     });
   }
 

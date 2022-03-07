@@ -12,7 +12,7 @@ const pool = {
 };
 
 describe('#connections handler', () => {
-  const config = function (key) {
+  const config = function(key) {
     return config.data && config.data[key];
   };
 
@@ -35,7 +35,7 @@ describe('#connections handler', () => {
       ];
 
       try {
-        await stageFn.apply(handler, [{ connections: data }]);
+        await stageFn.apply(handler, [ { connections: data } ]);
       } catch (err) {
         expect(err).to.be.an('object');
         expect(err.message).to.include('Names must be unique');
@@ -51,7 +51,7 @@ describe('#connections handler', () => {
         }
       ];
 
-      await stageFn.apply(handler, [{ connections: data }]);
+      await stageFn.apply(handler, [ { connections: data } ]);
     });
   });
 
@@ -59,7 +59,7 @@ describe('#connections handler', () => {
     it('should create connection', async () => {
       const auth0 = {
         connections: {
-          create: function (data) {
+          create: function(data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someConnection');
@@ -78,7 +78,7 @@ describe('#connections handler', () => {
       const handler = new connections.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [{ connections: [{ name: 'someConnection' }] }]);
+      await stageFn.apply(handler, [ { connections: [ { name: 'someConnection' } ] } ]);
     });
 
     it('should get connections', async () => {
@@ -87,7 +87,7 @@ describe('#connections handler', () => {
       const auth0 = {
         connections: {
           getAll: () => [
-            { strategy: 'github', name: 'github', enabled_clients: [clientId] },
+            { strategy: 'github', name: 'github', enabled_clients: [ clientId ] },
             { strategy: 'auth0', name: 'db-should-be-ignored', enabled_clients: [] }
           ]
         },
@@ -101,33 +101,33 @@ describe('#connections handler', () => {
 
       const handler = new connections.default({ client: auth0, config });
       const data = await handler.getType();
-      expect(data).to.deep.equal([{ strategy: 'github', name: 'github', enabled_clients: [clientId] }]);
+      expect(data).to.deep.equal([ { strategy: 'github', name: 'github', enabled_clients: [ clientId ] } ]);
     });
 
     it('should update connection', async () => {
       const auth0 = {
         connections: {
-          create: function (data) {
+          create: function(data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
             return Promise.resolve(data);
           },
-          update: function (params, data) {
+          update: function(params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
-              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
+              enabled_clients: [ 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' ],
               options: { passwordPolicy: 'testPolicy' }
             });
 
             return Promise.resolve({ ...params, ...data });
           },
           delete: () => Promise.resolve([]),
-          getAll: () => [{ name: 'someConnection', id: 'con1', strategy: 'custom' }]
+          getAll: () => [ { name: 'someConnection', id: 'con1', strategy: 'custom' } ]
         },
         clients: {
-          getAll: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]
+          getAll: () => [ { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' } ]
         },
         pool
       };
@@ -138,23 +138,23 @@ describe('#connections handler', () => {
         {
           name: 'someConnection',
           strategy: 'custom',
-          enabled_clients: ['client1'],
+          enabled_clients: [ 'client1' ],
           options: {
             passwordPolicy: 'testPolicy'
           }
         }
       ];
 
-      await stageFn.apply(handler, [{ connections: data }]);
+      await stageFn.apply(handler, [ { connections: data } ]);
     });
 
     it('should convert client name with ID in idpinitiated.client_id', async () => {
       const auth0 = {
         connections: {
-          create: function (data) {
+          create: function(data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.deep.equal({
-              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
+              enabled_clients: [ 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' ],
               name: 'someConnection-2',
               strategy: 'custom',
               options: {
@@ -168,12 +168,12 @@ describe('#connections handler', () => {
             });
             return Promise.resolve(data);
           },
-          update: function (params, data) {
+          update: function(params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
-              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
+              enabled_clients: [ 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' ],
               options: {
                 passwordPolicy: 'testPolicy',
                 idpinitiated: {
@@ -206,7 +206,7 @@ describe('#connections handler', () => {
         {
           name: 'someSamlConnection',
           strategy: 'samlp',
-          enabled_clients: ['client1'],
+          enabled_clients: [ 'client1' ],
           options: {
             passwordPolicy: 'testPolicy',
             idpinitiated: {
@@ -219,7 +219,7 @@ describe('#connections handler', () => {
         {
           name: 'someConnection-2',
           strategy: 'custom',
-          enabled_clients: ['client1'],
+          enabled_clients: [ 'client1' ],
           options: {
             passwordPolicy: 'testPolicy',
             idpinitiated: {
@@ -231,16 +231,16 @@ describe('#connections handler', () => {
         }
       ];
 
-      await stageFn.apply(handler, [{ connections: data }]);
+      await stageFn.apply(handler, [ { connections: data } ]);
     });
 
     it('should keep client ID in idpinitiated.client_id', async () => {
       const auth0 = {
         connections: {
-          create: function (data) {
+          create: function(data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.deep.equal({
-              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
+              enabled_clients: [ 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' ],
               name: 'someConnection-2',
               strategy: 'custom',
               options: {
@@ -254,12 +254,12 @@ describe('#connections handler', () => {
             });
             return Promise.resolve(data);
           },
-          update: function (params, data) {
+          update: function(params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
-              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
+              enabled_clients: [ 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' ],
               options: {
                 passwordPolicy: 'testPolicy',
                 idpinitiated: {
@@ -292,7 +292,7 @@ describe('#connections handler', () => {
         {
           name: 'someSamlConnection',
           strategy: 'samlp',
-          enabled_clients: ['client1'],
+          enabled_clients: [ 'client1' ],
           options: {
             passwordPolicy: 'testPolicy',
             idpinitiated: {
@@ -305,7 +305,7 @@ describe('#connections handler', () => {
         {
           name: 'someConnection-2',
           strategy: 'custom',
-          enabled_clients: ['client1'],
+          enabled_clients: [ 'client1' ],
           options: {
             passwordPolicy: 'testPolicy',
             idpinitiated: {
@@ -317,7 +317,7 @@ describe('#connections handler', () => {
         }
       ];
 
-      await stageFn.apply(handler, [{ connections: data }]);
+      await stageFn.apply(handler, [ { connections: data } ]);
     });
 
     // If client is excluded and in the existing connection this client is enabled, it should keep enabled
@@ -325,26 +325,26 @@ describe('#connections handler', () => {
     it('should handle excluded clients properly', async () => {
       const auth0 = {
         connections: {
-          create: function (data) {
+          create: function(data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
             return Promise.resolve(data);
           },
-          update: function (params, data) {
+          update: function(params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
-              enabled_clients: ['client1-id', 'excluded-one-id'],
+              enabled_clients: [ 'client1-id', 'excluded-one-id' ],
               options: { passwordPolicy: 'testPolicy' }
             });
 
             return Promise.resolve({ ...params, ...data });
           },
           delete: () => Promise.resolve([]),
-          getAll: () => [{
-            name: 'someConnection', id: 'con1', strategy: 'custom', enabled_clients: ['excluded-one-id']
-          }]
+          getAll: () => [ {
+            name: 'someConnection', id: 'con1', strategy: 'custom', enabled_clients: [ 'excluded-one-id' ]
+          } ]
         },
         clients: {
           getAll: () => [
@@ -362,34 +362,34 @@ describe('#connections handler', () => {
         {
           name: 'someConnection',
           strategy: 'custom',
-          enabled_clients: ['client1', 'excluded-one', 'excluded-two'],
+          enabled_clients: [ 'client1', 'excluded-one', 'excluded-two' ],
           options: {
             passwordPolicy: 'testPolicy'
           }
         }
       ];
 
-      await stageFn.apply(handler, [{ connections: data, exclude: { clients: ['excluded-one', 'excluded-two'] } }]);
+      await stageFn.apply(handler, [ { connections: data, exclude: { clients: [ 'excluded-one', 'excluded-two' ] } } ]);
     });
 
     it('should delete connection and create another one instead', async () => {
       const auth0 = {
         connections: {
-          create: function (data) {
+          create: function(data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someConnection');
             return Promise.resolve(data);
           },
           update: () => Promise.resolve([]),
-          delete: function (params) {
+          delete: function(params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
 
             return Promise.resolve([]);
           },
-          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }]
+          getAll: () => [ { id: 'con1', name: 'existingConnection', strategy: 'custom' } ]
         },
         clients: {
           getAll: () => []
@@ -406,7 +406,7 @@ describe('#connections handler', () => {
         }
       ];
 
-      await stageFn.apply(handler, [{ connections: data }]);
+      await stageFn.apply(handler, [ { connections: data } ]);
     });
 
     it('should delete all connections', async () => {
@@ -415,14 +415,14 @@ describe('#connections handler', () => {
         connections: {
           create: () => Promise.resolve([]),
           update: () => Promise.resolve([]),
-          delete: function (params) {
+          delete: function(params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             removed = true;
             return Promise.resolve([]);
           },
-          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }]
+          getAll: () => [ { id: 'con1', name: 'existingConnection', strategy: 'custom' } ]
         },
         clients: {
           getAll: () => []
@@ -433,7 +433,7 @@ describe('#connections handler', () => {
       const handler = new connections.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [{ connections: [] }]);
+      await stageFn.apply(handler, [ { connections: [] } ]);
       expect(removed).to.equal(true);
     });
 
@@ -441,17 +441,17 @@ describe('#connections handler', () => {
       config.data.AUTH0_ALLOW_DELETE = false;
       const auth0 = {
         connections: {
-          create: function (data) {
+          create: function(data) {
             (() => expect(this).to.not.be.undefined)();
             return Promise.resolve(data);
           },
           update: () => Promise.resolve([]),
-          delete: function (params) {
+          delete: function(params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },
-          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }]
+          getAll: () => [ { id: 'con1', name: 'existingConnection', strategy: 'custom' } ]
         },
         clients: {
           getAll: () => []
@@ -468,7 +468,7 @@ describe('#connections handler', () => {
         }
       ];
 
-      await stageFn.apply(handler, [{ connections: data }]);
+      await stageFn.apply(handler, [ { connections: data } ]);
     });
 
     it('should not remove connections if run by extension', async () => {
@@ -479,12 +479,12 @@ describe('#connections handler', () => {
         connections: {
           create: () => Promise.resolve(),
           update: () => Promise.resolve([]),
-          delete: function (params) {
+          delete: function(params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },
-          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }]
+          getAll: () => [ { id: 'con1', name: 'existingConnection', strategy: 'custom' } ]
         },
         clients: {
           getAll: () => []
@@ -495,7 +495,7 @@ describe('#connections handler', () => {
       const handler = new connections.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [{ connections: [] }]);
+      await stageFn.apply(handler, [ { connections: [] } ]);
     });
 
     it('should not remove/create/update excluded connections', async () => {
@@ -513,7 +513,7 @@ describe('#connections handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },
-          delete: function (params) {
+          delete: function(params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
@@ -533,12 +533,12 @@ describe('#connections handler', () => {
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const assets = {
         exclude: {
-          connections: ['existing1', 'existing2', 'existing3']
+          connections: [ 'existing1', 'existing2', 'existing3' ]
         },
-        connections: [{ name: 'existing3', strategy: 'custom' }]
+        connections: [ { name: 'existing3', strategy: 'custom' } ]
       };
 
-      await stageFn.apply(handler, [assets]);
+      await stageFn.apply(handler, [ assets ]);
     });
   });
 });
@@ -637,7 +637,7 @@ describe('#addExcludedConnectionPropertiesToChanges', () => {
       config: () => ({
         EXCLUDED_PROPS: {
           connections: [
-            'options',
+            'options'
           ]
         }
       }),
@@ -670,7 +670,7 @@ describe('#addExcludedConnectionPropertiesToChanges', () => {
         EXCLUDED_PROPS: {
           connections: [
             'some-unrelated-property-1',
-            'options.some-unrelated-property-2',
+            'options.some-unrelated-property-2'
           ],
           tenant: [
             'some-unrelated-property-3'
