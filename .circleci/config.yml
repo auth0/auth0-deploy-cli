@@ -50,7 +50,7 @@ jobs:
   
   ts_migration_progress:
     steps:
-     - run :
+      - run :
           name: Typescript Migration Progress
           command: sh typescript-migration-progress.sh
 
@@ -83,7 +83,7 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v.*/
-  ts_migration_progress:
+  ts_migration:
     jobs:
       - ts_migration_progress:
           filters:
