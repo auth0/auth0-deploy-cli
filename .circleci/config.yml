@@ -47,6 +47,12 @@ jobs:
       - run:
           name: Publish package
           command: npm publish
+  
+  ts_migration_progress:
+    steps:
+     - run :
+          name: Typescript Migration Progress
+          command: sh typescript-migration-progress.sh
 
 workflows:
   version: 2
@@ -77,3 +83,9 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v.*/
+  ts_migration_progress:
+    jobs:
+      - ts_migration_progress:
+          filters:
+            tags:
+              ignore: /.*/
