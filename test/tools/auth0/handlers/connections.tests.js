@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 const { expect } = require('chai');
 const connections = require('../../../../src/tools/auth0/handlers/connections');
 
@@ -539,5 +540,162 @@ describe('#connections handler', () => {
 
       await stageFn.apply(handler, [ assets ]);
     });
+  });
+});
+
+describe('#addExcludedConnectionPropertiesToChanges', () => {
+  const { addExcludedConnectionPropertiesToChanges } = connections;
+
+  const mockConnsWithoutExcludedProps = [
+    {
+      id: 'con_1',
+      name: 'connection-1',
+      options: {
+        domain: 'login.auth0.net'
+      },
+      enabled_clients: [
+        'client_1',
+        'client_2'
+      ],
+      shouldHaveExcludedProps: true// Not a real connection property, just helps testing
+    },
+    {
+      id: 'con_2',
+      name: 'connection-2',
+      options: {
+        domain: 'enterprise-login.auth0.net'
+      },
+      enabled_clients: [
+        'client_1'
+      ],
+      shouldHaveExcludedProps: false// Not a real connection property, just helps testing
+    },
+    {
+      id: 'con_3',
+      name: 'connection-3',
+      options: {
+        domain: 'login.azure-prod-us.net'
+      },
+      enabled_clients: [
+        'client_1',
+        'client_3'
+      ],
+      shouldHaveExcludedProps: true// Not a real connection property, just helps testing
+    }
+  ];
+
+  const mockConnsWithExcludedProps = mockConnsWithoutExcludedProps.map((conn) => {
+    if (!conn.shouldHaveExcludedProps) return conn;
+    return {
+      ...conn,
+      options: {
+        ...conn.options,
+        client_id: `${conn.id}-client-id`,
+        client_secret: `${conn.id}-client-secret`
+      }
+    };
+  });
+
+  const proposedChanges = {
+    del: [],
+    update: mockConnsWithoutExcludedProps,
+    create: []
+  };
+
+  const existingConnections = mockConnsWithExcludedProps;
+
+  const config = () => ({
+    EXCLUDED_PROPS: {
+      tenant: [
+        'some-unrelated-excluded-property'
+      ],
+      connections: [
+        'options.client_id',
+        'options.client_secret'
+      ]
+    }
+  });
+
+  it('should add excluded properties into connections update payload', () => {
+    const updatedProposedChanges = addExcludedConnectionPropertiesToChanges({
+      config,
+      existingConnections,
+      proposedChanges
+    });
+    expect(updatedProposedChanges.update).to.lengthOf(proposedChanges.update.length);
+    // Loop through proposed changes and expect to see connections that should have excluded properties to have them
+    updatedProposedChanges.update.forEach((change, i) => {
+      if (!change.shouldHaveExcludedProps) {
+        return expect(change).to.deep.equal(mockConnsWithoutExcludedProps[i]);
+      }
+      expect(change).to.deep.equal(mockConnsWithExcludedProps[i]);
+    });
+  });
+
+  it('should add entire excluded options object into connections update payload', () => {
+    const updatedProposedChanges = addExcludedConnectionPropertiesToChanges({
+      config: () => ({
+        EXCLUDED_PROPS: {
+          connections: [
+            'options'
+          ]
+        }
+      }),
+      existingConnections,
+      proposedChanges
+    });
+    expect(updatedProposedChanges.update).to.lengthOf(proposedChanges.update.length);
+    // Loop through proposed changes and expect to see connections that should have excluded properties to have them
+    updatedProposedChanges.update.forEach((change, i) => {
+      if (!change.shouldHaveExcludedProps) {
+        return expect(change).to.deep.equal(mockConnsWithoutExcludedProps[i]);
+      }
+      expect(change).to.deep.equal(mockConnsWithExcludedProps[i]);
+    });
+  });
+
+  it('should not modify update payload if no excluded properties exist', () => {
+    const updatedProposedChangesNoConfig = addExcludedConnectionPropertiesToChanges({
+      config: () => ({}),
+      existingConnections,
+      proposedChanges
+    });
+
+    expect(updatedProposedChangesNoConfig).to.deep.equal(proposedChanges);// Expect no change
+  });
+
+  it('should not modify update payload if only unrelated excluded properties exist', () => {
+    const updatedProposedChangesUnrelatedConfig = addExcludedConnectionPropertiesToChanges({
+      config: () => ({
+        EXCLUDED_PROPS: {
+          connections: [
+            'some-unrelated-property-1',
+            'options.some-unrelated-property-2'
+          ],
+          tenant: [
+            'some-unrelated-property-3'
+          ]
+        }
+      }),
+      existingConnections,
+      proposedChanges
+    });
+    expect(updatedProposedChangesUnrelatedConfig).to.deep.equal(proposedChanges);// Expect no change
+  });
+
+  it('should not modify update payload if no updates are proposed', () => {
+    const updatedProposedChangesUnrelatedConfig = addExcludedConnectionPropertiesToChanges({
+      config,
+      existingConnections,
+      proposedChanges: {
+        ...proposedChanges,
+        update: []// Override to have no proposed updates
+      }
+    });
+    expect(updatedProposedChangesUnrelatedConfig).to.deep.equal({
+      create: [],
+      del: [],
+      update: []
+    });// Expect no change
   });
 });

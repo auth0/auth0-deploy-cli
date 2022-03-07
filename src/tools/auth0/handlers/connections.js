@@ -1,3 +1,5 @@
+import dotProp from 'dot-prop';
+import _ from 'lodash';
 import DefaultHandler, { order } from './default';
 import { filterExcluded, convertClientNameToId, getEnabledClients } from '../../utils';
 
@@ -15,6 +17,52 @@ export const schema = {
     },
     required: [ 'name', 'strategy' ]
   }
+};
+
+// addExcludedConnectionPropertiesToChanges superimposes excluded properties on the `options` object. The Auth0 API
+// will overwrite the options property when updating connections, so it is necessary to add excluded properties back in to prevent those excluded properties from being deleted.
+// This use case is common because organizations may not want to expose sensitive connection details, but want to preserve them in the tenant.
+// exported only for unit testing purposes
+export const addExcludedConnectionPropertiesToChanges = ({
+  proposedChanges,
+  existingConnections,
+  config
+}) => {
+  if (proposedChanges.update.length === 0) return proposedChanges;
+
+  const excludedFields = config()?.EXCLUDED_PROPS?.connections || [];
+  if (excludedFields.length === 0) return proposedChanges;
+
+  const existingConnectionsMap = _.keyBy(existingConnections, 'id');
+  const excludedOptions = excludedFields.filter(
+    // Only include fields that pertain to options
+    (excludedField) => excludedField.startsWith('options')
+  );
+
+  const newProposedUpdates = proposedChanges.update.map((proposedConnection) => {
+    const currConnection = existingConnectionsMap[proposedConnection.id];
+    const currentExcludedPropertyValues = excludedOptions.reduce((agg, excludedField) => {
+      if (!dotProp.has(currConnection, excludedField)) return agg;
+
+      const currentExcludedFieldValue = dotProp.get(currConnection, excludedField);
+
+      dotProp.set(agg, excludedField, currentExcludedFieldValue);
+      return agg;
+    }, {});
+
+    return {
+      ...proposedConnection,
+      options: {
+        ...proposedConnection.options,
+        ...currentExcludedPropertyValues.options
+      }
+    };
+  });
+
+  return {
+    ...proposedChanges,
+    update: newProposedUpdates
+  };
 };
 
 export default class ConnectionsHandler extends DefaultHandler {
@@ -74,7 +122,11 @@ export default class ConnectionsHandler extends DefaultHandler {
         enabled_clients: getEnabledClients(assets, connection, existingConnections, clients)
       }
     ));
-    return super.calcChanges({ ...assets, connections: formatted });
+    const proposedChanges = await super.calcChanges({ ...assets, connections: formatted });
+
+    const proposedChangesWithExcludedProperties = addExcludedConnectionPropertiesToChanges({ proposedChanges, existingConnections, config: this.config });
+
+    return proposedChangesWithExcludedProperties;
   }
 
   // Run after clients are updated so we can convert all the enabled_clients names to id's
