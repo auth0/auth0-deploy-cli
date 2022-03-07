@@ -1,7 +1,7 @@
 import dotProp from 'dot-prop';
+import _ from 'lodash';
 import DefaultHandler, { order } from './default';
 import { filterExcluded, convertClientNameToId, getEnabledClients } from '../../utils';
-import _ from 'lodash'
 
 export const schema = {
   type: 'array',
@@ -15,7 +15,7 @@ export const schema = {
       realms: { type: 'array', items: { type: 'string' } },
       metadata: { type: 'object' }
     },
-    required: ['name', 'strategy']
+    required: [ 'name', 'strategy' ]
   }
 };
 
@@ -37,7 +37,7 @@ export const addExcludedConnectionPropertiesToChanges = ({
   const excludedOptions = excludedFields.filter(
     // Only include fields that pertain to options
     (excludedField) => excludedField.startsWith('options')
-  )
+  );
 
   const newProposedUpdates = proposedChanges.update.map((proposedConnection) => {
     const currConnection = existingConnectionsMap[proposedConnection.id];
@@ -70,7 +70,7 @@ export default class ConnectionsHandler extends DefaultHandler {
     super({
       ...config,
       type: 'connections',
-      stripUpdateFields: ['strategy', 'name']
+      stripUpdateFields: [ 'strategy', 'name' ]
     });
   }
 
