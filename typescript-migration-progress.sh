@@ -17,6 +17,4 @@ numJsFiles=$(find ./src -name "*.js" | wc -l | xargs)
 totalNumFiles=$(expr ${numTsFiles} + ${numJsFiles})
 percentFilesMigrated=$(expr $(expr ${numTsFiles} \* 100) / ${totalNumFiles})
 
-echo "numTsFiles: ${numTsFiles} numJsFiles: ${numJsFiles} percentFilesMigrated: ${percentFilesMigrated}" # debugging line
-
 echo "${numTsFiles} of ${numJsFiles} (${percentFilesMigrated}%) files migrated to Typescript"
