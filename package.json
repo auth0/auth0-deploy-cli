@@ -11,8 +11,8 @@
     "lint": "eslint --ignore-path .eslintignore --ignore-pattern webpack . && kacl lint",
     "pretest": "rimraf ./.nyc_output",
     "test": "cross-env NODE_ENV=test nyc mocha --recursive --require @babel/register test",
-    "build": "rimraf ./lib && babel src -d lib",
-    "dev": "npm run build -- --watch",
+    "build": "rimraf ./lib && npx tsc",
+    "dev": "npx tsc --watch",
     "prepare": "npm run build",
     "preversion": "kacl prerelease",
     "version": "kacl release && git add CHANGELOG.md"
@@ -40,6 +40,7 @@
     "nconf": "^0.11.0",
     "promise-pool-executor": "^1.1.1",
     "sanitize-filename": "^1.6.1",
+    "typescript": "^4.5.5",
     "winston": "^2.3.0",
     "yargs": "^15.3.1"
   },
