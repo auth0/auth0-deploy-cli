@@ -18,3 +18,5 @@ totalNumFiles=$(expr ${numTsFiles} + ${numJsFiles})
 percentFilesMigrated=$(expr $(expr ${numTsFiles} \* 100) / ${totalNumFiles})
 
 echo "${numTsFiles} of ${numJsFiles} (${percentFilesMigrated}%) files migrated to Typescript"
+
+echo "- - - - - - - - - - - - - - - - - - - - - -"
