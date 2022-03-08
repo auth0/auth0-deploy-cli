@@ -2,7 +2,7 @@ async function parse(context) {
   const { organizations } = context.assets;
 
   return {
-    organizations: organizations || []
+    organizations: organizations
   };
 }
 
