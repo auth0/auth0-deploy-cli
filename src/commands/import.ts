@@ -4,17 +4,33 @@ import { deploy as toolsDeploy } from '../tools';
 import log from '../logger';
 import setupContext from '../context';
 
-export default async function deploy(params) {
+type ImportParams = {
+  input_file: string,
+  base_path: string,
+  config_file: string,
+  env: boolean,
+  secret: string,
+  config: {
+    AUTH0_CLIENT_SECRET: string
+  },
+}
+
+export default async function importCMD(params:ImportParams) {
   const {
     input_file: inputFile,
     base_path: basePath,
     config_file: configFile,
     config: configObj,
-    env,
-    secret
+    env: shouldInheritEnv = false,
+    secret: clientSecret
   } = params;
 
-  nconf.env().use('memory');
+  if(shouldInheritEnv){
+    nconf.env().use('memory');
+
+    const mappings = nconf.get('AUTH0_KEYWORD_REPLACE_MAPPINGS') || {};
+    nconf.set('AUTH0_KEYWORD_REPLACE_MAPPINGS', Object.assign(mappings, process.env));
+  }
 
   if (configFile) {
     nconf.file(configFile);
@@ -30,13 +46,8 @@ export default async function deploy(params) {
 
   // Prepare configuration by initializing nconf, then passing that as the provider to the config object
   // Allow passed in secret to override the configured one
-  if (secret) {
-    overrides.AUTH0_CLIENT_SECRET = secret;
-  }
-
-  if (env) {
-    const mappings = nconf.get('AUTH0_KEYWORD_REPLACE_MAPPINGS') || {};
-    nconf.set('AUTH0_KEYWORD_REPLACE_MAPPINGS', Object.assign(mappings, process.env));
+  if (clientSecret) {
+    overrides.AUTH0_CLIENT_SECRET = clientSecret;
   }
 
   nconf.overrides(overrides);

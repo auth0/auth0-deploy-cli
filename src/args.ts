@@ -27,13 +27,6 @@ function getParams() {
         describe: 'The JSON configuration file.',
         type: 'string'
       },
-      env: {
-        alias: 'e',
-        describe: 'Override the mappings in config with process.env environment variables.',
-        type: 'string',
-        boolean: true,
-        default: true
-      },
       secret: {
         alias: 'x',
         describe: 'The client secret, this allows you to encrypt the secret in your build configuration instead of storing it in a config file',

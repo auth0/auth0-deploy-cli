@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { bootstrap } from 'global-agent';
 
-import { getParams } from './args';
+import { getParams } from './args.ts';
 import commands from './commands';
 import log from './logger';
 import tools from './tools';
