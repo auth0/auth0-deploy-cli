@@ -24,7 +24,7 @@ export default async function exportCMD(params: ExportParams) {
     config_file: configFile,
     config: configObj,
     export_ids: exportIds,
-    secret,
+    secret: clientSecret,
     env: shouldInheritEnv = false,
   } = params;
 
@@ -45,8 +45,8 @@ export default async function exportCMD(params: ExportParams) {
 
   // Prepare configuration by initializing nconf, then passing that as the provider to the config object
   // Allow passed in secret to override the configured one
-  if (secret) {
-    overrides.AUTH0_CLIENT_SECRET = secret;
+  if (clientSecret) {
+    overrides.AUTH0_CLIENT_SECRET = clientSecret;
   }
 
   // Allow passed in export_ids to override the configured one
