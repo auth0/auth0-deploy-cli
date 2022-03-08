@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Support for attack protection configuration management [#428]
+
+### Fixed
+- Excluded connection properties from getting deleted upon update [#430]
+- Organizations in YAML format are skipped when not defined [#388]
+
 ## [7.4.0] - 2022-02-24
 ### Added
 - Allowing @@ array variable replacement to work when wrapped in quotes [#421]
