@@ -1,5 +1,5 @@
-import importCMD from './import';
-import exportCMD from './export';
+import importCMD from './import.ts';
+import exportCMD from './export.ts';
 
 export default {
   import: importCMD,
