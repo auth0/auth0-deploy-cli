@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.5.0] - 2022-03-08
+### Added
+- Support for attack protection configuration management [#428]
+
+### Fixed
+- Excluded connection properties from getting deleted upon update [#430]
+- Organizations in YAML format are skipped when not defined [#388]
+
 ## [7.4.0] - 2022-02-24
 ### Added
 - Allowing @@ array variable replacement to work when wrapped in quotes [#421]
@@ -426,6 +434,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#364]: https://github.com/auth0/auth0-deploy-cli/issues/364
 [#367]: https://github.com/auth0/auth0-deploy-cli/issues/367
 [#379]: https://github.com/auth0/auth0-deploy-cli/issues/379
+[#388]: https://github.com/auth0/auth0-deploy-cli/issues/388
 [#400]: https://github.com/auth0/auth0-deploy-cli/issues/400
 [#401]: https://github.com/auth0/auth0-deploy-cli/issues/401
 [#403]: https://github.com/auth0/auth0-deploy-cli/issues/403
@@ -434,8 +443,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#412]: https://github.com/auth0/auth0-deploy-cli/issues/412
 [#416]: https://github.com/auth0/auth0-deploy-cli/issues/416
 [#421]: https://github.com/auth0/auth0-deploy-cli/issues/421
+[#428]: https://github.com/auth0/auth0-deploy-cli/issues/428
+[#430]: https://github.com/auth0/auth0-deploy-cli/issues/430
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.4.0...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.5.0...HEAD
+[7.5.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.4.0...v7.5.0
 [7.4.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.7...v7.4.0
 [7.3.7]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.6...v7.3.7
 [7.3.6]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.5...v7.3.6
