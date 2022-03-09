@@ -61,7 +61,7 @@ if (require.main === module) {
       }
 
       if (typeof msg === 'string' && msg.includes('Payload validation error')) {
-        log.info('Please see https://github.com/auth0/auth0-deploy-cli#troubleshooting for common issues');
+        log.info('Please refer to the Auth0 Management API docs for expected payloads: https://auth0.com/docs/api/management/v2');
       }
       process.exit(1);
     });
