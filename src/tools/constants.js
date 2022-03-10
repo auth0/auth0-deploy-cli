@@ -155,6 +155,11 @@ constants.GUARDIAN_FACTOR_PROVIDERS = {
   'push-notification': [ 'sns' ]
 };
 
+constants.UNIVERSAL_LOGIN_TEMPLATE = 'universal_login';
+constants.SUPPORTED_BRANDING_TEMPLATES = [
+  constants.UNIVERSAL_LOGIN_TEMPLATE
+];
+
 constants.RESOURCE_SERVERS_DIRECTORY = 'resource-servers';
 constants.RESOURCE_SERVERS_CLIENT_NAME = 'resourceServers';
 constants.RESOURCE_SERVERS_MANAGEMENT_API_NAME = 'Auth0 Management API';
@@ -162,6 +167,9 @@ constants.RESOURCE_SERVERS_ID_NAME = 'id';
 
 constants.CLIENTS_DIRECTORY = 'clients';
 constants.CLIENTS_GRANTS_DIRECTORY = 'grants';
+constants.BRANDING_DIRECTORY = 'branding';
+constants.BRANDING_TEMPLATES_DIRECTORY = 'templates';
+constants.BRANDING_TEMPLATES_YAML_DIRECTORY = 'branding_templates';
 constants.CLIENTS_CLIENT_NAME = 'clients';
 constants.CLIENTS_CLIENT_ID_NAME = 'client_id';
 
