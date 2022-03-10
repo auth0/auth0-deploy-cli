@@ -6,23 +6,37 @@ import log from '../logger';
 import { isDirectory } from '../utils';
 import setupContext from '../context';
 
-export default async function deploy(params) {
+type ExportParams = {
+  output_folder: string,
+  base_path: string,
+  config_file: string,
+  config: object,
+  export_ids: boolean,
+  secret: string
+  format: 'yaml' | 'directory'
+  env: boolean
+}
+
+export default async function exportCMD(params: ExportParams) {
   const {
     output_folder: outputFolder,
     base_path: basePath,
     config_file: configFile,
     config: configObj,
     export_ids: exportIds,
-    secret
+    secret: clientSecret,
+    env: shouldInheritEnv = false,
   } = params;
 
-  nconf.env().use('memory');
+  if(shouldInheritEnv){
+    nconf.env().use('memory');
+  }
 
   if (configFile) {
     nconf.file(configFile);
   }
 
-  const overrides = {
+  const overrides: { [key: string]: any } = {
     AUTH0_INPUT_FILE: outputFolder,
     AUTH0_BASE_PATH: basePath,
     AUTH0_CONFIG_FILE: configFile,
@@ -31,8 +45,8 @@ export default async function deploy(params) {
 
   // Prepare configuration by initializing nconf, then passing that as the provider to the config object
   // Allow passed in secret to override the configured one
-  if (secret) {
-    overrides.AUTH0_CLIENT_SECRET = secret;
+  if (clientSecret) {
+    overrides.AUTH0_CLIENT_SECRET = clientSecret;
   }
 
   // Allow passed in export_ids to override the configured one

@@ -29,8 +29,7 @@ function getParams() {
       },
       env: {
         alias: 'e',
-        describe: 'Override the mappings in config with process.env environment variables.',
-        type: 'string',
+        describe: 'Override the mappings in config with environment variables.',
         boolean: true,
         default: true
       },
@@ -63,6 +62,12 @@ function getParams() {
         alias: 'x',
         describe: 'The client secret, this allows you to encrypt the secret in your build configuration instead of storing it in a config file',
         type: 'string'
+      },
+      env: {
+        alias: 'e',
+        describe: 'Override the mappings in config with environment variables.',
+        boolean: true,
+        default: false
       },
       export_ids: {
         alias: 'e',
