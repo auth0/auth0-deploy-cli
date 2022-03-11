@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.5.1] - 2022-03-11
 ### Fixed
 - Updating dead link in logging output [#436]
 - Fixing `--env` flag to properly dictate environment variable inheritance [#432]
@@ -448,8 +450,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#421]: https://github.com/auth0/auth0-deploy-cli/issues/421
 [#428]: https://github.com/auth0/auth0-deploy-cli/issues/428
 [#430]: https://github.com/auth0/auth0-deploy-cli/issues/430
+[#432]: https://github.com/auth0/auth0-deploy-cli/issues/432
+[#436]: https://github.com/auth0/auth0-deploy-cli/issues/436
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.5.0...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.5.1...HEAD
+[7.5.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.5.0...v7.5.1
 [7.5.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.4.0...v7.5.0
 [7.4.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.7...v7.4.0
 [7.3.7]: https://github.com/auth0/auth0-deploy-cli/compare/v7.3.6...v7.3.7
