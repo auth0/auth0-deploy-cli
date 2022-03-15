@@ -31,6 +31,7 @@ export default class Auth0 {
   async runStage(stage) {
     // Sort by priority
     for (const handler of sortByOrder(this.handlers, stage)) { // eslint-disable-line
+
       try {
         const stageFn = Object.getPrototypeOf(handler)[stage];
         this.assets = {

@@ -1,6 +1,6 @@
 import path from 'path';
 import { expect } from 'chai';
-import * as utils from '../../src/tools/utils';
+import * as utils from '../../src/tools/calculateChanges';
 import DefaultHandler from '../../src/tools/auth0/handlers/default';
 import configFactory from '../../src/configFactory';
 
