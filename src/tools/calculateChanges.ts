@@ -83,6 +83,7 @@ export function processChangedObjectFields({
 type Asset = {
     id?: string
     name?: string
+    [key: string]: { [key: string]: string } | string//Temporarily accounting for different types of assets with arbitrary properties
 }
 
 // Temporary type for Auth0 API handler until more canonical types are created
@@ -91,6 +92,7 @@ type Handler = {
     name?: string
     objectFields: string[]
     objString: (arg0: Asset) => string
+
 }
 
 
@@ -133,7 +135,8 @@ export function calculateChanges({ handler, assets, existing, identifiers = ['id
                     assetIdValue = values.join('-');
                 }
             } else {
-                assetIdValue = asset[id];
+                //@ts-ignore becauuse we know that the id field will always resolve a string
+                assetIdValue = asset[id]
             }
 
             if (assetIdValue) {
