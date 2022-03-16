@@ -51,8 +51,9 @@ describe('#utils calcChanges', () => {
             handler: mockHandler,
             assets,
             existing,
+            allowDelete: false,
             //@ts-ignore need to investigate why this "grouping" exists
-            identifiers: ['id', ['client_id', 'audience']]
+            identifiers: ['id', ['client_id', 'audience']],
         });
 
         expect(create).to.have.length(1);
@@ -230,9 +231,9 @@ describe('#utils calcChanges', () => {
             handler: mockHandler,
             assets,
             existing,
+            allowDelete: false,
             //@ts-ignore need to look into why these "groupings exist"
             identifiers: ['id', ['client_id', 'audience']],
-            allowDelete: false,
         });
 
         expect(update).to.have.length(1);

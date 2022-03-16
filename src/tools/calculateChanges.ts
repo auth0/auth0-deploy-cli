@@ -135,7 +135,7 @@ export function calculateChanges({ handler, assets, existing, identifiers = ['id
                     assetIdValue = values.join('-');
                 }
             } else {
-                //@ts-ignore becauuse we know that the id field will always resolve a string
+                //@ts-ignore because we know that the id field will always resolve a string
                 assetIdValue = asset[id]
             }
 
