@@ -4,8 +4,13 @@ import { constants } from '../../../tools';
 import {
   existsMustBeDir, dumpJSON, loadJSON, isFile
 } from '../../../utils';
+import { DirectoryHandler } from '.'
 
-function parse(context) {
+type ParsedGuardianPolicies = {
+  guardianPolicies: unknown[] 
+} | {}
+
+function parse(context): ParsedGuardianPolicies {
   const guardianFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY);
   if (!existsMustBeDir(guardianFolder)) return {}; // Skip
 
@@ -17,7 +22,7 @@ function parse(context) {
     };
   }
 
-  return {};
+  return {} as ParsedGuardianPolicies;
 }
 
 async function dump(context) {
@@ -32,7 +37,9 @@ async function dump(context) {
   dumpJSON(file, guardianPolicies);
 }
 
-export default {
+const guardianPoliciesHandler: DirectoryHandler<ParsedGuardianPolicies> = {
   parse,
-  dump
-};
+  dump,
+}
+
+export default guardianPoliciesHandler;

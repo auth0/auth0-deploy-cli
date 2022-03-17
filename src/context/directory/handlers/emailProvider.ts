@@ -6,8 +6,13 @@ import {
   existsMustBeDir, isFile, dumpJSON, loadJSON
 } from '../../../utils';
 import { emailProviderDefaults } from '../../defaults';
+import { DirectoryHandler } from '.'
 
-function parse(context) {
+type ParsedEmailProvider = {
+  emailProvider: unknown
+} | {}
+
+function parse(context): ParsedEmailProvider {
   const emailsFolder = path.join(context.filePath, constants.EMAIL_TEMPLATES_DIRECTORY);
   if (!existsMustBeDir(emailsFolder)) return {}; // Skip
 
@@ -22,7 +27,7 @@ function parse(context) {
   return {};
 }
 
-async function dump(context) {
+async function dump(context): Promise<void> {
   let { emailProvider } = context.assets;
 
   if (!emailProvider) return; // Skip, nothing to dump
@@ -40,7 +45,9 @@ async function dump(context) {
   dumpJSON(emailProviderFile, emailProvider);
 }
 
-export default {
+const emailProviderHandler: DirectoryHandler<ParsedEmailProvider> = {
   parse,
-  dump
-};
+  dump,
+}
+
+export default emailProviderHandler;

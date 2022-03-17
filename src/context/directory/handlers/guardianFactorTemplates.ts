@@ -5,12 +5,17 @@ import { constants } from '../../../tools';
 import {
   getFiles, existsMustBeDir, dumpJSON, loadJSON
 } from '../../../utils';
+import { DirectoryHandler } from '.'
 
-function parse(context) {
+type ParsedGuardianFactorTemplates = {
+  guardianFactorTemplates: unknown[] | undefined
+}
+
+function parse(context): ParsedGuardianFactorTemplates {
   const factorTemplatesFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY, constants.GUARDIAN_TEMPLATES_DIRECTORY);
   if (!existsMustBeDir(factorTemplatesFolder)) return { guardianFactorTemplates: undefined }; // Skip
 
-  const foundFiles = getFiles(factorTemplatesFolder, [ '.json' ]);
+  const foundFiles = getFiles(factorTemplatesFolder, ['.json']);
 
   const guardianFactorTemplates = foundFiles.map((f) => loadJSON(f, context.mappings))
     .filter((p) => Object.keys(p).length > 0); // Filter out empty guardianFactorTemplates
@@ -20,7 +25,7 @@ function parse(context) {
   };
 }
 
-async function dump(context) {
+async function dump(context): Promise<void> {
   const { guardianFactorTemplates } = context.assets;
 
   if (!guardianFactorTemplates) return; // Skip, nothing to dump
@@ -34,7 +39,9 @@ async function dump(context) {
   });
 }
 
-export default {
+const guardianFactorTemplatesHandler: DirectoryHandler<ParsedGuardianFactorTemplates> = {
   parse,
-  dump
-};
+  dump,
+}
+
+export default guardianFactorTemplatesHandler;

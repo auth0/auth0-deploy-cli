@@ -2,24 +2,27 @@ import path from 'path';
 import {
   existsMustBeDir, isFile, dumpJSON, loadJSON
 } from '../../../utils';
+import { DirectoryHandler } from '.'
 
-function parse(context) {
+type ParsedMigrations = {
+  migrations: unknown[]
+} | {}
+
+function parse(context): ParsedMigrations {
   const baseFolder = path.join(context.filePath);
   if (!existsMustBeDir(baseFolder)) return {}; // Skip
 
   const migrationsFile = path.join(baseFolder, 'migrations.json');
 
-  if (isFile(migrationsFile)) {
-    /* eslint-disable camelcase */
-    const migrations = loadJSON(migrationsFile, context.mappings);
+  if (!isFile(migrationsFile)) return {};
 
-    return { migrations };
-  }
+  /* eslint-disable camelcase */
+  const migrations = loadJSON(migrationsFile, context.mappings);
 
-  return {};
+  return { migrations };
 }
 
-async function dump(context) {
+async function dump(context): Promise<void>{
   const { migrations } = context.assets;
 
   if (!migrations || Object.keys(migrations).length === 0) return; // Skip, nothing to dump
@@ -28,7 +31,9 @@ async function dump(context) {
   dumpJSON(migrationsFile, migrations);
 }
 
-export default {
+const migrationsHandler: DirectoryHandler<ParsedMigrations> = {
   parse,
-  dump
-};
+  dump,
+}
+
+export default migrationsHandler;

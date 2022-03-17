@@ -4,8 +4,13 @@ import { constants } from '../../../tools';
 import {
   existsMustBeDir, dumpJSON, loadJSON, isFile
 } from '../../../utils';
+import { DirectoryHandler } from '.'
 
-function parse(context) {
+type ParsedGuardianFactorMessageTypes = {
+  guardianPhoneFactorMessageTypes: unknown
+} | {}
+
+function parse(context): ParsedGuardianFactorMessageTypes {
   const guardianFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY);
   if (!existsMustBeDir(guardianFolder)) return {}; // Skip
 
@@ -20,7 +25,7 @@ function parse(context) {
   return {};
 }
 
-async function dump(context) {
+async function dump(context): Promise<void> {
   const { guardianPhoneFactorMessageTypes } = context.assets;
 
   if (!guardianPhoneFactorMessageTypes) return; // Skip, nothing to dump
@@ -32,7 +37,9 @@ async function dump(context) {
   dumpJSON(file, guardianPhoneFactorMessageTypes);
 }
 
-export default {
+const guardianFactorMessageTypesHandler: DirectoryHandler<ParsedGuardianFactorMessageTypes> = {
   parse,
-  dump
-};
+  dump,
+}
+
+export default guardianFactorMessageTypesHandler;

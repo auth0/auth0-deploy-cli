@@ -2,8 +2,23 @@ import fs from 'fs-extra';
 import path from 'path';
 import { constants } from '../../../tools';
 import { dumpJSON, existsMustBeDir, loadJSON } from '../../../utils';
+import { DirectoryHandler } from '.'
 
-function attackProtectionFiles(filePath) {
+type ParsedAttackProtection = {
+  attackProtection: {
+    breachedPasswordDetection: unknown
+    bruteForceProtection: unknown
+    suspiciousIpThrottling: unknown
+  } | undefined
+}
+
+
+function attackProtectionFiles(filePath: string): {
+  directory: string
+  breachedPasswordDetection: string
+  bruteForceProtection: string
+  suspiciousIpThrottling: string
+} {
   const directory = path.join(filePath, constants.ATTACK_PROTECTION_DIRECTORY);
 
   return {
@@ -14,7 +29,7 @@ function attackProtectionFiles(filePath) {
   };
 }
 
-function parse(context) {
+function parse(context): ParsedAttackProtection {
   const files = attackProtectionFiles(context.filePath);
 
   if (!existsMustBeDir(files.directory)) {
@@ -36,7 +51,7 @@ function parse(context) {
   };
 }
 
-async function dump(context) {
+async function dump(context): Promise<void> {
   const { attackProtection } = context.assets;
 
   const files = attackProtectionFiles(context.filePath);
@@ -47,7 +62,10 @@ async function dump(context) {
   dumpJSON(files.suspiciousIpThrottling, attackProtection.suspiciousIpThrottling);
 }
 
-export default {
+
+const attackProtectionHandler: DirectoryHandler<ParsedAttackProtection> = {
   parse,
-  dump
-};
+  dump,
+}
+
+export default attackProtectionHandler;

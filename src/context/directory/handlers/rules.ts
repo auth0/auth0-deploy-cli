@@ -7,11 +7,17 @@ import {
   getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize
 } from '../../../utils';
 
-function parse(context) {
+import { DirectoryHandler } from './index'
+
+type ParsedRules = {
+  rules: unknown[] | undefined
+}
+
+function parse(context): ParsedRules {
   const rulesFolder = path.join(context.filePath, constants.RULES_DIRECTORY);
   if (!existsMustBeDir(rulesFolder)) return { rules: undefined }; // Skip
 
-  const files = getFiles(rulesFolder, [ '.json' ]);
+  const files: string[] = getFiles(rulesFolder, [ '.json' ]);
 
   const rules = files.map((f) => {
     const rule = { ...loadJSON(f, context.mappings) };
@@ -26,7 +32,7 @@ function parse(context) {
   };
 }
 
-async function dump(context) {
+async function dump(context): Promise<void> {
   const rules = [ ...context.assets.rules || [] ];
 
   if (!rules) return; // Skip, nothing to dump
@@ -47,7 +53,9 @@ async function dump(context) {
   });
 }
 
-export default {
+const rulesHandler: DirectoryHandler<ParsedRules> = {
   parse,
-  dump
-};
+  dump,
+}
+
+export default rulesHandler;

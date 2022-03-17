@@ -6,33 +6,41 @@ import log from '../../../logger';
 import {
   getFiles, existsMustBeDir, dumpJSON, loadJSON
 } from '../../../utils';
+import { DirectoryHandler } from '.'
 
-function parse(context) {
+type ParsedPages = {
+  pages: unknown[] | undefined
+}
+
+function parse(context): ParsedPages {
   const pagesFolder = path.join(context.filePath, constants.PAGES_DIRECTORY);
   if (!existsMustBeDir(pagesFolder)) return { pages: undefined }; // Skip
 
-  const files = getFiles(pagesFolder, [ '.json', '.html' ]);
+  const files: string[] = getFiles(pagesFolder, ['.json', '.html']);
 
-  const sorted = {};
-
-  files.forEach((file) => {
+  const sorted: {
+    [key: string]: {
+      meta?: string
+      html?: string
+    }
+  } = files.reduce((acc, file) => {
     const { ext, name } = path.parse(file);
-    if (!sorted[name]) sorted[name] = {};
-    if (ext === '.json') sorted[name].meta = file;
-    if (ext === '.html') sorted[name].html = file;
-  });
+    if (!acc[name]) acc[name] = {};
+    if (ext === '.json') acc[name].meta = file;
+    if (ext === '.html') acc[name].html = file;
+    return acc
+  }, {});
 
-  const pages = [];
-  Object.values(sorted).forEach((data) => {
+  const pages = Object.values(sorted).map((data) => {
     if (!data.meta) {
       log.warn(`Skipping pages file ${data.html} as missing the corresponding '.json' file`);
     } else if (!data.html) {
       log.warn(`Skipping pages file ${data.meta} as missing corresponding '.html' file`);
     } else {
-      pages.push({
+      return {
         ...loadJSON(data.meta, context.mappings),
         html: loadFileAndReplaceKeywords(data.html, context.mappings)
-      });
+      };
     }
   });
 
@@ -41,8 +49,8 @@ function parse(context) {
   };
 }
 
-async function dump(context) {
-  const pages = [ ...context.assets.pages || [] ];
+async function dump(context): Promise<void> {
+  const pages = [...context.assets.pages || []];
 
   if (!pages) return; // Skip, nothing to dump
 
@@ -67,7 +75,9 @@ async function dump(context) {
   });
 }
 
-export default {
+const pagesHandler: DirectoryHandler<ParsedPages> = {
   parse,
-  dump
-};
+  dump,
+}
+
+export default pagesHandler;

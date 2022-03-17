@@ -1,3 +1,4 @@
+// @ts-nocheck TODO: FIX TYPE ISSUES IN THIS FILE. DO NOT MERGE UNTIL FIXED!
 import path from 'path';
 import fs from 'fs-extra';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
@@ -12,7 +13,14 @@ import {
   mapClientID2NameSorted
 } from '../../../utils';
 
-function getDatabase(folder, mappings) {
+import { DirectoryHandler } from '.'
+
+type ParsedDatabases = {
+  databases: unknown[] | undefined
+}
+
+
+function getDatabase(folder: string, mappings): {} {
   const metaFile = path.join(folder, 'database.json');
   let metaData = {};
 
@@ -42,7 +50,7 @@ function getDatabase(folder, mappings) {
 
   // If any customScripts configured then load content of files
   if (database.options.customScripts) {
-    Object.entries(database.options.customScripts).forEach(([ name, script ]) => {
+    Object.entries(database.options.customScripts).forEach(([name, script]) => {
       if (!constants.DATABASE_SCRIPTS.includes(name)) {
         // skip invalid keys in customScripts object
         log.warn('Skipping invalid database configuration: ' + name);
@@ -58,7 +66,7 @@ function getDatabase(folder, mappings) {
   return database;
 }
 
-function parse(context) {
+function parse(context): ParsedDatabases {
   const databaseFolder = path.join(context.filePath, constants.DATABASE_CONNECTIONS_DIRECTORY);
   if (!existsMustBeDir(databaseFolder)) return { databases: undefined }; // Skip
 
@@ -74,7 +82,7 @@ function parse(context) {
   };
 }
 
-async function dump(context) {
+async function dump(context): Promise<void> {
   const { databases } = context.assets;
 
   if (!databases) return; // Skip, nothing to dump
@@ -86,7 +94,7 @@ async function dump(context) {
     const dbFolder = path.join(databasesFolder, sanitize(database.name));
     fs.ensureDirSync(dbFolder);
 
-    const sortCustomScripts = ([ name1 ], [ name2 ]) => {
+    const sortCustomScripts = (name1: string, name2: string): 1 | 0 | -1 => {
       if (name1 === name2) return 0;
       return name1 > name2 ? 1 : -1;
     };
@@ -98,7 +106,7 @@ async function dump(context) {
         ...database.options,
         // customScripts option only written if there are scripts
         ...(database.options.customScripts && {
-          customScripts: Object.entries(database.options.customScripts).sort(sortCustomScripts).reduce((scripts, [ name, script ]) => {
+          customScripts: Object.entries(database.options.customScripts).sort(sortCustomScripts).reduce((scripts, [name, script]) => {
             // Dump custom script to file
             const scriptName = sanitize(`${name}.js`);
             const scriptFile = path.join(dbFolder, scriptName);
@@ -116,7 +124,9 @@ async function dump(context) {
   });
 }
 
-export default {
+const databasesHandler: DirectoryHandler<ParsedDatabases> = {
   parse,
-  dump
-};
+  dump,
+}
+
+export default databasesHandler;

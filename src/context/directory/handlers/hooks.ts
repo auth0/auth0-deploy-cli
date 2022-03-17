@@ -6,12 +6,17 @@ import {
   getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize
 } from '../../../utils';
 import log from '../../../logger';
+import { DirectoryHandler } from '.'
 
-function parse(context) {
+type ParsedHooks = {
+  hooks: unknown[] | undefined
+}
+
+function parse(context): ParsedHooks {
   const hooksFolder = path.join(context.filePath, constants.HOOKS_DIRECTORY);
   if (!existsMustBeDir(hooksFolder)) return { hooks: undefined }; // Skip
 
-  const files = getFiles(hooksFolder, [ '.json' ]);
+  const files = getFiles(hooksFolder, ['.json']);
 
   const hooks = files.map((f) => {
     const hook = { ...loadJSON(f, context.mappings) };
@@ -29,8 +34,8 @@ function parse(context) {
   };
 }
 
-async function dump(context) {
-  const hooks = [ ...context.assets.hooks || [] ];
+async function dump(context): Promise<void> {
+  const hooks = [...context.assets.hooks || []];
 
   if (hooks.length < 1) return;
 
@@ -52,7 +57,9 @@ async function dump(context) {
   });
 }
 
-export default {
+const hooksHandler: DirectoryHandler<ParsedHooks> = {
   parse,
-  dump
-};
+  dump,
+}
+
+export default hooksHandler;

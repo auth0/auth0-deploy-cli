@@ -2,8 +2,17 @@ import path from 'path';
 import {
   existsMustBeDir, isFile, dumpJSON, loadJSON, hoursAsInteger, clearTenantFlags
 } from '../../../utils';
+import { DirectoryHandler } from '.'
 
-function parse(context) {
+type ParsedTenant = {
+  tenant: {
+    session_lifetime: number,
+    idle_session_lifetime: number,
+    [key: string]: unknown,
+  }
+} | {}
+
+function parse(context): ParsedTenant {
   const baseFolder = path.join(context.filePath);
   if (!existsMustBeDir(baseFolder)) return {}; // Skip
 
@@ -20,11 +29,11 @@ function parse(context) {
     clearTenantFlags(tenant);
 
     return {
-      tenant: Object.assign(
-        tenant,
-        session_lifetime && hoursAsInteger('session_lifetime', session_lifetime),
-        idle_session_lifetime && hoursAsInteger('idle_session_lifetime', idle_session_lifetime)
-      )
+      tenant: {
+        ...tenant,
+        session_lifetime: hoursAsInteger('session_lifetime', session_lifetime),
+        idle_session_lifetime: hoursAsInteger('idle_session_lifetime', idle_session_lifetime),
+      }
     };
     /* eslint-enable camelcase */
   }
@@ -32,7 +41,7 @@ function parse(context) {
   return {};
 }
 
-async function dump(context) {
+async function dump(context): Promise<void> {
   const { tenant } = context.assets;
 
   if (!tenant) return; // Skip, nothing to dump
@@ -41,9 +50,12 @@ async function dump(context) {
 
   const tenantFile = path.join(context.filePath, 'tenant.json');
   dumpJSON(tenantFile, tenant);
+  return
 }
 
-export default {
+const tenantHandler: DirectoryHandler<ParsedTenant> = {
   parse,
-  dump
-};
+  dump,
+}
+
+export default tenantHandler;

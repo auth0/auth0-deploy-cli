@@ -1,3 +1,4 @@
+// @ts-nocheck TODO: FIX TYPE ISSUES IN THIS FILE. DO NOT MERGE UNTIL FIXED!
 import fs from 'fs-extra';
 import path from 'path';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
@@ -6,12 +7,17 @@ import log from '../../../logger';
 import {
   getFiles, existsMustBeDir, dumpJSON, loadJSON
 } from '../../../utils';
+import { DirectoryHandler } from '.'
 
-function parse(context) {
+type ParsedEmailTemplates = {
+  emailTemplates: unknown | undefined
+}
+
+function parse(context): ParsedEmailTemplates {
   const emailsFolder = path.join(context.filePath, constants.EMAIL_TEMPLATES_DIRECTORY);
   if (!existsMustBeDir(emailsFolder)) return { emailTemplates: undefined }; // Skip
 
-  const files = getFiles(emailsFolder, [ '.json', '.html' ]).filter((f) => path.basename(f) !== 'provider.json');
+  const files = getFiles(emailsFolder, ['.json', '.html']).filter((f) => path.basename(f) !== 'provider.json');
 
   const sorted = {};
 
@@ -41,8 +47,8 @@ function parse(context) {
   };
 }
 
-async function dump(context) {
-  const emailTemplates = [ ...context.assets.emailTemplates || [] ];
+async function dump(context): Promise<void> {
+  const emailTemplates = [...context.assets.emailTemplates || []];
 
   if (!emailTemplates) return; // Skip, nothing to dump
 
@@ -61,7 +67,9 @@ async function dump(context) {
   });
 }
 
-export default {
+const emailTemplatesHandler: DirectoryHandler<ParsedEmailTemplates> = {
   parse,
-  dump
-};
+  dump,
+}
+
+export default emailTemplatesHandler;

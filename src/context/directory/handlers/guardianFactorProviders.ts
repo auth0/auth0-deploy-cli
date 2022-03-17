@@ -5,12 +5,17 @@ import { constants } from '../../../tools';
 import {
   getFiles, existsMustBeDir, dumpJSON, loadJSON
 } from '../../../utils';
+import { DirectoryHandler } from '.'
 
-function parse(context) {
+type ParsedGuardianFactorProviders = {
+  guardianFactorProviders: unknown[] | undefined
+}
+
+function parse(context): ParsedGuardianFactorProviders {
   const factorProvidersFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY, constants.GUARDIAN_PROVIDERS_DIRECTORY);
   if (!existsMustBeDir(factorProvidersFolder)) return { guardianFactorProviders: undefined }; // Skip
 
-  const foundFiles = getFiles(factorProvidersFolder, [ '.json' ]);
+  const foundFiles = getFiles(factorProvidersFolder, ['.json']);
 
   const guardianFactorProviders = foundFiles.map((f) => loadJSON(f, context.mappings))
     .filter((p) => Object.keys(p).length > 0); // Filter out empty factorProvidersFolder
@@ -20,7 +25,7 @@ function parse(context) {
   };
 }
 
-async function dump(context) {
+async function dump(context): Promise<void> {
   const { guardianFactorProviders } = context.assets;
 
   if (!guardianFactorProviders) return; // Skip, nothing to dump
@@ -34,7 +39,9 @@ async function dump(context) {
   });
 }
 
-export default {
+const guardianFactorProvidersHandler: DirectoryHandler<ParsedGuardianFactorProviders> = {
   parse,
-  dump
-};
+  dump,
+}
+
+export default guardianFactorProvidersHandler;

@@ -4,12 +4,17 @@ import { constants } from '../../../tools';
 import {
   getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize
 } from '../../../utils';
+import { DirectoryHandler } from '.'
 
-function parse(context) {
+type ParsedResourceServers = {
+  resourceServers: unknown[] | undefined
+}
+
+function parse(context): ParsedResourceServers {
   const resourceServersFolder = path.join(context.filePath, constants.RESOURCE_SERVERS_DIRECTORY);
   if (!existsMustBeDir(resourceServersFolder)) return { resourceServers: undefined }; // Skip
 
-  const foundFiles = getFiles(resourceServersFolder, [ '.json' ]);
+  const foundFiles = getFiles(resourceServersFolder, ['.json']);
 
   const resourceServers = foundFiles.map((f) => loadJSON(f, context.mappings))
     .filter((p) => Object.keys(p).length > 0); // Filter out empty resourceServers
@@ -19,7 +24,7 @@ function parse(context) {
   };
 }
 
-async function dump(context) {
+async function dump(context): Promise<void> {
   const { resourceServers } = context.assets;
 
   if (!resourceServers) return; // Skip, nothing to dump
@@ -33,7 +38,9 @@ async function dump(context) {
   });
 }
 
-export default {
+const resourceServersHandler: DirectoryHandler<ParsedResourceServers> = {
   parse,
-  dump
-};
+  dump,
+}
+
+export default resourceServersHandler;

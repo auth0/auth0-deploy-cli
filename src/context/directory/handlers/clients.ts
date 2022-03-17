@@ -6,8 +6,13 @@ import log from '../../../logger';
 import {
   isFile, getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize, clearClientArrays
 } from '../../../utils';
+import { DirectoryHandler } from '.'
 
-function parse(context) {
+type ParsedClients = {
+  clients: unknown | undefined
+}
+
+function parse(context): ParsedClients {
   const clientsFolder = path.join(context.filePath, constants.CLIENTS_DIRECTORY);
   if (!existsMustBeDir(clientsFolder)) return { clients: undefined }; // Skip
 
@@ -34,7 +39,7 @@ function parse(context) {
   };
 }
 
-async function dump(context) {
+async function dump(context): Promise<void> {
   const { clients } = context.assets;
 
   if (!clients) return; // Skip, nothing to dump
@@ -59,7 +64,9 @@ async function dump(context) {
   });
 }
 
-export default {
+const clientsHandler: DirectoryHandler<ParsedClients> = {
   parse,
-  dump
-};
+  dump,
+}
+
+export default clientsHandler;

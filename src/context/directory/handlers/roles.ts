@@ -6,12 +6,17 @@ import log from '../../../logger';
 import {
   getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize
 } from '../../../utils';
+import { DirectoryHandler } from '.'
 
-function parse(context) {
+type ParsedRoles = {
+  roles: unknown[] | undefined
+}
+
+function parse(context): ParsedRoles {
   const rolesFolder = path.join(context.filePath, constants.ROLES_DIRECTORY);
   if (!existsMustBeDir(rolesFolder)) return { roles: undefined }; // Skip
 
-  const files = getFiles(rolesFolder, [ '.json' ]);
+  const files = getFiles(rolesFolder, ['.json']);
 
   const roles = files.map((f) => {
     const role = { ...loadJSON(f, context.mappings) };
@@ -45,7 +50,9 @@ async function dump(context) {
   });
 }
 
-export default {
+const rolesHandler: DirectoryHandler<ParsedRoles> = {
   parse,
-  dump
-};
+  dump,
+}
+
+export default rolesHandler;
