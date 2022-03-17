@@ -31,8 +31,8 @@ function parse(context): ParsedTenant {
     return {
       tenant: {
         ...tenant,
-        session_lifetime: hoursAsInteger('session_lifetime', session_lifetime),
-        idle_session_lifetime: hoursAsInteger('idle_session_lifetime', idle_session_lifetime),
+        session_lifetime_in_minutes: hoursAsInteger('session_lifetime', session_lifetime)['session_lifetime_in_minutes'],
+        idle_session_lifetime_in_minutes: hoursAsInteger('idle_session_lifetime', idle_session_lifetime)['idle_session_lifetime_in_minutes'],
       }
     };
     /* eslint-enable camelcase */
