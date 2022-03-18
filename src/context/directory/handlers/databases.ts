@@ -1,4 +1,3 @@
-// @ts-nocheck TODO: FIX TYPE ISSUES IN THIS FILE. DO NOT MERGE UNTIL FIXED!
 import path from 'path';
 import fs from 'fs-extra';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
@@ -19,18 +18,32 @@ type ParsedDatabases = {
   databases: unknown[] | undefined
 }
 
+type DatabaseMetadata = {
+  options?: {
+    customScripts?: {
+      change_password: string
+      create: string
+      delete: string
+      get_user: string
+      login: string
+      verify: string
+    },
+  }
+}
+
 
 function getDatabase(folder: string, mappings): {} {
   const metaFile = path.join(folder, 'database.json');
-  let metaData = {};
 
-  // First load database.json
-  try {
-    metaData = loadJSON(metaFile, mappings);
-  } catch (err) {
-    log.warn(`Skipping database folder ${folder} as cannot find or read ${metaFile}`);
-    return {};
-  }
+  const metaData: DatabaseMetadata | {} = (() => {
+    try {
+      return loadJSON(metaFile, mappings);
+    } catch (err) {
+      log.warn(`Skipping database folder ${folder} as cannot find or read ${metaFile}`);
+      return {};
+    }
+  })()
+
 
   if (!metaData) {
     log.warn(`Skipping database folder ${folder} as ${metaFile} is empty`);
@@ -40,11 +53,10 @@ function getDatabase(folder: string, mappings): {} {
   const database = {
     ...metaData,
     options: {
+      //@ts-ignore because this code exists currently, but still needs to be understood if it is correct or not
       ...metaData.options,
-      // customScripts option only written if there are scripts
-      ...(metaData.customScripts && {
-        customScripts: metaData.customScripts
-      })
+      //@ts-ignore because this code exists currently, but still needs to be understood if it is correct or not
+      ...(metaData.customScripts && { customScripts: metaData.customScripts })
     }
   };
 
@@ -56,6 +68,7 @@ function getDatabase(folder: string, mappings): {} {
         log.warn('Skipping invalid database configuration: ' + name);
       } else {
         database.options.customScripts[name] = loadFileAndReplaceKeywords(
+          //@ts-ignore
           path.join(folder, script),
           mappings
         );
@@ -106,6 +119,7 @@ async function dump(context): Promise<void> {
         ...database.options,
         // customScripts option only written if there are scripts
         ...(database.options.customScripts && {
+          //@ts-ignore
           customScripts: Object.entries(database.options.customScripts).sort(sortCustomScripts).reduce((scripts, [name, script]) => {
             // Dump custom script to file
             const scriptName = sanitize(`${name}.js`);
