@@ -1,4 +1,3 @@
-// @ts-nocheck TODO: FIX TYPE ISSUES IN THIS FILE. DO NOT MERGE UNTIL FIXED!
 import fs from 'fs-extra';
 import path from 'path';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
@@ -28,17 +27,24 @@ function parse(context): ParsedEmailTemplates {
     if (ext === '.html') sorted[name].html = file;
   });
 
-  const emailTemplates = [];
-  Object.values(sorted).forEach((data) => {
-    if (!data.meta) {
-      log.warn(`Skipping email template file ${data.html} as missing the corresponding '.json' file`);
-    } else if (!data.html) {
-      log.warn(`Skipping email template file ${data.meta} as missing corresponding '.html' file`);
+  const emailTemplates = Object.values(sorted).flatMap(({
+    meta,
+    html
+  }: {
+    meta?: unknown,
+    html?: unknown,
+  }) => {
+    if (!meta) {
+      log.warn(`Skipping email template file ${html} as missing the corresponding '.json' file`);
+      return [];
+    } else if (!html) {
+      log.warn(`Skipping email template file ${meta} as missing corresponding '.html' file`);
+      return [];
     } else {
-      emailTemplates.push({
-        ...loadJSON(data.meta, context.mappings),
-        body: loadFileAndReplaceKeywords(data.html, context.mappings)
-      });
+      return {
+        ...loadJSON(meta, context.mappings),
+        body: loadFileAndReplaceKeywords(html, context.mappings)
+      };
     }
   });
 
