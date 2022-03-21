@@ -22,6 +22,7 @@ import actions from './actions';
 import organizations from './organizations';
 import triggers from './triggers';
 import attackProtection from './attackProtection';
+import branding from './branding';
 
 export default {
   rules,
@@ -47,5 +48,6 @@ export default {
   actions,
   organizations,
   triggers,
-  attackProtection
+  attackProtection,
+  branding
 };
