@@ -31,7 +31,7 @@ function parse(context): ParsedPages {
     return acc
   }, {});
 
-  const pages = Object.values(sorted).map((data) => {
+  const pages = Object.values(sorted).flatMap((data) => {
     if (!data.meta) {
       log.warn(`Skipping pages file ${data.html} as missing the corresponding '.json' file`);
     } else if (!data.html) {

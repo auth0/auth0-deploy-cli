@@ -8,7 +8,23 @@ import {
   isDirectory, isFile, stripIdentifiers, toConfigFn
 } from '../../utils';
 
+type Config = { [key: string]: any }// TODO: replace with a more canonical representation of the Config type 
+type ManagementAPIClient = unknown// TODO: replace with a more canonical representation of the ManagementAPIClient type 
+type KeywordMappings = { [key: string]: (string | number)[] | string | number }
+
 export default class {
+  basePath: string;
+  filePath: string;
+  config: Config;
+  mappings: KeywordMappings;
+  mgmtClient: ManagementAPIClient;
+  assets: {
+    exclude: {
+      [key: string]: string[]
+    },
+    clientsOrig?: unknown[]
+  }
+
   constructor(config, mgmtClient) {
     this.filePath = config.AUTH0_INPUT_FILE;
     this.config = config;
@@ -67,6 +83,7 @@ export default class {
 
     // Copy clients to be used by handlers which require converting client_id to the name
     // Must copy as the client_id will be stripped if AUTH0_EXPORT_IDENTIFIERS is false
+    //@ts-ignore because assets haven't been typed yet TODO: type assets
     this.assets.clientsOrig = [ ...this.assets.clients ];
 
     // Optionally Strip identifiers
@@ -76,10 +93,7 @@ export default class {
 
     await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {
       try {
-        const data = await handler.dump(this);
-        if (data) {
-          log.info(`Exporting ${name}`);
-        }
+        await handler.dump(this);
       } catch (err) {
         log.debug(err.stack);
         throw new Error(`Problem exporting ${name}`);
