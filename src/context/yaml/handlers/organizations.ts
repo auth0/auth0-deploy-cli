@@ -1,4 +1,10 @@
-async function parse(context) {
+import { YAMLHandler, Context } from '.'
+
+type ParsedOrganizations = {
+  organizations: unknown[]
+}
+
+async function parse(context: Context): Promise<ParsedOrganizations> {
   const { organizations } = context.assets;
 
   return {
@@ -6,7 +12,7 @@ async function parse(context) {
   };
 }
 
-async function dump(context) {
+async function dump(context: Context): Promise<ParsedOrganizations> {
   const { organizations } = context.assets;
 
   return {
@@ -32,7 +38,9 @@ async function dump(context) {
   };
 }
 
-export default {
+const organizationsHandler: YAMLHandler<ParsedOrganizations> = {
   parse,
-  dump
+  dump,
 };
+
+export default organizationsHandler;

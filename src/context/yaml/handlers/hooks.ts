@@ -5,7 +5,13 @@ import { constants } from '../../../tools';
 import { sanitize } from '../../../utils';
 import log from '../../../logger';
 
-async function parse(context) {
+import { YAMLHandler, Context } from '.'
+
+type ParsedHooks = {
+  hooks: unknown[]
+} | {}
+
+async function parse(context: Context): Promise<ParsedHooks> {
   // Load the script file for each hook
   if (!context.assets.hooks) return {};
 
@@ -24,8 +30,8 @@ async function parse(context) {
   };
 }
 
-async function dump(context) {
-  let hooks = [ ...context.assets.hooks || [] ];
+async function dump(context: Context): Promise<ParsedHooks> {
+  let hooks = [...context.assets.hooks || []];
 
   if (hooks.length > 0) {
     // Create hooks folder
@@ -48,7 +54,9 @@ async function dump(context) {
   return { hooks };
 }
 
-export default {
+const hooksHandler: YAMLHandler<ParsedHooks> = {
   parse,
-  dump
+  dump,
 };
+
+export default hooksHandler;

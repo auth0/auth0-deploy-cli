@@ -10,7 +10,23 @@ import {
 import handlers from './handlers';
 import cleanAssets from '../../readonly';
 
+
+type Config = { [key: string]: any }// TODO: replace with a more canonical representation of the Config type 
+type ManagementAPIClient = unknown// TODO: replace with a more canonical representation of the ManagementAPIClient type 
+type KeywordMappings = { [key: string]: (string | number)[] | string | number }
+
 export default class {
+  basePath: string;
+  configFile: string;
+  config: Config;
+  mappings: KeywordMappings;
+  mgmtClient: ManagementAPIClient;
+  assets: {
+    exclude: {
+      [key: string]: string[]
+    }
+  }
+
   constructor(config, mgmtClient) {
     this.configFile = config.AUTH0_INPUT_FILE;
     this.config = config;
@@ -31,6 +47,7 @@ export default class {
 
     this.basePath = config.AUTH0_BASE_PATH;
     if (!this.basePath) {
+      //@ts-ignore because this looks to be a bug, but do not want to introduce regression; more investigation needed
       this.basePath = (typeof configFile === 'object') ? process.cwd() : path.dirname(this.configFile);
     }
   }
@@ -61,14 +78,14 @@ export default class {
 
     // Run initial schema check to ensure valid YAML
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
-    await auth0.validate('validate');
+    await auth0.validate();
 
     // Allow handlers to process the assets such as loading files etc
-    await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {
+    await Promise.all(Object.entries(handlers).map(async ([name, handler]) => {
       try {
         const parsed = await handler.parse(this);
         Object.entries(parsed)
-          .forEach(([ k, v ]) => {
+          .forEach(([k, v]) => {
             this.assets[k] = v;
           });
       } catch (err) {
@@ -78,7 +95,7 @@ export default class {
     }));
   }
 
-  async dump() {
+  async dump(): Promise<void> {
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
     log.info('Loading Auth0 Tenant Data');
     try {
@@ -90,13 +107,13 @@ export default class {
       throw new Error(`Problem loading tenant data from Auth0 ${err}${extraMessage}`);
     }
 
-    await Promise.all(Object.entries(handlers).map(async ([ name, handler ]) => {
+    await Promise.all(Object.entries(handlers).map(async ([name, handler]) => {
       try {
         const data = await handler.dump(this);
         if (data) {
           log.info(`Exporting ${name}`);
           Object.entries(data)
-            .forEach(([ k, v ]) => {
+            .forEach(([k, v]) => {
               this.assets[k] = Array.isArray(v) ? v.map(formatResults).sort(recordsSorter) : formatResults(v);
             });
         }
