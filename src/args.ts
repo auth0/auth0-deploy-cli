@@ -64,7 +64,6 @@ function getParams() {
         type: 'string'
       },
       env: {
-        alias: 'e',
         describe: 'Override the mappings in config with environment variables.',
         boolean: true,
         default: false
