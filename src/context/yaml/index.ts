@@ -27,7 +27,7 @@ export default class {
     }
   }
 
-  constructor(config, mgmtClient) {
+  constructor(config: Config, mgmtClient) {
     this.configFile = config.AUTH0_INPUT_FILE;
     this.config = config;
     this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS;
