@@ -2,13 +2,13 @@ import path from 'path';
 import {
   existsMustBeDir, isFile, dumpJSON, loadJSON
 } from '../../../utils';
-import { DirectoryHandler } from '.'
+import { DirectoryHandler, Context } from '.'
 
 type ParsedMigrations = {
   migrations: unknown[]
 } | {}
 
-function parse(context): ParsedMigrations {
+function parse(context: Context): ParsedMigrations {
   const baseFolder = path.join(context.filePath);
   if (!existsMustBeDir(baseFolder)) return {}; // Skip
 
@@ -22,7 +22,7 @@ function parse(context): ParsedMigrations {
   return { migrations };
 }
 
-async function dump(context): Promise<void>{
+async function dump(context: Context): Promise<void>{
   const { migrations } = context.assets;
 
   if (!migrations || Object.keys(migrations).length === 0) return; // Skip, nothing to dump

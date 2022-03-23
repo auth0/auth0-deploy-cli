@@ -5,13 +5,13 @@ import { constants } from '../../../tools';
 import {
   getFiles, existsMustBeDir, dumpJSON, loadJSON
 } from '../../../utils';
-import { DirectoryHandler } from '.'
+import { DirectoryHandler, Context } from '.'
 
 type ParsedGuardianFactors = {
   guardianFactors: unknown[] | undefined
 }
 
-function parse(context): ParsedGuardianFactors {
+function parse(context: Context): ParsedGuardianFactors {
   const factorsFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY, constants.GUARDIAN_FACTORS_DIRECTORY);
   if (!existsMustBeDir(factorsFolder)) return { guardianFactors: undefined }; // Skip
 
@@ -25,7 +25,7 @@ function parse(context): ParsedGuardianFactors {
   };
 }
 
-async function dump(context): Promise<void> {
+async function dump(context: Context): Promise<void> {
   const { guardianFactors } = context.assets;
 
   if (!guardianFactors) return; // Skip, nothing to dump

@@ -7,13 +7,13 @@ import {
   getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize
 } from '../../../utils';
 
-import { DirectoryHandler } from './index'
+import { DirectoryHandler, Context } from './index'
 
 type ParsedRules = {
   rules: unknown[] | undefined
 }
 
-function parse(context): ParsedRules {
+function parse(context: Context): ParsedRules {
   const rulesFolder = path.join(context.filePath, constants.RULES_DIRECTORY);
   if (!existsMustBeDir(rulesFolder)) return { rules: undefined }; // Skip
 
@@ -32,7 +32,7 @@ function parse(context): ParsedRules {
   };
 }
 
-async function dump(context): Promise<void> {
+async function dump(context: Context): Promise<void> {
   const rules = [ ...context.assets.rules || [] ];
 
   if (!rules) return; // Skip, nothing to dump

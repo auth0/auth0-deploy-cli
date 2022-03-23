@@ -6,13 +6,13 @@ import log from '../../../logger';
 import {
   getFiles, existsMustBeDir, dumpJSON, loadJSON
 } from '../../../utils';
-import { DirectoryHandler } from '.'
+import { DirectoryHandler, Context } from '.'
 
 type ParsedEmailTemplates = {
   emailTemplates: unknown | undefined
 }
 
-function parse(context): ParsedEmailTemplates {
+function parse(context: Context): ParsedEmailTemplates {
   const emailsFolder = path.join(context.filePath, constants.EMAIL_TEMPLATES_DIRECTORY);
   if (!existsMustBeDir(emailsFolder)) return { emailTemplates: undefined }; // Skip
 
@@ -53,7 +53,7 @@ function parse(context): ParsedEmailTemplates {
   };
 }
 
-async function dump(context): Promise<void> {
+async function dump(context: Context): Promise<void> {
   const emailTemplates = [...context.assets.emailTemplates || []];
 
   if (!emailTemplates) return; // Skip, nothing to dump
