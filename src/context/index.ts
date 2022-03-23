@@ -30,6 +30,40 @@ type Config = {
   AUTH0_API_MAX_RETRIES?: number
 }// TODO
 
+type Asset = { [key: string]: any }
+
+export type Assets = {
+  actions: Asset[],
+  attackProtection: Asset,
+  clients: Asset[],
+  clientGrants: Asset[],
+  connections: Asset[],
+  databases: Asset[],
+  emailProvider: Asset,
+  emailTemplates: Asset[],
+  guardianFactorProviders: Asset[],
+  guardianFactors: Asset[],
+  guardianFactorTemplates: Asset[],
+  guardianPhoneFactorMessageTypes: Asset[],
+  guardianPhoneFactorSelectedProvider: Asset,
+  guardianPolicies: Asset[],
+  hooks: Asset[],
+  migrations: Asset[]
+  organizations: Asset[],
+  pages: Asset[],
+  resourceServers: Asset[],
+  roles: Asset[],
+  rules: Asset[],
+  rulesConfigs: Asset[],
+  tenant: Asset,
+  triggers: Asset[],
+  //non-resource types
+  exclude: {
+    [key: string]: string[]
+  },
+  clientsOrig: Asset[],
+}
+
 export const setupContext = async (config: Config): Promise<DirectoryContext | YAMLContext> => {
   // Validate config
   const missingParams: ("AUTH0_DOMAIN" | "AUTH0_CLIENT_ID" | "AUTH0_CLIENT_SECRET")[] = [];

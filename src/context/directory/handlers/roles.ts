@@ -6,13 +6,14 @@ import log from '../../../logger';
 import {
   getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize
 } from '../../../utils';
-import { DirectoryHandler, Context } from '.'
+import { DirectoryHandler } from '.'
+import DirectoryContext from '..'
 
 type ParsedRoles = {
   roles: unknown[] | undefined
 }
 
-function parse(context: Context): ParsedRoles {
+function parse(context: DirectoryContext): ParsedRoles {
   const rolesFolder = path.join(context.filePath, constants.ROLES_DIRECTORY);
   if (!existsMustBeDir(rolesFolder)) return { roles: undefined }; // Skip
 
@@ -28,7 +29,7 @@ function parse(context: Context): ParsedRoles {
   };
 }
 
-async function dump(context: Context) {
+async function dump(context: DirectoryContext) {
   const { roles } = context.assets;
 
   // API returns an empty object if no grants are present

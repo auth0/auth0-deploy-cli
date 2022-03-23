@@ -13,13 +13,14 @@ import {
   ensureProp,
   mapClientID2NameSorted
 } from '../../../utils';
-import { DirectoryHandler, Context } from '.'
+import { DirectoryHandler } from '.'
+import DirectoryContext from '..'
 
 type ParsedConnections = {
   connections: unknown[] | undefined
 }
 
-function parse(context: Context): ParsedConnections {
+function parse(context: DirectoryContext): ParsedConnections {
   const connectionDirectory = context.config.AUTH0_CONNECTIONS_DIRECTORY || constants.CONNECTIONS_DIRECTORY;
   const connectionsFolder = path.join(context.filePath, connectionDirectory);
   if (!existsMustBeDir(connectionsFolder)) return { connections: undefined }; // Skip
@@ -48,7 +49,7 @@ function parse(context: Context): ParsedConnections {
   };
 }
 
-async function dump(context: Context): Promise<void> {
+async function dump(context: DirectoryContext): Promise<void> {
   const { connections } = context.assets;
 
   if (!connections) return; // Skip, nothing to dump

@@ -5,13 +5,14 @@ import { constants } from '../../../tools';
 import {
   getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize, convertClientIdToName
 } from '../../../utils';
-import { DirectoryHandler, Context } from '.'
+import { DirectoryHandler } from '.'
+import DirectoryContext from '..';
 
 type ParsedClientGrants = {
   clientGrants: unknown[] | undefined
 }
 
-function parse(context: Context): ParsedClientGrants {
+function parse(context: DirectoryContext): ParsedClientGrants {
   const grantsFolder = path.join(context.filePath, constants.CLIENTS_GRANTS_DIRECTORY);
   if (!existsMustBeDir(grantsFolder)) return { clientGrants: undefined }; // Skip
 
@@ -25,7 +26,7 @@ function parse(context: Context): ParsedClientGrants {
   };
 }
 
-async function dump(context: Context): Promise<void> {
+async function dump(context: DirectoryContext): Promise<void> {
   const { clientGrants } = context.assets;
 
   if (!clientGrants) return; // Skip, nothing to dump

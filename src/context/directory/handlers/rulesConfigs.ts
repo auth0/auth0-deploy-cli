@@ -2,13 +2,14 @@ import path from 'path';
 import { constants } from '../../../tools';
 
 import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
-import { DirectoryHandler, Context } from '.'
+import { DirectoryHandler } from '.'
+import DirectoryContext from '..'
 
 type ParsedRulesConfigs = {
   rulesConfigs: unknown[] | undefined
 }
 
-function parse(context: Context): ParsedRulesConfigs {
+function parse(context: DirectoryContext): ParsedRulesConfigs {
   const rulesConfigsFolder = path.join(context.filePath, constants.RULES_CONFIGS_DIRECTORY);
   if (!existsMustBeDir(rulesConfigsFolder)) return { rulesConfigs: undefined }; // Skip
 

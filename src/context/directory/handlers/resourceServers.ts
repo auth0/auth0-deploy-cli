@@ -4,13 +4,14 @@ import { constants } from '../../../tools';
 import {
   getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize
 } from '../../../utils';
-import { DirectoryHandler, Context } from '.'
+import { DirectoryHandler } from '.'
+import DirectoryContext from '..'
 
 type ParsedResourceServers = {
   resourceServers: unknown[] | undefined
 }
 
-function parse(context: Context): ParsedResourceServers {
+function parse(context: DirectoryContext): ParsedResourceServers {
   const resourceServersFolder = path.join(context.filePath, constants.RESOURCE_SERVERS_DIRECTORY);
   if (!existsMustBeDir(resourceServersFolder)) return { resourceServers: undefined }; // Skip
 
@@ -24,7 +25,7 @@ function parse(context: Context): ParsedResourceServers {
   };
 }
 
-async function dump(context: Context): Promise<void> {
+async function dump(context: DirectoryContext): Promise<void> {
   const { resourceServers } = context.assets;
 
   if (!resourceServers) return; // Skip, nothing to dump

@@ -6,13 +6,14 @@ import log from '../../../logger';
 import {
   getFiles, existsMustBeDir, dumpJSON, loadJSON
 } from '../../../utils';
-import { DirectoryHandler, Context } from '.'
+import { DirectoryHandler } from '.'
+import DirectoryContext from '..'
 
 type ParsedPages = {
   pages: unknown[] | undefined
 }
 
-function parse(context: Context): ParsedPages {
+function parse(context: DirectoryContext): ParsedPages {
   const pagesFolder = path.join(context.filePath, constants.PAGES_DIRECTORY);
   if (!existsMustBeDir(pagesFolder)) return { pages: undefined }; // Skip
 
@@ -49,7 +50,7 @@ function parse(context: Context): ParsedPages {
   };
 }
 
-async function dump(context: Context): Promise<void> {
+async function dump(context: DirectoryContext): Promise<void> {
   const pages = [...context.assets.pages || []];
 
   if (!pages) return; // Skip, nothing to dump

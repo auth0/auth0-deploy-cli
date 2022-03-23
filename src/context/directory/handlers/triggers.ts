@@ -1,7 +1,8 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { constants } from '../../../tools';
-import { DirectoryHandler, Context } from '.';
+import { DirectoryHandler } from '.'
+import DirectoryContext from '..';
 
 import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
 import log from '../../../logger';
@@ -10,7 +11,7 @@ type ParsedTriggers = {
   triggers: unknown[] | undefined
 }
 
-function parse(context: Context): ParsedTriggers {
+function parse(context: DirectoryContext): ParsedTriggers {
   const triggersFolder = path.join(context.filePath, constants.TRIGGERS_DIRECTORY);
 
   if (!existsMustBeDir(triggersFolder)) return { triggers: undefined }; // Skip
@@ -22,7 +23,7 @@ function parse(context: Context): ParsedTriggers {
   return { triggers };
 }
 
-async function dump(context: Context): Promise<void> {
+async function dump(context: DirectoryContext): Promise<void> {
   const { triggers } = context.assets;
 
   if (!triggers) return;

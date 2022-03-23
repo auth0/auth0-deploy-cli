@@ -12,7 +12,8 @@ import {
   mapClientID2NameSorted
 } from '../../../utils';
 
-import { DirectoryHandler, Context } from '.'
+import { DirectoryHandler } from '.'
+import DirectoryContext from '..';
 
 type ParsedDatabases = {
   databases: unknown[] | undefined
@@ -79,7 +80,7 @@ function getDatabase(folder: string, mappings): {} {
   return database;
 }
 
-function parse(context: Context): ParsedDatabases {
+function parse(context: DirectoryContext): ParsedDatabases {
   const databaseFolder = path.join(context.filePath, constants.DATABASE_CONNECTIONS_DIRECTORY);
   if (!existsMustBeDir(databaseFolder)) return { databases: undefined }; // Skip
 
@@ -95,7 +96,7 @@ function parse(context: Context): ParsedDatabases {
   };
 }
 
-async function dump(context: Context): Promise<void> {
+async function dump(context: DirectoryContext): Promise<void> {
   const { databases } = context.assets;
 
   if (!databases) return; // Skip, nothing to dump

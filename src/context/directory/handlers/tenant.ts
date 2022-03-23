@@ -2,7 +2,8 @@ import path from 'path';
 import {
   existsMustBeDir, isFile, dumpJSON, loadJSON, hoursAsInteger, clearTenantFlags
 } from '../../../utils';
-import { DirectoryHandler, Context } from '.'
+import { DirectoryHandler } from '.'
+import DirectoryContext from '..'
 
 type ParsedTenant = {
   tenant: {
@@ -12,7 +13,7 @@ type ParsedTenant = {
   }
 } | {}
 
-function parse(context: Context): ParsedTenant {
+function parse(context: DirectoryContext): ParsedTenant {
   const baseFolder = path.join(context.filePath);
   if (!existsMustBeDir(baseFolder)) return {}; // Skip
 
@@ -41,7 +42,7 @@ function parse(context: Context): ParsedTenant {
   return {};
 }
 
-async function dump(context: Context): Promise<void> {
+async function dump(context: DirectoryContext): Promise<void> {
   const { tenant } = context.assets;
 
   if (!tenant) return; // Skip, nothing to dump

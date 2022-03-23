@@ -1,10 +1,11 @@
-import { YAMLHandler, Context } from '.'
+import { YAMLHandler } from '.'
+import YAMLContext from '..'
 
 type ParsedGuardianFactorProviders = {
   guardianFactorProviders: unknown[]
 }
 
-async function parseAndDump(context: Context): Promise<ParsedGuardianFactorProviders> {
+async function parseAndDump(context: YAMLContext): Promise<ParsedGuardianFactorProviders> {
   // nothing to do, set default empty
   return {
     guardianFactorProviders: [...context.assets.guardianFactorProviders || []]

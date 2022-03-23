@@ -7,13 +7,14 @@ import {
   getFiles, existsMustBeDir, loadJSON, sanitize
 } from '../../../utils';
 import log from '../../../logger';
-import { DirectoryHandler, Context } from '.'
+import { DirectoryHandler } from '.'
+import DirectoryContext from '..';
 
 type ParsedActions = {
   actions: unknown[] | undefined
 }
 
-function parse(context: Context): ParsedActions {
+function parse(context: DirectoryContext): ParsedActions {
   const actionsFolder = path.join(context.filePath, constants.ACTIONS_DIRECTORY);
   if (!existsMustBeDir(actionsFolder)) return { actions: undefined }; // Skip
   const files = getFiles(actionsFolder, ['.json']);
@@ -68,7 +69,7 @@ function mapToAction(filePath, action) {
   };
 }
 
-async function dump(context: Context) {
+async function dump(context: DirectoryContext) {
   const actions = [...context.assets.actions || []];
   if (actions.length < 1) return;
 

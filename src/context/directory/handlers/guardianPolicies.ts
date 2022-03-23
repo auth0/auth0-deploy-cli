@@ -4,13 +4,14 @@ import { constants } from '../../../tools';
 import {
   existsMustBeDir, dumpJSON, loadJSON, isFile
 } from '../../../utils';
-import { DirectoryHandler, Context } from '.'
+import { DirectoryHandler } from '.'
+import DirectoryContext from '..'
 
 type ParsedGuardianPolicies = {
   guardianPolicies: unknown[] 
 } | {}
 
-function parse(context: Context): ParsedGuardianPolicies {
+function parse(context: DirectoryContext): ParsedGuardianPolicies {
   const guardianFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY);
   if (!existsMustBeDir(guardianFolder)) return {}; // Skip
 
@@ -25,7 +26,7 @@ function parse(context: Context): ParsedGuardianPolicies {
   return {} as ParsedGuardianPolicies;
 }
 
-async function dump(context: Context) {
+async function dump(context: DirectoryContext) {
   const { guardianPolicies } = context.assets;
 
   if (!guardianPolicies) return; // Skip, nothing to dump

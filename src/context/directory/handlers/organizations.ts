@@ -5,13 +5,14 @@ import log from '../../../logger';
 import {
   getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize
 } from '../../../utils';
-import { DirectoryHandler, Context } from '.'
+import { DirectoryHandler } from '.'
+import DirectoryContext from '..'
 
 type ParsedOrganizations = {
   organizations: unknown[] | undefined
 }
 
-function parse(context: Context): ParsedOrganizations {
+function parse(context: DirectoryContext): ParsedOrganizations {
   const organizationsFolder = path.join(context.filePath, 'organizations');
 
   if (!existsMustBeDir(organizationsFolder)) return { organizations: undefined }; // Skip
@@ -28,7 +29,7 @@ function parse(context: Context): ParsedOrganizations {
   };
 }
 
-async function dump(context: Context): Promise<void> {
+async function dump(context: DirectoryContext): Promise<void> {
   const { organizations } = context.assets;
 
   // API returns an empty object if no grants are present
