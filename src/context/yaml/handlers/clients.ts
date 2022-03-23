@@ -1,11 +1,15 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { constants } from '../../../tools';
-
 import log from '../../../logger';
 import { isFile, sanitize, clearClientArrays } from '../../../utils';
+import { YAMLHandler, Context } from '.'
 
-async function parse(context) {
+type ParsedClients = {
+  clients: unknown[]
+}
+
+async function parse(context: Context): Promise<ParsedClients> {
   // Load the HTML file for custom_login_page
 
   const { clients } = context.assets;
@@ -32,12 +36,12 @@ async function parse(context) {
   };
 }
 
-async function dump(context) {
+async function dump(context: Context): Promise<ParsedClients> {
   // Save custom_login_page to a separate html file
   const clientsFolder = path.join(context.basePath, constants.CLIENTS_DIRECTORY);
 
   return {
-    clients: [ ...context.assets.clients.map((client) => {
+    clients: [...context.assets.clients.map((client) => {
       if (client.custom_login_page) {
         const clientName = sanitize(client.name);
         const html = client.custom_login_page;
@@ -51,11 +55,13 @@ async function dump(context) {
       }
 
       return clearClientArrays(client);
-    }) ]
+    })]
   };
 }
 
-export default {
+const clientsHandler: YAMLHandler<ParsedClients> = {
   parse,
-  dump
+  dump,
 };
+
+export default clientsHandler;

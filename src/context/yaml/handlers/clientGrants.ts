@@ -1,13 +1,18 @@
 import { convertClientIdToName } from '../../../utils';
+import { YAMLHandler, Context } from '.'
 
-async function parse(context) {
+type ParsedClientGrants = {
+  clientGrants: unknown[]
+}
+
+async function parse(context: Context): Promise<ParsedClientGrants> {
   // nothing to do, set default empty
   return {
     clientGrants: context.assets.clientGrants
   };
 }
 
-async function dump(context) {
+async function dump(context: Context): Promise<ParsedClientGrants | {}>{
   const { clientGrants } = context.assets;
 
   // Nothing to do
@@ -23,7 +28,9 @@ async function dump(context) {
   };
 }
 
-export default {
+const clientGrantsHandler: YAMLHandler<ParsedClientGrants> = {
   parse,
-  dump
+  dump,
 };
+
+export default clientGrantsHandler;

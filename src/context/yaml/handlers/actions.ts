@@ -4,14 +4,21 @@ import fs from 'fs-extra';
 import { constants } from '../../../tools';
 import { sanitize } from '../../../utils';
 import log from '../../../logger';
+import { YAMLHandler, Context } from '.'
 
-function parseCode(context, code) {
+type ParsedActions = {
+  actions: unknown[] | undefined
+} | []
+
+type Secret = { name: string, value: string }
+
+function parseCode(context: Context, code: string) {
   if (code) {
     return context.loadFile(code, constants.ACTIONS_DIRECTORY);
   }
 }
 
-async function parse(context) {
+async function parse(context): Promise<ParsedActions> {
   // Load the script file for each action
   if (!context.assets.actions) return [];
   const actions = {
@@ -25,14 +32,14 @@ async function parse(context) {
   return actions;
 }
 
-function mapSecrets(secrets) {
+function mapSecrets(secrets: { name: string, value: string }[]): Secret[] {
   if (secrets && secrets.length > 0) {
     return secrets.map((secret) => ({ name: secret.name, value: secret.value }));
   }
   return [];
 }
 
-function mapActionCode(basePath, action) {
+function mapActionCode(basePath: string, action: { code: string, name: string }): string {
   const { code } = action;
 
   if (!code) {
@@ -54,10 +61,10 @@ function mapActionCode(basePath, action) {
   return `./${constants.ACTIONS_DIRECTORY}/${actionName}/code.js`;
 }
 
-async function dump(context) {
+async function dump(context: Context): Promise<ParsedActions> {
   const { actions } = context.assets;
-  // Nothing to do
-  if (!actions) return;
+  //@ts-ignore but need to investigate why returning void here when other handlers do not
+  if (!actions) return;// Nothing to do
   return {
     actions: actions.map((action) => ({
       name: action.name,
@@ -72,7 +79,9 @@ async function dump(context) {
   };
 }
 
-export default {
+const ActionsHandler: YAMLHandler<ParsedActions> = {
   parse,
   dump
 };
+
+export default ActionsHandler;
