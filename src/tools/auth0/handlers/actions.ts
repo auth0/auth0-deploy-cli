@@ -2,6 +2,7 @@ import _ from 'lodash';
 import DefaultHandler, { order } from './default';
 import log from '../../logger';
 import { areArraysEquals } from '../../utils';
+import { Asset } from '../../../types'
 
 const MAX_ACTION_DEPLOY_RETRY = 60;
 
@@ -10,7 +11,7 @@ export const schema = {
   type: 'array',
   items: {
     type: 'object',
-    required: [ 'name', 'supported_triggers', 'code' ],
+    required: ['name', 'supported_triggers', 'code'],
     additionalProperties: false,
     properties: {
       code: { type: 'string', default: '' },
@@ -147,7 +148,7 @@ export default class ActionHandler extends DefaultHandler {
   }
 
   async actionChanges(action, found) {
-    const actionChanges = {};
+    const actionChanges: Asset = {};
 
     // if action is deployed, should compare against curren_version - calcDeployedVersionChanges method
     if (!action.deployed) {
@@ -172,7 +173,7 @@ export default class ActionHandler extends DefaultHandler {
     return actionChanges;
   }
 
-  async getType() {
+  async getType(): Promise<Asset> {
     if (this.existing) return this.existing;
 
     if (!this.client.actions || typeof this.client.actions.getAll !== 'function') {
@@ -182,6 +183,7 @@ export default class ActionHandler extends DefaultHandler {
     // So we set it to false otherwise it will fail with "Additional properties not allowed: include_totals"
     try {
       this.existing = await this.client.actions.getAll({ paginate: true });
+      if (this.existing === null) return []
       return this.existing;
     } catch (err) {
       if (err.statusCode === 403 || err.statusCode === 404 || err.statusCode === 501) {
@@ -207,9 +209,10 @@ export default class ActionHandler extends DefaultHandler {
 
     await super.processChanges(assets, changes);
     // Deploy actions
-    const deployActions = [];
-    deployActions.push(...changes.create.filter((action) => action.deployed));
-    deployActions.push(...changes.update.filter((action) => action.deployed));
+    const deployActions = [
+      ...changes.create.filter((action) => action.deployed),
+      ...changes.update.filter((action) => action.deployed)
+    ];
     await this.deployActions(deployActions);
   }
 }

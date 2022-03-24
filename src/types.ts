@@ -3,9 +3,17 @@ export type Auth0APIClient = {
         getAll: any,
         create: any,
         update: any,
-        delete: any,
+        delete: any,    
     }
     pool: any
+} & {
+    actions: {
+        getAll: any,
+        create: any,
+        update: any,
+        delete: any,
+        deploy: ({ id: string }) => void
+    }
 }// TODO: replace with a more accurate representation of the Auth0APIClient type 
 
 export type Config = {
@@ -59,4 +67,11 @@ export type Assets = {
         [key: string]: string[]
     },
     clientsOrig: Asset[],
+}
+
+export type CalculatedChanges = {
+    del: Asset[],
+    update: Asset[],
+    conflicts: Asset[],
+    create: Asset[],
 }

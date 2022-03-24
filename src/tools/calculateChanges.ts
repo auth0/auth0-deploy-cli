@@ -1,6 +1,6 @@
 import log from './logger';
 import APIHandler from '../tools/auth0/handlers/default'
-import { Asset } from '../types'
+import { Asset, CalculatedChanges } from '../types'
 
 /**
  * @template T
@@ -87,12 +87,7 @@ export function calculateChanges({ handler, assets, existing, identifiers = ['id
     existing: Asset[],
     identifiers: string[],
     allowDelete: boolean,
-}): {
-    del: Asset[],
-    update: Asset[],
-    conflicts: Asset[],
-    create: Asset[],
-} {
+}): CalculatedChanges {
     // Calculate the changes required between two sets of assets.
     const update: Asset[] = [];
     let del: Asset[] = [...existing];

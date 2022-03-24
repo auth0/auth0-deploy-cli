@@ -5,7 +5,7 @@ import {
   stripFields, dumpJSON, duplicateItems
 } from '../../utils';
 import { calculateChanges } from '../../calculateChanges';
-import { Asset, Assets, Auth0APIClient, Config } from '../../../types'
+import { Asset, Assets, Auth0APIClient, Config, CalculatedChanges } from '../../../types'
 
 
 export function order(value) {
@@ -108,11 +108,16 @@ export default class APIHandler {
     return { [this.type]: this.existing };
   }
 
-  async calcChanges(assets: Assets) {
+  async calcChanges(assets: Assets): Promise<CalculatedChanges> {
     const typeAssets = assets[this.type];
 
     // Do nothing if not set
-    if (!typeAssets) return {};
+    if (!typeAssets) return {
+      del: [],
+      create: [],
+      conflicts: [],
+      update: []
+    };
 
     const existing = await this.getType();
 
