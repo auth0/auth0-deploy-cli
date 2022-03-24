@@ -81,8 +81,6 @@ export function processChangedObjectFields({
 
 // Temporary type for Asset until more canonical types are created
 type Asset = {
-    id?: string
-    name?: string
     [key: string]: { [key: string]: string } | string//Temporarily accounting for different types of assets with arbitrary properties
 }
 
@@ -92,7 +90,6 @@ type Handler = {
     name?: string
     objectFields: string[]
     objString: (arg0: Asset) => string
-
 }
 
 
@@ -109,39 +106,37 @@ export function calculateChanges({ handler, assets, existing, identifiers = ['id
     create: Asset[],
 } {
     // Calculate the changes required between two sets of assets.
-    const update = [];
-    let del = [...existing];
-    let create = [...assets];
-    const conflicts = [];
+    const update: Asset[] = [];
+    let del: Asset[] = [...existing];
+    let create: Asset[] = [...assets];
+    const conflicts: Asset[] = [];
 
-    const findByKeyValue = (key: string, value: string, arr: Asset[]): Asset => arr.find((e) => {
+    const findByKeyValue = (key: string, value: string, arr: Asset[]): Asset | undefined => arr.find((e) => {
         if (Array.isArray(key)) {
             const values = key.map((k) => e[k]);
             if (values.every((v) => v)) {
                 return value === values.join('-');
             }
-        } else {
-            return e[key] === value;
         }
-        return false;
+        return e[key] === value;
     });
 
     const processAssets = (id: string, arr: Asset[]) => {
         arr.forEach((asset) => {
-            let assetIdValue: string;
-            if (Array.isArray(id)) {
-                const values = id.map((i) => asset[i]);
-                if (values.every((v) => v)) {
-                    assetIdValue = values.join('-');
+            const assetIdValue: string | undefined = (() => {
+                if (Array.isArray(id)) {
+                    const values = id.map((i) => asset[i]);
+                    if (values.every((v) => v)) {
+                        return values.join('-');
+                    }
                 }
-            } else {
-                //@ts-ignore because we know that the id field will always resolve a string
-                assetIdValue = asset[id]
-            }
 
-            if (assetIdValue) {
+                return asset[id] as string
+            })();
+
+            if (assetIdValue !== undefined) {
                 const found = findByKeyValue(id, assetIdValue, del);
-                if (found) {
+                if (found !== undefined) {
                     // Delete from existing
                     del = del.filter((e) => e !== found);
 
