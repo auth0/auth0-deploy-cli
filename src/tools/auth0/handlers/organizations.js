@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import DefaultHandler, { order } from './default';
-import { calcChanges } from '../../utils';
+import { calculateChanges } from '../../calculateChanges';
 import log from '../../logger';
 
 export const schema = {
@@ -181,7 +181,12 @@ export default class OrganizationsHandler extends DefaultHandler {
       }).filter((connection) => !!connection.connection_id);
     });
 
-    const changes = calcChanges(this, organizations, existing, [ 'id', 'name' ]);
+    const changes = calculateChanges({
+      handler: this,
+      assets: organizations,
+      existing,
+      identifiers: [ 'id', 'name' ]
+    });
 
     log.debug(`Start processChanges for organizations [delete:${changes.del.length}] [update:${changes.update.length}], [create:${changes.create.length}]`);
 

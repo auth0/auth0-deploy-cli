@@ -106,7 +106,9 @@ describe('#YAML context validation', () => {
     await context.dump();
     const yaml = jsYaml.load(fs.readFileSync(tenantFile));
     expect(yaml).to.deep.equal({
-      branding: {},
+      branding: {
+        templates: []
+      },
       clientGrants: [],
       clients: [
         {
@@ -192,7 +194,9 @@ describe('#YAML context validation', () => {
     await context.dump();
     const yaml = jsYaml.load(fs.readFileSync(tenantFile));
     expect(yaml).to.deep.equal({
-      branding: {},
+      branding: {
+        templates: []
+      },
       clientGrants: [],
       clients: [
         {
@@ -273,7 +277,9 @@ describe('#YAML context validation', () => {
     await context.dump();
     const yaml = jsYaml.load(fs.readFileSync(tenantFile));
     expect(yaml).to.deep.equal({
-      branding: {},
+      branding: {
+        templates: []
+      },
       clientGrants: [],
       clients: [
         {

@@ -2,8 +2,9 @@ import ValidationError from '../../ValidationError';
 
 import log from '../../logger';
 import {
-  stripFields, dumpJSON, calcChanges, duplicateItems
+  stripFields, dumpJSON, duplicateItems
 } from '../../utils';
+import { calculateChanges } from '../../calculateChanges';
 
 export function order(value) {
   return function decorator(t, n, descriptor) {
@@ -83,7 +84,12 @@ export default class DefaultHandler {
     const existing = await this.getType();
 
     // Figure out what needs to be updated vs created
-    return calcChanges(this, typeAssets, existing, this.identifiers);
+    return calculateChanges({
+      handler: this,
+      assets: typeAssets,
+      existing,
+      identifiers: this.identifiers
+    });
   }
 
   async validate(assets) {

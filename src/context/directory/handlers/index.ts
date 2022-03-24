@@ -22,6 +22,7 @@ import actions from './actions';
 import organizations from './organizations';
 import triggers from './triggers';
 import attackProtection from './attackProtection';
+import branding from './branding';
 
 type Context = any // TODO: replace with a more canonical representation of the Context type 
 
@@ -54,5 +55,6 @@ export default {
   actions,
   organizations,
   triggers,
-  attackProtection
+  attackProtection,
+  branding
 };
