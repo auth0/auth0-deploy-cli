@@ -1,9 +1,13 @@
 import fs from 'fs-extra';
 import path from 'path';
-
 import log from '../../../logger';
+import { YAMLHandler, Context } from '.'
 
-async function parse(context) {
+type ParsedEmailTemplates = {
+  emailTemplates: unknown[]
+}
+
+async function parse(context: Context): Promise<ParsedEmailTemplates> {
   // Load the HTML file for each page
 
   const emailTemplates = context.assets.emailTemplates || [];
@@ -17,7 +21,7 @@ async function parse(context) {
   };
 }
 
-async function dump(context) {
+async function dump(context: Context): Promise<ParsedEmailTemplates> {
   let emailTemplates = [ ...context.assets.emailTemplates || [] ];
 
   if (emailTemplates.length > 0) {
@@ -36,7 +40,9 @@ async function dump(context) {
   return { emailTemplates };
 }
 
-export default {
+const emailTemplatesHandler: YAMLHandler<ParsedEmailTemplates> = {
   parse,
-  dump
+  dump,
 };
+
+export default emailTemplatesHandler;

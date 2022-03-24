@@ -24,6 +24,13 @@ import triggers from './triggers';
 import attackProtection from './attackProtection';
 import branding from './branding';
 
+export type Context = any // TODO: replace with a more canonical representation of the Context type 
+
+export type YAMLHandler<T> = {
+  dump: (context: Context) => Promise<T | {}>,//May return empty object to signal 
+  parse: (context: Context) => Promise<T>,
+}
+
 export default {
   rules,
   hooks,

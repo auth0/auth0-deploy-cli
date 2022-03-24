@@ -1,10 +1,14 @@
 import fs from 'fs-extra';
 import path from 'path';
-
 import { mapClientID2NameSorted, sanitize } from '../../../utils';
 import log from '../../../logger';
+import { YAMLHandler, Context } from '.'
 
-async function parse(context) {
+type ParsedDatabases = {
+  databases: unknown[]
+}
+
+async function parse(context: Context): Promise<ParsedDatabases | {}> {
   // Load the script file for custom db
   if (!context.assets.databases) return {};
 
@@ -16,7 +20,7 @@ async function parse(context) {
           ...database.options,
           // customScripts option only written if there are scripts
           ...(database.options.customScripts && {
-            customScripts: Object.entries(database.options.customScripts).reduce((scripts, [ name, script ]) => ({
+            customScripts: Object.entries(database.options.customScripts).reduce((scripts, [name, script]) => ({
               ...scripts,
               [name]: context.loadFile(script)
             }), {})
@@ -27,13 +31,13 @@ async function parse(context) {
   };
 }
 
-async function dump(context) {
+async function dump(context: Context): Promise<ParsedDatabases | {}> {
   const { databases } = context.assets;
 
   // Nothing to do
   if (!databases) return {};
 
-  const sortCustomScripts = ([ name1 ], [ name2 ]) => {
+  const sortCustomScripts = ([name1]: [string, Function], [name2]: [string, Function]): number => {
     if (name1 === name2) return 0;
     return name1 > name2 ? 1 : -1;
   };
@@ -47,7 +51,7 @@ async function dump(context) {
           ...database.options,
           // customScripts option only written if there are scripts
           ...(database.options.customScripts && {
-            customScripts: Object.entries(database.options.customScripts).sort(sortCustomScripts).reduce((scripts, [ name, script ]) => {
+            customScripts: Object.entries(database.options.customScripts).sort(sortCustomScripts).reduce((scripts, [name, script]) => {
               // Create Database folder
               const dbName = sanitize(database.name);
               const dbFolder = path.join(context.basePath, 'databases', sanitize(dbName));
@@ -67,8 +71,9 @@ async function dump(context) {
     ]
   };
 }
-
-export default {
+const databasesHandler: YAMLHandler<ParsedDatabases | {}> = {
   parse,
-  dump
+  dump,
 };
+
+export default databasesHandler;

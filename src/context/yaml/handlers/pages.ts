@@ -2,8 +2,13 @@ import path from 'path';
 import fs from 'fs-extra';
 
 import log from '../../../logger';
+import { YAMLHandler, Context } from '.'
 
-async function parse(context) {
+type ParsedPages = {
+  pages: unknown[]
+} | {}
+
+async function parse(context: Context): Promise<ParsedPages> {
   // Load the HTML file for each page
 
   if (!context.assets.pages) return {};
@@ -18,8 +23,8 @@ async function parse(context) {
   };
 }
 
-async function dump(context) {
-  let pages = [ ...context.assets.pages || [] ];
+async function dump(context: Context): Promise<ParsedPages> {
+  let pages = [...context.assets.pages || []];
 
   if (pages.length > 0) {
     // Create Pages folder
@@ -45,7 +50,9 @@ async function dump(context) {
   return { pages };
 }
 
-export default {
+const pagesHandler: YAMLHandler<ParsedPages> = {
   parse,
-  dump
+  dump,
 };
+
+export default pagesHandler;

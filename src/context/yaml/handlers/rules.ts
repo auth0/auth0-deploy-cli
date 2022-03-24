@@ -4,7 +4,13 @@ import fs from 'fs-extra';
 import { sanitize } from '../../../utils';
 import log from '../../../logger';
 
-async function parse(context) {
+import { YAMLHandler, Context } from '.'
+
+type ParsedRules = {
+  rules: unknown[]
+} | {}
+
+async function parse(context: Context): Promise<ParsedRules> {
   // Load the script file for each rule
   if (!context.assets.rules) return {};
 
@@ -18,7 +24,7 @@ async function parse(context) {
   };
 }
 
-async function dump(context) {
+async function dump(context: Context): Promise<ParsedRules> {
   let rules = [ ...context.assets.rules || [] ];
 
   if (rules.length > 0) {
@@ -39,7 +45,9 @@ async function dump(context) {
   return { rules };
 }
 
-export default {
+const rulesHandler: YAMLHandler<ParsedRules> = {
   parse,
-  dump
+  dump,
 };
+
+export default rulesHandler;

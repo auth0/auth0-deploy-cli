@@ -1,6 +1,11 @@
 import { hoursAsInteger, clearTenantFlags } from '../../../utils';
+import { YAMLHandler, Context } from '.'
 
-async function parse(context) {
+type ParsedTenant = {
+  tenant: unknown[]
+} | {}
+
+async function parse(context: Context): Promise<ParsedTenant> {
   // Nothing to do
   if (!context.assets.tenant) return {};
 
@@ -23,7 +28,7 @@ async function parse(context) {
   /* eslint-enable camelcase */
 }
 
-async function dump(context) {
+async function dump(context: Context): Promise<ParsedTenant> {
   const tenant = { ...context.assets.tenant || {} };
 
   clearTenantFlags(tenant);
@@ -31,7 +36,9 @@ async function dump(context) {
   return { tenant };
 }
 
-export default {
+const tenantHandler: YAMLHandler<ParsedTenant> = {
   parse,
-  dump
+  dump,
 };
+
+export default tenantHandler;

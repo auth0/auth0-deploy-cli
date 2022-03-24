@@ -1,11 +1,17 @@
-async function parse(context) {
+import { YAMLHandler, Context } from '.'
+
+type ParsedRoles = {
+  roles: unknown[]
+}
+
+async function parse(context: Context): Promise<ParsedRoles> {
   // nothing to do, set default empty
   return {
     roles: context.assets.roles
   };
 }
 
-async function dump(context) {
+async function dump(context: Context): Promise<ParsedRoles> {
   // remove empty descriptions
   return {
     roles: [
@@ -20,7 +26,9 @@ async function dump(context) {
   };
 }
 
-export default {
+const rolesHandler: YAMLHandler<ParsedRoles> = {
   parse,
-  dump
+  dump,
 };
+
+export default rolesHandler;
