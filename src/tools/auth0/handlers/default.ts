@@ -22,12 +22,18 @@ export default class APIHandler {
   updated: number
   created: number
   deleted: number
-  existing: Asset | Asset[] | null
+  existing: null | Asset | Asset[]
   client: Auth0APIClient // TODO: apply stronger types to Auth0 API client
   identifiers: string[]
   objectFields: string[]
   stripUpdateFields: string[]
-  name?:string // TODO: understand if any handlers actually leverage `name` property
+  name?: string // TODO: understand if any handlers actually leverage `name` property
+  functions: {
+    getAll: 'getAll',
+    update: 'update'
+    create: 'create',
+    delete: 'delete'
+  }// TODO: delete this enum object in favor of tighter typing
 
   constructor(options: {
     id?: APIHandler['id'],
@@ -37,6 +43,9 @@ export default class APIHandler {
     objectFields?: APIHandler['objectFields']
     identifiers?: APIHandler['identifiers']
     stripUpdateFields?: APIHandler['stripUpdateFields']
+    functions?: {
+      [key: string]: string
+    }//TODO: understand if any resource types pass in any additional functions
   }) {
     this.config = options.config;
     this.type = options.type;
@@ -50,12 +59,20 @@ export default class APIHandler {
       this.id
     ];
 
+    this.functions = {
+      getAll: 'getAll',
+      create: 'create',
+      delete: 'delete',
+      update: 'update',
+      ...options.functions || {}
+    }
+
     this.updated = 0;
     this.created = 0;
     this.deleted = 0;
   }
 
-  getClientFN(fn: 'getAll' | 'create' | 'update' | 'delete') {
+  getClientFN(fn: 'getAll' | 'create' | 'update' | 'delete' | Function): Function {
     if (typeof fn === 'string') {
       const client = this.client[this.type];
       return client[fn].bind(client);
