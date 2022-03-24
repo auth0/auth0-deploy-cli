@@ -2,7 +2,7 @@ import ValidationError from '../../ValidationError';
 
 import constants from '../../constants';
 import DefaultHandler from './default';
-import { calcChanges } from '../../utils';
+import { calculateChanges } from '../../calculateChanges';
 
 export const excludeSchema = {
   type: 'array',
@@ -66,7 +66,12 @@ export default class ResourceServersHandler extends DefaultHandler {
     resourceServers = resourceServers.filter((r) => !excluded.includes(r.name));
     existing = existing.filter((r) => !excluded.includes(r.name));
 
-    return calcChanges(this, resourceServers, existing, [ 'id', 'identifier' ]);
+    return calculateChanges({
+      handler: this,
+      assets: resourceServers,
+      existing,
+      identifiers: [ 'id', 'identifier' ]
+    });
   }
 
   async validate(assets) {

@@ -1,9 +1,10 @@
 import ValidationError from '../../ValidationError';
 import {
-  dumpJSON, calcChanges, stripFields, duplicateItems
+  dumpJSON, stripFields, duplicateItems
 } from '../../utils';
 import DefaultHandler from './default';
 import log from '../../logger';
+import { calculateChanges } from '../../calculateChanges';
 
 export const excludeSchema = {
   type: 'array',
@@ -82,8 +83,12 @@ export default class RulesHandler extends DefaultHandler {
     // Figure out what needs to be updated vs created
     const {
       del, update, create, conflicts
-    } = calcChanges(this, rules, existing, [ 'id', 'name' ]);
-
+    } = calculateChanges({
+      handler: this,
+      assets: rules,
+      existing,
+      identifiers: [ 'id', 'name' ]
+    });
     // Figure out the rules that need to be re-ordered
     const futureRules = [ ...create, ...update ];
 

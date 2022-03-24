@@ -22,6 +22,7 @@ import migrations from './migrations';
 import actions from './actions';
 import triggers from './triggers';
 import attackProtection from './attackProtection';
+import branding from './branding';
 
 import YAMLContext  from '..'
 
@@ -54,5 +55,6 @@ export default {
   actions,
   organizations,
   triggers,
-  attackProtection
+  attackProtection,
+  branding
 };

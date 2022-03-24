@@ -32,17 +32,19 @@ function parse(context: DirectoryContext): ParsedPages {
     return acc
   }, {});
 
-  const pages = Object.values(sorted).flatMap((data) => {
-    if (!data.meta) {
-      log.warn(`Skipping pages file ${data.html} as missing the corresponding '.json' file`);
-    } else if (!data.html) {
-      log.warn(`Skipping pages file ${data.meta} as missing corresponding '.html' file`);
-    } else {
-      return {
-        ...loadJSON(data.meta, context.mappings),
-        html: loadFileAndReplaceKeywords(data.html, context.mappings)
-      };
+  const pages = Object.values(sorted).flatMap(({ meta, html }): unknown[] => {
+    if (!meta) {
+      log.warn(`Skipping pages file ${html} as missing the corresponding '.json' file`);
+      return []
     }
+    if (!html) {
+      log.warn(`Skipping pages file ${meta} as missing corresponding '.html' file`);
+      return []
+    }
+    return {
+      ...loadJSON(meta, context.mappings),
+      html: loadFileAndReplaceKeywords(html, context.mappings)
+    };
   });
 
   return {
