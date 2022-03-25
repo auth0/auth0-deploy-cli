@@ -70,6 +70,8 @@ function isActionsDisabled(err) {
 }
 
 export default class ActionHandler extends DefaultHandler {
+  existing: Asset[] | null;
+
   constructor(options) {
     super({
       ...options,
@@ -173,7 +175,7 @@ export default class ActionHandler extends DefaultHandler {
     return actionChanges;
   }
 
-  async getType(): Promise<Asset> {
+  async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
 
     if (!this.client.actions || typeof this.client.actions.getAll !== 'function') {
@@ -183,7 +185,6 @@ export default class ActionHandler extends DefaultHandler {
     // So we set it to false otherwise it will fail with "Additional properties not allowed: include_totals"
     try {
       this.existing = await this.client.actions.getAll({ paginate: true });
-      if (this.existing === null) return []
       return this.existing;
     } catch (err) {
       if (err.statusCode === 403 || err.statusCode === 404 || err.statusCode === 501) {

@@ -96,12 +96,12 @@ export default class APIHandler {
     return dumpJSON(item);
   }
 
-  async getType(): Promise<Asset> {
+  async getType(): Promise<Asset | Asset[] | null> {
     // Each type to impl how to get the existing as its not consistent across the mgnt api.
     throw new Error(`Must implement getType for type ${this.type}`);
   }
 
-  async load(): Promise<{ [key: string]: Asset }> {
+  async load(): Promise<{ [key: string]: Asset | Asset[] | null }> {
     // Load Asset from Tenant
     log.info(`Retrieving ${this.type} data from Auth0`);
     this.existing = await this.getType();

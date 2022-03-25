@@ -1,3 +1,4 @@
+import { Asset, Assets } from '../../../types';
 import DefaultHandler from './default';
 
 export const schema = {
@@ -7,18 +8,20 @@ export const schema = {
     properties: {
       name: { type: 'string', minLength: 1, pattern: '[^<>]+' }
     },
-    required: [ 'name' ]
+    required: ['name']
   }
 };
 
 export default class ClientHandler extends DefaultHandler {
-  constructor(config) {
+  existing: Asset[] | null;
+
+  constructor(config: DefaultHandler) {
     super({
       ...config,
       type: 'clients',
       id: 'client_id',
-      identifiers: [ 'client_id', 'name' ],
-      objectFields: [ 'client_metadata' ],
+      identifiers: ['client_id', 'name'],
+      objectFields: ['client_metadata'],
       stripUpdateFields: [
         // Fields not allowed during updates
         'callback_url_template', 'signing_keys', 'global', 'tenant', 'jwt_configuration.secret_encoded'
@@ -26,11 +29,11 @@ export default class ClientHandler extends DefaultHandler {
     });
   }
 
-  objString(item) {
+  objString(item): string {
     return super.objString({ name: item.name, client_id: item.client_id });
   }
 
-  async processChanges(assets) {
+  async processChanges(assets: Assets): Promise<void> {
     const { clients } = assets;
 
     // Do nothing if not set
@@ -67,9 +70,7 @@ export default class ClientHandler extends DefaultHandler {
   }
 
   async getType() {
-    if (this.existing) {
-      return this.existing;
-    }
+    if (this.existing) return this.existing;
     this.existing = await this.client.clients.getAll({ paginate: true, include_totals: true, is_global: false });
     return this.existing;
   }

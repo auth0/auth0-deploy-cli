@@ -38,6 +38,9 @@ export type Config = {
     AUTH0_EXCLUDED_DEFAULTS?: any
     AUTH0_EXPORT_IDENTIFIERS?: boolean
     AUTH0_CONNECTIONS_DIRECTORY?: string
+    EXCLUDED_PROPS: {
+        [key:string]: string[]
+    }
 }// TODO: replace with a more accurate representation of the Config type 
 
 export type Asset = { [key: string]: any }

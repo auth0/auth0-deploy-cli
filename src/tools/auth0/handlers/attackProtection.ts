@@ -22,7 +22,7 @@ export default class AttackProtectionHandler extends DefaultHandler {
     breachedPasswordDetection: any
     bruteForceProtection: any
     suspiciousIpThrottling: any
-  }
+  } | null
 
   constructor(config: DefaultHandler) {
     super({

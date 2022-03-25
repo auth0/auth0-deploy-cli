@@ -2,6 +2,7 @@ import dotProp from 'dot-prop';
 import _ from 'lodash';
 import DefaultHandler, { order } from './default';
 import { filterExcluded, convertClientNameToId, getEnabledClients } from '../../utils';
+import { CalculatedChanges, Asset, Config, Assets } from '../../../types';
 
 export const schema = {
   type: 'array',
@@ -15,7 +16,7 @@ export const schema = {
       realms: { type: 'array', items: { type: 'string' } },
       metadata: { type: 'object' }
     },
-    required: [ 'name', 'strategy' ]
+    required: ['name', 'strategy']
   }
 };
 
@@ -27,6 +28,10 @@ export const addExcludedConnectionPropertiesToChanges = ({
   proposedChanges,
   existingConnections,
   config
+}: {
+  proposedChanges: CalculatedChanges,
+  existingConnections: Asset[],
+  config: () => Config
 }) => {
   if (proposedChanges.update.length === 0) return proposedChanges;
 
@@ -48,7 +53,9 @@ export const addExcludedConnectionPropertiesToChanges = ({
 
       dotProp.set(agg, excludedField, currentExcludedFieldValue);
       return agg;
-    }, {});
+    }, {
+      options: {}
+    });
 
     return {
       ...proposedConnection,
@@ -66,15 +73,17 @@ export const addExcludedConnectionPropertiesToChanges = ({
 };
 
 export default class ConnectionsHandler extends DefaultHandler {
-  constructor(config) {
+  existing: Asset[] | null;
+
+  constructor(config: DefaultHandler) {
     super({
       ...config,
       type: 'connections',
-      stripUpdateFields: [ 'strategy', 'name' ]
+      stripUpdateFields: ['strategy', 'name']
     });
   }
 
-  objString(connection) {
+  objString(connection): string {
     return super.objString({ name: connection.name, id: connection.id });
   }
 
@@ -97,20 +106,25 @@ export default class ConnectionsHandler extends DefaultHandler {
     }
   }
 
-  async getType() {
+  async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
-    const connections = await this.client.connections.getAll({ paginate: true, include_totals: true });
+    const connections: Asset[] = await this.client.connections.getAll({ paginate: true, include_totals: true });
     // Filter out database connections
     this.existing = connections.filter((c) => c.strategy !== 'auth0');
-
+    if (this.existing === null) return []
     return this.existing;
   }
 
-  async calcChanges(assets) {
+  async calcChanges(assets: Assets): Promise<CalculatedChanges> {
     const { connections } = assets;
 
     // Do nothing if not set
-    if (!connections) return {};
+    if (!connections) return {
+      del: [],
+      create: [],
+      update: [],
+      conflicts: [],
+    };
 
     // Convert enabled_clients by name to the id
     const clients = await this.client.clients.getAll({ paginate: true, include_totals: true });
@@ -131,7 +145,7 @@ export default class ConnectionsHandler extends DefaultHandler {
 
   // Run after clients are updated so we can convert all the enabled_clients names to id's
   @order('60')
-  async processChanges(assets) {
+  async processChanges(assets: Assets): Promise<void> {
     const { connections } = assets;
 
     // Do nothing if not set
