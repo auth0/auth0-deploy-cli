@@ -1,18 +1,23 @@
+type APICLientBaseFunctions = {
+    getAll: any,
+    create: any,
+    update: any,
+    delete: any,
+}
+
 export type Auth0APIClient = {
-    [key: string]: {
-        getAll: any,
-        create: any,
-        update: any,
-        delete: any,    
-    }
+    [key: string]: APICLientBaseFunctions
     pool: any
-} & {
-    actions: {
-        getAll: any,
-        create: any,
-        update: any,
-        delete: any,
+    actions: APICLientBaseFunctions & {
         deploy: ({ id: string }) => void
+    },
+    attackProtection: APICLientBaseFunctions & {
+        getBreachedPasswordDetectionConfig: () => unknown
+        getBruteForceConfig: () => unknown
+        getSuspiciousIpThrottlingConfig: () => unknown
+        updateBreachedPasswordDetectionConfig: ({}, Object) => unknown
+        updateSuspiciousIpThrottlingConfig: ({}, Object) => unknown
+        updateBruteForceConfig: ({}, Object) => unknown
     }
 }// TODO: replace with a more accurate representation of the Auth0APIClient type 
 

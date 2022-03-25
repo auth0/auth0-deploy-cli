@@ -157,7 +157,7 @@ export default class APIHandler {
     }
   }
 
-  async processChanges(assets, changes) {
+  async processChanges(assets: Assets, changes: CalculatedChanges): Promise<void> {
     if (!changes) {
       changes = await this.calcChanges(assets);
     }
