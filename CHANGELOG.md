@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- New branding template feature support [#438]
+### Fixed
+- Colliding `e` parameter alias between `export_ids` and `env` [#453]
+
 ## [7.5.2] - 2022-03-15
 ### Fixed
 - Resetting this version to be latest on NPM
