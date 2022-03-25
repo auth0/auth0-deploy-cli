@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.6.0] - 2022-03-25
+### Added
+- New branding template feature support [#438]
+
+### Fixed
+- Colliding `e` parameter alias between `export_ids` and `env` [#453]
+
 ## [7.5.2] - 2022-03-15
 ### Fixed
 - Resetting this version to be latest on NPM
@@ -456,8 +463,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#430]: https://github.com/auth0/auth0-deploy-cli/issues/430
 [#432]: https://github.com/auth0/auth0-deploy-cli/issues/432
 [#436]: https://github.com/auth0/auth0-deploy-cli/issues/436
+[#438]: https://github.com/auth0/auth0-deploy-cli/issues/438
+[#453]: https://github.com/auth0/auth0-deploy-cli/issues/453
 
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.5.2...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.6.0...HEAD
+[7.6.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.5.2...v7.6.0
 [7.5.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.5.1...v7.5.2
 [7.5.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.5.0...v7.5.1
 [7.5.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.4.0...v7.5.0
