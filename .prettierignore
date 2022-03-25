@@ -1,0 +1,10 @@
+# Ignore artifacts:
+local
+lib
+.circleci
+.github
+.husky
+node_modules
+examples
+test/**/*.json
+test/**/*.yaml
