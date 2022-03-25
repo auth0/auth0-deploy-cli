@@ -1,6 +1,7 @@
-import DefaultHandler, { order } from './default';
+import DefaultAPIHandler, { order } from './default';
 import constants from '../../constants';
 import { filterExcluded, getEnabledClients } from '../../utils';
+import { CalculatedChanges, Assets } from '../../../types';
 
 export const schema = {
   type: 'array',
@@ -25,8 +26,8 @@ export const schema = {
   }
 };
 
-export default class DatabaseHandler extends DefaultHandler {
-  constructor(config) {
+export default class DatabaseHandler extends DefaultAPIHandler {
+  constructor(config: DefaultAPIHandler) {
     super({
       ...config,
       type: 'databases',
@@ -38,10 +39,10 @@ export default class DatabaseHandler extends DefaultHandler {
     return super.objString({ name: db.name, id: db.id });
   }
 
-  getClientFN(fn) {
+  getClientFN(fn: "create" | "delete" | "getAll" | "update"): Function {
     // Override this as a database is actually a connection but we are treating them as a different object
     // If we going to update database, we need to get current options first
-    if (fn === this.functions.update) {
+    if (fn === 'update') {
       return (params, payload) => this.client.connections.get(params)
         .then((connection) => {
           payload.options = { ...connection.options, ...payload.options };
@@ -59,11 +60,16 @@ export default class DatabaseHandler extends DefaultHandler {
     return this.existing;
   }
 
-  async calcChanges(assets) {
+  async calcChanges(assets: Assets): Promise<CalculatedChanges> {
     const { databases } = assets;
 
     // Do nothing if not set
-    if (!databases) return {};
+    if (!databases) return {
+      del: [],
+      create: [],
+      update: [],
+      conflicts: [],
+    };
 
     // Convert enabled_clients by name to the id
     const clients = await this.client.clients.getAll({ paginate: true, include_totals: true });

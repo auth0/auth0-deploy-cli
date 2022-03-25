@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import DefaultHandler, { order } from './default';
+import DefaultAPIHandler, { order } from './default';
 import log from '../../logger';
 import { areArraysEquals } from '../../utils';
 import { Asset } from '../../../types'
@@ -69,7 +69,7 @@ function isActionsDisabled(err) {
   );
 }
 
-export default class ActionHandler extends DefaultHandler {
+export default class ActionHandler extends DefaultAPIHandler {
   existing: Asset[] | null;
 
   constructor(options) {

@@ -1,5 +1,5 @@
 import { Asset, Assets } from '../../../types';
-import DefaultHandler from './default';
+import DefaultAPIHandler from './default';
 
 export const schema = {
   type: 'array',
@@ -12,10 +12,10 @@ export const schema = {
   }
 };
 
-export default class ClientHandler extends DefaultHandler {
+export default class ClientHandler extends DefaultAPIHandler {
   existing: Asset[] | null;
 
-  constructor(config: DefaultHandler) {
+  constructor(config: DefaultAPIHandler) {
     super({
       ...config,
       type: 'clients',

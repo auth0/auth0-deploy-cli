@@ -1,4 +1,4 @@
-import DefaultHandler from './default';
+import DefaultAPIHandler from './default';
 import { Asset, Assets } from '../../../types'
 
 export const schema = {
@@ -17,14 +17,14 @@ export const schema = {
   additionalProperties: false
 };
 
-export default class AttackProtectionHandler extends DefaultHandler {
+export default class AttackProtectionHandler extends DefaultAPIHandler {
   existing: {
     breachedPasswordDetection: any
     bruteForceProtection: any
     suspiciousIpThrottling: any
   } | null
 
-  constructor(config: DefaultHandler) {
+  constructor(config: DefaultAPIHandler) {
     super({
       ...config,
       type: 'attackProtection'

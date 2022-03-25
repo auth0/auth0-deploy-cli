@@ -1,8 +1,8 @@
 type APICLientBaseFunctions = {
-    getAll: any,
-    create: any,
-    update: any,
-    delete: any,
+    getAll: (any) => Asset[],
+    create: (any) => any,
+    update: (arg0: any, arg1: any) => any,
+    delete: (any) => any,
 }
 
 export type Auth0APIClient = {
@@ -12,12 +12,15 @@ export type Auth0APIClient = {
         deploy: ({ id: string }) => void
     },
     attackProtection: APICLientBaseFunctions & {
-        getBreachedPasswordDetectionConfig: () => unknown
-        getBruteForceConfig: () => unknown
-        getSuspiciousIpThrottlingConfig: () => unknown
-        updateBreachedPasswordDetectionConfig: ({}, Object) => unknown
-        updateSuspiciousIpThrottlingConfig: ({}, Object) => unknown
-        updateBruteForceConfig: ({}, Object) => unknown
+        getBreachedPasswordDetectionConfig: () => Asset
+        getBruteForceConfig: () => Asset
+        getSuspiciousIpThrottlingConfig: () => Asset
+        updateBreachedPasswordDetectionConfig: ({ }, Object) => Asset
+        updateSuspiciousIpThrottlingConfig: ({ }, Object) => Asset
+        updateBruteForceConfig: ({ }, Object) => Asset
+    },
+    connections: APICLientBaseFunctions & {
+        get: (Object) => Asset
     }
 }// TODO: replace with a more accurate representation of the Auth0APIClient type 
 
@@ -39,7 +42,7 @@ export type Config = {
     AUTH0_EXPORT_IDENTIFIERS?: boolean
     AUTH0_CONNECTIONS_DIRECTORY?: string
     EXCLUDED_PROPS: {
-        [key:string]: string[]
+        [key: string]: string[]
     }
 }// TODO: replace with a more accurate representation of the Config type 
 

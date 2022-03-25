@@ -1,6 +1,6 @@
 import dotProp from 'dot-prop';
 import _ from 'lodash';
-import DefaultHandler, { order } from './default';
+import DefaultAPIHandler, { order } from './default';
 import { filterExcluded, convertClientNameToId, getEnabledClients } from '../../utils';
 import { CalculatedChanges, Asset, Config, Assets } from '../../../types';
 
@@ -72,10 +72,10 @@ export const addExcludedConnectionPropertiesToChanges = ({
   };
 };
 
-export default class ConnectionsHandler extends DefaultHandler {
+export default class ConnectionsHandler extends DefaultAPIHandler {
   existing: Asset[] | null;
 
-  constructor(config: DefaultHandler) {
+  constructor(config: DefaultAPIHandler) {
     super({
       ...config,
       type: 'connections',
