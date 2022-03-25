@@ -9,6 +9,7 @@
   "scripts": {
     "lint:fix": "eslint --fix --ignore-path .eslintignore --ignore-pattern webpack . && kacl lint",
     "lint": "eslint --ignore-path .eslintignore --ignore-pattern webpack . && kacl lint",
+    "format": "npx prettier --write .",
     "pretest": "rimraf ./.nyc_output",
     "test": "ts-mocha -p tsconfig.json --recursive 'test/**/*.test*'",
     "build": "rimraf ./lib && npx tsc",
