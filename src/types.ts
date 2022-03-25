@@ -21,7 +21,12 @@ export type Auth0APIClient = {
     },
     connections: APICLientBaseFunctions & {
         get: (Object) => Asset
-    }
+    },
+    emailProvider: APICLientBaseFunctions & {
+        delete: () => void
+        get: (Object) => Asset
+        configure: (arg0:Object, arg1:Object) => Asset
+    },
 }// TODO: replace with a more accurate representation of the Auth0APIClient type 
 
 export type Config = {

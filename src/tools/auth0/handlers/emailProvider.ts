@@ -1,19 +1,20 @@
 import DefaultHandler from './default';
+import { Asset, Assets, CalculatedChanges } from '../../../types'
 
 export const schema = { type: 'object' };
 
 // The Management API requires the fields to be specified
-const defaultFields = [ 'name', 'enabled', 'credentials', 'settings', 'default_from_address' ];
+const defaultFields = ['name', 'enabled', 'credentials', 'settings', 'default_from_address'];
 
 export default class EmailProviderHandler extends DefaultHandler {
-  constructor(options) {
+  constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'emailProvider'
     });
   }
 
-  async getType() {
+  async getType(): Promise<Asset> {
     try {
       return await this.client.emailProvider.get({ include_fields: true, fields: defaultFields });
     } catch (err) {
@@ -26,7 +27,7 @@ export default class EmailProviderHandler extends DefaultHandler {
     return super.objString({ name: provider.name, enabled: provider.enabled });
   }
 
-  async processChanges(assets) {
+  async processChanges(assets: Assets) : Promise<void> {
     const { emailProvider } = assets;
 
     // Do nothing if not set
