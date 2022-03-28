@@ -3,11 +3,7 @@
   "parserOptions": {
     "ecmaVersion": 2020
   },
-  "extends": [
-    "airbnb-base",
-    "plugin:import/errors",
-    "plugin:import/warnings"
-  ],
+  "extends": ["airbnb-base", "plugin:import/errors", "plugin:import/warnings"],
   "env": {
     "es2020": true,
     "node": true,
@@ -16,25 +12,16 @@
   "settings": {
     "import/resolver": {
       "node": {
-        "extensions": [
-          ".js",
-          ".ts"
-        ]
+        "extensions": [".js", ".ts"]
       }
     }
   },
   "rules": {
     "max-len": 0,
     "react/display-name": 0,
-    "array-bracket-spacing": [
-      2,
-      "always"
-    ],
+    "array-bracket-spacing": [2, "always"],
     "class-methods-use-this": 0,
-    "comma-dangle": [
-      2,
-      "never"
-    ],
+    "comma-dangle": [2, "never"],
     "eol-last": 2,
     "indent": [
       2,
@@ -66,24 +53,11 @@
     ],
     "no-unused-vars": 2,
     "no-var": 0,
-    "object-curly-spacing": [
-      2,
-      "always"
-    ],
-    "quotes": [
-      2,
-      "single",
-      "avoid-escape"
-    ],
-    "semi": [
-      2,
-      "always"
-    ],
+    "object-curly-spacing": [2, "always"],
+    "quotes": [2, "double", "avoid-escape"],
+    "semi": [2, "never"],
     "strict": 0,
-    "space-before-blocks": [
-      2,
-      "always"
-    ],
+    "space-before-blocks": [2, "always"],
     "space-before-function-paren": [
       2,
       {
