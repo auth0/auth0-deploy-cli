@@ -1,17 +1,8 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-
-STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g')
-[ -z "$STAGED_FILES" ] && exit 0
-
-# Run linting 
 npm run lint:fix
 
-# Prettify all files
-npm run format
-
-# Add back the modified/prettified files to staging
-echo "$FILES" | xargs git add
+npx pretty-quick --staged
 
 /bin/bash ./typescript-migration-progress.sh
