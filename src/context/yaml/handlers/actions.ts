@@ -22,7 +22,8 @@ function parseCode(context: YAMLContext, code: string) {
 
 async function parse(context: YAMLContext): Promise<ParsedActions> {
   // Load the script file for each action
-  if (!context.assets.actions) return { actions: [] };
+  //@ts-ignore TODO: understand if empty array is intentionally being returned
+  if (!context.assets.actions) return [];
   const actions = {
     actions: [
       ...context.assets.actions.map((action) => ({
