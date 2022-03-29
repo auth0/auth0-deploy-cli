@@ -9,10 +9,9 @@ import {
 } from '../../utils';
 import handlers from './handlers';
 import cleanAssets from '../../readonly';
-import { Assets } from '../../types'
+import { Assets, Config } from '../../types'
 
 
-type Config = { [key: string]: any }// TODO: replace with a more canonical representation of the Config type 
 type ManagementAPIClient = unknown// TODO: replace with a more canonical representation of the ManagementAPIClient type 
 type KeywordMappings = { [key: string]: (string | number)[] | string | number }
 
@@ -27,7 +26,7 @@ export default class YAMLContext {
   constructor(config: Config, mgmtClient) {
     this.configFile = config.AUTH0_INPUT_FILE;
     this.config = config;
-    this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS;
+    this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {};
     this.mgmtClient = mgmtClient;
 
     //@ts-ignore for now
@@ -42,11 +41,11 @@ export default class YAMLContext {
       defaults: config.AUTH0_EXCLUDED_DEFAULTS || []
     };
 
-    this.basePath = config.AUTH0_BASE_PATH;
-    if (!this.basePath) {
+    this.basePath = (() => {
+      if (!!config.AUTH0_BASE_PATH) return config.AUTH0_BASE_PATH;
       //@ts-ignore because this looks to be a bug, but do not want to introduce regression; more investigation needed
-      this.basePath = (typeof configFile === 'object') ? process.cwd() : path.dirname(this.configFile);
-    }
+      return (typeof configFile === 'object') ? process.cwd() : path.dirname(this.configFile);
+    })()
   }
 
   loadFile(f) {
