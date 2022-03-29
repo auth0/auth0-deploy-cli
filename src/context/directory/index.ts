@@ -7,9 +7,8 @@ import handlers from './handlers';
 import {
   isDirectory, isFile, stripIdentifiers, toConfigFn
 } from '../../utils';
-import { Assets } from '..'
+import { Assets, Auth0APIClient, Config } from '../../types'
 
-type Config = { [key: string]: any }// TODO: replace with a more canonical representation of the Config type 
 type ManagementAPIClient = unknown// TODO: replace with a more canonical representation of the ManagementAPIClient type 
 type KeywordMappings = { [key: string]: (string | number)[] | string | number }
 
@@ -21,7 +20,7 @@ export default class DirectoryContext {
   mgmtClient: ManagementAPIClient;
   assets: Assets
 
-  constructor(config, mgmtClient) {
+  constructor(config: Config, mgmtClient: Auth0APIClient) {
     this.filePath = config.AUTH0_INPUT_FILE;
     this.config = config;
     this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS;
@@ -40,7 +39,7 @@ export default class DirectoryContext {
     };
   }
 
-  loadFile(f:string, folder:string) {
+  loadFile(f: string, folder: string) {
     const basePath = path.join(this.filePath, folder);
     let toLoad = path.join(basePath, f);
     if (!isFile(toLoad)) {
@@ -50,7 +49,7 @@ export default class DirectoryContext {
     return loadFileAndReplaceKeywords(toLoad, this.mappings);
   }
 
-  async load() {
+  async load(): Promise<void> {
     if (isDirectory(this.filePath)) {
       /* If this is a directory, look for each file in the directory */
       log.info(`Processing directory ${this.filePath}`);
@@ -68,7 +67,7 @@ export default class DirectoryContext {
     throw new Error(`Not sure what to do with, ${this.filePath} as it is not a directory...`);
   }
 
-  async dump() {
+  async dump(): Promise<void> {
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
     log.info('Loading Auth0 Tenant Data');
     await auth0.loadAll();

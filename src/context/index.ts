@@ -5,6 +5,7 @@ import DirectoryContext from './directory';
 
 import { isDirectory } from '../utils';
 import log from '../logger';
+import { Config } from '../types'
 
 const { version: packageVersion } = require('../../package.json')
 
@@ -19,50 +20,6 @@ const nonPrimitiveProps = [
   'EXCLUDED_PROPS',
   'INCLUDED_PROPS'
 ];
-
-type Config = {
-  AUTH0_DOMAIN: string
-  AUTH0_CLIENT_ID: string
-  AUTH0_CLIENT_SECRET: string
-  AUTH0_INPUT_FILE: string
-  AUTH0_ACCESS_TOKEN?: string
-  AUTH0_AUDIENCE?: string
-  AUTH0_API_MAX_RETRIES?: number
-}// TODO
-
-type Asset = { [key: string]: any }
-
-export type Assets = {
-  actions: Asset[],
-  attackProtection: Asset,
-  clients: Asset[],
-  clientGrants: Asset[],
-  connections: Asset[],
-  databases: Asset[],
-  emailProvider: Asset,
-  emailTemplates: Asset[],
-  guardianFactorProviders: Asset[],
-  guardianFactors: Asset[],
-  guardianFactorTemplates: Asset[],
-  guardianPhoneFactorMessageTypes: Asset[],
-  guardianPhoneFactorSelectedProvider: Asset,
-  guardianPolicies: Asset[],
-  hooks: Asset[],
-  migrations: Asset[]
-  organizations: Asset[],
-  pages: Asset[],
-  resourceServers: Asset[],
-  roles: Asset[],
-  rules: Asset[],
-  rulesConfigs: Asset[],
-  tenant: Asset,
-  triggers: Asset[],
-  //non-resource types
-  exclude: {
-    [key: string]: string[]
-  },
-  clientsOrig: Asset[],
-}
 
 export const setupContext = async (config: Config): Promise<DirectoryContext | YAMLContext> => {
   // Validate config

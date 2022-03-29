@@ -1,4 +1,6 @@
 import log from './logger';
+import APIHandler from '../tools/auth0/handlers/default'
+import { Asset } from '../types'
 
 /**
  * @template T
@@ -12,7 +14,7 @@ import log from './logger';
 export function processChangedObjectFields({
     handler, desiredAssetState, currentAssetState, allowDelete = false
 }: {
-    handler: Handler,
+    handler: APIHandler,
     desiredAssetState: Asset,
     currentAssetState: Asset,
     allowDelete?: boolean
@@ -79,22 +81,8 @@ export function processChangedObjectFields({
     return desiredAssetStateWithChanges;
 }
 
-// Temporary type for Asset until more canonical types are created
-type Asset = {
-    [key: string]: { [key: string]: string } | string//Temporarily accounting for different types of assets with arbitrary properties
-}
-
-// Temporary type for Auth0 API handler until more canonical types are created
-type Handler = {
-    id: string
-    name?: string
-    objectFields: string[]
-    objString: (arg0: Asset) => string
-}
-
-
 export function calculateChanges({ handler, assets, existing, identifiers = ['id', 'name'], allowDelete }: {
-    handler: Handler,
+    handler: APIHandler,
     assets: Asset[],
     existing: Asset[],
     identifiers: string[],

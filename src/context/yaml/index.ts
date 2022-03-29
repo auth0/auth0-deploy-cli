@@ -9,7 +9,7 @@ import {
 } from '../../utils';
 import handlers from './handlers';
 import cleanAssets from '../../readonly';
-import { Assets } from '..'
+import { Assets } from '../../types'
 
 
 type Config = { [key: string]: any }// TODO: replace with a more canonical representation of the Config type 
