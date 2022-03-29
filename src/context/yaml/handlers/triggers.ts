@@ -1,10 +1,11 @@
-import { YAMLHandler, Context } from '.'
+import { YAMLHandler } from '.'
+import YAMLContext from '..'
 
 type ParsedTriggers = {
   triggers: unknown[]
 } | {}
 
-async function parse(context: Context): Promise<ParsedTriggers> {
+async function parse(context: YAMLContext): Promise<ParsedTriggers> {
   // Load the script file for each action
   if (!context.assets.triggers) return {};
   return {
@@ -12,7 +13,7 @@ async function parse(context: Context): Promise<ParsedTriggers> {
   };
 }
 
-async function dump(context: Context): Promise<ParsedTriggers> {
+async function dump(context: YAMLContext): Promise<ParsedTriggers> {
   const { triggers } = context.assets;
   // Nothing to do
   if (!triggers) return {};

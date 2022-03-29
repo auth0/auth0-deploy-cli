@@ -5,12 +5,13 @@ import {
   existsMustBeDir, dumpJSON, loadJSON, isFile
 } from '../../../utils';
 import { DirectoryHandler } from '.'
+import DirectoryContext from '..'
 
 type ParsedGuardianFactorSelectedProvider = {
   guardianPhoneFactorSelectedProvider: unknown
 } | {}
 
-function parse(context): ParsedGuardianFactorSelectedProvider {
+function parse(context: DirectoryContext): ParsedGuardianFactorSelectedProvider {
   const guardianFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY);
   if (!existsMustBeDir(guardianFolder)) return {}; // Skip
 
@@ -25,7 +26,7 @@ function parse(context): ParsedGuardianFactorSelectedProvider {
   return {};
 }
 
-async function dump(context): Promise<void> {
+async function dump(context: DirectoryContext): Promise<void> {
   const { guardianPhoneFactorSelectedProvider } = context.assets;
 
   if (!guardianPhoneFactorSelectedProvider) return; // Skip, nothing to dump

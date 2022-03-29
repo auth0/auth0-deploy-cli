@@ -7,12 +7,13 @@ import {
   getFiles, existsMustBeDir, dumpJSON, loadJSON
 } from '../../../utils';
 import { DirectoryHandler } from '.'
+import DirectoryContext from '..'
 
 type ParsedEmailTemplates = {
   emailTemplates: unknown | undefined
 }
 
-function parse(context): ParsedEmailTemplates {
+function parse(context: DirectoryContext): ParsedEmailTemplates {
   const emailsFolder = path.join(context.filePath, constants.EMAIL_TEMPLATES_DIRECTORY);
   if (!existsMustBeDir(emailsFolder)) return { emailTemplates: undefined }; // Skip
 
@@ -53,7 +54,7 @@ function parse(context): ParsedEmailTemplates {
   };
 }
 
-async function dump(context): Promise<void> {
+async function dump(context: DirectoryContext): Promise<void> {
   const emailTemplates = [...context.assets.emailTemplates || []];
 
   if (!emailTemplates) return; // Skip, nothing to dump

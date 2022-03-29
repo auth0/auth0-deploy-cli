@@ -8,12 +8,13 @@ import {
 } from '../../../utils';
 
 import { DirectoryHandler } from './index'
+import DirectoryContext from '..'
 
 type ParsedRules = {
   rules: unknown[] | undefined
 }
 
-function parse(context): ParsedRules {
+function parse(context: DirectoryContext): ParsedRules {
   const rulesFolder = path.join(context.filePath, constants.RULES_DIRECTORY);
   if (!existsMustBeDir(rulesFolder)) return { rules: undefined }; // Skip
 
@@ -32,7 +33,7 @@ function parse(context): ParsedRules {
   };
 }
 
-async function dump(context): Promise<void> {
+async function dump(context: DirectoryContext): Promise<void> {
   const rules = [ ...context.assets.rules || [] ];
 
   if (!rules) return; // Skip, nothing to dump

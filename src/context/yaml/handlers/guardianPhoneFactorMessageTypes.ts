@@ -1,10 +1,11 @@
-import { YAMLHandler, Context } from '.'
+import { YAMLHandler } from '.'
+import YAMLContext from '..'
 
 type ParsedGuardianFactorMessageTypes = {
   guardianPhoneFactorMessageTypes: unknown
 }
 
-async function parseAndDump(context: Context): Promise<ParsedGuardianFactorMessageTypes> {
+async function parseAndDump(context: YAMLContext): Promise<ParsedGuardianFactorMessageTypes> {
   // nothing to do, set default if empty
   return {
     guardianPhoneFactorMessageTypes: { ...context.assets.guardianPhoneFactorMessageTypes || {} }

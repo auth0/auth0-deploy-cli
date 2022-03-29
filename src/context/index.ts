@@ -4,8 +4,10 @@ import YAMLContext from './yaml';
 import DirectoryContext from './directory';
 
 import { isDirectory } from '../utils';
-import { version as packageVersion } from '../../package.json';
 import log from '../logger';
+import { Config } from '../types'
+
+const { version: packageVersion } = require('../../package.json')
 
 const nonPrimitiveProps = [
   'AUTH0_KEYWORD_REPLACE_MAPPINGS',
@@ -19,23 +21,23 @@ const nonPrimitiveProps = [
   'INCLUDED_PROPS'
 ];
 
-export default async function(config) {
+export const setupContext = async (config: Config): Promise<DirectoryContext | YAMLContext> => {
   // Validate config
-  const errors = [];
+  const missingParams: ("AUTH0_DOMAIN" | "AUTH0_CLIENT_ID" | "AUTH0_CLIENT_SECRET")[] = [];
 
-  if (!config.AUTH0_DOMAIN) errors.push('AUTH0_DOMAIN');
+  if (!config.AUTH0_DOMAIN) missingParams.push('AUTH0_DOMAIN');
   if (!config.AUTH0_ACCESS_TOKEN) {
-    if (!config.AUTH0_CLIENT_ID) errors.push('AUTH0_CLIENT_ID');
-    if (!config.AUTH0_CLIENT_SECRET) errors.push('AUTH0_CLIENT_SECRET');
+    if (!config.AUTH0_CLIENT_ID) missingParams.push('AUTH0_CLIENT_ID');
+    if (!config.AUTH0_CLIENT_SECRET) missingParams.push('AUTH0_CLIENT_SECRET');
   }
 
-  if (errors.length > 0) {
-    throw new Error(`The following parameters were missing. Please add them to your config.json or as an environment variable. ${JSON.stringify(errors)}`);
+  if (missingParams.length > 0) {
+    throw new Error(`The following parameters were missing. Please add them to your config.json or as an environment variable. ${JSON.stringify(missingParams)}`);
   }
 
-  let accessToken = config.AUTH0_ACCESS_TOKEN;
+  const accessToken = await (async (): Promise<string> => {
+    if (!!config.AUTH0_ACCESS_TOKEN) return config.AUTH0_ACCESS_TOKEN;
 
-  if (!accessToken) {
     const authClient = new AuthenticationClient({
       domain: config.AUTH0_DOMAIN,
       clientId: config.AUTH0_CLIENT_ID,
@@ -45,8 +47,8 @@ export default async function(config) {
     const clientCredentials = await authClient.clientCredentialsGrant({
       audience: config.AUTH0_AUDIENCE ? config.AUTH0_AUDIENCE : `https://${config.AUTH0_DOMAIN}/api/v2/`
     });
-    accessToken = clientCredentials.access_token;
-  }
+    return clientCredentials.access_token;
+  })()
 
   const mgmtClient = new ManagementClient({
     domain: config.AUTH0_DOMAIN,

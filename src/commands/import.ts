@@ -2,7 +2,7 @@ import nconf from 'nconf';
 import configFactory from '../configFactory';
 import { deploy as toolsDeploy } from '../tools';
 import log from '../logger';
-import setupContext from '../context';
+import { setupContext } from '../context';
 
 type ImportParams = {
   input_file: string,
@@ -15,7 +15,7 @@ type ImportParams = {
   },
 }
 
-export default async function importCMD(params:ImportParams) {
+export default async function importCMD(params: ImportParams) {
   const {
     input_file: inputFile,
     base_path: basePath,
@@ -25,7 +25,7 @@ export default async function importCMD(params:ImportParams) {
     secret: clientSecret
   } = params;
 
-  if(shouldInheritEnv){
+  if (shouldInheritEnv) {
     nconf.env().use('memory');
 
     const mappings = nconf.get('AUTH0_KEYWORD_REPLACE_MAPPINGS') || {};

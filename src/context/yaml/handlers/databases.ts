@@ -2,13 +2,14 @@ import fs from 'fs-extra';
 import path from 'path';
 import { mapClientID2NameSorted, sanitize } from '../../../utils';
 import log from '../../../logger';
-import { YAMLHandler, Context } from '.'
+import { YAMLHandler } from '.'
+import YAMLContext from '..'
 
 type ParsedDatabases = {
   databases: unknown[]
 }
 
-async function parse(context: Context): Promise<ParsedDatabases | {}> {
+async function parse(context: YAMLContext): Promise<ParsedDatabases | {}> {
   // Load the script file for custom db
   if (!context.assets.databases) return {};
 
@@ -31,7 +32,7 @@ async function parse(context: Context): Promise<ParsedDatabases | {}> {
   };
 }
 
-async function dump(context: Context): Promise<ParsedDatabases | {}> {
+async function dump(context: YAMLContext): Promise<ParsedDatabases | {}> {
   const { databases } = context.assets;
 
   // Nothing to do

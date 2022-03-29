@@ -7,12 +7,13 @@ import {
   isFile, getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize, clearClientArrays
 } from '../../../utils';
 import { DirectoryHandler } from '.'
+import DirectoryContext from '..';
 
 type ParsedClients = {
   clients: unknown | undefined
 }
 
-function parse(context): ParsedClients {
+function parse(context: DirectoryContext): ParsedClients {
   const clientsFolder = path.join(context.filePath, constants.CLIENTS_DIRECTORY);
   if (!existsMustBeDir(clientsFolder)) return { clients: undefined }; // Skip
 
@@ -39,7 +40,7 @@ function parse(context): ParsedClients {
   };
 }
 
-async function dump(context): Promise<void> {
+async function dump(context: DirectoryContext): Promise<void> {
   const { clients } = context.assets;
 
   if (!clients) return; // Skip, nothing to dump

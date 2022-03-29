@@ -5,6 +5,8 @@ import {
   stripFields, dumpJSON, duplicateItems
 } from '../../utils';
 import { calculateChanges } from '../../calculateChanges';
+import { Asset, Assets, Auth0APIClient, Config } from '../../../types'
+
 
 export function order(value) {
   return function decorator(t, n, descriptor) {
@@ -13,33 +15,64 @@ export function order(value) {
   };
 }
 
-export default class DefaultHandler {
-  constructor(options) {
+export default class APIHandler {
+  config: any
+  id: string
+  type: string
+  updated: number
+  created: number
+  deleted: number
+  existing: null | Asset | Asset[]
+  client: Auth0APIClient // TODO: apply stronger types to Auth0 API client
+  identifiers: string[]
+  objectFields: string[]
+  stripUpdateFields: string[]
+  name?: string // TODO: understand if any handlers actually leverage `name` property
+  functions: {
+    getAll: 'getAll',
+    update: 'update'
+    create: 'create',
+    delete: 'delete'
+  }// TODO: delete this enum object in favor of tighter typing
+
+  constructor(options: {
+    id?: APIHandler['id'],
+    config: Config,
+    type: APIHandler['type'],
+    client: Auth0APIClient,
+    objectFields?: APIHandler['objectFields']
+    identifiers?: APIHandler['identifiers']
+    stripUpdateFields?: APIHandler['stripUpdateFields']
+    functions?: {
+      [key: string]: string
+    }//TODO: understand if any resource types pass in any additional functions
+  }) {
     this.config = options.config;
     this.type = options.type;
     this.id = options.id || 'id';
     this.client = options.client;
     this.existing = null;
-    this.identifiers = options.identifiers || [ 'id', 'name' ];
+    this.identifiers = options.identifiers || ['id', 'name'];
     this.objectFields = options.objectFields || [];
     this.stripUpdateFields = [
       ...options.stripUpdateFields || [],
       this.id
     ];
+
     this.functions = {
       getAll: 'getAll',
       create: 'create',
-      update: 'update',
       delete: 'delete',
+      update: 'update',
       ...options.functions || {}
-    };
+    }
 
     this.updated = 0;
     this.created = 0;
     this.deleted = 0;
   }
 
-  getClientFN(fn) {
+  getClientFN(fn: 'getAll' | 'create' | 'update' | 'delete' | Function): Function {
     if (typeof fn === 'string') {
       const client = this.client[this.type];
       return client[fn].bind(client);
@@ -47,35 +80,35 @@ export default class DefaultHandler {
     return fn;
   }
 
-  didDelete(item) {
+  didDelete(item: Asset): void {
     log.info(`Deleted [${this.type}]: ${this.objString(item)}`);
   }
 
-  didCreate(item) {
+  didCreate(item: Asset): void {
     log.info(`Created [${this.type}]: ${this.objString(item)}`);
   }
 
-  didUpdate(item) {
+  didUpdate(item: Asset): void {
     log.info(`Updated [${this.type}]: ${this.objString(item)}`);
   }
 
-  objString(item) {
+  objString(item: Asset): string {
     return dumpJSON(item);
   }
 
-  async getType() {
+  async getType(): Promise<Asset> {
     // Each type to impl how to get the existing as its not consistent across the mgnt api.
     throw new Error(`Must implement getType for type ${this.type}`);
   }
 
-  async load() {
+  async load(): Promise<{ [key: string]: Asset }> {
     // Load Asset from Tenant
     log.info(`Retrieving ${this.type} data from Auth0`);
     this.existing = await this.getType();
     return { [this.type]: this.existing };
   }
 
-  async calcChanges(assets) {
+  async calcChanges(assets: Assets) {
     const typeAssets = assets[this.type];
 
     // Do nothing if not set
@@ -87,12 +120,13 @@ export default class DefaultHandler {
     return calculateChanges({
       handler: this,
       assets: typeAssets,
+      //@ts-ignore TODO: investigate what happens when `existing` is null
       existing,
       identifiers: this.identifiers
     });
   }
 
-  async validate(assets) {
+  async validate(assets: Assets): Promise<void> {
     // Ensure no duplication in id and name
     const typeAssets = assets[this.type];
 
@@ -143,7 +177,7 @@ export default class DefaultHandler {
         await this.client.pool.addEachTask({
           data: del || [],
           generator: (delItem) => {
-            const delFunction = this.getClientFN(this.functions.delete);
+            const delFunction = this.getClientFN('delete');
             return delFunction({ [this.id]: delItem[this.id] })
               .then(() => {
                 this.didDelete(delItem);
@@ -161,7 +195,7 @@ export default class DefaultHandler {
     await this.client.pool.addEachTask({
       data: conflicts || [],
       generator: (updateItem) => {
-        const updateFN = this.getClientFN(this.functions.update);
+        const updateFN = this.getClientFN('update');
         const params = { [this.id]: updateItem[this.id] };
         const payload = stripFields({ ...updateItem }, this.stripUpdateFields);
         return updateFN(params, payload)
@@ -176,7 +210,7 @@ export default class DefaultHandler {
     await this.client.pool.addEachTask({
       data: create || [],
       generator: (createItem) => {
-        const createFunction = this.getClientFN(this.functions.create);
+        const createFunction = this.getClientFN('create');
         return createFunction(createItem)
           .then((data) => {
             this.didCreate(data);
@@ -192,7 +226,7 @@ export default class DefaultHandler {
     await this.client.pool.addEachTask({
       data: update || [],
       generator: (updateItem) => {
-        const updateFN = this.getClientFN(this.functions.update);
+        const updateFN = this.getClientFN('update');
         const params = { [this.id]: updateItem[this.id] };
         const payload = stripFields({ ...updateItem }, this.stripUpdateFields);
         return updateFN(params, payload)

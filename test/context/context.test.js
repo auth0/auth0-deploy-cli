@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { expect } from 'chai';
 
-import context from '../../src/context';
+import { setupContext } from '../../src/context';
 import directoryContext from '../../src/context/directory';
 import yamlContext from '../../src/context/yaml';
 import { cleanThenMkdir, testDataDir } from '../utils';
@@ -15,14 +15,14 @@ const config = {
 
 describe('#context loader validation', async () => {
   it('should error on bad file', async () => {
-    await expect(context(config)).to.be.eventually.rejectedWith(Error);
+    await expect(setupContext(config)).to.be.eventually.rejectedWith(Error);
   });
 
   it('should load directory context', async () => {
     /* Create empty directory */
     const dir = path.resolve(testDataDir, 'context');
     cleanThenMkdir(dir);
-    const loaded = await context({ ...config, AUTH0_INPUT_FILE: dir });
+    const loaded = await setupContext({ ...config, AUTH0_INPUT_FILE: dir });
     expect(loaded).to.be.an.instanceof(directoryContext);
   });
 
@@ -35,10 +35,10 @@ describe('#context loader validation', async () => {
     const yml = path.join(dir, 'empty.yml');
     fs.writeFileSync(yml, '');
 
-    const loaded = await context({ ...config, AUTH0_INPUT_FILE: yaml });
+    const loaded = await setupContext({ ...config, AUTH0_INPUT_FILE: yaml });
     expect(loaded).to.be.an.instanceof(yamlContext);
 
-    const loaded2 = await context({ ...config, AUTH0_INPUT_FILE: yml });
+    const loaded2 = await setupContext({ ...config, AUTH0_INPUT_FILE: yml });
     expect(loaded2).to.be.an.instanceof(yamlContext);
   });
 
@@ -50,7 +50,7 @@ describe('#context loader validation', async () => {
     const yaml = path.join(dir, 'empty.yaml');
     fs.writeFileSync(yaml, '');
 
-    const loaded = await context({ ...config, AUTH0_INPUT_FILE: yaml });
+    const loaded = await setupContext({ ...config, AUTH0_INPUT_FILE: yaml });
     expect(loaded).to.be.an.instanceof(yamlContext);
 
     const userAgent = loaded.mgmtClient.rules.resource.restClient.restClient.options.headers['User-agent'];

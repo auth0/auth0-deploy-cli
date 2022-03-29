@@ -4,7 +4,7 @@ import mkdirp from 'mkdirp';
 
 import log from '../logger';
 import { isDirectory } from '../utils';
-import setupContext from '../context';
+import { setupContext } from '../context';
 
 type ExportParams = {
   output_folder: string,
@@ -28,7 +28,7 @@ export default async function exportCMD(params: ExportParams) {
     env: shouldInheritEnv = false,
   } = params;
 
-  if(shouldInheritEnv){
+  if (shouldInheritEnv) {
     nconf.env().use('memory');
   }
 

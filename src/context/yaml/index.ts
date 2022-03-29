@@ -9,40 +9,37 @@ import {
 } from '../../utils';
 import handlers from './handlers';
 import cleanAssets from '../../readonly';
+import { Assets } from '../../types'
 
 
 type Config = { [key: string]: any }// TODO: replace with a more canonical representation of the Config type 
 type ManagementAPIClient = unknown// TODO: replace with a more canonical representation of the ManagementAPIClient type 
 type KeywordMappings = { [key: string]: (string | number)[] | string | number }
 
-export default class {
+export default class YAMLContext {
   basePath: string;
   configFile: string;
   config: Config;
   mappings: KeywordMappings;
   mgmtClient: ManagementAPIClient;
-  assets: {
-    exclude: {
-      [key: string]: string[]
-    }
-  }
+  assets: Assets
 
-  constructor(config, mgmtClient) {
+  constructor(config: Config, mgmtClient) {
     this.configFile = config.AUTH0_INPUT_FILE;
     this.config = config;
     this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS;
     this.mgmtClient = mgmtClient;
 
+    //@ts-ignore for now
+    this.assets = {}
     // Get excluded rules
-    this.assets = {
-      exclude: {
-        rules: config.AUTH0_EXCLUDED_RULES || [],
-        clients: config.AUTH0_EXCLUDED_CLIENTS || [],
-        databases: config.AUTH0_EXCLUDED_DATABASES || [],
-        connections: config.AUTH0_EXCLUDED_CONNECTIONS || [],
-        resourceServers: config.AUTH0_EXCLUDED_RESOURCE_SERVERS || [],
-        defaults: config.AUTH0_EXCLUDED_DEFAULTS || []
-      }
+    this.assets.exclude = {
+      rules: config.AUTH0_EXCLUDED_RULES || [],
+      clients: config.AUTH0_EXCLUDED_CLIENTS || [],
+      databases: config.AUTH0_EXCLUDED_DATABASES || [],
+      connections: config.AUTH0_EXCLUDED_CONNECTIONS || [],
+      resourceServers: config.AUTH0_EXCLUDED_RESOURCE_SERVERS || [],
+      defaults: config.AUTH0_EXCLUDED_DEFAULTS || []
     };
 
     this.basePath = config.AUTH0_BASE_PATH;

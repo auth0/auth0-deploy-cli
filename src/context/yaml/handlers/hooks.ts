@@ -5,13 +5,14 @@ import { constants } from '../../../tools';
 import { sanitize } from '../../../utils';
 import log from '../../../logger';
 
-import { YAMLHandler, Context } from '.'
+import { YAMLHandler } from '.'
+import YAMLContext from '..'
 
 type ParsedHooks = {
   hooks: unknown[]
 } | {}
 
-async function parse(context: Context): Promise<ParsedHooks> {
+async function parse(context: YAMLContext): Promise<ParsedHooks> {
   // Load the script file for each hook
   if (!context.assets.hooks) return {};
 
@@ -19,6 +20,7 @@ async function parse(context: Context): Promise<ParsedHooks> {
     hooks: [
       ...context.assets.hooks.map((hook) => {
         if (hook.script) {
+          //@ts-ignore TODO: understand why two arguments are passed when context.loadFile only accepts one
           hook.script = context.loadFile(hook.script, constants.HOOKS_DIRECTORY);
         }
 
@@ -30,7 +32,7 @@ async function parse(context: Context): Promise<ParsedHooks> {
   };
 }
 
-async function dump(context: Context): Promise<ParsedHooks> {
+async function dump(context: YAMLContext): Promise<ParsedHooks> {
   let hooks = [...context.assets.hooks || []];
 
   if (hooks.length > 0) {

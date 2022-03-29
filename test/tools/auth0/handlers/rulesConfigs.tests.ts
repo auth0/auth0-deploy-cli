@@ -1,5 +1,5 @@
-const { expect } = require('chai');
-const rulesConfigs = require('../../../../src/tools/auth0/handlers/rulesConfigs');
+import { expect } from 'chai';
+import rulesConfigs from '../../../../src/tools/auth0/handlers/rulesConfigs'
 
 const pool = {
   addEachTask: (data) => {
@@ -15,7 +15,7 @@ describe('#rulesConfigs handler', () => {
     it('should set rulesConfig', async () => {
       const auth0 = {
         rulesConfigs: {
-          set: (params, data) => {
+          update: (params, data) => {
             expect(params).to.be.an('object');
             expect(data).to.be.an('object');
             expect(params.key).to.equal('someKey');
@@ -26,7 +26,7 @@ describe('#rulesConfigs handler', () => {
         pool
       };
 
-      const handler = new rulesConfigs.default({ client: auth0 });
+      const handler = new rulesConfigs({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [ { rulesConfigs: [ { key: 'someKey', value: 'some_value' } ] } ]);
@@ -43,7 +43,7 @@ describe('#rulesConfigs handler', () => {
       rulesConfigs: { getAll: () => rulesConfigData }
     };
 
-    const handler = new rulesConfigs.default({ client: auth0 });
+    const handler = new rulesConfigs({ client: auth0 });
     const data = await handler.getType();
     expect(data).to.deep.equal(rulesConfigData);
   });

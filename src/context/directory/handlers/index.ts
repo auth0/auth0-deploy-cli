@@ -24,11 +24,11 @@ import triggers from './triggers';
 import attackProtection from './attackProtection';
 import branding from './branding';
 
-type Context = any // TODO: replace with a more canonical representation of the Context type 
+import DirectoryContext from '..'
 
 export type DirectoryHandler<T> = {
-  dump: (context: Context) => void,
-  parse: (context: Context) => T,
+  dump: (context: DirectoryContext) => void,
+  parse: (context: DirectoryContext) => T,
 }
 
 export default {
