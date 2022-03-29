@@ -9,7 +9,7 @@ import YAMLContext from '..'
 
 type ParsedActions = {
   actions: unknown[] | undefined
-} | []
+}
 
 type Secret = { name: string, value: string }
 
@@ -22,7 +22,7 @@ function parseCode(context: YAMLContext, code: string) {
 
 async function parse(context: YAMLContext): Promise<ParsedActions> {
   // Load the script file for each action
-  if (!context.assets.actions) return [];
+  if (!context.assets.actions) return { actions: [] };
   const actions = {
     actions: [
       ...context.assets.actions.map((action) => ({

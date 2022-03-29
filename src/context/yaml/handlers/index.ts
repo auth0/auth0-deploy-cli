@@ -24,14 +24,15 @@ import triggers from './triggers';
 import attackProtection from './attackProtection';
 import branding from './branding';
 
-import YAMLContext  from '..'
+import YAMLContext from '..'
+import { AssetTypes } from '../../../types'
 
 export type YAMLHandler<T> = {
   dump: (context: YAMLContext) => Promise<T | {}>,//May return empty object to signal 
   parse: (context: YAMLContext) => Promise<T>,
 }
 
-export default {
+const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown }> } = {
   rules,
   hooks,
   rulesConfigs,
@@ -57,4 +58,6 @@ export default {
   triggers,
   attackProtection,
   branding
-};
+}
+
+export default yamlHandlers;
