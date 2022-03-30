@@ -37,6 +37,7 @@ export type Asset = { [key: string]: any }
 export type Assets = {
     actions: Asset[],
     attackProtection: Asset,
+    branding: Asset,
     clients: Asset[],
     clientGrants: Asset[],
     connections: Asset[],
