@@ -23,7 +23,7 @@ export default class DirectoryContext {
   constructor(config: Config, mgmtClient: Auth0APIClient) {
     this.filePath = config.AUTH0_INPUT_FILE;
     this.config = config;
-    this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS;
+    this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {};
     this.mgmtClient = mgmtClient;
 
     //@ts-ignore for now

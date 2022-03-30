@@ -1,7 +1,8 @@
 import Auth0 from './auth0';
 import log from './logger';
+import { ConfigFunction } from '../configFactory'
 
-export default async function deploy(assets, client, config) {
+export default async function deploy(assets, client, config: ConfigFunction) {
   // Setup log level
   log.transports.console.level = process.env.AUTH0_DEBUG === 'true' ? 'debug' : 'info';
 

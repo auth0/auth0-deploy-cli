@@ -6,6 +6,7 @@ import {
 } from '../../utils';
 import { calculateChanges } from '../../calculateChanges';
 import { Asset, Assets, Auth0APIClient, Config } from '../../../types'
+import { ConfigFunction } from '../../../configFactory'
 
 
 export function order(value) {
@@ -16,7 +17,7 @@ export function order(value) {
 }
 
 export default class APIHandler {
-  config: any
+  config: ConfigFunction
   id: string
   type: string
   updated: number
@@ -37,7 +38,7 @@ export default class APIHandler {
 
   constructor(options: {
     id?: APIHandler['id'],
-    config: Config,
+    config: ConfigFunction,
     type: APIHandler['type'],
     client: Auth0APIClient,
     objectFields?: APIHandler['objectFields']
