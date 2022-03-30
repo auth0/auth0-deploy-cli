@@ -9,7 +9,7 @@ import YAMLContext from '..'
 
 type ParsedActions = {
   actions: unknown[] | undefined
-} | []
+}
 
 type Secret = { name: string, value: string }
 
@@ -22,6 +22,7 @@ function parseCode(context: YAMLContext, code: string) {
 
 async function parse(context: YAMLContext): Promise<ParsedActions> {
   // Load the script file for each action
+  //@ts-ignore TODO: understand if empty array is intentionally being returned
   if (!context.assets.actions) return [];
   const actions = {
     actions: [
