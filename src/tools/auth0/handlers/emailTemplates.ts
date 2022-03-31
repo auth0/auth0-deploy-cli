@@ -41,7 +41,9 @@ export default class EmailTemplateHandler extends DefaultHandler {
       }
     }));
 
-    return emailTemplates;
+    const nonEmptyTemplates = emailTemplates.filter(template => !!template)
+
+    return nonEmptyTemplates;
   }
 
   async updateOrCreate(emailTemplate): Promise<void> {
