@@ -2,7 +2,7 @@ import _ from 'lodash';
 import DefaultHandler, { order } from './default';
 import { calculateChanges } from '../../calculateChanges';
 import log from '../../logger';
-import { Asset, Assets } from '../../../types';
+import { Asset, Assets, CalculatedChanges } from '../../../types';
 
 export const schema = {
   type: 'array',
@@ -74,7 +74,7 @@ export default class OrganizationsHandler extends DefaultHandler {
     return created;
   }
 
-  async createOrganizations(creates) {
+  async createOrganizations(creates: CalculatedChanges['create']) {
     await this.client.pool.addEachTask({
       data: creates || [],
       generator: (item) => this.createOrganization(item).then((data) => {
@@ -124,7 +124,7 @@ export default class OrganizationsHandler extends DefaultHandler {
     return params;
   }
 
-  async updateOrganizations(updates, orgs) {
+  async updateOrganizations(updates: CalculatedChanges['update'], orgs: Asset[]): Promise<void>{
     await this.client.pool.addEachTask({
       data: updates || [],
       generator: (item) => this.updateOrganization(item, orgs).then((data) => {
@@ -163,7 +163,7 @@ export default class OrganizationsHandler extends DefaultHandler {
 
   // Run after connections
   @order('70')
-  async processChanges(assets: Assets) {
+  async processChanges(assets: Assets): Promise<void> {
     const { organizations } = assets;
     // Do nothing if not set
     if (!organizations) return;
@@ -205,6 +205,7 @@ export default class OrganizationsHandler extends DefaultHandler {
           await this.createOrganizations(changes.create);
           break;
         case change.update && change.update.length > 0:
+          //@ts-ignore because change.update cannot be undefined here
           await this.updateOrganizations(change.update, existing);
           break;
         default:
