@@ -8,13 +8,15 @@ import { Assets, Auth0APIClient } from '../../types'
 import APIHandler from './handlers/default';
 import { ConfigFunction } from '../../configFactory';
 
-const defaultOrder = 50;
+
 
 type Stage = 'load' | 'validate' | 'processChanges'
 
 type StageFunction = APIHandler['load'] // Using `load` method as a template for what type stage functions resemble
 
 function sortByOrder(toSort: APIHandler[], stage: Stage): APIHandler[] {
+  const defaultOrder = 50
+
   const sorted = [...toSort];
   sorted.sort((a, b) => {
     //@ts-ignore because this doesn't actually work. TODO: apply stage order
@@ -27,7 +29,7 @@ function sortByOrder(toSort: APIHandler[], stage: Stage): APIHandler[] {
 }
 
 export default class Auth0 {
-  client: any
+  client: Auth0APIClient
   config: ConfigFunction
   assets: Assets
   handlers: APIHandler[]
