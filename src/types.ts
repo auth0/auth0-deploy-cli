@@ -51,6 +51,12 @@ export type Auth0APIClient = {
         updateFactor: (arg0: any, arg1: any) => void
         getPolicies: () => Asset[]
         updatePolicies: (arg0: any, arg1: any) => void,
+        getFactorTemplates: (arg0: { name: string }) => any
+        updateFactorTemplates: (arg0: any, arg1: any) => void,
+        updatePhoneFactorMessageTypes: (arg0: any, arg1: any) => void,
+        getPhoneFactorSelectedProvider: () => Asset[]
+        getPhoneFactorMessageTypes: () => Asset[]
+        updatePhoneFactorSelectedProvider: (arg0: {}, arg1: Asset) => void
     },
     hooks: APICLientBaseFunctions & {
         get: ({ id: string }) => Asset
@@ -71,6 +77,10 @@ export type Auth0APIClient = {
             get: (Object) => Asset
         }
     },
+    prompts: APICLientBaseFunctions & {
+        getSettings: () => Asset[]
+        updateSettings: (arg0: {}, arg1: Asset) => void
+    }
     roles: APICLientBaseFunctions & {
         permissions: APICLientBaseFunctions & {
             delete: (arg0: { id: string }, arg1: { permissions: any }) => void
@@ -132,7 +142,9 @@ export type Assets = {
     guardianFactorProviders: Asset[],
     guardianFactors: Asset[],
     guardianFactorTemplates: Asset[],
-    guardianPhoneFactorMessageTypes: Asset[],
+    guardianPhoneFactorMessageTypes: {
+        message_types: Asset[]
+    },
     guardianPhoneFactorSelectedProvider: Asset,
     guardianPolicies: {
         policies: Asset[],

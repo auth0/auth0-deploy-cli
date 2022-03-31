@@ -1,16 +1,20 @@
+//@ts-nocheck because prompts haven't been fully implemented in this codebase yet
 import DefaultHandler from './default';
+import { Asset, Assets } from '../../../types'
 
 export const schema = { type: 'object' };
 
 export default class PromptsHandler extends DefaultHandler {
-  constructor(options) {
+  existing: Asset[]
+  
+  constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'prompts'
     });
   }
 
-  async getType() {
+  async getType(): Promise<Asset[]> {
     // in case client version does not support branding
     if (!this.client.prompts || typeof this.client.prompts.getSettings !== 'function') {
       return {};
@@ -26,7 +30,7 @@ export default class PromptsHandler extends DefaultHandler {
     }
   }
 
-  async processChanges(assets) {
+  async processChanges(assets: Assets): Promise<void> {
     const { prompts } = assets;
 
     // Do nothing if not set
