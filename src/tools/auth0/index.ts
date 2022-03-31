@@ -40,7 +40,7 @@ export default class Auth0 {
     this.assets = assets;
 
     this.handlers = Object.values(handlers).map((handler) => {
-      //@ts-ignore because prompts don't appear to have been universally implemented yet
+      //@ts-ignore because class expects `type` property but gets directly injected into class constructors
       const newHandler = new handler.default({ client: this.client, config: this.config });
       return newHandler
     }).filter((handler) => {
