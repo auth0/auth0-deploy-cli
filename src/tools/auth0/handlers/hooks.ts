@@ -1,7 +1,8 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
+import { Asset, Assets, CalculatedChanges } from '../../../types';
 
-const ALLOWED_TRIGGER_IDS = [ 'credentials-exchange', 'pre-user-registration', 'post-user-registration', 'post-change-password', 'send-phone-message' ];
+const ALLOWED_TRIGGER_IDS = ['credentials-exchange', 'pre-user-registration', 'post-user-registration', 'post-change-password', 'send-phone-message'];
 
 export const excludeSchema = {
   type: 'array',
@@ -45,12 +46,12 @@ export const schema = {
         description: 'List of key-value pairs of NPM dependencies available to the hook.'
       }
     },
-    required: [ 'script', 'name', 'triggerId' ]
+    required: ['script', 'name', 'triggerId']
   }
 };
 
-const getCertainHook = (hooks, name, triggerId) => {
-  let result = null;
+const getCertainHook = (hooks: Asset[], name: string, triggerId: string): Asset | null => {
+  let result: Asset | null = null;
 
   hooks.forEach((hook) => {
     if (hook.name === name && hook.triggerId === triggerId) {
@@ -72,24 +73,27 @@ const getActive = (hooks) => {
 };
 
 export default class HooksHandler extends DefaultHandler {
-  constructor(options) {
+  existing: Asset[]
+  
+  constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'hooks',
-      stripUpdateFields: [ 'id', 'triggerId' ]
+      stripUpdateFields: ['id', 'triggerId']
     });
   }
 
-  objString(hook) {
+  objString(hook): string {
     return super.objString({ name: hook.name, triggerId: hook.triggerId });
   }
 
-  async processSecrets(hooks) {
+  async processSecrets(hooks): Promise<void> {
     const allHooks = await this.getType(true);
-    const changes = {
+    const changes: CalculatedChanges = {
       create: [],
       update: [],
-      del: []
+      del: [],
+      conflicts: []
     };
 
     hooks.forEach((hook) => {
@@ -99,7 +103,7 @@ export default class HooksHandler extends DefaultHandler {
         const newSecrets = hook.secrets || {};
         const create = {};
         const update = {};
-        const del = [];
+        const del: string[] = [];
 
         Object.keys(newSecrets).forEach((key) => {
           if (!oldSecrets[key]) {
@@ -134,7 +138,8 @@ export default class HooksHandler extends DefaultHandler {
     }));
   }
 
-  async getType(reload) {
+  //@ts-ignore
+  async getType(reload: boolean): Promise<Asset[]> {
     if (this.existing && !reload) {
       return this.existing;
     }
@@ -148,7 +153,7 @@ export default class HooksHandler extends DefaultHandler {
       const hooks = await this.client.hooks.getAll({ paginate: true, include_totals: true });
 
       // hooks.getAll does not return code and secrets, we have to fetch hooks one-by-one
-      this.existing = await Promise.all(hooks.map((hook) => this.client.hooks.get({ id: hook.id })
+      this.existing = await Promise.all(hooks.map((hook: {id: string}) => this.client.hooks.get({ id: hook.id })
         .then((hookWithCode) => this.client.hooks.getSecrets({ id: hook.id })
           .then((secrets) => ({ ...hookWithCode, secrets })))));
 
@@ -161,7 +166,7 @@ export default class HooksHandler extends DefaultHandler {
     }
   }
 
-  async calcChanges(assets) {
+  async calcChanges(assets: Assets): Promise<CalculatedChanges> {
     const {
       del, update, create, conflicts
     } = await super.calcChanges(assets);
@@ -177,7 +182,7 @@ export default class HooksHandler extends DefaultHandler {
     };
   }
 
-  async validate(assets) {
+  async validate(assets): Promise<void> {
     const { hooks } = assets;
 
     // Do nothing if not set
@@ -189,6 +194,7 @@ export default class HooksHandler extends DefaultHandler {
       if (activeHooks[type].length > 1) { // There can be only one!
         const conflict = activeHooks[type].map((h) => h.name).join(', ');
         const err = new Error(`Only one active hook allowed for "${type}" extensibility point. Conflicting hooks: ${conflict}`);
+        //@ts-ignore need to investigate if appending status actually works here
         err.status = 409;
         throw err;
       }
@@ -197,7 +203,7 @@ export default class HooksHandler extends DefaultHandler {
     await super.validate(assets);
   }
 
-  async processChanges(assets) {
+  async processChanges(assets: Assets): Promise<void> {
     const { hooks } = assets;
 
     // Do nothing if not set

@@ -41,7 +41,16 @@ export type Auth0APIClient = {
     },
     guardian: APICLientBaseFunctions & {
         getFactorProvider: (any) => Asset
-        updateFactorProvider: (arg0: any, arg1: any) => any
+        updateFactorProvider: (arg0: any, arg1: any) => void
+        getFactors: () => Asset[]
+        updateFactor: (arg0: any, arg1: any) => void
+    },
+    hooks: APICLientBaseFunctions & {
+        get: ({id:string}) => Asset
+        removeSecrets: (arg0: any, arg1: any) => any
+        updateSecrets: (arg0: any, arg1: any) => any
+        getSecrets: ({ id: string }) => Promise<Asset[]>
+        addSecrets: (arg0: any, arg1: any) => any
     }
 }// TODO: replace with a more accurate representation of the Auth0APIClient type 
 
