@@ -60,6 +60,12 @@ export type Auth0APIClient = {
             get: (Object) => Asset
         }
     },
+    roles: APICLientBaseFunctions & {
+        permissions: APICLientBaseFunctions & {
+            delete: (arg0: { id: string }, arg1: { permissions: any }) => void
+            create: (arg0: { id: string }, arg1: { permissions: any }) => Asset
+        }
+    },
     tenant: APICLientBaseFunctions & {
         getSettings: () => Asset
         updateSettings: (Asset) => void
