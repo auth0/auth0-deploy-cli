@@ -1,3 +1,4 @@
+import { Assets, Asset, CalculatedChanges } from '../../../types';
 import DefaultHandler from './default';
 
 export const schema = {
@@ -8,13 +9,13 @@ export const schema = {
       key: { type: 'string', pattern: '^[A-Za-z0-9_-]*$' },
       value: { type: 'string' }
     },
-    required: [ 'key', 'value' ]
+    required: ['key', 'value']
   },
   additionalProperties: false
 };
 
 export default class RulesConfigsHandler extends DefaultHandler {
-  constructor(options) {
+  constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'rulesConfigs',
@@ -25,25 +26,31 @@ export default class RulesConfigsHandler extends DefaultHandler {
     });
   }
 
-  async getType() {
+  async getType(): Promise<Asset[]> {
     return this.client.rulesConfigs.getAll();
   }
 
-  objString(item) {
+  objString(item): string {
     return super.objString({ key: item.key });
   }
 
-  async calcChanges(assets) {
+  async calcChanges(assets: Assets): Promise<CalculatedChanges> {
     const { rulesConfigs } = assets;
 
     // Do nothing if not set
-    if (!rulesConfigs || !rulesConfigs.length) return {};
+    if (!rulesConfigs || !rulesConfigs.length) return {
+      del: [],
+      update: [],
+      create: [],
+      conflicts: [],
+    };
 
     // Intention is to not delete/cleanup old configRules, that needs to be handled manually.
     return {
       del: [],
       update: rulesConfigs,
-      create: []
+      create: [],
+      conflicts: []
     };
   }
 }

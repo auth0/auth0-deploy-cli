@@ -77,6 +77,9 @@ export type Auth0APIClient = {
             create: (arg0: { id: string }, arg1: { permissions: any }) => Asset
         }
     },
+    rulesConfigs: APICLientBaseFunctions & {
+        getAll: () => Asset[]
+    }
     tenant: APICLientBaseFunctions & {
         getSettings: () => Asset
         updateSettings: (Asset) => void
