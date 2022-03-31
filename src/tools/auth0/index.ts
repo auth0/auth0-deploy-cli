@@ -40,8 +40,8 @@ export default class Auth0 {
     this.assets = assets;
 
     this.handlers = Object.values(handlers).map((h) => {
-      //@ts-ignore because `type` constructor property is missing but is set on each individual API class
-      const handler = new h({ client: this.client, config: this.config });
+      //@ts-ignore because prompts don't appear to have been universally implemented yet
+      const handler = new h.default({ client: this.client, config: this.config });
       return handler
     });
   }
@@ -65,6 +65,9 @@ export default class Auth0 {
 
   async validate(): Promise<void> {
     const ajv = new Ajv({ useDefaults: true });
+
+    console.log({schema,assets:this.assets})
+
     const valid = ajv.validate(schema, this.assets);
     if (!valid) {
       throw new Error(`Schema validation failed loading ${JSON.stringify(ajv.errors, null, 4)}`);

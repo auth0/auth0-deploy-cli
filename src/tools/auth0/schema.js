@@ -1,4 +1,4 @@
-import * as handlers from './handlers';
+import handlers from './handlers';
 
 const typesSchema = Object.entries(handlers).reduce((map, [ name, obj ]) => {
   map[name] = obj.schema; //eslint-disable-line

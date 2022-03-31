@@ -1,34 +1,34 @@
-import rules from './rules';
-import rulesConfigs from './rulesConfigs';
-import hooks from './hooks';
-import pages from './pages';
-import resourceServers from './resourceServers';
-import databases from './databases';
-import connections from './connections';
-import clients from './clients';
-import tenant from './tenant';
-import emailProvider from './emailProvider';
-import emailTemplates from './emailTemplates';
-import clientGrants from './clientGrants';
-import guardianFactors from './guardianFactors';
-import guardianFactorProviders from './guardianFactorProviders';
-import guardianFactorTemplates from './guardianFactorTemplates';
-import guardianPolicies from './guardianPolicies';
-import guardianPhoneFactorSelectedProvider from './guardianPhoneFactorSelectedProvider';
-import guardianPhoneFactorMessageTypes from './guardianPhoneFactorMessageTypes';
-import roles from './roles';
-import branding from './branding';
-import prompts from './prompts';
-import migrations from './migrations';
-import actions from './actions';
-import triggers from './triggers';
-import organizations from './organizations';
-import attackProtection from './attackProtection';
+//TODO: 
+import * as rules from './rules';
+import * as rulesConfigs from './rulesConfigs';
+import * as hooks from './hooks';
+import * as pages from './pages';
+import * as resourceServers from './resourceServers';
+import * as databases from './databases';
+import * as connections from './connections';
+import * as clients from './clients';
+import * as tenant from './tenant';
+import * as emailProvider from './emailProvider';
+import * as emailTemplates from './emailTemplates';
+import * as clientGrants from './clientGrants';
+import * as guardianFactors from './guardianFactors';
+import * as guardianFactorProviders from './guardianFactorProviders';
+import * as guardianFactorTemplates from './guardianFactorTemplates';
+import * as guardianPolicies from './guardianPolicies';
+import * as guardianPhoneFactorSelectedProvider from './guardianPhoneFactorSelectedProvider';
+import * as guardianPhoneFactorMessageTypes from './guardianPhoneFactorMessageTypes';
+import * as roles from './roles';
+import * as branding from './branding';
+import * as prompts from './prompts';
+import * as migrations from './migrations';
+import * as actions from './actions';
+import * as triggers from './triggers';
+import * as organizations from './organizations';
+import * as attackProtection from './attackProtection';
 
 import { AssetTypes } from '../../../types';
 import APIHandler from './default'
 
-// @ts-ignore
 const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   rules,
   rulesConfigs,
@@ -59,4 +59,4 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   attackProtection
 };
 
-export default auth0ApiHandlers as { [key in AssetTypes]: typeof APIHandler };
+export default auth0ApiHandlers as { [key in AssetTypes]: { default: typeof APIHandler, excludeSchema?: any, schema: any } };// TODO: apply stronger types to schema properties

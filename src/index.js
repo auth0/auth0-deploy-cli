@@ -50,6 +50,7 @@ if (require.main === module) {
       if (error.type || error.stage) {
         log.error(`Problem running command ${params._[0]} during stage ${error.stage} when processing type ${error.type}`);
       } else {
+        console.log({ error })
         log.error(`Problem running command ${params._[0]}`);
       }
 
