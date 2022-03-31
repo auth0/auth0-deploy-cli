@@ -9,7 +9,6 @@ import {
 } from '../../utils';
 import { Assets, Auth0APIClient, Config } from '../../types'
 
-type ManagementAPIClient = unknown// TODO: replace with a more canonical representation of the ManagementAPIClient type 
 type KeywordMappings = { [key: string]: (string | number)[] | string | number }
 
 export default class DirectoryContext {
@@ -17,7 +16,7 @@ export default class DirectoryContext {
   filePath: string;
   config: Config;
   mappings: KeywordMappings;
-  mgmtClient: ManagementAPIClient;
+  mgmtClient: Auth0APIClient;
   assets: Assets
 
   constructor(config: Config, mgmtClient: Auth0APIClient) {
