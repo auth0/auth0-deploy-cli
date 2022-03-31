@@ -3,6 +3,7 @@ import ValidationError from '../../ValidationError';
 import constants from '../../constants';
 import DefaultHandler from './default';
 import { calculateChanges } from '../../calculateChanges';
+import { Asset, Assets, CalculatedChanges } from '../../../types';
 
 export const excludeSchema = {
   type: 'array',
@@ -29,34 +30,41 @@ export const schema = {
       enforce_policies: { type: 'boolean' },
       token_dialect: { type: 'string' }
     },
-    required: [ 'name', 'identifier' ]
+    required: ['name', 'identifier']
   }
 };
 
 export default class ResourceServersHandler extends DefaultHandler {
-  constructor(options) {
+  existing: Asset[]
+
+  constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'resourceServers',
-      stripUpdateFields: [ 'identifier' ] // Fields not allowed in updates
+      stripUpdateFields: ['identifier'] // Fields not allowed in updates
     });
   }
 
-  objString(resourceServer) {
+  objString(resourceServer): string {
     return super.objString({ name: resourceServer.name, identifier: resourceServer.identifier });
   }
 
-  async getType() {
+  async getType(): Promise<Asset[]> {
     if (this.existing) return this.existing;
     const resourceServers = await this.client.resourceServers.getAll({ paginate: true, include_totals: true });
     return resourceServers.filter((rs) => rs.name !== constants.RESOURCE_SERVERS_MANAGEMENT_API_NAME);
   }
 
-  async calcChanges(assets) {
+  async calcChanges(assets: Assets): Promise<CalculatedChanges> {
     let { resourceServers } = assets;
 
     // Do nothing if not set
-    if (!resourceServers) return {};
+    if (!resourceServers) return {
+      del: [],
+      create: [],
+      conflicts: [],
+      update: []
+    };
 
     const excluded = (assets.exclude && assets.exclude.resourceServers) || [];
 
@@ -70,11 +78,12 @@ export default class ResourceServersHandler extends DefaultHandler {
       handler: this,
       assets: resourceServers,
       existing,
-      identifiers: [ 'id', 'identifier' ]
+      identifiers: ['id', 'identifier'],
+      allowDelete: false,  //TODO: actually pass in correct allowDelete value
     });
   }
 
-  async validate(assets) {
+  async validate(assets: Assets): Promise<void> {
     const { resourceServers } = assets;
 
     // Do nothing if not set

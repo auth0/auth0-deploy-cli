@@ -49,6 +49,8 @@ export type Auth0APIClient = {
         updateFactorProvider: (arg0: any, arg1: any) => void
         getFactors: () => Asset[]
         updateFactor: (arg0: any, arg1: any) => void
+        getPolicies: () => Asset[]
+        updatePolicies: (arg0: any, arg1: any) => void,
     },
     hooks: APICLientBaseFunctions & {
         get: ({ id: string }) => Asset
@@ -57,6 +59,10 @@ export type Auth0APIClient = {
         getSecrets: ({ id: string }) => Promise<Asset[]>
         addSecrets: (arg0: any, arg1: any) => any
     },
+    migrations: APICLientBaseFunctions & {
+        getMigrations: () => { flags: Asset[] }
+        updateMigrations: (arg0: { flags: Asset[] }) => void
+    }
     organizations: APICLientBaseFunctions & {
         updateEnabledConnection: (arg0: any, arg1: any) => any
         addEnabledConnection: (arg0: any, arg1: any) => any
@@ -105,6 +111,7 @@ export type Config = {
         [key: string]: string[]
     }
     INCLUDED_PROPS?: {}
+    AUTH0_IGNORE_UNAVAILABLE_MIGRATIONS?: boolean
 }// TODO: replace with a more accurate representation of the Config type 
 
 export type Asset = { [key: string]: any }
@@ -124,7 +131,9 @@ export type Assets = {
     guardianFactorTemplates: Asset[],
     guardianPhoneFactorMessageTypes: Asset[],
     guardianPhoneFactorSelectedProvider: Asset,
-    guardianPolicies: Asset[],
+    guardianPolicies: {
+        policies: Asset[],
+    },
     hooks: Asset[],
     migrations: Asset[]
     organizations: Asset[],
