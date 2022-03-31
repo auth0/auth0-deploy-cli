@@ -41,8 +41,7 @@ export default class Auth0 {
 
     this.handlers = Object.values(handlers).map((handler) => {
       //@ts-ignore because class expects `type` property but gets directly injected into class constructors
-      const newHandler = new handler.default({ client: this.client, config: this.config });
-      return newHandler
+      return new handler.default({ client: this.client, config: this.config });
     }).filter((handler) => {
       const excludedAssetTypes = config('AUTH0_EXCLUDED') || []
       return !excludedAssetTypes.includes(handler.type)
