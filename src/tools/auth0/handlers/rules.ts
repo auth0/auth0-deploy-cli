@@ -5,6 +5,7 @@ import {
 import DefaultHandler from './default';
 import log from '../../logger';
 import { calculateChanges } from '../../calculateChanges';
+import { Asset, Assets, CalculatedChanges } from '../../../types';
 
 export const excludeSchema = {
   type: 'array',
@@ -28,7 +29,7 @@ export const schema = {
         pattern: '^[^-\\s][a-zA-Z0-9-\\s]+[^-\\s]$'
       },
       order: {
-        type: [ 'number', 'null' ],
+        type: ['number', 'null'],
         description: 'The rule\'s order in relation to other rules. A rule with a lower order than another rule executes first.',
         default: null
       },
@@ -41,33 +42,35 @@ export const schema = {
         type: 'string',
         description: 'The rule\'s execution stage',
         default: 'login_success',
-        enum: [ 'login_success', 'login_failure', 'pre_authorize' ]
+        enum: ['login_success', 'login_failure', 'pre_authorize']
       }
     },
-    required: [ 'name' ]
+    required: ['name']
   }
 };
 
 export default class RulesHandler extends DefaultHandler {
-  constructor(options) {
+  existing: Asset[]
+
+  constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'rules',
-      stripUpdateFields: [ 'stage' ] // Fields not allowed in updates
+      stripUpdateFields: ['stage'] // Fields not allowed in updates
     });
   }
 
-  async getType() {
+  async getType(): Promise<Asset[]> {
     if (this.existing) return this.existing;
     this.existing = await this.client.rules.getAll({ paginate: true, include_totals: true });
     return this.existing;
   }
 
-  objString(rule) {
+  objString(rule): string {
     return super.objString({ name: rule.name, order: rule.order });
   }
 
-  async calcChanges(assets, includeExcluded = false) {
+  async calcChanges(assets, includeExcluded = false): Promise<CalculatedChanges & { reOrder: Asset[] }> {
     let { rules } = assets;
 
     const excludedRules = (assets.exclude && assets.exclude.rules) || [];
@@ -87,23 +90,29 @@ export default class RulesHandler extends DefaultHandler {
       handler: this,
       assets: rules,
       existing,
-      identifiers: [ 'id', 'name' ]
+      identifiers: ['id', 'name'],
+      allowDelete: false //TODO: actually pass in correct allowDelete value
+
     });
     // Figure out the rules that need to be re-ordered
-    const futureRules = [ ...create, ...update ];
+    const futureRules = [...create, ...update];
 
     const futureMaxOrder = Math.max(...futureRules.map((r) => r.order));
     const existingMaxOrder = Math.max(...existing.map((r) => r.order));
     let nextOrderNo = Math.max(futureMaxOrder, existingMaxOrder);
 
-    const reOrder = futureRules.reduce((accum, r) => {
+    //@ts-ignore because we know reOrder is Asset[]
+    const reOrder: Asset[] = futureRules.reduce((accum: Asset[], r) => {
       const conflict = existing.find((f) => r.order === f.order && r.name !== f.name);
-      if (conflict) {
+      if (conflict !== undefined) {
         nextOrderNo += 1;
-        accum.push({
-          ...conflict,
-          order: nextOrderNo
-        });
+        return [
+          ...accum,
+          {
+            ...conflict,
+            order: nextOrderNo
+          }
+        ]
       }
       return accum;
     }, []);
@@ -117,7 +126,7 @@ export default class RulesHandler extends DefaultHandler {
     };
   }
 
-  async validate(assets) {
+  async validate(assets: Assets): Promise<void> {
     const { rules } = assets;
 
     // Do nothing if not set
@@ -129,7 +138,7 @@ export default class RulesHandler extends DefaultHandler {
     const { update, create, del } = await this.calcChanges(assets, true);
     // Include del rules which are actually not going to be deleted but are excluded
     // they can still muck up the ordering so we must take it into consideration.
-    const futureRules = [ ...create, ...update, ...del.filter((r) => excludedRules.includes(r.name)) ];
+    const futureRules = [...create, ...update, ...del.filter((r) => excludedRules.includes(r.name))];
 
     // Detect rules with the same order
     const rulesSameOrder = duplicateItems(futureRules, 'order');
@@ -142,7 +151,7 @@ export default class RulesHandler extends DefaultHandler {
 
     // Detect Rules that are changing stage as it's not allowed.
     const existing = await this.getType();
-    const stateChanged = futureRules.reduce((changed, rule) => ([
+    const stateChanged = futureRules.reduce((changed: Asset[], rule) => ([
       ...changed,
       ...existing.filter((r) => rule.name.toLowerCase() === r.name.toLowerCase() && r.stage !== rule.stage)
     ]), []).map((r) => r.name);
@@ -156,7 +165,7 @@ export default class RulesHandler extends DefaultHandler {
     await super.validate(assets);
   }
 
-  async processChanges(assets) {
+  async processChanges(assets: Assets): Promise<void> {
     const { rules } = assets;
 
     // Do nothing if not set

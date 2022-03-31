@@ -8,6 +8,8 @@ type APICLientBaseFunctions = {
 export type Auth0APIClient = {
     [key: string]: APICLientBaseFunctions
     pool: any
+    //@ts-ignore
+    updateRule: (arg0: { id: string }, arg1: any) => any
     actions: APICLientBaseFunctions & {
         deploy: ({ id: string }) => void
         getAllTriggers: () => { triggers: Asset[] }
