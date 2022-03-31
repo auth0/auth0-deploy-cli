@@ -12,21 +12,21 @@ describe("#Auth0 class", () => {
 
             const auth0WithoutExclusions = new Auth0(mockEmptyClient, mockEmptyAssets, () => []);
 
-            const AUTH0_EXCLUDE = ['rules', 'organizations', 'connections']
-            const auth0WithExclusions = new Auth0(mockEmptyClient, mockEmptyAssets, () => AUTH0_EXCLUDE);
+            const AUTH0_EXCLUDED = ['rules', 'organizations', 'connections']
+            const auth0WithExclusions = new Auth0(mockEmptyClient, mockEmptyAssets, () => AUTH0_EXCLUDED);
 
-            expect(auth0WithoutExclusions.handlers.length).to.equal(auth0WithExclusions.handlers.length + AUTH0_EXCLUDE.length) // Number of handlers is reduced by number of exclusions
+            expect(auth0WithoutExclusions.handlers.length).to.equal(auth0WithExclusions.handlers.length + AUTH0_EXCLUDED.length) // Number of handlers is reduced by number of exclusions
 
             const areAllExcludedHandlersAbsent = auth0WithExclusions.handlers.some((handler) => {
-                return AUTH0_EXCLUDE.includes(handler.type)
+                return AUTH0_EXCLUDED.includes(handler.type)
             })
 
             expect(areAllExcludedHandlersAbsent).to.be.false;
         })
 
         it('should not exclude any handlers if AUTH0_EXCLUDED is undefined', () => {
-            const AUTH0_EXCLUDE = undefined
-            const auth0 = new Auth0(mockEmptyClient, mockEmptyAssets, () => AUTH0_EXCLUDE);
+            const AUTH0_EXCLUDED = undefined
+            const auth0 = new Auth0(mockEmptyClient, mockEmptyAssets, () => AUTH0_EXCLUDED);
 
             expect(auth0.handlers.length).to.be.greaterThan(0)
         })

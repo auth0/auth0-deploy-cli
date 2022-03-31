@@ -3,11 +3,11 @@ import { loadFileAndReplaceKeywords, Auth0 } from '../../tools';
 
 import cleanAssets from '../../readonly';
 import log from '../../logger';
-import handlers from './handlers';
+import handlers, { DirectoryHandler } from './handlers';
 import {
   isDirectory, isFile, stripIdentifiers, toConfigFn
 } from '../../utils';
-import { Assets, Auth0APIClient, Config } from '../../types'
+import { Assets, Auth0APIClient, Config, AssetTypes } from '../../types'
 
 type KeywordMappings = { [key: string]: (string | number)[] | string | number }
 
@@ -78,14 +78,17 @@ export default class DirectoryContext {
     // Copy clients to be used by handlers which require converting client_id to the name
     // Must copy as the client_id will be stripped if AUTH0_EXPORT_IDENTIFIERS is false
     //@ts-ignore because assets haven't been typed yet TODO: type assets
-    this.assets.clientsOrig = [...this.assets.clients];
+    this.assets.clientsOrig = [...this.assets.clients || []];
 
     // Optionally Strip identifiers
     if (!this.config.AUTH0_EXPORT_IDENTIFIERS) {
       this.assets = stripIdentifiers(auth0, this.assets);
     }
 
-    await Promise.all(Object.entries(handlers).map(async ([name, handler]) => {
+    await Promise.all(Object.entries(handlers).filter(([handlerName]: [AssetTypes, DirectoryHandler<any>]) => {
+      const excludedAssetTypes = this.config.AUTH0_EXCLUDED || []
+      return !excludedAssetTypes.includes(handlerName)
+    }).map(async ([name, handler]) => {
       try {
         await handler.dump(this);
       } catch (err) {
