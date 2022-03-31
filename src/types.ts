@@ -19,14 +19,30 @@ export type Auth0APIClient = {
         updateSuspiciousIpThrottlingConfig: ({ }, Object) => Asset
         updateBruteForceConfig: ({ }, Object) => Asset
     },
+    branding: APICLientBaseFunctions & {
+        getSettings: () => any,
+        getUniversalLoginTemplate: () => any,
+        updateSettings: ({ }, any) => any,
+        setUniversalLoginTemplate: ({ }, any) => any
+    },
     connections: APICLientBaseFunctions & {
         get: (Object) => Asset
+    },
+    customDomains: APICLientBaseFunctions & {
+        getAll: any
     },
     emailProvider: APICLientBaseFunctions & {
         delete: () => void
         get: (Object) => Asset
-        configure: (arg0:Object, arg1:Object) => Asset
+        configure: (arg0: Object, arg1: Object) => Asset
     },
+    emailTemplates: APICLientBaseFunctions & {
+        get: (Object) => Asset
+    },
+    guardian: APICLientBaseFunctions & {
+        getFactorProvider: (any) => Asset
+        updateFactorProvider: (arg0: any, arg1: any) => any
+    }
 }// TODO: replace with a more accurate representation of the Auth0APIClient type 
 
 export type Config = {

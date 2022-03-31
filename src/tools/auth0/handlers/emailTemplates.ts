@@ -1,5 +1,7 @@
 import DefaultHandler, { order } from './default';
 import constants from '../../constants';
+import { Assets, Asset } from '../../../types'
+
 
 export const supportedTemplates = constants.EMAIL_TEMPLATES_NAMES
   .filter((p) => p.includes('.json'))
@@ -13,12 +15,12 @@ export const schema = {
       template: { type: 'string', enum: supportedTemplates },
       body: { type: 'string', default: '' }
     },
-    required: [ 'template' ]
+    required: ['template']
   }
 };
 
 export default class EmailTemplateHandler extends DefaultHandler {
-  constructor(options) {
+  constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'emailTemplates',
@@ -26,15 +28,13 @@ export default class EmailTemplateHandler extends DefaultHandler {
     });
   }
 
-  async getType() {
-    const emailTemplates = [];
-
-    await Promise.all(constants.EMAIL_TEMPLATES_TYPES.map(async (name) => {
+  async getType(): Promise<Asset> {
+    const emailTemplates = await Promise.all(constants.EMAIL_TEMPLATES_TYPES.map(async (name) => {
       try {
         const template = await this.client.emailTemplates.get({ name });
-        emailTemplates.push(template);
+        return template
       } catch (err) {
-      // Ignore if not found, else throw error
+        // Ignore if not found, else throw error
         if (err.statusCode !== 404) {
           throw err;
         }
@@ -44,7 +44,7 @@ export default class EmailTemplateHandler extends DefaultHandler {
     return emailTemplates;
   }
 
-  async updateOrCreate(emailTemplate) {
+  async updateOrCreate(emailTemplate): Promise<void> {
     try {
       const params = { name: emailTemplate[this.id] };
       const updated = await this.client.emailTemplates.update(params, emailTemplate);
@@ -66,7 +66,7 @@ export default class EmailTemplateHandler extends DefaultHandler {
 
   // Run after email provider changes
   @order('60')
-  async processChanges(assets) {
+  async processChanges(assets: Assets): Promise<void> {
     const { emailTemplates } = assets;
 
     // Do nothing if not set
