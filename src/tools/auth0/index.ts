@@ -39,11 +39,14 @@ export default class Auth0 {
     this.config = config;
     this.assets = assets;
 
-    this.handlers = Object.values(handlers).map((h) => {
+    this.handlers = Object.values(handlers).map((handler) => {
       //@ts-ignore because prompts don't appear to have been universally implemented yet
-      const handler = new h.default({ client: this.client, config: this.config });
-      return handler
-    });
+      const newHandler = new handler.default({ client: this.client, config: this.config });
+      return newHandler
+    }).filter((handler) => {
+      const excludedAssetTypes = config('AUTH0_EXCLUDED')
+      return !excludedAssetTypes.includes(handler.type)
+    })
   }
 
   async runStage(stage: Stage): Promise<void> {

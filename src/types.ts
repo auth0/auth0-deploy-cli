@@ -14,22 +14,24 @@ export type Config = {
     AUTH0_CLIENT_SECRET: string
     AUTH0_INPUT_FILE: string
     AUTH0_ALLOW_DELETE: boolean
+    AUTH0_EXCLUDED: AssetTypes[]
     EXTENSION_SECRET: string
     AUTH0_ACCESS_TOKEN?: string
     AUTH0_BASE_PATH?: string
     AUTH0_AUDIENCE?: string
     AUTH0_API_MAX_RETRIES?: number
     AUTH0_KEYWORD_REPLACE_MAPPINGS?: { [key: string]: string[] | string }
+    AUTH0_EXPORT_IDENTIFIERS?: boolean
+    AUTH0_CONNECTIONS_DIRECTORY?: string
+    EXCLUDED_PROPS?: {}
+    INCLUDED_PROPS?: {}
+    // Eventually deprecate:
     AUTH0_EXCLUDED_RULES?: string[]
     AUTH0_EXCLUDED_CLIENTS?: string[]
     AUTH0_EXCLUDED_DATABASES?: string[]
     AUTH0_EXCLUDED_CONNECTIONS?: string[]
     AUTH0_EXCLUDED_RESOURCE_SERVERS?: string[]
     AUTH0_EXCLUDED_DEFAULTS?: string[]
-    AUTH0_EXPORT_IDENTIFIERS?: boolean
-    AUTH0_CONNECTIONS_DIRECTORY?: string
-    EXCLUDED_PROPS?: {}
-    INCLUDED_PROPS?: {}
 }// TODO: replace with a more accurate representation of the Config type 
 
 export type Asset = { [key: string]: any }
