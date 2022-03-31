@@ -65,9 +65,6 @@ export default class Auth0 {
 
   async validate(): Promise<void> {
     const ajv = new Ajv({ useDefaults: true });
-
-    console.log({schema,assets:this.assets})
-
     const valid = ajv.validate(schema, this.assets);
     if (!valid) {
       throw new Error(`Schema validation failed loading ${JSON.stringify(ajv.errors, null, 4)}`);
