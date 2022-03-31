@@ -46,11 +46,23 @@ export type Auth0APIClient = {
         updateFactor: (arg0: any, arg1: any) => void
     },
     hooks: APICLientBaseFunctions & {
-        get: ({id:string}) => Asset
+        get: ({ id: string }) => Asset
         removeSecrets: (arg0: any, arg1: any) => any
         updateSecrets: (arg0: any, arg1: any) => any
         getSecrets: ({ id: string }) => Promise<Asset[]>
         addSecrets: (arg0: any, arg1: any) => any
+    },
+    organizations: APICLientBaseFunctions & {
+        updateEnabledConnection: (arg0: any, arg1: any) => any
+        addEnabledConnection: (arg0: any, arg1: any) => any
+        removeEnabledConnection: (arg0: any) => any
+        connections: {
+            get: (Object) => Asset
+        }
+    },
+    tenant: APICLientBaseFunctions & {
+        getSettings: () => Asset
+        updateSettings: (Asset) => void
     }
 }// TODO: replace with a more accurate representation of the Auth0APIClient type 
 
