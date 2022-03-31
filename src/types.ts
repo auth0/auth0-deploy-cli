@@ -10,6 +10,9 @@ export type Auth0APIClient = {
     pool: any
     actions: APICLientBaseFunctions & {
         deploy: ({ id: string }) => void
+        getAllTriggers: () => { triggers: Asset[] }
+        getTriggerBindings: ({ trigger_id: string }) => { bindings: Asset[] }
+        updateTriggerBindings: ({ trigger_id: string }, { bindings: Object }) => { bindings: Asset[] }
     },
     attackProtection: APICLientBaseFunctions & {
         getBreachedPasswordDetectionConfig: () => Asset
@@ -69,6 +72,10 @@ export type Auth0APIClient = {
     tenant: APICLientBaseFunctions & {
         getSettings: () => Asset
         updateSettings: (Asset) => void
+    },
+    triggers: APICLientBaseFunctions & {
+
+        getTriggerBindings: () => Asset
     }
 }// TODO: replace with a more accurate representation of the Auth0APIClient type 
 

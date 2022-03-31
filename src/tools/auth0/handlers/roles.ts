@@ -26,7 +26,7 @@ export const schema = {
   }
 };
 
-export default class RoleHandler extends DefaultHandler {
+export default class RolesHandler extends DefaultHandler {
   existing: Asset[]
 
   constructor(config: DefaultHandler) {
