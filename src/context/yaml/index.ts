@@ -102,7 +102,7 @@ export default class YAMLContext {
     }
 
     await Promise.all(Object.entries(handlers).filter(([handlerName]: [AssetTypes, YAMLHandler<any>]) => {
-      const excludedAssetTypes = this.config.AUTH0_EXCLUDED
+      const excludedAssetTypes = this.config.AUTH0_EXCLUDED || []
       return !excludedAssetTypes.includes(handlerName)
     }).map(async ([name, handler]) => {
       try {

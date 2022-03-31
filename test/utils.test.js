@@ -22,7 +22,9 @@ import {
   toConfigFn
 } from '../src/utils';
 
-describe('#utils', function() {
+const mockConfigFn = () => { }
+
+describe('#utils', function () {
   it('should check if directory exist', () => {
     const dirExist = path.join(testDataDir, 'utils', 'isdir');
     const dirNotExist = path.join(testDataDir, 'utils', 'notexist');
@@ -52,7 +54,7 @@ describe('#utils', function() {
     fs.writeFileSync(path.join(dir, 'test2.html'), 'junk');
     fs.writeFileSync(path.join(dir, 'other.file'), 'junk');
 
-    expect(getFiles(dir, [ '.json', '.html' ])).to.deep.equal([
+    expect(getFiles(dir, ['.json', '.html'])).to.deep.equal([
       path.join(dir, 'test1.html'),
       path.join(dir, 'test1.json'),
       path.join(dir, 'test2.html'),
@@ -91,11 +93,11 @@ describe('#utils', function() {
 
   it('should strip identifiers', () => {
     const assets = {
-      clients: [ { name: 'some client', client_id: 'test' } ],
-      rulesConfigs: [ { key: 'test', value: 'test' } ]
+      clients: [{ name: 'some client', client_id: 'test' }],
+      rulesConfigs: [{ key: 'test', value: 'test' }]
     };
 
-    const auth0 = new Auth0(mockMgmtClient(), {}, {});
+    const auth0 = new Auth0(mockMgmtClient(), {}, mockConfigFn);
 
     expect(stripIdentifiers(auth0, assets)).to.deep.equal({
       clients: [
@@ -132,7 +134,7 @@ describe('#utils', function() {
       name: 'Name',
       a: 'Alpha'
     });
-    expect(Object.keys(result)).to.deep.equal([ 'name', 'identifier', 'id', 'a', 'b', 'c', 'd' ]);
+    expect(Object.keys(result)).to.deep.equal(['name', 'identifier', 'id', 'a', 'b', 'c', 'd']);
     expect(result).to.deep.equal({
       name: 'Name',
       identifier: 'Identifier',
@@ -198,12 +200,12 @@ describe('#utils', function() {
   it('should not touch correct client arrays', () => {
     const client = {
       name: 'Default App',
-      callbacks: [ 'callback' ],
+      callbacks: ['callback'],
       allowed_clients: [],
-      allowed_logout_urls: [ 'url', 'url' ],
+      allowed_logout_urls: ['url', 'url'],
       is_first_party: true,
       oidc_conformant: false,
-      allowed_origins: [ 'origin' ]
+      allowed_origins: ['origin']
     };
 
     expect(clearClientArrays(client)).to.deep.equal(client);
@@ -264,16 +266,16 @@ describe('#utils', function() {
 
     it('should return sorted list', () => {
       expect(mapClientID2NameSorted(
-        [ 'client_id_B', 'client_id_A', 'not_found_id' ],
+        ['client_id_B', 'client_id_A', 'not_found_id'],
         knownClients
-      )).deep.equal([ 'client_A', 'client_B', 'not_found_id' ]);
+      )).deep.equal(['client_A', 'client_B', 'not_found_id']);
     });
 
     it('should return sorted list even knownClient are invalid', () => {
       expect(mapClientID2NameSorted(
-        [ 'client_id_B', 'client_id_A', 'not_found_id' ],
+        ['client_id_B', 'client_id_A', 'not_found_id'],
         null
-      )).deep.equal([ 'client_id_A', 'client_id_B', 'not_found_id' ]);
+      )).deep.equal(['client_id_A', 'client_id_B', 'not_found_id']);
     });
 
     it('should return empty list upon invalid input', () => {

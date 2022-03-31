@@ -44,7 +44,7 @@ export default class Auth0 {
       const newHandler = new handler.default({ client: this.client, config: this.config });
       return newHandler
     }).filter((handler) => {
-      const excludedAssetTypes = config('AUTH0_EXCLUDED')
+      const excludedAssetTypes = config('AUTH0_EXCLUDED') || []
       return !excludedAssetTypes.includes(handler.type)
     })
   }
