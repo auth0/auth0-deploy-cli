@@ -9,10 +9,8 @@ import {
 } from '../../utils';
 import handlers from './handlers';
 import cleanAssets from '../../readonly';
-import { Assets, Config } from '../../types'
+import { Assets, Config, Auth0APIClient } from '../../types'
 
-
-type ManagementAPIClient = unknown// TODO: replace with a more canonical representation of the ManagementAPIClient type 
 type KeywordMappings = { [key: string]: (string | number)[] | string | number }
 
 export default class YAMLContext {
@@ -20,7 +18,7 @@ export default class YAMLContext {
   configFile: string;
   config: Config;
   mappings: KeywordMappings;
-  mgmtClient: ManagementAPIClient;
+  mgmtClient: Auth0APIClient;
   assets: Assets
 
   constructor(config: Config, mgmtClient) {
@@ -29,7 +27,7 @@ export default class YAMLContext {
     this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {};
     this.mgmtClient = mgmtClient;
 
-    //@ts-ignore for now
+    //@ts-ignore because the assets property gets filled out throughout 
     this.assets = {}
     // Get excluded rules
     this.assets.exclude = {

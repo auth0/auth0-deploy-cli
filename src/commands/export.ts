@@ -20,7 +20,6 @@ type ExportParams = {
 }
 
 export default async function exportCMD(params: ExportParams) {
-  console.log({ params })
   const {
     output_folder: outputFolder,
     base_path: basePath,
