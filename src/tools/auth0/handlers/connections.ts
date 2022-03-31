@@ -3,6 +3,7 @@ import _ from 'lodash';
 import DefaultAPIHandler, { order } from './default';
 import { filterExcluded, convertClientNameToId, getEnabledClients } from '../../utils';
 import { CalculatedChanges, Asset, Config, Assets } from '../../../types';
+import { ConfigFunction } from '../../../configFactory';
 
 export const schema = {
   type: 'array',
@@ -31,10 +32,11 @@ export const addExcludedConnectionPropertiesToChanges = ({
 }: {
   proposedChanges: CalculatedChanges,
   existingConnections: Asset[],
-  config: () => Config
+  config: ConfigFunction
 }) => {
   if (proposedChanges.update.length === 0) return proposedChanges;
 
+  //@ts-ignore because this expects a parameter to be passed
   const excludedFields = config()?.EXCLUDED_PROPS?.connections || [];
   if (excludedFields.length === 0) return proposedChanges;
 

@@ -9,7 +9,7 @@ import { Config } from '../types'
 
 const { version: packageVersion } = require('../../package.json')
 
-const nonPrimitiveProps = [
+const nonPrimitiveProps: (keyof Config)[] = [
   'AUTH0_KEYWORD_REPLACE_MAPPINGS',
   'AUTH0_EXCLUDED_RULES',
   'AUTH0_EXCLUDED_CLIENTS',
@@ -61,7 +61,7 @@ export const setupContext = async (config: Config): Promise<DirectoryContext | Y
 
   const inputFile = config.AUTH0_INPUT_FILE;
 
-  const ensureObject = (key, value) => {
+  const ensureObject = (key: keyof Config, value: any): any => {
     if (typeof value === 'string') {
       try {
         return JSON.parse(value);
@@ -76,6 +76,7 @@ export const setupContext = async (config: Config): Promise<DirectoryContext | Y
 
   nonPrimitiveProps.forEach((key) => {
     if (config[key]) {
+      //@ts-ignore because this method of config overwriting technically functions
       config[key] = ensureObject(key, config[key]);
     }
   });

@@ -25,13 +25,14 @@ import attackProtection from './attackProtection';
 import branding from './branding';
 
 import DirectoryContext from '..'
+import { AssetTypes } from '../../../types'
 
 export type DirectoryHandler<T> = {
   dump: (context: DirectoryContext) => void,
   parse: (context: DirectoryContext) => T,
 }
 
-export default {
+const directoryHandlers: { [key in AssetTypes]: DirectoryHandler<{ [key: string]: unknown }> } = {
   rules,
   rulesConfigs,
   hooks,
@@ -57,4 +58,6 @@ export default {
   triggers,
   attackProtection,
   branding
-};
+}
+
+export default directoryHandlers;

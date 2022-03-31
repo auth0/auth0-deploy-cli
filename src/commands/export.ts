@@ -4,16 +4,18 @@ import mkdirp from 'mkdirp';
 
 import log from '../logger';
 import { isDirectory } from '../utils';
-import { setupContext } from '../context';
+import { setupContext } from '../context/index';
+import { Config } from '../types'
 
 type ExportParams = {
   output_folder: string,
-  base_path: string,
+  base_path?: string,
   config_file: string,
-  config: object,
+  config?: Partial<Config>,
   export_ids: boolean,
-  secret: string
+  secret?: string
   format: 'yaml' | 'directory'
+  debug: boolean
   env: boolean
 }
 
@@ -36,10 +38,9 @@ export default async function exportCMD(params: ExportParams) {
     nconf.file(configFile);
   }
 
-  const overrides: { [key: string]: any } = {
+  const overrides: Partial<Config>  = {
     AUTH0_INPUT_FILE: outputFolder,
     AUTH0_BASE_PATH: basePath,
-    AUTH0_CONFIG_FILE: configFile,
     ...configObj || {}
   };
 
