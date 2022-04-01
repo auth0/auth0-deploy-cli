@@ -50,7 +50,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   guardianPhoneFactorMessageTypes,
   roles,
   branding,
-  //@ts-ignore because prompts don't appear to have been universally implemented yet
+  //@ts-ignore because prompts have not been universally implemented yet
   prompts,
   migrations,
   actions,

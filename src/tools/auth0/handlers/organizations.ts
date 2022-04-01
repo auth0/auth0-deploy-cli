@@ -205,8 +205,7 @@ export default class OrganizationsHandler extends DefaultHandler {
           await this.createOrganizations(changes.create);
           break;
         case change.update && change.update.length > 0:
-          //@ts-ignore because change.update cannot be undefined here
-          await this.updateOrganizations(change.update, existing);
+          if(change.update) await this.updateOrganizations(change.update, existing);
           break;
         default:
           break;

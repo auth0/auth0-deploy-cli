@@ -102,7 +102,7 @@ export default class RulesHandler extends DefaultHandler {
     let nextOrderNo = Math.max(futureMaxOrder, existingMaxOrder);
 
     //@ts-ignore because we know reOrder is Asset[]
-    const reOrder: Asset[] = futureRules.reduce((accum: Asset[], r) => {
+    const reOrder: Asset[] = futureRules.reduce((accum: Asset[], r: Asset) => {
       const conflict = existing.find((f) => r.order === f.order && r.name !== f.name);
       if (conflict !== undefined) {
         nextOrderNo += 1;

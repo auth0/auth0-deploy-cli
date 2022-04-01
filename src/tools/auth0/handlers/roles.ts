@@ -168,15 +168,13 @@ export default class RolesHandler extends DefaultHandler {
     await Promise.all(myChanges.map(async (change) => {
       switch (true) {
         case change.del && change.del.length > 0:
-          //@ts-ignore because we know change.del can't be undefined here
-          await this.deleteRoles(change.del);
+          if(change.del) await this.deleteRoles(change.del);
           break;
         case change.create && change.create.length > 0:
           await this.createRoles(changes.create);//TODO: fix this tho change.create
           break;
         case change.update && change.update.length > 0:
-          //@ts-ignore because we know change.del can't be undefined here
-          await this.updateRoles(change.update, existing);
+          if(change.update) await this.updateRoles(change.update, existing);
           break;
         default:
           break;

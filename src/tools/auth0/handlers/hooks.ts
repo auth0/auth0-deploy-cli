@@ -138,7 +138,7 @@ export default class HooksHandler extends DefaultHandler {
     }));
   }
 
-  //@ts-ignore
+  //@ts-ignore because hooks use a special reload argument
   async getType(reload: boolean): Promise<Asset[]> {
     if (this.existing && !reload) {
       return this.existing;
