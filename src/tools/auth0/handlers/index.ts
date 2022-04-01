@@ -1,3 +1,4 @@
+//TODO: 
 import * as rules from './rules';
 import * as rulesConfigs from './rulesConfigs';
 import * as hooks from './hooks';
@@ -25,7 +26,10 @@ import * as triggers from './triggers';
 import * as organizations from './organizations';
 import * as attackProtection from './attackProtection';
 
-export {
+import { AssetTypes } from '../../../types';
+import APIHandler from './default'
+
+const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   rules,
   rulesConfigs,
   hooks,
@@ -46,6 +50,7 @@ export {
   guardianPhoneFactorMessageTypes,
   roles,
   branding,
+  //@ts-ignore because prompts don't appear to have been universally implemented yet
   prompts,
   migrations,
   actions,
@@ -53,3 +58,5 @@ export {
   organizations,
   attackProtection
 };
+
+export default auth0ApiHandlers as { [key in AssetTypes]: { default: typeof APIHandler, excludeSchema?: any, schema: any } };// TODO: apply stronger types to schema properties

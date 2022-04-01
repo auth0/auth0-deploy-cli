@@ -5,7 +5,7 @@ import {
   stripFields, dumpJSON, duplicateItems
 } from '../../utils';
 import { calculateChanges } from '../../calculateChanges';
-import { Asset, Assets, Auth0APIClient, Config } from '../../../types'
+import { Asset, Assets, Auth0APIClient } from '../../../types'
 import { ConfigFunction } from '../../../configFactory'
 
 
