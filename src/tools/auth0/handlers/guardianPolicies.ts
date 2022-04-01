@@ -1,5 +1,6 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
+import { Asset, Assets } from '../../../types'
 
 export const schema = {
   type: 'object',
@@ -16,6 +17,10 @@ export const schema = {
 };
 
 export default class GuardianPoliciesHandler extends DefaultHandler {
+  existing: {
+    policies: Asset[]
+  }
+
   constructor(options) {
     super({
       ...options,
@@ -23,7 +28,8 @@ export default class GuardianPoliciesHandler extends DefaultHandler {
     });
   }
 
-  async getType() {
+  //TODO: standardize empty object literal with more intentional empty indicator
+  async getType(): Promise<GuardianPoliciesHandler['existing'] | {}> {
     // in case client version does not support the operation
     if (!this.client.guardian || typeof this.client.guardian.getPolicies !== 'function') {
       return {};
@@ -35,7 +41,7 @@ export default class GuardianPoliciesHandler extends DefaultHandler {
     return this.existing;
   }
 
-  async processChanges(assets) {
+  async processChanges(assets: Assets): Promise<void> {
     // No API to delete or create guardianPolicies, we can only update.
     const { guardianPolicies } = assets;
 

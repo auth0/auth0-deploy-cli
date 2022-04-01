@@ -1,5 +1,6 @@
 import DefaultHandler, { order } from './default';
 import log from '../../logger';
+import { Asset, Assets } from '../../../types'
 
 export const schema = {
   type: 'object',
@@ -7,14 +8,15 @@ export const schema = {
 };
 
 export default class MigrationsHandler extends DefaultHandler {
-  constructor(options) {
+  constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'migrations'
     });
   }
 
-  async getType() {
+  //TODO: standardize empty object literal with more intentional empty indicator
+  async getType(): Promise<Asset[] | {}> {
     try {
       const migrations = await this.client.migrations.getMigrations();
       return migrations.flags;
@@ -26,7 +28,7 @@ export default class MigrationsHandler extends DefaultHandler {
 
   // Run at the end since switching a flag will depend on other applying other changes
   @order('150')
-  async processChanges(assets) {
+  async processChanges(assets: Assets): Promise<void> {
     const { migrations } = assets;
 
     if (migrations && Object.keys(migrations).length > 0) {
@@ -40,7 +42,7 @@ export default class MigrationsHandler extends DefaultHandler {
     }
   }
 
-  logUnavailableMigrations(ignoreUnavailableMigrations, ignoredMigrations) {
+  logUnavailableMigrations(ignoreUnavailableMigrations: boolean, ignoredMigrations: string[]) {
     if (ignoreUnavailableMigrations) {
       log.info(`The following migrations are not available '${ignoredMigrations.join(',')}'. The migrations will be ignored because you have AUTH0_IGNORE_UNAVAILABLE_MIGRATIONS=true in your configuration.`);
     } else {
@@ -48,7 +50,7 @@ export default class MigrationsHandler extends DefaultHandler {
     }
   }
 
-  async removeUnavailableMigrations(migrations) {
+  async removeUnavailableMigrations(migrations: Asset[]): Promise<Asset[]> {
     const flags = { ...migrations };
     const ignoreUnavailableMigrations = !!this.config('AUTH0_IGNORE_UNAVAILABLE_MIGRATIONS');
     const existingMigrations = await this.getType();

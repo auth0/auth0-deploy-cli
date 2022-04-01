@@ -1,5 +1,7 @@
 import DefaultHandler, { order } from './default';
 import { convertClientNamesToIds } from '../../utils';
+import { Asset, Assets, CalculatedChanges } from '../../../types';
+import DefaultAPIHandler from './default';
 
 export const schema = {
   type: 'array',
@@ -14,26 +16,30 @@ export const schema = {
         uniqueItems: true
       }
     },
-    required: [ 'client_id', 'scope', 'audience' ]
+    required: ['client_id', 'scope', 'audience']
   }
 };
 
-export default class ClientHandler extends DefaultHandler {
-  constructor(config) {
+export default class ClientGrantsHandler extends DefaultHandler {
+
+  existing: Asset[] | null;
+
+  constructor(config: DefaultAPIHandler) {
     super({
       ...config,
       type: 'clientGrants',
       id: 'id',
-      identifiers: [ 'id', [ 'client_id', 'audience' ] ],
-      stripUpdateFields: [ 'audience', 'client_id' ]
+      //@ts-ignore because not sure why two-dimensional array passed in
+      identifiers: ['id', ['client_id', 'audience']],
+      stripUpdateFields: ['audience', 'client_id']
     });
   }
 
-  objString(item) {
+  objString(item): string {
     return super.objString({ id: item.id, client_id: item.client_id, audience: item.audience });
   }
 
-  async getType() {
+  async getType(): Promise<Asset> {
     if (this.existing) {
       return this.existing;
     }
@@ -50,7 +56,7 @@ export default class ClientHandler extends DefaultHandler {
 
   // Run after clients are updated so we can convert client_id names to id's
   @order('60')
-  async processChanges(assets) {
+  async processChanges(assets: Assets): Promise<void> {
     const { clientGrants } = assets;
 
     // Do nothing if not set
@@ -75,18 +81,22 @@ export default class ClientHandler extends DefaultHandler {
       del, update, create, conflicts
     } = await this.calcChanges({ ...assets, clientGrants: formatted });
 
-    const filterGrants = (list) => {
+    const filterGrants = (list: { client_id: string }[]) => {
       if (excludedClients.length) {
-        return list.filter((item) => item.client_id !== currentClient && ![ ...excludedClientsByNames, ...excludedClients ].includes(item.client_id));
+        return list.filter((item) => item.client_id !== currentClient && ![...excludedClientsByNames, ...excludedClients].includes(item.client_id));
       }
 
       return list.filter((item) => item.client_id !== currentClient);
     };
 
-    const changes = {
+    const changes: CalculatedChanges = {
+      //@ts-ignore because this expects `client_id` and that's not yet typed on Asset
       del: filterGrants(del),
+      //@ts-ignore because this expects `client_id` and that's not yet typed on Asset
       update: filterGrants(update),
+      //@ts-ignore because this expects `client_id` and that's not yet typed on Asset
       create: filterGrants(create),
+      //@ts-ignore because this expects `client_id` and that's not yet typed on Asset
       conflicts: filterGrants(conflicts)
     };
 

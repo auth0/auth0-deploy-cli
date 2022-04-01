@@ -1,6 +1,7 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
 import log from '../../../logger';
+import { Assets, Asset } from '../../../types'
 
 export const schema = {
   type: 'object',
@@ -19,15 +20,22 @@ export const schema = {
 };
 
 export default class BrandingHandler extends DefaultHandler {
-  constructor(options) {
+  existing: Asset
+
+  constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'branding'
     });
   }
 
-  async getType() {
-    let branding = {};
+  async getType(): Promise<Asset> {
+    let branding: {
+      templates?: {
+        template: string,
+        body: string
+      }[]
+    } = {};
 
     try {
       // in case client version does not support branding

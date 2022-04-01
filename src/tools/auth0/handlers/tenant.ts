@@ -3,22 +3,23 @@ import ValidationError from '../../ValidationError';
 import DefaultHandler, { order } from './default';
 import { supportedPages, pageNameMap } from './pages';
 import { dumpJSON } from '../../utils';
+import { Asset, Assets } from '../../../types';
 
 export const schema = {
   type: 'object'
 };
 
-const blockPageKeys = [ ...Object.keys(pageNameMap), ...Object.values(pageNameMap), ...supportedPages ];
+const blockPageKeys = [...Object.keys(pageNameMap), ...Object.values(pageNameMap), ...supportedPages];
 
 export default class TenantHandler extends DefaultHandler {
-  constructor(options) {
+  constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'tenant'
     });
   }
 
-  async getType() {
+  async getType(): Promise<Asset> {
     const tenant = await this.client.tenant.getSettings();
     blockPageKeys.forEach((key) => {
       if (tenant[key]) delete tenant[key];
@@ -27,7 +28,7 @@ export default class TenantHandler extends DefaultHandler {
     return tenant;
   }
 
-  async validate(assets) {
+  async validate(assets: Assets): Promise<void> {
     const { tenant } = assets;
 
     // Nothing to validate?
@@ -41,7 +42,7 @@ export default class TenantHandler extends DefaultHandler {
 
   // Run after other updates so objected can be referenced such as default directory
   @order('100')
-  async processChanges(assets) {
+  async processChanges(assets: Assets): Promise<void> {
     const { tenant } = assets;
 
     if (tenant && Object.keys(tenant).length > 0) {
