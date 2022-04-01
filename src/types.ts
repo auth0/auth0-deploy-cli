@@ -132,7 +132,9 @@ export type Config = {
     EXCLUDED_PROPS?: {
         [key: string]: string[]
     }
-    INCLUDED_PROPS?: {}
+    INCLUDED_PROPS?: {
+        [key: string]: string[]
+    }
     AUTH0_IGNORE_UNAVAILABLE_MIGRATIONS?: boolean
 }// TODO: replace with a more accurate representation of the Config type 
 
@@ -169,7 +171,7 @@ export type Assets = {
     tenant: Asset,
     triggers: Asset[],
     //non-resource types
-    exclude: {
+    exclude?: {
         [key: string]: string[]
     }
     clientsOrig: Asset[],

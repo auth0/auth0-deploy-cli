@@ -1,7 +1,9 @@
 import dotProp from 'dot-prop';
 import _ from 'lodash';
+import { Asset, Assets, AssetTypes, Config } from './types';
+
 // Filter out known read only fields during dump
-const readOnly = {
+const readOnlyFields: Partial<Record<AssetTypes, string[]>> = {
   guardianFactors: [
     'trial_expired'
   ],
@@ -32,51 +34,53 @@ const readOnly = {
   ]
 };
 
-function getExcludedFields(config) {
-  const strippedFields = { ...readOnly };
+function getExcludedFields(config: Config) {
+  const strippedFields = { ...readOnlyFields };
 
   let { EXCLUDED_PROPS: excluded, INCLUDED_PROPS: included } = config;
   if (typeof excluded !== 'object') excluded = {};
   if (typeof included !== 'object') included = {};
 
-  Object.entries(excluded).forEach(([ name, fields ]) => {
+  Object.entries(excluded).forEach(([name, fields]) => {
     // Do not allow same field to be included and excluded at the same time
-    const intersections = fields.filter((field) => included[name] && included[name].includes(field));
+    const intersections = fields.filter((field) => included && included[name] && included[name].includes(field));
     if (intersections.length > 0) {
       throw new Error(`EXCLUDED_PROPS should NOT have any intersections with INCLUDED_PROPS. Intersections found: ${name}: ${intersections.join(', ')}`);
     }
     strippedFields[name] = (strippedFields[name] || []).concat(fields);
   });
 
-  Object.entries(included).forEach(([ name, fields ]) => {
+  Object.entries(included).forEach(([name, fields]) => {
     if (strippedFields[name]) {
-      strippedFields[name] = strippedFields[name].filter((field) => !fields.includes(field));
+      strippedFields[name] = strippedFields[name].filter((field: string) => !fields.includes(field));
     }
   });
 
   return strippedFields;
 }
 
-function deleteKeys(obj, keys) {
+function deleteKeys(obj: Asset, keys: string[]) {
   const newObj = { ...obj };
   keys.forEach((k) => dotProp.delete(newObj, k));
   return newObj;
 }
 
-export default function cleanAssets(assets, config) {
+export default function cleanAssets(assets: Assets, config: Config): Assets {
   const cleaned = { ...assets };
   const excludedFields = getExcludedFields(config);
 
-  Object.entries(excludedFields).forEach(([ name, fields ]) => {
+  Object.entries(excludedFields).forEach(([name, fields]: [AssetTypes, string[]]) => {
     const obj = cleaned[name];
     if (!obj) return;
 
     if (Array.isArray(obj)) {
+      //@ts-ignore
       cleaned[name] = obj.map((o) => deleteKeys(o, fields));
     } else {
+      //@ts-ignore
       cleaned[name] = deleteKeys(cleaned[name], fields);
     }
   });
 
-  return _.pickBy(cleaned, _.identity);
+  return _.pickBy(cleaned, _.identity) as Assets;
 }

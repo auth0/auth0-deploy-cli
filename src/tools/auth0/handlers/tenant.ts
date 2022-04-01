@@ -1,4 +1,4 @@
-import ValidationError from '../../ValidationError';
+import ValidationError from '../../validationError';
 
 import DefaultHandler, { order } from './default';
 import { supportedPages, pageNameMap } from './pages';

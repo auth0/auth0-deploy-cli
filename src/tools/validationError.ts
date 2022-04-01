@@ -1,4 +1,4 @@
-function ValidationError(message) {
+function ValidationError(message: string) {
   Error.call(this, message);
   if (process.env.NODE_ENV !== 'production') {
     Error.captureStackTrace(this, this.constructor);
@@ -10,4 +10,5 @@ function ValidationError(message) {
 
 ValidationError.prototype = Object.create(Error.prototype);
 ValidationError.prototype.constructor = ValidationError;
-module.exports = ValidationError;
+
+export default ValidationError;
