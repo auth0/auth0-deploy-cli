@@ -7,9 +7,9 @@ import log from '../../logger';
 import {
   isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter
 } from '../../utils';
-import handlers from './handlers';
+import handlers, { YAMLHandler } from './handlers';
 import cleanAssets from '../../readonly';
-import { Assets, Config, Auth0APIClient } from '../../types'
+import { Assets, Config, Auth0APIClient, AssetTypes } from '../../types'
 
 type KeywordMappings = { [key: string]: (string | number)[] | string | number }
 
@@ -101,7 +101,10 @@ export default class YAMLContext {
       throw new Error(`Problem loading tenant data from Auth0 ${err}${extraMessage}`);
     }
 
-    await Promise.all(Object.entries(handlers).map(async ([name, handler]) => {
+    await Promise.all(Object.entries(handlers).filter(([handlerName]: [AssetTypes, YAMLHandler<any>]) => {
+      const excludedAssetTypes = this.config.AUTH0_EXCLUDED || []
+      return !excludedAssetTypes.includes(handlerName)
+    }).map(async ([name, handler]) => {
       try {
         const data = await handler.dump(this);
         if (data) {
