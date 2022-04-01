@@ -1,102 +1,102 @@
 type APICLientBaseFunctions = {
-    getAll: (any) => Asset[],
-    create: (any) => any,
-    update: (arg0: any, arg1: any) => any,
-    delete: (any) => any,
+    getAll: (arg0: { checkpoint?: boolean, is_global?: boolean, paginate?: boolean, include_totals?: boolean, id?: string }) => Promise<Asset[]>
+    create: (arg0: Asset) => Promise<Asset>
+    update: (arg0: {}, arg1: Asset) => Promise<Asset>
+    delete: (arg0: Asset) => Promise<void>
 }
 
 export type Auth0APIClient = {
     [key: string]: APICLientBaseFunctions
     pool: any
     //@ts-ignore
-    updateRule: (arg0: { id: string }, arg1: any) => any
+    updateRule: (arg0: { id: string }, arg1: Asset) => Promise<Asset>
     actions: APICLientBaseFunctions & {
-        deploy: ({ id: string }) => void
-        getAllTriggers: () => { triggers: Asset[] }
-        getTriggerBindings: ({ trigger_id: string }) => { bindings: Asset[] }
-        updateTriggerBindings: ({ trigger_id: string }, { bindings: Object }) => { bindings: Asset[] }
+        deploy: ({ id: string }) => Promise<void>
+        getAllTriggers: () => Promise<{ triggers: Asset[] }>
+        getTriggerBindings: ({ trigger_id: string }) => Promise<{ bindings: Asset[] }>
+        updateTriggerBindings: ({ trigger_id: string }, { bindings: Object }) => Promise<{ bindings: Asset[] }>
     },
     attackProtection: APICLientBaseFunctions & {
-        getBreachedPasswordDetectionConfig: () => Asset
-        getBruteForceConfig: () => Asset
-        getSuspiciousIpThrottlingConfig: () => Asset
-        updateBreachedPasswordDetectionConfig: ({ }, Object) => Asset
-        updateSuspiciousIpThrottlingConfig: ({ }, Object) => Asset
-        updateBruteForceConfig: ({ }, Object) => Asset
+        getBreachedPasswordDetectionConfig: () => Promise<Asset>
+        getBruteForceConfig: () => Promise<Asset>
+        getSuspiciousIpThrottlingConfig: () => Promise<Asset>
+        updateBreachedPasswordDetectionConfig: ({ }, arg1: Asset) => Promise<void>
+        updateSuspiciousIpThrottlingConfig: ({ }, arg1: Asset) => Promise<void>
+        updateBruteForceConfig: ({ }, arg1: Asset) => Promise<void>
     },
     branding: APICLientBaseFunctions & {
-        getSettings: () => any,
-        getUniversalLoginTemplate: () => any,
-        updateSettings: ({ }, any) => any,
-        setUniversalLoginTemplate: ({ }, any) => any
+        getSettings: () => Promise<Asset>
+        getUniversalLoginTemplate: () => Promise<Asset>
+        updateSettings: ({}, Asset) => Promise<void>
+        setUniversalLoginTemplate: ({}, Asset) => Promise<void>
     },
     connections: APICLientBaseFunctions & {
-        get: (Object) => Asset
+        get: (Object) => Promise<Asset>
+        getAll: (arg0: { strategy: 'auth0', checkpoint?: boolean, is_global?: boolean, paginate?: boolean, include_totals?: boolean, id?: string }) => Promise<Asset[]>
     },
     customDomains: APICLientBaseFunctions & {
-        getAll: any
+        getAll: () => Promise<Asset[]>
     },
     emailProvider: APICLientBaseFunctions & {
-        delete: () => void
-        get: (Object) => Asset
-        configure: (arg0: Object, arg1: Object) => Asset
+        delete: () => Promise<void>
+        get: (Object) => Promise<Asset>
+        configure: (arg0: Object, arg1: Object) => Promise<Asset>
     },
     emailTemplates: APICLientBaseFunctions & {
-        get: (Object) => Asset
+        get: (Object) => Promise<Asset>
     },
     guardian: APICLientBaseFunctions & {
-        getFactorProvider: (any) => Asset
-        updateFactorProvider: (arg0: any, arg1: any) => void
-        getFactors: () => Asset[]
-        updateFactor: (arg0: any, arg1: any) => void
-        getPolicies: () => Asset[]
-        updatePolicies: (arg0: any, arg1: any) => void,
-        getFactorTemplates: (arg0: { name: string }) => any
-        updateFactorTemplates: (arg0: any, arg1: any) => void,
-        updatePhoneFactorMessageTypes: (arg0: any, arg1: any) => void,
-        getPhoneFactorSelectedProvider: () => Asset[]
-        getPhoneFactorMessageTypes: () => Asset[]
-        updatePhoneFactorSelectedProvider: (arg0: {}, arg1: Asset) => void
+        getFactorProvider: (any) => Promise<Asset>
+        updateFactorProvider: (arg0: {}, arg1: Asset) => Promise<void>
+        getFactors: () => Promise<Asset[]>
+        updateFactor: (arg0: {}, arg1: Asset) => Promise<void>
+        getPolicies: () => Promise<Asset[]>
+        updatePolicies: (arg0: {}, arg1: Asset) => Promise<void>
+        getFactorTemplates: (arg0: { name: string }) => Promise<Asset[]>
+        updateFactorTemplates: (arg0: {}, arg1: Asset) => Promise<void>
+        updatePhoneFactorMessageTypes: (arg0: {}, arg1: Asset) => Promise<void>
+        getPhoneFactorSelectedProvider: () => Promise<Asset[]>
+        getPhoneFactorMessageTypes: () => Promise<Asset[]>
+        updatePhoneFactorSelectedProvider: (arg0: {}, arg1: Asset) => Promise<void>
     },
     hooks: APICLientBaseFunctions & {
-        get: ({ id: string }) => Asset
-        removeSecrets: (arg0: any, arg1: any) => any
-        updateSecrets: (arg0: any, arg1: any) => any
-        getSecrets: ({ id: string }) => Promise<Asset[]>
-        addSecrets: (arg0: any, arg1: any) => any
+        get: ({ id: string }) => Promise<Asset>
+        removeSecrets: (arg0: {}, arg1: Asset) => Promise<void>
+        updateSecrets: (arg0: {}, arg1: Asset) => Promise<void>
+        getSecrets: ({ id: string }) => Promise<Promise<Asset[]>>
+        addSecrets: (arg0: {}, arg1: Asset) => Promise<void>
     },
     migrations: APICLientBaseFunctions & {
-        getMigrations: () => { flags: Asset[] }
-        updateMigrations: (arg0: { flags: Asset[] }) => void
+        getMigrations: () => Promise<{ flags: Asset[] }>
+        updateMigrations: (arg0: { flags: Asset[] }) => Promise<void>
     }
     organizations: APICLientBaseFunctions & {
-        updateEnabledConnection: (arg0: any, arg1: any) => any
-        addEnabledConnection: (arg0: any, arg1: any) => any
-        removeEnabledConnection: (arg0: any) => any
+        updateEnabledConnection: (arg0: {}, arg1: Asset) => Promise<void>
+        addEnabledConnection: (arg0: {}, arg1: Asset) => Promise<void>
+        removeEnabledConnection: (arg0: any) => Promise<void>
         connections: {
-            get: (Object) => Asset
+            get: (Object) => Promise<Asset>
         }
     },
     prompts: APICLientBaseFunctions & {
-        getSettings: () => Asset[]
-        updateSettings: (arg0: {}, arg1: Asset) => void
+        getSettings: () => Promise<Asset[]>
+        updateSettings: (arg0: {}, arg1: Asset) => Promise<void>
     }
     roles: APICLientBaseFunctions & {
         permissions: APICLientBaseFunctions & {
-            delete: (arg0: { id: string }, arg1: { permissions: any }) => void
-            create: (arg0: { id: string }, arg1: { permissions: any }) => Asset
+            delete: (arg0: { id: string }, arg1: { permissions: Asset[] }) => Promise<void>
+            create: (arg0: { id: string }, arg1: { permissions: Asset[] }) => Promise<Asset>
         }
     },
     rulesConfigs: APICLientBaseFunctions & {
-        getAll: () => Asset[]
+        getAll: () => Promise<Asset[]>
     }
     tenant: APICLientBaseFunctions & {
-        getSettings: () => Asset
-        updateSettings: (Asset) => void
+        getSettings: () => Promise<Asset>
+        updateSettings: (Asset) => Promise<void>
     },
     triggers: APICLientBaseFunctions & {
-
-        getTriggerBindings: () => Asset
+        getTriggerBindings: () => Promise<Asset>
     }
 }// TODO: replace with a more accurate representation of the Auth0APIClient type 
 

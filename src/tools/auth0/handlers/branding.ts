@@ -20,6 +20,8 @@ export const schema = {
 };
 
 export default class BrandingHandler extends DefaultHandler {
+  existing: Asset
+
   constructor(options: DefaultHandler) {
     super({
       ...options,
