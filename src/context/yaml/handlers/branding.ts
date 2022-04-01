@@ -2,7 +2,14 @@ import fs from 'fs-extra';
 import path from 'path';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
-async function parse(context) {
+import { YAMLHandler } from '.'
+import YAMLContext from '..'
+
+type ParsedBranding = {
+  branding: unknown
+}
+
+async function parse(context: YAMLContext): Promise<ParsedBranding> {
   // Load the HTML file for each page
 
   const { branding } = context.assets;
@@ -25,7 +32,7 @@ async function parse(context) {
   };
 }
 
-async function dump(context) {
+async function dump(context: YAMLContext): Promise<ParsedBranding> {
   const { branding } = context.assets || { branding: undefined };
   branding.templates = branding.templates || [];
 
@@ -53,7 +60,9 @@ async function dump(context) {
   return { branding };
 }
 
-export default {
+const brandingHandler: YAMLHandler<ParsedBranding> = {
   parse,
-  dump
+  dump,
 };
+
+export default brandingHandler;

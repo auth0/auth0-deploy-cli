@@ -6,13 +6,19 @@ import {
 import {
   dumpJSON, existsMustBeDir, getFiles, loadJSON
 } from '../../../utils';
+import { DirectoryHandler } from '.'
+import DirectoryContext from '..';
 
-function parse(context) {
+type ParsedBranding = {
+  branding: unknown | undefined
+}
+
+function parse(context: DirectoryContext): ParsedBranding {
   const brandingTemplatesFolder = path.join(context.filePath, constants.BRANDING_DIRECTORY, constants.BRANDING_TEMPLATES_DIRECTORY);
 
-  if (!existsMustBeDir(brandingTemplatesFolder)) return { branding: context.branding };
+  if (!existsMustBeDir(brandingTemplatesFolder)) return { branding: context.assets.branding };
 
-  const templatesDefinitionFiles = getFiles(brandingTemplatesFolder, [ '.json' ]);
+  const templatesDefinitionFiles = getFiles(brandingTemplatesFolder, ['.json']);
   const templates = templatesDefinitionFiles.map((templateDefinitionFile) => {
     const definition = loadJSON(templateDefinitionFile, context.mappings);
     definition.body = loadFileAndReplaceKeywords(path.join(brandingTemplatesFolder, definition.body), context.mappings);
@@ -48,7 +54,9 @@ async function dump(context) {
   });
 }
 
-export default {
+const brandingHandler: DirectoryHandler<ParsedBranding> = {
   parse,
-  dump
-};
+  dump,
+}
+
+export default brandingHandler;
