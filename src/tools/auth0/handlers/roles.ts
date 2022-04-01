@@ -1,6 +1,7 @@
 import DefaultHandler, { order } from './default';
 import { calculateChanges } from '../../calculateChanges';
 import log from '../../logger';
+import { Asset, Assets, CalculatedChanges } from '../../../types';
 
 export const schema = {
   type: 'array',
@@ -21,21 +22,23 @@ export const schema = {
         }
       }
     },
-    required: [ 'name' ]
+    required: ['name']
   }
 };
 
-export default class RoleHandler extends DefaultHandler {
-  constructor(config) {
+export default class RolesHandler extends DefaultHandler {
+  existing: Asset[]
+
+  constructor(config: DefaultHandler) {
     super({
       ...config,
       type: 'roles',
       id: 'id',
-      identifiers: [ 'name' ]
+      identifiers: ['name']
     });
   }
 
-  async createRole(data) {
+  async createRole(data): Promise<Asset> {
     const role = { ...data };
     delete role.permissions;
 
@@ -48,7 +51,7 @@ export default class RoleHandler extends DefaultHandler {
     return created;
   }
 
-  async createRoles(creates) {
+  async createRoles(creates: CalculatedChanges['create']): Promise<void> {
     await this.client.pool.addEachTask({
       data: creates || [],
       generator: (item) => this.createRole(item).then((data) => {
@@ -64,7 +67,7 @@ export default class RoleHandler extends DefaultHandler {
     await this.client.roles.delete({ id: data.id });
   }
 
-  async deleteRoles(dels) {
+  async deleteRoles(dels: CalculatedChanges['del']): Promise<void> {
     if (this.config('AUTH0_ALLOW_DELETE') === 'true' || this.config('AUTH0_ALLOW_DELETE') === true) {
       await this.client.pool.addEachTask({
         data: dels || [],
@@ -103,7 +106,7 @@ export default class RoleHandler extends DefaultHandler {
     return params;
   }
 
-  async updateRoles(updates, roles) {
+  async updateRoles(updates: CalculatedChanges['update'], roles) {
     await this.client.pool.addEachTask({
       data: updates || [],
       generator: (item) => this.updateRole(item, roles).then((data) => {
@@ -147,7 +150,7 @@ export default class RoleHandler extends DefaultHandler {
   }
 
   @order('60')
-  async processChanges(assets) {
+  async processChanges(assets: Assets): Promise<void> {
     const { roles } = assets;
     // Do nothing if not set
     if (!roles) return;
@@ -157,20 +160,21 @@ export default class RoleHandler extends DefaultHandler {
       handler: this,
       assets: roles,
       existing,
-      identifiers: [ 'id', 'name' ]
+      identifiers: ['id', 'name'],
+      allowDelete: false,  //TODO: actually pass in correct allowDelete value
     });
     log.debug(`Start processChanges for roles [delete:${changes.del.length}] [update:${changes.update.length}], [create:${changes.create.length}]`);
-    const myChanges = [ { del: changes.del }, { create: changes.create }, { update: changes.update } ];
+    const myChanges = [{ del: changes.del }, { create: changes.create }, { update: changes.update }];
     await Promise.all(myChanges.map(async (change) => {
       switch (true) {
         case change.del && change.del.length > 0:
-          await this.deleteRoles(change.del);
+          if(change.del) await this.deleteRoles(change.del);
           break;
         case change.create && change.create.length > 0:
-          await this.createRoles(changes.create);
+          await this.createRoles(changes.create);//TODO: fix this tho change.create
           break;
         case change.update && change.update.length > 0:
-          await this.updateRoles(change.update, existing);
+          if(change.update) await this.updateRoles(change.update, existing);
           break;
         default:
           break;

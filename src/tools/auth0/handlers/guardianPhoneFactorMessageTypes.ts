@@ -1,5 +1,6 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
+import { Asset, Assets } from '../../../types'
 
 export const schema = {
   type: 'object',
@@ -15,7 +16,7 @@ export const schema = {
   additionalProperties: false
 };
 
-const isFeatureUnavailableError = (err) => {
+const isFeatureUnavailableError = (err): boolean => {
   if (err.statusCode === 404) {
     // Older Management API version where the endpoint is not available.
     return true;
@@ -32,14 +33,16 @@ const isFeatureUnavailableError = (err) => {
 };
 
 export default class GuardianPhoneMessageTypesHandler extends DefaultHandler {
-  constructor(options) {
+  existing: Asset[]
+
+  constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'guardianPhoneFactorMessageTypes'
     });
   }
 
-  async getType() {
+  async getType(): Promise<Asset[] | {}> {
     // in case client version does not support the operation
     if (!this.client.guardian || typeof this.client.guardian.getPhoneFactorMessageTypes !== 'function') {
       return {};
@@ -60,7 +63,7 @@ export default class GuardianPhoneMessageTypesHandler extends DefaultHandler {
     return this.existing;
   }
 
-  async processChanges(assets) {
+  async processChanges(assets: Assets): Promise<void> {
     // No API to delete or create guardianPhoneFactorMessageTypes, we can only update.
     const { guardianPhoneFactorMessageTypes } = assets;
 

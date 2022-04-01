@@ -2,6 +2,7 @@ import _ from 'lodash';
 import DefaultHandler, { order } from './default';
 import { calculateChanges } from '../../calculateChanges';
 import log from '../../logger';
+import { Asset, Assets, CalculatedChanges } from '../../../types';
 
 export const schema = {
   type: 'array',
@@ -23,25 +24,27 @@ export const schema = {
         }
       }
     },
-    required: [ 'name' ]
+    required: ['name']
   }
 };
 
 export default class OrganizationsHandler extends DefaultHandler {
-  constructor(config) {
+  existing: Asset[]
+
+  constructor(config: DefaultHandler) {
     super({
       ...config,
       type: 'organizations',
       id: 'id',
-      identifiers: [ 'name' ]
+      identifiers: ['name']
     });
   }
 
-  async deleteOrganization(org) {
+  async deleteOrganization(org): Promise<void> {
     await this.client.organizations.delete({ id: org.id });
   }
 
-  async deleteOrganizations(data) {
+  async deleteOrganizations(data): Promise<void> {
     if (this.config('AUTH0_ALLOW_DELETE') === 'true' || this.config('AUTH0_ALLOW_DELETE') === true) {
       await this.client.pool.addEachTask({
         data: data || [],
@@ -58,7 +61,7 @@ export default class OrganizationsHandler extends DefaultHandler {
     }
   }
 
-  async createOrganization(org) {
+  async createOrganization(org): Promise<Asset> {
     const organization = { ...org };
     delete organization.connections;
 
@@ -71,7 +74,7 @@ export default class OrganizationsHandler extends DefaultHandler {
     return created;
   }
 
-  async createOrganizations(creates) {
+  async createOrganizations(creates: CalculatedChanges['create']) {
     await this.client.pool.addEachTask({
       data: creates || [],
       generator: (item) => this.createOrganization(item).then((data) => {
@@ -121,7 +124,7 @@ export default class OrganizationsHandler extends DefaultHandler {
     return params;
   }
 
-  async updateOrganizations(updates, orgs) {
+  async updateOrganizations(updates: CalculatedChanges['update'], orgs: Asset[]): Promise<void>{
     await this.client.pool.addEachTask({
       data: updates || [],
       generator: (item) => this.updateOrganization(item, orgs).then((data) => {
@@ -133,7 +136,7 @@ export default class OrganizationsHandler extends DefaultHandler {
     }).promise();
   }
 
-  async getType() {
+  async getType(): Promise<Asset[]> {
     if (this.existing) {
       return this.existing;
     }
@@ -160,7 +163,7 @@ export default class OrganizationsHandler extends DefaultHandler {
 
   // Run after connections
   @order('70')
-  async processChanges(assets) {
+  async processChanges(assets: Assets): Promise<void> {
     const { organizations } = assets;
     // Do nothing if not set
     if (!organizations) return;
@@ -185,12 +188,13 @@ export default class OrganizationsHandler extends DefaultHandler {
       handler: this,
       assets: organizations,
       existing,
-      identifiers: [ 'id', 'name' ]
+      identifiers: ['id', 'name'],
+      allowDelete: false //TODO: actually pass in correct allowDelete value
     });
 
     log.debug(`Start processChanges for organizations [delete:${changes.del.length}] [update:${changes.update.length}], [create:${changes.create.length}]`);
 
-    const myChanges = [ { del: changes.del }, { create: changes.create }, { update: changes.update } ];
+    const myChanges = [{ del: changes.del }, { create: changes.create }, { update: changes.update }];
 
     await Promise.all(myChanges.map(async (change) => {
       switch (true) {
@@ -201,7 +205,7 @@ export default class OrganizationsHandler extends DefaultHandler {
           await this.createOrganizations(changes.create);
           break;
         case change.update && change.update.length > 0:
-          await this.updateOrganizations(change.update, existing);
+          if(change.update) await this.updateOrganizations(change.update, existing);
           break;
         default:
           break;

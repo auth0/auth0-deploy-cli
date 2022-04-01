@@ -1,5 +1,6 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
+import { Asset, Assets } from '../../../types';
 
 export const supportedPages = constants.PAGE_NAMES
   .filter((p) => p.includes('.json'))
@@ -23,23 +24,23 @@ export const schema = {
       show_log_link: { type: 'boolean' },
       enabled: { type: 'boolean' }
     },
-    required: [ 'name' ]
+    required: ['name']
   }
 };
 
-export default class PageHandler extends DefaultHandler {
-  constructor(options) {
+export default class PagesHandler extends DefaultHandler {
+  constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'pages'
     });
   }
 
-  objString(page) {
+  objString(page): string {
     return super.objString({ name: page.name, enabled: page.enabled });
   }
 
-  async updateLoginPage(page) {
+  async updateLoginPage(page): Promise<void> {
     const globalClient = await this.client.clients.getAll({ is_global: true, paginate: true, include_totals: true });
 
     if (!globalClient[0]) {
@@ -57,7 +58,7 @@ export default class PageHandler extends DefaultHandler {
     this.didUpdate(page);
   }
 
-  async updatePages(pages) {
+  async updatePages(pages: Asset[]): Promise<void> {
     const toUpdate = pages.filter((p) => supportedPages.includes(p.name));
     const update = toUpdate.reduce((accum, page) => {
       if (supportedPages.includes(page.name)) {
@@ -81,8 +82,12 @@ export default class PageHandler extends DefaultHandler {
     });
   }
 
-  async getType() {
-    const pages = [];
+  async getType(): Promise<Asset[]> {
+    const pages: {
+      name: string
+      enabled: boolean
+      html: string
+    }[] = [];
 
     // Login page is handled via the global client
     const globalClient = await this.client.clients.getAll({ is_global: true, paginate: true, include_totals: true });
@@ -100,7 +105,7 @@ export default class PageHandler extends DefaultHandler {
 
     const tenantSettings = await this.client.tenant.getSettings();
 
-    Object.entries(pageNameMap).forEach(([ key, name ]) => {
+    Object.entries(pageNameMap).forEach(([key, name]) => {
       const page = tenantSettings[name];
       if (tenantSettings[name]) {
         pages.push({
@@ -113,7 +118,7 @@ export default class PageHandler extends DefaultHandler {
     return pages;
   }
 
-  async processChanges(assets) {
+  async processChanges(assets: Assets): Promise<void> {
     const { pages } = assets;
 
     // Do nothing if not set
@@ -121,7 +126,7 @@ export default class PageHandler extends DefaultHandler {
 
     // Login page is handled via the global client
     const loginPage = pages.find((p) => p.name === 'login');
-    if (loginPage) {
+    if (loginPage !== undefined) {
       await this.updateLoginPage(loginPage);
     }
 

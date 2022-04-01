@@ -1,7 +1,8 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
+import { Asset, Assets } from '../../../types';
 
-const mappings = Object.entries(constants.GUARDIAN_FACTOR_PROVIDERS).reduce((accum, [ name, providers ]) => {
+const mappings = Object.entries(constants.GUARDIAN_FACTOR_PROVIDERS).reduce((accum: { name: string, provider: string }[], [name, providers]) => {
   providers.forEach((p) => {
     accum.push({ name, provider: p });
   });
@@ -16,12 +17,14 @@ export const schema = {
       name: { type: 'string', enum: constants.GUARDIAN_FACTORS },
       provider: { type: 'string', enum: mappings.map((p) => p.provider) }
     },
-    required: [ 'name', 'provider' ]
+    required: ['name', 'provider']
   }
 };
 
 export default class GuardianFactorProvidersHandler extends DefaultHandler {
-  constructor(options) {
+  existing: Asset[]
+
+  constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'guardianFactorProviders',
@@ -29,7 +32,7 @@ export default class GuardianFactorProvidersHandler extends DefaultHandler {
     });
   }
 
-  async getType() {
+  async getType(): Promise<Asset[]> {
     if (this.existing) return this.existing;
 
     const data = await Promise.all(mappings.map(async (m) => {
@@ -41,7 +44,7 @@ export default class GuardianFactorProvidersHandler extends DefaultHandler {
     return data.filter((d) => Object.keys(d).length > 2);
   }
 
-  async processChanges(assets) {
+  async processChanges(assets: Assets): Promise<void> {
     // No API to delete or create guardianFactorProviders, we can only update.
     const { guardianFactorProviders } = assets;
 

@@ -1,5 +1,6 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
+import { Asset, Assets } from '../../../types'
 
 export const schema = {
   type: 'object',
@@ -29,6 +30,8 @@ const isFeatureUnavailableError = (err) => {
 };
 
 export default class GuardianPhoneSelectedProviderHandler extends DefaultHandler {
+  existing: Asset[]
+  
   constructor(options) {
     super({
       ...options,
@@ -57,7 +60,7 @@ export default class GuardianPhoneSelectedProviderHandler extends DefaultHandler
     return this.existing;
   }
 
-  async processChanges(assets) {
+  async processChanges(assets: Assets): Promise<void> {
     // No API to delete or create guardianPhoneFactorSelectedProvider, we can only update.
     const { guardianPhoneFactorSelectedProvider } = assets;
 

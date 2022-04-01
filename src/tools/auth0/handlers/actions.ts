@@ -1,7 +1,8 @@
 import _ from 'lodash';
-import DefaultHandler, { order } from './default';
+import DefaultAPIHandler, { order } from './default';
 import log from '../../logger';
 import { areArraysEquals } from '../../utils';
+import { Asset } from '../../../types'
 
 const MAX_ACTION_DEPLOY_RETRY = 60;
 
@@ -10,7 +11,7 @@ export const schema = {
   type: 'array',
   items: {
     type: 'object',
-    required: [ 'name', 'supported_triggers', 'code' ],
+    required: ['name', 'supported_triggers', 'code'],
     additionalProperties: false,
     properties: {
       code: { type: 'string', default: '' },
@@ -68,7 +69,9 @@ function isActionsDisabled(err) {
   );
 }
 
-export default class ActionHandler extends DefaultHandler {
+export default class ActionHandler extends DefaultAPIHandler {
+  existing: Asset[] | null;
+
   constructor(options) {
     super({
       ...options,
@@ -147,7 +150,7 @@ export default class ActionHandler extends DefaultHandler {
   }
 
   async actionChanges(action, found) {
-    const actionChanges = {};
+    const actionChanges: Asset = {};
 
     // if action is deployed, should compare against curren_version - calcDeployedVersionChanges method
     if (!action.deployed) {
@@ -172,7 +175,7 @@ export default class ActionHandler extends DefaultHandler {
     return actionChanges;
   }
 
-  async getType() {
+  async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
 
     if (!this.client.actions || typeof this.client.actions.getAll !== 'function') {
@@ -207,9 +210,10 @@ export default class ActionHandler extends DefaultHandler {
 
     await super.processChanges(assets, changes);
     // Deploy actions
-    const deployActions = [];
-    deployActions.push(...changes.create.filter((action) => action.deployed));
-    deployActions.push(...changes.update.filter((action) => action.deployed));
+    const deployActions = [
+      ...changes.create.filter((action) => action.deployed),
+      ...changes.update.filter((action) => action.deployed)
+    ];
     await this.deployActions(deployActions);
   }
 }

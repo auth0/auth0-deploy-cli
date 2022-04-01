@@ -2,6 +2,7 @@ import _ from 'lodash';
 import DefaultHandler, { order } from './default';
 import constants from '../../constants';
 import log from '../../logger';
+import { Assets} from '../../../types';
 
 export const schema = {
   type: 'object',
@@ -20,15 +21,23 @@ export const schema = {
   }
 };
 
-function isActionsDisabled(err) {
+function isActionsDisabled(err): boolean {
   const errorBody = _.get(err, 'originalError.response.body') || {};
 
   return (
     err.statusCode === 403 && errorBody.errorCode === 'feature_not_enabled'
   );
 }
+
 export default class TriggersHandler extends DefaultHandler {
-  constructor(options) {
+  existing: {
+    [key: string]: {
+      action_name: string,
+      display_name: string,
+    }
+  }
+
+  constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'triggers',
@@ -36,7 +45,7 @@ export default class TriggersHandler extends DefaultHandler {
     });
   }
 
-  async getType() {
+  async getType(): Promise<DefaultHandler['existing']> {
     if (this.existing) {
       return this.existing;
     }
@@ -53,7 +62,7 @@ export default class TriggersHandler extends DefaultHandler {
 
     try {
       const res = await this.client.actions.getAllTriggers();
-      const triggers = _(res.triggers).map('id').uniq().value();
+      const triggers: string[] = _(res.triggers).map('id').uniq().value();
 
       for (let i = 0; i < triggers.length; i++) {
         const triggerId = triggers[i];
@@ -85,7 +94,7 @@ export default class TriggersHandler extends DefaultHandler {
   }
 
   @order('80')
-  async processChanges(assets) {
+  async processChanges(assets: Assets): Promise<void> {
     // No API to delete or create triggers, we can only update.
     const { triggers } = assets;
 
@@ -93,7 +102,7 @@ export default class TriggersHandler extends DefaultHandler {
     if (!triggers) return;
 
     // Process each trigger
-    await Promise.all(Object.entries(triggers).map(async ([ name, data ]) => {
+    await Promise.all(Object.entries(triggers).map(async ([name, data]) => {
       const bindings = data.map((binding) => ({
         ref: {
           type: 'action_name',

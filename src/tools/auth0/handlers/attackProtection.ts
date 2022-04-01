@@ -1,4 +1,5 @@
-import DefaultHandler from './default';
+import DefaultAPIHandler from './default';
+import { Asset, Assets } from '../../../types'
 
 export const schema = {
   type: 'object',
@@ -16,15 +17,21 @@ export const schema = {
   additionalProperties: false
 };
 
-export default class AttackProtectionHandler extends DefaultHandler {
-  constructor(config) {
+export default class AttackProtectionHandler extends DefaultAPIHandler {
+  existing: {
+    breachedPasswordDetection: any
+    bruteForceProtection: any
+    suspiciousIpThrottling: any
+  } | null
+
+  constructor(config: DefaultAPIHandler) {
     super({
       ...config,
       type: 'attackProtection'
     });
   }
 
-  objString(item) {
+  objString(item: Asset): string {
     return super.objString({
       'breached-password-protection': {
         enabled: item.breachedPasswordDetection.enabled
@@ -38,12 +45,12 @@ export default class AttackProtectionHandler extends DefaultHandler {
     });
   }
 
-  async getType() {
+  async getType(): Promise<Asset> {
     if (this.existing) {
       return this.existing;
     }
 
-    const [ breachedPasswordDetection, bruteForceProtection, suspiciousIpThrottling ] = await Promise.all([
+    const [breachedPasswordDetection, bruteForceProtection, suspiciousIpThrottling] = await Promise.all([
       this.client.attackProtection.getBreachedPasswordDetectionConfig(),
       this.client.attackProtection.getBruteForceConfig(),
       this.client.attackProtection.getSuspiciousIpThrottlingConfig()
@@ -58,7 +65,7 @@ export default class AttackProtectionHandler extends DefaultHandler {
     return this.existing;
   }
 
-  async processChanges(assets) {
+  async processChanges(assets: Assets): Promise<void> {
     const { attackProtection } = assets;
 
     if (!attackProtection || !Object.keys(attackProtection).length) {

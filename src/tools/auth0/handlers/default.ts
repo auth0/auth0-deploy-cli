@@ -5,7 +5,7 @@ import {
   stripFields, dumpJSON, duplicateItems
 } from '../../utils';
 import { calculateChanges } from '../../calculateChanges';
-import { Asset, Assets, Auth0APIClient } from '../../../types'
+import { Asset, Assets, Auth0APIClient, CalculatedChanges} from '../../../types'
 import { ConfigFunction } from '../../../configFactory'
 
 
@@ -97,23 +97,28 @@ export default class APIHandler {
     return dumpJSON(item);
   }
 
-  async getType(): Promise<Asset> {
+  async getType(): Promise<Asset | Asset[] | null> {
     // Each type to impl how to get the existing as its not consistent across the mgnt api.
     throw new Error(`Must implement getType for type ${this.type}`);
   }
 
-  async load(): Promise<{ [key: string]: Asset }> {
+  async load(): Promise<{ [key: string]: Asset | Asset[] | null }> {
     // Load Asset from Tenant
     log.info(`Retrieving ${this.type} data from Auth0`);
     this.existing = await this.getType();
     return { [this.type]: this.existing };
   }
 
-  async calcChanges(assets: Assets) {
+  async calcChanges(assets: Assets): Promise<CalculatedChanges> {
     const typeAssets = assets[this.type];
 
     // Do nothing if not set
-    if (!typeAssets) return {};
+    if (!typeAssets) return {
+      del: [],
+      create: [],
+      conflicts: [],
+      update: []
+    };
 
     const existing = await this.getType();
 
@@ -153,7 +158,7 @@ export default class APIHandler {
     }
   }
 
-  async processChanges(assets, changes) {
+  async processChanges(assets: Assets, changes: CalculatedChanges): Promise<void> {
     if (!changes) {
       changes = await this.calcChanges(assets);
     }

@@ -1,5 +1,6 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
+import { Assets, Asset, CalculatedChanges } from '../../../types';
 
 export const schema = {
   type: 'array',
@@ -8,11 +9,13 @@ export const schema = {
     properties: {
       name: { type: 'string', enum: constants.GUARDIAN_FACTOR_TEMPLATES }
     },
-    required: [ 'name' ]
+    required: ['name']
   }
 };
 
 export default class GuardianFactorTemplatesHandler extends DefaultHandler {
+  existing: Asset[]
+
   constructor(options) {
     super({
       ...options,
@@ -21,7 +24,7 @@ export default class GuardianFactorTemplatesHandler extends DefaultHandler {
     });
   }
 
-  async getType() {
+  async getType(): Promise<Asset[]> {
     if (this.existing) return this.existing;
 
     const data = await Promise.all(constants.GUARDIAN_FACTOR_TEMPLATES.map(async (name) => {
@@ -33,7 +36,7 @@ export default class GuardianFactorTemplatesHandler extends DefaultHandler {
     return data.filter((d) => Object.keys(d).length > 1);
   }
 
-  async processChanges(assets) {
+  async processChanges(assets: Assets): Promise<void> {
     // No API to delete or create guardianFactorTemplates, we can only update.
     const { guardianFactorTemplates } = assets;
 
