@@ -8,19 +8,19 @@ const RULES_STAGES = [
 const DATABASE_SCRIPTS_GET_USER = 'get_user'
 const DATABASE_SCRIPTS_CHANGE_EMAIL = 'change_email'
 
-const EMAIL_VERIFY = ' verify_email'
-const EMAIL_VERIFY_BY_CODE = ' verify_email_by_code'
-const EMAIL_RESET = ' reset_email'
-const EMAIL_WELCOME = ' welcome_email'
-const EMAIL_BLOCKED = ' blocked_account'
-const EMAIL_STOLEN_CREDENTIALS = ' stolen_credentials'
-const EMAIL_ENROLLMENT = ' enrollment_email'
-const EMAIL_CHANGE_PASSWORD = ' change_password'
-const EMAIL_PASSWORD_RESET = ' password_reset'
-const EMAIL_MFA_OOB_CODE = ' mfa_oob_code'
-const EMAIL_USER_INVITATION = ' user_invitation'
+const EMAIL_VERIFY = 'verify_email'
+const EMAIL_VERIFY_BY_CODE = 'verify_email_by_code'
+const EMAIL_RESET = 'reset_email'
+const EMAIL_WELCOME = 'welcome_email'
+const EMAIL_BLOCKED = 'blocked_account'
+const EMAIL_STOLEN_CREDENTIALS = 'stolen_credentials'
+const EMAIL_ENROLLMENT = 'enrollment_email'
+const EMAIL_CHANGE_PASSWORD = 'change_password'
+const EMAIL_PASSWORD_RESET = 'password_reset'
+const EMAIL_MFA_OOB_CODE = 'mfa_oob_code'
+const EMAIL_USER_INVITATION = 'user_invitation'
 
-const UNIVERSAL_LOGIN_TEMPLATE = ' universal_login'
+const UNIVERSAL_LOGIN_TEMPLATE = 'universal_login'
 
 const constants = {
   CONCURRENT_CALLS: 5,
@@ -61,7 +61,7 @@ const constants = {
     'post-change-password',
     'send-phone-message'
   ],
-  EMAIL_TEMPLATES_DIRECTORY: ' emails',
+  EMAIL_TEMPLATES_DIRECTORY: 'emails',
   EMAIL_VERIFY,
   EMAIL_VERIFY_BY_CODE,
   EMAIL_RESET,
@@ -73,27 +73,27 @@ const constants = {
   EMAIL_PASSWORD_RESET,
   EMAIL_MFA_OOB_CODE,
   EMAIL_USER_INVITATION,
-  GUARDIAN_DIRECTORY: ' guardian',
-  GUARDIAN_FACTORS_DIRECTORY: ' factors',
-  GUARDIAN_PROVIDERS_DIRECTORY: ' providers',
-  GUARDIAN_TEMPLATES_DIRECTORY: ' templates',
+  GUARDIAN_DIRECTORY: 'guardian',
+  GUARDIAN_FACTORS_DIRECTORY: 'factors',
+  GUARDIAN_PROVIDERS_DIRECTORY: 'providers',
+  GUARDIAN_TEMPLATES_DIRECTORY: 'templates',
   UNIVERSAL_LOGIN_TEMPLATE,
-  RESOURCE_SERVERS_DIRECTORY: ' resource-servers',
-  RESOURCE_SERVERS_CLIENT_NAME: ' resourceServers',
-  RESOURCE_SERVERS_MANAGEMENT_API_NAME: ' Auth0 Management API',
-  RESOURCE_SERVERS_ID_NAME: ' id',
-  CLIENTS_DIRECTORY: ' clients',
-  CLIENTS_GRANTS_DIRECTORY: ' grants',
-  BRANDING_DIRECTORY: ' branding',
-  BRANDING_TEMPLATES_DIRECTORY: ' templates',
-  BRANDING_TEMPLATES_YAML_DIRECTORY: ' branding_templates',
-  CLIENTS_CLIENT_NAME: ' clients',
-  CLIENTS_CLIENT_ID_NAME: ' client_id',
-  CONNECTIONS_DIRECTORY: ' connections',
-  CONNECTIONS_CLIENT_NAME: ' connections',
-  CONNECTIONS_ID_NAME: ' id',
-  ROLES_DIRECTORY: ' roles',
-  ATTACK_PROTECTION_DIRECTORY: ' attack-protection',
+  RESOURCE_SERVERS_DIRECTORY: 'resource-servers',
+  RESOURCE_SERVERS_CLIENT_NAME: 'resourceServers',
+  RESOURCE_SERVERS_MANAGEMENT_API_NAME: 'Auth0 Management API',
+  RESOURCE_SERVERS_ID_NAME: 'id',
+  CLIENTS_DIRECTORY: 'clients',
+  CLIENTS_GRANTS_DIRECTORY: 'grants',
+  BRANDING_DIRECTORY: 'branding',
+  BRANDING_TEMPLATES_DIRECTORY: 'templates',
+  BRANDING_TEMPLATES_YAML_DIRECTORY: 'branding_templates',
+  CLIENTS_CLIENT_NAME: 'clients',
+  CLIENTS_CLIENT_ID_NAME: 'client_id',
+  CONNECTIONS_DIRECTORY: 'connections',
+  CONNECTIONS_CLIENT_NAME: 'connections',
+  CONNECTIONS_ID_NAME: 'id',
+  ROLES_DIRECTORY: 'roles',
+  ATTACK_PROTECTION_DIRECTORY: 'attack-protection',
   GUARDIAN_FACTORS: [
     'sms',
     'push-notification',
