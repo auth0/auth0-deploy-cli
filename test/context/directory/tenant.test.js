@@ -8,10 +8,6 @@ import {
 import handler from '../../../src/context/directory/handlers/tenant';
 import { loadJSON } from '../../../src/utils';
 
-
-
-
-
 describe('#directory context tenant', () => {
   it('should process tenant', async () => {
     const tenantTest = {
@@ -44,7 +40,6 @@ describe('#directory context tenant', () => {
   });
 
   it('should process tenant without session durations', async () => {
-
     const tenantTest = {
       'tenant.json': `{
         "friendly_name": "Auth0 ##env##",
