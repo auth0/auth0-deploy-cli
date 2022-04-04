@@ -44,9 +44,6 @@ if (require.main === module) {
 
   log.debug('Starting Auth0 Deploy CLI Tool');
 
-  // Set log level
-  //@ts-ignore
-  log.transports.console.level = params.level;
   if (params.debug) {
     log.transports.console.level = 'debug';
     // Set for tools
