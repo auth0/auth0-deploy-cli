@@ -1,34 +1,18 @@
 #!/usr/bin/env node
 import { bootstrap } from 'global-agent';
 
-import { getParams } from './args';
+import { getParams, ExportParams, ImportParams } from './args';
 import commands from './commands';
 import log from './logger';
 import tools from './tools';
 
-import importCMD, { ImportParams } from './commands/import'
-import exportCMD, { ExportParams } from './commands/export'
-
-// type Params = {
-//   _: ['import'] | ['export']
-//   env: boolean,
-//   debug: boolean,
-//   config_file: string
-//   input_file?: string
-//   output_folder?: string
-//   format?: 'directory' | 'yaml'
-//   export_ids?: boolean
-//   proxy_url?: string
-//   base_path?: string
-//   secret?: string
-// }
+import importCMD from './commands/import'
+import exportCMD from './commands/export'
 
 async function run(params: ImportParams | ExportParams): Promise<void> {
-
-  console.log({ params })
-
   // Run command
-  const cmd: typeof importCMD | typeof exportCMD = commands[params._[0]];
+  const command = params._[0];
+
   const proxy = params.proxy_url;
 
   if (proxy) {
@@ -43,15 +27,22 @@ async function run(params: ImportParams | ExportParams): Promise<void> {
     bootstrap();
   }
 
-  log.debug(`Start command ${params._[0]}`);
-  await cmd(params);
-  log.debug(`Finished command ${params._[0]}`);
+  log.debug(`Start command ${command}`);
+  if (['deploy', 'import'].includes(command) && 'input_file' in params) {
+    await importCMD(params)
+  }
+  if (['dump', 'export'].includes(command) && 'output_folder' in params) {
+    await exportCMD(params)
+  }
+  log.debug(`Finished command ${command}`);
 }
 
 // Only run if from command line
 if (require.main === module) {
   // Load cli params
   const params = getParams();
+
+  console.log({ params })
 
   log.debug('Starting Auth0 Deploy CLI Tool');
 
@@ -65,6 +56,7 @@ if (require.main === module) {
     process.env.AUTH0_LOG = 'debug';
   }
 
+  //@ts-ignore
   run(params)
     .then(() => process.exit(0))
     .catch((error) => {

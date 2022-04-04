@@ -3,16 +3,7 @@ import { configFactory } from '../configFactory';
 import { deploy as toolsDeploy } from '../tools';
 import log from '../logger';
 import { setupContext } from '../context';
-import { Config } from '../types'
-
-export type ImportParams = {
-  input_file: string,
-  base_path: string,
-  config_file: string,
-  env: boolean,
-  secret: string,
-  config?: Partial<Config>,
-}
+import { ImportParams } from '../args'
 
 export default async function importCMD(params: ImportParams) {
   const {
