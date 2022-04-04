@@ -22,6 +22,8 @@ import {
   toConfigFn
 } from '../src/utils';
 
+const mockConfigFn = () => { };
+
 describe('#utils', function() {
   it('should check if directory exist', () => {
     const dirExist = path.join(testDataDir, 'utils', 'isdir');
@@ -95,7 +97,7 @@ describe('#utils', function() {
       rulesConfigs: [ { key: 'test', value: 'test' } ]
     };
 
-    const auth0 = new Auth0(mockMgmtClient(), {}, {});
+    const auth0 = new Auth0(mockMgmtClient(), {}, mockConfigFn);
 
     expect(stripIdentifiers(auth0, assets)).to.deep.equal({
       clients: [

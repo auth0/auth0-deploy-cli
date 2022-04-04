@@ -2,6 +2,8 @@ import { expect } from 'chai';
 import Auth0 from '../../../src/tools/auth0';
 import constants from '../../../src/tools/constants';
 
+const mockConfigFn = () => { };
+
 describe('#schema validation tests', () => {
   const client = {
     rules: {
@@ -33,13 +35,13 @@ describe('#schema validation tests', () => {
   };
 
   const checkPassed = (data, done) => {
-    const auth0 = new Auth0(client, data, {});
+    const auth0 = new Auth0(client, data, mockConfigFn);
 
     auth0.validate().then(passedCb(done), failedCb(done));
   };
 
   const checkRequired = (field, data, done) => {
-    const auth0 = new Auth0({}, data, {});
+    const auth0 = new Auth0({}, data, mockConfigFn);
 
     auth0
       .validate()
@@ -50,7 +52,7 @@ describe('#schema validation tests', () => {
   };
 
   const checkEnum = (data, done) => {
-    const auth0 = new Auth0({}, data, {});
+    const auth0 = new Auth0({}, data, mockConfigFn);
 
     auth0
       .validate()
@@ -61,7 +63,7 @@ describe('#schema validation tests', () => {
   };
 
   const checkTypeError = (field, expectedType, data, done) => {
-    const auth0 = new Auth0({}, data, {});
+    const auth0 = new Auth0({}, data, mockConfigFn);
 
     auth0
       .validate()
@@ -77,7 +79,7 @@ describe('#schema validation tests', () => {
         anything: 'anything'
       } ];
 
-      const auth0 = new Auth0({}, { branding: data }, {});
+      const auth0 = new Auth0({}, { branding: data }, mockConfigFn);
 
       auth0.validate().then(failedCb(done), passedCb(done, 'should be object'));
     });
@@ -125,7 +127,7 @@ describe('#schema validation tests', () => {
         audience: 'audience'
       } ];
 
-      const auth0 = new Auth0({}, { clientGrants: data }, {});
+      const auth0 = new Auth0({}, { clientGrants: data }, mockConfigFn);
 
       auth0.validate().then(failedCb(done), passedCb(done, 'should be array'));
     });
@@ -155,7 +157,7 @@ describe('#schema validation tests', () => {
         name: ''
       } ];
 
-      const auth0 = new Auth0({}, { clients: data }, {});
+      const auth0 = new Auth0({}, { clients: data }, mockConfigFn);
 
       auth0
         .validate()
@@ -235,7 +237,7 @@ describe('#schema validation tests', () => {
         anything: 'anything'
       } ];
 
-      const auth0 = new Auth0({}, { emailProvider: data }, {});
+      const auth0 = new Auth0({}, { emailProvider: data }, mockConfigFn);
 
       auth0.validate().then(failedCb(done), passedCb(done, 'should be object'));
     });
@@ -490,7 +492,7 @@ describe('#schema validation tests', () => {
         anything: 'anything'
       } ];
 
-      const auth0 = new Auth0({}, { prompts: data }, {});
+      const auth0 = new Auth0({}, { prompts: data }, mockConfigFn);
 
       auth0.validate().then(failedCb(done), passedCb(done, 'should be object'));
     });
@@ -545,7 +547,7 @@ describe('#schema validation tests', () => {
         name: '-rule-'
       } ];
 
-      const auth0 = new Auth0({}, { rules: data }, {});
+      const auth0 = new Auth0({}, { rules: data }, mockConfigFn);
 
       auth0
         .validate()
@@ -595,7 +597,7 @@ describe('#schema validation tests', () => {
         value: 'value'
       } ];
 
-      const auth0 = new Auth0({}, { rulesConfigs: data }, {});
+      const auth0 = new Auth0({}, { rulesConfigs: data }, mockConfigFn);
 
       auth0
         .validate()
@@ -626,7 +628,7 @@ describe('#schema validation tests', () => {
         name: '-hook-'
       } ];
 
-      const auth0 = new Auth0({}, { hooks: data }, {});
+      const auth0 = new Auth0({}, { hooks: data }, mockConfigFn);
 
       auth0
         .validate()
@@ -668,7 +670,7 @@ describe('#schema validation tests', () => {
         anything: 'anything'
       } ];
 
-      const auth0 = new Auth0({}, { tenant: data }, {});
+      const auth0 = new Auth0({}, { tenant: data }, mockConfigFn);
 
       auth0.validate().then(failedCb(done), passedCb(done, 'should be object'));
     });
@@ -686,7 +688,7 @@ describe('#schema validation tests', () => {
     it('should fail validation if migrations is not an object', (done) => {
       const data = '';
 
-      const auth0 = new Auth0({}, { migrations: data }, {});
+      const auth0 = new Auth0({}, { migrations: data }, mockConfigFn);
 
       auth0.validate().then(failedCb(done), passedCb(done, 'should be object'));
     });
@@ -696,7 +698,7 @@ describe('#schema validation tests', () => {
         migration_flag: 'string'
       };
 
-      const auth0 = new Auth0({}, { migrations: data }, {});
+      const auth0 = new Auth0({}, { migrations: data }, mockConfigFn);
 
       auth0.validate().then(failedCb(done), passedCb(done, 'should be boolean'));
     });
