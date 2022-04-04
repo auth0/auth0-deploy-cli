@@ -37,8 +37,10 @@ function parse(context: DirectoryContext): ParsedTenant {
     const sessionDurations = sessionDurationsToMinutes({ session_lifetime, idle_session_lifetime })
 
     return {
-      tenant,
-      ...sessionDurations
+      tenant: {
+        ...tenant,
+        ...sessionDurations
+      },
     };
   }
 
