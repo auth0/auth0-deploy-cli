@@ -5,6 +5,7 @@ import { getParams, ExportParams, ImportParams } from './args';
 import commands from './commands';
 import log from './logger';
 import tools from './tools';
+import { Stage } from './tools/auth0'
 
 import importCMD from './commands/import'
 import exportCMD from './commands/export'
@@ -59,17 +60,23 @@ if (require.main === module) {
   //@ts-ignore
   run(params)
     .then(() => process.exit(0))
-    .catch((error) => {
+    .catch((error: {
+      type?: string
+      stage?: Stage
+      message?: string
+      stack?: string
+    }) => {
+      const command = params._[0]
       if (error.type || error.stage) {
-        log.error(`Problem running command ${params._[0]} during stage ${error.stage} when processing type ${error.type}`);
+        log.error(`Problem running command ${command} during stage ${error.stage} when processing type ${error.type}`);
       } else {
-        log.error(`Problem running command ${params._[0]}`);
+        log.error(`Problem running command ${command}`);
       }
 
       const msg = error.message || error.toString();
       log.error(msg);
 
-      if (process.env.AUTH0_DEBUG === 'true') {
+      if (process.env.AUTH0_DEBUG === 'true' && error.stack) {
         log.debug(error.stack);
       }
 
@@ -82,9 +89,9 @@ if (require.main === module) {
 
 // Export commands to be used programmatically
 module.exports = {
-  deploy: commands.import,
-  dump: commands.export,
-  import: commands.import,
-  export: commands.export,
+  deploy: importCMD,
+  dump: exportCMD,
+  import: importCMD,
+  export: exportCMD,
   tools: tools
 };
