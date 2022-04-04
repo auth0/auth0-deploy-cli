@@ -1,7 +1,8 @@
 import path from 'path';
 import {
-  existsMustBeDir, isFile, dumpJSON, loadJSON, hoursAsInteger, clearTenantFlags
+  existsMustBeDir, isFile, dumpJSON, loadJSON, clearTenantFlags
 } from '../../../utils';
+import { sessionDurationsToMinutes } from '../../../sessionDurationsToMinutes'
 import { DirectoryHandler } from '.'
 import DirectoryContext from '..'
 
@@ -25,18 +26,20 @@ function parse(context: DirectoryContext): ParsedTenant {
       session_lifetime,
       idle_session_lifetime,
       ...tenant
+    }: {
+      session_lifetime?: number
+      idle_session_lifetime?: number,
+      [key: string]: any
     } = loadJSON(tenantFile, context.mappings);
 
     clearTenantFlags(tenant);
 
+    const sessionDurations = sessionDurationsToMinutes({ session_lifetime, idle_session_lifetime })
+
     return {
-      tenant: {
-        ...tenant,
-        session_lifetime_in_minutes: hoursAsInteger('session_lifetime', session_lifetime)['session_lifetime_in_minutes'],
-        idle_session_lifetime_in_minutes: hoursAsInteger('idle_session_lifetime', idle_session_lifetime)['idle_session_lifetime_in_minutes'],
-      }
+      tenant,
+      ...sessionDurations
     };
-    /* eslint-enable camelcase */
   }
 
   return {};

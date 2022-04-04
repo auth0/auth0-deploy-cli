@@ -1,6 +1,8 @@
-import { hoursAsInteger, clearTenantFlags } from '../../../utils';
+import { clearTenantFlags } from '../../../utils';
+import { sessionDurationsToMinutes } from '../../../sessionDurationsToMinutes'
 import { YAMLHandler } from '.'
 import YAMLContext from '..'
+import { Asset } from '../../../types'
 
 type ParsedTenant = {
   tenant: unknown[]
@@ -15,18 +17,20 @@ async function parse(context: YAMLContext): Promise<ParsedTenant> {
     session_lifetime,
     idle_session_lifetime,
     ...tenant
+  }: {
+    session_lifetime?: number
+    idle_session_lifetime?: number,
+    [key: string]: any
   } = context.assets.tenant;
 
   clearTenantFlags(tenant);
 
+  const sessionDurations = sessionDurationsToMinutes({session_lifetime,idle_session_lifetime})
+
   return {
-    tenant: Object.assign(
-      tenant,
-      session_lifetime && hoursAsInteger('session_lifetime', session_lifetime),
-      idle_session_lifetime && hoursAsInteger('idle_session_lifetime', idle_session_lifetime)
-    )
+    tenant,
+    ...sessionDurations
   };
-  /* eslint-enable camelcase */
 }
 
 async function dump(context: YAMLContext): Promise<ParsedTenant> {
