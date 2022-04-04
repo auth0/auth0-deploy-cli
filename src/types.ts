@@ -127,7 +127,9 @@ export type Config = {
     EXCLUDED_PROPS?: {
         [key: string]: string[]
     }
-    INCLUDED_PROPS?: {}
+    INCLUDED_PROPS?: {
+        [key: string]: string[]
+    }
     AUTH0_IGNORE_UNAVAILABLE_MIGRATIONS?: boolean
     // Eventually deprecate:
     AUTH0_EXCLUDED_RULES?: string[]
@@ -154,11 +156,11 @@ export type Assets = {
     guardianFactors: Asset[],
     guardianFactorTemplates: Asset[],
     guardianPhoneFactorMessageTypes: {
-        message_types: Asset[]
+        message_types: Asset[] //TODO: eliminate this intermediate level for consistency
     }
     guardianPhoneFactorSelectedProvider: Asset,
     guardianPolicies: {
-        policies: Asset[],
+        policies: Asset[]  //TODO: eliminate this intermediate level for consistency
     }
     hooks: Asset[],
     migrations: Asset[]
@@ -171,7 +173,7 @@ export type Assets = {
     tenant: Asset,
     triggers: Asset[],
     //non-resource types
-    exclude: {
+    exclude?: {
         [key: string]: string[]
     }
     clientsOrig: Asset[],

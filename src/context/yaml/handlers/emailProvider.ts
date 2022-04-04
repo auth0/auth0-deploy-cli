@@ -16,7 +16,7 @@ async function parse(context: YAMLContext): Promise<ParsedEmailProvider> {
 async function dump(context: YAMLContext): Promise<ParsedEmailProvider> {
   let { emailProvider } = context.assets;
 
-  const excludedDefaults = context.assets.exclude.defaults || [];
+  const excludedDefaults = context.assets.exclude?.defaults || [];
   if (emailProvider && !excludedDefaults.includes('emailProvider')) {
     // Add placeholder for credentials as they cannot be exported
     emailProvider = emailProviderDefaults(emailProvider);

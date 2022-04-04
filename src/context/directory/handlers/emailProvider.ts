@@ -33,7 +33,7 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   if (!emailProvider) return; // Skip, nothing to dump
 
-  const excludedDefaults = context.assets.exclude.defaults || [];
+  const excludedDefaults = context.assets.exclude?.defaults || [];
   if (!excludedDefaults.includes('emailProvider')) {
     // Add placeholder for credentials as they cannot be exported
     emailProvider = emailProviderDefaults(emailProvider);

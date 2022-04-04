@@ -1,5 +1,6 @@
-const winston = require('winston');
+import winston from 'winston'
 
+//@ts-ignore because emitErrs is still supported
 winston.emitErrs = true;
 
 const logger = new winston.Logger({
@@ -15,4 +16,4 @@ const logger = new winston.Logger({
   exitOnError: false
 });
 
-module.exports = logger;
+export default logger;

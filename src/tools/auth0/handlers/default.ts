@@ -1,4 +1,4 @@
-import ValidationError from '../../ValidationError';
+import ValidationError from '../../validationError';
 
 import log from '../../logger';
 import {

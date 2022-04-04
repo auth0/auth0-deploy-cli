@@ -1,5 +1,6 @@
 import winston from 'winston';
 
+//@ts-ignore because used version of Winston still supports emitErrs property
 winston.emitErrs = true;
 
 const log = new winston.Logger({

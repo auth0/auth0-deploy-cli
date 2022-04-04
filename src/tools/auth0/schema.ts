@@ -1,11 +1,11 @@
 import handlers from './handlers';
 
-const typesSchema = Object.entries(handlers).reduce((map, [ name, obj ]) => {
+const typesSchema = Object.entries(handlers).reduce((map: { [key: string]: Object }, [name, obj]) => {
   map[name] = obj.schema; //eslint-disable-line
   return map;
 }, {});
 
-const excludeSchema = Object.entries(handlers).reduce((map, [ name, obj ]) => {
+const excludeSchema = Object.entries(handlers).reduce((map: { [key: string]: Object }, [name, obj]) => {
   if (obj.excludeSchema) {
     map[name] = obj.excludeSchema;
   }
