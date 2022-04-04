@@ -5,7 +5,7 @@ import log from '../logger';
 import { setupContext } from '../context';
 import { Config } from '../types'
 
-type ImportParams = {
+export type ImportParams = {
   input_file: string,
   base_path: string,
   config_file: string,

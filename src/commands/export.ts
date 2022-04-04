@@ -7,7 +7,7 @@ import { isDirectory } from '../utils';
 import { setupContext } from '../context/index';
 import { Config } from '../types'
 
-type ExportParams = {
+export type ExportParams = {
   output_folder: string,
   base_path?: string,
   config_file: string,

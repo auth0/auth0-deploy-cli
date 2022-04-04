@@ -6,9 +6,29 @@ import commands from './commands';
 import log from './logger';
 import tools from './tools';
 
-async function run(params) {
+import importCMD, { ImportParams } from './commands/import'
+import exportCMD, { ExportParams } from './commands/export'
+
+// type Params = {
+//   _: ['import'] | ['export']
+//   env: boolean,
+//   debug: boolean,
+//   config_file: string
+//   input_file?: string
+//   output_folder?: string
+//   format?: 'directory' | 'yaml'
+//   export_ids?: boolean
+//   proxy_url?: string
+//   base_path?: string
+//   secret?: string
+// }
+
+async function run(params: ImportParams | ExportParams): Promise<void> {
+
+  console.log({ params })
+
   // Run command
-  const cmd = commands[params._[0]];
+  const cmd: typeof importCMD | typeof exportCMD = commands[params._[0]];
   const proxy = params.proxy_url;
 
   if (proxy) {
@@ -36,6 +56,7 @@ if (require.main === module) {
   log.debug('Starting Auth0 Deploy CLI Tool');
 
   // Set log level
+  //@ts-ignore
   log.transports.console.level = params.level;
   if (params.debug) {
     log.transports.console.level = 'debug';
