@@ -51,7 +51,6 @@ if (require.main === module) {
     process.env.AUTH0_LOG = 'debug';
   }
 
-  //@ts-ignore
   run(params)
     .then(() => process.exit(0))
     .catch((error: {
