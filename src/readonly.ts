@@ -59,7 +59,7 @@ function getExcludedFields(config: Config) {
   return strippedFields;
 }
 
-function deleteKeys(obj: Asset, keys: string[]) {
+function deleteKeys(obj: Asset, keys: string[]): { [key: string]: any } {
   const newObj = { ...obj };
   keys.forEach((k) => dotProp.delete(newObj, k));
   return newObj;
@@ -74,10 +74,10 @@ export default function cleanAssets(assets: Assets, config: Config): Assets {
     if (!obj) return;
 
     if (Array.isArray(obj)) {
-      //@ts-ignore
+      //@ts-ignore because `message_types` and `policies` on guardianPhoneFactorMessageTypes and guardianPolicies don't adhere to the expect types
       cleaned[name] = obj.map((o) => deleteKeys(o, fields));
     } else {
-      //@ts-ignore
+      //@ts-ignore because `message_types` and `policies` on guardianPhoneFactorMessageTypes and guardianPolicies don't adhere to the expect types
       cleaned[name] = deleteKeys(cleaned[name], fields);
     }
   });
