@@ -2,7 +2,6 @@
 import { bootstrap } from 'global-agent';
 
 import { getParams, ExportParams, ImportParams } from './args';
-import commands from './commands';
 import log from './logger';
 import tools from './tools';
 import { Stage } from './tools/auth0'
@@ -42,8 +41,6 @@ async function run(params: ImportParams | ExportParams): Promise<void> {
 if (require.main === module) {
   // Load cli params
   const params = getParams();
-
-  console.log({ params })
 
   log.debug('Starting Auth0 Deploy CLI Tool');
 
