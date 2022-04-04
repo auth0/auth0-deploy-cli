@@ -154,11 +154,11 @@ export type Assets = {
     guardianFactors: Asset[],
     guardianFactorTemplates: Asset[],
     guardianPhoneFactorMessageTypes: {
-        message_types: Asset[]
+        message_types: Asset[] //TODO: eliminate this intermediate level for consistency
     }
     guardianPhoneFactorSelectedProvider: Asset,
     guardianPolicies: {
-        policies: Asset[],
+        policies: Asset[]  //TODO: eliminate this intermediate level for consistency
     }
     hooks: Asset[],
     migrations: Asset[]
