@@ -8,7 +8,7 @@ export const schema = {
   items: {
     type: 'object',
     properties: {
-      strategy: { type: 'string', enum: [ 'auth0' ], default: 'auth0' },
+      strategy: { type: 'string', enum: ['auth0'], default: 'auth0' },
       name: { type: 'string' },
       options: {
         type: 'object',
@@ -22,7 +22,7 @@ export const schema = {
         }
       }
     },
-    required: [ 'name' ]
+    required: ['name']
   }
 };
 
@@ -31,7 +31,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     super({
       ...config,
       type: 'databases',
-      stripUpdateFields: [ 'strategy', 'name' ]
+      stripUpdateFields: ['strategy', 'name']
     });
   }
 
@@ -73,12 +73,12 @@ export default class DatabaseHandler extends DefaultAPIHandler {
 
     // Convert enabled_clients by name to the id
     const clients = await this.client.clients.getAll({ paginate: true, include_totals: true });
-    const existingDatabasesConecctions = await this.client.connections.getAll({ strategy: 'auth0', paginate: true, include_totals: true });
+    const existingDatabasesConnections = await this.client.connections.getAll({ strategy: 'auth0', paginate: true, include_totals: true });
     const formatted = databases.map((db) => {
       if (db.enabled_clients) {
         return {
           ...db,
-          enabled_clients: getEnabledClients(assets, db, existingDatabasesConecctions, clients)
+          enabled_clients: getEnabledClients(assets, db, existingDatabasesConnections, clients)
         };
       }
 
@@ -90,13 +90,13 @@ export default class DatabaseHandler extends DefaultAPIHandler {
 
   // Run after clients are updated so we can convert all the enabled_clients names to id's
   @order('60')
-  async processChanges(assets) {
+  async processChanges(assets: Assets) {
     const { databases } = assets;
 
     // Do nothing if not set
     if (!databases) return;
 
-    const excludedConnections = (assets.exclude && assets.exclude.databases) || [];
+    const excludedConnections: string[] = (assets.exclude && assets.exclude.databases) || [];
 
     const changes = await this.calcChanges(assets);
 

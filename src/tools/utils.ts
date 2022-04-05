@@ -1,9 +1,9 @@
 import path from 'path';
-import fs, {constants as fsConstants} from 'fs';
+import fs, { constants as fsConstants } from 'fs';
 import dotProp from 'dot-prop';
 import _ from 'lodash';
 import log from './logger';
-import {Asset, KeywordMappings} from "../types";
+import { Asset, Assets, CalculatedChanges, KeywordMappings } from "../types";
 
 export function keywordArrayReplace(input: string, mappings: KeywordMappings): string {
   Object.keys(mappings).forEach(function (key) {
@@ -42,7 +42,7 @@ export function convertClientNameToId(name: string, clients: Asset[]): string {
 }
 
 export function convertClientNamesToIds(names: string[], clients: Asset[]): string[] {
-  const resolvedNames = names.map((name) => ({name, resolved: false}));
+  const resolvedNames = names.map((name) => ({ name, resolved: false }));
   const result = clients.reduce((acc: string[], client): string[] => {
     if (names.includes(client.name)) {
       const index = resolvedNames.findIndex((item) => item.name === client.name);
@@ -70,12 +70,12 @@ export function loadFileAndReplaceKeywords(file: string, mappings: KeywordMappin
   }
 }
 
-export function flatten(list) {
+export function flatten(list: any[]): any[] {
   // Flatten an multiple arrays to single array
   return list.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []);
 }
 
-export function dumpJSON(obj, spacing = 0) {
+export function convertJsonToString(obj: { [key: string]: any }, spacing = 0): string {
   return JSON.stringify(obj, null, spacing);
 }
 
@@ -83,7 +83,7 @@ export function stripFields(obj: Asset, fields: string[]): Asset {
   // Strip object fields supporting dot notation (ie: a.deep.field)
   const stripped: string[] = [];
 
-  const newObj = {...obj};
+  const newObj = { ...obj };
   fields.forEach((f) => {
     if (dotProp.get(newObj, f) !== undefined) {
       dotProp.delete(newObj, f);
@@ -98,7 +98,7 @@ export function stripFields(obj: Asset, fields: string[]): Asset {
   return newObj;
 }
 
-export function getEnabledClients(assets, connection, existing, clients) {
+export function getEnabledClients(assets: Assets, connection: Asset, existing: Asset[], clients: Asset[]): string[] {
   // Convert enabled_clients by name to the id
   const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
   const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
@@ -137,7 +137,7 @@ export function duplicateItems(arr: Asset[], key: string): Asset[] {
   return Object.values(duplicates).filter((g) => g.length > 1);
 }
 
-export function filterExcluded(changes, exclude) {
+export function filterExcluded(changes: CalculatedChanges, exclude: string[]): CalculatedChanges {
   const {
     del, update, create, conflicts
   } = changes;
@@ -146,7 +146,7 @@ export function filterExcluded(changes, exclude) {
     return changes;
   }
 
-  const filter = (list) => list.filter((item) => !exclude.includes(item.name));
+  const filter = (list: Asset[]) => list.filter((item) => !exclude.includes(item.name));
 
   return {
     del: filter(del),
@@ -156,6 +156,6 @@ export function filterExcluded(changes, exclude) {
   };
 }
 
-export function areArraysEquals(x, y) {
+export function areArraysEquals(x: any[], y: any[]): boolean {
   return _.isEqual(x && x.sort(), y && y.sort());
 }
