@@ -33,7 +33,7 @@ function parse(context: DirectoryContext): ParsedEmailTemplates {
     html
   }: {
     meta?: unknown,
-    html?: unknown,
+    html?: string,
   }) => {
     if (!meta) {
       log.warn(`Skipping email template file ${html} as missing the corresponding '.json' file`);

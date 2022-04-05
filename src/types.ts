@@ -107,7 +107,7 @@ export type Auth0APIClient = {
         getTriggerBindings: () => Promise<Asset>
     }
     updateRule: (arg0: { id: string }, arg1: Asset) => Promise<Asset>
-}// TODO: replace with a more accurate representation of the Auth0APIClient type 
+}// TODO: replace with a more accurate representation of the Auth0APIClient type
 
 export type Config = {
     AUTH0_DOMAIN: string
@@ -121,7 +121,7 @@ export type Config = {
     AUTH0_BASE_PATH?: string
     AUTH0_AUDIENCE?: string
     AUTH0_API_MAX_RETRIES?: number
-    AUTH0_KEYWORD_REPLACE_MAPPINGS?: { [key: string]: string[] | string }
+    AUTH0_KEYWORD_REPLACE_MAPPINGS?: KeywordMappings
     AUTH0_EXPORT_IDENTIFIERS?: boolean
     AUTH0_CONNECTIONS_DIRECTORY?: string
     EXCLUDED_PROPS?: {
@@ -138,7 +138,7 @@ export type Config = {
     AUTH0_EXCLUDED_CONNECTIONS?: string[]
     AUTH0_EXCLUDED_RESOURCE_SERVERS?: string[]
     AUTH0_EXCLUDED_DEFAULTS?: string[]
-}// TODO: replace with a more accurate representation of the Config type 
+}// TODO: replace with a more accurate representation of the Config type
 
 export type Asset = { [key: string]: any }
 
@@ -187,3 +187,5 @@ export type CalculatedChanges = {
 }
 
 export type AssetTypes = 'rules' | 'rulesConfigs' | 'hooks' | 'pages' | 'databases' | 'clientGrants' | 'resourceServers' | 'clients' | 'connections' | 'tenant' | 'emailProvider' | 'emailTemplates' | 'guardianFactors' | 'guardianFactorProviders' | 'guardianFactorTemplates' | 'migrations' | 'guardianPhoneFactorMessageTypes' | 'guardianPhoneFactorSelectedProvider' | 'guardianPolicies' | 'roles' | 'actions' | 'organizations' | 'triggers' | 'attackProtection' | 'branding'
+
+export type KeywordMappings = { [key: string]: (string | number)[] | string | number }
