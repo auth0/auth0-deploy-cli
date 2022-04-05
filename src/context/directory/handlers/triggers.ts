@@ -1,22 +1,22 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { constants } from '../../../tools';
-import { DirectoryHandler } from '.'
+import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 
 import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
 import log from '../../../logger';
 
 type ParsedTriggers = {
-  triggers: unknown[] | undefined
-}
+  triggers: unknown[] | undefined;
+};
 
 function parse(context: DirectoryContext): ParsedTriggers {
   const triggersFolder = path.join(context.filePath, constants.TRIGGERS_DIRECTORY);
 
   if (!existsMustBeDir(triggersFolder)) return { triggers: undefined }; // Skip
 
-  const files = getFiles(triggersFolder, [ '.json' ]);
+  const files = getFiles(triggersFolder, ['.json']);
 
   const triggers = { ...loadJSON(files[0], context.mappings) };
 
@@ -39,6 +39,6 @@ async function dump(context: DirectoryContext): Promise<void> {
 const triggersHandler: DirectoryHandler<ParsedTriggers> = {
   parse,
   dump,
-}
+};
 
 export default triggersHandler;

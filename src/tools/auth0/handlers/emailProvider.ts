@@ -1,5 +1,5 @@
 import DefaultHandler from './default';
-import { Asset, Assets, CalculatedChanges } from '../../../types'
+import { Asset, Assets, CalculatedChanges } from '../../../types';
 
 export const schema = { type: 'object' };
 
@@ -10,7 +10,7 @@ export default class EmailProviderHandler extends DefaultHandler {
   constructor(options: DefaultHandler) {
     super({
       ...options,
-      type: 'emailProvider'
+      type: 'emailProvider',
     });
   }
 
@@ -27,7 +27,7 @@ export default class EmailProviderHandler extends DefaultHandler {
     return super.objString({ name: provider.name, enabled: provider.enabled });
   }
 
-  async processChanges(assets: Assets) : Promise<void> {
+  async processChanges(assets: Assets): Promise<void> {
     const { emailProvider } = assets;
 
     // Do nothing if not set

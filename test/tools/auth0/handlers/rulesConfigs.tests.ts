@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import rulesConfigs from '../../../../src/tools/auth0/handlers/rulesConfigs'
+import rulesConfigs from '../../../../src/tools/auth0/handlers/rulesConfigs';
 
 const pool = {
   addEachTask: (data) => {
@@ -7,7 +7,7 @@ const pool = {
       data.generator(data.data[0]);
     }
     return { promise: () => null };
-  }
+  },
 };
 
 describe('#rulesConfigs handler', () => {
@@ -21,26 +21,23 @@ describe('#rulesConfigs handler', () => {
             expect(params.key).to.equal('someKey');
             expect(data.value).to.equal('some_value');
             return Promise.resolve(params);
-          }
+          },
         },
-        pool
+        pool,
       };
 
       const handler = new rulesConfigs({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [ { rulesConfigs: [ { key: 'someKey', value: 'some_value' } ] } ]);
+      await stageFn.apply(handler, [{ rulesConfigs: [{ key: 'someKey', value: 'some_value' }] }]);
     });
   });
 
   it('should get rules configs', async () => {
-    const rulesConfigData = [
-      { key: 'SOME_SECRET' },
-      { key: 'SOME_OTHER_SECRET' }
-    ];
+    const rulesConfigData = [{ key: 'SOME_SECRET' }, { key: 'SOME_OTHER_SECRET' }];
 
     const auth0 = {
-      rulesConfigs: { getAll: () => rulesConfigData }
+      rulesConfigs: { getAll: () => rulesConfigData },
     };
 
     const handler = new rulesConfigs({ client: auth0 });

@@ -4,16 +4,16 @@ import pagedClient from './client';
 import schema from './schema';
 import handlers from './handlers';
 
-import { Assets, Auth0APIClient } from '../../types'
+import { Assets, Auth0APIClient } from '../../types';
 import APIHandler from './handlers/default';
 import { ConfigFunction } from '../../configFactory';
 
-export type Stage = 'load' | 'validate' | 'processChanges'
+export type Stage = 'load' | 'validate' | 'processChanges';
 
-type StageFunction = APIHandler['load'] // Using `load` method as a template for what type stage functions resemble
+type StageFunction = APIHandler['load']; // Using `load` method as a template for what type stage functions resemble
 
 function sortByOrder(toSort: APIHandler[], stage: Stage): APIHandler[] {
-  const defaultOrder = 50
+  const defaultOrder = 50;
 
   const sorted = [...toSort];
   sorted.sort((a, b) => {
@@ -27,33 +27,36 @@ function sortByOrder(toSort: APIHandler[], stage: Stage): APIHandler[] {
 }
 
 export default class Auth0 {
-  client: Auth0APIClient
-  config: ConfigFunction
-  assets: Assets
-  handlers: APIHandler[]
+  client: Auth0APIClient;
+  config: ConfigFunction;
+  assets: Assets;
+  handlers: APIHandler[];
 
   constructor(client: Auth0APIClient, assets: Assets, config: ConfigFunction) {
     this.client = pagedClient(client);
     this.config = config;
     this.assets = assets;
 
-    this.handlers = Object.values(handlers).map((handler) => {
-      //@ts-ignore because class expects `type` property but gets directly injected into class constructors
-      return new handler.default({ client: this.client, config: this.config });
-    }).filter((handler) => {
-      const excludedAssetTypes = config('AUTH0_EXCLUDED') || []
-      return !excludedAssetTypes.includes(handler.type)
-    })
+    this.handlers = Object.values(handlers)
+      .map((handler) => {
+        //@ts-ignore because class expects `type` property but gets directly injected into class constructors
+        return new handler.default({ client: this.client, config: this.config });
+      })
+      .filter((handler) => {
+        const excludedAssetTypes = config('AUTH0_EXCLUDED') || [];
+        return !excludedAssetTypes.includes(handler.type);
+      });
   }
 
   async runStage(stage: Stage): Promise<void> {
     // Sort by priority
-    for (const handler of sortByOrder(this.handlers, stage)) { // eslint-disable-line
+    for (const handler of sortByOrder(this.handlers, stage)) {
+      // eslint-disable-line
       try {
         const stageFn: StageFunction = Object.getPrototypeOf(handler)[stage];
         this.assets = {
           ...this.assets,
-          ...await stageFn.apply(handler, [this.assets]) || {}
+          ...((await stageFn.apply(handler, [this.assets])) || {}),
         };
       } catch (err) {
         err.type = handler.type;

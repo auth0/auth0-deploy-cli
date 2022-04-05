@@ -6,9 +6,7 @@ import { constants } from '../../../src/tools';
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/pages';
 import { loadJSON } from '../../../src/utils';
-import {
-  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
-} from '../../utils';
+import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
 
 const pages = {
   'login.json': '{ "name": "login", "enabled": true }',
@@ -17,8 +15,9 @@ const pages = {
   'guardian_multifactor.html': '<html>this is a page env ##env##</html>',
   'password_reset.json': '{ "name": "password_reset", "enabled": true }',
   'password_reset.html': '<html>this is a page env ##env##</html>',
-  'error_page.json': '{ "name": "error_page", "url": "https://example.com/error", "show_log_link": false }',
-  'error_page.html': '<html>this is a page env ##env##</html>'
+  'error_page.json':
+    '{ "name": "error_page", "url": "https://example.com/error", "show_log_link": false }',
+  'error_page.html': '<html>this is a page env ##env##</html>',
 };
 
 const pagesTarget = [
@@ -26,11 +25,11 @@ const pagesTarget = [
     html: '<html>this is a page env test</html>',
     name: 'error_page',
     url: 'https://example.com/error',
-    show_log_link: false
+    show_log_link: false,
   },
   { enabled: true, html: '<html>this is a page env test</html>', name: 'guardian_multifactor' },
   { enabled: true, html: '<html>this is a page env test</html>', name: 'login' },
-  { enabled: true, html: '<html>this is a page env test</html>', name: 'password_reset' }
+  { enabled: true, html: '<html>this is a page env test</html>', name: 'password_reset' },
 ];
 
 describe('#directory context pages', () => {
@@ -49,7 +48,7 @@ describe('#directory context pages', () => {
     const repoDir = path.join(testDataDir, 'directory', 'pages2');
     const invalidFile = {
       ...pages,
-      'README.md': 'something'
+      'README.md': 'something',
     };
     createDir(repoDir, { [constants.PAGES_DIRECTORY]: invalidFile });
 
@@ -89,30 +88,48 @@ describe('#directory context pages', () => {
         html: htmlValidation,
         name: 'error_page',
         url: errorPageUrl,
-        show_log_link: false
-      }
+        show_log_link: false,
+      },
     ];
 
     await handler.dump(context);
 
     const pagesFolder = path.join(dir, constants.PAGES_DIRECTORY);
 
-    expect(loadJSON(path.join(pagesFolder, 'login.json'))).to.deep.equal({ html: './login.html', name: 'login' });
-    expect(fs.readFileSync(path.join(pagesFolder, 'login.html'), 'utf8')).to.deep.equal(htmlValidation);
+    expect(loadJSON(path.join(pagesFolder, 'login.json'))).to.deep.equal({
+      html: './login.html',
+      name: 'login',
+    });
+    expect(fs.readFileSync(path.join(pagesFolder, 'login.html'), 'utf8')).to.deep.equal(
+      htmlValidation
+    );
 
-    expect(loadJSON(path.join(pagesFolder, 'password_reset.json'))).to.deep.equal({ html: './password_reset.html', name: 'password_reset' });
-    expect(fs.readFileSync(path.join(pagesFolder, 'password_reset.html'), 'utf8')).to.deep.equal(htmlValidation);
+    expect(loadJSON(path.join(pagesFolder, 'password_reset.json'))).to.deep.equal({
+      html: './password_reset.html',
+      name: 'password_reset',
+    });
+    expect(fs.readFileSync(path.join(pagesFolder, 'password_reset.html'), 'utf8')).to.deep.equal(
+      htmlValidation
+    );
 
-    expect(loadJSON(path.join(pagesFolder, 'guardian_multifactor.json'))).to.deep.equal({ html: './guardian_multifactor.html', name: 'guardian_multifactor', enabled: false });
-    expect(fs.readFileSync(path.join(pagesFolder, 'guardian_multifactor.html'), 'utf8')).to.deep.equal(htmlValidation);
+    expect(loadJSON(path.join(pagesFolder, 'guardian_multifactor.json'))).to.deep.equal({
+      html: './guardian_multifactor.html',
+      name: 'guardian_multifactor',
+      enabled: false,
+    });
+    expect(
+      fs.readFileSync(path.join(pagesFolder, 'guardian_multifactor.html'), 'utf8')
+    ).to.deep.equal(htmlValidation);
 
     expect(loadJSON(path.join(pagesFolder, 'error_page.json'))).to.deep.equal({
       html: './error_page.html',
       name: 'error_page',
       url: errorPageUrl,
-      show_log_link: false
+      show_log_link: false,
     });
-    expect(fs.readFileSync(path.join(pagesFolder, 'error_page.html'), 'utf8')).to.deep.equal(htmlValidation);
+    expect(fs.readFileSync(path.join(pagesFolder, 'error_page.html'), 'utf8')).to.deep.equal(
+      htmlValidation
+    );
   });
 
   it('should dump error page without html', async () => {
@@ -125,8 +142,8 @@ describe('#directory context pages', () => {
       {
         name: 'error_page',
         url: errorPageUrl,
-        show_log_link: false
-      }
+        show_log_link: false,
+      },
     ];
 
     await handler.dump(context);
@@ -135,7 +152,7 @@ describe('#directory context pages', () => {
     expect(loadJSON(path.join(pagesFolder, 'error_page.json'))).to.deep.equal({
       name: 'error_page',
       url: errorPageUrl,
-      show_log_link: false
+      show_log_link: false,
     });
     expect(fs.existsSync(path.join(pagesFolder, 'error_page.html'))).to.equal(false);
   });

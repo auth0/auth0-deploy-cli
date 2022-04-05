@@ -3,12 +3,12 @@ import fs from 'fs-extra';
 import { constants } from '../../../tools';
 import log from '../../../logger';
 import { isFile, sanitize, clearClientArrays } from '../../../utils';
-import { YAMLHandler } from '.'
-import YAMLContext from '..'
+import { YAMLHandler } from '.';
+import YAMLContext from '..';
 
 type ParsedClients = {
-  clients: unknown[]
-}
+  clients: unknown[];
+};
 
 async function parse(context: YAMLContext): Promise<ParsedClients> {
   // Load the HTML file for custom_login_page
@@ -32,8 +32,8 @@ async function parse(context: YAMLContext): Promise<ParsedClients> {
         }
 
         return client;
-      })
-    ]
+      }),
+    ],
   };
 }
 
@@ -42,21 +42,23 @@ async function dump(context: YAMLContext): Promise<ParsedClients> {
   const clientsFolder = path.join(context.basePath, constants.CLIENTS_DIRECTORY);
 
   return {
-    clients: [...context.assets.clients.map((client) => {
-      if (client.custom_login_page) {
-        const clientName = sanitize(client.name);
-        const html = client.custom_login_page;
-        const customLoginHtml = path.join(clientsFolder, `${clientName}_custom_login_page.html`);
+    clients: [
+      ...context.assets.clients.map((client) => {
+        if (client.custom_login_page) {
+          const clientName = sanitize(client.name);
+          const html = client.custom_login_page;
+          const customLoginHtml = path.join(clientsFolder, `${clientName}_custom_login_page.html`);
 
-        log.info(`Writing ${customLoginHtml}`);
-        fs.ensureDirSync(clientsFolder);
-        fs.writeFileSync(customLoginHtml, html);
+          log.info(`Writing ${customLoginHtml}`);
+          fs.ensureDirSync(clientsFolder);
+          fs.writeFileSync(customLoginHtml, html);
 
-        client.custom_login_page = `./${clientName}_custom_login_page.html`;
-      }
+          client.custom_login_page = `./${clientName}_custom_login_page.html`;
+        }
 
-      return clearClientArrays(client);
-    })]
+        return clearClientArrays(client);
+      }),
+    ],
   };
 }
 

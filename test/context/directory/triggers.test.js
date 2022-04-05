@@ -7,9 +7,7 @@ import { constants } from '../../../src/tools';
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/triggers';
 import { loadJSON } from '../../../src/utils';
-import {
-  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
-} from '../../utils';
+import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
 
 const actionFiles = {
   [constants.TRIGGERS_DIRECTORY]: {
@@ -25,22 +23,22 @@ const actionFiles = {
       "post-user-registration": [],
       "post-change-password": [],
       "send-phone-message": []
-    }`
-  }
+    }`,
+  },
 };
 
 const triggersTarget = {
   'post-login': [
     {
       action_name: 'test-action',
-      display_name: 'display-name'
-    }
+      display_name: 'display-name',
+    },
   ],
   'credentials-exchange': [],
   'pre-user-registration': [],
   'post-user-registration': [],
   'post-change-password': [],
-  'send-phone-message': []
+  'send-phone-message': [],
 };
 
 describe('#directory context triggers', () => {
@@ -81,14 +79,14 @@ describe('#directory context triggers', () => {
       'post-login': [
         {
           action_name: 'test-action',
-          display_name: 'display-name'
-        }
+          display_name: 'display-name',
+        },
       ],
       'credentials-exchange': [],
       'pre-user-registration': [],
       'post-user-registration': [],
       'post-change-password': [],
-      'send-phone-message': []
+      'send-phone-message': [],
     });
   });
 });

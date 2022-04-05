@@ -8,7 +8,7 @@ describe('#tenant handler', () => {
       const stageFn = Object.getPrototypeOf(handler).validate;
 
       try {
-        await stageFn.apply(handler, [ { tenant: { password_reset: 'page_body' } } ]);
+        await stageFn.apply(handler, [{ tenant: { password_reset: 'page_body' } }]);
       } catch (err) {
         expect(err).to.be.an('object');
         expect(err.message).to.include('Pages should be set separately');
@@ -21,16 +21,16 @@ describe('#tenant handler', () => {
       tenant: {
         getSettings: () => ({
           friendly_name: 'Test',
-          default_directory: 'users'
-        })
-      }
+          default_directory: 'users',
+        }),
+      },
     };
 
     const handler = new tenant.default({ client: auth0 });
     const data = await handler.getType();
     expect(data).to.deep.equal({
       friendly_name: 'Test',
-      default_directory: 'users'
+      default_directory: 'users',
     });
   });
 
@@ -42,14 +42,14 @@ describe('#tenant handler', () => {
             expect(data).to.be.an('object');
             expect(data.sandbox_version).to.equal('4');
             return Promise.resolve(data);
-          }
-        }
+          },
+        },
       };
 
       const handler = new tenant.default({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [ { tenant: { sandbox_version: '4' } } ]);
+      await stageFn.apply(handler, [{ tenant: { sandbox_version: '4' } }]);
     });
   });
 });

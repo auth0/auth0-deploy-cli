@@ -6,16 +6,20 @@ import { dumpJSON } from '../../utils';
 import { Asset, Assets } from '../../../types';
 
 export const schema = {
-  type: 'object'
+  type: 'object',
 };
 
-const blockPageKeys = [...Object.keys(pageNameMap), ...Object.values(pageNameMap), ...supportedPages];
+const blockPageKeys = [
+  ...Object.keys(pageNameMap),
+  ...Object.values(pageNameMap),
+  ...supportedPages,
+];
 
 export default class TenantHandler extends DefaultHandler {
   constructor(options: DefaultHandler) {
     super({
       ...options,
-      type: 'tenant'
+      type: 'tenant',
     });
   }
 
@@ -36,7 +40,11 @@ export default class TenantHandler extends DefaultHandler {
 
     const pageKeys = Object.keys(tenant).filter((k) => blockPageKeys.includes(k));
     if (pageKeys.length > 0) {
-      throw new ValidationError(`The following pages ${dumpJSON(pageKeys)} were found in tenant settings. Pages should be set separately. Please refer to the documentation.`);
+      throw new ValidationError(
+        `The following pages ${dumpJSON(
+          pageKeys
+        )} were found in tenant settings. Pages should be set separately. Please refer to the documentation.`
+      );
     }
   }
 

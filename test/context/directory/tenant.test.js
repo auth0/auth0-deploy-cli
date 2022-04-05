@@ -2,9 +2,7 @@ import path from 'path';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/directory';
-import {
-  testDataDir, createDir, mockMgmtClient, cleanThenMkdir
-} from '../../utils';
+import { testDataDir, createDir, mockMgmtClient, cleanThenMkdir } from '../../utils';
 import handler from '../../../src/context/directory/handlers/tenant';
 import { loadJSON } from '../../../src/utils';
 
@@ -17,21 +15,21 @@ describe('#directory context tenant', () => {
         "session_lifetime": 1.48394893,
         "idle_session_lifetime": 123.4,
         "flags": {}
-      }`
+      }`,
     };
 
     const tenantTarget = {
       friendly_name: 'Auth0 test',
       default_directory: 'users',
       session_lifetime_in_minutes: 89,
-      idle_session_lifetime_in_minutes: 7404
+      idle_session_lifetime_in_minutes: 7404,
     };
 
     createDir(path.join(testDataDir, 'directory'), { tenant1: tenantTest });
 
     const config = {
       AUTH0_INPUT_FILE: path.join(testDataDir, 'directory', 'tenant1'),
-      AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' }
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' },
     };
     const context = new Context(config, mockMgmtClient());
     await context.load();
@@ -45,19 +43,19 @@ describe('#directory context tenant', () => {
         "friendly_name": "Auth0 ##env##",
         "default_directory": "users",
         "flags": {}
-      }`
+      }`,
     };
 
     const tenantTarget = {
       friendly_name: 'Auth0 test',
-      default_directory: 'users'
+      default_directory: 'users',
     };
 
     createDir(path.join(testDataDir, 'directory'), { tenant1: tenantTest });
 
     const config = {
       AUTH0_INPUT_FILE: path.join(testDataDir, 'directory', 'tenant1'),
-      AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' }
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' },
     };
     const context = new Context(config, mockMgmtClient());
     await context.load();
@@ -71,7 +69,7 @@ describe('#directory context tenant', () => {
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
     context.assets.tenant = {
-      friendly_name: 'Auth0 test'
+      friendly_name: 'Auth0 test',
     };
 
     await handler.dump(context);
@@ -85,11 +83,11 @@ describe('#directory context tenant', () => {
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
     const tenant = {
-      friendly_name: 'Test'
+      friendly_name: 'Test',
     };
     context.assets.tenant = {
       friendly_name: 'Test',
-      flags: {}
+      flags: {},
     };
 
     await handler.dump(context);

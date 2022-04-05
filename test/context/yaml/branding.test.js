@@ -33,23 +33,26 @@ describe('#YAML context branding templates', () => {
     expect(context.assets.branding.templates).to.deep.equal([
       {
         template: 'universal_login',
-        body: htmlTransformed
-      }
+        body: htmlTransformed,
+      },
     ]);
   });
 
   it('should dump branding templates', async () => {
     const dir = path.join(testDataDir, 'yaml', 'branding-dump');
     cleanThenMkdir(dir);
-    const context = new Context({ AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') }, mockMgmtClient());
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') },
+      mockMgmtClient()
+    );
 
     context.assets.branding = {
       templates: [
         {
           template: 'universal_login',
-          body: html
-        }
-      ]
+          body: html,
+        },
+      ],
     };
 
     const dumped = await handler.dump(context);
@@ -58,13 +61,15 @@ describe('#YAML context branding templates', () => {
         templates: [
           {
             template: 'universal_login',
-            body: './branding_templates/universal_login.html'
-          }
-        ]
-      }
+            body: './branding_templates/universal_login.html',
+          },
+        ],
+      },
     });
 
     const templatesFolder = path.join(dir, 'branding_templates');
-    expect(fs.readFileSync(path.join(templatesFolder, 'universal_login.html'), 'utf8')).to.deep.equal(html);
+    expect(
+      fs.readFileSync(path.join(templatesFolder, 'universal_login.html'), 'utf8')
+    ).to.deep.equal(html);
   });
 });

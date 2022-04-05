@@ -7,13 +7,12 @@ import { constants } from '../../../src/tools';
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/actions';
 import { loadJSON } from '../../../src/utils';
-import {
-  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
-} from '../../utils';
+import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
 
 const actionFiles = {
   [constants.ACTIONS_DIRECTORY]: {
-    'code.js': '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log(@@replace@@); return {}; };',
+    'code.js':
+      '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log(@@replace@@); return {}; };',
     'action-one.json': `{
       "name": "action-one",
       "code": "./local/testData/directory/test1/actions/code.js",
@@ -33,8 +32,8 @@ const actionFiles = {
         }
       ],
       "deployed": true
-    }`
-  }
+    }`,
+  },
 };
 
 const actionsTarget = [
@@ -46,25 +45,28 @@ const actionsTarget = [
     dependencies: [
       {
         name: 'lodash',
-        version: '4.17.20'
-      }
+        version: '4.17.20',
+      },
     ],
     secrets: [],
     supported_triggers: [
       {
         id: 'post-login',
-        version: 'v1'
-      }
+        version: 'v1',
+      },
     ],
-    deployed: true
-  }
+    deployed: true,
+  },
 ];
 
 describe('#directory context actions', () => {
   it('should process actions', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'test1');
     createDir(repoDir, actionFiles);
-    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { replace: 'test-action' } };
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { replace: 'test-action' },
+    };
     const context = new Context(config, mockMgmtClient());
     await context.load();
     expect(context.assets.actions).to.deep.equal(actionsTarget);
@@ -88,7 +90,8 @@ describe('#directory context actions', () => {
     const dir = path.join(testDataDir, 'directory', 'test3');
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
-    const codeValidation = '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log("test-action"); return {}; };';
+    const codeValidation =
+      '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log("test-action"); return {}; };';
 
     context.assets.actions = [
       {
@@ -98,19 +101,19 @@ describe('#directory context actions', () => {
         dependencies: [
           {
             name: 'lodash',
-            version: '4.17.20'
-          }
+            version: '4.17.20',
+          },
         ],
         secrets: [],
         supported_triggers: [
           {
             id: 'post-login',
-            version: 'v1'
-          }
+            version: 'v1',
+          },
         ],
         deployed: true,
-        status: 'build'
-      }
+        status: 'build',
+      },
     ];
 
     await handler.dump(context);
@@ -124,19 +127,21 @@ describe('#directory context actions', () => {
       dependencies: [
         {
           name: 'lodash',
-          version: '4.17.20'
-        }
+          version: '4.17.20',
+        },
       ],
       secrets: [],
       supported_triggers: [
         {
           id: 'post-login',
-          version: 'v1'
-        }
+          version: 'v1',
+        },
       ],
       deployed: true,
-      status: 'build'
+      status: 'build',
     });
-    expect(fs.readFileSync(path.join(actionsFolder, actionName, 'code.js'), 'utf8')).to.deep.equal(codeValidation);
+    expect(fs.readFileSync(path.join(actionsFolder, actionName, 'code.js'), 'utf8')).to.deep.equal(
+      codeValidation
+    );
   });
 });

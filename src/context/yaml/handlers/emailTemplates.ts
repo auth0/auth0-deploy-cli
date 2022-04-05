@@ -1,12 +1,12 @@
 import fs from 'fs-extra';
 import path from 'path';
 import log from '../../../logger';
-import { YAMLHandler } from '.'
-import YAMLContext from '..'
+import { YAMLHandler } from '.';
+import YAMLContext from '..';
 
 type ParsedEmailTemplates = {
-  emailTemplates: unknown[]
-}
+  emailTemplates: unknown[];
+};
 
 async function parse(context: YAMLContext): Promise<ParsedEmailTemplates> {
   // Load the HTML file for each page
@@ -16,14 +16,14 @@ async function parse(context: YAMLContext): Promise<ParsedEmailTemplates> {
     emailTemplates: [
       ...emailTemplates.map((et) => ({
         ...et,
-        body: context.loadFile(et.body)
-      }))
-    ]
+        body: context.loadFile(et.body),
+      })),
+    ],
   };
 }
 
 async function dump(context: YAMLContext): Promise<ParsedEmailTemplates> {
-  let emailTemplates = [ ...context.assets.emailTemplates || [] ];
+  let emailTemplates = [...(context.assets.emailTemplates || [])];
 
   if (emailTemplates.length > 0) {
     // Create Templates folder

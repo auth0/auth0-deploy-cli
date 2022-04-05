@@ -2,12 +2,12 @@ import fs from 'fs-extra';
 import path from 'path';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
-import { YAMLHandler } from '.'
-import YAMLContext from '..'
+import { YAMLHandler } from '.';
+import YAMLContext from '..';
 
 type ParsedBranding = {
-  branding: unknown
-}
+  branding: unknown;
+};
 
 async function parse(context: YAMLContext): Promise<ParsedBranding> {
   // Load the HTML file for each page
@@ -20,15 +20,15 @@ async function parse(context: YAMLContext): Promise<ParsedBranding> {
     const markupFile = path.join(templateDefinition.body);
     return {
       template: templateDefinition.template,
-      body: loadFileAndReplaceKeywords(markupFile, context.mappings)
+      body: loadFileAndReplaceKeywords(markupFile, context.mappings),
     };
   });
 
   return {
     branding: {
       ...branding,
-      templates
-    }
+      templates,
+    },
   };
 }
 
@@ -38,7 +38,10 @@ async function dump(context: YAMLContext): Promise<ParsedBranding> {
 
   // create templates folder
   if (branding.templates.length) {
-    const brandingTemplatesFolder = path.join(context.basePath, constants.BRANDING_TEMPLATES_YAML_DIRECTORY);
+    const brandingTemplatesFolder = path.join(
+      context.basePath,
+      constants.BRANDING_TEMPLATES_YAML_DIRECTORY
+    );
     fs.ensureDirSync(brandingTemplatesFolder);
 
     branding.templates = branding.templates.map((templateDefinition) => {
@@ -48,11 +51,16 @@ async function dump(context: YAMLContext): Promise<ParsedBranding> {
       try {
         fs.writeFileSync(templateMarkupFile, markup);
       } catch (e) {
-        throw new Error(`Error writing template file: ${templateDefinition.template}, because: ${e.message}`);
+        throw new Error(
+          `Error writing template file: ${templateDefinition.template}, because: ${e.message}`
+        );
       }
 
       // save the location as relative file.
-      templateDefinition.body = `.${path.sep}${path.join(constants.BRANDING_TEMPLATES_YAML_DIRECTORY, file)}`;
+      templateDefinition.body = `.${path.sep}${path.join(
+        constants.BRANDING_TEMPLATES_YAML_DIRECTORY,
+        file
+      )}`;
       return templateDefinition;
     });
   }

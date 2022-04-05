@@ -15,13 +15,11 @@ function getEntity(rsp) {
   if (found.length === 1) {
     return found[0];
   }
-  throw new Error(
-    'There was an error trying to find the entity within paginate'
-  );
+  throw new Error('There was an error trying to find the entity within paginate');
 }
 
 function checkpointPaginator(client, target, name) {
-  return async function(...args) {
+  return async function (...args) {
     const data = [];
 
     // remove the _checkpoint_ flag
@@ -31,7 +29,7 @@ function checkpointPaginator(client, target, name) {
     const { total } = await client.pool
       .addSingleTask({
         data: newArgs,
-        generator: (requestArgs) => target[name](requestArgs)
+        generator: (requestArgs) => target[name](requestArgs),
       })
       .promise();
 
@@ -43,7 +41,7 @@ function checkpointPaginator(client, target, name) {
       const rsp = await client.pool
         .addSingleTask({
           data: newArgs,
-          generator: (requestArgs) => target[name](requestArgs)
+          generator: (requestArgs) => target[name](requestArgs),
         })
         .promise();
 
@@ -64,12 +62,12 @@ function checkpointPaginator(client, target, name) {
 }
 
 function pagePaginator(client, target, name) {
-  return async function(...args) {
+  return async function (...args) {
     // Where the entity data will be collected
     const data = [];
 
     // Create new args and inject the properties we require for pagination automation
-    const newArgs = [ ...args ];
+    const newArgs = [...args];
     newArgs[0] = { ...newArgs[0], page: 0 };
 
     // Grab data we need from the request then delete the keys as they are only needed for this automation function to work
@@ -81,7 +79,7 @@ function pagePaginator(client, target, name) {
     const rsp = await client.pool
       .addSingleTask({
         data: _.cloneDeep(newArgs),
-        generator: (pageArgs) => target[name](...pageArgs)
+        generator: (pageArgs) => target[name](...pageArgs),
       })
       .promise();
 
@@ -98,7 +96,7 @@ function pagePaginator(client, target, name) {
             pageArgs[0].page = page + 1;
 
             return target[name](...pageArgs).then((r) => getEntity(r));
-          }
+          },
         })
         .promise();
 
@@ -115,9 +113,9 @@ function pagePaginator(client, target, name) {
 // Warp around a <resource>Manager and detect when requesting specific pages to return all
 function pagedManager(client, manager) {
   return new Proxy(manager, {
-    get: function(target, name, receiver) {
+    get: function (target, name, receiver) {
       if (name === 'getAll') {
-        return async function(...args) {
+        return async function (...args) {
           switch (true) {
             case args[0] && typeof args[0] === 'object' && args[0].checkpoint:
               return checkpointPaginator(client, target, name)(...args);
@@ -136,7 +134,7 @@ function pagedManager(client, manager) {
       }
 
       return nestedManager;
-    }
+    },
   });
 }
 
@@ -145,7 +143,7 @@ export default function pagedClient(client) {
   client.pool = new PromisePoolExecutor({
     concurrencyLimit: API_CONCURRENCY,
     frequencyLimit: API_FREQUENCY_PER_SECOND,
-    frequencyWindow: 1000 // 1 sec
+    frequencyWindow: 1000, // 1 sec
   });
 
   return pagedManager(client, client);

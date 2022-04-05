@@ -2,12 +2,14 @@ import path from 'path';
 import fs from 'fs-extra';
 
 import log from '../../../logger';
-import { YAMLHandler } from '.'
-import YAMLContext from '..'
+import { YAMLHandler } from '.';
+import YAMLContext from '..';
 
-type ParsedPages = {
-  pages: unknown[]
-} | {}
+type ParsedPages =
+  | {
+      pages: unknown[];
+    }
+  | {};
 
 async function parse(context: YAMLContext): Promise<ParsedPages> {
   // Load the HTML file for each page
@@ -18,14 +20,14 @@ async function parse(context: YAMLContext): Promise<ParsedPages> {
     pages: [
       ...context.assets.pages.map((page) => ({
         ...page,
-        html: page.html ? context.loadFile(page.html) : ''
-      }))
-    ]
+        html: page.html ? context.loadFile(page.html) : '',
+      })),
+    ],
   };
 }
 
 async function dump(context: YAMLContext): Promise<ParsedPages> {
-  let pages = [...context.assets.pages || []];
+  let pages = [...(context.assets.pages || [])];
 
   if (pages.length > 0) {
     // Create Pages folder
@@ -43,7 +45,7 @@ async function dump(context: YAMLContext): Promise<ParsedPages> {
       fs.writeFileSync(htmlFile, page.html);
       return {
         ...page,
-        html: `./pages/${page.name}.html`
+        html: `./pages/${page.name}.html`,
       };
     });
   }

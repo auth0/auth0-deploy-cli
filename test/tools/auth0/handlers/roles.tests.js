@@ -7,17 +7,17 @@ const pool = {
       data.generator(data.data[0]);
     }
     return { promise: () => null };
-  }
+  },
 };
 
 describe('#roles handler', () => {
-  const config = function(key) {
+  const config = function (key) {
     return config.data && config.data[key];
   };
 
   config.data = {
     AUTH0_CLIENT_ID: 'client_id',
-    AUTH0_ALLOW_DELETE: true
+    AUTH0_ALLOW_DELETE: true,
   };
 
   describe('#roles validate', () => {
@@ -26,15 +26,15 @@ describe('#roles handler', () => {
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = [
         {
-          name: 'myRole'
+          name: 'myRole',
         },
         {
-          name: 'myRole'
-        }
+          name: 'myRole',
+        },
       ];
 
       try {
-        await stageFn.apply(handler, [ { roles: data } ]);
+        await stageFn.apply(handler, [{ roles: data }]);
       } catch (err) {
         expect(err).to.be.an('object');
         expect(err.message).to.include('Names must be unique');
@@ -46,11 +46,11 @@ describe('#roles handler', () => {
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = [
         {
-          name: 'myRole'
-        }
+          name: 'myRole',
+        },
       ];
 
-      await stageFn.apply(handler, [ { roles: data } ]);
+      await stageFn.apply(handler, [{ roles: data }]);
     });
   });
 
@@ -58,7 +58,7 @@ describe('#roles handler', () => {
     it('should create role', async () => {
       const auth0 = {
         roles: {
-          create: function(data) {
+          create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('myRole');
@@ -69,9 +69,10 @@ describe('#roles handler', () => {
           delete: () => Promise.resolve([]),
           getAll: () => Promise.resolve([]),
           permissions: {
-            getAll: () => Promise.resolve([
-              { permission_name: 'Create:cal_entry', resource_server_identifier: 'organise' }
-            ]),
+            getAll: () =>
+              Promise.resolve([
+                { permission_name: 'Create:cal_entry', resource_server_identifier: 'organise' },
+              ]),
             create: (params, data) => {
               expect(params).to.be.an('object');
               expect(params.id).to.equal('myRoleId');
@@ -80,10 +81,10 @@ describe('#roles handler', () => {
               expect(data.permissions).to.be.an('Array');
               return Promise.resolve(data.permissions);
             },
-            update: Promise.resolve([])
-          }
+            update: Promise.resolve([]),
+          },
         },
-        pool
+        pool,
       };
       const handler = new roles.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
@@ -94,32 +95,34 @@ describe('#roles handler', () => {
               name: 'myRole',
               id: 'myRoleId',
               description: 'myDescription',
-              permissions: []
-            }
-          ]
-        }
+              permissions: [],
+            },
+          ],
+        },
       ]);
     });
 
     it('should get roles', async () => {
-      const permissions = new Array(150).fill(
-        { permission_name: 'Create:cal_entry', resource_server_identifier: 'organise' }
-      );
+      const permissions = new Array(150).fill({
+        permission_name: 'Create:cal_entry',
+        resource_server_identifier: 'organise',
+      });
 
       const auth0 = {
         roles: {
-          getAll: () => Promise.resolve([
-            {
-              name: 'myRole',
-              id: 'myRoleId',
-              description: 'myDescription'
-            }
-          ]),
+          getAll: () =>
+            Promise.resolve([
+              {
+                name: 'myRole',
+                id: 'myRoleId',
+                description: 'myDescription',
+              },
+            ]),
           permissions: {
-            getAll: () => Promise.resolve(permissions)
-          }
+            getAll: () => Promise.resolve(permissions),
+          },
         },
-        pool
+        pool,
       };
 
       const handler = new roles.default({ client: auth0, config });
@@ -129,10 +132,11 @@ describe('#roles handler', () => {
           name: 'myRole',
           id: 'myRoleId',
           description: 'myDescription',
-          permissions: new Array(150).fill(
-            { permission_name: 'Create:cal_entry', resource_server_identifier: 'organise' }
-          )
-        }
+          permissions: new Array(150).fill({
+            permission_name: 'Create:cal_entry',
+            resource_server_identifier: 'organise',
+          }),
+        },
       ]);
     });
 
@@ -143,9 +147,9 @@ describe('#roles handler', () => {
             const error = new Error('Feature is not yet implemented');
             error.statusCode = 501;
             throw error;
-          }
+          },
         },
-        pool
+        pool,
       };
 
       const handler = new roles.default({ client: auth0, config });
@@ -160,9 +164,9 @@ describe('#roles handler', () => {
             const error = new Error('Not found');
             error.statusCode = 404;
             throw error;
-          }
+          },
         },
-        pool
+        pool,
       };
 
       const handler = new roles.default({ client: auth0, config });
@@ -177,9 +181,9 @@ describe('#roles handler', () => {
             const error = new Error('Bad request');
             error.statusCode = 500;
             throw error;
-          }
+          },
         },
-        pool
+        pool,
       };
 
       const handler = new roles.default({ client: auth0, config });
@@ -193,13 +197,13 @@ describe('#roles handler', () => {
     it('should update role', async () => {
       const auth0 = {
         roles: {
-          create: function(data) {
+          create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.length).to.equal(0);
             return Promise.resolve(data);
           },
-          update: function(params, data) {
+          update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('myRoleId');
@@ -210,17 +214,19 @@ describe('#roles handler', () => {
             return Promise.resolve(data);
           },
           delete: () => Promise.resolve([]),
-          getAll: () => Promise.resolve([
-            {
-              name: 'myRole',
-              id: 'myRoleId',
-              description: 'myDescription'
-            }
-          ]),
-          permissions: {
-            getAll: () => Promise.resolve([
-              { permission_name: 'Create:cal_entry', resource_server_identifier: 'organise' }
+          getAll: () =>
+            Promise.resolve([
+              {
+                name: 'myRole',
+                id: 'myRoleId',
+                description: 'myDescription',
+              },
             ]),
+          permissions: {
+            getAll: () =>
+              Promise.resolve([
+                { permission_name: 'Create:cal_entry', resource_server_identifier: 'organise' },
+              ]),
             create: (params, data) => {
               expect(params).to.be.an('object');
               expect(params.id).to.equal('myRoleId');
@@ -229,17 +235,16 @@ describe('#roles handler', () => {
               expect(data.permissions).to.be.an('Array');
               return Promise.resolve(data);
             },
-            delete: function(params, data) {
+            delete: function (params, data) {
               (() => expect(this).to.not.be.undefined)();
               expect(params).to.be.an('object');
               expect(params.id).to.equal('myRoleId');
               expect(data.permissions).to.be.an('Array');
               return Promise.resolve(data.permissions);
-            }
-          }
-
+            },
+          },
         },
-        pool
+        pool,
       };
 
       const handler = new roles.default({ client: auth0, config });
@@ -254,12 +259,13 @@ describe('#roles handler', () => {
               description: 'myDescription',
               permissions: [
                 {
-                  permission_name: 'Create:cal_entry', resource_server_identifier: 'organise'
-                }
-              ]
-            }
-          ]
-        }
+                  permission_name: 'Create:cal_entry',
+                  resource_server_identifier: 'organise',
+                },
+              ],
+            },
+          ],
+        },
       ]);
     });
 
@@ -273,22 +279,23 @@ describe('#roles handler', () => {
             expect(data.id).to.equal('myRoleId');
             return Promise.resolve(data);
           },
-          getAll: () => Promise.resolve([
-            {
-              name: 'myRole',
-              id: 'myRoleId',
-              description: 'myDescription'
-            }
-          ]),
+          getAll: () =>
+            Promise.resolve([
+              {
+                name: 'myRole',
+                id: 'myRoleId',
+                description: 'myDescription',
+              },
+            ]),
           permissions: {
-            getAll: () => Promise.resolve([])
-          }
+            getAll: () => Promise.resolve([]),
+          },
         },
-        pool
+        pool,
       };
       const handler = new roles.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
-      await stageFn.apply(handler, [ { roles: [ {} ] } ]);
+      await stageFn.apply(handler, [{ roles: [{}] }]);
     });
   });
 });

@@ -2,16 +2,16 @@ import fs from 'fs-extra';
 import path from 'path';
 import { constants } from '../../../tools';
 
-import {
-  existsMustBeDir, isFile, dumpJSON, loadJSON
-} from '../../../utils';
+import { existsMustBeDir, isFile, dumpJSON, loadJSON } from '../../../utils';
 import { emailProviderDefaults } from '../../defaults';
-import { DirectoryHandler } from '.'
+import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 
-type ParsedEmailProvider = {
-  emailProvider: unknown
-} | {}
+type ParsedEmailProvider =
+  | {
+      emailProvider: unknown;
+    }
+  | {};
 
 function parse(context: DirectoryContext): ParsedEmailProvider {
   const emailsFolder = path.join(context.filePath, constants.EMAIL_TEMPLATES_DIRECTORY);
@@ -21,7 +21,7 @@ function parse(context: DirectoryContext): ParsedEmailProvider {
 
   if (isFile(providerFile)) {
     return {
-      emailProvider: loadJSON(providerFile, context.mappings)
+      emailProvider: loadJSON(providerFile, context.mappings),
     };
   }
 
@@ -49,6 +49,6 @@ async function dump(context: DirectoryContext): Promise<void> {
 const emailProviderHandler: DirectoryHandler<ParsedEmailProvider> = {
   parse,
   dump,
-}
+};
 
 export default emailProviderHandler;

@@ -5,5 +5,5 @@ export default {
   import: importCMD,
   export: exportCMD,
   deploy: importCMD,
-  dump: exportCMD
+  dump: exportCMD,
 };

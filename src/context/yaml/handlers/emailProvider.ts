@@ -1,15 +1,15 @@
 import { emailProviderDefaults } from '../../defaults';
-import { YAMLHandler } from '.'
-import YAMLContext from '..'
+import { YAMLHandler } from '.';
+import YAMLContext from '..';
 
 type ParsedEmailProvider = {
-  emailProvider: unknown
-}
+  emailProvider: unknown;
+};
 
 async function parse(context: YAMLContext): Promise<ParsedEmailProvider> {
   // nothing to do, set default if empty
   return {
-    emailProvider: { ...context.assets.emailProvider || {} }
+    emailProvider: { ...(context.assets.emailProvider || {}) },
   };
 }
 
@@ -23,7 +23,7 @@ async function dump(context: YAMLContext): Promise<ParsedEmailProvider> {
   }
 
   return {
-    emailProvider: emailProvider || {}
+    emailProvider: emailProvider || {},
   };
 }
 

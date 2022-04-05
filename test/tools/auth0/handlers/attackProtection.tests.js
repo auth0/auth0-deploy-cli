@@ -10,31 +10,31 @@ describe('#attackProtection handler', () => {
             admin_notification_frequency: [],
             enabled: true,
             method: 'standard',
-            shields: []
+            shields: [],
           }),
           getBruteForceConfig: () => ({
             allowlist: [],
             enabled: true,
             max_attempts: 10,
             mode: 'count_per_identifier_and_ip',
-            shields: [ 'block', 'user_notification' ]
+            shields: ['block', 'user_notification'],
           }),
           getSuspiciousIpThrottlingConfig: () => ({
-            allowlist: [ '127.0.0.1' ],
+            allowlist: ['127.0.0.1'],
             enabled: true,
-            shields: [ 'block', 'admin_notification' ],
+            shields: ['block', 'admin_notification'],
             stage: {
               'pre-login': {
                 max_attempts: 100,
-                rate: 864000
+                rate: 864000,
               },
               'pre-user-registration': {
                 max_attempts: 50,
-                rate: 1200
-              }
-            }
-          })
-        }
+                rate: 1200,
+              },
+            },
+          }),
+        },
       };
 
       const handler = new attackProtection.default({ client: auth0 });
@@ -44,30 +44,30 @@ describe('#attackProtection handler', () => {
           admin_notification_frequency: [],
           enabled: true,
           method: 'standard',
-          shields: []
+          shields: [],
         },
         bruteForceProtection: {
           allowlist: [],
           enabled: true,
           max_attempts: 10,
           mode: 'count_per_identifier_and_ip',
-          shields: [ 'block', 'user_notification' ]
+          shields: ['block', 'user_notification'],
         },
         suspiciousIpThrottling: {
-          allowlist: [ '127.0.0.1' ],
+          allowlist: ['127.0.0.1'],
           enabled: true,
-          shields: [ 'block', 'admin_notification' ],
+          shields: ['block', 'admin_notification'],
           stage: {
             'pre-login': {
               max_attempts: 100,
-              rate: 864000
+              rate: 864000,
             },
             'pre-user-registration': {
               max_attempts: 50,
-              rate: 1200
-            }
-          }
-        }
+              rate: 1200,
+            },
+          },
+        },
       });
     });
 
@@ -80,26 +80,26 @@ describe('#attackProtection handler', () => {
               admin_notification_frequency: [],
               enabled: true,
               method: 'standard',
-              shields: []
+              shields: [],
             });
             return Promise.resolve(data);
           },
           updateSuspiciousIpThrottlingConfig: (params, data) => {
             expect(data).to.be.an('object');
             expect(data).to.deep.equal({
-              allowlist: [ '127.0.0.1' ],
+              allowlist: ['127.0.0.1'],
               enabled: true,
-              shields: [ 'block', 'admin_notification' ],
+              shields: ['block', 'admin_notification'],
               stage: {
                 'pre-login': {
                   max_attempts: 100,
-                  rate: 864000
+                  rate: 864000,
                 },
                 'pre-user-registration': {
                   max_attempts: 50,
-                  rate: 1200
-                }
-              }
+                  rate: 1200,
+                },
+              },
             });
             return Promise.resolve(data);
           },
@@ -110,48 +110,50 @@ describe('#attackProtection handler', () => {
               enabled: true,
               max_attempts: 10,
               mode: 'count_per_identifier_and_ip',
-              shields: [ 'block', 'user_notification' ]
+              shields: ['block', 'user_notification'],
             });
             return Promise.resolve(data);
-          }
-        }
+          },
+        },
       };
 
       const handler = new attackProtection.default({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [ {
-        attackProtection: {
-          breachedPasswordDetection: {
-            admin_notification_frequency: [],
-            enabled: true,
-            method: 'standard',
-            shields: []
-          },
-          bruteForceProtection: {
-            allowlist: [],
-            enabled: true,
-            max_attempts: 10,
-            mode: 'count_per_identifier_and_ip',
-            shields: [ 'block', 'user_notification' ]
-          },
-          suspiciousIpThrottling: {
-            allowlist: [ '127.0.0.1' ],
-            enabled: true,
-            shields: [ 'block', 'admin_notification' ],
-            stage: {
-              'pre-login': {
-                max_attempts: 100,
-                rate: 864000
+      await stageFn.apply(handler, [
+        {
+          attackProtection: {
+            breachedPasswordDetection: {
+              admin_notification_frequency: [],
+              enabled: true,
+              method: 'standard',
+              shields: [],
+            },
+            bruteForceProtection: {
+              allowlist: [],
+              enabled: true,
+              max_attempts: 10,
+              mode: 'count_per_identifier_and_ip',
+              shields: ['block', 'user_notification'],
+            },
+            suspiciousIpThrottling: {
+              allowlist: ['127.0.0.1'],
+              enabled: true,
+              shields: ['block', 'admin_notification'],
+              stage: {
+                'pre-login': {
+                  max_attempts: 100,
+                  rate: 864000,
+                },
+                'pre-user-registration': {
+                  max_attempts: 50,
+                  rate: 1200,
+                },
               },
-              'pre-user-registration': {
-                max_attempts: 50,
-                rate: 1200
-              }
-            }
-          }
-        }
-      } ]);
+            },
+          },
+        },
+      ]);
     });
   });
 });

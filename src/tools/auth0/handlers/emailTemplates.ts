@@ -1,11 +1,10 @@
 import DefaultHandler, { order } from './default';
 import constants from '../../constants';
-import { Assets, Asset } from '../../../types'
+import { Assets, Asset } from '../../../types';
 
-
-export const supportedTemplates = constants.EMAIL_TEMPLATES_NAMES
-  .filter((p) => p.includes('.json'))
-  .map((p) => p.replace('.json', ''));
+export const supportedTemplates = constants.EMAIL_TEMPLATES_NAMES.filter((p) =>
+  p.includes('.json')
+).map((p) => p.replace('.json', ''));
 
 export const schema = {
   type: 'array',
@@ -13,10 +12,10 @@ export const schema = {
     type: 'object',
     properties: {
       template: { type: 'string', enum: supportedTemplates },
-      body: { type: 'string', default: '' }
+      body: { type: 'string', default: '' },
     },
-    required: ['template']
-  }
+    required: ['template'],
+  },
 };
 
 export default class EmailTemplateHandler extends DefaultHandler {
@@ -24,24 +23,26 @@ export default class EmailTemplateHandler extends DefaultHandler {
     super({
       ...options,
       type: 'emailTemplates',
-      id: 'template'
+      id: 'template',
     });
   }
 
   async getType(): Promise<Asset> {
-    const emailTemplates = await Promise.all(constants.EMAIL_TEMPLATES_TYPES.map(async (name) => {
-      try {
-        const template = await this.client.emailTemplates.get({ name });
-        return template
-      } catch (err) {
-        // Ignore if not found, else throw error
-        if (err.statusCode !== 404) {
-          throw err;
+    const emailTemplates = await Promise.all(
+      constants.EMAIL_TEMPLATES_TYPES.map(async (name) => {
+        try {
+          const template = await this.client.emailTemplates.get({ name });
+          return template;
+        } catch (err) {
+          // Ignore if not found, else throw error
+          if (err.statusCode !== 404) {
+            throw err;
+          }
         }
-      }
-    }));
+      })
+    );
 
-    const nonEmptyTemplates = emailTemplates.filter(template => !!template)
+    const nonEmptyTemplates = emailTemplates.filter((template) => !!template);
 
     return nonEmptyTemplates;
   }
@@ -74,8 +75,10 @@ export default class EmailTemplateHandler extends DefaultHandler {
     // Do nothing if not set
     if (!emailTemplates || !emailTemplates.length) return;
 
-    await Promise.all(emailTemplates.map(async (emailTemplate) => {
-      await this.updateOrCreate(emailTemplate);
-    }));
+    await Promise.all(
+      emailTemplates.map(async (emailTemplate) => {
+        await this.updateOrCreate(emailTemplate);
+      })
+    );
   }
 }

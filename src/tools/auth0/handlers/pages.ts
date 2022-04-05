@@ -2,14 +2,14 @@ import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
 
-export const supportedPages = constants.PAGE_NAMES
-  .filter((p) => p.includes('.json'))
-  .map((p) => p.replace('.json', ''));
+export const supportedPages = constants.PAGE_NAMES.filter((p) => p.includes('.json')).map((p) =>
+  p.replace('.json', '')
+);
 
 export const pageNameMap = {
   guardian_multifactor: 'guardian_mfa_page',
   password_reset: 'change_password',
-  error_page: 'error_page'
+  error_page: 'error_page',
 };
 
 // With this schema, we can only validate property types but not valid properties on per type basis
@@ -22,17 +22,17 @@ export const schema = {
       html: { type: 'string', default: '' },
       url: { type: 'string' },
       show_log_link: { type: 'boolean' },
-      enabled: { type: 'boolean' }
+      enabled: { type: 'boolean' },
     },
-    required: ['name']
-  }
+    required: ['name'],
+  },
 };
 
 export default class PagesHandler extends DefaultHandler {
   constructor(options: DefaultHandler) {
     super({
       ...options,
-      type: 'pages'
+      type: 'pages',
     });
   }
 
@@ -41,7 +41,11 @@ export default class PagesHandler extends DefaultHandler {
   }
 
   async updateLoginPage(page): Promise<void> {
-    const globalClient = await this.client.clients.getAll({ is_global: true, paginate: true, include_totals: true });
+    const globalClient = await this.client.clients.getAll({
+      is_global: true,
+      paginate: true,
+      include_totals: true,
+    });
 
     if (!globalClient[0]) {
       throw new Error('Unable to find global client id when trying to update the login page');
@@ -51,7 +55,7 @@ export default class PagesHandler extends DefaultHandler {
       { client_id: globalClient[0].client_id },
       {
         custom_login_page: page.html,
-        custom_login_page_on: page.enabled
+        custom_login_page_on: page.enabled,
       }
     );
     this.updated += 1;
@@ -84,13 +88,17 @@ export default class PagesHandler extends DefaultHandler {
 
   async getType(): Promise<Asset[]> {
     const pages: {
-      name: string
-      enabled: boolean
-      html: string
+      name: string;
+      enabled: boolean;
+      html: string;
     }[] = [];
 
     // Login page is handled via the global client
-    const globalClient = await this.client.clients.getAll({ is_global: true, paginate: true, include_totals: true });
+    const globalClient = await this.client.clients.getAll({
+      is_global: true,
+      paginate: true,
+      include_totals: true,
+    });
     if (!globalClient[0]) {
       throw new Error('Unable to find global client id when trying to dump the login page');
     }
@@ -99,7 +107,7 @@ export default class PagesHandler extends DefaultHandler {
       pages.push({
         name: 'login',
         enabled: globalClient[0].custom_login_page_on,
-        html: globalClient[0].custom_login_page
+        html: globalClient[0].custom_login_page,
       });
     }
 
@@ -110,7 +118,7 @@ export default class PagesHandler extends DefaultHandler {
       if (tenantSettings[name]) {
         pages.push({
           ...page,
-          name: key
+          name: key,
         });
       }
     });

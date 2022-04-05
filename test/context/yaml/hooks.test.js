@@ -31,11 +31,14 @@ describe('#YAML context hooks', () => {
         dependencies: {},
         secrets: {},
         script: 'function someHook() { var hello = "test"; }',
-        triggerId: 'credentials-exchange'
-      }
+        triggerId: 'credentials-exchange',
+      },
     ];
 
-    const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { hello: 'test' } };
+    const config = {
+      AUTH0_INPUT_FILE: yamlFile,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { hello: 'test' },
+    };
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
@@ -45,7 +48,10 @@ describe('#YAML context hooks', () => {
   it('should dump hooks', async () => {
     const dir = path.join(testDataDir, 'yaml', 'hooksDump');
     cleanThenMkdir(dir);
-    const context = new Context({ AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') }, mockMgmtClient());
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') },
+      mockMgmtClient()
+    );
     const codeValidation = 'function someHook() { var hello = "test"; }';
 
     context.assets.hooks = [
@@ -53,13 +59,13 @@ describe('#YAML context hooks', () => {
         id: '1',
         name: 'someHook',
         script: codeValidation,
-        triggerId: 'credentials-exchange'
+        triggerId: 'credentials-exchange',
       },
       {
         id: 'unnamedHook',
         script: codeValidation,
-        triggerId: 'credentials-exchange'
-      }
+        triggerId: 'credentials-exchange',
+      },
     ];
 
     const dumped = await handler.dump(context);
@@ -69,33 +75,38 @@ describe('#YAML context hooks', () => {
           id: '1',
           name: 'someHook',
           script: './hooks/someHook.js',
-          triggerId: 'credentials-exchange'
+          triggerId: 'credentials-exchange',
         },
         {
           id: 'unnamedHook',
           name: 'unnamedHook',
           script: './hooks/unnamedHook.js',
-          triggerId: 'credentials-exchange'
-        }
-      ]
+          triggerId: 'credentials-exchange',
+        },
+      ],
     });
 
     const hooksFolder = path.join(dir, 'hooks');
-    expect(fs.readFileSync(path.join(hooksFolder, 'someHook.js'), 'utf8')).to.deep.equal(codeValidation);
+    expect(fs.readFileSync(path.join(hooksFolder, 'someHook.js'), 'utf8')).to.deep.equal(
+      codeValidation
+    );
   });
 
   it('should dump hooks sanitized', async () => {
     const dir = path.join(testDataDir, 'yaml', 'hooksDump');
     cleanThenMkdir(dir);
-    const context = new Context({ AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') }, mockMgmtClient());
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') },
+      mockMgmtClient()
+    );
     const codeValidation = 'function someHook() { var hello = "test"; }';
 
     context.assets.hooks = [
       {
         name: 'someHook / test',
         script: codeValidation,
-        triggerId: 'credentials-exchange'
-      }
+        triggerId: 'credentials-exchange',
+      },
     ];
 
     const dumped = await handler.dump(context);
@@ -104,12 +115,14 @@ describe('#YAML context hooks', () => {
         {
           name: 'someHook / test',
           script: './hooks/someHook - test.js',
-          triggerId: 'credentials-exchange'
-        }
-      ]
+          triggerId: 'credentials-exchange',
+        },
+      ],
     });
 
     const hooksFolder = path.join(dir, 'hooks');
-    expect(fs.readFileSync(path.join(hooksFolder, 'someHook - test.js'), 'utf8')).to.deep.equal(codeValidation);
+    expect(fs.readFileSync(path.join(hooksFolder, 'someHook - test.js'), 'utf8')).to.deep.equal(
+      codeValidation
+    );
   });
 });

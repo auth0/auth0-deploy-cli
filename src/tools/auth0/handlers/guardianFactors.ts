@@ -7,21 +7,20 @@ export const schema = {
   items: {
     type: 'object',
     properties: {
-      name: { type: 'string', enum: constants.GUARDIAN_FACTORS }
+      name: { type: 'string', enum: constants.GUARDIAN_FACTORS },
     },
-    required: [ 'name' ]
-  }
+    required: ['name'],
+  },
 };
 
 export default class GuardianFactorsHandler extends DefaultHandler {
-
   existing: Asset[];
 
   constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'guardianFactors',
-      id: 'name'
+      id: 'name',
     });
   }
 
@@ -39,13 +38,15 @@ export default class GuardianFactorsHandler extends DefaultHandler {
     if (!guardianFactors || !guardianFactors.length) return;
 
     // Process each factor
-    await Promise.all(guardianFactors.map(async (factor) => {
-      const data = { ...factor };
-      const params = { name: factor.name };
-      delete data.name;
-      await this.client.guardian.updateFactor(params, data);
-      this.didUpdate(params);
-      this.updated += 1;
-    }));
+    await Promise.all(
+      guardianFactors.map(async (factor) => {
+        const data = { ...factor };
+        const params = { name: factor.name };
+        delete data.name;
+        await this.client.guardian.updateFactor(params, data);
+        this.didUpdate(params);
+        this.updated += 1;
+      })
+    );
   }
 }

@@ -1,14 +1,14 @@
-import { YAMLHandler } from '.'
-import YAMLContext from '..'
+import { YAMLHandler } from '.';
+import YAMLContext from '..';
 
 type ParsedRoles = {
-  roles: unknown[]
-}
+  roles: unknown[];
+};
 
 async function parse(context: YAMLContext): Promise<ParsedRoles> {
   // nothing to do, set default empty
   return {
-    roles: context.assets.roles
+    roles: context.assets.roles,
   };
 }
 
@@ -22,8 +22,8 @@ async function dump(context: YAMLContext): Promise<ParsedRoles> {
         }
 
         return role;
-      })
-    ]
+      }),
+    ],
   };
 }
 

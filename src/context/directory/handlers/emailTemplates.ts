@@ -3,21 +3,21 @@ import path from 'path';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
 import log from '../../../logger';
-import {
-  getFiles, existsMustBeDir, dumpJSON, loadJSON
-} from '../../../utils';
-import { DirectoryHandler } from '.'
-import DirectoryContext from '..'
+import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
+import { DirectoryHandler } from '.';
+import DirectoryContext from '..';
 
 type ParsedEmailTemplates = {
-  emailTemplates: unknown | undefined
-}
+  emailTemplates: unknown | undefined;
+};
 
 function parse(context: DirectoryContext): ParsedEmailTemplates {
   const emailsFolder = path.join(context.filePath, constants.EMAIL_TEMPLATES_DIRECTORY);
   if (!existsMustBeDir(emailsFolder)) return { emailTemplates: undefined }; // Skip
 
-  const files = getFiles(emailsFolder, ['.json', '.html']).filter((f) => path.basename(f) !== 'provider.json');
+  const files = getFiles(emailsFolder, ['.json', '.html']).filter(
+    (f) => path.basename(f) !== 'provider.json'
+  );
 
   const sorted = {};
 
@@ -28,34 +28,30 @@ function parse(context: DirectoryContext): ParsedEmailTemplates {
     if (ext === '.html') sorted[name].html = file;
   });
 
-  const emailTemplates = Object.values(sorted).flatMap(({
-    meta,
-    html
-  }: {
-    meta?: unknown,
-    html?: unknown,
-  }) => {
-    if (!meta) {
-      log.warn(`Skipping email template file ${html} as missing the corresponding '.json' file`);
-      return [];
-    } else if (!html) {
-      log.warn(`Skipping email template file ${meta} as missing corresponding '.html' file`);
-      return [];
-    } else {
-      return {
-        ...loadJSON(meta, context.mappings),
-        body: loadFileAndReplaceKeywords(html, context.mappings)
-      };
+  const emailTemplates = Object.values(sorted).flatMap(
+    ({ meta, html }: { meta?: unknown; html?: unknown }) => {
+      if (!meta) {
+        log.warn(`Skipping email template file ${html} as missing the corresponding '.json' file`);
+        return [];
+      } else if (!html) {
+        log.warn(`Skipping email template file ${meta} as missing corresponding '.html' file`);
+        return [];
+      } else {
+        return {
+          ...loadJSON(meta, context.mappings),
+          body: loadFileAndReplaceKeywords(html, context.mappings),
+        };
+      }
     }
-  });
+  );
 
   return {
-    emailTemplates
+    emailTemplates,
   };
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const emailTemplates = [...context.assets.emailTemplates || []];
+  const emailTemplates = [...(context.assets.emailTemplates || [])];
 
   if (!emailTemplates) return; // Skip, nothing to dump
 
@@ -77,6 +73,6 @@ async function dump(context: DirectoryContext): Promise<void> {
 const emailTemplatesHandler: DirectoryHandler<ParsedEmailTemplates> = {
   parse,
   dump,
-}
+};
 
 export default emailTemplatesHandler;

@@ -8,17 +8,17 @@ const pool = {
       data.generator(data.data[0]);
     }
     return { promise: () => null };
-  }
+  },
 };
 
 describe('#connections handler', () => {
-  const config = function(key) {
+  const config = function (key) {
     return config.data && config.data[key];
   };
 
   config.data = {
     AUTH0_CLIENT_ID: 'client_id',
-    AUTH0_ALLOW_DELETE: true
+    AUTH0_ALLOW_DELETE: true,
   };
 
   describe('#connections validate', () => {
@@ -27,15 +27,15 @@ describe('#connections handler', () => {
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = [
         {
-          name: 'someConnection'
+          name: 'someConnection',
         },
         {
-          name: 'someConnection'
-        }
+          name: 'someConnection',
+        },
       ];
 
       try {
-        await stageFn.apply(handler, [ { connections: data } ]);
+        await stageFn.apply(handler, [{ connections: data }]);
       } catch (err) {
         expect(err).to.be.an('object');
         expect(err.message).to.include('Names must be unique');
@@ -47,11 +47,11 @@ describe('#connections handler', () => {
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = [
         {
-          name: 'someConnection'
-        }
+          name: 'someConnection',
+        },
       ];
 
-      await stageFn.apply(handler, [ { connections: data } ]);
+      await stageFn.apply(handler, [{ connections: data }]);
     });
   });
 
@@ -59,7 +59,7 @@ describe('#connections handler', () => {
     it('should create connection', async () => {
       const auth0 = {
         connections: {
-          create: function(data) {
+          create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someConnection');
@@ -67,18 +67,18 @@ describe('#connections handler', () => {
           },
           update: () => Promise.resolve([]),
           delete: () => Promise.resolve([]),
-          getAll: () => []
+          getAll: () => [],
         },
         clients: {
-          getAll: () => []
+          getAll: () => [],
         },
-        pool
+        pool,
       };
 
       const handler = new connections.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [ { connections: [ { name: 'someConnection' } ] } ]);
+      await stageFn.apply(handler, [{ connections: [{ name: 'someConnection' }] }]);
     });
 
     it('should get connections', async () => {
@@ -87,49 +87,49 @@ describe('#connections handler', () => {
       const auth0 = {
         connections: {
           getAll: () => [
-            { strategy: 'github', name: 'github', enabled_clients: [ clientId ] },
-            { strategy: 'auth0', name: 'db-should-be-ignored', enabled_clients: [] }
-          ]
+            { strategy: 'github', name: 'github', enabled_clients: [clientId] },
+            { strategy: 'auth0', name: 'db-should-be-ignored', enabled_clients: [] },
+          ],
         },
         clients: {
-          getAll: () => [
-            { name: 'test client', client_id: clientId }
-          ]
+          getAll: () => [{ name: 'test client', client_id: clientId }],
         },
-        pool
+        pool,
       };
 
       const handler = new connections.default({ client: auth0, config });
       const data = await handler.getType();
-      expect(data).to.deep.equal([ { strategy: 'github', name: 'github', enabled_clients: [ clientId ] } ]);
+      expect(data).to.deep.equal([
+        { strategy: 'github', name: 'github', enabled_clients: [clientId] },
+      ]);
     });
 
     it('should update connection', async () => {
       const auth0 = {
         connections: {
-          create: function(data) {
+          create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
             return Promise.resolve(data);
           },
-          update: function(params, data) {
+          update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
-              enabled_clients: [ 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' ],
-              options: { passwordPolicy: 'testPolicy' }
+              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
+              options: { passwordPolicy: 'testPolicy' },
             });
 
             return Promise.resolve({ ...params, ...data });
           },
           delete: () => Promise.resolve([]),
-          getAll: () => [ { name: 'someConnection', id: 'con1', strategy: 'custom' } ]
+          getAll: () => [{ name: 'someConnection', id: 'con1', strategy: 'custom' }],
         },
         clients: {
-          getAll: () => [ { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' } ]
+          getAll: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
         },
-        pool
+        pool,
       };
 
       const handler = new connections.default({ client: auth0, config });
@@ -138,23 +138,23 @@ describe('#connections handler', () => {
         {
           name: 'someConnection',
           strategy: 'custom',
-          enabled_clients: [ 'client1' ],
+          enabled_clients: ['client1'],
           options: {
-            passwordPolicy: 'testPolicy'
-          }
-        }
+            passwordPolicy: 'testPolicy',
+          },
+        },
       ];
 
-      await stageFn.apply(handler, [ { connections: data } ]);
+      await stageFn.apply(handler, [{ connections: data }]);
     });
 
     it('should convert client name with ID in idpinitiated.client_id', async () => {
       const auth0 = {
         connections: {
-          create: function(data) {
+          create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.deep.equal({
-              enabled_clients: [ 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' ],
+              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               name: 'someConnection-2',
               strategy: 'custom',
               options: {
@@ -162,42 +162,40 @@ describe('#connections handler', () => {
                 idpinitiated: {
                   client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec',
                   client_protocol: 'samlp',
-                  client_authorizequery: ''
-                }
-              }
+                  client_authorizequery: '',
+                },
+              },
             });
             return Promise.resolve(data);
           },
-          update: function(params, data) {
+          update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
-              enabled_clients: [ 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' ],
+              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               options: {
                 passwordPolicy: 'testPolicy',
                 idpinitiated: {
                   client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Teb',
                   client_protocol: 'samlp',
-                  client_authorizequery: ''
-                }
-              }
+                  client_authorizequery: '',
+                },
+              },
             });
 
             return Promise.resolve({ ...params, ...data });
           },
           delete: () => Promise.resolve([]),
-          getAll: () => [
-            { name: 'someSamlConnection', id: 'con1', strategy: 'samlp' }
-          ]
+          getAll: () => [{ name: 'someSamlConnection', id: 'con1', strategy: 'samlp' }],
         },
         clients: {
           getAll: () => [
             { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
-            { name: 'idp-one', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Teb' }
-          ]
+            { name: 'idp-one', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Teb' },
+          ],
         },
-        pool
+        pool,
       };
 
       const handler = new connections.default({ client: auth0, config });
@@ -206,41 +204,41 @@ describe('#connections handler', () => {
         {
           name: 'someSamlConnection',
           strategy: 'samlp',
-          enabled_clients: [ 'client1' ],
+          enabled_clients: ['client1'],
           options: {
             passwordPolicy: 'testPolicy',
             idpinitiated: {
               client_id: 'idp-one',
               client_protocol: 'samlp',
-              client_authorizequery: ''
-            }
-          }
+              client_authorizequery: '',
+            },
+          },
         },
         {
           name: 'someConnection-2',
           strategy: 'custom',
-          enabled_clients: [ 'client1' ],
+          enabled_clients: ['client1'],
           options: {
             passwordPolicy: 'testPolicy',
             idpinitiated: {
               client_id: 'client1',
               client_protocol: 'samlp',
-              client_authorizequery: ''
-            }
-          }
-        }
+              client_authorizequery: '',
+            },
+          },
+        },
       ];
 
-      await stageFn.apply(handler, [ { connections: data } ]);
+      await stageFn.apply(handler, [{ connections: data }]);
     });
 
     it('should keep client ID in idpinitiated.client_id', async () => {
       const auth0 = {
         connections: {
-          create: function(data) {
+          create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.deep.equal({
-              enabled_clients: [ 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' ],
+              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               name: 'someConnection-2',
               strategy: 'custom',
               options: {
@@ -248,42 +246,40 @@ describe('#connections handler', () => {
                 idpinitiated: {
                   client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Ted',
                   client_protocol: 'samlp',
-                  client_authorizequery: ''
-                }
-              }
+                  client_authorizequery: '',
+                },
+              },
             });
             return Promise.resolve(data);
           },
-          update: function(params, data) {
+          update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
-              enabled_clients: [ 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' ],
+              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               options: {
                 passwordPolicy: 'testPolicy',
                 idpinitiated: {
                   client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Teb',
                   client_protocol: 'samlp',
-                  client_authorizequery: ''
-                }
-              }
+                  client_authorizequery: '',
+                },
+              },
             });
 
             return Promise.resolve({ ...params, ...data });
           },
           delete: () => Promise.resolve([]),
-          getAll: () => [
-            { name: 'someSamlConnection', id: 'con1', strategy: 'samlp' }
-          ]
+          getAll: () => [{ name: 'someSamlConnection', id: 'con1', strategy: 'samlp' }],
         },
         clients: {
           getAll: () => [
             { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
-            { name: 'idp-one', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Teb' }
-          ]
+            { name: 'idp-one', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Teb' },
+          ],
         },
-        pool
+        pool,
       };
 
       const handler = new connections.default({ client: auth0, config });
@@ -292,32 +288,32 @@ describe('#connections handler', () => {
         {
           name: 'someSamlConnection',
           strategy: 'samlp',
-          enabled_clients: [ 'client1' ],
+          enabled_clients: ['client1'],
           options: {
             passwordPolicy: 'testPolicy',
             idpinitiated: {
               client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Teb',
               client_protocol: 'samlp',
-              client_authorizequery: ''
-            }
-          }
+              client_authorizequery: '',
+            },
+          },
         },
         {
           name: 'someConnection-2',
           strategy: 'custom',
-          enabled_clients: [ 'client1' ],
+          enabled_clients: ['client1'],
           options: {
             passwordPolicy: 'testPolicy',
             idpinitiated: {
               client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Ted',
               client_protocol: 'samlp',
-              client_authorizequery: ''
-            }
-          }
-        }
+              client_authorizequery: '',
+            },
+          },
+        },
       ];
 
-      await stageFn.apply(handler, [ { connections: data } ]);
+      await stageFn.apply(handler, [{ connections: data }]);
     });
 
     // If client is excluded and in the existing connection this client is enabled, it should keep enabled
@@ -325,35 +321,40 @@ describe('#connections handler', () => {
     it('should handle excluded clients properly', async () => {
       const auth0 = {
         connections: {
-          create: function(data) {
+          create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
             return Promise.resolve(data);
           },
-          update: function(params, data) {
+          update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
-              enabled_clients: [ 'client1-id', 'excluded-one-id' ],
-              options: { passwordPolicy: 'testPolicy' }
+              enabled_clients: ['client1-id', 'excluded-one-id'],
+              options: { passwordPolicy: 'testPolicy' },
             });
 
             return Promise.resolve({ ...params, ...data });
           },
           delete: () => Promise.resolve([]),
-          getAll: () => [ {
-            name: 'someConnection', id: 'con1', strategy: 'custom', enabled_clients: [ 'excluded-one-id' ]
-          } ]
+          getAll: () => [
+            {
+              name: 'someConnection',
+              id: 'con1',
+              strategy: 'custom',
+              enabled_clients: ['excluded-one-id'],
+            },
+          ],
         },
         clients: {
           getAll: () => [
             { name: 'client1', client_id: 'client1-id' },
             { name: 'excluded-one', client_id: 'excluded-one-id' },
-            { name: 'excluded-two', client_id: 'excluded-two-id' }
-          ]
+            { name: 'excluded-two', client_id: 'excluded-two-id' },
+          ],
         },
-        pool
+        pool,
       };
 
       const handler = new connections.default({ client: auth0, config });
@@ -362,39 +363,41 @@ describe('#connections handler', () => {
         {
           name: 'someConnection',
           strategy: 'custom',
-          enabled_clients: [ 'client1', 'excluded-one', 'excluded-two' ],
+          enabled_clients: ['client1', 'excluded-one', 'excluded-two'],
           options: {
-            passwordPolicy: 'testPolicy'
-          }
-        }
+            passwordPolicy: 'testPolicy',
+          },
+        },
       ];
 
-      await stageFn.apply(handler, [ { connections: data, exclude: { clients: [ 'excluded-one', 'excluded-two' ] } } ]);
+      await stageFn.apply(handler, [
+        { connections: data, exclude: { clients: ['excluded-one', 'excluded-two'] } },
+      ]);
     });
 
     it('should delete connection and create another one instead', async () => {
       const auth0 = {
         connections: {
-          create: function(data) {
+          create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someConnection');
             return Promise.resolve(data);
           },
           update: () => Promise.resolve([]),
-          delete: function(params) {
+          delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
 
             return Promise.resolve([]);
           },
-          getAll: () => [ { id: 'con1', name: 'existingConnection', strategy: 'custom' } ]
+          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }],
         },
         clients: {
-          getAll: () => []
+          getAll: () => [],
         },
-        pool
+        pool,
       };
 
       const handler = new connections.default({ client: auth0, config });
@@ -402,11 +405,11 @@ describe('#connections handler', () => {
       const data = [
         {
           name: 'someConnection',
-          strategy: 'custom'
-        }
+          strategy: 'custom',
+        },
       ];
 
-      await stageFn.apply(handler, [ { connections: data } ]);
+      await stageFn.apply(handler, [{ connections: data }]);
     });
 
     it('should delete all connections', async () => {
@@ -415,25 +418,25 @@ describe('#connections handler', () => {
         connections: {
           create: () => Promise.resolve([]),
           update: () => Promise.resolve([]),
-          delete: function(params) {
+          delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             removed = true;
             return Promise.resolve([]);
           },
-          getAll: () => [ { id: 'con1', name: 'existingConnection', strategy: 'custom' } ]
+          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }],
         },
         clients: {
-          getAll: () => []
+          getAll: () => [],
         },
-        pool
+        pool,
       };
 
       const handler = new connections.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [ { connections: [] } ]);
+      await stageFn.apply(handler, [{ connections: [] }]);
       expect(removed).to.equal(true);
     });
 
@@ -441,22 +444,22 @@ describe('#connections handler', () => {
       config.data.AUTH0_ALLOW_DELETE = false;
       const auth0 = {
         connections: {
-          create: function(data) {
+          create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             return Promise.resolve(data);
           },
           update: () => Promise.resolve([]),
-          delete: function(params) {
+          delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },
-          getAll: () => [ { id: 'con1', name: 'existingConnection', strategy: 'custom' } ]
+          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }],
         },
         clients: {
-          getAll: () => []
+          getAll: () => [],
         },
-        pool
+        pool,
       };
 
       const handler = new connections.default({ client: auth0, config });
@@ -464,44 +467,44 @@ describe('#connections handler', () => {
       const data = [
         {
           name: 'someConnection',
-          strategy: 'custom'
-        }
+          strategy: 'custom',
+        },
       ];
 
-      await stageFn.apply(handler, [ { connections: data } ]);
+      await stageFn.apply(handler, [{ connections: data }]);
     });
 
     it('should not remove connections if run by extension', async () => {
       config.data = {
-        EXTENSION_SECRET: 'some-secret'
+        EXTENSION_SECRET: 'some-secret',
       };
       const auth0 = {
         connections: {
           create: () => Promise.resolve(),
           update: () => Promise.resolve([]),
-          delete: function(params) {
+          delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },
-          getAll: () => [ { id: 'con1', name: 'existingConnection', strategy: 'custom' } ]
+          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }],
         },
         clients: {
-          getAll: () => []
+          getAll: () => [],
         },
-        pool
+        pool,
       };
 
       const handler = new connections.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [ { connections: [] } ]);
+      await stageFn.apply(handler, [{ connections: [] }]);
     });
 
     it('should not remove/create/update excluded connections', async () => {
       config.data = {
         EXTENSION_SECRET: false,
-        AUTH0_ALLOW_DELETE: true
+        AUTH0_ALLOW_DELETE: true,
       };
       const auth0 = {
         connections: {
@@ -513,32 +516,32 @@ describe('#connections handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },
-          delete: function(params) {
+          delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },
           getAll: () => [
             { id: 'con1', name: 'existing1', strategy: 'custom' },
-            { id: 'con2', name: 'existing2', strategy: 'custom' }
-          ]
+            { id: 'con2', name: 'existing2', strategy: 'custom' },
+          ],
         },
         clients: {
-          getAll: () => []
+          getAll: () => [],
         },
-        pool
+        pool,
       };
 
       const handler = new connections.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const assets = {
         exclude: {
-          connections: [ 'existing1', 'existing2', 'existing3' ]
+          connections: ['existing1', 'existing2', 'existing3'],
         },
-        connections: [ { name: 'existing3', strategy: 'custom' } ]
+        connections: [{ name: 'existing3', strategy: 'custom' }],
       };
 
-      await stageFn.apply(handler, [ assets ]);
+      await stageFn.apply(handler, [assets]);
     });
   });
 });
@@ -551,37 +554,29 @@ describe('#addExcludedConnectionPropertiesToChanges', () => {
       id: 'con_1',
       name: 'connection-1',
       options: {
-        domain: 'login.auth0.net'
+        domain: 'login.auth0.net',
       },
-      enabled_clients: [
-        'client_1',
-        'client_2'
-      ],
-      shouldHaveExcludedProps: true// Not a real connection property, just helps testing
+      enabled_clients: ['client_1', 'client_2'],
+      shouldHaveExcludedProps: true, // Not a real connection property, just helps testing
     },
     {
       id: 'con_2',
       name: 'connection-2',
       options: {
-        domain: 'enterprise-login.auth0.net'
+        domain: 'enterprise-login.auth0.net',
       },
-      enabled_clients: [
-        'client_1'
-      ],
-      shouldHaveExcludedProps: false// Not a real connection property, just helps testing
+      enabled_clients: ['client_1'],
+      shouldHaveExcludedProps: false, // Not a real connection property, just helps testing
     },
     {
       id: 'con_3',
       name: 'connection-3',
       options: {
-        domain: 'login.azure-prod-us.net'
+        domain: 'login.azure-prod-us.net',
       },
-      enabled_clients: [
-        'client_1',
-        'client_3'
-      ],
-      shouldHaveExcludedProps: true// Not a real connection property, just helps testing
-    }
+      enabled_clients: ['client_1', 'client_3'],
+      shouldHaveExcludedProps: true, // Not a real connection property, just helps testing
+    },
   ];
 
   const mockConnsWithExcludedProps = mockConnsWithoutExcludedProps.map((conn) => {
@@ -591,36 +586,31 @@ describe('#addExcludedConnectionPropertiesToChanges', () => {
       options: {
         ...conn.options,
         client_id: `${conn.id}-client-id`,
-        client_secret: `${conn.id}-client-secret`
-      }
+        client_secret: `${conn.id}-client-secret`,
+      },
     };
   });
 
   const proposedChanges = {
     del: [],
     update: mockConnsWithoutExcludedProps,
-    create: []
+    create: [],
   };
 
   const existingConnections = mockConnsWithExcludedProps;
 
   const config = () => ({
     EXCLUDED_PROPS: {
-      tenant: [
-        'some-unrelated-excluded-property'
-      ],
-      connections: [
-        'options.client_id',
-        'options.client_secret'
-      ]
-    }
+      tenant: ['some-unrelated-excluded-property'],
+      connections: ['options.client_id', 'options.client_secret'],
+    },
   });
 
   it('should add excluded properties into connections update payload', () => {
     const updatedProposedChanges = addExcludedConnectionPropertiesToChanges({
       config,
       existingConnections,
-      proposedChanges
+      proposedChanges,
     });
     expect(updatedProposedChanges.update).to.lengthOf(proposedChanges.update.length);
     // Loop through proposed changes and expect to see connections that should have excluded properties to have them
@@ -636,13 +626,11 @@ describe('#addExcludedConnectionPropertiesToChanges', () => {
     const updatedProposedChanges = addExcludedConnectionPropertiesToChanges({
       config: () => ({
         EXCLUDED_PROPS: {
-          connections: [
-            'options'
-          ]
-        }
+          connections: ['options'],
+        },
       }),
       existingConnections,
-      proposedChanges
+      proposedChanges,
     });
     expect(updatedProposedChanges.update).to.lengthOf(proposedChanges.update.length);
     // Loop through proposed changes and expect to see connections that should have excluded properties to have them
@@ -658,29 +646,24 @@ describe('#addExcludedConnectionPropertiesToChanges', () => {
     const updatedProposedChangesNoConfig = addExcludedConnectionPropertiesToChanges({
       config: () => ({}),
       existingConnections,
-      proposedChanges
+      proposedChanges,
     });
 
-    expect(updatedProposedChangesNoConfig).to.deep.equal(proposedChanges);// Expect no change
+    expect(updatedProposedChangesNoConfig).to.deep.equal(proposedChanges); // Expect no change
   });
 
   it('should not modify update payload if only unrelated excluded properties exist', () => {
     const updatedProposedChangesUnrelatedConfig = addExcludedConnectionPropertiesToChanges({
       config: () => ({
         EXCLUDED_PROPS: {
-          connections: [
-            'some-unrelated-property-1',
-            'options.some-unrelated-property-2'
-          ],
-          tenant: [
-            'some-unrelated-property-3'
-          ]
-        }
+          connections: ['some-unrelated-property-1', 'options.some-unrelated-property-2'],
+          tenant: ['some-unrelated-property-3'],
+        },
       }),
       existingConnections,
-      proposedChanges
+      proposedChanges,
     });
-    expect(updatedProposedChangesUnrelatedConfig).to.deep.equal(proposedChanges);// Expect no change
+    expect(updatedProposedChangesUnrelatedConfig).to.deep.equal(proposedChanges); // Expect no change
   });
 
   it('should not modify update payload if no updates are proposed', () => {
@@ -689,13 +672,13 @@ describe('#addExcludedConnectionPropertiesToChanges', () => {
       existingConnections,
       proposedChanges: {
         ...proposedChanges,
-        update: []// Override to have no proposed updates
-      }
+        update: [], // Override to have no proposed updates
+      },
     });
     expect(updatedProposedChangesUnrelatedConfig).to.deep.equal({
       create: [],
       del: [],
-      update: []
-    });// Expect no change
+      update: [],
+    }); // Expect no change
   });
 });

@@ -4,10 +4,10 @@ import { bootstrap } from 'global-agent';
 import { getParams, ExportParams, ImportParams } from './args';
 import log from './logger';
 import tools from './tools';
-import { Stage } from './tools/auth0'
+import { Stage } from './tools/auth0';
 
-import importCMD from './commands/import'
-import exportCMD from './commands/export'
+import importCMD from './commands/import';
+import exportCMD from './commands/export';
 
 async function run(params: ImportParams | ExportParams): Promise<void> {
   // Run command
@@ -29,10 +29,10 @@ async function run(params: ImportParams | ExportParams): Promise<void> {
 
   log.debug(`Start command ${command}`);
   if (['deploy', 'import'].includes(command) && 'input_file' in params) {
-    await importCMD(params)
+    await importCMD(params);
   }
   if (['dump', 'export'].includes(command) && 'output_folder' in params) {
-    await exportCMD(params)
+    await exportCMD(params);
   }
   log.debug(`Finished command ${command}`);
 }
@@ -53,15 +53,12 @@ if (require.main === module) {
 
   run(params)
     .then(() => process.exit(0))
-    .catch((error: {
-      type?: string
-      stage?: Stage
-      message?: string
-      stack?: string
-    }) => {
-      const command = params._[0]
+    .catch((error: { type?: string; stage?: Stage; message?: string; stack?: string }) => {
+      const command = params._[0];
       if (error.type || error.stage) {
-        log.error(`Problem running command ${command} during stage ${error.stage} when processing type ${error.type}`);
+        log.error(
+          `Problem running command ${command} during stage ${error.stage} when processing type ${error.type}`
+        );
       } else {
         log.error(`Problem running command ${command}`);
       }
@@ -74,7 +71,9 @@ if (require.main === module) {
       }
 
       if (typeof msg === 'string' && msg.includes('Payload validation error')) {
-        log.info('Please refer to the Auth0 Management API docs for expected payloads: https://auth0.com/docs/api/management/v2');
+        log.info(
+          'Please refer to the Auth0 Management API docs for expected payloads: https://auth0.com/docs/api/management/v2'
+        );
       }
       process.exit(1);
     });
@@ -86,5 +85,5 @@ module.exports = {
   dump: exportCMD,
   import: importCMD,
   export: exportCMD,
-  tools: tools
+  tools: tools,
 };

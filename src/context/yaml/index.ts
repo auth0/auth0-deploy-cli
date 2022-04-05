@@ -4,14 +4,12 @@ import path from 'path';
 import { loadFileAndReplaceKeywords, keywordReplace, Auth0 } from '../../tools';
 
 import log from '../../logger';
-import {
-  isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter
-} from '../../utils';
+import { isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter } from '../../utils';
 import handlers, { YAMLHandler } from './handlers';
 import cleanAssets from '../../readonly';
-import { Assets, Config, Auth0APIClient, AssetTypes } from '../../types'
+import { Assets, Config, Auth0APIClient, AssetTypes } from '../../types';
 
-type KeywordMappings = { [key: string]: (string | number)[] | string | number }
+type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 
 export default class YAMLContext {
   basePath: string;
@@ -19,7 +17,7 @@ export default class YAMLContext {
   config: Config;
   mappings: KeywordMappings;
   mgmtClient: Auth0APIClient;
-  assets: Assets
+  assets: Assets;
 
   constructor(config: Config, mgmtClient) {
     this.configFile = config.AUTH0_INPUT_FILE;
@@ -27,8 +25,8 @@ export default class YAMLContext {
     this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {};
     this.mgmtClient = mgmtClient;
 
-    //@ts-ignore because the assets property gets filled out throughout 
-    this.assets = {}
+    //@ts-ignore because the assets property gets filled out throughout
+    this.assets = {};
     // Get excluded rules
     this.assets.exclude = {
       rules: config.AUTH0_EXCLUDED_RULES || [],
@@ -36,14 +34,14 @@ export default class YAMLContext {
       databases: config.AUTH0_EXCLUDED_DATABASES || [],
       connections: config.AUTH0_EXCLUDED_CONNECTIONS || [],
       resourceServers: config.AUTH0_EXCLUDED_RESOURCE_SERVERS || [],
-      defaults: config.AUTH0_EXCLUDED_DEFAULTS || []
+      defaults: config.AUTH0_EXCLUDED_DEFAULTS || [],
     };
 
     this.basePath = (() => {
       if (!!config.AUTH0_BASE_PATH) return config.AUTH0_BASE_PATH;
       //@ts-ignore because this looks to be a bug, but do not want to introduce regression; more investigation needed
-      return (typeof configFile === 'object') ? process.cwd() : path.dirname(this.configFile);
-    })()
+      return typeof configFile === 'object' ? process.cwd() : path.dirname(this.configFile);
+    })();
   }
 
   loadFile(f) {
@@ -63,7 +61,10 @@ export default class YAMLContext {
       try {
         const fPath = path.resolve(this.configFile);
         log.debug(`Loading YAML from ${fPath}`);
-        Object.assign(this.assets, yaml.load(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)) || {});
+        Object.assign(
+          this.assets,
+          yaml.load(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)) || {}
+        );
       } catch (err) {
         log.debug(err.stack);
         throw new Error(`Problem loading ${this.configFile}\n${err}`);
@@ -75,18 +76,19 @@ export default class YAMLContext {
     await auth0.validate();
 
     // Allow handlers to process the assets such as loading files etc
-    await Promise.all(Object.entries(handlers).map(async ([name, handler]) => {
-      try {
-        const parsed = await handler.parse(this);
-        Object.entries(parsed)
-          .forEach(([k, v]) => {
+    await Promise.all(
+      Object.entries(handlers).map(async ([name, handler]) => {
+        try {
+          const parsed = await handler.parse(this);
+          Object.entries(parsed).forEach(([k, v]) => {
             this.assets[k] = v;
           });
-      } catch (err) {
-        log.debug(err.stack);
-        throw new Error(`Problem deploying ${name}`);
-      }
-    }));
+        } catch (err) {
+          log.debug(err.stack);
+          throw new Error(`Problem deploying ${name}`);
+        }
+      })
+    );
   }
 
   async dump(): Promise<void> {
@@ -96,29 +98,37 @@ export default class YAMLContext {
       await auth0.loadAll();
       this.assets = auth0.assets;
     } catch (err) {
-      const docUrl = 'https://auth0.com/docs/deploy/deploy-cli-tool/create-and-configure-the-deploy-cli-application#modify-deploy-cli-application-scopes';
-      const extraMessage = err.message.startsWith('Insufficient scope') ? `\nSee ${docUrl} for more information` : '';
+      const docUrl =
+        'https://auth0.com/docs/deploy/deploy-cli-tool/create-and-configure-the-deploy-cli-application#modify-deploy-cli-application-scopes';
+      const extraMessage = err.message.startsWith('Insufficient scope')
+        ? `\nSee ${docUrl} for more information`
+        : '';
       throw new Error(`Problem loading tenant data from Auth0 ${err}${extraMessage}`);
     }
 
-    await Promise.all(Object.entries(handlers).filter(([handlerName]: [AssetTypes, YAMLHandler<any>]) => {
-      const excludedAssetTypes = this.config.AUTH0_EXCLUDED || []
-      return !excludedAssetTypes.includes(handlerName)
-    }).map(async ([name, handler]) => {
-      try {
-        const data = await handler.dump(this);
-        if (data) {
-          log.info(`Exporting ${name}`);
-          Object.entries(data)
-            .forEach(([k, v]) => {
-              this.assets[k] = Array.isArray(v) ? v.map(formatResults).sort(recordsSorter) : formatResults(v);
-            });
-        }
-      } catch (err) {
-        log.debug(err.stack);
-        throw new Error(`Problem exporting ${name}`);
-      }
-    }));
+    await Promise.all(
+      Object.entries(handlers)
+        .filter(([handlerName]: [AssetTypes, YAMLHandler<any>]) => {
+          const excludedAssetTypes = this.config.AUTH0_EXCLUDED || [];
+          return !excludedAssetTypes.includes(handlerName);
+        })
+        .map(async ([name, handler]) => {
+          try {
+            const data = await handler.dump(this);
+            if (data) {
+              log.info(`Exporting ${name}`);
+              Object.entries(data).forEach(([k, v]) => {
+                this.assets[k] = Array.isArray(v)
+                  ? v.map(formatResults).sort(recordsSorter)
+                  : formatResults(v);
+              });
+            }
+          } catch (err) {
+            log.debug(err.stack);
+            throw new Error(`Problem exporting ${name}`);
+          }
+        })
+    );
 
     // Clean known read only fields
     let cleaned = cleanAssets(this.assets, this.config);

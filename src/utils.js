@@ -7,8 +7,7 @@ import log from './logger';
 
 export function isDirectory(f) {
   try {
-    return fs.statSync(path.resolve(f))
-      .isDirectory();
+    return fs.statSync(path.resolve(f)).isDirectory();
   } catch (err) {
     return false;
   }
@@ -16,8 +15,7 @@ export function isDirectory(f) {
 
 export function isFile(f) {
   try {
-    return fs.statSync(path.resolve(f))
-      .isFile();
+    return fs.statSync(path.resolve(f)).isFile();
   } catch (err) {
     return false;
   }
@@ -25,7 +23,8 @@ export function isFile(f) {
 
 export function getFiles(folder, exts) {
   if (isDirectory(folder)) {
-    return fs.readdirSync(folder)
+    return fs
+      .readdirSync(folder)
       .map((f) => path.join(folder, f))
       .filter((f) => isFile(f) && exts.includes(path.extname(f)));
   }
@@ -45,10 +44,7 @@ export function dumpJSON(file, mappings) {
   try {
     log.info(`Writing ${file}`);
     const jsonBody = JSON.stringify(mappings, null, 2);
-    fs.writeFileSync(
-      file,
-      jsonBody.endsWith('\n') ? jsonBody : `${jsonBody}\n`
-    );
+    fs.writeFileSync(file, jsonBody.endsWith('\n') ? jsonBody : `${jsonBody}\n`);
   } catch (e) {
     throw new Error(`Error writing JSON to metadata file: ${file}, because: ${e.message}`);
   }
@@ -79,7 +75,7 @@ export function stripIdentifiers(auth0, assets) {
     'emailTemplates',
     'guardianFactors',
     'guardianFactorProviders',
-    'guardianFactorTemplates'
+    'guardianFactorTemplates',
   ];
 
   // Optionally Strip identifiers
@@ -116,13 +112,15 @@ export function formatResults(item) {
     strategy: null,
     script: null,
     stage: null,
-    id: null
+    id: null,
   };
   const result = { ...importantFields };
 
-  Object.entries(item).sort().forEach(([ key, value ]) => {
-    result[key] = value;
-  });
+  Object.entries(item)
+    .sort()
+    .forEach(([key, value]) => {
+      result[key] = value;
+    });
 
   Object.keys(importantFields).forEach((key) => {
     if (result[key] === null) delete result[key];
@@ -132,12 +130,7 @@ export function formatResults(item) {
 }
 
 export function recordsSorter(a, b) {
-  const importantFields = [
-    'name',
-    'key',
-    'client_id',
-    'template'
-  ];
+  const importantFields = ['name', 'key', 'client_id', 'template'];
 
   for (let i = 0; i < importantFields.length; i += 1) {
     const key = importantFields[i];
@@ -163,7 +156,7 @@ export function ensureProp(obj, props, value = '') {
 }
 
 export function clearClientArrays(client) {
-  const propsToClear = [ 'allowed_clients', 'allowed_logout_urls', 'allowed_origins', 'callbacks' ];
+  const propsToClear = ['allowed_clients', 'allowed_logout_urls', 'allowed_origins', 'callbacks'];
   Object.keys(client).forEach((prop) => {
     if (propsToClear.indexOf(prop) >= 0 && !client[prop]) {
       client[prop] = [];
@@ -184,6 +177,6 @@ export function convertClientIdToName(clientId, knownClients = []) {
 
 export function mapClientID2NameSorted(enabledClients, knownClients) {
   return [
-    ...(enabledClients || []).map((clientId) => convertClientIdToName(clientId, knownClients))
+    ...(enabledClients || []).map((clientId) => convertClientIdToName(clientId, knownClients)),
   ].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 }

@@ -7,20 +7,22 @@ import { constants } from '../../../src/tools';
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/resourceServers';
 import { loadJSON } from '../../../src/utils';
-import {
-  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
-} from '../../utils';
+import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
 
 const resourceServers = {
-  'myapi.json': '{ "name": "My API", "identifier": "https://##ENV##.myapp.com/api/v1", "scopes": [ { "value": "update:account", "description": "update account" }, { "value": "read:account", "description": "read account" } ] }'
+  'myapi.json':
+    '{ "name": "My API", "identifier": "https://##ENV##.myapp.com/api/v1", "scopes": [ { "value": "update:account", "description": "update account" }, { "value": "read:account", "description": "read account" } ] }',
 };
 
 const resourceServersTarget = [
   {
     identifier: 'https://##ENV##.myapp.com/api/v1',
     name: 'My API',
-    scopes: [ { description: 'update account', value: 'update:account' }, { description: 'read account', value: 'read:account' } ]
-  }
+    scopes: [
+      { description: 'update account', value: 'update:account' },
+      { description: 'read account', value: 'read:account' },
+    ],
+  },
 ];
 
 describe('#directory context resourceServers', () => {
@@ -39,7 +41,7 @@ describe('#directory context resourceServers', () => {
     const repoDir = path.join(testDataDir, 'directory', 'resourceServers2');
     const invalid = {
       ...resourceServers,
-      'README.md': 'something'
+      'README.md': 'something',
     };
     createDir(repoDir, { [constants.RESOURCE_SERVERS_DIRECTORY]: invalid });
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
@@ -76,14 +78,16 @@ describe('#directory context resourceServers', () => {
         scopes: [
           { description: 'update account', name: 'update:account' },
           { description: 'read account', name: 'read:account' },
-          { description: 'admin access', name: 'admin' }
-        ]
-      }
+          { description: 'admin access', name: 'admin' },
+        ],
+      },
     ];
 
     await handler.dump(context);
     const resourceServersFolder = path.join(dir, constants.RESOURCE_SERVERS_DIRECTORY);
-    expect(loadJSON(path.join(resourceServersFolder, 'my resource.json'))).to.deep.equal(context.assets.resourceServers[0]);
+    expect(loadJSON(path.join(resourceServersFolder, 'my resource.json'))).to.deep.equal(
+      context.assets.resourceServers[0]
+    );
   });
 
   it('should dump resource servers sanitized', async () => {
@@ -98,13 +102,15 @@ describe('#directory context resourceServers', () => {
         scopes: [
           { description: 'update account', name: 'update:account' },
           { description: 'read account', name: 'read:account' },
-          { description: 'admin access', name: 'admin' }
-        ]
-      }
+          { description: 'admin access', name: 'admin' },
+        ],
+      },
     ];
 
     await handler.dump(context);
     const resourceServersFolder = path.join(dir, constants.RESOURCE_SERVERS_DIRECTORY);
-    expect(loadJSON(path.join(resourceServersFolder, 'my-test- resource.json'))).to.deep.equal(context.assets.resourceServers[0]);
+    expect(loadJSON(path.join(resourceServersFolder, 'my-test- resource.json'))).to.deep.equal(
+      context.assets.resourceServers[0]
+    );
   });
 });

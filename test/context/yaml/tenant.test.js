@@ -26,7 +26,7 @@ describe('#YAML context tenant settings', () => {
       friendly_name: 'Auth0 test',
       default_directory: 'users',
       session_lifetime_in_minutes: 89,
-      idle_session_lifetime_in_minutes: 7404
+      idle_session_lifetime_in_minutes: 7404,
     };
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { ENV: 'test' } };
@@ -51,7 +51,7 @@ describe('#YAML context tenant settings', () => {
 
     const target = {
       friendly_name: 'Auth0 test',
-      default_directory: 'users'
+      default_directory: 'users',
     };
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { ENV: 'test' } };
@@ -64,7 +64,7 @@ describe('#YAML context tenant settings', () => {
   it('should dump tenant', async () => {
     const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
     const tenant = {
-      friendly_name: 'Auth0 test'
+      friendly_name: 'Auth0 test',
     };
     context.assets.tenant = tenant;
 
@@ -75,11 +75,11 @@ describe('#YAML context tenant settings', () => {
   it('should dump tenant without flags', async () => {
     const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
     const tenant = {
-      friendly_name: 'Test'
+      friendly_name: 'Test',
     };
     context.assets.tenant = {
       friendly_name: 'Test',
-      flags: {}
+      flags: {},
     };
 
     const dumped = await handler.dump(context);
