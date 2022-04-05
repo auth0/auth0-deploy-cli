@@ -3,13 +3,14 @@ import fs from 'fs-extra';
 import { constants } from '../../../tools';
 import log from '../../../logger';
 import { isFile, sanitize, clearClientArrays } from '../../../utils';
-import { YAMLHandler, Context } from '.'
+import { YAMLHandler } from '.'
+import YAMLContext from '..'
 
 type ParsedClients = {
   clients: unknown[]
 }
 
-async function parse(context: Context): Promise<ParsedClients> {
+async function parse(context: YAMLContext): Promise<ParsedClients> {
   // Load the HTML file for custom_login_page
 
   const { clients } = context.assets;
@@ -36,7 +37,7 @@ async function parse(context: Context): Promise<ParsedClients> {
   };
 }
 
-async function dump(context: Context): Promise<ParsedClients> {
+async function dump(context: YAMLContext): Promise<ParsedClients> {
   // Save custom_login_page to a separate html file
   const clientsFolder = path.join(context.basePath, constants.CLIENTS_DIRECTORY);
 

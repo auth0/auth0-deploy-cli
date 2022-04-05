@@ -1,15 +1,16 @@
-import { YAMLHandler, Context } from '.'
+import { YAMLHandler } from '.'
+import YAMLContext from '..'
 
 type ParsedMigrations = {
   migrations: unknown[]
 }
 
-async function parse(context: Context): Promise<ParsedMigrations> {
+async function parse(context: YAMLContext): Promise<ParsedMigrations> {
   const { migrations } = context.assets;
   return { migrations };
 }
 
-async function dump(context: Context): Promise<ParsedMigrations> {
+async function dump(context: YAMLContext): Promise<ParsedMigrations> {
   const { migrations } = context.assets;
 
   return { migrations: migrations || {} };

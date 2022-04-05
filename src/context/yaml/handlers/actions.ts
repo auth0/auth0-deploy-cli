@@ -4,22 +4,25 @@ import fs from 'fs-extra';
 import { constants } from '../../../tools';
 import { sanitize } from '../../../utils';
 import log from '../../../logger';
-import { YAMLHandler, Context } from '.'
+import { YAMLHandler } from '.'
+import YAMLContext from '..'
 
 type ParsedActions = {
   actions: unknown[] | undefined
-} | []
+}
 
 type Secret = { name: string, value: string }
 
-function parseCode(context: Context, code: string) {
+function parseCode(context: YAMLContext, code: string) {
   if (code) {
+    //@ts-ignore TODO: understand why two arguments are passed when context.loadFile only accepts one
     return context.loadFile(code, constants.ACTIONS_DIRECTORY);
   }
 }
 
-async function parse(context): Promise<ParsedActions> {
+async function parse(context: YAMLContext): Promise<ParsedActions> {
   // Load the script file for each action
+  //@ts-ignore TODO: understand if empty array is intentionally being returned
   if (!context.assets.actions) return [];
   const actions = {
     actions: [
@@ -61,14 +64,15 @@ function mapActionCode(basePath: string, action: { code: string, name: string })
   return `./${constants.ACTIONS_DIRECTORY}/${actionName}/code.js`;
 }
 
-async function dump(context: Context): Promise<ParsedActions> {
+async function dump(context: YAMLContext): Promise<ParsedActions> {
   const { actions } = context.assets;
-  //@ts-ignore but need to investigate why returning void here when other handlers do not
+  //@ts-ignore TODO: need to investigate why returning void here when other handlers do not
   if (!actions) return;// Nothing to do
   return {
     actions: actions.map((action) => ({
       name: action.name,
       deployed: action.deployed || action.all_changes_deployed,
+      //@ts-ignore because Action resource needs to be typed more accurately
       code: mapActionCode(context.basePath, action),
       runtime: action.runtime,
       dependencies: action.dependencies || [],

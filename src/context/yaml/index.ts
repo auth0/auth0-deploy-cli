@@ -7,49 +7,43 @@ import log from '../../logger';
 import {
   isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter
 } from '../../utils';
-import handlers from './handlers';
+import handlers, { YAMLHandler } from './handlers';
 import cleanAssets from '../../readonly';
+import { Assets, Config, Auth0APIClient, AssetTypes } from '../../types'
 
-
-type Config = { [key: string]: any }// TODO: replace with a more canonical representation of the Config type 
-type ManagementAPIClient = unknown// TODO: replace with a more canonical representation of the ManagementAPIClient type 
 type KeywordMappings = { [key: string]: (string | number)[] | string | number }
 
-export default class {
+export default class YAMLContext {
   basePath: string;
   configFile: string;
   config: Config;
   mappings: KeywordMappings;
-  mgmtClient: ManagementAPIClient;
-  assets: {
-    exclude: {
-      [key: string]: string[]
-    }
-  }
+  mgmtClient: Auth0APIClient;
+  assets: Assets
 
-  constructor(config, mgmtClient) {
+  constructor(config: Config, mgmtClient) {
     this.configFile = config.AUTH0_INPUT_FILE;
     this.config = config;
-    this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS;
+    this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {};
     this.mgmtClient = mgmtClient;
 
+    //@ts-ignore because the assets property gets filled out throughout 
+    this.assets = {}
     // Get excluded rules
-    this.assets = {
-      exclude: {
-        rules: config.AUTH0_EXCLUDED_RULES || [],
-        clients: config.AUTH0_EXCLUDED_CLIENTS || [],
-        databases: config.AUTH0_EXCLUDED_DATABASES || [],
-        connections: config.AUTH0_EXCLUDED_CONNECTIONS || [],
-        resourceServers: config.AUTH0_EXCLUDED_RESOURCE_SERVERS || [],
-        defaults: config.AUTH0_EXCLUDED_DEFAULTS || []
-      }
+    this.assets.exclude = {
+      rules: config.AUTH0_EXCLUDED_RULES || [],
+      clients: config.AUTH0_EXCLUDED_CLIENTS || [],
+      databases: config.AUTH0_EXCLUDED_DATABASES || [],
+      connections: config.AUTH0_EXCLUDED_CONNECTIONS || [],
+      resourceServers: config.AUTH0_EXCLUDED_RESOURCE_SERVERS || [],
+      defaults: config.AUTH0_EXCLUDED_DEFAULTS || []
     };
 
-    this.basePath = config.AUTH0_BASE_PATH;
-    if (!this.basePath) {
+    this.basePath = (() => {
+      if (!!config.AUTH0_BASE_PATH) return config.AUTH0_BASE_PATH;
       //@ts-ignore because this looks to be a bug, but do not want to introduce regression; more investigation needed
-      this.basePath = (typeof configFile === 'object') ? process.cwd() : path.dirname(this.configFile);
-    }
+      return (typeof configFile === 'object') ? process.cwd() : path.dirname(this.configFile);
+    })()
   }
 
   loadFile(f) {
@@ -107,7 +101,10 @@ export default class {
       throw new Error(`Problem loading tenant data from Auth0 ${err}${extraMessage}`);
     }
 
-    await Promise.all(Object.entries(handlers).map(async ([name, handler]) => {
+    await Promise.all(Object.entries(handlers).filter(([handlerName]: [AssetTypes, YAMLHandler<any>]) => {
+      const excludedAssetTypes = this.config.AUTH0_EXCLUDED || []
+      return !excludedAssetTypes.includes(handlerName)
+    }).map(async ([name, handler]) => {
       try {
         const data = await handler.dump(this);
         if (data) {

@@ -1,17 +1,18 @@
-import { YAMLHandler, Context } from '.'
+import { YAMLHandler } from '.'
+import YAMLContext from '..'
 
 type ParsedRoles = {
   roles: unknown[]
 }
 
-async function parse(context: Context): Promise<ParsedRoles> {
+async function parse(context: YAMLContext): Promise<ParsedRoles> {
   // nothing to do, set default empty
   return {
     roles: context.assets.roles
   };
 }
 
-async function dump(context: Context): Promise<ParsedRoles> {
+async function dump(context: YAMLContext): Promise<ParsedRoles> {
   // remove empty descriptions
   return {
     roles: [

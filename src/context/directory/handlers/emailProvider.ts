@@ -7,12 +7,13 @@ import {
 } from '../../../utils';
 import { emailProviderDefaults } from '../../defaults';
 import { DirectoryHandler } from '.'
+import DirectoryContext from '..';
 
 type ParsedEmailProvider = {
   emailProvider: unknown
 } | {}
 
-function parse(context): ParsedEmailProvider {
+function parse(context: DirectoryContext): ParsedEmailProvider {
   const emailsFolder = path.join(context.filePath, constants.EMAIL_TEMPLATES_DIRECTORY);
   if (!existsMustBeDir(emailsFolder)) return {}; // Skip
 
@@ -27,12 +28,12 @@ function parse(context): ParsedEmailProvider {
   return {};
 }
 
-async function dump(context): Promise<void> {
+async function dump(context: DirectoryContext): Promise<void> {
   let { emailProvider } = context.assets;
 
   if (!emailProvider) return; // Skip, nothing to dump
 
-  const excludedDefaults = context.assets.exclude.defaults || [];
+  const excludedDefaults = context.assets.exclude?.defaults || [];
   if (!excludedDefaults.includes('emailProvider')) {
     // Add placeholder for credentials as they cannot be exported
     emailProvider = emailProviderDefaults(emailProvider);

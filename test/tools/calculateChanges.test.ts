@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { calculateChanges, processChangedObjectFields } from '../../src/tools/calculateChanges';
 import DefaultHandler from '../../src/tools/auth0/handlers/default';
-import configFactory from '../../src/configFactory';
+import { configFactory } from '../../src/configFactory';
 
 describe('#utils calcChanges', () => {
     class MockHandler extends DefaultHandler {
@@ -9,10 +9,12 @@ describe('#utils calcChanges', () => {
             const config = configFactory();
             // eslint-disable-next-line no-restricted-syntax
             for (const key of Object.keys(settings)) {
+                //@ts-ignore
                 config.setValue(key, settings[key]);
             }
 
             super({
+                //@ts-ignore
                 config,
                 type: 'mock'
             });

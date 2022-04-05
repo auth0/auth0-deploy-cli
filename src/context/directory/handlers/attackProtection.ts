@@ -3,6 +3,7 @@ import path from 'path';
 import { constants } from '../../../tools';
 import { dumpJSON, existsMustBeDir, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.'
+import DirectoryContext from '..';
 
 type ParsedAttackProtection = {
   attackProtection: {
@@ -29,7 +30,7 @@ function attackProtectionFiles(filePath: string): {
   };
 }
 
-function parse(context): ParsedAttackProtection {
+function parse(context: DirectoryContext): ParsedAttackProtection {
   const files = attackProtectionFiles(context.filePath);
 
   if (!existsMustBeDir(files.directory)) {
@@ -51,7 +52,7 @@ function parse(context): ParsedAttackProtection {
   };
 }
 
-async function dump(context): Promise<void> {
+async function dump(context: DirectoryContext): Promise<void> {
   const { attackProtection } = context.assets;
 
   const files = attackProtectionFiles(context.filePath);

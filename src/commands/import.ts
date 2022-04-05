@@ -1,8 +1,9 @@
 import nconf from 'nconf';
-import configFactory from '../configFactory';
+import { configFactory } from '../configFactory';
 import { deploy as toolsDeploy } from '../tools';
 import log from '../logger';
-import setupContext from '../context';
+import { setupContext } from '../context';
+import { Config } from '../types'
 
 type ImportParams = {
   input_file: string,
@@ -10,12 +11,10 @@ type ImportParams = {
   config_file: string,
   env: boolean,
   secret: string,
-  config: {
-    AUTH0_CLIENT_SECRET: string
-  },
+  config?: Partial<Config>,
 }
 
-export default async function importCMD(params:ImportParams) {
+export default async function importCMD(params: ImportParams) {
   const {
     input_file: inputFile,
     base_path: basePath,
@@ -25,7 +24,7 @@ export default async function importCMD(params:ImportParams) {
     secret: clientSecret
   } = params;
 
-  if(shouldInheritEnv){
+  if (shouldInheritEnv) {
     nconf.env().use('memory');
 
     const mappings = nconf.get('AUTH0_KEYWORD_REPLACE_MAPPINGS') || {};
@@ -39,7 +38,6 @@ export default async function importCMD(params:ImportParams) {
   const overrides = {
     AUTH0_INPUT_FILE: inputFile,
     AUTH0_BASE_PATH: basePath,
-    AUTH0_CONFIG_FILE: configFile,
     AUTH0_KEYWORD_REPLACE_MAPPINGS: {},
     ...configObj || {}
   };

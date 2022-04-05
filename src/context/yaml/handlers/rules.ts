@@ -4,13 +4,14 @@ import fs from 'fs-extra';
 import { sanitize } from '../../../utils';
 import log from '../../../logger';
 
-import { YAMLHandler, Context } from '.'
+import { YAMLHandler } from '.'
+import YAMLContext from '..'
 
 type ParsedRules = {
   rules: unknown[]
 } | {}
 
-async function parse(context: Context): Promise<ParsedRules> {
+async function parse(context: YAMLContext): Promise<ParsedRules> {
   // Load the script file for each rule
   if (!context.assets.rules) return {};
 
@@ -24,7 +25,7 @@ async function parse(context: Context): Promise<ParsedRules> {
   };
 }
 
-async function dump(context: Context): Promise<ParsedRules> {
+async function dump(context: YAMLContext): Promise<ParsedRules> {
   let rules = [ ...context.assets.rules || [] ];
 
   if (rules.length > 0) {

@@ -6,13 +6,14 @@ import log from '../../../logger';
 import {
   isFile, sanitize, ensureProp, convertClientIdToName, mapClientID2NameSorted
 } from '../../../utils';
-import { YAMLHandler, Context } from '.'
+import { YAMLHandler } from '.'
+import YAMLContext from '..'
 
 type ParsedConnections = {
   connections: unknown[]
 }
 
-async function parse(context: Context): Promise<ParsedConnections> {
+async function parse(context: YAMLContext): Promise<ParsedConnections> {
   // Load the HTML file for email connections
 
   const { connections } = context.assets;
@@ -59,7 +60,7 @@ const getFormattedOptions = (connection, clients) => {
   }
 };
 
-async function dump(context: Context): Promise<ParsedConnections | {}> {
+async function dump(context: YAMLContext): Promise<ParsedConnections | {}> {
   const { connections } = context.assets;
 
   // Nothing to do
