@@ -1,6 +1,6 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
-import { Asset, Assets } from '../../../types'
+import { Asset, Assets } from '../../../types';
 
 export const schema = {
   type: 'object',
@@ -9,11 +9,11 @@ export const schema = {
       type: 'array',
       items: {
         type: 'string',
-        enum: constants.GUARDIAN_PHONE_MESSAGE_TYPES
-      }
-    }
+        enum: constants.GUARDIAN_PHONE_MESSAGE_TYPES,
+      },
+    },
   },
-  additionalProperties: false
+  additionalProperties: false,
 };
 
 const isFeatureUnavailableError = (err): boolean => {
@@ -21,11 +21,13 @@ const isFeatureUnavailableError = (err): boolean => {
     // Older Management API version where the endpoint is not available.
     return true;
   }
-  if (err.statusCode === 403
-    && err.originalError
-    && err.originalError.response
-    && err.originalError.response.body
-    && err.originalError.response.body.errorCode === 'voice_mfa_not_allowed') {
+  if (
+    err.statusCode === 403 &&
+    err.originalError &&
+    err.originalError.response &&
+    err.originalError.response.body &&
+    err.originalError.response.body.errorCode === 'voice_mfa_not_allowed'
+  ) {
     // Recent Management API version, but with feature explicitly disabled.
     return true;
   }
@@ -33,18 +35,21 @@ const isFeatureUnavailableError = (err): boolean => {
 };
 
 export default class GuardianPhoneMessageTypesHandler extends DefaultHandler {
-  existing: Asset[]
+  existing: Asset[];
 
   constructor(options: DefaultHandler) {
     super({
       ...options,
-      type: 'guardianPhoneFactorMessageTypes'
+      type: 'guardianPhoneFactorMessageTypes',
     });
   }
 
   async getType(): Promise<Asset[] | {}> {
     // in case client version does not support the operation
-    if (!this.client.guardian || typeof this.client.guardian.getPhoneFactorMessageTypes !== 'function') {
+    if (
+      !this.client.guardian ||
+      typeof this.client.guardian.getPhoneFactorMessageTypes !== 'function'
+    ) {
       return {};
     }
 

@@ -5,9 +5,9 @@ import DirectoryContext from './directory';
 
 import { isDirectory } from '../utils';
 import log from '../logger';
-import { Config } from '../types'
+import { Config } from '../types';
 
-const { version: packageVersion } = require('../../package.json')
+const { version: packageVersion } = require('../../package.json');
 
 const nonPrimitiveProps: (keyof Config)[] = [
   'AUTH0_KEYWORD_REPLACE_MAPPINGS',
@@ -19,12 +19,12 @@ const nonPrimitiveProps: (keyof Config)[] = [
   'AUTH0_EXCLUDED_DEFAULTS',
   'AUTH0_EXCLUDED',
   'EXCLUDED_PROPS',
-  'INCLUDED_PROPS'
+  'INCLUDED_PROPS',
 ];
 
 export const setupContext = async (config: Config): Promise<DirectoryContext | YAMLContext> => {
   // Validate config
-  const missingParams: ("AUTH0_DOMAIN" | "AUTH0_CLIENT_ID" | "AUTH0_CLIENT_SECRET")[] = [];
+  const missingParams: ('AUTH0_DOMAIN' | 'AUTH0_CLIENT_ID' | 'AUTH0_CLIENT_SECRET')[] = [];
 
   if (!config.AUTH0_DOMAIN) missingParams.push('AUTH0_DOMAIN');
   if (!config.AUTH0_ACCESS_TOKEN) {
@@ -33,7 +33,11 @@ export const setupContext = async (config: Config): Promise<DirectoryContext | Y
   }
 
   if (missingParams.length > 0) {
-    throw new Error(`The following parameters were missing. Please add them to your config.json or as an environment variable. ${JSON.stringify(missingParams)}`);
+    throw new Error(
+      `The following parameters were missing. Please add them to your config.json or as an environment variable. ${JSON.stringify(
+        missingParams
+      )}`
+    );
   }
 
   const accessToken = await (async (): Promise<string> => {
@@ -42,22 +46,24 @@ export const setupContext = async (config: Config): Promise<DirectoryContext | Y
     const authClient = new AuthenticationClient({
       domain: config.AUTH0_DOMAIN,
       clientId: config.AUTH0_CLIENT_ID,
-      clientSecret: config.AUTH0_CLIENT_SECRET
+      clientSecret: config.AUTH0_CLIENT_SECRET,
     });
 
     const clientCredentials = await authClient.clientCredentialsGrant({
-      audience: config.AUTH0_AUDIENCE ? config.AUTH0_AUDIENCE : `https://${config.AUTH0_DOMAIN}/api/v2/`
+      audience: config.AUTH0_AUDIENCE
+        ? config.AUTH0_AUDIENCE
+        : `https://${config.AUTH0_DOMAIN}/api/v2/`,
     });
     return clientCredentials.access_token;
-  })()
+  })();
 
   const mgmtClient = new ManagementClient({
     domain: config.AUTH0_DOMAIN,
     token: accessToken,
     retry: { maxRetries: config.AUTH0_API_MAX_RETRIES || 10, enabled: true },
     headers: {
-      'User-agent': `deploy-cli/${packageVersion} (node.js/${process.version.replace('v', '')})`
-    }
+      'User-agent': `deploy-cli/${packageVersion} (node.js/${process.version.replace('v', '')})`,
+    },
   });
 
   const inputFile = config.AUTH0_INPUT_FILE;
@@ -95,5 +101,7 @@ export const setupContext = async (config: Config): Promise<DirectoryContext | Y
     return new YAMLContext(config, mgmtClient);
   }
 
-  throw new Error(`Unable to determine context processor to load for file ${inputFile}, does it exist? `);
-}
+  throw new Error(
+    `Unable to determine context processor to load for file ${inputFile}, does it exist? `
+  );
+};

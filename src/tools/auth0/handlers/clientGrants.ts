@@ -13,15 +13,14 @@ export const schema = {
       scope: {
         type: 'array',
         items: { type: 'string' },
-        uniqueItems: true
-      }
+        uniqueItems: true,
+      },
     },
-    required: ['client_id', 'scope', 'audience']
-  }
+    required: ['client_id', 'scope', 'audience'],
+  },
 };
 
 export default class ClientGrantsHandler extends DefaultHandler {
-
   existing: Asset[] | null;
 
   constructor(config: DefaultAPIHandler) {
@@ -31,7 +30,7 @@ export default class ClientGrantsHandler extends DefaultHandler {
       id: 'id',
       //@ts-ignore because not sure why two-dimensional array passed in
       identifiers: ['id', ['client_id', 'audience']],
-      stripUpdateFields: ['audience', 'client_id']
+      stripUpdateFields: ['audience', 'client_id'],
     });
   }
 
@@ -77,13 +76,18 @@ export default class ClientGrantsHandler extends DefaultHandler {
     // Always filter out the client we are using to access Auth0 Management API
     const currentClient = this.config('AUTH0_CLIENT_ID');
 
-    const {
-      del, update, create, conflicts
-    } = await this.calcChanges({ ...assets, clientGrants: formatted });
+    const { del, update, create, conflicts } = await this.calcChanges({
+      ...assets,
+      clientGrants: formatted,
+    });
 
     const filterGrants = (list: { client_id: string }[]) => {
       if (excludedClients.length) {
-        return list.filter((item) => item.client_id !== currentClient && ![...excludedClientsByNames, ...excludedClients].includes(item.client_id));
+        return list.filter(
+          (item) =>
+            item.client_id !== currentClient &&
+            ![...excludedClientsByNames, ...excludedClients].includes(item.client_id)
+        );
       }
 
       return list.filter((item) => item.client_id !== currentClient);
@@ -97,11 +101,11 @@ export default class ClientGrantsHandler extends DefaultHandler {
       //@ts-ignore because this expects `client_id` and that's not yet typed on Asset
       create: filterGrants(create),
       //@ts-ignore because this expects `client_id` and that's not yet typed on Asset
-      conflicts: filterGrants(conflicts)
+      conflicts: filterGrants(conflicts),
     };
 
     await super.processChanges(assets, {
-      ...changes
+      ...changes,
     });
   }
 }

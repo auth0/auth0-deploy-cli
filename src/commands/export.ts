@@ -5,8 +5,8 @@ import mkdirp from 'mkdirp';
 import log from '../logger';
 import { isDirectory } from '../utils';
 import { setupContext } from '../context/index';
-import { Config } from '../types'
-import { ExportParams } from '../args'
+import { Config } from '../types';
+import { ExportParams } from '../args';
 
 export default async function exportCMD(params: ExportParams) {
   const {
@@ -30,7 +30,7 @@ export default async function exportCMD(params: ExportParams) {
   const overrides: Partial<Config> = {
     AUTH0_INPUT_FILE: outputFolder,
     AUTH0_BASE_PATH: basePath,
-    ...configObj || {}
+    ...(configObj || {}),
   };
 
   // Prepare configuration by initializing nconf, then passing that as the provider to the config object

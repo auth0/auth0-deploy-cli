@@ -7,15 +7,15 @@ describe('#prompts handler', () => {
       const auth0 = {
         prompts: {
           getSettings: () => ({
-            universal_login_experience: 'new'
-          })
-        }
+            universal_login_experience: 'new',
+          }),
+        },
       };
 
       const handler = new prompts.default({ client: auth0 });
       const data = await handler.getType();
       expect(data).to.deep.equal({
-        universal_login_experience: 'new'
+        universal_login_experience: 'new',
       });
     });
 
@@ -26,16 +26,14 @@ describe('#prompts handler', () => {
             expect(data).to.be.an('object');
             expect(data.universal_login_experience).to.equal('new');
             return Promise.resolve(data);
-          }
-        }
+          },
+        },
       };
 
       const handler = new prompts.default({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [
-        { prompts: { universal_login_experience: 'new' } }
-      ]);
+      await stageFn.apply(handler, [{ prompts: { universal_login_experience: 'new' } }]);
     });
   });
 });

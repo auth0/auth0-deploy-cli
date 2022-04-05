@@ -1,18 +1,18 @@
 import path from 'path';
-import {
-  existsMustBeDir, isFile, dumpJSON, loadJSON, clearTenantFlags
-} from '../../../utils';
-import { sessionDurationsToMinutes } from '../../../sessionDurationsToMinutes'
-import { DirectoryHandler } from '.'
-import DirectoryContext from '..'
+import { existsMustBeDir, isFile, dumpJSON, loadJSON, clearTenantFlags } from '../../../utils';
+import { sessionDurationsToMinutes } from '../../../sessionDurationsToMinutes';
+import { DirectoryHandler } from '.';
+import DirectoryContext from '..';
 
-type ParsedTenant = {
-  tenant: {
-    session_lifetime: number,
-    idle_session_lifetime: number,
-    [key: string]: unknown,
-  }
-} | {}
+type ParsedTenant =
+  | {
+      tenant: {
+        session_lifetime: number;
+        idle_session_lifetime: number;
+        [key: string]: unknown;
+      };
+    }
+  | {};
 
 function parse(context: DirectoryContext): ParsedTenant {
   const baseFolder = path.join(context.filePath);
@@ -27,19 +27,19 @@ function parse(context: DirectoryContext): ParsedTenant {
       idle_session_lifetime,
       ...tenant
     }: {
-      session_lifetime?: number
-      idle_session_lifetime?: number,
-      [key: string]: any
+      session_lifetime?: number;
+      idle_session_lifetime?: number;
+      [key: string]: any;
     } = loadJSON(tenantFile, context.mappings);
 
     clearTenantFlags(tenant);
 
-    const sessionDurations = sessionDurationsToMinutes({ session_lifetime, idle_session_lifetime })
+    const sessionDurations = sessionDurationsToMinutes({ session_lifetime, idle_session_lifetime });
 
     return {
       tenant: {
         ...tenant,
-        ...sessionDurations
+        ...sessionDurations,
       },
     };
   }
@@ -56,12 +56,12 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   const tenantFile = path.join(context.filePath, 'tenant.json');
   dumpJSON(tenantFile, tenant);
-  return
+  return;
 }
 
 const tenantHandler: DirectoryHandler<ParsedTenant> = {
   parse,
   dump,
-}
+};
 
 export default tenantHandler;

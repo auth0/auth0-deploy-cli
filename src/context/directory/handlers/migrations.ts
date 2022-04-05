@@ -1,13 +1,13 @@
 import path from 'path';
-import {
-  existsMustBeDir, isFile, dumpJSON, loadJSON
-} from '../../../utils';
-import { DirectoryHandler } from '.'
-import DirectoryContext from '..'
+import { existsMustBeDir, isFile, dumpJSON, loadJSON } from '../../../utils';
+import { DirectoryHandler } from '.';
+import DirectoryContext from '..';
 
-type ParsedMigrations = {
-  migrations: unknown[]
-} | {}
+type ParsedMigrations =
+  | {
+      migrations: unknown[];
+    }
+  | {};
 
 function parse(context: DirectoryContext): ParsedMigrations {
   const baseFolder = path.join(context.filePath);
@@ -23,7 +23,7 @@ function parse(context: DirectoryContext): ParsedMigrations {
   return { migrations };
 }
 
-async function dump(context: DirectoryContext): Promise<void>{
+async function dump(context: DirectoryContext): Promise<void> {
   const { migrations } = context.assets;
 
   if (!migrations || Object.keys(migrations).length === 0) return; // Skip, nothing to dump
@@ -35,6 +35,6 @@ async function dump(context: DirectoryContext): Promise<void>{
 const migrationsHandler: DirectoryHandler<ParsedMigrations> = {
   parse,
   dump,
-}
+};
 
 export default migrationsHandler;

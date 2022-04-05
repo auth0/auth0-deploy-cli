@@ -25,8 +25,8 @@ describe('#YAML context guardian factors templates provider', () => {
       {
         enrollment_message: 'test message {{code}}',
         name: 'sms',
-        verification_message: '{{code}} is your verification code for {{tenant.friendly_name}}'
-      }
+        verification_message: '{{code}} is your verification code for {{tenant.friendly_name}}',
+      },
     ];
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { ENV: 'test' } };
@@ -41,8 +41,8 @@ describe('#YAML context guardian factors templates provider', () => {
       {
         enrollment_message: 'test message {{code}}',
         name: 'sms',
-        verification_message: '{{code}} is your verification code for {{tenant.friendly_name}}'
-      }
+        verification_message: '{{code}} is your verification code for {{tenant.friendly_name}}',
+      },
     ];
 
     const dumped = await handler.dump(context);
@@ -51,9 +51,9 @@ describe('#YAML context guardian factors templates provider', () => {
         {
           enrollment_message: 'test message {{code}}',
           name: 'sms',
-          verification_message: '{{code}} is your verification code for {{tenant.friendly_name}}'
-        }
-      ]
+          verification_message: '{{code}} is your verification code for {{tenant.friendly_name}}',
+        },
+      ],
     });
   });
 });

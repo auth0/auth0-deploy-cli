@@ -7,29 +7,29 @@ import { constants } from '../../../src/tools';
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/hooks';
 import { loadJSON } from '../../../src/utils';
-import {
-  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
-} from '../../utils';
+import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
 
 const hooks = {
   'some-hook.js': 'function someHook() { var hello = @@hello@@; }',
-  'some-hook.json': '{ "name": "Some Hook", "enabled": true, "script": "some-hook.js", "triggerId": "credentials-exchange" }',
+  'some-hook.json':
+    '{ "name": "Some Hook", "enabled": true, "script": "some-hook.js", "triggerId": "credentials-exchange" }',
   'other-hook.js': 'function someHook() { var hello = @@hello@@; }',
-  'other-hook.json': '{ "name": "Other Hook", "script": "other-hook.js", "triggerId": "credentials-exchange" }'
+  'other-hook.json':
+    '{ "name": "Other Hook", "script": "other-hook.js", "triggerId": "credentials-exchange" }',
 };
 
 const hooksTarget = [
   {
     name: 'other-hook',
     script: 'function someHook() { var hello = "goodbye"; }',
-    triggerId: 'credentials-exchange'
+    triggerId: 'credentials-exchange',
   },
   {
     name: 'some-hook',
     enabled: true,
     script: 'function someHook() { var hello = "goodbye"; }',
-    triggerId: 'credentials-exchange'
-  }
+    triggerId: 'credentials-exchange',
+  },
 ];
 
 describe('#directory context hooks', () => {
@@ -38,7 +38,10 @@ describe('#directory context hooks', () => {
     const dir = path.join(repoDir);
     createDir(dir, { [constants.HOOKS_DIRECTORY]: hooks });
 
-    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { hello: 'goodbye' } };
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { hello: 'goodbye' },
+    };
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
@@ -50,7 +53,10 @@ describe('#directory context hooks', () => {
     const dir = path.join(repoDir);
     createDir(dir, { [constants.HOOKS_DIRECTORY]: hooks });
 
-    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { hello: 'goodbye' } };
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { hello: 'goodbye' },
+    };
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
@@ -81,13 +87,13 @@ describe('#directory context hooks', () => {
         id: '1',
         name: 'someHook',
         script: codeValidation,
-        triggerId: 'credentials-exchange'
+        triggerId: 'credentials-exchange',
       },
       {
         id: 'unnamedHook',
         script: codeValidation,
-        triggerId: 'credentials-exchange'
-      }
+        triggerId: 'credentials-exchange',
+      },
     ];
 
     await handler.dump(context);
@@ -98,16 +104,20 @@ describe('#directory context hooks', () => {
       id: '1',
       name: 'someHook',
       script: './someHook.js',
-      triggerId: 'credentials-exchange'
+      triggerId: 'credentials-exchange',
     });
     expect(loadJSON(path.join(hooksFolder, 'unnamedHook.json'))).to.deep.equal({
       id: 'unnamedHook',
       name: 'unnamedHook',
       script: './unnamedHook.js',
-      triggerId: 'credentials-exchange'
+      triggerId: 'credentials-exchange',
     });
-    expect(fs.readFileSync(path.join(hooksFolder, 'someHook.js'), 'utf8')).to.deep.equal(codeValidation);
-    expect(fs.readFileSync(path.join(hooksFolder, 'unnamedHook.js'), 'utf8')).to.deep.equal(codeValidation);
+    expect(fs.readFileSync(path.join(hooksFolder, 'someHook.js'), 'utf8')).to.deep.equal(
+      codeValidation
+    );
+    expect(fs.readFileSync(path.join(hooksFolder, 'unnamedHook.js'), 'utf8')).to.deep.equal(
+      codeValidation
+    );
   });
 
   it('should dump hooks sanitized', async () => {
@@ -120,8 +130,8 @@ describe('#directory context hooks', () => {
       {
         name: 'some/Hook',
         script: codeValidation,
-        triggerId: 'credentials-exchange'
-      }
+        triggerId: 'credentials-exchange',
+      },
     ];
 
     await handler.dump(context);
@@ -131,8 +141,10 @@ describe('#directory context hooks', () => {
     expect(loadJSON(path.join(hooksFolder, 'some-Hook.json'))).to.deep.equal({
       name: 'some/Hook',
       script: './some-Hook.js',
-      triggerId: 'credentials-exchange'
+      triggerId: 'credentials-exchange',
     });
-    expect(fs.readFileSync(path.join(hooksFolder, 'some-Hook.js'), 'utf8')).to.deep.equal(codeValidation);
+    expect(fs.readFileSync(path.join(hooksFolder, 'some-Hook.js'), 'utf8')).to.deep.equal(
+      codeValidation
+    );
   });
 });

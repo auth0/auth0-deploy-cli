@@ -3,15 +3,13 @@ import path from 'path';
 import { constants } from '../../../tools';
 
 import log from '../../../logger';
-import {
-  getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize
-} from '../../../utils';
-import { DirectoryHandler } from '.'
-import DirectoryContext from '..'
+import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
+import { DirectoryHandler } from '.';
+import DirectoryContext from '..';
 
 type ParsedRoles = {
-  roles: unknown[] | undefined
-}
+  roles: unknown[] | undefined;
+};
 
 function parse(context: DirectoryContext): ParsedRoles {
   const rolesFolder = path.join(context.filePath, constants.ROLES_DIRECTORY);
@@ -25,7 +23,7 @@ function parse(context: DirectoryContext): ParsedRoles {
   });
 
   return {
-    roles
+    roles,
   };
 }
 
@@ -54,6 +52,6 @@ async function dump(context: DirectoryContext) {
 const rolesHandler: DirectoryHandler<ParsedRoles> = {
   parse,
   dump,
-}
+};
 
 export default rolesHandler;

@@ -2,22 +2,20 @@ import fs from 'fs-extra';
 import path from 'path';
 
 import log from '../../../logger';
-import {
-  getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize
-} from '../../../utils';
-import { DirectoryHandler } from '.'
-import DirectoryContext from '..'
+import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
+import { DirectoryHandler } from '.';
+import DirectoryContext from '..';
 
 type ParsedOrganizations = {
-  organizations: unknown[] | undefined
-}
+  organizations: unknown[] | undefined;
+};
 
 function parse(context: DirectoryContext): ParsedOrganizations {
   const organizationsFolder = path.join(context.filePath, 'organizations');
 
   if (!existsMustBeDir(organizationsFolder)) return { organizations: undefined }; // Skip
 
-  const files = getFiles(organizationsFolder, [ '.json' ]);
+  const files = getFiles(organizationsFolder, ['.json']);
 
   const organizations = files.map((f) => {
     const org = { ...loadJSON(f, context.mappings) };
@@ -25,7 +23,7 @@ function parse(context: DirectoryContext): ParsedOrganizations {
   });
 
   return {
-    organizations
+    organizations,
   };
 }
 
@@ -49,7 +47,7 @@ async function dump(context: DirectoryContext): Promise<void> {
 
         const conn = {
           name,
-          ...c
+          ...c,
         };
 
         delete conn.connection_id;
@@ -66,6 +64,6 @@ async function dump(context: DirectoryContext): Promise<void> {
 const organizationsHandler: DirectoryHandler<ParsedOrganizations> = {
   parse,
   dump,
-}
+};
 
 export default organizationsHandler;

@@ -3,26 +3,32 @@ import path from 'path';
 import { constants } from '../../../tools';
 
 import {
-  getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize, convertClientIdToName
+  getFiles,
+  existsMustBeDir,
+  dumpJSON,
+  loadJSON,
+  sanitize,
+  convertClientIdToName,
 } from '../../../utils';
-import { DirectoryHandler } from '.'
+import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 
 type ParsedClientGrants = {
-  clientGrants: unknown[] | undefined
-}
+  clientGrants: unknown[] | undefined;
+};
 
 function parse(context: DirectoryContext): ParsedClientGrants {
   const grantsFolder = path.join(context.filePath, constants.CLIENTS_GRANTS_DIRECTORY);
   if (!existsMustBeDir(grantsFolder)) return { clientGrants: undefined }; // Skip
 
-  const foundFiles = getFiles(grantsFolder, [ '.json' ]);
+  const foundFiles = getFiles(grantsFolder, ['.json']);
 
-  const clientGrants = foundFiles.map((f) => loadJSON(f, context.mappings))
+  const clientGrants = foundFiles
+    .map((f) => loadJSON(f, context.mappings))
     .filter((p) => Object.keys(p).length > 0); // Filter out empty grants
 
   return {
-    clientGrants
+    clientGrants,
   };
 }
 
@@ -48,6 +54,6 @@ async function dump(context: DirectoryContext): Promise<void> {
 const clientGrantsHandler: DirectoryHandler<ParsedClientGrants> = {
   parse,
   dump,
-}
+};
 
 export default clientGrantsHandler;

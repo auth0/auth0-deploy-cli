@@ -10,10 +10,10 @@ const log = new winston.Logger({
       level: process.env.AUTH0_LOG || 'info',
       handleExceptions: true,
       json: false,
-      colorize: true
-    })
+      colorize: true,
+    }),
   ],
-  exitOnError: false
+  exitOnError: false,
 });
 
 export default log;

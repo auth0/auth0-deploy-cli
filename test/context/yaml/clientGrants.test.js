@@ -27,10 +27,8 @@ describe('#YAML context client grants', () => {
         audience: 'https://test.myapp.com/api/v1',
         client_id: 'my_client_id',
         name: 'My M2M',
-        scope: [
-          'update:account'
-        ]
-      }
+        scope: ['update:account'],
+      },
     ];
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { ENV: 'test' } };
@@ -42,7 +40,7 @@ describe('#YAML context client grants', () => {
   it('should dump client grants', async () => {
     const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
     const clientGrants = [
-      { audience: 'https://test.myapp.com/api/v1', client_id: 'My M2M', scope: [ 'update:account' ] }
+      { audience: 'https://test.myapp.com/api/v1', client_id: 'My M2M', scope: ['update:account'] },
     ];
     context.assets.clientGrants = clientGrants;
 

@@ -1,20 +1,25 @@
-import { YAMLHandler } from '.'
-import YAMLContext from '..'
+import { YAMLHandler } from '.';
+import YAMLContext from '..';
 
 type ParsedGuardianPhoneFactorSelectedProvider = {
-  guardianPhoneFactorSelectedProvider: unknown
-}
+  guardianPhoneFactorSelectedProvider: unknown;
+};
 
-async function parseAndDump(context: YAMLContext): Promise<ParsedGuardianPhoneFactorSelectedProvider> {
+async function parseAndDump(
+  context: YAMLContext
+): Promise<ParsedGuardianPhoneFactorSelectedProvider> {
   // nothing to do, set default empty
   return {
-    guardianPhoneFactorSelectedProvider: { ...context.assets.guardianPhoneFactorSelectedProvider || {} }
+    guardianPhoneFactorSelectedProvider: {
+      ...(context.assets.guardianPhoneFactorSelectedProvider || {}),
+    },
   };
 }
 
-const guardianPhoneFactorSelectedProviderHandler: YAMLHandler<ParsedGuardianPhoneFactorSelectedProvider> = {
-  parse: parseAndDump,
-  dump: parseAndDump,
-};
+const guardianPhoneFactorSelectedProviderHandler: YAMLHandler<ParsedGuardianPhoneFactorSelectedProvider> =
+  {
+    parse: parseAndDump,
+    dump: parseAndDump,
+  };
 
 export default guardianPhoneFactorSelectedProviderHandler;

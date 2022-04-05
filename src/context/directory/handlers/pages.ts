@@ -3,15 +3,13 @@ import path from 'path';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
 import log from '../../../logger';
-import {
-  getFiles, existsMustBeDir, dumpJSON, loadJSON
-} from '../../../utils';
-import { DirectoryHandler } from '.'
-import DirectoryContext from '..'
+import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
+import { DirectoryHandler } from '.';
+import DirectoryContext from '..';
 
 type ParsedPages = {
-  pages: unknown[] | undefined
-}
+  pages: unknown[] | undefined;
+};
 
 function parse(context: DirectoryContext): ParsedPages {
   const pagesFolder = path.join(context.filePath, constants.PAGES_DIRECTORY);
@@ -21,39 +19,39 @@ function parse(context: DirectoryContext): ParsedPages {
 
   const sorted: {
     [key: string]: {
-      meta?: string
-      html?: string
-    }
+      meta?: string;
+      html?: string;
+    };
   } = files.reduce((acc, file) => {
     const { ext, name } = path.parse(file);
     if (!acc[name]) acc[name] = {};
     if (ext === '.json') acc[name].meta = file;
     if (ext === '.html') acc[name].html = file;
-    return acc
+    return acc;
   }, {});
 
   const pages = Object.values(sorted).flatMap(({ meta, html }): unknown[] => {
     if (!meta) {
       log.warn(`Skipping pages file ${html} as missing the corresponding '.json' file`);
-      return []
+      return [];
     }
     if (!html) {
       log.warn(`Skipping pages file ${meta} as missing corresponding '.html' file`);
-      return []
+      return [];
     }
     return {
       ...loadJSON(meta, context.mappings),
-      html: loadFileAndReplaceKeywords(html, context.mappings)
+      html: loadFileAndReplaceKeywords(html, context.mappings),
     };
   });
 
   return {
-    pages
+    pages,
   };
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const pages = [...context.assets.pages || []];
+  const pages = [...(context.assets.pages || [])];
 
   if (!pages) return; // Skip, nothing to dump
 
@@ -81,6 +79,6 @@ async function dump(context: DirectoryContext): Promise<void> {
 const pagesHandler: DirectoryHandler<ParsedPages> = {
   parse,
   dump,
-}
+};
 
 export default pagesHandler;

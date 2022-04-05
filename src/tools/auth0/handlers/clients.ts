@@ -6,10 +6,10 @@ export const schema = {
   items: {
     type: 'object',
     properties: {
-      name: { type: 'string', minLength: 1, pattern: '[^<>]+' }
+      name: { type: 'string', minLength: 1, pattern: '[^<>]+' },
     },
-    required: ['name']
-  }
+    required: ['name'],
+  },
 };
 
 export default class ClientHandler extends DefaultAPIHandler {
@@ -24,8 +24,12 @@ export default class ClientHandler extends DefaultAPIHandler {
       objectFields: ['client_metadata'],
       stripUpdateFields: [
         // Fields not allowed during updates
-        'callback_url_template', 'signing_keys', 'global', 'tenant', 'jwt_configuration.secret_encoded'
-      ]
+        'callback_url_template',
+        'signing_keys',
+        'global',
+        'tenant',
+        'jwt_configuration.secret_encoded',
+      ],
     });
   }
 
@@ -41,9 +45,7 @@ export default class ClientHandler extends DefaultAPIHandler {
 
     const excludedClients = (assets.exclude && assets.exclude.clients) || [];
 
-    const {
-      del, update, create, conflicts
-    } = await this.calcChanges(assets);
+    const { del, update, create, conflicts } = await this.calcChanges(assets);
 
     // Always filter out the client we are using to access Auth0 Management API
     // As it could cause problems if it gets deleted or updated etc
@@ -51,7 +53,9 @@ export default class ClientHandler extends DefaultAPIHandler {
 
     const filterClients = (list) => {
       if (excludedClients.length) {
-        return list.filter((item) => item.client_id !== currentClient && !excludedClients.includes(item.name));
+        return list.filter(
+          (item) => item.client_id !== currentClient && !excludedClients.includes(item.name)
+        );
       }
 
       return list.filter((item) => item.client_id !== currentClient);
@@ -61,17 +65,21 @@ export default class ClientHandler extends DefaultAPIHandler {
       del: filterClients(del),
       update: filterClients(update),
       create: filterClients(create),
-      conflicts: filterClients(conflicts)
+      conflicts: filterClients(conflicts),
     };
 
     await super.processChanges(assets, {
-      ...changes
+      ...changes,
     });
   }
 
   async getType() {
     if (this.existing) return this.existing;
-    this.existing = await this.client.clients.getAll({ paginate: true, include_totals: true, is_global: false });
+    this.existing = await this.client.clients.getAll({
+      paginate: true,
+      include_totals: true,
+      is_global: false,
+    });
     return this.existing;
   }
 }

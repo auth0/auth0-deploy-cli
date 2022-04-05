@@ -1,4 +1,4 @@
-import winston from 'winston'
+import winston from 'winston';
 
 //@ts-ignore because emitErrs is still supported
 winston.emitErrs = true;
@@ -10,10 +10,10 @@ const logger = new winston.Logger({
       level: 'info',
       handleExceptions: true,
       json: false,
-      colorize: true
-    })
+      colorize: true,
+    }),
   ],
-  exitOnError: false
+  exitOnError: false,
 });
 
 export default logger;

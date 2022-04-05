@@ -11,21 +11,22 @@ import {
   loadJSON,
   sanitize,
   ensureProp,
-  mapClientID2NameSorted
+  mapClientID2NameSorted,
 } from '../../../utils';
-import { DirectoryHandler } from '.'
-import DirectoryContext from '..'
+import { DirectoryHandler } from '.';
+import DirectoryContext from '..';
 
 type ParsedConnections = {
-  connections: unknown[] | undefined
-}
+  connections: unknown[] | undefined;
+};
 
 function parse(context: DirectoryContext): ParsedConnections {
-  const connectionDirectory = context.config.AUTH0_CONNECTIONS_DIRECTORY || constants.CONNECTIONS_DIRECTORY;
+  const connectionDirectory =
+    context.config.AUTH0_CONNECTIONS_DIRECTORY || constants.CONNECTIONS_DIRECTORY;
   const connectionsFolder = path.join(context.filePath, connectionDirectory);
   if (!existsMustBeDir(connectionsFolder)) return { connections: undefined }; // Skip
 
-  const foundFiles = getFiles(connectionsFolder, [ '.json' ]);
+  const foundFiles = getFiles(connectionsFolder, ['.json']);
 
   const connections = foundFiles
     .map((f) => {
@@ -36,7 +37,10 @@ function parse(context: DirectoryContext): ParsedConnections {
         const htmlFileName = path.join(connectionsFolder, connection.options.email.body);
 
         if (isFile(htmlFileName)) {
-          connection.options.email.body = loadFileAndReplaceKeywords(htmlFileName, context.mappings);
+          connection.options.email.body = loadFileAndReplaceKeywords(
+            htmlFileName,
+            context.mappings
+          );
         }
       }
 
@@ -45,7 +49,7 @@ function parse(context: DirectoryContext): ParsedConnections {
     .filter((p) => Object.keys(p).length > 0); // Filter out empty connections
 
   return {
-    connections
+    connections,
   };
 }
 
@@ -61,7 +65,12 @@ async function dump(context: DirectoryContext): Promise<void> {
   connections.forEach((connection) => {
     const dumpedConnection = {
       ...connection,
-      ...(connection.enabled_clients && { enabled_clients: mapClientID2NameSorted(connection.enabled_clients, context.assets.clientsOrig) })
+      ...(connection.enabled_clients && {
+        enabled_clients: mapClientID2NameSorted(
+          connection.enabled_clients,
+          context.assets.clientsOrig
+        ),
+      }),
     };
 
     const connectionName = sanitize(dumpedConnection.name);
@@ -85,6 +94,6 @@ async function dump(context: DirectoryContext): Promise<void> {
 const connectionsHandler: DirectoryHandler<ParsedConnections> = {
   parse,
   dump,
-}
+};
 
 export default connectionsHandler;

@@ -33,7 +33,7 @@ describe('#YAML context guardian factors provider', () => {
       { enabled: false, name: 'push-notification' },
       { enabled: false, name: 'otp' },
       { enabled: false, name: 'email' },
-      { enabled: false, name: 'duo' }
+      { enabled: false, name: 'duo' },
     ];
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { ENV: 'test' } };
@@ -49,7 +49,7 @@ describe('#YAML context guardian factors provider', () => {
       { enabled: false, name: 'push-notification' },
       { enabled: false, name: 'otp' },
       { enabled: false, name: 'email' },
-      { enabled: false, name: 'duo' }
+      { enabled: false, name: 'duo' },
     ];
 
     const dumped = await handler.dump(context);
@@ -59,8 +59,8 @@ describe('#YAML context guardian factors provider', () => {
         { enabled: false, name: 'push-notification' },
         { enabled: false, name: 'otp' },
         { enabled: false, name: 'email' },
-        { enabled: false, name: 'duo' }
-      ]
+        { enabled: false, name: 'duo' },
+      ],
     });
   });
 });

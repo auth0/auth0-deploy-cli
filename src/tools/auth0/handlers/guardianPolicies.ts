@@ -1,6 +1,6 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
-import { Asset, Assets } from '../../../types'
+import { Asset, Assets } from '../../../types';
 
 export const schema = {
   type: 'object',
@@ -9,22 +9,22 @@ export const schema = {
       type: 'array',
       items: {
         type: 'string',
-        enum: constants.GUARDIAN_POLICIES
-      }
-    }
+        enum: constants.GUARDIAN_POLICIES,
+      },
+    },
   },
-  additionalProperties: false
+  additionalProperties: false,
 };
 
 export default class GuardianPoliciesHandler extends DefaultHandler {
   existing: {
-    policies: Asset[]
-  }
+    policies: Asset[];
+  };
 
   constructor(options) {
     super({
       ...options,
-      type: 'guardianPolicies'
+      type: 'guardianPolicies',
     });
   }
 

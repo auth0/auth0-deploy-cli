@@ -40,13 +40,15 @@ describe('#YAML context organizations', () => {
         branding: {
           colors: {
             primary: '#3678e2',
-            page_background: '#9c4949'
-          }
+            page_background: '#9c4949',
+          },
         },
-        connections: [ {
-          connection_id: 'con_123',
-          assign_membership_on_login: false
-        } ]
+        connections: [
+          {
+            connection_id: 'con_123',
+            assign_membership_on_login: false,
+          },
+        ],
       },
       {
         name: 'contoso',
@@ -54,14 +56,16 @@ describe('#YAML context organizations', () => {
         branding: {
           colors: {
             primary: '#3678e2',
-            page_background: '#9c4949'
-          }
+            page_background: '#9c4949',
+          },
         },
-        connections: [ {
-          connection_id: 'con_456',
-          assign_membership_on_login: true
-        } ]
-      }
+        connections: [
+          {
+            connection_id: 'con_456',
+            assign_membership_on_login: true,
+          },
+        ],
+      },
     ];
 
     const yamlFile = path.join(dir, 'organizations.yaml');
@@ -82,18 +86,20 @@ describe('#YAML context organizations', () => {
         branding: {
           colors: {
             primary: '#3678e2',
-            page_background: '#9c4949'
-          }
+            page_background: '#9c4949',
+          },
         },
-        connections: [ {
-          connection_id: 'con_123',
-          assign_membership_on_login: false,
-          connection: {
-            name: 'foo',
-            strategy: 'auth0'
-          }
-        } ]
-      }
+        connections: [
+          {
+            connection_id: 'con_123',
+            assign_membership_on_login: false,
+            connection: {
+              name: 'foo',
+              strategy: 'auth0',
+            },
+          },
+        ],
+      },
     ];
     context.assets.organizations = organizations;
 

@@ -29,8 +29,8 @@ describe('#YAML context guardian factor provider provider', () => {
         enabled: true,
         name: 'sms',
         provider: 'twilio',
-        sid: 'test'
-      }
+        sid: 'test',
+      },
     ];
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { ENV: 'test' } };
@@ -47,8 +47,8 @@ describe('#YAML context guardian factor provider provider', () => {
         enabled: true,
         name: 'sms',
         provider: 'twilio',
-        sid: 'test'
-      }
+        sid: 'test',
+      },
     ];
 
     const dumped = await handler.dump(context);
@@ -59,9 +59,9 @@ describe('#YAML context guardian factor provider provider', () => {
           enabled: true,
           name: 'sms',
           provider: 'twilio',
-          sid: 'test'
-        }
-      ]
+          sid: 'test',
+        },
+      ],
     });
   });
 });

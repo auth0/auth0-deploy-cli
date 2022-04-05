@@ -9,21 +9,21 @@ describe('#branding handler', () => {
       const auth0 = {
         branding: {
           getSettings: () => ({
-            logo_url: 'https://example.com/logo.png'
+            logo_url: 'https://example.com/logo.png',
           }),
           getUniversalLoginTemplate: () => ({
-            body: html
-          })
+            body: html,
+          }),
         },
         customDomains: {
-          getAll: () => [] // mock no custom domains
-        }
+          getAll: () => [], // mock no custom domains
+        },
       };
 
       const handler = new branding.default({ client: auth0 });
       const data = await handler.getType();
       expect(data).to.deep.equal({
-        logo_url: 'https://example.com/logo.png'
+        logo_url: 'https://example.com/logo.png',
       });
     });
 
@@ -31,17 +31,17 @@ describe('#branding handler', () => {
       const auth0 = {
         branding: {
           getSettings: () => ({
-            logo_url: 'https://example.com/logo.png'
+            logo_url: 'https://example.com/logo.png',
           }),
           getUniversalLoginTemplate: () => ({
-            body: html
-          })
+            body: html,
+          }),
         },
         customDomains: {
           getAll: () => [
-            {} // mock one custom domain.
-          ]
-        }
+            {}, // mock one custom domain.
+          ],
+        },
       };
 
       const handler = new branding.default({ client: auth0 });
@@ -51,9 +51,9 @@ describe('#branding handler', () => {
         templates: [
           {
             template: 'universal_login',
-            body: html
-          }
-        ]
+            body: html,
+          },
+        ],
       });
     });
 
@@ -61,25 +61,25 @@ describe('#branding handler', () => {
       const auth0 = {
         branding: {
           getSettings: () => ({
-            logo_url: 'https://example.com/logo.png'
+            logo_url: 'https://example.com/logo.png',
           }),
           getUniversalLoginTemplate: () => ({
-            body: html
-          })
+            body: html,
+          }),
         },
         customDomains: {
           getAll: () => {
             const err = new Error('FakeHttpError');
             err.statusCode = 403;
             return Promise.reject(err);
-          }
-        }
+          },
+        },
       };
 
       const handler = new branding.default({ client: auth0 });
       const data = await handler.getType();
       expect(data).to.deep.equal({
-        logo_url: 'https://example.com/logo.png'
+        logo_url: 'https://example.com/logo.png',
       });
     });
 
@@ -98,8 +98,8 @@ describe('#branding handler', () => {
           },
           setUniversalLoginTemplate: () => {
             done(new Error('setUniversalLoginTemplate should not have been called.'));
-          }
-        }
+          },
+        },
       };
 
       const handler = new branding.default({ client: auth0 });
@@ -108,9 +108,9 @@ describe('#branding handler', () => {
       stageFn.apply(handler, [
         {
           branding: {
-            logo_url: 'https://example.com/logo.png'
-          }
-        }
+            logo_url: 'https://example.com/logo.png',
+          },
+        },
       ]);
     });
 
@@ -134,8 +134,8 @@ describe('#branding handler', () => {
             } catch (err) {
               done(err);
             }
-          }
-        }
+          },
+        },
       };
 
       const handler = new branding.default({ client: auth0 });
@@ -148,11 +148,11 @@ describe('#branding handler', () => {
             templates: [
               {
                 template: 'universal_login',
-                body: html
-              }
-            ]
-          }
-        }
+                body: html,
+              },
+            ],
+          },
+        },
       ]);
     });
 
@@ -164,8 +164,8 @@ describe('#branding handler', () => {
           },
           setUniversalLoginTemplate: () => {
             throw new Error('setUniversalLoginTemplate should not have been called.');
-          }
-        }
+          },
+        },
       };
 
       const handler = new branding.default({ client: auth0 });
@@ -174,7 +174,7 @@ describe('#branding handler', () => {
       await stageFn.apply(handler, [
         {
           // don't include branding prop.
-        }
+        },
       ]);
     });
   });

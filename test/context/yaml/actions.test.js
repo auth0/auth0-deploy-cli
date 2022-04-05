@@ -11,7 +11,8 @@ describe('#YAML context actions', () => {
     const dir = path.join(testDataDir, 'yaml', 'action-one');
     cleanThenMkdir(dir);
 
-    const codeContext = '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log(@@replace@@); return {}; };';
+    const codeContext =
+      '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log(@@replace@@); return {}; };';
     const codeFile = path.join(dir, 'code.js');
     fs.writeFileSync(codeFile, codeContext);
 
@@ -42,19 +43,24 @@ describe('#YAML context actions', () => {
         supported_triggers: [
           {
             id: 'post-login',
-            version: 'v1'
-          }
+            version: 'v1',
+          },
         ],
-        dependencies: [ {
-          name: 'lodash',
-          version: '4.17.21'
-        } ],
+        dependencies: [
+          {
+            name: 'lodash',
+            version: '4.17.21',
+          },
+        ],
         secrets: [],
-        deployed: true
-      }
+        deployed: true,
+      },
     ];
 
-    const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { replace: 'test-action' } };
+    const config = {
+      AUTH0_INPUT_FILE: yamlFile,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { replace: 'test-action' },
+    };
     const context = new Context(config, mockMgmtClient());
     await context.load();
     expect(context.assets.actions).to.deep.equal(target);
@@ -63,8 +69,12 @@ describe('#YAML context actions', () => {
   it('should dump actions', async () => {
     const dir = path.join(testDataDir, 'yaml', 'actionsDump');
     cleanThenMkdir(dir);
-    const context = new Context({ AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') }, mockMgmtClient());
-    const codeValidation = '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log("test-action"); return {}; };';
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') },
+      mockMgmtClient()
+    );
+    const codeValidation =
+      '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log("test-action"); return {}; };';
 
     context.assets.actions = [
       {
@@ -75,18 +85,18 @@ describe('#YAML context actions', () => {
         dependencies: [
           {
             name: 'lodash',
-            version: '4.17.20'
-          }
+            version: '4.17.20',
+          },
         ],
         supported_triggers: [
           {
             id: 'post-login',
-            version: 'v1'
-          }
+            version: 'v1',
+          },
         ],
         secrets: [],
-        deployed: true
-      }
+        deployed: true,
+      },
     ];
 
     const dumped = await handler.dump(context);
@@ -100,22 +110,24 @@ describe('#YAML context actions', () => {
           dependencies: [
             {
               name: 'lodash',
-              version: '4.17.20'
-            }
+              version: '4.17.20',
+            },
           ],
           supported_triggers: [
             {
               id: 'post-login',
-              version: 'v1'
-            }
+              version: 'v1',
+            },
           ],
           secrets: [],
-          deployed: true
-        }
-      ]
+          deployed: true,
+        },
+      ],
     });
 
     const actionsFolder = path.join(dir, 'actions', 'action-one');
-    expect(fs.readFileSync(path.join(actionsFolder, 'code.js'), 'utf8')).to.deep.equal(codeValidation);
+    expect(fs.readFileSync(path.join(actionsFolder, 'code.js'), 'utf8')).to.deep.equal(
+      codeValidation
+    );
   });
 });

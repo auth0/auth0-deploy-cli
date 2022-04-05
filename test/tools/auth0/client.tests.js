@@ -8,23 +8,27 @@ describe('#schema validation tests', async () => {
 
     for (let i = 0; i < expectedNbClients; i++) {
       clients.push({
-        name: 'test-' + i + '-' + Math.round(Math.random() * 10000000000)
+        name: 'test-' + i + '-' + Math.round(Math.random() * 10000000000),
       });
     }
 
     const mock = {
       clients: {
-        getAll: async (args) => new Promise((resolve) => {
-          const localArgs = { ...args };
-          setTimeout(() => {
-            resolve({
-              start: localArgs.page * localArgs.per_page,
-              total: expectedNbClients,
-              clients: clients.slice(localArgs.page * localArgs.per_page, (localArgs.page + 1) * localArgs.per_page)
-            });
-          }, 10);
-        })
-      }
+        getAll: async (args) =>
+          new Promise((resolve) => {
+            const localArgs = { ...args };
+            setTimeout(() => {
+              resolve({
+                start: localArgs.page * localArgs.per_page,
+                total: expectedNbClients,
+                clients: clients.slice(
+                  localArgs.page * localArgs.per_page,
+                  (localArgs.page + 1) * localArgs.per_page
+                ),
+              });
+            }, 10);
+          }),
+      },
     };
 
     const pagedManager = client(mock);
@@ -40,20 +44,24 @@ describe('#schema validation tests', async () => {
 
     for (let i = 0; i < expectedNbItems; i++) {
       permissions.push({
-        name: 'test-' + i + '-' + Math.round(Math.random() * 10000000000)
+        name: 'test-' + i + '-' + Math.round(Math.random() * 10000000000),
       });
     }
 
     const mock = {
       roles: {
         permissions: {
-          getAll: async (localArgs) => Promise.resolve({
-            start: localArgs.page * localArgs.per_page,
-            total: expectedNbItems,
-            permissions: permissions.slice(localArgs.page * localArgs.per_page, (localArgs.page + 1) * localArgs.per_page)
-          })
-        }
-      }
+          getAll: async (localArgs) =>
+            Promise.resolve({
+              start: localArgs.page * localArgs.per_page,
+              total: expectedNbItems,
+              permissions: permissions.slice(
+                localArgs.page * localArgs.per_page,
+                (localArgs.page + 1) * localArgs.per_page
+              ),
+            }),
+        },
+      },
     };
 
     const pagedManager = client(mock);

@@ -8,7 +8,7 @@ export const schema = {
   items: {
     type: 'object',
     properties: {
-      strategy: { type: 'string', enum: [ 'auth0' ], default: 'auth0' },
+      strategy: { type: 'string', enum: ['auth0'], default: 'auth0' },
       name: { type: 'string' },
       options: {
         type: 'object',
@@ -16,14 +16,17 @@ export const schema = {
           customScripts: {
             type: 'object',
             properties: {
-              ...constants.DATABASE_SCRIPTS.reduce((o, script) => ({ ...o, [script]: { type: 'string' } }), {})
-            }
-          }
-        }
-      }
+              ...constants.DATABASE_SCRIPTS.reduce(
+                (o, script) => ({ ...o, [script]: { type: 'string' } }),
+                {}
+              ),
+            },
+          },
+        },
+      },
     },
-    required: [ 'name' ]
-  }
+    required: ['name'],
+  },
 };
 
 export default class DatabaseHandler extends DefaultAPIHandler {
@@ -31,7 +34,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     super({
       ...config,
       type: 'databases',
-      stripUpdateFields: [ 'strategy', 'name' ]
+      stripUpdateFields: ['strategy', 'name'],
     });
   }
 
@@ -39,12 +42,12 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     return super.objString({ name: db.name, id: db.id });
   }
 
-  getClientFN(fn: "create" | "delete" | "getAll" | "update"): Function {
+  getClientFN(fn: 'create' | 'delete' | 'getAll' | 'update'): Function {
     // Override this as a database is actually a connection but we are treating them as a different object
     // If we going to update database, we need to get current options first
     if (fn === 'update') {
-      return (params, payload) => this.client.connections.get(params)
-        .then((connection) => {
+      return (params, payload) =>
+        this.client.connections.get(params).then((connection) => {
           payload.options = { ...connection.options, ...payload.options };
           return this.client.connections.update(params, payload);
         });
@@ -55,7 +58,11 @@ export default class DatabaseHandler extends DefaultAPIHandler {
 
   async getType() {
     if (this.existing) return this.existing;
-    this.existing = this.client.connections.getAll({ strategy: 'auth0', paginate: true, include_totals: true });
+    this.existing = this.client.connections.getAll({
+      strategy: 'auth0',
+      paginate: true,
+      include_totals: true,
+    });
 
     return this.existing;
   }
@@ -64,21 +71,26 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     const { databases } = assets;
 
     // Do nothing if not set
-    if (!databases) return {
-      del: [],
-      create: [],
-      update: [],
-      conflicts: [],
-    };
+    if (!databases)
+      return {
+        del: [],
+        create: [],
+        update: [],
+        conflicts: [],
+      };
 
     // Convert enabled_clients by name to the id
     const clients = await this.client.clients.getAll({ paginate: true, include_totals: true });
-    const existingDatabasesConecctions = await this.client.connections.getAll({ strategy: 'auth0', paginate: true, include_totals: true });
+    const existingDatabasesConecctions = await this.client.connections.getAll({
+      strategy: 'auth0',
+      paginate: true,
+      include_totals: true,
+    });
     const formatted = databases.map((db) => {
       if (db.enabled_clients) {
         return {
           ...db,
-          enabled_clients: getEnabledClients(assets, db, existingDatabasesConecctions, clients)
+          enabled_clients: getEnabledClients(assets, db, existingDatabasesConecctions, clients),
         };
       }
 

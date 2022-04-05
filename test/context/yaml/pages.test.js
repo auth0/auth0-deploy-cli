@@ -9,10 +9,7 @@ import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 function createPagesDir(pagesDir, target) {
   cleanThenMkdir(pagesDir);
   Object.keys(target).forEach((scriptName) => {
-    fs.writeFileSync(
-      path.resolve(pagesDir, scriptName + '.html'),
-      target[scriptName].html
-    );
+    fs.writeFileSync(path.resolve(pagesDir, scriptName + '.html'), target[scriptName].html);
     if (target[scriptName].metadata) {
       fs.writeFileSync(
         path.resolve(pagesDir, scriptName + '.json'),
@@ -54,29 +51,32 @@ describe('#YAML context pages', () => {
     const target = [
       {
         html: htmlValidation,
-        name: 'login'
+        name: 'login',
       },
       {
         html: htmlValidation,
-        name: 'password_reset'
+        name: 'password_reset',
       },
       {
         enabled: false,
         html: htmlValidation,
-        name: 'guardian_multifactor'
+        name: 'guardian_multifactor',
       },
       {
         html: htmlValidation,
         name: 'error_page',
         url: errorPageUrl,
-        show_log_link: false
-      }
+        show_log_link: false,
+      },
     ];
     createPagesDir(dir, target);
     const yamlFile = path.join(dir, 'rule1.yaml');
     fs.writeFileSync(yamlFile, yaml);
 
-    const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { val1: 'env1', val2: 'env2' } };
+    const config = {
+      AUTH0_INPUT_FILE: yamlFile,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { val1: 'env1', val2: 'env2' },
+    };
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
@@ -86,7 +86,10 @@ describe('#YAML context pages', () => {
   it('should dump pages', async () => {
     const dir = path.join(testDataDir, 'yaml', 'pagesDump');
     cleanThenMkdir(dir);
-    const context = new Context({ AUTH0_INPUT_FILE: path.join(dir, 'tennat.yaml') }, mockMgmtClient());
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, 'tennat.yaml') },
+      mockMgmtClient()
+    );
     const htmlValidation = '<html>this is a env1 "env2"</html>';
     const errorPageUrl = 'https://example.com';
 
@@ -98,8 +101,8 @@ describe('#YAML context pages', () => {
         html: htmlValidation,
         name: 'error_page',
         url: errorPageUrl,
-        show_log_link: false
-      }
+        show_log_link: false,
+      },
     ];
 
     const dumped = await handler.dump(context);
@@ -112,30 +115,41 @@ describe('#YAML context pages', () => {
           html: './pages/error_page.html',
           name: 'error_page',
           url: errorPageUrl,
-          show_log_link: false
-        }
-      ]
+          show_log_link: false,
+        },
+      ],
     });
 
     const pagesFolder = path.join(dir, 'pages');
-    expect(fs.readFileSync(path.join(pagesFolder, 'login.html'), 'utf8')).to.deep.equal(htmlValidation);
-    expect(fs.readFileSync(path.join(pagesFolder, 'password_reset.html'), 'utf8')).to.deep.equal(htmlValidation);
-    expect(fs.readFileSync(path.join(pagesFolder, 'guardian_multifactor.html'), 'utf8')).to.deep.equal(htmlValidation);
-    expect(fs.readFileSync(path.join(pagesFolder, 'error_page.html'), 'utf8')).to.deep.equal(htmlValidation);
+    expect(fs.readFileSync(path.join(pagesFolder, 'login.html'), 'utf8')).to.deep.equal(
+      htmlValidation
+    );
+    expect(fs.readFileSync(path.join(pagesFolder, 'password_reset.html'), 'utf8')).to.deep.equal(
+      htmlValidation
+    );
+    expect(
+      fs.readFileSync(path.join(pagesFolder, 'guardian_multifactor.html'), 'utf8')
+    ).to.deep.equal(htmlValidation);
+    expect(fs.readFileSync(path.join(pagesFolder, 'error_page.html'), 'utf8')).to.deep.equal(
+      htmlValidation
+    );
   });
 
   it('should dump error_page with html undefined', async () => {
     const dir = path.join(testDataDir, 'yaml', 'pagesDump');
     cleanThenMkdir(dir);
-    const context = new Context({ AUTH0_INPUT_FILE: path.join(dir, 'tennat.yaml') }, mockMgmtClient());
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, 'tennat.yaml') },
+      mockMgmtClient()
+    );
     const errorPageUrl = 'https://example.com';
 
     context.assets.pages = [
       {
         name: 'error_page',
         url: errorPageUrl,
-        show_log_link: false
-      }
+        show_log_link: false,
+      },
     ];
 
     const dumped = await handler.dump(context);
@@ -144,9 +158,9 @@ describe('#YAML context pages', () => {
         {
           name: 'error_page',
           url: errorPageUrl,
-          show_log_link: false
-        }
-      ]
+          show_log_link: false,
+        },
+      ],
     });
 
     const pagesFolder = path.join(dir, 'pages');
@@ -156,7 +170,10 @@ describe('#YAML context pages', () => {
   it('should dump error_page with empty html', async () => {
     const dir = path.join(testDataDir, 'yaml', 'pagesDump');
     cleanThenMkdir(dir);
-    const context = new Context({ AUTH0_INPUT_FILE: path.join(dir, 'tennat.yaml') }, mockMgmtClient());
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, 'tennat.yaml') },
+      mockMgmtClient()
+    );
     const htmlValidation = '';
     const errorPageUrl = 'https://example.com';
 
@@ -165,8 +182,8 @@ describe('#YAML context pages', () => {
         html: htmlValidation,
         name: 'error_page',
         url: errorPageUrl,
-        show_log_link: false
-      }
+        show_log_link: false,
+      },
     ];
 
     const dumped = await handler.dump(context);
@@ -176,13 +193,15 @@ describe('#YAML context pages', () => {
           html: './pages/error_page.html',
           name: 'error_page',
           url: errorPageUrl,
-          show_log_link: false
-        }
-      ]
+          show_log_link: false,
+        },
+      ],
     });
 
     const pagesFolder = path.join(dir, 'pages');
-    expect(fs.readFileSync(path.join(pagesFolder, 'error_page.html'), 'utf8')).to.deep.equal(htmlValidation);
+    expect(fs.readFileSync(path.join(pagesFolder, 'error_page.html'), 'utf8')).to.deep.equal(
+      htmlValidation
+    );
   });
 
   it('should process error_pages without html field', async () => {
@@ -199,8 +218,8 @@ describe('#YAML context pages', () => {
       {
         name: 'error_page',
         url: errorPageUrl,
-        html: ''
-      }
+        html: '',
+      },
     ];
     createPagesDir(dir, target);
     const yamlFile = path.join(dir, 'rule1.yaml');

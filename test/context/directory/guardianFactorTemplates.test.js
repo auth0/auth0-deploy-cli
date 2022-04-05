@@ -3,9 +3,7 @@ import { expect } from 'chai';
 import { constants } from '../../../src/tools';
 
 import Context from '../../../src/context/directory';
-import {
-  testDataDir, createDir, mockMgmtClient, cleanThenMkdir
-} from '../../utils';
+import { testDataDir, createDir, mockMgmtClient, cleanThenMkdir } from '../../utils';
 import handler from '../../../src/context/directory/handlers/guardianFactorTemplates';
 import { loadJSON } from '../../../src/utils';
 
@@ -16,7 +14,7 @@ describe('#directory context guardian factors templates provider', () => {
         "enrollment_message": "test message {{code}}",
         "name": "sms",
         "verification_message": "{{code}} is your verification code for {{tenant.friendly_name}}"
-      }`
+      }`,
     };
 
     const folder = path.join(constants.GUARDIAN_DIRECTORY, constants.GUARDIAN_TEMPLATES_DIRECTORY);
@@ -31,8 +29,8 @@ describe('#directory context guardian factors templates provider', () => {
       {
         enrollment_message: 'test message {{code}}',
         name: 'sms',
-        verification_message: '{{code}} is your verification code for {{tenant.friendly_name}}'
-      }
+        verification_message: '{{code}} is your verification code for {{tenant.friendly_name}}',
+      },
     ]);
   });
 
@@ -45,16 +43,20 @@ describe('#directory context guardian factors templates provider', () => {
       {
         enrollment_message: 'test message {{code}}',
         name: 'sms',
-        verification_message: '{{code}} is your verification code for {{tenant.friendly_name}}'
-      }
+        verification_message: '{{code}} is your verification code for {{tenant.friendly_name}}',
+      },
     ];
 
     await handler.dump(context);
-    const factorTemplatesFolder = path.join(dir, constants.GUARDIAN_DIRECTORY, constants.GUARDIAN_TEMPLATES_DIRECTORY);
+    const factorTemplatesFolder = path.join(
+      dir,
+      constants.GUARDIAN_DIRECTORY,
+      constants.GUARDIAN_TEMPLATES_DIRECTORY
+    );
     expect(loadJSON(path.join(factorTemplatesFolder, 'sms.json'))).to.deep.equal({
       enrollment_message: 'test message {{code}}',
       name: 'sms',
-      verification_message: '{{code}} is your verification code for {{tenant.friendly_name}}'
+      verification_message: '{{code}} is your verification code for {{tenant.friendly_name}}',
     });
   });
 });

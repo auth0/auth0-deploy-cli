@@ -3,9 +3,7 @@ import { expect } from 'chai';
 import { constants } from '../../../src/tools';
 
 import Context from '../../../src/context/directory';
-import {
-  testDataDir, createDir, mockMgmtClient, cleanThenMkdir
-} from '../../utils';
+import { testDataDir, createDir, mockMgmtClient, cleanThenMkdir } from '../../utils';
 import handler from '../../../src/context/directory/handlers/guardianPolicies';
 import { loadJSON } from '../../../src/utils';
 
@@ -16,7 +14,7 @@ describe('#directory context guardian policies provider', () => {
         "policies": [
           "all-applications"
         ]
-      }`
+      }`,
     };
     const repoDir = path.join(testDataDir, 'directory', 'guardianPolicies');
     createDir(repoDir, { [constants.GUARDIAN_DIRECTORY]: guardianPoliciesTest });
@@ -26,7 +24,7 @@ describe('#directory context guardian policies provider', () => {
     await context.load();
 
     expect(context.assets.guardianPolicies).to.deep.equal({
-      policies: [ 'all-applications' ]
+      policies: ['all-applications'],
     });
   });
 
@@ -36,13 +34,13 @@ describe('#directory context guardian policies provider', () => {
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
     context.assets.guardianPolicies = {
-      policies: [ 'all-applications' ]
+      policies: ['all-applications'],
     };
 
     await handler.dump(context);
     const guardianFolder = path.join(dir, constants.GUARDIAN_DIRECTORY);
     expect(loadJSON(path.join(guardianFolder, 'policies.json'))).to.deep.equal({
-      policies: [ 'all-applications' ]
+      policies: ['all-applications'],
     });
   });
 });

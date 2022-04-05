@@ -1,14 +1,14 @@
-import { YAMLHandler } from '.'
-import YAMLContext from '..'
+import { YAMLHandler } from '.';
+import YAMLContext from '..';
 
 type ParsedGuardianFactorMessageTypes = {
-  guardianPhoneFactorMessageTypes: unknown
-}
+  guardianPhoneFactorMessageTypes: unknown;
+};
 
 async function parseAndDump(context: YAMLContext): Promise<ParsedGuardianFactorMessageTypes> {
   // nothing to do, set default if empty
   return {
-    guardianPhoneFactorMessageTypes: { ...context.assets.guardianPhoneFactorMessageTypes || {} }
+    guardianPhoneFactorMessageTypes: { ...(context.assets.guardianPhoneFactorMessageTypes || {}) },
   };
 }
 

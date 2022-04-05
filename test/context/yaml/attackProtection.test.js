@@ -46,30 +46,30 @@ describe('#YAML context attack-protection', () => {
         admin_notification_frequency: [],
         enabled: true,
         method: 'standard',
-        shields: []
+        shields: [],
       },
       bruteForceProtection: {
         allowlist: [],
         enabled: true,
         max_attempts: 10,
         mode: 'count_per_identifier_and_ip',
-        shields: [ 'block', 'user_notification' ]
+        shields: ['block', 'user_notification'],
       },
       suspiciousIpThrottling: {
-        allowlist: [ '127.0.0.1' ],
+        allowlist: ['127.0.0.1'],
         enabled: true,
-        shields: [ 'block', 'admin_notification' ],
+        shields: ['block', 'admin_notification'],
         stage: {
           'pre-login': {
             max_attempts: 100,
-            rate: 864000
+            rate: 864000,
           },
           'pre-user-registration': {
             max_attempts: 50,
-            rate: 1200
-          }
-        }
-      }
+            rate: 1200,
+          },
+        },
+      },
     };
 
     const yamlFile = path.join(dir, 'attack-protection.yaml');
@@ -88,30 +88,30 @@ describe('#YAML context attack-protection', () => {
         admin_notification_frequency: [],
         enabled: true,
         method: 'standard',
-        shields: []
+        shields: [],
       },
       bruteForceProtection: {
         allowlist: [],
         enabled: true,
         max_attempts: 10,
         mode: 'count_per_identifier_and_ip',
-        shields: [ 'block', 'user_notification' ]
+        shields: ['block', 'user_notification'],
       },
       suspiciousIpThrottling: {
-        allowlist: [ '127.0.0.1' ],
+        allowlist: ['127.0.0.1'],
         enabled: true,
-        shields: [ 'block', 'admin_notification' ],
+        shields: ['block', 'admin_notification'],
         stage: {
           'pre-login': {
             max_attempts: 100,
-            rate: 864000
+            rate: 864000,
           },
           'pre-user-registration': {
             max_attempts: 50,
-            rate: 1200
-          }
-        }
-      }
+            rate: 1200,
+          },
+        },
+      },
     };
     context.assets.attackProtection = attackProtection;
 

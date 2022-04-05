@@ -1,16 +1,16 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
-import { Asset, Assets } from '../../../types'
+import { Asset, Assets } from '../../../types';
 
 export const schema = {
   type: 'object',
   properties: {
     provider: {
       type: 'string',
-      enum: constants.GUARDIAN_PHONE_PROVIDERS
-    }
+      enum: constants.GUARDIAN_PHONE_PROVIDERS,
+    },
   },
-  additionalProperties: false
+  additionalProperties: false,
 };
 
 const isFeatureUnavailableError = (err) => {
@@ -18,11 +18,13 @@ const isFeatureUnavailableError = (err) => {
     // Older Management API version where the endpoint is not available.
     return true;
   }
-  if (err.statusCode === 403
-    && err.originalError
-    && err.originalError.response
-    && err.originalError.response.body
-    && err.originalError.response.body.errorCode === 'hooks_not_allowed') {
+  if (
+    err.statusCode === 403 &&
+    err.originalError &&
+    err.originalError.response &&
+    err.originalError.response.body &&
+    err.originalError.response.body.errorCode === 'hooks_not_allowed'
+  ) {
     // Recent Management API version, but with feature explicitly disabled.
     return true;
   }
@@ -30,18 +32,21 @@ const isFeatureUnavailableError = (err) => {
 };
 
 export default class GuardianPhoneSelectedProviderHandler extends DefaultHandler {
-  existing: Asset[]
-  
+  existing: Asset[];
+
   constructor(options) {
     super({
       ...options,
-      type: 'guardianPhoneFactorSelectedProvider'
+      type: 'guardianPhoneFactorSelectedProvider',
     });
   }
 
   async getType() {
     // in case client version does not support the operation
-    if (!this.client.guardian || typeof this.client.guardian.getPhoneFactorSelectedProvider !== 'function') {
+    if (
+      !this.client.guardian ||
+      typeof this.client.guardian.getPhoneFactorSelectedProvider !== 'function'
+    ) {
       return {};
     }
 
@@ -65,7 +70,8 @@ export default class GuardianPhoneSelectedProviderHandler extends DefaultHandler
     const { guardianPhoneFactorSelectedProvider } = assets;
 
     // Do nothing if not set
-    if (!guardianPhoneFactorSelectedProvider || !guardianPhoneFactorSelectedProvider.provider) return;
+    if (!guardianPhoneFactorSelectedProvider || !guardianPhoneFactorSelectedProvider.provider)
+      return;
 
     const params = {};
     const data = guardianPhoneFactorSelectedProvider;

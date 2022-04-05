@@ -7,7 +7,7 @@ import { Asset, Assets, CalculatedChanges } from '../../../types';
 
 export const excludeSchema = {
   type: 'array',
-  items: { type: 'string' }
+  items: { type: 'string' },
 };
 
 export const schema = {
@@ -23,25 +23,25 @@ export const schema = {
           type: 'object',
           properties: {
             name: { type: 'string' },
-            description: { type: 'string' }
-          }
-        }
+            description: { type: 'string' },
+          },
+        },
       },
       enforce_policies: { type: 'boolean' },
-      token_dialect: { type: 'string' }
+      token_dialect: { type: 'string' },
     },
-    required: ['name', 'identifier']
-  }
+    required: ['name', 'identifier'],
+  },
 };
 
 export default class ResourceServersHandler extends DefaultHandler {
-  existing: Asset[]
+  existing: Asset[];
 
   constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'resourceServers',
-      stripUpdateFields: ['identifier'] // Fields not allowed in updates
+      stripUpdateFields: ['identifier'], // Fields not allowed in updates
     });
   }
 
@@ -51,20 +51,26 @@ export default class ResourceServersHandler extends DefaultHandler {
 
   async getType(): Promise<Asset[]> {
     if (this.existing) return this.existing;
-    const resourceServers = await this.client.resourceServers.getAll({ paginate: true, include_totals: true });
-    return resourceServers.filter((rs) => rs.name !== constants.RESOURCE_SERVERS_MANAGEMENT_API_NAME);
+    const resourceServers = await this.client.resourceServers.getAll({
+      paginate: true,
+      include_totals: true,
+    });
+    return resourceServers.filter(
+      (rs) => rs.name !== constants.RESOURCE_SERVERS_MANAGEMENT_API_NAME
+    );
   }
 
   async calcChanges(assets: Assets): Promise<CalculatedChanges> {
     let { resourceServers } = assets;
 
     // Do nothing if not set
-    if (!resourceServers) return {
-      del: [],
-      create: [],
-      conflicts: [],
-      update: []
-    };
+    if (!resourceServers)
+      return {
+        del: [],
+        create: [],
+        conflicts: [],
+        update: [],
+      };
 
     const excluded = (assets.exclude && assets.exclude.resourceServers) || [];
 
@@ -79,7 +85,7 @@ export default class ResourceServersHandler extends DefaultHandler {
       assets: resourceServers,
       existing,
       identifiers: ['id', 'identifier'],
-      allowDelete: false,  //TODO: actually pass in correct allowDelete value
+      allowDelete: false, //TODO: actually pass in correct allowDelete value
     });
   }
 
@@ -89,9 +95,13 @@ export default class ResourceServersHandler extends DefaultHandler {
     // Do nothing if not set
     if (!resourceServers) return;
 
-    const mgmtAPIResource = resourceServers.find((r) => r.name === constants.RESOURCE_SERVERS_MANAGEMENT_API_NAME);
+    const mgmtAPIResource = resourceServers.find(
+      (r) => r.name === constants.RESOURCE_SERVERS_MANAGEMENT_API_NAME
+    );
     if (mgmtAPIResource) {
-      throw new ValidationError(`You can not configure the '${constants.RESOURCE_SERVERS_MANAGEMENT_API_NAME}'.`);
+      throw new ValidationError(
+        `You can not configure the '${constants.RESOURCE_SERVERS_MANAGEMENT_API_NAME}'.`
+      );
     }
 
     await super.validate(assets);

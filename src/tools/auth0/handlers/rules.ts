@@ -1,7 +1,5 @@
 import ValidationError from '../../validationError';
-import {
-  dumpJSON, stripFields, duplicateItems
-} from '../../utils';
+import { dumpJSON, stripFields, duplicateItems } from '../../utils';
 import DefaultHandler from './default';
 import log from '../../logger';
 import { calculateChanges } from '../../calculateChanges';
@@ -9,7 +7,7 @@ import { Asset, Assets, CalculatedChanges } from '../../../types';
 
 export const excludeSchema = {
   type: 'array',
-  items: { type: 'string' }
+  items: { type: 'string' },
 };
 
 export const schema = {
@@ -20,43 +18,45 @@ export const schema = {
     properties: {
       script: {
         type: 'string',
-        description: 'A script that contains the rule\'s code',
-        default: ''
+        description: "A script that contains the rule's code",
+        default: '',
       },
       name: {
         type: 'string',
-        description: 'The name of the rule. Can only contain alphanumeric characters, spaces and \'-\'. Can neither start nor end with \'-\' or spaces',
-        pattern: '^[^-\\s][a-zA-Z0-9-\\s]+[^-\\s]$'
+        description:
+          "The name of the rule. Can only contain alphanumeric characters, spaces and '-'. Can neither start nor end with '-' or spaces",
+        pattern: '^[^-\\s][a-zA-Z0-9-\\s]+[^-\\s]$',
       },
       order: {
         type: ['number', 'null'],
-        description: 'The rule\'s order in relation to other rules. A rule with a lower order than another rule executes first.',
-        default: null
+        description:
+          "The rule's order in relation to other rules. A rule with a lower order than another rule executes first.",
+        default: null,
       },
       enabled: {
         type: 'boolean',
         description: 'true if the rule is enabled, false otherwise',
-        default: true
+        default: true,
       },
       stage: {
         type: 'string',
-        description: 'The rule\'s execution stage',
+        description: "The rule's execution stage",
         default: 'login_success',
-        enum: ['login_success', 'login_failure', 'pre_authorize']
-      }
+        enum: ['login_success', 'login_failure', 'pre_authorize'],
+      },
     },
-    required: ['name']
-  }
+    required: ['name'],
+  },
 };
 
 export default class RulesHandler extends DefaultHandler {
-  existing: Asset[]
+  existing: Asset[];
 
   constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'rules',
-      stripUpdateFields: ['stage'] // Fields not allowed in updates
+      stripUpdateFields: ['stage'], // Fields not allowed in updates
     });
   }
 
@@ -70,7 +70,10 @@ export default class RulesHandler extends DefaultHandler {
     return super.objString({ name: rule.name, order: rule.order });
   }
 
-  async calcChanges(assets, includeExcluded = false): Promise<CalculatedChanges & { reOrder: Asset[] }> {
+  async calcChanges(
+    assets,
+    includeExcluded = false
+  ): Promise<CalculatedChanges & { reOrder: Asset[] }> {
     let { rules } = assets;
 
     const excludedRules = (assets.exclude && assets.exclude.rules) || [];
@@ -84,15 +87,12 @@ export default class RulesHandler extends DefaultHandler {
     }
 
     // Figure out what needs to be updated vs created
-    const {
-      del, update, create, conflicts
-    } = calculateChanges({
+    const { del, update, create, conflicts } = calculateChanges({
       handler: this,
       assets: rules,
       existing,
       identifiers: ['id', 'name'],
-      allowDelete: false //TODO: actually pass in correct allowDelete value
-
+      allowDelete: false, //TODO: actually pass in correct allowDelete value
     });
     // Figure out the rules that need to be re-ordered
     const futureRules = [...create, ...update];
@@ -110,9 +110,9 @@ export default class RulesHandler extends DefaultHandler {
           ...accum,
           {
             ...conflict,
-            order: nextOrderNo
-          }
-        ]
+            order: nextOrderNo,
+          },
+        ];
       }
       return accum;
     }, []);
@@ -122,7 +122,7 @@ export default class RulesHandler extends DefaultHandler {
       update,
       create,
       reOrder,
-      conflicts
+      conflicts,
     };
   }
 
@@ -138,7 +138,11 @@ export default class RulesHandler extends DefaultHandler {
     const { update, create, del } = await this.calcChanges(assets, true);
     // Include del rules which are actually not going to be deleted but are excluded
     // they can still muck up the ordering so we must take it into consideration.
-    const futureRules = [...create, ...update, ...del.filter((r) => excludedRules.includes(r.name))];
+    const futureRules = [
+      ...create,
+      ...update,
+      ...del.filter((r) => excludedRules.includes(r.name)),
+    ];
 
     // Detect rules with the same order
     const rulesSameOrder = duplicateItems(futureRules, 'order');
@@ -151,10 +155,17 @@ export default class RulesHandler extends DefaultHandler {
 
     // Detect Rules that are changing stage as it's not allowed.
     const existing = await this.getType();
-    const stateChanged = futureRules.reduce((changed: Asset[], rule) => ([
-      ...changed,
-      ...existing.filter((r) => rule.name.toLowerCase() === r.name.toLowerCase() && r.stage !== rule.stage)
-    ]), []).map((r) => r.name);
+    const stateChanged = futureRules
+      .reduce(
+        (changed: Asset[], rule) => [
+          ...changed,
+          ...existing.filter(
+            (r) => rule.name.toLowerCase() === r.name.toLowerCase() && r.stage !== rule.stage
+          ),
+        ],
+        []
+      )
+      .map((r) => r.name);
 
     if (stateChanged.length > 0) {
       throw new ValidationError(`The following rules changed stage which is not allowed:
@@ -175,21 +186,29 @@ export default class RulesHandler extends DefaultHandler {
     const changes = await this.calcChanges(assets);
 
     // Temporally re-order rules with conflicting ordering
-    await this.client.pool.addEachTask({
-      data: changes.reOrder,
-      generator: (rule) => this.client.updateRule({ id: rule.id }, stripFields(rule, this.stripUpdateFields)).then(() => {
-        const updated = {
-          name: rule.name, stage: rule.stage, order: rule.order, id: rule.id
-        };
-        log.info(`Temporally re-order Rule ${dumpJSON(updated)}`);
+    await this.client.pool
+      .addEachTask({
+        data: changes.reOrder,
+        generator: (rule) =>
+          this.client
+            .updateRule({ id: rule.id }, stripFields(rule, this.stripUpdateFields))
+            .then(() => {
+              const updated = {
+                name: rule.name,
+                stage: rule.stage,
+                order: rule.order,
+                id: rule.id,
+              };
+              log.info(`Temporally re-order Rule ${dumpJSON(updated)}`);
+            }),
       })
-    }).promise();
+      .promise();
 
     await super.processChanges(assets, {
       del: changes.del,
       create: changes.create,
       update: changes.update,
-      conflicts: changes.conflicts
+      conflicts: changes.conflicts,
     });
   }
 }
