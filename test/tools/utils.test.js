@@ -66,7 +66,7 @@ describe('#utils', function() {
   });
 
   it('should dump json', () => {
-    expect(utils.dumpJSON(expectations, 2)).to.deep.equal(JSON.stringify(expectations, null, 2));
+    expect(utils.convertJsonToString(expectations, 2)).to.deep.equal(JSON.stringify(expectations, null, 2));
   });
 
   it('should strip fields', () => {
