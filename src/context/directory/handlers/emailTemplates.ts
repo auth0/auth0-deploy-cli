@@ -19,7 +19,7 @@ function parse(context: DirectoryContext): ParsedEmailTemplates {
 
   const files = getFiles(emailsFolder, ['.json', '.html']).filter((f) => path.basename(f) !== 'provider.json');
 
-  const sorted = {};
+  const sorted: { meta: string } | { html: string } | {} = {};
 
   files.forEach((file) => {
     const { ext, name } = path.parse(file);
@@ -32,7 +32,7 @@ function parse(context: DirectoryContext): ParsedEmailTemplates {
     meta,
     html
   }: {
-    meta?: unknown,
+    meta?: string,
     html?: string,
   }) => {
     if (!meta) {
