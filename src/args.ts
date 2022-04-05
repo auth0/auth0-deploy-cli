@@ -1,6 +1,31 @@
 import yargs from 'yargs';
+import { Config } from './types'
 
-function getParams() {
+type SharedParams = {
+  _: ['export' | 'import' | 'deploy' | 'dump']
+  proxy_url?: string
+  debug: boolean
+  config_file?: string
+  env: boolean
+  format: 'yaml' | 'directory'
+  secret?: string
+  base_path?: string // Necessary when package imported as Node module
+  config?: Partial<Config>,
+}
+
+type ImportSpecificParams = {
+  input_file: string
+}
+
+type ExportSpecificParams = {
+  output_folder: string
+  export_ids: boolean
+}
+
+export type ExportParams = ExportSpecificParams & SharedParams
+export type ImportParams = ImportSpecificParams & SharedParams
+
+function getParams(): ExportParams | ImportParams {
   const args = yargs
     .demandCommand(1, 'A command is required')
     .usage('Auth0 Deploy CLI')
@@ -15,7 +40,7 @@ function getParams() {
       describe: 'A url for proxying requests, only set this if you are behind a proxy.',
       type: 'string'
     })
-    .command([ 'import', 'deploy' ], 'Deploy Configuration', {
+    .command(['import', 'deploy'], 'Deploy Configuration', {
       input_file: {
         alias: 'i',
         describe: 'The updates to deploy. Either a JSON file, or directory that contains the correct file layout. See README and online for more info.',
@@ -38,7 +63,7 @@ function getParams() {
         type: 'string'
       }
     })
-    .command([ 'export', 'dump' ], 'Export Auth0 Tenant Configuration', {
+    .command(['export', 'dump'], 'Export Auth0 Tenant Configuration', {
       output_folder: {
         alias: 'o',
         describe: 'The output directory.',
@@ -49,7 +74,7 @@ function getParams() {
         alias: 'f',
         describe: 'The output format.',
         type: 'string',
-        choices: [ 'yaml', 'directory' ],
+        choices: ['yaml', 'directory'],
         demandOption: true
       },
       config_file: {
@@ -84,6 +109,7 @@ function getParams() {
     .example('$0 deploy -c config.json -i path/to/files', 'Deploy Auth0 via Path')
     .epilogue('See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.')
     .wrap(null);
+  //@ts-ignore because we know these types are either ExportParams or ImportParams. TODO: fix more native way of inferring types from yargs
   return args.argv;
 }
 

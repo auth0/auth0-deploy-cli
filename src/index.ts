@@ -1,14 +1,18 @@
 #!/usr/bin/env node
 import { bootstrap } from 'global-agent';
 
-import { getParams } from './args';
-import commands from './commands';
+import { getParams, ExportParams, ImportParams } from './args';
 import log from './logger';
 import tools from './tools';
+import { Stage } from './tools/auth0'
 
-async function run(params) {
+import importCMD from './commands/import'
+import exportCMD from './commands/export'
+
+async function run(params: ImportParams | ExportParams): Promise<void> {
   // Run command
-  const cmd = commands[params._[0]];
+  const command = params._[0];
+
   const proxy = params.proxy_url;
 
   if (proxy) {
@@ -23,9 +27,14 @@ async function run(params) {
     bootstrap();
   }
 
-  log.debug(`Start command ${params._[0]}`);
-  await cmd(params);
-  log.debug(`Finished command ${params._[0]}`);
+  log.debug(`Start command ${command}`);
+  if (['deploy', 'import'].includes(command) && 'input_file' in params) {
+    await importCMD(params)
+  }
+  if (['dump', 'export'].includes(command) && 'output_folder' in params) {
+    await exportCMD(params)
+  }
+  log.debug(`Finished command ${command}`);
 }
 
 // Only run if from command line
@@ -35,8 +44,6 @@ if (require.main === module) {
 
   log.debug('Starting Auth0 Deploy CLI Tool');
 
-  // Set log level
-  log.transports.console.level = params.level;
   if (params.debug) {
     log.transports.console.level = 'debug';
     // Set for tools
@@ -46,17 +53,23 @@ if (require.main === module) {
 
   run(params)
     .then(() => process.exit(0))
-    .catch((error) => {
+    .catch((error: {
+      type?: string
+      stage?: Stage
+      message?: string
+      stack?: string
+    }) => {
+      const command = params._[0]
       if (error.type || error.stage) {
-        log.error(`Problem running command ${params._[0]} during stage ${error.stage} when processing type ${error.type}`);
+        log.error(`Problem running command ${command} during stage ${error.stage} when processing type ${error.type}`);
       } else {
-        log.error(`Problem running command ${params._[0]}`);
+        log.error(`Problem running command ${command}`);
       }
 
       const msg = error.message || error.toString();
       log.error(msg);
 
-      if (process.env.AUTH0_DEBUG === 'true') {
+      if (process.env.AUTH0_DEBUG === 'true' && error.stack) {
         log.debug(error.stack);
       }
 
@@ -69,9 +82,9 @@ if (require.main === module) {
 
 // Export commands to be used programmatically
 module.exports = {
-  deploy: commands.import,
-  dump: commands.export,
-  import: commands.import,
-  export: commands.export,
+  deploy: importCMD,
+  dump: exportCMD,
+  import: importCMD,
+  export: exportCMD,
   tools: tools
 };
