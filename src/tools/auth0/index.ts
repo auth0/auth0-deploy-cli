@@ -8,9 +8,7 @@ import { Assets, Auth0APIClient } from '../../types'
 import APIHandler from './handlers/default';
 import { ConfigFunction } from '../../configFactory';
 
-
-
-type Stage = 'load' | 'validate' | 'processChanges'
+export type Stage = 'load' | 'validate' | 'processChanges'
 
 type StageFunction = APIHandler['load'] // Using `load` method as a template for what type stage functions resemble
 
