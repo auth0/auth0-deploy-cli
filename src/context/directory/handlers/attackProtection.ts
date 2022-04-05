@@ -40,7 +40,7 @@ function parse(context: DirectoryContext): ParsedAttackProtection {
     };
   }
 
-  const keywordReplacements = context.config['AUTH0_KEYWORD_REPLACE_MAPPINGS'] || {}
+  const keywordReplacements = context.config['AUTH0_KEYWORD_REPLACE_MAPPINGS'] || {};
 
   const breachedPasswordDetection = loadJSON(files.breachedPasswordDetection, keywordReplacements);
   const bruteForceProtection = loadJSON(files.bruteForceProtection, keywordReplacements);

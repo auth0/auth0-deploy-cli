@@ -7,7 +7,7 @@ import log from '../../logger';
 import { isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter } from '../../utils';
 import handlers, { YAMLHandler } from './handlers';
 import cleanAssets from '../../readonly';
-import {Assets, Config, Auth0APIClient, AssetTypes, KeywordMappings} from '../../types'
+import { Assets, Config, Auth0APIClient, AssetTypes, KeywordMappings } from '../../types';
 
 export default class YAMLContext {
   basePath: string;
@@ -24,7 +24,7 @@ export default class YAMLContext {
     this.mgmtClient = mgmtClient;
 
     //@ts-ignore because the assets property gets filled out throughout
-    this.assets = {}
+    this.assets = {};
     // Get excluded rules
     this.assets.exclude = {
       rules: config.AUTH0_EXCLUDED_RULES || [],

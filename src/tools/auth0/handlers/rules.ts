@@ -1,7 +1,5 @@
 import ValidationError from '../../validationError';
-import {
-  convertJsonToString, stripFields, duplicateItems
-} from '../../utils';
+import { convertJsonToString, stripFields, duplicateItems } from '../../utils';
 import DefaultHandler from './default';
 import log from '../../logger';
 import { calculateChanges } from '../../calculateChanges';
@@ -188,13 +186,21 @@ export default class RulesHandler extends DefaultHandler {
     const changes = await this.calcChanges(assets);
 
     // Temporally re-order rules with conflicting ordering
-    await this.client.pool.addEachTask({
-      data: changes.reOrder,
-      generator: (rule) => this.client.updateRule({ id: rule.id }, stripFields(rule, this.stripUpdateFields)).then(() => {
-        const updated = {
-          name: rule.name, stage: rule.stage, order: rule.order, id: rule.id
-        };
-        log.info(`Temporally re-order Rule ${convertJsonToString(updated)}`);
+    await this.client.pool
+      .addEachTask({
+        data: changes.reOrder,
+        generator: (rule) =>
+          this.client
+            .updateRule({ id: rule.id }, stripFields(rule, this.stripUpdateFields))
+            .then(() => {
+              const updated = {
+                name: rule.name,
+                stage: rule.stage,
+                order: rule.order,
+                id: rule.id,
+              };
+              log.info(`Temporally re-order Rule ${convertJsonToString(updated)}`);
+            }),
       })
       .promise();
 

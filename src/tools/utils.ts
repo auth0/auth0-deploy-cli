@@ -3,7 +3,7 @@ import fs, { constants as fsConstants } from 'fs';
 import dotProp from 'dot-prop';
 import _ from 'lodash';
 import log from './logger';
-import { Asset, Assets, CalculatedChanges, KeywordMappings } from "../types";
+import { Asset, Assets, CalculatedChanges, KeywordMappings } from '../types';
 
 export function keywordArrayReplace(input: string, mappings: KeywordMappings): string {
   Object.keys(mappings).forEach(function (key) {
@@ -98,17 +98,19 @@ export function stripFields(obj: Asset, fields: string[]): Asset {
   return newObj;
 }
 
-export function getEnabledClients(assets: Assets, connection: Asset, existing: Asset[], clients: Asset[]): string[] {
+export function getEnabledClients(
+  assets: Assets,
+  connection: Asset,
+  existing: Asset[],
+  clients: Asset[]
+): string[] {
   // Convert enabled_clients by name to the id
   const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
   const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
   const enabledClients = [
-    ...convertClientNamesToIds(
-      connection.enabled_clients || [],
-      clients
-    ).filter(
+    ...convertClientNamesToIds(connection.enabled_clients || [], clients).filter(
       (item) => ![...excludedClientsByNames, ...excludedClients].includes(item)
-    )
+    ),
   ];
   // If client is excluded and in the existing connection this client is enabled, it should keep enabled
   // If client is excluded and in the existing connection this client is disabled, it should keep disabled
@@ -126,21 +128,22 @@ export function getEnabledClients(assets: Assets, connection: Asset, existing: A
 
 export function duplicateItems(arr: Asset[], key: string): Asset[] {
   // Find duplicates objects within array that have the same key value
-  const duplicates = arr.reduce((accum: { [key: string]: Asset[] }, obj): { [key: string]: Asset[] } => {
-    const keyValue = obj[key];
-    if (keyValue) {
-      if (!(keyValue in accum)) accum[keyValue] = [];
-      accum[keyValue].push(obj);
-    }
-    return accum;
-  }, {});
+  const duplicates = arr.reduce(
+    (accum: { [key: string]: Asset[] }, obj): { [key: string]: Asset[] } => {
+      const keyValue = obj[key];
+      if (keyValue) {
+        if (!(keyValue in accum)) accum[keyValue] = [];
+        accum[keyValue].push(obj);
+      }
+      return accum;
+    },
+    {}
+  );
   return Object.values(duplicates).filter((g) => g.length > 1);
 }
 
 export function filterExcluded(changes: CalculatedChanges, exclude: string[]): CalculatedChanges {
-  const {
-    del, update, create, conflicts
-  } = changes;
+  const { del, update, create, conflicts } = changes;
 
   if (!exclude.length) {
     return changes;

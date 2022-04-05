@@ -25,8 +25,8 @@ export const schema = {
         },
       },
     },
-    required: ['name']
-  }
+    required: ['name'],
+  },
 };
 
 export default class DatabaseHandler extends DefaultAPIHandler {
@@ -34,7 +34,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     super({
       ...config,
       type: 'databases',
-      stripUpdateFields: ['strategy', 'name']
+      stripUpdateFields: ['strategy', 'name'],
     });
   }
 
@@ -81,12 +81,16 @@ export default class DatabaseHandler extends DefaultAPIHandler {
 
     // Convert enabled_clients by name to the id
     const clients = await this.client.clients.getAll({ paginate: true, include_totals: true });
-    const existingDatabasesConnections = await this.client.connections.getAll({ strategy: 'auth0', paginate: true, include_totals: true });
+    const existingDatabasesConnections = await this.client.connections.getAll({
+      strategy: 'auth0',
+      paginate: true,
+      include_totals: true,
+    });
     const formatted = databases.map((db) => {
       if (db.enabled_clients) {
         return {
           ...db,
-          enabled_clients: getEnabledClients(assets, db, existingDatabasesConnections, clients)
+          enabled_clients: getEnabledClients(assets, db, existingDatabasesConnections, clients),
         };
       }
 

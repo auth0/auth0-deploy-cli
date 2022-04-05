@@ -1,9 +1,7 @@
 import ValidationError from '../../validationError';
 
 import log from '../../logger';
-import {
-  stripFields, convertJsonToString, duplicateItems
-} from '../../utils';
+import { stripFields, convertJsonToString, duplicateItems } from '../../utils';
 import { calculateChanges } from '../../calculateChanges';
 import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
@@ -149,7 +147,9 @@ export default class APIHandler {
     const duplicateIDs = duplicateItems(typeAssets, this.id);
     if (duplicateIDs.length > 0) {
       const formatted = duplicateIDs.map((dups) => dups.map((d) => `${d[this.id]}`));
-      throw new ValidationError(`There are multiple ${this.type} for the following stage-order combinations
+      throw new ValidationError(`There are multiple ${
+        this.type
+      } for the following stage-order combinations
       ${convertJsonToString(formatted)}.
        Only one rule must be defined for the same order number in a stage.`);
     }

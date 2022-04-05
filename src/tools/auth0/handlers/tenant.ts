@@ -40,7 +40,11 @@ export default class TenantHandler extends DefaultHandler {
 
     const pageKeys = Object.keys(tenant).filter((k) => blockPageKeys.includes(k));
     if (pageKeys.length > 0) {
-      throw new ValidationError(`The following pages ${convertJsonToString(pageKeys)} were found in tenant settings. Pages should be set separately. Please refer to the documentation.`);
+      throw new ValidationError(
+        `The following pages ${convertJsonToString(
+          pageKeys
+        )} were found in tenant settings. Pages should be set separately. Please refer to the documentation.`
+      );
     }
   }
 

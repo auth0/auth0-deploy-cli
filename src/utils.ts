@@ -8,8 +8,7 @@ import { Asset, Assets, Config, KeywordMappings } from './types';
 
 export function isDirectory(filePath: string): boolean {
   try {
-    return fs.statSync(path.resolve(filePath))
-      .isDirectory();
+    return fs.statSync(path.resolve(filePath)).isDirectory();
   } catch (err) {
     return false;
   }
@@ -17,8 +16,7 @@ export function isDirectory(filePath: string): boolean {
 
 export function isFile(filePath: string): boolean {
   try {
-    return fs.statSync(path.resolve(filePath))
-      .isFile();
+    return fs.statSync(path.resolve(filePath)).isFile();
   } catch (err) {
     return false;
   }
@@ -103,16 +101,16 @@ export function sanitize(str: string): string {
 }
 
 type ImportantFields = {
-  name: string | null,
-  client_id: string | null,
-  audience: string | null,
-  template: string | null,
-  identifier: string | null,
-  strategy: string | null,
-  script: string | null,
-  stage: string | null,
-  id: string | null
-}
+  name: string | null;
+  client_id: string | null;
+  audience: string | null;
+  template: string | null;
+  identifier: string | null;
+  strategy: string | null;
+  script: string | null;
+  stage: string | null;
+  id: string | null;
+};
 
 export function formatResults(item: any): Partial<ImportantFields> {
   if (typeof item !== 'object') {
@@ -131,9 +129,11 @@ export function formatResults(item: any): Partial<ImportantFields> {
   };
   const result = { ...importantFields };
 
-  Object.entries(item).sort().forEach(([key, value]) => {
-    result[key] = value;
-  });
+  Object.entries(item)
+    .sort()
+    .forEach(([key, value]) => {
+      result[key] = value;
+    });
 
   Object.keys(importantFields).forEach((key) => {
     if (result[key] === null) delete result[key];
@@ -143,12 +143,7 @@ export function formatResults(item: any): Partial<ImportantFields> {
 }
 
 export function recordsSorter(a: Partial<ImportantFields>, b: Partial<ImportantFields>): number {
-  const importantFields = [
-    'name',
-    'key',
-    'client_id',
-    'template'
-  ];
+  const importantFields = ['name', 'key', 'client_id', 'template'];
 
   for (let i = 0; i < importantFields.length; i += 1) {
     const key = importantFields[i];
@@ -168,7 +163,7 @@ export function clearTenantFlags(tenant: Asset): void {
 }
 
 export function ensureProp(obj: Asset, props: string): void {
-  const value = ''
+  const value = '';
   if (!dotProp.has(obj, props)) {
     dotProp.set(obj, props, value);
   }

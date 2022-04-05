@@ -28,24 +28,20 @@ function parse(context: DirectoryContext): ParsedEmailTemplates {
     if (ext === '.html') sorted[name].html = file;
   });
 
-  const emailTemplates = Object.values(sorted).flatMap(({
-    meta,
-    html
-  }: {
-    meta?: string,
-    html?: string,
-  }) => {
-    if (!meta) {
-      log.warn(`Skipping email template file ${html} as missing the corresponding '.json' file`);
-      return [];
-    } else if (!html) {
-      log.warn(`Skipping email template file ${meta} as missing corresponding '.html' file`);
-      return [];
-    } else {
-      return {
-        ...loadJSON(meta, context.mappings),
-        body: loadFileAndReplaceKeywords(html, context.mappings)
-      };
+  const emailTemplates = Object.values(sorted).flatMap(
+    ({ meta, html }: { meta?: string; html?: string }) => {
+      if (!meta) {
+        log.warn(`Skipping email template file ${html} as missing the corresponding '.json' file`);
+        return [];
+      } else if (!html) {
+        log.warn(`Skipping email template file ${meta} as missing corresponding '.html' file`);
+        return [];
+      } else {
+        return {
+          ...loadJSON(meta, context.mappings),
+          body: loadFileAndReplaceKeywords(html, context.mappings),
+        };
+      }
     }
   );
 
