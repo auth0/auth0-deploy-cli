@@ -20,7 +20,7 @@
     "max-len": 0,
     "react/display-name": 0,
     "class-methods-use-this": 0,
-    "comma-dangle": [2, "never"],
+    "comma-dangle": 0,
     "eol-last": 2,
     "indent": [
       2,
