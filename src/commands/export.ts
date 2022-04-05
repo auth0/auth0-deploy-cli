@@ -6,18 +6,7 @@ import log from '../logger';
 import { isDirectory } from '../utils';
 import { setupContext } from '../context/index';
 import { Config } from '../types'
-
-type ExportParams = {
-  output_folder: string,
-  base_path?: string,
-  config_file: string,
-  config?: Partial<Config>,
-  export_ids: boolean,
-  secret?: string
-  format: 'yaml' | 'directory'
-  debug: boolean
-  env: boolean
-}
+import { ExportParams } from '../args'
 
 export default async function exportCMD(params: ExportParams) {
   const {
@@ -38,7 +27,7 @@ export default async function exportCMD(params: ExportParams) {
     nconf.file(configFile);
   }
 
-  const overrides: Partial<Config>  = {
+  const overrides: Partial<Config> = {
     AUTH0_INPUT_FILE: outputFolder,
     AUTH0_BASE_PATH: basePath,
     ...configObj || {}

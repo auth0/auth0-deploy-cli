@@ -11,7 +11,6 @@ import {
   existsMustBeDir,
   formatResults,
   getFiles,
-  hoursAsInteger,
   isDirectory,
   isFile,
   loadJSON,
@@ -111,16 +110,6 @@ describe('#utils', function() {
           value: 'test'
         }
       ]
-    });
-  });
-
-  it('should convert value to integer', () => {
-    expect(hoursAsInteger('test', 72)).to.deep.equal({
-      test: 72
-    });
-
-    expect(hoursAsInteger('test', 1.23)).to.deep.equal({
-      test_in_minutes: 74
     });
   });
 
