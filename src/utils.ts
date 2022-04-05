@@ -26,7 +26,8 @@ export function isFile(filePath: string): boolean {
 
 export function getFiles(folder: string, exts: string[]): string[] {
   if (isDirectory(folder)) {
-    return fs.readdirSync(folder)
+    return fs
+      .readdirSync(folder)
       .map((f) => path.join(folder, f))
       .filter((f) => isFile(f) && exts.includes(path.extname(f)));
   }
@@ -46,10 +47,7 @@ export function dumpJSON(file: string, mappings: { [key: string]: any }): void {
   try {
     log.info(`Writing ${file}`);
     const jsonBody = JSON.stringify(mappings, null, 2);
-    fs.writeFileSync(
-      file,
-      jsonBody.endsWith('\n') ? jsonBody : `${jsonBody}\n`
-    );
+    fs.writeFileSync(file, jsonBody.endsWith('\n') ? jsonBody : `${jsonBody}\n`);
   } catch (e) {
     throw new Error(`Error writing JSON to metadata file: ${file}, because: ${e.message}`);
   }
@@ -80,7 +78,7 @@ export function stripIdentifiers(auth0: Auth0, assets: Assets) {
     'emailTemplates',
     'guardianFactors',
     'guardianFactorProviders',
-    'guardianFactorTemplates'
+    'guardianFactorTemplates',
   ];
 
   // Optionally Strip identifiers
@@ -129,7 +127,7 @@ export function formatResults(item: any): Partial<ImportantFields> {
     strategy: null,
     script: null,
     stage: null,
-    id: null
+    id: null,
   };
   const result = { ...importantFields };
 
@@ -200,6 +198,6 @@ export function convertClientIdToName(clientId: string, knownClients: Asset[] = 
 
 export function mapClientID2NameSorted(enabledClients: string[], knownClients: Asset[]): string[] {
   return [
-    ...(enabledClients || []).map((clientId) => convertClientIdToName(clientId, knownClients))
+    ...(enabledClients || []).map((clientId) => convertClientIdToName(clientId, knownClients)),
   ].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 }

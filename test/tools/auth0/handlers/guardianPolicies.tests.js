@@ -7,7 +7,7 @@ describe('#guardianPolicies handler', () => {
       const auth0 = {
         guardian: {
           // omitting getPolicies()
-        }
+        },
       };
 
       const handler = new guardianPolicies.default({ client: auth0 });
@@ -18,14 +18,14 @@ describe('#guardianPolicies handler', () => {
     it('should get guardian policies', async () => {
       const auth0 = {
         guardian: {
-          getPolicies: () => ([ 'all-applications' ])
-        }
+          getPolicies: () => ['all-applications'],
+        },
       };
 
       const handler = new guardianPolicies.default({ client: auth0 });
       const data = await handler.getType();
       expect(data).to.deep.equal({
-        policies: [ 'all-applications' ]
+        policies: ['all-applications'],
       });
     });
   });
@@ -38,8 +38,8 @@ describe('#guardianPolicies handler', () => {
             expect(data).to.be.an('array');
             expect(data[0]).to.equal('all-applications');
             return Promise.resolve(data);
-          }
-        }
+          },
+        },
       };
 
       const handler = new guardianPolicies.default({ client: auth0 });
@@ -48,9 +48,9 @@ describe('#guardianPolicies handler', () => {
       await stageFn.apply(handler, [
         {
           guardianPolicies: {
-            policies: [ 'all-applications' ]
-          }
-        }
+            policies: ['all-applications'],
+          },
+        },
       ]);
     });
 
@@ -60,16 +60,14 @@ describe('#guardianPolicies handler', () => {
           updatePolicies: () => {
             const err = new Error('updatePolicies() should not have been called');
             return Promise.reject(err);
-          }
-        }
+          },
+        },
       };
 
       const handler = new guardianPolicies.default({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [
-        { guardianPolicies: {} }
-      ]);
+      await stageFn.apply(handler, [{ guardianPolicies: {} }]);
     });
   });
 });

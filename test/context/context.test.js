@@ -10,7 +10,7 @@ import { cleanThenMkdir, testDataDir } from '../utils';
 const config = {
   AUTH0_INPUT_FILE: path.resolve(testDataDir, 'notexist'),
   AUTH0_DOMAIN: 'tenant.auth0.com',
-  AUTH0_ACCESS_TOKEN: 'fake'
+  AUTH0_ACCESS_TOKEN: 'fake',
 };
 
 describe('#context loader validation', async () => {
@@ -53,7 +53,8 @@ describe('#context loader validation', async () => {
     const loaded = await setupContext({ ...config, AUTH0_INPUT_FILE: yaml });
     expect(loaded).to.be.an.instanceof(yamlContext);
 
-    const userAgent = loaded.mgmtClient.rules.resource.restClient.restClient.options.headers['User-agent'];
+    const userAgent =
+      loaded.mgmtClient.rules.resource.restClient.restClient.options.headers['User-agent'];
 
     expect(userAgent).to.contain('deploy-cli');
     expect(userAgent).to.contain('node.js');

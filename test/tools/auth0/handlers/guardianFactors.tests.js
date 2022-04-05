@@ -7,17 +7,17 @@ const pool = {
       data.generator(data.data[0]);
     }
     return { promise: () => null };
-  }
+  },
 };
 
 describe('#guardianFactors handler', () => {
-  const config = function(key) {
+  const config = function (key) {
     return config.data && config.data[key];
   };
 
   config.data = {
     AUTH0_CLIENT_ID: 'client_id',
-    AUTH0_ALLOW_DELETE: true
+    AUTH0_ALLOW_DELETE: true,
   };
 
   describe('#guardianFactors validate', () => {
@@ -26,15 +26,15 @@ describe('#guardianFactors handler', () => {
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = [
         {
-          name: 'sms'
+          name: 'sms',
         },
         {
-          name: 'sms'
-        }
+          name: 'sms',
+        },
       ];
 
       try {
-        await stageFn.apply(handler, [ { guardianFactors: data } ]);
+        await stageFn.apply(handler, [{ guardianFactors: data }]);
       } catch (err) {
         expect(err).to.be.an('object');
         expect(err.message).to.include('Names must be unique');
@@ -46,11 +46,11 @@ describe('#guardianFactors handler', () => {
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = [
         {
-          name: 'sms'
-        }
+          name: 'sms',
+        },
       ];
 
-      await stageFn.apply(handler, [ { guardianFactors: data } ]);
+      await stageFn.apply(handler, [{ guardianFactors: data }]);
     });
   });
 
@@ -64,14 +64,14 @@ describe('#guardianFactors handler', () => {
         { name: 'duo', enabled: false },
         { name: 'webauthn-roaming', enabled: false },
         { name: 'webauthn-platform', enabled: false },
-        { name: 'recovery-code', enabled: false }
+        { name: 'recovery-code', enabled: false },
       ];
 
       const auth0 = {
         guardian: {
-          getFactors: () => [ ...factors ]
+          getFactors: () => [...factors],
         },
-        pool
+        pool,
       };
 
       const handler = new guardianFactorsTests.default({ client: auth0, config });
@@ -88,15 +88,15 @@ describe('#guardianFactors handler', () => {
         { name: 'duo', enabled: false },
         { name: 'webauthn-roaming', enabled: false },
         { name: 'webauthn-platform', enabled: false },
-        { name: 'recovery-code', enabled: false }
+        { name: 'recovery-code', enabled: false },
       ];
 
       const auth0 = {
         guardian: {
-          getFactors: () => [ ...factors ],
-          updateFactor: () => ({ enabled: true })
+          getFactors: () => [...factors],
+          updateFactor: () => ({ enabled: true }),
         },
-        pool
+        pool,
       };
 
       const handler = new guardianFactorsTests.default({ client: auth0, config });
@@ -104,11 +104,11 @@ describe('#guardianFactors handler', () => {
       const data = [
         {
           name: 'sms',
-          enabled: false
-        }
+          enabled: false,
+        },
       ];
 
-      await stageFn.apply(handler, [ { guardianFactors: data } ]);
+      await stageFn.apply(handler, [{ guardianFactors: data }]);
     });
   });
 });

@@ -1,26 +1,24 @@
-const PAGE_GUARDIAN_MULTIFACTOR = 'guardian_multifactor'
-const PAGE_PASSWORD_RESET = 'password_reset'
-const PAGE_LOGIN = 'login'
-const PAGE_ERROR = 'error_page'
-const RULES_STAGES = [
-  'login_success'
-]
-const DATABASE_SCRIPTS_GET_USER = 'get_user'
-const DATABASE_SCRIPTS_CHANGE_EMAIL = 'change_email'
+const PAGE_GUARDIAN_MULTIFACTOR = 'guardian_multifactor';
+const PAGE_PASSWORD_RESET = 'password_reset';
+const PAGE_LOGIN = 'login';
+const PAGE_ERROR = 'error_page';
+const RULES_STAGES = ['login_success'];
+const DATABASE_SCRIPTS_GET_USER = 'get_user';
+const DATABASE_SCRIPTS_CHANGE_EMAIL = 'change_email';
 
-const EMAIL_VERIFY = 'verify_email'
-const EMAIL_VERIFY_BY_CODE = 'verify_email_by_code'
-const EMAIL_RESET = 'reset_email'
-const EMAIL_WELCOME = 'welcome_email'
-const EMAIL_BLOCKED = 'blocked_account'
-const EMAIL_STOLEN_CREDENTIALS = 'stolen_credentials'
-const EMAIL_ENROLLMENT = 'enrollment_email'
-const EMAIL_CHANGE_PASSWORD = 'change_password'
-const EMAIL_PASSWORD_RESET = 'password_reset'
-const EMAIL_MFA_OOB_CODE = 'mfa_oob_code'
-const EMAIL_USER_INVITATION = 'user_invitation'
+const EMAIL_VERIFY = 'verify_email';
+const EMAIL_VERIFY_BY_CODE = 'verify_email_by_code';
+const EMAIL_RESET = 'reset_email';
+const EMAIL_WELCOME = 'welcome_email';
+const EMAIL_BLOCKED = 'blocked_account';
+const EMAIL_STOLEN_CREDENTIALS = 'stolen_credentials';
+const EMAIL_ENROLLMENT = 'enrollment_email';
+const EMAIL_CHANGE_PASSWORD = 'change_password';
+const EMAIL_PASSWORD_RESET = 'password_reset';
+const EMAIL_MFA_OOB_CODE = 'mfa_oob_code';
+const EMAIL_USER_INVITATION = 'user_invitation';
 
-const UNIVERSAL_LOGIN_TEMPLATE = 'universal_login'
+const UNIVERSAL_LOGIN_TEMPLATE = 'universal_login';
 
 const constants = {
   CONCURRENT_CALLS: 5,
@@ -51,7 +49,7 @@ const constants = {
     'mfa_oob_code',
     'change_password',
     'password_reset',
-    'user_invitation'
+    'user_invitation',
   ],
   ACTIONS_TRIGGERS: [
     'post-login',
@@ -59,7 +57,7 @@ const constants = {
     'pre-user-registration',
     'post-user-registration',
     'post-change-password',
-    'send-phone-message'
+    'send-phone-message',
   ],
   EMAIL_TEMPLATES_DIRECTORY: 'emails',
   EMAIL_VERIFY,
@@ -102,27 +100,15 @@ const constants = {
     'duo',
     'webauthn-roaming',
     'webauthn-platform',
-    'recovery-code'
+    'recovery-code',
   ],
-  GUARDIAN_POLICIES: [
-    'all-applications',
-    'confidence-score'
-  ],
-  GUARDIAN_PHONE_PROVIDERS: [
-    'auth0',
-    'twilio',
-    'phone-message-hook'
-  ],
-  GUARDIAN_PHONE_MESSAGE_TYPES: [
-    'sms',
-    'voice'
-  ],
-  GUARDIAN_FACTOR_TEMPLATES: [
-    'sms'
-  ],
+  GUARDIAN_POLICIES: ['all-applications', 'confidence-score'],
+  GUARDIAN_PHONE_PROVIDERS: ['auth0', 'twilio', 'phone-message-hook'],
+  GUARDIAN_PHONE_MESSAGE_TYPES: ['sms', 'voice'],
+  GUARDIAN_FACTOR_TEMPLATES: ['sms'],
   GUARDIAN_FACTOR_PROVIDERS: {
     sms: ['twilio'],
-    'push-notification': ['sns']
+    'push-notification': ['sns'],
   },
   PAGE_NAMES: [
     `${PAGE_GUARDIAN_MULTIFACTOR}.html`,
@@ -132,7 +118,7 @@ const constants = {
     `${PAGE_LOGIN}.html`,
     `${PAGE_LOGIN}.json`,
     `${PAGE_ERROR}.html`,
-    `${PAGE_ERROR}.json`
+    `${PAGE_ERROR}.json`,
   ],
   DATABASE_SCRIPTS: [
     DATABASE_SCRIPTS_GET_USER,
@@ -141,7 +127,7 @@ const constants = {
     'login',
     'change_password',
     'delete',
-    DATABASE_SCRIPTS_CHANGE_EMAIL
+    DATABASE_SCRIPTS_CHANGE_EMAIL,
   ],
   DATABASE_SCRIPTS_NO_IMPORT: [
     DATABASE_SCRIPTS_GET_USER,
@@ -149,12 +135,9 @@ const constants = {
     'verify',
     'login',
     'change_password',
-    'delete'
+    'delete',
   ],
-  DATABASE_SCRIPTS_IMPORT: [
-    DATABASE_SCRIPTS_GET_USER,
-    'login'
-  ],
+  DATABASE_SCRIPTS_IMPORT: [DATABASE_SCRIPTS_GET_USER, 'login'],
   EMAIL_TEMPLATES_NAMES: [
     `${EMAIL_VERIFY}.json`,
     `${EMAIL_VERIFY}.html`,
@@ -179,7 +162,7 @@ const constants = {
     `${EMAIL_USER_INVITATION}.json`,
     `${EMAIL_USER_INVITATION}.html`,
   ],
-  SUPPORTED_BRANDING_TEMPLATES: [UNIVERSAL_LOGIN_TEMPLATE]
-}
+  SUPPORTED_BRANDING_TEMPLATES: [UNIVERSAL_LOGIN_TEMPLATE],
+};
 
 export default constants;

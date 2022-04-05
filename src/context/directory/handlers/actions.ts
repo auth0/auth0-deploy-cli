@@ -3,16 +3,14 @@ import fs from 'fs-extra';
 import path from 'path';
 import { constants } from '../../../tools';
 
-import {
-  getFiles, existsMustBeDir, loadJSON, sanitize
-} from '../../../utils';
+import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
 import log from '../../../logger';
-import { DirectoryHandler } from '.'
+import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 
 type ParsedActions = {
-  actions: unknown[] | undefined
-}
+  actions: unknown[] | undefined;
+};
 
 function parse(context: DirectoryContext): ParsedActions {
   const actionsFolder = path.join(context.filePath, constants.ACTIONS_DIRECTORY);
@@ -27,7 +25,7 @@ function parse(context: DirectoryContext): ParsedActions {
     return action;
   });
   return {
-    actions
+    actions,
   };
 }
 
@@ -65,12 +63,12 @@ function mapToAction(filePath, action) {
     dependencies: action.dependencies || [],
     secrets: mapSecrets(action.secrets),
     supported_triggers: action.supported_triggers,
-    deployed: action.deployed || action.all_changes_deployed
+    deployed: action.deployed || action.all_changes_deployed,
   };
 }
 
 async function dump(context: DirectoryContext) {
-  const actions = [...context.assets.actions || []];
+  const actions = [...(context.assets.actions || [])];
   if (actions.length < 1) return;
 
   // Create Actions folder
@@ -88,6 +86,6 @@ async function dump(context: DirectoryContext) {
 const actionsHandler: DirectoryHandler<ParsedActions> = {
   parse,
   dump,
-}
+};
 
 export default actionsHandler;

@@ -1,9 +1,15 @@
 type APIClientBaseFunctions = {
-    getAll: (arg0: { checkpoint?: boolean, is_global?: boolean, paginate?: boolean, include_totals?: boolean, id?: string }) => Promise<Asset[]>
-    create: (arg0: { id: string }) => Promise<Asset>
-    update: (arg0: {}, arg1: Asset) => Promise<Asset>
-    delete: (arg0: Asset) => Promise<void>
-}
+  getAll: (arg0: {
+    checkpoint?: boolean;
+    is_global?: boolean;
+    paginate?: boolean;
+    include_totals?: boolean;
+    id?: string;
+  }) => Promise<Asset[]>;
+  create: (arg0: { id: string }) => Promise<Asset>;
+  update: (arg0: {}, arg1: Asset) => Promise<Asset>;
+  delete: (arg0: Asset) => Promise<void>;
+};
 
 export type Auth0APIClient = {
     pool: {
@@ -140,51 +146,51 @@ export type Config = {
     AUTH0_EXCLUDED_DEFAULTS?: string[]
 }// TODO: replace with a more accurate representation of the Config type
 
-export type Asset = { [key: string]: any }
+export type Asset = { [key: string]: any };
 
 export type Assets = {
-    actions: Asset[],
-    attackProtection: Asset,
-    branding: Asset,
-    clients: Asset[],
-    clientGrants: Asset[],
-    connections: Asset[],
-    databases: Asset[],
-    emailProvider: Asset,
-    emailTemplates: Asset[],
-    guardianFactorProviders: Asset[],
-    guardianFactors: Asset[],
-    guardianFactorTemplates: Asset[],
-    guardianPhoneFactorMessageTypes: {
-        message_types: Asset[] //TODO: eliminate this intermediate level for consistency
-    }
-    guardianPhoneFactorSelectedProvider: Asset,
-    guardianPolicies: {
-        policies: Asset[]  //TODO: eliminate this intermediate level for consistency
-    }
-    hooks: Asset[],
-    migrations: Asset[]
-    organizations: Asset[],
-    pages: Asset[],
-    resourceServers: Asset[],
-    roles: Asset[],
-    rules: Asset[],
-    rulesConfigs: Asset[],
-    tenant: Asset,
-    triggers: Asset[],
-    //non-resource types
-    exclude?: {
-        [key: string]: string[]
-    }
-    clientsOrig: Asset[],
-}
+  actions: Asset[];
+  attackProtection: Asset;
+  branding: Asset;
+  clients: Asset[];
+  clientGrants: Asset[];
+  connections: Asset[];
+  databases: Asset[];
+  emailProvider: Asset;
+  emailTemplates: Asset[];
+  guardianFactorProviders: Asset[];
+  guardianFactors: Asset[];
+  guardianFactorTemplates: Asset[];
+  guardianPhoneFactorMessageTypes: {
+    message_types: Asset[]; //TODO: eliminate this intermediate level for consistency
+  };
+  guardianPhoneFactorSelectedProvider: Asset;
+  guardianPolicies: {
+    policies: Asset[]; //TODO: eliminate this intermediate level for consistency
+  };
+  hooks: Asset[];
+  migrations: Asset[];
+  organizations: Asset[];
+  pages: Asset[];
+  resourceServers: Asset[];
+  roles: Asset[];
+  rules: Asset[];
+  rulesConfigs: Asset[];
+  tenant: Asset;
+  triggers: Asset[];
+  //non-resource types
+  exclude?: {
+    [key: string]: string[];
+  };
+  clientsOrig: Asset[];
+};
 
 export type CalculatedChanges = {
-    del: Asset[],
-    update: Asset[],
-    conflicts: Asset[],
-    create: Asset[],
-}
+  del: Asset[];
+  update: Asset[];
+  conflicts: Asset[];
+  create: Asset[];
+};
 
 export type AssetTypes = 'rules' | 'rulesConfigs' | 'hooks' | 'pages' | 'databases' | 'clientGrants' | 'resourceServers' | 'clients' | 'connections' | 'tenant' | 'emailProvider' | 'emailTemplates' | 'guardianFactors' | 'guardianFactorProviders' | 'guardianFactorTemplates' | 'migrations' | 'guardianPhoneFactorMessageTypes' | 'guardianPhoneFactorSelectedProvider' | 'guardianPolicies' | 'roles' | 'actions' | 'organizations' | 'triggers' | 'attackProtection' | 'branding'
 

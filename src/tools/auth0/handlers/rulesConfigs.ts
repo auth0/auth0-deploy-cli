@@ -7,11 +7,11 @@ export const schema = {
     type: 'object',
     properties: {
       key: { type: 'string', pattern: '^[A-Za-z0-9_-]*$' },
-      value: { type: 'string' }
+      value: { type: 'string' },
     },
-    required: ['key', 'value']
+    required: ['key', 'value'],
   },
-  additionalProperties: false
+  additionalProperties: false,
 };
 
 export default class RulesConfigsHandler extends DefaultHandler {
@@ -21,8 +21,8 @@ export default class RulesConfigsHandler extends DefaultHandler {
       type: 'rulesConfigs',
       id: 'key',
       functions: {
-        update: 'set' // Update or Creation of a ruleConfig is via set not update
-      }
+        update: 'set', // Update or Creation of a ruleConfig is via set not update
+      },
     });
   }
 
@@ -38,19 +38,20 @@ export default class RulesConfigsHandler extends DefaultHandler {
     const { rulesConfigs } = assets;
 
     // Do nothing if not set
-    if (!rulesConfigs || !rulesConfigs.length) return {
-      del: [],
-      update: [],
-      create: [],
-      conflicts: [],
-    };
+    if (!rulesConfigs || !rulesConfigs.length)
+      return {
+        del: [],
+        update: [],
+        create: [],
+        conflicts: [],
+      };
 
     // Intention is to not delete/cleanup old configRules, that needs to be handled manually.
     return {
       del: [],
       update: rulesConfigs,
       create: [],
-      conflicts: []
+      conflicts: [],
     };
   }
 }

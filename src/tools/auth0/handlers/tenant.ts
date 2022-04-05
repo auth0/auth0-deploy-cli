@@ -6,16 +6,20 @@ import { convertJsonToString } from '../../utils';
 import { Asset, Assets } from '../../../types';
 
 export const schema = {
-  type: 'object'
+  type: 'object',
 };
 
-const blockPageKeys = [...Object.keys(pageNameMap), ...Object.values(pageNameMap), ...supportedPages];
+const blockPageKeys = [
+  ...Object.keys(pageNameMap),
+  ...Object.values(pageNameMap),
+  ...supportedPages,
+];
 
 export default class TenantHandler extends DefaultHandler {
   constructor(options: DefaultHandler) {
     super({
       ...options,
-      type: 'tenant'
+      type: 'tenant',
     });
   }
 

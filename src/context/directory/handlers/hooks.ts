@@ -2,16 +2,14 @@ import fs from 'fs-extra';
 import path from 'path';
 import { constants } from '../../../tools';
 
-import {
-  getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize
-} from '../../../utils';
+import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
 import log from '../../../logger';
-import { DirectoryHandler } from '.'
-import DirectoryContext from '..'
+import { DirectoryHandler } from '.';
+import DirectoryContext from '..';
 
 type ParsedHooks = {
-  hooks: unknown[] | undefined
-}
+  hooks: unknown[] | undefined;
+};
 
 function parse(context: DirectoryContext): ParsedHooks {
   const hooksFolder = path.join(context.filePath, constants.HOOKS_DIRECTORY);
@@ -31,12 +29,12 @@ function parse(context: DirectoryContext): ParsedHooks {
   });
 
   return {
-    hooks
+    hooks,
   };
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const hooks = [...context.assets.hooks || []];
+  const hooks = [...(context.assets.hooks || [])];
 
   if (hooks.length < 1) return;
 
@@ -61,6 +59,6 @@ async function dump(context: DirectoryContext): Promise<void> {
 const hooksHandler: DirectoryHandler<ParsedHooks> = {
   parse,
   dump,
-}
+};
 
 export default hooksHandler;

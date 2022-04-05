@@ -2,7 +2,7 @@ const { expect } = require('chai');
 const emailTemplates = require('../../../../src/tools/auth0/handlers/emailTemplates');
 
 describe('#emailTemplates handler', () => {
-  const config = function(key) {
+  const config = function (key) {
     return config.data && config.data[key];
   };
 
@@ -10,11 +10,11 @@ describe('#emailTemplates handler', () => {
     it('should update email template', async () => {
       const auth0 = {
         emailTemplates: {
-          create: function(data) {
+          create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             return Promise.resolve(data);
           },
-          update: function(params, data) {
+          update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(data).to.be.an('object');
@@ -22,14 +22,16 @@ describe('#emailTemplates handler', () => {
             expect(data.template).to.equal('verify_email');
             expect(data.body).to.equal('body');
             return Promise.resolve({ params, data });
-          }
-        }
+          },
+        },
       };
 
       const handler = new emailTemplates.default({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [ { emailTemplates: [ { template: 'verify_email', body: 'body' } ] } ]);
+      await stageFn.apply(handler, [
+        { emailTemplates: [{ template: 'verify_email', body: 'body' }] },
+      ]);
     });
 
     it('should get email templates', async () => {
@@ -38,9 +40,9 @@ describe('#emailTemplates handler', () => {
           get: (template) => ({
             template: template.name,
             enabled: true,
-            body: '<html>some email</html>'
-          })
-        }
+            body: '<html>some email</html>',
+          }),
+        },
       };
 
       const handler = new emailTemplates.default({ client: auth0, config });
@@ -50,14 +52,14 @@ describe('#emailTemplates handler', () => {
       expect(verify).to.deep.equal({
         template: 'verify_email',
         enabled: true,
-        body: '<html>some email</html>'
+        body: '<html>some email</html>',
       });
     });
 
     it('should create email template', async () => {
       const auth0 = {
         emailTemplates: {
-          create: function(data) {
+          create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.template).to.equal('verify_email');
@@ -68,14 +70,16 @@ describe('#emailTemplates handler', () => {
             const error = new Error('test');
             error.statusCode = 404;
             throw error;
-          }
-        }
+          },
+        },
       };
 
       const handler = new emailTemplates.default({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [ { emailTemplates: [ { template: 'verify_email', body: 'body' } ] } ]);
+      await stageFn.apply(handler, [
+        { emailTemplates: [{ template: 'verify_email', body: 'body' }] },
+      ]);
     });
   });
 });

@@ -32,15 +32,18 @@ describe('#YAML context resource servers', () => {
         scopes: [
           { description: 'update account', name: 'update:account' },
           { description: 'read account', name: 'read:account' },
-          { description: 'admin access', name: 'admin' }
-        ]
-      }
+          { description: 'admin access', name: 'admin' },
+        ],
+      },
     ];
 
     const yamlFile = path.join(dir, 'resources1.yaml');
     fs.writeFileSync(yamlFile, yaml);
 
-    const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { name: 'my resource', identifier: 'http://myapi.com/api' } };
+    const config = {
+      AUTH0_INPUT_FILE: yamlFile,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { name: 'my resource', identifier: 'http://myapi.com/api' },
+    };
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
@@ -56,9 +59,9 @@ describe('#YAML context resource servers', () => {
         scopes: [
           { description: 'update account', name: 'update:account' },
           { description: 'read account', name: 'read:account' },
-          { description: 'admin access', name: 'admin' }
-        ]
-      }
+          { description: 'admin access', name: 'admin' },
+        ],
+      },
     ];
     context.assets.resourceServers = resourceServers;
 

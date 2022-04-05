@@ -4,12 +4,14 @@ import fs from 'fs-extra';
 import { sanitize } from '../../../utils';
 import log from '../../../logger';
 
-import { YAMLHandler } from '.'
-import YAMLContext from '..'
+import { YAMLHandler } from '.';
+import YAMLContext from '..';
 
-type ParsedRules = {
-  rules: unknown[]
-} | {}
+type ParsedRules =
+  | {
+      rules: unknown[];
+    }
+  | {};
 
 async function parse(context: YAMLContext): Promise<ParsedRules> {
   // Load the script file for each rule
@@ -19,14 +21,14 @@ async function parse(context: YAMLContext): Promise<ParsedRules> {
     rules: [
       ...context.assets.rules.map((rule) => ({
         ...rule,
-        script: context.loadFile(rule.script)
-      }))
-    ]
+        script: context.loadFile(rule.script),
+      })),
+    ],
   };
 }
 
 async function dump(context: YAMLContext): Promise<ParsedRules> {
-  let rules = [ ...context.assets.rules || [] ];
+  let rules = [...(context.assets.rules || [])];
 
   if (rules.length > 0) {
     // Create Rules folder

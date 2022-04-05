@@ -7,9 +7,7 @@ import { constants } from '../../../src/tools';
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/connections';
 import { loadJSON } from '../../../src/utils';
-import {
-  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
-} from '../../utils';
+import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
 
 describe('#directory context connections', () => {
   it('should process connections', async () => {
@@ -17,15 +15,19 @@ describe('#directory context connections', () => {
       [constants.CONNECTIONS_DIRECTORY]: {
         'azuread.json': '{ "name": "myad-waad", "strategy": "waad", "var": @@var@@ }',
         'facebook.json': '{  "name": "facebook", "strategy": "facebook", "var": @@var@@ }',
-        'email.json': '{  "name": "email", "strategy": "email", "var": @@var@@, "options": { "email": { "body": "./email.html" } } }',
-        'email.html': 'html code with ##secret##'
-      }
+        'email.json':
+          '{  "name": "email", "strategy": "email", "var": @@var@@, "options": { "email": { "body": "./email.html" } } }',
+        'email.html': 'html code with ##secret##',
+      },
     };
 
     const repoDir = path.join(testDataDir, 'directory', 'connections1');
     createDir(repoDir, files);
 
-    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { secret: 'test secret', var: 'something' } };
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { secret: 'test secret', var: 'something' },
+    };
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
@@ -35,9 +37,9 @@ describe('#directory context connections', () => {
         name: 'email',
         strategy: 'email',
         var: 'something',
-        options: { email: { body: 'html code with test secret' } }
+        options: { email: { body: 'html code with test secret' } },
       },
-      { name: 'facebook', strategy: 'facebook', var: 'something' }
+      { name: 'facebook', strategy: 'facebook', var: 'something' },
     ];
 
     expect(context.assets.connections).to.deep.equal(target);
@@ -48,20 +50,21 @@ describe('#directory context connections', () => {
 
     const files = {
       [customConnectionDirectory]: {
-        'a-connection.json': '{ "name": "A Connection" }'
-      }
+        'a-connection.json': '{ "name": "A Connection" }',
+      },
     };
 
     const repoDir = path.join(testDataDir, 'directory', 'connections1');
     createDir(repoDir, files);
 
-    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_CONNECTIONS_DIRECTORY: customConnectionDirectory };
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+      AUTH0_CONNECTIONS_DIRECTORY: customConnectionDirectory,
+    };
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
-    const target = [
-      { name: 'A Connection' }
-    ];
+    const target = [{ name: 'A Connection' }];
 
     expect(context.assets.connections).to.deep.equal(target);
   });
@@ -70,20 +73,21 @@ describe('#directory context connections', () => {
     const files = {
       [constants.CONNECTIONS_DIRECTORY]: {
         'azuread.json': '{ "name": "myad-waad", "strategy": "waad", "var": @@var@@ }',
-        'README.md': 'something'
-      }
+        'README.md': 'something',
+      },
     };
 
     const repoDir = path.join(testDataDir, 'directory', 'connections2');
     createDir(repoDir, files);
 
-    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { var: 'something' } };
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { var: 'something' },
+    };
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
-    const target = [
-      { name: 'myad-waad', strategy: 'waad', var: 'something' }
-    ];
+    const target = [{ name: 'myad-waad', strategy: 'waad', var: 'something' }];
 
     expect(context.assets.connections).to.deep.equal(target);
   });
@@ -110,32 +114,44 @@ describe('#directory context connections', () => {
 
     context.assets.connections = [
       {
-        name: 'myad-waad', strategy: 'waad', var: 'something', enabled_clients: []
+        name: 'myad-waad',
+        strategy: 'waad',
+        var: 'something',
+        enabled_clients: [],
       },
       {
-        name: 'facebook', strategy: 'facebook', var: 'something', enabled_clients: []
+        name: 'facebook',
+        strategy: 'facebook',
+        var: 'something',
+        enabled_clients: [],
       },
       {
         name: 'email',
         strategy: 'email',
         enabled_clients: [],
-        options: { email: { body: 'html code' } }
-      }
+        options: { email: { body: 'html code' } },
+      },
     ];
 
     const emailTarget = {
       name: 'email',
       strategy: 'email',
       enabled_clients: [],
-      options: { email: { body: './email.html' } }
+      options: { email: { body: './email.html' } },
     };
 
     await handler.dump(context);
     const connectionsFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
-    expect(loadJSON(path.join(connectionsFolder, 'myad-waad.json'))).to.deep.equal(context.assets.connections[0]);
-    expect(loadJSON(path.join(connectionsFolder, 'facebook.json'))).to.deep.equal(context.assets.connections[1]);
+    expect(loadJSON(path.join(connectionsFolder, 'myad-waad.json'))).to.deep.equal(
+      context.assets.connections[0]
+    );
+    expect(loadJSON(path.join(connectionsFolder, 'facebook.json'))).to.deep.equal(
+      context.assets.connections[1]
+    );
     expect(loadJSON(path.join(connectionsFolder, 'email.json'))).to.deep.equal(emailTarget);
-    expect(fs.readFileSync(path.join(connectionsFolder, 'email.html'), 'utf8')).to.deep.equal('html code');
+    expect(fs.readFileSync(path.join(connectionsFolder, 'email.html'), 'utf8')).to.deep.equal(
+      'html code'
+    );
   });
 
   it('should dump connections sanitized', async () => {
@@ -145,13 +161,18 @@ describe('#directory context connections', () => {
 
     context.assets.connections = [
       {
-        name: 'my/ad-waad', strategy: 'waad', var: 'something', enabled_clients: []
-      }
+        name: 'my/ad-waad',
+        strategy: 'waad',
+        var: 'something',
+        enabled_clients: [],
+      },
     ];
 
     await handler.dump(context);
     const clientFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
-    expect(loadJSON(path.join(clientFolder, 'my-ad-waad.json'))).to.deep.equal(context.assets.connections[0]);
+    expect(loadJSON(path.join(clientFolder, 'my-ad-waad.json'))).to.deep.equal(
+      context.assets.connections[0]
+    );
   });
 
   it('should dump connections with enabled_clients sorted', async () => {
@@ -161,12 +182,19 @@ describe('#directory context connections', () => {
 
     context.assets.connections = [
       {
-        name: 'my/ad-waad', strategy: 'waad', var: 'something', enabled_clients: [ 'client2', 'client3', 'client1' ]
-      }
+        name: 'my/ad-waad',
+        strategy: 'waad',
+        var: 'something',
+        enabled_clients: ['client2', 'client3', 'client1'],
+      },
     ];
 
     await handler.dump(context);
     const clientFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
-    expect(loadJSON(path.join(clientFolder, 'my-ad-waad.json')).enabled_clients).to.deep.equal([ 'client1', 'client2', 'client3' ]);
+    expect(loadJSON(path.join(clientFolder, 'my-ad-waad.json')).enabled_clients).to.deep.equal([
+      'client1',
+      'client2',
+      'client3',
+    ]);
   });
 });

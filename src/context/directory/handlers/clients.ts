@@ -4,20 +4,26 @@ import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
 import log from '../../../logger';
 import {
-  isFile, getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize, clearClientArrays
+  isFile,
+  getFiles,
+  existsMustBeDir,
+  dumpJSON,
+  loadJSON,
+  sanitize,
+  clearClientArrays,
 } from '../../../utils';
-import { DirectoryHandler } from '.'
+import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 
 type ParsedClients = {
-  clients: unknown | undefined
-}
+  clients: unknown | undefined;
+};
 
 function parse(context: DirectoryContext): ParsedClients {
   const clientsFolder = path.join(context.filePath, constants.CLIENTS_DIRECTORY);
   if (!existsMustBeDir(clientsFolder)) return { clients: undefined }; // Skip
 
-  const foundFiles = getFiles(clientsFolder, [ '.json' ]);
+  const foundFiles = getFiles(clientsFolder, ['.json']);
 
   const clients = foundFiles
     .map((f) => {
@@ -36,7 +42,7 @@ function parse(context: DirectoryContext): ParsedClients {
     .filter((p) => Object.keys(p).length > 0); // Filter out empty clients
 
   return {
-    clients
+    clients,
   };
 }
 
@@ -68,6 +74,6 @@ async function dump(context: DirectoryContext): Promise<void> {
 const clientsHandler: DirectoryHandler<ParsedClients> = {
   parse,
   dump,
-}
+};
 
 export default clientsHandler;

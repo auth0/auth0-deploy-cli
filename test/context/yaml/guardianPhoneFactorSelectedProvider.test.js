@@ -20,7 +20,7 @@ describe('#YAML context guardian phone factor selected provider', () => {
     fs.writeFileSync(yamlFile, yaml);
 
     const target = {
-      provider: 'twilio'
+      provider: 'twilio',
     };
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { ENV: 'test' } };
@@ -32,14 +32,14 @@ describe('#YAML context guardian phone factor selected provider', () => {
   it('should dump guardian phone factor selected provider', async () => {
     const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
     context.assets.guardianPhoneFactorSelectedProvider = {
-      provider: 'twilio'
+      provider: 'twilio',
     };
 
     const dumped = await handler.dump(context);
     expect(dumped).to.deep.equal({
       guardianPhoneFactorSelectedProvider: {
-        provider: 'twilio'
-      }
+        provider: 'twilio',
+      },
     });
   });
 });

@@ -29,10 +29,10 @@ describe('#YAML context email provider', () => {
         smtp_host: 'smtp.mailtrap.io',
         smtp_port: 2525,
         smtp_user: 'smtp_user',
-        smtp_pass: 'smtp_secret_password'
+        smtp_pass: 'smtp_secret_password',
       },
       enabled: true,
-      name: 'smtp'
+      name: 'smtp',
     };
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { ENV: 'test' } };
@@ -45,7 +45,7 @@ describe('#YAML context email provider', () => {
     const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
     context.assets.emailProvider = {
       enabled: true,
-      name: 'smtp'
+      name: 'smtp',
     };
 
     const dumped = await handler.dump(context);
@@ -55,11 +55,11 @@ describe('#YAML context email provider', () => {
           smtp_host: '##SMTP_HOSTNAME##',
           smtp_pass: '##SMTP_PASS##',
           smtp_port: '##SMTP_PORT##',
-          smtp_user: '##SMTP_USER##'
+          smtp_user: '##SMTP_USER##',
         },
         enabled: true,
-        name: 'smtp'
-      }
+        name: 'smtp',
+      },
     });
   });
 
@@ -67,16 +67,16 @@ describe('#YAML context email provider', () => {
     const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
     context.assets.emailProvider = {
       enabled: true,
-      name: 'smtp'
+      name: 'smtp',
     };
 
-    context.assets.exclude.defaults = [ 'emailProvider' ];
+    context.assets.exclude.defaults = ['emailProvider'];
     const dumped = await handler.dump(context);
     expect(dumped).to.deep.equal({
       emailProvider: {
         enabled: true,
-        name: 'smtp'
-      }
+        name: 'smtp',
+      },
     });
   });
 });

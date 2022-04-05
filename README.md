@@ -5,6 +5,7 @@ Auth0 supports continuous integration and deployment (CI/CD) of Auth0 Tenants an
 The `auth0-deploy-cli` tool supports the importing and exporting of Auth0 Tenant configuration data.
 
 Supported Auth0 Management API resources
+
 - [x] [Actions](https://auth0.com/docs/api/management/v2/#!/Actions/get_actions)
 - [ ] [Branding](https://auth0.com/docs/api/management/v2/#!/Branding/get_branding)
 - [x] [Clients (Applications)](https://auth0.com/docs/api/management/v2#!/Clients/get_clients)
@@ -47,7 +48,9 @@ Supported Auth0 Management API resources
 Please visit Auth0 Doc for this [Deploy CLI Tool](https://auth0.com/docs/deploy/deploy-cli-tool)
 
 # Integrating with popular CI/CD pipelines
+
 Please visit Auth0 Marketplace Guide for:
+
 - [Azure Pipelines](https://marketplace.auth0.com/integrations/azure-pipeline)
 - [Bitbucket Pipelines](https://marketplace.auth0.com/integrations/bitbucket-pipeline)
 - [GitLab Pipelines](https://marketplace.auth0.com/integrations/gitlab-pipeline)

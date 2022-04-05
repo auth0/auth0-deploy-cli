@@ -7,7 +7,7 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
       const auth0 = {
         guardian: {
           // omitting getPhoneFactorSelectedProvider()
-        }
+        },
       };
 
       const handler = new guardianPhoneFactorSelectedProvider.default({ client: auth0 });
@@ -24,7 +24,7 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
             err.statusCode = 404;
             err.requestInfo = {
               method: 'get',
-              url: 'https://example.auth0.com/api/v2/guardian/factors/sms/selected-provider'
+              url: 'https://example.auth0.com/api/v2/guardian/factors/sms/selected-provider',
             };
             err.originalError = new Error('Not Found');
             err.originalError.status = 404;
@@ -32,12 +32,12 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
               body: {
                 statusCode: 404,
                 error: 'Not Found',
-                message: 'Not Found'
-              }
+                message: 'Not Found',
+              },
             };
             return Promise.reject(err);
-          }
-        }
+          },
+        },
       };
 
       const handler = new guardianPhoneFactorSelectedProvider.default({ client: auth0 });
@@ -54,7 +54,7 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
             err.statusCode = 403;
             err.requestInfo = {
               method: 'get',
-              url: 'https://example.auth0.com/api/v2/guardian/factors/sms/selected-provider'
+              url: 'https://example.auth0.com/api/v2/guardian/factors/sms/selected-provider',
             };
             err.originalError = new Error('Forbidden');
             err.originalError.status = 403;
@@ -63,12 +63,12 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
                 statusCode: 403,
                 error: 'Forbidden',
                 message: 'This endpoint is disabled for your tenant.',
-                errorCode: 'hooks_not_allowed'
-              }
+                errorCode: 'hooks_not_allowed',
+              },
             };
             return Promise.reject(err);
-          }
-        }
+          },
+        },
       };
 
       const handler = new guardianPhoneFactorSelectedProvider.default({ client: auth0 });
@@ -79,8 +79,8 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
     it('should get guardian phone factor selected provider', async () => {
       const auth0 = {
         guardian: {
-          getPhoneFactorSelectedProvider: () => ({ provider: 'twilio' })
-        }
+          getPhoneFactorSelectedProvider: () => ({ provider: 'twilio' }),
+        },
       };
 
       const handler = new guardianPhoneFactorSelectedProvider.default({ client: auth0 });
@@ -95,8 +95,8 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
             const error = new Error('Bad request');
             error.statusCode = 500;
             throw error;
-          }
-        }
+          },
+        },
       };
 
       const handler = new guardianPhoneFactorSelectedProvider.default({ client: auth0 });
@@ -115,15 +115,15 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
           updatePhoneFactorSelectedProvider: (params, data) => {
             expect(data).to.eql({ provider: 'twilio' });
             return Promise.resolve(data);
-          }
-        }
+          },
+        },
       };
 
       const handler = new guardianPhoneFactorSelectedProvider.default({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
-        { guardianPhoneFactorSelectedProvider: { provider: 'twilio' } }
+        { guardianPhoneFactorSelectedProvider: { provider: 'twilio' } },
       ]);
     });
 
@@ -131,18 +131,18 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
       const auth0 = {
         guardian: {
           updatePhoneFactorSelectedProvider: () => {
-            const err = new Error('updatePhoneFactorSelectedProvider() should not have been called');
+            const err = new Error(
+              'updatePhoneFactorSelectedProvider() should not have been called'
+            );
             return Promise.reject(err);
-          }
-        }
+          },
+        },
       };
 
       const handler = new guardianPhoneFactorSelectedProvider.default({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [
-        { guardianPhoneFactorSelectedProvider: {} }
-      ]);
+      await stageFn.apply(handler, [{ guardianPhoneFactorSelectedProvider: {} }]);
     });
   });
 });

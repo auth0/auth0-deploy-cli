@@ -7,20 +7,18 @@ import { constants } from '../../../src/tools';
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/rules';
 import { loadJSON } from '../../../src/utils';
-import {
-  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
-} from '../../utils';
+import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
 
 const rules = {
   'somerule.js': 'function someRule() { var hello = @@hello@@; }',
   'somerule.json': '{ "name": "somerule", "enabled": "foo", "script": "somerule.js" }',
   'otherrule.js': 'function someRule() { var hello = @@hello@@; }',
-  'otherrule.json': '{ "name": "otherrule", "enabled": "foo", "script": "otherrule.js" }'
+  'otherrule.json': '{ "name": "otherrule", "enabled": "foo", "script": "otherrule.js" }',
 };
 
 const rulesTarget = [
   { enabled: 'foo', name: 'otherrule', script: 'function someRule() { var hello = "goodbye"; }' },
-  { enabled: 'foo', name: 'somerule', script: 'function someRule() { var hello = "goodbye"; }' }
+  { enabled: 'foo', name: 'somerule', script: 'function someRule() { var hello = "goodbye"; }' },
 ];
 
 describe('#directory context rules', () => {
@@ -29,7 +27,10 @@ describe('#directory context rules', () => {
     const dir = path.join(repoDir);
     createDir(dir, { [constants.RULES_DIRECTORY]: rules });
 
-    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { hello: 'goodbye' } };
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { hello: 'goodbye' },
+    };
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
@@ -41,7 +42,10 @@ describe('#directory context rules', () => {
     const dir = path.join(repoDir);
     createDir(dir, { [constants.RULES_DIRECTORY]: rules });
 
-    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { hello: 'goodbye' } };
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { hello: 'goodbye' },
+    };
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
@@ -73,8 +77,8 @@ describe('#directory context rules', () => {
         name: 'someRule',
         order: 10,
         script: scriptValidation,
-        stage: 'login_success'
-      }
+        stage: 'login_success',
+      },
     ];
 
     await handler.dump(context);
@@ -86,9 +90,11 @@ describe('#directory context rules', () => {
       name: 'someRule',
       order: 10,
       script: './someRule.js',
-      stage: 'login_success'
+      stage: 'login_success',
     });
-    expect(fs.readFileSync(path.join(rulesFolder, 'someRule.js'), 'utf8')).to.deep.equal(scriptValidation);
+    expect(fs.readFileSync(path.join(rulesFolder, 'someRule.js'), 'utf8')).to.deep.equal(
+      scriptValidation
+    );
   });
 
   it('should dump rules sanitized', async () => {
@@ -103,8 +109,8 @@ describe('#directory context rules', () => {
         name: 'some/Rule',
         order: 10,
         script: scriptValidation,
-        stage: 'login_success'
-      }
+        stage: 'login_success',
+      },
     ];
 
     await handler.dump(context);
@@ -116,8 +122,10 @@ describe('#directory context rules', () => {
       name: 'some/Rule',
       order: 10,
       script: './some-Rule.js',
-      stage: 'login_success'
+      stage: 'login_success',
     });
-    expect(fs.readFileSync(path.join(rulesFolder, 'some-Rule.js'), 'utf8')).to.deep.equal(scriptValidation);
+    expect(fs.readFileSync(path.join(rulesFolder, 'some-Rule.js'), 'utf8')).to.deep.equal(
+      scriptValidation
+    );
   });
 });

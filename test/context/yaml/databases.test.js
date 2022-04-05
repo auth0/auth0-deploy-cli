@@ -12,7 +12,10 @@ describe('#YAML context databases', () => {
   const scriptFile = path.join(dbDir, 'script.js');
   const scriptValidate = 'function login() { var env1 = "env2"; }';
   const yamlFile = path.join(dbDir, 'databases.yaml');
-  const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { val1: 'env1', val2: 'env2' } };
+  const config = {
+    AUTH0_INPUT_FILE: yamlFile,
+    AUTH0_KEYWORD_REPLACE_MAPPINGS: { val1: 'env1', val2: 'env2' },
+  };
 
   it('should process normal database', async () => {
     cleanThenMkdir(dbDir);
@@ -32,10 +35,10 @@ describe('#YAML context databases', () => {
         name: 'users',
         options: {
           import_mode: true,
-          requires_username: true
+          requires_username: true,
         },
-        strategy: 'auth0'
-      }
+        strategy: 'auth0',
+      },
     ];
 
     fs.writeFileSync(yamlFile, yaml);
@@ -79,12 +82,12 @@ describe('#YAML context databases', () => {
             delete: scriptValidate,
             get_user: scriptValidate,
             login: scriptValidate,
-            verify: scriptValidate
+            verify: scriptValidate,
           },
-          enabledDatabaseCustomization: true
+          enabledDatabaseCustomization: true,
         },
-        strategy: 'auth0'
-      }
+        strategy: 'auth0',
+      },
     ];
 
     fs.writeFileSync(yamlFile, yaml);
@@ -99,7 +102,10 @@ describe('#YAML context databases', () => {
 
   it('should dump normal databases', async () => {
     cleanThenMkdir(dbDumpDir);
-    const context = new Context({ AUTH0_INPUT_FILE: path.join(dbDumpDir, 'tennat.yaml') }, mockMgmtClient());
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dbDumpDir, 'tennat.yaml') },
+      mockMgmtClient()
+    );
 
     context.assets.databases = [
       {
@@ -107,10 +113,10 @@ describe('#YAML context databases', () => {
         enabled_clients: [],
         options: {
           import_mode: true,
-          requires_username: true
+          requires_username: true,
         },
-        strategy: 'auth0'
-      }
+        strategy: 'auth0',
+      },
     ];
 
     const dumped = await handler.dump(context);
@@ -121,17 +127,20 @@ describe('#YAML context databases', () => {
           enabled_clients: [],
           options: {
             import_mode: true,
-            requires_username: true
+            requires_username: true,
           },
-          strategy: 'auth0'
-        }
-      ]
+          strategy: 'auth0',
+        },
+      ],
     });
   });
 
   it('should dump custom databases', async () => {
     cleanThenMkdir(dbDumpDir);
-    const context = new Context({ AUTH0_INPUT_FILE: path.join(dbDumpDir, 'tennat.yaml') }, mockMgmtClient());
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dbDumpDir, 'tennat.yaml') },
+      mockMgmtClient()
+    );
 
     context.assets.databases = [
       {
@@ -146,12 +155,12 @@ describe('#YAML context databases', () => {
             delete: scriptValidate,
             get_user: scriptValidate,
             login: scriptValidate,
-            verify: scriptValidate
+            verify: scriptValidate,
           },
-          enabledDatabaseCustomization: true
+          enabledDatabaseCustomization: true,
         },
-        strategy: 'auth0'
-      }
+        strategy: 'auth0',
+      },
     ];
 
     const dumped = await handler.dump(context);
@@ -169,42 +178,59 @@ describe('#YAML context databases', () => {
               delete: './databases/users/delete.js',
               get_user: './databases/users/get_user.js',
               login: './databases/users/login.js',
-              verify: './databases/users/verify.js'
+              verify: './databases/users/verify.js',
             },
-            enabledDatabaseCustomization: true
+            enabledDatabaseCustomization: true,
           },
-          strategy: 'auth0'
-        }
-      ]
+          strategy: 'auth0',
+        },
+      ],
     });
 
     const scripsFolder = path.join(dbDumpDir, 'databases', 'users');
-    expect(fs.readFileSync(path.join(scripsFolder, 'change_email.js'), 'utf8')).to.deep.equal(scriptValidate);
-    expect(fs.readFileSync(path.join(scripsFolder, 'change_password.js'), 'utf8')).to.deep.equal(scriptValidate);
-    expect(fs.readFileSync(path.join(scripsFolder, 'create.js'), 'utf8')).to.deep.equal(scriptValidate);
-    expect(fs.readFileSync(path.join(scripsFolder, 'delete.js'), 'utf8')).to.deep.equal(scriptValidate);
-    expect(fs.readFileSync(path.join(scripsFolder, 'get_user.js'), 'utf8')).to.deep.equal(scriptValidate);
-    expect(fs.readFileSync(path.join(scripsFolder, 'login.js'), 'utf8')).to.deep.equal(scriptValidate);
-    expect(fs.readFileSync(path.join(scripsFolder, 'verify.js'), 'utf8')).to.deep.equal(scriptValidate);
+    expect(fs.readFileSync(path.join(scripsFolder, 'change_email.js'), 'utf8')).to.deep.equal(
+      scriptValidate
+    );
+    expect(fs.readFileSync(path.join(scripsFolder, 'change_password.js'), 'utf8')).to.deep.equal(
+      scriptValidate
+    );
+    expect(fs.readFileSync(path.join(scripsFolder, 'create.js'), 'utf8')).to.deep.equal(
+      scriptValidate
+    );
+    expect(fs.readFileSync(path.join(scripsFolder, 'delete.js'), 'utf8')).to.deep.equal(
+      scriptValidate
+    );
+    expect(fs.readFileSync(path.join(scripsFolder, 'get_user.js'), 'utf8')).to.deep.equal(
+      scriptValidate
+    );
+    expect(fs.readFileSync(path.join(scripsFolder, 'login.js'), 'utf8')).to.deep.equal(
+      scriptValidate
+    );
+    expect(fs.readFileSync(path.join(scripsFolder, 'verify.js'), 'utf8')).to.deep.equal(
+      scriptValidate
+    );
   });
 
   it('should dump custom databases sanitized', async () => {
     cleanThenMkdir(dbDumpDir);
-    const context = new Context({ AUTH0_INPUT_FILE: path.join(dbDumpDir, 'tennat.yaml') }, mockMgmtClient());
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dbDumpDir, 'tennat.yaml') },
+      mockMgmtClient()
+    );
 
     context.assets.databases = [
       {
         name: 'users/test',
-        enabled_clients: [ 'client3', 'client2', 'client1' ],
+        enabled_clients: ['client3', 'client2', 'client1'],
         options: {
           import_mode: true,
           customScripts: {
-            change_email: scriptValidate
+            change_email: scriptValidate,
           },
-          enabledDatabaseCustomization: true
+          enabledDatabaseCustomization: true,
         },
-        strategy: 'auth0'
-      }
+        strategy: 'auth0',
+      },
     ];
 
     const dumped = await handler.dump(context);
@@ -212,20 +238,22 @@ describe('#YAML context databases', () => {
       databases: [
         {
           name: 'users/test',
-          enabled_clients: [ 'client1', 'client2', 'client3' ],
+          enabled_clients: ['client1', 'client2', 'client3'],
           options: {
             import_mode: true,
             customScripts: {
-              change_email: './databases/users-test/change_email.js'
+              change_email: './databases/users-test/change_email.js',
             },
-            enabledDatabaseCustomization: true
+            enabledDatabaseCustomization: true,
           },
-          strategy: 'auth0'
-        }
-      ]
+          strategy: 'auth0',
+        },
+      ],
     });
 
     const scripsFolder = path.join(dbDumpDir, 'databases', 'users-test');
-    expect(fs.readFileSync(path.join(scripsFolder, 'change_email.js'), 'utf8')).to.deep.equal(scriptValidate);
+    expect(fs.readFileSync(path.join(scripsFolder, 'change_email.js'), 'utf8')).to.deep.equal(
+      scriptValidate
+    );
   });
 });

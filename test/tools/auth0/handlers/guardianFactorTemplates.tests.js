@@ -8,17 +8,17 @@ const pool = {
       data.generator(data.data[0]);
     }
     return { promise: () => null };
-  }
+  },
 };
 
 describe('#guardianFactorTemplates handler', () => {
-  const config = function(key) {
+  const config = function (key) {
     return config.data && config.data[key];
   };
 
   config.data = {
     AUTH0_CLIENT_ID: 'client_id',
-    AUTH0_ALLOW_DELETE: true
+    AUTH0_ALLOW_DELETE: true,
   };
 
   describe('#guardianFactorTemplates validate', () => {
@@ -27,16 +27,15 @@ describe('#guardianFactorTemplates handler', () => {
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = [
         {
-          name: 'sms'
+          name: 'sms',
         },
         {
-          name: 'sms'
-        }
-
+          name: 'sms',
+        },
       ];
 
       try {
-        await stageFn.apply(handler, [ { guardianFactorTemplates: data } ]);
+        await stageFn.apply(handler, [{ guardianFactorTemplates: data }]);
       } catch (err) {
         expect(err).to.be.an('object');
         expect(err.message).to.include('Names must be unique');
@@ -48,11 +47,11 @@ describe('#guardianFactorTemplates handler', () => {
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = [
         {
-          name: 'sms'
-        }
+          name: 'sms',
+        },
       ];
 
-      await stageFn.apply(handler, [ { guardianFactorTemplates: data } ]);
+      await stageFn.apply(handler, [{ guardianFactorTemplates: data }]);
     });
   });
 
@@ -60,9 +59,9 @@ describe('#guardianFactorTemplates handler', () => {
     it('should get guardianFactorTemplates', async () => {
       const auth0 = {
         guardian: {
-          getFactorTemplates: (params) => ({ ...params, enrollment_message: 'test' })
+          getFactorTemplates: (params) => ({ ...params, enrollment_message: 'test' }),
         },
-        pool
+        pool,
       };
 
       const handler = new guardianFactorTemplatesTests.default({ client: auth0, config });
@@ -70,17 +69,17 @@ describe('#guardianFactorTemplates handler', () => {
       expect(data).to.deep.equal([
         {
           enrollment_message: 'test',
-          name: 'sms'
-        }
+          name: 'sms',
+        },
       ]);
     });
 
     it('should update guardianFactorTemplates', async () => {
       const auth0 = {
         guardian: {
-          updateFactorTemplates: (params, data) => ({ ...data })
+          updateFactorTemplates: (params, data) => ({ ...data }),
         },
-        pool
+        pool,
       };
 
       const handler = new guardianFactorTemplatesTests.default({ client: auth0, config });
@@ -88,11 +87,11 @@ describe('#guardianFactorTemplates handler', () => {
       const data = [
         {
           name: 'sms',
-          enrollment_message: 'test'
-        }
+          enrollment_message: 'test',
+        },
       ];
 
-      await stageFn.apply(handler, [ { guardianFactorTemplates: data } ]);
+      await stageFn.apply(handler, [{ guardianFactorTemplates: data }]);
     });
   });
 });

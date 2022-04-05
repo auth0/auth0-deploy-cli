@@ -3,7 +3,7 @@ import { configFactory } from '../configFactory';
 import { deploy as toolsDeploy } from '../tools';
 import log from '../logger';
 import { setupContext } from '../context';
-import { ImportParams } from '../args'
+import { ImportParams } from '../args';
 
 export default async function importCMD(params: ImportParams) {
   const {
@@ -12,7 +12,7 @@ export default async function importCMD(params: ImportParams) {
     config_file: configFile,
     config: configObj,
     env: shouldInheritEnv = false,
-    secret: clientSecret
+    secret: clientSecret,
   } = params;
 
   if (shouldInheritEnv) {
@@ -30,7 +30,7 @@ export default async function importCMD(params: ImportParams) {
     AUTH0_INPUT_FILE: inputFile,
     AUTH0_BASE_PATH: basePath,
     AUTH0_KEYWORD_REPLACE_MAPPINGS: {},
-    ...configObj || {}
+    ...(configObj || {}),
   };
 
   // Prepare configuration by initializing nconf, then passing that as the provider to the config object

@@ -19,9 +19,7 @@ describe('#YAML context rules configs', () => {
     const yamlFile = path.join(dir, 'config.yaml');
     fs.writeFileSync(yamlFile, yaml);
 
-    const target = [
-      { key: 'SOME_SECRET', value: 'some_key' }
-    ];
+    const target = [{ key: 'SOME_SECRET', value: 'some_key' }];
 
     const config = { AUTH0_INPUT_FILE: yamlFile };
     const context = new Context(config, mockMgmtClient());
@@ -32,9 +30,7 @@ describe('#YAML context rules configs', () => {
 
   it('should dump rules configs', async () => {
     const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
-    const rulesConfigs = [
-      { key: 'SOME_SECRET', value: 'some_key' }
-    ];
+    const rulesConfigs = [{ key: 'SOME_SECRET', value: 'some_key' }];
     context.assets.rulesConfigs = rulesConfigs;
 
     const dumped = await handler.dump(context);

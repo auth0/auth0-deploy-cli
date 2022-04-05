@@ -7,7 +7,7 @@ describe('#guardianPhoneFactorMessageTypes handler', () => {
       const auth0 = {
         guardian: {
           // omitting getPhoneFactorMessageTypes()
-        }
+        },
       };
 
       const handler = new guardianPhoneFactorMessageTypes.default({ client: auth0 });
@@ -24,7 +24,7 @@ describe('#guardianPhoneFactorMessageTypes handler', () => {
             err.statusCode = 404;
             err.requestInfo = {
               method: 'get',
-              url: 'https://example.auth0.com/api/v2/guardian/factors/phone/message-types'
+              url: 'https://example.auth0.com/api/v2/guardian/factors/phone/message-types',
             };
             err.originalError = new Error('Not Found');
             err.originalError.status = 404;
@@ -32,12 +32,12 @@ describe('#guardianPhoneFactorMessageTypes handler', () => {
               body: {
                 statusCode: 404,
                 error: 'Not Found',
-                message: 'Not Found'
-              }
+                message: 'Not Found',
+              },
             };
             return Promise.reject(err);
-          }
-        }
+          },
+        },
       };
 
       const handler = new guardianPhoneFactorMessageTypes.default({ client: auth0 });
@@ -54,7 +54,7 @@ describe('#guardianPhoneFactorMessageTypes handler', () => {
             err.statusCode = 403;
             err.requestInfo = {
               method: 'get',
-              url: 'https://example.auth0.com/api/v2/guardian/factors/phone/message-types'
+              url: 'https://example.auth0.com/api/v2/guardian/factors/phone/message-types',
             };
             err.originalError = new Error('Forbidden');
             err.originalError.status = 403;
@@ -63,12 +63,12 @@ describe('#guardianPhoneFactorMessageTypes handler', () => {
                 statusCode: 403,
                 error: 'Forbidden',
                 message: 'This endpoint is disabled for your tenant.',
-                errorCode: 'voice_mfa_not_allowed'
-              }
+                errorCode: 'voice_mfa_not_allowed',
+              },
             };
             return Promise.reject(err);
-          }
-        }
+          },
+        },
       };
 
       const handler = new guardianPhoneFactorMessageTypes.default({ client: auth0 });
@@ -79,13 +79,13 @@ describe('#guardianPhoneFactorMessageTypes handler', () => {
     it('should get guardian phone factor message types', async () => {
       const auth0 = {
         guardian: {
-          getPhoneFactorMessageTypes: () => ({ message_types: [ 'sms', 'voice' ] })
-        }
+          getPhoneFactorMessageTypes: () => ({ message_types: ['sms', 'voice'] }),
+        },
       };
 
       const handler = new guardianPhoneFactorMessageTypes.default({ client: auth0 });
       const data = await handler.getType();
-      expect(data).to.deep.equal({ message_types: [ 'sms', 'voice' ] });
+      expect(data).to.deep.equal({ message_types: ['sms', 'voice'] });
     });
 
     it('should throw an error for all other failed requests', async () => {
@@ -95,8 +95,8 @@ describe('#guardianPhoneFactorMessageTypes handler', () => {
             const error = new Error('Bad request');
             error.statusCode = 500;
             throw error;
-          }
-        }
+          },
+        },
       };
 
       const handler = new guardianPhoneFactorMessageTypes.default({ client: auth0 });
@@ -113,17 +113,17 @@ describe('#guardianPhoneFactorMessageTypes handler', () => {
       const auth0 = {
         guardian: {
           updatePhoneFactorMessageTypes: (params, data) => {
-            expect(data).to.eql({ message_types: [ 'sms', 'voice' ] });
+            expect(data).to.eql({ message_types: ['sms', 'voice'] });
             return Promise.resolve(data);
-          }
-        }
+          },
+        },
       };
 
       const handler = new guardianPhoneFactorMessageTypes.default({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
-        { guardianPhoneFactorMessageTypes: { message_types: [ 'sms', 'voice' ] } }
+        { guardianPhoneFactorMessageTypes: { message_types: ['sms', 'voice'] } },
       ]);
     });
 
@@ -133,16 +133,14 @@ describe('#guardianPhoneFactorMessageTypes handler', () => {
           updatePhoneFactorMessageTypes: () => {
             const err = new Error('updatePhoneFactorMessageTypes() should not have been called');
             return Promise.reject(err);
-          }
-        }
+          },
+        },
       };
 
       const handler = new guardianPhoneFactorMessageTypes.default({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [
-        { guardianPhoneFactorMessageTypes: {} }
-      ]);
+      await stageFn.apply(handler, [{ guardianPhoneFactorMessageTypes: {} }]);
     });
   });
 });

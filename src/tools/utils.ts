@@ -152,7 +152,7 @@ export function filterExcluded(changes: CalculatedChanges, exclude: string[]): C
     del: filter(del),
     update: filter(update),
     create: filter(create),
-    conflicts: filter(conflicts)
+    conflicts: filter(conflicts),
   };
 }
 

@@ -7,15 +7,15 @@ describe('#migrations handler', () => {
     migrations: {
       getMigrations: () => ({
         flags: {
-          migration_flag: true
-        }
+          migration_flag: true,
+        },
       }),
       updateMigrations: (data) => {
         expect(data).to.be.an('object');
         expect(data).to.have.deep.property('flags', { migration_flag: false, ...flags });
         return Promise.resolve(data);
-      }
-    }
+      },
+    },
   });
 
   describe('#getType()', () => {
@@ -25,7 +25,7 @@ describe('#migrations handler', () => {
       const handler = new migrations({ client });
       const data = await handler.getType();
       expect(data).to.deep.equal({
-        migration_flag: true
+        migration_flag: true,
       });
     });
 
@@ -38,7 +38,7 @@ describe('#migrations handler', () => {
             err.statusCode = 404;
             err.requestInfo = {
               method: 'get',
-              url: 'https://example.auth0.com/api/v2/migrations'
+              url: 'https://example.auth0.com/api/v2/migrations',
             };
             err.originalError = new Error('Not Found');
             err.originalError.status = 404;
@@ -46,12 +46,12 @@ describe('#migrations handler', () => {
               body: {
                 statusCode: 404,
                 error: 'Not Found',
-                message: 'Not Found'
-              }
+                message: 'Not Found',
+              },
             };
             return Promise.reject(err);
-          }
-        }
+          },
+        },
       };
 
       const handler = new migrations({ client });
@@ -68,11 +68,13 @@ describe('#migrations handler', () => {
       const handler = new migrations({ client, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [ {
-        migrations: {
-          migration_flag: false
-        }
-      } ]);
+      await stageFn.apply(handler, [
+        {
+          migrations: {
+            migration_flag: false,
+          },
+        },
+      ]);
     });
 
     describe('when AUTH0_IGNORE_UNAVAILABLE_MIGRATIONS=false (default)', () => {
@@ -83,27 +85,33 @@ describe('#migrations handler', () => {
         const handler = new migrations({ client, config });
         const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-        await stageFn.apply(handler, [ {
-          migrations: {
-            migration_flag: false,
-            disabled_flag: false
-          }
-        } ]);
+        await stageFn.apply(handler, [
+          {
+            migrations: {
+              migration_flag: false,
+              disabled_flag: false,
+            },
+          },
+        ]);
       });
 
       it('should not try to update if all flags are ignored', async () => {
         const client = mockClient();
         const config = () => false;
-        client.migrations.updateMigrations = () => { throw new Error('tried to update migrations'); };
+        client.migrations.updateMigrations = () => {
+          throw new Error('tried to update migrations');
+        };
 
         const handler = new migrations({ client, config });
         const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-        await stageFn.apply(handler, [ {
-          migrations: {
-            disabled_flag: false
-          }
-        } ]);
+        await stageFn.apply(handler, [
+          {
+            migrations: {
+              disabled_flag: false,
+            },
+          },
+        ]);
       });
 
       it('should not ignore unavailable enabled migration flags', async () => {
@@ -113,12 +121,14 @@ describe('#migrations handler', () => {
         const handler = new migrations({ client, config });
         const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-        await stageFn.apply(handler, [ {
-          migrations: {
-            migration_flag: false,
-            disabled_flag: true
-          }
-        } ]);
+        await stageFn.apply(handler, [
+          {
+            migrations: {
+              migration_flag: false,
+              disabled_flag: true,
+            },
+          },
+        ]);
       });
     });
 
@@ -130,13 +140,15 @@ describe('#migrations handler', () => {
         const handler = new migrations({ client, config });
         const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-        await stageFn.apply(handler, [ {
-          migrations: {
-            migration_flag: false,
-            disabled_flag: true,
-            another_disabled_flag: false
-          }
-        } ]);
+        await stageFn.apply(handler, [
+          {
+            migrations: {
+              migration_flag: false,
+              disabled_flag: true,
+              another_disabled_flag: false,
+            },
+          },
+        ]);
       });
     });
   });

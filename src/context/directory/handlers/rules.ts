@@ -3,22 +3,20 @@ import path from 'path';
 import { constants } from '../../../tools';
 
 import log from '../../../logger';
-import {
-  getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize
-} from '../../../utils';
+import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
 
-import { DirectoryHandler } from './index'
-import DirectoryContext from '..'
+import { DirectoryHandler } from './index';
+import DirectoryContext from '..';
 
 type ParsedRules = {
-  rules: unknown[] | undefined
-}
+  rules: unknown[] | undefined;
+};
 
 function parse(context: DirectoryContext): ParsedRules {
   const rulesFolder = path.join(context.filePath, constants.RULES_DIRECTORY);
   if (!existsMustBeDir(rulesFolder)) return { rules: undefined }; // Skip
 
-  const files: string[] = getFiles(rulesFolder, [ '.json' ]);
+  const files: string[] = getFiles(rulesFolder, ['.json']);
 
   const rules = files.map((f) => {
     const rule = { ...loadJSON(f, context.mappings) };
@@ -29,12 +27,12 @@ function parse(context: DirectoryContext): ParsedRules {
   });
 
   return {
-    rules
+    rules,
   };
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const rules = [ ...context.assets.rules || [] ];
+  const rules = [...(context.assets.rules || [])];
 
   if (!rules) return; // Skip, nothing to dump
 
@@ -57,6 +55,6 @@ async function dump(context: DirectoryContext): Promise<void> {
 const rulesHandler: DirectoryHandler<ParsedRules> = {
   parse,
   dump,
-}
+};
 
 export default rulesHandler;

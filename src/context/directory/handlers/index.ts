@@ -24,13 +24,13 @@ import triggers from './triggers';
 import attackProtection from './attackProtection';
 import branding from './branding';
 
-import DirectoryContext from '..'
-import { AssetTypes } from '../../../types'
+import DirectoryContext from '..';
+import { AssetTypes } from '../../../types';
 
 export type DirectoryHandler<T> = {
-  dump: (context: DirectoryContext) => void,
-  parse: (context: DirectoryContext) => T,
-}
+  dump: (context: DirectoryContext) => void;
+  parse: (context: DirectoryContext) => T;
+};
 
 const directoryHandlers: { [key in AssetTypes]: DirectoryHandler<{ [key: string]: unknown }> } = {
   rules,
@@ -57,7 +57,7 @@ const directoryHandlers: { [key in AssetTypes]: DirectoryHandler<{ [key: string]
   organizations,
   triggers,
   attackProtection,
-  branding
-}
+  branding,
+};
 
 export default directoryHandlers;

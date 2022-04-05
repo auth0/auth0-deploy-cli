@@ -1,4 +1,4 @@
-//TODO: 
+//TODO:
 import * as rules from './rules';
 import * as rulesConfigs from './rulesConfigs';
 import * as hooks from './hooks';
@@ -27,7 +27,7 @@ import * as organizations from './organizations';
 import * as attackProtection from './attackProtection';
 
 import { AssetTypes } from '../../../types';
-import APIHandler from './default'
+import APIHandler from './default';
 
 const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   rules,
@@ -56,7 +56,9 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   actions,
   triggers,
   organizations,
-  attackProtection
+  attackProtection,
 };
 
-export default auth0ApiHandlers as { [key in AssetTypes]: { default: typeof APIHandler, excludeSchema?: any, schema: any } };// TODO: apply stronger types to schema properties
+export default auth0ApiHandlers as {
+  [key in AssetTypes]: { default: typeof APIHandler; excludeSchema?: any; schema: any };
+}; // TODO: apply stronger types to schema properties

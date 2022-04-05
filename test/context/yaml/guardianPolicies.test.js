@@ -21,9 +21,7 @@ describe('#YAML context guardian policies provider', () => {
     fs.writeFileSync(yamlFile, yaml);
 
     const target = {
-      policies: [
-        'all-applications'
-      ]
+      policies: ['all-applications'],
     };
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { ENV: 'test' } };
@@ -45,7 +43,7 @@ describe('#YAML context guardian policies provider', () => {
     fs.writeFileSync(yamlFile, yaml);
 
     const target = {
-      policies: []
+      policies: [],
     };
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { ENV: 'test' } };
@@ -57,18 +55,14 @@ describe('#YAML context guardian policies provider', () => {
   it('should dump guardian policies', async () => {
     const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
     context.assets.guardianPolicies = {
-      policies: [
-        'all-applications'
-      ]
+      policies: ['all-applications'],
     };
 
     const dumped = await handler.dump(context);
     expect(dumped).to.deep.equal({
       guardianPolicies: {
-        policies: [
-          'all-applications'
-        ]
-      }
+        policies: ['all-applications'],
+      },
     });
   });
 });

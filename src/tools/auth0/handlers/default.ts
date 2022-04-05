@@ -5,9 +5,8 @@ import {
   stripFields, convertJsonToString, duplicateItems
 } from '../../utils';
 import { calculateChanges } from '../../calculateChanges';
-import { Asset, Assets, Auth0APIClient, CalculatedChanges} from '../../../types'
-import { ConfigFunction } from '../../../configFactory'
-
+import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
+import { ConfigFunction } from '../../../configFactory';
 
 export function order(value) {
   return function decorator(t, n, descriptor) {
@@ -17,36 +16,36 @@ export function order(value) {
 }
 
 export default class APIHandler {
-  config: ConfigFunction
-  id: string
-  type: string
-  updated: number
-  created: number
-  deleted: number
-  existing: null | Asset | Asset[]
-  client: Auth0APIClient // TODO: apply stronger types to Auth0 API client
-  identifiers: string[]
-  objectFields: string[]
-  stripUpdateFields: string[]
-  name?: string // TODO: understand if any handlers actually leverage `name` property
+  config: ConfigFunction;
+  id: string;
+  type: string;
+  updated: number;
+  created: number;
+  deleted: number;
+  existing: null | Asset | Asset[];
+  client: Auth0APIClient; // TODO: apply stronger types to Auth0 API client
+  identifiers: string[];
+  objectFields: string[];
+  stripUpdateFields: string[];
+  name?: string; // TODO: understand if any handlers actually leverage `name` property
   functions: {
-    getAll: 'getAll',
-    update: 'update'
-    create: 'create',
-    delete: 'delete'
-  }// TODO: delete this enum object in favor of tighter typing
+    getAll: 'getAll';
+    update: 'update';
+    create: 'create';
+    delete: 'delete';
+  }; // TODO: delete this enum object in favor of tighter typing
 
   constructor(options: {
-    id?: APIHandler['id'],
-    config: ConfigFunction,
-    type: APIHandler['type'],
-    client: Auth0APIClient,
-    objectFields?: APIHandler['objectFields']
-    identifiers?: APIHandler['identifiers']
-    stripUpdateFields?: APIHandler['stripUpdateFields']
+    id?: APIHandler['id'];
+    config: ConfigFunction;
+    type: APIHandler['type'];
+    client: Auth0APIClient;
+    objectFields?: APIHandler['objectFields'];
+    identifiers?: APIHandler['identifiers'];
+    stripUpdateFields?: APIHandler['stripUpdateFields'];
     functions?: {
-      [key: string]: string
-    }//TODO: understand if any resource types pass in any additional functions
+      [key: string]: string;
+    }; //TODO: understand if any resource types pass in any additional functions
   }) {
     this.config = options.config;
     this.type = options.type;
@@ -55,18 +54,15 @@ export default class APIHandler {
     this.existing = null;
     this.identifiers = options.identifiers || ['id', 'name'];
     this.objectFields = options.objectFields || [];
-    this.stripUpdateFields = [
-      ...options.stripUpdateFields || [],
-      this.id
-    ];
+    this.stripUpdateFields = [...(options.stripUpdateFields || []), this.id];
 
     this.functions = {
       getAll: 'getAll',
       create: 'create',
       delete: 'delete',
       update: 'update',
-      ...options.functions || {}
-    }
+      ...(options.functions || {}),
+    };
 
     this.updated = 0;
     this.created = 0;
@@ -113,12 +109,13 @@ export default class APIHandler {
     const typeAssets = assets[this.type];
 
     // Do nothing if not set
-    if (!typeAssets) return {
-      del: [],
-      create: [],
-      conflicts: [],
-      update: []
-    };
+    if (!typeAssets)
+      return {
+        del: [],
+        create: [],
+        conflicts: [],
+        update: [],
+      };
 
     const existing = await this.getType();
 
@@ -128,7 +125,7 @@ export default class APIHandler {
       assets: typeAssets,
       //@ts-ignore TODO: investigate what happens when `existing` is null
       existing,
-      identifiers: this.identifiers
+      identifiers: this.identifiers,
     });
   }
 
@@ -168,82 +165,105 @@ export default class APIHandler {
     const create = changes.create || [];
     const conflicts = changes.conflicts || [];
 
-    log.debug(`Start processChanges for ${this.type} [delete:${del.length}] [update:${update.length}], [create:${create.length}], [conflicts:${conflicts.length}]`);
+    log.debug(
+      `Start processChanges for ${this.type} [delete:${del.length}] [update:${update.length}], [create:${create.length}], [conflicts:${conflicts.length}]`
+    );
 
     // Process Deleted
     if (del.length > 0) {
-      const allowDelete = this.config('AUTH0_ALLOW_DELETE') === 'true' || this.config('AUTH0_ALLOW_DELETE') === true;
-      const byExtension = this.config('EXTENSION_SECRET') && (this.type === 'rules' || this.type === 'resourceServers');
+      const allowDelete =
+        this.config('AUTH0_ALLOW_DELETE') === 'true' || this.config('AUTH0_ALLOW_DELETE') === true;
+      const byExtension =
+        this.config('EXTENSION_SECRET') &&
+        (this.type === 'rules' || this.type === 'resourceServers');
       const shouldDelete = allowDelete || byExtension;
       if (!shouldDelete) {
-        log.warn(`Detected the following ${this.type} should be deleted. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config
+        log.warn(`Detected the following ${
+          this.type
+        } should be deleted. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config
         \n${changes.del.map((i) => this.objString(i)).join('\n')}
          `);
       } else {
-        await this.client.pool.addEachTask({
-          data: del || [],
-          generator: (delItem) => {
-            const delFunction = this.getClientFN('delete');
-            return delFunction({ [this.id]: delItem[this.id] })
-              .then(() => {
-                this.didDelete(delItem);
-                this.deleted += 1;
-              })
-              .catch((err) => {
-                throw new Error(`Problem deleting ${this.type} ${this.objString(delItem)}\n${err}`);
-              });
-          }
-        }).promise();
+        await this.client.pool
+          .addEachTask({
+            data: del || [],
+            generator: (delItem) => {
+              const delFunction = this.getClientFN('delete');
+              return delFunction({ [this.id]: delItem[this.id] })
+                .then(() => {
+                  this.didDelete(delItem);
+                  this.deleted += 1;
+                })
+                .catch((err) => {
+                  throw new Error(
+                    `Problem deleting ${this.type} ${this.objString(delItem)}\n${err}`
+                  );
+                });
+            },
+          })
+          .promise();
       }
     }
 
     // Process Renaming Entries Temp due to conflicts in names
-    await this.client.pool.addEachTask({
-      data: conflicts || [],
-      generator: (updateItem) => {
-        const updateFN = this.getClientFN('update');
-        const params = { [this.id]: updateItem[this.id] };
-        const payload = stripFields({ ...updateItem }, this.stripUpdateFields);
-        return updateFN(params, payload)
-          .then((data) => this.didUpdate(data))
-          .catch((err) => {
-            throw new Error(`Problem updating ${this.type} ${this.objString(updateItem)}\n${err}`);
-          });
-      }
-    }).promise();
+    await this.client.pool
+      .addEachTask({
+        data: conflicts || [],
+        generator: (updateItem) => {
+          const updateFN = this.getClientFN('update');
+          const params = { [this.id]: updateItem[this.id] };
+          const payload = stripFields({ ...updateItem }, this.stripUpdateFields);
+          return updateFN(params, payload)
+            .then((data) => this.didUpdate(data))
+            .catch((err) => {
+              throw new Error(
+                `Problem updating ${this.type} ${this.objString(updateItem)}\n${err}`
+              );
+            });
+        },
+      })
+      .promise();
 
     // Process Creations
-    await this.client.pool.addEachTask({
-      data: create || [],
-      generator: (createItem) => {
-        const createFunction = this.getClientFN('create');
-        return createFunction(createItem)
-          .then((data) => {
-            this.didCreate(data);
-            this.created += 1;
-          })
-          .catch((err) => {
-            throw new Error(`Problem creating ${this.type} ${this.objString(createItem)}\n${err}`);
-          });
-      }
-    }).promise();
+    await this.client.pool
+      .addEachTask({
+        data: create || [],
+        generator: (createItem) => {
+          const createFunction = this.getClientFN('create');
+          return createFunction(createItem)
+            .then((data) => {
+              this.didCreate(data);
+              this.created += 1;
+            })
+            .catch((err) => {
+              throw new Error(
+                `Problem creating ${this.type} ${this.objString(createItem)}\n${err}`
+              );
+            });
+        },
+      })
+      .promise();
 
     // Process Updates and strip fields not allowed in updates
-    await this.client.pool.addEachTask({
-      data: update || [],
-      generator: (updateItem) => {
-        const updateFN = this.getClientFN('update');
-        const params = { [this.id]: updateItem[this.id] };
-        const payload = stripFields({ ...updateItem }, this.stripUpdateFields);
-        return updateFN(params, payload)
-          .then((data) => {
-            this.didUpdate(data);
-            this.updated += 1;
-          })
-          .catch((err) => {
-            throw new Error(`Problem updating ${this.type} ${this.objString(updateItem)}\n${err}`);
-          });
-      }
-    }).promise();
+    await this.client.pool
+      .addEachTask({
+        data: update || [],
+        generator: (updateItem) => {
+          const updateFN = this.getClientFN('update');
+          const params = { [this.id]: updateItem[this.id] };
+          const payload = stripFields({ ...updateItem }, this.stripUpdateFields);
+          return updateFN(params, payload)
+            .then((data) => {
+              this.didUpdate(data);
+              this.updated += 1;
+            })
+            .catch((err) => {
+              throw new Error(
+                `Problem updating ${this.type} ${this.objString(updateItem)}\n${err}`
+              );
+            });
+        },
+      })
+      .promise();
   }
 }

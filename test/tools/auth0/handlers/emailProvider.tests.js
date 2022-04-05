@@ -15,14 +15,14 @@ describe('#emailProvider handler', () => {
           },
           update: (provider, data) => Promise.resolve({ provider, data }),
           delete: () => Promise.resolve(null),
-          get: () => []
-        }
+          get: () => [],
+        },
       };
 
       const handler = new emailProvider.default({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [ { emailProvider: { name: 'someProvider', enabled: true } } ]);
+      await stageFn.apply(handler, [{ emailProvider: { name: 'someProvider', enabled: true } }]);
     });
 
     it('should update email provider', async () => {
@@ -41,8 +41,8 @@ describe('#emailProvider handler', () => {
             return Promise.resolve(data);
           },
           delete: () => Promise.resolve(null),
-          get: () => ({ name: 'someProvider', enabled: false })
-        }
+          get: () => ({ name: 'someProvider', enabled: false }),
+        },
       };
 
       const handler = new emailProvider.default({ client: auth0 });
@@ -50,17 +50,17 @@ describe('#emailProvider handler', () => {
       const data = {
         name: 'someProvider',
         enabled: true,
-        credentials: 'password'
+        credentials: 'password',
       };
 
-      await stageFn.apply(handler, [ { emailProvider: data } ]);
+      await stageFn.apply(handler, [{ emailProvider: data }]);
     });
 
     it('should get email provider', async () => {
       const auth0 = {
         emailProvider: {
-          get: () => ({ name: 'smtp', enabled: true })
-        }
+          get: () => ({ name: 'smtp', enabled: true }),
+        },
       };
 
       const handler = new emailProvider.default({ client: auth0 });
@@ -84,8 +84,8 @@ describe('#emailProvider handler', () => {
             return Promise.resolve(data);
           },
           delete: () => Promise.resolve(null),
-          get: () => ({ name: 'oldProvider', enabled: true })
-        }
+          get: () => ({ name: 'oldProvider', enabled: true }),
+        },
       };
 
       const handler = new emailProvider.default({ client: auth0 });
@@ -93,10 +93,10 @@ describe('#emailProvider handler', () => {
       const data = {
         name: 'someProvider',
         enabled: true,
-        credentials: 'password'
+        credentials: 'password',
       };
 
-      await stageFn.apply(handler, [ { emailProvider: data } ]);
+      await stageFn.apply(handler, [{ emailProvider: data }]);
     });
   });
 });

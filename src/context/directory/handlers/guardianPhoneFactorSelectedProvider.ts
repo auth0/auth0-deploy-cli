@@ -1,15 +1,15 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { constants } from '../../../tools';
-import {
-  existsMustBeDir, dumpJSON, loadJSON, isFile
-} from '../../../utils';
-import { DirectoryHandler } from '.'
-import DirectoryContext from '..'
+import { existsMustBeDir, dumpJSON, loadJSON, isFile } from '../../../utils';
+import { DirectoryHandler } from '.';
+import DirectoryContext from '..';
 
-type ParsedGuardianFactorSelectedProvider = {
-  guardianPhoneFactorSelectedProvider: unknown
-} | {}
+type ParsedGuardianFactorSelectedProvider =
+  | {
+      guardianPhoneFactorSelectedProvider: unknown;
+    }
+  | {};
 
 function parse(context: DirectoryContext): ParsedGuardianFactorSelectedProvider {
   const guardianFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY);
@@ -19,7 +19,7 @@ function parse(context: DirectoryContext): ParsedGuardianFactorSelectedProvider 
 
   if (isFile(file)) {
     return {
-      guardianPhoneFactorSelectedProvider: loadJSON(file, context.mappings)
+      guardianPhoneFactorSelectedProvider: loadJSON(file, context.mappings),
     };
   }
 
@@ -38,10 +38,10 @@ async function dump(context: DirectoryContext): Promise<void> {
   dumpJSON(file, guardianPhoneFactorSelectedProvider);
 }
 
-
-const guardianFactorSelectedProviderHandler: DirectoryHandler<ParsedGuardianFactorSelectedProvider> = {
-  parse,
-  dump,
-}
+const guardianFactorSelectedProviderHandler: DirectoryHandler<ParsedGuardianFactorSelectedProvider> =
+  {
+    parse,
+    dump,
+  };
 
 export default guardianFactorSelectedProviderHandler;

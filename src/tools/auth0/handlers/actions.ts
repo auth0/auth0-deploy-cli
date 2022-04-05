@@ -2,7 +2,7 @@ import _ from 'lodash';
 import DefaultAPIHandler, { order } from './default';
 import log from '../../logger';
 import { areArraysEquals } from '../../utils';
-import { Asset } from '../../../types'
+import { Asset } from '../../../types';
 
 const MAX_ACTION_DEPLOY_RETRY = 60;
 
@@ -24,9 +24,9 @@ export const schema = {
           properties: {
             name: { type: 'string' },
             version: { type: 'string' },
-            registry_url: { type: 'string' }
-          }
-        }
+            registry_url: { type: 'string' },
+          },
+        },
       },
       secrets: {
         type: 'array',
@@ -35,9 +35,9 @@ export const schema = {
           properties: {
             name: { type: 'string' },
             value: { type: 'string' },
-            updated_at: { type: 'string', format: 'date-time' }
-          }
-        }
+            updated_at: { type: 'string', format: 'date-time' },
+          },
+        },
       },
       name: { type: 'string', default: '' },
       supported_triggers: {
@@ -47,14 +47,14 @@ export const schema = {
           properties: {
             id: { type: 'string', default: '' },
             version: { type: 'string' },
-            url: { type: 'string' }
-          }
-        }
+            url: { type: 'string' },
+          },
+        },
       },
       deployed: { type: 'boolean' },
-      status: { type: 'string' }
-    }
-  }
+      status: { type: 'string' },
+    },
+  },
 };
 
 function sleep(ms) {
@@ -64,9 +64,7 @@ function sleep(ms) {
 function isActionsDisabled(err) {
   const errorBody = _.get(err, 'originalError.response.body') || {};
 
-  return (
-    err.statusCode === 403 && errorBody.errorCode === 'feature_not_enabled'
-  );
+  return err.statusCode === 403 && errorBody.errorCode === 'feature_not_enabled';
 }
 
 export default class ActionHandler extends DefaultAPIHandler {
@@ -78,12 +76,9 @@ export default class ActionHandler extends DefaultAPIHandler {
       type: 'actions',
       functions: {
         create: (action) => this.createAction(action),
-        delete: (action) => this.deleteAction(action)
+        delete: (action) => this.deleteAction(action),
       },
-      stripUpdateFields: [
-        'deployed',
-        'status'
-      ]
+      stripUpdateFields: ['deployed', 'status'],
     });
   }
 
@@ -114,15 +109,14 @@ export default class ActionHandler extends DefaultAPIHandler {
     await this.client.pool
       .addEachTask({
         data: actions || [],
-        generator: (action) => this.deployAction(action)
-          .then(() => {
-            log.info(`Deployed [${this.type}]: ${this.objString(action)}`);
-          })
-          .catch((err) => {
-            throw new Error(
-              `Problem Deploying ${this.type} ${this.objString(action)}\n${err}`
-            );
-          })
+        generator: (action) =>
+          this.deployAction(action)
+            .then(() => {
+              log.info(`Deployed [${this.type}]: ${this.objString(action)}`);
+            })
+            .catch((err) => {
+              throw new Error(`Problem Deploying ${this.type} ${this.objString(action)}\n${err}`);
+            }),
       })
       .promise();
   }
@@ -132,7 +126,7 @@ export default class ActionHandler extends DefaultAPIHandler {
       await this.client.actions.deploy({ id: action.id });
     } catch (err) {
       // Retry if pending build.
-      if (err.message && err.message.includes('must be in the \'built\' state')) {
+      if (err.message && err.message.includes("must be in the 'built' state")) {
         if (!action.retry_count) {
           log.info(`[${this.type}]: Waiting for build to complete ${this.objString(action)}`);
           action.retry_count = 1;
@@ -212,7 +206,7 @@ export default class ActionHandler extends DefaultAPIHandler {
     // Deploy actions
     const deployActions = [
       ...changes.create.filter((action) => action.deployed),
-      ...changes.update.filter((action) => action.deployed)
+      ...changes.update.filter((action) => action.deployed),
     ];
     await this.deployActions(deployActions);
   }

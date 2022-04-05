@@ -7,24 +7,24 @@ const pool = {
       data.generator(data.data[0]);
     }
     return { promise: () => null };
-  }
+  },
 };
 
 describe('#actions handler', () => {
-  const config = function(key) {
+  const config = function (key) {
     return config.data && config.data[key];
   };
 
   config.data = {
-    AUTH0_ALLOW_DELETE: true
+    AUTH0_ALLOW_DELETE: true,
   };
 
   describe('#Actions validate', () => {
     it('should not allow same names', (done) => {
       const auth0 = {
         actions: {
-          getAll: () => []
-        }
+          getAll: () => [],
+        },
       };
 
       const handler = new actions.default({ client: auth0, config });
@@ -35,23 +35,23 @@ describe('#actions handler', () => {
           supported_triggers: [
             {
               id: 'post-login',
-              version: 'v1'
-            }
-          ]
+              version: 'v1',
+            },
+          ],
         },
         {
           name: 'actions-one',
           supported_triggers: [
             {
               id: 'credentials-exchange',
-              version: 'v1'
-            }
-          ]
-        }
+              version: 'v1',
+            },
+          ],
+        },
       ];
 
       stageFn
-        .apply(handler, [ { actions: data } ])
+        .apply(handler, [{ actions: data }])
         .then(() => done(new Error('Expecting error')))
         .catch((err) => {
           expect(err).to.be.an('object');
@@ -63,8 +63,8 @@ describe('#actions handler', () => {
     it('should pass validation', async () => {
       const auth0 = {
         actions: {
-          getAll: () => []
-        }
+          getAll: () => [],
+        },
       };
 
       const handler = new actions.default({ client: auth0, config });
@@ -75,28 +75,28 @@ describe('#actions handler', () => {
           supported_triggers: [
             {
               id: 'post-login',
-              version: 'v1'
-            }
+              version: 'v1',
+            },
           ],
           deployed_version: {
             code: 'some code',
             dependencies: [],
             secrets: [],
-            runtime: 'node12'
-          }
+            runtime: 'node12',
+          },
         },
         {
           name: 'action-two',
           supported_triggers: [
             {
               id: 'post-login',
-              version: 'v1'
-            }
-          ]
-        }
+              version: 'v1',
+            },
+          ],
+        },
       ];
 
-      await stageFn.apply(handler, [ { actions: data } ]);
+      await stageFn.apply(handler, [{ actions: data }]);
     });
   });
 
@@ -107,7 +107,7 @@ describe('#actions handler', () => {
         dependencies: [],
         id: 'version-id',
         runtime: 'node12',
-        secrets: []
+        secrets: [],
       };
 
       const actionId = 'new-action-id';
@@ -116,9 +116,9 @@ describe('#actions handler', () => {
         supported_triggers: [
           {
             id: 'post-login',
-            version: 'v1'
-          }
-        ]
+            version: 'v1',
+          },
+        ],
       };
 
       const auth0 = {
@@ -127,7 +127,7 @@ describe('#actions handler', () => {
             expect(params.id).to.equal(actionId);
             return Promise.resolve({ ...action, id: actionId });
           },
-          create: function(data) {
+          create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('action-test');
@@ -148,21 +148,21 @@ describe('#actions handler', () => {
                 {
                   name: action.name,
                   supported_triggers: action.supported_triggers,
-                  id: actionId
-                }
-              ]
+                  id: actionId,
+                },
+              ],
             });
           },
-          createVersion: () => Promise.resolve(version)
+          createVersion: () => Promise.resolve(version),
         },
         pool,
-        getAllCalled: false
+        getAllCalled: false,
       };
 
       const handler = new actions.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [ { actions: [ action ] } ]);
+      await stageFn.apply(handler, [{ actions: [action] }]);
     });
 
     it('should get actions', async () => {
@@ -179,17 +179,17 @@ describe('#actions handler', () => {
           supported_triggers: [
             {
               id: 'post-login',
-              version: 'v1'
-            }
+              version: 'v1',
+            },
           ],
-          deployed: true
-        }
+          deployed: true,
+        },
       ];
 
       const auth0 = {
         actions: {
-          getAll: () => actionsData
-        }
+          getAll: () => actionsData,
+        },
       };
 
       const handler = new actions.default({ client: auth0, config });
@@ -204,9 +204,9 @@ describe('#actions handler', () => {
             const error = new Error('Feature is not yet implemented');
             error.statusCode = 501;
             throw error;
-          }
+          },
         },
-        pool
+        pool,
       };
 
       const handler = new actions.default({ client: auth0, config });
@@ -221,9 +221,9 @@ describe('#actions handler', () => {
             const error = new Error('Not found');
             error.statusCode = 404;
             throw error;
-          }
+          },
         },
-        pool
+        pool,
       };
 
       const handler = new actions.default({ client: auth0, config });
@@ -240,14 +240,14 @@ describe('#actions handler', () => {
             error.originalError = {
               response: {
                 body: {
-                  errorCode: 'feature_not_enabled'
-                }
-              }
+                  errorCode: 'feature_not_enabled',
+                },
+              },
             };
             throw error;
-          }
+          },
         },
-        pool
+        pool,
       };
 
       const handler = new actions.default({ client: auth0, config });
@@ -262,9 +262,9 @@ describe('#actions handler', () => {
             const error = new Error('Bad request');
             error.statusCode = 500;
             throw error;
-          }
+          },
         },
-        pool
+        pool,
       };
 
       const handler = new actions.default({ client: auth0, config });
@@ -285,41 +285,41 @@ describe('#actions handler', () => {
             expect(data.id).to.equal('action-1');
             return Promise.resolve(data);
           },
-          getAll: () => Promise.resolve(
-            [
+          getAll: () =>
+            Promise.resolve([
               {
                 id: 'action-1',
                 name: 'action-test',
                 supported_triggers: [
                   {
                     id: 'post-login',
-                    version: 'v1'
-                  }
-                ]
-              }
-            ]
-          ),
-          getVersion: () => Promise.resolve({
-            action: {},
-            code: "/** @type {PostLoginAction} */\nmodule.exports = async (event, context) => {\n    console.log('new version');\n    return {};\n  };\n  ",
-            dependencies: [],
-            runtime: 'node12',
-            id: '0906fe5b-f4d6-44ec-a8f1-3c05fc186483',
-            deployed: true,
-            number: 1,
-            built_at: '2020-12-03T15:20:54.413725492Z',
-            status: 'built',
-            created_at: '2020-12-03T15:20:52.094497448Z',
-            updated_at: '2020-12-03T15:20:54.415669983Z'
-          })
+                    version: 'v1',
+                  },
+                ],
+              },
+            ]),
+          getVersion: () =>
+            Promise.resolve({
+              action: {},
+              code: "/** @type {PostLoginAction} */\nmodule.exports = async (event, context) => {\n    console.log('new version');\n    return {};\n  };\n  ",
+              dependencies: [],
+              runtime: 'node12',
+              id: '0906fe5b-f4d6-44ec-a8f1-3c05fc186483',
+              deployed: true,
+              number: 1,
+              built_at: '2020-12-03T15:20:54.413725492Z',
+              status: 'built',
+              created_at: '2020-12-03T15:20:52.094497448Z',
+              updated_at: '2020-12-03T15:20:54.415669983Z',
+            }),
         },
-        pool
+        pool,
       };
 
       const handler = new actions.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [ { actions: [] } ]);
+      await stageFn.apply(handler, [{ actions: [] }]);
     });
   });
 });

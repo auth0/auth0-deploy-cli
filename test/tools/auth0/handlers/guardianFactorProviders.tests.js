@@ -8,17 +8,17 @@ const pool = {
       data.generator(data.data[0]);
     }
     return { promise: () => null };
-  }
+  },
 };
 
 describe('#guardianFactorProviders handler', () => {
-  const config = function(key) {
+  const config = function (key) {
     return config.data && config.data[key];
   };
 
   config.data = {
     AUTH0_CLIENT_ID: 'client_id',
-    AUTH0_ALLOW_DELETE: true
+    AUTH0_ALLOW_DELETE: true,
   };
 
   describe('#guardianFactorProviders validate', () => {
@@ -28,17 +28,16 @@ describe('#guardianFactorProviders handler', () => {
       const data = [
         {
           name: 'sms',
-          provider: 'twilio'
+          provider: 'twilio',
         },
         {
           name: 'sms',
-          provider: 'twilio'
-        }
-
+          provider: 'twilio',
+        },
       ];
 
       try {
-        await stageFn.apply(handler, [ { guardianFactorProviders: data } ]);
+        await stageFn.apply(handler, [{ guardianFactorProviders: data }]);
       } catch (err) {
         expect(err).to.be.an('object');
         expect(err.message).to.include('Names must be unique');
@@ -51,11 +50,11 @@ describe('#guardianFactorProviders handler', () => {
       const data = [
         {
           name: 'sms',
-          provider: 'test'
-        }
+          provider: 'test',
+        },
       ];
 
-      await stageFn.apply(handler, [ { guardianFactorProviders: data } ]);
+      await stageFn.apply(handler, [{ guardianFactorProviders: data }]);
     });
   });
 
@@ -63,16 +62,16 @@ describe('#guardianFactorProviders handler', () => {
     it('should get guardianFactorProviders', async () => {
       const auth0 = {
         guardian: {
-          getFactorProvider: (params) => ({ ...params, test: 'data' })
+          getFactorProvider: (params) => ({ ...params, test: 'data' }),
         },
-        pool
+        pool,
       };
 
       const handler = new guardianFactorProvidersTests.default({ client: auth0, config });
       const data = await handler.getType();
       expect(data).to.deep.equal([
         { name: 'sms', provider: 'twilio', test: 'data' },
-        { name: 'push-notification', provider: 'sns', test: 'data' }
+        { name: 'push-notification', provider: 'sns', test: 'data' },
       ]);
     });
 
@@ -83,14 +82,14 @@ describe('#guardianFactorProviders handler', () => {
         auth_token: 'test',
         sid: 'test',
         from: null,
-        messaging_service_sid: 'test'
+        messaging_service_sid: 'test',
       };
 
       const auth0 = {
         guardian: {
-          updateFactorProvider: () => ({ ...provider })
+          updateFactorProvider: () => ({ ...provider }),
         },
-        pool
+        pool,
       };
 
       const handler = new guardianFactorProvidersTests.default({ client: auth0, config });
@@ -98,11 +97,11 @@ describe('#guardianFactorProviders handler', () => {
       const data = [
         {
           name: 'sms',
-          enabled: false
-        }
+          enabled: false,
+        },
       ];
 
-      await stageFn.apply(handler, [ { guardianFactorProviders: data } ]);
+      await stageFn.apply(handler, [{ guardianFactorProviders: data }]);
     });
   });
 });

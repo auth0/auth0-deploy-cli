@@ -15,10 +15,10 @@ export const schema = {
       options: { type: 'object' },
       enabled_clients: { type: 'array', items: { type: 'string' } },
       realms: { type: 'array', items: { type: 'string' } },
-      metadata: { type: 'object' }
+      metadata: { type: 'object' },
     },
-    required: ['name', 'strategy']
-  }
+    required: ['name', 'strategy'],
+  },
 };
 
 // addExcludedConnectionPropertiesToChanges superimposes excluded properties on the `options` object. The Auth0 API
@@ -28,11 +28,11 @@ export const schema = {
 export const addExcludedConnectionPropertiesToChanges = ({
   proposedChanges,
   existingConnections,
-  config
+  config,
 }: {
-  proposedChanges: CalculatedChanges,
-  existingConnections: Asset[],
-  config: ConfigFunction
+  proposedChanges: CalculatedChanges;
+  existingConnections: Asset[];
+  config: ConfigFunction;
 }) => {
   if (proposedChanges.update.length === 0) return proposedChanges;
 
@@ -48,29 +48,32 @@ export const addExcludedConnectionPropertiesToChanges = ({
 
   const newProposedUpdates = proposedChanges.update.map((proposedConnection) => {
     const currConnection = existingConnectionsMap[proposedConnection.id];
-    const currentExcludedPropertyValues = excludedOptions.reduce((agg, excludedField) => {
-      if (!dotProp.has(currConnection, excludedField)) return agg;
+    const currentExcludedPropertyValues = excludedOptions.reduce(
+      (agg, excludedField) => {
+        if (!dotProp.has(currConnection, excludedField)) return agg;
 
-      const currentExcludedFieldValue = dotProp.get(currConnection, excludedField);
+        const currentExcludedFieldValue = dotProp.get(currConnection, excludedField);
 
-      dotProp.set(agg, excludedField, currentExcludedFieldValue);
-      return agg;
-    }, {
-      options: {}
-    });
+        dotProp.set(agg, excludedField, currentExcludedFieldValue);
+        return agg;
+      },
+      {
+        options: {},
+      }
+    );
 
     return {
       ...proposedConnection,
       options: {
         ...proposedConnection.options,
-        ...currentExcludedPropertyValues.options
-      }
+        ...currentExcludedPropertyValues.options,
+      },
     };
   });
 
   return {
     ...proposedChanges,
-    update: newProposedUpdates
+    update: newProposedUpdates,
   };
 };
 
@@ -81,7 +84,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     super({
       ...config,
       type: 'connections',
-      stripUpdateFields: ['strategy', 'name']
+      stripUpdateFields: ['strategy', 'name'],
     });
   }
 
@@ -96,12 +99,9 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
           ...connection.options,
           idpinitiated: {
             ...connection.options.idpinitiated,
-            client_id: convertClientNameToId(
-              connection.options.idpinitiated.client_id,
-              clients
-            )
-          }
-        }
+            client_id: convertClientNameToId(connection.options.idpinitiated.client_id, clients),
+          },
+        },
       };
     } catch (e) {
       return {};
@@ -110,10 +110,13 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
 
   async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
-    const connections: Asset[] = await this.client.connections.getAll({ paginate: true, include_totals: true });
+    const connections: Asset[] = await this.client.connections.getAll({
+      paginate: true,
+      include_totals: true,
+    });
     // Filter out database connections
     this.existing = connections.filter((c) => c.strategy !== 'auth0');
-    if (this.existing === null) return []
+    if (this.existing === null) return [];
     return this.existing;
   }
 
@@ -121,26 +124,32 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     const { connections } = assets;
 
     // Do nothing if not set
-    if (!connections) return {
-      del: [],
-      create: [],
-      update: [],
-      conflicts: [],
-    };
+    if (!connections)
+      return {
+        del: [],
+        create: [],
+        update: [],
+        conflicts: [],
+      };
 
     // Convert enabled_clients by name to the id
     const clients = await this.client.clients.getAll({ paginate: true, include_totals: true });
-    const existingConnections = await this.client.connections.getAll({ paginate: true, include_totals: true });
-    const formatted = assets.connections.map((connection) => (
-      {
-        ...connection,
-        ...this.getFormattedOptions(connection, clients),
-        enabled_clients: getEnabledClients(assets, connection, existingConnections, clients)
-      }
-    ));
+    const existingConnections = await this.client.connections.getAll({
+      paginate: true,
+      include_totals: true,
+    });
+    const formatted = assets.connections.map((connection) => ({
+      ...connection,
+      ...this.getFormattedOptions(connection, clients),
+      enabled_clients: getEnabledClients(assets, connection, existingConnections, clients),
+    }));
     const proposedChanges = await super.calcChanges({ ...assets, connections: formatted });
 
-    const proposedChangesWithExcludedProperties = addExcludedConnectionPropertiesToChanges({ proposedChanges, existingConnections, config: this.config });
+    const proposedChangesWithExcludedProperties = addExcludedConnectionPropertiesToChanges({
+      proposedChanges,
+      existingConnections,
+      config: this.config,
+    });
 
     return proposedChangesWithExcludedProperties;
   }

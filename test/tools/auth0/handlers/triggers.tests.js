@@ -7,11 +7,11 @@ const pool = {
       data.generator(data.data[0]);
     }
     return { promise: () => null };
-  }
+  },
 };
 
 describe('#triggers handler', () => {
-  const config = function(key) {
+  const config = function (key) {
     return config.data && config.data[key];
   };
 
@@ -19,65 +19,59 @@ describe('#triggers handler', () => {
     it('should pass validation', async () => {
       const auth0 = {
         actions: {
-          getTriggerBindings: () => []
-        }
+          getTriggerBindings: () => [],
+        },
       };
 
       const handler = new triggers.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = {
-        'post-login': [
-          { action_name: 'action-one', display_name: 'dysplay-name' }
-        ],
+        'post-login': [{ action_name: 'action-one', display_name: 'dysplay-name' }],
         'credentials-exchange': [],
         'pre-user-registration': [],
         'post-user-registration': [],
         'post-change-password': [],
-        'send-phone-message': []
+        'send-phone-message': [],
       };
 
-      await stageFn.apply(handler, [ { triggers: data } ]);
+      await stageFn.apply(handler, [{ triggers: data }]);
     });
   });
 
   describe('#triggers process', () => {
     it('should bind a trigger', async () => {
       const triggersBindings = {
-        'post-login': [
-          { action_name: 'action-one', display_name: 'dysplay-name' }
-        ],
+        'post-login': [{ action_name: 'action-one', display_name: 'dysplay-name' }],
         'credentials-exchange': [],
         'pre-user-registration': [],
         'post-user-registration': [],
         'post-change-password': [],
-        'send-phone-message': []
+        'send-phone-message': [],
       };
 
       const auth0 = {
         actions: {
           getAllTriggers: () => Promise.resolve(triggersBindings),
-          updateTriggerBindings: () => Promise.resolve([])
+          updateTriggerBindings: () => Promise.resolve([]),
         },
         pool,
-        getAllCalled: false
+        getAllCalled: false,
       };
 
       const handler = new triggers.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [ { triggers: triggersBindings } ]);
+      await stageFn.apply(handler, [{ triggers: triggersBindings }]);
     });
 
     it('should get all triggers', async () => {
       const triggersBindings = {
-        'post-login': [
-          { action_name: 'action-one', display_name: 'display-name' }
-        ],
+        'post-login': [{ action_name: 'action-one', display_name: 'display-name' }],
         'credentials-exchange': [],
         'pre-user-registration': [],
         'post-user-registration': [],
         'post-change-password': [],
-        'send-phone-message': []
+        'send-phone-message': [],
       };
 
       const auth0 = {
@@ -90,9 +84,9 @@ describe('#triggers handler', () => {
                   bindings: [
                     {
                       action: { name: 'action-one' },
-                      display_name: 'display-name'
-                    }
-                  ]
+                      display_name: 'display-name',
+                    },
+                  ],
                 };
                 break;
               case 'credentials-exchange':
@@ -114,8 +108,8 @@ describe('#triggers handler', () => {
                 break;
             }
             return Promise.resolve(res);
-          }
-        }
+          },
+        },
       };
 
       const handler = new triggers.default({ client: auth0, config });
@@ -130,9 +124,9 @@ describe('#triggers handler', () => {
             const error = new Error('Not found');
             error.statusCode = 404;
             throw error;
-          }
+          },
         },
-        pool
+        pool,
       };
 
       const handler = new triggers.default({ client: auth0, config });
@@ -149,14 +143,14 @@ describe('#triggers handler', () => {
             error.originalError = {
               response: {
                 body: {
-                  errorCode: 'feature_not_enabled'
-                }
-              }
+                  errorCode: 'feature_not_enabled',
+                },
+              },
             };
             throw error;
-          }
+          },
         },
-        pool
+        pool,
       };
 
       const handler = new triggers.default({ client: auth0, config });
@@ -171,9 +165,9 @@ describe('#triggers handler', () => {
             const error = new Error('Bad request');
             error.statusCode = 500;
             throw error;
-          }
+          },
         },
-        pool
+        pool,
       };
 
       const handler = new triggers.default({ client: auth0, config });

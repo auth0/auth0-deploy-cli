@@ -26,84 +26,85 @@ export function mockMgmtClient() {
     emailProvider: {
       get: () => ({
         name: 'smtp',
-        enabled: true
-      })
+        enabled: true,
+      }),
     },
     clientGrants: { getAll: () => ({ clientGrants: [] }) },
     guardian: {
       getFactors: () => [],
       getFactorProvider: () => [],
       getFactorTemplates: () => [],
-      getPhoneFactorMessageTypes: () => ({ message_types: [ 'sms' ] }),
+      getPhoneFactorMessageTypes: () => ({ message_types: ['sms'] }),
       getPhoneFactorSelectedProvider: () => ({ provider: 'twilio' }),
-      getPolicies: () => []
+      getPolicies: () => [],
     },
     emailTemplates: {
       get: (template) => ({
         template: template.name,
         enabled: true,
-        body: 'fake template'
-      })
+        body: 'fake template',
+      }),
     },
     clients: {
       getAll: (params) => {
         const client = {
-          name: 'Global Client', client_id: 'FMfcgxvzLDvPsgpRFKkLVrnKqGgkHhQV', client_secret: 'dummy_client_secret', custom_login_page_on: true, custom_login_page: '<html>page</html>'
+          name: 'Global Client',
+          client_id: 'FMfcgxvzLDvPsgpRFKkLVrnKqGgkHhQV',
+          client_secret: 'dummy_client_secret',
+          custom_login_page_on: true,
+          custom_login_page: '<html>page</html>',
         };
 
         if (params.per_page) {
           return {
-            clients: [ client ]
+            clients: [client],
           };
         }
 
-        return [ client ];
-      }
+        return [client];
+      },
     },
     roles: {
-      getAll: () => (
-        {
-          roles: [
+      getAll: () => ({
+        roles: [
+          {
+            name: 'App Admin',
+            id: 'myRoleId',
+            description: 'Admin of app',
+          },
+        ],
+        total: 1,
+        limit: 50,
+      }),
+      permissions: {
+        getAll: () => ({
+          permissions: [
             {
-              name: 'App Admin',
-              id: 'myRoleId',
-              description: 'Admin of app'
-            }
+              permission_name: 'create:data',
+              resource_server_identifier: 'urn:ref',
+            },
           ],
           total: 1,
-          limit: 50
-        }
-      ),
-      permissions: {
-        getAll: () => (
-          {
-            permissions: [
-              {
-                permission_name: 'create:data', resource_server_identifier: 'urn:ref'
-              }
-            ],
-            total: 1,
-            limit: 50
-          }
-        )
-      }
+          limit: 50,
+        }),
+      },
     },
     tenant: {
       getSettings: () => ({
         friendly_name: 'Test',
-        default_directory: 'users'
-      })
+        default_directory: 'users',
+      }),
     },
     migrations: {
       getMigrations: () => ({
-        migration_flag: true
-      })
+        migration_flag: true,
+      }),
     },
     attackProtection: {
       getBreachedPasswordDetectionConfig: () => ({}),
       getBruteForceConfig: () => ({}),
-      getSuspiciousIpThrottlingConfig: () => ({})
-    }
+      getSuspiciousIpThrottlingConfig: () => ({}),
+    },
   };
 }
 
@@ -120,7 +121,7 @@ export function createDir(repoDir, files) {
   Object.keys(files).forEach((type) => {
     const configDir = path.resolve(repoDir, type);
     cleanThenMkdir(configDir);
-    Object.entries(files[type]).forEach(([ name, content ]) => {
+    Object.entries(files[type]).forEach(([name, content]) => {
       fs.writeFileSync(path.join(configDir, name), content);
     });
   });

@@ -2,23 +2,24 @@ import fs from 'fs-extra';
 import path from 'path';
 import { constants } from '../../../tools';
 import { dumpJSON, existsMustBeDir, loadJSON } from '../../../utils';
-import { DirectoryHandler } from '.'
+import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 
 type ParsedAttackProtection = {
-  attackProtection: {
-    breachedPasswordDetection: unknown
-    bruteForceProtection: unknown
-    suspiciousIpThrottling: unknown
-  } | undefined
-}
-
+  attackProtection:
+    | {
+        breachedPasswordDetection: unknown;
+        bruteForceProtection: unknown;
+        suspiciousIpThrottling: unknown;
+      }
+    | undefined;
+};
 
 function attackProtectionFiles(filePath: string): {
-  directory: string
-  breachedPasswordDetection: string
-  bruteForceProtection: string
-  suspiciousIpThrottling: string
+  directory: string;
+  breachedPasswordDetection: string;
+  bruteForceProtection: string;
+  suspiciousIpThrottling: string;
 } {
   const directory = path.join(filePath, constants.ATTACK_PROTECTION_DIRECTORY);
 
@@ -26,7 +27,7 @@ function attackProtectionFiles(filePath: string): {
     directory: directory,
     breachedPasswordDetection: path.join(directory, 'breached-password-detection.json'),
     bruteForceProtection: path.join(directory, 'brute-force-protection.json'),
-    suspiciousIpThrottling: path.join(directory, 'suspicious-ip-throttling.json')
+    suspiciousIpThrottling: path.join(directory, 'suspicious-ip-throttling.json'),
   };
 }
 
@@ -35,7 +36,7 @@ function parse(context: DirectoryContext): ParsedAttackProtection {
 
   if (!existsMustBeDir(files.directory)) {
     return {
-      attackProtection: undefined
+      attackProtection: undefined,
     };
   }
 
@@ -49,8 +50,8 @@ function parse(context: DirectoryContext): ParsedAttackProtection {
     attackProtection: {
       breachedPasswordDetection,
       bruteForceProtection,
-      suspiciousIpThrottling
-    }
+      suspiciousIpThrottling,
+    },
   };
 }
 
@@ -65,10 +66,9 @@ async function dump(context: DirectoryContext): Promise<void> {
   dumpJSON(files.suspiciousIpThrottling, attackProtection.suspiciousIpThrottling);
 }
 
-
 const attackProtectionHandler: DirectoryHandler<ParsedAttackProtection> = {
   parse,
   dump,
-}
+};
 
 export default attackProtectionHandler;

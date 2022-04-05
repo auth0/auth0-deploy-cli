@@ -1,6 +1,6 @@
-import { Config } from './types'
+import { Config } from './types';
 
-export type ConfigFunction = (arg0: keyof Config) => any // TODO: refactor configFactory function to allow for more precise typing
+export type ConfigFunction = (arg0: keyof Config) => any; // TODO: refactor configFactory function to allow for more precise typing
 
 export const configFactory = () => {
   const settings: Partial<Config> = {};

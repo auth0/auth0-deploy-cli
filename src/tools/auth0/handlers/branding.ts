@@ -1,7 +1,7 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
 import log from '../../../logger';
-import { Assets, Asset } from '../../../types'
+import { Assets, Asset } from '../../../types';
 
 export const schema = {
   type: 'object',
@@ -12,29 +12,29 @@ export const schema = {
         type: 'object',
         properties: {
           template: { type: 'string' },
-          body: { type: 'string' }
-        }
-      }
-    }
-  }
+          body: { type: 'string' },
+        },
+      },
+    },
+  },
 };
 
 export default class BrandingHandler extends DefaultHandler {
-  existing: Asset
+  existing: Asset;
 
   constructor(options: DefaultHandler) {
     super({
       ...options,
-      type: 'branding'
+      type: 'branding',
     });
   }
 
   async getType(): Promise<Asset> {
     let branding: {
       templates?: {
-        template: string,
-        body: string
-      }[]
+        template: string;
+        body: string;
+      }[];
     } = {};
 
     try {
@@ -52,8 +52,8 @@ export default class BrandingHandler extends DefaultHandler {
           branding.templates = [
             {
               template: constants.UNIVERSAL_LOGIN_TEMPLATE,
-              body: payload.body
-            }
+              body: payload.body,
+            },
           ];
         }
       }
@@ -86,15 +86,26 @@ export default class BrandingHandler extends DefaultHandler {
 
     // handle templates
     if (branding.templates && branding.templates.length) {
-      const unknownTemplates = branding.templates.filter((t) => !constants.SUPPORTED_BRANDING_TEMPLATES.includes(t.template)).map((t) => t.template);
+      const unknownTemplates = branding.templates
+        .filter((t) => !constants.SUPPORTED_BRANDING_TEMPLATES.includes(t.template))
+        .map((t) => t.template);
       if (unknownTemplates.length) {
         // throw a helpful warning for unknown templates, the context handlers are unaware of which are supported, that's all handled here.
-        log.warn(`Found unknown branding template(s): ${unknownTemplates.join().toString()}. Supported branding templates are: ${constants.SUPPORTED_BRANDING_TEMPLATES.join()}.`);
+        log.warn(
+          `Found unknown branding template(s): ${unknownTemplates
+            .join()
+            .toString()}. Supported branding templates are: ${constants.SUPPORTED_BRANDING_TEMPLATES.join()}.`
+        );
       }
 
-      const templateDefinition = branding.templates.find((t) => t.template === constants.UNIVERSAL_LOGIN_TEMPLATE);
+      const templateDefinition = branding.templates.find(
+        (t) => t.template === constants.UNIVERSAL_LOGIN_TEMPLATE
+      );
       if (templateDefinition && templateDefinition.body) {
-        await this.client.branding.setUniversalLoginTemplate({}, { template: templateDefinition.body });
+        await this.client.branding.setUniversalLoginTemplate(
+          {},
+          { template: templateDefinition.body }
+        );
         this.updated += 1;
         this.didUpdate(branding.templates);
       }

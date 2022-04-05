@@ -4,12 +4,10 @@ import { loadFileAndReplaceKeywords, Auth0 } from '../../tools';
 import cleanAssets from '../../readonly';
 import log from '../../logger';
 import handlers, { DirectoryHandler } from './handlers';
-import {
-  isDirectory, isFile, stripIdentifiers, toConfigFn
-} from '../../utils';
-import { Assets, Auth0APIClient, Config, AssetTypes } from '../../types'
+import { isDirectory, isFile, stripIdentifiers, toConfigFn } from '../../utils';
+import { Assets, Auth0APIClient, Config, AssetTypes } from '../../types';
 
-type KeywordMappings = { [key: string]: (string | number)[] | string | number }
+type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 
 export default class DirectoryContext {
   basePath: string;
@@ -17,7 +15,7 @@ export default class DirectoryContext {
   config: Config;
   mappings: KeywordMappings;
   mgmtClient: Auth0APIClient;
-  assets: Assets
+  assets: Assets;
 
   constructor(config: Config, mgmtClient: Auth0APIClient) {
     this.filePath = config.AUTH0_INPUT_FILE;
@@ -26,7 +24,7 @@ export default class DirectoryContext {
     this.mgmtClient = mgmtClient;
 
     //@ts-ignore for now
-    this.assets = {}
+    this.assets = {};
     // Get excluded rules
     this.assets.exclude = {
       rules: config.AUTH0_EXCLUDED_RULES || [],
@@ -34,7 +32,7 @@ export default class DirectoryContext {
       databases: config.AUTH0_EXCLUDED_DATABASES || [],
       connections: config.AUTH0_EXCLUDED_CONNECTIONS || [],
       resourceServers: config.AUTH0_EXCLUDED_RESOURCE_SERVERS || [],
-      defaults: config.AUTH0_EXCLUDED_DEFAULTS || []
+      defaults: config.AUTH0_EXCLUDED_DEFAULTS || [],
     };
   }
 
@@ -53,14 +51,12 @@ export default class DirectoryContext {
       /* If this is a directory, look for each file in the directory */
       log.info(`Processing directory ${this.filePath}`);
 
-      Object.values(handlers)
-        .forEach((handler) => {
-          const parsed = handler.parse(this);
-          Object.entries(parsed)
-            .forEach(([k, v]) => {
-              this.assets[k] = v;
-            });
+      Object.values(handlers).forEach((handler) => {
+        const parsed = handler.parse(this);
+        Object.entries(parsed).forEach(([k, v]) => {
+          this.assets[k] = v;
         });
+      });
       return;
     }
     throw new Error(`Not sure what to do with, ${this.filePath} as it is not a directory...`);
@@ -78,23 +74,27 @@ export default class DirectoryContext {
     // Copy clients to be used by handlers which require converting client_id to the name
     // Must copy as the client_id will be stripped if AUTH0_EXPORT_IDENTIFIERS is false
     //@ts-ignore because assets haven't been typed yet TODO: type assets
-    this.assets.clientsOrig = [...this.assets.clients || []];
+    this.assets.clientsOrig = [...(this.assets.clients || [])];
 
     // Optionally Strip identifiers
     if (!this.config.AUTH0_EXPORT_IDENTIFIERS) {
       this.assets = stripIdentifiers(auth0, this.assets);
     }
 
-    await Promise.all(Object.entries(handlers).filter(([handlerName]: [AssetTypes, DirectoryHandler<any>]) => {
-      const excludedAssetTypes = this.config.AUTH0_EXCLUDED || []
-      return !excludedAssetTypes.includes(handlerName)
-    }).map(async ([name, handler]) => {
-      try {
-        await handler.dump(this);
-      } catch (err) {
-        log.debug(err.stack);
-        throw new Error(`Problem exporting ${name}`);
-      }
-    }));
+    await Promise.all(
+      Object.entries(handlers)
+        .filter(([handlerName]: [AssetTypes, DirectoryHandler<any>]) => {
+          const excludedAssetTypes = this.config.AUTH0_EXCLUDED || [];
+          return !excludedAssetTypes.includes(handlerName);
+        })
+        .map(async ([name, handler]) => {
+          try {
+            await handler.dump(this);
+          } catch (err) {
+            log.debug(err.stack);
+            throw new Error(`Problem exporting ${name}`);
+          }
+        })
+    );
   }
 }

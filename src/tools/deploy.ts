@@ -1,6 +1,6 @@
 import Auth0 from './auth0';
 import log from './logger';
-import { ConfigFunction } from '../configFactory'
+import { ConfigFunction } from '../configFactory';
 
 export default async function deploy(assets, client, config: ConfigFunction) {
   // Setup log level
@@ -20,7 +20,7 @@ export default async function deploy(assets, client, config: ConfigFunction) {
     accum[h.type] = {
       deleted: h.deleted,
       created: h.created,
-      updated: h.updated
+      updated: h.updated,
     };
     return accum;
   }, {});
