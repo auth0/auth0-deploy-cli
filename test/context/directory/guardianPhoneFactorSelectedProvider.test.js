@@ -3,9 +3,7 @@ import { expect } from 'chai';
 import { constants } from '../../../src/tools';
 
 import Context from '../../../src/context/directory';
-import {
-  testDataDir, createDir, mockMgmtClient, cleanThenMkdir
-} from '../../utils';
+import { testDataDir, createDir, mockMgmtClient, cleanThenMkdir } from '../../utils';
 import handler from '../../../src/context/directory/handlers/guardianPhoneFactorSelectedProvider';
 import { loadJSON } from '../../../src/utils';
 
@@ -14,7 +12,7 @@ describe('#directory context guardian phone factor selected provider', () => {
     const guardianPhoneFactorSelectedProviderTest = {
       'phoneFactorSelectedProvider.json': `{
         "provider": "twilio"
-      }`
+      }`,
     };
     const repoDir = path.join(testDataDir, 'directory', 'guardianPhoneFactorSelectedProvider');
     createDir(repoDir, { [constants.GUARDIAN_DIRECTORY]: guardianPhoneFactorSelectedProviderTest });
@@ -24,7 +22,7 @@ describe('#directory context guardian phone factor selected provider', () => {
     await context.load();
 
     expect(context.assets.guardianPhoneFactorSelectedProvider).to.deep.equal({
-      provider: 'twilio'
+      provider: 'twilio',
     });
   });
 
@@ -34,13 +32,13 @@ describe('#directory context guardian phone factor selected provider', () => {
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
     context.assets.guardianPhoneFactorSelectedProvider = {
-      provider: 'twilio'
+      provider: 'twilio',
     };
 
     await handler.dump(context);
     const guardianFolder = path.join(dir, constants.GUARDIAN_DIRECTORY);
     expect(loadJSON(path.join(guardianFolder, 'phoneFactorSelectedProvider.json'))).to.deep.equal({
-      provider: 'twilio'
+      provider: 'twilio',
     });
   });
 });

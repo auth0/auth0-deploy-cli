@@ -31,19 +31,21 @@ describe('#YAML context roles', () => {
         description: 'Admin of app',
         permissions: [
           {
-            permission_name: 'create:data', resource_server_identifier: 'urn:ref'
-          }
-        ]
+            permission_name: 'create:data',
+            resource_server_identifier: 'urn:ref',
+          },
+        ],
       },
       {
         name: 'App User',
         description: 'User of app',
         permissions: [
           {
-            permission_name: 'read:data', resource_server_identifier: 'urn:ref'
-          }
-        ]
-      }
+            permission_name: 'read:data',
+            resource_server_identifier: 'urn:ref',
+          },
+        ],
+      },
     ];
 
     const yamlFile = path.join(dir, 'roles.yaml');
@@ -63,19 +65,21 @@ describe('#YAML context roles', () => {
         description: 'Admin of app',
         permissions: [
           {
-            permission_name: 'create:data', resource_server_identifier: 'urn:ref'
-          }
-        ]
+            permission_name: 'create:data',
+            resource_server_identifier: 'urn:ref',
+          },
+        ],
       },
       {
         name: 'App User',
         description: 'User of app',
         permissions: [
           {
-            permission_name: 'read:data', resource_server_identifier: 'urn:ref'
-          }
-        ]
-      }
+            permission_name: 'read:data',
+            resource_server_identifier: 'urn:ref',
+          },
+        ],
+      },
     ];
     context.assets.roles = roles;
 

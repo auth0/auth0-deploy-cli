@@ -1,16 +1,16 @@
 //@ts-nocheck because prompts haven't been fully implemented in this codebase yet
 import DefaultHandler from './default';
-import { Asset, Assets } from '../../../types'
+import { Asset, Assets } from '../../../types';
 
 export const schema = { type: 'object' };
 
 export default class PromptsHandler extends DefaultHandler {
-  existing: Asset[]
-  
+  existing: Asset[];
+
   constructor(options: DefaultHandler) {
     super({
       ...options,
-      type: 'prompts'
+      type: 'prompts',
     });
   }
 

@@ -28,16 +28,22 @@ describe('#YAML context clients', () => {
     const target = [
       { app_type: 'spa', name: 'someClient' },
       { app_type: 'spa', name: 'someClient2' },
-      { app_type: 'spa', name: 'customLoginClient', custom_login_page: 'html code spa "spa"' }
+      { app_type: 'spa', name: 'customLoginClient', custom_login_page: 'html code spa "spa"' },
     ];
 
     const yamlFile = path.join(dir, 'clients1.yaml');
     const clientsPath = path.join(dir, 'clients');
     fs.writeFileSync(yamlFile, yaml);
     fs.ensureDirSync(clientsPath);
-    fs.writeFileSync(path.join(clientsPath, 'customLoginClient_custom_login_page.html'), 'html code ##appType## @@appType@@');
+    fs.writeFileSync(
+      path.join(clientsPath, 'customLoginClient_custom_login_page.html'),
+      'html code ##appType## @@appType@@'
+    );
 
-    const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { appType: 'spa' } };
+    const config = {
+      AUTH0_INPUT_FILE: yamlFile,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { appType: 'spa' },
+    };
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
@@ -47,16 +53,23 @@ describe('#YAML context clients', () => {
   it('should dump clients', async () => {
     const dir = path.join(testDataDir, 'yaml', 'clientsDump');
     cleanThenMkdir(dir);
-    const context = new Context({ AUTH0_INPUT_FILE: path.join(dir, './test.yml') }, mockMgmtClient());
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, './test.yml') },
+      mockMgmtClient()
+    );
 
     const clients = [
       { name: 'someClient', app_type: 'spa' },
-      { name: 'customLoginClient', app_type: 'spa', custom_login_page: 'html code' }
+      { name: 'customLoginClient', app_type: 'spa', custom_login_page: 'html code' },
     ];
 
     const target = [
       { name: 'someClient', app_type: 'spa' },
-      { name: 'customLoginClient', app_type: 'spa', custom_login_page: './customLoginClient_custom_login_page.html' }
+      {
+        name: 'customLoginClient',
+        app_type: 'spa',
+        custom_login_page: './customLoginClient_custom_login_page.html',
+      },
     ];
 
     context.assets.clients = clients;
@@ -65,6 +78,8 @@ describe('#YAML context clients', () => {
     const clientsFolder = path.join(dir, 'clients');
 
     expect(dumped).to.deep.equal({ clients: target });
-    expect(fs.readFileSync(path.join(clientsFolder, 'customLoginClient_custom_login_page.html'), 'utf8')).to.deep.equal('html code');
+    expect(
+      fs.readFileSync(path.join(clientsFolder, 'customLoginClient_custom_login_page.html'), 'utf8')
+    ).to.deep.equal('html code');
   });
 });

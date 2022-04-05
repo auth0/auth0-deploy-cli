@@ -38,23 +38,23 @@ describe('#YAML context validation', () => {
 
     const config = {
       AUTH0_INPUT_FILE: yaml,
-      AUTH0_EXCLUDED_RULES: [ 'rule' ],
-      AUTH0_EXCLUDED_CLIENTS: [ 'client' ],
-      AUTH0_EXCLUDED_DATABASES: [ 'db' ],
-      AUTH0_EXCLUDED_CONNECTIONS: [ 'conn' ],
-      AUTH0_EXCLUDED_RESOURCE_SERVERS: [ 'api' ],
-      AUTH0_EXCLUDED_DEFAULTS: [ 'emailProvider' ]
+      AUTH0_EXCLUDED_RULES: ['rule'],
+      AUTH0_EXCLUDED_CLIENTS: ['client'],
+      AUTH0_EXCLUDED_DATABASES: ['db'],
+      AUTH0_EXCLUDED_CONNECTIONS: ['conn'],
+      AUTH0_EXCLUDED_RESOURCE_SERVERS: ['api'],
+      AUTH0_EXCLUDED_DEFAULTS: ['emailProvider'],
     };
 
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
-    expect(context.assets.exclude.rules).to.deep.equal([ 'rule' ]);
-    expect(context.assets.exclude.clients).to.deep.equal([ 'client' ]);
-    expect(context.assets.exclude.databases).to.deep.equal([ 'db' ]);
-    expect(context.assets.exclude.connections).to.deep.equal([ 'conn' ]);
-    expect(context.assets.exclude.resourceServers).to.deep.equal([ 'api' ]);
-    expect(context.assets.exclude.defaults).to.deep.equal([ 'emailProvider' ]);
+    expect(context.assets.exclude.rules).to.deep.equal(['rule']);
+    expect(context.assets.exclude.clients).to.deep.equal(['client']);
+    expect(context.assets.exclude.databases).to.deep.equal(['db']);
+    expect(context.assets.exclude.connections).to.deep.equal(['conn']);
+    expect(context.assets.exclude.resourceServers).to.deep.equal(['api']);
+    expect(context.assets.exclude.defaults).to.deep.equal(['emailProvider']);
   });
 
   it('should error invalid schema', async () => {
@@ -107,15 +107,15 @@ describe('#YAML context validation', () => {
     const yaml = jsYaml.load(fs.readFileSync(tenantFile));
     expect(yaml).to.deep.equal({
       branding: {
-        templates: []
+        templates: [],
       },
       clientGrants: [],
       clients: [
         {
           custom_login_page: './Global Client_custom_login_page.html',
           custom_login_page_on: true,
-          name: 'Global Client'
-        }
+          name: 'Global Client',
+        },
       ],
       connections: [],
       databases: [],
@@ -126,29 +126,53 @@ describe('#YAML context validation', () => {
           smtp_host: '##SMTP_HOSTNAME##',
           smtp_pass: '##SMTP_PASS##',
           smtp_port: '##SMTP_PORT##',
-          smtp_user: '##SMTP_USER##'
-        }
+          smtp_user: '##SMTP_USER##',
+        },
       },
       emailTemplates: [
-        { body: './emailTemplates/blocked_account.html', enabled: true, template: 'blocked_account' },
-        { body: './emailTemplates/change_password.html', enabled: true, template: 'change_password' },
-        { body: './emailTemplates/enrollment_email.html', enabled: true, template: 'enrollment_email' },
+        {
+          body: './emailTemplates/blocked_account.html',
+          enabled: true,
+          template: 'blocked_account',
+        },
+        {
+          body: './emailTemplates/change_password.html',
+          enabled: true,
+          template: 'change_password',
+        },
+        {
+          body: './emailTemplates/enrollment_email.html',
+          enabled: true,
+          template: 'enrollment_email',
+        },
         { body: './emailTemplates/mfa_oob_code.html', enabled: true, template: 'mfa_oob_code' },
         { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' },
         { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
-        { body: './emailTemplates/stolen_credentials.html', enabled: true, template: 'stolen_credentials' },
-        { body: './emailTemplates/user_invitation.html', enabled: true, template: 'user_invitation' },
+        {
+          body: './emailTemplates/stolen_credentials.html',
+          enabled: true,
+          template: 'stolen_credentials',
+        },
+        {
+          body: './emailTemplates/user_invitation.html',
+          enabled: true,
+          template: 'user_invitation',
+        },
         { body: './emailTemplates/verify_email.html', enabled: true, template: 'verify_email' },
-        { body: './emailTemplates/verify_email_by_code.html', enabled: true, template: 'verify_email_by_code' },
-        { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' }
+        {
+          body: './emailTemplates/verify_email_by_code.html',
+          enabled: true,
+          template: 'verify_email_by_code',
+        },
+        { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' },
       ],
       organizations: [],
-      pages: [ { enabled: true, html: './pages/login.html', name: 'login' } ],
+      pages: [{ enabled: true, html: './pages/login.html', name: 'login' }],
       guardianFactors: [],
       guardianFactorProviders: [],
       guardianFactorTemplates: [],
       migrations: {},
-      guardianPhoneFactorMessageTypes: { message_types: [ 'sms' ] },
+      guardianPhoneFactorMessageTypes: { message_types: ['sms'] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
       prompts: {},
@@ -165,20 +189,20 @@ describe('#YAML context validation', () => {
           permissions: [
             {
               permission_name: 'create:data',
-              resource_server_identifier: 'urn:ref'
-            }
-          ]
-        }
+              resource_server_identifier: 'urn:ref',
+            },
+          ],
+        },
       ],
       tenant: {
         default_directory: 'users',
-        friendly_name: 'Test'
+        friendly_name: 'Test',
       },
       attackProtection: {
         breachedPasswordDetection: {},
         bruteForceProtection: {},
-        suspiciousIpThrottling: {}
-      }
+        suspiciousIpThrottling: {},
+      },
     });
   });
 
@@ -188,49 +212,73 @@ describe('#YAML context validation', () => {
     const tenantFile = path.join(dir, 'tenant.yml');
     const config = {
       AUTH0_INPUT_FILE: tenantFile,
-      AUTH0_EXCLUDED_DEFAULTS: [ 'emailProvider' ]
+      AUTH0_EXCLUDED_DEFAULTS: ['emailProvider'],
     };
     const context = new Context(config, mockMgmtClient());
     await context.dump();
     const yaml = jsYaml.load(fs.readFileSync(tenantFile));
     expect(yaml).to.deep.equal({
       branding: {
-        templates: []
+        templates: [],
       },
       clientGrants: [],
       clients: [
         {
           custom_login_page: './Global Client_custom_login_page.html',
           custom_login_page_on: true,
-          name: 'Global Client'
-        }
+          name: 'Global Client',
+        },
       ],
       connections: [],
       databases: [],
       emailProvider: {
         enabled: true,
-        name: 'smtp'
+        name: 'smtp',
       },
       emailTemplates: [
-        { body: './emailTemplates/blocked_account.html', enabled: true, template: 'blocked_account' },
-        { body: './emailTemplates/change_password.html', enabled: true, template: 'change_password' },
-        { body: './emailTemplates/enrollment_email.html', enabled: true, template: 'enrollment_email' },
+        {
+          body: './emailTemplates/blocked_account.html',
+          enabled: true,
+          template: 'blocked_account',
+        },
+        {
+          body: './emailTemplates/change_password.html',
+          enabled: true,
+          template: 'change_password',
+        },
+        {
+          body: './emailTemplates/enrollment_email.html',
+          enabled: true,
+          template: 'enrollment_email',
+        },
         { body: './emailTemplates/mfa_oob_code.html', enabled: true, template: 'mfa_oob_code' },
         { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' },
         { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
-        { body: './emailTemplates/stolen_credentials.html', enabled: true, template: 'stolen_credentials' },
-        { body: './emailTemplates/user_invitation.html', enabled: true, template: 'user_invitation' },
+        {
+          body: './emailTemplates/stolen_credentials.html',
+          enabled: true,
+          template: 'stolen_credentials',
+        },
+        {
+          body: './emailTemplates/user_invitation.html',
+          enabled: true,
+          template: 'user_invitation',
+        },
         { body: './emailTemplates/verify_email.html', enabled: true, template: 'verify_email' },
-        { body: './emailTemplates/verify_email_by_code.html', enabled: true, template: 'verify_email_by_code' },
-        { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' }
+        {
+          body: './emailTemplates/verify_email_by_code.html',
+          enabled: true,
+          template: 'verify_email_by_code',
+        },
+        { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' },
       ],
       organizations: [],
-      pages: [ { enabled: true, html: './pages/login.html', name: 'login' } ],
+      pages: [{ enabled: true, html: './pages/login.html', name: 'login' }],
       guardianFactors: [],
       guardianFactorProviders: [],
       guardianFactorTemplates: [],
       migrations: {},
-      guardianPhoneFactorMessageTypes: { message_types: [ 'sms' ] },
+      guardianPhoneFactorMessageTypes: { message_types: ['sms'] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
       prompts: {},
@@ -247,20 +295,20 @@ describe('#YAML context validation', () => {
           permissions: [
             {
               permission_name: 'create:data',
-              resource_server_identifier: 'urn:ref'
-            }
-          ]
-        }
+              resource_server_identifier: 'urn:ref',
+            },
+          ],
+        },
       ],
       tenant: {
         default_directory: 'users',
-        friendly_name: 'Test'
+        friendly_name: 'Test',
       },
       attackProtection: {
         breachedPasswordDetection: {},
         bruteForceProtection: {},
-        suspiciousIpThrottling: {}
-      }
+        suspiciousIpThrottling: {},
+      },
     });
   });
 
@@ -270,50 +318,74 @@ describe('#YAML context validation', () => {
     const tenantFile = path.join(dir, 'tenant.yml');
     const config = {
       AUTH0_INPUT_FILE: tenantFile,
-      INCLUDED_PROPS: { clients: [ 'client_secret' ] },
-      EXCLUDED_PROPS: { clients: [ 'name' ], emailProvider: [ 'credentials' ] }
+      INCLUDED_PROPS: { clients: ['client_secret'] },
+      EXCLUDED_PROPS: { clients: ['name'], emailProvider: ['credentials'] },
     };
     const context = new Context(config, mockMgmtClient());
     await context.dump();
     const yaml = jsYaml.load(fs.readFileSync(tenantFile));
     expect(yaml).to.deep.equal({
       branding: {
-        templates: []
+        templates: [],
       },
       clientGrants: [],
       clients: [
         {
           custom_login_page: './Global Client_custom_login_page.html',
           custom_login_page_on: true,
-          client_secret: 'dummy_client_secret'
-        }
+          client_secret: 'dummy_client_secret',
+        },
       ],
       connections: [],
       databases: [],
       emailProvider: {
         enabled: true,
-        name: 'smtp'
+        name: 'smtp',
       },
       emailTemplates: [
-        { body: './emailTemplates/blocked_account.html', enabled: true, template: 'blocked_account' },
-        { body: './emailTemplates/change_password.html', enabled: true, template: 'change_password' },
-        { body: './emailTemplates/enrollment_email.html', enabled: true, template: 'enrollment_email' },
+        {
+          body: './emailTemplates/blocked_account.html',
+          enabled: true,
+          template: 'blocked_account',
+        },
+        {
+          body: './emailTemplates/change_password.html',
+          enabled: true,
+          template: 'change_password',
+        },
+        {
+          body: './emailTemplates/enrollment_email.html',
+          enabled: true,
+          template: 'enrollment_email',
+        },
         { body: './emailTemplates/mfa_oob_code.html', enabled: true, template: 'mfa_oob_code' },
         { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' },
         { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
-        { body: './emailTemplates/stolen_credentials.html', enabled: true, template: 'stolen_credentials' },
-        { body: './emailTemplates/user_invitation.html', enabled: true, template: 'user_invitation' },
+        {
+          body: './emailTemplates/stolen_credentials.html',
+          enabled: true,
+          template: 'stolen_credentials',
+        },
+        {
+          body: './emailTemplates/user_invitation.html',
+          enabled: true,
+          template: 'user_invitation',
+        },
         { body: './emailTemplates/verify_email.html', enabled: true, template: 'verify_email' },
-        { body: './emailTemplates/verify_email_by_code.html', enabled: true, template: 'verify_email_by_code' },
-        { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' }
+        {
+          body: './emailTemplates/verify_email_by_code.html',
+          enabled: true,
+          template: 'verify_email_by_code',
+        },
+        { body: './emailTemplates/welcome_email.html', enabled: true, template: 'welcome_email' },
       ],
       organizations: [],
-      pages: [ { enabled: true, html: './pages/login.html', name: 'login' } ],
+      pages: [{ enabled: true, html: './pages/login.html', name: 'login' }],
       guardianFactors: [],
       guardianFactorProviders: [],
       guardianFactorTemplates: [],
       migrations: {},
-      guardianPhoneFactorMessageTypes: { message_types: [ 'sms' ] },
+      guardianPhoneFactorMessageTypes: { message_types: ['sms'] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
       prompts: {},
@@ -330,20 +402,20 @@ describe('#YAML context validation', () => {
           permissions: [
             {
               permission_name: 'create:data',
-              resource_server_identifier: 'urn:ref'
-            }
-          ]
-        }
+              resource_server_identifier: 'urn:ref',
+            },
+          ],
+        },
       ],
       tenant: {
         default_directory: 'users',
-        friendly_name: 'Test'
+        friendly_name: 'Test',
       },
       attackProtection: {
         breachedPasswordDetection: {},
         bruteForceProtection: {},
-        suspiciousIpThrottling: {}
-      }
+        suspiciousIpThrottling: {},
+      },
     });
   });
 
@@ -353,8 +425,8 @@ describe('#YAML context validation', () => {
     const tenantFile = path.join(dir, 'tenant.yml');
     const config = {
       AUTH0_INPUT_FILE: tenantFile,
-      INCLUDED_PROPS: { clients: [ 'client_secret', 'name' ] },
-      EXCLUDED_PROPS: { clients: [ 'client_secret', 'name' ] }
+      INCLUDED_PROPS: { clients: ['client_secret', 'name'] },
+      EXCLUDED_PROPS: { clients: ['client_secret', 'name'] },
     };
     const context = new Context(config, mockMgmtClient());
     let err;
@@ -365,6 +437,8 @@ describe('#YAML context validation', () => {
       err = e.message;
     }
 
-    expect(err).to.equal('EXCLUDED_PROPS should NOT have any intersections with INCLUDED_PROPS. Intersections found: clients: client_secret, name');
+    expect(err).to.equal(
+      'EXCLUDED_PROPS should NOT have any intersections with INCLUDED_PROPS. Intersections found: clients: client_secret, name'
+    );
   });
 });

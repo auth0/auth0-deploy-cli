@@ -2,7 +2,7 @@ import _ from 'lodash';
 import DefaultHandler, { order } from './default';
 import constants from '../../constants';
 import log from '../../logger';
-import { Assets} from '../../../types';
+import { Assets } from '../../../types';
 
 export const schema = {
   type: 'object',
@@ -14,34 +14,32 @@ export const schema = {
         type: 'object',
         properties: {
           action_name: { type: 'string', enum: constants.ACTIONS_TRIGGERS },
-          display_name: { type: 'string', default: '' }
-        }
-      }
-    }
-  }
+          display_name: { type: 'string', default: '' },
+        },
+      },
+    },
+  },
 };
 
 function isActionsDisabled(err): boolean {
   const errorBody = _.get(err, 'originalError.response.body') || {};
 
-  return (
-    err.statusCode === 403 && errorBody.errorCode === 'feature_not_enabled'
-  );
+  return err.statusCode === 403 && errorBody.errorCode === 'feature_not_enabled';
 }
 
 export default class TriggersHandler extends DefaultHandler {
   existing: {
     [key: string]: {
-      action_name: string,
-      display_name: string,
-    }
-  }
+      action_name: string;
+      display_name: string;
+    };
+  };
 
   constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'triggers',
-      id: 'name'
+      id: 'name',
     });
   }
 
@@ -51,10 +49,7 @@ export default class TriggersHandler extends DefaultHandler {
     }
 
     // in case client version does not support actions
-    if (
-      !this.client.actions
-      || typeof this.client.actions.getAllTriggers !== 'function'
-    ) {
+    if (!this.client.actions || typeof this.client.actions.getAllTriggers !== 'function') {
       return [];
     }
 
@@ -67,12 +62,12 @@ export default class TriggersHandler extends DefaultHandler {
       for (let i = 0; i < triggers.length; i++) {
         const triggerId = triggers[i];
         const { bindings } = await this.client.actions.getTriggerBindings({
-          trigger_id: triggerId
+          trigger_id: triggerId,
         });
         if (bindings.length > 0) {
           triggerBindings[triggerId] = bindings.map((binding) => ({
             action_name: binding.action.name,
-            display_name: binding.display_name
+            display_name: binding.display_name,
           }));
         }
       }
@@ -102,17 +97,19 @@ export default class TriggersHandler extends DefaultHandler {
     if (!triggers) return;
 
     // Process each trigger
-    await Promise.all(Object.entries(triggers).map(async ([name, data]) => {
-      const bindings = data.map((binding) => ({
-        ref: {
-          type: 'action_name',
-          value: binding.action_name
-        },
-        display_name: binding.display_name
-      }));
-      await this.client.actions.updateTriggerBindings({ trigger_id: name }, { bindings });
-      this.didUpdate({ trigger_id: name });
-      this.updated += 1;
-    }));
+    await Promise.all(
+      Object.entries(triggers).map(async ([name, data]) => {
+        const bindings = data.map((binding) => ({
+          ref: {
+            type: 'action_name',
+            value: binding.action_name,
+          },
+          display_name: binding.display_name,
+        }));
+        await this.client.actions.updateTriggerBindings({ trigger_id: name }, { bindings });
+        this.didUpdate({ trigger_id: name });
+        this.updated += 1;
+      })
+    );
   }
 }

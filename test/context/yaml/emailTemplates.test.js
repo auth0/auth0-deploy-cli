@@ -41,7 +41,7 @@ describe('#YAML context email templates', () => {
         from: 'test@email.com',
         subject: 'something',
         syntax: 'liquid',
-        template: 'verify_email'
+        template: 'verify_email',
       },
       {
         body: '<html>test</html>',
@@ -49,8 +49,8 @@ describe('#YAML context email templates', () => {
         from: 'test@email.com',
         subject: 'something',
         syntax: 'liquid',
-        template: 'welcome_email'
-      }
+        template: 'welcome_email',
+      },
     ];
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { ENV: 'test' } };
@@ -62,7 +62,10 @@ describe('#YAML context email templates', () => {
   it('should dump email templates', async () => {
     const dir = path.join(testDataDir, 'yaml', 'emailTemplatesDump');
     cleanThenMkdir(dir);
-    const context = new Context({ AUTH0_INPUT_FILE: path.join(dir, 'tennat.yaml') }, mockMgmtClient());
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, 'tennat.yaml') },
+      mockMgmtClient()
+    );
 
     context.assets.emailTemplates = [
       {
@@ -71,7 +74,7 @@ describe('#YAML context email templates', () => {
         from: 'test@email.com',
         subject: 'something',
         syntax: 'liquid',
-        template: 'verify_email'
+        template: 'verify_email',
       },
       {
         body: '<html>test</html>',
@@ -79,8 +82,8 @@ describe('#YAML context email templates', () => {
         from: 'test@email.com',
         subject: 'something',
         syntax: 'liquid',
-        template: 'welcome_email'
-      }
+        template: 'welcome_email',
+      },
     ];
 
     const dumped = await handler.dump(context);
@@ -92,7 +95,7 @@ describe('#YAML context email templates', () => {
           from: 'test@email.com',
           subject: 'something',
           syntax: 'liquid',
-          template: 'verify_email'
+          template: 'verify_email',
         },
         {
           body: './emailTemplates/welcome_email.html',
@@ -100,13 +103,17 @@ describe('#YAML context email templates', () => {
           from: 'test@email.com',
           subject: 'something',
           syntax: 'liquid',
-          template: 'welcome_email'
-        }
-      ]
+          template: 'welcome_email',
+        },
+      ],
     });
 
     const templatesFolder = path.join(dir, 'emailTemplates');
-    expect(fs.readFileSync(path.join(templatesFolder, 'verify_email.html'), 'utf8')).to.deep.equal('<html>test</html>');
-    expect(fs.readFileSync(path.join(templatesFolder, 'welcome_email.html'), 'utf8')).to.deep.equal('<html>test</html>');
+    expect(fs.readFileSync(path.join(templatesFolder, 'verify_email.html'), 'utf8')).to.deep.equal(
+      '<html>test</html>'
+    );
+    expect(fs.readFileSync(path.join(templatesFolder, 'welcome_email.html'), 'utf8')).to.deep.equal(
+      '<html>test</html>'
+    );
   });
 });

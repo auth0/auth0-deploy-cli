@@ -8,13 +8,7 @@ export default {
   deploy,
   keywordReplace,
   loadFileAndReplaceKeywords,
-  Auth0
+  Auth0,
 };
 
-export {
-  constants,
-  deploy,
-  keywordReplace,
-  loadFileAndReplaceKeywords,
-  Auth0
-};
+export { constants, deploy, keywordReplace, loadFileAndReplaceKeywords, Auth0 };

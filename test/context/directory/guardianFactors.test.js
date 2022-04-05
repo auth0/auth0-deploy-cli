@@ -3,9 +3,7 @@ import { expect } from 'chai';
 import { constants } from '../../../src/tools';
 
 import Context from '../../../src/context/directory';
-import {
-  testDataDir, createDir, mockMgmtClient, cleanThenMkdir
-} from '../../utils';
+import { testDataDir, createDir, mockMgmtClient, cleanThenMkdir } from '../../utils';
 import handler from '../../../src/context/directory/handlers/guardianFactors';
 import { loadJSON } from '../../../src/utils';
 
@@ -19,8 +17,7 @@ describe('#directory context guardian factors provider', () => {
       'otp.json': `{
         "name": "otp",
         "enabled": true
-      }`
-
+      }`,
     };
 
     const folder = path.join(constants.GUARDIAN_DIRECTORY, constants.GUARDIAN_FACTORS_DIRECTORY);
@@ -33,7 +30,7 @@ describe('#directory context guardian factors provider', () => {
 
     expect(context.assets.guardianFactors).to.deep.equal([
       { enabled: true, name: 'otp' },
-      { enabled: true, name: 'sms' }
+      { enabled: true, name: 'sms' },
     ]);
   });
 
@@ -44,12 +41,22 @@ describe('#directory context guardian factors provider', () => {
 
     context.assets.guardianFactors = [
       { enabled: true, name: 'otp' },
-      { enabled: true, name: 'sms' }
+      { enabled: true, name: 'sms' },
     ];
 
     await handler.dump(context);
-    const factorsFolder = path.join(dir, constants.GUARDIAN_DIRECTORY, constants.GUARDIAN_FACTORS_DIRECTORY);
-    expect(loadJSON(path.join(factorsFolder, 'sms.json'))).to.deep.equal({ enabled: true, name: 'sms' });
-    expect(loadJSON(path.join(factorsFolder, 'otp.json'))).to.deep.equal({ enabled: true, name: 'otp' });
+    const factorsFolder = path.join(
+      dir,
+      constants.GUARDIAN_DIRECTORY,
+      constants.GUARDIAN_FACTORS_DIRECTORY
+    );
+    expect(loadJSON(path.join(factorsFolder, 'sms.json'))).to.deep.equal({
+      enabled: true,
+      name: 'sms',
+    });
+    expect(loadJSON(path.join(factorsFolder, 'otp.json'))).to.deep.equal({
+      enabled: true,
+      name: 'otp',
+    });
   });
 });

@@ -4,14 +4,14 @@ import fs from 'fs-extra';
 import { constants } from '../../../tools';
 import { sanitize } from '../../../utils';
 import log from '../../../logger';
-import { YAMLHandler } from '.'
-import YAMLContext from '..'
+import { YAMLHandler } from '.';
+import YAMLContext from '..';
 
 type ParsedActions = {
-  actions: unknown[] | undefined
-}
+  actions: unknown[] | undefined;
+};
 
-type Secret = { name: string, value: string }
+type Secret = { name: string; value: string };
 
 function parseCode(context: YAMLContext, code: string) {
   if (code) {
@@ -28,21 +28,21 @@ async function parse(context: YAMLContext): Promise<ParsedActions> {
     actions: [
       ...context.assets.actions.map((action) => ({
         ...action,
-        code: parseCode(context, action.code)
-      }))
-    ]
+        code: parseCode(context, action.code),
+      })),
+    ],
   };
   return actions;
 }
 
-function mapSecrets(secrets: { name: string, value: string }[]): Secret[] {
+function mapSecrets(secrets: { name: string; value: string }[]): Secret[] {
   if (secrets && secrets.length > 0) {
     return secrets.map((secret) => ({ name: secret.name, value: secret.value }));
   }
   return [];
 }
 
-function mapActionCode(basePath: string, action: { code: string, name: string }): string {
+function mapActionCode(basePath: string, action: { code: string; name: string }): string {
   const { code } = action;
 
   if (!code) {
@@ -50,11 +50,7 @@ function mapActionCode(basePath: string, action: { code: string, name: string })
   }
 
   const actionName = sanitize(action.name);
-  const actionVersionsFolder = path.join(
-    basePath,
-    constants.ACTIONS_DIRECTORY,
-    actionName
-  );
+  const actionVersionsFolder = path.join(basePath, constants.ACTIONS_DIRECTORY, actionName);
   fs.ensureDirSync(actionVersionsFolder);
 
   const codeFile = path.join(actionVersionsFolder, 'code.js');
@@ -67,7 +63,7 @@ function mapActionCode(basePath: string, action: { code: string, name: string })
 async function dump(context: YAMLContext): Promise<ParsedActions> {
   const { actions } = context.assets;
   //@ts-ignore TODO: need to investigate why returning void here when other handlers do not
-  if (!actions) return;// Nothing to do
+  if (!actions) return; // Nothing to do
   return {
     actions: actions.map((action) => ({
       name: action.name,
@@ -78,14 +74,14 @@ async function dump(context: YAMLContext): Promise<ParsedActions> {
       dependencies: action.dependencies || [],
       status: action.status,
       secrets: mapSecrets(action.secrets),
-      supported_triggers: action.supported_triggers
-    }))
+      supported_triggers: action.supported_triggers,
+    })),
   };
 }
 
 const ActionsHandler: YAMLHandler<ParsedActions> = {
   parse,
-  dump
+  dump,
 };
 
 export default ActionsHandler;

@@ -1,15 +1,15 @@
-import { YAMLHandler } from '.'
-import YAMLContext from '..'
+import { YAMLHandler } from '.';
+import YAMLContext from '..';
 
 type ParsedOrganizations = {
-  organizations: unknown[]
-}
+  organizations: unknown[];
+};
 
 async function parse(context: YAMLContext): Promise<ParsedOrganizations> {
   const { organizations } = context.assets;
 
   return {
-    organizations: organizations
+    organizations: organizations,
   };
 }
 
@@ -28,14 +28,14 @@ async function dump(context: YAMLContext): Promise<ParsedOrganizations> {
 
             return {
               name,
-              ...c
+              ...c,
             };
           });
         }
 
         return org;
-      })
-    ]
+      }),
+    ],
   };
 }
 

@@ -6,17 +6,17 @@ import { expect } from 'chai';
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/organizations';
 import { loadJSON } from '../../../src/utils';
-import {
-  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
-} from '../../utils';
+import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
 
 describe('#directory context organizations', () => {
   it('should process organizations', async () => {
     const files = {
       organizations: {
-        'acme.json': '{ "name": "acme", "display_name": "acme", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "name": "google", "assign_membership_on_login": false }]}',
-        'contoso.json': '{ "name": "contoso", "display_name": "contoso", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "name": "google", "assign_membership_on_login": false }]}'
-      }
+        'acme.json':
+          '{ "name": "acme", "display_name": "acme", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "name": "google", "assign_membership_on_login": false }]}',
+        'contoso.json':
+          '{ "name": "contoso", "display_name": "contoso", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "name": "google", "assign_membership_on_login": false }]}',
+      },
     };
 
     const repoDir = path.join(testDataDir, 'directory', 'orgs2');
@@ -33,13 +33,15 @@ describe('#directory context organizations', () => {
         branding: {
           colors: {
             primary: '#3678e2',
-            page_background: '#9c4949'
-          }
+            page_background: '#9c4949',
+          },
         },
-        connections: [ {
-          name: 'google',
-          assign_membership_on_login: false
-        } ]
+        connections: [
+          {
+            name: 'google',
+            assign_membership_on_login: false,
+          },
+        ],
       },
       {
         name: 'contoso',
@@ -47,14 +49,16 @@ describe('#directory context organizations', () => {
         branding: {
           colors: {
             primary: '#3678e2',
-            page_background: '#9c4949'
-          }
+            page_background: '#9c4949',
+          },
         },
-        connections: [ {
-          name: 'google',
-          assign_membership_on_login: false
-        } ]
-      }
+        connections: [
+          {
+            name: 'google',
+            assign_membership_on_login: false,
+          },
+        ],
+      },
     ];
 
     expect(context.assets.organizations).to.deep.equal(target);
@@ -102,13 +106,15 @@ describe('#directory context organizations', () => {
         branding: {
           colors: {
             primary: '#3678e2',
-            page_background: '#9c4949'
-          }
+            page_background: '#9c4949',
+          },
         },
-        connections: [ {
-          name: 'google',
-          assign_membership_on_login: false
-        } ]
+        connections: [
+          {
+            name: 'google',
+            assign_membership_on_login: false,
+          },
+        ],
       },
       {
         name: 'contoso',
@@ -116,19 +122,25 @@ describe('#directory context organizations', () => {
         branding: {
           colors: {
             primary: '#3678e2',
-            page_background: '#9c4949'
-          }
+            page_background: '#9c4949',
+          },
         },
-        connections: [ {
-          name: 'google',
-          assign_membership_on_login: false
-        } ]
-      }
+        connections: [
+          {
+            name: 'google',
+            assign_membership_on_login: false,
+          },
+        ],
+      },
     ];
 
     await handler.dump(context);
     const organizationsFolder = path.join(dir, 'organizations');
-    expect(loadJSON(path.join(organizationsFolder, 'acme.json'))).to.deep.equal(context.assets.organizations[0]);
-    expect(loadJSON(path.join(organizationsFolder, 'contoso.json'))).to.deep.equal(context.assets.organizations[1]);
+    expect(loadJSON(path.join(organizationsFolder, 'acme.json'))).to.deep.equal(
+      context.assets.organizations[0]
+    );
+    expect(loadJSON(path.join(organizationsFolder, 'contoso.json'))).to.deep.equal(
+      context.assets.organizations[1]
+    );
   });
 });

@@ -9,29 +9,28 @@ import {
   dumpJSON,
   loadJSON,
   sanitize,
-  mapClientID2NameSorted
+  mapClientID2NameSorted,
 } from '../../../utils';
 
-import { DirectoryHandler } from '.'
+import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 
 type ParsedDatabases = {
-  databases: unknown[] | undefined
-}
+  databases: unknown[] | undefined;
+};
 
 type DatabaseMetadata = {
   options?: {
     customScripts?: {
-      change_password: string
-      create: string
-      delete: string
-      get_user: string
-      login: string
-      verify: string
-    },
-  }
-}
-
+      change_password: string;
+      create: string;
+      delete: string;
+      get_user: string;
+      login: string;
+      verify: string;
+    };
+  };
+};
 
 function getDatabase(folder: string, mappings): {} {
   const metaFile = path.join(folder, 'database.json');
@@ -43,8 +42,7 @@ function getDatabase(folder: string, mappings): {} {
       log.warn(`Skipping database folder ${folder} as cannot find or read ${metaFile}`);
       return {};
     }
-  })()
-
+  })();
 
   if (!metaData) {
     log.warn(`Skipping database folder ${folder} as ${metaFile} is empty`);
@@ -57,8 +55,8 @@ function getDatabase(folder: string, mappings): {} {
       //@ts-ignore because this code exists currently, but still needs to be understood if it is correct or not
       ...metaData.options,
       //@ts-ignore because this code exists currently, but still needs to be understood if it is correct or not
-      ...(metaData.customScripts && { customScripts: metaData.customScripts })
-    }
+      ...(metaData.customScripts && { customScripts: metaData.customScripts }),
+    },
   };
 
   // If any customScripts configured then load content of files
@@ -84,15 +82,17 @@ function parse(context: DirectoryContext): ParsedDatabases {
   const databaseFolder = path.join(context.filePath, constants.DATABASE_CONNECTIONS_DIRECTORY);
   if (!existsMustBeDir(databaseFolder)) return { databases: undefined }; // Skip
 
-  const folders = fs.readdirSync(databaseFolder)
+  const folders = fs
+    .readdirSync(databaseFolder)
     .map((f) => path.join(databaseFolder, f))
     .filter((f) => isDirectory(f));
 
-  const databases = folders.map((f) => getDatabase(f, context.mappings))
+  const databases = folders
+    .map((f) => getDatabase(f, context.mappings))
     .filter((p) => Object.keys(p).length > 1);
 
   return {
-    databases
+    databases,
   };
 }
 
@@ -115,23 +115,30 @@ async function dump(context: DirectoryContext): Promise<void> {
 
     const formatted = {
       ...database,
-      ...(database.enabled_clients && { enabled_clients: mapClientID2NameSorted(database.enabled_clients, context.assets.clientsOrig) }),
+      ...(database.enabled_clients && {
+        enabled_clients: mapClientID2NameSorted(
+          database.enabled_clients,
+          context.assets.clientsOrig
+        ),
+      }),
       options: {
         ...database.options,
         // customScripts option only written if there are scripts
         ...(database.options.customScripts && {
-          //@ts-ignore
-          customScripts: Object.entries(database.options.customScripts).sort(sortCustomScripts).reduce((scripts, [name, script]) => {
-            // Dump custom script to file
-            const scriptName = sanitize(`${name}.js`);
-            const scriptFile = path.join(dbFolder, scriptName);
-            log.info(`Writing ${scriptFile}`);
-            fs.writeFileSync(scriptFile, script);
-            scripts[name] = `./${scriptName}`;
-            return scripts;
-          }, {})
-        })
-      }
+          customScripts: Object.entries(database.options.customScripts)
+            //@ts-ignore
+            .sort(sortCustomScripts)
+            .reduce((scripts, [name, script]) => {
+              // Dump custom script to file
+              const scriptName = sanitize(`${name}.js`);
+              const scriptFile = path.join(dbFolder, scriptName);
+              log.info(`Writing ${scriptFile}`);
+              fs.writeFileSync(scriptFile, script);
+              scripts[name] = `./${scriptName}`;
+              return scripts;
+            }, {}),
+        }),
+      },
     };
 
     const databaseFile = path.join(dbFolder, 'database.json');
@@ -142,6 +149,6 @@ async function dump(context: DirectoryContext): Promise<void> {
 const databasesHandler: DirectoryHandler<ParsedDatabases> = {
   parse,
   dump,
-}
+};
 
 export default databasesHandler;

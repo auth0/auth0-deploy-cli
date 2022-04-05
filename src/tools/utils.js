@@ -5,7 +5,7 @@ import _ from 'lodash';
 import log from './logger';
 
 export function keywordArrayReplace(input, mappings) {
-  Object.keys(mappings).forEach(function(key) {
+  Object.keys(mappings).forEach(function (key) {
     // Matching against two sets of patterns because a developer may provide their array replacement keyword with or without wrapping quotes. It is not obvious to the developer which to do depending if they're operating in YAML or JSON.
     const pattern = `@@${key}@@`;
     const patternWithQuotes = `"${pattern}"`;
@@ -17,7 +17,7 @@ export function keywordArrayReplace(input, mappings) {
 }
 
 export function keywordStringReplace(input, mappings) {
-  Object.keys(mappings).forEach(function(key) {
+  Object.keys(mappings).forEach(function (key) {
     const regex = new RegExp(`##${key}##`, 'g');
     input = input.replace(regex, mappings[key]);
   });
@@ -50,7 +50,7 @@ export function convertClientNamesToIds(names, clients) {
     return acc;
   }, []);
   const unresolved = resolvedNames.filter((item) => !item.resolved).map((item) => item.name);
-  return [ ...unresolved, ...result ];
+  return [...unresolved, ...result];
 }
 
 export function loadFileAndReplaceKeywords(file, mappings) {
@@ -89,7 +89,7 @@ export function stripFields(obj, fields) {
   });
 
   if (stripped) {
-    const name = [ 'id', 'client_id', 'template', 'name' ].reduce((n, k) => newObj[k] || n, '');
+    const name = ['id', 'client_id', 'template', 'name'].reduce((n, k) => newObj[k] || n, '');
     log.debug(`Stripping "${name}" read-only fields ${JSON.stringify(stripped)}`);
   }
   return newObj;
@@ -100,12 +100,9 @@ export function getEnabledClients(assets, connection, existing, clients) {
   const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
   const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
   const enabledClients = [
-    ...convertClientNamesToIds(
-      connection.enabled_clients || [],
-      clients
-    ).filter(
-      (item) => ![ ...excludedClientsByNames, ...excludedClients ].includes(item)
-    )
+    ...convertClientNamesToIds(connection.enabled_clients || [], clients).filter(
+      (item) => ![...excludedClientsByNames, ...excludedClients].includes(item)
+    ),
   ];
   // If client is excluded and in the existing connection this client is enabled, it should keep enabled
   // If client is excluded and in the existing connection this client is disabled, it should keep disabled
@@ -135,9 +132,7 @@ export function duplicateItems(arr, key) {
 }
 
 export function filterExcluded(changes, exclude) {
-  const {
-    del, update, create, conflicts
-  } = changes;
+  const { del, update, create, conflicts } = changes;
 
   if (!exclude.length) {
     return changes;
@@ -149,7 +144,7 @@ export function filterExcluded(changes, exclude) {
     del: filter(del),
     update: filter(update),
     create: filter(create),
-    conflicts: filter(conflicts)
+    conflicts: filter(conflicts),
   };
 }
 

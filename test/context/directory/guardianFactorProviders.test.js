@@ -3,9 +3,7 @@ import { expect } from 'chai';
 import { constants } from '../../../src/tools';
 
 import Context from '../../../src/context/directory';
-import {
-  testDataDir, createDir, mockMgmtClient, cleanThenMkdir
-} from '../../utils';
+import { testDataDir, createDir, mockMgmtClient, cleanThenMkdir } from '../../utils';
 import handler from '../../../src/context/directory/handlers/guardianFactorProviders';
 import { loadJSON } from '../../../src/utils';
 
@@ -18,7 +16,7 @@ describe('#directory context guardian factors providers provider', () => {
         "auth_token": "test",
         "sid": "test",
         "messaging_service_sid": "test"
-      }`
+      }`,
     };
 
     const folder = path.join(constants.GUARDIAN_DIRECTORY, constants.GUARDIAN_PROVIDERS_DIRECTORY);
@@ -35,8 +33,8 @@ describe('#directory context guardian factors providers provider', () => {
         messaging_service_sid: 'test',
         name: 'sms',
         provider: 'twilio',
-        sid: 'test'
-      }
+        sid: 'test',
+      },
     ]);
   });
 
@@ -51,18 +49,22 @@ describe('#directory context guardian factors providers provider', () => {
         messaging_service_sid: 'test',
         name: 'sms',
         provider: 'twilio',
-        sid: 'test'
-      }
+        sid: 'test',
+      },
     ];
 
     await handler.dump(context);
-    const factorsProvidersFolder = path.join(dir, constants.GUARDIAN_DIRECTORY, constants.GUARDIAN_PROVIDERS_DIRECTORY);
+    const factorsProvidersFolder = path.join(
+      dir,
+      constants.GUARDIAN_DIRECTORY,
+      constants.GUARDIAN_PROVIDERS_DIRECTORY
+    );
     expect(loadJSON(path.join(factorsProvidersFolder, 'sms-twilio.json'))).to.deep.equal({
       auth_token: 'test',
       messaging_service_sid: 'test',
       name: 'sms',
       provider: 'twilio',
-      sid: 'test'
+      sid: 'test',
     });
   });
 });

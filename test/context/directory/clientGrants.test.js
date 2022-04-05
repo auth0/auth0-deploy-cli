@@ -6,9 +6,7 @@ import { constants } from '../../../src/tools';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/clientGrants';
-import {
-  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
-} from '../../utils';
+import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
 import { loadJSON } from '../../../src/utils';
 
 describe('#directory context clientGrants', () => {
@@ -23,14 +21,17 @@ describe('#directory context clientGrants', () => {
               "read:logs"
            ],
            "var": @@var@@
-          }`
-      }
+          }`,
+      },
     };
 
     const repoDir = path.join(testDataDir, 'directory', 'clientGrants1');
     createDir(repoDir, files);
 
-    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { var: 'something' } };
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { var: 'something' },
+    };
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
@@ -38,9 +39,9 @@ describe('#directory context clientGrants', () => {
       {
         audience: 'https://test.auth0.com/api/v2/',
         client_id: 'auth0-webhooks',
-        scope: [ 'read:logs' ],
-        var: 'something'
-      }
+        scope: ['read:logs'],
+        var: 'something',
+      },
     ];
 
     expect(context.assets.clientGrants).to.deep.equal(target);
@@ -58,14 +59,17 @@ describe('#directory context clientGrants', () => {
            ],
            "var": @@var@@
           }`,
-        'README.md': 'something'
-      }
+        'README.md': 'something',
+      },
     };
 
     const repoDir = path.join(testDataDir, 'directory', 'clientGrants2');
     createDir(repoDir, files);
 
-    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { var: 'something' } };
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { var: 'something' },
+    };
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
@@ -73,9 +77,9 @@ describe('#directory context clientGrants', () => {
       {
         audience: 'https://test.auth0.com/api/v2/',
         client_id: 'auth0-webhooks',
-        scope: [ 'read:logs' ],
-        var: 'something'
-      }
+        scope: ['read:logs'],
+        var: 'something',
+      },
     ];
 
     expect(context.assets.clientGrants).to.deep.equal(target);
@@ -102,12 +106,14 @@ describe('#directory context clientGrants', () => {
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
     context.assets.clientGrants = [
-      { audience: 'https://test.myapp.com/api/v1', client_id: 'My M2M', scope: [ 'update:account' ] }
+      { audience: 'https://test.myapp.com/api/v1', client_id: 'My M2M', scope: ['update:account'] },
     ];
 
     await handler.dump(context);
     const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
-    expect(loadJSON(path.join(clientGrantsFolder, 'My M2M (https---test.myapp.com-api-v1).json'))).to.deep.equal(context.assets.clientGrants[0]);
+    expect(
+      loadJSON(path.join(clientGrantsFolder, 'My M2M (https---test.myapp.com-api-v1).json'))
+    ).to.deep.equal(context.assets.clientGrants[0]);
   });
 
   it('should dump client grants sanitized', async () => {
@@ -116,11 +122,13 @@ describe('#directory context clientGrants', () => {
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
     context.assets.clientGrants = [
-      { audience: 'https://test.myapp.com/api/v1', client_id: 'My M2M', scope: [ 'update:account' ] }
+      { audience: 'https://test.myapp.com/api/v1', client_id: 'My M2M', scope: ['update:account'] },
     ];
 
     await handler.dump(context);
     const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
-    expect(loadJSON(path.join(clientGrantsFolder, 'My M2M (https---test.myapp.com-api-v1).json'))).to.deep.equal(context.assets.clientGrants[0]);
+    expect(
+      loadJSON(path.join(clientGrantsFolder, 'My M2M (https---test.myapp.com-api-v1).json'))
+    ).to.deep.equal(context.assets.clientGrants[0]);
   });
 });

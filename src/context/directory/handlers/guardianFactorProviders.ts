@@ -2,27 +2,30 @@ import fs from 'fs-extra';
 import path from 'path';
 import { constants } from '../../../tools';
 
-import {
-  getFiles, existsMustBeDir, dumpJSON, loadJSON
-} from '../../../utils';
-import { DirectoryHandler } from '.'
-import DirectoryContext from '..'
+import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
+import { DirectoryHandler } from '.';
+import DirectoryContext from '..';
 
 type ParsedGuardianFactorProviders = {
-  guardianFactorProviders: unknown[] | undefined
-}
+  guardianFactorProviders: unknown[] | undefined;
+};
 
 function parse(context: DirectoryContext): ParsedGuardianFactorProviders {
-  const factorProvidersFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY, constants.GUARDIAN_PROVIDERS_DIRECTORY);
+  const factorProvidersFolder = path.join(
+    context.filePath,
+    constants.GUARDIAN_DIRECTORY,
+    constants.GUARDIAN_PROVIDERS_DIRECTORY
+  );
   if (!existsMustBeDir(factorProvidersFolder)) return { guardianFactorProviders: undefined }; // Skip
 
   const foundFiles = getFiles(factorProvidersFolder, ['.json']);
 
-  const guardianFactorProviders = foundFiles.map((f) => loadJSON(f, context.mappings))
+  const guardianFactorProviders = foundFiles
+    .map((f) => loadJSON(f, context.mappings))
     .filter((p) => Object.keys(p).length > 0); // Filter out empty factorProvidersFolder
 
   return {
-    guardianFactorProviders
+    guardianFactorProviders,
   };
 }
 
@@ -31,11 +34,18 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   if (!guardianFactorProviders) return; // Skip, nothing to dump
 
-  const factorProvidersFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY, constants.GUARDIAN_PROVIDERS_DIRECTORY);
+  const factorProvidersFolder = path.join(
+    context.filePath,
+    constants.GUARDIAN_DIRECTORY,
+    constants.GUARDIAN_PROVIDERS_DIRECTORY
+  );
   fs.ensureDirSync(factorProvidersFolder);
 
   guardianFactorProviders.forEach((factorProvider) => {
-    const factorProviderFile = path.join(factorProvidersFolder, `${factorProvider.name}-${factorProvider.provider}.json`);
+    const factorProviderFile = path.join(
+      factorProvidersFolder,
+      `${factorProvider.name}-${factorProvider.provider}.json`
+    );
     dumpJSON(factorProviderFile, factorProvider);
   });
 }
@@ -43,6 +53,6 @@ async function dump(context: DirectoryContext): Promise<void> {
 const guardianFactorProvidersHandler: DirectoryHandler<ParsedGuardianFactorProviders> = {
   parse,
   dump,
-}
+};
 
 export default guardianFactorProvidersHandler;

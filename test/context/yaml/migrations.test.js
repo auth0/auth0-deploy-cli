@@ -22,7 +22,7 @@ describe('#YAML context migrations', () => {
 
     const target = {
       migration_flag_1: true,
-      migration_flag_2: false
+      migration_flag_2: false,
     };
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { ENV: 'test' } };
@@ -35,7 +35,7 @@ describe('#YAML context migrations', () => {
   it('should dump migrations', async () => {
     const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
     const migrations = {
-      migration_flags: true
+      migration_flags: true,
     };
     context.assets.migrations = migrations;
 
@@ -46,10 +46,10 @@ describe('#YAML context migrations', () => {
   it('should dump tenant without flags', async () => {
     const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
     const migrations = {
-      migration_flags: true
+      migration_flags: true,
     };
     context.assets.migrations = {
-      migration_flags: true
+      migration_flags: true,
     };
 
     const dumped = await handler.dump(context);

@@ -7,25 +7,31 @@ import { constants } from '../../../src/tools';
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/emailTemplates';
 import { loadJSON } from '../../../src/utils';
-import {
-  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
-} from '../../utils';
+import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
 
 const emailTemplates = {
   'provider.json': '{"name": "smtp"}',
-  'verify_email.json': '{ "template": "verify_email", "enabled": true, "from": "test@##env##.com" }',
+  'verify_email.json':
+    '{ "template": "verify_email", "enabled": true, "from": "test@##env##.com" }',
   'verify_email.html': '<html>some ##env## email</html>',
-  'welcome_email.json': '{ "template": "welcome_email", "enabled": true, "from": "test@##env##.com" }',
-  'welcome_email.html': '<html>some ##env## email</html>'
+  'welcome_email.json':
+    '{ "template": "welcome_email", "enabled": true, "from": "test@##env##.com" }',
+  'welcome_email.html': '<html>some ##env## email</html>',
 };
 
 const emailTemplaesTarget = [
   {
-    body: '<html>some test email</html>', enabled: true, from: 'test@test.com', template: 'verify_email'
+    body: '<html>some test email</html>',
+    enabled: true,
+    from: 'test@test.com',
+    template: 'verify_email',
   },
   {
-    body: '<html>some test email</html>', enabled: true, from: 'test@test.com', template: 'welcome_email'
-  }
+    body: '<html>some test email</html>',
+    enabled: true,
+    from: 'test@test.com',
+    template: 'welcome_email',
+  },
 ];
 
 describe('#directory context email templates', () => {
@@ -45,8 +51,8 @@ describe('#directory context email templates', () => {
     const files = {
       [constants.EMAIL_TEMPLATES_DIRECTORY]: {
         ...emailTemplates,
-        'README.md': 'something'
-      }
+        'README.md': 'something',
+      },
     };
 
     const repoDir = path.join(testDataDir, 'directory', 'emailTemplates2');
@@ -84,7 +90,7 @@ describe('#directory context email templates', () => {
         from: 'test@email.com',
         subject: 'something',
         syntax: 'liquid',
-        template: 'verify_email'
+        template: 'verify_email',
       },
       {
         body: '<html>test</html>',
@@ -92,8 +98,8 @@ describe('#directory context email templates', () => {
         from: 'test@email.com',
         subject: 'something',
         syntax: 'liquid',
-        template: 'welcome_email'
-      }
+        template: 'welcome_email',
+      },
     ];
 
     await handler.dump(context);
@@ -106,9 +112,11 @@ describe('#directory context email templates', () => {
       from: 'test@email.com',
       subject: 'something',
       syntax: 'liquid',
-      template: 'verify_email'
+      template: 'verify_email',
     });
-    expect(fs.readFileSync(path.join(emailTemplateFolder, 'verify_email.html'), 'utf8')).to.deep.equal('<html>test</html>');
+    expect(
+      fs.readFileSync(path.join(emailTemplateFolder, 'verify_email.html'), 'utf8')
+    ).to.deep.equal('<html>test</html>');
 
     expect(loadJSON(path.join(emailTemplateFolder, 'welcome_email.json'))).to.deep.equal({
       body: './welcome_email.html',
@@ -116,8 +124,10 @@ describe('#directory context email templates', () => {
       from: 'test@email.com',
       subject: 'something',
       syntax: 'liquid',
-      template: 'welcome_email'
+      template: 'welcome_email',
     });
-    expect(fs.readFileSync(path.join(emailTemplateFolder, 'welcome_email.html'), 'utf8')).to.deep.equal('<html>test</html>');
+    expect(
+      fs.readFileSync(path.join(emailTemplateFolder, 'welcome_email.html'), 'utf8')
+    ).to.deep.equal('<html>test</html>');
   });
 });

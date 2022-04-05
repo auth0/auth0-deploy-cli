@@ -1,15 +1,15 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { constants } from '../../../tools';
-import {
-  existsMustBeDir, dumpJSON, loadJSON, isFile
-} from '../../../utils';
-import { DirectoryHandler } from '.'
-import DirectoryContext from '..'
+import { existsMustBeDir, dumpJSON, loadJSON, isFile } from '../../../utils';
+import { DirectoryHandler } from '.';
+import DirectoryContext from '..';
 
-type ParsedGuardianFactorMessageTypes = {
-  guardianPhoneFactorMessageTypes: unknown
-} | {}
+type ParsedGuardianFactorMessageTypes =
+  | {
+      guardianPhoneFactorMessageTypes: unknown;
+    }
+  | {};
 
 function parse(context: DirectoryContext): ParsedGuardianFactorMessageTypes {
   const guardianFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY);
@@ -19,7 +19,7 @@ function parse(context: DirectoryContext): ParsedGuardianFactorMessageTypes {
 
   if (isFile(file)) {
     return {
-      guardianPhoneFactorMessageTypes: loadJSON(file, context.mappings)
+      guardianPhoneFactorMessageTypes: loadJSON(file, context.mappings),
     };
   }
 
@@ -41,6 +41,6 @@ async function dump(context: DirectoryContext): Promise<void> {
 const guardianFactorMessageTypesHandler: DirectoryHandler<ParsedGuardianFactorMessageTypes> = {
   parse,
   dump,
-}
+};
 
 export default guardianFactorMessageTypesHandler;

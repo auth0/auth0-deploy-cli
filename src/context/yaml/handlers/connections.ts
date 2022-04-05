@@ -4,14 +4,18 @@ import { constants } from '../../../tools';
 
 import log from '../../../logger';
 import {
-  isFile, sanitize, ensureProp, convertClientIdToName, mapClientID2NameSorted
+  isFile,
+  sanitize,
+  ensureProp,
+  convertClientIdToName,
+  mapClientID2NameSorted,
 } from '../../../utils';
-import { YAMLHandler } from '.'
-import YAMLContext from '..'
+import { YAMLHandler } from '.';
+import YAMLContext from '..';
 
 type ParsedConnections = {
-  connections: unknown[]
-}
+  connections: unknown[];
+};
 
 async function parse(context: YAMLContext): Promise<ParsedConnections> {
   // Load the HTML file for email connections
@@ -36,8 +40,8 @@ async function parse(context: YAMLContext): Promise<ParsedConnections> {
         }
 
         return connection;
-      })
-    ]
+      }),
+    ],
   };
 }
 
@@ -48,12 +52,9 @@ const getFormattedOptions = (connection, clients) => {
         ...connection.options,
         idpinitiated: {
           ...connection.options.idpinitiated,
-          client_id: convertClientIdToName(
-            connection.options.idpinitiated.client_id,
-            clients
-          )
-        }
-      }
+          client_id: convertClientIdToName(connection.options.idpinitiated.client_id, clients),
+        },
+      },
     };
   } catch (e) {
     return {};
@@ -72,7 +73,12 @@ async function dump(context: YAMLContext): Promise<ParsedConnections | {}> {
       const dumpedConnection = {
         ...connection,
         ...getFormattedOptions(connection, context.assets.clients),
-        ...(connection.enabled_clients && { enabled_clients: mapClientID2NameSorted(connection.enabled_clients, context.assets.clients) })
+        ...(connection.enabled_clients && {
+          enabled_clients: mapClientID2NameSorted(
+            connection.enabled_clients,
+            context.assets.clients
+          ),
+        }),
       };
 
       if (dumpedConnection.strategy === 'email') {
@@ -90,7 +96,7 @@ async function dump(context: YAMLContext): Promise<ParsedConnections | {}> {
       }
 
       return dumpedConnection;
-    })
+    }),
   };
 }
 

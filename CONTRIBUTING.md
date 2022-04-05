@@ -7,7 +7,7 @@ Ensure that before running the versioning scripts below, the Unreleased changelo
 ### Production Versioning
 
 ```sh
-npm version patch --no-git-tag-version  
+npm version patch --no-git-tag-version
 ```
 
 ### Beta Versioning

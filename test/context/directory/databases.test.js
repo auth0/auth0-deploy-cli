@@ -7,9 +7,7 @@ import { constants } from '../../../src/tools';
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/databases';
 import { loadJSON } from '../../../src/utils';
-import {
-  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
-} from '../../utils';
+import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
 
 describe('#directory context databases', () => {
   const normalUsersDB = {
@@ -22,13 +20,15 @@ describe('#directory context databases', () => {
           "requires_username": true
         }
       }
-    `
+    `,
   };
 
   it('should process normal databases', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'databases1');
     cleanThenMkdir(repoDir);
-    createDir(path.join(repoDir, constants.DATABASE_CONNECTIONS_DIRECTORY), { users: normalUsersDB });
+    createDir(path.join(repoDir, constants.DATABASE_CONNECTIONS_DIRECTORY), {
+      users: normalUsersDB,
+    });
 
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
     const context = new Context(config, mockMgmtClient());
@@ -36,15 +36,13 @@ describe('#directory context databases', () => {
 
     expect(context.assets.databases).to.deep.equal([
       {
-        enabled_clients: [
-          'My SPA'
-        ],
+        enabled_clients: ['My SPA'],
         name: 'users',
         options: {
           import_mode: true,
-          requires_username: true
-        }
-      }
+          requires_username: true,
+        },
+      },
     ]);
   });
 
@@ -102,13 +100,15 @@ describe('#directory context databases', () => {
     'delete.js': 'function test(email, callback) {var env = @@env@@};',
     'get_user.js': 'function test(email, callback) {var env = @@env@@};',
     'custom-login.js': 'function test(email, callback) {var env = @@env@@};',
-    'verify.js': 'function test(email, callback) {var env = @@env@@};'
+    'verify.js': 'function test(email, callback) {var env = @@env@@};',
   };
 
   it('should process custom databases', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'databases4');
     cleanThenMkdir(repoDir);
-    createDir(path.join(repoDir, constants.DATABASE_CONNECTIONS_DIRECTORY), { users: customUsersDB });
+    createDir(path.join(repoDir, constants.DATABASE_CONNECTIONS_DIRECTORY), {
+      users: customUsersDB,
+    });
 
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
     const context = new Context(config, mockMgmtClient());
@@ -116,9 +116,7 @@ describe('#directory context databases', () => {
 
     expect(context.assets.databases).to.deep.equal([
       {
-        enabled_clients: [
-          'My SPA'
-        ],
+        enabled_clients: ['My SPA'],
         name: 'users',
         options: {
           customScripts: {
@@ -128,11 +126,11 @@ describe('#directory context databases', () => {
             delete: 'function test(email, callback) {var env = "test"};',
             get_user: 'function test(email, callback) {var env = "test"};',
             login: 'function test(email, callback) {var env = "test"};',
-            verify: 'function test(email, callback) {var env = "test"};'
+            verify: 'function test(email, callback) {var env = "test"};',
           },
-          enabledDatabaseCustomization: true
-        }
-      }
+          enabledDatabaseCustomization: true,
+        },
+      },
     ]);
   });
 
@@ -150,9 +148,7 @@ describe('#directory context databases', () => {
 
     expect(context.assets.databases).to.deep.equal([
       {
-        enabled_clients: [
-          'My SPA'
-        ],
+        enabled_clients: ['My SPA'],
         name: 'users',
         options: {
           customScripts: {
@@ -162,11 +158,11 @@ describe('#directory context databases', () => {
             delete: 'function test(email, callback) {var env = "test"};',
             get_user: 'function test(email, callback) {var env = "test"};',
             login: 'function test(email, callback) {var env = "test"};',
-            verify: 'function test(email, callback) {var env = "test"};'
+            verify: 'function test(email, callback) {var env = "test"};',
           },
-          enabledDatabaseCustomization: true
-        }
-      }
+          enabledDatabaseCustomization: true,
+        },
+      },
     ]);
   });
 
@@ -181,10 +177,10 @@ describe('#directory context databases', () => {
         name: 'users',
         enabled_clients: [],
         options: {
-          requires_username: true
+          requires_username: true,
         },
-        strategy: 'auth0'
-      }
+        strategy: 'auth0',
+      },
     ];
 
     await handler.dump(context);
@@ -193,9 +189,9 @@ describe('#directory context databases', () => {
       name: 'users',
       enabled_clients: [],
       options: {
-        requires_username: true
+        requires_username: true,
       },
-      strategy: 'auth0'
+      strategy: 'auth0',
     });
   });
 
@@ -206,17 +202,21 @@ describe('#directory context databases', () => {
     context.assets.databases = [
       {
         name: 'users',
-        enabled_clients: [ 'client2', 'client1', 'client3' ],
+        enabled_clients: ['client2', 'client1', 'client3'],
         options: {
-          requires_username: true
+          requires_username: true,
         },
-        strategy: 'auth0'
-      }
+        strategy: 'auth0',
+      },
     ];
 
     await handler.dump(context);
     const scripsFolder = path.join(dbDumpDir, constants.DATABASE_CONNECTIONS_DIRECTORY, 'users');
-    expect(loadJSON(path.join(scripsFolder, 'database.json')).enabled_clients).to.deep.equal([ 'client1', 'client2', 'client3' ]);
+    expect(loadJSON(path.join(scripsFolder, 'database.json')).enabled_clients).to.deep.equal([
+      'client1',
+      'client2',
+      'client3',
+    ]);
   });
 
   it('should dump custom databases', async () => {
@@ -236,12 +236,12 @@ describe('#directory context databases', () => {
             delete: scriptValidate,
             get_user: scriptValidate,
             login: scriptValidate,
-            verify: scriptValidate
+            verify: scriptValidate,
           },
-          enabledDatabaseCustomization: true
+          enabledDatabaseCustomization: true,
         },
-        strategy: 'auth0'
-      }
+        strategy: 'auth0',
+      },
     ];
 
     await handler.dump(context);
@@ -257,20 +257,34 @@ describe('#directory context databases', () => {
           delete: './delete.js',
           get_user: './get_user.js',
           login: './login.js',
-          verify: './verify.js'
+          verify: './verify.js',
         },
-        enabledDatabaseCustomization: true
+        enabledDatabaseCustomization: true,
       },
-      strategy: 'auth0'
+      strategy: 'auth0',
     });
 
-    expect(fs.readFileSync(path.join(scripsFolder, 'change_email.js'), 'utf8')).to.deep.equal(scriptValidate);
-    expect(fs.readFileSync(path.join(scripsFolder, 'change_password.js'), 'utf8')).to.deep.equal(scriptValidate);
-    expect(fs.readFileSync(path.join(scripsFolder, 'create.js'), 'utf8')).to.deep.equal(scriptValidate);
-    expect(fs.readFileSync(path.join(scripsFolder, 'delete.js'), 'utf8')).to.deep.equal(scriptValidate);
-    expect(fs.readFileSync(path.join(scripsFolder, 'get_user.js'), 'utf8')).to.deep.equal(scriptValidate);
-    expect(fs.readFileSync(path.join(scripsFolder, 'login.js'), 'utf8')).to.deep.equal(scriptValidate);
-    expect(fs.readFileSync(path.join(scripsFolder, 'verify.js'), 'utf8')).to.deep.equal(scriptValidate);
+    expect(fs.readFileSync(path.join(scripsFolder, 'change_email.js'), 'utf8')).to.deep.equal(
+      scriptValidate
+    );
+    expect(fs.readFileSync(path.join(scripsFolder, 'change_password.js'), 'utf8')).to.deep.equal(
+      scriptValidate
+    );
+    expect(fs.readFileSync(path.join(scripsFolder, 'create.js'), 'utf8')).to.deep.equal(
+      scriptValidate
+    );
+    expect(fs.readFileSync(path.join(scripsFolder, 'delete.js'), 'utf8')).to.deep.equal(
+      scriptValidate
+    );
+    expect(fs.readFileSync(path.join(scripsFolder, 'get_user.js'), 'utf8')).to.deep.equal(
+      scriptValidate
+    );
+    expect(fs.readFileSync(path.join(scripsFolder, 'login.js'), 'utf8')).to.deep.equal(
+      scriptValidate
+    );
+    expect(fs.readFileSync(path.join(scripsFolder, 'verify.js'), 'utf8')).to.deep.equal(
+      scriptValidate
+    );
   });
 
   it('should dump custom databases sanitized', async () => {
@@ -284,28 +298,34 @@ describe('#directory context databases', () => {
         enabled_clients: [],
         options: {
           customScripts: {
-            change_email: scriptValidate
+            change_email: scriptValidate,
           },
-          enabledDatabaseCustomization: true
+          enabledDatabaseCustomization: true,
         },
-        strategy: 'auth0'
-      }
+        strategy: 'auth0',
+      },
     ];
 
     await handler.dump(context);
-    const scripsFolder = path.join(dbDumpDir, constants.DATABASE_CONNECTIONS_DIRECTORY, 'users-test');
+    const scripsFolder = path.join(
+      dbDumpDir,
+      constants.DATABASE_CONNECTIONS_DIRECTORY,
+      'users-test'
+    );
     expect(loadJSON(path.join(scripsFolder, 'database.json'))).to.deep.equal({
       name: 'users/test',
       enabled_clients: [],
       options: {
         customScripts: {
-          change_email: './change_email.js'
+          change_email: './change_email.js',
         },
-        enabledDatabaseCustomization: true
+        enabledDatabaseCustomization: true,
       },
-      strategy: 'auth0'
+      strategy: 'auth0',
     });
 
-    expect(fs.readFileSync(path.join(scripsFolder, 'change_email.js'), 'utf8')).to.deep.equal(scriptValidate);
+    expect(fs.readFileSync(path.join(scripsFolder, 'change_email.js'), 'utf8')).to.deep.equal(
+      scriptValidate
+    );
   });
 });

@@ -4,23 +4,16 @@ import { Asset, Assets, AssetTypes, Config } from './types';
 
 // Filter out known read only fields during dump
 const readOnlyFields: Partial<Record<AssetTypes, string[]>> = {
-  guardianFactors: [
-    'trial_expired'
-  ],
-  connections: [
-    'provisioning_ticket_url',
-    'realms'
-  ],
-  databases: [
-    'options.configuration'
-  ],
+  guardianFactors: ['trial_expired'],
+  connections: ['provisioning_ticket_url', 'realms'],
+  databases: ['options.configuration'],
   tenant: [
     'sandbox_version',
     'sandbox_versions_available',
     'flags.allow_changing_enable_sso',
     'flags.enable_sso',
     'flags.disable_impersonation',
-    'flags.remove_stale_idp_attributes'
+    'flags.remove_stale_idp_attributes',
   ],
   clients: [
     'client_secret',
@@ -30,8 +23,8 @@ const readOnlyFields: Partial<Record<AssetTypes, string[]>> = {
     'tenant',
     'custom_login_page_preview',
     'config_route',
-    'owners'
-  ]
+    'owners',
+  ],
 };
 
 function getExcludedFields(config: Config) {
@@ -43,16 +36,24 @@ function getExcludedFields(config: Config) {
 
   Object.entries(excluded).forEach(([name, fields]) => {
     // Do not allow same field to be included and excluded at the same time
-    const intersections = fields.filter((field) => included && included[name] && included[name].includes(field));
+    const intersections = fields.filter(
+      (field) => included && included[name] && included[name].includes(field)
+    );
     if (intersections.length > 0) {
-      throw new Error(`EXCLUDED_PROPS should NOT have any intersections with INCLUDED_PROPS. Intersections found: ${name}: ${intersections.join(', ')}`);
+      throw new Error(
+        `EXCLUDED_PROPS should NOT have any intersections with INCLUDED_PROPS. Intersections found: ${name}: ${intersections.join(
+          ', '
+        )}`
+      );
     }
     strippedFields[name] = (strippedFields[name] || []).concat(fields);
   });
 
   Object.entries(included).forEach(([name, fields]) => {
     if (strippedFields[name]) {
-      strippedFields[name] = strippedFields[name].filter((field: string) => !fields.includes(field));
+      strippedFields[name] = strippedFields[name].filter(
+        (field: string) => !fields.includes(field)
+      );
     }
   });
 

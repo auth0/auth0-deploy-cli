@@ -1,15 +1,15 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { constants } from '../../../tools';
-import {
-  existsMustBeDir, dumpJSON, loadJSON, isFile
-} from '../../../utils';
-import { DirectoryHandler } from '.'
-import DirectoryContext from '..'
+import { existsMustBeDir, dumpJSON, loadJSON, isFile } from '../../../utils';
+import { DirectoryHandler } from '.';
+import DirectoryContext from '..';
 
-type ParsedGuardianPolicies = {
-  guardianPolicies: unknown[] 
-} | {}
+type ParsedGuardianPolicies =
+  | {
+      guardianPolicies: unknown[];
+    }
+  | {};
 
 function parse(context: DirectoryContext): ParsedGuardianPolicies {
   const guardianFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY);
@@ -19,7 +19,7 @@ function parse(context: DirectoryContext): ParsedGuardianPolicies {
 
   if (isFile(file)) {
     return {
-      guardianPolicies: loadJSON(file, context.mappings)
+      guardianPolicies: loadJSON(file, context.mappings),
     };
   }
 
@@ -41,6 +41,6 @@ async function dump(context: DirectoryContext) {
 const guardianPoliciesHandler: DirectoryHandler<ParsedGuardianPolicies> = {
   parse,
   dump,
-}
+};
 
 export default guardianPoliciesHandler;

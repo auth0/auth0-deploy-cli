@@ -29,14 +29,14 @@ describe('#YAML context triggers', () => {
       'post-login': [
         {
           action_name: 'test-action',
-          display_name: 'display-name'
-        }
+          display_name: 'display-name',
+        },
       ],
       'credentials-exchange': [],
       'pre-user-registration': [],
       'post-user-registration': [],
       'post-change-password': [],
-      'send-phone-message': []
+      'send-phone-message': [],
     };
 
     const config = { AUTH0_INPUT_FILE: yamlFile };
@@ -49,20 +49,23 @@ describe('#YAML context triggers', () => {
   it('should dump triggers', async () => {
     const dir = path.join(testDataDir, 'yaml', 'actionsDump');
     cleanThenMkdir(dir);
-    const context = new Context({ AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') }, mockMgmtClient());
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') },
+      mockMgmtClient()
+    );
 
     context.assets.triggers = {
       'post-login': [
         {
           action_name: 'test-action',
-          display_name: 'display-name'
-        }
+          display_name: 'display-name',
+        },
       ],
       'credentials-exchange': [],
       'pre-user-registration': [],
       'post-user-registration': [],
       'post-change-password': [],
-      'send-phone-message': []
+      'send-phone-message': [],
     };
 
     const dumped = await handler.dump(context);
@@ -71,15 +74,15 @@ describe('#YAML context triggers', () => {
         'post-login': [
           {
             action_name: 'test-action',
-            display_name: 'display-name'
-          }
+            display_name: 'display-name',
+          },
         ],
         'credentials-exchange': [],
         'pre-user-registration': [],
         'post-user-registration': [],
         'post-change-password': [],
-        'send-phone-message': []
-      }
+        'send-phone-message': [],
+      },
     });
   });
 });

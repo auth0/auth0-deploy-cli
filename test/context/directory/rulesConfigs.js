@@ -6,17 +6,15 @@ import { constants } from '../../../src/tools';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/rulesConfigs';
-import {
-  cleanThenMkdir, testDataDir, createDir, mockMgmtClient
-} from '../../utils';
+import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
 
 describe('#directory context rulesConfigs', () => {
   it('should process rules configs', async () => {
     const files = {
       [constants.RULES_CONFIGS_DIRECTORY]: {
         'setting1.json': '{ "key": "setting1", "value": "##env##" }',
-        'setting2.json': '{ "key": "setting2", "value": "##env##" }'
-      }
+        'setting2.json': '{ "key": "setting2", "value": "##env##" }',
+      },
     };
 
     const repoDir = path.join(testDataDir, 'directory', 'rulesconfigs1');
@@ -28,7 +26,7 @@ describe('#directory context rulesConfigs', () => {
 
     const target = [
       { key: 'setting1', value: 'test' },
-      { key: 'setting2', value: 'test' }
+      { key: 'setting2', value: 'test' },
     ];
     expect(context.assets.rulesConfigs).to.deep.equal(target);
   });
@@ -37,8 +35,8 @@ describe('#directory context rulesConfigs', () => {
     const files = {
       [constants.RULES_CONFIGS_DIRECTORY]: {
         'setting1.json': '{ "key": "setting1", "value": "##env##" }',
-        'README.md': 'something'
-      }
+        'README.md': 'something',
+      },
     };
 
     const repoDir = path.join(testDataDir, 'directory', 'rulesconfigs2');
@@ -48,9 +46,7 @@ describe('#directory context rulesConfigs', () => {
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
-    const target = [
-      { key: 'setting1', value: 'test' }
-    ];
+    const target = [{ key: 'setting1', value: 'test' }];
 
     expect(context.assets.rulesConfigs).to.deep.equal(target);
   });
@@ -75,9 +71,7 @@ describe('#directory context rulesConfigs', () => {
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
-    context.assets.rulesConfigs = [
-      { key: 'SOME_SECRET', value: 'some_key' }
-    ];
+    context.assets.rulesConfigs = [{ key: 'SOME_SECRET', value: 'some_key' }];
 
     await handler.dump(context);
     const rulesConfigsFolder = path.join(dir, constants.RULES_CONFIGS_DIRECTORY);

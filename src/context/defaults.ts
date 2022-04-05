@@ -1,7 +1,8 @@
-export function emailProviderDefaults(emailProvider) {  // eslint-disable-line
+export function emailProviderDefaults(emailProvider) {
+  // eslint-disable-line
   const updated = { ...emailProvider };
 
-  const apiKeyProviders = [ 'mailgun', 'mandrill', 'sendgrid', 'sparkpost' ];
+  const apiKeyProviders = ['mailgun', 'mandrill', 'sendgrid', 'sparkpost'];
 
   // Add placeholder for credentials as they cannot be exported
   const { name } = updated;
@@ -9,7 +10,7 @@ export function emailProviderDefaults(emailProvider) {  // eslint-disable-line
   if (apiKeyProviders.includes(name)) {
     updated.credentials = {
       api_key: `##${name.toUpperCase()}_API_KEY##`,
-      ...updated.credentials || {}
+      ...(updated.credentials || {}),
     };
   }
 
@@ -19,7 +20,7 @@ export function emailProviderDefaults(emailProvider) {  // eslint-disable-line
       smtp_port: '##SMTP_PORT##',
       smtp_user: '##SMTP_USER##',
       smtp_pass: '##SMTP_PASS##',
-      ...updated.credentials || {}
+      ...(updated.credentials || {}),
     };
   }
 
@@ -28,7 +29,7 @@ export function emailProviderDefaults(emailProvider) {  // eslint-disable-line
       accessKeyId: '##SES_ACCESS_KEY_ID##',
       secretAccessKey: '##SES_ACCESS_SECRET_KEY##',
       region: '##SES_AWS_REGION##',
-      ...updated.credentials || {}
+      ...(updated.credentials || {}),
     };
   }
 

@@ -18,12 +18,12 @@ import {
   recordsSorter,
   sanitize,
   stripIdentifiers,
-  toConfigFn
+  toConfigFn,
 } from '../src/utils';
 
-const mockConfigFn = () => { };
+const mockConfigFn = () => {};
 
-describe('#utils', function() {
+describe('#utils', function () {
   it('should check if directory exist', () => {
     const dirExist = path.join(testDataDir, 'utils', 'isdir');
     const dirNotExist = path.join(testDataDir, 'utils', 'notexist');
@@ -53,11 +53,11 @@ describe('#utils', function() {
     fs.writeFileSync(path.join(dir, 'test2.html'), 'junk');
     fs.writeFileSync(path.join(dir, 'other.file'), 'junk');
 
-    expect(getFiles(dir, [ '.json', '.html' ])).to.deep.equal([
+    expect(getFiles(dir, ['.json', '.html'])).to.deep.equal([
       path.join(dir, 'test1.html'),
       path.join(dir, 'test1.json'),
       path.join(dir, 'test2.html'),
-      path.join(dir, 'test2.json')
+      path.join(dir, 'test2.json'),
     ]);
   });
 
@@ -69,7 +69,7 @@ describe('#utils', function() {
     expect(loadJSON(file, { env1: 'test1', env2: 'test2' })).to.deep.equal({
       env1: 'test1',
       env2: 'test2',
-      test: '123'
+      test: '123',
     });
   });
 
@@ -92,8 +92,8 @@ describe('#utils', function() {
 
   it('should strip identifiers', () => {
     const assets = {
-      clients: [ { name: 'some client', client_id: 'test' } ],
-      rulesConfigs: [ { key: 'test', value: 'test' } ]
+      clients: [{ name: 'some client', client_id: 'test' }],
+      rulesConfigs: [{ key: 'test', value: 'test' }],
     };
 
     const auth0 = new Auth0(mockMgmtClient(), {}, mockConfigFn);
@@ -101,15 +101,15 @@ describe('#utils', function() {
     expect(stripIdentifiers(auth0, assets)).to.deep.equal({
       clients: [
         {
-          name: 'some client'
-        }
+          name: 'some client',
+        },
       ],
       rulesConfigs: [
         {
           key: 'test',
-          value: 'test'
-        }
-      ]
+          value: 'test',
+        },
+      ],
     });
   });
 
@@ -121,9 +121,9 @@ describe('#utils', function() {
       identifier: 'Identifier',
       c: 'Charlie',
       name: 'Name',
-      a: 'Alpha'
+      a: 'Alpha',
     });
-    expect(Object.keys(result)).to.deep.equal([ 'name', 'identifier', 'id', 'a', 'b', 'c', 'd' ]);
+    expect(Object.keys(result)).to.deep.equal(['name', 'identifier', 'id', 'a', 'b', 'c', 'd']);
     expect(result).to.deep.equal({
       name: 'Name',
       identifier: 'Identifier',
@@ -131,7 +131,7 @@ describe('#utils', function() {
       a: 'Alpha',
       b: 'Bravo',
       c: 'Charlie',
-      d: 'Delta'
+      d: 'Delta',
     });
   });
 
@@ -144,23 +144,23 @@ describe('#utils', function() {
     const name = [
       { name: 'b', id: 0 },
       { name: 'a', id: 1 },
-      { name: 'c', id: 2 }
+      { name: 'c', id: 2 },
     ];
     const template = [
       { template: 'b', id: 0 },
       { template: 'a', id: 1 },
-      { template: 'c', id: 2 }
+      { template: 'c', id: 2 },
     ];
 
     expect(name.sort(recordsSorter)).to.deep.equal([
       { name: 'a', id: 1 },
       { name: 'b', id: 0 },
-      { name: 'c', id: 2 }
+      { name: 'c', id: 2 },
     ]);
     expect(template.sort(recordsSorter)).to.deep.equal([
       { template: 'a', id: 1 },
       { template: 'b', id: 0 },
-      { template: 'c', id: 2 }
+      { template: 'c', id: 2 },
     ]);
   });
 
@@ -172,7 +172,7 @@ describe('#utils', function() {
       allowed_logout_urls: null,
       is_first_party: true,
       oidc_conformant: false,
-      allowed_origins: null
+      allowed_origins: null,
     };
 
     expect(clearClientArrays(client)).to.deep.equal({
@@ -182,19 +182,19 @@ describe('#utils', function() {
       allowed_logout_urls: [],
       is_first_party: true,
       oidc_conformant: false,
-      allowed_origins: []
+      allowed_origins: [],
     });
   });
 
   it('should not touch correct client arrays', () => {
     const client = {
       name: 'Default App',
-      callbacks: [ 'callback' ],
+      callbacks: ['callback'],
       allowed_clients: [],
-      allowed_logout_urls: [ 'url', 'url' ],
+      allowed_logout_urls: ['url', 'url'],
       is_first_party: true,
       oidc_conformant: false,
-      allowed_origins: [ 'origin' ]
+      allowed_origins: ['origin'],
     };
 
     expect(clearClientArrays(client)).to.deep.equal(client);
@@ -207,7 +207,7 @@ describe('#utils', function() {
     const testObject = {
       env1: 'test1',
       env2: 'test2',
-      test: '123'
+      test: '123',
     };
     dumpJSON(file, testObject);
     const testFileContents = fs.readFileSync(file, { encoding: 'utf8' });
@@ -229,12 +229,12 @@ describe('#utils', function() {
     const knownClients = [
       {
         client_id: 'client_id_B',
-        name: 'client_B'
+        name: 'client_B',
       },
       {
         client_id: 'client_id_A',
-        name: 'client_A'
-      }
+        name: 'client_A',
+      },
     ];
 
     it('should return client id if not found', () => {
@@ -254,17 +254,15 @@ describe('#utils', function() {
     });
 
     it('should return sorted list', () => {
-      expect(mapClientID2NameSorted(
-        [ 'client_id_B', 'client_id_A', 'not_found_id' ],
-        knownClients
-      )).deep.equal([ 'client_A', 'client_B', 'not_found_id' ]);
+      expect(
+        mapClientID2NameSorted(['client_id_B', 'client_id_A', 'not_found_id'], knownClients)
+      ).deep.equal(['client_A', 'client_B', 'not_found_id']);
     });
 
     it('should return sorted list even knownClient are invalid', () => {
-      expect(mapClientID2NameSorted(
-        [ 'client_id_B', 'client_id_A', 'not_found_id' ],
-        null
-      )).deep.equal([ 'client_id_A', 'client_id_B', 'not_found_id' ]);
+      expect(
+        mapClientID2NameSorted(['client_id_B', 'client_id_A', 'not_found_id'], null)
+      ).deep.equal(['client_id_A', 'client_id_B', 'not_found_id']);
     });
 
     it('should return empty list upon invalid input', () => {
