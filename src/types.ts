@@ -1,11 +1,13 @@
+export type GetAllArgs = {
+  checkpoint?: boolean;
+  is_global?: boolean;
+  paginate?: boolean;
+  include_totals?: boolean;
+  id?: string;
+};
+
 type APIClientBaseFunctions = {
-  getAll: (arg0: {
-    checkpoint?: boolean;
-    is_global?: boolean;
-    paginate?: boolean;
-    include_totals?: boolean;
-    id?: string;
-  }) => Promise<Asset[]>;
+  getAll: (arg0: GetAllArgs) => Promise<Asset[]>;
   create: (arg0: { id: string }) => Promise<Asset>;
   update: (arg0: {}, arg1: Asset) => Promise<Asset>;
   delete: (arg0: Asset) => Promise<void>;
@@ -13,8 +15,11 @@ type APIClientBaseFunctions = {
 
 export type Auth0APIClient = {
   pool: {
+    addSingleTask: (arg0: { data: Object; generator: any }) => {
+      promise: () => Promise<Asset[][]>;
+    };
     addEachTask: (arg0: { data: Object; generator: any }) => {
-      promise: () => Promise<void>;
+      promise: () => Promise<Asset[][]>;
     };
   };
   actions: APIClientBaseFunctions & {
@@ -44,14 +49,11 @@ export type Auth0APIClient = {
   clientGrants: APIClientBaseFunctions;
   connections: APIClientBaseFunctions & {
     get: (arg0: Asset) => Promise<Asset>;
-    getAll: (arg0: {
-      strategy: 'auth0';
-      checkpoint?: boolean;
-      is_global?: boolean;
-      paginate?: boolean;
-      include_totals?: boolean;
-      id?: string;
-    }) => Promise<Asset[]>;
+    getAll: (
+      arg0: GetAllArgs & {
+        strategy: 'auth0';
+      }
+    ) => Promise<Asset[]>;
   };
   customDomains: APIClientBaseFunctions & {
     getAll: () => Promise<Asset[]>;
