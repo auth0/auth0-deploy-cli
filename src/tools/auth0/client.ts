@@ -127,7 +127,7 @@ function pagePaginator(
 }
 
 // Warp around a <resource>Manager and detect when requesting specific pages to return all
-function pagedManager(client: Auth0APIClient, manager) {
+function pagedManager(client: Auth0APIClient, manager: Auth0APIClient) {
   return new Proxy<Auth0APIClient>(manager, {
     get: function (target: Auth0APIClient, name: string, receiver: unknown) {
       if (name === 'getAll') {
@@ -169,5 +169,5 @@ export default function pagedClient(client: BaseAuth0APIClient): Auth0APIClient 
     }),
   };
 
-  return pagedManager(clientWithPooling, client);
+  return pagedManager(clientWithPooling, clientWithPooling);
 }
