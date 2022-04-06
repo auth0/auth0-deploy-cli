@@ -33,15 +33,7 @@ export type ApiResponse = {
   next?: string;
 };
 
-export type Auth0APIClient = {
-  pool: {
-    addSingleTask: (arg0: { data: Object; generator: any }) => {
-      promise: () => Promise<ApiResponse>;
-    };
-    addEachTask: (arg0: { data: Object; generator: any }) => {
-      promise: () => Promise<Asset[][]>;
-    };
-  };
+export type BaseAuth0APIClient = {
   actions: APIClientBaseFunctions & {
     deploy: ({ id: string }) => Promise<void>;
     getAllTriggers: () => Promise<{ triggers: Asset[] }>;
@@ -139,6 +131,17 @@ export type Auth0APIClient = {
   };
   updateRule: (arg0: { id: string }, arg1: Asset) => Promise<Asset>;
 }; // TODO: replace with a more accurate representation of the Auth0APIClient type
+
+export type Auth0APIClient = BaseAuth0APIClient & {
+  pool: {
+    addSingleTask: (arg0: { data: Object; generator: any }) => {
+      promise: () => Promise<ApiResponse>;
+    };
+    addEachTask: (arg0: { data: Object; generator: any }) => {
+      promise: () => Promise<Asset[][]>;
+    };
+  };
+};
 
 export type Config = {
   AUTH0_DOMAIN: string;

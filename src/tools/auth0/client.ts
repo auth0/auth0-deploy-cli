@@ -8,6 +8,7 @@ import {
   Auth0APIClient,
   CheckpointPaginationParams,
   PagePaginationParams,
+  BaseAuth0APIClient,
 } from '../../types';
 
 const API_CONCURRENCY = 3;
@@ -159,7 +160,7 @@ function pagedManager(client: Auth0APIClient, manager) {
 }
 
 // Warp around the ManagementClient and detect when requesting specific pages to return all
-export default function pagedClient(client: Omit<Auth0APIClient, 'pool'>): Auth0APIClient {
+export default function pagedClient(client: BaseAuth0APIClient): Auth0APIClient {
   const clientWithPooling: Auth0APIClient = {
     ...client,
     pool: new PromisePoolExecutor({
