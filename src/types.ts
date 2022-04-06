@@ -31,7 +31,7 @@ export type ApiResponse = {
   limit: number;
   total: number;
   next?: string;
-};
+} & { [key in AssetTypes]: Asset[] };
 
 export type BaseAuth0APIClient = {
   actions: APIClientBaseFunctions & {

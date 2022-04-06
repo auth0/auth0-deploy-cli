@@ -20,9 +20,8 @@ const MAX_PAGE_SIZE = 100;
 
 function getEntity(rsp: ApiResponse): Asset[] {
   const found = Object.values(rsp).filter((a) => Array.isArray(a));
-  if (found.length === 1) {
-    //@ts-ignore
-    return found[0];
+  if (Array.isArray(found) && found.length === 1) {
+    return found[0] as Asset[];
   }
   throw new Error('There was an error trying to find the entity within paginate');
 }
