@@ -1,22 +1,42 @@
-export type GetAllArgs = {
+type SharedPaginationParams = {
   checkpoint?: boolean;
-  is_global?: boolean;
   paginate?: boolean;
+  is_global?: boolean;
   include_totals?: boolean;
   id?: string;
+  strategy?: 'auth0';
 };
 
+export type CheckpointPaginationParams = SharedPaginationParams & {
+  from: string;
+  take: number;
+};
+
+export type PagePaginationParams = SharedPaginationParams & {
+  page: number;
+  per_page: number;
+};
+
+type GetAllArgs = PagePaginationParams | CheckpointPaginationParams;
+
 type APIClientBaseFunctions = {
-  getAll: (arg0: GetAllArgs) => Promise<Asset[]>;
+  getAll: (arg0: SharedPaginationParams) => Promise<Asset[]>;
   create: (arg0: { id: string }) => Promise<Asset>;
   update: (arg0: {}, arg1: Asset) => Promise<Asset>;
   delete: (arg0: Asset) => Promise<void>;
 };
 
+export type ApiResponse = {
+  start: number;
+  limit: number;
+  total: number;
+  next?: string;
+};
+
 export type Auth0APIClient = {
   pool: {
     addSingleTask: (arg0: { data: Object; generator: any }) => {
-      promise: () => Promise<Asset[][]>;
+      promise: () => Promise<ApiResponse>;
     };
     addEachTask: (arg0: { data: Object; generator: any }) => {
       promise: () => Promise<Asset[][]>;
@@ -49,11 +69,7 @@ export type Auth0APIClient = {
   clientGrants: APIClientBaseFunctions;
   connections: APIClientBaseFunctions & {
     get: (arg0: Asset) => Promise<Asset>;
-    getAll: (
-      arg0: GetAllArgs & {
-        strategy: 'auth0';
-      }
-    ) => Promise<Asset[]>;
+    getAll: (arg0: GetAllArgs) => Promise<Asset[]>;
   };
   customDomains: APIClientBaseFunctions & {
     getAll: () => Promise<Asset[]>;
