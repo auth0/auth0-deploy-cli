@@ -40,9 +40,9 @@ function parse(context: DirectoryContext): ParsedAttackProtection {
     };
   }
 
-  const breachedPasswordDetection = loadJSON(files.breachedPasswordDetection);
-  const bruteForceProtection = loadJSON(files.bruteForceProtection);
-  const suspiciousIpThrottling = loadJSON(files.suspiciousIpThrottling);
+  const breachedPasswordDetection = loadJSON(files.breachedPasswordDetection, context.mappings);
+  const bruteForceProtection = loadJSON(files.bruteForceProtection, context.mappings);
+  const suspiciousIpThrottling = loadJSON(files.suspiciousIpThrottling, context.mappings);
 
   return {
     attackProtection: {
