@@ -16,7 +16,7 @@ const API_CONCURRENCY = 3;
 // https://auth0.com/docs/policies/rate-limits#management-api-v2
 const API_FREQUENCY_PER_SECOND = 8;
 
-const MAX_PAGE_SIZE = 1;
+const MAX_PAGE_SIZE = 100;
 
 function getEntity(rsp: ApiResponse): Asset[] {
   const found = Object.values(rsp).filter((a) => Array.isArray(a));
