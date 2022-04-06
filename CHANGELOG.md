@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Exclusion of entire resource types via the `AUTH0_EXCLUDED` configuration parameter. See [Resource Exclusion Proposal](https://github.com/auth0/auth0-deploy-cli/issues/451) for details. [#468]
+
+### Fixed
+
+- `idle_session_lifetime` and `session_lifetime` values properly ignored on update if inheriting default tenant values.[#471]
+
 ## [7.6.0] - 2022-03-25
 
 ### Added
