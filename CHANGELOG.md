@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.7.0] - 2022-04-06
+
+### Added
+
+- Exclusion of entire resource types via the `AUTH0_EXCLUDED` configuration parameter. See [Resource Exclusion Proposal](https://github.com/auth0/auth0-deploy-cli/issues/451) for details. [#468]
+
+### Fixed
+
+- `idle_session_lifetime` and `session_lifetime` values properly ignored on update if inheriting default tenant values.[#471]
+
 ## [7.6.0] - 2022-03-25
 
 ### Added
@@ -640,7 +650,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#436]: https://github.com/auth0/auth0-deploy-cli/issues/436
 [#438]: https://github.com/auth0/auth0-deploy-cli/issues/438
 [#453]: https://github.com/auth0/auth0-deploy-cli/issues/453
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.6.0...HEAD
+[#468]: https://github.com/auth0/auth0-deploy-cli/issues/468
+[#471]: https://github.com/auth0/auth0-deploy-cli/issues/471
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.7.0...HEAD
+[7.7.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.6.0...v7.7.0
 [7.6.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.5.2...v7.6.0
 [7.5.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.5.1...v7.5.2
 [7.5.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.5.0...v7.5.1
