@@ -40,6 +40,29 @@ export const setupContext = async (config: Config): Promise<DirectoryContext | Y
     );
   }
 
+  ((config: Config) => {
+    // Detect and warn on usage of deprecated exclusion params. See: https://github.com/auth0/auth0-deploy-cli/issues/451#user-content-deprecated-exclusion-props
+    const deprecatedExclusionParams: (keyof Config)[] = [
+      'AUTH0_EXCLUDED_RULES',
+      'AUTH0_EXCLUDED_CLIENTS',
+      'AUTH0_EXCLUDED_DATABASES',
+      'AUTH0_EXCLUDED_CONNECTIONS',
+      'AUTH0_EXCLUDED_RESOURCE_SERVERS',
+      'AUTH0_EXCLUDED_DEFAULTS',
+    ];
+    const usedDeprecatedParams = deprecatedExclusionParams.filter((deprecatedParam) => {
+      const deprecatedConfigValue = config[deprecatedParam] as string[] | undefined;
+      return !!deprecatedConfigValue && deprecatedConfigValue.length > 0;
+    });
+    if (usedDeprecatedParams.length > 0) {
+      log.warn(
+        `Usage of the ${usedDeprecatedParams.join(', ')} exclusion ${
+          usedDeprecatedParams.length > 1 ? 'params are' : 'param is'
+        } deprecated and may be removed from future major versions. See: https://github.com/auth0/auth0-deploy-cli/issues/451#user-content-deprecated-exclusion-props for details.`
+      );
+    }
+  })(config);
+
   const accessToken = await (async (): Promise<string> => {
     if (!!config.AUTH0_ACCESS_TOKEN) return config.AUTH0_ACCESS_TOKEN;
 
