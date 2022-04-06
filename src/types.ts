@@ -134,7 +134,7 @@ export type Config = {
   AUTH0_BASE_PATH?: string;
   AUTH0_AUDIENCE?: string;
   AUTH0_API_MAX_RETRIES?: number;
-  AUTH0_KEYWORD_REPLACE_MAPPINGS?: { [key: string]: string[] | string };
+  AUTH0_KEYWORD_REPLACE_MAPPINGS?: KeywordMappings;
   AUTH0_EXPORT_IDENTIFIERS?: boolean;
   AUTH0_CONNECTIONS_DIRECTORY?: string;
   EXCLUDED_PROPS?: {
@@ -225,3 +225,5 @@ export type AssetTypes =
   | 'triggers'
   | 'attackProtection'
   | 'branding';
+
+export type KeywordMappings = { [key: string]: (string | number)[] | string | number };

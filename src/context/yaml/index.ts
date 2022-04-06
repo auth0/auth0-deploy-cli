@@ -7,9 +7,7 @@ import log from '../../logger';
 import { isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter } from '../../utils';
 import handlers, { YAMLHandler } from './handlers';
 import cleanAssets from '../../readonly';
-import { Assets, Config, Auth0APIClient, AssetTypes } from '../../types';
-
-type KeywordMappings = { [key: string]: (string | number)[] | string | number };
+import { Assets, Config, Auth0APIClient, AssetTypes, KeywordMappings } from '../../types';
 
 export default class YAMLContext {
   basePath: string;

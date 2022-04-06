@@ -1,10 +1,11 @@
 import path from 'path';
-import fs from 'fs';
+import fs, { constants as fsConstants } from 'fs';
 import dotProp from 'dot-prop';
 import _ from 'lodash';
 import log from './logger';
+import { Asset, Assets, CalculatedChanges, KeywordMappings } from '../types';
 
-export function keywordArrayReplace(input, mappings) {
+export function keywordArrayReplace(input: string, mappings: KeywordMappings): string {
   Object.keys(mappings).forEach(function (key) {
     // Matching against two sets of patterns because a developer may provide their array replacement keyword with or without wrapping quotes. It is not obvious to the developer which to do depending if they're operating in YAML or JSON.
     const pattern = `@@${key}@@`;
@@ -16,15 +17,16 @@ export function keywordArrayReplace(input, mappings) {
   return input;
 }
 
-export function keywordStringReplace(input, mappings) {
+export function keywordStringReplace(input: string, mappings: KeywordMappings): string {
   Object.keys(mappings).forEach(function (key) {
     const regex = new RegExp(`##${key}##`, 'g');
+    // @ts-ignore TODO: come back and distinguish strings vs array replacement.
     input = input.replace(regex, mappings[key]);
   });
   return input;
 }
 
-export function keywordReplace(input, mappings) {
+export function keywordReplace(input: string, mappings: KeywordMappings): string {
   // Replace keywords with mappings within input.
   if (mappings && Object.keys(mappings).length > 0) {
     input = keywordStringReplace(input, mappings);
@@ -34,30 +36,31 @@ export function keywordReplace(input, mappings) {
   return input;
 }
 
-export function convertClientNameToId(name, clients) {
+export function convertClientNameToId(name: string, clients: Asset[]): string {
   const found = clients.find((c) => c.name === name);
   return (found && found.client_id) || name;
 }
 
-export function convertClientNamesToIds(names, clients) {
+export function convertClientNamesToIds(names: string[], clients: Asset[]): string[] {
   const resolvedNames = names.map((name) => ({ name, resolved: false }));
-  const result = clients.reduce((acc, client) => {
+  const result = clients.reduce((acc: string[], client): string[] => {
     if (names.includes(client.name)) {
       const index = resolvedNames.findIndex((item) => item.name === client.name);
       resolvedNames[index].resolved = true;
-      acc.push(client.client_id);
+      return [...acc, client.client_id];
     }
-    return acc;
+    return [...acc];
   }, []);
   const unresolved = resolvedNames.filter((item) => !item.resolved).map((item) => item.name);
+  // @ts-ignore TODO: come back and refactor to use map instead of reduce.
   return [...unresolved, ...result];
 }
 
-export function loadFileAndReplaceKeywords(file, mappings) {
+export function loadFileAndReplaceKeywords(file: string, mappings: KeywordMappings): string {
   // Load file and replace keyword mappings
   const f = path.resolve(file);
   try {
-    fs.accessSync(f, fs.F_OK);
+    fs.accessSync(f, fsConstants.F_OK);
     if (mappings) {
       return keywordReplace(fs.readFileSync(f, 'utf8'), mappings);
     }
@@ -67,18 +70,18 @@ export function loadFileAndReplaceKeywords(file, mappings) {
   }
 }
 
-export function flatten(list) {
+export function flatten(list: any[]): any[] {
   // Flatten an multiple arrays to single array
   return list.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []);
 }
 
-export function dumpJSON(obj, spacing = 0) {
+export function convertJsonToString(obj: { [key: string]: any }, spacing = 0): string {
   return JSON.stringify(obj, null, spacing);
 }
 
-export function stripFields(obj, fields) {
+export function stripFields(obj: Asset, fields: string[]): Asset {
   // Strip object fields supporting dot notation (ie: a.deep.field)
-  const stripped = [];
+  const stripped: string[] = [];
 
   const newObj = { ...obj };
   fields.forEach((f) => {
@@ -95,7 +98,12 @@ export function stripFields(obj, fields) {
   return newObj;
 }
 
-export function getEnabledClients(assets, connection, existing, clients) {
+export function getEnabledClients(
+  assets: Assets,
+  connection: Asset,
+  existing: Asset[],
+  clients: Asset[]
+): string[] {
   // Convert enabled_clients by name to the id
   const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
   const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
@@ -118,27 +126,30 @@ export function getEnabledClients(assets, connection, existing, clients) {
   return enabledClients;
 }
 
-export function duplicateItems(arr, key) {
+export function duplicateItems(arr: Asset[], key: string): Asset[] {
   // Find duplicates objects within array that have the same key value
-  const duplicates = arr.reduce((accum, obj) => {
-    const keyValue = obj[key];
-    if (keyValue) {
-      if (!(keyValue in accum)) accum[keyValue] = [];
-      accum[keyValue].push(obj);
-    }
-    return accum;
-  }, {});
+  const duplicates = arr.reduce(
+    (accum: { [key: string]: Asset[] }, obj): { [key: string]: Asset[] } => {
+      const keyValue = obj[key];
+      if (keyValue) {
+        if (!(keyValue in accum)) accum[keyValue] = [];
+        accum[keyValue].push(obj);
+      }
+      return accum;
+    },
+    {}
+  );
   return Object.values(duplicates).filter((g) => g.length > 1);
 }
 
-export function filterExcluded(changes, exclude) {
+export function filterExcluded(changes: CalculatedChanges, exclude: string[]): CalculatedChanges {
   const { del, update, create, conflicts } = changes;
 
   if (!exclude.length) {
     return changes;
   }
 
-  const filter = (list) => list.filter((item) => !exclude.includes(item.name));
+  const filter = (list: Asset[]) => list.filter((item) => !exclude.includes(item.name));
 
   return {
     del: filter(del),
@@ -148,6 +159,6 @@ export function filterExcluded(changes, exclude) {
   };
 }
 
-export function areArraysEquals(x, y) {
+export function areArraysEquals(x: any[], y: any[]): boolean {
   return _.isEqual(x && x.sort(), y && y.sort());
 }

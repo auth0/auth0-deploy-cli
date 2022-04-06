@@ -2,26 +2,27 @@ import fs from 'fs-extra';
 import path from 'path';
 import sanitizeName from 'sanitize-filename';
 import dotProp from 'dot-prop';
-import { loadFileAndReplaceKeywords } from './tools';
+import { loadFileAndReplaceKeywords, Auth0 } from './tools';
 import log from './logger';
+import { Asset, Assets, Config, KeywordMappings } from './types';
 
-export function isDirectory(f) {
+export function isDirectory(filePath: string): boolean {
   try {
-    return fs.statSync(path.resolve(f)).isDirectory();
+    return fs.statSync(path.resolve(filePath)).isDirectory();
   } catch (err) {
     return false;
   }
 }
 
-export function isFile(f) {
+export function isFile(filePath: string): boolean {
   try {
-    return fs.statSync(path.resolve(f)).isFile();
+    return fs.statSync(path.resolve(filePath)).isFile();
   } catch (err) {
     return false;
   }
 }
 
-export function getFiles(folder, exts) {
+export function getFiles(folder: string, exts: string[]): string[] {
   if (isDirectory(folder)) {
     return fs
       .readdirSync(folder)
@@ -31,7 +32,7 @@ export function getFiles(folder, exts) {
   return [];
 }
 
-export function loadJSON(file, mappings) {
+export function loadJSON(file: string, mappings: KeywordMappings): any {
   try {
     const content = loadFileAndReplaceKeywords(file, mappings);
     return JSON.parse(content);
@@ -40,7 +41,7 @@ export function loadJSON(file, mappings) {
   }
 }
 
-export function dumpJSON(file, mappings) {
+export function dumpJSON(file: string, mappings: { [key: string]: any }): void {
   try {
     log.info(`Writing ${file}`);
     const jsonBody = JSON.stringify(mappings, null, 2);
@@ -50,7 +51,7 @@ export function dumpJSON(file, mappings) {
   }
 }
 
-export function existsMustBeDir(folder) {
+export function existsMustBeDir(folder: string): boolean {
   if (fs.existsSync(folder)) {
     if (!isDirectory(folder)) {
       throw new Error(`Expected ${folder} to be a folder but got a file?`);
@@ -60,11 +61,11 @@ export function existsMustBeDir(folder) {
   return false;
 }
 
-export function toConfigFn(data) {
+export function toConfigFn(data: Config): (arg0: keyof Config) => any {
   return (key) => data[key];
 }
 
-export function stripIdentifiers(auth0, assets) {
+export function stripIdentifiers(auth0: Auth0, assets: Assets) {
   const updated = { ...assets };
 
   // Some of the object identifiers are required to perform updates.
@@ -95,15 +96,27 @@ export function stripIdentifiers(auth0, assets) {
   return updated;
 }
 
-export function sanitize(str) {
+export function sanitize(str: string): string {
   return sanitizeName(str, { replacement: '-' });
 }
 
-export function formatResults(item) {
+type ImportantFields = {
+  name: string | null;
+  client_id: string | null;
+  audience: string | null;
+  template: string | null;
+  identifier: string | null;
+  strategy: string | null;
+  script: string | null;
+  stage: string | null;
+  id: string | null;
+};
+
+export function formatResults(item: any): Partial<ImportantFields> {
   if (typeof item !== 'object') {
     return item;
   }
-  const importantFields = {
+  const importantFields: ImportantFields = {
     name: null,
     client_id: null,
     audience: null,
@@ -129,7 +142,7 @@ export function formatResults(item) {
   return result;
 }
 
-export function recordsSorter(a, b) {
+export function recordsSorter(a: Partial<ImportantFields>, b: Partial<ImportantFields>): number {
   const importantFields = ['name', 'key', 'client_id', 'template'];
 
   for (let i = 0; i < importantFields.length; i += 1) {
@@ -143,22 +156,25 @@ export function recordsSorter(a, b) {
   return 0;
 }
 
-export function clearTenantFlags(tenant) {
+export function clearTenantFlags(tenant: Asset): void {
   if (tenant.flags && !Object.keys(tenant.flags).length) {
     delete tenant.flags;
   }
 }
 
-export function ensureProp(obj, props, value = '') {
+export function ensureProp(obj: Asset, props: string): void {
+  const value = '';
   if (!dotProp.has(obj, props)) {
     dotProp.set(obj, props, value);
   }
 }
 
-export function clearClientArrays(client) {
+export function clearClientArrays(client: Asset): Asset {
   const propsToClear = ['allowed_clients', 'allowed_logout_urls', 'allowed_origins', 'callbacks'];
+  //If designated properties are null, set them as empty arrays instead
   Object.keys(client).forEach((prop) => {
     if (propsToClear.indexOf(prop) >= 0 && !client[prop]) {
+      //TODO: understand why setting as empty array instead of deleting null prop. Ex: `delete client[prop]`
       client[prop] = [];
     }
   });
@@ -166,7 +182,7 @@ export function clearClientArrays(client) {
   return client;
 }
 
-export function convertClientIdToName(clientId, knownClients = []) {
+export function convertClientIdToName(clientId: string, knownClients: Asset[] = []): string {
   try {
     const found = knownClients.find((c) => c.client_id === clientId);
     return (found && found.name) || clientId;
@@ -175,7 +191,7 @@ export function convertClientIdToName(clientId, knownClients = []) {
   }
 }
 
-export function mapClientID2NameSorted(enabledClients, knownClients) {
+export function mapClientID2NameSorted(enabledClients: string[], knownClients: Asset[]): string[] {
   return [
     ...(enabledClients || []).map((clientId) => convertClientIdToName(clientId, knownClients)),
   ].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));

@@ -40,9 +40,11 @@ function parse(context: DirectoryContext): ParsedAttackProtection {
     };
   }
 
-  const breachedPasswordDetection = loadJSON(files.breachedPasswordDetection);
-  const bruteForceProtection = loadJSON(files.bruteForceProtection);
-  const suspiciousIpThrottling = loadJSON(files.suspiciousIpThrottling);
+  const keywordReplacements = context.config['AUTH0_KEYWORD_REPLACE_MAPPINGS'] || {};
+
+  const breachedPasswordDetection = loadJSON(files.breachedPasswordDetection, keywordReplacements);
+  const bruteForceProtection = loadJSON(files.bruteForceProtection, keywordReplacements);
+  const suspiciousIpThrottling = loadJSON(files.suspiciousIpThrottling, keywordReplacements);
 
   return {
     attackProtection: {
