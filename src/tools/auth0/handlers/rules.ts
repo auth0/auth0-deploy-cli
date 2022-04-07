@@ -1,5 +1,5 @@
 import ValidationError from '../../validationError';
-import { dumpJSON, stripFields, duplicateItems } from '../../utils';
+import { convertJsonToString, stripFields, duplicateItems } from '../../utils';
 import DefaultHandler from './default';
 import log from '../../logger';
 import { calculateChanges } from '../../calculateChanges';
@@ -149,7 +149,7 @@ export default class RulesHandler extends DefaultHandler {
     if (rulesSameOrder.length > 0) {
       const formatted = rulesSameOrder.map((dups) => dups.map((d) => `${d.name}`));
       throw new ValidationError(`There are multiple rules for the following stage-order combinations
-      ${dumpJSON(formatted)}.
+      ${convertJsonToString(formatted)}.
        Only one rule must be defined for the same order number in a stage.`);
     }
 
@@ -169,7 +169,7 @@ export default class RulesHandler extends DefaultHandler {
 
     if (stateChanged.length > 0) {
       throw new ValidationError(`The following rules changed stage which is not allowed:
-      ${dumpJSON(stateChanged)}.
+      ${convertJsonToString(stateChanged)}.
       Rename the rules to recreate them and avoid this error.`);
     }
 
@@ -199,7 +199,7 @@ export default class RulesHandler extends DefaultHandler {
                 order: rule.order,
                 id: rule.id,
               };
-              log.info(`Temporally re-order Rule ${dumpJSON(updated)}`);
+              log.info(`Temporally re-order Rule ${convertJsonToString(updated)}`);
             }),
       })
       .promise();

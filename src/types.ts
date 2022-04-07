@@ -1,22 +1,39 @@
+type SharedPaginationParams = {
+  checkpoint?: boolean;
+  paginate?: boolean;
+  is_global?: boolean;
+  include_totals?: boolean;
+  id?: string;
+  strategy?: 'auth0';
+};
+
+export type CheckpointPaginationParams = SharedPaginationParams & {
+  from: string;
+  take: number;
+};
+
+export type PagePaginationParams = SharedPaginationParams & {
+  page: number;
+  per_page: number;
+};
+
+type GetAllArgs = PagePaginationParams | CheckpointPaginationParams;
+
 type APIClientBaseFunctions = {
-  getAll: (arg0: {
-    checkpoint?: boolean;
-    is_global?: boolean;
-    paginate?: boolean;
-    include_totals?: boolean;
-    id?: string;
-  }) => Promise<Asset[]>;
+  getAll: (arg0: SharedPaginationParams) => Promise<Asset[]>;
   create: (arg0: { id: string }) => Promise<Asset>;
   update: (arg0: {}, arg1: Asset) => Promise<Asset>;
   delete: (arg0: Asset) => Promise<void>;
 };
 
-export type Auth0APIClient = {
-  pool: {
-    addEachTask: (arg0: { data: Object; generator: any }) => {
-      promise: () => Promise<void>;
-    };
-  };
+export type ApiResponse = {
+  start: number;
+  limit: number;
+  total: number;
+  next?: string;
+} & { [key in AssetTypes]: Asset[] };
+
+export type BaseAuth0APIClient = {
   actions: APIClientBaseFunctions & {
     deploy: ({ id: string }) => Promise<void>;
     getAllTriggers: () => Promise<{ triggers: Asset[] }>;
@@ -44,14 +61,7 @@ export type Auth0APIClient = {
   clientGrants: APIClientBaseFunctions;
   connections: APIClientBaseFunctions & {
     get: (arg0: Asset) => Promise<Asset>;
-    getAll: (arg0: {
-      strategy: 'auth0';
-      checkpoint?: boolean;
-      is_global?: boolean;
-      paginate?: boolean;
-      include_totals?: boolean;
-      id?: string;
-    }) => Promise<Asset[]>;
+    getAll: (arg0: GetAllArgs) => Promise<Asset[]>;
   };
   customDomains: APIClientBaseFunctions & {
     getAll: () => Promise<Asset[]>;
@@ -122,6 +132,17 @@ export type Auth0APIClient = {
   updateRule: (arg0: { id: string }, arg1: Asset) => Promise<Asset>;
 }; // TODO: replace with a more accurate representation of the Auth0APIClient type
 
+export type Auth0APIClient = BaseAuth0APIClient & {
+  pool: {
+    addSingleTask: (arg0: { data: Object; generator: any }) => {
+      promise: () => Promise<ApiResponse>;
+    };
+    addEachTask: (arg0: { data: Object; generator: any }) => {
+      promise: () => Promise<Asset[][]>;
+    };
+  };
+};
+
 export type Config = {
   AUTH0_DOMAIN: string;
   AUTH0_CLIENT_ID: string;
@@ -134,7 +155,7 @@ export type Config = {
   AUTH0_BASE_PATH?: string;
   AUTH0_AUDIENCE?: string;
   AUTH0_API_MAX_RETRIES?: number;
-  AUTH0_KEYWORD_REPLACE_MAPPINGS?: { [key: string]: string[] | string };
+  AUTH0_KEYWORD_REPLACE_MAPPINGS?: KeywordMappings;
   AUTH0_EXPORT_IDENTIFIERS?: boolean;
   AUTH0_CONNECTIONS_DIRECTORY?: string;
   EXCLUDED_PROPS?: {
@@ -144,7 +165,7 @@ export type Config = {
     [key: string]: string[];
   };
   AUTH0_IGNORE_UNAVAILABLE_MIGRATIONS?: boolean;
-  // Eventually deprecate:
+  // Eventually deprecate. See: https://github.com/auth0/auth0-deploy-cli/issues/451#user-content-deprecated-exclusion-props
   AUTH0_EXCLUDED_RULES?: string[];
   AUTH0_EXCLUDED_CLIENTS?: string[];
   AUTH0_EXCLUDED_DATABASES?: string[];
@@ -225,3 +246,5 @@ export type AssetTypes =
   | 'triggers'
   | 'attackProtection'
   | 'branding';
+
+export type KeywordMappings = { [key: string]: (string | number)[] | string | number };

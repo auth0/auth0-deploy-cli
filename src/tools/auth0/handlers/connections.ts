@@ -2,7 +2,7 @@ import dotProp from 'dot-prop';
 import _ from 'lodash';
 import DefaultAPIHandler, { order } from './default';
 import { filterExcluded, convertClientNameToId, getEnabledClients } from '../../utils';
-import { CalculatedChanges, Asset, Config, Assets } from '../../../types';
+import { CalculatedChanges, Asset, Assets } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
 
 export const schema = {

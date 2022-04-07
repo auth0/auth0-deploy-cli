@@ -1,7 +1,7 @@
 import ValidationError from '../../validationError';
 
 import log from '../../logger';
-import { stripFields, dumpJSON, duplicateItems } from '../../utils';
+import { stripFields, convertJsonToString, duplicateItems } from '../../utils';
 import { calculateChanges } from '../../calculateChanges';
 import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
@@ -88,7 +88,7 @@ export default class APIHandler {
   }
 
   objString(item: Asset): string {
-    return dumpJSON(item);
+    return convertJsonToString(item);
   }
 
   async getType(): Promise<Asset | Asset[] | null> {
@@ -139,7 +139,7 @@ export default class APIHandler {
     if (duplicateNames.length > 0) {
       const formatted = duplicateNames.map((dups) => dups.map((d) => `${d.name}`));
       throw new ValidationError(`There are multiple ${this.type} with the same name combinations
-      ${dumpJSON(formatted)}.
+      ${convertJsonToString(formatted)}.
        Names must be unique.`);
     }
 
@@ -150,7 +150,7 @@ export default class APIHandler {
       throw new ValidationError(`There are multiple ${
         this.type
       } for the following stage-order combinations
-      ${dumpJSON(formatted)}.
+      ${convertJsonToString(formatted)}.
        Only one rule must be defined for the same order number in a stage.`);
     }
   }

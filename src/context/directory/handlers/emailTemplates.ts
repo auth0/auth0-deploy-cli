@@ -19,7 +19,7 @@ function parse(context: DirectoryContext): ParsedEmailTemplates {
     (f) => path.basename(f) !== 'provider.json'
   );
 
-  const sorted = {};
+  const sorted: { meta: string } | { html: string } | {} = {};
 
   files.forEach((file) => {
     const { ext, name } = path.parse(file);
@@ -29,7 +29,7 @@ function parse(context: DirectoryContext): ParsedEmailTemplates {
   });
 
   const emailTemplates = Object.values(sorted).flatMap(
-    ({ meta, html }: { meta?: unknown; html?: unknown }) => {
+    ({ meta, html }: { meta?: string; html?: string }) => {
       if (!meta) {
         log.warn(`Skipping email template file ${html} as missing the corresponding '.json' file`);
         return [];
