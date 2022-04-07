@@ -6,6 +6,64 @@ import handler from '../../../src/context/directory/handlers/attackProtection';
 import { loadJSON } from '../../../src/utils';
 
 describe('#directory context attack-protection', () => {
+  it('should replace keywords', async () => {
+    const files = {
+      'attack-protection': {
+        'breached-password-detection.json': '{"enabled": "@@BREACH_PASSWORD_ENABLED@@", "shields": [], "admin_notification_frequency": [], "method": "##BREACH_PASSWORD_PROT_METHOD##"}',
+        'brute-force-protection.json': '{"enabled": "@@BRUTE_FORCE_PROT_ENABLED@@", "shields": ["block", "user_notification"], "mode": "count_per_identifier_and_ip", "allowlist": [], "max_attempts": 10}',
+        'suspicious-ip-throttling.json': '{"enabled": true, "shields": ["block", "admin_notification"], "allowlist": ["127.0.0.1"], "stage": {"pre-login": {"max_attempts": 100, "rate": 864000}, "pre-user-registration": {"max_attempts": 50, "rate": 1200}}}'
+      }
+    };
+
+    const repoDir = path.join(testDataDir, 'directory', 'attackProtection1');
+    createDir(repoDir, files);
+
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: {
+        BREACH_PASSWORD_ENABLED: true,
+        BREACH_PASSWORD_PROT_METHOD: 'standard',
+        BRUTE_FORCE_PROT_ENABLED: false
+      }
+    };
+
+    const context = new Context(config, mockMgmtClient());
+    await context.load();
+
+    const target = {
+      breachedPasswordDetection: {
+        admin_notification_frequency: [],
+        enabled: true,
+        method: 'standard',
+        shields: []
+      },
+      bruteForceProtection: {
+        allowlist: [],
+        enabled: false,
+        max_attempts: 10,
+        mode: 'count_per_identifier_and_ip',
+        shields: [ 'block', 'user_notification' ]
+      },
+      suspiciousIpThrottling: {
+        allowlist: [ '127.0.0.1' ],
+        enabled: true,
+        shields: [ 'block', 'admin_notification' ],
+        stage: {
+          'pre-login': {
+            max_attempts: 100,
+            rate: 864000
+          },
+          'pre-user-registration': {
+            max_attempts: 50,
+            rate: 1200
+          }
+        }
+      }
+    };
+
+    expect(context.assets.attackProtection).to.deep.equal(target);
+  });
+
   it('should process attack-protection', async () => {
     const files = {
       'attack-protection': {
