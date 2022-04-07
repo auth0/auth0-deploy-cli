@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.7.1] - 2022-04-07
+
 ### Added
 
 - Deprecation warnings for now deprecated asset-specific exclusion configuration properties: `AUTH0_EXCLUDED_RULES`, `AUTH0_EXCLUDED_CLIENTS`, `AUTH0_EXCLUDED_DATABASES`, `AUTH0_EXCLUDED_CONNECTIONS`, `AUTH0_EXCLUDED_RESOURCE_SERVERS`, `AUTH0_EXCLUDED_DEFAULTS`. See [Resource Exclusion Proposal](https://github.com/auth0/auth0-deploy-cli/issues/451#user-content-deprecated-exclusion-props) for details. [#481]
@@ -661,7 +663,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#453]: https://github.com/auth0/auth0-deploy-cli/issues/453
 [#468]: https://github.com/auth0/auth0-deploy-cli/issues/468
 [#471]: https://github.com/auth0/auth0-deploy-cli/issues/471
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.7.0...HEAD
+[#478]: https://github.com/auth0/auth0-deploy-cli/issues/478
+[#481]: https://github.com/auth0/auth0-deploy-cli/issues/481
+[#482]: https://github.com/auth0/auth0-deploy-cli/issues/482
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.7.1...HEAD
+[7.7.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.7.0...v7.7.1
 [7.7.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.6.0...v7.7.0
 [7.6.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.5.2...v7.6.0
 [7.5.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.5.1...v7.5.2
