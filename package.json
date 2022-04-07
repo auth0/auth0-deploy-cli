@@ -44,6 +44,8 @@
     "nconf": "^0.11.0",
     "promise-pool-executor": "^1.1.1",
     "sanitize-filename": "^1.6.1",
+    "sinon": "^13.0.1",
+    "sinon-chai": "^3.7.0",
     "winston": "^2.3.0",
     "yargs": "^15.3.1"
   },
