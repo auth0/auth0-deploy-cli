@@ -15,7 +15,7 @@ describe('#rulesConfigs handler', () => {
     it('should set rulesConfig', async () => {
       const auth0 = {
         rulesConfigs: {
-          update: (params, data) => {
+          set: (params, data) => {
             expect(params).to.be.an('object');
             expect(data).to.be.an('object');
             expect(params.key).to.equal('someKey');
