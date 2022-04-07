@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Deprecation warnings for now deprecated asset-specific exclusion configuration properties: `AUTH0_EXCLUDED_RULES`, `AUTH0_EXCLUDED_CLIENTS`, `AUTH0_EXCLUDED_DATABASES`, `AUTH0_EXCLUDED_CONNECTIONS`, `AUTH0_EXCLUDED_RESOURCE_SERVERS`, `AUTH0_EXCLUDED_DEFAULTS`. See [Resource Exclusion Proposal](https://github.com/auth0/auth0-deploy-cli/issues/451#user-content-deprecated-exclusion-props) for details. [#481]
+
+### Fixed
+
+- Rules configs failing to update after regression prevented asset-specific overrides of Node Auth0 SDK methods [#482]
+- Attack protection not replacing keywords [#478]
+
 ## [7.7.0] - 2022-04-06
 
 ### Added
