@@ -2,6 +2,14 @@ import { PromisePoolExecutor } from 'promise-pool-executor';
 import _ from 'lodash';
 
 import { flatten } from '../utils';
+import {
+  Asset,
+  ApiResponse,
+  Auth0APIClient,
+  CheckpointPaginationParams,
+  PagePaginationParams,
+  BaseAuth0APIClient,
+} from '../../types';
 
 const API_CONCURRENCY = 3;
 // To ensure a complete deployment, limit the API requests generated to be 80% of the capacity
@@ -10,17 +18,21 @@ const API_FREQUENCY_PER_SECOND = 8;
 
 const MAX_PAGE_SIZE = 100;
 
-function getEntity(rsp) {
+function getEntity(rsp: ApiResponse): Asset[] {
   const found = Object.values(rsp).filter((a) => Array.isArray(a));
-  if (found.length === 1) {
-    return found[0];
+  if (Array.isArray(found) && found.length === 1) {
+    return found[0] as Asset[];
   }
   throw new Error('There was an error trying to find the entity within paginate');
 }
 
-function checkpointPaginator(client, target, name) {
-  return async function (...args) {
-    const data = [];
+function checkpointPaginator(
+  client: Auth0APIClient,
+  target,
+  name: 'getAll'
+): (arg0: CheckpointPaginationParams) => Promise<Asset[]> {
+  return async function (...args: [CheckpointPaginationParams]) {
+    const data: Asset[] = [];
 
     // remove the _checkpoint_ flag
     const { checkpoint, ...newArgs } = _.cloneDeep(args[0]);
@@ -61,10 +73,14 @@ function checkpointPaginator(client, target, name) {
   };
 }
 
-function pagePaginator(client, target, name) {
-  return async function (...args) {
+function pagePaginator(
+  client: Auth0APIClient,
+  target,
+  name: 'getAll'
+): (arg0: PagePaginationParams) => Promise<Asset[]> {
+  return async function (...args: [PagePaginationParams]): Promise<Asset[]> {
     // Where the entity data will be collected
-    const data = [];
+    const data: Asset[] = [];
 
     // Create new args and inject the properties we require for pagination automation
     const newArgs = [...args];
@@ -111,16 +127,20 @@ function pagePaginator(client, target, name) {
 }
 
 // Warp around a <resource>Manager and detect when requesting specific pages to return all
-function pagedManager(client, manager) {
-  return new Proxy(manager, {
-    get: function (target, name, receiver) {
+function pagedManager(client: Auth0APIClient, manager: Auth0APIClient) {
+  return new Proxy<Auth0APIClient>(manager, {
+    get: function (target: Auth0APIClient, name: string, receiver: unknown) {
       if (name === 'getAll') {
-        return async function (...args) {
+        return async function (...args: [CheckpointPaginationParams | PagePaginationParams]) {
           switch (true) {
             case args[0] && typeof args[0] === 'object' && args[0].checkpoint:
-              return checkpointPaginator(client, target, name)(...args);
+              return checkpointPaginator(
+                client,
+                target,
+                name
+              )(...(args as [CheckpointPaginationParams]));
             case args[0] && typeof args[0] === 'object' && args[0].paginate:
-              return pagePaginator(client, target, name)(...args);
+              return pagePaginator(client, target, name)(...(args as [PagePaginationParams]));
             default:
               return target[name](...args);
           }
@@ -139,12 +159,15 @@ function pagedManager(client, manager) {
 }
 
 // Warp around the ManagementClient and detect when requesting specific pages to return all
-export default function pagedClient(client) {
-  client.pool = new PromisePoolExecutor({
-    concurrencyLimit: API_CONCURRENCY,
-    frequencyLimit: API_FREQUENCY_PER_SECOND,
-    frequencyWindow: 1000, // 1 sec
-  });
+export default function pagedClient(client: BaseAuth0APIClient): Auth0APIClient {
+  const clientWithPooling: Auth0APIClient = {
+    ...client,
+    pool: new PromisePoolExecutor({
+      concurrencyLimit: API_CONCURRENCY,
+      frequencyLimit: API_FREQUENCY_PER_SECOND,
+      frequencyWindow: 1000, // 1 sec
+    }),
+  };
 
-  return pagedManager(client, client);
+  return pagedManager(clientWithPooling, clientWithPooling);
 }
