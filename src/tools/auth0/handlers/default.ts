@@ -27,10 +27,10 @@ export default class APIHandler {
   stripUpdateFields: string[];
   name?: string; // TODO: understand if any handlers actually leverage `name` property
   functions: {
-    getAll: 'getAll';
-    update: 'update';
-    create: 'create';
-    delete: 'delete';
+    getAll: string;
+    update: string;
+    create: string;
+    delete: string;
   }; // TODO: delete this enum object in favor of tighter typing
 
   constructor(options: {
@@ -41,8 +41,11 @@ export default class APIHandler {
     objectFields?: APIHandler['objectFields'];
     identifiers?: APIHandler['identifiers'];
     stripUpdateFields?: APIHandler['stripUpdateFields'];
-    functions?: {
-      [key: string]: string;
+    functions: {
+      getAll?: string;
+      update?: string;
+      create?: string;
+      delete?: string;
     }; //TODO: understand if any resource types pass in any additional functions
   }) {
     this.config = options.config;
@@ -67,7 +70,7 @@ export default class APIHandler {
     this.deleted = 0;
   }
 
-  getClientFN(fn: 'getAll' | 'create' | 'update' | 'delete' | Function): Function {
+  getClientFN(fn: string | Function): Function {
     if (typeof fn === 'string') {
       const client = this.client[this.type];
       return client[fn].bind(client);
@@ -188,7 +191,7 @@ export default class APIHandler {
           .addEachTask({
             data: del || [],
             generator: (delItem) => {
-              const delFunction = this.getClientFN('delete');
+              const delFunction = this.getClientFN(this.functions.delete);
               return delFunction({ [this.id]: delItem[this.id] })
                 .then(() => {
                   this.didDelete(delItem);
@@ -210,7 +213,7 @@ export default class APIHandler {
       .addEachTask({
         data: conflicts || [],
         generator: (updateItem) => {
-          const updateFN = this.getClientFN('update');
+          const updateFN = this.getClientFN(this.functions.update);
           const params = { [this.id]: updateItem[this.id] };
           const payload = stripFields({ ...updateItem }, this.stripUpdateFields);
           return updateFN(params, payload)
@@ -229,7 +232,7 @@ export default class APIHandler {
       .addEachTask({
         data: create || [],
         generator: (createItem) => {
-          const createFunction = this.getClientFN('create');
+          const createFunction = this.getClientFN(this.functions.create);
           return createFunction(createItem)
             .then((data) => {
               this.didCreate(data);
@@ -249,7 +252,7 @@ export default class APIHandler {
       .addEachTask({
         data: update || [],
         generator: (updateItem) => {
-          const updateFN = this.getClientFN('update');
+          const updateFN = this.getClientFN(this.functions.update);
           const params = { [this.id]: updateItem[this.id] };
           const payload = stripFields({ ...updateItem }, this.stripUpdateFields);
           return updateFN(params, payload)

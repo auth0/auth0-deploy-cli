@@ -55,6 +55,7 @@ if (require.main === module) {
     .then(() => process.exit(0))
     .catch((error: { type?: string; stage?: Stage; message?: string; stack?: string }) => {
       const command = params._[0];
+      console.log({ error });
       if (error.type || error.stage) {
         log.error(
           `Problem running command ${command} during stage ${error.stage} when processing type ${error.type}`
