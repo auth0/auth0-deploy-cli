@@ -1,22 +1,30 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { constants, loadFileAndReplaceKeywords } from '../../../tools';
-import { dumpJSON, existsMustBeDir, getFiles, loadJSON } from '../../../utils';
-import { DirectoryHandler } from '.';
+import {
+  constants, loadFileAndReplaceKeywords
+} from '../../../tools';
+import {
+  dumpJSON, existsMustBeDir, getFiles, loadJSON, isFile
+} from '../../../utils';
+import { DirectoryHandler } from '.'
 import DirectoryContext from '..';
+import log from '../../../logger';
 
 type ParsedBranding = {
   branding: unknown | undefined;
 };
 
 function parse(context: DirectoryContext): ParsedBranding {
-  const brandingTemplatesFolder = path.join(
-    context.filePath,
-    constants.BRANDING_DIRECTORY,
-    constants.BRANDING_TEMPLATES_DIRECTORY
-  );
+  const brandingFolder = path.join(context.filePath, constants.BRANDING_DIRECTORY);
+  const brandingTemplatesFolder = path.join(brandingFolder, constants.BRANDING_TEMPLATES_DIRECTORY);
+  const brandingFile = path.join(brandingFolder, 'branding.json');
+  var branding = {};
 
   if (!existsMustBeDir(brandingTemplatesFolder)) return { branding: context.assets.branding };
+
+  if (isFile(brandingFile)) {
+    branding = loadJSON(brandingFile, context.mappings);
+  }
 
   const templatesDefinitionFiles = getFiles(brandingTemplatesFolder, ['.json']);
   const templates = templatesDefinitionFiles.map((templateDefinitionFile) => {
@@ -30,15 +38,16 @@ function parse(context: DirectoryContext): ParsedBranding {
 
   return {
     branding: {
+      ...branding,
       templates,
     },
   };
 }
 
-async function dump(context) {
+async function dumpTemplates(context) {
   const { branding } = context.assets;
 
-  if (!branding || !branding.templates || !branding.templates) return; // Skip, nothing to dump
+  if (!branding.templates) return; // Skip, nothing to dump
 
   const brandingTemplatesFolder = path.join(
     context.filePath,
@@ -67,6 +76,22 @@ async function dump(context) {
       templateDefinition
     );
   });
+}
+
+async function dump(context) {
+  const { branding } = context.assets;
+  var data = { ...branding };
+
+  if (!branding) return; // Skip, nothing to dump
+
+  const brandingFolder = path.join(context.filePath, constants.BRANDING_DIRECTORY);
+  fs.ensureDirSync(brandingFolder);
+
+  delete data.templates;
+  const brandingFile = path.join(brandingFolder, 'branding.json');
+  log.info(`Writing ${brandingFile}`);
+  fs.writeFileSync(brandingFile, JSON.stringify(data, null, 2));
+  dumpTemplates(context);
 }
 
 const brandingHandler: DirectoryHandler<ParsedBranding> = {
