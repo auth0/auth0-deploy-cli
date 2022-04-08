@@ -2,12 +2,10 @@ import yargs from 'yargs';
 import { Config } from './types';
 
 type SharedParams = {
-  _: ['export' | 'import' | 'deploy' | 'dump'];
   proxy_url?: string;
-  debug: boolean;
+  debug?: boolean;
   config_file?: string;
-  env: boolean;
-  format: 'yaml' | 'directory';
+  env?: boolean;
   secret?: string;
   base_path?: string; // Necessary when package imported as Node module
   config?: Partial<Config>;
@@ -18,14 +16,19 @@ type ImportSpecificParams = {
 };
 
 type ExportSpecificParams = {
+  format: 'yaml' | 'directory';
   output_folder: string;
-  export_ids: boolean;
+  export_ids?: boolean;
 };
 
 export type ExportParams = ExportSpecificParams & SharedParams;
 export type ImportParams = ImportSpecificParams & SharedParams;
 
-function getParams(): ExportParams | ImportParams {
+export type CliParams = (ExportParams | ImportParams) & {
+  _: ['export' | 'import' | 'deploy' | 'dump'];
+};
+
+function getParams(): CliParams {
   const args = yargs
     .demandCommand(1, 'A command is required')
     .usage('Auth0 Deploy CLI')
