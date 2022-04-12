@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { bootstrap } from 'global-agent';
 
-import { getParams, ExportParams, ImportParams } from './args';
+import { getParams, CliParams } from './args';
 import log from './logger';
 import tools from './tools';
 import { Stage } from './tools/auth0';
@@ -9,7 +9,7 @@ import { Stage } from './tools/auth0';
 import importCMD from './commands/import';
 import exportCMD from './commands/export';
 
-async function run(params: ImportParams | ExportParams): Promise<void> {
+async function run(params: CliParams): Promise<void> {
   // Run command
   const command = params._[0];
 
@@ -80,10 +80,13 @@ if (require.main === module) {
 }
 
 // Export commands to be used programmatically
-module.exports = {
+export default {
   deploy: importCMD,
   dump: exportCMD,
   import: importCMD,
   export: exportCMD,
-  tools: tools,
+  tools,
 };
+
+export const dump = exportCMD;
+export const deploy = importCMD;

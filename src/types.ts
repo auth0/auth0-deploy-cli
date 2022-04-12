@@ -17,8 +17,6 @@ export type PagePaginationParams = SharedPaginationParams & {
   per_page: number;
 };
 
-type GetAllArgs = PagePaginationParams | CheckpointPaginationParams;
-
 type APIClientBaseFunctions = {
   getAll: (arg0: SharedPaginationParams) => Promise<Asset[]>;
   create: (arg0: { id: string }) => Promise<Asset>;
@@ -61,7 +59,7 @@ export type BaseAuth0APIClient = {
   clientGrants: APIClientBaseFunctions;
   connections: APIClientBaseFunctions & {
     get: (arg0: Asset) => Promise<Asset>;
-    getAll: (arg0: GetAllArgs) => Promise<Asset[]>;
+    getAll: (arg0: PagePaginationParams | CheckpointPaginationParams) => Promise<Asset[]>;
   };
   customDomains: APIClientBaseFunctions & {
     getAll: () => Promise<Asset[]>;
