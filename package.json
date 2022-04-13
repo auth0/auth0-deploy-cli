@@ -41,7 +41,7 @@
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.20",
     "mkdirp": "^0.5.1",
-    "nconf": "^0.11.0",
+    "nconf": "^0.11.4",
     "promise-pool-executor": "^1.1.1",
     "sanitize-filename": "^1.6.1",
     "sinon": "^13.0.1",
