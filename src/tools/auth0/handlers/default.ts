@@ -231,7 +231,7 @@ export default class APIHandler {
           const params = { [this.id]: updateItem[this.id] };
           const updatePayload = (() => {
             let data = stripFields({ ...updateItem }, this.stripUpdateFields);
-            return stripObfuscatedFieldsFromPayload(data, this.stripUpdateFields);
+            return stripObfuscatedFieldsFromPayload(data, this.sensitiveFieldsToObfuscate);
           })();
           return updateFN(params, updatePayload)
             .then((data) => this.didUpdate(data))
@@ -250,11 +250,12 @@ export default class APIHandler {
         data: create || [],
         generator: (createItem) => {
           const createFunction = this.getClientFN(this.functions.create);
-
           const createPayload = (() => {
-            return stripObfuscatedFieldsFromPayload({ ...createItem }, this.stripUpdateFields);
+            return stripObfuscatedFieldsFromPayload(
+              { ...createItem },
+              this.sensitiveFieldsToObfuscate
+            );
           })();
-
           return createFunction(createPayload)
             .then((data) => {
               this.didCreate(data);
@@ -276,8 +277,11 @@ export default class APIHandler {
         generator: (updateItem) => {
           const updateFN = this.getClientFN(this.functions.update);
           const params = { [this.id]: updateItem[this.id] };
-          const payload = stripFields({ ...updateItem }, this.stripUpdateFields);
-          return updateFN(params, payload)
+          const updatePayload = (() => {
+            let data = stripFields({ ...updateItem }, this.stripUpdateFields);
+            return stripObfuscatedFieldsFromPayload(data, this.sensitiveFieldsToObfuscate);
+          })();
+          return updateFN(params, updatePayload)
             .then((data) => {
               this.didUpdate(data);
               this.updated += 1;
