@@ -1,6 +1,6 @@
 import ValidationError from '../../validationError';
 
-import log from '../../logger';
+import log from '../../../logger';
 import { stripFields, convertJsonToString, duplicateItems } from '../../utils';
 import { calculateChanges } from '../../calculateChanges';
 import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';

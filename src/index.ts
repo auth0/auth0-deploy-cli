@@ -45,7 +45,7 @@ if (require.main === module) {
   log.debug('Starting Auth0 Deploy CLI Tool');
 
   if (params.debug) {
-    log.transports.console.level = 'debug';
+    log.level = 'debug';
     // Set for tools
     process.env.AUTH0_DEBUG = 'true';
     process.env.AUTH0_LOG = 'debug';

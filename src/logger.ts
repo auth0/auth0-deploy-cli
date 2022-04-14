@@ -1,19 +1,16 @@
-import winston from 'winston';
+import { format, createLogger, transports } from 'winston';
 
-//@ts-ignore because used version of Winston still supports emitErrs property
-winston.emitErrs = true;
+const { combine, timestamp, colorize } = format;
 
-const log = new winston.Logger({
-  transports: [
-    new winston.transports.Console({
-      timestamp: true,
-      level: process.env.AUTH0_LOG || 'info',
-      handleExceptions: true,
-      json: false,
-      colorize: true,
-    }),
-  ],
+const logger = createLogger({
+  level: process.env.AUTH0_LOG || 'info',
+  format: combine(
+    colorize(),
+    timestamp(),
+    format.printf((info) => `[${info.timestamp}] ${info.level}: ${info.message}`)
+  ),
+  transports: [new transports.Console()],
   exitOnError: false,
 });
 
-export default log;
+export default logger;

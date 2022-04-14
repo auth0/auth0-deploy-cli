@@ -6,7 +6,7 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import log from '../src/logger';
 
-log.transports.console.level = 'debug';
+log.level = 'debug';
 
 chai.use(chaiAsPromised);
 

@@ -1,5 +1,5 @@
 import Auth0 from './auth0';
-import log from './logger';
+import log from '../logger';
 import { ConfigFunction } from '../configFactory';
 import { Assets, Auth0APIClient } from '../types';
 
@@ -9,7 +9,7 @@ export default async function deploy(
   config: ConfigFunction
 ) {
   // Setup log level
-  log.transports.console.level = process.env.AUTH0_DEBUG === 'true' ? 'debug' : 'info';
+  log.level = process.env.AUTH0_DEBUG === 'true' ? 'debug' : 'info';
 
   log.info('Getting access token for ' + config('AUTH0_CLIENT_ID') + '/' + config('AUTH0_DOMAIN'));
 
