@@ -23,6 +23,7 @@ import organizations from './organizations';
 import triggers from './triggers';
 import attackProtection from './attackProtection';
 import branding from './branding';
+import logStreams from './logStreams';
 
 import DirectoryContext from '..';
 import { AssetTypes } from '../../../types';
@@ -58,6 +59,7 @@ const directoryHandlers: { [key in AssetTypes]: DirectoryHandler<{ [key: string]
   triggers,
   attackProtection,
   branding,
+  logStreams,
 };
 
 export default directoryHandlers;

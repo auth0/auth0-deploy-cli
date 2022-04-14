@@ -163,6 +163,7 @@ const constants = {
     `${EMAIL_USER_INVITATION}.html`,
   ],
   SUPPORTED_BRANDING_TEMPLATES: [UNIVERSAL_LOGIN_TEMPLATE],
+  LOG_STREAMS_DIRECTORY: 'log-streams',
 };
 
 export default constants;
