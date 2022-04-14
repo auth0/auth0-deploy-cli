@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Type declarations for more seamless integration into Typescript projects when used as a module [#485]
+
+### Security
+
+- Updated Winston from 2.3.x to 3.3.0 which applies fix for theoretical prototype pollution vulnerability [#497]
+
 ## [7.7.1] - 2022-04-07
 
 ### Added
