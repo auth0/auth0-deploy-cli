@@ -2,7 +2,7 @@ import path from 'path';
 import fs, { constants as fsConstants } from 'fs';
 import dotProp from 'dot-prop';
 import _ from 'lodash';
-import log from './logger';
+import log from '../logger';
 import { Asset, Assets, CalculatedChanges, KeywordMappings } from '../types';
 
 export function keywordArrayReplace(input: string, mappings: KeywordMappings): string {
