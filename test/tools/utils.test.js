@@ -1,6 +1,7 @@
 import path from 'path';
 import { expect } from 'chai';
 import * as utils from '../../src/tools/utils';
+import constants from '../../src/tools/constants';
 
 const mappings = {
   string: 'some string',
@@ -253,6 +254,115 @@ describe('#filterExcluded', () => {
       create: [{ name: 'create' }],
       update: [{ name: 'update' }],
       conflicts: [{ name: 'conflicts' }],
+    });
+  });
+
+  describe('#obfuscateSensitiveValues', () => {
+    it('should obfuscate sensitive values for single asset', () => {
+      const asset = {
+        id: 'asset-id-100',
+        name: 'some asset',
+        status: 'active',
+        http: {
+          authorization: 'sensitive-token',
+        },
+      };
+
+      const obfuscatedAsset = utils.obfuscateSensitiveValues(asset, ['http.authorization']);
+      expect(obfuscatedAsset).to.deep.equal({
+        ...asset,
+        http: {
+          authorization: '_VALUE_NOT_SHOWN_',
+        },
+      });
+    });
+
+    it('should obfuscate sensitive values for a set of assets', () => {
+      const assets = [
+        {
+          id: 'asset-id-1',
+          http: {
+            authorization: 'sensitive-token-to-obfuscate-1',
+          },
+        },
+        {
+          id: 'asset-id-2',
+          secret: 'some-different-secret-to-obfuscate',
+        },
+        {
+          id: 'asset-id-3',
+          http: {
+            authorization: 'sensitive-token-to-obfuscate-3',
+          },
+        },
+      ];
+
+      const obfuscatedAssets = utils.obfuscateSensitiveValues(assets, [
+        'secret',
+        'http.authorization',
+      ]);
+      expect(obfuscatedAssets).to.deep.equal(
+        assets.map((asset) => {
+          if (asset?.secret) asset.secret = '_VALUE_NOT_SHOWN_';
+          if (asset?.http?.authorization) asset.http.authorization = '_VALUE_NOT_SHOWN_';
+          return asset;
+        })
+      );
+    });
+  });
+
+  describe('#stripObfuscatedFieldsFromPayload', () => {
+    it('should remove obfuscated values for API payload if contains designated obfuscation value', () => {
+      const asset = {
+        id: 'asset-id-100',
+        name: 'some asset',
+        http: {
+          status: 'active',
+          authorization: constants.OBFUSCATED_SECRET_VALUE,
+        },
+      };
+
+      const obfuscatedAsset = utils.stripObfuscatedFieldsFromPayload(asset, ['http.authorization']);
+      expect(obfuscatedAsset).to.deep.equal({
+        ...asset,
+        http: {
+          status: asset.http.status,
+          // authorization property omitted
+        },
+      });
+    });
+
+    it('should remove obfuscated values for API payload of multiple assets if contains designated obfuscation value', () => {
+      const assets = [
+        {
+          id: 'asset-id-1',
+          http: {
+            authorization: constants.OBFUSCATED_SECRET_VALUE,
+          },
+        },
+        {
+          id: 'asset-id-2',
+          secret: constants.OBFUSCATED_SECRET_VALUE,
+        },
+        {
+          id: 'asset-id-3',
+          http: {
+            authorization: constants.OBFUSCATED_SECRET_VALUE,
+          },
+        },
+      ];
+
+      const strippedPayload = utils.stripObfuscatedFieldsFromPayload(assets, [
+        'secret',
+        'http.authorization',
+      ]);
+      expect(strippedPayload).to.deep.equal(
+        assets.map((asset) => {
+          delete asset.secret;
+          if (asset.http) delete asset.http.authorization;
+          return asset;
+        })
+      );
     });
   });
 });

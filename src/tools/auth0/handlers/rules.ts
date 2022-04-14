@@ -1,7 +1,7 @@
 import ValidationError from '../../validationError';
 import { convertJsonToString, stripFields, duplicateItems } from '../../utils';
 import DefaultHandler from './default';
-import log from '../../logger';
+import log from '../../../logger';
 import { calculateChanges } from '../../calculateChanges';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 

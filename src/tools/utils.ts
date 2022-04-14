@@ -2,8 +2,9 @@ import path from 'path';
 import fs, { constants as fsConstants } from 'fs';
 import dotProp from 'dot-prop';
 import _ from 'lodash';
-import log from './logger';
+import log from '../logger';
 import { Asset, Assets, CalculatedChanges, KeywordMappings } from '../types';
+import constants from './constants';
 
 export function keywordArrayReplace(input: string, mappings: KeywordMappings): string {
   Object.keys(mappings).forEach(function (key) {
@@ -162,3 +163,43 @@ export function filterExcluded(changes: CalculatedChanges, exclude: string[]): C
 export function areArraysEquals(x: any[], y: any[]): boolean {
   return _.isEqual(x && x.sort(), y && y.sort());
 }
+
+export const obfuscateSensitiveValues = (
+  data: Asset | Asset[] | null,
+  sensitiveFieldsToObfuscate: string[]
+): Asset | Asset[] | null => {
+  if (data === null) return data;
+  if (Array.isArray(data)) {
+    return data.map((asset) => obfuscateSensitiveValues(asset, sensitiveFieldsToObfuscate));
+  }
+
+  const newAsset = { ...data };
+  sensitiveFieldsToObfuscate.forEach((sensitiveField) => {
+    if (dotProp.get(newAsset, sensitiveField) !== undefined) {
+      dotProp.set(newAsset, sensitiveField, constants.OBFUSCATED_SECRET_VALUE);
+    }
+  });
+
+  return newAsset;
+};
+
+// The reverse of `obfuscateSensitiveValues()`, preventing an obfuscated value from being passed to the API
+export const stripObfuscatedFieldsFromPayload = (
+  data: Asset | Asset[] | null,
+  obfuscatedFields: string[]
+): Asset | Asset[] | null => {
+  if (data === null) return data;
+  if (Array.isArray(data)) {
+    return data.map((asset) => stripObfuscatedFieldsFromPayload(asset, obfuscatedFields));
+  }
+
+  const newAsset = { ...data };
+  obfuscatedFields.forEach((sensitiveField) => {
+    const obfuscatedFieldValue = dotProp.get(newAsset, sensitiveField);
+    if (obfuscatedFieldValue === constants.OBFUSCATED_SECRET_VALUE) {
+      dotProp.delete(newAsset, sensitiveField);
+    }
+  });
+
+  return newAsset;
+};

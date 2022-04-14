@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import DefaultHandler, { order } from './default';
 import constants from '../../constants';
-import log from '../../logger';
+import log from '../../../logger';
 import { Assets } from '../../../types';
 
 export const schema = {
