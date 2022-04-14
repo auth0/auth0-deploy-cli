@@ -24,7 +24,8 @@ export default class APIHandler {
   client: Auth0APIClient; // TODO: apply stronger types to Auth0 API client
   identifiers: string[];
   objectFields: string[];
-  stripUpdateFields: string[];
+  stripUpdateFields: string[]; //Fields to strip from payload when updating
+  stripCreateFields: string[]; //Fields to strip from payload when creating
   name?: string; // TODO: understand if any handlers actually leverage `name` property
   functions: {
     getAll: string;
@@ -41,6 +42,7 @@ export default class APIHandler {
     objectFields?: APIHandler['objectFields'];
     identifiers?: APIHandler['identifiers'];
     stripUpdateFields?: APIHandler['stripUpdateFields'];
+    stripCreateFields?: APIHandler['stripCreateFields'];
     functions: {
       getAll?: string;
       update?: string;
@@ -56,6 +58,7 @@ export default class APIHandler {
     this.identifiers = options.identifiers || ['id', 'name'];
     this.objectFields = options.objectFields || [];
     this.stripUpdateFields = [...(options.stripUpdateFields || []), this.id];
+    this.stripCreateFields = options.stripCreateFields || [];
 
     this.functions = {
       getAll: 'getAll',
@@ -232,8 +235,9 @@ export default class APIHandler {
       .addEachTask({
         data: create || [],
         generator: (createItem) => {
+          const strippedPayload = stripFields(createItem, this.stripCreateFields);
           const createFunction = this.getClientFN(this.functions.create);
-          return createFunction(createItem)
+          return createFunction(strippedPayload)
             .then((data) => {
               this.didCreate(data);
               this.created += 1;
