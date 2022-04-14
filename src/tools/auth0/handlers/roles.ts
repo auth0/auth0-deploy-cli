@@ -1,6 +1,6 @@
 import DefaultHandler, { order } from './default';
 import { calculateChanges } from '../../calculateChanges';
-import log from '../../logger';
+import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 
 export const schema = {

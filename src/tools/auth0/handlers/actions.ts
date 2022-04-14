@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import DefaultAPIHandler, { order } from './default';
-import log from '../../logger';
+import log from '../../../logger';
 import { areArraysEquals } from '../../utils';
 import { Asset } from '../../../types';
 
