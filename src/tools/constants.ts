@@ -33,7 +33,6 @@ const constants = {
   ACTIONS_DIRECTORY: 'actions',
   TRIGGERS_DIRECTORY: 'triggers',
   RULES_CONFIGS_DIRECTORY: 'rules-configs',
-  LOG_STREAMS_DIRECTORY: 'log-streams',
   PAGES_DIRECTORY: 'pages',
   PAGE_LOGIN,
   PAGE_GUARDIAN_MULTIFACTOR,

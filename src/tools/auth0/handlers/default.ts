@@ -9,7 +9,7 @@ import {
   stripObfuscatedFieldsFromPayload,
 } from '../../utils';
 import { calculateChanges } from '../../calculateChanges';
-import { ApiResponse, Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
+import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
 
 export function order(value) {
