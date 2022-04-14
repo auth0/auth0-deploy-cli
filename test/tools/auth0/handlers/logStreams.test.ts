@@ -27,11 +27,23 @@ const logStreams = [
       httpEndpoint: 'https://example.com/test',
     },
   },
+  {
+    id: 'log-stream-3',
+    name: 'Suspended Log Stream',
+    type: 'http',
+    status: 'suspended',
+    sink: {
+      httpContentFormat: 'JSONLINES',
+      httpContentType: 'application/json',
+      httpEndpoint: 'https://example.com/test',
+    },
+  },
 ];
 
 const auth0ApiClientMock = {
   logStreams: {
     getAll: async () => logStreams,
+    create: async () => logStreams,
     update: async () => logStreams,
     delete: async () => logStreams,
   },
@@ -47,7 +59,12 @@ describe('#logStreams handler', () => {
     it('should get log streams', async () => {
       const handler = new logStreamsHandler({ client: auth0ApiClientMock });
       const data = await handler.load();
-      expect(data).to.deep.equal({ logStreams });
+
+      const expectedLogStreams = logStreams.filter((logStream) => {
+        return logStream.status !== 'suspended';
+      });
+
+      expect(data).to.deep.equal({ logStreams: expectedLogStreams });
     });
 
     it('should update log streams settings', async () => {
