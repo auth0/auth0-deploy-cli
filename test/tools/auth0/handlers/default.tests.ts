@@ -30,6 +30,45 @@ const mockApiClient = {
 } as Auth0APIClient;
 
 describe('#default handler', () => {
+  it('should strip designated fields from payload when creating', async () => {
+    let didCreateFunctionGetCalled = false;
+
+    const handler = new mockHandler({
+      client: mockApiClient,
+      stripCreateFields: ['stripThisFromCreate', 'stripObjectFromCreate.nestedProperty'],
+      type: mockAssetType,
+      functions: {
+        //@ts-ignore
+        create: async (payload) => {
+          didCreateFunctionGetCalled = true;
+          expect(payload).to.deep.equal({
+            id: 'some-id',
+            stripObjectFromCreate: {},
+            shouldNotSTripFromCreate: 'this property should be untouched',
+          });
+          return payload;
+        },
+      },
+    });
+
+    await handler.processChanges({} as Assets, {
+      del: [],
+      update: [],
+      conflicts: [],
+      create: [
+        {
+          id: 'some-id',
+          stripThisFromCreate: 'strip this from the create payload',
+          stripObjectFromCreate: {
+            nestedProperty: 'also strip this from the create payload',
+          },
+          shouldNotSTripFromCreate: 'this property should be untouched',
+        },
+      ],
+    });
+    expect(didCreateFunctionGetCalled).to.equal(true);
+  });
+
   it('should fetch data and obfuscate sensitive values', async () => {
     //@ts-ignore because missing lots of required properties
     const handler = new mockHandler({

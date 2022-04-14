@@ -30,8 +30,9 @@ export default class APIHandler {
   client: Auth0APIClient; // TODO: apply stronger types to Auth0 API client
   identifiers: string[];
   objectFields: string[];
-  stripUpdateFields: string[];
   sensitiveFieldsToObfuscate: string[];
+  stripUpdateFields: string[]; //Fields to strip from payload when updating
+  stripCreateFields: string[]; //Fields to strip from payload when creating
   name?: string; // TODO: understand if any handlers actually leverage `name` property
   functions: {
     getAll: string;
@@ -49,6 +50,7 @@ export default class APIHandler {
     identifiers?: APIHandler['identifiers'];
     stripUpdateFields?: APIHandler['stripUpdateFields'];
     sensitiveFieldsToObfuscate?: APIHandler['sensitiveFieldsToObfuscate'];
+    stripCreateFields?: APIHandler['stripCreateFields'];
     functions: {
       getAll?: string;
       update?: string;
@@ -65,6 +67,7 @@ export default class APIHandler {
     this.objectFields = options.objectFields || [];
     this.stripUpdateFields = [...(options.stripUpdateFields || []), this.id];
     this.sensitiveFieldsToObfuscate = options.sensitiveFieldsToObfuscate || [];
+    this.stripCreateFields = options.stripCreateFields || [];
 
     this.functions = {
       getAll: 'getAll',
@@ -251,8 +254,9 @@ export default class APIHandler {
         generator: (createItem) => {
           const createFunction = this.getClientFN(this.functions.create);
           const createPayload = (() => {
+            const strippedPayload = stripFields(createItem, this.stripCreateFields);
             return stripObfuscatedFieldsFromPayload(
-              { ...createItem },
+              strippedPayload,
               this.sensitiveFieldsToObfuscate
             );
           })();
