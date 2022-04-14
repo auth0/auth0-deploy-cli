@@ -1,7 +1,13 @@
 import ValidationError from '../../validationError';
 
+import {
+  stripFields,
+  convertJsonToString,
+  duplicateItems,
+  obfuscateSensitiveValues,
+  stripObfuscatedFieldsFromPayload,
+} from '../../utils';
 import log from '../../../logger';
-import { stripFields, convertJsonToString, duplicateItems } from '../../utils';
 import { calculateChanges } from '../../calculateChanges';
 import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
@@ -24,6 +30,7 @@ export default class APIHandler {
   client: Auth0APIClient; // TODO: apply stronger types to Auth0 API client
   identifiers: string[];
   objectFields: string[];
+  sensitiveFieldsToObfuscate: string[];
   stripUpdateFields: string[]; //Fields to strip from payload when updating
   stripCreateFields: string[]; //Fields to strip from payload when creating
   name?: string; // TODO: understand if any handlers actually leverage `name` property
@@ -42,6 +49,7 @@ export default class APIHandler {
     objectFields?: APIHandler['objectFields'];
     identifiers?: APIHandler['identifiers'];
     stripUpdateFields?: APIHandler['stripUpdateFields'];
+    sensitiveFieldsToObfuscate?: APIHandler['sensitiveFieldsToObfuscate'];
     stripCreateFields?: APIHandler['stripCreateFields'];
     functions: {
       getAll?: string;
@@ -58,6 +66,7 @@ export default class APIHandler {
     this.identifiers = options.identifiers || ['id', 'name'];
     this.objectFields = options.objectFields || [];
     this.stripUpdateFields = [...(options.stripUpdateFields || []), this.id];
+    this.sensitiveFieldsToObfuscate = options.sensitiveFieldsToObfuscate || [];
     this.stripCreateFields = options.stripCreateFields || [];
 
     this.functions = {
@@ -105,7 +114,11 @@ export default class APIHandler {
   async load(): Promise<{ [key: string]: Asset | Asset[] | null }> {
     // Load Asset from Tenant
     log.info(`Retrieving ${this.type} data from Auth0`);
-    this.existing = await this.getType();
+
+    const data = await this.getType();
+
+    this.existing = obfuscateSensitiveValues(data, this.sensitiveFieldsToObfuscate);
+
     return { [this.type]: this.existing };
   }
 
@@ -113,13 +126,14 @@ export default class APIHandler {
     const typeAssets = assets[this.type];
 
     // Do nothing if not set
-    if (!typeAssets)
+    if (!typeAssets) {
       return {
         del: [],
         create: [],
         conflicts: [],
         update: [],
       };
+    }
 
     const existing = await this.getType();
 
@@ -218,8 +232,11 @@ export default class APIHandler {
         generator: (updateItem) => {
           const updateFN = this.getClientFN(this.functions.update);
           const params = { [this.id]: updateItem[this.id] };
-          const payload = stripFields({ ...updateItem }, this.stripUpdateFields);
-          return updateFN(params, payload)
+          const updatePayload = (() => {
+            let data = stripFields({ ...updateItem }, this.stripUpdateFields);
+            return stripObfuscatedFieldsFromPayload(data, this.sensitiveFieldsToObfuscate);
+          })();
+          return updateFN(params, updatePayload)
             .then((data) => this.didUpdate(data))
             .catch((err) => {
               throw new Error(
@@ -235,9 +252,15 @@ export default class APIHandler {
       .addEachTask({
         data: create || [],
         generator: (createItem) => {
-          const strippedPayload = stripFields(createItem, this.stripCreateFields);
           const createFunction = this.getClientFN(this.functions.create);
-          return createFunction(strippedPayload)
+          const createPayload = (() => {
+            const strippedPayload = stripFields(createItem, this.stripCreateFields);
+            return stripObfuscatedFieldsFromPayload(
+              strippedPayload,
+              this.sensitiveFieldsToObfuscate
+            );
+          })();
+          return createFunction(createPayload)
             .then((data) => {
               this.didCreate(data);
               this.created += 1;
@@ -258,8 +281,11 @@ export default class APIHandler {
         generator: (updateItem) => {
           const updateFN = this.getClientFN(this.functions.update);
           const params = { [this.id]: updateItem[this.id] };
-          const payload = stripFields({ ...updateItem }, this.stripUpdateFields);
-          return updateFN(params, payload)
+          const updatePayload = (() => {
+            let data = stripFields({ ...updateItem }, this.stripUpdateFields);
+            return stripObfuscatedFieldsFromPayload(data, this.sensitiveFieldsToObfuscate);
+          })();
+          return updateFN(params, updatePayload)
             .then((data) => {
               this.didUpdate(data);
               this.updated += 1;
