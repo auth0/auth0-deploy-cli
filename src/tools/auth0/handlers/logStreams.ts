@@ -9,7 +9,7 @@ export const schema = {
       id: { type: 'string' },
       type: { type: 'string' },
       name: { type: 'string' },
-      status: { type: 'string', enum: ['active', 'paused'] },
+      status: { type: 'string', enum: ['active', 'paused', 'suspended'] },
       sink: { type: 'object' },
       filters: {
         type: 'array',
