@@ -1,6 +1,5 @@
 import ValidationError from '../../validationError';
 
-import log from '../../logger';
 import {
   stripFields,
   convertJsonToString,
@@ -8,6 +7,7 @@ import {
   obfuscateSensitiveValues,
   stripObfuscatedFieldsFromPayload,
 } from '../../utils';
+import log from '../../../logger';
 import { calculateChanges } from '../../calculateChanges';
 import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';

@@ -1,5 +1,5 @@
 import DefaultHandler, { order } from './default';
-import log from '../../logger';
+import log from '../../../logger';
 import { Asset, Assets } from '../../../types';
 
 export const schema = {
