@@ -56,9 +56,9 @@ export default class LogStreamsHandler extends DefaultAPIHandler {
 
     const logStreams = await this.client.logStreams.getAll({ paginate: false });
 
-    const nonSuspendedLogStreams = logStreams.filter((logStream) => {
-      return logStream.status !== 'suspended';
-    });
+    const nonSuspendedLogStreams = logStreams.filter(
+      (logStream: LogStream) => logStream.status !== 'suspended'
+    );
 
     this.existing = nonSuspendedLogStreams;
 

@@ -14,7 +14,7 @@ function parse(context: DirectoryContext): ParsedLogStreams {
   const logStreamsDirectory = path.join(context.filePath, constants.LOG_STREAMS_DIRECTORY);
   if (!existsMustBeDir(logStreamsDirectory)) return { logStreams: undefined }; // Skip
 
-  const foundFiles: string[] = getFiles(logStreamsDirectory, ['.json']);
+  const foundFiles = getFiles(logStreamsDirectory, ['.json']);
 
   const logStreams = foundFiles
     .map((f) => loadJSON(f, context.mappings))
