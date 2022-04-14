@@ -52,7 +52,7 @@
   "devDependencies": {
     "@types/expect": "^24.3.0",
     "@types/mocha": "^9.1.0",
-    "@typescript-eslint/parser": "^5.14.0",
+    "@typescript-eslint/parser": "^5.16.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "cross-env": "^3.1.4",
