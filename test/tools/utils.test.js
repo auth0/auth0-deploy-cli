@@ -166,6 +166,64 @@ describe('#keywordReplacement', () => {
     expect(output).to.equal(expectedOutputYAML);
   });
 
+  it('should perform ## string replacement if nested within an @@ array replacement', () => {
+    const mapping = {
+      NO_REPLACEMENT: 'no-replace-value',
+      STRING_REPLACEMENT: 'string-replace-value',
+      ARRAY_REPLACEMENT: ['##STRING_REPLACEMENT##', 'other-array-replace-value'],
+    };
+    const inputJSON = `{ 
+        "arrayReplace": "@@ARRAY_REPLACEMENT@@", 
+        "stringReplace": "##STRING_REPLACEMENT##", 
+        "noReplace": "NO_REPLACEMENT" 
+      }`;
+    const output = utils.keywordReplace(inputJSON, mapping);
+
+    expect(() => JSON.parse(output)).to.not.throw();
+
+    const outputNoWhitespace = JSON.stringify(JSON.parse(output)); //Ensuring conversion can occur back and forth, remove whitespace for test consistency
+    const expected = JSON.stringify({
+      arrayReplace: ['string-replace-value', 'other-array-replace-value'],
+      stringReplace: 'string-replace-value',
+      noReplace: 'NO_REPLACEMENT',
+    });
+
+    expect(outputNoWhitespace).to.equal(expected);
+  });
+
+  it('should perform ## string replacement if nested within an @@ object replacement', () => {
+    const mapping = {
+      NO_REPLACEMENT: 'no-replace-value',
+      STRING_REPLACEMENT: 'string-replace-value',
+      OBJECT_REPLACEMENT: {
+        propertyShouldStringReplace: '##STRING_REPLACEMENT##',
+        propertyShouldNotStringReplace: 'this should not be replaced',
+      },
+    };
+    const inputJSON = `{ 
+        "objectReplace": "@@OBJECT_REPLACEMENT@@", 
+        "stringReplace": "##STRING_REPLACEMENT##", 
+        "noReplace": "NO_REPLACEMENT" 
+      }`;
+    const output = utils.keywordReplace(inputJSON, mapping);
+
+    expect(() => JSON.parse(output)).to.not.throw();
+
+    const outputNoWhitespace = JSON.stringify(JSON.parse(output)); //Ensuring conversion can occur back and forth, remove whitespace for test consistency
+    const expected = JSON.stringify({
+      objectReplace: {
+        propertyShouldStringReplace: 'string-replace-value',
+        propertyShouldNotStringReplace: 'this should not be replaced',
+      },
+      stringReplace: 'string-replace-value',
+      noReplace: 'NO_REPLACEMENT',
+    });
+
+    console.log({outputNoWhitespace})
+
+    expect(outputNoWhitespace).to.equal(expected);
+  });
+
   describe('#keywordStringReplace', () => {
     const mapping = {
       STRING_REPLACEMENT: 'foo',
@@ -229,6 +287,23 @@ describe('#keywordReplacement', () => {
       const parsedOutput = JSON.parse(output);
       expect(parsedOutput).to.deep.equal({
         foo: mapping.ARRAY_REPLACEMENT,
+        bar: 'OTHER_REPLACEMENT',
+      });
+    });
+
+    //DO NOT MERGE
+    it('TEST! -- see if this works for objects', () => {
+      const inputWrappedInQuotes = '{ "foo": "@@ARRAY_REPLACEMENT@@", "bar": "OTHER_REPLACEMENT"}';
+
+      const objectInput = { someObject: 'this is an object' };
+
+      const output = utils.keywordArrayReplace(inputWrappedInQuotes, {
+        ARRAY_REPLACEMENT: objectInput,
+        OTHER_REPLACEMENT: 'baz',
+      });
+      const parsedOutput = JSON.parse(output);
+      expect(parsedOutput).to.deep.equal({
+        foo: objectInput,
         bar: 'OTHER_REPLACEMENT',
       });
     });
