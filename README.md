@@ -7,7 +7,7 @@ The `auth0-deploy-cli` tool supports the importing and exporting of Auth0 Tenant
 Supported Auth0 Management API resources
 
 - [x] [Actions](https://auth0.com/docs/api/management/v2/#!/Actions/get_actions)
-- [ ] [Branding](https://auth0.com/docs/api/management/v2/#!/Branding/get_branding)
+- [x] [Branding](https://auth0.com/docs/api/management/v2/#!/Branding/get_branding)
 - [x] [Clients (Applications)](https://auth0.com/docs/api/management/v2#!/Clients/get_clients)
 - [x] [Client Grants](https://auth0.com/docs/api/management/v2#!/Client_Grants/get_client_grants)
 - [x] [Connections](https://auth0.com/docs/api/management/v2#!/Connections/get_connections)
