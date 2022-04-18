@@ -288,23 +288,6 @@ describe('#keywordReplacement', () => {
         bar: 'OTHER_REPLACEMENT',
       });
     });
-
-    // DO NOT MERGE
-    it('TEST! -- see if this works for objects', () => {
-      const inputWrappedInQuotes = '{ "foo": "@@ARRAY_REPLACEMENT@@", "bar": "OTHER_REPLACEMENT"}';
-
-      const objectInput = { someObject: 'this is an object' };
-
-      const output = utils.keywordArrayReplace(inputWrappedInQuotes, {
-        ARRAY_REPLACEMENT: objectInput,
-        OTHER_REPLACEMENT: 'baz',
-      });
-      const parsedOutput = JSON.parse(output);
-      expect(parsedOutput).to.deep.equal({
-        foo: objectInput,
-        bar: 'OTHER_REPLACEMENT',
-      });
-    });
   });
 });
 
