@@ -181,7 +181,7 @@ describe('#keywordReplacement', () => {
 
     expect(() => JSON.parse(output)).to.not.throw();
 
-    const outputNoWhitespace = JSON.stringify(JSON.parse(output)); //Ensuring conversion can occur back and forth, remove whitespace for test consistency
+    const outputNoWhitespace = JSON.stringify(JSON.parse(output)); // Ensuring conversion can occur back and forth, remove whitespace for test consistency
     const expected = JSON.stringify({
       arrayReplace: ['string-replace-value', 'other-array-replace-value'],
       stringReplace: 'string-replace-value',
@@ -201,25 +201,23 @@ describe('#keywordReplacement', () => {
       },
     };
     const inputJSON = `{ 
-        "objectReplace": "@@OBJECT_REPLACEMENT@@", 
-        "stringReplace": "##STRING_REPLACEMENT##", 
-        "noReplace": "NO_REPLACEMENT" 
+      "stringReplace": "##STRING_REPLACEMENT##", 
+      "noReplace": "NO_REPLACEMENT",
+      "objectReplace": "@@OBJECT_REPLACEMENT@@"
       }`;
     const output = utils.keywordReplace(inputJSON, mapping);
 
     expect(() => JSON.parse(output)).to.not.throw();
 
-    const outputNoWhitespace = JSON.stringify(JSON.parse(output)); //Ensuring conversion can occur back and forth, remove whitespace for test consistency
+    const outputNoWhitespace = JSON.stringify(JSON.parse(output)); // Ensuring conversion can occur back and forth, remove whitespace for test consistency
     const expected = JSON.stringify({
+      stringReplace: 'string-replace-value',
+      noReplace: 'NO_REPLACEMENT',
       objectReplace: {
         propertyShouldStringReplace: 'string-replace-value',
         propertyShouldNotStringReplace: 'this should not be replaced',
       },
-      stringReplace: 'string-replace-value',
-      noReplace: 'NO_REPLACEMENT',
     });
-
-    console.log({outputNoWhitespace})
 
     expect(outputNoWhitespace).to.equal(expected);
   });
@@ -291,7 +289,7 @@ describe('#keywordReplacement', () => {
       });
     });
 
-    //DO NOT MERGE
+    // DO NOT MERGE
     it('TEST! -- see if this works for objects', () => {
       const inputWrappedInQuotes = '{ "foo": "@@ARRAY_REPLACEMENT@@", "bar": "OTHER_REPLACEMENT"}';
 
