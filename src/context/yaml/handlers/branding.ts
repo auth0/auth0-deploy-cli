@@ -11,13 +11,12 @@ type ParsedBranding = {
 
 async function parse(context: YAMLContext): Promise<ParsedBranding> {
   // Load the HTML file for each page
-
   const { branding } = context.assets;
 
-  if (!branding || !branding.templates) return { branding };
+  if (!branding && !branding['templates']) return { branding };
 
   const templates = branding.templates.map((templateDefinition) => {
-    const markupFile = path.join(templateDefinition.body);
+    const markupFile = path.join(context.basePath, templateDefinition.body);
     return {
       template: templateDefinition.template,
       body: loadFileAndReplaceKeywords(markupFile, context.mappings),
@@ -33,7 +32,7 @@ async function parse(context: YAMLContext): Promise<ParsedBranding> {
 }
 
 async function dump(context: YAMLContext): Promise<ParsedBranding> {
-  const { branding } = context.assets || { branding: undefined };
+  const { branding } = context.assets.branding;
   branding.templates = branding.templates || [];
 
   // create templates folder
