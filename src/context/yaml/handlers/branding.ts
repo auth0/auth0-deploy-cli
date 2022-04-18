@@ -5,28 +5,40 @@ import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 
+type BrandingTemplate = {
+  template: string;
+  body: string;
+};
+
 type ParsedBranding = {
-  branding: unknown;
+  branding: {
+    templates?: BrandingTemplate[];
+    [key: string]: unknown;
+  };
 };
 
 async function parse(context: YAMLContext): Promise<ParsedBranding> {
   // Load the HTML file for each page
-  const { branding } = context.assets;
+  const {
+    branding: { templates, ...branding },
+  } = context.assets;
 
   if (!branding && !branding['templates']) return { branding };
 
-  const templates = branding.templates.map((templateDefinition) => {
-    const markupFile = path.join(context.basePath, templateDefinition.body);
-    return {
-      template: templateDefinition.template,
-      body: loadFileAndReplaceKeywords(markupFile, context.mappings),
-    };
-  });
+  const parsedTemplates: BrandingTemplate[] = templates.map(
+    (templateDefinition: BrandingTemplate): BrandingTemplate => {
+      const markupFile = path.join(context.basePath, templateDefinition.body);
+      return {
+        template: templateDefinition.template,
+        body: loadFileAndReplaceKeywords(markupFile, context.mappings),
+      };
+    }
+  );
 
   return {
     branding: {
       ...branding,
-      templates,
+      templates: parsedTemplates,
     },
   };
 }
