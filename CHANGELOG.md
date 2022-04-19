@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Log streams support [#495]
+
+### Fixed
+
+- `##` String keyword replacements now work when nested inside `@@` array replacements [#504]
+
 ## [7.8.0] - 2022-04-14
 
 ### Added
