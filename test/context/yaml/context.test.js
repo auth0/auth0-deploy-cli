@@ -203,6 +203,7 @@ describe('#YAML context validation', () => {
         bruteForceProtection: {},
         suspiciousIpThrottling: {},
       },
+      logStreams: [],
     });
   });
 
@@ -309,6 +310,7 @@ describe('#YAML context validation', () => {
         bruteForceProtection: {},
         suspiciousIpThrottling: {},
       },
+      logStreams: [],
     });
   });
 
@@ -416,6 +418,7 @@ describe('#YAML context validation', () => {
         bruteForceProtection: {},
         suspiciousIpThrottling: {},
       },
+      logStreams: [],
     });
   });
 

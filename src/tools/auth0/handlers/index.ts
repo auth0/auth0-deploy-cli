@@ -25,6 +25,7 @@ import * as actions from './actions';
 import * as triggers from './triggers';
 import * as organizations from './organizations';
 import * as attackProtection from './attackProtection';
+import * as logStreams from './logStreams';
 
 import { AssetTypes } from '../../../types';
 import APIHandler from './default';
@@ -57,6 +58,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   triggers,
   organizations,
   attackProtection,
+  logStreams,
 };
 
 export default auth0ApiHandlers as {

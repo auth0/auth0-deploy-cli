@@ -93,6 +93,7 @@ export type BaseAuth0APIClient = {
     getSecrets: ({ id: string }) => Promise<Promise<Asset[]>>;
     addSecrets: (arg0: {}, arg1: Asset) => Promise<void>;
   };
+  logStreams: APIClientBaseFunctions;
   migrations: APIClientBaseFunctions & {
     getMigrations: () => Promise<{ flags: Asset[] }>;
     updateMigrations: (arg0: { flags: Asset[] }) => Promise<void>;
@@ -195,6 +196,7 @@ export type Assets = {
     policies: Asset[]; //TODO: eliminate this intermediate level for consistency
   };
   hooks: Asset[];
+  logStreams: Asset[];
   migrations: Asset[];
   organizations: Asset[];
   pages: Asset[];
@@ -243,6 +245,7 @@ export type AssetTypes =
   | 'organizations'
   | 'triggers'
   | 'attackProtection'
-  | 'branding';
+  | 'branding'
+  | 'logStreams';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };

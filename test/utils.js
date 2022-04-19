@@ -105,6 +105,7 @@ export function mockMgmtClient() {
       getBruteForceConfig: () => ({}),
       getSuspiciousIpThrottlingConfig: () => ({}),
     },
+    logStreams: { getAll: () => [] },
   };
 }
 
