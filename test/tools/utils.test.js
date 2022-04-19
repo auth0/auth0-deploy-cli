@@ -166,6 +166,62 @@ describe('#keywordReplacement', () => {
     expect(output).to.equal(expectedOutputYAML);
   });
 
+  it('should perform ## string replacement if nested within an @@ array replacement', () => {
+    const mapping = {
+      NO_REPLACEMENT: 'no-replace-value',
+      STRING_REPLACEMENT: 'string-replace-value',
+      ARRAY_REPLACEMENT: ['##STRING_REPLACEMENT##', 'other-array-replace-value'],
+    };
+    const inputJSON = `{ 
+        "arrayReplace": "@@ARRAY_REPLACEMENT@@", 
+        "stringReplace": "##STRING_REPLACEMENT##", 
+        "noReplace": "NO_REPLACEMENT" 
+      }`;
+    const output = utils.keywordReplace(inputJSON, mapping);
+
+    expect(() => JSON.parse(output)).to.not.throw();
+
+    const outputNoWhitespace = JSON.stringify(JSON.parse(output)); // Ensuring conversion can occur back and forth, remove whitespace for test consistency
+    const expected = JSON.stringify({
+      arrayReplace: ['string-replace-value', 'other-array-replace-value'],
+      stringReplace: 'string-replace-value',
+      noReplace: 'NO_REPLACEMENT',
+    });
+
+    expect(outputNoWhitespace).to.equal(expected);
+  });
+
+  it('should perform ## string replacement if nested within an @@ object replacement', () => {
+    const mapping = {
+      NO_REPLACEMENT: 'no-replace-value',
+      STRING_REPLACEMENT: 'string-replace-value',
+      OBJECT_REPLACEMENT: {
+        propertyShouldStringReplace: '##STRING_REPLACEMENT##',
+        propertyShouldNotStringReplace: 'this should not be replaced',
+      },
+    };
+    const inputJSON = `{ 
+      "stringReplace": "##STRING_REPLACEMENT##", 
+      "noReplace": "NO_REPLACEMENT",
+      "objectReplace": "@@OBJECT_REPLACEMENT@@"
+      }`;
+    const output = utils.keywordReplace(inputJSON, mapping);
+
+    expect(() => JSON.parse(output)).to.not.throw();
+
+    const outputNoWhitespace = JSON.stringify(JSON.parse(output)); // Ensuring conversion can occur back and forth, remove whitespace for test consistency
+    const expected = JSON.stringify({
+      stringReplace: 'string-replace-value',
+      noReplace: 'NO_REPLACEMENT',
+      objectReplace: {
+        propertyShouldStringReplace: 'string-replace-value',
+        propertyShouldNotStringReplace: 'this should not be replaced',
+      },
+    });
+
+    expect(outputNoWhitespace).to.equal(expected);
+  });
+
   describe('#keywordStringReplace', () => {
     const mapping = {
       STRING_REPLACEMENT: 'foo',
