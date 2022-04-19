@@ -51,12 +51,13 @@ async function dump(context: DirectoryContext) {
   if (!!templates) dumpBrandingTemplates(context);
 }
 
-const dumpBrandingTemplates = ({
-  filePath,
-  assets: {
+const dumpBrandingTemplates = ({ filePath, assets }: DirectoryContext): void => {
+  if (!assets || !assets.branding) return;
+
+  const {
     branding: { templates = [] },
-  },
-}: DirectoryContext): void => {
+  } = assets;
+
   const brandingTemplatesFolder = path.join(
     filePath,
     constants.BRANDING_DIRECTORY,
@@ -86,19 +87,24 @@ const dumpBrandingTemplates = ({
   });
 };
 
-const dumpBranding = ({
-  filePath,
-  assets: {
-    branding: { templates: _templates, ...branding },
-  },
-}: DirectoryContext): void => {
+const dumpBranding = ({ filePath, assets }: DirectoryContext): void => {
+  if (!assets || !assets.branding) return;
+
+  const { branding } = assets;
+
+  const brandingWithoutTemplates = (() => {
+    const newBranding = { ...branding };
+    delete newBranding.templates;
+    return newBranding;
+  })();
+
   const brandingDirectory = path.join(filePath, constants.BRANDING_DIRECTORY);
 
   fs.ensureDirSync(brandingDirectory);
 
   const brandingFilePath = path.join(brandingDirectory, 'branding.json');
 
-  dumpJSON(brandingFilePath, branding);
+  dumpJSON(brandingFilePath, brandingWithoutTemplates);
 };
 
 const brandingHandler: DirectoryHandler<ParsedBranding> = {

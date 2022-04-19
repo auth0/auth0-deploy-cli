@@ -15,13 +15,14 @@ describe('#YAML context branding templates', () => {
     cleanThenMkdir(dir);
 
     const htmlFile = path.join(dir, 'universalLogin.html');
+
     fs.writeFileSync(htmlFile, html);
 
     const yaml = `
     branding:
       templates:
         - template: universal_login
-          body: ${htmlFile}
+          body: universalLogin.html
     `;
     const yamlFile = path.join(dir, 'config.yaml');
     fs.writeFileSync(yamlFile, yaml);

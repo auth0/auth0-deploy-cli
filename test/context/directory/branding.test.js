@@ -10,20 +10,30 @@ import { cleanThenMkdir, mockMgmtClient, testDataDir } from '../../utils';
 const html = '<html>##foo##</html>';
 const htmlTransformed = '<html>bar</html>';
 
+const brandingSettings = JSON.stringify({
+  colors: {
+    primary: '#FFFFFF',
+    page_background: '#000000',
+  },
+  font: {
+    url: 'https://mycompany.org/font/myfont.ttf',
+  },
+});
+
 describe('#directory context branding', () => {
   it('should process templates', async () => {
     const dir = path.join(testDataDir, 'directory', 'branding-process');
     cleanThenMkdir(dir);
-    const brandingDir = path.join(
-      dir,
-      constants.BRANDING_DIRECTORY,
-      constants.BRANDING_TEMPLATES_DIRECTORY
-    );
+    const brandingDir = path.join(dir, constants.BRANDING_DIRECTORY);
     cleanThenMkdir(brandingDir);
-    const markupFile = path.join(brandingDir, 'universal_login.html');
-    fs.writeFileSync(markupFile, html);
+    const brandingTemplatesDir = path.join(brandingDir, constants.BRANDING_TEMPLATES_DIRECTORY);
+    cleanThenMkdir(brandingTemplatesDir);
+
+    fs.writeFileSync(path.join(brandingDir, 'branding.json'), brandingSettings);
+
+    fs.writeFileSync(path.join(brandingTemplatesDir, 'universal_login.html'), html);
     fs.writeFileSync(
-      path.join(brandingDir, 'universal_login.json'),
+      path.join(brandingTemplatesDir, 'universal_login.json'),
       JSON.stringify({ template: 'universal_login', body: `.${path.sep}universal_login.html` })
     );
 
@@ -46,6 +56,13 @@ describe('#directory context branding', () => {
     const context = new Context({ AUTH0_INPUT_FILE: repoDir }, mockMgmtClient());
 
     context.assets.branding = {
+      colors: {
+        primary: '#F8F8F2',
+        page_background: '#112',
+      },
+      font: {
+        url: 'https://mycompany.org/font/myfont.ttf',
+      },
       templates: [
         {
           body: html,
@@ -56,14 +73,29 @@ describe('#directory context branding', () => {
 
     await handler.dump(context);
 
-    const brandingDir = path.join(
-      repoDir,
-      constants.BRANDING_DIRECTORY,
-      constants.BRANDING_TEMPLATES_DIRECTORY
-    );
-    const markup = fs.readFileSync(path.join(brandingDir, 'universal_login.html')).toString();
+    const brandingDir = path.join(repoDir, constants.BRANDING_DIRECTORY);
+    const brandingTemplatesDir = path.join(brandingDir, constants.BRANDING_TEMPLATES_DIRECTORY);
+
+    const brandingSettingsFile = fs
+      .readFileSync(path.join(brandingDir, 'branding.json'))
+      .toString();
+
+    expect(JSON.parse(brandingSettingsFile)).to.deep.equal({
+      colors: {
+        primary: '#F8F8F2',
+        page_background: '#112',
+      },
+      font: {
+        url: 'https://mycompany.org/font/myfont.ttf',
+      },
+    });
+
+    const markup = fs
+      .readFileSync(path.join(brandingTemplatesDir, 'universal_login.html'))
+      .toString();
+
     expect(markup).to.equal(html);
-    const templateDefinition = loadJSON(path.join(brandingDir, 'universal_login.json'));
+    const templateDefinition = loadJSON(path.join(brandingTemplatesDir, 'universal_login.json'));
     expect(templateDefinition).to.deep.equal({
       template: 'universal_login',
       body: `.${path.sep}universal_login.html`,
