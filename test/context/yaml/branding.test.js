@@ -10,7 +10,7 @@ const html = '<html>##foo##</html>';
 const htmlTransformed = '<html>bar</html>';
 
 describe('#YAML context branding templates', () => {
-  it('should process branding templates', async () => {
+  it('should process branding settings, including templates', async () => {
     const dir = path.join(testDataDir, 'yaml', 'branding-process');
     cleanThenMkdir(dir);
 
@@ -39,7 +39,7 @@ describe('#YAML context branding templates', () => {
     ]);
   });
 
-  it('should dump branding templates', async () => {
+  it('should dump branding settings, including templates', async () => {
     const dir = path.join(testDataDir, 'yaml', 'branding-dump');
     cleanThenMkdir(dir);
     const context = new Context(

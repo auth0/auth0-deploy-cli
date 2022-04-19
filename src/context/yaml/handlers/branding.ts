@@ -19,8 +19,12 @@ type ParsedBranding = {
 
 async function parse(context: YAMLContext): Promise<ParsedBranding> {
   // Load the HTML file for each page
-  //@ts-ignore
-  if (!context.assets.branding) return { branding: undefined };
+  if (!context.assets.branding)
+    return {
+      branding: {
+        templates: [],
+      },
+    };
 
   const {
     branding: { templates, ...branding },

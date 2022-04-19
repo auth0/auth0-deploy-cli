@@ -21,7 +21,7 @@ const brandingSettings = JSON.stringify({
 });
 
 describe('#directory context branding', () => {
-  it('should process templates', async () => {
+  it('should process branding settings, including templates', async () => {
     const dir = path.join(testDataDir, 'directory', 'branding-process');
     cleanThenMkdir(dir);
     const brandingDir = path.join(dir, constants.BRANDING_DIRECTORY);
@@ -50,7 +50,7 @@ describe('#directory context branding', () => {
     ]);
   });
 
-  it('should dump templates', async () => {
+  it('should dump branding settings, including templates', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'branding-dump');
     cleanThenMkdir(repoDir);
     const context = new Context({ AUTH0_INPUT_FILE: repoDir }, mockMgmtClient());
