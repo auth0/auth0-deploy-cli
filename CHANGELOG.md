@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.9.0] - 2022-04-19
+
+### Added
+
+- Log streams support [#495]
+
+### Fixed
+
+- `##` String keyword replacements now work when nested inside `@@` array replacements [#504]
+
 ## [7.8.0] - 2022-04-14
 
 ### Added
@@ -677,8 +687,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#481]: https://github.com/auth0/auth0-deploy-cli/issues/481
 [#482]: https://github.com/auth0/auth0-deploy-cli/issues/482
 [#485]: https://github.com/auth0/auth0-deploy-cli/issues/485
+[#495]: https://github.com/auth0/auth0-deploy-cli/issues/495
 [#497]: https://github.com/auth0/auth0-deploy-cli/issues/497
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.8.0...HEAD
+[#504]: https://github.com/auth0/auth0-deploy-cli/issues/504
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.9.0...HEAD
+[7.9.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.8.0...v7.9.0
 [7.8.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.7.1...v7.8.0
 [7.7.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.7.0...v7.7.1
 [7.7.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.6.0...v7.7.0
