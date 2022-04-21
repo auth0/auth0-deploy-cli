@@ -106,6 +106,7 @@ export function mockMgmtClient() {
       getSuspiciousIpThrottlingConfig: () => ({}),
     },
     branding: { getSettings: () => ({}) },
+    logStreams: { getAll: () => [] },
   };
 }
 

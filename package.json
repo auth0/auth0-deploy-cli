@@ -1,6 +1,6 @@
 {
   "name": "auth0-deploy-cli",
-  "version": "7.7.1",
+  "version": "7.9.0",
   "description": "A command line tool for deploying updates to your Auth0 tenant",
   "main": "lib/index.js",
   "bin": {
@@ -40,20 +40,20 @@
     "global-agent": "^2.1.12",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.20",
-    "mkdirp": "^0.5.1",
+    "mkdirp": "^0.5.6",
     "nconf": "^0.11.4",
     "promise-pool-executor": "^1.1.1",
     "sanitize-filename": "^1.6.1",
     "sinon": "^13.0.1",
     "sinon-chai": "^3.7.0",
-    "winston": "^3.3.0",
+    "winston": "^3.6.0",
     "yargs": "^15.3.1"
   },
   "devDependencies": {
     "@types/expect": "^24.3.0",
     "@types/mocha": "^9.1.0",
     "chai": "^4.3.6",
-    "@typescript-eslint/parser": "^5.16.0",
+    "@typescript-eslint/parser": "^5.17.0",
     "chai-as-promised": "^7.1.1",
     "cross-env": "^3.1.4",
     "eslint": "^7.28.0",
@@ -69,6 +69,6 @@
     "rimraf": "^3.0.2",
     "rmdir-sync": "^1.0.1",
     "ts-mocha": "^9.0.2",
-    "typescript": "^4.6.2"
+    "typescript": "^4.6.3"
   }
 }

@@ -23,6 +23,7 @@ import actions from './actions';
 import triggers from './triggers';
 import attackProtection from './attackProtection';
 import branding from './branding';
+import logStreams from './logStreams';
 
 import YAMLContext from '..';
 import { AssetTypes } from '../../../types';
@@ -58,6 +59,7 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   triggers,
   attackProtection,
   branding,
+  logStreams,
 };
 
 export default yamlHandlers;
