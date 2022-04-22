@@ -249,12 +249,14 @@ export default class OrganizationsHandler extends DefaultHandler {
         .filter((connection) => !!connection.connection_id);
     });
 
+    console.log({ allowDelete: this.config('AUTH0_ALLOW_DELETE') });
+
     const changes = calculateChanges({
       handler: this,
       assets: organizations,
       existing,
       identifiers: ['id', 'name'],
-      allowDelete: false, //TODO: actually pass in correct allowDelete value
+      allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
     });
 
     log.debug(

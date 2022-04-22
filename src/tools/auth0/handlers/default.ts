@@ -137,6 +137,7 @@ export default class APIHandler {
 
     const existing = await this.getType();
 
+    console.log({ allowDelete: this.config('AUTH0_ALLOW_DELETE') });
     // Figure out what needs to be updated vs created
     return calculateChanges({
       handler: this,
@@ -144,6 +145,7 @@ export default class APIHandler {
       //@ts-ignore TODO: investigate what happens when `existing` is null
       existing,
       identifiers: this.identifiers,
+      allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
     });
   }
 

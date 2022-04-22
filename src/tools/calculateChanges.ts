@@ -8,19 +8,19 @@ import { Asset, CalculatedChanges } from '../types';
  * @param {T} desiredAssetState
  * @param {T} currentAssetState
  * @param {string[]} [objectFields=[]]
- * @param {boolean} [allowDelete=false]
+ * @param {boolean} [allowDelete]
  * @returns T
  */
 export function processChangedObjectFields({
   handler,
   desiredAssetState,
   currentAssetState,
-  allowDelete = false,
+  allowDelete,
 }: {
   handler: APIHandler;
   desiredAssetState: Asset;
   currentAssetState: Asset;
-  allowDelete?: boolean;
+  allowDelete: boolean;
 }) {
   const desiredAssetStateWithChanges = { ...desiredAssetState };
 
