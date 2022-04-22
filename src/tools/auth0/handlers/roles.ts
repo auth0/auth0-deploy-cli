@@ -186,7 +186,6 @@ export default class RolesHandler extends DefaultHandler {
     // Gets roles from destination tenant
     const existing = await this.getType();
 
-    console.log({ allowDelete: this.config('AUTH0_ALLOW_DELETE') });
     const changes = calculateChanges({
       handler: this,
       assets: roles,

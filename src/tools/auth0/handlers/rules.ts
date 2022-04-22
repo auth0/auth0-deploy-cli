@@ -86,8 +86,6 @@ export default class RulesHandler extends DefaultHandler {
       existing = existing.filter((r) => !excludedRules.includes(r.name));
     }
 
-    console.log({ allowDelete: this.config('AUTH0_ALLOW_DELETE') });
-
     // Figure out what needs to be updated vs created
     const { del, update, create, conflicts } = calculateChanges({
       handler: this,

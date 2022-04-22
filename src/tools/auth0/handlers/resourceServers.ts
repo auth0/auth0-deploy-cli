@@ -80,8 +80,6 @@ export default class ResourceServersHandler extends DefaultHandler {
     resourceServers = resourceServers.filter((r) => !excluded.includes(r.name));
     existing = existing.filter((r) => !excluded.includes(r.name));
 
-    console.log({ allowDelete: this.config('AUTH0_ALLOW_DELETE') });
-
     return calculateChanges({
       handler: this,
       assets: resourceServers,
