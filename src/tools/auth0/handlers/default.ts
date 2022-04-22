@@ -9,7 +9,7 @@ import {
 } from '../../utils';
 import log from '../../../logger';
 import { calculateChanges } from '../../calculateChanges';
-import { Asset, Assets, AssetTypes, Auth0APIClient, CalculatedChanges } from '../../../types';
+import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
 
 export function order(value) {
@@ -113,24 +113,10 @@ export default class APIHandler {
 
   async load(): Promise<{ [key: string]: Asset | Asset[] | null }> {
     // Load Asset from Tenant
-    const data = await (async () => {
-      try {
-        const data = await this.getType();
-        log.info(`Retrieving ${this.type} data from Auth0`);
-        return data;
-      } catch (err) {
-        if (err.statusCode === 403 && err.message.includes('Insufficient scope')) {
-          const requiredScopes = err.message
-            ?.split('Insufficient scope, expected any of: ')
-            ?.slice(1);
-          log.warn(`Cannot retrieve ${this.type} due to missing scopes: ${requiredScopes}`);
-          return undefined;
-        }
-        throw err;
-      }
-    })();
+    log.info(`Retrieving ${this.type} data from Auth0`);
 
-    //@ts-ignore
+    const data = await this.getType();
+
     this.existing = obfuscateSensitiveValues(data, this.sensitiveFieldsToObfuscate);
 
     return { [this.type]: this.existing };
@@ -149,14 +135,14 @@ export default class APIHandler {
       };
     }
 
-    const existing = await this.load();
+    const existing = await this.getType();
 
     // Figure out what needs to be updated vs created
     return calculateChanges({
       handler: this,
       assets: typeAssets,
       //@ts-ignore TODO: investigate what happens when `existing` is null
-      existing: existing[this.type],
+      existing,
       identifiers: this.identifiers,
     });
   }
