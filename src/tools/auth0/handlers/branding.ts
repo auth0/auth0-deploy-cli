@@ -1,7 +1,7 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
 import log from '../../../logger';
-import { Assets, Asset } from '../../../types';
+import { Asset } from '../../../types';
 
 export const schema = {
   type: 'object',

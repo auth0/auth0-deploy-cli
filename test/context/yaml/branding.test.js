@@ -10,18 +10,19 @@ const html = '<html>##foo##</html>';
 const htmlTransformed = '<html>bar</html>';
 
 describe('#YAML context branding templates', () => {
-  it('should process branding templates', async () => {
+  it('should process branding settings, including templates', async () => {
     const dir = path.join(testDataDir, 'yaml', 'branding-process');
     cleanThenMkdir(dir);
 
     const htmlFile = path.join(dir, 'universalLogin.html');
+
     fs.writeFileSync(htmlFile, html);
 
     const yaml = `
     branding:
       templates:
         - template: universal_login
-          body: ${htmlFile}
+          body: universalLogin.html
     `;
     const yamlFile = path.join(dir, 'config.yaml');
     fs.writeFileSync(yamlFile, yaml);
@@ -38,7 +39,7 @@ describe('#YAML context branding templates', () => {
     ]);
   });
 
-  it('should dump branding templates', async () => {
+  it('should dump branding settings, including templates', async () => {
     const dir = path.join(testDataDir, 'yaml', 'branding-dump');
     cleanThenMkdir(dir);
     const context = new Context(

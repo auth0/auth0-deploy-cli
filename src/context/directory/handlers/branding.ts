@@ -10,9 +10,14 @@ type ParsedBranding = {
 };
 
 function parse(context: DirectoryContext): ParsedBranding {
+  const brandingDirectory = path.join(context.filePath, constants.BRANDING_DIRECTORY);
+
+  if (!existsMustBeDir(brandingDirectory)) return { branding: undefined };
+
+  const branding = loadJSON(path.join(brandingDirectory, 'branding.json'), context.mappings);
+
   const brandingTemplatesFolder = path.join(
-    context.filePath,
-    constants.BRANDING_DIRECTORY,
+    brandingDirectory,
     constants.BRANDING_TEMPLATES_DIRECTORY
   );
 
@@ -30,24 +35,37 @@ function parse(context: DirectoryContext): ParsedBranding {
 
   return {
     branding: {
+      ...branding,
       templates,
     },
   };
 }
 
-async function dump(context) {
-  const { branding } = context.assets;
+async function dump(context: DirectoryContext) {
+  const {
+    branding: { templates = [], ...branding },
+  } = context.assets;
 
-  if (!branding || !branding.templates || !branding.templates) return; // Skip, nothing to dump
+  if (!!branding) dumpBranding(context);
+
+  if (!!templates) dumpBrandingTemplates(context);
+}
+
+const dumpBrandingTemplates = ({ filePath, assets }: DirectoryContext): void => {
+  if (!assets || !assets.branding) return;
+
+  const {
+    branding: { templates = [] },
+  } = assets;
 
   const brandingTemplatesFolder = path.join(
-    context.filePath,
+    filePath,
     constants.BRANDING_DIRECTORY,
     constants.BRANDING_TEMPLATES_DIRECTORY
   );
   fs.ensureDirSync(brandingTemplatesFolder);
 
-  branding.templates.forEach((templateDefinition) => {
+  templates.forEach((templateDefinition) => {
     const markup = templateDefinition.body;
     try {
       fs.writeFileSync(
@@ -67,7 +85,27 @@ async function dump(context) {
       templateDefinition
     );
   });
-}
+};
+
+const dumpBranding = ({ filePath, assets }: DirectoryContext): void => {
+  if (!assets || !assets.branding) return;
+
+  const { branding } = assets;
+
+  const brandingWithoutTemplates = (() => {
+    const newBranding = { ...branding };
+    delete newBranding.templates;
+    return newBranding;
+  })();
+
+  const brandingDirectory = path.join(filePath, constants.BRANDING_DIRECTORY);
+
+  fs.ensureDirSync(brandingDirectory);
+
+  const brandingFilePath = path.join(brandingDirectory, 'branding.json');
+
+  dumpJSON(brandingFilePath, brandingWithoutTemplates);
+};
 
 const brandingHandler: DirectoryHandler<ParsedBranding> = {
   parse,
