@@ -1,5 +1,10 @@
 import ValidationError from '../../validationError';
-import { convertJsonToString, stripFields, duplicateItems } from '../../utils';
+import {
+  convertJsonToString,
+  stripFields,
+  duplicateItems,
+  detectInsufficientScopeError,
+} from '../../utils';
 import DefaultHandler from './default';
 import log from '../../../logger';
 import { calculateChanges } from '../../calculateChanges';
@@ -78,7 +83,20 @@ export default class RulesHandler extends DefaultHandler {
 
     const excludedRules = (assets.exclude && assets.exclude.rules) || [];
 
-    let existing = await this.getType();
+    const { data, hadSufficientScopes, requiredScopes } = await detectInsufficientScopeError<
+      Asset[]
+    >(() => this.getType());
+    if (!hadSufficientScopes) {
+      log.warn(`Cannot process ${this.type} due to missing scopes: ${requiredScopes}`);
+      return {
+        del: [],
+        create: [],
+        update: [],
+        conflicts: [],
+        reOrder: [],
+      };
+    }
+    let existing = data;
 
     // Filter excluded rules
     if (!includeExcluded) {
@@ -154,7 +172,15 @@ export default class RulesHandler extends DefaultHandler {
     }
 
     // Detect Rules that are changing stage as it's not allowed.
-    const existing = await this.getType();
+    const {
+      data: existing,
+      hadSufficientScopes,
+      requiredScopes,
+    } = await detectInsufficientScopeError<Asset[]>(() => this.getType());
+    if (!hadSufficientScopes) {
+      log.warn(`Cannot process ${this.type} due to missing scopes: ${requiredScopes}`);
+      return;
+    }
     const stateChanged = futureRules
       .reduce(
         (changed: Asset[], rule) => [

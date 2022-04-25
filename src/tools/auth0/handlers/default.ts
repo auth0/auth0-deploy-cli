@@ -6,10 +6,11 @@ import {
   duplicateItems,
   obfuscateSensitiveValues,
   stripObfuscatedFieldsFromPayload,
+  detectInsufficientScopeError,
 } from '../../utils';
 import log from '../../../logger';
 import { calculateChanges } from '../../calculateChanges';
-import { Asset, Assets, AssetTypes, Auth0APIClient, CalculatedChanges } from '../../../types';
+import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
 
 export function order(value) {
@@ -114,22 +115,19 @@ export default class APIHandler {
   async load(): Promise<{ [key: string]: Asset | Asset[] | null }> {
     // Load Asset from Tenant
     const data = await (async () => {
-      try {
-        const data = await this.getType();
-        log.info(`Retrieving ${this.type} data from Auth0`);
+      const { data, hadSufficientScopes, requiredScopes } = await detectInsufficientScopeError(() =>
+        this.getType().then((data) => {
+          log.info(`Retrieving ${this.type} data from Auth0`);
+          return data;
+        })
+      );
+      if (!hadSufficientScopes) {
+        log.warn(`Cannot retrieve ${this.type} due to missing scopes: ${requiredScopes}`);
         return data;
-      } catch (err) {
-        if (err.statusCode === 403 && err.message.includes('Insufficient scope')) {
-          const requiredScopes = err.message
-            ?.split('Insufficient scope, expected any of: ')
-            ?.slice(1);
-          log.warn(`Cannot retrieve ${this.type} due to missing scopes: ${requiredScopes}`);
-          return undefined;
-        }
-        throw err;
       }
+      return data;
     })();
-    
+
     //@ts-ignore
     this.existing = obfuscateSensitiveValues(data, this.sensitiveFieldsToObfuscate);
 
@@ -149,6 +147,10 @@ export default class APIHandler {
       };
     }
 
+    //const { data, hadSufficientScopes, requiredScopes } = await detectInsufficientScopeError(() =>
+    const resp = await detectInsufficientScopeError(() =>
+      this.getType()
+    );
     const existing = await this.load();
 
     // Figure out what needs to be updated vs created

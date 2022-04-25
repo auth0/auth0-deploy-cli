@@ -3,6 +3,8 @@ import ValidationError from '../../validationError';
 import constants from '../../constants';
 import DefaultHandler from './default';
 import { calculateChanges } from '../../calculateChanges';
+import log from '../../../logger';
+import { detectInsufficientScopeError } from '../../utils';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 
 export const excludeSchema = {
@@ -74,11 +76,24 @@ export default class ResourceServersHandler extends DefaultHandler {
 
     const excluded = (assets.exclude && assets.exclude.resourceServers) || [];
 
-    let existing = await this.getType();
+    const {
+      data,
+      hadSufficientScopes,
+      requiredScopes,
+    } = await detectInsufficientScopeError<Asset[]>(() => this.getType());
+    if (!hadSufficientScopes) {
+      log.warn(`Cannot process ${this.type} due to missing scopes: ${requiredScopes}`);
+      return {
+        del: [],
+        create: [],
+        conflicts: [],
+        update: [],
+      };
+    }
 
     // Filter excluded
     resourceServers = resourceServers.filter((r) => !excluded.includes(r.name));
-    existing = existing.filter((r) => !excluded.includes(r.name));
+    const existing = data.filter((r) => !excluded.includes(r.name));
 
     return calculateChanges({
       handler: this,

@@ -4,7 +4,7 @@ import pagedClient from './client';
 import schema from './schema';
 import handlers from './handlers';
 
-import { Assets, Auth0APIClient, BaseAuth0APIClient, ClientScopes } from '../../types';
+import { Assets, Auth0APIClient, BaseAuth0APIClient } from '../../types';
 import APIHandler from './handlers/default';
 import { ConfigFunction } from '../../configFactory';
 
@@ -31,7 +31,6 @@ export default class Auth0 {
   config: ConfigFunction;
   assets: Assets;
   handlers: APIHandler[];
-  availableScopes: ClientScopes[];
 
   constructor(client: BaseAuth0APIClient, assets: Assets, config: ConfigFunction) {
     this.client = pagedClient(client);
@@ -47,11 +46,6 @@ export default class Auth0 {
         const excludedAssetTypes = config('AUTH0_EXCLUDED') || [];
         return !excludedAssetTypes.includes(handler.type);
       });
-  }
-
-  async init(){
-    const scopes = await this.client.clientGrants.getAll({ paginate: true });
-    console.log({ scopes });
   }
 
   async runStage(stage: Stage): Promise<void> {

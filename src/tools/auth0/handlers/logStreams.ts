@@ -1,5 +1,7 @@
 import DefaultAPIHandler from './default';
 import { Asset, Assets } from '../../../types';
+import log from '../../../logger';
+import { detectInsufficientScopeError } from '../../utils';
 
 export const schema = {
   type: 'array',
@@ -49,12 +51,18 @@ export default class LogStreamsHandler extends DefaultAPIHandler {
     return super.objString(item.name);
   }
 
-  async getType(): Promise<Asset> {
+  async getType(): Promise<Asset[] | null> {
     if (this.existing) {
       return this.existing;
     }
 
-    const logStreams = await this.client.logStreams.getAll({ paginate: false });
+    const { data: logStreams, hadSufficientScopes, requiredScopes } = await detectInsufficientScopeError<Asset[]>(
+      () => this.client.logStreams.getAll({ paginate: false })
+    );
+    if (!hadSufficientScopes) {
+      log.warn(`Cannot process ${this.type} due to missing scopes: ${requiredScopes}`);
+      return []
+    }
 
     const nonSuspendedLogStreams = logStreams.filter(
       (logStream: LogStream) => logStream.status !== 'suspended'
