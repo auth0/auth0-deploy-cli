@@ -4,6 +4,7 @@ import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset } from '../../../types';
 
 type BrandingTemplate = {
   template: string;
@@ -11,10 +12,11 @@ type BrandingTemplate = {
 };
 
 type ParsedBranding = {
-  branding: {
-    templates?: BrandingTemplate[];
-    [key: string]: unknown;
-  };
+  branding:
+    | ({ [key: string]: Asset } & {
+        templates?: BrandingTemplate[];
+      })
+    | null;
 };
 
 async function parse(context: YAMLContext): Promise<ParsedBranding> {
@@ -26,11 +28,15 @@ async function parse(context: YAMLContext): Promise<ParsedBranding> {
       },
     };
 
+  if (context.assets.branding === null) return { branding: null };
+
   const {
     branding: { templates, ...branding },
   } = context.assets;
 
-  if (!branding && !branding['templates']) return { branding };
+  if (templates === null || templates === undefined) {
+    return { branding: { ...branding } };
+  }
 
   const parsedTemplates: BrandingTemplate[] = templates.map(
     (templateDefinition: BrandingTemplate): BrandingTemplate => {
@@ -53,17 +59,19 @@ async function parse(context: YAMLContext): Promise<ParsedBranding> {
 async function dump(context: YAMLContext): Promise<ParsedBranding> {
   const { branding } = context.assets;
 
-  branding.templates = branding.templates || [];
+  if (branding === null) return { branding: null };
+
+  let templates = branding.templates || [];
 
   // create templates folder
-  if (branding.templates.length) {
+  if (templates.length) {
     const brandingTemplatesFolder = path.join(
       context.basePath,
       constants.BRANDING_TEMPLATES_YAML_DIRECTORY
     );
     fs.ensureDirSync(brandingTemplatesFolder);
 
-    branding.templates = branding.templates.map((templateDefinition) => {
+    templates = templates.map((templateDefinition) => {
       const file = `${templateDefinition.template}.html`;
       const templateMarkupFile = path.join(brandingTemplatesFolder, file);
       const markup = templateDefinition.body;
@@ -84,7 +92,7 @@ async function dump(context: YAMLContext): Promise<ParsedBranding> {
     });
   }
 
-  return { branding };
+  return { branding: { templates } };
 }
 
 const brandingHandler: YAMLHandler<ParsedBranding> = {

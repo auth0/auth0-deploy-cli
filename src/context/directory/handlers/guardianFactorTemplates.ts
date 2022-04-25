@@ -5,9 +5,10 @@ import { constants } from '../../../tools';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset } from '../../../types';
 
 type ParsedGuardianFactorTemplates = {
-  guardianFactorTemplates: unknown[] | undefined;
+  guardianFactorTemplates: Asset[] | null;
 };
 
 function parse(context: DirectoryContext): ParsedGuardianFactorTemplates {
@@ -16,7 +17,7 @@ function parse(context: DirectoryContext): ParsedGuardianFactorTemplates {
     constants.GUARDIAN_DIRECTORY,
     constants.GUARDIAN_TEMPLATES_DIRECTORY
   );
-  if (!existsMustBeDir(factorTemplatesFolder)) return { guardianFactorTemplates: undefined }; // Skip
+  if (!existsMustBeDir(factorTemplatesFolder)) return { guardianFactorTemplates: null }; // Skip
 
   const foundFiles = getFiles(factorTemplatesFolder, ['.json']);
 

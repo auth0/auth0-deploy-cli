@@ -2,20 +2,19 @@ import path from 'path';
 import { existsMustBeDir, isFile, dumpJSON, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset } from '../../../types';
 
-type ParsedMigrations =
-  | {
-      migrations: unknown[];
-    }
-  | {};
+type ParsedMigrations = {
+  migrations: Asset[] | null;
+};
 
 function parse(context: DirectoryContext): ParsedMigrations {
   const baseFolder = path.join(context.filePath);
-  if (!existsMustBeDir(baseFolder)) return {}; // Skip
+  if (!existsMustBeDir(baseFolder)) return { migrations: null }; // Skip
 
   const migrationsFile = path.join(baseFolder, 'migrations.json');
 
-  if (!isFile(migrationsFile)) return {};
+  if (!isFile(migrationsFile)) return { migrations: null };
 
   /* eslint-disable camelcase */
   const migrations = loadJSON(migrationsFile, context.mappings);

@@ -1,9 +1,10 @@
 import { convertClientIdToName } from '../../../utils';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset } from '../../../types';
 
 type ParsedClientGrants = {
-  clientGrants: unknown[];
+  clientGrants: Asset[] | null;
 };
 
 async function parse(context: YAMLContext): Promise<ParsedClientGrants> {
@@ -14,7 +15,7 @@ async function parse(context: YAMLContext): Promise<ParsedClientGrants> {
 }
 
 async function dump(context: YAMLContext): Promise<ParsedClientGrants | {}> {
-  const { clientGrants } = context.assets;
+  const { clientGrants, clients } = context.assets;
 
   // Nothing to do
   if (!clientGrants) return {};
@@ -23,7 +24,7 @@ async function dump(context: YAMLContext): Promise<ParsedClientGrants | {}> {
   return {
     clientGrants: clientGrants.map((grant) => {
       const dumpGrant = { ...grant };
-      dumpGrant.client_id = convertClientIdToName(dumpGrant.client_id, context.assets.clients);
+      dumpGrant.client_id = convertClientIdToName(dumpGrant.client_id, clients || []);
       return dumpGrant;
     }),
   };

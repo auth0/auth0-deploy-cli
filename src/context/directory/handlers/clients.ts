@@ -12,16 +12,17 @@ import {
   sanitize,
   clearClientArrays,
 } from '../../../utils';
+import { Asset } from '../../../types';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 
 type ParsedClients = {
-  clients: unknown | undefined;
+  clients: Asset[] | null;
 };
 
 function parse(context: DirectoryContext): ParsedClients {
   const clientsFolder = path.join(context.filePath, constants.CLIENTS_DIRECTORY);
-  if (!existsMustBeDir(clientsFolder)) return { clients: undefined }; // Skip
+  if (!existsMustBeDir(clientsFolder)) return { clients: null }; // Skip
 
   const foundFiles = getFiles(clientsFolder, ['.json']);
 

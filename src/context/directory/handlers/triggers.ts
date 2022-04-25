@@ -6,15 +6,16 @@ import DirectoryContext from '..';
 
 import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
 import log from '../../../logger';
+import { Asset } from '../../../types';
 
 type ParsedTriggers = {
-  triggers: unknown[] | undefined;
+  triggers: Asset[] | null;
 };
 
 function parse(context: DirectoryContext): ParsedTriggers {
   const triggersFolder = path.join(context.filePath, constants.TRIGGERS_DIRECTORY);
 
-  if (!existsMustBeDir(triggersFolder)) return { triggers: undefined }; // Skip
+  if (!existsMustBeDir(triggersFolder)) return { triggers: null }; // Skip
 
   const files = getFiles(triggersFolder, ['.json']);
 

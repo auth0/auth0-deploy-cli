@@ -6,14 +6,15 @@ import log from '../../../logger';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset } from '../../../types';
 
 type ParsedPages = {
-  pages: unknown[] | undefined;
+  pages: Asset[] | null;
 };
 
 function parse(context: DirectoryContext): ParsedPages {
   const pagesFolder = path.join(context.filePath, constants.PAGES_DIRECTORY);
-  if (!existsMustBeDir(pagesFolder)) return { pages: undefined }; // Skip
+  if (!existsMustBeDir(pagesFolder)) return { pages: null }; // Skip
 
   const files: string[] = getFiles(pagesFolder, ['.json', '.html']);
 
@@ -30,7 +31,7 @@ function parse(context: DirectoryContext): ParsedPages {
     return acc;
   }, {});
 
-  const pages = Object.values(sorted).flatMap(({ meta, html }): unknown[] => {
+  const pages = Object.values(sorted).flatMap(({ meta, html }): Asset[] => {
     if (!meta) {
       log.warn(`Skipping pages file ${html} as missing the corresponding '.json' file`);
       return [];

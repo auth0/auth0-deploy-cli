@@ -6,16 +6,15 @@ import { existsMustBeDir, isFile, dumpJSON, loadJSON } from '../../../utils';
 import { emailProviderDefaults } from '../../defaults';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset } from '../../../types';
 
-type ParsedEmailProvider =
-  | {
-      emailProvider: unknown;
-    }
-  | {};
+type ParsedEmailProvider = {
+  emailProvider: Asset | null;
+};
 
 function parse(context: DirectoryContext): ParsedEmailProvider {
   const emailsFolder = path.join(context.filePath, constants.EMAIL_TEMPLATES_DIRECTORY);
-  if (!existsMustBeDir(emailsFolder)) return {}; // Skip
+  if (!existsMustBeDir(emailsFolder)) return { emailProvider: null }; // Skip
 
   const providerFile = path.join(emailsFolder, 'provider.json');
 
@@ -25,19 +24,20 @@ function parse(context: DirectoryContext): ParsedEmailProvider {
     };
   }
 
-  return {};
+  return { emailProvider: null };
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  let { emailProvider } = context.assets;
+  if (context.assets.emailProvider === null) return; // Skip, nothing to dump
 
-  if (!emailProvider) return; // Skip, nothing to dump
-
-  const excludedDefaults = context.assets.exclude?.defaults || [];
-  if (!excludedDefaults.includes('emailProvider')) {
-    // Add placeholder for credentials as they cannot be exported
-    emailProvider = emailProviderDefaults(emailProvider);
-  }
+  const emailProvider: typeof context.assets.emailProvider = (() => {
+    const excludedDefaults = context.assets.exclude?.defaults || [];
+    if (!excludedDefaults.includes('emailProvider')) {
+      // Add placeholder for credentials as they cannot be exported
+      return emailProviderDefaults(context.assets.emailProvider);
+    }
+    return context.assets.emailProvider;
+  })();
 
   const emailsFolder = path.join(context.filePath, constants.EMAIL_TEMPLATES_DIRECTORY);
   fs.ensureDirSync(emailsFolder);

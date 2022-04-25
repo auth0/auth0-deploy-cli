@@ -1,8 +1,9 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset } from '../../../types';
 
 type ParsedMigrations = {
-  migrations: unknown[];
+  migrations: Asset | null;
 };
 
 async function parse(context: YAMLContext): Promise<ParsedMigrations> {

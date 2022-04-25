@@ -12,9 +12,10 @@ import {
 } from '../../../utils';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset } from '../../../types';
 
 type ParsedConnections = {
-  connections: unknown[];
+  connections: Asset[] | null;
 };
 
 async function parse(context: YAMLContext): Promise<ParsedConnections> {
@@ -62,7 +63,7 @@ const getFormattedOptions = (connection, clients) => {
 };
 
 async function dump(context: YAMLContext): Promise<ParsedConnections | {}> {
-  const { connections } = context.assets;
+  const { connections, clients } = context.assets;
 
   // Nothing to do
   if (!connections) return {};
@@ -72,12 +73,9 @@ async function dump(context: YAMLContext): Promise<ParsedConnections | {}> {
     connections: connections.map((connection) => {
       const dumpedConnection = {
         ...connection,
-        ...getFormattedOptions(connection, context.assets.clients),
+        ...getFormattedOptions(connection, clients),
         ...(connection.enabled_clients && {
-          enabled_clients: mapClientID2NameSorted(
-            connection.enabled_clients,
-            context.assets.clients
-          ),
+          enabled_clients: mapClientID2NameSorted(connection.enabled_clients, clients || []),
         }),
       };
 

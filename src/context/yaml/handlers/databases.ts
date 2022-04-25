@@ -4,9 +4,10 @@ import { mapClientID2NameSorted, sanitize } from '../../../utils';
 import log from '../../../logger';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset } from '../../../types';
 
 type ParsedDatabases = {
-  databases: unknown[];
+  databases: Asset[] | null;
 };
 
 async function parse(context: YAMLContext): Promise<ParsedDatabases | {}> {
@@ -51,7 +52,10 @@ async function dump(context: YAMLContext): Promise<ParsedDatabases | {}> {
       ...databases.map((database) => ({
         ...database,
         ...(database.enabled_clients && {
-          enabled_clients: mapClientID2NameSorted(database.enabled_clients, context.assets.clients),
+          enabled_clients: mapClientID2NameSorted(
+            database.enabled_clients,
+            context.assets.clients || []
+          ),
         }),
         options: {
           ...database.options,

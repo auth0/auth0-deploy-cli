@@ -176,41 +176,43 @@ export type Config = {
 export type Asset = { [key: string]: any };
 
 export type Assets = {
-  actions: Asset[];
-  attackProtection: Asset;
-  branding: Asset;
-  clients: Asset[];
-  clientGrants: Asset[];
-  connections: Asset[];
-  databases: Asset[];
-  emailProvider: Asset;
-  emailTemplates: Asset[];
-  guardianFactorProviders: Asset[];
-  guardianFactors: Asset[];
-  guardianFactorTemplates: Asset[];
+  actions: Asset[] | null;
+  attackProtection: Asset | null;
+  branding: {
+    templates?: { template: string; body: string }[] | null;
+  } | null;
+  clients: Asset[] | null;
+  clientGrants: Asset[] | null;
+  connections: Asset[] | null;
+  databases: Asset[] | null;
+  emailProvider: Asset | null;
+  emailTemplates: Asset[] | null;
+  guardianFactorProviders: Asset[] | null;
+  guardianFactors: Asset[] | null;
+  guardianFactorTemplates: Asset[] | null;
   guardianPhoneFactorMessageTypes: {
     message_types: Asset[]; //TODO: eliminate this intermediate level for consistency
-  };
-  guardianPhoneFactorSelectedProvider: Asset;
+  } | null;
+  guardianPhoneFactorSelectedProvider: Asset | null;
   guardianPolicies: {
     policies: Asset[]; //TODO: eliminate this intermediate level for consistency
-  };
-  hooks: Asset[];
-  logStreams: Asset[];
-  migrations: Asset[];
-  organizations: Asset[];
-  pages: Asset[];
-  resourceServers: Asset[];
-  roles: Asset[];
-  rules: Asset[];
-  rulesConfigs: Asset[];
-  tenant: Asset;
-  triggers: Asset[];
+  } | null;
+  hooks: Asset[] | null;
+  logStreams: Asset[] | null;
+  migrations: Asset[] | null;
+  organizations: Asset[] | null;
+  pages: Asset[] | null;
+  resourceServers: Asset[] | null;
+  roles: Asset[] | null;
+  rules: Asset[] | null;
+  rulesConfigs: Asset[] | null;
+  tenant: Asset | null;
+  triggers: Asset[] | null;
   //non-resource types
   exclude?: {
     [key: string]: string[];
   };
-  clientsOrig: Asset[];
+  clientsOrig: Asset[] | null;
 };
 
 export type CalculatedChanges = {

@@ -7,12 +7,12 @@ import DirectoryContext from '..';
 import { Asset } from '../../../types';
 
 type ParsedLogStreams = {
-  logStreams: Asset[] | undefined;
+  logStreams: Asset[] | null;
 };
 
 function parse(context: DirectoryContext): ParsedLogStreams {
   const logStreamsDirectory = path.join(context.filePath, constants.LOG_STREAMS_DIRECTORY);
-  if (!existsMustBeDir(logStreamsDirectory)) return { logStreams: undefined }; // Skip
+  if (!existsMustBeDir(logStreamsDirectory)) return { logStreams: null }; // Skip
 
   const foundFiles = getFiles(logStreamsDirectory, ['.json']);
 

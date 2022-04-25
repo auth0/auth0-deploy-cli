@@ -1,7 +1,7 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
 import log from '../../../logger';
-import { Asset } from '../../../types';
+import { Asset, Assets } from '../../../types';
 
 export const schema = {
   type: 'object',
@@ -68,11 +68,11 @@ export default class BrandingHandler extends DefaultHandler {
     }
   }
 
-  async processChanges(assets) {
+  async processChanges(assets: Assets) {
     const { branding } = assets;
 
     // quit early if there's no branding to process.
-    if (!branding) return;
+    if (branding === null) return;
 
     // remove templates, we only want top level branding settings for this API call
     const brandingSettings = { ...branding };

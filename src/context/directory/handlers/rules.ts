@@ -7,14 +7,15 @@ import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../.
 
 import { DirectoryHandler } from './index';
 import DirectoryContext from '..';
+import { Asset } from '../../../types';
 
 type ParsedRules = {
-  rules: unknown[] | undefined;
+  rules: Asset[] | null;
 };
 
 function parse(context: DirectoryContext): ParsedRules {
   const rulesFolder = path.join(context.filePath, constants.RULES_DIRECTORY);
-  if (!existsMustBeDir(rulesFolder)) return { rules: undefined }; // Skip
+  if (!existsMustBeDir(rulesFolder)) return { rules: null }; // Skip
 
   const files: string[] = getFiles(rulesFolder, ['.json']);
 

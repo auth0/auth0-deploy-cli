@@ -14,9 +14,10 @@ import {
 
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset } from '../../../types';
 
 type ParsedDatabases = {
-  databases: unknown[] | undefined;
+  databases: Asset[] | null;
 };
 
 type DatabaseMetadata = {
@@ -80,7 +81,7 @@ function getDatabase(folder: string, mappings): {} {
 
 function parse(context: DirectoryContext): ParsedDatabases {
   const databaseFolder = path.join(context.filePath, constants.DATABASE_CONNECTIONS_DIRECTORY);
-  if (!existsMustBeDir(databaseFolder)) return { databases: undefined }; // Skip
+  if (!existsMustBeDir(databaseFolder)) return { databases: null }; // Skip
 
   const folders = fs
     .readdirSync(databaseFolder)
@@ -118,7 +119,7 @@ async function dump(context: DirectoryContext): Promise<void> {
       ...(database.enabled_clients && {
         enabled_clients: mapClientID2NameSorted(
           database.enabled_clients,
-          context.assets.clientsOrig
+          context.assets.clientsOrig || []
         ),
       }),
       options: {

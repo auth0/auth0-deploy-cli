@@ -4,26 +4,25 @@ import { constants } from '../../../tools';
 import { existsMustBeDir, dumpJSON, loadJSON, isFile } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset } from '../../../types';
 
-type ParsedGuardianFactorSelectedProvider =
-  | {
-      guardianPhoneFactorSelectedProvider: unknown;
-    }
-  | {};
+type ParsedGuardianFactorSelectedProvider = {
+  guardianPhoneFactorSelectedProvider: Asset | null;
+};
 
 function parse(context: DirectoryContext): ParsedGuardianFactorSelectedProvider {
   const guardianFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY);
-  if (!existsMustBeDir(guardianFolder)) return {}; // Skip
+  if (!existsMustBeDir(guardianFolder)) return { guardianPhoneFactorSelectedProvider: null }; // Skip
 
   const file = path.join(guardianFolder, 'phoneFactorSelectedProvider.json');
 
-  if (isFile(file)) {
-    return {
-      guardianPhoneFactorSelectedProvider: loadJSON(file, context.mappings),
-    };
+  if (!isFile(file)) {
+    return { guardianPhoneFactorSelectedProvider: null };
   }
 
-  return {};
+  return {
+    guardianPhoneFactorSelectedProvider: loadJSON(file, context.mappings),
+  };
 }
 
 async function dump(context: DirectoryContext): Promise<void> {

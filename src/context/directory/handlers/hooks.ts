@@ -6,14 +6,15 @@ import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../.
 import log from '../../../logger';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset } from '../../../types';
 
 type ParsedHooks = {
-  hooks: unknown[] | undefined;
+  hooks: Asset[] | null;
 };
 
 function parse(context: DirectoryContext): ParsedHooks {
   const hooksFolder = path.join(context.filePath, constants.HOOKS_DIRECTORY);
-  if (!existsMustBeDir(hooksFolder)) return { hooks: undefined }; // Skip
+  if (!existsMustBeDir(hooksFolder)) return { hooks: null }; // Skip
 
   const files = getFiles(hooksFolder, ['.json']);
 

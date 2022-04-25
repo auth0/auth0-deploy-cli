@@ -4,15 +4,16 @@ import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 import { dumpJSON, existsMustBeDir, getFiles, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset } from '../../../types';
 
 type ParsedBranding = {
-  branding: unknown | undefined;
+  branding: Asset | null;
 };
 
 function parse(context: DirectoryContext): ParsedBranding {
   const brandingDirectory = path.join(context.filePath, constants.BRANDING_DIRECTORY);
 
-  if (!existsMustBeDir(brandingDirectory)) return { branding: undefined };
+  if (!existsMustBeDir(brandingDirectory)) return { branding: null };
 
   const branding = loadJSON(path.join(brandingDirectory, 'branding.json'), context.mappings);
 
@@ -42,17 +43,17 @@ function parse(context: DirectoryContext): ParsedBranding {
 }
 
 async function dump(context: DirectoryContext) {
-  const {
-    branding: { templates = [], ...branding },
-  } = context.assets;
+  const { branding } = context.assets;
 
-  if (!!branding) dumpBranding(context);
+  if (branding === null) return;
 
-  if (!!templates) dumpBrandingTemplates(context);
+  dumpBranding(context);
+
+  if (branding.templates !== null) dumpBrandingTemplates(context);
 }
 
 const dumpBrandingTemplates = ({ filePath, assets }: DirectoryContext): void => {
-  if (!assets || !assets.branding) return;
+  if (assets.branding === null || assets.branding.templates === null) return;
 
   const {
     branding: { templates = [] },

@@ -6,14 +6,15 @@ import log from '../../../logger';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset } from '../../../types';
 
 type ParsedEmailTemplates = {
-  emailTemplates: unknown | undefined;
+  emailTemplates: Asset | null;
 };
 
 function parse(context: DirectoryContext): ParsedEmailTemplates {
   const emailsFolder = path.join(context.filePath, constants.EMAIL_TEMPLATES_DIRECTORY);
-  if (!existsMustBeDir(emailsFolder)) return { emailTemplates: undefined }; // Skip
+  if (!existsMustBeDir(emailsFolder)) return { emailTemplates: null }; // Skip
 
   const files = getFiles(emailsFolder, ['.json', '.html']).filter(
     (f) => path.basename(f) !== 'provider.json'
