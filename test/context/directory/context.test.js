@@ -4,6 +4,7 @@ import { expect } from 'chai';
 
 import Context from '../../../src/context/directory';
 import { cleanThenMkdir, testDataDir } from '../../utils';
+import handlers from '../../../src/context/directory/handlers';
 
 describe('#directory context validation', () => {
   it('should do nothing on empty repo', async () => {
@@ -14,11 +15,21 @@ describe('#directory context validation', () => {
     const context = new Context({ AUTH0_INPUT_FILE: dir });
     await context.load();
 
-    Object.entries(context.assets).forEach(([k, v]) => {
-      if (typeof v === 'undefined') delete context.assets[k];
+    expect(Object.keys(context.assets).length).to.equal(Object.keys(handlers).length + 1);
+    Object.keys(context.assets).forEach((key) => {
+      if (key === 'exclude') {
+        expect(context.assets[key]).to.deep.equal({
+          rules: [],
+          clients: [],
+          databases: [],
+          connections: [],
+          resourceServers: [],
+          defaults: [],
+        });
+      } else {
+        expect(context.assets[key]).to.equal(null);
+      }
     });
-
-    expect(context.assets).to.have.all.keys('exclude');
   });
 
   it('should load excludes', async () => {
