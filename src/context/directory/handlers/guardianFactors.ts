@@ -7,9 +7,7 @@ import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedGuardianFactors = {
-  guardianFactors: Asset[] | null;
-};
+type ParsedGuardianFactors = ParsedAsset<'guardianFactors', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedGuardianFactors {
   const factorsFolder = path.join(

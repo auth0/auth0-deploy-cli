@@ -4,9 +4,7 @@ import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedTenant = {
-  tenant: Asset | null;
-};
+type ParsedTenant = ParsedAsset<'tenant', Asset>;
 
 async function parse(context: YAMLContext): Promise<ParsedTenant> {
   if (!context.assets.tenant) return { tenant: null };

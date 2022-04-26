@@ -2,9 +2,7 @@ import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedLogStreams = {
-  logStreams: Asset[] | null;
-};
+type ParsedLogStreams = ParsedAsset<'logStreams', Asset[]>;
 
 async function parseAndDump(context: YAMLContext): Promise<ParsedLogStreams> {
   const { logStreams } = context.assets;

@@ -113,7 +113,7 @@ type ImportantFields = {
 };
 
 export function formatResults(item: any): Partial<ImportantFields> {
-  if (typeof item !== 'object') {
+  if (!item || typeof item !== 'object') {
     return item;
   }
   const importantFields: ImportantFields = {

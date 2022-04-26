@@ -14,11 +14,7 @@ import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedClientGrants = {
-  clientGrants: Asset[] | null;
-};
-
-type ParsedBranding = ParsedAsset<'branding', Asset[]>;
+type ParsedClientGrants = ParsedAsset<'clientGrants', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedClientGrants {
   const grantsFolder = path.join(context.filePath, constants.CLIENTS_GRANTS_DIRECTORY);

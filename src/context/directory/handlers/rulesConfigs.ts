@@ -6,9 +6,7 @@ import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedRulesConfigs = {
-  rulesConfigs: Asset[] | null;
-};
+type ParsedRulesConfigs = ParsedAsset<'rulesConfigs', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedRulesConfigs {
   const rulesConfigsFolder = path.join(context.filePath, constants.RULES_CONFIGS_DIRECTORY);
