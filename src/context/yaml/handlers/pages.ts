@@ -4,11 +4,9 @@ import fs from 'fs-extra';
 import log from '../../../logger';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedPages = {
-  pages: Asset[] | null;
-};
+type ParsedPages = ParsedAsset<'pages', Asset[]>;
 
 async function parse(context: YAMLContext): Promise<ParsedPages> {
   // Load the HTML file for each page

@@ -6,11 +6,9 @@ import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../.
 import log from '../../../logger';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedHooks = {
-  hooks: Asset[] | null;
-};
+type ParsedHooks = ParsedAsset<'hooks', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedHooks {
   const hooksFolder = path.join(context.filePath, constants.HOOKS_DIRECTORY);

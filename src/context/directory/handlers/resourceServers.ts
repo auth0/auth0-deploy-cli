@@ -4,11 +4,9 @@ import { constants } from '../../../tools';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedResourceServers = {
-  resourceServers: Asset[] | null;
-};
+type ParsedResourceServers = ParsedAsset<'resourceServers', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedResourceServers {
   const resourceServersFolder = path.join(context.filePath, constants.RESOURCE_SERVERS_DIRECTORY);

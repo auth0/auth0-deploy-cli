@@ -1,11 +1,9 @@
 import { convertClientIdToName } from '../../../utils';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedClientGrants = {
-  clientGrants: Asset[] | null;
-};
+type ParsedClientGrants = ParsedAsset<'clientGrants', Asset[]>;
 
 async function parse(context: YAMLContext): Promise<ParsedClientGrants> {
   const { clientGrants } = context.assets;

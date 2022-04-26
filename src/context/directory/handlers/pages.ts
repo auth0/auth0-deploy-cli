@@ -6,11 +6,9 @@ import log from '../../../logger';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedPages = {
-  pages: Asset[] | null;
-};
+type ParsedPages = ParsedAsset<'pages', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedPages {
   const pagesFolder = path.join(context.filePath, constants.PAGES_DIRECTORY);

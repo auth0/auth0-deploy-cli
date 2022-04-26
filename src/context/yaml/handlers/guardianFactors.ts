@@ -1,10 +1,8 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedGuardianFactors = {
-  guardianFactors: Asset[] | null;
-};
+type ParsedGuardianFactors = ParsedAsset<'guardianFactors', Asset[]>;
 
 async function parseAndDump(context: YAMLContext): Promise<ParsedGuardianFactors> {
   const { guardianFactors } = context.assets;

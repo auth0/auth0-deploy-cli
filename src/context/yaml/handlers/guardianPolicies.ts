@@ -1,9 +1,8 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedGuardianPolicies = {
-  guardianPolicies: unknown;
-};
+type ParsedGuardianPolicies = ParsedAsset<'guardianPolicies', { policies: Asset[] }>;
 
 async function parseAndDump(context: YAMLContext): Promise<ParsedGuardianPolicies> {
   const { guardianPolicies } = context.assets;

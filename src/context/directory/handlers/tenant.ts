@@ -3,18 +3,17 @@ import { existsMustBeDir, isFile, dumpJSON, loadJSON, clearTenantFlags } from '.
 import { sessionDurationsToMinutes } from '../../../sessionDurationsToMinutes';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedTenant = {
-  tenant:
-    | ({
-        session_lifetime: number;
-        idle_session_lifetime: number;
-      } & {
-        [key: string]: Asset;
-      })
-    | null;
-};
+type ParsedTenant = ParsedAsset<
+  'tenant',
+  {
+    session_lifetime: number;
+    idle_session_lifetime: number;
+  } & {
+    [key: string]: Asset;
+  }
+>;
 
 function parse(context: DirectoryContext): ParsedTenant {
   const baseFolder = path.join(context.filePath);

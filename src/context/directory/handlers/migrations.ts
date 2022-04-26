@@ -2,11 +2,9 @@ import path from 'path';
 import { existsMustBeDir, isFile, dumpJSON, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedMigrations = {
-  migrations: Asset[] | null;
-};
+type ParsedMigrations = ParsedAsset<'migrations', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedMigrations {
   const baseFolder = path.join(context.filePath);

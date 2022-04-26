@@ -12,11 +12,13 @@ import {
 } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
 type ParsedClientGrants = {
   clientGrants: Asset[] | null;
 };
+
+type ParsedBranding = ParsedAsset<'branding', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedClientGrants {
   const grantsFolder = path.join(context.filePath, constants.CLIENTS_GRANTS_DIRECTORY);

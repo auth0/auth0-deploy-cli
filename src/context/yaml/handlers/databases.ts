@@ -4,11 +4,9 @@ import { mapClientID2NameSorted, sanitize } from '../../../utils';
 import log from '../../../logger';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedDatabases = {
-  databases: Asset[] | null;
-};
+type ParsedDatabases = ParsedAsset<'databases', Asset[]>;
 
 async function parse(context: YAMLContext): Promise<ParsedDatabases> {
   // Load the script file for custom db

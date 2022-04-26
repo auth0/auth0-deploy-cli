@@ -4,11 +4,9 @@ import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 import { dumpJSON, existsMustBeDir, getFiles, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedBranding = {
-  branding: Asset | null;
-};
+type ParsedBranding = ParsedAsset<'branding', Asset>;
 
 function parse(context: DirectoryContext): ParsedBranding {
   const brandingDirectory = path.join(context.filePath, constants.BRANDING_DIRECTORY);

@@ -12,11 +12,9 @@ import {
 } from '../../../utils';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedConnections = {
-  connections: Asset[] | null;
-};
+type ParsedConnections = ParsedAsset<'connections', Asset[]>;
 
 async function parse(context: YAMLContext): Promise<ParsedConnections> {
   const { connections } = context.assets;

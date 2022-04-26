@@ -7,11 +7,9 @@ import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
 import log from '../../../logger';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedActions = {
-  actions: Asset[] | null;
-};
+type ParsedActions = ParsedAsset<'actions', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedActions {
   const actionsFolder = path.join(context.filePath, constants.ACTIONS_DIRECTORY);

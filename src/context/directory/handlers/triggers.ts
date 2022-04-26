@@ -6,7 +6,7 @@ import DirectoryContext from '..';
 
 import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
 import log from '../../../logger';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
 type ParsedTriggers = {
   triggers: Asset[] | null;

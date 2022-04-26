@@ -15,7 +15,7 @@ import {
 } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
 type ParsedConnections = {
   connections: Asset[] | null;

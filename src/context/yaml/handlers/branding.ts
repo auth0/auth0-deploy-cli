@@ -4,20 +4,19 @@ import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
 type BrandingTemplate = {
   template: string;
   body: string;
 };
 
-type ParsedBranding = {
-  branding:
-    | ({ [key: string]: Asset } & {
-        templates?: BrandingTemplate[];
-      })
-    | null;
-};
+type ParsedBranding = ParsedAsset<
+  'branding',
+  { [key: string]: Asset } & {
+    templates?: BrandingTemplate[];
+  }
+>;
 
 async function parse(context: YAMLContext): Promise<ParsedBranding> {
   // Load the HTML file for each page

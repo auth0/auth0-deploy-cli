@@ -2,7 +2,7 @@ import { clearTenantFlags } from '../../../utils';
 import { sessionDurationsToMinutes } from '../../../sessionDurationsToMinutes';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
 type ParsedTenant = {
   tenant: Asset | null;

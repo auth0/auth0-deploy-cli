@@ -6,11 +6,9 @@ import log from '../../../logger';
 
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedRules = {
-  rules: Asset[] | null;
-};
+type ParsedRules = ParsedAsset<'rules', Asset[]>;
 
 async function parse(context: YAMLContext): Promise<ParsedRules> {
   const { rules } = context.assets;
