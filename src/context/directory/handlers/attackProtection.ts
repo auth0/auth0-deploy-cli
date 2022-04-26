@@ -55,7 +55,7 @@ function parse(context: DirectoryContext): ParsedAttackProtection {
 async function dump(context: DirectoryContext): Promise<void> {
   const { attackProtection } = context.assets;
 
-  if (attackProtection === null) return;
+  if (!attackProtection) return;
 
   const files = attackProtectionFiles(context.filePath);
   fs.ensureDirSync(files.directory);

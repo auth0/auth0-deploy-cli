@@ -19,13 +19,11 @@ type ParsedConnections = {
 };
 
 async function parse(context: YAMLContext): Promise<ParsedConnections> {
-  // Load the HTML file for email connections
-
   const { connections } = context.assets;
   const connectionsFolder = path.join(context.basePath, constants.CONNECTIONS_DIRECTORY);
 
-  if (!connections || !connections.length) {
-    return { connections: context.assets.connections };
+  if (!connections) {
+    return { connections: null };
   }
 
   return {
@@ -62,11 +60,11 @@ const getFormattedOptions = (connection, clients) => {
   }
 };
 
-async function dump(context: YAMLContext): Promise<ParsedConnections | {}> {
+async function dump(context: YAMLContext): Promise<ParsedConnections> {
   const { connections, clients } = context.assets;
 
   // Nothing to do
-  if (!connections) return {};
+  if (!connections) return { connections: null };
 
   // nothing to do, set default if empty
   return {

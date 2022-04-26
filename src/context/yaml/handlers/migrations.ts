@@ -8,6 +8,9 @@ type ParsedMigrations = {
 
 async function parse(context: YAMLContext): Promise<ParsedMigrations> {
   const { migrations } = context.assets;
+
+  if (!migrations) return { migrations: null };
+
   return { migrations };
 }
 

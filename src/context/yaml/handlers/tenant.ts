@@ -2,16 +2,14 @@ import { clearTenantFlags } from '../../../utils';
 import { sessionDurationsToMinutes } from '../../../sessionDurationsToMinutes';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset } from '../../../types';
 
-type ParsedTenant =
-  | {
-      tenant: unknown[];
-    }
-  | {};
+type ParsedTenant = {
+  tenant: Asset | null;
+};
 
 async function parse(context: YAMLContext): Promise<ParsedTenant> {
-  // Nothing to do
-  if (!context.assets.tenant) return {};
+  if (!context.assets.tenant) return { tenant: null };
 
   /* eslint-disable camelcase */
   const {
@@ -29,6 +27,7 @@ async function parse(context: YAMLContext): Promise<ParsedTenant> {
   const sessionDurations = sessionDurationsToMinutes({ session_lifetime, idle_session_lifetime });
 
   return {
+    //@ts-ignore
     tenant: {
       ...tenant,
       ...sessionDurations,

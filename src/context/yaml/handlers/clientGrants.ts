@@ -8,17 +8,20 @@ type ParsedClientGrants = {
 };
 
 async function parse(context: YAMLContext): Promise<ParsedClientGrants> {
-  // nothing to do, set default empty
+  const { clientGrants } = context.assets;
+
+  if (!clientGrants) return { clientGrants: null };
+
   return {
-    clientGrants: context.assets.clientGrants,
+    clientGrants,
   };
 }
 
-async function dump(context: YAMLContext): Promise<ParsedClientGrants | {}> {
+async function dump(context: YAMLContext): Promise<ParsedClientGrants> {
   const { clientGrants, clients } = context.assets;
 
   // Nothing to do
-  if (!clientGrants) return {};
+  if (!clientGrants) return { clientGrants: null };
 
   // Convert client_id to the client name for readability
   return {

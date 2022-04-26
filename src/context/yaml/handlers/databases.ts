@@ -10,13 +10,15 @@ type ParsedDatabases = {
   databases: Asset[] | null;
 };
 
-async function parse(context: YAMLContext): Promise<ParsedDatabases | {}> {
+async function parse(context: YAMLContext): Promise<ParsedDatabases> {
   // Load the script file for custom db
-  if (!context.assets.databases) return {};
+  const { databases } = context.assets;
+
+  if (!databases) return { databases: null };
 
   return {
     databases: [
-      ...context.assets.databases.map((database) => ({
+      ...databases.map((database) => ({
         ...database,
         options: {
           ...database.options,
@@ -36,11 +38,11 @@ async function parse(context: YAMLContext): Promise<ParsedDatabases | {}> {
   };
 }
 
-async function dump(context: YAMLContext): Promise<ParsedDatabases | {}> {
+async function dump(context: YAMLContext): Promise<ParsedDatabases> {
   const { databases } = context.assets;
 
   // Nothing to do
-  if (!databases) return {};
+  if (!databases) return { databases: null };
 
   const sortCustomScripts = ([name1]: [string, Function], [name2]: [string, Function]): number => {
     if (name1 === name2) return 0;
@@ -83,7 +85,7 @@ async function dump(context: YAMLContext): Promise<ParsedDatabases | {}> {
     ],
   };
 }
-const databasesHandler: YAMLHandler<ParsedDatabases | {}> = {
+const databasesHandler: YAMLHandler<ParsedDatabases> = {
   parse,
   dump,
 };

@@ -6,9 +6,12 @@ type ParsedGuardianPolicies = {
 };
 
 async function parseAndDump(context: YAMLContext): Promise<ParsedGuardianPolicies> {
-  // nothing to do, set default if empty
+  const { guardianPolicies } = context.assets;
+
+  if (!guardianPolicies) return { guardianPolicies: null };
+
   return {
-    guardianPolicies: { ...(context.assets.guardianPolicies || {}) },
+    guardianPolicies,
   };
 }
 

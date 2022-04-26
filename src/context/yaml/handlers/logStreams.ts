@@ -7,8 +7,12 @@ type ParsedLogStreams = {
 };
 
 async function parseAndDump(context: YAMLContext): Promise<ParsedLogStreams> {
+  const { logStreams } = context.assets;
+
+  if (!logStreams) return { logStreams: null };
+
   return {
-    logStreams: context.assets.logStreams || [],
+    logStreams,
   };
 }
 

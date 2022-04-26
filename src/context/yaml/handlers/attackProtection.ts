@@ -1,8 +1,9 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset } from '../../../types';
 
 type ParsedAttackProtection = {
-  attackProtection: unknown;
+  attackProtection: Asset;
 };
 
 async function parseAndDump(context: YAMLContext): Promise<ParsedAttackProtection> {

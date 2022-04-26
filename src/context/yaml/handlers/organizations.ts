@@ -9,8 +9,10 @@ type ParsedOrganizations = {
 async function parse(context: YAMLContext): Promise<ParsedOrganizations> {
   const { organizations } = context.assets;
 
+  if (!organizations) return { organizations: null };
+
   return {
-    organizations: organizations,
+    organizations,
   };
 }
 

@@ -28,13 +28,13 @@ async function parse(context: YAMLContext): Promise<ParsedBranding> {
       },
     };
 
-  if (context.assets.branding === null) return { branding: null };
+  if (!context.assets.branding) return { branding: null };
 
   const {
     branding: { templates, ...branding },
   } = context.assets;
 
-  if (templates === null || templates === undefined) {
+  if (!templates) {
     return { branding: { ...branding } };
   }
 
@@ -59,7 +59,7 @@ async function parse(context: YAMLContext): Promise<ParsedBranding> {
 async function dump(context: YAMLContext): Promise<ParsedBranding> {
   const { branding } = context.assets;
 
-  if (branding === null) return { branding: null };
+  if (!branding) return { branding: null };
 
   let templates = branding.templates || [];
 

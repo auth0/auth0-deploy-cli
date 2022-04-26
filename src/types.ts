@@ -175,7 +175,7 @@ export type Config = {
 
 export type Asset = { [key: string]: any };
 
-export type Assets = {
+export type Assets = Partial<{
   actions: Asset[] | null;
   attackProtection: Asset | null;
   branding: {
@@ -213,7 +213,7 @@ export type Assets = {
     [key: string]: string[];
   };
   clientsOrig: Asset[] | null;
-};
+}>;
 
 export type CalculatedChanges = {
   del: Asset[];

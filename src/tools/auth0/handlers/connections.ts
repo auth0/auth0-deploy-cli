@@ -124,7 +124,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     const { connections } = assets;
 
     // Do nothing if not set
-    if (connections === null)
+    if (!connections)
       return {
         del: [],
         create: [],

@@ -4,21 +4,21 @@ import fs from 'fs-extra';
 import log from '../../../logger';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset } from '../../../types';
 
-type ParsedPages =
-  | {
-      pages: unknown[];
-    }
-  | {};
+type ParsedPages = {
+  pages: Asset[] | null;
+};
 
 async function parse(context: YAMLContext): Promise<ParsedPages> {
   // Load the HTML file for each page
+  const { pages } = context.assets;
 
-  if (!context.assets.pages) return {};
+  if (!pages) return { pages: null };
 
   return {
     pages: [
-      ...context.assets.pages.map((page) => ({
+      ...pages.map((page) => ({
         ...page,
         html: page.html ? context.loadFile(page.html) : '',
       })),

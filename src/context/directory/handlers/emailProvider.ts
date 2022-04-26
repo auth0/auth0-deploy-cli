@@ -28,7 +28,7 @@ function parse(context: DirectoryContext): ParsedEmailProvider {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  if (context.assets.emailProvider === null) return; // Skip, nothing to dump
+  if (!context.assets.emailProvider) return; // Skip, nothing to dump
 
   const emailProvider: typeof context.assets.emailProvider = (() => {
     const excludedDefaults = context.assets.exclude?.defaults || [];

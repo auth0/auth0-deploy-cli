@@ -1,14 +1,18 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset } from '../../../types';
 
 type ParsedGuardianFactorProviders = {
-  guardianFactorProviders: unknown[];
+  guardianFactorProviders: Asset[] | null;
 };
 
 async function parseAndDump(context: YAMLContext): Promise<ParsedGuardianFactorProviders> {
-  // nothing to do, set default empty
+  const { guardianFactorProviders } = context.assets;
+
+  if (!guardianFactorProviders) return { guardianFactorProviders: null };
+
   return {
-    guardianFactorProviders: [...(context.assets.guardianFactorProviders || [])],
+    guardianFactorProviders,
   };
 }
 

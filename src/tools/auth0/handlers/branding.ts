@@ -72,7 +72,7 @@ export default class BrandingHandler extends DefaultHandler {
     const { branding } = assets;
 
     // quit early if there's no branding to process.
-    if (branding === null) return;
+    if (!branding) return;
 
     // remove templates, we only want top level branding settings for this API call
     const brandingSettings = { ...branding };

@@ -22,7 +22,7 @@ function parse(context: DirectoryContext): ParsedBranding {
     constants.BRANDING_TEMPLATES_DIRECTORY
   );
 
-  if (!existsMustBeDir(brandingTemplatesFolder)) return { branding: context.assets.branding };
+  if (!existsMustBeDir(brandingTemplatesFolder)) return { branding: null };
 
   const templatesDefinitionFiles = getFiles(brandingTemplatesFolder, ['.json']);
   const templates = templatesDefinitionFiles.map((templateDefinitionFile) => {
@@ -45,15 +45,15 @@ function parse(context: DirectoryContext): ParsedBranding {
 async function dump(context: DirectoryContext) {
   const { branding } = context.assets;
 
-  if (branding === null) return;
+  if (!branding) return;
 
   dumpBranding(context);
 
-  if (branding.templates !== null) dumpBrandingTemplates(context);
+  if (!!branding.templates) dumpBrandingTemplates(context);
 }
 
 const dumpBrandingTemplates = ({ filePath, assets }: DirectoryContext): void => {
-  if (assets.branding === null || assets.branding.templates === null) return;
+  if (!assets.branding || !assets.branding.templates) return;
 
   const {
     branding: { templates = [] },

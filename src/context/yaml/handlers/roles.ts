@@ -8,8 +8,12 @@ type ParsedRoles = {
 
 async function parse(context: YAMLContext): Promise<ParsedRoles> {
   // nothing to do, set default empty
+  const { roles } = context.assets;
+
+  if (!roles) return { roles: null };
+
   return {
-    roles: context.assets.roles,
+    roles,
   };
 }
 

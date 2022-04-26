@@ -7,9 +7,13 @@ type ParsedResourceServers = {
 };
 
 async function parse(context: YAMLContext): Promise<ParsedResourceServers> {
-  // nothing to do, set default if empty
+  const { resourceServers } = context.assets;
+
+  if (!resourceServers) {
+    return { resourceServers: null };
+  }
   return {
-    resourceServers: context.assets.resourceServers,
+    resourceServers,
   };
 }
 

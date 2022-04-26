@@ -17,8 +17,8 @@ async function parse(context: YAMLContext): Promise<ParsedClients> {
   const { clients } = context.assets;
   const clientsFolder = path.join(context.basePath, constants.CLIENTS_DIRECTORY);
 
-  if (!clients || !clients.length) {
-    return { clients: context.assets.clients };
+  if (!clients) {
+    return { clients: null };
   }
 
   return {
@@ -43,7 +43,7 @@ async function dump(context: YAMLContext): Promise<ParsedClients> {
   const clientsFolder = path.join(context.basePath, constants.CLIENTS_DIRECTORY);
 
   const { clients } = context.assets;
-  if (clients === null) return { clients: null };
+  if (!clients) return { clients: null };
 
   return {
     clients: [

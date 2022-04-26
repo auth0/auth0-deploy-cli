@@ -7,20 +7,19 @@ import log from '../../../logger';
 
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset } from '../../../types';
 
-type ParsedHooks =
-  | {
-      hooks: unknown[];
-    }
-  | {};
+type ParsedHooks = {
+  hooks: Asset[] | null;
+};
 
 async function parse(context: YAMLContext): Promise<ParsedHooks> {
-  // Load the script file for each hook
-  if (!context.assets.hooks) return {};
+  const { hooks } = context.assets;
+  if (!hooks) return { hooks: null };
 
   return {
     hooks: [
-      ...context.assets.hooks.map((hook) => {
+      ...hooks.map((hook) => {
         if (hook.script) {
           //@ts-ignore TODO: understand why two arguments are passed when context.loadFile only accepts one
           hook.script = context.loadFile(hook.script, constants.HOOKS_DIRECTORY);

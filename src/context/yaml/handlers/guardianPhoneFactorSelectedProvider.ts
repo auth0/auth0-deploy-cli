@@ -8,11 +8,12 @@ type ParsedGuardianPhoneFactorSelectedProvider = {
 async function parseAndDump(
   context: YAMLContext
 ): Promise<ParsedGuardianPhoneFactorSelectedProvider> {
-  // nothing to do, set default empty
+  const { guardianPhoneFactorSelectedProvider } = context.assets;
+
+  if (!guardianPhoneFactorSelectedProvider) return { guardianPhoneFactorSelectedProvider: null };
+
   return {
-    guardianPhoneFactorSelectedProvider: {
-      ...(context.assets.guardianPhoneFactorSelectedProvider || {}),
-    },
+    guardianPhoneFactorSelectedProvider,
   };
 }
 

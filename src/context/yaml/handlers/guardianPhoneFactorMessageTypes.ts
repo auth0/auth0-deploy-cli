@@ -6,9 +6,12 @@ type ParsedGuardianFactorMessageTypes = {
 };
 
 async function parseAndDump(context: YAMLContext): Promise<ParsedGuardianFactorMessageTypes> {
-  // nothing to do, set default if empty
+  const { guardianPhoneFactorMessageTypes } = context.assets;
+
+  if (!guardianPhoneFactorMessageTypes) return { guardianPhoneFactorMessageTypes: null };
+
   return {
-    guardianPhoneFactorMessageTypes: { ...(context.assets.guardianPhoneFactorMessageTypes || {}) },
+    guardianPhoneFactorMessageTypes,
   };
 }
 

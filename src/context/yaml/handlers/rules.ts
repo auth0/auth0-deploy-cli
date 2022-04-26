@@ -6,20 +6,20 @@ import log from '../../../logger';
 
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset } from '../../../types';
 
-type ParsedRules =
-  | {
-      rules: unknown[];
-    }
-  | {};
+type ParsedRules = {
+  rules: Asset[] | null;
+};
 
 async function parse(context: YAMLContext): Promise<ParsedRules> {
-  // Load the script file for each rule
-  if (!context.assets.rules) return {};
+  const { rules } = context.assets;
+
+  if (!rules) return { rules: null };
 
   return {
     rules: [
-      ...context.assets.rules.map((rule) => ({
+      ...rules.map((rule) => ({
         ...rule,
         script: context.loadFile(rule.script),
       })),
