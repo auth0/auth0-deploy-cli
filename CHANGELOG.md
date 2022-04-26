@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Branding support for directory format [#505]
+
+### Fixed
+
+- More comprehensive support for deletions through `AUTH0_ALLOW_DELETE` [#509]
+
 ## [7.9.0] - 2022-04-19
 
 ### Added
