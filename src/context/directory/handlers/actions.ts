@@ -68,7 +68,7 @@ function mapToAction(filePath, action) {
 
 async function dump(context: DirectoryContext): Promise<void> {
   const { actions } = context.assets;
-  if (!actions || actions.length < 1) return;
+  if (!actions) return;
 
   // Create Actions folder
   const actionsFolder = path.join(context.filePath, constants.ACTIONS_DIRECTORY);

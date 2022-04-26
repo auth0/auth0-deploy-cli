@@ -28,7 +28,7 @@ async function parse(context: YAMLContext): Promise<ParsedRules> {
 async function dump(context: YAMLContext): Promise<ParsedRules> {
   let { rules } = context.assets;
 
-  if (!rules || rules.length < 1) {
+  if (!rules) {
     return { rules: null };
   }
 

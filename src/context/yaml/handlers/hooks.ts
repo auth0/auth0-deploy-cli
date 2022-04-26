@@ -34,7 +34,7 @@ async function parse(context: YAMLContext): Promise<ParsedHooks> {
 async function dump(context: YAMLContext): Promise<ParsedHooks> {
   let hooks = context.assets.hooks;
 
-  if (!hooks || hooks.length < 1) {
+  if (!hooks) {
     return { hooks: null };
   }
 

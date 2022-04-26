@@ -27,7 +27,7 @@ async function parse(context: YAMLContext): Promise<ParsedPages> {
 async function dump(context: YAMLContext): Promise<ParsedPages> {
   let pages = context.assets.pages;
 
-  if (!pages || pages.length < 1) {
+  if (!pages) {
     return { pages: null };
   }
 
