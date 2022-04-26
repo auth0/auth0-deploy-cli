@@ -9,7 +9,7 @@ import DirectoryContext from '..';
 import { Asset } from '../../../types';
 
 type ParsedEmailTemplates = {
-  emailTemplates: Asset | null;
+  emailTemplates: Asset[] | null;
 };
 
 function parse(context: DirectoryContext): ParsedEmailTemplates {
@@ -52,7 +52,7 @@ function parse(context: DirectoryContext): ParsedEmailTemplates {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const emailTemplates = [...(context.assets.emailTemplates || [])];
+  const emailTemplates = context.assets.emailTemplates;
 
   if (!emailTemplates) return; // Skip, nothing to dump
 

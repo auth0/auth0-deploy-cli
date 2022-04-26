@@ -63,10 +63,8 @@ const getFormattedOptions = (connection, clients) => {
 async function dump(context: YAMLContext): Promise<ParsedConnections> {
   const { connections, clients } = context.assets;
 
-  // Nothing to do
   if (!connections) return { connections: null };
 
-  // nothing to do, set default if empty
   return {
     connections: connections.map((connection) => {
       const dumpedConnection = {

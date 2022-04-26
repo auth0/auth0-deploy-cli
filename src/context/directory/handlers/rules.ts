@@ -33,7 +33,7 @@ function parse(context: DirectoryContext): ParsedRules {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const rules = [...(context.assets.rules || [])];
+  const { rules } = context.assets;
 
   if (!rules) return; // Skip, nothing to dump
 

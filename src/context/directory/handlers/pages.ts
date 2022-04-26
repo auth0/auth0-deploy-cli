@@ -52,7 +52,7 @@ function parse(context: DirectoryContext): ParsedPages {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const pages = [...(context.assets.pages || [])];
+  const pages = context.assets.pages;
 
   if (!pages) return; // Skip, nothing to dump
 

@@ -26,7 +26,7 @@ function parse(context: DirectoryContext): ParsedLogStreams {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const logStreams = context.assets.logStreams || [];
+  const logStreams = context.assets.logStreams;
 
   if (!logStreams) return; // Skip, nothing to dump
 

@@ -39,9 +39,8 @@ async function parse(context: YAMLContext): Promise<ParsedDatabases> {
 }
 
 async function dump(context: YAMLContext): Promise<ParsedDatabases> {
-  const { databases } = context.assets;
+  const { databases, clients } = context.assets;
 
-  // Nothing to do
   if (!databases) return { databases: null };
 
   const sortCustomScripts = ([name1]: [string, Function], [name2]: [string, Function]): number => {
@@ -54,10 +53,7 @@ async function dump(context: YAMLContext): Promise<ParsedDatabases> {
       ...databases.map((database) => ({
         ...database,
         ...(database.enabled_clients && {
-          enabled_clients: mapClientID2NameSorted(
-            database.enabled_clients,
-            context.assets.clients || []
-          ),
+          enabled_clients: mapClientID2NameSorted(database.enabled_clients, clients || []),
         }),
         options: {
           ...database.options,

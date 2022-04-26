@@ -27,7 +27,6 @@ async function parse(context: YAMLContext): Promise<ParsedTenant> {
   const sessionDurations = sessionDurationsToMinutes({ session_lifetime, idle_session_lifetime });
 
   return {
-    //@ts-ignore
     tenant: {
       ...tenant,
       ...sessionDurations,
@@ -36,7 +35,9 @@ async function parse(context: YAMLContext): Promise<ParsedTenant> {
 }
 
 async function dump(context: YAMLContext): Promise<ParsedTenant> {
-  const tenant = { ...(context.assets.tenant || {}) };
+  const tenant = context.assets.tenant;
+
+  if (!tenant) return { tenant: null };
 
   clearTenantFlags(tenant);
 

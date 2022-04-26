@@ -61,16 +61,16 @@ function mapToAction(filePath, action) {
     code: mapActionCode(filePath, action),
     runtime: action.runtime,
     status: action.status,
-    dependencies: action.dependencies || [],
+    dependencies: action.dependencies,
     secrets: mapSecrets(action.secrets),
     supported_triggers: action.supported_triggers,
     deployed: action.deployed || action.all_changes_deployed,
   };
 }
 
-async function dump(context: DirectoryContext) {
-  const actions = [...(context.assets.actions || [])];
-  if (actions.length < 1) return;
+async function dump(context: DirectoryContext): Promise<void> {
+  const { actions } = context.assets;
+  if (!actions || actions.length < 1) return;
 
   // Create Actions folder
   const actionsFolder = path.join(context.filePath, constants.ACTIONS_DIRECTORY);

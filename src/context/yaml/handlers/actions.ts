@@ -64,8 +64,9 @@ function mapActionCode(basePath: string, action: { code: string; name: string })
 
 async function dump(context: YAMLContext): Promise<ParsedActions> {
   const { actions } = context.assets;
-  //@ts-ignore TODO: need to investigate why returning void here when other handlers do not
-  if (!actions) return; // Nothing to do
+
+  if (!actions) return { actions: null };
+
   return {
     actions: actions.map((action) => ({
       name: action.name,

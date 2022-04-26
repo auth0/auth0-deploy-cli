@@ -7,7 +7,6 @@ type ParsedRulesConfigs = {
 };
 
 async function parse(context: YAMLContext): Promise<ParsedRulesConfigs> {
-  // nothing to do, set default if empty
   const { rulesConfigs } = context.assets;
 
   if (!rulesConfigs) return { rulesConfigs: null };

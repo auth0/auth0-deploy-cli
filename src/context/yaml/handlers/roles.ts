@@ -7,7 +7,6 @@ type ParsedRoles = {
 };
 
 async function parse(context: YAMLContext): Promise<ParsedRoles> {
-  // nothing to do, set default empty
   const { roles } = context.assets;
 
   if (!roles) return { roles: null };
@@ -18,17 +17,18 @@ async function parse(context: YAMLContext): Promise<ParsedRoles> {
 }
 
 async function dump(context: YAMLContext): Promise<ParsedRoles> {
-  // remove empty descriptions
-  return {
-    roles: [
-      ...(context.assets.roles || []).map((role) => {
-        if (role.description === null) {
-          delete role.description;
-        }
+  const { roles } = context.assets;
 
-        return role;
-      }),
-    ],
+  if (!roles) return { roles: null };
+
+  return {
+    roles: roles.map((role) => {
+      if (role.description === null) {
+        delete role.description;
+      }
+
+      return role;
+    }),
   };
 }
 

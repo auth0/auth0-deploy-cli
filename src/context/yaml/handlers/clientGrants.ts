@@ -20,7 +20,6 @@ async function parse(context: YAMLContext): Promise<ParsedClientGrants> {
 async function dump(context: YAMLContext): Promise<ParsedClientGrants> {
   const { clientGrants, clients } = context.assets;
 
-  // Nothing to do
   if (!clientGrants) return { clientGrants: null };
 
   // Convert client_id to the client name for readability

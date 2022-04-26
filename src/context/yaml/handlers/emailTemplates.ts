@@ -26,20 +26,22 @@ async function parse(context: YAMLContext): Promise<ParsedEmailTemplates> {
 }
 
 async function dump(context: YAMLContext): Promise<ParsedEmailTemplates> {
-  let emailTemplates = [...(context.assets.emailTemplates || [])];
+  let emailTemplates = context.assets.emailTemplates;
 
-  if (emailTemplates.length > 0) {
-    // Create Templates folder
-    const templatesFolder = path.join(context.basePath, 'emailTemplates');
-    fs.ensureDirSync(templatesFolder);
-    emailTemplates = emailTemplates.map((template) => {
-      // Dump template to file
-      const templateFile = path.join(templatesFolder, `${template.template}.html`);
-      log.info(`Writing ${templateFile}`);
-      fs.writeFileSync(templateFile, template.body);
-      return { ...template, body: `./emailTemplates/${template.template}.html` };
-    });
+  if (!emailTemplates || emailTemplates.length < 1) {
+    return { emailTemplates: null };
   }
+
+  // Create Templates folder
+  const templatesFolder = path.join(context.basePath, 'emailTemplates');
+  fs.ensureDirSync(templatesFolder);
+  emailTemplates = emailTemplates.map((template) => {
+    // Dump template to file
+    const templateFile = path.join(templatesFolder, `${template.template}.html`);
+    log.info(`Writing ${templateFile}`);
+    fs.writeFileSync(templateFile, template.body);
+    return { ...template, body: `./emailTemplates/${template.template}.html` };
+  });
 
   return { emailTemplates };
 }

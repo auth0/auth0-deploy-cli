@@ -34,25 +34,27 @@ async function parse(context: YAMLContext): Promise<ParsedHooks> {
 }
 
 async function dump(context: YAMLContext): Promise<ParsedHooks> {
-  let hooks = [...(context.assets.hooks || [])];
+  let hooks = context.assets.hooks;
 
-  if (hooks.length > 0) {
-    // Create hooks folder
-    const hooksFolder = path.join(context.basePath, 'hooks');
-    fs.ensureDirSync(hooksFolder);
-
-    hooks = hooks.map((hook) => {
-      // Dump hook code to file
-      // For cases when hook does not have `meta['hook-name']`
-      hook.name = hook.name || hook.id;
-      const codeName = sanitize(`${hook.name}.js`);
-      const codeFile = path.join(hooksFolder, codeName);
-      log.info(`Writing ${codeFile}`);
-      fs.writeFileSync(codeFile, hook.script);
-
-      return { ...hook, script: `./hooks/${codeName}` };
-    });
+  if (!hooks || hooks.length < 1) {
+    return { hooks: null };
   }
+
+  // Create hooks folder
+  const hooksFolder = path.join(context.basePath, 'hooks');
+  fs.ensureDirSync(hooksFolder);
+
+  hooks = hooks.map((hook) => {
+    // Dump hook code to file
+    // For cases when hook does not have `meta['hook-name']`
+    hook.name = hook.name || hook.id;
+    const codeName = sanitize(`${hook.name}.js`);
+    const codeFile = path.join(hooksFolder, codeName);
+    log.info(`Writing ${codeFile}`);
+    fs.writeFileSync(codeFile, hook.script);
+
+    return { ...hook, script: `./hooks/${codeName}` };
+  });
 
   return { hooks };
 }

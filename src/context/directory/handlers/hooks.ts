@@ -35,9 +35,9 @@ function parse(context: DirectoryContext): ParsedHooks {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const hooks = [...(context.assets.hooks || [])];
+  const hooks = context.assets.hooks;
 
-  if (hooks.length < 1) return;
+  if (!hooks || hooks.length < 1) return;
 
   // Create Hooks folder
   const hooksFolder = path.join(context.filePath, constants.HOOKS_DIRECTORY);
