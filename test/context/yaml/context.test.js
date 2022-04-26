@@ -105,8 +105,6 @@ describe('#YAML context validation', () => {
     await context.dump();
     const yaml = jsYaml.load(fs.readFileSync(tenantFile));
 
-    console.log({ testDataDir, yaml });
-
     expect(yaml).to.deep.equal({
       branding: {
         templates: [],
