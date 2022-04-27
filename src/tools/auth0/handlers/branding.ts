@@ -2,6 +2,7 @@ import DefaultHandler from './default';
 import constants from '../../constants';
 import log from '../../../logger';
 import { Asset, Assets } from '../../../types';
+import { detectInsufficientScopeError } from '../../utils';
 
 export const schema = {
   type: 'object',
