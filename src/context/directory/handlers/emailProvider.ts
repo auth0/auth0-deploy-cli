@@ -6,11 +6,9 @@ import { existsMustBeDir, isFile, dumpJSON, loadJSON } from '../../../utils';
 import { emailProviderDefaults } from '../../defaults';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedEmailProvider = {
-  emailProvider: Asset | null;
-};
+type ParsedEmailProvider = ParsedAsset<'emailProvider', Asset>;
 
 function parse(context: DirectoryContext): ParsedEmailProvider {
   const emailsFolder = path.join(context.filePath, constants.EMAIL_TEMPLATES_DIRECTORY);

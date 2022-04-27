@@ -29,7 +29,7 @@ import YAMLContext from '..';
 import { AssetTypes } from '../../../types';
 
 export type YAMLHandler<T> = {
-  dump: (context: YAMLContext) => Promise<T | {}>; //May return empty object to signal
+  dump: (context: YAMLContext) => Promise<T>;
   parse: (context: YAMLContext) => Promise<T>;
 };
 

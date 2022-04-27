@@ -6,11 +6,9 @@ import log from '../../../logger';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedRoles = {
-  roles: Asset[] | null;
-};
+type ParsedRoles = ParsedAsset<'roles', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedRoles {
   const rolesFolder = path.join(context.filePath, constants.ROLES_DIRECTORY);

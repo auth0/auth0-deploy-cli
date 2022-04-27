@@ -6,11 +6,9 @@ import DirectoryContext from '..';
 
 import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
 import log from '../../../logger';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedTriggers = {
-  triggers: Asset[] | null;
-};
+type ParsedTriggers = ParsedAsset<'triggers', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedTriggers {
   const triggersFolder = path.join(context.filePath, constants.TRIGGERS_DIRECTORY);

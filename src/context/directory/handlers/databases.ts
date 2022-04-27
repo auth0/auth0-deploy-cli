@@ -14,11 +14,9 @@ import {
 
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedDatabases = {
-  databases: Asset[] | null;
-};
+type ParsedDatabases = ParsedAsset<'databases', Asset[]>;
 
 type DatabaseMetadata = {
   options?: {

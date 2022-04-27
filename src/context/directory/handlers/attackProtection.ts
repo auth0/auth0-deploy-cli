@@ -4,15 +4,16 @@ import { constants } from '../../../tools';
 import { dumpJSON, existsMustBeDir, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedAttackProtection = {
-  attackProtection: {
+type ParsedAttackProtection = ParsedAsset<
+  'attackProtection',
+  {
     breachedPasswordDetection: Asset;
     bruteForceProtection: Asset;
     suspiciousIpThrottling: Asset;
-  } | null;
-};
+  }
+>;
 
 function attackProtectionFiles(filePath: string): {
   directory: string;

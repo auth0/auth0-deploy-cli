@@ -4,11 +4,9 @@ import { constants } from '../../../tools';
 import { existsMustBeDir, dumpJSON, loadJSON, isFile } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedGuardianFactorMessageTypes = {
-  guardianPhoneFactorMessageTypes: Asset | null;
-};
+type ParsedGuardianFactorMessageTypes = ParsedAsset<'guardianPhoneFactorMessageTypes', Asset>;
 
 function parse(context: DirectoryContext): ParsedGuardianFactorMessageTypes {
   const guardianFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY);

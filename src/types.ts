@@ -251,3 +251,7 @@ export type AssetTypes =
   | 'logStreams';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
+
+export type ParsedAsset<Key extends AssetTypes, T> = {
+  [key in Key]: T | null;
+};

@@ -3,11 +3,9 @@ import path from 'path';
 import log from '../../../logger';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedEmailTemplates = {
-  emailTemplates: Asset[] | null;
-};
+type ParsedEmailTemplates = ParsedAsset<'emailTemplates', Asset[]>;
 
 async function parse(context: YAMLContext): Promise<ParsedEmailTemplates> {
   // Load the HTML file for each page

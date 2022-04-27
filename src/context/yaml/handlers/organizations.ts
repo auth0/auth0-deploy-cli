@@ -1,6 +1,6 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
 type ParsedOrganizations = {
   organizations: Asset[] | null;

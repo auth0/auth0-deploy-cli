@@ -5,11 +5,9 @@ import log from '../../../logger';
 import { isFile, sanitize, clearClientArrays } from '../../../utils';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedClients = {
-  clients: Asset[] | null;
-};
+type ParsedClients = ParsedAsset<'clients', Asset[]>;
 
 async function parse(context: YAMLContext): Promise<ParsedClients> {
   // Load the HTML file for custom_login_page

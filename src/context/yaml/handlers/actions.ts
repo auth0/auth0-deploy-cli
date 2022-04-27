@@ -6,11 +6,9 @@ import { sanitize } from '../../../utils';
 import log from '../../../logger';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedActions = {
-  actions: Asset[] | null;
-};
+type ParsedActions = ParsedAsset<'actions', Asset[]>;
 
 type Secret = { name: string; value: string };
 

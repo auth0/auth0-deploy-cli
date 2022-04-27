@@ -5,11 +5,9 @@ import { constants } from '../../../tools';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedGuardianFactorTemplates = {
-  guardianFactorTemplates: Asset[] | null;
-};
+type ParsedGuardianFactorTemplates = ParsedAsset<'guardianFactorTemplates', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedGuardianFactorTemplates {
   const factorTemplatesFolder = path.join(

@@ -1,9 +1,11 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedGuardianPhoneFactorSelectedProvider = {
-  guardianPhoneFactorSelectedProvider: unknown;
-};
+type ParsedGuardianPhoneFactorSelectedProvider = ParsedAsset<
+  'guardianPhoneFactorSelectedProvider',
+  Asset
+>;
 
 async function parseAndDump(
   context: YAMLContext

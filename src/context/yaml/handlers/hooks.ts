@@ -7,11 +7,9 @@ import log from '../../../logger';
 
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedHooks = {
-  hooks: Asset[] | null;
-};
+type ParsedHooks = ParsedAsset<'hooks', Asset[]>;
 
 async function parse(context: YAMLContext): Promise<ParsedHooks> {
   const { hooks } = context.assets;

@@ -7,11 +7,9 @@ import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../.
 
 import { DirectoryHandler } from './index';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedRules = {
-  rules: Asset[] | null;
-};
+type ParsedRules = ParsedAsset<'rules', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedRules {
   const rulesFolder = path.join(context.filePath, constants.RULES_DIRECTORY);

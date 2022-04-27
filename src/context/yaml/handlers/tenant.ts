@@ -2,11 +2,9 @@ import { clearTenantFlags } from '../../../utils';
 import { sessionDurationsToMinutes } from '../../../sessionDurationsToMinutes';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedTenant = {
-  tenant: Asset | null;
-};
+type ParsedTenant = ParsedAsset<'tenant', Asset>;
 
 async function parse(context: YAMLContext): Promise<ParsedTenant> {
   if (!context.assets.tenant) return { tenant: null };

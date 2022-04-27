@@ -4,11 +4,9 @@ import { constants } from '../../../tools';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedLogStreams = {
-  logStreams: Asset[] | null;
-};
+type ParsedLogStreams = ParsedAsset<'logStreams', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedLogStreams {
   const logStreamsDirectory = path.join(context.filePath, constants.LOG_STREAMS_DIRECTORY);

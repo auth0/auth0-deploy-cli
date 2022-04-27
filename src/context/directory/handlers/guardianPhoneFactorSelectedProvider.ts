@@ -4,11 +4,12 @@ import { constants } from '../../../tools';
 import { existsMustBeDir, dumpJSON, loadJSON, isFile } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedGuardianFactorSelectedProvider = {
-  guardianPhoneFactorSelectedProvider: Asset | null;
-};
+type ParsedGuardianFactorSelectedProvider = ParsedAsset<
+  'guardianPhoneFactorSelectedProvider',
+  Asset
+>;
 
 function parse(context: DirectoryContext): ParsedGuardianFactorSelectedProvider {
   const guardianFolder = path.join(context.filePath, constants.GUARDIAN_DIRECTORY);

@@ -1,9 +1,8 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedGuardianFactorMessageTypes = {
-  guardianPhoneFactorMessageTypes: unknown;
-};
+type ParsedGuardianFactorMessageTypes = ParsedAsset<'guardianPhoneFactorMessageTypes', Asset>;
 
 async function parseAndDump(context: YAMLContext): Promise<ParsedGuardianFactorMessageTypes> {
   const { guardianPhoneFactorMessageTypes } = context.assets;

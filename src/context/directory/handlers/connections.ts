@@ -15,11 +15,9 @@ import {
 } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedConnections = {
-  connections: Asset[] | null;
-};
+type ParsedConnections = ParsedAsset<'connections', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedConnections {
   const connectionDirectory =
