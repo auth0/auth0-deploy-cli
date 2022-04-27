@@ -1,8 +1,6 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
-import log from '../../../logger';
-import { detectInsufficientScopeError } from '../../utils';
 
 export const supportedPages = constants.PAGE_NAMES.filter((p) => p.includes('.json')).map((p) =>
   p.replace('.json', '')
@@ -95,23 +93,13 @@ export default class PagesHandler extends DefaultHandler {
       html: string;
     }[] = [];
 
-    const {
-      data: globalClient,
-      hadSufficientScopes,
-      requiredScopes,
-    } = await detectInsufficientScopeError<Asset[]>(() =>
-      // Login page is handled via the global client
-      this.client.clients.getAll({
-        is_global: true,
-        paginate: true,
-        include_totals: true,
-      })
-    );
-    if (!hadSufficientScopes) {
-      log.warn(`Cannot retrieve ${this.type} due to missing scopes: ${requiredScopes}`);
-    }
-
-    if (!globalClient || !globalClient[0]) {
+    // Login page is handled via the global client
+    const globalClient = await this.client.clients.getAll({
+      is_global: true,
+      paginate: true,
+      include_totals: true,
+    });
+    if (!globalClient[0]) {
       throw new Error('Unable to find global client id when trying to dump the login page');
     }
 
@@ -147,22 +135,10 @@ export default class PagesHandler extends DefaultHandler {
     // Login page is handled via the global client
     const loginPage = pages.find((p) => p.name === 'login');
     if (loginPage !== undefined) {
-      const { hadSufficientScopes, requiredScopes } = await detectInsufficientScopeError<Asset[]>(
-        () => this.updateLoginPage(loginPage)
-      );
-      if (!hadSufficientScopes) {
-        log.warn(`Cannot process ${this.type} due to missing scopes: ${requiredScopes}`);
-        return;
-      }
+      await this.updateLoginPage(loginPage);
     }
 
     // Rest of pages are on tenant level settings
-    const { hadSufficientScopes, requiredScopes } = await detectInsufficientScopeError<Asset[]>(
-      () => this.updatePages(pages.filter((p) => p.name !== 'login'))
-    );
-    if (!hadSufficientScopes) {
-      log.warn(`Cannot process ${this.type} due to missing scopes: ${requiredScopes}`);
-      return;
-    }
+    await this.updatePages(pages.filter((p) => p.name !== 'login'));
   }
 }

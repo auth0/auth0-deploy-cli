@@ -14,10 +14,13 @@ async function parse(context: YAMLContext): Promise<ParsedRulesConfigs> {
   };
 }
 
-async function dump(_context: YAMLContext): Promise<ParsedRulesConfigs> {
-  // do not export rulesConfigs as its values cannot be extracted
+async function dump(context: YAMLContext): Promise<ParsedRulesConfigs> {
+  const { rulesConfigs } = context.assets;
+
+  if (!rulesConfigs) return { rulesConfigs: null };
+
   return {
-    rulesConfigs: [],
+    rulesConfigs: [], // even if they exist, do not export rulesConfigs as its values cannot be extracted
   };
 }
 

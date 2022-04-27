@@ -1,8 +1,6 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
-import { detectInsufficientScopeError } from '../../utils';
-import log from '../../../logger';
 
 const ALLOWED_TRIGGER_IDS = [
   'credentials-exchange',
@@ -97,21 +95,13 @@ export default class HooksHandler extends DefaultHandler {
   }
 
   async processSecrets(hooks): Promise<void> {
+    const allHooks = await this.getType(true);
     const changes: CalculatedChanges = {
       create: [],
       update: [],
       del: [],
       conflicts: [],
     };
-    const {
-      data: allHooks,
-      hadSufficientScopes,
-      requiredScopes,
-    } = await detectInsufficientScopeError<Asset[]>(() => this.getType(true));
-    if (!hadSufficientScopes) {
-      log.warn(`Cannot process ${this.type} due to missing scopes: ${requiredScopes}`);
-      return;
-    }
 
     hooks.forEach((hook) => {
       const current = getCertainHook(allHooks, hook.name, hook.triggerId);
@@ -176,17 +166,7 @@ export default class HooksHandler extends DefaultHandler {
     }
 
     try {
-      const {
-        data: hooks,
-        hadSufficientScopes,
-        requiredScopes,
-      } = await detectInsufficientScopeError<Asset[]>(() =>
-        this.client.hooks.getAll({ paginate: true, include_totals: true })
-      );
-      if (!hadSufficientScopes) {
-        log.warn(`Cannot process ${this.type} due to missing scopes: ${requiredScopes}`);
-        return [];
-      }
+      const hooks = await this.client.hooks.getAll({ paginate: true, include_totals: true });
 
       // hooks.getAll does not return code and secrets, we have to fetch hooks one-by-one
       this.existing = await Promise.all(

@@ -1,7 +1,5 @@
 import { Asset, Assets } from '../../../types';
 import DefaultAPIHandler from './default';
-import { detectInsufficientScopeError } from '../../utils';
-import log from '../../../logger';
 
 export const schema = {
   type: 'array',
@@ -75,24 +73,13 @@ export default class ClientHandler extends DefaultAPIHandler {
     });
   }
 
-  async getType(): Promise<Asset[] | null> {
+  async getType() {
     if (this.existing) return this.existing;
-
-    const { data, hadSufficientScopes, requiredScopes } = await detectInsufficientScopeError<
-      Asset[]
-    >(() =>
-      this.client.clients.getAll({
-        paginate: true,
-        include_totals: true,
-        is_global: false,
-      })
-    );
-    if (!hadSufficientScopes) {
-      log.warn(`Cannot process ${this.type} due to missing scopes: ${requiredScopes}`);
-      return null;
-    }
-
-    this.existing = data;
+    this.existing = await this.client.clients.getAll({
+      paginate: true,
+      include_totals: true,
+      is_global: false,
+    });
     return this.existing;
   }
 }

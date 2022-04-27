@@ -181,13 +181,13 @@ export default class ActionHandler extends DefaultAPIHandler {
       this.existing = await this.client.actions.getAll({ paginate: true });
       return this.existing;
     } catch (err) {
-      if (err.statusCode === 403 || err.statusCode === 404 || err.statusCode === 501) {
-        return [];
+      if (err.statusCode === 404 || err.statusCode === 501) {
+        return null;
       }
 
       if (isActionsDisabled(err)) {
         log.info('Skipping actions because it is not enabled.');
-        return [];
+        return null;
       }
 
       throw err;

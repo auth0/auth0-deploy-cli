@@ -115,16 +115,14 @@ export default class APIHandler {
   async load(): Promise<{ [key: string]: Asset | Asset[] | null }> {
     // Load Asset from Tenant
     const data = await (async () => {
-      const { data, hadSufficientScopes, requiredScopes } = await detectInsufficientScopeError(() =>
-        this.getType().then((data) => {
-          log.info(`Retrieving ${this.type} data from Auth0`);
-          return data;
-        })
+      const { data, hadSufficientScopes, requiredScopes } = await detectInsufficientScopeError(
+        this.getType.bind(this)
       );
       if (!hadSufficientScopes) {
         log.warn(`Cannot retrieve ${this.type} due to missing scopes: ${requiredScopes}`);
-        return data;
+        return null;
       }
+      log.info(`Retrieving ${this.type} data from Auth0`);
       return data;
     })();
 
@@ -147,11 +145,7 @@ export default class APIHandler {
       };
     }
 
-    //const { data, hadSufficientScopes, requiredScopes } = await detectInsufficientScopeError(() =>
-    const resp = await detectInsufficientScopeError(() =>
-      this.getType()
-    );
-    const existing = await this.load();
+    const existing = await this.getType();
 
     // Figure out what needs to be updated vs created
     return calculateChanges({
@@ -159,7 +153,7 @@ export default class APIHandler {
       assets: typeAssets,
       allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
       //@ts-ignore TODO: investigate what happens when `existing` is null
-      existing: existing[this.type],
+      existing,
       identifiers: this.identifiers,
     });
   }
