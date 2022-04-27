@@ -138,7 +138,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       paginate: true,
       include_totals: true,
     });
-    const formatted = assets.connections.map((connection) => ({
+    const formatted = connections.map((connection) => ({
       ...connection,
       ...this.getFormattedOptions(connection, clients),
       enabled_clients: getEnabledClients(assets, connection, existingConnections, clients),

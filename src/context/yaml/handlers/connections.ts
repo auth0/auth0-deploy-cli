@@ -12,19 +12,16 @@ import {
 } from '../../../utils';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedConnections = {
-  connections: unknown[];
-};
+type ParsedConnections = ParsedAsset<'connections', Asset[]>;
 
 async function parse(context: YAMLContext): Promise<ParsedConnections> {
-  // Load the HTML file for email connections
-
   const { connections } = context.assets;
   const connectionsFolder = path.join(context.basePath, constants.CONNECTIONS_DIRECTORY);
 
-  if (!connections || !connections.length) {
-    return { connections: context.assets.connections };
+  if (!connections) {
+    return { connections: null };
   }
 
   return {
@@ -61,23 +58,18 @@ const getFormattedOptions = (connection, clients) => {
   }
 };
 
-async function dump(context: YAMLContext): Promise<ParsedConnections | {}> {
-  const { connections } = context.assets;
+async function dump(context: YAMLContext): Promise<ParsedConnections> {
+  const { connections, clients } = context.assets;
 
-  // Nothing to do
-  if (!connections) return {};
+  if (!connections) return { connections: null };
 
-  // nothing to do, set default if empty
   return {
     connections: connections.map((connection) => {
       const dumpedConnection = {
         ...connection,
-        ...getFormattedOptions(connection, context.assets.clients),
+        ...getFormattedOptions(connection, clients),
         ...(connection.enabled_clients && {
-          enabled_clients: mapClientID2NameSorted(
-            connection.enabled_clients,
-            context.assets.clients
-          ),
+          enabled_clients: mapClientID2NameSorted(connection.enabled_clients, clients || []),
         }),
       };
 

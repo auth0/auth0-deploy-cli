@@ -66,7 +66,7 @@ export default class ClientGrantsHandler extends DefaultHandler {
     const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
 
     // Convert clients by name to the id
-    const formatted = assets.clientGrants.map((clientGrant) => {
+    const formatted = clientGrants.map((clientGrant) => {
       const grant = { ...clientGrant };
       const found = clients.find((c) => c.name === grant.client_id);
       if (found) grant.client_id = found.client_id;

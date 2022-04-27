@@ -5,15 +5,14 @@ import log from '../../../logger';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedOrganizations = {
-  organizations: unknown[] | undefined;
-};
+type ParsedOrganizations = ParsedAsset<'organizations', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedOrganizations {
   const organizationsFolder = path.join(context.filePath, 'organizations');
 
-  if (!existsMustBeDir(organizationsFolder)) return { organizations: undefined }; // Skip
+  if (!existsMustBeDir(organizationsFolder)) return { organizations: null }; // Skip
 
   const files = getFiles(organizationsFolder, ['.json']);
 

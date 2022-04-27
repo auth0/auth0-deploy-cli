@@ -26,14 +26,16 @@ import branding from './branding';
 import logStreams from './logStreams';
 
 import DirectoryContext from '..';
-import { AssetTypes } from '../../../types';
+import { AssetTypes, Asset } from '../../../types';
 
 export type DirectoryHandler<T> = {
   dump: (context: DirectoryContext) => void;
   parse: (context: DirectoryContext) => T;
 };
 
-const directoryHandlers: { [key in AssetTypes]: DirectoryHandler<{ [key: string]: unknown }> } = {
+const directoryHandlers: {
+  [key in AssetTypes]: DirectoryHandler<{ [key: string]: Asset | Asset[] | null }>;
+} = {
   rules,
   rulesConfigs,
   hooks,

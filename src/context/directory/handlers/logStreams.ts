@@ -4,15 +4,13 @@ import { constants } from '../../../tools';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset } from '../../../types';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedLogStreams = {
-  logStreams: Asset[] | undefined;
-};
+type ParsedLogStreams = ParsedAsset<'logStreams', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedLogStreams {
   const logStreamsDirectory = path.join(context.filePath, constants.LOG_STREAMS_DIRECTORY);
-  if (!existsMustBeDir(logStreamsDirectory)) return { logStreams: undefined }; // Skip
+  if (!existsMustBeDir(logStreamsDirectory)) return { logStreams: null }; // Skip
 
   const foundFiles = getFiles(logStreamsDirectory, ['.json']);
 
@@ -26,7 +24,7 @@ function parse(context: DirectoryContext): ParsedLogStreams {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const logStreams = context.assets.logStreams || [];
+  const logStreams = context.assets.logStreams;
 
   if (!logStreams) return; // Skip, nothing to dump
 

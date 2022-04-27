@@ -6,14 +6,13 @@ import log from '../../../logger';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedPages = {
-  pages: unknown[] | undefined;
-};
+type ParsedPages = ParsedAsset<'pages', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedPages {
   const pagesFolder = path.join(context.filePath, constants.PAGES_DIRECTORY);
-  if (!existsMustBeDir(pagesFolder)) return { pages: undefined }; // Skip
+  if (!existsMustBeDir(pagesFolder)) return { pages: null }; // Skip
 
   const files: string[] = getFiles(pagesFolder, ['.json', '.html']);
 
@@ -30,7 +29,7 @@ function parse(context: DirectoryContext): ParsedPages {
     return acc;
   }, {});
 
-  const pages = Object.values(sorted).flatMap(({ meta, html }): unknown[] => {
+  const pages = Object.values(sorted).flatMap(({ meta, html }): Asset[] => {
     if (!meta) {
       log.warn(`Skipping pages file ${html} as missing the corresponding '.json' file`);
       return [];
@@ -51,7 +50,7 @@ function parse(context: DirectoryContext): ParsedPages {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const pages = [...(context.assets.pages || [])];
+  const pages = context.assets.pages;
 
   if (!pages) return; // Skip, nothing to dump
 

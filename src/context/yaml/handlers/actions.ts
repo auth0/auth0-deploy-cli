@@ -6,10 +6,9 @@ import { sanitize } from '../../../utils';
 import log from '../../../logger';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedActions = {
-  actions: unknown[] | undefined;
-};
+type ParsedActions = ParsedAsset<'actions', Asset[]>;
 
 type Secret = { name: string; value: string };
 
@@ -22,17 +21,18 @@ function parseCode(context: YAMLContext, code: string) {
 
 async function parse(context: YAMLContext): Promise<ParsedActions> {
   // Load the script file for each action
-  //@ts-ignore TODO: understand if empty array is intentionally being returned
-  if (!context.assets.actions) return [];
-  const actions = {
+  const { actions } = context.assets;
+
+  if (!actions) return { actions: null };
+
+  return {
     actions: [
-      ...context.assets.actions.map((action) => ({
+      ...actions.map((action) => ({
         ...action,
         code: parseCode(context, action.code),
       })),
     ],
   };
-  return actions;
 }
 
 function mapSecrets(secrets: { name: string; value: string }[]): Secret[] {
@@ -62,8 +62,9 @@ function mapActionCode(basePath: string, action: { code: string; name: string })
 
 async function dump(context: YAMLContext): Promise<ParsedActions> {
   const { actions } = context.assets;
-  //@ts-ignore TODO: need to investigate why returning void here when other handlers do not
-  if (!actions) return; // Nothing to do
+
+  if (!actions) return { actions: null };
+
   return {
     actions: actions.map((action) => ({
       name: action.name,

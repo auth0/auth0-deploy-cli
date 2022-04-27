@@ -1,27 +1,23 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedResourceServers = {
-  resourceServers: unknown[];
-};
+type ParsedResourceServers = ParsedAsset<'resourceServers', Asset[]>;
 
-async function parse(context: YAMLContext): Promise<ParsedResourceServers> {
-  // nothing to do, set default if empty
+async function dumpAndParse(context: YAMLContext): Promise<ParsedResourceServers> {
+  const { resourceServers } = context.assets;
+
+  if (!resourceServers) {
+    return { resourceServers: null };
+  }
   return {
-    resourceServers: context.assets.resourceServers,
-  };
-}
-
-async function dump(context: YAMLContext): Promise<ParsedResourceServers> {
-  // nothing to do, set default if empty
-  return {
-    resourceServers: [...(context.assets.resourceServers || [])],
+    resourceServers,
   };
 }
 
 const resourceServersHandler: YAMLHandler<ParsedResourceServers> = {
-  parse,
-  dump,
+  parse: dumpAndParse,
+  dump: dumpAndParse,
 };
 
 export default resourceServersHandler;
