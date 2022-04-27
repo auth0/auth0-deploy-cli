@@ -447,6 +447,7 @@ describe('#filterExcluded', () => {
       const { hadSufficientScopes, data, requiredScopes } =
         await utils.detectInsufficientScopeError(() => {
           didCallbackGetCalled = true;
+          // eslint-disable-next-line no-throw-literal
           throw {
             statusCode: 403,
             message: `Insufficient scope, expected any of: ${requiredScope}`,

@@ -122,7 +122,6 @@ export default class YAMLContext {
               });
             }
           } catch (err) {
-            console.log({err})
             log.debug(err.stack);
             throw new Error(`Problem exporting ${name}`);
           }
