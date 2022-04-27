@@ -115,9 +115,9 @@ export default class APIHandler {
   async load(): Promise<{ [key: string]: Asset | Asset[] | null }> {
     // Load Asset from Tenant
     const data = await (async () => {
-      const { data, hadSufficientScopes, requiredScopes } = await detectInsufficientScopeError(
-        this.getType.bind(this)
-      );
+      const { data, hadSufficientScopes, requiredScopes } = await detectInsufficientScopeError<
+        Asset | Asset[]
+      >(this.getType.bind(this));
       if (!hadSufficientScopes) {
         log.warn(`Cannot retrieve ${this.type} due to missing scopes: ${requiredScopes}`);
         return null;
@@ -126,7 +126,6 @@ export default class APIHandler {
       return data;
     })();
 
-    //@ts-ignore
     this.existing = obfuscateSensitiveValues(data, this.sensitiveFieldsToObfuscate);
 
     return { [this.type]: this.existing };
