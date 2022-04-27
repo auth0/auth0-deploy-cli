@@ -185,12 +185,13 @@ export default class RolesHandler extends DefaultHandler {
     if (!roles) return;
     // Gets roles from destination tenant
     const existing = await this.getType();
+
     const changes = calculateChanges({
       handler: this,
       assets: roles,
       existing,
       identifiers: ['id', 'name'],
-      allowDelete: false, //TODO: actually pass in correct allowDelete value
+      allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
     });
     log.debug(
       `Start processChanges for roles [delete:${changes.del.length}] [update:${changes.update.length}], [create:${changes.create.length}]`

@@ -1,24 +1,20 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedMigrations = {
-  migrations: unknown[];
-};
+type ParsedMigrations = ParsedAsset<'migrations', Asset[]>;
 
-async function parse(context: YAMLContext): Promise<ParsedMigrations> {
+async function parseAndDump(context: YAMLContext): Promise<ParsedMigrations> {
   const { migrations } = context.assets;
+
+  if (!migrations) return { migrations: null };
+
   return { migrations };
 }
 
-async function dump(context: YAMLContext): Promise<ParsedMigrations> {
-  const { migrations } = context.assets;
-
-  return { migrations: migrations || {} };
-}
-
 const migrationsHandler: YAMLHandler<ParsedMigrations> = {
-  parse,
-  dump,
+  parse: parseAndDump,
+  dump: parseAndDump,
 };
 
 export default migrationsHandler;

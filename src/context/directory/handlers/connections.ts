@@ -15,16 +15,15 @@ import {
 } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedConnections = {
-  connections: unknown[] | undefined;
-};
+type ParsedConnections = ParsedAsset<'connections', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedConnections {
   const connectionDirectory =
     context.config.AUTH0_CONNECTIONS_DIRECTORY || constants.CONNECTIONS_DIRECTORY;
   const connectionsFolder = path.join(context.filePath, connectionDirectory);
-  if (!existsMustBeDir(connectionsFolder)) return { connections: undefined }; // Skip
+  if (!existsMustBeDir(connectionsFolder)) return { connections: null }; // Skip
 
   const foundFiles = getFiles(connectionsFolder, ['.json']);
 
@@ -54,7 +53,7 @@ function parse(context: DirectoryContext): ParsedConnections {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const { connections } = context.assets;
+  const { connections, clientsOrig } = context.assets;
 
   if (!connections) return; // Skip, nothing to dump
 
@@ -66,10 +65,7 @@ async function dump(context: DirectoryContext): Promise<void> {
     const dumpedConnection = {
       ...connection,
       ...(connection.enabled_clients && {
-        enabled_clients: mapClientID2NameSorted(
-          connection.enabled_clients,
-          context.assets.clientsOrig
-        ),
+        enabled_clients: mapClientID2NameSorted(connection.enabled_clients, clientsOrig || []),
       }),
     };
 

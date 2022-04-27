@@ -4,16 +4,16 @@ import { constants } from '../../../tools';
 import { dumpJSON, existsMustBeDir, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedAttackProtection = {
-  attackProtection:
-    | {
-        breachedPasswordDetection: unknown;
-        bruteForceProtection: unknown;
-        suspiciousIpThrottling: unknown;
-      }
-    | undefined;
-};
+type ParsedAttackProtection = ParsedAsset<
+  'attackProtection',
+  {
+    breachedPasswordDetection: Asset;
+    bruteForceProtection: Asset;
+    suspiciousIpThrottling: Asset;
+  }
+>;
 
 function attackProtectionFiles(filePath: string): {
   directory: string;
@@ -36,7 +36,7 @@ function parse(context: DirectoryContext): ParsedAttackProtection {
 
   if (!existsMustBeDir(files.directory)) {
     return {
-      attackProtection: undefined,
+      attackProtection: null,
     };
   }
 
@@ -55,6 +55,8 @@ function parse(context: DirectoryContext): ParsedAttackProtection {
 
 async function dump(context: DirectoryContext): Promise<void> {
   const { attackProtection } = context.assets;
+
+  if (!attackProtection) return;
 
   const files = attackProtectionFiles(context.filePath);
   fs.ensureDirSync(files.directory);

@@ -5,10 +5,9 @@ import { constants } from '../../../tools';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedGuardianFactorProviders = {
-  guardianFactorProviders: unknown[] | undefined;
-};
+type ParsedGuardianFactorProviders = ParsedAsset<'guardianFactorProviders', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedGuardianFactorProviders {
   const factorProvidersFolder = path.join(
@@ -16,7 +15,7 @@ function parse(context: DirectoryContext): ParsedGuardianFactorProviders {
     constants.GUARDIAN_DIRECTORY,
     constants.GUARDIAN_PROVIDERS_DIRECTORY
   );
-  if (!existsMustBeDir(factorProvidersFolder)) return { guardianFactorProviders: undefined }; // Skip
+  if (!existsMustBeDir(factorProvidersFolder)) return { guardianFactorProviders: null }; // Skip
 
   const foundFiles = getFiles(factorProvidersFolder, ['.json']);
 

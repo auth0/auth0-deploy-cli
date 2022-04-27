@@ -6,14 +6,13 @@ import log from '../../../logger';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedEmailTemplates = {
-  emailTemplates: unknown | undefined;
-};
+type ParsedEmailTemplates = ParsedAsset<'emailTemplates', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedEmailTemplates {
   const emailsFolder = path.join(context.filePath, constants.EMAIL_TEMPLATES_DIRECTORY);
-  if (!existsMustBeDir(emailsFolder)) return { emailTemplates: undefined }; // Skip
+  if (!existsMustBeDir(emailsFolder)) return { emailTemplates: null }; // Skip
 
   const files = getFiles(emailsFolder, ['.json', '.html']).filter(
     (f) => path.basename(f) !== 'provider.json'
@@ -51,7 +50,7 @@ function parse(context: DirectoryContext): ParsedEmailTemplates {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const emailTemplates = [...(context.assets.emailTemplates || [])];
+  const emailTemplates = context.assets.emailTemplates;
 
   if (!emailTemplates) return; // Skip, nothing to dump
 

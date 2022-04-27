@@ -4,14 +4,13 @@ import { constants } from '../../../tools';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedResourceServers = {
-  resourceServers: unknown[] | undefined;
-};
+type ParsedResourceServers = ParsedAsset<'resourceServers', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedResourceServers {
   const resourceServersFolder = path.join(context.filePath, constants.RESOURCE_SERVERS_DIRECTORY);
-  if (!existsMustBeDir(resourceServersFolder)) return { resourceServers: undefined }; // Skip
+  if (!existsMustBeDir(resourceServersFolder)) return { resourceServers: null }; // Skip
 
   const foundFiles = getFiles(resourceServersFolder, ['.json']);
 

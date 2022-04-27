@@ -71,6 +71,7 @@ describe('#logStreams handler', () => {
       let didUpdateFunctionGetCalled = false;
 
       const handler = new logStreamsHandler({
+        config: () => {},
         client: auth0ApiClientMock,
         functions: {
           update: ({ id }, data) => {

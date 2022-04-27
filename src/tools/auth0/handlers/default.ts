@@ -157,6 +157,7 @@ export default class APIHandler {
     return calculateChanges({
       handler: this,
       assets: typeAssets,
+      allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
       //@ts-ignore TODO: investigate what happens when `existing` is null
       existing: existing[this.type],
       identifiers: this.identifiers,

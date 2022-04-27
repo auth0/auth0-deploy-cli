@@ -1,18 +1,21 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedGuardianPhoneFactorSelectedProvider = {
-  guardianPhoneFactorSelectedProvider: unknown;
-};
+type ParsedGuardianPhoneFactorSelectedProvider = ParsedAsset<
+  'guardianPhoneFactorSelectedProvider',
+  Asset
+>;
 
 async function parseAndDump(
   context: YAMLContext
 ): Promise<ParsedGuardianPhoneFactorSelectedProvider> {
-  // nothing to do, set default empty
+  const { guardianPhoneFactorSelectedProvider } = context.assets;
+
+  if (!guardianPhoneFactorSelectedProvider) return { guardianPhoneFactorSelectedProvider: null };
+
   return {
-    guardianPhoneFactorSelectedProvider: {
-      ...(context.assets.guardianPhoneFactorSelectedProvider || {}),
-    },
+    guardianPhoneFactorSelectedProvider,
   };
 }
 

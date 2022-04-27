@@ -6,14 +6,13 @@ import log from '../../../logger';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedRoles = {
-  roles: unknown[] | undefined;
-};
+type ParsedRoles = ParsedAsset<'roles', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedRoles {
   const rolesFolder = path.join(context.filePath, constants.ROLES_DIRECTORY);
-  if (!existsMustBeDir(rolesFolder)) return { roles: undefined }; // Skip
+  if (!existsMustBeDir(rolesFolder)) return { roles: null }; // Skip
 
   const files = getFiles(rolesFolder, ['.json']);
 

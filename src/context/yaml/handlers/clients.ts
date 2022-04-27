@@ -5,10 +5,9 @@ import log from '../../../logger';
 import { isFile, sanitize, clearClientArrays } from '../../../utils';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedClients = {
-  clients: unknown[];
-};
+type ParsedClients = ParsedAsset<'clients', Asset[]>;
 
 async function parse(context: YAMLContext): Promise<ParsedClients> {
   // Load the HTML file for custom_login_page
@@ -16,8 +15,8 @@ async function parse(context: YAMLContext): Promise<ParsedClients> {
   const { clients } = context.assets;
   const clientsFolder = path.join(context.basePath, constants.CLIENTS_DIRECTORY);
 
-  if (!clients || !clients.length) {
-    return { clients: context.assets.clients };
+  if (!clients) {
+    return { clients: null };
   }
 
   return {
@@ -41,9 +40,12 @@ async function dump(context: YAMLContext): Promise<ParsedClients> {
   // Save custom_login_page to a separate html file
   const clientsFolder = path.join(context.basePath, constants.CLIENTS_DIRECTORY);
 
+  const { clients } = context.assets;
+  if (!clients) return { clients: null };
+
   return {
     clients: [
-      ...context.assets.clients.map((client) => {
+      ...clients.map((client) => {
         if (client.custom_login_page) {
           const clientName = sanitize(client.name);
           const html = client.custom_login_page;

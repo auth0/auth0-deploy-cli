@@ -18,15 +18,15 @@ describe('#YAML context validation', () => {
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
-    expect(context.assets.rules).to.deep.equal(undefined);
-    expect(context.assets.databases).to.deep.equal(undefined);
-    expect(context.assets.pages).to.deep.equal(undefined);
-    expect(context.assets.clients).to.deep.equal(undefined);
-    expect(context.assets.resourceServers).to.deep.equal(undefined);
-    expect(context.assets.clientGrants).to.deep.equal(undefined);
-    expect(context.assets.connections).to.deep.equal(undefined);
-    expect(context.assets.rulesConfigs).to.deep.equal(undefined);
-    expect(context.assets.organizations).to.deep.equal(undefined);
+    expect(context.assets.rules).to.deep.equal(null);
+    expect(context.assets.databases).to.deep.equal(null);
+    expect(context.assets.pages).to.deep.equal(null);
+    expect(context.assets.clients).to.deep.equal(null);
+    expect(context.assets.resourceServers).to.deep.equal(null);
+    expect(context.assets.clientGrants).to.deep.equal(null);
+    expect(context.assets.connections).to.deep.equal(null);
+    expect(context.assets.rulesConfigs).to.deep.equal(null);
+    expect(context.assets.organizations).to.deep.equal(null);
   });
 
   it('should load excludes', async () => {
@@ -101,10 +101,10 @@ describe('#YAML context validation', () => {
     const dir = path.resolve(testDataDir, 'yaml', 'dump');
     cleanThenMkdir(dir);
     const tenantFile = path.join(dir, 'tenant.yml');
-    const config = { AUTH0_INPUT_FILE: tenantFile };
-    const context = new Context(config, mockMgmtClient());
+    const context = new Context({ AUTH0_INPUT_FILE: tenantFile }, mockMgmtClient());
     await context.dump();
     const yaml = jsYaml.load(fs.readFileSync(tenantFile));
+
     expect(yaml).to.deep.equal({
       branding: {
         templates: [],

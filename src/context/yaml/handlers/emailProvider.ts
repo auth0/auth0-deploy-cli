@@ -1,29 +1,35 @@
 import { emailProviderDefaults } from '../../defaults';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedEmailProvider = {
-  emailProvider: unknown;
-};
+type ParsedEmailProvider = ParsedAsset<'emailProvider', Asset>;
 
 async function parse(context: YAMLContext): Promise<ParsedEmailProvider> {
-  // nothing to do, set default if empty
+  const { emailProvider } = context.assets;
+
+  if (!emailProvider) return { emailProvider: null };
+
   return {
-    emailProvider: { ...(context.assets.emailProvider || {}) },
+    emailProvider,
   };
 }
 
 async function dump(context: YAMLContext): Promise<ParsedEmailProvider> {
-  let { emailProvider } = context.assets;
+  if (!context.assets.emailProvider) return { emailProvider: null };
 
-  const excludedDefaults = context.assets.exclude?.defaults || [];
-  if (emailProvider && !excludedDefaults.includes('emailProvider')) {
-    // Add placeholder for credentials as they cannot be exported
-    emailProvider = emailProviderDefaults(emailProvider);
-  }
+  const emailProvider = (() => {
+    const { emailProvider } = context.assets;
+    const excludedDefaults = context.assets.exclude?.defaults || [];
+    if (emailProvider && !excludedDefaults.includes('emailProvider')) {
+      // Add placeholder for credentials as they cannot be exported
+      return emailProviderDefaults(emailProvider);
+    }
+    return emailProvider;
+  })();
 
   return {
-    emailProvider: emailProvider || {},
+    emailProvider,
   };
 }
 

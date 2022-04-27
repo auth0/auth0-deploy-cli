@@ -6,14 +6,13 @@ import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../.
 import log from '../../../logger';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedHooks = {
-  hooks: unknown[] | undefined;
-};
+type ParsedHooks = ParsedAsset<'hooks', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedHooks {
   const hooksFolder = path.join(context.filePath, constants.HOOKS_DIRECTORY);
-  if (!existsMustBeDir(hooksFolder)) return { hooks: undefined }; // Skip
+  if (!existsMustBeDir(hooksFolder)) return { hooks: null }; // Skip
 
   const files = getFiles(hooksFolder, ['.json']);
 
@@ -34,9 +33,9 @@ function parse(context: DirectoryContext): ParsedHooks {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const hooks = [...(context.assets.hooks || [])];
+  const hooks = context.assets.hooks;
 
-  if (hooks.length < 1) return;
+  if (!hooks) return;
 
   // Create Hooks folder
   const hooksFolder = path.join(context.filePath, constants.HOOKS_DIRECTORY);

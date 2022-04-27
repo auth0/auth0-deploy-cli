@@ -254,7 +254,7 @@ export default class OrganizationsHandler extends DefaultHandler {
       assets: organizations,
       existing,
       identifiers: ['id', 'name'],
-      allowDelete: false, //TODO: actually pass in correct allowDelete value
+      allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
     });
 
     log.debug(

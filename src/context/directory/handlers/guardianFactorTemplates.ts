@@ -5,10 +5,9 @@ import { constants } from '../../../tools';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedGuardianFactorTemplates = {
-  guardianFactorTemplates: unknown[] | undefined;
-};
+type ParsedGuardianFactorTemplates = ParsedAsset<'guardianFactorTemplates', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedGuardianFactorTemplates {
   const factorTemplatesFolder = path.join(
@@ -16,7 +15,7 @@ function parse(context: DirectoryContext): ParsedGuardianFactorTemplates {
     constants.GUARDIAN_DIRECTORY,
     constants.GUARDIAN_TEMPLATES_DIRECTORY
   );
-  if (!existsMustBeDir(factorTemplatesFolder)) return { guardianFactorTemplates: undefined }; // Skip
+  if (!existsMustBeDir(factorTemplatesFolder)) return { guardianFactorTemplates: null }; // Skip
 
   const foundFiles = getFiles(factorTemplatesFolder, ['.json']);
 

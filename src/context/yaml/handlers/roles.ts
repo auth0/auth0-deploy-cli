@@ -1,29 +1,32 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedRoles = {
-  roles: unknown[];
-};
+type ParsedRoles = ParsedAsset<'roles', Asset[]>;
 
 async function parse(context: YAMLContext): Promise<ParsedRoles> {
-  // nothing to do, set default empty
+  const { roles } = context.assets;
+
+  if (!roles) return { roles: null };
+
   return {
-    roles: context.assets.roles,
+    roles,
   };
 }
 
 async function dump(context: YAMLContext): Promise<ParsedRoles> {
-  // remove empty descriptions
-  return {
-    roles: [
-      ...(context.assets.roles || []).map((role) => {
-        if (role.description === null) {
-          delete role.description;
-        }
+  const { roles } = context.assets;
 
-        return role;
-      }),
-    ],
+  if (!roles) return { roles: null };
+
+  return {
+    roles: roles.map((role) => {
+      if (role.description === null) {
+        delete role.description;
+      }
+
+      return role;
+    }),
   };
 }
 

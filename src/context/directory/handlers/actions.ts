@@ -7,14 +7,13 @@ import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
 import log from '../../../logger';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedActions = {
-  actions: unknown[] | undefined;
-};
+type ParsedActions = ParsedAsset<'actions', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedActions {
   const actionsFolder = path.join(context.filePath, constants.ACTIONS_DIRECTORY);
-  if (!existsMustBeDir(actionsFolder)) return { actions: undefined }; // Skip
+  if (!existsMustBeDir(actionsFolder)) return { actions: null }; // Skip
   const files = getFiles(actionsFolder, ['.json']);
   const actions = files.map((file) => {
     const action = { ...loadJSON(file, context.mappings) };
@@ -60,16 +59,16 @@ function mapToAction(filePath, action) {
     code: mapActionCode(filePath, action),
     runtime: action.runtime,
     status: action.status,
-    dependencies: action.dependencies || [],
+    dependencies: action.dependencies,
     secrets: mapSecrets(action.secrets),
     supported_triggers: action.supported_triggers,
     deployed: action.deployed || action.all_changes_deployed,
   };
 }
 
-async function dump(context: DirectoryContext) {
-  const actions = [...(context.assets.actions || [])];
-  if (actions.length < 1) return;
+async function dump(context: DirectoryContext): Promise<void> {
+  const { actions } = context.assets;
+  if (!actions) return;
 
   // Create Actions folder
   const actionsFolder = path.join(context.filePath, constants.ACTIONS_DIRECTORY);
