@@ -421,63 +421,65 @@ describe('#filterExcluded', () => {
       );
     });
   });
+});
 
-  describe('#detectInsufficientScopeError', () => {
-    it('should execute passed  callback', async () => {
-      let didCallbackGetCalled = false;
+describe('#detectInsufficientScopeError', () => {
+  it('should execute passed callback if no error detected', async () => {
+    let didCallbackGetCalled = false;
 
-      const mockReturnData = 'expect this to be returned';
+    const mockReturnData = 'expect this to be returned';
 
-      const { requiredScopes, data, hadSufficientScopes } =
-        await utils.detectInsufficientScopeError(() => {
-          didCallbackGetCalled = true;
-          return mockReturnData;
-        });
-
-      expect(data).to.equal(mockReturnData);
-      expect(hadSufficientScopes).to.equal(true);
-      expect(requiredScopes).to.deep.equal([]);
-      expect(didCallbackGetCalled).to.equal(true);
-    });
-
-    it('should detect insufficient scope error', async () => {
-      let didCallbackGetCalled = false;
-
-      const requiredScope = 'read:clients';
-      const { hadSufficientScopes, data, requiredScopes } =
-        await utils.detectInsufficientScopeError(() => {
-          didCallbackGetCalled = true;
-          // eslint-disable-next-line no-throw-literal
-          throw {
-            statusCode: 403,
-            message: `Insufficient scope, expected any of: ${requiredScope}`,
-          };
-        });
-
-      expect(hadSufficientScopes).to.equal(false);
-      expect(requiredScopes).to.deep.equal([requiredScope]);
-      expect(data).to.equal(null);
-      expect(didCallbackGetCalled).to.equal(true);
-    });
-
-    it('should throw non-insufficient scope errors', async () => {
-      let didThrow = false;
-
-      const mockError = {
-        statusCode: 403,
-        message: 'Some other type of access issue',
-      };
-
-      try {
-        await utils.detectInsufficientScopeError(() => {
-          throw mockError;
-        });
-      } catch (error) {
-        didThrow = true;
-        expect(error).to.equal(mockError);
+    const { requiredScopes, data, hadSufficientScopes } = await utils.detectInsufficientScopeError(
+      () => {
+        didCallbackGetCalled = true;
+        return mockReturnData;
       }
+    );
 
-      expect(didThrow).to.equal(true);
-    });
+    expect(data).to.equal(mockReturnData);
+    expect(hadSufficientScopes).to.equal(true);
+    expect(requiredScopes).to.deep.equal([]);
+    expect(didCallbackGetCalled).to.equal(true);
+  });
+
+  it('should detect insufficient scope error', async () => {
+    let didCallbackGetCalled = false;
+
+    const requiredScope = 'read:clients';
+    const { hadSufficientScopes, data, requiredScopes } = await utils.detectInsufficientScopeError(
+      () => {
+        didCallbackGetCalled = true;
+        // eslint-disable-next-line no-throw-literal
+        throw {
+          statusCode: 403,
+          message: `Insufficient scope, expected any of: ${requiredScope}`,
+        };
+      }
+    );
+
+    expect(hadSufficientScopes).to.equal(false);
+    expect(requiredScopes).to.deep.equal([requiredScope]);
+    expect(data).to.equal(null);
+    expect(didCallbackGetCalled).to.equal(true);
+  });
+
+  it('should bubble-up error if not an insufficient scope error', async () => {
+    let didThrow = false;
+
+    const mockError = {
+      statusCode: 403,
+      message: 'Some other type of access issue',
+    };
+
+    try {
+      await utils.detectInsufficientScopeError(() => {
+        throw mockError;
+      });
+    } catch (error) {
+      didThrow = true;
+      expect(error).to.equal(mockError);
+    }
+
+    expect(didThrow).to.equal(true);
   });
 });
