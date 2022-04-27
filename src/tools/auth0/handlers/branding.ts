@@ -61,6 +61,7 @@ export default class BrandingHandler extends DefaultHandler {
       return branding;
     } catch (err) {
       log.debug(`Error calling branding API, ${err.message}, status code: ${err.statusCode}`);
+      if (err.statusCode === 403) return branding;
       if (err.statusCode === 404) return branding;
       if (err.statusCode === 501) return branding;
       throw err;

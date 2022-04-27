@@ -211,7 +211,7 @@ describe('#actions handler', () => {
 
       const handler = new actions.default({ client: auth0, config });
       const data = await handler.getType();
-      expect(data).to.deep.equal([]);
+      expect(data).to.deep.equal(null);
     });
 
     it('should return an empty array for 404 status code', async () => {
@@ -228,7 +228,7 @@ describe('#actions handler', () => {
 
       const handler = new actions.default({ client: auth0, config });
       const data = await handler.getType();
-      expect(data).to.deep.equal([]);
+      expect(data).to.deep.equal(null);
     });
 
     it('should return an empty array when the feature flag is disabled', async () => {
@@ -252,7 +252,7 @@ describe('#actions handler', () => {
 
       const handler = new actions.default({ client: auth0, config });
       const data = await handler.getType();
-      expect(data).to.deep.equal([]);
+      expect(data).to.deep.equal(null);
     });
 
     it('should throw an error for all other failed requests', async () => {
