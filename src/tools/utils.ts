@@ -202,3 +202,33 @@ export const stripObfuscatedFieldsFromPayload = (
 
   return newAsset;
 };
+
+export const detectInsufficientScopeError = async <T>(
+  fn: Function
+): Promise<
+  | {
+      hadSufficientScopes: true;
+      data: T;
+      requiredScopes: [];
+    }
+  | { hadSufficientScopes: false; requiredScopes: string[]; data: null }
+> => {
+  try {
+    const data = await fn();
+    return {
+      hadSufficientScopes: true,
+      data,
+      requiredScopes: [],
+    };
+  } catch (err) {
+    if (err.statusCode === 403 && err.message.includes('Insufficient scope')) {
+      const requiredScopes = err.message?.split('Insufficient scope, expected any of: ')?.slice(1);
+      return {
+        hadSufficientScopes: false,
+        requiredScopes,
+        data: null,
+      };
+    }
+    throw err;
+  }
+};

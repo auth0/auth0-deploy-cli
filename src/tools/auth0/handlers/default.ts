@@ -6,6 +6,7 @@ import {
   duplicateItems,
   obfuscateSensitiveValues,
   stripObfuscatedFieldsFromPayload,
+  detectInsufficientScopeError,
 } from '../../utils';
 import log from '../../../logger';
 import { calculateChanges } from '../../calculateChanges';
@@ -113,9 +114,17 @@ export default class APIHandler {
 
   async load(): Promise<{ [key: string]: Asset | Asset[] | null }> {
     // Load Asset from Tenant
-    log.info(`Retrieving ${this.type} data from Auth0`);
-
-    const data = await this.getType();
+    const data = await (async () => {
+      const { data, hadSufficientScopes, requiredScopes } = await detectInsufficientScopeError<
+        Asset | Asset[]
+      >(this.getType.bind(this));
+      if (!hadSufficientScopes) {
+        log.warn(`Cannot retrieve ${this.type} due to missing scopes: ${requiredScopes}`);
+        return null;
+      }
+      log.info(`Retrieving ${this.type} data from Auth0`);
+      return data;
+    })();
 
     this.existing = obfuscateSensitiveValues(data, this.sensitiveFieldsToObfuscate);
 

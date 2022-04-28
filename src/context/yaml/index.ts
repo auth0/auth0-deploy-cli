@@ -113,8 +113,8 @@ export default class YAMLContext {
         .map(async ([name, handler]) => {
           try {
             const data = await handler.dump(this);
-            if (!!data) {
-              log.info(`Exporting ${name}`);
+            if (data) {
+              if (data[name] !== null) log.info(`Exporting ${name}`);
               Object.entries(data).forEach(([k, v]) => {
                 this.assets[k] = Array.isArray(v)
                   ? v.map(formatResults).sort(recordsSorter)
