@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Intelligent scope detection, will skip resources when insufficient scope provided to designated application [#517]
+
+### Fixed
+
+- Inconsistencies between resource handlers with respect to empty, null and undefined values [#512]
+
 ## [7.10.0] - 2022-04-26
 
 ### Added
