@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.11.0] - 2022-04-28
+
 ### Added
 
 - Intelligent scope detection, will skip resources when insufficient scope provided to designated application [#517]
@@ -710,7 +712,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#504]: https://github.com/auth0/auth0-deploy-cli/issues/504
 [#505]: https://github.com/auth0/auth0-deploy-cli/issues/505
 [#509]: https://github.com/auth0/auth0-deploy-cli/issues/509
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.10.0...HEAD
+[#512]: https://github.com/auth0/auth0-deploy-cli/issues/512
+[#517]: https://github.com/auth0/auth0-deploy-cli/issues/517
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.11.0...HEAD
+[7.11.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.10.0...v7.11.0
 [7.10.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.9.0...v7.10.0
 [7.9.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.8.0...v7.9.0
 [7.8.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.7.1...v7.8.0
