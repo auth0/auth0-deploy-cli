@@ -202,6 +202,7 @@ export type Assets = Partial<{
   migrations: Asset[] | null;
   organizations: Asset[] | null;
   pages: Asset[] | null;
+  prompts: { customText: { [key: string]: Asset[] } } | null;
   resourceServers: Asset[] | null;
   roles: Asset[] | null;
   rules: Asset[] | null;
@@ -248,7 +249,8 @@ export type AssetTypes =
   | 'triggers'
   | 'attackProtection'
   | 'branding'
-  | 'logStreams';
+  | 'logStreams'
+  | 'prompts';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 

@@ -91,6 +91,7 @@ export default class DirectoryContext {
           try {
             await handler.dump(this);
           } catch (err) {
+            console.log({ err });
             log.debug(err.stack);
             throw new Error(`Problem exporting ${name}`);
           }
