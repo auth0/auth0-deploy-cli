@@ -1,12 +1,11 @@
 import { expect } from 'chai';
 import { PromisePoolExecutor } from 'promise-pool-executor';
-import auth0ApiHandlers from '../../../../src/tools/auth0/handlers';
 import customDomainsHandler from '../../../../src/tools/auth0/handlers/customDomains';
 import { Auth0APIClient } from '../../../../src/types';
 
 const customDomains = [
   {
-    domain: 'auth.will-vedder12.com',
+    domain: 'auth.test-domain.com',
     primary: true,
     status: 'pending_verification',
     type: 'auth0_managed_certs',
@@ -14,7 +13,7 @@ const customDomains = [
       methods: [
         {
           name: 'cname',
-          record: 'will-vedder-cd-q8r7eqawrhd4o1oh.edge.tenants.us.auth0.com',
+          record: 'test-domain-555.edge.tenants.us.auth0.com',
         },
       ],
     },
