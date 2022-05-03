@@ -184,6 +184,7 @@ export type Assets = Partial<{
   clients: Asset[] | null;
   clientGrants: Asset[] | null;
   connections: Asset[] | null;
+  customDomains: Asset[] | null;
   databases: Asset[] | null;
   emailProvider: Asset | null;
   emailTemplates: Asset[] | null;
@@ -248,7 +249,8 @@ export type AssetTypes =
   | 'triggers'
   | 'attackProtection'
   | 'branding'
-  | 'logStreams';
+  | 'logStreams'
+  | 'customDomains';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 

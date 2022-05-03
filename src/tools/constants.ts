@@ -167,6 +167,7 @@ const constants = {
   ],
   SUPPORTED_BRANDING_TEMPLATES: [UNIVERSAL_LOGIN_TEMPLATE],
   LOG_STREAMS_DIRECTORY: 'log-streams',
+  CUSTOM_DOMAINS_DIRECTORY: 'custom-domains',
 };
 
 export default constants;
