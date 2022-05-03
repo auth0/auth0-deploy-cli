@@ -204,6 +204,7 @@ describe('#YAML context validation', () => {
         suspiciousIpThrottling: {},
       },
       logStreams: [],
+      customDomains: [],
     });
   });
 
@@ -311,6 +312,7 @@ describe('#YAML context validation', () => {
         suspiciousIpThrottling: {},
       },
       logStreams: [],
+      customDomains: [],
     });
   });
 
@@ -419,6 +421,7 @@ describe('#YAML context validation', () => {
         suspiciousIpThrottling: {},
       },
       logStreams: [],
+      customDomains: [],
     });
   });
 
