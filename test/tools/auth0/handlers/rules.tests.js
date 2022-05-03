@@ -152,6 +152,64 @@ describe('#rules handler', () => {
       expect(checker(newRulesOrder, reorderedRulesOrder)).to.be.equal(false);
     });
 
+    it('should allow for a temporary rules re-ordering if conflicts of order between config and remote', async () => {
+      let didUpdateGetCalled = false;
+
+      const auth0 = {
+        rules: {
+          getAll: () => [
+            {
+              id: 'rul_1',
+              name: 'Order 1 on tenant',
+              order: 1,
+            },
+            {
+              id: 'rul_2',
+              name: 'Order 2 on tenant',
+              order: 2,
+            },
+          ],
+          update: (args) => {
+            didUpdateGetCalled = true;
+            return new Promise(() => args);
+          },
+          delete: (args) => new Promise(() => args),
+          create: (args) => new Promise(() => args),
+        },
+        pool,
+      };
+
+      const handler = new rules.default({ client: auth0, config });
+      const calcChangesFn = Object.getPrototypeOf(handler).calcChanges;
+      const localRulesConfig = [
+        {
+          name: 'Order 1 on config',
+          order: 1,
+        },
+        {
+          name: 'Order 2 on config',
+          order: 2,
+        },
+      ];
+
+      const calculatedChanges = await calcChangesFn.apply(
+        handler,
+        [{ rules: localRulesConfig }],
+        true
+      );
+
+      expect(calculatedChanges.reOrder).to.deep.equal([
+        { id: 'rul_1', name: 'Order 1 on tenant', order: 3 },
+        { id: 'rul_2', name: 'Order 2 on tenant', order: 4 },
+      ]);
+
+      const processChangesFn = Object.getPrototypeOf(handler).processChanges;
+
+      await processChangesFn.apply(handler, [{ rules: localRulesConfig }], true);
+
+      expect(didUpdateGetCalled).to.equal(true);
+    });
+
     it('should not allow change stage', async () => {
       const auth0 = {
         rules: {

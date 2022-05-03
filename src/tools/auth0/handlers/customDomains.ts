@@ -7,25 +7,20 @@ export const schema = {
     type: 'object',
     properties: {
       custom_domain_id: { type: 'string' },
+      custom_client_ip_header: {
+        type: 'string',
+        nullable: true,
+        enum: ['true-client-ip', 'cf-connecting-ip', 'x-forwarded-for', null],
+      },
       domain: { type: 'string' },
       primary: { type: 'boolean' },
       status: { type: 'string', enum: ['pending_verification', 'ready', 'disabled', 'pending'] },
       type: { type: 'string', enum: ['auth0_managed_certs', 'self_managed_certs'] },
       verifications: { type: 'object' },
     },
-    required: ['domain'],
+    required: ['domain', 'type'],
   },
 };
-
-// type CustomDomain = {
-//   type: 'eventbridge' | 'eventgrid' | 'datadog' | 'http' | 'splunk' | 'sumo';
-//   name: string;
-//   id: string;
-//   status: 'active' | 'suspended' | 'paused';
-//   sink?: {
-//     [key: string]: string | boolean;
-//   };
-// };
 
 export default class CustomDomainsHadnler extends DefaultAPIHandler {
   existing: Asset[] | null;
@@ -36,19 +31,18 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
       type: 'customDomains',
       id: 'custom_domain_id',
       identifiers: ['domain'],
-      stripCreateFields: ['verification'],
+      stripCreateFields: ['status', 'primary', 'verification'],
       functions: {
         //@ts-ignore
         delete: (args) => {
-          console.log({ args });
-          return new Promise(() => 5);
+          return this.client.customDomains.delete({ id: args.custom_domain_id });
         },
       },
     });
   }
 
   objString(item: Asset): string {
-    return super.objString(item.name);
+    return super.objString(item.domain);
   }
 
   async getType(): Promise<Asset> {
@@ -65,12 +59,19 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
 
   async processChanges(assets: Assets): Promise<void> {
     const { customDomains } = assets;
-    // Do nothing if not set
+
     if (!customDomains) return;
-    // Figure out what needs to be updated vs created
     const changes = await this.calcChanges(assets).then((changes) => {
       const changesWithoutUpdates = {
         ...changes,
+        create: changes.create.map((customDomainToCreate) => {
+          const newCustomDomain = { ...customDomainToCreate };
+          if (customDomainToCreate.custom_client_ip_header === null) {
+            delete newCustomDomain.custom_client_ip_header;
+          }
+
+          return newCustomDomain;
+        }),
         delete: changes.del.map((deleteToMake) => {
           const deleteWithSDKCompatibleID = {
             ...deleteToMake,
@@ -79,7 +80,7 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
           delete deleteWithSDKCompatibleID['custom_domain_id'];
           return deleteWithSDKCompatibleID;
         }),
-        update: [],
+        update: [], //Do not perform custom domain updates because not supported by SDK
       };
       return changesWithoutUpdates;
     });
