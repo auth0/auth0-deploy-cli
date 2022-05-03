@@ -22,22 +22,23 @@ const customDomains = [
   },
 ];
 
-const auth0ApiClientMock = {
-  customDomains: {
-    getAll: async () => customDomains,
-    create: async () => customDomains[0],
-    update: async () => {},
-    delete: async () => {},
-  },
-  pool: new PromisePoolExecutor({
-    concurrencyLimit: 3,
-    frequencyLimit: 8,
-    frequencyWindow: 1000, // 1 sec
-  }),
-};
-
 describe('#customDomains handler', () => {
   it('should get custom domains', async () => {
+    const auth0ApiClientMock = {
+      customDomains: {
+        getAll: async () => customDomains,
+        create: async () => customDomains[0],
+        update: async () => {},
+        delete: async () => {},
+      },
+      pool: new PromisePoolExecutor({
+        concurrencyLimit: 3,
+        frequencyLimit: 8,
+        frequencyWindow: 1000, // 1 sec
+      }),
+    };
+
+    //@ts-ignore
     const handler = new customDomainsHandler({ client: auth0ApiClientMock });
     const data = await handler.load();
 
