@@ -165,6 +165,70 @@ describe('#actions handler', () => {
       await stageFn.apply(handler, [{ actions: [action] }]);
     });
 
+    it('newly-created action should get deployed', async () => {
+      let didDeployGetCalled = false;
+
+      const version = {
+        code: 'action-code',
+        dependencies: [],
+        id: 'version-id',
+        runtime: 'node12',
+        secrets: [],
+      };
+
+      const actionId = 'new-action-id';
+      const action = {
+        name: 'action-test',
+        deployed: true,
+        supported_triggers: [
+          {
+            id: 'post-login',
+            version: 'v1',
+          },
+        ],
+      };
+
+      const auth0 = {
+        actions: {
+          get: (params) => {
+            expect(params.id).to.equal(actionId);
+            return Promise.resolve({ ...action, id: actionId });
+          },
+          create: (data) => Promise.resolve({ ...data, id: actionId }),
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          getAll: () => {
+            if (!auth0.getAllCalled) {
+              auth0.getAllCalled = true;
+              return Promise.resolve([]);
+            }
+
+            return Promise.resolve([
+              {
+                name: action.name,
+                supported_triggers: action.supported_triggers,
+                id: actionId,
+              },
+            ]);
+          },
+          createVersion: () => Promise.resolve(version),
+          deploy: (data) => {
+            expect(data).to.deep.equal({ id: actionId })
+            didDeployGetCalled = true;
+          },
+        },
+        pool,
+        getAllCalled: false,
+      };
+
+      const handler = new actions.default({ client: auth0, config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ actions: [action] }]);
+
+      expect(didDeployGetCalled).to.equal(true);
+    });
+
     it('should get actions', async () => {
       const code = 'action-code';
 

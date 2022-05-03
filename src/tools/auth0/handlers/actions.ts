@@ -3,6 +3,7 @@ import DefaultAPIHandler, { order } from './default';
 import log from '../../../logger';
 import { areArraysEquals } from '../../utils';
 import { Asset } from '../../../types';
+import { showCompletionScript } from 'yargs';
 
 const MAX_ACTION_DEPLOY_RETRY_ATTEMPTS = 60; // 60 * 2s => 2 min timeout
 
@@ -215,7 +216,7 @@ export default class ActionHandler extends DefaultAPIHandler {
       ...changes.create
         .filter((action) => action.deployed)
         .map((actionWithoutId) => {
-          // Supplement the just-created actions with their IDs
+          // Add IDs to just-created actions
           const actionId = postProcessedActions?.find((postProcessedAction) => {
             return postProcessedAction.name === actionWithoutId.name;
           })?.id;
