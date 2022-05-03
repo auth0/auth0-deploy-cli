@@ -95,7 +95,7 @@ describe('#customDomains handler', () => {
     const auth0ApiClientMock = {
       customDomains: {
         getAll: async () => customDomains,
-        create: async (args) => {
+        create: async () => {
           didCreateFunctionGetCalled = true;
         },
         update: async () => {
@@ -134,7 +134,7 @@ describe('#customDomains handler', () => {
     const auth0ApiClientMock = {
       customDomains: {
         getAll: async () => customDomains,
-        create: async (args) => {
+        create: async () => {
           didCreateFunctionGetCalled = true;
         },
         update: async () => {
@@ -173,7 +173,7 @@ describe('#customDomains handler', () => {
     const auth0ApiClientMock = {
       customDomains: {
         getAll: async () => [],
-        create: async (args) => {
+        create: async () => {
           didCreateFunctionGetCalled = true;
         },
         update: async () => {
