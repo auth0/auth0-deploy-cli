@@ -213,7 +213,7 @@ describe('#actions handler', () => {
           },
           createVersion: () => Promise.resolve(version),
           deploy: (data) => {
-            expect(data).to.deep.equal({ id: actionId })
+            expect(data).to.deep.equal({ id: actionId });
             didDeployGetCalled = true;
           },
         },
