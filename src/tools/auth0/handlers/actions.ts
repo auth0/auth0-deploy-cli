@@ -4,7 +4,7 @@ import log from '../../../logger';
 import { areArraysEquals } from '../../utils';
 import { Asset } from '../../../types';
 
-const MAX_ACTION_DEPLOY_RETRY = 60;
+const MAX_ACTION_DEPLOY_RETRY_ATTEMPTS = 60; // 60 * 2s => 2 min timeout
 
 // With this schema, we can only validate property types but not valid properties on per type basis
 export const schema = {
@@ -131,10 +131,10 @@ export default class ActionHandler extends DefaultAPIHandler {
           log.info(`[${this.type}]: Waiting for build to complete ${this.objString(action)}`);
           action.retry_count = 1;
         }
-        if (action.retry_count > MAX_ACTION_DEPLOY_RETRY) {
+        if (action.retry_count > MAX_ACTION_DEPLOY_RETRY_ATTEMPTS) {
           throw err;
         }
-        await sleep(1000);
+        await sleep(2000);
         action.retry_count += 1;
         await this.deployAction(action);
       } else {
@@ -203,11 +203,33 @@ export default class ActionHandler extends DefaultAPIHandler {
     const changes = await this.calcChanges(assets);
 
     await super.processChanges(assets, changes);
+
+    const postProcessedActions = await (async () => {
+      this.existing = null; //Clear the cache
+      const actions = await this.getType();
+      return actions;
+    })();
+
     // Deploy actions
     const deployActions = [
-      ...changes.create.filter((action) => action.deployed),
+      ...changes.create
+        .filter((action) => action.deployed)
+        .map((actionWithoutId) => {
+          // Supplement the just-created actions with their IDs
+          const actionId = postProcessedActions?.find((postProcessedAction) => {
+            return postProcessedAction.name === actionWithoutId.name;
+          })?.id;
+
+          const actionWithId = {
+            ...actionWithoutId,
+            id: actionId,
+          };
+          return actionWithId;
+        })
+        .filter((action) => !!action.id),
       ...changes.update.filter((action) => action.deployed),
     ];
+
     await this.deployActions(deployActions);
   }
 }
