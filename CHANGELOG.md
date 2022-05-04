@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.11.1] - 2022-05-04
+
 ### Fixed
 
 - Deployment of newly-created actions always failing due to "A draft must be in the 'built' state" error [#524]
@@ -719,7 +721,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#509]: https://github.com/auth0/auth0-deploy-cli/issues/509
 [#512]: https://github.com/auth0/auth0-deploy-cli/issues/512
 [#517]: https://github.com/auth0/auth0-deploy-cli/issues/517
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.11.0...HEAD
+[#524]: https://github.com/auth0/auth0-deploy-cli/issues/524
+[#526]: https://github.com/auth0/auth0-deploy-cli/issues/526
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.11.1...HEAD
+[7.11.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.11.0...v7.11.1
 [7.11.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.10.0...v7.11.0
 [7.10.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.9.0...v7.10.0
 [7.9.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.8.0...v7.9.0
