@@ -1,12 +1,20 @@
 import path from 'path';
 import { ensureDirSync } from 'fs-extra';
 import { constants } from '../../../tools';
-import { existsMustBeDir, dumpJSON, loadJSON, getFiles } from '../../../utils';
+import { existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset, ParsedAsset } from '../../../types';
+import { Asset, ParsedAsset, Language } from '../../../types';
 
-type ParsedPrompts = ParsedAsset<'prompts', Asset & { customText: { [key: string]: Asset[] } }>;
+type ParsedPrompts = ParsedAsset<
+  'prompts',
+  {
+    universal_login_experience: 'new' | 'classic';
+    identifier_first: boolean;
+    webauthn_platform_first_factor: boolean;
+    customText: { [key in Language]: Asset[] };
+  }
+>;
 
 const getPromptsDirectory = (filePath: string) => {
   return path.join(filePath, constants.PROMPTS_DIRECTORY);

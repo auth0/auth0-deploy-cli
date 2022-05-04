@@ -1,10 +1,9 @@
-//@ts-nocheck because prompts haven't been fully implemented in this codebase yet
 import DefaultHandler from './default';
-import { Asset, Assets } from '../../../types';
+import { Assets, Language } from '../../../types';
 
 export const schema = { type: 'object' };
 
-const promptTypes = [
+const promptScreenTypes = [
   'login',
   'login-id',
   'login-password',
@@ -30,16 +29,35 @@ const promptTypes = [
   'organizations',
   'invitation',
   'common',
-];
+] as const;
 
-type PromptSettings = {
+// convert namesArr into string literal union type
+export type PromptScreenTypes = typeof promptScreenTypes[number];
+
+export type PromptSettings = {
   universal_login_experience?: 'new' | 'classic';
   webauthn_platform_first_factor?: boolean;
   identifier_first?: boolean;
-  customText?: [];
 };
+
+export type PromptsCustomText = {
+  [key in PromptScreenTypes]: {
+    [key: string]: string;
+  };
+};
+
+export type Prompts = Partial<
+  PromptSettings & {
+    customText: AllPromptsByLanguage;
+  }
+>;
+
+type AllPromptsByLanguage = Partial<{
+  [key in Language]: Partial<PromptsCustomText>;
+}>;
+
 export default class PromptsHandler extends DefaultHandler {
-  existing: PromptSettings[];
+  existing: Prompts;
 
   constructor(options: DefaultHandler) {
     super({
@@ -48,35 +66,32 @@ export default class PromptsHandler extends DefaultHandler {
     });
   }
 
-  async getType(): Promise<PromptSettings | null> {
-    try {
-      const promptsSettings = await this.client.prompts.getSettings();
-
-      const customText = await this.getCustomTextSettings();
-
-      return {
-        ...promptsSettings,
-        customText,
-      };
-    } catch (err) {
-      if (err.statusCode === 404) return null;
-      if (err.statusCode === 501) return null;
-
-      throw err;
-    }
+  objString({ customText }: Prompts): string {
+    return `Prompts settings${!!customText ? ' and prompts custom text' : ''}`;
   }
 
-  async getCustomTextSettings(): Promise<{ [key: string]: Asset[] }> {
+  async getType(): Promise<Prompts | null> {
+    const promptsSettings = await this.client.prompts.getSettings();
+
+    const customText = await this.getCustomTextSettings();
+
+    return {
+      ...promptsSettings,
+      customText,
+    };
+  }
+
+  async getCustomTextSettings(): Promise<AllPromptsByLanguage> {
     const supportedLanguages = await this.client.tenant
       .getSettings()
       .then(({ enabled_locales }) => enabled_locales);
 
-    return await Promise.all(
+    const data = await Promise.all(
       supportedLanguages.flatMap((language) => {
-        return promptTypes.map((promptType) => {
+        return promptScreenTypes.map((screenType) => {
           return this.client.prompts
             .getCustomTextByLanguage({
-              prompt: promptType,
+              prompt: screenType,
               language,
             })
             .then((customTextData) => {
@@ -88,11 +103,16 @@ export default class PromptsHandler extends DefaultHandler {
             });
         });
       })
-    ).then((customTextData: { language: string; [key: string]: Asset }[]) => {
+    ).then((customTextData) => {
       return customTextData
-        .filter((customTextData) => customTextData !== null)
-        .reduce((acc: { [key: string]: { [key: string]: Object } }, customTextItem) => {
+        .filter((customTextData) => {
+          return customTextData !== null;
+        })
+        .reduce((acc: AllPromptsByLanguage, customTextItem) => {
+          if (customTextItem?.language === undefined) return acc;
+
           const { language, ...customTextSettings } = customTextItem;
+
           return {
             ...acc,
             [language]: !!acc[language]
@@ -101,32 +121,50 @@ export default class PromptsHandler extends DefaultHandler {
           };
         }, {});
     });
+
+    return data;
   }
 
   async processChanges(assets: Assets): Promise<void> {
     const { prompts } = assets;
-    // Do nothing if not set
-    if (!prompts || !Object.keys(prompts).length) return;
+
+    if (!prompts) return;
 
     const { customText, ...promptSettings } = prompts;
 
     await this.client.prompts.updateSettings({}, promptSettings);
 
-    const changes = calculateChanges({
-      handler: this,
-      assets: customText,
-      existing: await this.getCustomTextSettings(),
-      identifiers: ['id', 'name'],
-      allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
-    });
+    await this.updateCustomTextSettings(customText);
 
     this.updated += 1;
     this.didUpdate(prompts);
   }
 
-  async updateCustomTextSettings(customText): Promise<void> {
-    const supportedLanguages = await this.client.tenant
-      .getSettings()
-      .then(({ enabled_locales }) => enabled_locales);
+  async updateCustomTextSettings(customText: Prompts['customText']): Promise<void> {
+    /*
+      Note: only updates and creates are supported, deletes are not currently calculated
+    */
+    if (!customText) return;
+
+    await Promise.all(
+      Object.keys(customText).flatMap((language: Language) => {
+        const languageScreenTypes = customText[language];
+
+        if (!languageScreenTypes) return [];
+
+        return Object.keys(languageScreenTypes).map((prompt: PromptScreenTypes) => {
+          const body = languageScreenTypes[prompt];
+          return this.client.prompts.updateCustomTextByLanguage({
+            prompt,
+            language,
+            //@ts-ignore
+            body:
+              {
+                [prompt]: languageScreenTypes[prompt],
+              } || {},
+          });
+        });
+      })
+    );
   }
 }

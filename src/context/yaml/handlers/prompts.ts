@@ -1,8 +1,9 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset, ParsedAsset } from '../../../types';
+import { ParsedAsset } from '../../../types';
+import { Prompts } from '../../../tools/auth0/handlers/prompts';
 
-type ParsedPrompts = ParsedAsset<'prompts', Asset>;
+type ParsedPrompts = ParsedAsset<'prompts', Prompts>;
 
 async function parseAndDump(context: YAMLContext): Promise<ParsedPrompts> {
   const { prompts } = context.assets;
