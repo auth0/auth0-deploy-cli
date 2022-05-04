@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Deployment of newly-created actions always failing due to "A draft must be in the 'built' state" error [#524]
+- Undefined `updateRule` Auth0 SDK alias replaced with operational `rules.update` [#526]
+
 ## [7.11.0] - 2022-04-28
 
 ### Added
