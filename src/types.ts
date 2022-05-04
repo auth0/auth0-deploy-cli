@@ -128,7 +128,6 @@ export type BaseAuth0APIClient = {
   triggers: APIClientBaseFunctions & {
     getTriggerBindings: () => Promise<Asset>;
   };
-  updateRule: (arg0: { id: string }, arg1: Asset) => Promise<Asset>;
 }; // TODO: replace with a more accurate representation of the Auth0APIClient type
 
 export type Auth0APIClient = BaseAuth0APIClient & {
