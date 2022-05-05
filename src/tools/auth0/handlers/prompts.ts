@@ -142,7 +142,7 @@ export default class PromptsHandler extends DefaultHandler {
 
   async updateCustomTextSettings(customText: Prompts['customText']): Promise<void> {
     /*
-      Note: only updates and creates are supported, deletes are not currently calculated
+      Note: deletes are not currently supported
     */
     if (!customText) return;
 
