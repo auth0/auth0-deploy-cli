@@ -65,9 +65,9 @@ async function dump(context: DirectoryContext): Promise<void> {
   dumpJSON(customTextFile, customText);
 }
 
-const logStreamsHandler: DirectoryHandler<ParsedPrompts> = {
+const promptsHandler: DirectoryHandler<ParsedPrompts> = {
   parse,
   dump,
 };
 
-export default logStreamsHandler;
+export default promptsHandler;

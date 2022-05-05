@@ -196,6 +196,7 @@ describe('#YAML context validation', () => {
       tenant: {
         default_directory: 'users',
         friendly_name: 'Test',
+        enabled_locales: ['en'],
       },
       attackProtection: {
         breachedPasswordDetection: {},
@@ -203,6 +204,9 @@ describe('#YAML context validation', () => {
         suspiciousIpThrottling: {},
       },
       logStreams: [],
+      prompts: {
+        customText: {},
+      },
     });
   });
 
@@ -302,6 +306,7 @@ describe('#YAML context validation', () => {
       tenant: {
         default_directory: 'users',
         friendly_name: 'Test',
+        enabled_locales: ['en'],
       },
       attackProtection: {
         breachedPasswordDetection: {},
@@ -412,6 +417,7 @@ describe('#YAML context validation', () => {
       tenant: {
         default_directory: 'users',
         friendly_name: 'Test',
+        enabled_locales: ['en'],
       },
       attackProtection: {
         breachedPasswordDetection: {},
