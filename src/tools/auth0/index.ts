@@ -59,7 +59,6 @@ export default class Auth0 {
           ...((await stageFn.apply(handler, [this.assets])) || {}),
         };
       } catch (err) {
-        console.log({ err });
         err.type = handler.type;
         err.stage = stage;
         throw err;
