@@ -52,7 +52,7 @@ export type Prompts = Partial<
   }
 >;
 
-type AllPromptsByLanguage = Partial<{
+export type AllPromptsByLanguage = Partial<{
   [key in Language]: Partial<PromptsCustomText>;
 }>;
 

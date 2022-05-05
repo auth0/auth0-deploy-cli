@@ -4,37 +4,46 @@ import { constants } from '../../../tools';
 import { existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset, ParsedAsset, Language } from '../../../types';
+import { ParsedAsset } from '../../../types';
+import {
+  Prompts,
+  PromptSettings,
+  AllPromptsByLanguage,
+} from '../../../tools/auth0/handlers/prompts';
 
-type ParsedPrompts = ParsedAsset<
-  'prompts',
-  {
-    universal_login_experience: 'new' | 'classic';
-    identifier_first: boolean;
-    webauthn_platform_first_factor: boolean;
-    customText: { [key in Language]: Asset[] };
-  }
->;
+type ParsedPrompts = ParsedAsset<'prompts', Prompts>;
 
 const getPromptsDirectory = (filePath: string) => {
   return path.join(filePath, constants.PROMPTS_DIRECTORY);
 };
 
-const getPromptsFile = (promptsDirectory: string) => {
+const getPromptsSettingsFile = (promptsDirectory: string) => {
   return path.join(promptsDirectory, 'prompts.json');
+};
+
+const getCustomTextFile = (promptsDirectory: string) => {
+  return path.join(promptsDirectory, 'custom-text.json');
 };
 
 function parse(context: DirectoryContext): ParsedPrompts {
   const promptsDirectory = getPromptsDirectory(context.filePath);
   if (!existsMustBeDir(promptsDirectory)) return { prompts: null }; // Skip
 
-  const prompts = (() => {
-    const promptsFile = getPromptsFile(promptsDirectory);
-    return loadJSON(promptsFile, context.mappings);
+  const promptsSettings = (() => {
+    const promptsSettingsFile = getPromptsSettingsFile(promptsDirectory);
+    return loadJSON(promptsSettingsFile, context.mappings) as PromptSettings;
+  })();
+
+  const customText = (() => {
+    const customTextFile = getCustomTextFile(promptsDirectory);
+    return loadJSON(customTextFile, context.mappings) as AllPromptsByLanguage;
   })();
 
   return {
-    prompts,
+    prompts: {
+      ...promptsSettings,
+      customText,
+    },
   };
 }
 
@@ -43,9 +52,17 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   if (!prompts) return;
 
+  const { customText, ...promptsSettings } = prompts;
+
   const promptsDirectory = getPromptsDirectory(context.filePath);
   ensureDirSync(promptsDirectory);
-  dumpJSON(getPromptsFile(promptsDirectory), prompts);
+
+  const promptsSettingsFile = getPromptsSettingsFile(promptsDirectory);
+  dumpJSON(promptsSettingsFile, promptsSettings);
+
+  if (!customText) return;
+  const customTextFile = getCustomTextFile(promptsDirectory);
+  dumpJSON(customTextFile, customText);
 }
 
 const logStreamsHandler: DirectoryHandler<ParsedPrompts> = {
