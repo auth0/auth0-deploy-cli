@@ -1,5 +1,6 @@
 import DefaultHandler from './default';
 import { Assets, Language } from '../../../types';
+import { isEmpty } from 'lodash';
 
 export const schema = { type: 'object' };
 
@@ -95,7 +96,7 @@ export default class PromptsHandler extends DefaultHandler {
               language,
             })
             .then((customTextData) => {
-              if (Object.keys(customTextData).length === 0) return null;
+              if (isEmpty(customTextData)) return null;
               return {
                 language,
                 ...customTextData,
