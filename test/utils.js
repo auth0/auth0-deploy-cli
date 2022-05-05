@@ -107,6 +107,10 @@ export function mockMgmtClient() {
     },
     branding: { getSettings: () => ({}) },
     logStreams: { getAll: () => [] },
+    prompts: {
+      getCustomTextByLanguage: () => {},
+      getSettings: () => {},
+    },
   };
 }
 

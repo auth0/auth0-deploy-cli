@@ -122,7 +122,7 @@ export type BaseAuth0APIClient = {
     getCustomTextByLanguage: (arg0: {
       prompt: PromptScreenTypes;
       language: Language;
-    }) => Promise<PromptsCustomText>;
+    }) => Promise<Partial<PromptsCustomText>>;
     getSettings: () => Promise<PromptSettings>;
     updateSettings: (arg0: {}, arg1: Partial<PromptSettings>) => Promise<void>;
   };

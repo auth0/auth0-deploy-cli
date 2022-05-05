@@ -175,7 +175,6 @@ describe('#YAML context validation', () => {
       guardianPhoneFactorMessageTypes: { message_types: ['sms'] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
-      prompts: {},
       resourceServers: [],
       rules: [],
       hooks: [],
@@ -282,7 +281,6 @@ describe('#YAML context validation', () => {
       guardianPhoneFactorMessageTypes: { message_types: ['sms'] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
-      prompts: {},
       resourceServers: [],
       rules: [],
       hooks: [],
@@ -311,6 +309,9 @@ describe('#YAML context validation', () => {
         suspiciousIpThrottling: {},
       },
       logStreams: [],
+      prompts: {
+        customText: {},
+      },
     });
   });
 
@@ -390,7 +391,6 @@ describe('#YAML context validation', () => {
       guardianPhoneFactorMessageTypes: { message_types: ['sms'] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
-      prompts: {},
       resourceServers: [],
       rules: [],
       hooks: [],
@@ -419,6 +419,9 @@ describe('#YAML context validation', () => {
         suspiciousIpThrottling: {},
       },
       logStreams: [],
+      prompts: {
+        customText: {},
+      },
     });
   });
 
