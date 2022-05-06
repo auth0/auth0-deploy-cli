@@ -107,6 +107,7 @@ export function mockMgmtClient() {
     },
     branding: { getSettings: () => ({}) },
     logStreams: { getAll: () => [] },
+    customDomains: { getAll: () => [] },
   };
 }
 
