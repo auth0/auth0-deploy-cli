@@ -85,7 +85,7 @@ export default class APIHandler {
     this.deleted = 0;
   }
 
-  getClientFN(fn: string | Function): Function {
+  getClientFN(fn: ApiMethodOverride): Function {
     if (typeof fn === 'string') {
       const client = this.client[this.type];
       return client[fn].bind(client);
