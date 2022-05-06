@@ -50,6 +50,51 @@ describe('#directory context branding', () => {
     ]);
   });
 
+  it('should process only templates, not branding settings', async () => {
+    const dir = path.join(testDataDir, 'directory', 'branding-process');
+    cleanThenMkdir(dir);
+    const brandingDir = path.join(dir, constants.BRANDING_DIRECTORY);
+    cleanThenMkdir(brandingDir);
+    const brandingTemplatesDir = path.join(brandingDir, constants.BRANDING_TEMPLATES_DIRECTORY);
+    cleanThenMkdir(brandingTemplatesDir);
+
+    fs.writeFileSync(path.join(brandingTemplatesDir, 'universal_login.html'), html);
+    fs.writeFileSync(
+      path.join(brandingTemplatesDir, 'universal_login.json'),
+      JSON.stringify({ template: 'universal_login', body: `.${path.sep}universal_login.html` })
+    );
+
+    const config = { AUTH0_INPUT_FILE: dir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { foo: 'bar' } };
+    const context = new Context(config, mockMgmtClient());
+    await context.load();
+
+    expect(context.assets.branding).to.be.an('object');
+    expect(context.assets.branding).to.deep.equal({
+        templates: [
+          {
+          template: 'universal_login',
+          body: htmlTransformed,
+          },
+        ]},
+    );
+  });
+
+  it('should process only branding settings, not templates', async () => {
+    const dir = path.join(testDataDir, 'directory', 'branding-process');
+    cleanThenMkdir(dir);
+    const brandingDir = path.join(dir, constants.BRANDING_DIRECTORY);
+    cleanThenMkdir(brandingDir);
+
+    fs.writeFileSync(path.join(brandingDir, 'branding.json'), brandingSettings);
+
+    const config = { AUTH0_INPUT_FILE: dir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { foo: 'bar' } };
+    const context = new Context(config, mockMgmtClient());
+    await context.load();
+
+    expect(context.assets.branding).to.be.an('object');
+    expect(context.assets.branding).to.not.have.property('templates');
+  });
+
   it('should dump branding settings, including templates', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'branding-dump');
     cleanThenMkdir(repoDir);

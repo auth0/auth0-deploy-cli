@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
-import { dumpJSON, existsMustBeDir, getFiles, loadJSON } from '../../../utils';
+import { dumpJSON, existsMustBeDir, getFiles, isFile, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
@@ -10,17 +10,24 @@ type ParsedBranding = ParsedAsset<'branding', Asset>;
 
 function parse(context: DirectoryContext): ParsedBranding {
   const brandingDirectory = path.join(context.filePath, constants.BRANDING_DIRECTORY);
+  const brandingFile = path.join(brandingDirectory, 'branding.json');
 
   if (!existsMustBeDir(brandingDirectory)) return { branding: null };
 
-  const branding = loadJSON(path.join(brandingDirectory, 'branding.json'), context.mappings);
+  const branding = (() => {
+    if (isFile(brandingFile)) {
+      return loadJSON(brandingFile, context.mappings);
+    }
+
+    return null;
+  })();
 
   const brandingTemplatesFolder = path.join(
     brandingDirectory,
     constants.BRANDING_TEMPLATES_DIRECTORY
   );
 
-  if (!existsMustBeDir(brandingTemplatesFolder)) return { branding: null };
+  if (!existsMustBeDir(brandingTemplatesFolder)) return { branding: branding };
 
   const templatesDefinitionFiles = getFiles(brandingTemplatesFolder, ['.json']);
   const templates = templatesDefinitionFiles.map((templateDefinitionFile) => {
