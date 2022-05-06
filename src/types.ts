@@ -274,47 +274,50 @@ export type ParsedAsset<Key extends AssetTypes, T> = {
   [key in Key]: T | null;
 };
 
-export type Language =
-  | 'ar'
-  | 'bg'
-  | 'bs'
-  | 'cs'
-  | 'da'
-  | 'de'
-  | 'el'
-  | 'en'
-  | 'es'
-  | 'et'
-  | 'fi'
-  | 'fr'
-  | 'fr-CA'
-  | 'fr-FR'
-  | 'he'
-  | 'hi'
-  | 'hr'
-  | 'hu'
-  | 'id'
-  | 'is'
-  | 'it'
-  | 'ja'
-  | 'ko'
-  | 'lt'
-  | 'lv'
-  | 'nb'
-  | 'nl'
-  | 'pl'
-  | 'pt'
-  | 'pt-BR'
-  | 'pt-PT'
-  | 'ro'
-  | 'ru'
-  | 'sk'
-  | 'sl'
-  | 'sr'
-  | 'sv'
-  | 'th'
-  | 'tr'
-  | 'uk'
-  | 'vi'
-  | 'zh-CN'
-  | 'zh-TW';
+export const languages = [
+  'ar',
+  'bg',
+  'bs',
+  'cs',
+  'da',
+  'de',
+  'el',
+  'en',
+  'es',
+  'et',
+  'fi',
+  'fr',
+  'fr-CA',
+  'fr-FR',
+  'he',
+  'hi',
+  'hr',
+  'hu',
+  'id',
+  'is',
+  'it',
+  'ja',
+  'ko',
+  'lt',
+  'lv',
+  'nb',
+  'nl',
+  'pl',
+  'pt',
+  'pt-BR',
+  'pt-PT',
+  'ro',
+  'ru',
+  'sk',
+  'sl',
+  'sr',
+  'sv',
+  'th',
+  'tr',
+  'uk',
+  'vi',
+  'zh-CN',
+  'zh-TW',
+] as const;
+
+export type Language = typeof languages[number];

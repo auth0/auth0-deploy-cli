@@ -1,8 +1,6 @@
 import DefaultHandler from './default';
-import { Assets, Language } from '../../../types';
+import { Assets, Language, languages } from '../../../types';
 import { isEmpty } from 'lodash';
-
-export const schema = { type: 'object' };
 
 const promptScreenTypes = [
   'login',
@@ -32,7 +30,41 @@ const promptScreenTypes = [
   'common',
 ] as const;
 
-// convert namesArr into string literal union type
+export const schema = {
+  type: 'object',
+  properties: {
+    universal_login_experience: {
+      type: 'string',
+      enum: ['new', 'classic'],
+    },
+    webauthn_platform_first_factor: {
+      type: 'boolean',
+    },
+    identifier_first: {
+      type: 'boolean',
+    },
+    customText: {
+      type: 'object',
+      properties: languages.reduce((acc, language) => {
+        return {
+          ...acc,
+          [language]: {
+            type: 'object',
+            properties: promptScreenTypes.reduce((acc, screenType) => {
+              return {
+                ...acc,
+                [screenType]: {
+                  type: 'object',
+                },
+              };
+            }, {}),
+          },
+        };
+      }, {}),
+    },
+  },
+};
+
 export type PromptScreenTypes = typeof promptScreenTypes[number];
 
 export type PromptSettings = {
