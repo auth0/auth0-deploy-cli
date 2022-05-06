@@ -70,7 +70,7 @@ function isActionsDisabled(err) {
 export default class ActionHandler extends DefaultAPIHandler {
   existing: Asset[] | null;
 
-  constructor(options) {
+  constructor(options: DefaultAPIHandler) {
     super({
       ...options,
       type: 'actions',
