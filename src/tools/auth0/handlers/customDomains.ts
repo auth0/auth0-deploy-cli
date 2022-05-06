@@ -16,7 +16,7 @@ export const schema = {
       primary: { type: 'boolean' },
       status: { type: 'string', enum: ['pending_verification', 'ready', 'disabled', 'pending'] },
       type: { type: 'string', enum: ['auth0_managed_certs', 'self_managed_certs'] },
-      verifications: { type: 'object' },
+      verification: { type: 'object' },
     },
     required: ['domain', 'type'],
   },
