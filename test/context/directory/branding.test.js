@@ -70,13 +70,13 @@ describe('#directory context branding', () => {
 
     expect(context.assets.branding).to.be.an('object');
     expect(context.assets.branding).to.deep.equal({
-        templates: [
-          {
+      templates: [
+        {
           template: 'universal_login',
           body: htmlTransformed,
-          },
-        ]},
-    );
+        },
+      ],
+    });
   });
 
   it('should process only branding settings, not templates', async () => {
