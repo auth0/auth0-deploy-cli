@@ -14,7 +14,7 @@ const promptsSettingsFile = 'prompts.json';
 const customTextFile = 'custom-text.json';
 
 describe('#directory context prompts', () => {
-  it('should process prompts', async () => {
+  it('should parse prompts', async () => {
     const files = {
       [constants.PROMPTS_DIRECTORY]: {
         [promptsSettingsFile]: JSON.stringify({
@@ -79,7 +79,49 @@ describe('#directory context prompts', () => {
     });
   });
 
-  it('should not dump prompts settings and prompts custom when prompts object is null', async () => {
+  describe('should parse prompts even if one or both files are absent', async () => {
+    it('should parse even if custom text file is absent', async () => {
+      cleanThenMkdir(promptsDirectory);
+      const mockPromptsSettings = {
+        universal_login_experience: 'classic',
+        identifier_first: true,
+      };
+      const promptsDirectoryNoCustomTextFile = {
+        [constants.PROMPTS_DIRECTORY]: {
+          [promptsSettingsFile]: JSON.stringify(mockPromptsSettings),
+        },
+      };
+
+      createDir(promptsDirectory, promptsDirectoryNoCustomTextFile);
+
+      const config = {
+        AUTH0_INPUT_FILE: promptsDirectory,
+      };
+      const context = new Context(config, mockMgmtClient());
+      await context.load();
+
+      expect(context.assets.prompts).to.deep.equal({ ...mockPromptsSettings, customText: {} });
+    });
+
+    it('should parse even if both files are absent', async () => {
+      cleanThenMkdir(promptsDirectory);
+      const emptyPromptsDirectory = {
+        [constants.PROMPTS_DIRECTORY]: {},
+      };
+
+      createDir(promptsDirectory, emptyPromptsDirectory);
+
+      const config = {
+        AUTH0_INPUT_FILE: promptsDirectory,
+      };
+      const context = new Context(config, mockMgmtClient());
+      await context.load();
+
+      expect(context.assets.prompts).to.deep.equal({ customText: {} });
+    });
+  });
+
+  it('should not dump prompts settings and prompts custom text when prompts object is null', async () => {
     cleanThenMkdir(dir);
 
     const context = new Context({ AUTH0_INPUT_FILE: dir });
@@ -91,7 +133,7 @@ describe('#directory context prompts', () => {
     expect(dumpedFiles).to.have.length(0);
   });
 
-  it('should not dump prompts settings and prompts custom when prompts object is undefined', async () => {
+  it('should not dump prompts settings and prompts custom text when prompts object is undefined', async () => {
     cleanThenMkdir(dir);
 
     const context = new Context({ AUTH0_INPUT_FILE: dir });

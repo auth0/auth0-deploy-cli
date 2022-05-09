@@ -1,7 +1,7 @@
 import path from 'path';
 import { ensureDirSync } from 'fs-extra';
 import { constants } from '../../../tools';
-import { existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
+import { existsMustBeDir, dumpJSON, loadJSON, isFile } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { ParsedAsset } from '../../../types';
@@ -31,11 +31,13 @@ function parse(context: DirectoryContext): ParsedPrompts {
 
   const promptsSettings = (() => {
     const promptsSettingsFile = getPromptsSettingsFile(promptsDirectory);
+    if (!isFile(promptsSettingsFile)) return {};
     return loadJSON(promptsSettingsFile, context.mappings) as PromptSettings;
   })();
 
   const customText = (() => {
     const customTextFile = getCustomTextFile(promptsDirectory);
+    if (!isFile(customTextFile)) return {};
     return loadJSON(customTextFile, context.mappings) as AllPromptsByLanguage;
   })();
 
@@ -57,6 +59,7 @@ async function dump(context: DirectoryContext): Promise<void> {
   const promptsDirectory = getPromptsDirectory(context.filePath);
   ensureDirSync(promptsDirectory);
 
+  if (!promptsSettings) return;
   const promptsSettingsFile = getPromptsSettingsFile(promptsDirectory);
   dumpJSON(promptsSettingsFile, promptsSettings);
 

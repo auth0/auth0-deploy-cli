@@ -165,7 +165,9 @@ export default class PromptsHandler extends DefaultHandler {
 
     const { customText, ...promptSettings } = prompts;
 
-    await this.client.prompts.updateSettings({}, promptSettings);
+    if (!isEmpty(promptSettings)) {
+      await this.client.prompts.updateSettings({}, promptSettings);
+    }
 
     await this.updateCustomTextSettings(customText);
 
