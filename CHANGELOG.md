@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.12.0] - 2022-05-10
+
 ### Added
 
 - Prompts support (both prompts settings and custom text for prompts) [#530]
@@ -728,7 +730,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#517]: https://github.com/auth0/auth0-deploy-cli/issues/517
 [#524]: https://github.com/auth0/auth0-deploy-cli/issues/524
 [#526]: https://github.com/auth0/auth0-deploy-cli/issues/526
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.11.1...HEAD
+[#527]: https://github.com/auth0/auth0-deploy-cli/issues/527
+[#530]: https://github.com/auth0/auth0-deploy-cli/issues/530
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.0...HEAD
+[7.12.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.11.1...v7.12.0
 [7.11.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.11.0...v7.11.1
 [7.11.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.10.0...v7.11.0
 [7.10.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.9.0...v7.10.0
