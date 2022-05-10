@@ -7,4 +7,3 @@ npx pretty-quick --staged
 
 npx tsc --noEmit # Ensure that code compiles
 
-/bin/bash ./typescript-migration-progress.sh
