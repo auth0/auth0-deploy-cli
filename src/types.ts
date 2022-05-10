@@ -144,7 +144,6 @@ export type BaseAuth0APIClient = {
   triggers: APIClientBaseFunctions & {
     getTriggerBindings: () => Promise<Asset>;
   };
-  updateRule: (arg0: { id: string }, arg1: Asset) => Promise<Asset>;
 }; // TODO: replace with a more accurate representation of the Auth0APIClient type
 
 export type Auth0APIClient = BaseAuth0APIClient & {
@@ -200,6 +199,7 @@ export type Assets = Partial<{
   clients: Asset[] | null;
   clientGrants: Asset[] | null;
   connections: Asset[] | null;
+  customDomains: Asset[] | null;
   databases: Asset[] | null;
   emailProvider: Asset | null;
   emailTemplates: Asset[] | null;
@@ -266,7 +266,8 @@ export type AssetTypes =
   | 'attackProtection'
   | 'branding'
   | 'logStreams'
-  | 'prompts';
+  | 'prompts'
+  | 'customDomains';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 

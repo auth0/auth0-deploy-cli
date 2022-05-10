@@ -119,6 +119,7 @@ export function mockMgmtClient() {
         }),
       getSettings: () => {},
     },
+    customDomains: { getAll: () => [] },
   };
 }
 

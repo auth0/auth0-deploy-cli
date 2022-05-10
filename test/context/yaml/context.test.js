@@ -207,6 +207,7 @@ describe('#YAML context validation', () => {
       prompts: {
         customText: {},
       },
+      customDomains: [],
     });
   });
 
@@ -317,6 +318,7 @@ describe('#YAML context validation', () => {
       prompts: {
         customText: {},
       },
+      customDomains: [],
     });
   });
 
@@ -428,6 +430,7 @@ describe('#YAML context validation', () => {
       prompts: {
         customText: {},
       },
+      customDomains: [],
     });
   });
 

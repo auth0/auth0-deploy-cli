@@ -190,8 +190,8 @@ export default class RulesHandler extends DefaultHandler {
       .addEachTask({
         data: changes.reOrder,
         generator: (rule) =>
-          this.client
-            .updateRule({ id: rule.id }, stripFields(rule, this.stripUpdateFields))
+          this.client.rules
+            .update({ id: rule.id }, stripFields(rule, this.stripUpdateFields))
             .then(() => {
               const updated = {
                 name: rule.name,

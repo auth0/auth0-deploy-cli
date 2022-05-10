@@ -25,6 +25,7 @@ import attackProtection from './attackProtection';
 import branding from './branding';
 import logStreams from './logStreams';
 import prompts from './prompts';
+import customDomains from './customDomains';
 
 import DirectoryContext from '..';
 import { AssetTypes, Asset } from '../../../types';
@@ -64,6 +65,7 @@ const directoryHandlers: {
   branding,
   logStreams,
   prompts,
+  customDomains,
 };
 
 export default directoryHandlers;
