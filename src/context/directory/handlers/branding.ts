@@ -14,7 +14,7 @@ function parse(context: DirectoryContext): ParsedBranding {
 
   if (!existsMustBeDir(brandingDirectory)) return { branding: null };
 
-  const branding = (() => {
+  const brandingSettings = (() => {
     if (isFile(brandingFile)) {
       return loadJSON(brandingFile, context.mappings);
     }
@@ -27,7 +27,7 @@ function parse(context: DirectoryContext): ParsedBranding {
     constants.BRANDING_TEMPLATES_DIRECTORY
   );
 
-  if (!existsMustBeDir(brandingTemplatesFolder)) return { branding: branding };
+  if (!existsMustBeDir(brandingTemplatesFolder)) return { branding: brandingSettings };
 
   const templatesDefinitionFiles = getFiles(brandingTemplatesFolder, ['.json']);
   const templates = templatesDefinitionFiles.map((templateDefinitionFile) => {
@@ -41,7 +41,7 @@ function parse(context: DirectoryContext): ParsedBranding {
 
   return {
     branding: {
-      ...branding,
+      ...brandingSettings,
       templates,
     },
   };
