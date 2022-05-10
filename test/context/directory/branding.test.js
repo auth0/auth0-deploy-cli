@@ -68,7 +68,6 @@ describe('#directory context branding', () => {
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
-    expect(context.assets.branding).to.be.an('object');
     expect(context.assets.branding).to.deep.equal({
       templates: [
         {
@@ -91,8 +90,7 @@ describe('#directory context branding', () => {
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
-    expect(context.assets.branding).to.be.an('object');
-    expect(context.assets.branding).to.not.have.property('templates');
+    expect(context.assets.branding).to.deep.equal(JSON.parse(brandingSettings));
   });
 
   it('should dump branding settings, including templates', async () => {
