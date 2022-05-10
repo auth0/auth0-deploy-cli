@@ -59,7 +59,7 @@ export default class APIHandler {
       update?: ApiMethodOverride;
       create?: ApiMethodOverride;
       delete?: ApiMethodOverride;
-    }; //TODO: understand if any resource types pass in any additional functions
+    };
   }) {
     this.config = options.config;
     this.type = options.type;
