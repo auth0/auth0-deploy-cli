@@ -77,9 +77,3 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v.*/
-  ts_migration:
-    jobs:
-      - ts_migration_progress:
-          filters:
-            tags:
-              ignore: /.*/

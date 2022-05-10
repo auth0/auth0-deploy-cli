@@ -6,4 +6,3 @@ npm run lint:fix
 npx pretty-quick --staged
 
 npx tsc --noEmit # Ensure that code compiles
-
