@@ -90,10 +90,15 @@ export function mockMgmtClient() {
       },
     },
     tenant: {
-      getSettings: () => ({
-        friendly_name: 'Test',
-        default_directory: 'users',
-      }),
+      getSettings: async () =>
+        new Promise((res) =>
+          res({
+            friendly_name: 'Test',
+            default_directory: 'users',
+            enabled_locales: ['en'],
+          })
+        ),
+      getCustomTextByLanguage: () => Promise.resolve({}),
     },
     migrations: {
       getMigrations: () => ({
@@ -107,6 +112,13 @@ export function mockMgmtClient() {
     },
     branding: { getSettings: () => ({}) },
     logStreams: { getAll: () => [] },
+    prompts: {
+      getCustomTextByLanguage: () =>
+        new Promise((res) => {
+          res({});
+        }),
+      getSettings: () => {},
+    },
     customDomains: { getAll: () => [] },
   };
 }

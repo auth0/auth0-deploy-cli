@@ -1,3 +1,10 @@
+import {
+  PromptScreenTypes,
+  Prompts,
+  PromptsCustomText,
+  PromptSettings,
+} from './tools/auth0/handlers/prompts';
+
 type SharedPaginationParams = {
   checkpoint?: boolean;
   paginate?: boolean;
@@ -106,9 +113,18 @@ export type BaseAuth0APIClient = {
       get: (arg0: Asset) => Promise<Asset>;
     };
   };
-  prompts: APIClientBaseFunctions & {
-    getSettings: () => Promise<Asset[]>;
-    updateSettings: (arg0: {}, arg1: Asset) => Promise<void>;
+  prompts: {
+    updateCustomTextByLanguage: (arg0: {
+      prompt: PromptScreenTypes;
+      language: Language;
+      body: { [key: string]: string };
+    }) => Promise<void>;
+    getCustomTextByLanguage: (arg0: {
+      prompt: PromptScreenTypes;
+      language: Language;
+    }) => Promise<Partial<PromptsCustomText>>;
+    getSettings: () => Promise<PromptSettings>;
+    updateSettings: (arg0: {}, arg1: Partial<PromptSettings>) => Promise<void>;
   };
   resourceServers: APIClientBaseFunctions;
   roles: APIClientBaseFunctions & {
@@ -122,7 +138,7 @@ export type BaseAuth0APIClient = {
     getAll: () => Promise<Asset[]>;
   };
   tenant: APIClientBaseFunctions & {
-    getSettings: () => Promise<Asset>;
+    getSettings: () => Promise<Asset & { enabled_locales: Language[] }>;
     updateSettings: (arg0: Asset) => Promise<void>;
   };
   triggers: APIClientBaseFunctions & {
@@ -202,6 +218,7 @@ export type Assets = Partial<{
   migrations: Asset[] | null;
   organizations: Asset[] | null;
   pages: Asset[] | null;
+  prompts: Prompts | null;
   resourceServers: Asset[] | null;
   roles: Asset[] | null;
   rules: Asset[] | null;
@@ -249,6 +266,7 @@ export type AssetTypes =
   | 'attackProtection'
   | 'branding'
   | 'logStreams'
+  | 'prompts'
   | 'customDomains';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
@@ -256,3 +274,51 @@ export type KeywordMappings = { [key: string]: (string | number)[] | string | nu
 export type ParsedAsset<Key extends AssetTypes, T> = {
   [key in Key]: T | null;
 };
+
+export const languages = [
+  'ar',
+  'bg',
+  'bs',
+  'cs',
+  'da',
+  'de',
+  'el',
+  'en',
+  'es',
+  'et',
+  'fi',
+  'fr',
+  'fr-CA',
+  'fr-FR',
+  'he',
+  'hi',
+  'hr',
+  'hu',
+  'id',
+  'is',
+  'it',
+  'ja',
+  'ko',
+  'lt',
+  'lv',
+  'nb',
+  'nl',
+  'pl',
+  'pt',
+  'pt-BR',
+  'pt-PT',
+  'ro',
+  'ru',
+  'sk',
+  'sl',
+  'sr',
+  'sv',
+  'th',
+  'tr',
+  'uk',
+  'vi',
+  'zh-CN',
+  'zh-TW',
+] as const;
+
+export type Language = typeof languages[number];

@@ -24,6 +24,7 @@ import triggers from './triggers';
 import attackProtection from './attackProtection';
 import branding from './branding';
 import logStreams from './logStreams';
+import prompts from './prompts';
 import customDomains from './customDomains';
 
 import YAMLContext from '..';
@@ -61,6 +62,7 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   attackProtection,
   branding,
   logStreams,
+  prompts,
   customDomains,
 };
 
