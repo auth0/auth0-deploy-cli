@@ -4,7 +4,7 @@
     "experimentalDecorators": true,
     "module": "commonjs",
     "rootDir": "./src",
-    "allowJs": false,
+    "allowJs": true,
     "outDir": "./lib",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
