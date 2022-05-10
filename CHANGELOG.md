@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Prompts support (both prompts settings and custom text for prompts) [#530]
+- Custom domains support [#527]
+
 ## [7.11.1] - 2022-05-04
 
 ### Fixed
