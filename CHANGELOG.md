@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.12.1] - 2022-05-11
+
+### Fixed
+
+- Unable to deploy without branding settings feature [#532]
+
 ## [7.12.0] - 2022-05-10
 
 ### Added
@@ -732,7 +738,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#526]: https://github.com/auth0/auth0-deploy-cli/issues/526
 [#527]: https://github.com/auth0/auth0-deploy-cli/issues/527
 [#530]: https://github.com/auth0/auth0-deploy-cli/issues/530
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.0...HEAD
+[#532]: https://github.com/auth0/auth0-deploy-cli/issues/532
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.1...HEAD
+[7.12.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.0...v7.12.1
 [7.12.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.11.1...v7.12.0
 [7.11.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.11.0...v7.11.1
 [7.11.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.10.0...v7.11.0
