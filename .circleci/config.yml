@@ -47,13 +47,13 @@ jobs:
       - run:
           name: Publish package
           command: npm publish
-          
+
   ts_migration_progress:
     machine:
       image: ubuntu-2004:202111-02
     steps:
       - checkout
-      - run :    
+      - run :
           name: Typescript Migration Progress
           command: sh typescript-migration-progress.sh
 
@@ -66,7 +66,7 @@ workflows:
           v: "lts"
       - test:
           name: test_current
-          v: "current"
+          v: "18.0.0"
   test_and_deploy:
     jobs:
       - test:
