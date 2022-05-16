@@ -67,9 +67,7 @@ describe('#prompts handler', () => {
             if (customTextValue === undefined || _.isEmpty(customTextValue))
               return Promise.resolve({});
 
-            return Promise.resolve({
-              [prompt]: customTextValue,
-            });
+            return Promise.resolve(customTextValue);
           },
         },
       };
