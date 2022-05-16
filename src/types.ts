@@ -1,5 +1,6 @@
 import {
-  PromptScreenTypes,
+  PromptTypes,
+  ScreenTypes,
   Prompts,
   PromptsCustomText,
   PromptSettings,
@@ -115,12 +116,12 @@ export type BaseAuth0APIClient = {
   };
   prompts: {
     updateCustomTextByLanguage: (arg0: {
-      prompt: PromptScreenTypes;
+      prompt: PromptTypes;
       language: Language;
-      body: { [key: string]: string };
+      body: Partial<{ [key in ScreenTypes]: { [key: string]: string } }>;
     }) => Promise<void>;
     getCustomTextByLanguage: (arg0: {
-      prompt: PromptScreenTypes;
+      prompt: PromptTypes;
       language: Language;
     }) => Promise<Partial<PromptsCustomText>>;
     getSettings: () => Promise<PromptSettings>;
