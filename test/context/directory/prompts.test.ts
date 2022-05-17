@@ -24,18 +24,24 @@ describe('#directory context prompts', () => {
         [customTextFile]: JSON.stringify({
           en: {
             login: {
-              buttonText: '##BUTTON_TEXT_ENGLISH##',
-              description: 'english login description text',
+              login: {
+                buttonText: '##BUTTON_TEXT_ENGLISH##',
+                description: 'english login description text',
+              },
             },
             'signup-password': {
-              buttonText: '##BUTTON_TEXT_ENGLISH##',
-              description: 'english signup password description text',
+              'signup-password': {
+                buttonText: '##BUTTON_TEXT_ENGLISH##',
+                description: 'english signup password description text',
+              },
             },
           },
           fr: {
             login: {
-              buttonText: '##BUTTON_TEXT_FRENCH##',
-              description: 'french login description text',
+              login: {
+                buttonText: '##BUTTON_TEXT_FRENCH##',
+                description: 'french login description text',
+              },
             },
           },
         }),
@@ -61,18 +67,24 @@ describe('#directory context prompts', () => {
       customText: {
         en: {
           login: {
-            buttonText: `${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.BUTTON_TEXT_ENGLISH}`,
-            description: 'english login description text',
+            login: {
+              buttonText: `${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.BUTTON_TEXT_ENGLISH}`,
+              description: 'english login description text',
+            },
           },
           'signup-password': {
-            buttonText: `${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.BUTTON_TEXT_ENGLISH}`,
-            description: 'english signup password description text',
+            'signup-password': {
+              buttonText: `${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.BUTTON_TEXT_ENGLISH}`,
+              description: 'english signup password description text',
+            },
           },
         },
         fr: {
           login: {
-            buttonText: `${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.BUTTON_TEXT_FRENCH}`,
-            description: 'french login description text',
+            login: {
+              buttonText: `${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.BUTTON_TEXT_FRENCH}`,
+              description: 'french login description text',
+            },
           },
         },
       },
@@ -155,14 +167,18 @@ describe('#directory context prompts', () => {
       customText: {
         en: {
           login: {
-            buttonText: 'English login button text',
-            description: 'English login description',
+            login: {
+              buttonText: 'English login button text',
+              description: 'English login description',
+            },
           },
         },
         fr: {
           login: {
-            buttonText: 'French login button text',
-            description: 'French login description',
+            login: {
+              buttonText: 'French login button text',
+              description: 'French login description',
+            },
           },
         },
       },
