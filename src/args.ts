@@ -96,7 +96,7 @@ function getParams(): CliParams {
       env: {
         describe: 'Override the mappings in config with environment variables.',
         boolean: true,
-        default: false,
+        default: true,
       },
       export_ids: {
         alias: 'e',
