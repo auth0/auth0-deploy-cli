@@ -175,7 +175,6 @@ describe('#YAML context validation', () => {
       guardianPhoneFactorMessageTypes: { message_types: ['sms'] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
-      prompts: {},
       resourceServers: [],
       rules: [],
       hooks: [],
@@ -197,6 +196,7 @@ describe('#YAML context validation', () => {
       tenant: {
         default_directory: 'users',
         friendly_name: 'Test',
+        enabled_locales: ['en'],
       },
       attackProtection: {
         breachedPasswordDetection: {},
@@ -204,6 +204,10 @@ describe('#YAML context validation', () => {
         suspiciousIpThrottling: {},
       },
       logStreams: [],
+      prompts: {
+        customText: {},
+      },
+      customDomains: [],
     });
   });
 
@@ -282,7 +286,6 @@ describe('#YAML context validation', () => {
       guardianPhoneFactorMessageTypes: { message_types: ['sms'] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
-      prompts: {},
       resourceServers: [],
       rules: [],
       hooks: [],
@@ -304,6 +307,7 @@ describe('#YAML context validation', () => {
       tenant: {
         default_directory: 'users',
         friendly_name: 'Test',
+        enabled_locales: ['en'],
       },
       attackProtection: {
         breachedPasswordDetection: {},
@@ -311,6 +315,10 @@ describe('#YAML context validation', () => {
         suspiciousIpThrottling: {},
       },
       logStreams: [],
+      prompts: {
+        customText: {},
+      },
+      customDomains: [],
     });
   });
 
@@ -390,7 +398,6 @@ describe('#YAML context validation', () => {
       guardianPhoneFactorMessageTypes: { message_types: ['sms'] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
-      prompts: {},
       resourceServers: [],
       rules: [],
       hooks: [],
@@ -412,6 +419,7 @@ describe('#YAML context validation', () => {
       tenant: {
         default_directory: 'users',
         friendly_name: 'Test',
+        enabled_locales: ['en'],
       },
       attackProtection: {
         breachedPasswordDetection: {},
@@ -419,6 +427,10 @@ describe('#YAML context validation', () => {
         suspiciousIpThrottling: {},
       },
       logStreams: [],
+      prompts: {
+        customText: {},
+      },
+      customDomains: [],
     });
   });
 
