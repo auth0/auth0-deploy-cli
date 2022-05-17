@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Properly handle all screen types within a prompt grouping [#541]
+- Gracefully ignoring custom domains if not supported by tenant [#542]
+
 ## [7.12.1] - 2022-05-11
 
 ### Fixed
