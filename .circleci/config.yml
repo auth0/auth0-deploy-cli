@@ -57,7 +57,7 @@ workflows:
           v: "lts"
       - test:
           name: test_current
-          v: "current"
+          v: "18.0.0"
   test_and_deploy:
     jobs:
       - test:
