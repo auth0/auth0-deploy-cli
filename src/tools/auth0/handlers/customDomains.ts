@@ -33,10 +33,7 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
       identifiers: ['domain'],
       stripCreateFields: ['status', 'primary', 'verification'],
       functions: {
-        //@ts-ignore
-        delete: (args) => {
-          return this.client.customDomains.delete({ id: args.custom_domain_id });
-        },
+        delete: (args) => this.client.customDomains.delete({ id: args.custom_domain_id }),
       },
     });
   }
