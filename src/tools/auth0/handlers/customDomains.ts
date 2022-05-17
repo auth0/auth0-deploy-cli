@@ -42,16 +42,27 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
     return super.objString(item.domain);
   }
 
-  async getType(): Promise<Asset> {
-    if (this.existing) {
-      return this.existing;
+  async getType(): Promise<Asset | null> {
+    try {
+      if (this.existing) {
+        return this.existing;
+      }
+
+      const customDomains = await this.client.customDomains.getAll({ paginate: false });
+
+      this.existing = customDomains;
+
+      return customDomains;
+    } catch (err) {
+      if (
+        err.statusCode === 403 &&
+        err.message ===
+          'The account is not allowed to perform this operation, please contact our support team'
+      ) {
+        return null;
+      }
+      throw err;
     }
-
-    const customDomains = await this.client.customDomains.getAll({ paginate: false });
-
-    this.existing = customDomains;
-
-    return customDomains;
   }
 
   async processChanges(assets: Assets): Promise<void> {
