@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.12.2] - 2022-05-17
+
+### Fixed
+
+- Properly handle all screen types within a prompt grouping [#541]
+- Gracefully ignoring custom domains if not supported by tenant [#542]
+
 ## [7.12.1] - 2022-05-11
 
 ### Fixed
@@ -739,7 +746,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#527]: https://github.com/auth0/auth0-deploy-cli/issues/527
 [#530]: https://github.com/auth0/auth0-deploy-cli/issues/530
 [#532]: https://github.com/auth0/auth0-deploy-cli/issues/532
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.1...HEAD
+[#541]: https://github.com/auth0/auth0-deploy-cli/issues/541
+[#542]: https://github.com/auth0/auth0-deploy-cli/issues/542
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.2...HEAD
+[7.12.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.1...v7.12.2
 [7.12.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.0...v7.12.1
 [7.12.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.11.1...v7.12.0
 [7.11.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.11.0...v7.11.1
