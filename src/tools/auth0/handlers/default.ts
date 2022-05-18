@@ -20,6 +20,8 @@ export function order(value) {
   };
 }
 
+type ApiMethodOverride = string | Function;
+
 export default class APIHandler {
   config: ConfigFunction;
   id: string;
@@ -36,11 +38,11 @@ export default class APIHandler {
   stripCreateFields: string[]; //Fields to strip from payload when creating
   name?: string; // TODO: understand if any handlers actually leverage `name` property
   functions: {
-    getAll: string;
-    update: string;
-    create: string;
-    delete: string;
-  }; // TODO: delete this enum object in favor of tighter typing
+    getAll: ApiMethodOverride;
+    update: ApiMethodOverride;
+    create: ApiMethodOverride;
+    delete: ApiMethodOverride;
+  };
 
   constructor(options: {
     id?: APIHandler['id'];
@@ -53,11 +55,11 @@ export default class APIHandler {
     sensitiveFieldsToObfuscate?: APIHandler['sensitiveFieldsToObfuscate'];
     stripCreateFields?: APIHandler['stripCreateFields'];
     functions: {
-      getAll?: string;
-      update?: string;
-      create?: string;
-      delete?: string;
-    }; //TODO: understand if any resource types pass in any additional functions
+      getAll?: ApiMethodOverride;
+      update?: ApiMethodOverride;
+      create?: ApiMethodOverride;
+      delete?: ApiMethodOverride;
+    };
   }) {
     this.config = options.config;
     this.type = options.type;
@@ -83,7 +85,7 @@ export default class APIHandler {
     this.deleted = 0;
   }
 
-  getClientFN(fn: string | Function): Function {
+  getClientFN(fn: ApiMethodOverride): Function {
     if (typeof fn === 'string') {
       const client = this.client[this.type];
       return client[fn].bind(client);

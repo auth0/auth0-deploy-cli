@@ -44,6 +44,34 @@ describe('#customDomains handler', () => {
     expect(data).to.deep.equal({ customDomains });
   });
 
+  it('should handle error gracefully if custom domains not supported by tenant', async () => {
+    const auth0ApiClientMock = {
+      customDomains: {
+        getAll: async () => {
+          throw {
+            statusCode: 403,
+            message:
+              'The account is not allowed to perform this operation, please contact our support team',
+          };
+        },
+        create: async () => {},
+        update: async () => {},
+        delete: async () => {},
+      },
+      pool: new PromisePoolExecutor({
+        concurrencyLimit: 3,
+        frequencyLimit: 8,
+        frequencyWindow: 1000, // 1 sec
+      }),
+    };
+
+    //@ts-ignore
+    const handler = new customDomainsHandler({ client: auth0ApiClientMock });
+    const data = await handler.load();
+
+    expect(data).to.deep.equal({ customDomains: null });
+  });
+
   it('should create custom domains', async () => {
     let didCreateFunctionGetCalled = false;
     let didUpdateFunctionGetCalled = false;

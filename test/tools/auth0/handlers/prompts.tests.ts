@@ -15,22 +15,28 @@ describe('#prompts handler', () => {
 
       const englishCustomText = {
         'signup-password': {
-          buttonText: 'signup password button text in english',
-          description: 'signup password description in english',
-          editEmailText: 'signup password edit in english',
+          'signup-password': {
+            buttonText: 'signup password button text in english',
+            description: 'signup password description in english',
+            editEmailText: 'signup password edit in english',
+          },
         },
         login: {
-          description: 'login description in english',
-          title: 'login title in english',
-          buttonText: 'login button text in english',
+          login: {
+            description: 'login description in english',
+            title: 'login title in english',
+            buttonText: 'login button text in english',
+          },
         },
         'mfa-webauthn': {},
       };
       const frenchCustomText = {
         login: {
-          description: 'login description in french',
-          title: 'login title in french',
-          buttonText: 'login button text in french',
+          login: {
+            description: 'login description in french',
+            title: 'login title in french',
+            buttonText: 'login button text in french',
+          },
         }, // Only has the single login prompt
         'signup-password': {},
         'mfa-webauthn': {},
@@ -61,9 +67,7 @@ describe('#prompts handler', () => {
             if (customTextValue === undefined || _.isEmpty(customTextValue))
               return Promise.resolve({});
 
-            return Promise.resolve({
-              [prompt]: customTextValue,
-            });
+            return Promise.resolve(customTextValue);
           },
         },
       };

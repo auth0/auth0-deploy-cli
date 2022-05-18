@@ -19,7 +19,7 @@ Supported Auth0 Management API resources
 - [x] [Log Streams](https://auth0.com/docs/api/management/v2#!/Log_Streams/get_log_streams)
 - [ ] [Logs](https://auth0.com/docs/api/management/v2#!/Logs/get_logs)
 - [x] [Organizations](https://auth0.com/docs/api/management/v2#!/Organizations/get_organizations)
-- [ ] [Prompts](https://auth0.com/docs/api/management/v2#!/Prompts/get_prompts)
+- [x] [Prompts](https://auth0.com/docs/api/management/v2#!/Prompts/get_prompts)
 - [x] [Resource Servers (APIs)](https://auth0.com/docs/api/management/v2#!/Resource_Servers/get_resource_servers)
 - [x] [Roles](https://auth0.com/docs/api/management/v2#!/Roles)
 - [x] [Rules](https://auth0.com/docs/api/management/v2#!/Rules/get_rules)
