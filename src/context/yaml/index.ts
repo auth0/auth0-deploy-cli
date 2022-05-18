@@ -63,25 +63,25 @@ export default class YAMLContext {
           this.assets,
           yaml.load(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)) || {}
         );
-
-        const excludedAssetsFiltered = Object.keys(this.assets).reduce(
-          (acc: Assets, key: AssetTypes) => {
-            const excludedAssetTypes = this.config.AUTH0_EXCLUDED || [];
-            if (excludedAssetTypes.includes(key)) return acc;
-
-            return {
-              ...acc,
-              [key]: this.assets[key],
-            };
-          },
-          {}
-        );
-        this.assets = excludedAssetsFiltered;
       } catch (err) {
         log.debug(err.stack);
         throw new Error(`Problem loading ${this.configFile}\n${err}`);
       }
     }
+
+    const excludedAssetsFiltered = Object.keys(this.assets).reduce(
+      (acc: Assets, key: AssetTypes) => {
+        const excludedAssetTypes = this.config.AUTH0_EXCLUDED || [];
+        if (excludedAssetTypes.includes(key)) return acc;
+
+        return {
+          ...acc,
+          [key]: this.assets[key],
+        };
+      },
+      {}
+    );
+    this.assets = excludedAssetsFiltered;
 
     // Run initial schema check to ensure valid YAML
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));

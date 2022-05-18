@@ -57,6 +57,38 @@ describe('#YAML context validation', () => {
     expect(context.assets.exclude.defaults).to.deep.equal(['emailProvider']);
   });
 
+  it('should respect resource exclusion on import', async () => {
+    /* Create empty directory */
+    const dir = path.resolve(testDataDir, 'yaml', 'resource-exclusion');
+    cleanThenMkdir(dir);
+    const yaml = path.join(dir, 'resource-exclusion.yaml');
+    fs.writeFileSync(
+      yaml,
+      `
+      actions: []
+      rules:
+        - name: my-rule
+          script: ./rules/my-rule.js
+          stage: login_success
+          enabled: true
+          order: 2
+      hooks: []
+    `
+    );
+
+    const config = {
+      AUTH0_INPUT_FILE: yaml,
+      AUTH0_EXCLUDED: ['hooks', 'rules', 'prompts'], //Only actions are defined above but not excluded
+    };
+
+    const context = new Context(config, mockMgmtClient());
+    await context.load();
+    config.AUTH0_EXCLUDED.forEach((excludedResource) => {
+      expect(context.assets[excludedResource]).to.equal(null); //Ensure all excluded resources, defined or not, are null
+    });
+    expect(context.assets.actions).to.deep.equal([]); //Actions were not excluded
+  });
+
   it('should error invalid schema', async () => {
     const dir = path.resolve(testDataDir, 'yaml', 'invalid');
     cleanThenMkdir(dir);
