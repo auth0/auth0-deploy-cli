@@ -66,27 +66,38 @@ describe('#YAML context validation', () => {
       yaml,
       `
       actions: []
-      rules:
-        - name: my-rule
-          script: ./rules/my-rule.js
-          stage: login_success
-          enabled: true
-          order: 2
+      rules: []
       hooks: []
     `
     );
 
-    const config = {
-      AUTH0_INPUT_FILE: yaml,
-      AUTH0_EXCLUDED: ['hooks', 'rules', 'prompts'], //Only actions are defined above but not excluded
-    };
+    const exclusions = ['hooks', 'rules', 'prompts']; // Only actions are defined above but not excluded
+    const contextWithExclusion = new Context(
+      {
+        AUTH0_INPUT_FILE: yaml,
+        AUTH0_EXCLUDED: exclusions,
+      },
+      mockMgmtClient()
+    );
 
-    const context = new Context(config, mockMgmtClient());
-    await context.load();
-    config.AUTH0_EXCLUDED.forEach((excludedResource) => {
-      expect(context.assets[excludedResource]).to.equal(null); //Ensure all excluded resources, defined or not, are null
+    await contextWithExclusion.load();
+    exclusions.forEach((excludedResource) => {
+      expect(contextWithExclusion.assets[excludedResource]).to.equal(null); // Ensure all excluded resources, defined or not, are null
     });
-    expect(context.assets.actions).to.deep.equal([]); //Actions were not excluded
+    expect(contextWithExclusion.assets.actions).to.deep.equal([]); // Actions were not excluded
+
+    const contextWithoutExclusion = new Context(
+      {
+        AUTH0_INPUT_FILE: yaml,
+        AUTH0_EXCLUDED: [], // Not excluding any resources
+      },
+      mockMgmtClient()
+    );
+
+    await contextWithoutExclusion.load();
+    expect(contextWithoutExclusion.assets.actions).to.deep.equal([]);
+    expect(contextWithoutExclusion.assets.hooks).to.deep.equal([]);
+    expect(contextWithoutExclusion.assets.rules).to.deep.equal([]);
   });
 
   it('should error invalid schema', async () => {

@@ -57,6 +57,32 @@ describe('#directory context validation', () => {
     expect(context.assets.exclude.defaults).to.deep.equal(['emailProvider']);
   });
 
+  it('should respect resource exclusion on import', async () => {
+    const tenantConfig = {
+      allowed_logout_urls: ['https://mycompany.org/logoutCallback'],
+      enabled_locales: ['en'],
+    };
+
+    /* Create empty directory */
+    const dir = path.resolve(testDataDir, 'directory', 'resource-exclusion');
+    cleanThenMkdir(dir);
+    fs.writeFileSync(path.join(dir, 'tenant.json'), JSON.stringify(tenantConfig));
+
+    const contextWithExclusion = new Context({
+      AUTH0_INPUT_FILE: dir,
+      AUTH0_EXCLUDED: ['tenant'],
+    });
+    await contextWithExclusion.load();
+    expect(contextWithExclusion.assets.tenant).to.equal(undefined);
+
+    const contextWithoutExclusion = new Context({
+      AUTH0_INPUT_FILE: dir,
+      AUTH0_EXCLUDED: [], // Not excluding tenant resource
+    });
+    await contextWithoutExclusion.load();
+    expect(contextWithoutExclusion.assets.tenant).to.deep.equal(tenantConfig);
+  });
+
   it('should error on bad directory', async () => {
     const dir = path.resolve(testDataDir, 'directory', 'doesNotExist');
     const context = new Context({ AUTH0_INPUT_FILE: dir });
