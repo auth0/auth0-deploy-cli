@@ -69,6 +69,20 @@ export default class YAMLContext {
       }
     }
 
+    const excludedAssetsFiltered = Object.keys(this.assets).reduce(
+      (acc: Assets, key: AssetTypes) => {
+        const excludedAssetTypes = this.config.AUTH0_EXCLUDED || [];
+        if (excludedAssetTypes.includes(key)) return acc;
+
+        return {
+          ...acc,
+          [key]: this.assets[key],
+        };
+      },
+      {}
+    );
+    this.assets = excludedAssetsFiltered;
+
     // Run initial schema check to ensure valid YAML
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
     await auth0.validate();
