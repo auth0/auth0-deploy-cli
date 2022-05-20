@@ -5,10 +5,10 @@ import mkdirp from 'mkdirp';
 import log from '../logger';
 import { isDirectory } from '../utils';
 import { setupContext } from '../context/index';
-import { Config } from '../types';
+import { Config, Assets } from '../types';
 import { ExportParams } from '../args';
 
-export default async function exportCMD(params: ExportParams) {
+export default async function exportCMD(params: ExportParams): Promise<Assets> {
   const {
     output_folder: outputFolder,
     base_path: basePath,
@@ -59,5 +59,7 @@ export default async function exportCMD(params: ExportParams) {
   // Setup context and load
   const context = await setupContext(nconf.get());
   await context.dump();
+
   log.info('Export Successful');
+  return context.assets;
 }

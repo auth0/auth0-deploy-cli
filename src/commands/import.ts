@@ -4,8 +4,9 @@ import { deploy as toolsDeploy } from '../tools';
 import log from '../logger';
 import { setupContext } from '../context';
 import { ImportParams } from '../args';
+import { Assets } from '../types';
 
-export default async function importCMD(params: ImportParams) {
+export default async function importCMD(params: ImportParams): Promise<Assets> {
   const {
     input_file: inputFile,
     base_path: basePath,
@@ -52,4 +53,6 @@ export default async function importCMD(params: ImportParams) {
   await toolsDeploy(context.assets, context.mgmtClient, config);
 
   log.info('Import Successful');
+
+  return context.assets;
 }
