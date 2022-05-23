@@ -51,12 +51,17 @@ export default class DirectoryContext {
       /* If this is a directory, look for each file in the directory */
       log.info(`Processing directory ${this.filePath}`);
 
-      Object.values(handlers).forEach((handler) => {
-        const parsed = handler.parse(this);
-        Object.entries(parsed).forEach(([k, v]) => {
-          this.assets[k] = v;
+      Object.entries(handlers)
+        .filter(([handlerName]: [AssetTypes, DirectoryHandler<any>]) => {
+          const excludedAssetTypes = this.config.AUTH0_EXCLUDED || [];
+          return !excludedAssetTypes.includes(handlerName);
+        })
+        .forEach(([_name, handler]) => {
+          const parsed = handler.parse(this);
+          Object.entries(parsed).forEach(([k, v]) => {
+            this.assets[k] = v;
+          });
         });
-      });
       return;
     }
     throw new Error(`Not sure what to do with, ${this.filePath} as it is not a directory...`);

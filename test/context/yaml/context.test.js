@@ -57,6 +57,49 @@ describe('#YAML context validation', () => {
     expect(context.assets.exclude.defaults).to.deep.equal(['emailProvider']);
   });
 
+  it('should respect resource exclusion on import', async () => {
+    /* Create empty directory */
+    const dir = path.resolve(testDataDir, 'yaml', 'resource-exclusion');
+    cleanThenMkdir(dir);
+    const yaml = path.join(dir, 'resource-exclusion.yaml');
+    fs.writeFileSync(
+      yaml,
+      `
+      actions: []
+      rules: []
+      hooks: []
+    `
+    );
+
+    const exclusions = ['hooks', 'rules', 'prompts']; // Only actions are defined above but not excluded
+    const contextWithExclusion = new Context(
+      {
+        AUTH0_INPUT_FILE: yaml,
+        AUTH0_EXCLUDED: exclusions,
+      },
+      mockMgmtClient()
+    );
+
+    await contextWithExclusion.load();
+    exclusions.forEach((excludedResource) => {
+      expect(contextWithExclusion.assets[excludedResource]).to.equal(null); // Ensure all excluded resources, defined or not, are null
+    });
+    expect(contextWithExclusion.assets.actions).to.deep.equal([]); // Actions were not excluded
+
+    const contextWithoutExclusion = new Context(
+      {
+        AUTH0_INPUT_FILE: yaml,
+        AUTH0_EXCLUDED: [], // Not excluding any resources
+      },
+      mockMgmtClient()
+    );
+
+    await contextWithoutExclusion.load();
+    expect(contextWithoutExclusion.assets.actions).to.deep.equal([]);
+    expect(contextWithoutExclusion.assets.hooks).to.deep.equal([]);
+    expect(contextWithoutExclusion.assets.rules).to.deep.equal([]);
+  });
+
   it('should error invalid schema', async () => {
     const dir = path.resolve(testDataDir, 'yaml', 'invalid');
     cleanThenMkdir(dir);
