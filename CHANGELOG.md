@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Resource exclusion respected during import even if resource configuration exists [#545]
+- Environment variables ingested by default [#553]
+
 ## [7.12.2] - 2022-05-17
 
 ### Fixed
