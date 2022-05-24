@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.12.3] - 2022-05-24
+
+### Fixed
+
+- Resource exclusion respected during import even if resource configuration exists [#545]
+- Environment variables ingested by default [#553]
+
 ## [7.12.2] - 2022-05-17
 
 ### Fixed
@@ -748,7 +755,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#532]: https://github.com/auth0/auth0-deploy-cli/issues/532
 [#541]: https://github.com/auth0/auth0-deploy-cli/issues/541
 [#542]: https://github.com/auth0/auth0-deploy-cli/issues/542
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.2...HEAD
+[#545]: https://github.com/auth0/auth0-deploy-cli/issues/545
+[#553]: https://github.com/auth0/auth0-deploy-cli/issues/553
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.3...HEAD
+[7.12.3]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.2...v7.12.3
 [7.12.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.1...v7.12.2
 [7.12.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.0...v7.12.1
 [7.12.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.11.1...v7.12.0
