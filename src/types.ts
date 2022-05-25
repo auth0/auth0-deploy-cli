@@ -6,6 +6,8 @@ import {
   PromptSettings,
 } from './tools/auth0/handlers/prompts';
 
+import { ThemeResponse, ThemeRequest } from './tools/auth0/handlers/themes';
+
 type SharedPaginationParams = {
   checkpoint?: boolean;
   paginate?: boolean;
@@ -62,6 +64,10 @@ export type BaseAuth0APIClient = {
     getUniversalLoginTemplate: () => Promise<Asset>;
     updateSettings: ({}, Asset) => Promise<void>;
     setUniversalLoginTemplate: ({}, Asset) => Promise<void>;
+    getDefaultTheme: () => Promise<Asset>;
+    updateTheme: (arg0: { id: string }, ThemeRequest) => Promise<ThemeResponse>;
+    deleteTheme: (arg0: { id: string }) => Promise<void>;
+    createTheme: (ThemeRequest) => Promise<ThemeResponse>;
   };
   clients: APIClientBaseFunctions;
   clientGrants: APIClientBaseFunctions;
@@ -231,6 +237,7 @@ export type Assets = Partial<{
     [key: string]: string[];
   };
   clientsOrig: Asset[] | null;
+  themes: ThemeRequest[] | null;
 }>;
 
 export type CalculatedChanges = {
@@ -268,7 +275,8 @@ export type AssetTypes =
   | 'branding'
   | 'logStreams'
   | 'prompts'
-  | 'customDomains';
+  | 'customDomains'
+  | 'themes';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 

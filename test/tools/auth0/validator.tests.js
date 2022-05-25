@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import Auth0 from '../../../src/tools/auth0';
 import constants from '../../../src/tools/constants';
+import { validTheme } from '../../../src/tools/auth0/handlers/themes';
 
 const mockConfigFn = () => {};
 
@@ -789,6 +790,27 @@ describe('#schema validation tests', () => {
       };
 
       checkPassed({ migrations: data }, done);
+    });
+  });
+
+  describe('#themes validate', () => {
+    it('should fail validation if themes is invalid', (done) => {
+      const data = [
+        {
+          colors: true,
+        },
+      ];
+      const auth0 = new Auth0(client, { themes: data }, mockConfigFn);
+
+      auth0
+        .validate()
+        .then(failedCb(done), passedCb(done, "should have required property 'borders'"));
+    });
+
+    it('should pass validation', (done) => {
+      const data = [validTheme()];
+
+      checkPassed({ themes: data }, done);
     });
   });
 });
