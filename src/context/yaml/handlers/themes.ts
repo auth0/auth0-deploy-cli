@@ -1,9 +1,9 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { ParsedAsset } from '../../../types';
-import { ThemeRequest } from '../../../tools/auth0/handlers/themes';
+import { Theme } from '../../../tools/auth0/handlers/themes';
 
-type ParsedThemes = ParsedAsset<'themes', ThemeRequest[]>;
+type ParsedThemes = ParsedAsset<'themes', Theme[]>;
 
 async function parseAndDump(context: YAMLContext): Promise<ParsedThemes> {
   const { themes } = context.assets;

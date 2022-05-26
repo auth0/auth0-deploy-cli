@@ -5,12 +5,12 @@ import Context from '../../../src/context/directory';
 import { testDataDir, createDir, mockMgmtClient, cleanThenMkdir } from '../../utils';
 import { constants } from '../../../src/tools';
 import { loadJSON } from '../../../src/utils';
-import { validTheme } from '../../../src/tools/auth0/handlers/themes';
+import { mockTheme } from '../../tools/auth0/handlers/themes.tests';
 import handler from '../../../src/context/directory/handlers/themes';
 
 describe('#directory context themes', () => {
-  it('should process themes', async () => {
-    const theme = validTheme();
+  it('should load single theme', async () => {
+    const theme = mockTheme();
 
     const dir = path.join(testDataDir, 'directory', 'themesProcess');
     createDir(dir, {
@@ -25,10 +25,10 @@ describe('#directory context themes', () => {
     expect(context.assets.themes).to.deep.equal([theme]);
   });
 
-  it('should process multiple themes', async () => {
-    const theme1 = validTheme();
+  it('should load themes', async () => {
+    const theme1 = mockTheme();
     theme1.displayName = 'Theme 1';
-    const theme2 = validTheme();
+    const theme2 = mockTheme();
     theme2.displayName = 'Theme 2';
 
     const dir = path.join(testDataDir, 'directory', 'themesProcess');
@@ -47,8 +47,8 @@ describe('#directory context themes', () => {
     expect(context.assets.themes).to.deep.equal([theme1, theme2]);
   });
 
-  it('should dump themes', async () => {
-    const theme = validTheme();
+  it('should dump single theme', async () => {
+    const theme = mockTheme();
 
     const dir = path.join(testDataDir, 'directory', 'themesDump');
     cleanThenMkdir(dir);
@@ -65,9 +65,9 @@ describe('#directory context themes', () => {
   });
 
   it('should dump multiple themes', async () => {
-    const themeJson = validTheme();
+    const themeJson = mockTheme();
     themeJson.displayName = 'Theme';
-    const theme1Json = validTheme();
+    const theme1Json = mockTheme();
     theme1Json.displayName = 'Theme 1';
 
     const dir = path.join(testDataDir, 'directory', 'themesDump');

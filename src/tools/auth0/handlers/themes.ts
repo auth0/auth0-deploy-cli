@@ -4,16 +4,17 @@ import log from '../../../logger';
 import DefaultHandler from './default';
 
 export default class ThemesHandler extends DefaultHandler {
-  existing: ThemeRequest[] | null;
+  existing: Theme[];
 
   constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'themes',
+      identifiers: ['themeId'],
     });
   }
 
-  async getType(): Promise<ThemeRequest[] | null> {
+  async getType(): Promise<Theme[] | null> {
     if (!this.existing) {
       this.existing = await this.getThemes();
     }
@@ -21,11 +22,61 @@ export default class ThemesHandler extends DefaultHandler {
     return this.existing;
   }
 
-  async getThemes(): Promise<ThemeRequest[] | null> {
-    let theme;
+  async processChanges(assets: Assets): Promise<void> {
+    const { themes } = assets;
 
+    // Non existing section means themes doesn't need to be processed
+    if (!themes) {
+      return;
+    }
+
+    // Empty array means themes should be deleted
+    if (themes.length === 0) {
+      return this.deleteThemes();
+    }
+
+    return this.updateThemes(themes);
+  }
+
+  async deleteThemes(): Promise<void> {
+    if (!this.config('AUTH0_ALLOW_DELETE')) {
+      return;
+    }
+
+    // if theme exists we need to delete it
+    const currentTheme = (await this.getThemes())[0];
+    if (!currentTheme?.themeId) {
+      return;
+    }
+
+    await this.client.branding.deleteTheme({ id: currentTheme.themeId });
+
+    this.deleted += 1;
+    this.didDelete(currentTheme);
+  }
+
+  async updateThemes(themes: Theme[]): Promise<void> {
+    if (themes.length > 1) {
+      log.warn('Only one theme is supported per tenant');
+    }
+
+    const currentTheme = (await this.getThemes())[0];
+
+    // if theme exists, overwrite it otherwise create it
+    if (currentTheme?.themeId) {
+      await this.client.branding.updateTheme({ id: currentTheme.themeId }, themes[0]);
+    } else {
+      await this.client.branding.createTheme(themes[0]);
+    }
+
+    this.updated += 1;
+    this.didUpdate(themes[0]);
+  }
+
+  async getThemes(): Promise<Theme[]> {
     try {
-      theme = await this.client.branding.getDefaultTheme();
+      const theme = (await this.client.branding.getDefaultTheme()) as Theme;
+      return [theme];
     } catch (err) {
       // Errors other than 404 (theme doesn't exist) or 400 (no-code not enabled) shouldn't be expected
       if (err.statusCode !== 404 && err.statusCode !== 400) {
@@ -33,45 +84,7 @@ export default class ThemesHandler extends DefaultHandler {
       }
     }
 
-    if (theme) {
-      delete theme.themeId;
-      return [theme];
-    }
-
-    return null;
-  }
-
-  async processChanges(assets: Assets): Promise<void> {
-    const { themes } = assets;
-
-    if (!themes || themes.length === 0) {
-      return;
-    }
-
-    if (themes.length > 1) {
-      log.warn('Only one theme is supported per tenant');
-    }
-
-    let themeId: string = '';
-    try {
-      const theme = await this.client.branding.getDefaultTheme();
-      themeId = theme.themeId;
-    } catch (err) {
-      // error 404 is expected, the tenant may not have a default theme
-      if (err.statusCode !== 404) {
-        throw err;
-      }
-    }
-
-    // if theme exists, overwrite it otherwise create it
-    if (themeId) {
-      await this.client.branding.updateTheme({ id: themeId }, themes[0]);
-    } else {
-      await this.client.branding.createTheme(themes[0]);
-    }
-
-    this.updated += 1;
-    this.didUpdate(themes[0]);
+    return [];
   }
 }
 
@@ -568,89 +581,6 @@ export interface Theme {
   borders: Borders;
   widget: Widget;
   page_background: PageBackground;
-}
-
-export interface ThemeRequest extends Theme {
+  themeId?: string;
   displayName?: string;
 }
-
-export interface ThemeResponse extends Theme {
-  themeId: string;
-  displayName: string;
-}
-
-export const validTheme = (): ThemeRequest => {
-  return cloneDeep({
-    borders: {
-      button_border_radius: 1,
-      button_border_weight: 1,
-      buttons_style: 'pill',
-      input_border_radius: 3,
-      input_border_weight: 1,
-      inputs_style: 'pill',
-      show_widget_shadow: false,
-      widget_border_weight: 1,
-      widget_corner_radius: 3,
-    },
-    colors: {
-      body_text: '#FF00CC',
-      error: '#FF00CC',
-      header: '#FF00CC',
-      icons: '#FF00CC',
-      input_background: '#FF00CC',
-      input_border: '#FF00CC',
-      input_filled_text: '#FF00CC',
-      input_labels_placeholders: '#FF00CC',
-      links_focused_components: '#FF00CC',
-      primary_button: '#FF00CC',
-      primary_button_label: '#FF00CC',
-      secondary_button_border: '#FF00CC',
-      secondary_button_label: '#FF00CC',
-      success: '#FF00CC',
-      widget_background: '#FF00CC',
-      widget_border: '#FF00CC',
-    },
-    fonts: {
-      body_text: {
-        bold: false,
-        size: 100,
-      },
-      buttons_text: {
-        bold: false,
-        size: 100,
-      },
-      font_url: 'https://google.com/font.woff',
-      input_labels: {
-        bold: false,
-        size: 100,
-      },
-      links: {
-        bold: false,
-        size: 100,
-      },
-      links_style: 'normal',
-      reference_text_size: 12,
-      subtitle: {
-        bold: false,
-        size: 100,
-      },
-      title: {
-        bold: false,
-        size: 100,
-      },
-    },
-    page_background: {
-      background_color: '#000000',
-      background_image_url: 'https://google.com/background.png',
-      page_layout: 'center',
-    },
-    widget: {
-      header_text_alignment: 'center',
-      logo_height: 55,
-      logo_position: 'center',
-      logo_url: 'https://google.com/logo.png',
-      social_buttons_layout: 'top',
-    },
-    displayName: 'Default theme',
-  });
-};

@@ -6,7 +6,7 @@ import {
   PromptSettings,
 } from './tools/auth0/handlers/prompts';
 
-import { ThemeResponse, ThemeRequest } from './tools/auth0/handlers/themes';
+import { Theme } from './tools/auth0/handlers/themes';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -65,9 +65,9 @@ export type BaseAuth0APIClient = {
     updateSettings: ({}, Asset) => Promise<void>;
     setUniversalLoginTemplate: ({}, Asset) => Promise<void>;
     getDefaultTheme: () => Promise<Asset>;
-    updateTheme: (arg0: { id: string }, ThemeRequest) => Promise<ThemeResponse>;
+    updateTheme: (arg0: { id: string }, Theme) => Promise<Theme>;
     deleteTheme: (arg0: { id: string }) => Promise<void>;
-    createTheme: (ThemeRequest) => Promise<ThemeResponse>;
+    createTheme: (arg0: Theme) => Promise<Theme>;
   };
   clients: APIClientBaseFunctions;
   clientGrants: APIClientBaseFunctions;
@@ -237,7 +237,7 @@ export type Assets = Partial<{
     [key: string]: string[];
   };
   clientsOrig: Asset[] | null;
-  themes: ThemeRequest[] | null;
+  themes: Theme[] | null;
 }>;
 
 export type CalculatedChanges = {

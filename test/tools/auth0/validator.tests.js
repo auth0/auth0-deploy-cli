@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import Auth0 from '../../../src/tools/auth0';
 import constants from '../../../src/tools/constants';
-import { validTheme } from '../../../src/tools/auth0/handlers/themes';
+import { mockTheme } from './handlers/themes.tests';
 
 const mockConfigFn = () => {};
 
@@ -808,7 +808,7 @@ describe('#schema validation tests', () => {
     });
 
     it('should pass validation', (done) => {
-      const data = [validTheme()];
+      const data = [mockTheme()];
 
       checkPassed({ themes: data }, done);
     });

@@ -1,4 +1,4 @@
-import { dump } from 'js-yaml';
+import { dump as toYaml } from 'js-yaml';
 import fs from 'fs-extra';
 import path from 'path';
 import { expect } from 'chai';
@@ -6,15 +6,15 @@ import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
 import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/themes';
-import { validTheme } from '../../../src/tools/auth0/handlers/themes';
+import { mockTheme } from '../../tools/auth0/handlers/themes.tests';
 
 describe('#YAML context themes', () => {
   it('should process themes', async () => {
-    const theme = validTheme();
+    const theme = mockTheme();
     const dir = path.join(testDataDir, 'yaml', 'themes');
     cleanThenMkdir(dir);
 
-    const yaml = dump({
+    const yaml = toYaml({
       themes: [theme],
     });
 
@@ -29,15 +29,15 @@ describe('#YAML context themes', () => {
   });
 
   it('should process multiple themes', async () => {
-    const theme1 = validTheme();
+    const theme1 = mockTheme();
     theme1.displayName = 'Theme 1';
-    const theme2 = validTheme();
+    const theme2 = mockTheme();
     theme2.displayName = 'Theme 2';
 
     const dir = path.join(testDataDir, 'yaml', 'themes');
     cleanThenMkdir(dir);
 
-    const yaml = dump({
+    const yaml = toYaml({
       themes: [theme1, theme2],
     });
 
@@ -52,7 +52,7 @@ describe('#YAML context themes', () => {
   });
 
   it('should dump themes', async () => {
-    const theme = validTheme();
+    const theme = mockTheme();
 
     const dir = path.join(testDataDir, 'directory', 'themesDump');
     cleanThenMkdir(dir);
@@ -68,9 +68,9 @@ describe('#YAML context themes', () => {
   });
 
   it('should dump multiple themes', async () => {
-    const theme1 = validTheme();
+    const theme1 = mockTheme();
     theme1.displayName = 'Theme 1';
-    const theme2 = validTheme();
+    const theme2 = mockTheme();
     theme2.displayName = 'Theme 2';
 
     const dir = path.join(testDataDir, 'directory', 'themesDump');

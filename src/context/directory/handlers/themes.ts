@@ -4,10 +4,10 @@ import { getFiles, dumpJSON, loadJSON, existsMustBeDir } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { ParsedAsset } from '../../../types';
-import { ThemeRequest } from '../../../tools/auth0/handlers/themes';
+import { Theme } from '../../../tools/auth0/handlers/themes';
 import { constants } from '../../../tools';
 
-type ParsedThemes = ParsedAsset<'themes', ThemeRequest[]>;
+type ParsedThemes = ParsedAsset<'themes', Theme[]>;
 
 function parse(context: DirectoryContext): ParsedThemes {
   const baseFolder = path.join(context.filePath, constants.THEMES_DIRECTORY);
@@ -17,11 +17,11 @@ function parse(context: DirectoryContext): ParsedThemes {
 
   const themeDefinitionsFiles = getFiles(baseFolder, ['.json']);
   if (!themeDefinitionsFiles.length) {
-    return { themes: null };
+    return { themes: [] };
   }
 
   const themes = themeDefinitionsFiles.map(
-    (themeDefinitionsFile) => loadJSON(themeDefinitionsFile, context.mappings) as ThemeRequest
+    (themeDefinitionsFile) => loadJSON(themeDefinitionsFile, context.mappings) as Theme
   );
 
   return { themes };
