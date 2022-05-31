@@ -170,7 +170,7 @@ describe('#themes handler', () => {
       const handler = new ThemesHandler({ client: auth0 });
       const data = await handler.getType();
 
-      expect(data).to.deep.equal([]);
+      expect(data).to.deep.equal(null);
       expect(auth0.branding.getDefaultTheme.called).to.equal(true);
       expect(auth0.branding.getDefaultTheme.callCount).to.equal(1);
     });

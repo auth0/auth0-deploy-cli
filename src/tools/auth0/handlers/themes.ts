@@ -1,17 +1,20 @@
-import { cloneDeep } from 'lodash';
-import { Assets } from '../../../types';
+import { Asset, Assets } from '../../../types';
 import log from '../../../logger';
 import DefaultHandler from './default';
 
 export default class ThemesHandler extends DefaultHandler {
-  existing: Theme[];
+  existing: Theme[] | null;
 
   constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'themes',
-      identifiers: ['themeId'],
+      id: 'themeId',
     });
+  }
+
+  objString(theme: Theme): string {
+    return theme.displayName || JSON.stringify(theme);
   }
 
   async getType(): Promise<Theme[] | null> {
@@ -44,11 +47,12 @@ export default class ThemesHandler extends DefaultHandler {
     }
 
     // if theme exists we need to delete it
-    const currentTheme = (await this.getThemes())[0];
-    if (!currentTheme?.themeId) {
+    const currentThemes = await this.getThemes();
+    if (currentThemes === null || currentThemes.length === 0) {
       return;
     }
 
+    const currentTheme = currentThemes[0];
     await this.client.branding.deleteTheme({ id: currentTheme.themeId });
 
     this.deleted += 1;
@@ -60,31 +64,31 @@ export default class ThemesHandler extends DefaultHandler {
       log.warn('Only one theme is supported per tenant');
     }
 
-    const currentTheme = (await this.getThemes())[0];
+    const currentThemes = await this.getThemes();
 
-    // if theme exists, overwrite it otherwise create it
-    if (currentTheme?.themeId) {
-      await this.client.branding.updateTheme({ id: currentTheme.themeId }, themes[0]);
-    } else {
+    if (currentThemes === null || currentThemes.length === 0) {
       await this.client.branding.createTheme(themes[0]);
+    } else {
+      const currentTheme = currentThemes[0];
+      // if theme exists, overwrite it otherwise create it
+      await this.client.branding.updateTheme({ id: currentTheme.themeId }, themes[0]);
     }
 
     this.updated += 1;
     this.didUpdate(themes[0]);
   }
 
-  async getThemes(): Promise<Theme[]> {
+  async getThemes(): Promise<Theme[] | null> {
     try {
-      const theme = (await this.client.branding.getDefaultTheme()) as Theme;
+      const theme = await this.client.branding.getDefaultTheme();
       return [theme];
     } catch (err) {
-      // Errors other than 404 (theme doesn't exist) or 400 (no-code not enabled) shouldn't be expected
-      if (err.statusCode !== 404 && err.statusCode !== 400) {
-        throw err;
-      }
-    }
+      if (err.statusCode === 404) return [];
+      if (err.statusCode === 400) return null;
 
-    return [];
+      // Errors other than 404 (theme doesn't exist) or 400 (no-code not enabled) shouldn't be expected
+      throw err;
+    }
   }
 }
 
@@ -581,6 +585,6 @@ export interface Theme {
   borders: Borders;
   widget: Widget;
   page_background: PageBackground;
-  themeId?: string;
+  themeId: string;
   displayName?: string;
 }
