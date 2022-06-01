@@ -34,7 +34,7 @@
     "@types/nconf": "^0.10.2",
     "@types/winston": "^2.4.4",
     "ajv": "^6.12.6",
-    "auth0": "^2.40.0",
+    "auth0": "^2.42.0",
     "dot-prop": "^5.2.0",
     "fs-extra": "^10.1.0",
     "global-agent": "^2.1.12",
@@ -52,8 +52,8 @@
   "devDependencies": {
     "@types/expect": "^24.3.0",
     "@types/mocha": "^9.1.0",
-    "chai": "^4.3.6",
     "@typescript-eslint/parser": "^5.18.0",
+    "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "cross-env": "^3.1.4",
     "eslint": "^7.28.0",

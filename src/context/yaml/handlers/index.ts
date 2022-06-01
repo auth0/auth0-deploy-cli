@@ -26,6 +26,7 @@ import branding from './branding';
 import logStreams from './logStreams';
 import prompts from './prompts';
 import customDomains from './customDomains';
+import themes from './themes';
 
 import YAMLContext from '..';
 import { AssetTypes } from '../../../types';
@@ -64,6 +65,7 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   logStreams,
   prompts,
   customDomains,
+  themes,
 };
 
 export default yamlHandlers;

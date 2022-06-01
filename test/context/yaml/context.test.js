@@ -251,6 +251,7 @@ describe('#YAML context validation', () => {
         customText: {},
       },
       customDomains: [],
+      themes: [],
     });
   });
 
@@ -362,6 +363,7 @@ describe('#YAML context validation', () => {
         customText: {},
       },
       customDomains: [],
+      themes: [],
     });
   });
 
@@ -474,6 +476,7 @@ describe('#YAML context validation', () => {
         customText: {},
       },
       customDomains: [],
+      themes: [],
     });
   });
 
