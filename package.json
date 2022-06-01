@@ -37,7 +37,7 @@
     "auth0": "^2.42.0",
     "dot-prop": "^5.2.0",
     "fs-extra": "^10.1.0",
-    "global-agent": "^2.1.12",
+    "global-agent": "^3.0.0",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.20",
     "mkdirp": "^1.0.4",
