@@ -166,5 +166,31 @@ describe('#prompts handler', () => {
       expect(didCallUpdateCustomText).to.equal(true);
       expect(numberOfUpdateCustomTextCalls).to.equal(3);
     });
+
+    it('should return empty custom text object if API returns non-array `enabled_locales` value', async () => {
+      const NON_ARRAY_VALUE = null; // some arbitrary non-array value. See: ESD-20252
+
+      expect(Array.isArray(NON_ARRAY_VALUE)).to.equal(false);
+
+      const auth0 = {
+        tenant: {
+          getSettings: () =>
+            Promise.resolve({
+              enabled_locales: NON_ARRAY_VALUE,
+            }),
+        },
+        prompts: {
+          getSettings: () => mockPromptsSettings,
+        },
+      };
+
+      //@ts-ignore
+      const handler = new promptsHandler({ client: auth0 });
+      const data = await handler.getType();
+      expect(data).to.deep.equal({
+        ...mockPromptsSettings,
+        customText: {},
+      });
+    });
   });
 });

@@ -186,9 +186,17 @@ export default class PromptsHandler extends DefaultHandler {
   }
 
   async getCustomTextSettings(): Promise<AllPromptsByLanguage> {
-    const supportedLanguages = await this.client.tenant
-      .getSettings()
-      .then(({ enabled_locales }) => enabled_locales);
+    const supportedLanguages = await (async () => {
+      const enabledLocales = await this.client.tenant
+        .getSettings()
+        .then(({ enabled_locales }) => enabled_locales);
+
+      if (!Array.isArray(enabledLocales)) {
+        return []; // For reasons unknown, enabled_locales is sometimes not an array. See: ESD-20252
+      }
+
+      return enabledLocales;
+    })();
 
     const data = await Promise.all(
       supportedLanguages.flatMap((language) => {
