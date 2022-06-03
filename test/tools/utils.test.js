@@ -483,13 +483,3 @@ describe('#detectInsufficientScopeError', () => {
     expect(didThrow).to.equal(true);
   });
 });
-
-describe('#getEnabledClients', () => {
-  it('should retrieve enabled clients', () => {
-    utils.getEnabledClients();
-  });
-
-  it('should return undefined if no enabled clients value is passed in', () => {
-    utils.getEnabledClients();
-  });
-});
