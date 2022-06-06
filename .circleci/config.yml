@@ -47,12 +47,12 @@ jobs:
       - run:
           name: Publish package
           command: npm publish
-
-
-  token-test:
+  token_test:
+    docker:
+      - image: cimg/node:16
     steps:
       - run:
-        command: echo "Hello world"
+          command: echo "Hello world"
 workflows:
   version: 2
   test:
@@ -65,9 +65,9 @@ workflows:
           v: "18.0.0"
   test_and_deploy:
     jobs:
-      - token-test
-        context: publish-npm
-
+      - token_test:
+          name: "Token test"
+          context: publish-npm
       - test:
           name: test_lts
           v: "lts"
