@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Themes support (if supported by tenant) [#554]
+
+### Fixed
+
+- Omit `enabled_clients` from connection payload if not defined in resource configuration files [#563]
+
 ## [7.12.3] - 2022-05-24
 
 ### Fixed
