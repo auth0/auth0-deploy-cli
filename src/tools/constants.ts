@@ -169,6 +169,7 @@ const constants = {
   LOG_STREAMS_DIRECTORY: 'log-streams',
   PROMPTS_DIRECTORY: 'prompts',
   CUSTOM_DOMAINS_DIRECTORY: 'custom-domains',
+  THEMES_DIRECTORY: 'themes',
 };
 
 export default constants;

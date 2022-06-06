@@ -110,7 +110,14 @@ export function mockMgmtClient() {
       getBruteForceConfig: () => ({}),
       getSuspiciousIpThrottlingConfig: () => ({}),
     },
-    branding: { getSettings: () => ({}) },
+    branding: {
+      getSettings: () => ({}),
+      getDefaultTheme: () => {
+        const err = new Error('Not found');
+        err.statusCode = 404;
+        return Promise.reject(err);
+      },
+    },
     logStreams: { getAll: () => [] },
     prompts: {
       getCustomTextByLanguage: () =>
