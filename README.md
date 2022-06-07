@@ -37,7 +37,7 @@ This guide will help you to a working implementation of the Deploy CLI tool used
 
 ### Prerequisites
 
-- Node version 10 or greater
+- [Node](https://nodejs.dev/) version 10 or greater
 - An Auth0 tenant
 
 ### Install the Deploy CLI
