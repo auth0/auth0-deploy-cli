@@ -103,8 +103,11 @@ export function getEnabledClients(
   connection: Asset,
   existing: Asset[],
   clients: Asset[]
-): string[] {
+): string[] | undefined {
   // Convert enabled_clients by name to the id
+
+  if (connection.enabled_clients === undefined) return undefined; // If no enabled clients passed in, explicitly ignore from management, preventing unintentional disabling of connection.
+
   const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
   const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
   const enabledClients = [
