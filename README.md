@@ -1,65 +1,88 @@
-# Auth0 Deploy CLI
+<div align="center">
+  <h1>Auth0 Deploy CLI</h1>
+  The Auth0 Deploy CLI is a tool that helps you manage your Auth0 tenant configuration. It integrates into your development workflows as a standalone CLI or as a node module.
+</div>
 
-Auth0 supports continuous integration and deployment (CI/CD) of Auth0 Tenants and integration into existing CI/CD pipelines by using this **auth0-deploy-cli** tool.
+**Supported resource types:**
 
-The `auth0-deploy-cli` tool supports the importing and exporting of Auth0 Tenant configuration data.
+actions, branding, client grants, clients (applications), connections, custom domains, email templates, emails, grants, guardian, hook secrets, hooks, log streams, migrations, organizations, pages, prompts, resource servers (APIs), roles, rules, rules configs, tenant settings, themes
 
-Supported Auth0 Management API resources
+## Highlights
 
-- [x] [Actions](https://auth0.com/docs/api/management/v2/#!/Actions/get_actions)
-- [x] [Branding](https://auth0.com/docs/api/management/v2/#!/Branding/get_branding)
-- [x] [Clients (Applications)](https://auth0.com/docs/api/management/v2#!/Clients/get_clients)
-- [x] [Client Grants](https://auth0.com/docs/api/management/v2#!/Client_Grants/get_client_grants)
-- [x] [Connections](https://auth0.com/docs/api/management/v2#!/Connections/get_connections)
-- [ ] [Custom Domains](https://auth0.com/docs/api/management/v2#!/Custom_Domains/get_custom_domains)
-- [ ] [Device Credentials](https://auth0.com/docs/api/management/v2#!/Device_Credentials/get_device_credentials)
-- [x] [Grants](https://auth0.com/docs/api/management/v2#!/Grants/get_grants)
-- [x] [Hooks](https://auth0.com/docs/api/management/v2#!/Hooks/get_hooks)
-- [x] [Hook Secrets](https://auth0.com/docs/api/management/v2/#!/Hooks/get_secrets)
-- [x] [Log Streams](https://auth0.com/docs/api/management/v2#!/Log_Streams/get_log_streams)
-- [ ] [Logs](https://auth0.com/docs/api/management/v2#!/Logs/get_logs)
-- [x] [Organizations](https://auth0.com/docs/api/management/v2#!/Organizations/get_organizations)
-- [x] [Prompts](https://auth0.com/docs/api/management/v2#!/Prompts/get_prompts)
-- [x] [Resource Servers (APIs)](https://auth0.com/docs/api/management/v2#!/Resource_Servers/get_resource_servers)
-- [x] [Roles](https://auth0.com/docs/api/management/v2#!/Roles)
-- [x] [Rules](https://auth0.com/docs/api/management/v2#!/Rules/get_rules)
-- [x] [Rules Configs](https://auth0.com/docs/api/management/v2#!/Rules_Configs/get_rules_configs)
-- [ ] [User Blocks](https://auth0.com/docs/api/management/v2#!/User_Blocks/get_user_blocks)
-- [ ] [Users](https://auth0.com/docs/api/management/v2#!/Users/get_users)
-- [ ] [Users By Email](https://auth0.com/docs/api/management/v2#!/Users_By_Email/get_users_by_email)
-- [ ] [Blacklists](https://auth0.com/docs/api/management/v2#!/Blacklists/get_tokens)
-- [x] [Email Templates](https://auth0.com/docs/api/management/v2#!/Email_Templates/get_email_templates_by_templateName)
-- [x] [Emails](https://auth0.com/docs/api/management/v2#!/Emails/get_provider)
-- [x] [Guardian](https://auth0.com/docs/api/management/v2#!/Guardian/get_factors)
-- [ ] [Jobs](https://auth0.com/docs/api/management/v2#!/Jobs/get_jobs_by_id)
-- [ ] [Stats](https://auth0.com/docs/api/management/v2#!/Stats/get_active_users)
-- [x] [Tenants (Pages and Migrations)](https://auth0.com/docs/api/management/v2#!/Tenants/get_settings)
-- [ ] [Anomaly](https://auth0.com/docs/api/management/v2#!/Anomaly/get_ips_by_id)
-- [ ] [Tickets](https://auth0.com/docs/api/management/v2#!/Tickets/post_email_verification)
-- [ ] [Signing Keys](https://auth0.com/docs/api/management/v2#!/Keys/get_signing_keys)
+- **Multi-Environment Oriented:** Foo
+- **Multi-Environment Oriented:** Foo
+- **Multi-Environment Oriented:** Foo
 
-# Before you begin
+## Documentation
 
-- This tool can be destructive to your Auth0 tenant. Please ensure you have read the documentation and tested the tool on a development tenant before using it in production.
-- Entities created using this tool may share user data with or receive user data from 3rd parties. Please see the [documentation for the individual Management endpoints](https://auth0.com/docs/api/management/v2) for details.
+- [Using as a CLI](#)
+- [Using as a Node Module](#)
+- [Configuring the Deploy CLI](#)
+- [Keyword Replacement](#)
+- [Incorporating Into Multi-environment Workflows](#)
+- [Excluding from Management Purview](#)
+- [Available Resource Formats](#)
+- [Terraform Provider](#)
+- [How to Contribute](#)
 
-# Documentation
+## Getting Started
 
-Please visit Auth0 Doc for this [Deploy CLI Tool](https://auth0.com/docs/deploy/deploy-cli-tool)
+This guide will help you to a working implementation of the Deploy CLI tool used as a standalone CLI. There are three main steps before the Deploy CLI can be run:
 
-# Integrating with popular CI/CD pipelines
+- Install the Deploy CLI tool
+- Create a dedicated Auth0 application
+- Configure the Deploy CLI
 
-Please visit Auth0 Marketplace Guide for:
+> ⚠️ **NOTE:** This tool can be destructive to your Auth0 tenant. It is recommended to be familiar with the [`AUTH0_ALLOW_DELETE` configuration](#) and to test on development tenants prior to using in production.
 
-- [Azure Pipelines](https://marketplace.auth0.com/integrations/azure-pipeline)
-- [Bitbucket Pipelines](https://marketplace.auth0.com/integrations/bitbucket-pipeline)
-- [GitLab Pipelines](https://marketplace.auth0.com/integrations/gitlab-pipeline)
-- [GitHub Actions](https://marketplace.auth0.com/integrations/github-actions)
+### Prerequisites
 
-# Known issues
+- Node version 10 or greater
+- An Auth0 tenant
 
-See https://github.com/auth0/auth0-deploy-cli/issues
+### Install the Deploy CLI
 
-# License
+To run as a standalone command-line tool:
 
-MIT
+```shell
+npm install -g auth0-deploy-cli
+```
+
+### Create a Dedicated Auth0 Application
+
+In order for the Deploy CLI to call the Management API, a dedicated Auth0 application must be created to make calls on behalf of the tool.
+
+1. From the Auth0 dashboard, navigate to **Applications > Applications**
+2. Click “Create Application”
+3. On Create application page:
+   1. Name it “Deploy CLI” or similar
+   2. Select “Machine to Machine Applications” as application type
+   3. Click “Create”
+4. On the “Authorize Machine to Machine Application” page
+   1. Select “Auth0 Management API”
+   2. Select the appropriate permissions for the resources you wish to manage. At a minimum, `read:clients` need to be selected, but is is recommended to select `read`, `create` and `update` permissions for most resources. Please refer to the [Permissions](#) section for more information.
+   3. Click “Authorize”
+
+# Configure the Deploy CLI
+
+The Deploy CLI can be configured two ways, through a `config.json` file and through environment variables. The decision to choose one or both would depend on your specific use case and preferences. More comprehensive information about configuring the tool can be found on the [Configuring the Deploy CLI](#) page. However, for this example, the simplest way to get going is by setting the following environment variables:
+
+- `AUTH0_DOMAIN`
+- `AUTH0_CLIENT_ID`
+- `AUTH0_CLIENT_SECRET`
+
+These values can be found in the “Settings” tab within the Auth0 application created in the previous step.
+
+### Calling the Deploy CLI
+
+Finally, with above complete, the Deploy CLI export command can be run:
+
+```shell
+a0deploy export --format=yaml --output_folder=local
+```
+
+Once the process completes, observe the resource configuration files generated in the `local` directory. Then, run the import command, which pushes configuration from the local machine to your Auth0 tenant:
+
+```shell
+a0deploy import -c=config.json --input_file local/tenant.yaml
+```
