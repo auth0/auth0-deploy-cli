@@ -8,7 +8,7 @@ The Auth0 Deploy CLI is a tool that helps you manage your Auth0 tenant configura
 
 ## Highlights
 
-- **Multi-Environment Oriented:** Designed to help you test your applications' Auth0 integrations from feature branch all the way to production
+- **Multi-Environment Oriented:** Designed to help you test your applications' Auth0 integrations from feature branch all the way to production.
 - **Keyword Replacement:** Shared resource configurations across all environments with dynamic keyword replacement.
 - **Versatile:** Integrate into your CI/CD workflows either as a CLI or as a Node module.
 
