@@ -4,7 +4,7 @@
 
 The Auth0 Deploy CLI is a tool that helps you manage your Auth0 tenant configuration. It integrates into your development workflows as a standalone CLI or as a node module.
 
-**Supported resource types:** actions, branding, client grants, clients (applications), connections, custom domains, email templates, emails, grants, guardian, hook secrets, hooks, log streams, migrations, organizations, pages, prompts, resource servers (APIs), roles, rules, rules configs, tenant settings, themes
+**Supported resource types:** actions, branding, client grants, clients (applications), connections, custom domains, email templates, emails, grants, guardian, hook secrets, hooks, log streams, migrations, organizations, pages, prompts, resource servers (APIs), roles, rules, rules configs, tenant settings, themes.
 
 ## Highlights
 
