@@ -12,7 +12,7 @@ Path. Specifies the target directory for configuration files to be written to.
 
 ### `--config_file`, `-c`
 
-Path. Specifies the user-defined configuration file (`config.json`). Refer to the list of [all configurable properties](#).
+Path. Specifies the user-defined configuration file (`config.json`). Refer to the list of [all configurable properties](./configuring-the-deploy-cli.md).
 
 ### `--format`, `-f`
 
@@ -57,7 +57,7 @@ Path. Specifies the location of the resource configuration files. For YAML forma
 
 ### `--config_file`, `-c`
 
-Path. Specifies the user-defined configuration file (config.json). Refer to the list of [all configurable properties](#).
+Path. Specifies the user-defined configuration file (config.json). Refer to the list of [all configurable properties](./configuring-the-deploy-cli.md).
 
 ### `--env`
 
