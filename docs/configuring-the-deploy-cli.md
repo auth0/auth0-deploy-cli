@@ -19,7 +19,7 @@ Example **config.json** file:
 }
 ```
 
-> ⚠️ **NOTE:** Hard-coding credentials is not recommended, and risks secret leakage should this file ever be committed to a public version control system. Instead, passing credentials as [environment variables](#) is considered best practice.
+> ⚠️ **NOTE:** Hard-coding credentials is not recommended, and risks secret leakage should this file ever be committed to a public version control system. Instead, passing credentials as [environment variables](#Environment variables) is considered best practice.
 
 ### Environment variables
 
@@ -29,7 +29,7 @@ Non-primitive configuration values like `AUTH0_KEYWORD_MAPPING` and `AUTH0_EXCLU
 
 To **disable** the consumption of environment variables for either the `import` or `export` commands, pass the `--env=false` argument.
 
-#### Examples:
+#### Examples
 
 ```shell
 # Deploying configuration for YAML formats without a config.json file
@@ -83,7 +83,7 @@ Array of strings. Excludes entire resource types from being managed, bi-directio
 
 ### `AUTH0_KEYWORD_REPLACE_MAPPINGS`
 
-Mapping of specific keywords to facilities dynamic replacement. See also: keyword replacement mapping.
+Mapping of specific keywords to facilities dynamic replacement. See also: [keyword replacement](keyword-replacement.md).
 
 #### Example
 
