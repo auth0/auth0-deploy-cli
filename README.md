@@ -47,7 +47,7 @@ To run as a standalone command-line tool:
 npm install -g auth0-deploy-cli
 ```
 
-### Create a Dedicated Auth0 Application
+### Create a dedicated Auth0 Application
 
 In order for the Deploy CLI to call the Management API, a dedicated Auth0 application must be created to make calls on behalf of the tool.
 
