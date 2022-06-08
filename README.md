@@ -1,17 +1,16 @@
 <div align="center">
   <h1>Auth0 Deploy CLI</h1>
-  The Auth0 Deploy CLI is a tool that helps you manage your Auth0 tenant configuration. It integrates into your development workflows as a standalone CLI or as a node module.
 </div>
 
-**Supported resource types:**
+The Auth0 Deploy CLI is a tool that helps you manage your Auth0 tenant configuration. It integrates into your development workflows as a standalone CLI or as a node module.
 
-actions, branding, client grants, clients (applications), connections, custom domains, email templates, emails, grants, guardian, hook secrets, hooks, log streams, migrations, organizations, pages, prompts, resource servers (APIs), roles, rules, rules configs, tenant settings, themes
+**Supported resource types:** actions, branding, client grants, clients (applications), connections, custom domains, email templates, emails, grants, guardian, hook secrets, hooks, log streams, migrations, organizations, pages, prompts, resource servers (APIs), roles, rules, rules configs, tenant settings, themes
 
 ## Highlights
 
-- **Multi-Environment Oriented:** Foo
-- **Multi-Environment Oriented:** Foo
-- **Multi-Environment Oriented:** Foo
+- **Multi-Environment Oriented:** Designed to help you test your applications' Auth0 integrations from feature branch all the way to production
+- **Keyword Replacement:** Shared resource configurations across all environments with dynamic keyword replacement.
+- **Versatile:** Integrate into your CI/CD workflows either as a CLI or as a Node module
 
 ## Documentation
 
@@ -55,13 +54,13 @@ In order for the Deploy CLI to call the Management API, a dedicated Auth0 applic
 1. From the Auth0 dashboard, navigate to **Applications > Applications**
 2. Click “Create Application”
 3. On Create application page:
-   1. Name it “Deploy CLI” or similar
-   2. Select “Machine to Machine Applications” as application type
-   3. Click “Create”
+   a. Name it “Deploy CLI” or similar
+   b. Select “Machine to Machine Applications” as application type
+   c. Click “Create”
 4. On the “Authorize Machine to Machine Application” page
-   1. Select “Auth0 Management API”
-   2. Select the appropriate permissions for the resources you wish to manage. At a minimum, `read:clients` need to be selected, but is is recommended to select `read`, `create` and `update` permissions for most resources. Please refer to the [Permissions](#) section for more information.
-   3. Click “Authorize”
+   a. Select “Auth0 Management API”
+   b. Select the appropriate permissions for the resources you wish to manage. At a minimum, `read:clients` need to be selected, but is is recommended to select `read`, `create` and `update` permissions for most resources. Please refer to the [Permissions](#) section for more information.
+   c. Click “Authorize”
 
 # Configure the Deploy CLI
 
