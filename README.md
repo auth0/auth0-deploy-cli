@@ -20,7 +20,7 @@ The Auth0 Deploy CLI is a tool that helps you manage your Auth0 tenant configura
 - [Keyword Replacement](docs/keyword-replacement.md)
 - [Incorporating Into Multi-environment Workflows](docs/multi-environment-workflow.md)
 - [Excluding from Management Purview](docs/excluding-from-management.md)
-- [Available Resource Formats](#)
+- [Available Resource Formats](docs/available-resource-config-formats.md)
 - [Terraform Provider](#)
 - [How to Contribute](#)
 
