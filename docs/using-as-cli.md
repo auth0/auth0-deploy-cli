@@ -84,4 +84,6 @@ a0deploy import -c=config.json --input_file=local
 a0deploy import -c=config.json --input_file=local/tenant.yaml --env=false
 ```
 
+---
+
 [[table of contents]](../README.md#documentation)

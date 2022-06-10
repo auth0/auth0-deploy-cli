@@ -134,4 +134,6 @@ Array of strings. Excludes the management of specific connections by ID. **Note:
 
 Array of strings. Excludes the management of specific resource servers by ID. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
 
+---
+
 [[table of contents]](../README.md#documentation)

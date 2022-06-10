@@ -15,4 +15,6 @@ You may **not** want to consider the Auth0 Terraform Provider if:
 - Your development workflows are primarily concerned with managing your tenants in bulk, working mostly in a [multi-environment context](multi-environment-workflow.md)
 - Your tenant has lots of existing resources, may require significant effort to “import”
 
+---
+
 [[table of contents]](../README.md#documentation)

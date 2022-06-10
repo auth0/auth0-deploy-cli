@@ -78,4 +78,6 @@ connections: [] # Empty connections
 tenant: {} # Effectively a no-op, emptiness does not apply to non-set resource config
 ```
 
+---
+
 [[table of contents]](../README.md#documentation)

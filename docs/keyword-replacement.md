@@ -40,4 +40,6 @@ clients:
 
 Currently, the Deploy CLI only preserves keywords during import. Once added, keywords are overwritten with subsequent exports. For this reason, it is recommended that if a workflow heavily depends on keyword replacement, to only perform imports in perpetuity. This limitation is noted in [this Github issue](https://github.com/auth0/auth0-deploy-cli/issues/328).
 
+---
+
 [[table of contents]](../README.md#documentation)
