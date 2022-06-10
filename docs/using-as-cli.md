@@ -20,7 +20,7 @@ Options: `yaml` or `directory`. Determines the Refer to the list of all configur
 
 ### `--export_ids`, `-e`
 
-Boolean: When enabled, will export the identifier fields for each resource. Default: `false`.
+Boolean. When enabled, will export the identifier fields for each resource. Default: `false`.
 
 ### `--env`
 
