@@ -45,7 +45,7 @@ Some resource types support exclusions of individual resource by ID. This is pri
 
 > ⚠️ **NOTE:** Excluding resources by ID is being considered for deprecation in future major versions. See the [resource exclusion proposal](https://github.com/auth0/auth0-deploy-cli/issues/451) for more details.
 
-## Omission vs excluded vs empty
+## Omitted vs excluded vs empty
 
 The above sections pertain to exclusion which forcefully ignore configurations bi-directionally. It is worth noting similar but very different concepts: “omissions” and “empty” states.
 
