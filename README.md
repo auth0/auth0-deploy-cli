@@ -59,13 +59,19 @@ In order for the Deploy CLI to call the Management API, a dedicated Auth0 applic
 1. From the Auth0 dashboard, navigate to **Applications > Applications**
 2. Click “Create Application”
 3. On Create application page:
-   - Name it “Deploy CLI” or similar
-   - Select “Machine to Machine Applications” as application type
-   - Click “Create”
+   a. Name it “Deploy CLI” or similar
+   b. Select “Machine to Machine Applications” as application type
+   c. Click “Create”
 4. On the “Authorize Machine to Machine Application” page
-   - Select “Auth0 Management API”
-   - Select the appropriate permissions for the resources you wish to manage. At a minimum, `read:clients` need to be selected, but is is recommended to select `read`, `create` and `update` permissions for most resources. Please refer to the [Permissions](#) section for more information.
-   - Click “Authorize”
+   a. Select “Auth0 Management API”
+   b. Select the appropriate permissions for the resources you wish to manage. Refer to the [Client Scopes](#client-scopes) section for more information.
+   c. Click “Authorize”
+
+#### Client Scopes
+
+The designated application needs to be granted scopes in order to allow the Deploy CLI to execute Management operations.
+
+The principle of least privilege is abided, so it will operate within the set of permissions granted. At a minimum, `read:clients` need to be selected, but is is recommended to select `read:`, `create:` and `update:` permissions for all resource types within management purview. To enable deletions, the `delete:` scopes are also necessary.
 
 ### Configure the Deploy CLI
 
