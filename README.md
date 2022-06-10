@@ -1,5 +1,8 @@
 <div align="center">
   <h1>Auth0 Deploy CLI</h1>
+  [![Build Status][circleci-image]][circleci-url]
+  [![NPM version][npm-image]][npm-url]
+  [![License][license-image]][license-url]
 </div>
 
 The Auth0 Deploy CLI is a tool that helps you manage your Auth0 tenant configuration. It integrates into your development workflows as a standalone CLI or as a node module.
