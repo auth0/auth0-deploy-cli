@@ -1,8 +1,10 @@
 <div align="center">
   <h1>Auth0 Deploy CLI</h1>
-  [![Build Status][circleci-image]][circleci-url]
-  [![NPM version][npm-image]][npm-url]
-  [![License][license-image]][license-url]
+
+[![npm version](https://badge.fury.io/js/auth0-deploy-cli.svg)](https://badge.fury.io/js/auth0-deploy-cli)
+[![CircleCI](https://circleci.com/gh/auth0/auth0-deploy-cli/tree/master.svg?style=svg)](https://circleci.com/gh/auth0/auth0-deploy-cli/tree/master)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 </div>
 
 The Auth0 Deploy CLI is a tool that helps you manage your Auth0 tenant configuration. It integrates into your development workflows as a standalone CLI or as a node module.
