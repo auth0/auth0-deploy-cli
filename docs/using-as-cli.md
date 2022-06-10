@@ -83,3 +83,5 @@ a0deploy import -c=config.json --input_file=local
 # Deploying configuration with environment variables ignored
 a0deploy import -c=config.json --input_file=local/tenant.yaml --env=false
 ```
+
+[[table of contents]](../README.md#documentation)
