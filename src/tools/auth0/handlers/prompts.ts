@@ -191,24 +191,26 @@ export default class PromptsHandler extends DefaultHandler {
       .then(({ enabled_locales }) => enabled_locales);
 
     const data = await Promise.all(
-      supportedLanguages.flatMap((language) => {
-        return promptTypes.map((promptType) => {
-          return this.client.prompts
-            .getCustomTextByLanguage({
-              prompt: promptType,
-              language,
-            })
-            .then((customTextData) => {
-              if (isEmpty(customTextData)) return null;
-              return {
+      supportedLanguages
+        .map((language) => {
+          return promptTypes.map((promptType) => {
+            return this.client.prompts
+              .getCustomTextByLanguage({
+                prompt: promptType,
                 language,
-                [promptType]: {
-                  ...customTextData,
-                },
-              };
-            });
-        });
-      })
+              })
+              .then((customTextData) => {
+                if (isEmpty(customTextData)) return null;
+                return {
+                  language,
+                  [promptType]: {
+                    ...customTextData,
+                  },
+                };
+              });
+          });
+        })
+        .reduce((acc, val) => acc.concat(val), []) // TODO: replace .map().reduce() with .flatMap() once we officially eliminate Node v10 support
     ).then((customTextData) => {
       return customTextData
         .filter((customTextData) => {
