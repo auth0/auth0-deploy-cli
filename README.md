@@ -28,9 +28,9 @@ The Auth0 Deploy CLI is a tool that helps you manage your Auth0 tenant configura
 
 This guide will help you to a working implementation of the Deploy CLI tool used as a standalone CLI. There are three main steps before the Deploy CLI can be run:
 
-- Install the Deploy CLI tool
-- Create a dedicated Auth0 application
-- Configure the Deploy CLI
+1. [Create a Dedicated Auth0 Application](#create-a-dedicated-auth0-application)
+2. [Configure the Deploy CLI](#configure-the-deploy-cli)
+3. [Calling the Deploy CLI](#calling-the-deploy-cli)
 
 > ⚠️ **NOTE:** This tool can be destructive to your Auth0 tenant. It is recommended to be familiar with the [`AUTH0_ALLOW_DELETE` configuration](#) and to test on development tenants prior to using in production.
 
@@ -62,7 +62,7 @@ In order for the Deploy CLI to call the Management API, a dedicated Auth0 applic
    - Select the appropriate permissions for the resources you wish to manage. At a minimum, `read:clients` need to be selected, but is is recommended to select `read`, `create` and `update` permissions for most resources. Please refer to the [Permissions](#) section for more information.
    - Click “Authorize”
 
-# Configure the Deploy CLI
+### Configure the Deploy CLI
 
 The Deploy CLI can be configured two ways, through a `config.json` file and through environment variables. The decision to choose one or both would depend on your specific use case and preferences. More comprehensive information about configuring the tool can be found on the [Configuring the Deploy CLI](#) page. However, for this example, the simplest way to get going is by setting the following environment variables:
 
@@ -85,3 +85,7 @@ Once the process completes, observe the resource configuration files generated i
 ```shell
 a0deploy import -c=config.json --input_file local/tenant.yaml
 ```
+
+## License
+
+This project is licensed under the MIT license. See the [LICENSE](LICENSE) file for more information.
