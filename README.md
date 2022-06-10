@@ -7,13 +7,13 @@
 
 The Auth0 Deploy CLI is a tool that helps you manage your Auth0 tenant configuration. It integrates into your development workflows as a standalone CLI or as a node module.
 
-**Supported resource types:** actions, branding, client grants, clients (applications), connections, custom domains, email templates, emails, grants, guardian, hook secrets, hooks, log streams, migrations, organizations, pages, prompts, resource servers (APIs), roles, rules, rules configs, tenant settings, themes
+**Supported resource types:** actions, branding, client grants, clients (applications), connections, custom domains, email templates, emails, grants, guardian, hook secrets, hooks, log streams, migrations, organizations, pages, prompts, resource servers (APIs), roles, rules, rules configs, tenant settings, themes.
 
 ## Highlights
 
-- **Multi-Environment Oriented:** Designed to help you test your applications' Auth0 integrations from feature branch all the way to production
+- **Multi-Environment Oriented:** Designed to help you test your applications' Auth0 integrations from feature branch all the way to production.
 - **Keyword Replacement:** Shared resource configurations across all environments with dynamic keyword replacement.
-- **Versatile:** Integrate into your CI/CD workflows either as a CLI or as a Node module
+- **Versatile:** Integrate into your CI/CD workflows either as a CLI or as a Node module.
 
 ## Documentation
 
@@ -40,7 +40,7 @@ This guide will help you to a working implementation of the Deploy CLI tool used
 ### Prerequisites
 
 - [Node](https://nodejs.dev/) version 10 or greater
-- An Auth0 tenant
+- [Auth0 Tenant](https://auth0.com/)
 
 ### Install the Deploy CLI
 
@@ -50,7 +50,7 @@ To run as a standalone command-line tool:
 npm install -g auth0-deploy-cli
 ```
 
-### Create a Dedicated Auth0 Application
+### Create a dedicated Auth0 Application
 
 In order for the Deploy CLI to call the Management API, a dedicated Auth0 application must be created to make calls on behalf of the tool.
 
