@@ -32,7 +32,7 @@ dump({
 
 #### `format`
 
-Options: yaml or directory. Determines the file format of the exported resource configuration files. See: [Available File Formats](available-file-formats).
+Options: yaml or directory. Determines the file format of the exported resource configuration files. See: [Available Resource Config Formats](available-resource-config-formats).
 
 #### `output_folder`
 
