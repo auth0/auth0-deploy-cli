@@ -4,7 +4,7 @@ The Deploy CLI can not only be used as a standalone CLI, but as a node module. D
 
 ## `dump` function
 
-Fetching configurations from Auth0 tenant to the local machine.
+Fetches configurations from Auth0 tenant to the local machine.
 
 ### Example
 
@@ -56,17 +56,17 @@ Boolean. Indicates if tools should ingest environment variables or not. Default:
 
 #### `proxy_url`
 
-A url for proxying requests, only set this if you are behind a proxy.
+A url for proxying requests. Only set this if you are behind a proxy.
 
 ## `deploy` function
 
-Applying configurations from local machine to Auth0 tenant.
+Applies configurations from local machine to Auth0 tenant.
 
 ### Argument parameters
 
 #### `input_file`
 
-Path. Specifies the location of the resource configuration files. For YAML formats, this will point to the tenant.yaml file, for directory formats, this will point to the resource configuration directory.
+Path. Specifies the location of the resource configuration files. For YAML formats, this will point to the tenant.yaml file. For directory formats, this will point to the resource configuration directory.
 
 #### `config`
 
