@@ -1,6 +1,6 @@
 # Excluding from Management
 
-In many cases, you may find it useful to exclude resources from being managed. This could be because your tenant has a large number of a particular resource and thus operationally burdensome to manage. Other times, you may wish to exclude them as your development workflow only pertains to a specific subset of resources and you’d like to omit all other resources for performance. Regardless of the use case, there are several options available for expressing exclusions in the Deploy CLI.
+In many cases, you may find it useful to exclude resources from being managed. This could be because your tenant has a large number of a particular resource and thus it is operationally burdensome to manage. Other times, you may wish to exclude them as your development workflow only pertains to a specific subset of resources and you’d like to omit all other resources for performance. Regardless of the use case, there are several options available for expressing exclusions in the Deploy CLI.
 
 ## Excluding entire resources by type
 
