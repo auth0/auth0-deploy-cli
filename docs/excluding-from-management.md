@@ -14,9 +14,7 @@ This type of exclusion is expressed by passing an array of resource names into t
 
 All supported resource values for exclusion:
 
-```
-["actions", "attackProtection", "branding", "clientGrants", "clients", "connections", "customDomains", "databases", "emailProvider", "emailTemplates", "guardianFactorProviders", "guardianFactorTemplates", "guardianFactors", "guardianPhoneFactorMessageTypes", "guardianPhoneFactorSelectedProvider", "guardianPolicies", "hooks", "logStreams", "migrations", "organizations", "pages", "prompts", "resourceServers", "roles", "rules", "rulesConfigs", "tenant", "themes", "triggers"]
-```
+`actions`, `attackProtection`, `branding`, `clientGrants`, `clients`, `connections`, `customDomains`, `databases`, `emailProvider`, `emailTemplates`, `guardianFactorProviders`, `guardianFactorTemplates`, `guardianFactors`, `guardianPhoneFactorMessageTypes`, `guardianPhoneFactorSelectedProvider`, `guardianPolicies`, `hooks`, `logStreams`, `migrations`, `organizations`, `pages`, `prompts`, `resourceServers`, `roles`, `rules`, `rulesConfigs`, `tenant`, `triggers`
 
 ### Example
 
