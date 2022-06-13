@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Removing single usage of `flatMap` array method to prevent crashes with Node v10 [#577]
+
 ## [7.13.0] - 2022-06-06
 
 ### Added
