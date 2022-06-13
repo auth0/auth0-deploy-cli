@@ -42,8 +42,8 @@ a0deploy import --input_file=local/tenant.yaml
 a0deploy export -c=config.json --format=yaml --output_folder=local --env=false
 
 # Non-primitive configuration values
-AUTH0_EXCLUDED='["actions","organizations"]'\
-AUTH0_KEYWORD_REPLACE_MAPPINGS='{"ENVIRONMENT":"dev"}'\
+export AUTH0_EXCLUDED='["actions","organizations"]'
+export AUTH0_KEYWORD_REPLACE_MAPPINGS='{"ENVIRONMENT":"dev"}'
 a0deploy export -c=config.json --format=yaml --output_folder=local
 ```
 
