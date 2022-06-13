@@ -51,7 +51,7 @@ The above sections pertain to exclusion which forcefully ignore configurations b
 
 ### Omission
 
-Resource configuration that is absent, either intentionally or unintentionally, will be skipped during import. That is, if you resource configuration were deleted, those configurations would be skipped during import and will not alter the remote tenant state. There is no concept of omission for exporting; unless specifically excluded, all your tenant configurations will write to resource configuration files.
+Resource configuration that is absent, either intentionally or unintentionally, will be skipped during import. That is, if you resource configuration were deleted, those configurations would be skipped during import and will not alter the remote tenant state. There is no concept of omission for exporting; unless specifically excluded, all your tenant configurations will be written to resource configuration files.
 
 ### Example of omission
 
