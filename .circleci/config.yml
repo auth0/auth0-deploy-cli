@@ -49,7 +49,7 @@ jobs:
           command: npm publish
   token_test:
     docker:
-      - image: cimg/node:16
+      - image: cimg/node:16.15.1
     steps:
       - run:
           command: echo "Hello world"
