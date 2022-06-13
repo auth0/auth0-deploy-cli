@@ -60,7 +60,7 @@ A url for proxying requests. Only set this if you are behind a proxy.
 
 ## `deploy` function
 
-Applying configurations from local machine to Auth0 tenant.
+Applies configurations from local machine to Auth0 tenant.
 
 ### Argument parameters
 
