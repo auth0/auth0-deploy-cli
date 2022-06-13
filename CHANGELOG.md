@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.13.1] - 2022-06-13
+
 ### Fixed
 
 - Removing single usage of `flatMap` array method to prevent crashes with Node v10 [#577]
@@ -773,7 +775,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#553]: https://github.com/auth0/auth0-deploy-cli/issues/553
 [#554]: https://github.com/auth0/auth0-deploy-cli/issues/554
 [#563]: https://github.com/auth0/auth0-deploy-cli/issues/563
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.13.0...HEAD
+[#577]: https://github.com/auth0/auth0-deploy-cli/issues/577
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.13.1...HEAD
+[7.13.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.13.0...v7.13.1
 [7.13.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.3...v7.13.0
 [7.12.3]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.2...v7.12.3
 [7.12.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.1...v7.12.2
