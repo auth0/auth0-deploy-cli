@@ -15,7 +15,7 @@ npm run dev # Runs compiler, continuously observes source file changes
 
 ## Running tests
 
-In order to run the entire test suite, execute npm run test.
+In order to run the entire test suite, execute `npm run test`.
 
 To run a single test file or single test execute:
 
