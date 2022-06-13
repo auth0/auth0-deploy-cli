@@ -66,7 +66,7 @@ Applying configurations from local machine to Auth0 tenant.
 
 #### `input_file`
 
-Path. Specifies the location of the resource configuration files. For YAML formats, this will point to the tenant.yaml file, for directory formats, this will point to the resource configuration directory.
+Path. Specifies the location of the resource configuration files. For YAML formats, this will point to the tenant.yaml file. For directory formats, this will point to the resource configuration directory.
 
 #### `config`
 
