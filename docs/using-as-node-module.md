@@ -4,7 +4,7 @@ The Deploy CLI can not only be used as a standalone CLI, but as a node module. D
 
 ## `dump` function
 
-Fetching configurations from Auth0 tenant to the local machine.
+Fetches configurations from Auth0 tenant to the local machine.
 
 ### Example
 
