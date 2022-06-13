@@ -56,7 +56,7 @@ Boolean. Indicates if tools should ingest environment variables or not. Default:
 
 #### `proxy_url`
 
-A url for proxying requests, only set this if you are behind a proxy.
+A url for proxying requests. Only set this if you are behind a proxy.
 
 ## `deploy` function
 
