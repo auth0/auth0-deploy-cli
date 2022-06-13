@@ -8,9 +8,9 @@ Fetches configurations from Auth0 tenant to the local machine.
 
 ### Example
 
-import { dump } from 'auth0-deploy-cli'
-
 ```ts
+import { dump } from 'auth0-deploy-cli';
+
 dump({
   output_folder: './local',
   format: 'yaml',
