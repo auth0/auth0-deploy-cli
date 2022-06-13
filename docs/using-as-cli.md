@@ -16,7 +16,7 @@ Path. Specifies the user-defined configuration file (`config.json`). Refer to th
 
 ### `--format`, `-f`
 
-Options: `yaml` or `directory`. Determines the Refer to the list of all configurable properties.
+Options: yaml or directory. Determines the file format of the exported resource configuration files. See: [Available Resource Config Formats](available-resource-config-formats).
 
 ### `--export_ids`, `-e`
 
