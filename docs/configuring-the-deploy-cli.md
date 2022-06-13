@@ -33,9 +33,10 @@ To **disable** the consumption of environment variables for either the `import` 
 
 ```shell
 # Deploying configuration for YAML formats without a config.json file
-AUTH0_DOMAIN=<YOUR_AUTH0_DOMAIN> \
-AUTH0_CLIENT_ID=<YOUR_CLIENT_ID> \
-AUTH0_CLIENT_SECRET=<YOUR_CLIENT_SECRET> \
+export AUTH0_DOMAIN=<YOUR_AUTH0_DOMAIN>
+export AUTH0_CLIENT_ID=<YOUR_CLIENT_ID> 
+export AUTH0_CLIENT_SECRET=<YOUR_CLIENT_SECRET> 
+
 a0deploy import --input_file=local/tenant.yaml
 
 # Disable environment variable ingestion
