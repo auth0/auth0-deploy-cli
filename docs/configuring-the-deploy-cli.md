@@ -19,7 +19,7 @@ Example **config.json** file:
 }
 ```
 
-> ⚠️ **NOTE:** Hard-coding credentials is not recommended, and risks secret leakage should this file ever be committed to a public version control system. Instead, passing credentials as [environment variables](#) is considered best practice.
+> ⚠️ **NOTE:** Hard-coding credentials is not recommended, and risks secret leakage should this file ever be committed to a public version control system. Instead, passing credentials as [environment variables](#Environment variables) is considered best practice.
 
 ### Environment variables
 
@@ -29,7 +29,7 @@ Non-primitive configuration values like `AUTH0_KEYWORD_MAPPING` and `AUTH0_EXCLU
 
 To **disable** the consumption of environment variables for either the `import` or `export` commands, pass the `--env=false` argument.
 
-#### Examples:
+#### Examples
 
 ```shell
 # Deploying configuration for YAML formats without a config.json file
@@ -72,7 +72,7 @@ Boolean. When enabled, will allow the tool to delete resources. Default: `false`
 
 ### `AUTH0_EXCLUDED`
 
-Array of strings. Excludes entire resource types from being managed, bi-directionally. See also: [excluding resources from management](#). Possible values: `actions`, `attackProtection`, `branding`, `clientGrants`, `clients`, `connections`, `customDomains`, `databases`, `emailProvider`, `emailTemplates`, `guardianFactorProviders`, `guardianFactorTemplates`, `guardianFactors`, `guardianPhoneFactorMessageTypes`, `guardianPhoneFactorSelectedProvider`, `guardianPolicies`, `hooks`, `logStreams`, `migrations`, `organizations`, `pages`, `prompts`, `resourceServers`, `roles`, `rules`, `rulesConfigs`, `tenant`, `triggers`
+Array of strings. Excludes entire resource types from being managed, bi-directionally. See also: [excluding resources from management](excluding-from-management.md). Possible values: `actions`, `attackProtection`, `branding`, `clientGrants`, `clients`, `connections`, `customDomains`, `databases`, `emailProvider`, `emailTemplates`, `guardianFactorProviders`, `guardianFactorTemplates`, `guardianFactors`, `guardianPhoneFactorMessageTypes`, `guardianPhoneFactorSelectedProvider`, `guardianPolicies`, `hooks`, `logStreams`, `migrations`, `organizations`, `pages`, `prompts`, `resourceServers`, `roles`, `rules`, `rulesConfigs`, `tenant`, `triggers`
 
 #### Example
 
@@ -84,7 +84,7 @@ Array of strings. Excludes entire resource types from being managed, bi-directio
 
 ### `AUTH0_KEYWORD_REPLACE_MAPPINGS`
 
-Mapping of specific keywords to facilities dynamic replacement. See also: keyword replacement mapping.
+Mapping of specific keywords to facilities dynamic replacement. See also: [keyword replacement](keyword-replacement.md).
 
 #### Example
 
@@ -117,20 +117,24 @@ String. Separate value from audience value while retrieving an access token for 
 
 ### `AUTH0_EXCLUDED_RULES`
 
-Array of strings. Excludes the management of specific rules by ID. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](#).
+Array of strings. Excludes the management of specific rules by ID. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
 
 ### `AUTH0_EXCLUDED_CLIENTS`
 
-Array of strings. Excludes the management of specific clients by ID. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](#).
+Array of strings. Excludes the management of specific clients by ID. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
 
 ### `AUTH0_EXCLUDED_DATABASES`
 
-Array of strings. Excludes the management of specific databases by ID. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](#).
+Array of strings. Excludes the management of specific databases by ID. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
 
 ### `AUTH0_EXCLUDED_CONNECTIONS`
 
-Array of strings. Excludes the management of specific connections by ID. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](#).
+Array of strings. Excludes the management of specific connections by ID. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
 
 ### `AUTH0_EXCLUDED_RESOURCE_SERVERS`
 
-Array of strings. Excludes the management of specific resource servers by ID. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](#).
+Array of strings. Excludes the management of specific resource servers by ID. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
+
+---
+
+[[table of contents]](../README.md#documentation)
