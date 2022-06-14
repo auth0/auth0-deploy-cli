@@ -32,7 +32,7 @@ Boolean. Enables more verbose error logging; useful during troubleshooting. Defa
 
 ### `--proxy_url`, `-p`
 
-A url for proxying requests, only set this if you are behind a proxy.
+A url for proxying requests. Only set this if you are behind a proxy.
 
 ### Examples
 
