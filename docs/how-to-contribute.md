@@ -43,3 +43,7 @@ Before finally submitting a PR, please ensure to complete the following:
 - [ ] Accompanying tests for functional changes
 - [ ] Any necessary documentation changes to pages in the /docs directory
 - [ ] PR includes thorough description about what code does and why it was added
+
+---
+
+[[table of contents]](../README.md#documentation)
