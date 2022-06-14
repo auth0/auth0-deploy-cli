@@ -12,7 +12,7 @@ The directory format separates resource types into separate directories, with ea
 
 ## How to Choose
 
-The decision to select which format to use primarily made off of preference. Both formats are tenable solutions that achieve the same task, but with subtly different strengths and weaknesses described above. Be sure to evaluate each in the context of your context. Importantly, **this choice is not permanent**, and switching from one to the other via the import command is an option at your disposal.
+The decision to select which format to use should be primarily made off of preference. Both formats are tenable solutions that achieve the same task, but with subtly different strengths and weaknesses described above. Be sure to evaluate each in the context of your context. Importantly, **this choice is not permanent**, and switching from one to the other via the import command is an option at your disposal.
 
 ---
 
