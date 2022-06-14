@@ -24,7 +24,7 @@ Boolean. When enabled, will export the identifier fields for each resource. Defa
 
 ### `--env`
 
-Boolean. Indicates if tools should ingest environment variables or not. Default: `true`.
+Boolean. Indicates if the tool should ingest environment variables or not. Default: `true`.
 
 ### `--debug`
 
