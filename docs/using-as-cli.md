@@ -65,7 +65,7 @@ Boolean. Indicates if the tool should ingest environment variables or not. Defau
 
 ### `--proxy_url`, `-p`
 
-A url for proxying requests, only set this if you are behind a proxy.
+A url for proxying requests. Only set this if you are behind a proxy.
 
 ### `--debug`
 
