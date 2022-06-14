@@ -1,4 +1,4 @@
-# Incorporating into multi-environment workflows
+# Incorporating Into Multi-environment Workflows
 
 The Deploy CLI supports working within a multi-tenant, multi-environment context. When integrated into your CI/CD development workflows, can be used to propagate Auth0 changes from feature development all the way through production.
 
