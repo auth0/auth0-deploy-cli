@@ -52,7 +52,7 @@ Boolean: When enabled, will export the identifier fields for each resource. Defa
 
 #### `env`
 
-Boolean. Indicates if tools should ingest environment variables or not. Default: `false`.
+Boolean. Indicates if the tool should ingest environment variables or not. Default: `false`.
 
 #### `proxy_url`
 
