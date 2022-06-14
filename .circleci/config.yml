@@ -76,3 +76,5 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v.*/
+          context:
+            - publish-npm
