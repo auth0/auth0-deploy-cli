@@ -5,7 +5,7 @@ The Deploy CLI supports dynamic keyword replacement with environment-specific va
 To use the keyword replacement, the `AUTH0_KEYWORD_REPLACEMENT_MAPPINGS` configuration property needs to contain the appropriate mappings. Then, in the resource configuration files, keywords can be injected through one of two ways:
 
 - `@@EXAMPLE_KEY@@`: Using the `@` symbols causes the tool to perform a `JSON.stringify` on your value before replacing it. So if your value is a string, the tool will add quotes; if your value is an array or object, the tool will add braces.
-- `##EXAMPLE_KEY##`: Using the `#` symbol causes the tool to perform a literal replacement; it will not add quotes or brackets.
+- `##EXAMPLE_KEY##`: Using the `#` symbol causes the tool to perform a literal replacement; it will not add quotes or braces.
 
 ### Example `config.json`
 
