@@ -37,7 +37,7 @@ This guide will help you to a working implementation of the Deploy CLI tool used
 2. [Configure the Deploy CLI](#configure-the-deploy-cli)
 3. [Calling the Deploy CLI](#calling-the-deploy-cli)
 
-> ⚠️ **NOTE:** This tool can be destructive to your Auth0 tenant. It is recommended to be familiar with the [`AUTH0_ALLOW_DELETE` configuration](#) and to test on development tenants prior to using in production.
+> ⚠️ **NOTE:** This tool can be destructive to your Auth0 tenant. It is recommended to be familiar with the [`AUTH0_ALLOW_DELETE` configuration](docs/configuring-the-deploy-cli.md#auth0allowdelete) and to test on development tenants prior to using in production.
 
 ### Prerequisites
 
@@ -75,7 +75,7 @@ The principle of least privilege is abided, so it will operate within the set of
 
 ### Configure the Deploy CLI
 
-The Deploy CLI can be configured two ways, through a `config.json` file and through environment variables. The decision to choose one or both would depend on your specific use case and preferences. More comprehensive information about configuring the tool can be found on the [Configuring the Deploy CLI](#) page. However, for this example, the simplest way to get going is by setting the following environment variables:
+The Deploy CLI can be configured two ways, through a `config.json` file and through environment variables. The decision to choose one or both would depend on your specific use case and preferences. More comprehensive information about configuring the tool can be found on the [Configuring the Deploy CLI](docs/configuring-the-deploy-cli.md) page. However, for this example, the simplest way to get going is by setting the following environment variables:
 
 - `AUTH0_DOMAIN`
 - `AUTH0_CLIENT_ID`

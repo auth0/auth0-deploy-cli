@@ -32,7 +32,7 @@ dump({
 
 #### `format`
 
-Options: `yaml` or `directory`. Determines the file format of the exported resource configuration files. See: [Available Resource Config Formats](available-resource-config-formats).
+Options: `yaml` or `directory`. Determines the file format of the exported resource configuration files. See: [Available Resource Configuration Formats](available-resource-config-formats).
 
 #### `output_folder`
 
@@ -90,21 +90,23 @@ A url for proxying requests. Only set this if you are behind a proxy.
 
 ### Example
 
-```
-import { deploy } from 'auth0-deploy-cli'
+```ts
+import { deploy } from 'auth0-deploy-cli';
 
 deploy({
-input_file: './local/tenant.yaml',
-config: {
-AUTH0_DOMAIN: "<YOUR_AUTH0_TENANT_DOMAIN>",
-AUTH0_CLIENT_ID: "<YOUR_AUTH0_CLIENT_ID>",
-AUTH0_CLIENT_SECRET: "<YOUR_AUTH0_CLIENT_SECRET>",
-}
-}).then(()=>{
-console.log("Auth0 configuration applied to tenant successful")
-}).catch((err)=>{
-console.log("Error when applying configuration to Auth0 tenant:",err)
+  input_file: './local/tenant.yaml',
+  config: {
+    AUTH0_DOMAIN: '<YOUR_AUTH0_TENANT_DOMAIN>',
+    AUTH0_CLIENT_ID: '<YOUR_AUTH0_CLIENT_ID>',
+    AUTH0_CLIENT_SECRET: '<YOUR_AUTH0_CLIENT_SECRET>',
+  },
 })
+  .then(() => {
+    console.log('Auth0 configuration applied to tenant successful');
+  })
+  .catch((err) => {
+    console.log('Error when applying configuration to Auth0 tenant:', err);
+  });
 ```
 
 ---
