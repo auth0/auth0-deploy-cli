@@ -32,7 +32,7 @@ dump({
 
 #### `format`
 
-Options: yaml or directory. Determines the file format of the exported resource configuration files. See: [Available Resource Config Formats](available-resource-config-formats).
+Options: `yaml` or `directory`. Determines the file format of the exported resource configuration files. See: [Available Resource Config Formats](available-resource-config-formats).
 
 #### `output_folder`
 
@@ -40,11 +40,11 @@ Path. Specifies the target directory for configuration files to be written to.
 
 #### `config`
 
-Object. Configures behavior of utility. Refer to the list of [all configurable properties](#).
+Object. Configures behavior of utility. Refer to the list of [all configurable properties](./configuring-the-deploy-cli.md).
 
 #### `config_file`
 
-Path. Specifies the user-defined configuration file (config.json). Refer to the list of [all configurable properties](#).
+Path. Specifies the user-defined configuration file (config.json). Refer to the list of [all configurable properties](./configuring-the-deploy-cli.md).
 
 #### `export_ids`
 
@@ -70,11 +70,11 @@ Path. Specifies the location of the resource configuration files. For YAML forma
 
 #### `config`
 
-Object. Configures behavior of utility. Refer to the list of [all configurable properties](#).
+Object. Configures behavior of utility. Refer to the list of [all configurable properties](./configuring-the-deploy-cli.md).
 
 #### `config_file`
 
-Path. Specifies the user-defined configuration file (config.json). Refer to the list of [all configurable properties](#).
+Path. Specifies the user-defined configuration file (config.json). Refer to the list of [all configurable properties](./configuring-the-deploy-cli.md).
 
 #### `export_ids`
 
@@ -106,3 +106,7 @@ console.log("Auth0 configuration applied to tenant successful")
 console.log("Error when applying configuration to Auth0 tenant:",err)
 })
 ```
+
+---
+
+[[table of contents]](../README.md#documentation)
