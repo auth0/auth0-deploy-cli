@@ -1,6 +1,6 @@
 # Incorporating into multi-environment workflows
 
-The Deploy CLI is most powerful when working within a multi-tenant, multi-environment context. When integrated into your CI/CD development workflows, can be used to propagate Auth0 changes from feature development all the way through production.
+The Deploy CLI supports working within a multi-tenant, multi-environment context. When integrated into your CI/CD development workflows, can be used to propagate Auth0 changes from feature development all the way through production.
 
 In general, the advised workflow is as follows:
 
@@ -25,7 +25,7 @@ When exported, your Auth0 tenant state will be represented as a set of resource 
 
 You should have at least one branch for each tenant in your repository, which allows you to make changes without deploying them (the changes would only deploy when you merged your branch into the master, or primary, branch). With this setup, you can have a continuous integration task for each environment that automatically deploys changes to the targeted environment whenever the master branch receives updates.
 
-Your workflow would, therefore, look something like this:
+Your workflow could potentially look something like this:
 
 1. Make changes to development.
 2. Merge changes to testing (or `uat`).

@@ -1,6 +1,6 @@
-# Excluding from Management
+# Excluding resources from management
 
-In many cases, you may find it useful to exclude resources from being managed. This could be because your tenant has a large number of a particular resource and thus operationally burdensome to manage. Other times, you may wish to exclude them as your development workflow only pertains to a specific subset of resources and you’d like to omit all other resources for performance. Regardless of the use case, there are several options available for expressing exclusions in the Deploy CLI.
+In many cases, you may find it useful to exclude resources from being managed. This could be because your tenant has a large number of a particular resource and thus it is operationally burdensome to manage. Other times, you may wish to exclude them as your development workflow only pertains to a specific subset of resources and you’d like to omit all other resources for performance. Regardless of the use case, there are several options available for expressing exclusions in the Deploy CLI.
 
 ## Excluding entire resources by type
 
@@ -14,9 +14,7 @@ This type of exclusion is expressed by passing an array of resource names into t
 
 All supported resource values for exclusion:
 
-```
-["actions", "attackProtection", "branding", "clientGrants", "clients", "connections", "customDomains", "databases", "emailProvider", "emailTemplates", "guardianFactorProviders", "guardianFactorTemplates", "guardianFactors", "guardianPhoneFactorMessageTypes", "guardianPhoneFactorSelectedProvider", "guardianPolicies", "hooks", "logStreams", "migrations", "organizations", "pages", "prompts", "resourceServers", "roles", "rules", "rulesConfigs", "tenant", "themes", "triggers"]
-```
+`actions`, `attackProtection`, `branding`, `clientGrants`, `clients`, `connections`, `customDomains`, `databases`, `emailProvider`, `emailTemplates`, `guardianFactorProviders`, `guardianFactorTemplates`, `guardianFactors`, `guardianPhoneFactorMessageTypes`, `guardianPhoneFactorSelectedProvider`, `guardianPolicies`, `hooks`, `logStreams`, `migrations`, `organizations`, `pages`, `prompts`, `resourceServers`, `roles`, `rules`, `rulesConfigs`, `tenant`, `triggers`
 
 ### Example
 
@@ -45,13 +43,13 @@ Some resource types support exclusions of individual resource by ID. This is pri
 
 > ⚠️ **NOTE:** Excluding resources by ID is being considered for deprecation in future major versions. See the [resource exclusion proposal](https://github.com/auth0/auth0-deploy-cli/issues/451) for more details.
 
-## Omission vs excluded vs empty
+## Omitted vs excluded vs empty
 
 The above sections pertain to exclusion which forcefully ignore configurations bi-directionally. It is worth noting similar but very different concepts: “omissions” and “empty” states.
 
 ### Omission
 
-Resource configuration that is absent, either intentionally or unintentionally, will be skipped during import. That is, if you resource configuration were deleted, those configurations would be skipped during import and will not alter the remote tenant state. There is no concept of omission for exporting; unless specifically excluded, all your tenant configurations will write to resource configuration files.
+Resource configuration that is absent, either intentionally or unintentionally, will be skipped during import. That is, if you resource configuration were deleted, those configurations would be skipped during import and will not alter the remote tenant state. There is no concept of omission for exporting; unless specifically excluded, all your tenant configurations will be written to resource configuration files.
 
 ### Example of omission
 
