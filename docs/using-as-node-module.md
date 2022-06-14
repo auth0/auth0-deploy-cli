@@ -104,3 +104,7 @@ console.log("Auth0 configuration applied to tenant successful")
 }).catch((err)=>{
 console.log("Error when applying configuration to Auth0 tenant:",err)
 })
+
+---
+
+[[table of contents]](../README.md#documentation)

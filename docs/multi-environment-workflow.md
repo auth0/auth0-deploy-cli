@@ -21,7 +21,7 @@ It is recommended to have a separate Auth0 tenant/account for each environment y
 
 ## Resource configuration repository
 
-When exported, your Auth0 tenant state will be represented as a set of resource configuration files, either in a [YAML or JSON format](#). In a multi-environment context it is expected to have a single repository of resource configurations that is applied to all environments. In practice, this may exist as a directory in your project’s codebase or in a separate codebase altogether.
+When exported, your Auth0 tenant state will be represented as a set of resource configuration files, either in a [YAML or JSON format](./available-resource-config-formats.md). In a multi-environment context it is expected to have a single repository of resource configurations that is applied to all environments. In practice, this may exist as a directory in your project’s codebase or in a separate codebase altogether.
 
 You should have at least one branch for each tenant in your repository, which allows you to make changes without deploying them (the changes would only deploy when you merged your branch into the master, or primary, branch). With this setup, you can have a continuous integration task for each environment that automatically deploys changes to the targeted environment whenever the master branch receives updates.
 
@@ -92,3 +92,7 @@ Once separate configurations files are adopted for each environment, keyword rep
   }
 }
 ```
+
+---
+
+[[table of contents]](../README.md#documentation)
