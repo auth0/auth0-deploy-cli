@@ -33,7 +33,7 @@
     "@types/lodash": "^4.14.181",
     "@types/nconf": "^0.10.2",
     "@types/winston": "^2.4.4",
-    "ajv": "^6.12.6",
+    "ajv": "^8.11.0",
     "auth0": "^2.42.0",
     "dot-prop": "^5.2.0",
     "fs-extra": "^10.1.0",
