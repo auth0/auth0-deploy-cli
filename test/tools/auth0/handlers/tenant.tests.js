@@ -38,6 +38,10 @@ describe('#tenant handler', () => {
     it('should update tenant settings', async () => {
       const auth0 = {
         tenant: {
+          getSettings: () => ({
+            friendly_name: 'Test',
+            default_directory: 'users',
+          }),
           updateSettings: (data) => {
             expect(data).to.be.an('object');
             expect(data.sandbox_version).to.equal('4');

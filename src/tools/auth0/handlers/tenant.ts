@@ -90,7 +90,7 @@ export const sanitizeMigrationFlags = (
   tenant. See: https://github.com/auth0/auth0-deploy-cli/issues/374
   */
 
-  const TENANT_MIGRATION_FLAGS = [
+  const tenantMigrationFlags = [
     'disable_clickjack_protection_headers',
     'enable_mgmt_api_v1',
     'trust_azure_adfs_email_verified_connection_property',
@@ -100,7 +100,7 @@ export const sanitizeMigrationFlags = (
 
   return Object.keys(proposedFlags).reduce(
     (acc: Tenant['flags'], proposedKey: string): Tenant['flags'] => {
-      const isMigrationFlag = TENANT_MIGRATION_FLAGS.includes(proposedKey);
+      const isMigrationFlag = tenantMigrationFlags.includes(proposedKey);
       if (!isMigrationFlag)
         return {
           ...acc,
