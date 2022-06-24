@@ -65,17 +65,20 @@ export default class TenantHandler extends DefaultHandler {
 
     const existingTenant = this.existing || this.getType();
 
-    const sanitizedFlags = removeUnapplicableMigrationFlags(tenant.flags, existingTenant.flags);
+    const updatedTenant = {
+      ...tenant,
+      flags: sanitizeMigrationFlags(tenant.flags, existingTenant.flags),
+    };
 
-    if (tenant && Object.keys(tenant).length > 0) {
-      await this.client.tenant.updateSettings(tenant);
+    if (updatedTenant && Object.keys(updatedTenant).length > 0) {
+      await this.client.tenant.updateSettings(updatedTenant);
       this.updated += 1;
-      this.didUpdate(tenant);
+      this.didUpdate(updatedTenant);
     }
   }
 }
 
-export const removeUnapplicableMigrationFlags = (
+export const sanitizeMigrationFlags = (
   existingFlags: Tenant['flags'] = {},
   proposedFlags: Tenant['flags'] = {}
 ): Tenant['flags'] => {
