@@ -135,6 +135,34 @@ describe('#YAML context pages', () => {
     );
   });
 
+  it('should not throw if page HTML is not defined', async () => {
+    //See: https://github.com/auth0/auth0-deploy-cli/issues/365
+    const dir = path.join(testDataDir, 'yaml', 'pagesDump');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, 'tennat.yaml') },
+      mockMgmtClient()
+    );
+
+    context.assets.pages = [
+      { html: undefined, name: 'login' }, //HTML property is not defined here
+    ];
+
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({
+      pages: [
+        {
+          html: './pages/login.html',
+          name: 'login',
+        },
+      ],
+    });
+
+    const pagesFolder = path.join(dir, 'pages');
+    expect(fs.readFileSync(path.join(pagesFolder, 'login.html'), 'utf8')).to.deep.equal("");
+    expect(fs.readdirSync(pagesFolder).length).to.equal(1)
+  });
+
   it('should dump error_page with html undefined', async () => {
     const dir = path.join(testDataDir, 'yaml', 'pagesDump');
     cleanThenMkdir(dir);
