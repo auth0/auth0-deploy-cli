@@ -103,7 +103,10 @@ describe('#tenant handler', () => {
         'some-flag-2': true,
       };
 
-      const result = tenant.sanitizeMigrationFlags(flags, flags);
+      const result = tenant.sanitizeMigrationFlags({
+        existingFlags: flags,
+        proposedFlags: flags,
+      });
 
       expect(result).to.deep.equal(flags);
     });
@@ -120,7 +123,10 @@ describe('#tenant handler', () => {
         'some-flag-2': true,
       };
 
-      const result = tenant.sanitizeMigrationFlags(existingFlags, proposedFlags);
+      const result = tenant.sanitizeMigrationFlags({
+        existingFlags,
+        proposedFlags,
+      });
 
       const expectedFlags = (() => {
         const expected = proposedFlags;
@@ -144,7 +150,7 @@ describe('#tenant handler', () => {
         'some-flag-2': false,
       };
 
-      const result = tenant.sanitizeMigrationFlags(existingFlags, proposedFlags);
+      const result = tenant.sanitizeMigrationFlags({ existingFlags, proposedFlags });
 
       expect(result).to.deep.equal(proposedFlags);
     });
@@ -161,7 +167,7 @@ describe('#tenant handler', () => {
         'some-flag-3': true, // Doesn't currently exist
       };
 
-      const result = tenant.sanitizeMigrationFlags(existingFlags, proposedFlags);
+      const result = tenant.sanitizeMigrationFlags({ existingFlags, proposedFlags });
 
       expect(result).to.deep.equal(proposedFlags);
     });
@@ -173,9 +179,15 @@ describe('#tenant handler', () => {
         'some-flag-2': true, // Doesn't currently exist
       };
 
-      expect(() => tenant.sanitizeMigrationFlags({}, {})).to.not.throw();
-      expect(() => tenant.sanitizeMigrationFlags(mockFlags, {})).to.not.throw();
-      expect(() => tenant.sanitizeMigrationFlags({}, mockFlags)).to.not.throw();
+      expect(() =>
+        tenant.sanitizeMigrationFlags({ existingFlags: {}, proposedFlags: {} })
+      ).to.not.throw();
+      expect(() =>
+        tenant.sanitizeMigrationFlags({ existingFlags: mockFlags, proposedFlags: {} })
+      ).to.not.throw();
+      expect(() =>
+        tenant.sanitizeMigrationFlags({ existingFlags: {}, proposedFlags: mockFlags })
+      ).to.not.throw();
     });
   });
 });

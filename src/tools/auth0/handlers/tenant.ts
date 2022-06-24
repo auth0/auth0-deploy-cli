@@ -67,7 +67,10 @@ export default class TenantHandler extends DefaultHandler {
 
     const updatedTenant = {
       ...tenant,
-      flags: sanitizeMigrationFlags(tenant.flags, existingTenant.flags),
+      flags: sanitizeMigrationFlags({
+        existingFlags: existingTenant.flags,
+        proposedFlags: tenant.flags,
+      }),
     };
 
     if (updatedTenant && Object.keys(updatedTenant).length > 0) {
@@ -78,10 +81,13 @@ export default class TenantHandler extends DefaultHandler {
   }
 }
 
-export const sanitizeMigrationFlags = (
-  existingFlags: Tenant['flags'] = {},
-  proposedFlags: Tenant['flags'] = {}
-): Tenant['flags'] => {
+export const sanitizeMigrationFlags = ({
+  existingFlags = {},
+  proposedFlags = {},
+}: {
+  existingFlags: Tenant['flags'];
+  proposedFlags: Tenant['flags'];
+}): Tenant['flags'] => {
   /*
   Tenants can only update migration flags that are already configured.
   If moving configuration from one tenant to another, there may be instances
