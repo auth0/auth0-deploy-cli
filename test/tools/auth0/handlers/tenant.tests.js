@@ -51,6 +51,44 @@ describe('#tenant handler', () => {
 
       await stageFn.apply(handler, [{ tenant: { sandbox_version: '4' } }]);
     });
+
+    it("should remove migration flags if don't exist on target tenant", async () => {
+      const mockFlags = {
+        trust_azure_adfs_email_verified_connection_property: true, // Migration flag
+        'some-flag-1': true,
+        'some-flag-2': false,
+      };
+
+      const auth0 = {
+        tenant: {
+          getSettings: async () => {
+            const flags = { ...mockFlags };
+            delete flags.trust_azure_adfs_email_verified_connection_property;
+            return Promise.resolve({
+              friendly_name: 'Test',
+              default_directory: 'users',
+              flags,
+            });
+          },
+          updateSettings: (data) => {
+            expect(data).to.be.an('object');
+            expect(data.flags).to.deep.equal(
+              (() => {
+                const flags = { ...mockFlags };
+                delete flags.trust_azure_adfs_email_verified_connection_property;
+                return flags;
+              })()
+            );
+            return Promise.resolve(data);
+          },
+        },
+      };
+
+      const handler = new tenant.default({ client: auth0 });
+      const { processChanges } = Object.getPrototypeOf(handler);
+
+      await processChanges.apply(handler, [{ tenant: { flags: mockFlags } }]);
+    });
   });
 
   describe('#sanitizeMigrationFlags function', () => {

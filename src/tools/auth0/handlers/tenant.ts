@@ -63,7 +63,7 @@ export default class TenantHandler extends DefaultHandler {
     // Do nothing if not set
     if (!tenant) return;
 
-    const existingTenant = this.existing || this.getType();
+    const existingTenant = this.existing || (await this.getType());
 
     const updatedTenant = {
       ...tenant,
