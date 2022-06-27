@@ -43,7 +43,7 @@ async function dump(context: YAMLContext): Promise<ParsedPages> {
     // Dump html to file
     const htmlFile = path.join(pagesFolder, `${page.name}.html`);
     log.info(`Writing ${htmlFile}`);
-    fs.writeFileSync(htmlFile, page.html);
+    fs.writeFileSync(htmlFile, page.html || '');
     return {
       ...page,
       html: `./pages/${page.name}.html`,
