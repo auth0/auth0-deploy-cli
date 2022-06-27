@@ -5,7 +5,7 @@ import {
   PromptsCustomText,
   PromptSettings,
 } from './tools/auth0/handlers/prompts';
-
+import { Tenant } from './tools/auth0/handlers/tenant';
 import { Theme } from './tools/auth0/handlers/themes';
 
 type SharedPaginationParams = {
@@ -145,8 +145,8 @@ export type BaseAuth0APIClient = {
     getAll: () => Promise<Asset[]>;
   };
   tenant: APIClientBaseFunctions & {
-    getSettings: () => Promise<Asset & { enabled_locales: Language[] }>;
-    updateSettings: (arg0: Asset) => Promise<void>;
+    getSettings: () => Promise<Tenant>;
+    updateSettings: (arg0: Partial<Tenant>) => Promise<Tenant>;
   };
   triggers: APIClientBaseFunctions & {
     getTriggerBindings: () => Promise<Asset>;
@@ -230,7 +230,7 @@ export type Assets = Partial<{
   roles: Asset[] | null;
   rules: Asset[] | null;
   rulesConfigs: Asset[] | null;
-  tenant: Asset | null;
+  tenant: Tenant | null;
   triggers: Asset[] | null;
   //non-resource types
   exclude?: {
