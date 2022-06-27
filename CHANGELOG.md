@@ -11,12 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Validation to detect unreplaced keyword mappings during import. [#591]
+- Validation to detect unreplaced keyword mappings during import [#591]
 
 ### Fixed
 
-- Detect and prevent `You are not allowed to set flag '<SOME_FLAG>' for this tenant.` errors when erroneously setting non-configurable migration flag. [#590]
-- Crash when attempting to create page templates from undefined value. [#592]
+- Detect and prevent `You are not allowed to set flag '<SOME_FLAG>' for this tenant.` errors when erroneously setting non-configurable migration flag [#590]
+- Crash when attempting to create page templates from undefined value [#592]
 
 ## [7.13.1] - 2022-06-13
 
