@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.14.1] - 2022-06-29
+
 ### Fixed
 
 - Reverting unreplaced keyword mapping detection that would trigger some false-positives [#597]
@@ -794,7 +796,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#590]: https://github.com/auth0/auth0-deploy-cli/issues/590
 [#591]: https://github.com/auth0/auth0-deploy-cli/issues/591
 [#592]: https://github.com/auth0/auth0-deploy-cli/issues/592
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.0...HEAD
+[#597]: https://github.com/auth0/auth0-deploy-cli/issues/597
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.1...HEAD
+[7.14.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.0...v7.14.1
 [7.14.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.13.1...v7.14.0
 [7.13.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.13.0...v7.13.1
 [7.13.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.3...v7.13.0
