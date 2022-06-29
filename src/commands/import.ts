@@ -4,7 +4,6 @@ import { deploy as toolsDeploy } from '../tools';
 import log from '../logger';
 import { setupContext } from '../context';
 import { ImportParams } from '../args';
-import { Assets, Config } from '../types';
 
 export default async function importCMD(params: ImportParams) {
   const {
@@ -49,47 +48,8 @@ export default async function importCMD(params: ImportParams) {
   const config = configFactory();
   config.setProvider((key) => nconf.get(key));
 
-  findUnreplacedKeywords(context.assets);
-
+  //@ts-ignore because context and assets still need to be typed TODO: type assets and type context
   await toolsDeploy(context.assets, context.mgmtClient, config);
 
   log.info('Import Successful');
 }
-
-export const findUnreplacedKeywords = (assets: Assets) => {
-  const recursiveFindUnreplacedKeywords = (target): string[] => {
-    let unreplaced: string[] = [];
-    if (target === undefined || target === null) return [];
-    if (Array.isArray(target)) {
-      target.forEach((child) => {
-        unreplaced.push(...recursiveFindUnreplacedKeywords(child));
-      });
-    } else if (typeof target === 'object') {
-      Object.values(target).forEach((child) => {
-        unreplaced.push(...recursiveFindUnreplacedKeywords(child));
-      });
-    }
-
-    if (typeof target === 'string') {
-      const arrayMatches = target.match(/(?<=@@).*(?=@@)/g);
-      if (arrayMatches !== null) {
-        return arrayMatches;
-      }
-      const keywordMatches = target.match(/(?<=##).*(?=##)/g);
-      if (keywordMatches !== null) {
-        return keywordMatches;
-      }
-    }
-
-    return unreplaced;
-  };
-
-  const unreplacedKeywords = recursiveFindUnreplacedKeywords(assets);
-
-  if (unreplacedKeywords.length > 0) {
-    throw `Unreplaced keywords found: ${unreplacedKeywords.join(
-      ', '
-    )}. Either correct these values or add to AUTH0_KEYWORD_REPLACE_MAPPINGS configuration.`;
-  }
-  return;
-};
