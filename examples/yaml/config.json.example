@@ -1,5 +1,6 @@
 {
-  "AUTH0_DOMAIN": "<YOUR_TENANT>.<YOUR_REGION>.auth0.com",
+  "AUTH0_DOMAIN": "<YOUR_TENANT>.auth0.com", 
+  #include your region if you are not using custom domains. e.g. <YOUR_TENANT>.<YOUR_REGION>.auth0.com
   "AUTH0_CLIENT_ID": "<client_id>",
   "AUTH0_CLIENT_SECRET": "<client_secret>",
   "AUTH0_KEYWORD_REPLACE_MAPPINGS": {
