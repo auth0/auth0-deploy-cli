@@ -65,8 +65,11 @@ export type BaseAuth0APIClient = {
     updateSettings: ({}, Asset) => Promise<void>;
     setUniversalLoginTemplate: ({}, Asset) => Promise<void>;
     getDefaultTheme: () => Promise<Theme>;
-    updateTheme: (arg0: { id: string }, Theme) => Promise<Omit<Theme, 'themeId'>>;
-    createTheme: (arg0: Theme) => Promise<Omit<Theme, 'themeId'>>;
+    updateTheme: (
+      arg0: { id: string },
+      arg1: Omit<Theme, 'themeId'>
+    ) => Promise<Omit<Theme, 'themeId'>>;
+    createTheme: (arg0: Omit<Theme, 'themeId'>) => Promise<Omit<Theme, 'themeId'>>;
     deleteTheme: (arg0: { id: string }) => Promise<void>;
   };
   clients: APIClientBaseFunctions;
