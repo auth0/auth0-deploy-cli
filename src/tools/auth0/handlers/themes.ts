@@ -66,12 +66,21 @@ export default class ThemesHandler extends DefaultHandler {
 
     const currentThemes = await this.getThemes();
 
+    const themeReqPayload = ((): Omit<Theme, 'themeId'> => {
+      // Removing themeId from update and create payloads, otherwise API will error
+      // Theme ID may be required to handle if `--export_ids=true`
+      const payload = themes[0];
+      //@ts-ignore to quell non-optional themeId property, but we know that it's ok to delete
+      delete payload.themeId;
+      return payload;
+    })();
+
     if (currentThemes === null || currentThemes.length === 0) {
-      await this.client.branding.createTheme(themes[0]);
+      await this.client.branding.createTheme(themeReqPayload);
     } else {
       const currentTheme = currentThemes[0];
       // if theme exists, overwrite it otherwise create it
-      await this.client.branding.updateTheme({ id: currentTheme.themeId }, themes[0]);
+      await this.client.branding.updateTheme({ id: currentTheme.themeId }, themeReqPayload);
     }
 
     this.updated += 1;
@@ -98,7 +107,7 @@ export default class ThemesHandler extends DefaultHandler {
 export const schema = {
   type: 'array',
   items: {
-    additionalProperties: false,
+    additionalProperties: true,
     properties: {
       borders: {
         additionalProperties: false,
