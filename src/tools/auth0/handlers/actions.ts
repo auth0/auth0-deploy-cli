@@ -6,6 +6,7 @@ import { Asset } from '../../../types';
 import { showCompletionScript } from 'yargs';
 
 const MAX_ACTION_DEPLOY_RETRY_ATTEMPTS = 60; // 60 * 2s => 2 min timeout
+const RETRY_FLOW = MAX_ACTION_DEPLOY_RETRY_ATTEMPTS + 2; // Retry rebuilding actions flow 2 times
 
 // With this schema, we can only validate property types but not valid properties on per type basis
 export const schema = {
@@ -106,12 +107,12 @@ export default class ActionHandler extends DefaultAPIHandler {
     return super.objString({ id: action.id, name: action.name });
   }
 
-  async deployActions(actions) {
+  async deployActions(actions, assets) {
     await this.client.pool
       .addEachTask({
         data: actions || [],
-        generator: (action) =>
-          this.deployAction(action)
+        generator: (action,) =>
+          this.deployAction(action, assets)
             .then(() => {
               log.info(`Deployed [${this.type}]: ${this.objString(action)}`);
             })
@@ -122,7 +123,7 @@ export default class ActionHandler extends DefaultAPIHandler {
       .promise();
   }
 
-  async deployAction(action) {
+  async deployAction(action, assets) {
     try {
       await this.client.actions.deploy({ id: action.id });
     } catch (err) {
@@ -132,12 +133,22 @@ export default class ActionHandler extends DefaultAPIHandler {
           log.info(`[${this.type}]: Waiting for build to complete ${this.objString(action)}`);
           action.retry_count = 1;
         }
+
         if (action.retry_count > MAX_ACTION_DEPLOY_RETRY_ATTEMPTS) {
-          throw err;
+          if (action.retry_count > RETRY_FLOW) {
+            log.info(`Failed to deploy action: ${this.objString(action)}`);
+            throw err;
+          }
+          log.info(`RETRYING FLOW: Processing actions changes again.`);
+          await sleep(3000);
+          // Retry whole flow again
+          await this.processChanges(assets);
+        } else {
+          await sleep(2000);
+          action.retry_count += 1;
+          await this.deployAction(action, assets);
         }
-        await sleep(2000);
-        action.retry_count += 1;
-        await this.deployAction(action);
+
       } else {
         throw err;
       }
@@ -231,6 +242,6 @@ export default class ActionHandler extends DefaultAPIHandler {
       ...changes.update.filter((action) => action.deployed),
     ];
 
-    await this.deployActions(deployActions);
+    await this.deployActions(deployActions, assets);
   }
 }
