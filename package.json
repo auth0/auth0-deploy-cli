@@ -11,7 +11,7 @@
     "lint": "eslint --ignore-path .eslintignore --ignore-pattern webpack . && kacl lint",
     "format": "npx prettier --write .",
     "test": "ts-mocha -p tsconfig.json --recursive 'test/**/*.test*' --timeout 5000",
-    "test:coverage": "nyc npm run test",
+    "test:coverage": "nyc npm run test; nyc report --reporter=text-lcov",
     "build": "rimraf ./lib && npx tsc",
     "dev": "npx tsc --watch",
     "prepare": "npm run build",
