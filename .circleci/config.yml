@@ -3,7 +3,8 @@
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
 version: 2.1
-
+orbs:
+  codecov: codecov/codecov@3
 jobs:
   test:
     parameters:
@@ -25,10 +26,11 @@ jobs:
           paths:
             - node_modules
       - run: npm run lint
-      - run: npm test
+      - run: npm run test:coverage
       - persist_to_workspace:
           root: ~/repo
           paths: .
+      - codecov/upload
 
   deploy:
     parameters:
