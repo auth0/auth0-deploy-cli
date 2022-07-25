@@ -1,7 +1,7 @@
 import { dump, deploy } from '../../src';
 import path from 'path';
 
-const workDirectory = './local';
+const workDirectory = './local/node-module';
 
 ['AUTH0_E2E_TENANT_DOMAIN', 'AUTH0_E2E_CLIENT_ID', 'AUTH0_E2E_CLIENT_SECRET'].forEach((key) => {
   if (!process.env[key]) {
