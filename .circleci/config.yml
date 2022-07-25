@@ -8,7 +8,7 @@ orbs:
 jobs:
   e2e_test_as_node_module:
     docker:
-      - image: cimg/node:18.4.0
+      - image: cimg/node:current
     working_directory: ~/repo
     steps:
       - checkout
