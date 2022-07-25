@@ -13,7 +13,14 @@ jobs:
     steps:
       - checkout
       - run: npm ci
-      - run: npm run test:e2e
+      - run: npm run test:e2e:node-module
+  e2e_test_as_cli:
+    docker:
+      - image: cimg/node:current
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run: npm run test:e2e:cli
   unit_test:
     parameters:
       v:
@@ -62,6 +69,7 @@ workflows:
   e2e_test:
     jobs:
       - e2e_test_as_node_module
+      - e2e_test_as_cli
   unit_test:
     jobs:
       - unit_test:
