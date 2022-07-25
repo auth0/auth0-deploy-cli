@@ -16,5 +16,5 @@ node lib/index.js export --env=false --output_folder=$WORK_DIR --format=yaml -c=
 
 echo "-------- Beginning deploy/import phase --------"
 
-node lib/index.js import --env=false --output_folder=$WORK_DIR --format=yaml -c=$CONFIG_FILE
+node lib/index.js import --env=false --input_file=$WORK_DIR --format=yaml -c=$CONFIG_FILE
 
