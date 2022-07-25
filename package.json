@@ -11,8 +11,7 @@
     "lint": "eslint --ignore-path .eslintignore --ignore-pattern webpack . && kacl lint",
     "format": "npx prettier --write .",
     "test": "ts-mocha -p tsconfig.json --recursive 'test/**/*.test*' --exclude test/e2e/* --timeout 5000",
-    "test:e2e": "ts-node test/e2e/e2e-node-module.ts
-    "test": "ts-mocha -p tsconfig.json --recursive 'test/**/*.test*' --timeout 5000",
+    "test:e2e": "ts-node test/e2e/e2e-node-module.ts",
     "test:coverage": "nyc npm run test; nyc report --reporter=lcov",
     "build": "rimraf ./lib && npx tsc",
     "dev": "npx tsc --watch",
