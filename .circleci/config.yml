@@ -69,8 +69,14 @@ workflows:
   version: 2
   e2e_test:
     jobs:
-      - e2e_test_as_node_module
-      - e2e_test_as_cli
+      - e2e_test_as_node_module:
+        filters:
+          branches:
+            ignore: /pull\/[0-9]+/ # Ignore running on forked PRs
+      - e2e_test_as_cli:
+        filters:
+          branches:
+            ignore: /pull\/[0-9]+/ # Ignore running on forked PRs
   unit_test:
     jobs:
       - unit_test:
