@@ -26,7 +26,7 @@ const AUTH0_CLIENT_SECRET = process.env['AUTH0_E2E_CLIENT_SECRET'];
     console.log('Error during dump:', err);
   });
 
-  console.log('-------- Beginning deploy/export phase --------');
+  console.log('-------- Beginning deploy/import phase --------');
 
   await deploy({
     input_file: path.join(workDirectory, 'tenant.yaml'),
