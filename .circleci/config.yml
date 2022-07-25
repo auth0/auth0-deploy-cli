@@ -12,6 +12,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
+      - run: npm ci
       - run: npm run test:e2e
   unit_test:
     parameters:
