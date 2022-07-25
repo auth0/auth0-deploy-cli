@@ -7,7 +7,7 @@ version: 2.1
 jobs:
   e2e_test_as_node_module:
     docker:
-      - image: cimg/node:18.6.0
+      - image: cimg/node:18.4.0
     working_directory: ~/repo
     steps:
       - checkout
