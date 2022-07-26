@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import zlib from 'zlib';
 import path from 'path';
 import _ from 'lodash';
-import { getFiles } from '../../src/utils';
+import { getFiles, existsMustBeDir } from '../../src/utils';
 
 //Nock Config
 import { back as nockBack, Definition } from 'nock';
@@ -42,8 +42,12 @@ describe('#end to end tests', function () {
     });
 
     const files = getFiles(workDirectory, ['.yaml']);
+
     expect(files).to.have.length(1);
     expect(files[0]).to.equal(path.join(workDirectory, 'tenant.yaml'));
+    ['emailTemplates', 'hooks', 'pages', 'rules'].forEach((directory) => {
+      expect(existsMustBeDir(path.join(workDirectory, directory))).to.equal(true);
+    });
   });
 });
 
