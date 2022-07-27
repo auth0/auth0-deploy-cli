@@ -6,7 +6,7 @@ import { testNameToFilename, testNameToWorkingDirectory, afterRecord } from './e
 //Nock Config
 import { back as nockBack } from 'nock';
 nockBack.setMode('record');
-nockBack.fixtures = __dirname + '/recordings';
+nockBack.fixtures = path.join(__dirname, 'recordings');
 
 //Application Config
 import { dump, deploy } from '../../src';
