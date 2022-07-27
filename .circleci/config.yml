@@ -6,7 +6,15 @@ version: 2.1
 orbs:
   codecov: codecov/codecov@3
 jobs:
-  test:
+  e2e_test_as_node_module:
+    docker:
+      - image: cimg/node:current
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run: npm ci
+      - run: npm run test:e2e
+  unit_test:
     parameters:
       v:
         type: string
@@ -51,17 +59,23 @@ jobs:
           command: npm publish
 workflows:
   version: 2
-  test:
+  e2e_test:
     jobs:
-      - test:
+      - e2e_test_as_node_module:
+        filters:
+          branches:
+            ignore: /pull\/[0-9]+/ # Ignore running on forked PRs
+  unit_test:
+    jobs:
+      - unit_test:
           name: test_lts
           v: "lts"
-      - test:
+      - unit_test:
           name: test_current
           v: "18.0.0"
   test_and_deploy:
     jobs:
-      - test:
+      - unit_test:
           name: test_lts
           v: "lts"
           filters:

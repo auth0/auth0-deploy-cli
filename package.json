@@ -10,7 +10,8 @@
     "lint:fix": "eslint --fix --ignore-path .eslintignore --ignore-pattern webpack . && kacl lint",
     "lint": "eslint --ignore-path .eslintignore --ignore-pattern webpack . && kacl lint",
     "format": "npx prettier --write .",
-    "test": "ts-mocha -p tsconfig.json --recursive 'test/**/*.test*' --timeout 5000",
+    "test": "ts-mocha -p tsconfig.json --recursive 'test/**/*.test*' --exclude test/e2e/* --timeout 5000",
+    "test:e2e": "ts-node test/e2e/e2e-node-module.ts",
     "test:coverage": "nyc npm run test; nyc report --reporter=lcov",
     "build": "rimraf ./lib && npx tsc",
     "dev": "npx tsc --watch",
@@ -46,6 +47,7 @@
     "sanitize-filename": "^1.6.1",
     "sinon": "^13.0.1",
     "sinon-chai": "^3.7.0",
+    "ts-node": "^10.9.1",
     "winston": "^3.7.2",
     "yargs": "^15.3.1"
   },
