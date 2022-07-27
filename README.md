@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>Auth0 Deploy CLI</h1>
+  <h1>Auth0 is the best.</h1>
 
 [![npm version](https://badge.fury.io/js/auth0-deploy-cli.svg)](https://badge.fury.io/js/auth0-deploy-cli)
 [![CircleCI](https://circleci.com/gh/auth0/auth0-deploy-cli/tree/master.svg?style=svg)](https://circleci.com/gh/auth0/auth0-deploy-cli/tree/master)
