@@ -7,28 +7,21 @@ import { getFiles, existsMustBeDir } from '../../src/utils';
 //Nock Config
 import { back as nockBack, Definition } from 'nock';
 nockBack.setMode('record');
-nockBack.fixtures = __dirname + '/fixtures'; //this only needs to be set once in your test helper
-type Fixture = Definition & { rawHeaders: string[] };
+nockBack.fixtures = __dirname + '/recordings'; //this only needs to be set once in your test helper
+type Recording = Definition & { rawHeaders: string[] };
 
 //Application Config
-import { dump } from '../../src';
+import { dump, deploy } from '../../src';
 const AUTH0_DOMAIN = process.env['AUTH0_E2E_TENANT_DOMAIN'];
 const AUTH0_CLIENT_ID = process.env['AUTH0_E2E_CLIENT_ID'];
 const AUTH0_CLIENT_SECRET = process.env['AUTH0_E2E_CLIENT_SECRET'];
 
-describe('#end to end tests', function () {
+describe('#end-to-end dump', function () {
   it('should dump without throwing an error', async function () {
     const workDirectory = testNameToWorkingDirectory(this?.test?.title);
-    nockBack(testNameToFilename(this?.test?.title), { afterRecord }, async (nockDone) => {
-      await dump({
-        output_folder: workDirectory,
-        format: 'yaml',
-        config: {
-          AUTH0_DOMAIN,
-          AUTH0_CLIENT_ID,
-          AUTH0_CLIENT_SECRET,
-        },
-      }).finally(nockDone);
+
+    const { nockDone } = await nockBack(testNameToFilename(this?.test?.title), {
+      afterRecord,
     });
 
     await dump({
@@ -48,13 +41,36 @@ describe('#end to end tests', function () {
     ['emailTemplates', 'hooks', 'pages', 'rules'].forEach((directory) => {
       expect(existsMustBeDir(path.join(workDirectory, directory))).to.equal(true);
     });
+
+    nockDone();
   });
 });
 
-function decodeBuffer(fixtureResponse: Fixture['response']) {
+describe('#end-to-end deploy', function () {
+  it('should deploy without throwing an error', async function () {
+    const { nockDone } = await nockBack(testNameToFilename(this?.test?.title), {
+      afterRecord,
+    });
+
+    await deploy({
+      input_file: `${__dirname}/testdata/should-deploy-without-throwing-an-error/tenant.yaml`, //TODO: perhaps generate automatically based on test name?
+      config: {
+        AUTH0_DOMAIN,
+        AUTH0_CLIENT_ID,
+        AUTH0_CLIENT_SECRET,
+      },
+    });
+
+    nockDone();
+  });
+});
+
+function decodeBuffer(recordingResponse: Recording['response']) {
   try {
     // Decode the hex buffer that nock made
-    const response = Array.isArray(fixtureResponse) ? fixtureResponse.join('') : fixtureResponse;
+    const response = Array.isArray(recordingResponse)
+      ? recordingResponse.join('')
+      : recordingResponse;
     const decoded = Buffer.from(response, 'hex');
     const unzipped = zlib.gunzipSync(decoded).toString('utf-8');
     return JSON.parse(unzipped);
@@ -63,11 +79,12 @@ function decodeBuffer(fixtureResponse: Fixture['response']) {
   }
 }
 
-function afterRecord(fixtures: Fixture[]): Fixture[] {
-  return fixtures.map((fixture) => {
-    fixture.response = decodeBuffer(fixture.response);
+function afterRecord(recordings) {
+  //TODO: apply tighter typing to this function
+  return recordings.map((recording) => {
+    recording.response = decodeBuffer(recording.response);
 
-    return sanitizeFixture(fixture);
+    return sanitizeRecording(recording);
   });
 }
 
@@ -81,12 +98,12 @@ function testNameToWorkingDirectory(testName = ''): string {
   return path.join('./local/recorded', directoryName);
 }
 
-function sanitizeFixture(fixture: Fixture): Fixture {
+function sanitizeRecording(recording: Recording): Recording {
   //Remove clientID and secret
-  const newFixture = fixture;
+  const newRecording = recording;
 
-  newFixture.rawHeaders = (() => {
-    const newHeaders = _.chunk(fixture.rawHeaders, 2)
+  newRecording.rawHeaders = (() => {
+    const newHeaders = _.chunk(recording.rawHeaders, 2)
       .filter((pair) => {
         return pair[0] !== 'Content-Encoding'; // Prevents recordings from becoming gzipped
       })
@@ -94,5 +111,5 @@ function sanitizeFixture(fixture: Fixture): Fixture {
     return newHeaders;
   })();
 
-  return newFixture;
+  return newRecording;
 }
