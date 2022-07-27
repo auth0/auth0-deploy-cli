@@ -39,16 +39,16 @@ export function testNameToWorkingDirectory(testName = ''): string {
 export function sanitizeRecording(recording: Definition): Definition {
   const sanitizedRecording = recording;
 
-  sanitizedRecording.response = sanitizeObject(
-    recording.response,
-    ['access_token', 'client_secret', 'cert', 'pkcs7'],
-    '[REDACTED]'
-  );
-
   //@ts-ignore because the `rawHeaders` property does actually exist
   sanitizedRecording.rawHeaders = [];
   sanitizedRecording.scope = 'https://deploy-cli-dev.eu.auth0.com:443';
-  sanitizedRecording.body = sanitizeObject(recording.body, ['client_secret'], '[REDACTED]');
+  sanitizedRecording.body = sanitizeObject(recording.body, ['client_secret']);
+  sanitizedRecording.response = sanitizeObject(recording.response, [
+    'access_token',
+    'client_secret',
+    'cert',
+    'pkcs7',
+  ]);
 
   return sanitizedRecording;
 }
