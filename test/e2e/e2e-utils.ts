@@ -22,7 +22,6 @@ export function decodeBuffer(recordingResponse: Definition['response']) {
 export function afterRecord(recordings: Definition[]): Definition[] {
   return recordings.map((recording) => {
     recording.response = decodeBuffer(recording.response as string);
-    //@ts-ignore because we know `rawHeaders` actually exists
     return sanitizeRecording(recording);
   });
 }
@@ -37,7 +36,7 @@ export function testNameToWorkingDirectory(testName = ''): string {
   return path.join('./local/recorded', directoryName);
 }
 
-export function sanitizeRecording(recording: Recording): Recording {
+export function sanitizeRecording(recording: Definition): Definition {
   const sanitizedRecording = recording;
 
   sanitizedRecording.response = sanitizeObject(
@@ -46,6 +45,7 @@ export function sanitizeRecording(recording: Recording): Recording {
     '[REDACTED]'
   );
 
+  //@ts-ignore because the `rawHeaders` property does actually exist
   sanitizedRecording.rawHeaders = [];
   sanitizedRecording.scope = 'https://deploy-cli-dev.eu.auth0.com:443';
   sanitizedRecording.body = sanitizeObject(recording.body, ['client_secret'], '[REDACTED]');
