@@ -13,7 +13,7 @@ jobs:
     steps:
       - checkout
       - run: npm ci
-      - run: npm run test:e2e:node-module
+      - run: AUTH0_HTTP_RECORDINGS="on" npm run test:e2e:node-module
   e2e_test_as_cli:
     docker:
       - image: cimg/node:current
