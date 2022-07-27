@@ -10,6 +10,9 @@ describe('#sanitizeObject', function () {
         secret: 'SENSITIVE VALUE THAT SHOULD BE REDACTED!',
         id: 'connection-1',
       },
+      keys: {
+        data: [{ client_secret: 'SENSITIVE VALUE THAT SHOULD BE REDACTED!' }],
+      },
       clients: [
         {
           client_secret: 'SENSITIVE VALUE THAT SHOULD BE REDACTED!',
@@ -35,6 +38,9 @@ describe('#sanitizeObject', function () {
       connection: {
         secret: '[REDACTED]',
         id: 'connection-1',
+      },
+      keys: {
+        data: [{ client_secret: '[REDACTED]' }],
       },
       clients: [
         {

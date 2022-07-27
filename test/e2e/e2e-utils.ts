@@ -40,23 +40,23 @@ export function testNameToWorkingDirectory(testName = ''): string {
 export function sanitizeRecording(recording: Recording): Recording {
   const sanitizedRecording = recording;
 
-  sanitizedRecording.response = sanitizeObject(recording.response, [
-    'access_token',
-    'client_secret',
-    'cert',
-    'pkcs7',
-  ]);
+  sanitizedRecording.response = sanitizeObject(
+    recording.response,
+    ['access_token', 'client_secret', 'cert', 'pkcs7'],
+    '[REDACTED]'
+  );
 
   sanitizedRecording.rawHeaders = [];
   sanitizedRecording.scope = 'https://deploy-cli-dev.eu.auth0.com:443';
-  sanitizedRecording.body = sanitizeObject(recording.body, ['client_secret']);
+  sanitizedRecording.body = sanitizeObject(recording.body, ['client_secret'], '[REDACTED]');
 
   return sanitizedRecording;
 }
 
 export const sanitizeObject = (
   obj: object | any[] | string | undefined,
-  keysToRedact: string[]
+  keysToRedact: string[],
+  replaceWith = '[REDACTED]'
 ) => {
   if (typeof obj === 'string' || obj === undefined) return obj;
 
@@ -66,15 +66,11 @@ export const sanitizeObject = (
 
   Object.keys(obj).forEach((key) => {
     if (keysToRedact.includes(key)) {
-      obj[key] = '[REDACTED]';
+      obj[key] = replaceWith;
     }
 
     if (typeof obj[key] === 'object') {
       obj[key] = sanitizeObject(obj[key], keysToRedact);
-    }
-
-    if (Array.isArray(obj[key])) {
-      return obj[key].map((item) => sanitizeObject(item, keysToRedact));
     }
   });
 
