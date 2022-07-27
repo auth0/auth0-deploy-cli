@@ -1,3 +1,0 @@
-# Temporary gitignore to prevent leaking secrets in fixtures file! Delete this file once fixture sanitation step is completed
-recordings/*
-.env

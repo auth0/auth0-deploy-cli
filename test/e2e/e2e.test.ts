@@ -1,26 +1,21 @@
 import { expect } from 'chai';
 import path from 'path';
 import { getFiles, existsMustBeDir } from '../../src/utils';
-import { testNameToFilename, testNameToWorkingDirectory, afterRecord } from './e2e-utils';
-
-//Nock Config
-import { back as nockBack } from 'nock';
-nockBack.setMode('record');
-nockBack.fixtures = path.join(__dirname, 'recordings');
-
-//Application Config
+import { setupRecording, testNameToWorkingDirectory } from './e2e-utils';
 import { dump, deploy } from '../../src';
-const AUTH0_DOMAIN = process.env['AUTH0_E2E_TENANT_DOMAIN'];
-const AUTH0_CLIENT_ID = process.env['AUTH0_E2E_CLIENT_ID'];
-const AUTH0_CLIENT_SECRET = process.env['AUTH0_E2E_CLIENT_SECRET'];
+
+const shouldUseRecordings = process.env['AUTH0_HTTP_RECORDINGS'] === 'on';
+const AUTH0_DOMAIN = shouldUseRecordings
+  ? 'deploy-cli-dev.eu.auth0.com'
+  : process.env['AUTH0_E2E_TENANT_DOMAIN'] || '';
+const AUTH0_CLIENT_ID = process.env['AUTH0_E2E_CLIENT_ID'] || '';
+const AUTH0_CLIENT_SECRET = process.env['AUTH0_E2E_CLIENT_SECRET'] || '';
 
 describe('#end-to-end dump', function () {
   it('should dump without throwing an error', async function () {
     const workDirectory = testNameToWorkingDirectory(this.test?.title);
 
-    const { nockDone } = await nockBack(testNameToFilename(this.test?.title), {
-      afterRecord,
-    });
+    const { recordingDone } = await setupRecording(this.test?.title);
 
     await dump({
       output_folder: workDirectory,
@@ -33,7 +28,6 @@ describe('#end-to-end dump', function () {
     });
 
     const files = getFiles(workDirectory, ['.yaml']);
-
     expect(files).to.have.length(1);
     expect(files[0]).to.equal(path.join(workDirectory, 'tenant.yaml'));
     ['emailTemplates', 'hooks', 'pages', 'rules'].forEach((dirName) => {
@@ -42,15 +36,13 @@ describe('#end-to-end dump', function () {
       expect(getFiles(directory, ['.yaml'])).to.have.length(0);
     });
 
-    nockDone();
+    recordingDone();
   });
 });
 
 describe('#end-to-end deploy', function () {
   it('should deploy without throwing an error', async function () {
-    const { nockDone } = await nockBack(testNameToFilename(this.test?.title), {
-      afterRecord,
-    });
+    const { recordingDone } = await setupRecording(this.test?.title);
 
     await deploy({
       input_file: `${__dirname}/testdata/should-deploy-without-throwing-an-error/tenant.yaml`, //TODO: perhaps generate automatically based on test name?
@@ -61,7 +53,7 @@ describe('#end-to-end deploy', function () {
       },
     });
 
-    nockDone();
+    recordingDone();
   });
 });
 
@@ -69,9 +61,7 @@ describe('#end-to-end dump and deploy cycle', function () {
   it('should dump and deploy without throwing an error', async function () {
     const workDirectory = testNameToWorkingDirectory(this.test?.title);
 
-    const { nockDone } = await nockBack(testNameToFilename(this.test?.title), {
-      afterRecord,
-    });
+    const { recordingDone } = await setupRecording(this.test?.title);
 
     await dump({
       output_folder: workDirectory,
@@ -92,6 +82,6 @@ describe('#end-to-end dump and deploy cycle', function () {
       },
     });
 
-    nockDone();
+    recordingDone();
   });
 });

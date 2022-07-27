@@ -10,8 +10,8 @@ export function decodeBuffer(recordingResponse: Definition['response']) {
     // Decode the hex buffer that nock made
     const response = Array.isArray(recordingResponse)
       ? recordingResponse.join('')
-      : recordingResponse;
-    const decoded = Buffer.from(response as string, 'hex');
+      : recordingResponse?.toString() || '';
+    const decoded = Buffer.from(response, 'hex');
     const unzipped = zlib.gunzipSync(decoded).toString('utf-8');
     return JSON.parse(unzipped);
   } catch (err) {
@@ -40,14 +40,61 @@ export function testNameToWorkingDirectory(testName = ''): string {
 export function sanitizeRecording(recording: Recording): Recording {
   const sanitizedRecording = recording;
 
-  sanitizedRecording.rawHeaders = (() => {
-    const newHeaders = _.chunk(recording.rawHeaders, 2)
-      .filter((pair) => {
-        return pair[0] !== 'Content-Encoding'; // Prevents recordings from becoming gzipped
-      })
-      .flat();
-    return newHeaders;
-  })();
+  sanitizedRecording.response = sanitizeObject(recording.response, [
+    'access_token',
+    'client_secret',
+    'cert',
+    'pkcs7',
+  ]);
+
+  sanitizedRecording.rawHeaders = [];
+  sanitizedRecording.scope = 'https://deploy-cli-dev.eu.auth0.com:443';
+  sanitizedRecording.body = sanitizeObject(recording.body, ['client_secret']);
 
   return sanitizedRecording;
+}
+
+export const sanitizeObject = (
+  obj: object | any[] | string | undefined,
+  keysToRedact: string[]
+) => {
+  if (typeof obj === 'string' || obj === undefined) return obj;
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => sanitizeObject(item, keysToRedact));
+  }
+
+  Object.keys(obj).forEach((key) => {
+    if (keysToRedact.includes(key)) {
+      obj[key] = '[REDACTED]';
+    }
+
+    if (typeof obj[key] === 'object') {
+      obj[key] = sanitizeObject(obj[key], keysToRedact);
+    }
+
+    if (Array.isArray(obj[key])) {
+      return obj[key].map((item) => sanitizeObject(item, keysToRedact));
+    }
+  });
+
+  return obj;
+};
+
+//Nock Config
+import { back as nockBack } from 'nock';
+nockBack.setMode(process.env['AUTH0_HTTP_RECORDINGS'] === 'on' ? 'lockdown' : 'wild');
+nockBack.fixtures = path.join(__dirname, 'recordings');
+
+export function setupRecording(testName) {
+  if (!testName) throw new Error('No test name provided');
+  return nockBack(testNameToFilename(testName), {
+    afterRecord,
+    recorder: { enable_reqheaders_recording: false },
+  }).then((ret) => {
+    return {
+      ...ret,
+      recordingDone: ret.nockDone,
+    };
+  });
 }
