@@ -47,7 +47,7 @@ describe('#end-to-end deploy', function () {
     const { recordingDone } = await setupRecording(this.test?.title);
 
     await deploy({
-      input_file: `${__dirname}/testdata/should-deploy-without-throwing-an-error/tenant.yaml`, //TODO: perhaps generate automatically based on test name?
+      input_file: `${__dirname}/testdata/should-deploy-without-throwing-an-error/tenant.yaml`,
       config: {
         AUTH0_DOMAIN,
         AUTH0_CLIENT_ID,
