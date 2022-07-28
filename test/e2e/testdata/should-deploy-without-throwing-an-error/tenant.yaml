@@ -1,0 +1,161 @@
+rules: []
+rulesConfigs: []
+hooks: []
+pages: []
+resourceServers: []
+clients:
+  - name: Default App
+    callbacks: []
+    cross_origin_auth: false
+    custom_login_page_on: true
+    grant_types:
+      - authorization_code
+      - implicit
+      - refresh_token
+      - client_credentials
+    is_first_party: true
+    is_token_endpoint_ip_header_trusted: false
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+      secret_encoded: false
+    oidc_conformant: true
+    refresh_token:
+      expiration_type: non-expiring
+      leeway: 0
+      infinite_token_lifetime: true
+      infinite_idle_token_lifetime: true
+      token_lifetime: 2592000
+      idle_token_lifetime: 1296000
+      rotation_type: non-rotating
+    sso_disabled: false
+  - name: Deploy CLI
+    app_type: non_interactive
+    cross_origin_auth: false
+    custom_login_page_on: true
+    grant_types:
+      - client_credentials
+    is_first_party: true
+    is_token_endpoint_ip_header_trusted: false
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+      secret_encoded: false
+    oidc_conformant: true
+    refresh_token:
+      expiration_type: non-expiring
+      leeway: 0
+      infinite_token_lifetime: true
+      infinite_idle_token_lifetime: true
+      token_lifetime: 31557600
+      idle_token_lifetime: 2592000
+      rotation_type: non-rotating
+    sso_disabled: false
+    token_endpoint_auth_method: client_secret_post
+databases:
+  - name: Username-Password-Authentication
+    strategy: auth0
+    enabled_clients:
+      - Default App
+      - Deploy CLI
+    is_domain_connection: false
+    options:
+      mfa:
+        active: true
+        return_enroll_settings: true
+      passwordPolicy: good
+      strategy_version: 2
+      brute_force_protection: true
+    realms:
+      - Username-Password-Authentication
+connections:
+  - name: google-oauth2
+    strategy: google-oauth2
+    enabled_clients:
+      - Default App
+      - Deploy CLI
+    is_domain_connection: false
+    options:
+      email: true
+      scope:
+        - email
+        - profile
+      profile: true
+tenant:
+  enabled_locales:
+    - en
+  flags:
+    allow_legacy_delegation_grant_types: true
+    allow_legacy_ro_grant_types: true
+    new_universal_login_experience_enabled: true
+    universal_login: true
+    revoke_refresh_token_grant: false
+    disable_clickjack_protection_headers: false
+emailProvider: {}
+emailTemplates: []
+clientGrants: []
+guardianFactors:
+  - name: duo
+    enabled: false
+  - name: email
+    enabled: false
+  - name: otp
+    enabled: false
+  - name: push-notification
+    enabled: false
+  - name: recovery-code
+    enabled: false
+  - name: sms
+    enabled: false
+  - name: webauthn-platform
+    enabled: false
+  - name: webauthn-roaming
+    enabled: false
+guardianFactorProviders: []
+guardianFactorTemplates: []
+guardianPolicies:
+  policies: []
+guardianPhoneFactorSelectedProvider:
+  provider: auth0
+guardianPhoneFactorMessageTypes:
+  message_types: []
+roles: []
+branding:
+  templates: []
+prompts:
+  customText: {}
+  universal_login_experience: new
+migrations: {}
+actions: []
+triggers: {}
+organizations: []
+attackProtection:
+  breachedPasswordDetection:
+    enabled: false
+    shields: []
+    admin_notification_frequency: []
+    method: standard
+  bruteForceProtection:
+    enabled: true
+    shields:
+      - block
+      - user_notification
+    mode: count_per_identifier_and_ip
+    allowlist: []
+    max_attempts: 10
+  suspiciousIpThrottling:
+    enabled: true
+    shields:
+      - admin_notification
+      - block
+    allowlist: []
+    stage:
+      pre-login:
+        max_attempts: 100
+        rate: 864000
+      pre-user-registration:
+        max_attempts: 50
+        rate: 1200
+logStreams: []
+customDomains: []
+themes: []
