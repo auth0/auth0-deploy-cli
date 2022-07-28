@@ -4,8 +4,7 @@ local/
 node_modules/
 lib/
 /npm-debug.log
-config.json
-config-cli-e2e.json
+config*.json
 .env
 .idea
 .npmrc
