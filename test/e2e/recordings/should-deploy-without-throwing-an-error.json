@@ -1174,7 +1174,7 @@
                         "rotation_type": "non-rotating"
                     },
                     "owners": [
-                        "mr|samlp|okta|will.vedder@auth0.com"
+                        "mr|samlp|okta|auth0-user@auth0.com"
                     ],
                     "signing_keys": [
                         {
@@ -1456,7 +1456,7 @@
                         "rotation_type": "non-rotating"
                     },
                     "owners": [
-                        "mr|samlp|okta|will.vedder@auth0.com"
+                        "mr|samlp|okta|auth0-user@auth0.com"
                     ],
                     "signing_keys": [
                         {
@@ -1744,7 +1744,7 @@
                         "rotation_type": "non-rotating"
                     },
                     "owners": [
-                        "mr|samlp|okta|will.vedder@auth0.com"
+                        "mr|samlp|okta|auth0-user@auth0.com"
                     ],
                     "signing_keys": [
                         {

@@ -5,11 +5,10 @@ import { back as nockBack, BackMode, Definition } from 'nock';
 
 export function decodeBuffer(recordingResponse: Definition['response']) {
   try {
-    // Decode the hex buffer that nock made
-    const response = Array.isArray(recordingResponse)
-      ? recordingResponse.join('')
-      : recordingResponse?.toString() || '';
-    const decoded = Buffer.from(response, 'hex');
+    const isArray = Array.isArray(recordingResponse);
+    if (!isArray) return recordingResponse; // Some Auth0 Management API endpoints aren't gzipped, we can tell this if they are an array or not
+
+    const decoded = Buffer.from(recordingResponse.join(''), 'hex');
     const unzipped = zlib.gunzipSync(decoded).toString('utf-8');
     return JSON.parse(unzipped);
   } catch (err) {
@@ -50,6 +49,7 @@ export function sanitizeRecording(recording: Definition): Definition {
     'client_secret',
     'cert',
     'pkcs7',
+    'key',
   ]);
 
   return sanitizedRecording;

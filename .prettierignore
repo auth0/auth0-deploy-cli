@@ -8,3 +8,4 @@ node_modules
 examples
 test/**/*.json
 test/**/*.yaml
+test/e2e/testdata
