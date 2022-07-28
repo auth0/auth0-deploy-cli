@@ -4,12 +4,13 @@ import { getFiles, existsMustBeDir } from '../../src/utils';
 import { setupRecording, testNameToWorkingDirectory } from './e2e-utils';
 import { dump, deploy } from '../../src';
 
-const shouldUseRecordings = process.env['AUTH0_HTTP_RECORDINGS'] === 'on';
+const shouldUseRecordings = process.env['AUTH0_HTTP_RECORDINGS'] === 'lockdown';
 const AUTH0_DOMAIN = shouldUseRecordings
   ? 'deploy-cli-dev.eu.auth0.com'
   : process.env['AUTH0_E2E_TENANT_DOMAIN'] || '';
 const AUTH0_CLIENT_ID = process.env['AUTH0_E2E_CLIENT_ID'] || '';
 const AUTH0_CLIENT_SECRET = process.env['AUTH0_E2E_CLIENT_SECRET'] || '';
+const AUTH0_ACCESS_TOKEN = shouldUseRecordings ? 'insecure' : undefined;
 
 describe('#end-to-end dump', function () {
   it('should dump without throwing an error', async function () {
@@ -24,6 +25,7 @@ describe('#end-to-end dump', function () {
         AUTH0_DOMAIN,
         AUTH0_CLIENT_ID,
         AUTH0_CLIENT_SECRET,
+        AUTH0_ACCESS_TOKEN,
       },
     });
 
@@ -50,6 +52,7 @@ describe('#end-to-end deploy', function () {
         AUTH0_DOMAIN,
         AUTH0_CLIENT_ID,
         AUTH0_CLIENT_SECRET,
+        AUTH0_ACCESS_TOKEN,
       },
     });
 
@@ -70,6 +73,7 @@ describe('#end-to-end dump and deploy cycle', function () {
         AUTH0_DOMAIN,
         AUTH0_CLIENT_ID,
         AUTH0_CLIENT_SECRET,
+        AUTH0_ACCESS_TOKEN,
       },
     });
 
@@ -79,6 +83,7 @@ describe('#end-to-end dump and deploy cycle', function () {
         AUTH0_DOMAIN,
         AUTH0_CLIENT_ID,
         AUTH0_CLIENT_SECRET,
+        AUTH0_ACCESS_TOKEN,
       },
     });
 

@@ -64,7 +64,6 @@ export const setupContext = async (config: Config): Promise<DirectoryContext | Y
   })(config);
 
   const accessToken = await (async (): Promise<string> => {
-    if (config.AUTH0_DOMAIN === 'deploy-cli-dev.eu.auth0.com') return '[REDACTED]';
     if (!!config.AUTH0_ACCESS_TOKEN) return config.AUTH0_ACCESS_TOKEN;
 
     const authClient = new AuthenticationClient({

@@ -1,7 +1,7 @@
 import zlib from 'zlib';
-import _ from 'lodash';
 import path from 'path';
-import { Definition } from 'nock';
+// Nock Config
+import {back as nockBack, BackMode, Definition} from 'nock';
 
 type Recording = Definition & { rawHeaders: string[] }; // Hack to fix issue in Nock types that does not include `rawHeaders` property in `Definition` type
 
@@ -20,7 +20,11 @@ export function decodeBuffer(recordingResponse: Definition['response']) {
 }
 
 export function afterRecord(recordings: Definition[]): Definition[] {
-  return recordings.map((recording) => {
+  const filteredRecordings = recordings.filter(function (recording): boolean {
+    return recording.path !== '/oauth/token';
+  });
+
+  return filteredRecordings.map((recording) => {
     recording.response = decodeBuffer(recording.response as string);
     return sanitizeRecording(recording);
   });
@@ -77,9 +81,14 @@ export const sanitizeObject = (
   return obj;
 };
 
-//Nock Config
-import { back as nockBack } from 'nock';
-nockBack.setMode(process.env['AUTH0_HTTP_RECORDINGS'] === 'on' ? 'lockdown' : 'wild');
+const allowedRecordingModes: BackMode[] = ['lockdown', 'record', 'wild'];
+let recordingsMode = process.env['AUTH0_HTTP_RECORDINGS'] as BackMode;
+
+if (!allowedRecordingModes.includes(recordingsMode)) {
+  throw new Error(`Invalid recording mode: ${process.env['AUTH0_HTTP_RECORDINGS']}. The only ones allowed are: ${allowedRecordingModes.join(", ")}.`);
+}
+
+nockBack.setMode(recordingsMode);
 nockBack.fixtures = path.join(__dirname, 'recordings');
 
 export function setupRecording(testName) {
