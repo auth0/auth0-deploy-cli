@@ -119,7 +119,7 @@ describe('#YAML context connections', () => {
     const connectionsPath = path.join(dir, 'connections');
     fs.writeFileSync(yamlFile, yaml);
     fs.ensureDirSync(connectionsPath);
-    // Intentionally skip creating the `./email.html` file
+    // Intentionally skip creation of `./email.html` file
 
     const context = new Context(
       {
