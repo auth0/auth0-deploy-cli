@@ -102,6 +102,35 @@ describe('#YAML context connections', () => {
     expect(context.assets.connections).to.deep.equal(target);
   });
 
+  it('should throw error and halt deployment if passwordless email template is missing', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'connections2');
+    cleanThenMkdir(dir);
+
+    const yaml = `
+    connections:
+      - name: "email"
+        strategy: "email"
+        options:
+          email:
+            body: "./email.html" # This template will be missing
+    `;
+
+    const yamlFile = path.join(dir, 'connections.yaml');
+    const connectionsPath = path.join(dir, 'connections');
+    fs.writeFileSync(yamlFile, yaml);
+    fs.ensureDirSync(connectionsPath);
+    // Intentionally skip creating the `./email.html` file
+
+    const context = new Context(
+      {
+        AUTH0_INPUT_FILE: yamlFile,
+      },
+      mockMgmtClient()
+    );
+
+    await expect(context.load()).to.be.eventually.rejectedWith('Problem deploying connections');
+  });
+
   it('should dump connections', async () => {
     const dir = path.join(testDataDir, 'yaml', 'connectionsDump');
     cleanThenMkdir(dir);
