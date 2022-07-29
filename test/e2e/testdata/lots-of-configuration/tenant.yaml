@@ -283,7 +283,19 @@ databases:
       enabledDatabaseCustomization: true
     realms:
       - boo-baz-db-connection-test
-connections: []
+connections:
+  - name: google-oauth2
+    strategy: google-oauth2
+    enabled_clients:
+      - Default App
+      - Deploy CLI
+    is_domain_connection: false
+    options:
+      email: true
+      scope:
+        - email
+        - profile
+      profile: true
 tenant:
   allowed_logout_urls:
     - https://mycompany.org/logoutCallback
@@ -661,16 +673,16 @@ actions:
         version: v2
 triggers: {}
 organizations:
-  - name: gopuff
+  - name: org1
     branding:
       colors:
         page_background: '#fff5f5'
         primary: '#57ddff'
     connections: []
-    display_name: Gopuff organization
-  - name: sidecar
+    display_name: Organization
+  - name: org2
     connections: []
-    display_name: Sidecar Organization
+    display_name: Organization2
 attackProtection:
   breachedPasswordDetection:
     enabled: false
