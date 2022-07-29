@@ -287,8 +287,8 @@ connections:
   - name: google-oauth2
     strategy: google-oauth2
     enabled_clients:
-      - Default App
-      - Deploy CLI
+      - The Default App
+      - auth0-deploy-cli-extension
     is_domain_connection: false
     options:
       email: true
