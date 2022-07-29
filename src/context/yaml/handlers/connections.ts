@@ -31,9 +31,12 @@ async function parse(context: YAMLContext): Promise<ParsedConnections> {
           ensureProp(connection, 'options.email.body');
           const htmlFileName = path.join(connectionsFolder, connection.options.email.body);
 
-          if (isFile(htmlFileName)) {
-            connection.options.email.body = context.loadFile(htmlFileName);
+          if (!isFile(htmlFileName)) {
+            const missingTemplateErrorMessage = `Passwordless email template purportedly located at ${htmlFileName} does not exist for connection. Ensure the existence of this file to proceed with deployment.`;
+            log.error(missingTemplateErrorMessage);
+            throw new Error(missingTemplateErrorMessage);
           }
+          connection.options.email.body = context.loadFile(htmlFileName);
         }
 
         return connection;
