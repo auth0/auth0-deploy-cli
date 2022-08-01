@@ -224,7 +224,7 @@ describe('#keywordReplacement', () => {
   });
 
   describe('#array concatenation with keyword replacement', function () {
-    it('should concatenate string array values in directory format', () => {
+    it('should concatenate string array values in directory format with workaround', () => {
       const mapping = {
         // prettier-ignore
         GLOBAL_WEB_ORIGINS: "\"http://local.me:8080\", \"http://localhost\", \"http://localhost:3000\"", // eslint-disable-line
@@ -253,7 +253,7 @@ describe('#keywordReplacement', () => {
       ]);
     });
 
-    it('should concatenate string array values in YAML format', () => {
+    it('should concatenate string array values in YAML format with workaround', () => {
       const mapping = {
         // prettier-ignore
         GLOBAL_WEB_ORIGINS: "\"http://local.me:8080\", \"http://localhost\", \"http://localhost:3000\"", // eslint-disable-line
