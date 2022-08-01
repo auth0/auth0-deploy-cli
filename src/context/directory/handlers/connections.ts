@@ -35,12 +35,12 @@ function parse(context: DirectoryContext): ParsedConnections {
         ensureProp(connection, 'options.email.body');
         const htmlFileName = path.join(connectionsFolder, connection.options.email.body);
 
-        if (isFile(htmlFileName)) {
-          connection.options.email.body = loadFileAndReplaceKeywords(
-            htmlFileName,
-            context.mappings
+        if (!isFile(htmlFileName)) {
+          throw new Error(
+            `Passwordless email template purportedly located at ${htmlFileName} does not exist for connection. Ensure the existence of this file to proceed with deployment.`
           );
         }
+        connection.options.email.body = loadFileAndReplaceKeywords(htmlFileName, context.mappings);
       }
 
       return connection;
