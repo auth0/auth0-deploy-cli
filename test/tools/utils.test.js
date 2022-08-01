@@ -225,7 +225,7 @@ describe('#keywordReplacement', () => {
   it('should be able to concatenate array string values with keyword replacement', () => {
     const mapping = {
       // prettier-ignore
-      GLOBAL_WEB_ORIGINS: "\"http://local.me:8080\", \"http://localhost\", \"http://localhost:3000\"",
+      GLOBAL_WEB_ORIGINS: "\"http://local.me:8080\", \"http://localhost\", \"http://localhost:3000\"", // eslint-disable-line
     };
 
     const inputJSON = `{ 
