@@ -1,5 +1,6 @@
 import path from 'path';
 import { expect } from 'chai';
+import jsYaml from 'js-yaml';
 import * as utils from '../../src/tools/utils';
 import constants from '../../src/tools/constants';
 
@@ -222,13 +223,14 @@ describe('#keywordReplacement', () => {
     expect(outputNoWhitespace).to.equal(expected);
   });
 
-  it('should be able to concatenate array string values with keyword replacement', () => {
-    const mapping = {
-      // prettier-ignore
-      GLOBAL_WEB_ORIGINS: "\"http://local.me:8080\", \"http://localhost\", \"http://localhost:3000\"", // eslint-disable-line
-    };
+  describe('#array concatenation with keyword replacement', function () {
+    it('should concatenate string array values in directory format', () => {
+      const mapping = {
+        // prettier-ignore
+        GLOBAL_WEB_ORIGINS: "\"http://local.me:8080\", \"http://localhost\", \"http://localhost:3000\"", // eslint-disable-line
+      };
 
-    const inputJSON = `{ 
+      const inputJSON = `{ 
       "web_origins": [
         ##GLOBAL_WEB_ORIGINS##,
         "http://a.foo.com",
@@ -236,19 +238,42 @@ describe('#keywordReplacement', () => {
       ]
     }`;
 
-    const output = utils.keywordReplace(inputJSON, mapping);
+      const output = utils.keywordReplace(inputJSON, mapping);
 
-    expect(() => JSON.parse(output)).to.not.throw();
+      expect(() => JSON.parse(output)).to.not.throw();
 
-    const parsed = JSON.parse(output);
+      const parsed = JSON.parse(output);
 
-    expect(parsed.web_origins).to.deep.equal([
-      'http://local.me:8080',
-      'http://localhost',
-      'http://localhost:3000',
-      'http://a.foo.com',
-      'https://a.foo.com',
-    ]);
+      expect(parsed.web_origins).to.deep.equal([
+        'http://local.me:8080',
+        'http://localhost',
+        'http://localhost:3000',
+        'http://a.foo.com',
+        'https://a.foo.com',
+      ]);
+    });
+
+    it('should concatenate string array values in YAML format', () => {
+      const mapping = {
+        // prettier-ignore
+        GLOBAL_WEB_ORIGINS: "\"http://local.me:8080\", \"http://localhost\", \"http://localhost:3000\"", // eslint-disable-line
+      };
+
+      const inputYAML =
+        'web_origins: [ ##GLOBAL_WEB_ORIGINS## , "http://a.foo.com", "https://a.foo.com"]';
+
+      const output = utils.keywordReplace(inputYAML, mapping);
+
+      const parsed = jsYaml.load(output);
+
+      expect(parsed.web_origins).to.deep.equal([
+        'http://local.me:8080',
+        'http://localhost',
+        'http://localhost:3000',
+        'http://a.foo.com',
+        'https://a.foo.com',
+      ]);
+    });
   });
 
   describe('#keywordStringReplace', () => {
