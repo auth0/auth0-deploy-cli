@@ -44,7 +44,7 @@ You may encounter situations where you would want to concatenate values onto a s
 
 ```json
 {
-  "AUTH0_KEYWORD_REPLACEMENT": {
+  "AUTH0_KEYWORD_REPLACE_MAPPINGS": {
     "GLOBAL_WEB_ORIGINS": "\"http://local.me:8080\", \"http://localhost\", \"http://localhost:3000\""
   }
 }

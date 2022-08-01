@@ -25,7 +25,7 @@ Example **config.json** file:
 
 By default, the Deploy CLI ingests environment variables, providing the ability to pass credentials and other configurations to the tool without needing to publish to the `config.json` file. Environment variables can either be used to augment the `config.json` file or replace it altogether depending on the project needs.
 
-Non-primitive configuration values like `AUTH0_KEYWORD_MAPPING` and `AUTH0_EXCLUDED` can also be passed in through environment variables so long as these values are properly serialized JSON.
+Non-primitive configuration values like `AUTH0_KEYWORD_REPLACE_MAPPINGS` and `AUTH0_EXCLUDED` can also be passed in through environment variables so long as these values are properly serialized JSON.
 
 To **disable** the consumption of environment variables for either the `import` or `export` commands, pass the `--env=false` argument.
 
@@ -34,8 +34,8 @@ To **disable** the consumption of environment variables for either the `import` 
 ```shell
 # Deploying configuration for YAML formats without a config.json file
 export AUTH0_DOMAIN=<YOUR_AUTH0_DOMAIN>
-export AUTH0_CLIENT_ID=<YOUR_CLIENT_ID> 
-export AUTH0_CLIENT_SECRET=<YOUR_CLIENT_SECRET> 
+export AUTH0_CLIENT_ID=<YOUR_CLIENT_ID>
+export AUTH0_CLIENT_SECRET=<YOUR_CLIENT_SECRET>
 
 a0deploy import --input_file=local/tenant.yaml
 
