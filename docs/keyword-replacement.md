@@ -36,6 +36,24 @@ clients:
     allowed_logout_urls: @@ALLOWED_LOGOUTS@@
 ```
 
+## Array Concatenation
+
+You may encounter situations where you would want to concatenate values onto a static array through keyword replacement. There is no special syntax to support this case, however, it is possible to achieve this by escaping double quotes in a single string that contains the appropriate values and injecting with the `##` keyword syntax.
+
+### Example
+
+```json
+{
+  "AUTH0_KEYWORD_REPLACEMENT": {
+    "GLOBAL_WEB_ORIGINS": "\"http://local.me:8080\", \"http://localhost\", \"http://localhost:3000\""
+  }
+}
+```
+
+```yaml
+web_origins: [ "http://production-app.com", "https://production-app.com", ##GLOBAL_WEB_ORIGINS## ]
+```
+
 ## Uni-directional Limitation
 
 Currently, the Deploy CLI only preserves keywords during import. Once added, keywords are overwritten with subsequent exports. For this reason, it is recommended that if a workflow heavily depends on keyword replacement, to only perform imports in perpetuity. This limitation is noted in [this Github issue](https://github.com/auth0/auth0-deploy-cli/issues/328).

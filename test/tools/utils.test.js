@@ -233,8 +233,8 @@ describe('#keywordReplacement', () => {
       const inputJSON = `{ 
       "web_origins": [
         ##GLOBAL_WEB_ORIGINS##,
-        "http://a.foo.com",
-        "https://a.foo.com"
+        "http://production-app.com",
+        "https://production-app.com"
       ]
     }`;
 
@@ -248,8 +248,8 @@ describe('#keywordReplacement', () => {
         'http://local.me:8080',
         'http://localhost',
         'http://localhost:3000',
-        'http://a.foo.com',
-        'https://a.foo.com',
+        'http://production-app.com',
+        'https://production-app.com',
       ]);
     });
 
@@ -260,7 +260,7 @@ describe('#keywordReplacement', () => {
       };
 
       const inputYAML =
-        'web_origins: [ ##GLOBAL_WEB_ORIGINS## , "http://a.foo.com", "https://a.foo.com"]';
+        'web_origins: [ ##GLOBAL_WEB_ORIGINS## , "http://production-app.com", "https://production-app.com"]';
 
       const output = utils.keywordReplace(inputYAML, mapping);
 
@@ -270,8 +270,8 @@ describe('#keywordReplacement', () => {
         'http://local.me:8080',
         'http://localhost',
         'http://localhost:3000',
-        'http://a.foo.com',
-        'https://a.foo.com',
+        'http://production-app.com',
+        'https://production-app.com',
       ]);
     });
   });
