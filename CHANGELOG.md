@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Allowing updating of branding themes when used in conjunction with `--export_ids` flag [#603]
+- Halting deploy process if passwordless email template does not exist [#617]
+
 ## [7.14.1] - 2022-06-29
 
 ### Fixed
