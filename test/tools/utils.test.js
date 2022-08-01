@@ -222,6 +222,35 @@ describe('#keywordReplacement', () => {
     expect(outputNoWhitespace).to.equal(expected);
   });
 
+  it('should be able to concatenate array string values with keyword replacement', () => {
+    const mapping = {
+      // prettier-ignore
+      GLOBAL_WEB_ORIGINS: "\"http://local.me:8080\", \"http://localhost\", \"http://localhost:3000\"",
+    };
+
+    const inputJSON = `{ 
+      "web_origins": [
+        ##GLOBAL_WEB_ORIGINS##,
+        "http://a.foo.com",
+        "https://a.foo.com"
+      ]
+    }`;
+
+    const output = utils.keywordReplace(inputJSON, mapping);
+
+    expect(() => JSON.parse(output)).to.not.throw();
+
+    const parsed = JSON.parse(output);
+
+    expect(parsed.web_origins).to.deep.equal([
+      'http://local.me:8080',
+      'http://localhost',
+      'http://localhost:3000',
+      'http://a.foo.com',
+      'https://a.foo.com',
+    ]);
+  });
+
   describe('#keywordStringReplace', () => {
     const mapping = {
       STRING_REPLACEMENT: 'foo',
