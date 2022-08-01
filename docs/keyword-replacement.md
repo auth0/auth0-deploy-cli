@@ -38,9 +38,9 @@ clients:
 
 ## Array Concatenation
 
-You may encounter situations where you would want to concatenate values onto a static array through keyword replacement. There is no special syntax to support this case, however, it is possible to achieve this by escaping double quotes in a single string that contains the appropriate values and injecting with the `##` keyword syntax.
+You may encounter situations where you would want to concatenate values onto a static array through keyword replacement. There is no special syntax to support this case, however, it is possible to achieve this by escaping double quotes in a single string that contains the appropriate values and injecting with the `##` keyword syntax. This technique works for both the [YAML and directory formats](./available-resource-config-formats.md).
 
-### Example
+### Example `config.json`
 
 ```json
 {
@@ -50,8 +50,12 @@ You may encounter situations where you would want to concatenate values onto a s
 }
 ```
 
+### Example `tenant.yaml`
+
 ```yaml
-web_origins: [ "http://production-app.com", "https://production-app.com", ##GLOBAL_WEB_ORIGINS## ]
+clients:
+  - name: Test App
+    web_origins: [ "http://production-app.com", "https://production-app.com", ##GLOBAL_WEB_ORIGINS## ]
 ```
 
 ## Uni-directional Limitation
