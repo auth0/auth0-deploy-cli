@@ -1,5 +1,6 @@
 import path from 'path';
 import { expect } from 'chai';
+import jsYaml from 'js-yaml';
 import * as utils from '../../src/tools/utils';
 import constants from '../../src/tools/constants';
 
@@ -220,6 +221,59 @@ describe('#keywordReplacement', () => {
     });
 
     expect(outputNoWhitespace).to.equal(expected);
+  });
+
+  describe('#array concatenation with keyword replacement', function () {
+    it('should concatenate string array values in directory format with workaround', () => {
+      const mapping = {
+        // prettier-ignore
+        GLOBAL_WEB_ORIGINS: "\"http://local.me:8080\", \"http://localhost\", \"http://localhost:3000\"", // eslint-disable-line
+      };
+
+      const inputJSON = `{ 
+      "web_origins": [
+        ##GLOBAL_WEB_ORIGINS##,
+        "http://production-app.com",
+        "https://production-app.com"
+      ]
+    }`;
+
+      const output = utils.keywordReplace(inputJSON, mapping);
+
+      expect(() => JSON.parse(output)).to.not.throw();
+
+      const parsed = JSON.parse(output);
+
+      expect(parsed.web_origins).to.deep.equal([
+        'http://local.me:8080',
+        'http://localhost',
+        'http://localhost:3000',
+        'http://production-app.com',
+        'https://production-app.com',
+      ]);
+    });
+
+    it('should concatenate string array values in YAML format with workaround', () => {
+      const mapping = {
+        // prettier-ignore
+        GLOBAL_WEB_ORIGINS: "\"http://local.me:8080\", \"http://localhost\", \"http://localhost:3000\"", // eslint-disable-line
+      };
+
+      const inputYAML =
+        'web_origins: [ ##GLOBAL_WEB_ORIGINS## , "http://production-app.com", "https://production-app.com"]';
+
+      const output = utils.keywordReplace(inputYAML, mapping);
+
+      const parsed = jsYaml.load(output);
+
+      expect(parsed.web_origins).to.deep.equal([
+        'http://local.me:8080',
+        'http://localhost',
+        'http://localhost:3000',
+        'http://production-app.com',
+        'https://production-app.com',
+      ]);
+    });
   });
 
   describe('#keywordStringReplace', () => {
