@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.14.2] - 2022-08-01
+
+### Fixed
+
+- Allowing updating of branding themes when used in conjunction with `--export_ids` flag [#603]
+- Halting deploy process if passwordless email template does not exist [#617]
+
 ## [7.14.1] - 2022-06-29
 
 ### Fixed
@@ -797,7 +804,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#591]: https://github.com/auth0/auth0-deploy-cli/issues/591
 [#592]: https://github.com/auth0/auth0-deploy-cli/issues/592
 [#597]: https://github.com/auth0/auth0-deploy-cli/issues/597
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.1...HEAD
+[#603]: https://github.com/auth0/auth0-deploy-cli/issues/603
+[#617]: https://github.com/auth0/auth0-deploy-cli/issues/617
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.2...HEAD
+[7.14.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.1...v7.14.2
 [7.14.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.0...v7.14.1
 [7.14.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.13.1...v7.14.0
 [7.13.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.13.0...v7.13.1
