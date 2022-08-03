@@ -33,7 +33,7 @@
   "homepage": "https://github.com/auth0/auth0-deploy-cli#readme",
   "dependencies": {
     "@types/lodash": "^4.14.181",
-    "@types/nconf": "^0.10.2",
+    "@types/nconf": "^0.10.3",
     "@types/nock": "^11.1.0",
     "@types/winston": "^2.4.4",
     "ajv": "^6.12.6",
