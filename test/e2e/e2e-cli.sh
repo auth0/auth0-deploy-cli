@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 WORK_DIR="./local/cli"
 CONFIG_FILE="./config-cli-e2e.json"
