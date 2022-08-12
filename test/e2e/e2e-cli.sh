@@ -8,7 +8,7 @@ npm run build
 npm ci --omit=dev #Remove dev dependencies
 
 TARBALL_PATH=$(npm pack)
-npm install $TARBALL_PATH
+npm install -g $TARBALL_PATH
 
 echo "{
   \"AUTH0_DOMAIN\": \"$AUTH0_E2E_TENANT_DOMAIN\",
@@ -16,10 +16,11 @@ echo "{
   \"AUTH0_CLIENT_SECRET\": \"$AUTH0_E2E_CLIENT_SECRET\"
 }" > $CONFIG_FILE
 
-npx a0deploy export --env=false --output_folder=$WORK_DIR --format=yaml -c=$CONFIG_FILE
+a0deploy export --env=false --output_folder=$WORK_DIR --format=yaml -c=$CONFIG_FILE
 
 echo "-------- Beginning deploy/import phase --------"
 
-npx a0deploy import --env=false --input_file=$WORK_DIR --format=yaml -c=$CONFIG_FILE
+a0deploy import --env=false --input_file=$WORK_DIR --format=yaml -c=$CONFIG_FILE
 
 rm $CONFIG_FILE
+rm $TARBALL_PATH
