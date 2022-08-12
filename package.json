@@ -14,7 +14,7 @@
     "test:e2e:node-module": "ts-mocha -p tsconfig.json --recursive 'test/e2e/*.test*' --timeout 120000",
     "test:e2e:cli": "sh ./test/e2e/e2e-cli.sh",
     "test:coverage": "nyc npm run test; nyc report --reporter=lcov",
-    "build": "rm -rf ./lib && npx tsc",
+    "build": "rimraf ./lib && npx tsc",
     "dev": "npx tsc --watch",
     "prepublishOnly": "npm run build",
     "preversion": "kacl prerelease",
@@ -42,6 +42,7 @@
     "mkdirp": "^1.0.4",
     "nconf": "^0.12.0",
     "promise-pool-executor": "^1.1.1",
+    "rimraf": "^3.0.2",
     "sanitize-filename": "^1.6.1",
     "winston": "^3.7.2",
     "yargs": "^15.3.1"
