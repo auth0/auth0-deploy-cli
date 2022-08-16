@@ -35,7 +35,7 @@ function parse(context: DirectoryContext): ParsedPages {
       log.warn(`Skipping pages file ${html} as missing the corresponding '.json' file`);
       return [];
     }
-    if (!html && key === 'error_page') {
+    if (!html && ['error_page', 'login'].includes(key)) {
       //Error pages don't require an HTML template, it is valid to redirect errors to URL
       return {
         ...loadJSON(meta, context.mappings),
