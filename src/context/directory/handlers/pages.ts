@@ -35,13 +35,20 @@ function parse(context: DirectoryContext): ParsedPages {
       log.warn(`Skipping pages file ${html} as missing the corresponding '.json' file`);
       return [];
     }
-    if (!html && key !== 'error_page') {
+    if (!html && key === 'error_page') {
+      //Error pages don't require an HTML template, it is valid to redirect errors to URL
+      return {
+        ...loadJSON(meta, context.mappings),
+        html: '',
+      };
+    }
+    if (!html) {
       log.warn(`Skipping pages file ${meta} as missing corresponding '.html' file`);
       return [];
     }
     return {
       ...loadJSON(meta, context.mappings),
-      html: loadFileAndReplaceKeywords(html || '', context.mappings),
+      html: loadFileAndReplaceKeywords(html, context.mappings),
     };
   });
 

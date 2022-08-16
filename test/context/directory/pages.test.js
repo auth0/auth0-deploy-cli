@@ -33,6 +33,27 @@ const pagesTarget = [
 ];
 
 describe('#directory context pages', () => {
+  it('should process pages even without error_page HTML file', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'pages4');
+    const noErrorPageHtml = (() => {
+      const newPages = { ...pages };
+      delete newPages['error_page.html'];
+      return newPages;
+    })();
+    createDir(repoDir, { [constants.PAGES_DIRECTORY]: noErrorPageHtml });
+
+    const config = { AUTH0_INPUT_FILE: repoDir };
+    const context = new Context(config, mockMgmtClient());
+    await context.load();
+
+    expect(context.assets.pages.find((page) => page.name === 'error_page')).to.deep.equal({
+      html: '',
+      name: 'error_page',
+      show_log_link: false,
+      url: 'https://example.com/error',
+    });
+  });
+
   it('should process pages', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'pages1');
     createDir(repoDir, { [constants.PAGES_DIRECTORY]: pages });
@@ -132,7 +153,7 @@ describe('#directory context pages', () => {
     );
   });
 
-  it('should dump error page without html', async () => {
+  it('should dump empty error page even if HTML is not set', async () => {
     const dir = path.join(testDataDir, 'directory', 'pagesDump');
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
@@ -143,6 +164,7 @@ describe('#directory context pages', () => {
         name: 'error_page',
         url: errorPageUrl,
         show_log_link: false,
+        html: '',
       },
     ];
 
@@ -153,7 +175,8 @@ describe('#directory context pages', () => {
       name: 'error_page',
       url: errorPageUrl,
       show_log_link: false,
+      html: './error_page.html',
     });
-    expect(fs.existsSync(path.join(pagesFolder, 'error_page.html'))).to.equal(false);
+    expect(fs.existsSync(path.join(pagesFolder, 'error_page.html'))).to.equal(true);
   });
 });
