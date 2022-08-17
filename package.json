@@ -16,7 +16,7 @@
     "test:coverage": "nyc npm run test; nyc report --reporter=lcov",
     "build": "rimraf ./lib && npx tsc",
     "dev": "npx tsc --watch",
-    "prepare": "npm run build",
+    "prepublishOnly": "npm run build",
     "preversion": "kacl prerelease",
     "version": "kacl release && git add CHANGELOG.md"
   },
