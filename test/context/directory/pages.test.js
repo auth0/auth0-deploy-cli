@@ -33,27 +33,6 @@ const pagesTarget = [
 ];
 
 describe('#directory context pages', () => {
-  it('should process pages even without error_page HTML file', async () => {
-    const repoDir = path.join(testDataDir, 'directory', 'pages4');
-    const noErrorPageHtml = (() => {
-      const newPages = { ...pages };
-      delete newPages['error_page.html'];
-      return newPages;
-    })();
-    createDir(repoDir, { [constants.PAGES_DIRECTORY]: noErrorPageHtml });
-
-    const config = { AUTH0_INPUT_FILE: repoDir };
-    const context = new Context(config, mockMgmtClient());
-    await context.load();
-
-    expect(context.assets.pages.find((page) => page.name === 'error_page')).to.deep.equal({
-      html: '',
-      name: 'error_page',
-      show_log_link: false,
-      url: 'https://example.com/error',
-    });
-  });
-
   it('should process pages', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'pages1');
     createDir(repoDir, { [constants.PAGES_DIRECTORY]: pages });
@@ -63,6 +42,36 @@ describe('#directory context pages', () => {
     await context.load();
 
     expect(context.assets.pages).to.deep.equal(pagesTarget);
+  });
+
+  it('should process login and error pages without HTML files', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'pages4');
+
+    const pagesNoHtml = {
+      'login.json': '{ "name": "login", "enabled": false }',
+      'error_page.json':
+        '{ "name": "error_page", "url": "https://example.com/error", "show_log_link": false }',
+    };
+
+    createDir(repoDir, { [constants.PAGES_DIRECTORY]: pagesNoHtml });
+
+    const config = { AUTH0_INPUT_FILE: repoDir };
+    const context = new Context(config, mockMgmtClient());
+    await context.load();
+
+    expect(context.assets.pages).to.deep.equal([
+      {
+        html: '',
+        name: 'error_page',
+        show_log_link: false,
+        url: 'https://example.com/error',
+      },
+      {
+        html: '',
+        name: 'login',
+        enabled: false,
+      },
+    ]);
   });
 
   it('should ignore unknown file', async () => {
