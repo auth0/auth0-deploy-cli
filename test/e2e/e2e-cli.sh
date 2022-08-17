@@ -9,7 +9,7 @@ npm run build
 npm ci --omit=dev #Remove dev dependencies
 
 TARBALL_PATH=$(npm pack)
-npm install -g $TARBALL_PATH
+sudo npm install -g $TARBALL_PATH
 
 echo "{
   \"AUTH0_DOMAIN\": \"$AUTH0_E2E_TENANT_DOMAIN\",
