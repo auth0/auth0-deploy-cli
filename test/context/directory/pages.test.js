@@ -33,6 +33,17 @@ const pagesTarget = [
 ];
 
 describe('#directory context pages', () => {
+  it('should process pages', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'pages1');
+    createDir(repoDir, { [constants.PAGES_DIRECTORY]: pages });
+
+    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
+    const context = new Context(config, mockMgmtClient());
+    await context.load();
+
+    expect(context.assets.pages).to.deep.equal(pagesTarget);
+  });
+
   it('should process pages even without error_page HTML file', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'pages4');
     const noErrorPageHtml = (() => {
@@ -52,17 +63,6 @@ describe('#directory context pages', () => {
       show_log_link: false,
       url: 'https://example.com/error',
     });
-  });
-
-  it('should process pages', async () => {
-    const repoDir = path.join(testDataDir, 'directory', 'pages1');
-    createDir(repoDir, { [constants.PAGES_DIRECTORY]: pages });
-
-    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
-    const context = new Context(config, mockMgmtClient());
-    await context.load();
-
-    expect(context.assets.pages).to.deep.equal(pagesTarget);
   });
 
   it('should ignore unknown file', async () => {
