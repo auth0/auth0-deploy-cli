@@ -75,9 +75,7 @@ workflows:
       - e2e_test_as_cli:
           filters:
             branches:
-              only:
-                - master
-                - fix-ci-npm-install # Temporary to test to see if this works
+              only: master
 
   unit_test:
     jobs:
