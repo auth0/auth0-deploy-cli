@@ -1,4 +1,5 @@
 import path from 'path';
+import { randomUUID } from 'crypto';
 import { AuthenticationClient, ManagementClient } from 'auth0';
 import YAMLContext from './yaml';
 import DirectoryContext from './directory';
@@ -80,12 +81,18 @@ export const setupContext = async (config: Config): Promise<DirectoryContext | Y
     return clientCredentials.access_token;
   })();
 
+  const nodeVersion = process.version.replace('v', '');
+
   const mgmtClient = new ManagementClient({
     domain: config.AUTH0_DOMAIN,
     token: accessToken,
     retry: { maxRetries: config.AUTH0_API_MAX_RETRIES || 10, enabled: true },
     headers: {
-      'User-agent': `deploy-cli/${packageVersion} (node.js/${process.version.replace('v', '')})`,
+      'User-agent': `deploy-cli/${packageVersion} (node.js/${nodeVersion})`,
+      'Auth0-deploy-cli-version': packageVersion,
+      'Auth0-deploy-cli-node-version': nodeVersion,
+      'Auth0-deploy-cli-os': process.platform,
+      'Auth0-deploy-cli-session': randomUUID(),
     },
   });
 
