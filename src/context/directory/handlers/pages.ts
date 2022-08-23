@@ -29,10 +29,18 @@ function parse(context: DirectoryContext): ParsedPages {
     return acc;
   }, {});
 
-  const pages = Object.values(sorted).flatMap(({ meta, html }): Asset[] => {
+  const pages = Object.keys(sorted).flatMap((key): Asset[] => {
+    const { meta, html } = sorted[key];
     if (!meta) {
       log.warn(`Skipping pages file ${html} as missing the corresponding '.json' file`);
       return [];
+    }
+    if (!html && ['error_page', 'login'].includes(key)) {
+      //Error pages don't require an HTML template, it is valid to redirect errors to URL
+      return {
+        ...loadJSON(meta, context.mappings),
+        html: '',
+      };
     }
     if (!html) {
       log.warn(`Skipping pages file ${meta} as missing corresponding '.html' file`);
@@ -65,7 +73,7 @@ async function dump(context: DirectoryContext): Promise<void> {
       // Dump template html to file
       const htmlFile = path.join(pagesFolder, `${page.name}.html`);
       log.info(`Writing ${htmlFile}`);
-      fs.writeFileSync(htmlFile, page.html);
+      fs.writeFileSync(htmlFile || '', page.html);
       metadata.html = `./${page.name}.html`;
     }
 

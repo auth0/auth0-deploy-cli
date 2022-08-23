@@ -44,6 +44,36 @@ describe('#directory context pages', () => {
     expect(context.assets.pages).to.deep.equal(pagesTarget);
   });
 
+  it('should process login and error pages without HTML files', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'pages4');
+
+    const pagesNoHtml = {
+      'login.json': '{ "name": "login", "enabled": false }',
+      'error_page.json':
+        '{ "name": "error_page", "url": "https://example.com/error", "show_log_link": false }',
+    };
+
+    createDir(repoDir, { [constants.PAGES_DIRECTORY]: pagesNoHtml });
+
+    const config = { AUTH0_INPUT_FILE: repoDir };
+    const context = new Context(config, mockMgmtClient());
+    await context.load();
+
+    expect(context.assets.pages).to.deep.equal([
+      {
+        html: '',
+        name: 'error_page',
+        show_log_link: false,
+        url: 'https://example.com/error',
+      },
+      {
+        html: '',
+        name: 'login',
+        enabled: false,
+      },
+    ]);
+  });
+
   it('should ignore unknown file', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'pages2');
     const invalidFile = {
@@ -132,7 +162,7 @@ describe('#directory context pages', () => {
     );
   });
 
-  it('should dump error page without html', async () => {
+  it('should dump empty error page even if HTML is not set', async () => {
     const dir = path.join(testDataDir, 'directory', 'pagesDump');
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
@@ -143,6 +173,7 @@ describe('#directory context pages', () => {
         name: 'error_page',
         url: errorPageUrl,
         show_log_link: false,
+        html: '',
       },
     ];
 
@@ -153,7 +184,8 @@ describe('#directory context pages', () => {
       name: 'error_page',
       url: errorPageUrl,
       show_log_link: false,
+      html: './error_page.html',
     });
-    expect(fs.existsSync(path.join(pagesFolder, 'error_page.html'))).to.equal(false);
+    expect(fs.existsSync(path.join(pagesFolder, 'error_page.html'))).to.equal(true);
   });
 });
