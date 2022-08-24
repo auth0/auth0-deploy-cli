@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.14.3] - 2022-08-24
+
 ### Fixed
 
 - Reclassify select production dependencies as dev dependencies [#626]
@@ -811,7 +813,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#597]: https://github.com/auth0/auth0-deploy-cli/issues/597
 [#603]: https://github.com/auth0/auth0-deploy-cli/issues/603
 [#617]: https://github.com/auth0/auth0-deploy-cli/issues/617
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.2...HEAD
+[#626]: https://github.com/auth0/auth0-deploy-cli/issues/626
+[#629]: https://github.com/auth0/auth0-deploy-cli/issues/629
+[#630]: https://github.com/auth0/auth0-deploy-cli/issues/630
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.3...HEAD
+[7.14.3]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.2...v7.14.3
 [7.14.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.1...v7.14.2
 [7.14.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.0...v7.14.1
 [7.14.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.13.1...v7.14.0
