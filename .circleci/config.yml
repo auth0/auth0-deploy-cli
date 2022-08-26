@@ -66,30 +66,43 @@ jobs:
           name: Publish package
           command: npm publish
 
+  does_typescript_compile: 
+    docker:
+      - image: cimg/node:current
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run: npm ci
+      - run: npx tsc --noEmit
+
 workflows:
   version: 2
 
   e2e_test:
     jobs:
-      - e2e_test_as_node_module
+      - e2e_test_as_node_module:
+          name: E2E tests as Node module
       - e2e_test_as_cli:
+          name: E2E tests as CLI
           filters:
             branches:
               only: master
 
   unit_test:
     jobs:
+      - does_typescript_compile:
+          name: Does Typescript compile?
       - unit_test:
-          name: test_lts
+          name: Unit tests with Node LTS
           v: "lts"
       - unit_test:
-          name: test_current
+          name: Unit tests with Node current
           v: "current"
 
   test_and_deploy:
     jobs:
       - unit_test:
-          name: test_lts
+          name: Unit tests with Node LTS
           v: "lts"
           filters:
             branches:
@@ -97,9 +110,10 @@ workflows:
             tags:
               only: /^v.*/
       - deploy:
+          name: Publish to NPM
           v: "lts"
           requires:
-            - test_lts
+            - Unit tests with Node LTS
           filters:
             branches:
               ignore: /.*/
