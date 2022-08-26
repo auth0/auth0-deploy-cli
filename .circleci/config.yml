@@ -66,6 +66,15 @@ jobs:
           name: Publish package
           command: npm publish
 
+  does_typescript_compile: 
+    docker:
+      - image: cimg/node:<< parameters.v >>
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run: npm ci
+      - run: npx tsc --noEmit
+
 workflows:
   version: 2
 
@@ -79,6 +88,9 @@ workflows:
 
   unit_test:
     jobs:
+      - does_typescript_compile:
+          name: Does Typescript compile?
+          v: "lts"
       - unit_test:
           name: test_lts
           v: "lts"
