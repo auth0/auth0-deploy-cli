@@ -96,7 +96,7 @@ workflows:
           name: Unit tests with Node LTS
           v: "lts"
       - unit_test:
-          name: Unit tests with current Node version
+          name: Unit tests with Node current
           v: "current"
 
   test_and_deploy:
