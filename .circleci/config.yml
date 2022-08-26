@@ -68,7 +68,7 @@ jobs:
 
   does_typescript_compile: 
     docker:
-      - image: cimg/node:<< parameters.v >>
+      - image: cimg/node:current
     working_directory: ~/repo
     steps:
       - checkout
@@ -90,7 +90,6 @@ workflows:
     jobs:
       - does_typescript_compile:
           name: Does Typescript compile?
-          v: "lts"
       - unit_test:
           name: test_lts
           v: "lts"
