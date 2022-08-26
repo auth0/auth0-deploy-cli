@@ -115,7 +115,7 @@ export type BaseAuth0APIClient = {
     getMigrations: () => Promise<{ flags: Asset[] }>;
     updateMigrations: (arg0: { flags: Asset[] }) => Promise<void>;
   };
-  organizzations: APIClientBaseFunctions & {
+  organizations: APIClientBaseFunctions & {
     updateEnabledConnection: (arg0: {}, arg1: Asset) => Promise<void>;
     addEnabledConnection: (arg0: {}, arg1: Asset) => Promise<void>;
     removeEnabledConnection: (arg0: Asset) => Promise<void>;
