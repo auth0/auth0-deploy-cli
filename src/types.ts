@@ -43,12 +43,12 @@ export type ApiResponse = {
 
 export type BaseAuth0APIClient = {
   actions: APIClientBaseFunctions & {
-    deploy: ({ id: string }) => Promise<void>;
+    deploy: (arg0: { id: string }) => Promise<void>;
     getAllTriggers: () => Promise<{ triggers: Asset[] }>;
-    getTriggerBindings: ({ trigger_id: string }) => Promise<{ bindings: Asset[] }>;
+    getTriggerBindings: (arg0: { trigger_id: string }) => Promise<{ bindings: Asset[] }>;
     updateTriggerBindings: (
-      { trigger_id: string },
-      { bindings: Object }
+      arg0: { trigger_id: string },
+      arg1: { bindings: Object }
     ) => Promise<{ bindings: Asset[] }>;
   };
   attackProtection: APIClientBaseFunctions & {
@@ -104,10 +104,10 @@ export type BaseAuth0APIClient = {
     updatePhoneFactorSelectedProvider: (arg0: {}, arg1: Asset) => Promise<void>;
   };
   hooks: APIClientBaseFunctions & {
-    get: ({ id: string }) => Promise<Asset>;
+    get: (arg0: { id: string }) => Promise<Asset>;
     removeSecrets: (arg0: {}, arg1: Asset) => Promise<void>;
     updateSecrets: (arg0: {}, arg1: Asset) => Promise<void>;
-    getSecrets: ({ id: string }) => Promise<Promise<Asset[]>>;
+    getSecrets: (arg0: { id: string }) => Promise<Promise<Asset[]>>;
     addSecrets: (arg0: {}, arg1: Asset) => Promise<void>;
   };
   logStreams: APIClientBaseFunctions;
