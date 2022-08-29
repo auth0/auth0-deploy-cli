@@ -69,6 +69,8 @@ In order for the Deploy CLI to call the Management API, a dedicated Auth0 applic
    b. Select the appropriate permissions for the resources you wish to manage. Refer to the [Client Scopes](#client-scopes) section for more information.
    c. Click “Authorize”
 
+> ⚠️ **NOTE:** The Deploy CLI's own client grant is unconfigurable by itself to [prevent potentially destructive changes](./docs/resource-specific-documentation.md#client-grants).
+
 #### Client Scopes
 
 The designated application needs to be granted scopes in order to allow the Deploy CLI to execute Management operations.
