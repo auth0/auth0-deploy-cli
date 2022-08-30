@@ -17,7 +17,7 @@ Multilingual custom text prompts follow a particular hierarchy. Under the root-l
 ```yaml
 prompts:
   customText:
-    <LANGUAGE>: #two character language code
+    <LANGUAGE>: # two character language code
       <PROMPT_ID>: # prompt ID
         <SCREEN_ID>: # prompt screen ID
           <TEXT_ID>: 'Some text'
