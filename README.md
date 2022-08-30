@@ -26,6 +26,7 @@ The Auth0 Deploy CLI is a tool that helps you manage your Auth0 tenant configura
 - [Keyword Replacement](docs/keyword-replacement.md)
 - [Incorporating Into Multi-environment Workflows](docs/multi-environment-workflow.md)
 - [Excluding Resources From Management](docs/excluding-from-management.md)
+- [Resource-specific Documentation](docs/resource-specific-documentation.md)
 - [Available Resource Formats](docs/available-resource-config-formats.md)
 - [Terraform Provider](docs/terraform-provider.md)
 - [How to Contribute](docs/how-to-contribute.md)
@@ -67,6 +68,8 @@ In order for the Deploy CLI to call the Management API, a dedicated Auth0 applic
    a. Select “Auth0 Management API”
    b. Select the appropriate permissions for the resources you wish to manage. Refer to the [Client Scopes](#client-scopes) section for more information.
    c. Click “Authorize”
+
+> ⚠️ **NOTE:** The Deploy CLI's own client grant is unconfigurable by itself to [prevent potentially destructive changes](./docs/resource-specific-documentation.md#client-grants).
 
 #### Client Scopes
 
