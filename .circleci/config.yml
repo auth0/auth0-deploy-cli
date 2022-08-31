@@ -86,7 +86,9 @@ workflows:
           name: E2E tests as CLI
           filters:
             branches:
-              only: master
+              only: 
+               - master
+               - demo-bad-dep-declaration
 
   unit_test:
     jobs:
