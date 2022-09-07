@@ -47,7 +47,7 @@
     "yargs": "^15.3.1"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.182",
+    "@types/lodash": "^4.14.183",
     "@types/mocha": "^9.1.0",
     "@types/nconf": "^0.10.3",
     "@typescript-eslint/parser": "^5.30.3",
