@@ -1,3 +1,4 @@
+import { Action } from './tools/auth0/handlers/actions';
 import {
   PromptTypes,
   ScreenTypes,
@@ -42,7 +43,11 @@ export type ApiResponse = {
 } & { [key in AssetTypes]: Asset[] };
 
 export type BaseAuth0APIClient = {
-  actions: APIClientBaseFunctions & {
+  actions: {
+    getAll: (arg0: SharedPaginationParams) => Promise<Action[]>;
+    create: (arg0: { id: string }) => Promise<Action>;
+    update: (arg0: {}, arg1: Action) => Promise<Action>;
+    delete: (arg0: Asset) => Promise<void>;
     deploy: (arg0: { id: string }) => Promise<void>;
     getAllTriggers: () => Promise<{ triggers: Asset[] }>;
     getTriggerBindings: (arg0: { trigger_id: string }) => Promise<{ bindings: Asset[] }>;

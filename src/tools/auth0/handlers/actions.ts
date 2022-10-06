@@ -3,9 +3,28 @@ import DefaultAPIHandler, { order } from './default';
 import log from '../../../logger';
 import { areArraysEquals } from '../../utils';
 import { Asset } from '../../../types';
-import { showCompletionScript } from 'yargs';
 
 const MAX_ACTION_DEPLOY_RETRY_ATTEMPTS = 60; // 60 * 2s => 2 min timeout
+
+export type Action = {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+  deployed?: boolean;
+  supported_triggers: {
+    id: string;
+    version: string;
+    status?: string;
+  }[];
+  code?: string;
+  dependencies?: [];
+  runtime?: string;
+  status?: string;
+  secrets?: string[];
+  installed_integration_id?: string;
+  integration?: Object;
+};
 
 // With this schema, we can only validate property types but not valid properties on per type basis
 export const schema = {
@@ -68,22 +87,26 @@ function isActionsDisabled(err) {
   return err.statusCode === 403 && errorBody.errorCode === 'feature_not_enabled';
 }
 
+function isMarketplaceAction(action: Action): boolean {
+  return !!action.integration;
+}
+
 export default class ActionHandler extends DefaultAPIHandler {
-  existing: Asset[] | null;
+  existing: Action[] | null;
 
   constructor(options: DefaultAPIHandler) {
     super({
       ...options,
       type: 'actions',
       functions: {
-        create: (action) => this.createAction(action),
-        delete: (action) => this.deleteAction(action),
+        create: (action: Action) => this.createAction(action),
+        delete: (action: Action) => this.deleteAction(action),
       },
       stripUpdateFields: ['deployed', 'status'],
     });
   }
 
-  async createAction(action) {
+  async createAction(action: Action) {
     // Strip the deployed flag
     const addAction = { ...action };
     delete addAction.deployed;
@@ -95,7 +118,7 @@ export default class ActionHandler extends DefaultAPIHandler {
     return createdAction;
   }
 
-  async deleteAction(action) {
+  async deleteAction(action: Action) {
     if (!this.client.actions || typeof this.client.actions.delete !== 'function') {
       return [];
     }
