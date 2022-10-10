@@ -206,7 +206,7 @@ export type Config = {
 export type Asset = { [key: string]: any };
 
 export type Assets = Partial<{
-  actions: Asset[] | null;
+  actions: Action[] | null;
   attackProtection: Asset | null;
   branding: {
     templates?: { template: string; body: string }[] | null;

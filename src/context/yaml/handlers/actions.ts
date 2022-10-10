@@ -6,9 +6,10 @@ import { sanitize } from '../../../utils';
 import log from '../../../logger';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset, ParsedAsset } from '../../../types';
+import { ParsedAsset } from '../../../types';
+import { Action, isMarketplaceAction } from '../../../tools/auth0/handlers/actions';
 
-type ParsedActions = ParsedAsset<'actions', Asset[]>;
+type ParsedActions = ParsedAsset<'actions', Partial<Action>[]>;
 
 type Secret = { name: string; value: string };
 
@@ -29,7 +30,7 @@ async function parse(context: YAMLContext): Promise<ParsedActions> {
     actions: [
       ...actions.map((action) => ({
         ...action,
-        code: parseCode(context, action.code),
+        code: parseCode(context, action.code || ''),
       })),
     ],
   };
@@ -65,17 +66,29 @@ async function dump(context: YAMLContext): Promise<ParsedActions> {
 
   if (!actions) return { actions: null };
 
+  // Marketplace actions are not currently supported for management (See ESD-23225)
+  const filteredActions = actions.filter((action) => {
+    if (isMarketplaceAction(action)) {
+      log.warn(
+        `Skipping export of marketplace action "${action.name}". Management of marketplace actions are not currently supported.`
+      );
+      return false;
+    }
+    return true;
+  });
+
   return {
-    actions: actions.map((action) => ({
+    actions: filteredActions.map((action) => ({
       name: action.name,
-      deployed: action.deployed || action.all_changes_deployed,
+      deployed: !!action.deployed || !!action.all_changes_deployed,
       //@ts-ignore because Action resource needs to be typed more accurately
       code: mapActionCode(context.basePath, action),
       runtime: action.runtime,
       dependencies: action.dependencies || [],
       status: action.status,
-      secrets: mapSecrets(action.secrets),
+      secrets: mapSecrets(action.secrets || []),
       supported_triggers: action.supported_triggers,
+      installed_integration_id: action.installed_integration_id,
     })),
   };
 }

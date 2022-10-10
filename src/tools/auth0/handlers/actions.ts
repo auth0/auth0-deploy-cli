@@ -2,7 +2,7 @@ import _ from 'lodash';
 import DefaultAPIHandler, { order } from './default';
 import log from '../../../logger';
 import { areArraysEquals } from '../../utils';
-import { Asset } from '../../../types';
+import { Asset, Assets, CalculatedChanges } from '../../../types';
 
 const MAX_ACTION_DEPLOY_RETRY_ATTEMPTS = 60; // 60 * 2s => 2 min timeout
 
@@ -21,7 +21,11 @@ export type Action = {
   dependencies?: [];
   runtime?: string;
   status?: string;
-  secrets?: string[];
+  secrets?: {
+    name: string;
+    value: string;
+  }[];
+  all_changes_deployed?: boolean;
   installed_integration_id?: string;
   integration?: Object;
 };
@@ -87,7 +91,7 @@ function isActionsDisabled(err) {
   return err.statusCode === 403 && errorBody.errorCode === 'feature_not_enabled';
 }
 
-function isMarketplaceAction(action: Action): boolean {
+export function isMarketplaceAction(action: Action): boolean {
   return !!action.integration;
 }
 
@@ -202,8 +206,9 @@ export default class ActionHandler extends DefaultAPIHandler {
     // Actions API does not support include_totals param like the other paginate API's.
     // So we set it to false otherwise it will fail with "Additional properties not allowed: include_totals"
     try {
-      this.existing = await this.client.actions.getAll({ paginate: true });
-      return this.existing;
+      const actions = await this.client.actions.getAll({ paginate: true });
+      this.existing = actions;
+      return actions;
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 501) {
         return null;
@@ -219,14 +224,22 @@ export default class ActionHandler extends DefaultAPIHandler {
   }
 
   @order('60')
-  async processChanges(assets) {
+  async processChanges(assets: Assets) {
     const { actions } = assets;
 
     // Do nothing if not set
     if (!actions) return;
     const changes = await this.calcChanges(assets);
 
-    await super.processChanges(assets, changes);
+    //Management of marketplace actions not currently supported, see ESD-23225.
+    const changesWithMarketplaceActionsFiltered: CalculatedChanges = (() => {
+      return {
+        ...changes,
+        del: changes.del.filter((action: Action) => !isMarketplaceAction(action)),
+      };
+    })();
+
+    await super.processChanges(assets, changesWithMarketplaceActionsFiltered);
 
     const postProcessedActions = await (async () => {
       this.existing = null; //Clear the cache
