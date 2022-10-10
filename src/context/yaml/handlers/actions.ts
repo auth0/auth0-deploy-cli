@@ -88,7 +88,6 @@ async function dump(context: YAMLContext): Promise<ParsedActions> {
       status: action.status,
       secrets: mapSecrets(action.secrets || []),
       supported_triggers: action.supported_triggers,
-      installed_integration_id: action.installed_integration_id,
     })),
   };
 }
