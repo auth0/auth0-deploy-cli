@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.15.0] - 2022-10-11
+
+### Added
+
+- Ignoring management of marketplace actions because they are unsupported by the Management API [#660]
+
+### Fixed
+
+- Allowing partial attack protection configurations [#638]
+
 ## [7.14.3] - 2022-08-24
 
 ### Fixed
