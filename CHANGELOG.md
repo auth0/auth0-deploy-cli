@@ -7,8 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [7.15.0] - 2022-10-11
-
 ### Added
 
 - Ignoring management of marketplace actions because they are unsupported by the Management API [#660]
