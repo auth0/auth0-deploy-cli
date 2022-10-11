@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.15.0] - 2022-10-11
+
+### Added
+
+- Ignoring management of marketplace actions because they are unsupported by the Management API [#660]
+
+### Fixed
+
+- Allowing partial attack protection configurations [#638]
+
 ## [7.14.3] - 2022-08-24
 
 ### Fixed
@@ -816,7 +826,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#626]: https://github.com/auth0/auth0-deploy-cli/issues/626
 [#629]: https://github.com/auth0/auth0-deploy-cli/issues/629
 [#630]: https://github.com/auth0/auth0-deploy-cli/issues/630
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.3...HEAD
+[#638]: https://github.com/auth0/auth0-deploy-cli/issues/638
+[#660]: https://github.com/auth0/auth0-deploy-cli/issues/660
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.15.0...HEAD
+[7.15.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.3...v7.15.0
 [7.14.3]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.2...v7.14.3
 [7.14.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.1...v7.14.2
 [7.14.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.0...v7.14.1
