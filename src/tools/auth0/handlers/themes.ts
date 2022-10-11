@@ -1,4 +1,4 @@
-import { Asset, Assets } from '../../../types';
+import { Assets } from '../../../types';
 import log from '../../../logger';
 import DefaultHandler from './default';
 

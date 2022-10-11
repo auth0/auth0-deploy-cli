@@ -130,4 +130,50 @@ describe('#YAML context actions', () => {
       codeValidation
     );
   });
+
+  it('should exclude marketplace actions during dump', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'actionsDump');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') },
+      mockMgmtClient()
+    );
+
+    const marketplaceAction = {
+      id: 'D1AF7CCF-7ZAB-417F-81C0-533595A926D8',
+      name: 'Travel0 Integration',
+      supported_triggers: [
+        {
+          id: 'post-login',
+          version: 'v1',
+        },
+      ],
+      created_at: '2022-08-22T23:57:45.856907897Z',
+      updated_at: '2022-08-22T23:57:45.856907897Z',
+      installed_integration_id: '73f156dc-e7aa-47b4-9dda-0ef741205c31',
+      integration: {
+        id: '046042e2-5732-48ef-9313-0a93778ea8b1',
+        catalog_id: 'travel0-action',
+        url_slug: 'travel0-sms',
+        partner_id: 'bea44019-d08d-47cd-b4f9-30074ca2ab69',
+        name: 'Travel0',
+        logo: 'https://cdn.auth0.com/travel0-logo.png',
+        updated_at: '2022-05-03T15:05:45.684007768Z',
+        created_at: '2021-08-24T20:49:30.446854653Z',
+        feature_type: 'action',
+        current_release: {
+          id: '',
+          semver: {},
+        },
+        all_changes_deployed: false,
+      },
+    };
+
+    context.assets.actions = [marketplaceAction];
+
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({
+      actions: [],
+    });
+  });
 });

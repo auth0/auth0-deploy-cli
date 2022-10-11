@@ -2,10 +2,33 @@ import _ from 'lodash';
 import DefaultAPIHandler, { order } from './default';
 import log from '../../../logger';
 import { areArraysEquals } from '../../utils';
-import { Asset } from '../../../types';
-import { showCompletionScript } from 'yargs';
+import { Asset, Assets, CalculatedChanges } from '../../../types';
 
 const MAX_ACTION_DEPLOY_RETRY_ATTEMPTS = 60; // 60 * 2s => 2 min timeout
+
+export type Action = {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+  deployed?: boolean;
+  supported_triggers: {
+    id: string;
+    version: string;
+    status?: string;
+  }[];
+  code?: string;
+  dependencies?: [];
+  runtime?: string;
+  status?: string;
+  secrets?: {
+    name: string;
+    value: string;
+  }[];
+  all_changes_deployed?: boolean;
+  installed_integration_id?: string;
+  integration?: Object;
+};
 
 // With this schema, we can only validate property types but not valid properties on per type basis
 export const schema = {
@@ -68,22 +91,26 @@ function isActionsDisabled(err) {
   return err.statusCode === 403 && errorBody.errorCode === 'feature_not_enabled';
 }
 
+export function isMarketplaceAction(action: Action): boolean {
+  return !!action.integration;
+}
+
 export default class ActionHandler extends DefaultAPIHandler {
-  existing: Asset[] | null;
+  existing: Action[] | null;
 
   constructor(options: DefaultAPIHandler) {
     super({
       ...options,
       type: 'actions',
       functions: {
-        create: (action) => this.createAction(action),
-        delete: (action) => this.deleteAction(action),
+        create: (action: Action) => this.createAction(action),
+        delete: (action: Action) => this.deleteAction(action),
       },
       stripUpdateFields: ['deployed', 'status'],
     });
   }
 
-  async createAction(action) {
+  async createAction(action: Action) {
     // Strip the deployed flag
     const addAction = { ...action };
     delete addAction.deployed;
@@ -95,7 +122,7 @@ export default class ActionHandler extends DefaultAPIHandler {
     return createdAction;
   }
 
-  async deleteAction(action) {
+  async deleteAction(action: Action) {
     if (!this.client.actions || typeof this.client.actions.delete !== 'function') {
       return [];
     }
@@ -179,8 +206,9 @@ export default class ActionHandler extends DefaultAPIHandler {
     // Actions API does not support include_totals param like the other paginate API's.
     // So we set it to false otherwise it will fail with "Additional properties not allowed: include_totals"
     try {
-      this.existing = await this.client.actions.getAll({ paginate: true });
-      return this.existing;
+      const actions = await this.client.actions.getAll({ paginate: true });
+      this.existing = actions;
+      return actions;
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 501) {
         return null;
@@ -196,14 +224,22 @@ export default class ActionHandler extends DefaultAPIHandler {
   }
 
   @order('60')
-  async processChanges(assets) {
+  async processChanges(assets: Assets) {
     const { actions } = assets;
 
     // Do nothing if not set
     if (!actions) return;
     const changes = await this.calcChanges(assets);
 
-    await super.processChanges(assets, changes);
+    //Management of marketplace actions not currently supported, see ESD-23225.
+    const changesWithMarketplaceActionsFiltered: CalculatedChanges = (() => {
+      return {
+        ...changes,
+        del: changes.del.filter((action: Action) => !isMarketplaceAction(action)),
+      };
+    })();
+
+    await super.processChanges(assets, changesWithMarketplaceActionsFiltered);
 
     const postProcessedActions = await (async () => {
       this.existing = null; //Clear the cache
