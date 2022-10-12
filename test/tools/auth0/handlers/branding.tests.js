@@ -156,6 +156,34 @@ describe('#branding handler', () => {
       ]);
     });
 
+    it('should ignore empty string `logo_url` during update', async () => {
+      let wasUpdateCalled = false;
+
+      const auth0 = {
+        branding: {
+          updateSettings: () => {
+            wasUpdateCalled = true;
+            throw new Error(
+              'updateSettings should not have been called because omitted `logo_url` means that no API request needs to be made.'
+            );
+          },
+        },
+      };
+
+      const handler = new branding.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          branding: {
+            logo_url: '', // Note the empty string!
+          },
+        },
+      ]);
+
+      expect(wasUpdateCalled).to.equal(false);
+    });
+
     it('should not throw, and be no-op if branding not set in context', async () => {
       const auth0 = {
         branding: {
