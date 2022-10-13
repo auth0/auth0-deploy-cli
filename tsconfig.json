@@ -6,6 +6,7 @@
     "rootDir": "./src",
     "allowJs": true,
     "outDir": "./lib",
+    "sourceMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": false,

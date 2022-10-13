@@ -19,14 +19,6 @@ type ParsedBranding = ParsedAsset<
 >;
 
 async function parse(context: YAMLContext): Promise<ParsedBranding> {
-  // Load the HTML file for each page
-  if (!context.assets.branding)
-    return {
-      branding: {
-        templates: [],
-      },
-    };
-
   if (!context.assets.branding) return { branding: null };
 
   const {
@@ -56,11 +48,11 @@ async function parse(context: YAMLContext): Promise<ParsedBranding> {
 }
 
 async function dump(context: YAMLContext): Promise<ParsedBranding> {
-  const { branding } = context.assets;
+  if (!context.assets.branding) return { branding: null };
 
-  if (!branding) return { branding: null };
+  const { templates: templateConfig, ...branding } = context.assets.branding;
 
-  let templates = branding.templates || [];
+  let templates = templateConfig || [];
 
   // create templates folder
   if (templates.length) {
@@ -91,7 +83,7 @@ async function dump(context: YAMLContext): Promise<ParsedBranding> {
     });
   }
 
-  return { branding: { templates } };
+  return { branding: { templates, ...branding } };
 }
 
 const brandingHandler: YAMLHandler<ParsedBranding> = {

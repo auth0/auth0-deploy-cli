@@ -171,7 +171,7 @@ describe('#branding handler', () => {
                 url: 'https://mycompany.org/font/myfont.ttf',
               },
             });
-            expect(data.logo_url).to.be.undefined; //eslint-disable-line no-unused-expressions
+            expect(data.logo_url).to.be.undefined; // eslint-disable-line no-unused-expressions
             wasUpdateCalled = true;
           },
         },
