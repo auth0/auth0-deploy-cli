@@ -60,24 +60,21 @@ function parse(context: DirectoryContext): ParsedPages {
 async function dump(context: DirectoryContext): Promise<void> {
   const pages = context.assets.pages;
 
-  if (!pages) return; // Skip, nothing to dump
+  if (!pages) return;
 
-  // Create Pages folder
   const pagesFolder = path.join(context.filePath, constants.PAGES_DIRECTORY);
   fs.ensureDirSync(pagesFolder);
 
   pages.forEach((page) => {
-    var metadata = { ...page };
+    const metadata = { ...page };
 
-    if (page.name !== 'error_page' || page.html !== undefined) {
-      // Dump template html to file
+    if (page.html !== undefined) {
       const htmlFile = path.join(pagesFolder, `${page.name}.html`);
       log.info(`Writing ${htmlFile}`);
       fs.writeFileSync(htmlFile || '', page.html);
       metadata.html = `./${page.name}.html`;
     }
 
-    // Dump page metadata
     const pageFile = path.join(pagesFolder, `${page.name}.json`);
     dumpJSON(pageFile, metadata);
   });

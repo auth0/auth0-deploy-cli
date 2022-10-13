@@ -36,11 +36,10 @@ async function dump(context: YAMLContext): Promise<ParsedPages> {
   fs.ensureDirSync(pagesFolder);
 
   pages = pages.map((page) => {
-    if (page.name === 'error_page' && page.html === undefined) {
+    if (page.html === undefined) {
       return page;
     }
 
-    // Dump html to file
     const htmlFile = path.join(pagesFolder, `${page.name}.html`);
     log.info(`Writing ${htmlFile}`);
     fs.writeFileSync(htmlFile, page.html || '');
