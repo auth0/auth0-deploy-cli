@@ -14,19 +14,23 @@ type ParsedActions = ParsedAsset<'actions', Asset[]>;
 
 function parse(context: DirectoryContext): ParsedActions {
   const actionsFolder = path.join(context.filePath, constants.ACTIONS_DIRECTORY);
+
   if (!existsMustBeDir(actionsFolder)) return { actions: null }; // Skip
+
   const files = getFiles(actionsFolder, ['.json']);
   const actions = files.map((file) => {
     const action = { ...loadJSON(file, context.mappings) };
     const actionFolder = path.join(constants.ACTIONS_DIRECTORY, `${action.name}`);
+
     if (action.code) {
-      action.code = context.loadFile(action.code, actionFolder);
+      const toUnixPath = somePath => somePath.replace(/[\\/]+/g, '/').replace(/^([a-zA-Z]+:|\.\/)/, '');
+      action.code = context.loadFile(toUnixPath(action.code), actionFolder);
     }
+
     return action;
   });
-  return {
-    actions,
-  };
+
+  return { actions };
 }
 
 function mapSecrets(secrets) {

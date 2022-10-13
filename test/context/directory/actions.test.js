@@ -36,6 +36,33 @@ const actionFiles = {
   },
 };
 
+const actionFilesWin32 = {
+  [constants.ACTIONS_DIRECTORY]: {
+    'code.js':
+      '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log(@@replace@@); return {}; };',
+    'action-one.json': `{
+      "name": "action-one",
+      "code": "local\\\\testData\\\\directory\\\\test1\\\\actions\\\\code.js",
+      "runtime": "node12",
+      "dependencies": [
+        {
+          "name": "lodash",
+          "version": "4.17.20"
+        }
+      ],
+      "secrets": [],
+      "status": "built",
+      "supported_triggers": [
+        {
+          "id": "post-login",
+          "version": "v1"
+        }
+      ],
+      "deployed": true
+    }`,
+  },
+};
+
 const actionsTarget = [
   {
     name: 'action-one',
@@ -60,9 +87,21 @@ const actionsTarget = [
 ];
 
 describe('#directory context actions', () => {
-  it('should process actions', async () => {
+  it('should process actions from unix systems', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'test1');
     createDir(repoDir, actionFiles);
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { replace: 'test-action' },
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.load();
+    expect(context.assets.actions).to.deep.equal(actionsTarget);
+  });
+
+  it('should process actions from windows systems', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'test1');
+    createDir(repoDir, actionFilesWin32);
     const config = {
       AUTH0_INPUT_FILE: repoDir,
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { replace: 'test-action' },
