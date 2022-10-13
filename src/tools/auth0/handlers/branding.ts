@@ -69,13 +69,15 @@ export default class BrandingHandler extends DefaultHandler {
   }
 
   async processChanges(assets: Assets) {
-    // quit early if there's no branding to process.
     if (!assets.branding) return;
 
-    // remove templates, we only want top level branding settings for this API call
     const { templates, ...brandingSettings } = assets.branding;
 
-    // Do nothing if not set
+    if (brandingSettings.logo_url === '') {
+      //Sometimes blank logo_url returned by API but is invalid on import. See: DXCDT-240
+      delete brandingSettings.logo_url;
+    }
+
     if (brandingSettings && Object.keys(brandingSettings).length) {
       await this.client.branding.updateSettings({}, brandingSettings);
       this.updated += 1;
