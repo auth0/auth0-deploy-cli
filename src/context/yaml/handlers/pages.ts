@@ -31,7 +31,6 @@ async function dump(context: YAMLContext): Promise<ParsedPages> {
     return { pages: null };
   }
 
-  // Create Pages folder
   const pagesFolder = path.join(context.basePath, 'pages');
   fs.ensureDirSync(pagesFolder);
 
