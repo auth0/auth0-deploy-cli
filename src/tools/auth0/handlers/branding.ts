@@ -79,7 +79,7 @@ export default class BrandingHandler extends DefaultHandler {
     delete brandingSettings.templates;
 
     if (brandingSettings.logo_url === '') {
-      //Sometimes blank logo_url exported, API invalidates on import. See: DXCDT-240
+      //Sometimes blank logo_url returned by API but is invalid on import. See: DXCDT-240
       delete brandingSettings.logo_url;
     }
 
