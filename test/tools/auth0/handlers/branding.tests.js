@@ -156,6 +156,74 @@ describe('#branding handler', () => {
       ]);
     });
 
+    it('should ignore empty string `logo_url` during update', async () => {
+      let wasUpdateCalled = false;
+
+      const auth0 = {
+        branding: {
+          updateSettings: (_params, data) => {
+            expect(data).to.deep.equal({
+              colors: {
+                primary: '#F8F8F2',
+                page_background: '#112',
+              },
+              font: {
+                url: 'https://mycompany.org/font/myfont.ttf',
+              },
+            });
+            expect(data.logo_url).to.be.undefined; // eslint-disable-line no-unused-expressions
+            wasUpdateCalled = true;
+          },
+        },
+      };
+
+      const handler = new branding.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          branding: {
+            logo_url: '', // Note the empty string
+            colors: {
+              primary: '#F8F8F2',
+              page_background: '#112',
+            },
+            font: {
+              url: 'https://mycompany.org/font/myfont.ttf',
+            },
+          },
+        },
+      ]);
+
+      expect(wasUpdateCalled).to.equal(true);
+    });
+
+    it('should not send updateSettings request if empty object passed', async () => {
+      let wasUpdateCalled = false;
+
+      const auth0 = {
+        branding: {
+          updateSettings: () => {
+            wasUpdateCalled = true;
+            throw new Error(
+              'updateSettings should not have been called because omitted `logo_url` means that no API request needs to be made.'
+            );
+          },
+        },
+      };
+
+      const handler = new branding.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          branding: {},
+        },
+      ]);
+
+      expect(wasUpdateCalled).to.equal(false);
+    });
+
     it('should not throw, and be no-op if branding not set in context', async () => {
       const auth0 = {
         branding: {
