@@ -34,9 +34,11 @@ export default class EmailProviderHandler extends DefaultHandler {
 
     let existing = await this.getType();
 
-    if (Object.keys(emailProvider).length === 0 && this.config('AUTH0_ALLOW_DELETE') === true) {
-      await this.client.emailProvider.delete();
-      this.didDelete(existing);
+    if (Object.keys(emailProvider).length === 0) {
+      if (this.config('AUTH0_ALLOW_DELETE') === true) {
+        await this.client.emailProvider.delete();
+        this.didDelete(existing);
+      }
       return;
     }
 
