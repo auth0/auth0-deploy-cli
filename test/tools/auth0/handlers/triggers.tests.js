@@ -92,7 +92,7 @@ describe('#triggers handler', () => {
               'send-phone-message',
             ]).to.include(trigger_id); // eslint-disable-line camelcase
             expect(bindings).to.be.an('array').that.is.empty; // eslint-disable-line no-unused-expressions
-            timesUpdateTriggerBindingsCalled = timesUpdateTriggerBindingsCalled + 1;
+            timesUpdateTriggerBindingsCalled += 1;
             return Promise.resolve([]);
           },
         },
@@ -160,7 +160,7 @@ describe('#triggers handler', () => {
           updateTriggerBindings: ({ trigger_id }, { bindings }) => {
             expect(trigger_id).to.equal('post-login');
             expect(bindings).to.deep.equal(updatePayload);
-            timesUpdateTriggerBindingsCalled = timesUpdateTriggerBindingsCalled + 1;
+            timesUpdateTriggerBindingsCalled += 1;
             return Promise.resolve(updatePayload);
           },
         },
