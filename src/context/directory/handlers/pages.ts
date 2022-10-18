@@ -71,7 +71,7 @@ async function dump(context: DirectoryContext): Promise<void> {
     if (page.html !== undefined) {
       const htmlFile = path.join(pagesFolder, `${page.name}.html`);
       log.info(`Writing ${htmlFile}`);
-      fs.writeFileSync(htmlFile || '', page.html);
+      fs.writeFileSync(htmlFile, page.html);
       metadata.html = `./${page.name}.html`;
     }
 
