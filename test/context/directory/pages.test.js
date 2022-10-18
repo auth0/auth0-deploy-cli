@@ -113,7 +113,7 @@ describe('#directory context pages', () => {
     context.assets.pages = [
       { html: htmlValidation, name: 'login' },
       { enabled: false, html: htmlValidation, name: 'password_reset' },
-      { name: 'guardian_multifactor' }, //No `html` property defined
+      { name: 'guardian_multifactor' }, // No `html` property defined
       {
         name: 'error_page',
         url: errorPageUrl, // URL defined instead of `html` property
