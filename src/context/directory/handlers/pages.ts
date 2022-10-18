@@ -6,9 +6,10 @@ import log from '../../../logger';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset, ParsedAsset } from '../../../types';
+import { ParsedAsset } from '../../../types';
+import { Page } from '../../../tools/auth0/handlers/pages';
 
-type ParsedPages = ParsedAsset<'pages', Asset[]>;
+type ParsedPages = ParsedAsset<'pages', Page[]>;
 
 function parse(context: DirectoryContext): ParsedPages {
   const pagesFolder = path.join(context.filePath, constants.PAGES_DIRECTORY);
@@ -29,7 +30,7 @@ function parse(context: DirectoryContext): ParsedPages {
     return acc;
   }, {});
 
-  const pages = Object.keys(sorted).flatMap((key): Asset[] => {
+  const pages = Object.keys(sorted).flatMap((key): Page[] => {
     const { meta, html } = sorted[key];
     if (!meta) {
       log.warn(`Skipping pages file ${html} as missing the corresponding '.json' file`);
