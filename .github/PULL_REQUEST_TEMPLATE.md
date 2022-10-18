@@ -1,24 +1,42 @@
-## ✏️ Changes
+<!--
+❗ For general support or usage questions, use the Auth0 Community forums or raise a support ticket.
 
-> DESCRIPTION GOES HERE. Try to describe both what is changing and why this is important
-> - Make sure you run  when adding / updating a package
-> - What did you change from a design standpoint?
-> - What did you change in the code itself?
-> - If you are updating a dependency, explain why this is needed.
+By submitting a pull request to this repository, you agree to the terms within the Auth0 Code of Conduct: https://github.com/auth0/open-source-template/blob/master/CODE-OF-CONDUCT.md.
+-->
 
-## 🔗 References
+### 🔧 Changes
 
-> Include at least one link to an explanation + requirements for this change, and more if at all possible. Typically this is a Jira/GitHub Issue, but could also be links to Zendesk tickets, RFCs, rollout plan or Slack conversations (for Slack conversations, make sure you provide a summary of the conversation under “Changes”).
+<!--
+Describe both what is changing and why this is important. Include:
 
-## 🎯 Testing
+- Types and methods added, deleted, deprecated, or changed
+- A summary of usage if this is a new feature or a change to a public API
+-->
 
-> Describe how this can be tested by reviewers. Please be specific about anything not tested and reasons why.
-> - Make sure you add unit and integration tests.
-> - If this is on a hot path, add load or performance tests
-> - Especially for dependency updates we also need to make sure that there is no impact on performance.
+### 📚 References
 
-✅🚫 This change has unit test coverage
+<!--
+Add relevant links supporting this change, such as:
 
-✅🚫 This change has integration test coverage
+- GitHub issue/PR number addressed or fixed
+- Auth0 Community post
+- StackOverflow answer
+- Related pull requests/issues from other repositories
 
-✅🚫 This change has been tested for performance
+If there are no references, simply delete this section.
+-->
+
+### 🔬 Testing
+
+<!--
+Describe how this can be tested by reviewers. Be specific about anything not tested and why. Include any manual steps for testing end-to-end, or for testing functionality not covered by unit tests.
+-->
+
+### 📝 Checklist
+
+- [ ] All new/changed/fixed functionality is covered by tests (or N/A)
+- [ ] I have added documentation for all new/changed functionality (or N/A)
+
+<!--
+❗ All the above items are required. Pull requests with an incomplete or missing checklist will be closed.
+-->

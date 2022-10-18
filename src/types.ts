@@ -209,9 +209,11 @@ export type Asset = { [key: string]: any };
 export type Assets = Partial<{
   actions: Action[] | null;
   attackProtection: Asset | null;
-  branding: {
-    templates?: { template: string; body: string }[] | null;
-  } | null;
+  branding:
+    | (Asset & {
+        templates?: { template: string; body: string }[] | null;
+      })
+    | null;
   clients: Asset[] | null;
   clientGrants: Asset[] | null;
   connections: Asset[] | null;
