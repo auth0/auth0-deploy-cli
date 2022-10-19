@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Warning about future fix that enables deletion of email provider; no significant changes to functionality [#672]
+
 ### Fixed
 
 - Returning all branding setting when using YAML [#666]
