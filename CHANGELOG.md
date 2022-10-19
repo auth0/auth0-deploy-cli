@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.15.1] - 2022-10-19
+
+### Added
+
+- Warning about future fix that enables deletion of email provider; no significant changes to functionality [#672]
+
+### Fixed
+
+- Returning all branding setting when using YAML [#666]
+- Preventing empty `logo_url` from update tenant payload [#667]
+- Loading actions between different operating systems [#668]
+- Prevent writing undefined page templates files [#671]
+
 ## [7.15.0] - 2022-10-11
 
 ### Added
@@ -828,7 +841,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#630]: https://github.com/auth0/auth0-deploy-cli/issues/630
 [#638]: https://github.com/auth0/auth0-deploy-cli/issues/638
 [#660]: https://github.com/auth0/auth0-deploy-cli/issues/660
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.15.0...HEAD
+[#666]: https://github.com/auth0/auth0-deploy-cli/issues/666
+[#667]: https://github.com/auth0/auth0-deploy-cli/issues/667
+[#668]: https://github.com/auth0/auth0-deploy-cli/issues/668
+[#671]: https://github.com/auth0/auth0-deploy-cli/issues/671
+[#672]: https://github.com/auth0/auth0-deploy-cli/issues/672
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.15.1...HEAD
+[7.15.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.15.0...v7.15.1
 [7.15.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.3...v7.15.0
 [7.14.3]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.2...v7.14.3
 [7.14.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.1...v7.14.2
