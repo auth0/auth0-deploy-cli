@@ -8,6 +8,7 @@ import {
 } from './tools/auth0/handlers/prompts';
 import { Tenant } from './tools/auth0/handlers/tenant';
 import { Theme } from './tools/auth0/handlers/themes';
+import { Page } from './tools/auth0/handlers/pages';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -234,7 +235,7 @@ export type Assets = Partial<{
   logStreams: Asset[] | null;
   migrations: Asset[] | null;
   organizations: Asset[] | null;
-  pages: Asset[] | null;
+  pages: Page[] | null;
   prompts: Prompts | null;
   resourceServers: Asset[] | null;
   roles: Asset[] | null;

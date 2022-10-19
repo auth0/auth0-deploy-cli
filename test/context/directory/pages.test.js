@@ -112,12 +112,11 @@ describe('#directory context pages', () => {
 
     context.assets.pages = [
       { html: htmlValidation, name: 'login' },
-      { html: htmlValidation, name: 'password_reset' },
-      { enabled: false, html: htmlValidation, name: 'guardian_multifactor' },
+      { enabled: false, html: htmlValidation, name: 'password_reset' },
+      { name: 'guardian_multifactor' }, // No `html` property defined
       {
-        html: htmlValidation,
         name: 'error_page',
-        url: errorPageUrl,
+        url: errorPageUrl, // URL defined instead of `html` property
         show_log_link: false,
       },
     ];
@@ -137,29 +136,25 @@ describe('#directory context pages', () => {
     expect(loadJSON(path.join(pagesFolder, 'password_reset.json'))).to.deep.equal({
       html: './password_reset.html',
       name: 'password_reset',
+      enabled: false,
     });
     expect(fs.readFileSync(path.join(pagesFolder, 'password_reset.html'), 'utf8')).to.deep.equal(
       htmlValidation
     );
 
     expect(loadJSON(path.join(pagesFolder, 'guardian_multifactor.json'))).to.deep.equal({
-      html: './guardian_multifactor.html',
       name: 'guardian_multifactor',
-      enabled: false,
     });
-    expect(
-      fs.readFileSync(path.join(pagesFolder, 'guardian_multifactor.html'), 'utf8')
-    ).to.deep.equal(htmlValidation);
+    // eslint-disable-next-line no-unused-expressions
+    expect(fs.existsSync(path.join(pagesFolder, 'guardian_multifactor.html'), 'utf8')).to.be.false; // Should not dump template with no HTML
 
     expect(loadJSON(path.join(pagesFolder, 'error_page.json'))).to.deep.equal({
-      html: './error_page.html',
       name: 'error_page',
       url: errorPageUrl,
       show_log_link: false,
     });
-    expect(fs.readFileSync(path.join(pagesFolder, 'error_page.html'), 'utf8')).to.deep.equal(
-      htmlValidation
-    );
+    // eslint-disable-next-line no-unused-expressions
+    expect(fs.existsSync(path.join(pagesFolder, 'error_page.html'), 'utf8')).to.be.false; // Should not dump template with no HTML
   });
 
   it('should dump empty error page even if HTML is not set', async () => {
