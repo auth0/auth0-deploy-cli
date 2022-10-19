@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Returning all branding setting when using YAML [#666]
+- Preventing empty `logo_url` from update tenant payload [#667]
+- Loading actions between different operating systems [#668]
+- Prevent writing undefined page templates files [#671]
+
 ## [7.15.0] - 2022-10-11
 
 ### Added
