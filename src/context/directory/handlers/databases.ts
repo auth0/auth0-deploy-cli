@@ -125,13 +125,14 @@ async function dump(context: DirectoryContext): Promise<void> {
         // customScripts option only written if there are scripts
         ...(database.options.customScripts && {
           customScripts: Object.entries(database.options.customScripts)
-            //@ts-ignore
+            //@ts-ignore because we'll fix this in subsequent PR
             .sort(sortCustomScripts)
             .reduce((scripts, [name, script]) => {
               // Dump custom script to file
               const scriptName = sanitize(`${name}.js`);
               const scriptFile = path.join(dbFolder, scriptName);
               log.info(`Writing ${scriptFile}`);
+              //@ts-ignore because we'll fix this in subsequent PR
               fs.writeFileSync(scriptFile, script);
               scripts[name] = `./${scriptName}`;
               return scripts;

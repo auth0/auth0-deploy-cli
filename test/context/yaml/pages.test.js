@@ -145,22 +145,20 @@ describe('#YAML context pages', () => {
     );
 
     context.assets.pages = [
-      { html: undefined, name: 'login' }, // HTML property is not defined here
+      { name: 'login' }, // HTML property is not defined here
     ];
 
     const dumped = await handler.dump(context);
     expect(dumped).to.deep.equal({
       pages: [
         {
-          html: './pages/login.html',
           name: 'login',
         },
       ],
     });
 
     const pagesFolder = path.join(dir, 'pages');
-    expect(fs.readFileSync(path.join(pagesFolder, 'login.html'), 'utf8')).to.deep.equal('');
-    expect(fs.readdirSync(pagesFolder).length).to.equal(1);
+    expect(fs.readdirSync(pagesFolder).length).to.equal(0);
   });
 
   it('should dump error_page with html undefined', async () => {
