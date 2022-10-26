@@ -56,6 +56,7 @@ the path of the output folder.
 
 ```yaml
 # Folder structure when in YAML mode.
+#
 # ./databases/
 #     /Username-Password-Authentication
 #         /change_password.js   
@@ -65,7 +66,7 @@ the path of the output folder.
 #         /login.js   
 #         /verify.js   
 # ./tenant.yaml
-
+#
 # Contents of ./tenant.yaml
 databases:
   - name: Username-Password-Authentication
@@ -112,6 +113,7 @@ databases:
 
 ```json
 // Folder structure when in DIRECTORY mode.
+//
 // ./database-connections/
 //     ./Username-Password-Authentication/
 //         ./change_password.js
@@ -121,7 +123,7 @@ databases:
 //         ./get_user.js
 //         ./login.js
 //         ./verify.js
-
+//
 // Contents of database.json
 {
   "options": {
@@ -173,5 +175,83 @@ databases:
   "enabled_clients": [
     "Deploy CLI"
   ]
+}
+```
+
+## Universal Login
+
+### Pages
+
+When overriding the Universal Login with custom HTML, the error, login, multi-factor authentication and password reset
+contents are organized in specific HTML pages.
+
+**YAML Example**
+
+```yaml
+# Folder structure when in YAML mode.
+#
+# ./pages/
+#     /error_page.html
+#     /guardian_multifactor.html
+#     /login.html
+#     /password_reset.html
+# ./tenant.yaml
+#
+# Contents of ./tenant.yaml
+pages:
+  - name: error_page
+    html: ./pages/error_page.html
+    show_log_link: false
+    url: https://mycompany.org/error
+  - name: guardian_multifactor
+    enabled: true
+    html: ./pages/guardian_multifactor.html
+  - name: login
+    enabled: false
+    html: ./pages/login.html
+  - name: password_reset
+    enabled: true
+    html: ./pages/password_reset.html
+```
+
+**DIRECTORY Example**
+
+```json
+// Folder structure when in DIRECTORY mode.
+//
+// ./pages/
+//     ./error_page.html
+//     ./error_page.json
+//     ./guardian_multifactor.html
+//     ./guardian_multifactor.json
+//     ./login.html
+//     ./login.json
+//     ./password_reset.html
+//     ./password_reset.json
+//
+// Contents of login.json
+{
+  "name": "login",
+  "enabled": false,
+  "html": "./login.html"
+}
+// Contents of error_page.json
+{
+  "html": "./error_page.html",
+  "show_log_link": false,
+  "url": "https://mycompany.org/error",
+  "name": "error_page"
+}
+// Contents of guardian_multifactor.json
+{
+  "enabled": true,
+  "html": "./guardian_multifactor.html",
+  "name": "guardian_multifactor"
+}
+// Contents of password_reset.json
+{
+  "enabled": true,
+  "html": "./password_reset.html",
+  "name": "password_reset"
 }
 ```
