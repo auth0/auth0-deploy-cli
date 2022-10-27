@@ -98,8 +98,9 @@ Folder structure when in directory mode.
         ./verify.js
 ```
 
+
+Contents of `database.json`
 ```json
-// Contents of database.json
 {
   "options": {
     "customScripts": {
@@ -168,27 +169,37 @@ Folder structure when in directory mode.
     ./password_reset.json
 ```
 
+
+Contents of `login.json`
 ```json
-// Contents of login.json
 {
   "name": "login",
   "enabled": false,
   "html": "./login.html"
 }
-// Contents of error_page.json
+```
+
+Contents of `error_page.json`
+```json
 {
   "html": "./error_page.html",
   "show_log_link": false,
   "url": "https://mycompany.org/error",
   "name": "error_page"
 }
-// Contents of guardian_multifactor.json
+```
+
+Contents of `guardian_multifactor.json`
+```json
 {
   "enabled": true,
   "html": "./guardian_multifactor.html",
   "name": "guardian_multifactor"
 }
-// Contents of password_reset.json
+```
+
+Contents of `password_reset.json`
+```json
 {
   "enabled": true,
   "html": "./password_reset.html",
