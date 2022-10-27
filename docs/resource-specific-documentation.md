@@ -45,44 +45,34 @@ prompts:
           authenticatorNamesSMS: 'SMS'
 ```
 
-## Connections
-
-### Database
+## Databases
 
 When managing database connections, the values of `options.customScripts` point to specific javascript files relative to
-the path of the output folder.
+the path of the output folder. Otherwise, the payload closely matches that of the [Management API](https://auth0.com/docs/api/management/v2#!/Connections/post_connections).
 
 **YAML Example**
 
+```
+Folder structure when in YAML mode.
+
+./databases/
+    /Username-Password-Authentication
+        /change_password.js   
+        /create.js   
+        /delete.js   
+        /get_user.js   
+        /login.js   
+        /verify.js   
+./tenant.yaml
+```
+
 ```yaml
-# Folder structure when in YAML mode.
-#
-# ./databases/
-#     /Username-Password-Authentication
-#         /change_password.js   
-#         /create.js   
-#         /delete.js   
-#         /get_user.js   
-#         /login.js   
-#         /verify.js   
-# ./tenant.yaml
-#
 # Contents of ./tenant.yaml
 databases:
   - name: Username-Password-Authentication
-    strategy: auth0
-    enabled_clients:
-      - Deploy CLI
-    is_domain_connection: false
+    # ...
     options:
-      mfa:
-        active: true
-        return_enroll_settings: true
-      validation:
-        username:
-          max: 15
-          min: 1
-      import_mode: false
+      # ...
       customScripts:
         change_password: ./databases/Username-Password-Authentication/change_password.js
         create: ./databases/Username-Password-Authentication/create.js
@@ -90,54 +80,28 @@ databases:
         get_user: ./databases/Username-Password-Authentication/get_user.js
         login: ./databases/Username-Password-Authentication/login.js
         verify: ./databases/Username-Password-Authentication/verify.js
-      passwordPolicy: good
-      password_history:
-        size: 5
-        enable: false
-      strategy_version: 2
-      requires_username: true
-      password_dictionary:
-        enable: false
-        dictionary: []
-      brute_force_protection: true
-      password_no_personal_info:
-        enable: false
-      password_complexity_options:
-        min_length: 8
-      enabledDatabaseCustomization: false
-    realms:
-      - Username-Password-Authentication
 ```
 
-**DIRECTORY Example**
+**Directory Example**
+
+```
+Folder structure when in directory mode.
+
+./database-connections/
+    ./Username-Password-Authentication/
+        ./change_password.js
+        ./create.js
+        ./database.json
+        ./delete.js
+        ./get_user.js
+        ./login.js
+        ./verify.js
+```
 
 ```json
-// Folder structure when in DIRECTORY mode.
-//
-// ./database-connections/
-//     ./Username-Password-Authentication/
-//         ./change_password.js
-//         ./create.js
-//         ./database.json
-//         ./delete.js
-//         ./get_user.js
-//         ./login.js
-//         ./verify.js
-//
 // Contents of database.json
 {
   "options": {
-    "mfa": {
-      "active": true,
-      "return_enroll_settings": true
-    },
-    "validation": {
-      "username": {
-        "max": 15,
-        "min": 1
-      }
-    },
-    "import_mode": false,
     "customScripts": {
       "change_password": "./change_password.js",
       "create": "./create.js",
@@ -145,36 +109,8 @@ databases:
       "get_user": "./get_user.js",
       "login": "./login.js",
       "verify": "./verify.js"
-    },
-    "passwordPolicy": "good",
-    "password_history": {
-      "size": 5,
-      "enable": false
-    },
-    "strategy_version": 2,
-    "requires_username": true,
-    "password_dictionary": {
-      "enable": false,
-      "dictionary": []
-    },
-    "brute_force_protection": true,
-    "password_no_personal_info": {
-      "enable": false
-    },
-    "password_complexity_options": {
-      "min_length": 8
-    },
-    "enabledDatabaseCustomization": false
-  },
-  "strategy": "auth0",
-  "name": "Username-Password-Authentication",
-  "is_domain_connection": false,
-  "realms": [
-    "Username-Password-Authentication"
-  ],
-  "enabled_clients": [
-    "Deploy CLI"
-  ]
+    }
+  }
 }
 ```
 
@@ -187,16 +123,18 @@ contents are organized in specific HTML pages.
 
 **YAML Example**
 
+```
+Folder structure when in YAML mode.
+
+./pages/
+    /error_page.html
+    /guardian_multifactor.html
+    /login.html
+    /password_reset.html
+./tenant.yaml
+```
+
 ```yaml
-# Folder structure when in YAML mode.
-#
-# ./pages/
-#     /error_page.html
-#     /guardian_multifactor.html
-#     /login.html
-#     /password_reset.html
-# ./tenant.yaml
-#
 # Contents of ./tenant.yaml
 pages:
   - name: error_page
@@ -214,21 +152,23 @@ pages:
     html: ./pages/password_reset.html
 ```
 
-**DIRECTORY Example**
+**Directory Example**
+
+```
+Folder structure when in directory mode.
+
+./pages/
+    ./error_page.html
+    ./error_page.json
+    ./guardian_multifactor.html
+    ./guardian_multifactor.json
+    ./login.html
+    ./login.json
+    ./password_reset.html
+    ./password_reset.json
+```
 
 ```json
-// Folder structure when in DIRECTORY mode.
-//
-// ./pages/
-//     ./error_page.html
-//     ./error_page.json
-//     ./guardian_multifactor.html
-//     ./guardian_multifactor.json
-//     ./login.html
-//     ./login.json
-//     ./password_reset.html
-//     ./password_reset.json
-//
 // Contents of login.json
 {
   "name": "login",
