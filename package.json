@@ -13,7 +13,7 @@
     "test": "ts-mocha -p tsconfig.json --recursive 'test/**/*.test*' --exclude 'test/e2e/*' --timeout 5000",
     "test:e2e:node-module": "ts-mocha -p tsconfig.json --recursive 'test/e2e/*.test*' --timeout 120000",
     "test:e2e:cli": "sh ./test/e2e/e2e-cli.sh",
-    "test:coverage": "nyc npm run test; nyc report --reporter=lcov",
+    "test:coverage": "nyc npm run test && nyc report --reporter=lcov",
     "build": "rimraf ./lib && npx tsc",
     "dev": "npx tsc --watch",
     "prepublishOnly": "npm run build",
