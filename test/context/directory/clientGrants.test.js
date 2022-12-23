@@ -108,7 +108,7 @@ describe('#directory context clientGrants', () => {
     context.assets.clientGrants = [
       { audience: 'https://test.myapp.com/api/v1', client_id: 'My M2M', scope: ['update:account'] },
     ];
-    //local/testData/directory/clientGrantsDump'
+    // local/testData/directory/clientGrantsDump'
     await handler.dump(context);
     const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
 
