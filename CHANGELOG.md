@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Deletion of email provider when setting as empty object [#673]
+
+### Security
+
+- Upgraded `node-auth0` which addresses [vulnerability reported](https://github.com/advisories/GHSA-hjrf-2m68-5959) for `jsonwebtoken` package
+
 ## [7.15.1] - 2022-10-19
 
 ### Added
