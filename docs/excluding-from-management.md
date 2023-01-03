@@ -66,14 +66,17 @@ roles: # roles configuration is not omitted
 
 ### Empty
 
-Resource configuration that is explicitly defined as empty. For set-based configurations like hooks, organizations and actions, setting these configurations to an empty set expresses an intentional emptying of those resources. In practice, this would signal a deletion, so long as the [`AUTH0_ALLOW_DELETE` deletion configuration property](configuring-the-deploy-cli.md#AUTH0_ALLOW_DELETE) is enabled. For non-set-based resource configuration like tenant and branding, the concept of emptiness does not apply, will not trigger any deletions or removals.
+Resource configuration that is explicitly defined as empty. For set-based configurations like hooks, organizations and actions, setting these configurations to an empty set expresses an intentional emptying of those resources. In practice, this would signal a deletion, so long as the [`AUTH0_ALLOW_DELETE` deletion configuration property](configuring-the-deploy-cli.md#AUTH0_ALLOW_DELETE) is enabled.
+
+For non-set-based resource configuration like tenant, email provider and branding, the expected behavior when applying an explicitly empty configuration value will depend on the resource. The `tenant`, `branding`, `attackProtection`, and `guardianPhoneFactorSelectedProvider` resources cannot be deleted whereas the `emailProvider` resource can be deleted.
 
 #### Example of emptiness
 
 ```yaml
 hooks: [] # Empty hooks
 connections: [] # Empty connections
-tenant: {} # Effectively a no-op, emptiness does not apply to non-set resource config
+tenant: {} # Effectively a no-op, cannot delete tenant
+emailProvider: {} # Will delete email provider
 ```
 
 ---
