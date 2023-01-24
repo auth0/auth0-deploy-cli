@@ -56,6 +56,52 @@ describe('#emailProvider handler', () => {
       await stageFn.apply(handler, [{ emailProvider: data }]);
     });
 
+    it('should delete email provider if set to empty object and AUTH0_ALLOW_DELETE is true', async () => {
+      const AUTH0_ALLOW_DELETE = true;
+      let wasDeleteCalled = false;
+
+      const auth0 = {
+        emailProvider: {
+          delete: () => {
+            wasDeleteCalled = true;
+            return Promise.resolve({});
+          },
+          get: () => ({ name: 'someProvider', enabled: true }),
+        },
+      };
+
+      const handler = new emailProvider.default({
+        client: auth0,
+        config: () => AUTH0_ALLOW_DELETE,
+      });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ emailProvider: {} }]);
+
+      expect(wasDeleteCalled).to.equal(true);
+    });
+
+    it('should not delete email provider if set to empty object and if AUTH0_ALLOW_DELETE is false', async () => {
+      const AUTH0_ALLOW_DELETE = false;
+
+      const auth0 = {
+        emailProvider: {
+          delete: () => {
+            throw new Error('was not expecting delete to be called');
+          },
+          get: () => ({ name: 'someProvider', enabled: true }),
+        },
+      };
+
+      const handler = new emailProvider.default({
+        client: auth0,
+        config: () => AUTH0_ALLOW_DELETE,
+      });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ emailProvider: {} }]);
+    });
+
     it('should get email provider', async () => {
       const auth0 = {
         emailProvider: {

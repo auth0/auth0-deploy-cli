@@ -1,3 +1,4 @@
+import { Action } from './tools/auth0/handlers/actions';
 import {
   PromptTypes,
   ScreenTypes,
@@ -7,6 +8,7 @@ import {
 } from './tools/auth0/handlers/prompts';
 import { Tenant } from './tools/auth0/handlers/tenant';
 import { Theme } from './tools/auth0/handlers/themes';
+import { Page } from './tools/auth0/handlers/pages';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -42,7 +44,11 @@ export type ApiResponse = {
 } & { [key in AssetTypes]: Asset[] };
 
 export type BaseAuth0APIClient = {
-  actions: APIClientBaseFunctions & {
+  actions: {
+    getAll: (arg0: SharedPaginationParams) => Promise<Action[]>;
+    create: (arg0: { id: string }) => Promise<Action>;
+    update: (arg0: {}, arg1: Action) => Promise<Action>;
+    delete: (arg0: Asset) => Promise<void>;
     deploy: (arg0: { id: string }) => Promise<void>;
     getAllTriggers: () => Promise<{ triggers: Asset[] }>;
     getTriggerBindings: (arg0: { trigger_id: string }) => Promise<{ bindings: Asset[] }>;
@@ -201,11 +207,13 @@ export type Config = {
 export type Asset = { [key: string]: any };
 
 export type Assets = Partial<{
-  actions: Asset[] | null;
+  actions: Action[] | null;
   attackProtection: Asset | null;
-  branding: {
-    templates?: { template: string; body: string }[] | null;
-  } | null;
+  branding:
+    | (Asset & {
+        templates?: { template: string; body: string }[] | null;
+      })
+    | null;
   clients: Asset[] | null;
   clientGrants: Asset[] | null;
   connections: Asset[] | null;
@@ -227,7 +235,7 @@ export type Assets = Partial<{
   logStreams: Asset[] | null;
   migrations: Asset[] | null;
   organizations: Asset[] | null;
-  pages: Asset[] | null;
+  pages: Page[] | null;
   prompts: Prompts | null;
   resourceServers: Asset[] | null;
   roles: Asset[] | null;

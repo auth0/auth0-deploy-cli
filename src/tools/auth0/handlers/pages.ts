@@ -12,6 +12,14 @@ export const pageNameMap = {
   error_page: 'error_page',
 };
 
+export type Page = {
+  show_log_link?: boolean;
+  name: string;
+  enabled?: boolean;
+  html?: string;
+  url?: string;
+};
+
 // With this schema, we can only validate property types but not valid properties on per type basis
 export const schema = {
   type: 'array',
