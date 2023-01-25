@@ -19,7 +19,7 @@ Example **config.json** file:
 }
 ```
 
-> ⚠️ **NOTE:** Hard-coding credentials is not recommended, and risks secret leakage should this file ever be committed to a public version control system. Instead, passing credentials as [environment variables](#Environment variables) is considered best practice.
+> ⚠️ **NOTE:** Hard-coding credentials is not recommended, and risks secret leakage should this file ever be committed to a public version control system. Instead, passing credentials as [environment variables](#environment-variables) is considered best practice.
 
 ### Environment variables
 
