@@ -27,17 +27,6 @@ const logStreams = [
       httpEndpoint: 'https://example.com/test',
     },
   },
-  {
-    id: 'log-stream-3',
-    name: 'Suspended Log Stream',
-    type: 'http',
-    status: 'suspended',
-    sink: {
-      httpContentFormat: 'JSONLINES',
-      httpContentType: 'application/json',
-      httpEndpoint: 'https://example.com/test',
-    },
-  },
 ];
 
 const auth0ApiClientMock = {
@@ -60,11 +49,7 @@ describe('#logStreams handler', () => {
       const handler = new logStreamsHandler({ client: auth0ApiClientMock });
       const data = await handler.load();
 
-      const expectedLogStreams = logStreams.filter((logStream) => {
-        return logStream.status !== 'suspended';
-      });
-
-      expect(data).to.deep.equal({ logStreams: expectedLogStreams });
+      expect(data).to.deep.equal({ logStreams });
     });
 
     it('should update log streams settings', async () => {
@@ -80,8 +65,10 @@ describe('#logStreams handler', () => {
               const value = logStreams.find((logStream) => {
                 return logStream.id === id;
               });
-              delete value.id;
-              delete value.type;
+              delete value.id; // Not expecting ID in PATCH payload
+              delete value.type; // Not expecting type in PATCH payload
+              //@ts-ignore because it's actually ok for status property to be omitted in PATCH payload
+              if (value?.status === 'suspended') delete value.status; // Not expecting status in PATCH payload if suspended
               return value;
             })();
 
