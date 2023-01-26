@@ -54,28 +54,28 @@ export default class LogStreamsHandler extends DefaultAPIHandler {
       return this.existing;
     }
 
-    const logStreams = await this.client.logStreams.getAll({ paginate: false });
+    this.existing = await this.client.logStreams.getAll({ paginate: false });
 
-    const nonSuspendedLogStreams = logStreams.filter(
-      (logStream: LogStream) => logStream.status !== 'suspended'
-    );
-
-    this.existing = nonSuspendedLogStreams;
-
-    return nonSuspendedLogStreams;
+    return this.existing;
   }
 
   async processChanges(assets: Assets): Promise<void> {
     const { logStreams } = assets;
-    // Do nothing if not set
+
     if (!logStreams) return;
-    // Figure out what needs to be updated vs created
+
     const changes = await this.calcChanges(assets).then((changes) => {
       return {
         ...changes,
         update: changes.update.map((update: LogStream) => {
           if (update.type === 'eventbridge' || update.type === 'eventgrid') {
             delete update.sink;
+          }
+          if (update.status === 'suspended') {
+            // @ts-ignore because while status is usually expected for update payloads, it is ok to be omitted
+            // for suspended log streams. Setting as `active` in these instances would probably be ok
+            // but bit presumptuous, let suspended log streams remain suspended.
+            delete update.status;
           }
           return update;
         }),
