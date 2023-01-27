@@ -54,15 +54,12 @@ export default class LogStreamsHandler extends DefaultAPIHandler {
       return this.existing;
     }
 
-    const logStreams = await this.client.logStreams
-      .getAll({ paginate: false })
-      .then((logStreams) => {
-        console.log(logStreams);
-        return logStreams.map((logStream) => {
-          if (logStream.status === 'suspended') delete logStream.status;
-          return logStream;
-        });
-      });
+    const logStreams = await this.client.logStreams.getAll({ paginate: false }).then((logStreams) =>
+      logStreams.map((logStream) => {
+        if (logStream.status === 'suspended') delete logStream.status;
+        return logStream;
+      })
+    );
 
     this.existing = logStreams;
 
