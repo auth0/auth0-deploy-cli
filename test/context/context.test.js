@@ -3,6 +3,7 @@ import path from 'path';
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import chaiAsPromised from 'chai-as-promised';
 
 import logger from '../../src/logger';
 import { setupContext } from '../../src/context';
@@ -10,6 +11,7 @@ import directoryContext from '../../src/context/directory';
 import yamlContext from '../../src/context/yaml';
 import { cleanThenMkdir, testDataDir } from '../utils';
 
+chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
 const config = {
@@ -87,5 +89,50 @@ describe('#context loader validation', async () => {
     await setupContext({ ...config, AUTH0_INPUT_FILE: yaml });
     // eslint-disable-next-line no-unused-expressions
     expect(loggerSpy).to.not.have.been.called;
+  });
+
+  it('should error if trying to configure AUTH0_EXCLUDED and AUTH0_INCLUDED_ONLY simultaneously', async () => {
+    /* Create empty directory */
+    const dir = path.resolve(testDataDir, 'context');
+    cleanThenMkdir(dir);
+    const yaml = path.join(dir, 'empty.yaml');
+    fs.writeFileSync(yaml, '');
+
+    await expect(
+      setupContext({
+        ...config,
+        AUTH0_INPUT_FILE: yaml,
+        AUTH0_EXCLUDED: ['actions', 'rules'],
+        AUTH0_INCLUDED_ONLY: ['tenant'],
+      })
+    ).to.be.rejectedWith(
+      'Both AUTH0_EXCLUDED and AUTH0_INCLUDED_ONLY configuration values are defined'
+    );
+
+    await expect(
+      setupContext({
+        ...config,
+        AUTH0_INCLUDED_ONLY: ['tenant'],
+        AUTH0_INPUT_FILE: yaml,
+      })
+    ).to.be.not.rejected;
+  });
+
+  it('should error if trying to define AUTH0_INCLUDED_ONLY as an empty array', async () => {
+    /* Create empty directory */
+    const dir = path.resolve(testDataDir, 'context');
+    cleanThenMkdir(dir);
+    const yaml = path.join(dir, 'empty.yaml');
+    fs.writeFileSync(yaml, '');
+
+    await expect(
+      setupContext({
+        ...config,
+        AUTH0_INPUT_FILE: yaml,
+        AUTH0_INCLUDED_ONLY: [],
+      })
+    ).to.be.rejectedWith(
+      'Need to define at least one resource in AUTH0_INCLUDED_ONLY configuration.'
+    );
   });
 });

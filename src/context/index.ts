@@ -18,6 +18,7 @@ const nonPrimitiveProps: (keyof Config)[] = [
   'AUTH0_EXCLUDED_RESOURCE_SERVERS',
   'AUTH0_EXCLUDED_DEFAULTS',
   'AUTH0_EXCLUDED',
+  'AUTH0_INCLUDED_ONLY',
   'EXCLUDED_PROPS',
   'INCLUDED_PROPS',
 ];
@@ -39,6 +40,24 @@ export const setupContext = async (config: Config): Promise<DirectoryContext | Y
       )}`
     );
   }
+
+  ((config: Config) => {
+    if (config.AUTH0_INCLUDED_ONLY === undefined) return;
+
+    if (config.AUTH0_INCLUDED_ONLY.length === 0) {
+      throw new Error(`Need to define at least one resource in AUTH0_INCLUDED_ONLY configuration.`);
+    }
+
+    const hasExcludedResources =
+      config.AUTH0_EXCLUDED !== undefined && config.AUTH0_EXCLUDED.length > 0;
+    const hasIncludedResources = config.AUTH0_INCLUDED_ONLY.length > 0;
+
+    if (hasExcludedResources && hasIncludedResources) {
+      throw new Error(
+        `Both AUTH0_EXCLUDED and AUTH0_INCLUDED_ONLY configuration values are defined`
+      );
+    }
+  })(config);
 
   ((config: Config) => {
     // Detect and warn on usage of deprecated exclusion params. See: https://github.com/auth0/auth0-deploy-cli/issues/451#user-content-deprecated-exclusion-props
