@@ -22,11 +22,11 @@ export const schema = {
   },
 };
 
-type LogStream = {
+export type LogStream = {
   type: 'eventbridge' | 'eventgrid' | 'datadog' | 'http' | 'splunk' | 'sumo';
   name: string;
   id: string;
-  status: 'active' | 'suspended' | 'paused';
+  status?: 'active' | 'suspended' | 'paused';
   sink?: {
     [key: string]: string | boolean;
   };
@@ -54,9 +54,19 @@ export default class LogStreamsHandler extends DefaultAPIHandler {
       return this.existing;
     }
 
-    this.existing = await this.client.logStreams.getAll({ paginate: false });
+    const logStreams = await this.client.logStreams
+      .getAll({ paginate: false })
+      .then((logStreams) => {
+        console.log(logStreams);
+        return logStreams.map((logStream) => {
+          if (logStream.status === 'suspended') delete logStream.status;
+          return logStream;
+        });
+      });
 
-    return this.existing;
+    this.existing = logStreams;
+
+    return logStreams;
   }
 
   async processChanges(assets: Assets): Promise<void> {

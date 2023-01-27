@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import logStreamsHandler from '../../../../src/tools/auth0/handlers/logStreams';
 
-const logStreams = [
+const mockLogStreams = [
   {
     id: 'log-stream-1',
     name: 'Splunky',
@@ -27,14 +27,26 @@ const logStreams = [
       httpEndpoint: 'https://example.com/test',
     },
   },
+  {
+    id: 'log-stream-3',
+    name: 'Suspended HTTP Log Stream',
+    type: 'http',
+    status: 'suspended',
+    sink: {
+      httpAuthorization: 'SOME_SENSITIVE_TOKEN',
+      httpContentFormat: 'JSONLINES',
+      httpContentType: 'application/json',
+      httpEndpoint: 'https://suspended.com/logs',
+    },
+  },
 ];
 
 const auth0ApiClientMock = {
   logStreams: {
-    getAll: async () => logStreams,
-    create: async () => logStreams,
-    update: async () => logStreams,
-    delete: async () => logStreams,
+    getAll: async () => mockLogStreams,
+    create: async () => mockLogStreams,
+    update: async () => mockLogStreams,
+    delete: async () => mockLogStreams,
   },
   pool: new PromisePoolExecutor({
     concurrencyLimit: 3,
@@ -49,7 +61,46 @@ describe('#logStreams handler', () => {
       const handler = new logStreamsHandler({ client: auth0ApiClientMock });
       const data = await handler.load();
 
-      expect(data).to.deep.equal({ logStreams });
+      expect(data).to.deep.equal({
+        logStreams: [
+          {
+            id: 'log-stream-1',
+            name: 'Splunky',
+            type: 'splunk',
+            status: 'paused',
+            sink: {
+              splunkDomain: 'test-splunk.com',
+              splunkPort: '8089',
+              splunkToken: '7b838bd0-028e-4d78-a82c-3564a2007770',
+              splunkSecure: false,
+            },
+          },
+          {
+            id: 'log-stream-2',
+            name: 'HTTP Log Stream',
+            type: 'http',
+            status: 'active',
+            sink: {
+              httpAuthorization: '_VALUE_NOT_SHOWN_', // secret obfuscated
+              httpContentFormat: 'JSONLINES',
+              httpContentType: 'application/json',
+              httpEndpoint: 'https://example.com/test',
+            },
+          },
+          {
+            id: 'log-stream-3',
+            name: 'Suspended HTTP Log Stream',
+            type: 'http',
+            // status property omitted if suspended
+            sink: {
+              httpAuthorization: '_VALUE_NOT_SHOWN_', // secret obfuscated
+              httpContentFormat: 'JSONLINES',
+              httpContentType: 'application/json',
+              httpEndpoint: 'https://suspended.com/logs',
+            },
+          },
+        ],
+      });
     });
 
     it('should update log streams settings', async () => {
@@ -62,7 +113,7 @@ describe('#logStreams handler', () => {
           update: ({ id }, data) => {
             didUpdateFunctionGetCalled = true;
             const expectedValue = (() => {
-              const value = logStreams.find((logStream) => {
+              const value = mockLogStreams.find((logStream) => {
                 return logStream.id === id;
               });
               delete value.id; // Not expecting ID in PATCH payload
@@ -78,7 +129,7 @@ describe('#logStreams handler', () => {
         },
       });
 
-      await handler.processChanges({ logStreams });
+      await handler.processChanges({ logStreams: mockLogStreams });
       expect(didUpdateFunctionGetCalled).to.equal(true);
     });
   });
