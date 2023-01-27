@@ -1,5 +1,9 @@
-const { expect } = require('chai');
+import chai, { expect } from 'chai';
+import chaiAsPromised from 'chai-as-promised';
+
 const actions = require('../../../../src/tools/auth0/handlers/actions');
+
+chai.use(chaiAsPromised);
 
 const pool = {
   addEachTask: (data) => {
@@ -259,6 +263,25 @@ describe('#actions handler', () => {
       const handler = new actions.default({ client: auth0, config });
       const data = await handler.getType();
       expect(data).to.deep.include({ ...actionsData[0], deployed: true });
+    });
+
+    it('should throw informative error when actions service returns "An internal server error occurred" 500 error', async () => {
+      const auth0 = {
+        actions: {
+          getAll: () => {
+            const error = new Error();
+            error.statusCode = 500;
+            error.message = 'An internal server error occurred';
+            throw error;
+          },
+        },
+        pool,
+      };
+
+      const handler = new actions.default({ client: auth0, config });
+      await expect(handler.getType()).to.be.rejectedWith(
+        "Cannot process actions because the actions service is currently unavailable. Retrying may result in a successful operation. Alternatively, adding 'actions' to `AUTH0_EXCLUDED` configuration property will provide ability to skip until service is restored to actions service. This is not an issue with the Deploy CLI."
+      );
     });
 
     it('should return an empty array for 501 status code', async () => {
