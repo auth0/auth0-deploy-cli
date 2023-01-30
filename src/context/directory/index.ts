@@ -6,6 +6,7 @@ import log from '../../logger';
 import handlers, { DirectoryHandler } from './handlers';
 import { isDirectory, isFile, stripIdentifiers, toConfigFn } from '../../utils';
 import { Assets, Auth0APIClient, Config, AssetTypes } from '../../types';
+import { filterOnlyIncludedResourceTypes } from '..';
 
 type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 
@@ -56,11 +57,7 @@ export default class DirectoryContext {
           const excludedAssetTypes = this.config.AUTH0_EXCLUDED || [];
           return !excludedAssetTypes.includes(handlerName);
         })
-        .filter(([handlerName]: [AssetTypes, DirectoryHandler<any>]) => {
-          const includedAssetTypes = this.config.AUTH0_INCLUDED_ONLY;
-          if (includedAssetTypes === undefined) return true;
-          return includedAssetTypes.includes(handlerName);
-        })
+        .filter(filterOnlyIncludedResourceTypes(this.config.AUTH0_INCLUDED_ONLY))
         .forEach(([_name, handler]) => {
           const parsed = handler.parse(this);
           Object.entries(parsed).forEach(([k, v]) => {
@@ -91,17 +88,17 @@ export default class DirectoryContext {
       this.assets = stripIdentifiers(auth0, this.assets);
     }
 
+    // [{"hooks": any}].filter(
+    //   filterOnlyIncludedResourceTypes(["hooks"])
+    // )
+
     await Promise.all(
       Object.entries(handlers)
         .filter(([handlerName]: [AssetTypes, DirectoryHandler<any>]) => {
           const excludedAssetTypes = this.config.AUTH0_EXCLUDED || [];
           return !excludedAssetTypes.includes(handlerName);
         })
-        .filter(([handlerName]: [AssetTypes, DirectoryHandler<any>]) => {
-          const includedAssetTypes = this.config.AUTH0_INCLUDED_ONLY;
-          if (includedAssetTypes === undefined) return true;
-          return includedAssetTypes.includes(handlerName);
-        })
+        .filter(filterOnlyIncludedResourceTypes(this.config.AUTH0_INCLUDED_ONLY))
         .map(async ([name, handler]) => {
           try {
             await handler.dump(this);

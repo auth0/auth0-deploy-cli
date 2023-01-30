@@ -5,7 +5,7 @@ import DirectoryContext from './directory';
 
 import { isDirectory } from '../utils';
 import log from '../logger';
-import { Config } from '../types';
+import { AssetTypes, Config } from '../types';
 
 const { version: packageVersion } = require('../../package.json');
 
@@ -150,3 +150,10 @@ export const setupContext = async (config: Config): Promise<DirectoryContext | Y
     `Unable to determine context processor to load for file ${inputFile}, does it exist? `
   );
 };
+
+export const filterOnlyIncludedResourceTypes =
+  (includedAssetTypes: AssetTypes[] | undefined) =>
+  ([handlerName, _]: [AssetTypes, any]) => {
+    if (includedAssetTypes === undefined) return true;
+    return includedAssetTypes.includes(handlerName);
+  };

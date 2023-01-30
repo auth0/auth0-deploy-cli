@@ -6,7 +6,7 @@ import sinonChai from 'sinon-chai';
 import chaiAsPromised from 'chai-as-promised';
 
 import logger from '../../src/logger';
-import { setupContext } from '../../src/context';
+import { setupContext, filterOnlyIncludedResourceTypes } from '../../src/context';
 import directoryContext from '../../src/context/directory';
 import yamlContext from '../../src/context/yaml';
 import { cleanThenMkdir, testDataDir } from '../utils';
@@ -134,5 +134,35 @@ describe('#context loader validation', async () => {
     ).to.be.rejectedWith(
       'Need to define at least one resource type in AUTH0_INCLUDED_ONLY configuration.'
     );
+  });
+});
+
+describe('#filterOnlyIncludedResourceTypes', async () => {
+  it('should filter out all excepted defined in AUTH0_INCLUDED_ONLY', () => {
+    const AUTH0_INCLUDED_ONLY = ['hooks', 'actions', 'tenant'];
+
+    expect(
+      [['connections'], ['clients'], ['tenant'], ['hooks'], ['actions']].filter(
+        filterOnlyIncludedResourceTypes(AUTH0_INCLUDED_ONLY)
+      )
+    ).to.deep.equal([['tenant'], ['hooks'], ['actions']]);
+  });
+
+  it('should filter out nothing if AUTH0_INCLUDED_ONLY is undefined', () => {
+    const AUTH0_INCLUDED_ONLY = undefined;
+
+    const all = [['connections'], ['clients'], ['tenant'], ['hooks'], ['actions']];
+
+    expect(all.filter(filterOnlyIncludedResourceTypes(AUTH0_INCLUDED_ONLY))).to.deep.equal(all);
+  });
+
+  it('should filter out all if AUTH0_INCLUDED_ONLY is empty', () => {
+    const AUTH0_INCLUDED_ONLY = [];
+
+    expect(
+      [['connections'], ['clients'], ['tenant'], ['hooks'], ['actions']].filter(
+        filterOnlyIncludedResourceTypes(AUTH0_INCLUDED_ONLY)
+      )
+    ).to.deep.equal([]);
   });
 });

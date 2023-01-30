@@ -8,6 +8,7 @@ import { isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter } fr
 import handlers, { YAMLHandler } from './handlers';
 import cleanAssets from '../../readonly';
 import { Assets, Config, Auth0APIClient, AssetTypes, KeywordMappings } from '../../types';
+import { filterOnlyIncludedResourceTypes } from '..';
 
 export default class YAMLContext {
   basePath: string;
@@ -131,11 +132,7 @@ export default class YAMLContext {
           const excludedAssetTypes = this.config.AUTH0_EXCLUDED || [];
           return !excludedAssetTypes.includes(handlerName);
         })
-        .filter(([handlerName]: [AssetTypes, YAMLHandler<any>]) => {
-          const includedAssetTypes = this.config.AUTH0_INCLUDED_ONLY;
-          if (includedAssetTypes === undefined) return true;
-          return includedAssetTypes.includes(handlerName);
-        })
+        .filter(filterOnlyIncludedResourceTypes(this.config.AUTH0_INCLUDED_ONLY))
         .map(async ([name, handler]) => {
           try {
             const data = await handler.dump(this);
