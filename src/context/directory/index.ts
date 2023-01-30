@@ -58,9 +58,7 @@ export default class DirectoryContext {
         })
         .filter(([handlerName]: [AssetTypes, DirectoryHandler<any>]) => {
           const includedAssetTypes = this.config.AUTH0_INCLUDED_ONLY;
-
           if (includedAssetTypes === undefined) return true;
-
           return includedAssetTypes.includes(handlerName);
         })
         .forEach(([_name, handler]) => {
