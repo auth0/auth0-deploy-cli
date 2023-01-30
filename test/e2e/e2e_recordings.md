@@ -20,7 +20,7 @@ AUTH0_HTTP_RECORDINGS="record" npx ts-mocha --timeout=120000 -p tsconfig.json te
 
 ### Common Errors When Re-Recording
 
-- `access_denied: {"error":"access_denied","error_description":"Unauthorized"}` - The client ID/secret pair provided through `AUTH0_E2E_CLIENT_ID` and `AUTH0_E2E_CLIENT_SECRET` respectively is not valid, double-check their correct values
+- `access_denied: {"error":"access_denied","error_description":"Unauthorized"}` - The client ID/secret pair provided through `AUTH0_E2E_CLIENT_ID` and `AUTH0_E2E_CLIENT_SECRET` respectively is not valid, double-check their correct values.
 - `APIError: Nock: Disallowed net connect for "auth0-deploy-cli-e2e.us.auth0.com:443/oauth/token"` - Recordings already exist for this test, will need to remove the correlating recordings file and try again. Re-recording the entire file is necessary even if HTTP request changes are additive.
 
 ## Running Tests w/ Recordings
