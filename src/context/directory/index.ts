@@ -88,10 +88,6 @@ export default class DirectoryContext {
       this.assets = stripIdentifiers(auth0, this.assets);
     }
 
-    // [{"hooks": any}].filter(
-    //   filterOnlyIncludedResourceTypes(["hooks"])
-    // )
-
     await Promise.all(
       Object.entries(handlers)
         .filter(([handlerName]: [AssetTypes, DirectoryHandler<any>]) => {
