@@ -9,7 +9,7 @@ export const schema = {
   type: 'object',
 };
 
-export type Tenant = Asset & { enabled_locales: Language[]; flags: { [key: string]: boolean } };
+export type Tenant = Asset & { enabled_locales?: Language[]; flags: { [key: string]: boolean } };
 
 const blockPageKeys = [
   ...Object.keys(pageNameMap),
