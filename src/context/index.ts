@@ -46,7 +46,9 @@ export const setupContext = async (config: Config): Promise<DirectoryContext | Y
     if (config.AUTH0_INCLUDED_ONLY === undefined) return;
 
     if (config.AUTH0_INCLUDED_ONLY.length === 0) {
-      throw new Error(`Need to define at least one resource in AUTH0_INCLUDED_ONLY configuration.`);
+      throw new Error(
+        `Need to define at least one resource type in AUTH0_INCLUDED_ONLY configuration.`
+      );
     }
 
     const hasExcludedResources =

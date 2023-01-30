@@ -19,8 +19,6 @@ describe('#Auth0 class', () => {
         return config[key];
       });
 
-      console.log({ auth0WithExclusions });
-
       expect(auth0WithoutExclusions.handlers.length).to.equal(
         auth0WithExclusions.handlers.length + AUTH0_EXCLUDED.length
       ); // Number of handlers is reduced by number of exclusions
