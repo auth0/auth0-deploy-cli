@@ -48,14 +48,14 @@ export default class Auth0 {
         if (excludedAssetTypes === undefined) return true;
 
         return !excludedAssetTypes.includes(handler.type as AssetTypes);
+      })
+      .filter((handler) => {
+        const onlyIncludedAssetTypes: undefined | AssetTypes[] = config('AUTH0_INCLUDED_ONLY');
+
+        if (onlyIncludedAssetTypes === undefined) return true;
+
+        return onlyIncludedAssetTypes.includes(handler.type as AssetTypes);
       });
-    // .filter((handler) => {
-    //   const onlyIncludedAssetTypes: undefined | AssetTypes[] = config('AUTH0_INCLUDED_ONLY');
-
-    //   if (onlyIncludedAssetTypes === undefined) return false;
-
-    //   return onlyIncludedAssetTypes.includes(handler.type as AssetTypes);
-    // });
   }
 
   async runStage(stage: Stage): Promise<void> {

@@ -10,6 +10,8 @@ import { Config } from '../types';
 const { version: packageVersion } = require('../../package.json');
 
 const nonPrimitiveProps: (keyof Config)[] = [
+  // List of properties that are arrays or objects. This list
+  // enables decoding of string env variables for these configurations.
   'AUTH0_KEYWORD_REPLACE_MAPPINGS',
   'AUTH0_EXCLUDED_RULES',
   'AUTH0_EXCLUDED_CLIENTS',
@@ -24,7 +26,6 @@ const nonPrimitiveProps: (keyof Config)[] = [
 ];
 
 export const setupContext = async (config: Config): Promise<DirectoryContext | YAMLContext> => {
-  // Validate config
   const missingParams: ('AUTH0_DOMAIN' | 'AUTH0_CLIENT_ID' | 'AUTH0_CLIENT_SECRET')[] = [];
 
   if (!config.AUTH0_DOMAIN) missingParams.push('AUTH0_DOMAIN');

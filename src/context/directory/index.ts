@@ -56,6 +56,13 @@ export default class DirectoryContext {
           const excludedAssetTypes = this.config.AUTH0_EXCLUDED || [];
           return !excludedAssetTypes.includes(handlerName);
         })
+        .filter(([handlerName]: [AssetTypes, DirectoryHandler<any>]) => {
+          const includedAssetTypes = this.config.AUTH0_INCLUDED_ONLY;
+
+          if (includedAssetTypes === undefined) return true;
+
+          return includedAssetTypes.includes(handlerName);
+        })
         .forEach(([_name, handler]) => {
           const parsed = handler.parse(this);
           Object.entries(parsed).forEach(([k, v]) => {
@@ -91,6 +98,11 @@ export default class DirectoryContext {
         .filter(([handlerName]: [AssetTypes, DirectoryHandler<any>]) => {
           const excludedAssetTypes = this.config.AUTH0_EXCLUDED || [];
           return !excludedAssetTypes.includes(handlerName);
+        })
+        .filter(([handlerName]: [AssetTypes, DirectoryHandler<any>]) => {
+          const includedAssetTypes = this.config.AUTH0_INCLUDED_ONLY;
+          if (includedAssetTypes === undefined) return true;
+          return includedAssetTypes.includes(handlerName);
         })
         .map(async ([name, handler]) => {
           try {

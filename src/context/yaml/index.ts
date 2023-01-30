@@ -69,19 +69,26 @@ export default class YAMLContext {
       }
     }
 
-    const excludedAssetsFiltered = Object.keys(this.assets).reduce(
-      (acc: Assets, key: AssetTypes) => {
-        const excludedAssetTypes = this.config.AUTH0_EXCLUDED || [];
-        if (excludedAssetTypes.includes(key)) return acc;
+    this.assets = Object.keys(this.assets).reduce((acc: Assets, key: AssetTypes) => {
+      const excludedAssetTypes = this.config.AUTH0_EXCLUDED || [];
+      if (excludedAssetTypes.includes(key)) return acc;
 
-        return {
-          ...acc,
-          [key]: this.assets[key],
-        };
-      },
-      {}
-    );
-    this.assets = excludedAssetsFiltered;
+      return {
+        ...acc,
+        [key]: this.assets[key],
+      };
+    }, {});
+
+    this.assets = Object.keys(this.assets).reduce((acc: Assets, key: AssetTypes) => {
+      const includedAssetTypes = this.config.AUTH0_INCLUDED_ONLY;
+
+      if (includedAssetTypes !== undefined && !includedAssetTypes.includes(key)) return acc;
+
+      return {
+        ...acc,
+        [key]: this.assets[key],
+      };
+    }, {});
 
     // Run initial schema check to ensure valid YAML
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
@@ -123,6 +130,11 @@ export default class YAMLContext {
         .filter(([handlerName]: [AssetTypes, YAMLHandler<any>]) => {
           const excludedAssetTypes = this.config.AUTH0_EXCLUDED || [];
           return !excludedAssetTypes.includes(handlerName);
+        })
+        .filter(([handlerName]: [AssetTypes, YAMLHandler<any>]) => {
+          const includedAssetTypes = this.config.AUTH0_INCLUDED_ONLY;
+          if (includedAssetTypes === undefined) return true;
+          return includedAssetTypes.includes(handlerName);
         })
         .map(async ([name, handler]) => {
           try {
