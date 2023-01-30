@@ -1,0 +1,134 @@
+[
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/tenants/settings",
+        "body": "",
+        "status": 200,
+        "response": {
+            "allowed_logout_urls": [
+                "https://mycompany.org/logoutCallback"
+            ],
+            "change_password": {
+                "enabled": true,
+                "html": "<html>Change Password</html>\n"
+            },
+            "enabled_locales": [
+                "en"
+            ],
+            "error_page": {
+                "html": "<html>Error Page</html>\n",
+                "show_log_link": false,
+                "url": "https://mycompany.org/error"
+            },
+            "flags": {
+                "allow_changing_enable_sso": false,
+                "allow_legacy_delegation_grant_types": true,
+                "allow_legacy_ro_grant_types": true,
+                "change_pwd_flow_v1": false,
+                "disable_impersonation": true,
+                "enable_apis_section": false,
+                "enable_client_connections": false,
+                "enable_custom_domain_in_emails": false,
+                "enable_dynamic_client_registration": false,
+                "enable_legacy_logs_search_v2": false,
+                "enable_public_signup_user_exists_error": true,
+                "enable_sso": true,
+                "new_universal_login_experience_enabled": true,
+                "universal_login": true,
+                "use_scope_descriptions_for_consent": false,
+                "revoke_refresh_token_grant": false,
+                "disable_clickjack_protection_headers": false,
+                "enable_pipeline2": false
+            },
+            "friendly_name": "My Test Tenant",
+            "guardian_mfa_page": {
+                "enabled": true,
+                "html": "<html>MFA</html>\n"
+            },
+            "idle_session_lifetime": 1,
+            "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
+            "sandbox_version": "12",
+            "session_lifetime": 3.0166666666666666,
+            "support_email": "support@mycompany.org",
+            "support_url": "https://mycompany.org/support",
+            "universal_login": {
+                "colors": {
+                    "primary": "#F8F8F2",
+                    "page_background": "#222221"
+                }
+            },
+            "session_cookie": {
+                "mode": "non-persistent"
+            },
+            "sandbox_versions_available": [
+                "16",
+                "12"
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/actions/actions?page=0&per_page=100",
+        "body": "",
+        "status": 200,
+        "response": {
+            "actions": [
+                {
+                    "id": "5992c6f4-daae-4079-9aa6-f4111823c6be",
+                    "name": "My Custom Action",
+                    "supported_triggers": [
+                        {
+                            "id": "post-login",
+                            "version": "v2"
+                        }
+                    ],
+                    "created_at": "2023-01-27T13:22:16.579099437Z",
+                    "updated_at": "2023-01-27T13:22:16.587984016Z",
+                    "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
+                    "dependencies": [],
+                    "runtime": "node16",
+                    "status": "built",
+                    "secrets": [],
+                    "current_version": {
+                        "id": "6a39ef63-7d53-4d4e-9b19-b7138d19604c",
+                        "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
+                        "runtime": "node16",
+                        "status": "BUILT",
+                        "number": 1,
+                        "build_time": "2023-01-27T13:22:17.032504530Z",
+                        "created_at": "2023-01-27T13:22:16.918712794Z",
+                        "updated_at": "2023-01-27T13:22:17.034577338Z"
+                    },
+                    "deployed_version": {
+                        "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
+                        "dependencies": [],
+                        "id": "6a39ef63-7d53-4d4e-9b19-b7138d19604c",
+                        "deployed": true,
+                        "number": 1,
+                        "built_at": "2023-01-27T13:22:17.032504530Z",
+                        "secrets": [],
+                        "status": "built",
+                        "created_at": "2023-01-27T13:22:16.918712794Z",
+                        "updated_at": "2023-01-27T13:22:17.034577338Z",
+                        "runtime": "node16",
+                        "supported_triggers": [
+                            {
+                                "id": "post-login",
+                                "version": "v2"
+                            }
+                        ]
+                    },
+                    "all_changes_deployed": true
+                }
+            ],
+            "total": 1,
+            "per_page": 100
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    }
+]
