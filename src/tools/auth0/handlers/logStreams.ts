@@ -22,11 +22,11 @@ export const schema = {
   },
 };
 
-type LogStream = {
+export type LogStream = {
   type: 'eventbridge' | 'eventgrid' | 'datadog' | 'http' | 'splunk' | 'sumo';
   name: string;
   id: string;
-  status: 'active' | 'suspended' | 'paused';
+  status?: 'active' | 'suspended' | 'paused';
   sink?: {
     [key: string]: string | boolean;
   };
@@ -54,28 +54,35 @@ export default class LogStreamsHandler extends DefaultAPIHandler {
       return this.existing;
     }
 
-    const logStreams = await this.client.logStreams.getAll({ paginate: false });
-
-    const nonSuspendedLogStreams = logStreams.filter(
-      (logStream: LogStream) => logStream.status !== 'suspended'
+    const logStreams = await this.client.logStreams.getAll({ paginate: false }).then((logStreams) =>
+      logStreams.map((logStream) => {
+        if (logStream.status === 'suspended') delete logStream.status;
+        return logStream;
+      })
     );
 
-    this.existing = nonSuspendedLogStreams;
+    this.existing = logStreams;
 
-    return nonSuspendedLogStreams;
+    return logStreams;
   }
 
   async processChanges(assets: Assets): Promise<void> {
     const { logStreams } = assets;
-    // Do nothing if not set
+
     if (!logStreams) return;
-    // Figure out what needs to be updated vs created
+
     const changes = await this.calcChanges(assets).then((changes) => {
       return {
         ...changes,
         update: changes.update.map((update: LogStream) => {
           if (update.type === 'eventbridge' || update.type === 'eventgrid') {
             delete update.sink;
+          }
+          if (update.status === 'suspended') {
+            // @ts-ignore because while status is usually expected for update payloads, it is ok to be omitted
+            // for suspended log streams. Setting as `active` in these instances would probably be ok
+            // but bit presumptuous, let suspended log streams remain suspended.
+            delete update.status;
           }
           return update;
         }),
