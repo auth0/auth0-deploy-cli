@@ -9,6 +9,7 @@ import {
 import { Tenant } from './tools/auth0/handlers/tenant';
 import { Theme } from './tools/auth0/handlers/themes';
 import { Page } from './tools/auth0/handlers/pages';
+import { LogStream } from './tools/auth0/handlers/logStreams';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -116,7 +117,12 @@ export type BaseAuth0APIClient = {
     getSecrets: (arg0: { id: string }) => Promise<Promise<Asset[]>>;
     addSecrets: (arg0: {}, arg1: Asset) => Promise<void>;
   };
-  logStreams: APIClientBaseFunctions;
+  logStreams: {
+    getAll: (arg0: SharedPaginationParams) => Promise<LogStream[]>;
+    create: (arg0: { id: string }) => Promise<LogStream>;
+    update: (arg0: {}, arg1: Partial<LogStream>) => Promise<LogStream>;
+    delete: (arg0: Asset) => Promise<void>;
+  };
   migrations: APIClientBaseFunctions & {
     getMigrations: () => Promise<{ flags: Asset[] }>;
     updateMigrations: (arg0: { flags: Asset[] }) => Promise<void>;
@@ -232,7 +238,7 @@ export type Assets = Partial<{
     policies: Asset[]; //TODO: eliminate this intermediate level for consistency
   } | null;
   hooks: Asset[] | null;
-  logStreams: Asset[] | null;
+  logStreams: LogStream[] | null;
   migrations: Asset[] | null;
   organizations: Asset[] | null;
   pages: Page[] | null;
