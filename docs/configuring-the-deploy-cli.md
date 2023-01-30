@@ -96,7 +96,7 @@ Array of strings. Dictates which resource types to _only_ manage, bi-directional
 }
 ```
 
-Cannot be used simultaneously with `AUTH0_INCLUDED_ONLY`.
+Cannot be used simultaneously with `AUTH0_EXCLUDED`.
 
 ### `AUTH0_KEYWORD_REPLACE_MAPPINGS`
 
