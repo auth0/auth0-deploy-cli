@@ -738,3 +738,8 @@ logStreams:
         aws.partner/auth0.com/auth0-user-79f1a6de-7fc2-47de-9202-4b7b15c9d601/auth0.logs
     status: active
     type: eventbridge
+  - name: Suspended DD Log Stream
+    sink:
+      datadogApiKey: some-sensitive-api-key
+      datadogRegion: us
+    type: datadog
