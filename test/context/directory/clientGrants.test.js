@@ -16,19 +16,19 @@ describe('#directory context clientGrants', () => {
         'Primary M2M-Auth0 Management API.json': `
         {
           "audience": "https://travel0.us.auth0.com/api/v2",
-          "client_id": "Primary M2M",
+          "client_id": "client-id-1",
           "scope": ["read:users"]
         }`,
         'Primary M2M-Payments Service.json': `
         {
           "audience": "https://payments.travel0.com/api",
-          "client_id": "Primary M2M",
+          "client_id": "client-id-1",
           "scope": ["update:card", "create:card", "delete:card"]
         }`,
         'some-arbitrary-filename.json': `
         {
           "audience": "https://payments.travel0.com/api",
-          "client_id": "Secondary M2M",
+          "client_id": "client-id-2",
           "scope": ["update:card", "create:card", "delete:card"]
         }`,
       },
@@ -47,18 +47,18 @@ describe('#directory context clientGrants', () => {
     expect(context.assets.clientGrants).to.deep.equal([
       {
         audience: 'https://travel0.us.auth0.com/api/v2',
-        client_id: 'Primary M2M',
+        client_id: 'client-id-1',
         scope: ['read:users'],
       },
 
       {
         audience: 'https://payments.travel0.com/api',
-        client_id: 'Primary M2M',
+        client_id: 'client-id-1',
         scope: ['update:card', 'create:card', 'delete:card'],
       },
       {
         audience: 'https://payments.travel0.com/api',
-        client_id: 'Secondary M2M',
+        client_id: 'client-id-2',
         scope: ['update:card', 'create:card', 'delete:card'],
       },
     ]);
@@ -124,6 +124,18 @@ describe('#directory context clientGrants', () => {
       { AUTH0_INPUT_FILE: dir },
       {
         ...mockMgmtClient(),
+        clients: {
+          getAll: () => [
+            {
+              client_id: 'client-id-1',
+              name: 'Primary M2M',
+            },
+            {
+              client_id: 'client-id-2',
+              name: 'Secondary M2M',
+            },
+          ],
+        },
         resourceServers: {
           getAll: () => [
             {
@@ -144,17 +156,17 @@ describe('#directory context clientGrants', () => {
     context.assets.clientGrants = [
       {
         audience: 'https://travel0.us.auth0.com/api/v2',
-        client_id: 'Primary M2M',
+        client_id: 'client-id-1',
         scope: ['read:users'],
       },
       {
         audience: 'https://payments.travel0.com/api',
-        client_id: 'Primary M2M',
+        client_id: 'client-id-1',
         scope: ['update:card', 'create:card', 'delete:card'],
       },
       {
         audience: 'https://payments.travel0.com/api',
-        client_id: 'Secondary M2M',
+        client_id: 'client-id-2',
         scope: ['update:card', 'create:card', 'delete:card'],
       },
     ];

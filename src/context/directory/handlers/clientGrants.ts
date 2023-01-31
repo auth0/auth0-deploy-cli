@@ -44,6 +44,10 @@ async function dump(context: DirectoryContext): Promise<void> {
     paginate: true,
   });
 
+  const allClients = await context.mgmtClient.clients.getAll({
+    paginate: true,
+  });
+
   // Convert client_id to the client name for readability
   clientGrants.forEach((grant: ClientGrant) => {
     const dumpGrant = { ...grant };
@@ -51,6 +55,16 @@ async function dump(context: DirectoryContext): Promise<void> {
     if (context.assets.clientsOrig) {
       dumpGrant.client_id = convertClientIdToName(dumpGrant.client_id, context.assets.clientsOrig);
     }
+
+    const clientName = (() => {
+      const associatedClient = allClients.find((client) => {
+        return client.client_id === grant.client_id;
+      });
+
+      if (associatedClient === undefined) return grant.client_id;
+
+      return associatedClient.name;
+    })();
 
     const apiName = (() => {
       const associatedAPI = allResourceServers.find((resourceServer) => {
@@ -62,7 +76,7 @@ async function dump(context: DirectoryContext): Promise<void> {
       return associatedAPI.name;
     })();
 
-    const name = sanitize(`${dumpGrant.client_id}-${apiName}`);
+    const name = sanitize(`${clientName}-${apiName}`);
     const grantFile = path.join(grantsFolder, `${name}.json`);
 
     dumpJSON(grantFile, dumpGrant);

@@ -114,7 +114,7 @@ export default class PagesHandler extends DefaultHandler {
     if (globalClient[0].custom_login_page) {
       pages.push({
         name: 'login',
-        enabled: globalClient[0].custom_login_page_on,
+        enabled: !!globalClient[0].custom_login_page_on,
         html: globalClient[0].custom_login_page,
       });
     }

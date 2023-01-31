@@ -10,6 +10,7 @@ import { Tenant } from './tools/auth0/handlers/tenant';
 import { Theme } from './tools/auth0/handlers/themes';
 import { Page } from './tools/auth0/handlers/pages';
 import { LogStream } from './tools/auth0/handlers/logStreams';
+import { Client } from './tools/auth0/handlers/clients';
 import { ClientGrant } from './tools/auth0/handlers/clientGrants';
 import { ResourceServer } from './tools/auth0/handlers/resourceServers';
 
@@ -81,7 +82,12 @@ export type BaseAuth0APIClient = {
     createTheme: (arg0: Omit<Theme, 'themeId'>) => Promise<Omit<Theme, 'themeId'>>;
     deleteTheme: (arg0: { id: string }) => Promise<void>;
   };
-  clients: APIClientBaseFunctions;
+  clients: {
+    getAll: (arg0: SharedPaginationParams) => Promise<Client[]>;
+    create: (arg0: { id: string }) => Promise<Client>;
+    update: (arg0: {}, arg1: Partial<Client>) => Promise<Client>;
+    delete: (arg0: Asset) => Promise<void>;
+  };
   clientGrants: {
     getAll: (arg0: SharedPaginationParams) => Promise<ClientGrant[]>;
     create: (arg0: { id: string }) => Promise<ClientGrant>;
@@ -233,7 +239,7 @@ export type Assets = Partial<{
         templates?: { template: string; body: string }[] | null;
       })
     | null;
-  clients: Asset[] | null;
+  clients: Client[] | null;
   clientGrants: ClientGrant[] | null;
   connections: Asset[] | null;
   customDomains: Asset[] | null;
