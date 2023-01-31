@@ -8,7 +8,6 @@ const readOnlyFields: Partial<Record<AssetTypes, string[]>> = {
   connections: ['provisioning_ticket_url', 'realms'],
   databases: ['options.configuration'],
   tenant: [
-    'sandbox_version',
     'sandbox_versions_available',
     'flags.allow_changing_enable_sso',
     'flags.enable_sso',
