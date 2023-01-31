@@ -132,7 +132,7 @@ describe('#context loader validation', async () => {
         AUTH0_INCLUDED_ONLY: [],
       })
     ).to.be.rejectedWith(
-      'Need to define at least one resource type in AUTH0_INCLUDED_ONLY configuration.'
+      'Need to define at least one resource type in AUTH0_INCLUDED_ONLY configuration. See: https://github.com/auth0/auth0-deploy-cli/blob/master/docs/configuring-the-deploy-cli.md#auth0_included_only'
     );
   });
 });

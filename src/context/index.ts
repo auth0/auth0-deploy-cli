@@ -47,7 +47,7 @@ export const setupContext = async (config: Config): Promise<DirectoryContext | Y
 
     if (config.AUTH0_INCLUDED_ONLY.length === 0) {
       throw new Error(
-        `Need to define at least one resource type in AUTH0_INCLUDED_ONLY configuration.`
+        'Need to define at least one resource type in AUTH0_INCLUDED_ONLY configuration. See: https://github.com/auth0/auth0-deploy-cli/blob/master/docs/configuring-the-deploy-cli.md#auth0_included_only'
       );
     }
 
@@ -57,7 +57,7 @@ export const setupContext = async (config: Config): Promise<DirectoryContext | Y
 
     if (hasExcludedResources && hasIncludedResources) {
       throw new Error(
-        `Both AUTH0_EXCLUDED and AUTH0_INCLUDED_ONLY configuration values are defined`
+        'Both AUTH0_EXCLUDED and AUTH0_INCLUDED_ONLY configuration values are defined, only one can be configured at a time. See: https://github.com/auth0/auth0-deploy-cli/blob/master/docs/excluding-from-management.md'
       );
     }
   })(config);
