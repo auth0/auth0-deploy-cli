@@ -5,11 +5,13 @@ import DirectoryContext from './directory';
 
 import { isDirectory } from '../utils';
 import log from '../logger';
-import { Config } from '../types';
+import { AssetTypes, Config } from '../types';
 
 const { version: packageVersion } = require('../../package.json');
 
 const nonPrimitiveProps: (keyof Config)[] = [
+  // List of properties that are arrays or objects. This list
+  // enables decoding of string env variables for these configurations.
   'AUTH0_KEYWORD_REPLACE_MAPPINGS',
   'AUTH0_EXCLUDED_RULES',
   'AUTH0_EXCLUDED_CLIENTS',
@@ -18,12 +20,12 @@ const nonPrimitiveProps: (keyof Config)[] = [
   'AUTH0_EXCLUDED_RESOURCE_SERVERS',
   'AUTH0_EXCLUDED_DEFAULTS',
   'AUTH0_EXCLUDED',
+  'AUTH0_INCLUDED_ONLY',
   'EXCLUDED_PROPS',
   'INCLUDED_PROPS',
 ];
 
 export const setupContext = async (config: Config): Promise<DirectoryContext | YAMLContext> => {
-  // Validate config
   const missingParams: ('AUTH0_DOMAIN' | 'AUTH0_CLIENT_ID' | 'AUTH0_CLIENT_SECRET')[] = [];
 
   if (!config.AUTH0_DOMAIN) missingParams.push('AUTH0_DOMAIN');
@@ -39,6 +41,26 @@ export const setupContext = async (config: Config): Promise<DirectoryContext | Y
       )}`
     );
   }
+
+  ((config: Config) => {
+    if (config.AUTH0_INCLUDED_ONLY === undefined) return;
+
+    if (config.AUTH0_INCLUDED_ONLY.length === 0) {
+      throw new Error(
+        'Need to define at least one resource type in AUTH0_INCLUDED_ONLY configuration. See: https://github.com/auth0/auth0-deploy-cli/blob/master/docs/configuring-the-deploy-cli.md#auth0_included_only'
+      );
+    }
+
+    const hasExcludedResources =
+      config.AUTH0_EXCLUDED !== undefined && config.AUTH0_EXCLUDED.length > 0;
+    const hasIncludedResources = config.AUTH0_INCLUDED_ONLY.length > 0;
+
+    if (hasExcludedResources && hasIncludedResources) {
+      throw new Error(
+        'Both AUTH0_EXCLUDED and AUTH0_INCLUDED_ONLY configuration values are defined, only one can be configured at a time. See: https://github.com/auth0/auth0-deploy-cli/blob/master/docs/excluding-from-management.md'
+      );
+    }
+  })(config);
 
   ((config: Config) => {
     // Detect and warn on usage of deprecated exclusion params. See: https://github.com/auth0/auth0-deploy-cli/issues/451#user-content-deprecated-exclusion-props
@@ -128,3 +150,10 @@ export const setupContext = async (config: Config): Promise<DirectoryContext | Y
     `Unable to determine context processor to load for file ${inputFile}, does it exist? `
   );
 };
+
+export const filterOnlyIncludedResourceTypes =
+  (includedAssetTypes: AssetTypes[] | undefined) =>
+  ([handlerName, _]: [AssetTypes, any]) => {
+    if (includedAssetTypes === undefined) return true;
+    return includedAssetTypes.includes(handlerName);
+  };
