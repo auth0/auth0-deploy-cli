@@ -13,15 +13,24 @@ describe('#directory context clientGrants', () => {
   it('should process clientGrants', async () => {
     const files = {
       [constants.CLIENTS_GRANTS_DIRECTORY]: {
-        'test.json': `
-          {
-           "client_id": "auth0-webhooks",
-           "audience": "https://test.auth0.com/api/v2/",
-           "scope": [
-              "read:logs"
-           ],
-           "var": @@var@@
-          }`,
+        'Primary M2M-Auth0 Management API.json': `
+        {
+          "audience": "https://travel0.us.auth0.com/api/v2",
+          "client_id": "Primary M2M",
+          "scope": ["read:users"]
+        }`,
+        'Primary M2M-Payments Service.json': `
+        {
+          "audience": "https://payments.travel0.com/api",
+          "client_id": "Primary M2M",
+          "scope": ["update:card", "create:card", "delete:card"]
+        }`,
+        'some-arbitrary-filename.json': `
+        {
+          "audience": "https://payments.travel0.com/api",
+          "client_id": "Secondary M2M",
+          "scope": ["update:card", "create:card", "delete:card"]
+        }`,
       },
     };
 
@@ -35,16 +44,24 @@ describe('#directory context clientGrants', () => {
     const context = new Context(config, mockMgmtClient());
     await context.load();
 
-    const target = [
+    expect(context.assets.clientGrants).to.deep.equal([
       {
-        audience: 'https://test.auth0.com/api/v2/',
-        client_id: 'auth0-webhooks',
-        scope: ['read:logs'],
-        var: 'something',
+        audience: 'https://travel0.us.auth0.com/api/v2',
+        client_id: 'Primary M2M',
+        scope: ['read:users'],
       },
-    ];
 
-    expect(context.assets.clientGrants).to.deep.equal(target);
+      {
+        audience: 'https://payments.travel0.com/api',
+        client_id: 'Primary M2M',
+        scope: ['update:card', 'create:card', 'delete:card'],
+      },
+      {
+        audience: 'https://payments.travel0.com/api',
+        client_id: 'Secondary M2M',
+        scope: ['update:card', 'create:card', 'delete:card'],
+      },
+    ]);
   });
 
   it('should ignore unknown file', async () => {
@@ -108,20 +125,18 @@ describe('#directory context clientGrants', () => {
       {
         ...mockMgmtClient(),
         resourceServers: {
-          getAll: () => {
-            return [
-              {
-                id: 'resource-server-1',
-                name: 'Payments Service',
-                identifier: 'https://payments.travel0.com/api',
-              },
-              {
-                id: 'resource-server-2',
-                name: 'Auth0 Management API',
-                identifier: 'https://travel0.us.auth0.com/api/v2',
-              },
-            ];
-          },
+          getAll: () => [
+            {
+              id: 'resource-server-1',
+              name: 'Payments Service',
+              identifier: 'https://payments.travel0.com/api',
+            },
+            {
+              id: 'resource-server-2',
+              name: 'Auth0 Management API',
+              identifier: 'https://travel0.us.auth0.com/api/v2',
+            },
+          ],
         },
       }
     );
@@ -130,7 +145,7 @@ describe('#directory context clientGrants', () => {
       {
         audience: 'https://travel0.us.auth0.com/api/v2',
         client_id: 'Primary M2M',
-        scope: ['update:account'],
+        scope: ['read:users'],
       },
       {
         audience: 'https://payments.travel0.com/api',
