@@ -100,6 +100,39 @@ describe('#YAML context validation', () => {
     expect(contextWithoutExclusion.assets.rules).to.deep.equal([]);
   });
 
+  it('should respect resource inclusion on import', async () => {
+    /* Create empty directory */
+    const dir = path.resolve(testDataDir, 'yaml', 'resource-inclusion');
+    cleanThenMkdir(dir);
+    const yaml = path.join(dir, 'resource-inclusion.yaml');
+    fs.writeFileSync(
+      yaml,
+      `
+      actions: []
+      rules: []
+      tenant:
+        enabled_locales:
+          - en
+    `
+    );
+
+    const contextWithInclusion = new Context(
+      {
+        AUTH0_INPUT_FILE: yaml,
+        AUTH0_INCLUDED_ONLY: ['tenant'],
+      },
+      mockMgmtClient()
+    );
+
+    await contextWithInclusion.load();
+    expect(contextWithInclusion.assets.tenant).to.deep.equal({
+      enabled_locales: ['en'],
+    });
+
+    expect(contextWithInclusion.assets.actions).to.equal(null);
+    expect(contextWithInclusion.assets.rules).to.equal(null);
+  });
+
   it('should error invalid schema', async () => {
     const dir = path.resolve(testDataDir, 'yaml', 'invalid');
     cleanThenMkdir(dir);
