@@ -5,6 +5,8 @@ import { getFiles, existsMustBeDir } from '../../src/utils';
 import { load as yamlLoad } from 'js-yaml';
 import { setupRecording, testNameToWorkingDirectory } from './e2e-utils';
 import { dump, deploy } from '../../src';
+import exp from 'constants';
+import { AssetTypes } from '../../src/types';
 
 const shouldUseRecordings = process.env['AUTH0_HTTP_RECORDINGS'] === 'lockdown';
 const AUTH0_DOMAIN = shouldUseRecordings
@@ -39,6 +41,35 @@ describe('#end-to-end dump', function () {
       expect(existsMustBeDir(directory)).to.equal(true);
       expect(getFiles(directory, ['.yaml'])).to.have.length(0);
     });
+
+    recordingDone();
+  });
+
+  it('should only dump the resources listed in AUTH0_INCLUDED_ONLY', async function () {
+    const workDirectory = testNameToWorkingDirectory(this.test?.title);
+
+    const AUTH0_INCLUDED_ONLY = ['actions', 'tenant'] as AssetTypes[];
+
+    const { recordingDone } = await setupRecording(this.test?.title);
+
+    await dump({
+      output_folder: workDirectory,
+      format: 'yaml',
+      config: {
+        AUTH0_DOMAIN,
+        AUTH0_CLIENT_ID,
+        AUTH0_CLIENT_SECRET,
+        AUTH0_ACCESS_TOKEN,
+        AUTH0_INCLUDED_ONLY,
+      },
+    });
+
+    const files = getFiles(workDirectory, ['.yaml']);
+    expect(files).to.have.length(1);
+
+    const yaml = yamlLoad(fs.readFileSync(files[0]));
+
+    expect(Object.keys(yaml).sort()).to.deep.equal(AUTH0_INCLUDED_ONLY.sort());
 
     recordingDone();
   });
