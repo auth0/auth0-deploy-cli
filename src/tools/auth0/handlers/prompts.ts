@@ -188,9 +188,10 @@ export default class PromptsHandler extends DefaultHandler {
   async getCustomTextSettings(): Promise<AllPromptsByLanguage> {
     const supportedLanguages = await this.client.tenant
       .getSettings()
-      .then(({ enabled_locales }) => enabled_locales);
-
-    if (supportedLanguages === undefined) return {}; // In rare cases, private cloud tenants may not have `enabled_locales` defined
+      .then(({ enabled_locales }) => {
+        if (enabled_locales === undefined) return []; // In rare cases, private cloud tenants may not have `enabled_locales` defined
+        return enabled_locales;
+      });
 
     const data = await Promise.all(
       supportedLanguages
