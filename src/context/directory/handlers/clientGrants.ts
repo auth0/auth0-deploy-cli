@@ -40,13 +40,16 @@ async function dump(context: DirectoryContext): Promise<void> {
   fs.ensureDirSync(grantsFolder);
 
   // Convert client_id to the client name for readability
-  clientGrants.forEach((grant) => {
+  clientGrants.forEach((grant: Asset) => {
     const dumpGrant = { ...grant };
-    if (context.assets.clientsOrig)
-      dumpGrant.client_id = convertClientIdToName(dumpGrant.client_id, context.assets.clientsOrig);
 
-    const name = sanitize(`${dumpGrant.client_id} (${dumpGrant.audience})`);
+    if (context.assets.clientsOrig) {
+      dumpGrant.client_id = convertClientIdToName(dumpGrant.client_id, context.assets.clientsOrig);
+    }
+
+    const name = sanitize(`${dumpGrant.client_id}`);
     const grantFile = path.join(grantsFolder, `${name}.json`);
+
     dumpJSON(grantFile, dumpGrant);
   });
 }

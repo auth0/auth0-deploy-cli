@@ -111,9 +111,10 @@ describe('#directory context clientGrants', () => {
 
     await handler.dump(context);
     const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
-    expect(
-      loadJSON(path.join(clientGrantsFolder, 'My M2M (https---test.myapp.com-api-v1).json'))
-    ).to.deep.equal(context.assets.clientGrants[0]);
+
+    expect(loadJSON(path.join(clientGrantsFolder, 'My M2M.json'))).to.deep.equal(
+      context.assets.clientGrants[0]
+    );
   });
 
   it('should dump client grants sanitized', async () => {
@@ -127,8 +128,8 @@ describe('#directory context clientGrants', () => {
 
     await handler.dump(context);
     const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
-    expect(
-      loadJSON(path.join(clientGrantsFolder, 'My M2M (https---test.myapp.com-api-v1).json'))
-    ).to.deep.equal(context.assets.clientGrants[0]);
+    expect(loadJSON(path.join(clientGrantsFolder, 'My M2M.json'))).to.deep.equal(
+      context.assets.clientGrants[0]
+    );
   });
 });

@@ -7,12 +7,15 @@ export function decodeBuffer(recordingResponse: Definition['response']) {
   try {
     const isArray = Array.isArray(recordingResponse);
     if (!isArray) return recordingResponse; // Some Auth0 Management API endpoints aren't gzipped, we can tell this if they are an array or not
+    if (recordingResponse.length === 0) return []; // Empty arrays can be piped through as-is too
 
     const decoded = Buffer.from(recordingResponse.join(''), 'hex');
     const unzipped = zlib.gunzipSync(decoded).toString('utf-8');
     return JSON.parse(unzipped);
   } catch (err) {
-    throw new Error(`Error decoding nock hex:\n${err}`);
+    throw new Error(
+      `Error decoding nock response, likely when decoding the response buffer:\n${err}\nRecording response: ${recordingResponse}`
+    );
   }
 }
 

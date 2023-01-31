@@ -1,6 +1,5 @@
 import DefaultHandler from './default';
 import { Asset, Assets } from '../../../types';
-import logger from '../../../logger';
 
 export const schema = { type: 'object' };
 
@@ -37,9 +36,8 @@ export default class EmailProviderHandler extends DefaultHandler {
 
     if (Object.keys(emailProvider).length === 0) {
       if (this.config('AUTH0_ALLOW_DELETE') === true) {
-        logger.warn(
-          'Setting email provider to empty object will delete the provider in future versions. The current inability to delete is considered a bug. For more details see: https://github.com/auth0/auth0-deploy-cli/issues/653'
-        );
+        await this.client.emailProvider.delete();
+        this.didDelete(existing);
       }
       return;
     }

@@ -214,6 +214,12 @@ export default class ActionHandler extends DefaultAPIHandler {
         return null;
       }
 
+      if (err.statusCode === 500 && err.message === 'An internal server error occurred') {
+        throw new Error(
+          "Cannot process actions because the actions service is currently unavailable. Retrying may result in a successful operation. Alternatively, adding 'actions' to `AUTH0_EXCLUDED` configuration property will provide ability to skip until service is restored to actions service. This is not an issue with the Deploy CLI."
+        );
+      }
+
       if (isActionsDisabled(err)) {
         log.info('Skipping actions because it is not enabled.');
         return null;

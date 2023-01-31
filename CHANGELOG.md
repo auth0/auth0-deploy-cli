@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.15.2] - 2023-01-03
+
+### Fixed
+
+- Deletion of email provider when setting as empty object [#673]
+
+### Security
+
+- Upgraded `node-auth0` which addresses [vulnerability reported](https://github.com/advisories/GHSA-hjrf-2m68-5959) for `jsonwebtoken` package
+
 ## [7.15.1] - 2022-10-19
 
 ### Added
@@ -846,7 +856,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#668]: https://github.com/auth0/auth0-deploy-cli/issues/668
 [#671]: https://github.com/auth0/auth0-deploy-cli/issues/671
 [#672]: https://github.com/auth0/auth0-deploy-cli/issues/672
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.15.1...HEAD
+[#673]: https://github.com/auth0/auth0-deploy-cli/issues/673
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.15.2...HEAD
+[7.15.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.15.1...v7.15.2
 [7.15.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.15.0...v7.15.1
 [7.15.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.3...v7.15.0
 [7.14.3]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.2...v7.14.3

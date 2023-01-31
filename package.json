@@ -1,6 +1,6 @@
 {
   "name": "auth0-deploy-cli",
-  "version": "7.15.1",
+  "version": "7.15.2",
   "description": "A command line tool for deploying updates to your Auth0 tenant",
   "main": "lib/index.js",
   "bin": {
@@ -13,7 +13,7 @@
     "test": "ts-mocha -p tsconfig.json --recursive 'test/**/*.test*' --exclude 'test/e2e/*' --timeout 5000",
     "test:e2e:node-module": "ts-mocha -p tsconfig.json --recursive 'test/e2e/*.test*' --timeout 120000",
     "test:e2e:cli": "sh ./test/e2e/e2e-cli.sh",
-    "test:coverage": "nyc npm run test; nyc report --reporter=lcov",
+    "test:coverage": "nyc npm run test && nyc report --reporter=lcov",
     "build": "rimraf ./lib && npx tsc",
     "dev": "npx tsc --watch",
     "prepublishOnly": "npm run build",
@@ -33,7 +33,7 @@
   "homepage": "https://github.com/auth0/auth0-deploy-cli#readme",
   "dependencies": {
     "ajv": "^6.12.6",
-    "auth0": "^2.42.0",
+    "auth0": "^3.0.0",
     "dot-prop": "^5.2.0",
     "fs-extra": "^10.1.0",
     "global-agent": "^2.1.12",
@@ -48,11 +48,11 @@
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
-    "@types/lodash": "^4.14.186",
-    "@types/mocha": "^9.1.0",
+    "@types/lodash": "^4.14.187",
+    "@types/mocha": "^10.0.0",
     "@types/nconf": "^0.10.3",
     "@typescript-eslint/parser": "^5.30.3",
-    "chai": "^4.3.6",
+    "chai": "^4.3.7",
     "chai-as-promised": "^7.1.1",
     "eslint": "^7.28.0",
     "eslint-config-airbnb-base": "^14.2.1",
@@ -60,7 +60,7 @@
     "eslint-plugin-import": "^2.26.0",
     "husky": "^7.0.4",
     "kacl": "^1.1.1",
-    "mocha": "^9.2.2",
+    "mocha": "^10.1.0",
     "nock": "^13.2.9",
     "nyc": "^15.0.1",
     "prettier": "^2.6.2",
@@ -69,7 +69,7 @@
     "rmdir-sync": "^1.0.1",
     "sinon": "^13.0.2",
     "sinon-chai": "^3.7.0",
-    "ts-mocha": "^9.0.2",
+    "ts-mocha": "^10.0.0",
     "typescript": "^4.8.4",
     "zlib": "^1.0.5"
   },
