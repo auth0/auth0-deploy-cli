@@ -10,13 +10,13 @@ For more complex tenants, you may find yourself wanting to omit entire resource 
 - CI/CD process only focuses on managing roles, you may wish to exclude all others
 - Feature development pertains to hook, you may wish to temporarily exclude all others to optimize performance
 
-This type of exclusion is expressed by passing an array of resource names into the `AUTH0_EXCLUDED` configuration property. This exclusion works **bi-directionally**, that is, both when export from Auth0 and importing to Auth0, regardless if resource configuration files exist or not.
+This type of exclusion is expressed by passing an array of resource names into either the `AUTH0_EXCLUDED` or `AUTH0_INCLUDED_ONLY` configuration properties. The `AUTH0_EXCLUDED` configuration property excludes only the resource types provided to it. Inversely, the `AUTH0_INCLUDED_ONLY` property excludes all properties except the ones defined. Exclusion works **bi-directionally**, that is, both when export from Auth0 and importing to Auth0, regardless if resource configuration files exist or not.
 
 All supported resource values for exclusion:
 
 `actions`, `attackProtection`, `branding`, `clientGrants`, `clients`, `connections`, `customDomains`, `databases`, `emailProvider`, `emailTemplates`, `guardianFactorProviders`, `guardianFactorTemplates`, `guardianFactors`, `guardianPhoneFactorMessageTypes`, `guardianPhoneFactorSelectedProvider`, `guardianPolicies`, `hooks`, `logStreams`, `migrations`, `organizations`, `pages`, `prompts`, `resourceServers`, `roles`, `rules`, `rulesConfigs`, `tenant`, `triggers`
 
-### Example
+### Exclusion Example
 
 The following example excludes `clients`, `connections`, `databases` and `organizations` from being managed by the Deploy CLI. However, this example is arbitrary and your use case may require you to exclude less or more types.
 
@@ -25,6 +25,18 @@ The following example excludes `clients`, `connections`, `databases` and `organi
   "AUTH0_DOMAIN": "example-site.us.auth0.com",
   "AUTH0_CLIENT_ID": "<YOUR_AUTH0_CLIENT_ID>",
   "AUTH0_EXCLUDED": ["clients", "connections", "databases", "organizations"]
+}
+```
+
+### Inclusion Example
+
+The following example dictates to _only_ manage `actions`, `hooks` and `rules` by the Deploy CLI.
+
+```json
+{
+  "AUTH0_DOMAIN": "example-site.us.auth0.com",
+  "AUTH0_CLIENT_ID": "<YOUR_AUTH0_CLIENT_ID>",
+  "AUTH0_INCLUDED_ONLY": ["actions", "hooks", "rules"]
 }
 ```
 
