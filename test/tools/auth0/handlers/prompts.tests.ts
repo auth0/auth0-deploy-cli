@@ -166,5 +166,26 @@ describe('#prompts handler', () => {
       expect(didCallUpdateCustomText).to.equal(true);
       expect(numberOfUpdateCustomTextCalls).to.equal(3);
     });
+
+    it('should not fail if tenant languages undefined', async () => {
+      const auth0 = {
+        tenant: {
+          getSettings: () =>
+            Promise.resolve({
+              enabled_locales: undefined,
+            }),
+        },
+        prompts: {
+          getSettings: () => mockPromptsSettings,
+        },
+      };
+
+      const handler = new promptsHandler({ client: auth0 });
+      const data = await handler.getType();
+      expect(data).to.deep.equal({
+        ...mockPromptsSettings,
+        customText: {}, // Custom text empty
+      });
+    });
   });
 });
