@@ -3,7 +3,7 @@ import ValidationError from '../../validationError';
 import constants from '../../constants';
 import DefaultHandler from './default';
 import { calculateChanges } from '../../calculateChanges';
-import { Asset, Assets, CalculatedChanges } from '../../../types';
+import { Assets, CalculatedChanges } from '../../../types';
 
 export const excludeSchema = {
   type: 'array',
@@ -34,8 +34,14 @@ export const schema = {
   },
 };
 
+export type ResourceServer = {
+  id: string;
+  name: string;
+  identifier: string;
+  scopes?: { description: string; value: string }[];
+};
 export default class ResourceServersHandler extends DefaultHandler {
-  existing: Asset[];
+  existing: ResourceServer[];
 
   constructor(options: DefaultHandler) {
     super({
@@ -49,7 +55,7 @@ export default class ResourceServersHandler extends DefaultHandler {
     return super.objString({ name: resourceServer.name, identifier: resourceServer.identifier });
   }
 
-  async getType(): Promise<Asset[]> {
+  async getType(): Promise<ResourceServer[]> {
     if (this.existing) return this.existing;
     const resourceServers = await this.client.resourceServers.getAll({
       paginate: true,

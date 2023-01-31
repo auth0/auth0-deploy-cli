@@ -7,7 +7,7 @@ import { constants } from '../../../src/tools';
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/clientGrants';
 import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
-import { loadJSON } from '../../../src/utils';
+import { getFiles, loadJSON } from '../../../src/utils';
 
 describe('#directory context clientGrants', () => {
   it('should process clientGrants', async () => {
@@ -103,33 +103,67 @@ describe('#directory context clientGrants', () => {
   it('should dump client grants', async () => {
     const dir = path.join(testDataDir, 'directory', 'clientGrantsDump');
     cleanThenMkdir(dir);
-    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    const context = new Context(
+      { AUTH0_INPUT_FILE: dir },
+      {
+        ...mockMgmtClient(),
+        resourceServers: {
+          getAll: () => {
+            return [
+              {
+                id: 'resource-server-1',
+                name: 'Payments Service',
+                identifier: 'https://payments.travel0.com/api',
+              },
+              {
+                id: 'resource-server-2',
+                name: 'Auth0 Management API',
+                identifier: 'https://travel0.us.auth0.com/api/v2',
+              },
+            ];
+          },
+        },
+      }
+    );
 
     context.assets.clientGrants = [
-      { audience: 'https://test.myapp.com/api/v1', client_id: 'My M2M', scope: ['update:account'] },
+      {
+        audience: 'https://travel0.us.auth0.com/api/v2',
+        client_id: 'Primary M2M',
+        scope: ['update:account'],
+      },
+      {
+        audience: 'https://payments.travel0.com/api',
+        client_id: 'Primary M2M',
+        scope: ['update:card', 'create:card', 'delete:card'],
+      },
+      {
+        audience: 'https://payments.travel0.com/api',
+        client_id: 'Secondary M2M',
+        scope: ['update:card', 'create:card', 'delete:card'],
+      },
     ];
 
     await handler.dump(context);
     const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
 
-    expect(loadJSON(path.join(clientGrantsFolder, 'My M2M.json'))).to.deep.equal(
-      context.assets.clientGrants[0]
-    );
-  });
+    const files = getFiles(clientGrantsFolder, ['.json']);
 
-  it('should dump client grants sanitized', async () => {
-    const dir = path.join(testDataDir, 'directory', 'clientGrantsDump');
-    cleanThenMkdir(dir);
-    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    expect(files).to.have.length(context.assets.clientGrants.length);
+    expect(files).to.have.members([
+      path.join(clientGrantsFolder, 'Primary M2M-Auth0 Management API.json'),
+      path.join(clientGrantsFolder, 'Primary M2M-Payments Service.json'),
+      path.join(clientGrantsFolder, 'Secondary M2M-Payments Service.json'),
+    ]);
 
-    context.assets.clientGrants = [
-      { audience: 'https://test.myapp.com/api/v1', client_id: 'My M2M', scope: ['update:account'] },
-    ];
-
-    await handler.dump(context);
-    const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
-    expect(loadJSON(path.join(clientGrantsFolder, 'My M2M.json'))).to.deep.equal(
-      context.assets.clientGrants[0]
-    );
+    expect(
+      loadJSON(path.join(clientGrantsFolder, 'Primary M2M-Auth0 Management API.json'))
+    ).to.deep.equal(context.assets.clientGrants[0]);
+    expect(
+      loadJSON(path.join(clientGrantsFolder, 'Primary M2M-Payments Service.json'))
+    ).to.deep.equal(context.assets.clientGrants[1]);
+    expect(
+      loadJSON(path.join(clientGrantsFolder, 'Secondary M2M-Payments Service.json'))
+    ).to.deep.equal(context.assets.clientGrants[2]);
   });
 });

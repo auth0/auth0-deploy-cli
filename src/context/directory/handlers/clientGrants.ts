@@ -12,9 +12,10 @@ import {
 } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset, ParsedAsset } from '../../../types';
+import { ParsedAsset } from '../../../types';
+import { ClientGrant } from '../../../tools/auth0/handlers/clientGrants';
 
-type ParsedClientGrants = ParsedAsset<'clientGrants', Asset[]>;
+type ParsedClientGrants = ParsedAsset<'clientGrants', ClientGrant[]>;
 
 function parse(context: DirectoryContext): ParsedClientGrants {
   const grantsFolder = path.join(context.filePath, constants.CLIENTS_GRANTS_DIRECTORY);
@@ -39,15 +40,29 @@ async function dump(context: DirectoryContext): Promise<void> {
   const grantsFolder = path.join(context.filePath, constants.CLIENTS_GRANTS_DIRECTORY);
   fs.ensureDirSync(grantsFolder);
 
+  const allResourceServers = await context.mgmtClient.resourceServers.getAll({
+    paginate: true,
+  });
+
   // Convert client_id to the client name for readability
-  clientGrants.forEach((grant: Asset) => {
+  clientGrants.forEach((grant: ClientGrant) => {
     const dumpGrant = { ...grant };
 
     if (context.assets.clientsOrig) {
       dumpGrant.client_id = convertClientIdToName(dumpGrant.client_id, context.assets.clientsOrig);
     }
 
-    const name = sanitize(`${dumpGrant.client_id}`);
+    const apiName = (() => {
+      const associatedAPI = allResourceServers.find((resourceServer) => {
+        return resourceServer.identifier === grant.audience;
+      });
+
+      if (associatedAPI === undefined) return grant.audience;
+
+      return associatedAPI.name;
+    })();
+
+    const name = sanitize(`${dumpGrant.client_id}-${apiName}`);
     const grantFile = path.join(grantsFolder, `${name}.json`);
 
     dumpJSON(grantFile, dumpGrant);
