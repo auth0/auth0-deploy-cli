@@ -17,7 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Exporting of multiple client grants for a single client when using directory format [#729]
 - Remove configurable tenant `sandbox_version` property from readonly list [#683]
 - Handling of undefined tenant `enabled_locales` property [#727]
 
