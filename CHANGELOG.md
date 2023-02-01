@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `AUTH0_INCLUDED_ONLY` configuration property to express sole management of certain resource types [#726]
+- Suspended log stream management support [#725]
+- More descriptive errors when actions service is unavailable [#724]
+
+### Fixed
+
+- Exporting of multiple client grants for a single client when using directory format [#729]
+- Remove configurable tenant `sandbox_version` property from readonly list [#683]
+- Handling of undefined tenant `enabled_locales` property [#727]
+
 ## [7.15.2] - 2023-01-03
 
 ### Fixed
