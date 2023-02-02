@@ -193,4 +193,36 @@ describe('#directory context clientGrants', () => {
       loadJSON(path.join(clientGrantsFolder, 'Secondary M2M-Payments Service.json'))
     ).to.deep.equal(context.assets.clientGrants[2]);
   });
+
+  it('should not fetch clients and resource servers if no client grants defined', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientGrantsDump');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: dir },
+      {
+        ...mockMgmtClient(),
+        clients: {
+          getAll: () => {
+            throw new 'This should not be called'();
+          },
+        },
+        resourceServers: {
+          getAll: () => {
+            throw new 'This should not be called'();
+          },
+        },
+      }
+    );
+
+    const EMPTY_CLIENT_GRANTS = [];
+
+    context.assets.clientGrants = EMPTY_CLIENT_GRANTS;
+
+    await handler.dump(context);
+    const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
+
+    const files = getFiles(clientGrantsFolder, ['.json']);
+
+    expect(files).to.have.length(EMPTY_CLIENT_GRANTS);
+  });
 });

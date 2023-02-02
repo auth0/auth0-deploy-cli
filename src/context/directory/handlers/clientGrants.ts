@@ -40,6 +40,8 @@ async function dump(context: DirectoryContext): Promise<void> {
   const grantsFolder = path.join(context.filePath, constants.CLIENTS_GRANTS_DIRECTORY);
   fs.ensureDirSync(grantsFolder);
 
+  if (clientGrants.length === 0) return;
+
   const allResourceServers = await context.mgmtClient.resourceServers.getAll({
     paginate: true,
   });
