@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.16.0] - 2023-02-01
+
+### Added
+
+- `AUTH0_INCLUDED_ONLY` configuration property to express sole management of certain resource types [#726]
+- Suspended log stream management support [#725]
+- More descriptive errors when actions service is unavailable [#724]
+
+### Fixed
+
+- Remove configurable tenant `sandbox_version` property from readonly list [#683]
+- Handling of undefined tenant `enabled_locales` property [#727]
+
 ## [7.15.2] - 2023-01-03
 
 ### Fixed
@@ -857,7 +870,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#671]: https://github.com/auth0/auth0-deploy-cli/issues/671
 [#672]: https://github.com/auth0/auth0-deploy-cli/issues/672
 [#673]: https://github.com/auth0/auth0-deploy-cli/issues/673
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.15.2...HEAD
+[#683]: https://github.com/auth0/auth0-deploy-cli/issues/683
+[#724]: https://github.com/auth0/auth0-deploy-cli/issues/724
+[#725]: https://github.com/auth0/auth0-deploy-cli/issues/725
+[#726]: https://github.com/auth0/auth0-deploy-cli/issues/726
+[#727]: https://github.com/auth0/auth0-deploy-cli/issues/727
+[#729]: https://github.com/auth0/auth0-deploy-cli/issues/729
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.16.0...HEAD
+[7.16.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.15.2...v7.16.0
 [7.15.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.15.1...v7.15.2
 [7.15.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.15.0...v7.15.1
 [7.15.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.3...v7.15.0
