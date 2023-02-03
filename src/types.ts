@@ -10,6 +10,9 @@ import { Tenant } from './tools/auth0/handlers/tenant';
 import { Theme } from './tools/auth0/handlers/themes';
 import { Page } from './tools/auth0/handlers/pages';
 import { LogStream } from './tools/auth0/handlers/logStreams';
+import { Client } from './tools/auth0/handlers/clients';
+import { ClientGrant } from './tools/auth0/handlers/clientGrants';
+import { ResourceServer } from './tools/auth0/handlers/resourceServers';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -79,8 +82,18 @@ export type BaseAuth0APIClient = {
     createTheme: (arg0: Omit<Theme, 'themeId'>) => Promise<Omit<Theme, 'themeId'>>;
     deleteTheme: (arg0: { id: string }) => Promise<void>;
   };
-  clients: APIClientBaseFunctions;
-  clientGrants: APIClientBaseFunctions;
+  clients: {
+    getAll: (arg0: SharedPaginationParams) => Promise<Client[]>;
+    create: (arg0: { id: string }) => Promise<Client>;
+    update: (arg0: {}, arg1: Partial<Client>) => Promise<Client>;
+    delete: (arg0: Asset) => Promise<void>;
+  };
+  clientGrants: {
+    getAll: (arg0: SharedPaginationParams) => Promise<ClientGrant[]>;
+    create: (arg0: { id: string }) => Promise<ClientGrant>;
+    update: (arg0: {}, arg1: Partial<ClientGrant>) => Promise<ClientGrant>;
+    delete: (arg0: Asset) => Promise<void>;
+  };
   connections: APIClientBaseFunctions & {
     get: (arg0: Asset) => Promise<Asset>;
     getAll: (arg0: PagePaginationParams | CheckpointPaginationParams) => Promise<Asset[]>;
@@ -148,7 +161,12 @@ export type BaseAuth0APIClient = {
     getSettings: () => Promise<PromptSettings>;
     updateSettings: (arg0: {}, arg1: Partial<PromptSettings>) => Promise<void>;
   };
-  resourceServers: APIClientBaseFunctions;
+  resourceServers: {
+    getAll: (arg0: SharedPaginationParams) => Promise<ResourceServer[]>;
+    create: (arg0: { id: string }) => Promise<ResourceServer>;
+    update: (arg0: {}, arg1: Partial<ResourceServer>) => Promise<ResourceServer>;
+    delete: (arg0: Asset) => Promise<void>;
+  };
   roles: APIClientBaseFunctions & {
     permissions: APIClientBaseFunctions & {
       delete: (arg0: { id: string }, arg1: { permissions: Asset[] }) => Promise<void>;
@@ -221,8 +239,8 @@ export type Assets = Partial<{
         templates?: { template: string; body: string }[] | null;
       })
     | null;
-  clients: Asset[] | null;
-  clientGrants: Asset[] | null;
+  clients: Client[] | null;
+  clientGrants: ClientGrant[] | null;
   connections: Asset[] | null;
   customDomains: Asset[] | null;
   databases: Asset[] | null;
@@ -244,7 +262,7 @@ export type Assets = Partial<{
   organizations: Asset[] | null;
   pages: Page[] | null;
   prompts: Prompts | null;
-  resourceServers: Asset[] | null;
+  resourceServers: ResourceServer[] | null;
   roles: Asset[] | null;
   rules: Asset[] | null;
   rulesConfigs: Asset[] | null;

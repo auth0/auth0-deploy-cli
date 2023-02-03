@@ -12,6 +12,13 @@ export const schema = {
   },
 };
 
+export type Client = {
+  client_id: string;
+  name: string;
+  custom_login_page?: string;
+  custom_login_page_on?: boolean;
+};
+
 export default class ClientHandler extends DefaultAPIHandler {
   existing: Asset[] | null;
 

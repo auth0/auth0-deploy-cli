@@ -12,11 +12,12 @@ import {
   sanitize,
   clearClientArrays,
 } from '../../../utils';
-import { Asset, ParsedAsset } from '../../../types';
+import { ParsedAsset } from '../../../types';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
+import { Client } from '../../../tools/auth0/handlers/clients';
 
-type ParsedClients = ParsedAsset<'clients', Asset[]>;
+type ParsedClients = ParsedAsset<'clients', Client[]>;
 
 function parse(context: DirectoryContext): ParsedClients {
   const clientsFolder = path.join(context.filePath, constants.CLIENTS_DIRECTORY);
