@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Exporting of multiple client grants for a single client when using directory format [#729]
+- Tenant-agnostic client grant files when exporting using directory format [#729]
+
 ## [7.16.0] - 2023-02-01
 
 ### Added
