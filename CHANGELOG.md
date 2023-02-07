@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.16.1] - 2023-02-07
+
 ### Fixed
 
 - Exporting of multiple client grants for a single client when using directory format [#729]
@@ -881,7 +883,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#726]: https://github.com/auth0/auth0-deploy-cli/issues/726
 [#727]: https://github.com/auth0/auth0-deploy-cli/issues/727
 [#729]: https://github.com/auth0/auth0-deploy-cli/issues/729
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.16.0...HEAD
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.16.1...HEAD
+[7.16.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.16.0...v7.16.1
 [7.16.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.15.2...v7.16.0
 [7.15.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.15.1...v7.15.2
 [7.15.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.15.0...v7.15.1
