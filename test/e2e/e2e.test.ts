@@ -302,4 +302,59 @@ describe('#end-to-end keyword replacement', function () {
 
     recordingDone();
   });
+
+  it('should deploy directory (JSON) config with keyword replacements', async function () {
+    const { recordingDone } = await setupRecording(this.test?.title);
+
+    //Resetting tenant to baseline state
+    await deploy({
+      input_file: `${__dirname}/testdata/keyword-replacements/directory`,
+      config: {
+        AUTH0_DOMAIN,
+        AUTH0_CLIENT_ID,
+        AUTH0_CLIENT_SECRET,
+        AUTH0_ACCESS_TOKEN,
+        AUTH0_INCLUDED_ONLY: ['tenant'],
+      },
+    });
+
+    const keywordMapping = {
+      COMPANY_NAME: 'Travel0',
+      //LANGUAGES: ['en', 'es'], //TODO: support array replacement for directory format
+    };
+
+    await deploy({
+      input_file: `${__dirname}/testdata/keyword-replacements/directory`,
+      config: {
+        AUTH0_DOMAIN,
+        AUTH0_CLIENT_ID,
+        AUTH0_CLIENT_SECRET,
+        AUTH0_ACCESS_TOKEN,
+        AUTH0_INCLUDED_ONLY: ['tenant'],
+        AUTH0_KEYWORD_REPLACE_MAPPINGS: keywordMapping,
+      },
+    });
+
+    const workDirectory = testNameToWorkingDirectory(this.test?.title);
+    await dump({
+      output_folder: workDirectory,
+      format: 'directory',
+      config: {
+        AUTH0_DOMAIN,
+        AUTH0_CLIENT_ID,
+        AUTH0_CLIENT_SECRET,
+        AUTH0_ACCESS_TOKEN,
+        AUTH0_INCLUDED_ONLY: ['tenant'],
+      },
+    });
+
+    const files = getFiles(workDirectory, ['.json']);
+    expect(files).to.have.length(1);
+    expect(files[0]).to.equal(path.join(workDirectory, 'tenant.json'));
+
+    const json = JSON.parse(fs.readFileSync(files[0]).toString());
+    expect(json.friendly_name).to.equal(`This is the ${keywordMapping.COMPANY_NAME} Tenant`);
+
+    recordingDone();
+  });
 });

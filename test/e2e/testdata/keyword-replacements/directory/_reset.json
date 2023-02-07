@@ -1,0 +1,9 @@
+{
+    "enabled_locales": ["en"],
+    "friendly_name": "Tenant friendly name",
+    "flags": {
+      "new_universal_login_experience_enabled": true
+    },
+    "universal_login": {}
+  }
+  
