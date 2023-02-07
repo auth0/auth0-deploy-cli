@@ -1,0 +1,368 @@
+[
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/tenants/settings",
+        "body": "",
+        "status": 200,
+        "response": {
+            "allowed_logout_urls": [
+                "https://mycompany.org/logoutCallback"
+            ],
+            "change_password": {
+                "enabled": true,
+                "html": "<html>Change Password</html>\n"
+            },
+            "enabled_locales": [
+                "en",
+                "es"
+            ],
+            "error_page": {
+                "html": "<html>Error Page</html>\n",
+                "show_log_link": false,
+                "url": "https://mycompany.org/error"
+            },
+            "flags": {
+                "allow_changing_enable_sso": false,
+                "allow_legacy_delegation_grant_types": true,
+                "allow_legacy_ro_grant_types": true,
+                "change_pwd_flow_v1": false,
+                "disable_impersonation": true,
+                "enable_apis_section": false,
+                "enable_client_connections": false,
+                "enable_custom_domain_in_emails": false,
+                "enable_dynamic_client_registration": false,
+                "enable_legacy_logs_search_v2": false,
+                "enable_public_signup_user_exists_error": true,
+                "enable_sso": true,
+                "new_universal_login_experience_enabled": true,
+                "universal_login": true,
+                "use_scope_descriptions_for_consent": false,
+                "revoke_refresh_token_grant": false,
+                "disable_clickjack_protection_headers": false,
+                "enable_pipeline2": false
+            },
+            "friendly_name": "This is the Travel0 Tenant",
+            "guardian_mfa_page": {
+                "enabled": true,
+                "html": "<html>MFA</html>\n"
+            },
+            "idle_session_lifetime": 1,
+            "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
+            "sandbox_version": "12",
+            "session_lifetime": 3.0166666666666666,
+            "support_email": "support@mycompany.org",
+            "support_url": "https://mycompany.org/support",
+            "universal_login": {
+                "colors": {
+                    "primary": "#F8F8F2",
+                    "page_background": "#222221"
+                }
+            },
+            "session_cookie": {
+                "mode": "non-persistent"
+            },
+            "sandbox_versions_available": [
+                "16",
+                "12"
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/tenants/settings",
+        "body": {
+            "friendly_name": "Tenant friendly name",
+            "enabled_locales": [
+                "en"
+            ],
+            "flags": {
+                "new_universal_login_experience_enabled": true
+            }
+        },
+        "status": 200,
+        "response": {
+            "allowed_logout_urls": [
+                "https://mycompany.org/logoutCallback"
+            ],
+            "change_password": {
+                "enabled": true,
+                "html": "<html>Change Password</html>\n"
+            },
+            "enabled_locales": [
+                "en"
+            ],
+            "error_page": {
+                "html": "<html>Error Page</html>\n",
+                "show_log_link": false,
+                "url": "https://mycompany.org/error"
+            },
+            "flags": {
+                "allow_changing_enable_sso": false,
+                "allow_legacy_delegation_grant_types": true,
+                "allow_legacy_ro_grant_types": true,
+                "cannot_change_enforce_client_authentication_on_passwordless_start": true,
+                "change_pwd_flow_v1": false,
+                "disable_impersonation": true,
+                "enable_apis_section": false,
+                "enable_client_connections": false,
+                "enable_custom_domain_in_emails": false,
+                "enable_dynamic_client_registration": false,
+                "enable_legacy_logs_search_v2": false,
+                "enable_public_signup_user_exists_error": true,
+                "enable_sso": true,
+                "enforce_client_authentication_on_passwordless_start": true,
+                "new_universal_login_experience_enabled": true,
+                "universal_login": true,
+                "use_scope_descriptions_for_consent": false,
+                "revoke_refresh_token_grant": false,
+                "disable_clickjack_protection_headers": false,
+                "enable_pipeline2": false
+            },
+            "friendly_name": "Tenant friendly name",
+            "guardian_mfa_page": {
+                "enabled": true,
+                "html": "<html>MFA</html>\n"
+            },
+            "idle_session_lifetime": 1,
+            "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
+            "sandbox_version": "12",
+            "session_lifetime": 3.0166666666666666,
+            "support_email": "support@mycompany.org",
+            "support_url": "https://mycompany.org/support",
+            "universal_login": {
+                "colors": {
+                    "primary": "#F8F8F2",
+                    "page_background": "#222221"
+                }
+            },
+            "session_cookie": {
+                "mode": "non-persistent"
+            }
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/tenants/settings",
+        "body": "",
+        "status": 200,
+        "response": {
+            "allowed_logout_urls": [
+                "https://mycompany.org/logoutCallback"
+            ],
+            "change_password": {
+                "enabled": true,
+                "html": "<html>Change Password</html>\n"
+            },
+            "enabled_locales": [
+                "en"
+            ],
+            "error_page": {
+                "html": "<html>Error Page</html>\n",
+                "show_log_link": false,
+                "url": "https://mycompany.org/error"
+            },
+            "flags": {
+                "allow_changing_enable_sso": false,
+                "allow_legacy_delegation_grant_types": true,
+                "allow_legacy_ro_grant_types": true,
+                "change_pwd_flow_v1": false,
+                "disable_impersonation": true,
+                "enable_apis_section": false,
+                "enable_client_connections": false,
+                "enable_custom_domain_in_emails": false,
+                "enable_dynamic_client_registration": false,
+                "enable_legacy_logs_search_v2": false,
+                "enable_public_signup_user_exists_error": true,
+                "enable_sso": true,
+                "new_universal_login_experience_enabled": true,
+                "universal_login": true,
+                "use_scope_descriptions_for_consent": false,
+                "revoke_refresh_token_grant": false,
+                "disable_clickjack_protection_headers": false,
+                "enable_pipeline2": false
+            },
+            "friendly_name": "Tenant friendly name",
+            "guardian_mfa_page": {
+                "enabled": true,
+                "html": "<html>MFA</html>\n"
+            },
+            "idle_session_lifetime": 1,
+            "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
+            "sandbox_version": "12",
+            "session_lifetime": 3.0166666666666666,
+            "support_email": "support@mycompany.org",
+            "support_url": "https://mycompany.org/support",
+            "universal_login": {
+                "colors": {
+                    "primary": "#F8F8F2",
+                    "page_background": "#222221"
+                }
+            },
+            "session_cookie": {
+                "mode": "non-persistent"
+            },
+            "sandbox_versions_available": [
+                "16",
+                "12"
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/tenants/settings",
+        "body": {
+            "friendly_name": "This is the Travel0 Tenant",
+            "enabled_locales": [
+                "en",
+                "es"
+            ],
+            "flags": {
+                "new_universal_login_experience_enabled": true
+            }
+        },
+        "status": 200,
+        "response": {
+            "allowed_logout_urls": [
+                "https://mycompany.org/logoutCallback"
+            ],
+            "change_password": {
+                "enabled": true,
+                "html": "<html>Change Password</html>\n"
+            },
+            "enabled_locales": [
+                "en",
+                "es"
+            ],
+            "error_page": {
+                "html": "<html>Error Page</html>\n",
+                "show_log_link": false,
+                "url": "https://mycompany.org/error"
+            },
+            "flags": {
+                "allow_changing_enable_sso": false,
+                "allow_legacy_delegation_grant_types": true,
+                "allow_legacy_ro_grant_types": true,
+                "cannot_change_enforce_client_authentication_on_passwordless_start": true,
+                "change_pwd_flow_v1": false,
+                "disable_impersonation": true,
+                "enable_apis_section": false,
+                "enable_client_connections": false,
+                "enable_custom_domain_in_emails": false,
+                "enable_dynamic_client_registration": false,
+                "enable_legacy_logs_search_v2": false,
+                "enable_public_signup_user_exists_error": true,
+                "enable_sso": true,
+                "enforce_client_authentication_on_passwordless_start": true,
+                "new_universal_login_experience_enabled": true,
+                "universal_login": true,
+                "use_scope_descriptions_for_consent": false,
+                "revoke_refresh_token_grant": false,
+                "disable_clickjack_protection_headers": false,
+                "enable_pipeline2": false
+            },
+            "friendly_name": "This is the Travel0 Tenant",
+            "guardian_mfa_page": {
+                "enabled": true,
+                "html": "<html>MFA</html>\n"
+            },
+            "idle_session_lifetime": 1,
+            "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
+            "sandbox_version": "12",
+            "session_lifetime": 3.0166666666666666,
+            "support_email": "support@mycompany.org",
+            "support_url": "https://mycompany.org/support",
+            "universal_login": {
+                "colors": {
+                    "primary": "#F8F8F2",
+                    "page_background": "#222221"
+                }
+            },
+            "session_cookie": {
+                "mode": "non-persistent"
+            }
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/tenants/settings",
+        "body": "",
+        "status": 200,
+        "response": {
+            "allowed_logout_urls": [
+                "https://mycompany.org/logoutCallback"
+            ],
+            "change_password": {
+                "enabled": true,
+                "html": "<html>Change Password</html>\n"
+            },
+            "enabled_locales": [
+                "en",
+                "es"
+            ],
+            "error_page": {
+                "html": "<html>Error Page</html>\n",
+                "show_log_link": false,
+                "url": "https://mycompany.org/error"
+            },
+            "flags": {
+                "allow_changing_enable_sso": false,
+                "allow_legacy_delegation_grant_types": true,
+                "allow_legacy_ro_grant_types": true,
+                "change_pwd_flow_v1": false,
+                "disable_impersonation": true,
+                "enable_apis_section": false,
+                "enable_client_connections": false,
+                "enable_custom_domain_in_emails": false,
+                "enable_dynamic_client_registration": false,
+                "enable_legacy_logs_search_v2": false,
+                "enable_public_signup_user_exists_error": true,
+                "enable_sso": true,
+                "new_universal_login_experience_enabled": true,
+                "universal_login": true,
+                "use_scope_descriptions_for_consent": false,
+                "revoke_refresh_token_grant": false,
+                "disable_clickjack_protection_headers": false,
+                "enable_pipeline2": false
+            },
+            "friendly_name": "This is the Travel0 Tenant",
+            "guardian_mfa_page": {
+                "enabled": true,
+                "html": "<html>MFA</html>\n"
+            },
+            "idle_session_lifetime": 1,
+            "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
+            "sandbox_version": "12",
+            "session_lifetime": 3.0166666666666666,
+            "support_email": "support@mycompany.org",
+            "support_url": "https://mycompany.org/support",
+            "universal_login": {
+                "colors": {
+                    "primary": "#F8F8F2",
+                    "page_background": "#222221"
+                }
+            },
+            "session_cookie": {
+                "mode": "non-persistent"
+            },
+            "sandbox_versions_available": [
+                "16",
+                "12"
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    }
+]

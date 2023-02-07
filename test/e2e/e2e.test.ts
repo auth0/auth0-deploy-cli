@@ -245,3 +245,61 @@ describe('#end-to-end dump and deploy cycle', function () {
     recordingDone();
   });
 });
+
+describe('#end-to-end keyword replacement', function () {
+  it('should deploy yaml config with keyword replacements', async function () {
+    const { recordingDone } = await setupRecording(this.test?.title);
+
+    //Resetting tenant to baseline state
+    await deploy({
+      input_file: `${__dirname}/testdata/keyword-replacements/yaml/_reset.yaml`,
+      config: {
+        AUTH0_DOMAIN,
+        AUTH0_CLIENT_ID,
+        AUTH0_CLIENT_SECRET,
+        AUTH0_ACCESS_TOKEN,
+        AUTH0_INCLUDED_ONLY: ['tenant'],
+      },
+    });
+
+    const keywordMapping = {
+      COMPANY_NAME: 'Travel0',
+      LANGUAGES: ['en', 'es'],
+    };
+
+    await deploy({
+      input_file: `${__dirname}/testdata/keyword-replacements/yaml/tenant.yaml`,
+      config: {
+        AUTH0_DOMAIN,
+        AUTH0_CLIENT_ID,
+        AUTH0_CLIENT_SECRET,
+        AUTH0_ACCESS_TOKEN,
+        AUTH0_INCLUDED_ONLY: ['tenant'],
+        AUTH0_KEYWORD_REPLACE_MAPPINGS: keywordMapping,
+      },
+    });
+
+    const workDirectory = testNameToWorkingDirectory(this.test?.title);
+    await dump({
+      output_folder: workDirectory,
+      format: 'yaml',
+      config: {
+        AUTH0_DOMAIN,
+        AUTH0_CLIENT_ID,
+        AUTH0_CLIENT_SECRET,
+        AUTH0_ACCESS_TOKEN,
+        AUTH0_INCLUDED_ONLY: ['tenant'],
+      },
+    });
+
+    const files = getFiles(workDirectory, ['.yaml']);
+    expect(files).to.have.length(1);
+    expect(files[0]).to.equal(path.join(workDirectory, 'tenant.yaml'));
+
+    const yaml = yamlLoad(fs.readFileSync(files[0]));
+    expect(yaml.tenant.friendly_name).to.equal(`This is the ${keywordMapping.COMPANY_NAME} Tenant`);
+    expect(yaml.tenant.enabled_locales).to.deep.equal(keywordMapping.LANGUAGES);
+
+    recordingDone();
+  });
+});
