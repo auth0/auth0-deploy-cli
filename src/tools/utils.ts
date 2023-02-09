@@ -6,13 +6,22 @@ import log from '../logger';
 import { Asset, Assets, CalculatedChanges, KeywordMappings } from '../types';
 import constants from './constants';
 
+export const keywordReplaceArrayRegExp = (key) => {
+  const pattern = `@@${key}@@`;
+  const patternWithQuotes = `"${pattern}"`;
+
+  return new RegExp(`${patternWithQuotes}|${pattern}`, 'g');
+};
+
+export const keywordReplaceStringRegExp = (key) => {
+  return new RegExp(`##${key}##`, 'g');
+};
+
 export function keywordArrayReplace(input: string, mappings: KeywordMappings): string {
   Object.keys(mappings).forEach(function (key) {
     // Matching against two sets of patterns because a developer may provide their array replacement keyword with or without wrapping quotes. It is not obvious to the developer which to do depending if they're operating in YAML or JSON.
-    const pattern = `@@${key}@@`;
-    const patternWithQuotes = `"${pattern}"`;
+    const regex = keywordReplaceArrayRegExp(key);
 
-    const regex = new RegExp(`${patternWithQuotes}|${pattern}`, 'g');
     input = input.replace(regex, JSON.stringify(mappings[key]));
   });
   return input;
@@ -20,7 +29,7 @@ export function keywordArrayReplace(input: string, mappings: KeywordMappings): s
 
 export function keywordStringReplace(input: string, mappings: KeywordMappings): string {
   Object.keys(mappings).forEach(function (key) {
-    const regex = new RegExp(`##${key}##`, 'g');
+    const regex = keywordReplaceStringRegExp(key);
     // @ts-ignore TODO: come back and distinguish strings vs array replacement.
     input = input.replace(regex, mappings[key]);
   });
