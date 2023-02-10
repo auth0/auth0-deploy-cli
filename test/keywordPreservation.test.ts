@@ -61,9 +61,11 @@ describe('#Keyword Preservation', () => {
               },
             },
           ],
+          arrayReplace: '@@ARRAY_REPLACE_KEYWORD@@',
         },
         {
           KEYWORD: 'Travel0',
+          ARRAY_REPLACE_KEYWORD: ['this value', 'that value'],
         }
       );
 
@@ -73,6 +75,7 @@ describe('#Keyword Preservation', () => {
         'Nested array value 1 ##KEYWORD##',
         'Nested array value 2 ##KEYWORD##',
         'Another nested array property ##KEYWORD##',
+        '@@ARRAY_REPLACE_KEYWORD@@',
       ]);
     });
   });
