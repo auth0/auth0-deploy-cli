@@ -62,6 +62,8 @@ describe('#Keyword Preservation', () => {
             },
           ],
           arrayReplace: '@@ARRAY_REPLACE_KEYWORD@@',
+          nullField: null,
+          undefinedField: undefined,
         },
         {
           KEYWORD: 'Travel0',
