@@ -32,6 +32,12 @@ export const getPreservableFieldsFromAssets = (
   if (Array.isArray(asset)) {
     return asset
       .map((arrayItem) => {
+        // Using the `name` field as the primary unique identifier for array items
+        // TODO: expand the available identifier fields to encompass objects that lack name
+        const hasIdentifier = arrayItem.name !== undefined;
+
+        if (!hasIdentifier) return [];
+
         return getPreservableFieldsFromAssets(
           arrayItem,
           `${address}${shouldRenderDot ? '.' : ''}[name=${arrayItem.name}]`,
