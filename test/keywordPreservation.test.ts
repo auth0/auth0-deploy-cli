@@ -1,5 +1,9 @@
 import { expect } from 'chai';
-import { shouldFieldBePreserved, getPreservableFieldsFromAssets } from '../src/keywordPreservation';
+import {
+  shouldFieldBePreserved,
+  getPreservableFieldsFromAssets,
+  getAssetsValueByAddress,
+} from '../src/keywordPreservation';
 
 describe('#Keyword Preservation', () => {
   describe('shouldFieldBePreserved', () => {
@@ -91,5 +95,47 @@ describe('#Keyword Preservation', () => {
         '.arrayReplace',
       ]);
     });
+  });
+});
+
+describe('getAssetsValueByAddress', () => {
+  it('should find address with proprietary notation', () => {
+    const mockAssetTree = {
+      tenant: {
+        display_name: 'This is my tenant display name',
+      },
+      clients: [
+        {
+          name: 'client-1',
+          display_name: 'Some Display Name',
+        },
+        {
+          name: 'client-2',
+          display_name: 'This is the target value',
+        },
+        {
+          name: 'client-3',
+          connections: [
+            {
+              connection_name: 'connection-1',
+              display_name: 'My connection display name',
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(getAssetsValueByAddress('tenant.display_name', mockAssetTree)).to.equal(
+      'This is my tenant display name'
+    );
+    expect(getAssetsValueByAddress('clients.[name=client-2].display_name', mockAssetTree)).to.equal(
+      'This is the target value'
+    );
+    expect(
+      getAssetsValueByAddress(
+        'clients.[name=client-3].connections.[connection_name=connection-1].display_name',
+        mockAssetTree
+      )
+    ).to.equal('My connection display name');
   });
 });
