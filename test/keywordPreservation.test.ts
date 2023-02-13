@@ -87,19 +87,19 @@ describe('#Keyword Preservation', () => {
       );
 
       expect(fieldsToPreserve).to.have.members([
-        '.object.friendly_name',
-        '.object.nested.nestedProperty',
-        '.array.[name=array-item-1].nestedArray.[name=nested-array-item-1].value',
-        '.array.[name=array-item-1].nestedArray.[name=nested-array-item-2].value',
-        '.array.[name=array-item-1].nested.nestedProperty',
-        '.arrayReplace',
+        'object.friendly_name',
+        'object.nested.nestedProperty',
+        'array.[name=array-item-1].nestedArray.[name=nested-array-item-1].value',
+        'array.[name=array-item-1].nestedArray.[name=nested-array-item-2].value',
+        'array.[name=array-item-1].nested.nestedProperty',
+        'arrayReplace',
       ]);
     });
   });
 });
 
 describe('getAssetsValueByAddress', () => {
-  it('should find address with proprietary notation', () => {
+  it('should find the value of the addressed property', () => {
     const mockAssetTree = {
       tenant: {
         display_name: 'This is my tenant display name',
@@ -137,5 +137,14 @@ describe('getAssetsValueByAddress', () => {
         mockAssetTree
       )
     ).to.equal('My connection display name');
+    expect(getAssetsValueByAddress('this.address.should.not.exist', mockAssetTree)).to.equal(
+      undefined
+    );
+    expect(getAssetsValueByAddress('this.address.[should=not].exist', mockAssetTree)).to.equal(
+      undefined
+    );
+    expect(getAssetsValueByAddress('this.address.should.[not=exist]', mockAssetTree)).to.equal(
+      undefined
+    );
   });
 });
