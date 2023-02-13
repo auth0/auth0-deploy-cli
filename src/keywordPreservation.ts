@@ -15,18 +15,23 @@ export const shouldFieldBePreserved = (
 
 export const getPreservableFieldsFromAssets = (
   asset: any,
+  address: string,
   keywordMappings: KeywordMappings
 ): string[] => {
   if (typeof asset === 'string') {
     if (shouldFieldBePreserved(asset, keywordMappings)) {
-      return [asset];
+      return [address];
     }
     return [];
   }
   if (Array.isArray(asset)) {
     return asset
       .map((arrayItem) => {
-        return getPreservableFieldsFromAssets(arrayItem, keywordMappings);
+        return getPreservableFieldsFromAssets(
+          arrayItem,
+          `${address}.[name=${arrayItem.name}]`,
+          keywordMappings
+        );
       })
       .flat();
   }
@@ -36,7 +41,7 @@ export const getPreservableFieldsFromAssets = (
         const value = asset[key];
 
         if (value === undefined || value === null) return [];
-        return getPreservableFieldsFromAssets(value, keywordMappings);
+        return getPreservableFieldsFromAssets(value, `${address}.${key}`, keywordMappings);
       })
       .flat();
   }

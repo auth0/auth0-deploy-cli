@@ -54,7 +54,17 @@ describe('#Keyword Preservation', () => {
           },
           array: [
             {
-              nestedArray: ['Nested array value 1 ##KEYWORD##', 'Nested array value 2 ##KEYWORD##'],
+              name: 'array-item-1',
+              nestedArray: [
+                {
+                  name: 'nested-array-item-1',
+                  value: 'Nested array value 1 ##KEYWORD##',
+                },
+                {
+                  name: 'nested-array-item-2',
+                  value: 'Nested array value 2 ##KEYWORD##',
+                },
+              ],
               notInKeywordMapping: '##NOT_IN_KEYWORD_MAPPING##',
               nested: {
                 nestedProperty: 'Another nested array property ##KEYWORD##',
@@ -65,6 +75,7 @@ describe('#Keyword Preservation', () => {
           nullField: null,
           undefinedField: undefined,
         },
+        '',
         {
           KEYWORD: 'Travel0',
           ARRAY_REPLACE_KEYWORD: ['this value', 'that value'],
@@ -72,12 +83,12 @@ describe('#Keyword Preservation', () => {
       );
 
       expect(fieldsToPreserve).to.have.members([
-        'Friendly name ##KEYWORD##',
-        'Nested property ##KEYWORD##',
-        'Nested array value 1 ##KEYWORD##',
-        'Nested array value 2 ##KEYWORD##',
-        'Another nested array property ##KEYWORD##',
-        '@@ARRAY_REPLACE_KEYWORD@@',
+        '.object.friendly_name',
+        '.object.nested.nestedProperty',
+        '.array.[name=array-item-1].nestedArray.[name=nested-array-item-1].value',
+        '.array.[name=array-item-1].nestedArray.[name=nested-array-item-2].value',
+        '.array.[name=array-item-1].nested.nestedProperty',
+        '.arrayReplace',
       ]);
     });
   });
