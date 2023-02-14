@@ -265,7 +265,7 @@ describe('updateAssetsByAddress', () => {
     );
   });
 
-  it('should _____ if invalid address provided', () => {
+  it('should throw errors if invalid addresses provided', () => {
     expect(() =>
       updateAssetsByAddress(mockAssetTree, 'clients.[name=this-client-does-not-exist]', '_')
     ).to.throw();
