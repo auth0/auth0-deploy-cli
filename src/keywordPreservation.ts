@@ -1,7 +1,6 @@
 import { get as getByDotNotation } from 'dot-prop';
 import { KeywordMappings } from './types';
 import { keywordReplaceArrayRegExp, keywordReplaceStringRegExp } from './tools/utils';
-import { add } from 'lodash';
 
 export const shouldFieldBePreserved = (
   string: string,
