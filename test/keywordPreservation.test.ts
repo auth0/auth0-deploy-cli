@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { shouldFieldBePreserved } from '../src/keywordPreservation';
+import { shouldFieldBePreserved, getPreservableFieldsFromAssets } from '../src/keywordPreservation';
 
 describe('#Keyword Preservation', () => {
   describe('shouldFieldBePreserved', () => {
@@ -36,6 +36,49 @@ describe('#Keyword Preservation', () => {
       expect(
         shouldFieldBePreserved('this field has both a ##FOO## and ##BAR## marker', keywordMappings)
       ).to.be.true;
+    });
+  });
+
+  describe('getPreservableFieldsFromAssets', () => {
+    it('should retrieve all preservable fields from assets tree', () => {
+      const fieldsToPreserve = getPreservableFieldsFromAssets(
+        {
+          object: {
+            friendly_name: 'Friendly name ##KEYWORD##',
+            notInKeywordMapping: '##NOT_IN_KEYWORD_MAPPING##',
+            number: 5,
+            boolean: true,
+            nested: {
+              nestedProperty: 'Nested property ##KEYWORD##',
+            },
+          },
+          array: [
+            {
+              nestedArray: ['Nested array value 1 ##KEYWORD##', 'Nested array value 2 ##KEYWORD##'],
+              notInKeywordMapping: '##NOT_IN_KEYWORD_MAPPING##',
+              nested: {
+                nestedProperty: 'Another nested array property ##KEYWORD##',
+              },
+            },
+          ],
+          arrayReplace: '@@ARRAY_REPLACE_KEYWORD@@',
+          nullField: null,
+          undefinedField: undefined,
+        },
+        {
+          KEYWORD: 'Travel0',
+          ARRAY_REPLACE_KEYWORD: ['this value', 'that value'],
+        }
+      );
+
+      expect(fieldsToPreserve).to.have.members([
+        'Friendly name ##KEYWORD##',
+        'Nested property ##KEYWORD##',
+        'Nested array value 1 ##KEYWORD##',
+        'Nested array value 2 ##KEYWORD##',
+        'Another nested array property ##KEYWORD##',
+        '@@ARRAY_REPLACE_KEYWORD@@',
+      ]);
     });
   });
 });
