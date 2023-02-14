@@ -1,8 +1,10 @@
 import { expect } from 'chai';
+import { get as getDotNotation } from 'dot-prop';
 import {
   shouldFieldBePreserved,
   getPreservableFieldsFromAssets,
   getAssetsValueByAddress,
+  convertAddressToDotNotation,
 } from '../src/keywordPreservation';
 
 describe('#Keyword Preservation', () => {
@@ -145,6 +147,67 @@ describe('getAssetsValueByAddress', () => {
     );
     expect(getAssetsValueByAddress('this.address.should.[not=exist]', mockAssetTree)).to.equal(
       undefined
+    );
+  });
+});
+
+describe('convertAddressToDotNotation', () => {
+  const mockAssets = {
+    tenant: {
+      friendly_name: 'Friendly Tenant Name',
+    },
+    actions: [
+      {
+        name: 'action-1',
+        code: "window.alert('Foo')",
+      },
+      {
+        name: 'action-2',
+        nestedProperty: {
+          array: [
+            {
+              name: 'foo',
+            },
+            {
+              name: 'bar',
+              arrayProperty: 'baz',
+            },
+          ],
+        },
+      },
+    ],
+  };
+
+  it('should convert proprietary address to conventional JS object notation (aka "dot notation")', () => {
+    expect(convertAddressToDotNotation(mockAssets, 'tenant.friendly_name')).to.equal(
+      'tenant.friendly_name'
+    );
+    expect(getDotNotation(mockAssets, 'tenant.friendly_name')).to.equal(
+      mockAssets.tenant.friendly_name
+    );
+
+    expect(convertAddressToDotNotation(mockAssets, 'actions.[name=action-1].code')).to.equal(
+      'actions.0.code'
+    );
+    expect(getDotNotation(mockAssets, 'actions.0.code')).to.equal(mockAssets.actions[0].code);
+
+    expect(
+      convertAddressToDotNotation(
+        mockAssets,
+        'actions.[name=action-2].nestedProperty.array.[name=bar].arrayProperty'
+      )
+    ).to.equal('actions.1.nestedProperty.array.1.arrayProperty');
+
+    expect(getDotNotation(mockAssets, 'actions.1.nestedProperty.array.1.arrayProperty')).to.equal(
+      mockAssets.actions[1].nestedProperty?.array[1].arrayProperty
+    );
+  });
+
+  it('should throw if provided address is invalid', () => {
+    expect(() =>
+      convertAddressToDotNotation(mockAssets, 'actions.[name=this-action-does-not-exist].code')
+    ).to.throw(
+      `Cannot find [name=this-action-does-not-exist] in [{"name":"action-1","code":"window.alert('Foo')"},{"name":"action-2","nestedProperty":{"array":[{"name":"foo"},{"name":"bar","arrayProperty":"baz"}]}}]`
     );
   });
 });

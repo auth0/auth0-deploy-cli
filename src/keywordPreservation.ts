@@ -102,3 +102,44 @@ export const getAssetsValueByAddress = (address: string, assets: any): any => {
     getByDotNotation(assets, directions[0])
   );
 };
+
+// convertAddressToDotNotation will convert the proprietary address into conventional
+// JS object notation. Performing this conversion simplifies the process
+// of updating a specific property for a given asset tree using the dot-prop library
+export const convertAddressToDotNotation = (
+  assets: any,
+  address: string,
+  finalAddressTrail = ''
+): string => {
+  const directions = address.split('.');
+
+  if (directions[0] === '') return finalAddressTrail;
+
+  if (directions[0].charAt(0) === '[') {
+    const identifier = directions[0].substring(1, directions[0].length - 1).split('=')[0];
+    const identifierValue = directions[0].substring(1, directions[0].length - 1).split('=')[1];
+
+    let targetIndex = -1;
+
+    assets.forEach((item: any, index: number) => {
+      if (item[identifier] === identifierValue) {
+        targetIndex = index;
+      }
+    });
+
+    if (targetIndex === -1)
+      throw new Error(`Cannot find ${directions[0]} in ${JSON.stringify(assets)}`);
+
+    return convertAddressToDotNotation(
+      assets[targetIndex],
+      directions.slice(1).join('.'),
+      `${finalAddressTrail}.${targetIndex}`
+    );
+  }
+
+  return convertAddressToDotNotation(
+    getByDotNotation(assets, directions[0]),
+    directions.slice(1).join('.'),
+    finalAddressTrail === '' ? directions[0] : `${finalAddressTrail}.${directions[0]}`
+  );
+};
