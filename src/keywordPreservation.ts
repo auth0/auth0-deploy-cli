@@ -1,6 +1,13 @@
 import { get as getByDotNotation, set as setByDotNotation } from 'dot-prop';
+import { keywordReplace } from './tools/utils';
 import { KeywordMappings } from './types';
 import { keywordReplaceArrayRegExp, keywordReplaceStringRegExp } from './tools/utils';
+import { cloneDeep } from 'lodash';
+
+/*
+  RFC for Keyword Preservation: https://github.com/auth0/auth0-deploy-cli/issues/688
+  Original Github Issue: https://github.com/auth0/auth0-deploy-cli/issues/328
+*/
 
 export const shouldFieldBePreserved = (
   string: string,
@@ -15,9 +22,9 @@ export const shouldFieldBePreserved = (
 };
 
 export const getPreservableFieldsFromAssets = (
-  asset: any,
-  address: string,
-  keywordMappings: KeywordMappings
+  asset: object,
+  keywordMappings: KeywordMappings,
+  address = ''
 ): string[] => {
   if (typeof asset === 'string') {
     if (shouldFieldBePreserved(asset, keywordMappings)) {
@@ -39,8 +46,8 @@ export const getPreservableFieldsFromAssets = (
 
         return getPreservableFieldsFromAssets(
           arrayItem,
-          `${address}${shouldRenderDot ? '.' : ''}[name=${arrayItem.name}]`,
-          keywordMappings
+          keywordMappings,
+          `${address}${shouldRenderDot ? '.' : ''}[name=${arrayItem.name}]`
         );
       })
       .flat();
@@ -54,8 +61,8 @@ export const getPreservableFieldsFromAssets = (
 
         return getPreservableFieldsFromAssets(
           value,
-          `${address}${shouldRenderDot ? '.' : ''}${key}`,
-          keywordMappings
+          keywordMappings,
+          `${address}${shouldRenderDot ? '.' : ''}${key}`
         );
       })
       .flat();
@@ -159,4 +166,41 @@ export const updateAssetsByAddress = (
 
   setByDotNotation(assets, dotNotationAddress, newValue);
   return assets;
+};
+
+// preserveKeywords is the function that ultimately gets executed during export
+// to attempt to preserve keywords (ex: ##KEYWORD##) in local configuration files
+// from getting overwritten by remote values during export.
+export const preserveKeywords = (
+  localAssets: object,
+  remoteAssets: object,
+  keywordMappings: KeywordMappings
+): object => {
+  const addresses = getPreservableFieldsFromAssets(localAssets, keywordMappings, '');
+
+  let updatedRemoteAssets = cloneDeep(remoteAssets);
+
+  addresses.forEach((address) => {
+    const localValue = getAssetsValueByAddress(address, localAssets);
+    const remoteValue = getAssetsValueByAddress(address, remoteAssets);
+
+    const localValueWithReplacement = keywordReplace(localValue, keywordMappings);
+
+    const localAndRemoteValuesAreEqual = (() => {
+      if (typeof remoteValue === 'string') {
+        return localValueWithReplacement === remoteValue;
+      }
+      //TODO: Account for non-string replacements via @@ syntax
+    })();
+
+    if (!localAndRemoteValuesAreEqual) {
+      console.warn(
+        `WARNING! The remote value with address of ${address} has value of "${remoteValue}" but will be preserved with "${localValueWithReplacement}" due to keyword preservation.`
+      );
+    }
+
+    updatedRemoteAssets = updateAssetsByAddress(updatedRemoteAssets, address, localValue);
+  });
+
+  return updatedRemoteAssets;
 };

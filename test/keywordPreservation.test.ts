@@ -6,7 +6,9 @@ import {
   getAssetsValueByAddress,
   convertAddressToDotNotation,
   updateAssetsByAddress,
+  preserveKeywords,
 } from '../src/keywordPreservation';
+import { cloneDeep } from 'lodash';
 
 describe('#Keyword Preservation', () => {
   describe('shouldFieldBePreserved', () => {
@@ -82,7 +84,6 @@ describe('#Keyword Preservation', () => {
           nullField: null,
           undefinedField: undefined,
         },
-        '',
         {
           KEYWORD: 'Travel0',
           ARRAY_REPLACE_KEYWORD: ['this value', 'that value'],
@@ -275,5 +276,70 @@ describe('updateAssetsByAddress', () => {
     ).to.throw(
       'cannot update assets by address: tenant.this_property_does_not_exist because it does not exist.'
     );
+  });
+});
+
+describe('preserveKeywords', () => {
+  const mockLocalAssets = {
+    tenant: {
+      display_name: 'The ##COMPANY_NAME## Tenant',
+      allowed_logout_urls: '@@ALLOWED_LOGOUT_URLS@@',
+    },
+    actions: [
+      {
+        name: 'action-1',
+        display_name: '##ENV## Action 1',
+      },
+      {
+        name: 'action-2',
+        display_name: "This action won't exist on remote, will be deleted",
+      },
+    ],
+  };
+
+  const mockRemoteAssets = {
+    tenant: {
+      display_name: 'The Travel0 Tenant',
+      allowed_logout_urls: ['localhost:3000/logout', 'https://travel0.com/logout'],
+    },
+    prompts: {
+      universal_login_enabled: true,
+      customText: {},
+    },
+    pages: undefined, //TODO: test these cases more thoroughly
+    rules: null, //TODO: test these cases more thoroughly
+    actions: [
+      {
+        name: 'action-1',
+        display_name: 'Production Action 1',
+      },
+      {
+        name: 'action-3',
+        display_name: 'This action exists on remote but not local',
+      },
+    ],
+  };
+
+  it('should preserve keywords when they correlate to keyword mappings', () => {
+    const preservedAssets = preserveKeywords(mockLocalAssets, mockRemoteAssets, {
+      COMPANY_NAME: 'Travel0',
+      ALLOWED_LOGOUT_URLS: ['localhost:3000/logout', 'https://travel0.com/logout'],
+      ENV: 'Production',
+    });
+
+    expect(preservedAssets).to.deep.equal(
+      (() => {
+        const expected = cloneDeep(mockRemoteAssets);
+        //@ts-ignore
+        expected.tenant = mockLocalAssets.tenant;
+        expected.actions[0].display_name = '##ENV## Action 1';
+        return expected;
+      })()
+    );
+  });
+
+  it('should not preserve keywords when no keyword mappings', () => {
+    const preservedAssets = preserveKeywords(mockLocalAssets, mockRemoteAssets, {});
+    expect(preservedAssets).to.deep.equal(mockRemoteAssets);
   });
 });
