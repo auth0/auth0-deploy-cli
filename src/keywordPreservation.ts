@@ -1,4 +1,4 @@
-import { get as getByDotNotation } from 'dot-prop';
+import { get as getByDotNotation, set as setByDotNotation } from 'dot-prop';
 import { KeywordMappings } from './types';
 import { keywordReplaceArrayRegExp, keywordReplaceStringRegExp } from './tools/utils';
 
@@ -142,4 +142,21 @@ export const convertAddressToDotNotation = (
     directions.slice(1).join('.'),
     finalAddressTrail === '' ? directions[0] : `${finalAddressTrail}.${directions[0]}`
   );
+};
+
+export const updateAssetsByAddress = (
+  assets: object,
+  address: string,
+  newValue: string
+): object => {
+  const dotNotationAddress = convertAddressToDotNotation(assets, address);
+
+  const doesPropertyExist = getByDotNotation(assets, dotNotationAddress) !== undefined;
+
+  if (!doesPropertyExist) {
+    throw new Error(`cannot update assets by address: ${address} because it does not exist.`);
+  }
+
+  setByDotNotation(assets, dotNotationAddress, newValue);
+  return assets;
 };

@@ -5,6 +5,7 @@ import {
   getPreservableFieldsFromAssets,
   getAssetsValueByAddress,
   convertAddressToDotNotation,
+  updateAssetsByAddress,
 } from '../src/keywordPreservation';
 
 describe('#Keyword Preservation', () => {
@@ -208,6 +209,71 @@ describe('convertAddressToDotNotation', () => {
       convertAddressToDotNotation(mockAssets, 'actions.[name=this-action-does-not-exist].code')
     ).to.throw(
       `Cannot find [name=this-action-does-not-exist] in [{"name":"action-1","code":"window.alert('Foo')"},{"name":"action-2","nestedProperty":{"array":[{"name":"foo"},{"name":"bar","arrayProperty":"baz"}]}}]`
+    );
+  });
+});
+
+describe('updateAssetsByAddress', () => {
+  const mockAssetTree = {
+    tenant: {
+      display_name: 'This is my tenant display name',
+    },
+    clients: [
+      {
+        name: 'client-1',
+        display_name: 'Some Display Name',
+      },
+      {
+        name: 'client-2',
+        display_name: 'This is the target value',
+      },
+      {
+        name: 'client-3',
+        connections: [
+          {
+            connection_name: 'connection-1',
+            display_name: 'My connection display name',
+          },
+        ],
+      },
+    ],
+  };
+  it('should update an specific asset field for a provided address', () => {
+    expect(
+      updateAssetsByAddress(
+        mockAssetTree,
+        'clients.[name=client-3].connections.[connection_name=connection-1].display_name',
+        'New connection display name'
+      )
+    ).to.deep.equal(
+      (() => {
+        const newAssets = mockAssetTree;
+        //@ts-ignore because we know this value is defined
+        newAssets.clients[2].connections[0].display_name = 'New connection display name';
+        return newAssets;
+      })()
+    );
+
+    expect(
+      updateAssetsByAddress(mockAssetTree, 'tenant.display_name', 'This is the new display name')
+    ).to.deep.equal(
+      (() => {
+        const newAssets = mockAssetTree;
+        newAssets.tenant.display_name = 'This is the new display name';
+        return newAssets;
+      })()
+    );
+  });
+
+  it('should _____ if invalid address provided', () => {
+    expect(() =>
+      updateAssetsByAddress(mockAssetTree, 'clients.[name=this-client-does-not-exist]', '_')
+    ).to.throw();
+
+    expect(() =>
+      updateAssetsByAddress(mockAssetTree, 'tenant.this_property_does_not_exist', '_')
+    ).to.throw(
+      'cannot update assets by address: tenant.this_property_does_not_exist because it does not exist.'
     );
   });
 });
