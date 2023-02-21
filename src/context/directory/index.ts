@@ -47,7 +47,7 @@ export default class DirectoryContext {
     return loadFileAndReplaceKeywords(toLoad, this.mappings);
   }
 
-  async load(): Promise<void> {
+  async loadAssetsFromLocal(): Promise<void> {
     if (isDirectory(this.filePath)) {
       /* If this is a directory, look for each file in the directory */
       log.info(`Processing directory ${this.filePath}`);

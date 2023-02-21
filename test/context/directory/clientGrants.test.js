@@ -42,7 +42,7 @@ describe('#directory context clientGrants', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { var: 'something' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.clientGrants).to.deep.equal([
       {
@@ -88,7 +88,7 @@ describe('#directory context clientGrants', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { var: 'something' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     const target = [
       {
@@ -112,7 +112,7 @@ describe('#directory context clientGrants', () => {
     const context = new Context(config, mockMgmtClient());
 
     const errorMessage = `Expected ${dir} to be a folder but got a file?`;
-    await expect(context.load())
+    await expect(context.loadAssetsFromLocal())
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
   });

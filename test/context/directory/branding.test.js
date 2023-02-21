@@ -39,7 +39,7 @@ describe('#directory context branding', () => {
 
     const config = { AUTH0_INPUT_FILE: dir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { foo: 'bar' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.branding).to.be.an('object');
     expect(context.assets.branding.templates).to.deep.equal([
@@ -66,7 +66,7 @@ describe('#directory context branding', () => {
 
     const config = { AUTH0_INPUT_FILE: dir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { foo: 'bar' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.branding).to.deep.equal({
       templates: [
@@ -88,7 +88,7 @@ describe('#directory context branding', () => {
 
     const config = { AUTH0_INPUT_FILE: dir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { foo: 'bar' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.branding).to.deep.equal(JSON.parse(brandingSettings));
   });

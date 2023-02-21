@@ -29,7 +29,7 @@ describe('#directory context clients', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { appType: 'spa' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     const target = [
       { app_type: 'spa', name: 'customLoginClient', custom_login_page: 'html code spa "spa"' },
@@ -55,7 +55,7 @@ describe('#directory context clients', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { appType: 'spa' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     const target = [{ app_type: 'spa', name: 'someClient' }];
 
@@ -72,7 +72,7 @@ describe('#directory context clients', () => {
     const context = new Context(config, mockMgmtClient());
 
     const errorMessage = `Expected ${dir} to be a folder but got a file?`;
-    await expect(context.load())
+    await expect(context.loadAssetsFromLocal())
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
   });

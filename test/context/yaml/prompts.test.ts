@@ -69,7 +69,7 @@ describe('#YAML context prompts', () => {
 
     const config = { AUTH0_INPUT_FILE: yamlFile };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.prompts).to.deep.equal({
       customText: {

@@ -78,7 +78,7 @@ describe('#YAML context pages', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { val1: 'env1', val2: 'env2' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.pages).to.deep.equal(target);
   });
@@ -253,7 +253,7 @@ describe('#YAML context pages', () => {
 
     const config = { AUTH0_INPUT_FILE: yamlFile };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.pages).to.deep.equal(target);
   });

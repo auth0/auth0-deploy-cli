@@ -16,7 +16,7 @@ describe('#YAML context validation', () => {
 
     const config = { AUTH0_INPUT_FILE: yaml };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.rules).to.deep.equal(null);
     expect(context.assets.databases).to.deep.equal(null);
@@ -47,7 +47,7 @@ describe('#YAML context validation', () => {
     };
 
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.exclude.rules).to.deep.equal(['rule']);
     expect(context.assets.exclude.clients).to.deep.equal(['client']);
@@ -80,7 +80,7 @@ describe('#YAML context validation', () => {
       mockMgmtClient()
     );
 
-    await contextWithExclusion.load();
+    await contextWithExclusion.loadAssetsFromLocal();
     exclusions.forEach((excludedResource) => {
       expect(contextWithExclusion.assets[excludedResource]).to.equal(null); // Ensure all excluded resources, defined or not, are null
     });
@@ -94,7 +94,7 @@ describe('#YAML context validation', () => {
       mockMgmtClient()
     );
 
-    await contextWithoutExclusion.load();
+    await contextWithoutExclusion.loadAssetsFromLocal();
     expect(contextWithoutExclusion.assets.actions).to.deep.equal([]);
     expect(contextWithoutExclusion.assets.hooks).to.deep.equal([]);
     expect(contextWithoutExclusion.assets.rules).to.deep.equal([]);
@@ -124,7 +124,7 @@ describe('#YAML context validation', () => {
       mockMgmtClient()
     );
 
-    await contextWithInclusion.load();
+    await contextWithInclusion.loadAssetsFromLocal();
     expect(contextWithInclusion.assets.tenant).to.deep.equal({
       enabled_locales: ['en'],
     });
@@ -141,14 +141,14 @@ describe('#YAML context validation', () => {
 
     const config = { AUTH0_INPUT_FILE: yaml };
     const context = new Context(config, mockMgmtClient());
-    await expect(context.load()).to.be.eventually.rejectedWith(Error);
+    await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(Error);
   });
 
   it('should error on bad file', async () => {
     const yaml = path.resolve(testDataDir, 'yaml', 'notexist.yml');
     const config = { AUTH0_INPUT_FILE: yaml };
     const context = new Context(config, mockMgmtClient());
-    await expect(context.load()).to.be.eventually.rejectedWith(Error);
+    await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(Error);
   });
 
   it('should load relative file', async () => {

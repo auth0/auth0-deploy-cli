@@ -24,7 +24,7 @@ describe('#directory context roles', () => {
 
     const config = { AUTH0_INPUT_FILE: repoDir };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     const target = [
       {
@@ -66,7 +66,7 @@ describe('#directory context roles', () => {
 
     const config = { AUTH0_INPUT_FILE: repoDir };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     const target = [
       {
@@ -119,7 +119,7 @@ describe('#directory context roles', () => {
     const context = new Context(config, mockMgmtClient());
 
     const errorMessage = `Expected ${dir} to be a folder but got a file?`;
-    await expect(context.load())
+    await expect(context.loadAssetsFromLocal())
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
   });

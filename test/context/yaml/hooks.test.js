@@ -40,7 +40,7 @@ describe('#YAML context hooks', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { hello: 'test' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.hooks).to.deep.equal(target);
   });
