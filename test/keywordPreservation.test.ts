@@ -285,6 +285,8 @@ describe('preserveKeywords', () => {
       display_name: 'The ##COMPANY_NAME## Tenant',
       allowed_logout_urls: '@@ALLOWED_LOGOUT_URLS@@',
     },
+    roles: null,
+    hooks: undefined,
     actions: [
       {
         name: 'action-1',
