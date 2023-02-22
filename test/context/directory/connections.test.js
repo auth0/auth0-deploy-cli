@@ -29,7 +29,7 @@ describe('#directory context connections', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { secret: 'test secret', var: 'something' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     const target = [
       { name: 'myad-waad', strategy: 'waad', var: 'something' },
@@ -62,7 +62,7 @@ describe('#directory context connections', () => {
       AUTH0_CONNECTIONS_DIRECTORY: customConnectionDirectory,
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     const target = [{ name: 'A Connection' }];
 
@@ -85,7 +85,7 @@ describe('#directory context connections', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { var: 'something' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     const target = [{ name: 'myad-waad', strategy: 'waad', var: 'something' }];
 
@@ -102,7 +102,7 @@ describe('#directory context connections', () => {
     const context = new Context(config, mockMgmtClient());
 
     const errorMessage = `Expected ${dir} to be a folder but got a file?`;
-    await expect(context.load())
+    await expect(context.loadAssetsFromLocal())
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
   });
@@ -217,7 +217,7 @@ describe('#directory context connections', () => {
       mockMgmtClient()
     );
 
-    await expect(context.load()).to.be.eventually.rejectedWith(
+    await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(
       `Passwordless email template purportedly located at ${path.join(
         repoDir,
         'connections',

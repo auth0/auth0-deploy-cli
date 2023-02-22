@@ -77,7 +77,7 @@ describe('#YAML context attack-protection', () => {
 
     const config = { AUTH0_INPUT_FILE: yamlFile };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
     expect(context.assets.attackProtection).to.deep.equal(target);
   });
 

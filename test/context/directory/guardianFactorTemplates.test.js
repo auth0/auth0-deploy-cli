@@ -23,7 +23,7 @@ describe('#directory context guardian factors templates provider', () => {
 
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.guardianFactorTemplates).to.deep.equal([
       {

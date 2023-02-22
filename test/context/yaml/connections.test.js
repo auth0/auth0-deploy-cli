@@ -97,7 +97,7 @@ describe('#YAML context connections', () => {
       },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.connections).to.deep.equal(target);
   });
@@ -128,7 +128,9 @@ describe('#YAML context connections', () => {
       mockMgmtClient()
     );
 
-    await expect(context.load()).to.be.eventually.rejectedWith('Problem deploying connections');
+    await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(
+      'Problem deploying connections'
+    );
   });
 
   it('should dump connections', async () => {

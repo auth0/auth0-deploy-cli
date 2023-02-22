@@ -42,7 +42,7 @@ describe('#directory context email templates', () => {
 
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.emailTemplates).to.deep.equal(emailTemplaesTarget);
   });
@@ -60,7 +60,7 @@ describe('#directory context email templates', () => {
     createDir(dir, files);
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.emailTemplates).to.deep.equal(emailTemplaesTarget);
   });
@@ -73,7 +73,7 @@ describe('#directory context email templates', () => {
 
     const context = new Context({ AUTH0_INPUT_FILE: repoDir });
     const errorMessage = `Expected ${dir} to be a folder but got a file?`;
-    await expect(context.load())
+    await expect(context.loadAssetsFromLocal())
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
   });

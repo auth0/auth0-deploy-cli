@@ -53,7 +53,7 @@ describe('#YAML context roles', () => {
 
     const config = { AUTH0_INPUT_FILE: yamlFile };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
     expect(context.assets.roles).to.deep.equal(target);
   });
 

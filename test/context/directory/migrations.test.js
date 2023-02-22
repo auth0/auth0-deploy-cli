@@ -25,7 +25,7 @@ describe('#directory context migrations', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.migrations).to.deep.equal(migrationsTarget);
   });

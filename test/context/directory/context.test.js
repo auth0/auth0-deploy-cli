@@ -13,7 +13,7 @@ describe('#directory context validation', () => {
     cleanThenMkdir(dir);
 
     const context = new Context({ AUTH0_INPUT_FILE: dir });
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(Object.keys(context.assets).length).to.equal(Object.keys(handlers).length + 1);
     Object.keys(context.assets).forEach((key) => {
@@ -47,7 +47,7 @@ describe('#directory context validation', () => {
       AUTH0_EXCLUDED_DEFAULTS: ['emailProvider'],
     };
     const context = new Context(config);
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.exclude.rules).to.deep.equal(['rule']);
     expect(context.assets.exclude.clients).to.deep.equal(['client']);
@@ -72,14 +72,14 @@ describe('#directory context validation', () => {
       AUTH0_INPUT_FILE: dir,
       AUTH0_EXCLUDED: ['tenant'],
     });
-    await contextWithExclusion.load();
+    await contextWithExclusion.loadAssetsFromLocal();
     expect(contextWithExclusion.assets.tenant).to.equal(undefined);
 
     const contextWithoutExclusion = new Context({
       AUTH0_INPUT_FILE: dir,
       AUTH0_EXCLUDED: [], // Not excluding tenant resource
     });
-    await contextWithoutExclusion.load();
+    await contextWithoutExclusion.loadAssetsFromLocal();
     expect(contextWithoutExclusion.assets.tenant).to.deep.equal(tenantConfig);
   });
 
@@ -98,7 +98,7 @@ describe('#directory context validation', () => {
       AUTH0_INPUT_FILE: dir,
       AUTH0_INCLUDED_ONLY: ['tenant'],
     });
-    await contextWithInclusion.load();
+    await contextWithInclusion.loadAssetsFromLocal();
     expect(contextWithInclusion.assets.tenant).to.deep.equal(tenantConfig);
     expect(contextWithInclusion.assets.actions).to.equal(undefined); // Arbitrary sample resources
     expect(contextWithInclusion.assets.clients).to.equal(undefined); // Arbitrary sample resources
@@ -108,7 +108,7 @@ describe('#directory context validation', () => {
     const dir = path.resolve(testDataDir, 'directory', 'doesNotExist');
     const context = new Context({ AUTH0_INPUT_FILE: dir });
     const errorMessage = `Not sure what to do with, ${dir} as it is not a directory...`;
-    await expect(context.load())
+    await expect(context.loadAssetsFromLocal())
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
   });
@@ -128,7 +128,7 @@ describe('#directory context validation', () => {
 
     const context = new Context({ AUTH0_INPUT_FILE: link });
     const errorMessage = `Not sure what to do with, ${link} as it is not a directory...`;
-    await expect(context.load())
+    await expect(context.loadAssetsFromLocal())
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
   });

@@ -52,7 +52,7 @@ export default class YAMLContext {
     return loadFileAndReplaceKeywords(path.resolve(toLoad), this.mappings);
   }
 
-  async load() {
+  async loadAssetsFromLocal() {
     // Allow to send object/json directly
     if (typeof this.configFile === 'object') {
       this.assets = this.configFile;
