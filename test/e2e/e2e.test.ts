@@ -431,6 +431,11 @@ describe('keyword preservation', () => {
     expect(json.support_email).to.equal('support@##DOMAIN##');
     expect(json.support_url).to.equal('https://##DOMAIN##/support');
 
+    // const emailTemplateHTML = fs
+    //   .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
+    //   .toString();
+    // expect(emailTemplateHTML).to.contain('##TENANT##'); TODO: enable keyword preservation in auxillary template files
+
     recordingDone();
   });
 });
