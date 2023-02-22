@@ -1,11 +1,11 @@
 import { expect } from 'chai';
 import path from 'path';
 import fs from 'fs';
+import { copySync } from 'fs-extra';
 import { getFiles, existsMustBeDir } from '../../src/utils';
 import { load as yamlLoad } from 'js-yaml';
 import { setupRecording, testNameToWorkingDirectory } from './e2e-utils';
 import { dump, deploy } from '../../src';
-import exp from 'constants';
 import { AssetTypes } from '../../src/types';
 
 const shouldUseRecordings = process.env['AUTH0_HTTP_RECORDINGS'] === 'lockdown';
@@ -376,6 +376,8 @@ describe('keyword preservation', () => {
   it('should preserve keywords for yaml format', async function () {
     const workDirectory = testNameToWorkingDirectory(this.test?.title);
 
+    console.log({ workDirectory });
+
     const { recordingDone } = await setupRecording(this.test?.title);
 
     await deploy({
@@ -383,15 +385,15 @@ describe('keyword preservation', () => {
       config,
     });
 
+    copySync(`${__dirname}/testdata/should-preserve-keywords/yaml`, workDirectory); //It is necessary to copy directory contents to work directory to prevent overwriting of Git-committed files
+
     await dump({
-      output_folder: `${__dirname}/testdata/should-preserve-keywords/yaml`,
+      output_folder: workDirectory,
       format: 'yaml',
       config,
     });
 
-    const yaml = yamlLoad(
-      fs.readFileSync(`${__dirname}/testdata/should-preserve-keywords/yaml/tenant.yaml`)
-    );
+    const yaml = yamlLoad(fs.readFileSync(path.join(workDirectory, 'tenant.yaml')));
     expect(yaml.tenant.friendly_name).to.equal('##TENANT_NAME##');
     // expect(yaml.tenant.enabled_locales).to.equal('@@LANGUAGES@@'); TODO: enable @@ARRAY@@ keyword preservation in yaml formats
 
@@ -408,17 +410,15 @@ describe('keyword preservation', () => {
       config,
     });
 
+    copySync(`${__dirname}/testdata/should-preserve-keywords/directory`, workDirectory); //It is necessary to copy directory contents to work directory to prevent overwriting of Git-committed files
+
     await dump({
-      output_folder: `${__dirname}/testdata/should-preserve-keywords/directory`,
+      output_folder: workDirectory,
       format: 'directory',
       config,
     });
 
-    const json = JSON.parse(
-      fs
-        .readFileSync(`${__dirname}/testdata/should-preserve-keywords/directory/tenant.json`)
-        .toString()
-    );
+    const json = JSON.parse(fs.readFileSync(path.join(workDirectory, 'tenant.json')).toString());
 
     expect(json.friendly_name).to.equal('##TENANT_NAME##');
     expect(json.enabled_locales).to.equal('@@LANGUAGES@@');

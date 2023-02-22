@@ -78,10 +78,6 @@
             "allowed_logout_urls": [
                 "https://mycompany.org/logoutCallback"
             ],
-            "enabled_locales": [
-                "en",
-                "es"
-            ],
             "flags": {
                 "allow_legacy_delegation_grant_types": true,
                 "allow_legacy_ro_grant_types": true,

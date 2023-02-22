@@ -1,9 +1,7 @@
 tenant:
   allowed_logout_urls:
     - https://mycompany.org/logoutCallback
-  enabled_locales:
-    - en
-    - es
+  # enabled_locales: @@LANGUAGES@@ TODO: enable @@ARRAY@@ keyword preservation in yaml
   flags:
     allow_legacy_delegation_grant_types: true
     allow_legacy_ro_grant_types: true
