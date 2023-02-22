@@ -1,6 +1,6 @@
 {
   "allowed_logout_urls": [
-    "https://mycompany.org/logoutCallback"
+    "https://travel0.com/logoutCallback"
   ],
   "enabled_locales": "@@LANGUAGES@@",
   "flags": {
@@ -25,8 +25,8 @@
   "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
   "sandbox_version": "12",
   "session_lifetime": 3.0166666666666666,
-  "support_email": "support@mycompany.org",
-  "support_url": "https://mycompany.org/support",
+  "support_email": "support@##DOMAIN##",
+  "support_url": "https://##DOMAIN##/support",
   "universal_login": {
     "colors": {
       "primary": "#F8F8F2",

@@ -366,17 +366,16 @@ describe('keyword preservation', () => {
     AUTH0_CLIENT_SECRET,
     AUTH0_ACCESS_TOKEN,
     AUTH0_PRESERVE_KEYWORDS: true,
-    AUTH0_INCLUDED_ONLY: ['tenant'] as AssetTypes[],
+    AUTH0_INCLUDED_ONLY: ['tenant', 'emailTemplates'] as AssetTypes[],
     AUTH0_KEYWORD_REPLACE_MAPPINGS: {
       TENANT_NAME: 'This tenant name should be preserved',
+      DOMAIN: 'travel0.com',
       LANGUAGES: ['en', 'es'],
     },
   };
 
   it('should preserve keywords for yaml format', async function () {
     const workDirectory = testNameToWorkingDirectory(this.test?.title);
-
-    console.log({ workDirectory });
 
     const { recordingDone } = await setupRecording(this.test?.title);
 
@@ -395,7 +394,14 @@ describe('keyword preservation', () => {
 
     const yaml = yamlLoad(fs.readFileSync(path.join(workDirectory, 'tenant.yaml')));
     expect(yaml.tenant.friendly_name).to.equal('##TENANT_NAME##');
+    expect(yaml.tenant.support_email).to.equal('support@##DOMAIN##');
+    expect(yaml.tenant.support_url).to.equal('https://##DOMAIN##/support');
     // expect(yaml.tenant.enabled_locales).to.equal('@@LANGUAGES@@'); TODO: enable @@ARRAY@@ keyword preservation in yaml formats
+
+    // const emailTemplateHTML = fs
+    //   .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
+    //   .toString();
+    // expect(emailTemplateHTML).to.contain('##TENANT##'); TODO: enable keyword preservation in auxillary template files
 
     recordingDone();
   });
@@ -422,6 +428,8 @@ describe('keyword preservation', () => {
 
     expect(json.friendly_name).to.equal('##TENANT_NAME##');
     expect(json.enabled_locales).to.equal('@@LANGUAGES@@');
+    expect(json.support_email).to.equal('support@##DOMAIN##');
+    expect(json.support_url).to.equal('https://##DOMAIN##/support');
 
     recordingDone();
   });

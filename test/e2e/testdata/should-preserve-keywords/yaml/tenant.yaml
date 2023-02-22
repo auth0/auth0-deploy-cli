@@ -1,6 +1,6 @@
 tenant:
   allowed_logout_urls:
-    - https://mycompany.org/logoutCallback
+    - https://travel0.com/logoutCallback
   # enabled_locales: @@LANGUAGES@@ TODO: enable @@ARRAY@@ keyword preservation in yaml
   flags:
     allow_legacy_delegation_grant_types: true
@@ -25,9 +25,18 @@ tenant:
   session_cookie:
     mode: non-persistent
   session_lifetime: 3.0166666666666666
-  support_email: support@mycompany.org
-  support_url: https://mycompany.org/support
+  support_email: support@##DOMAIN##
+  support_url: https://##DOMAIN##/support
   universal_login:
     colors:
       primary: '#F8F8F2'
       page_background: '#222221'
+emailTemplates:
+  - template: welcome_email
+    body: ./emailTemplates/welcome_email.html
+    enabled: false
+    from: ''
+    resultUrl: https://##DOMAIN##/welcome
+    subject: Welcome
+    syntax: liquid
+    urlLifetimeInSeconds: 3600
