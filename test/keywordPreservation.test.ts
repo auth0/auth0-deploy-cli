@@ -205,12 +205,10 @@ describe('convertAddressToDotNotation', () => {
     );
   });
 
-  it('should throw if provided address is invalid', () => {
-    expect(() =>
+  it('should return null if provided address is invalid', () => {
+    expect(
       convertAddressToDotNotation(mockAssets, 'actions.[name=this-action-does-not-exist].code')
-    ).to.throw(
-      `Cannot find [name=this-action-does-not-exist] in [{"name":"action-1","code":"window.alert('Foo')"},{"name":"action-2","nestedProperty":{"array":[{"name":"foo"},{"name":"bar","arrayProperty":"baz"}]}}]`
-    );
+    ).to.be.null;
   });
 });
 
@@ -266,16 +264,14 @@ describe('updateAssetsByAddress', () => {
     );
   });
 
-  it('should throw errors if invalid addresses provided', () => {
-    expect(() =>
+  it('should return unaltered assets tree if non-existent address provided', () => {
+    expect(
       updateAssetsByAddress(mockAssetTree, 'clients.[name=this-client-does-not-exist]', '_')
-    ).to.throw();
+    ).to.deep.equal(mockAssetTree);
 
-    expect(() =>
+    expect(
       updateAssetsByAddress(mockAssetTree, 'tenant.this_property_does_not_exist', '_')
-    ).to.throw(
-      'cannot update assets by address: tenant.this_property_does_not_exist because it does not exist.'
-    );
+    ).to.deep.equal(mockAssetTree);
   });
 });
 
@@ -287,6 +283,15 @@ describe('preserveKeywords', () => {
     },
     roles: null,
     hooks: undefined,
+    connections: [
+      {
+        name: 'connection-1',
+        type: 'waad',
+        options: {
+          domain: '##COMPANY_NAME##.com',
+        },
+      },
+    ],
     actions: [
       {
         name: 'action-1',
@@ -310,6 +315,7 @@ describe('preserveKeywords', () => {
     },
     pages: undefined, //TODO: test these cases more thoroughly
     rules: null, //TODO: test these cases more thoroughly
+    connections: [], // Empty on remote but has local assets
     actions: [
       {
         name: 'action-1',
