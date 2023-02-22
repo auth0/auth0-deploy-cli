@@ -14,7 +14,8 @@
                 "html": "<html>Change Password</html>\n"
             },
             "enabled_locales": [
-                "en"
+                "en",
+                "es"
             ],
             "error_page": {
                 "html": "<html>Error Page</html>\n",
@@ -47,7 +48,7 @@
                 "html": "<html>MFA</html>\n"
             },
             "idle_session_lifetime": 1,
-            "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
+            "picture_url": "https://unsplash.com/photos/8v1T2SCM6Ek",
             "sandbox_version": "12",
             "session_lifetime": 3.0166666666666666,
             "support_email": "support@mycompany.org",
@@ -78,7 +79,8 @@
                 "https://mycompany.org/logoutCallback"
             ],
             "enabled_locales": [
-                "en"
+                "en",
+                "es"
             ],
             "flags": {
                 "allow_legacy_delegation_grant_types": true,
@@ -124,7 +126,8 @@
                 "html": "<html>Change Password</html>\n"
             },
             "enabled_locales": [
-                "en"
+                "en",
+                "es"
             ],
             "error_page": {
                 "html": "<html>Error Page</html>\n",
@@ -192,7 +195,8 @@
                 "html": "<html>Change Password</html>\n"
             },
             "enabled_locales": [
-                "en"
+                "en",
+                "es"
             ],
             "error_page": {
                 "html": "<html>Error Page</html>\n",

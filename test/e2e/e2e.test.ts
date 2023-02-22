@@ -369,6 +369,7 @@ describe('keyword preservation', () => {
     AUTH0_INCLUDED_ONLY: ['tenant'] as AssetTypes[],
     AUTH0_KEYWORD_REPLACE_MAPPINGS: {
       TENANT_NAME: 'This tenant name should be preserved',
+      LANGUAGES: ['en', 'es'],
     },
   };
 
@@ -392,6 +393,7 @@ describe('keyword preservation', () => {
       fs.readFileSync(`${__dirname}/testdata/should-preserve-keywords/yaml/tenant.yaml`)
     );
     expect(yaml.tenant.friendly_name).to.equal('##TENANT_NAME##');
+    // expect(yaml.tenant.enabled_locales).to.equal('@@LANGUAGES@@'); TODO: enable @@ARRAY@@ keyword preservation in yaml formats
 
     recordingDone();
   });
@@ -419,6 +421,7 @@ describe('keyword preservation', () => {
     );
 
     expect(json.friendly_name).to.equal('##TENANT_NAME##');
+    expect(json.enabled_locales).to.equal('@@LANGUAGES@@');
 
     recordingDone();
   });

@@ -3,6 +3,7 @@ tenant:
     - https://mycompany.org/logoutCallback
   enabled_locales:
     - en
+    - es
   flags:
     allow_legacy_delegation_grant_types: true
     allow_legacy_ro_grant_types: true
@@ -21,8 +22,7 @@ tenant:
     enable_pipeline2: false
   friendly_name: '##TENANT_NAME##'
   idle_session_lifetime: 1
-  picture_url: >-
-    https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png
+  picture_url: https://unsplash.com/photos/8v1T2SCM6Ek
   sandbox_version: '12'
   session_cookie:
     mode: non-persistent
