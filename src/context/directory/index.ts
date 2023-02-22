@@ -76,8 +76,7 @@ export default class DirectoryContext {
   async dump(): Promise<void> {
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
     log.info('Loading Auth0 Tenant Data');
-
-    await this.loadAssetsFromLocal({ disableKeywordReplacement: true }); //Need to disable keyword replacement to retrieve the raw keyword markers (ex: ##KEYWORD##)
+    await auth0.loadAssetsFromAuth0();
 
     const shouldPreserveKeywords =
       //@ts-ignore because the string=>boolean conversion may not have happened if passed-in as env var
@@ -85,6 +84,7 @@ export default class DirectoryContext {
       this.config.AUTH0_PRESERVE_KEYWORDS === true;
     if (shouldPreserveKeywords) {
       const localAssets = { ...this.assets };
+      await this.loadAssetsFromLocal({ disableKeywordReplacement: true }); //Need to disable keyword replacement to retrieve the raw keyword markers (ex: ##KEYWORD##)
       //@ts-ignore
       delete this['assets'];
 

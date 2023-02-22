@@ -127,7 +127,7 @@ export default class YAMLContext {
         this.config.AUTH0_PRESERVE_KEYWORDS === 'true' ||
         this.config.AUTH0_PRESERVE_KEYWORDS === true;
       if (shouldPreserveKeywords) {
-        await this.loadAssetsFromLocal({ disableKeywordReplacement: true });
+        await this.loadAssetsFromLocal({ disableKeywordReplacement: true }); //Need to disable keyword replacement to retrieve the raw keyword markers (ex: ##KEYWORD##)
         const localAssets = { ...this.assets };
         //@ts-ignore
         delete this['assets'];
