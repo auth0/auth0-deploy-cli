@@ -16,7 +16,7 @@ describe('#YAML context validation', () => {
 
     const config = { AUTH0_INPUT_FILE: yaml };
     const context = new Context(config, mockMgmtClient());
-    await context.loadAssetsFromLocal({ disableKeywordReplacement: false });
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.rules).to.deep.equal(null);
     expect(context.assets.databases).to.deep.equal(null);
