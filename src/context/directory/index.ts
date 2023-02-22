@@ -76,7 +76,10 @@ export default class DirectoryContext {
 
     await this.loadAssetsFromLocal();
 
-    const shouldPreserveKeywords = false;
+    const shouldPreserveKeywords =
+      //@ts-ignore because the string=>boolean conversion may not have happened if passed-in as env var
+      this.config.AUTH0_PRESERVE_KEYWORDS === 'true' ||
+      this.config.AUTH0_PRESERVE_KEYWORDS === true;
     if (shouldPreserveKeywords) {
       const localAssets = { ...this.assets };
       //@ts-ignore
