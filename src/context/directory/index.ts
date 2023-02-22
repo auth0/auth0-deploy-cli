@@ -83,8 +83,8 @@ export default class DirectoryContext {
       this.config.AUTH0_PRESERVE_KEYWORDS === 'true' ||
       this.config.AUTH0_PRESERVE_KEYWORDS === true;
     if (shouldPreserveKeywords) {
-      const localAssets = { ...this.assets };
       await this.loadAssetsFromLocal({ disableKeywordReplacement: true }); //Need to disable keyword replacement to retrieve the raw keyword markers (ex: ##KEYWORD##)
+      const localAssets = { ...this.assets };
       //@ts-ignore
       delete this['assets'];
 

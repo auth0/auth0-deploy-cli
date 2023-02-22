@@ -134,7 +134,7 @@ describe('#directory context validation', () => {
   });
 
   it('should preserve keywords when dumping', async () => {
-    const dir = path.resolve(testDataDir, 'yaml', 'dump');
+    const dir = path.resolve(testDataDir, 'directory', 'dump');
 
     const localTenantData = {
       friendly_name: '##ENV## Tenant',
