@@ -16,7 +16,7 @@ describe('#YAML context validation', () => {
 
     const config = { AUTH0_INPUT_FILE: yaml };
     const context = new Context(config, mockMgmtClient());
-    await context.loadAssetsFromLocal();
+    await context.loadAssetsFromLocal({ disableKeywordReplacement: false });
 
     expect(context.assets.rules).to.deep.equal(null);
     expect(context.assets.databases).to.deep.equal(null);
@@ -534,5 +534,69 @@ describe('#YAML context validation', () => {
     expect(err).to.equal(
       'EXCLUDED_PROPS should NOT have any intersections with INCLUDED_PROPS. Intersections found: clients: client_secret, name'
     );
+  });
+
+  it('should preserve keywords when dumping', async () => {
+    const dir = path.resolve(testDataDir, 'yaml', 'dump');
+    cleanThenMkdir(dir);
+    const tenantFile = path.join(dir, 'tenant.yml');
+
+    const localAssets = {
+      tenant: {
+        friendly_name: '##ENV## Tenant',
+        enabled_locales: '@@LANGUAGES@@',
+      },
+      connections: [
+        {
+          name: 'connection-1',
+          strategy: 'waad',
+          options: {
+            tenant_domain: '##DOMAIN##',
+          },
+        },
+      ],
+    };
+
+    fs.writeFileSync(tenantFile, jsYaml.dump(localAssets));
+    const context = new Context(
+      {
+        AUTH0_INPUT_FILE: tenantFile,
+        AUTH0_PRESERVE_KEYWORDS: true,
+        AUTH0_INCLUDED_ONLY: ['tenant', 'connections'],
+        AUTH0_KEYWORD_REPLACE_MAPPINGS: {
+          ENV: 'Production',
+          LANGUAGES: ['en', 'es'],
+          DOMAIN: 'travel0.com',
+        },
+      },
+      {
+        tenant: {
+          getSettings: async () =>
+            new Promise((res) =>
+              res({
+                friendly_name: 'Production Tenant',
+                enabled_locales: ['en', 'es'],
+              })
+            ),
+        },
+        connections: {
+          getAll: () => ({
+            connections: [
+              {
+                name: 'connection-1',
+                strategy: 'waad',
+                options: {
+                  tenant_domain: 'travel0.com',
+                },
+              },
+            ],
+          }),
+        },
+      }
+    );
+    await context.dump();
+    const yaml = jsYaml.load(fs.readFileSync(tenantFile));
+
+    expect(yaml).to.deep.equal(localAssets);
   });
 });

@@ -29,7 +29,10 @@ function parse(context: DirectoryContext): ParsedConnections {
 
   const connections = foundFiles
     .map((f) => {
-      const connection = loadJSON(f, context.mappings);
+      const connection = loadJSON(f, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      });
 
       if (connection.strategy === 'email') {
         ensureProp(connection, 'options.email.body');

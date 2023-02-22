@@ -53,7 +53,7 @@ export default class YAMLContext {
     return loadFileAndReplaceKeywords(path.resolve(toLoad), this.mappings);
   }
 
-  async loadAssetsFromLocal(shouldReplaceKeywords = true) {
+  async loadAssetsFromLocal(opts = { disableKeywordReplacement: false }) {
     // Allow to send object/json directly
     if (typeof this.configFile === 'object') {
       this.assets = this.configFile;
@@ -64,9 +64,9 @@ export default class YAMLContext {
         Object.assign(
           this.assets,
           yaml.load(
-            shouldReplaceKeywords
-              ? keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)
-              : fs.readFileSync(fPath, 'utf8')
+            opts.disableKeywordReplacement
+              ? fs.readFileSync(fPath, 'utf8')
+              : keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)
           ) || {}
         );
       } catch (err) {
@@ -110,7 +110,7 @@ export default class YAMLContext {
           });
         } catch (err) {
           log.debug(err.stack);
-          throw new Error(`Problem deploying ${name}`);
+          throw new Error(`Problem deploying ${name}, ${err}`);
         }
       })
     );
@@ -127,7 +127,7 @@ export default class YAMLContext {
         this.config.AUTH0_PRESERVE_KEYWORDS === 'true' ||
         this.config.AUTH0_PRESERVE_KEYWORDS === true;
       if (shouldPreserveKeywords) {
-        await this.loadAssetsFromLocal(false);
+        await this.loadAssetsFromLocal({ disableKeywordReplacement: true });
         const localAssets = { ...this.assets };
         //@ts-ignore
         delete this['assets'];

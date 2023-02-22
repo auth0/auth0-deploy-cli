@@ -132,4 +132,44 @@ describe('#directory context validation', () => {
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
   });
+
+  it('should preserve keywords when dumping', async () => {
+    const dir = path.resolve(testDataDir, 'yaml', 'dump');
+
+    const localTenantData = {
+      friendly_name: '##ENV## Tenant',
+      enabled_locales: '@@LANGUAGES@@',
+    };
+
+    cleanThenMkdir(dir);
+    const tenantFile = path.join(dir, 'tenant.json');
+    fs.writeFileSync(tenantFile, JSON.stringify(localTenantData));
+
+    const context = new Context(
+      {
+        AUTH0_INPUT_FILE: dir,
+        AUTH0_PRESERVE_KEYWORDS: true,
+        AUTH0_INCLUDED_ONLY: ['tenant'],
+        AUTH0_KEYWORD_REPLACE_MAPPINGS: {
+          ENV: 'Production',
+          LANGUAGES: ['en', 'es'],
+        },
+      },
+      {
+        tenant: {
+          getSettings: async () =>
+            new Promise((res) =>
+              res({
+                friendly_name: 'Production Tenant',
+                enabled_locales: ['en', 'es'],
+              })
+            ),
+        },
+      }
+    );
+    await context.dump();
+    const json = JSON.parse(fs.readFileSync(tenantFile));
+
+    expect(json).to.deep.equal(localTenantData);
+  });
 });

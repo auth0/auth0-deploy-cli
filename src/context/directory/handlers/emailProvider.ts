@@ -18,7 +18,10 @@ function parse(context: DirectoryContext): ParsedEmailProvider {
 
   if (isFile(providerFile)) {
     return {
-      emailProvider: loadJSON(providerFile, context.mappings),
+      emailProvider: loadJSON(providerFile, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      }),
     };
   }
 

@@ -18,12 +18,14 @@ export default class DirectoryContext {
   mappings: KeywordMappings;
   mgmtClient: Auth0APIClient;
   assets: Assets;
+  disableKeywordReplacement: boolean;
 
   constructor(config: Config, mgmtClient: Auth0APIClient) {
     this.filePath = config.AUTH0_INPUT_FILE;
     this.config = config;
     this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {};
     this.mgmtClient = mgmtClient;
+    this.disableKeywordReplacement = false;
 
     //@ts-ignore for now
     this.assets = {};
@@ -48,7 +50,8 @@ export default class DirectoryContext {
     return loadFileAndReplaceKeywords(toLoad, this.mappings);
   }
 
-  async loadAssetsFromLocal(): Promise<void> {
+  async loadAssetsFromLocal(opts = { disableKeywordReplacement: false }): Promise<void> {
+    this.disableKeywordReplacement = opts.disableKeywordReplacement;
     if (isDirectory(this.filePath)) {
       /* If this is a directory, look for each file in the directory */
       log.info(`Processing directory ${this.filePath}`);
@@ -74,7 +77,7 @@ export default class DirectoryContext {
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
     log.info('Loading Auth0 Tenant Data');
 
-    await this.loadAssetsFromLocal();
+    await this.loadAssetsFromLocal({ disableKeywordReplacement: true }); //Need to disable keyword replacement to retrieve the raw keyword markers (ex: ##KEYWORD##)
 
     const shouldPreserveKeywords =
       //@ts-ignore because the string=>boolean conversion may not have happened if passed-in as env var
@@ -85,11 +88,9 @@ export default class DirectoryContext {
       //@ts-ignore
       delete this['assets'];
 
-      this.assets = auth0.assets;
-
       this.assets = preserveKeywords(
         localAssets,
-        this.assets,
+        auth0.assets,
         this.config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {}
       );
     } else {

@@ -17,7 +17,12 @@ function parse(context: DirectoryContext): ParsedHooks {
   const files = getFiles(hooksFolder, ['.json']);
 
   const hooks = files.map((f) => {
-    const hook = { ...loadJSON(f, context.mappings) };
+    const hook = {
+      ...loadJSON(f, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      }),
+    };
     if (hook.script) {
       hook.script = context.loadFile(hook.script, constants.HOOKS_DIRECTORY);
     }
