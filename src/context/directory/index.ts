@@ -7,6 +7,7 @@ import handlers, { DirectoryHandler } from './handlers';
 import { isDirectory, isFile, stripIdentifiers, toConfigFn } from '../../utils';
 import { Assets, Auth0APIClient, Config, AssetTypes } from '../../types';
 import { filterOnlyIncludedResourceTypes } from '..';
+import { preserveKeywords } from '../../keywordPreservation';
 
 type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 
@@ -72,8 +73,25 @@ export default class DirectoryContext {
   async dump(): Promise<void> {
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
     log.info('Loading Auth0 Tenant Data');
-    await auth0.loadAssetsFromAuth0();
-    this.assets = auth0.assets;
+
+    await this.loadAssetsFromLocal();
+
+    const shouldPreserveKeywords = false;
+    if (shouldPreserveKeywords) {
+      const localAssets = { ...this.assets };
+      //@ts-ignore
+      delete this['assets'];
+
+      this.assets = auth0.assets;
+
+      this.assets = preserveKeywords(
+        localAssets,
+        this.assets,
+        this.config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {}
+      );
+    } else {
+      this.assets = auth0.assets;
+    }
 
     // Clean known read only fields
     this.assets = cleanAssets(this.assets, this.config);

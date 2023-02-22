@@ -9,6 +9,7 @@ import handlers, { YAMLHandler } from './handlers';
 import cleanAssets from '../../readonly';
 import { Assets, Config, Auth0APIClient, AssetTypes, KeywordMappings } from '../../types';
 import { filterOnlyIncludedResourceTypes } from '..';
+import { preserveKeywords } from '../../keywordPreservation';
 
 export default class YAMLContext {
   basePath: string;
@@ -52,7 +53,7 @@ export default class YAMLContext {
     return loadFileAndReplaceKeywords(path.resolve(toLoad), this.mappings);
   }
 
-  async loadAssetsFromLocal() {
+  async loadAssetsFromLocal(shouldReplaceKeywords = true) {
     // Allow to send object/json directly
     if (typeof this.configFile === 'object') {
       this.assets = this.configFile;
@@ -62,7 +63,11 @@ export default class YAMLContext {
         log.debug(`Loading YAML from ${fPath}`);
         Object.assign(
           this.assets,
-          yaml.load(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)) || {}
+          yaml.load(
+            shouldReplaceKeywords
+              ? keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)
+              : fs.readFileSync(fPath, 'utf8')
+          ) || {}
         );
       } catch (err) {
         log.debug(err.stack);
@@ -116,7 +121,22 @@ export default class YAMLContext {
     log.info('Loading Auth0 Tenant Data');
     try {
       await auth0.loadAssetsFromAuth0();
-      this.assets = auth0.assets;
+
+      const shouldPreserveKeywords = false;
+      if (shouldPreserveKeywords) {
+        await this.loadAssetsFromLocal(false);
+        const localAssets = { ...this.assets };
+        //@ts-ignore
+        delete this['assets'];
+
+        this.assets = preserveKeywords(
+          localAssets,
+          auth0.assets,
+          this.config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {}
+        );
+      } else {
+        this.assets = auth0.assets;
+      }
     } catch (err) {
       const docUrl =
         'https://auth0.com/docs/deploy/deploy-cli-tool/create-and-configure-the-deploy-cli-application#modify-deploy-cli-application-scopes';
