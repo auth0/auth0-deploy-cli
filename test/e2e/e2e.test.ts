@@ -357,4 +357,122 @@ describe('#end-to-end keyword replacement', function () {
 
     recordingDone();
   });
+
+  it('should preserve keywords for yaml format', async function () {
+    const workDirectory = testNameToWorkingDirectory(this.test?.title);
+
+    const { recordingDone } = await setupRecording(this.test?.title);
+
+    await deploy({
+      input_file: `${__dirname}/testdata/should-preserve-keywords/yaml/tenant.yaml`,
+      config,
+    });
+
+    await dump({
+      output_folder: `${__dirname}/testdata/should-preserve-keywords/yaml`,
+      format: 'yaml',
+      config,
+    });
+
+    const yaml = yamlLoad(
+      fs.readFileSync(`${__dirname}/testdata/should-preserve-keywords/yaml/tenant.yaml`)
+    );
+    expect(yaml.tenant.friendly_name).to.equal('##TENANT_NAME##');
+
+    recordingDone();
+  });
+
+  it.skip('should preserve keywords for directory format', async function () {
+    const workDirectory = testNameToWorkingDirectory(this.test?.title);
+
+    const { recordingDone } = await setupRecording(this.test?.title);
+
+    await deploy({
+      input_file: `${__dirname}/testdata/should-preserve-keywords/directory`,
+      config,
+    });
+
+    await dump({
+      output_folder: `${__dirname}/testdata/should-preserve-keywords/directory`,
+      format: 'directory',
+      config,
+    });
+
+    const json = JSON.parse(
+      fs
+        .readFileSync(`${__dirname}/testdata/should-preserve-keywords/directory/tenant.json`)
+        .toString()
+    );
+
+    console.log({ json });
+    expect(json.friendly_name).to.equal('##TENANT_NAME##');
+
+    recordingDone();
+  });
+});
+
+describe('keyword preservation', () => {
+  const config = {
+    AUTH0_DOMAIN,
+    AUTH0_CLIENT_ID,
+    AUTH0_CLIENT_SECRET,
+    AUTH0_ACCESS_TOKEN,
+    AUTH0_PRESERVE_KEYWORDS: true,
+    AUTH0_INCLUDED_ONLY: ['tenant'] as AssetTypes[],
+    AUTH0_KEYWORD_REPLACE_MAPPINGS: {
+      TENANT_NAME: 'This tenant name should be preserved',
+    },
+  };
+
+  it('should preserve keywords for yaml format', async function () {
+    const workDirectory = testNameToWorkingDirectory(this.test?.title);
+
+    const { recordingDone } = await setupRecording(this.test?.title);
+
+    await deploy({
+      input_file: `${__dirname}/testdata/should-preserve-keywords/yaml/tenant.yaml`,
+      config,
+    });
+
+    await dump({
+      output_folder: `${__dirname}/testdata/should-preserve-keywords/yaml`,
+      format: 'yaml',
+      config,
+    });
+
+    const yaml = yamlLoad(
+      fs.readFileSync(`${__dirname}/testdata/should-preserve-keywords/yaml/tenant.yaml`)
+    );
+    expect(yaml.tenant.friendly_name).to.equal('##TENANT_NAME##');
+
+    recordingDone();
+  });
+
+  it('should preserve keywords for directory format', async function () {
+    const workDirectory = testNameToWorkingDirectory(this.test?.title);
+
+    const { recordingDone } = await setupRecording(this.test?.title);
+
+    await deploy({
+      input_file: `${__dirname}/testdata/should-preserve-keywords/directory`,
+      config,
+    });
+
+    await dump({
+      output_folder: `${__dirname}/testdata/should-preserve-keywords/directory`,
+      format: 'directory',
+      config,
+    });
+
+    const json = JSON.parse(
+      fs
+        .readFileSync(`${__dirname}/testdata/should-preserve-keywords/directory/tenant.json`)
+        .toString()
+    );
+
+    console.log({ json });
+    expect(json.friendly_name).to.equal('##TENANT_NAME##');
+
+    recordingDone();
+  });
 });
