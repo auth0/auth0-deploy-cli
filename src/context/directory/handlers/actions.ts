@@ -19,11 +19,17 @@ function parse(context: DirectoryContext): ParsedActions {
 
   const files = getFiles(actionsFolder, ['.json']);
   const actions = files.map((file) => {
-    const action = { ...loadJSON(file, context.mappings) };
+    const action = {
+      ...loadJSON(file, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      }),
+    };
     const actionFolder = path.join(constants.ACTIONS_DIRECTORY, `${action.name}`);
 
     if (action.code) {
-      const toUnixPath = somePath => somePath.replace(/[\\/]+/g, '/').replace(/^([a-zA-Z]+:|\.\/)/, '');
+      const toUnixPath = (somePath) =>
+        somePath.replace(/[\\/]+/g, '/').replace(/^([a-zA-Z]+:|\.\/)/, '');
       action.code = context.loadFile(toUnixPath(action.code), actionFolder);
     }
 

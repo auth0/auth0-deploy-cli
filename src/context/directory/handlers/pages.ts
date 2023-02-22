@@ -39,7 +39,10 @@ function parse(context: DirectoryContext): ParsedPages {
     if (!html && ['error_page', 'login'].includes(key)) {
       //Error pages don't require an HTML template, it is valid to redirect errors to URL
       return {
-        ...loadJSON(meta, context.mappings),
+        ...loadJSON(meta, {
+          mappings: context.mappings,
+          disableKeywordReplacement: context.disableKeywordReplacement,
+        }),
         html: '',
       };
     }
@@ -48,7 +51,10 @@ function parse(context: DirectoryContext): ParsedPages {
       return [];
     }
     return {
-      ...loadJSON(meta, context.mappings),
+      ...loadJSON(meta, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      }),
       html: loadFileAndReplaceKeywords(html, context.mappings),
     };
   });

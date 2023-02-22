@@ -22,7 +22,10 @@ function parse(context: DirectoryContext): ParsedGuardianFactorSelectedProvider 
   }
 
   return {
-    guardianPhoneFactorSelectedProvider: loadJSON(file, context.mappings),
+    guardianPhoneFactorSelectedProvider: loadJSON(file, {
+      mappings: context.mappings,
+      disableKeywordReplacement: context.disableKeywordReplacement,
+    }),
   };
 }
 

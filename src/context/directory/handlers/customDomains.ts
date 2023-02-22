@@ -21,7 +21,10 @@ function parse(context: DirectoryContext): ParsedCustomDomains {
   const customDomainsFile = getCustomDomainsFile(context.filePath);
 
   return {
-    customDomains: loadJSON(customDomainsFile, context.mappings),
+    customDomains: loadJSON(customDomainsFile, {
+      mappings: context.mappings,
+      disableKeywordReplacement: context.disableKeywordReplacement,
+    }),
   };
 }
 

@@ -205,6 +205,7 @@ export type Config = {
   AUTH0_ALLOW_DELETE: boolean;
   AUTH0_EXCLUDED?: AssetTypes[];
   AUTH0_INCLUDED_ONLY?: AssetTypes[];
+  AUTH0_PRESERVE_KEYWORDS: boolean;
   EXTENSION_SECRET: string;
   AUTH0_ACCESS_TOKEN?: string;
   AUTH0_BASE_PATH?: string;

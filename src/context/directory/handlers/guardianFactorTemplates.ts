@@ -20,7 +20,12 @@ function parse(context: DirectoryContext): ParsedGuardianFactorTemplates {
   const foundFiles = getFiles(factorTemplatesFolder, ['.json']);
 
   const guardianFactorTemplates = foundFiles
-    .map((f) => loadJSON(f, context.mappings))
+    .map((f) =>
+      loadJSON(f, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      })
+    )
     .filter((p) => Object.keys(p).length > 0); // Filter out empty guardianFactorTemplates
 
   return {
