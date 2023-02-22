@@ -72,7 +72,7 @@ export default class DirectoryContext {
   async dump(): Promise<void> {
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
     log.info('Loading Auth0 Tenant Data');
-    await auth0.loadAll();
+    await auth0.loadAssetsFromAuth0();
     this.assets = auth0.assets;
 
     // Clean known read only fields

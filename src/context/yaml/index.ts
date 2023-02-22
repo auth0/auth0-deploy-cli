@@ -115,7 +115,7 @@ export default class YAMLContext {
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
     log.info('Loading Auth0 Tenant Data');
     try {
-      await auth0.loadAll();
+      await auth0.loadAssetsFromAuth0();
       this.assets = auth0.assets;
     } catch (err) {
       const docUrl =
