@@ -470,19 +470,19 @@ describe('keyword preservation', () => {
       throw new Error("The above should've thrown an exception");
     } catch (err) {
       expect(err.message).to.contain(
-        'Attempting to preserve keywords for local resource configuration files that do not exist. Ensure that there are resource files in the output directory or disable AUTH0_PRESERVE_KEYWORDS.'
+        'Attempting to preserve keywords without defining keyword mappings. Doing so could result in unintentional overwriting of resource configurations. Either define keyword mappings via AUTH0_KEYWORD_REPLACE_MAPPINGS or disable AUTH0_PRESERVE_KEYWORDS.'
       );
     }
 
     try {
       await dump({
-        output_folder: `${__dirname}/testdata/empty-directory`,
+        output_folder: workDirectory,
         format: 'yaml',
         config,
       });
     } catch (err) {
       expect(err.message).to.contain(
-        'Attempting to preserve keywords for local resource configuration files that do not exist. Ensure that there are resource files in the output directory or disable AUTH0_PRESERVE_KEYWORDS.'
+        'Attempting to preserve keywords without defining keyword mappings. Doing so could result in unintentional overwriting of resource configurations. Either define keyword mappings via AUTH0_KEYWORD_REPLACE_MAPPINGS or disable AUTH0_PRESERVE_KEYWORDS.'
       );
       return;
     }
