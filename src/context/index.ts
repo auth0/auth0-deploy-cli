@@ -1,3 +1,4 @@
+import { lstatSync, readdirSync, readFileSync, existsSync } from 'fs';
 import path from 'path';
 import { AuthenticationClient, ManagementClient } from 'auth0';
 import YAMLContext from './yaml';
@@ -25,7 +26,10 @@ const nonPrimitiveProps: (keyof Config)[] = [
   'INCLUDED_PROPS',
 ];
 
-export const setupContext = async (config: Config): Promise<DirectoryContext | YAMLContext> => {
+export const setupContext = async (
+  config: Config,
+  command: 'import' | 'export'
+): Promise<DirectoryContext | YAMLContext> => {
   const missingParams: ('AUTH0_DOMAIN' | 'AUTH0_CLIENT_ID' | 'AUTH0_CLIENT_SECRET')[] = [];
 
   if (!config.AUTH0_DOMAIN) missingParams.push('AUTH0_DOMAIN');
@@ -58,6 +62,42 @@ export const setupContext = async (config: Config): Promise<DirectoryContext | Y
     if (hasExcludedResources && hasIncludedResources) {
       throw new Error(
         'Both AUTH0_EXCLUDED and AUTH0_INCLUDED_ONLY configuration values are defined, only one can be configured at a time. See: https://github.com/auth0/auth0-deploy-cli/blob/master/docs/excluding-from-management.md'
+      );
+    }
+  })(config);
+
+  ((config: Config) => {
+    if (command === 'import') return;
+
+    const shouldPreserveKeywords =
+      //@ts-ignore because the string=>boolean conversion may not have happened if passed-in as env var
+      config.AUTH0_PRESERVE_KEYWORDS === 'true' || config.AUTH0_PRESERVE_KEYWORDS === true;
+
+    if (!shouldPreserveKeywords) return;
+
+    const isKeywordMappingsEmpty =
+      config.AUTH0_KEYWORD_REPLACE_MAPPINGS === undefined ||
+      Object.keys(config.AUTH0_KEYWORD_REPLACE_MAPPINGS).length === 0;
+
+    if (isKeywordMappingsEmpty) {
+      throw new Error(
+        'Attempting to preserve keywords without defining keyword mappings. Doing so could result in unintentional overwriting of resource configurations. Either define keyword mappings via AUTH0_KEYWORD_REPLACE_MAPPINGS or disable AUTH0_PRESERVE_KEYWORDS.'
+      );
+    }
+
+    const doLocalFilesExist = (() => {
+      if (!existsSync(config.AUTH0_INPUT_FILE)) return false;
+
+      const isDirectory = lstatSync(config.AUTH0_INPUT_FILE).isDirectory();
+      if (isDirectory) {
+        return readdirSync(config.AUTH0_INPUT_FILE).length > 0;
+      }
+      return existsSync(config.AUTH0_INPUT_FILE);
+    })();
+
+    if (!doLocalFilesExist) {
+      throw new Error(
+        'Attempting to preserve keywords for local resource configuration files that do not exist. Ensure that there are resource files in the output directory or disable AUTH0_PRESERVE_KEYWORDS.'
       );
     }
   })(config);

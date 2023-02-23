@@ -438,4 +438,54 @@ describe('keyword preservation', () => {
 
     recordingDone();
   });
+
+  it('should throw if attempting to preserve keywords but no keywords defined', async function () {
+    const workDirectory = testNameToWorkingDirectory(this.test?.title);
+    try {
+      //@ts-ignore
+      delete config['AUTH0_KEYWORD_REPLACE_MAPPINGS'];
+      await dump({
+        output_folder: workDirectory,
+        format: 'directory',
+        config,
+      });
+    } catch (err) {
+      expect(err.message).to.contain(
+        'Attempting to preserve keywords without defining keyword mappings. Doing so could result in unintentional overwriting of resource configurations. Either define keyword mappings via AUTH0_KEYWORD_REPLACE_MAPPINGS or disable AUTH0_PRESERVE_KEYWORDS.'
+      );
+      return;
+    }
+    throw new Error("The above should've thrown an exception");
+  });
+
+  it('should throw if attempting to preserve keywords without having local configuration files', async function () {
+    const workDirectory = testNameToWorkingDirectory(this.test?.title);
+
+    try {
+      await dump({
+        output_folder: workDirectory,
+        format: 'directory',
+        config,
+      });
+      throw new Error("The above should've thrown an exception");
+    } catch (err) {
+      expect(err.message).to.contain(
+        'Attempting to preserve keywords for local resource configuration files that do not exist. Ensure that there are resource files in the output directory or disable AUTH0_PRESERVE_KEYWORDS.'
+      );
+    }
+
+    try {
+      await dump({
+        output_folder: `${__dirname}/testdata/empty-directory`,
+        format: 'yaml',
+        config,
+      });
+    } catch (err) {
+      expect(err.message).to.contain(
+        'Attempting to preserve keywords for local resource configuration files that do not exist. Ensure that there are resource files in the output directory or disable AUTH0_PRESERVE_KEYWORDS.'
+      );
+      return;
+    }
+    throw new Error("The above should've thrown an exception");
+  });
 });
