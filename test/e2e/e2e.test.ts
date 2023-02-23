@@ -1,11 +1,11 @@
 import { expect } from 'chai';
 import path from 'path';
 import fs from 'fs';
+import { copySync } from 'fs-extra';
 import { getFiles, existsMustBeDir } from '../../src/utils';
 import { load as yamlLoad } from 'js-yaml';
 import { setupRecording, testNameToWorkingDirectory } from './e2e-utils';
 import { dump, deploy } from '../../src';
-import exp from 'constants';
 import { AssetTypes } from '../../src/types';
 
 const shouldUseRecordings = process.env['AUTH0_HTTP_RECORDINGS'] === 'lockdown';
@@ -354,6 +354,87 @@ describe('#end-to-end keyword replacement', function () {
 
     const json = JSON.parse(fs.readFileSync(files[0]).toString());
     expect(json.friendly_name).to.equal(`This is the ${keywordMapping.COMPANY_NAME} Tenant`);
+
+    recordingDone();
+  });
+});
+
+describe('keyword preservation', () => {
+  const config = {
+    AUTH0_DOMAIN,
+    AUTH0_CLIENT_ID,
+    AUTH0_CLIENT_SECRET,
+    AUTH0_ACCESS_TOKEN,
+    AUTH0_PRESERVE_KEYWORDS: true,
+    AUTH0_INCLUDED_ONLY: ['tenant', 'emailTemplates'] as AssetTypes[],
+    AUTH0_KEYWORD_REPLACE_MAPPINGS: {
+      TENANT_NAME: 'This tenant name should be preserved',
+      DOMAIN: 'travel0.com',
+      LANGUAGES: ['en', 'es'],
+    },
+  };
+
+  it('should preserve keywords for yaml format', async function () {
+    const workDirectory = testNameToWorkingDirectory(this.test?.title);
+
+    const { recordingDone } = await setupRecording(this.test?.title);
+
+    await deploy({
+      input_file: `${__dirname}/testdata/should-preserve-keywords/yaml/tenant.yaml`,
+      config,
+    });
+
+    copySync(`${__dirname}/testdata/should-preserve-keywords/yaml`, workDirectory); //It is necessary to copy directory contents to work directory to prevent overwriting of Git-committed files
+
+    await dump({
+      output_folder: workDirectory,
+      format: 'yaml',
+      config,
+    });
+
+    const yaml = yamlLoad(fs.readFileSync(path.join(workDirectory, 'tenant.yaml')));
+    expect(yaml.tenant.friendly_name).to.equal('##TENANT_NAME##');
+    expect(yaml.tenant.support_email).to.equal('support@##DOMAIN##');
+    expect(yaml.tenant.support_url).to.equal('https://##DOMAIN##/support');
+    // expect(yaml.tenant.enabled_locales).to.equal('@@LANGUAGES@@'); TODO: enable @@ARRAY@@ keyword preservation in yaml formats
+
+    // const emailTemplateHTML = fs
+    //   .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
+    //   .toString();
+    // expect(emailTemplateHTML).to.contain('##TENANT##'); TODO: enable keyword preservation in auxillary template files
+
+    recordingDone();
+  });
+
+  it('should preserve keywords for directory format', async function () {
+    const workDirectory = testNameToWorkingDirectory(this.test?.title);
+
+    const { recordingDone } = await setupRecording(this.test?.title);
+
+    await deploy({
+      input_file: `${__dirname}/testdata/should-preserve-keywords/directory`,
+      config,
+    });
+
+    copySync(`${__dirname}/testdata/should-preserve-keywords/directory`, workDirectory); //It is necessary to copy directory contents to work directory to prevent overwriting of Git-committed files
+
+    await dump({
+      output_folder: workDirectory,
+      format: 'directory',
+      config,
+    });
+
+    const json = JSON.parse(fs.readFileSync(path.join(workDirectory, 'tenant.json')).toString());
+
+    expect(json.friendly_name).to.equal('##TENANT_NAME##');
+    expect(json.enabled_locales).to.equal('@@LANGUAGES@@');
+    expect(json.support_email).to.equal('support@##DOMAIN##');
+    expect(json.support_url).to.equal('https://##DOMAIN##/support');
+
+    // const emailTemplateHTML = fs
+    //   .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
+    //   .toString();
+    // expect(emailTemplateHTML).to.contain('##TENANT##'); TODO: enable keyword preservation in auxillary template files
 
     recordingDone();
   });
