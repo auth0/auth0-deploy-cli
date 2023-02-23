@@ -165,6 +165,9 @@ describe('#directory context validation', () => {
               })
             ),
         },
+        actions: {
+          getSettings: async () => new Promise((res) => res([])),
+        },
       }
     );
     await context.dump();

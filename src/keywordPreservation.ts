@@ -113,11 +113,12 @@ export const getAssetsValueByAddress = (address: string, assets: any): any => {
 // convertAddressToDotNotation will convert the proprietary address into conventional
 // JS object notation. Performing this conversion simplifies the process
 // of updating a specific property for a given asset tree using the dot-prop library
+// returns null if address value does not exist in asset tree
 export const convertAddressToDotNotation = (
   assets: any,
   address: string,
   finalAddressTrail = ''
-): string => {
+): string | null => {
   const directions = address.split('.');
 
   if (directions[0] === '') return finalAddressTrail;
@@ -134,8 +135,7 @@ export const convertAddressToDotNotation = (
       }
     });
 
-    if (targetIndex === -1)
-      throw new Error(`Cannot find ${directions[0]} in ${JSON.stringify(assets)}`);
+    if (targetIndex === -1) return null; // No object of this address exists in the assets
 
     return convertAddressToDotNotation(
       assets[targetIndex],
@@ -158,10 +158,12 @@ export const updateAssetsByAddress = (
 ): object => {
   const dotNotationAddress = convertAddressToDotNotation(assets, address);
 
+  if (dotNotationAddress === null) return assets;
+
   const doesPropertyExist = getByDotNotation(assets, dotNotationAddress) !== undefined;
 
   if (!doesPropertyExist) {
-    throw new Error(`cannot update assets by address: ${address} because it does not exist.`);
+    return assets;
   }
 
   setByDotNotation(assets, dotNotationAddress, newValue);
