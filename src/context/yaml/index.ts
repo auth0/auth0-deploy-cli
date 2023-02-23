@@ -9,6 +9,7 @@ import handlers, { YAMLHandler } from './handlers';
 import cleanAssets from '../../readonly';
 import { Assets, Config, Auth0APIClient, AssetTypes, KeywordMappings } from '../../types';
 import { filterOnlyIncludedResourceTypes } from '..';
+import { preserveKeywords } from '../../keywordPreservation';
 
 export default class YAMLContext {
   basePath: string;
@@ -52,7 +53,7 @@ export default class YAMLContext {
     return loadFileAndReplaceKeywords(path.resolve(toLoad), this.mappings);
   }
 
-  async loadAssetsFromLocal() {
+  async loadAssetsFromLocal(opts = { disableKeywordReplacement: false }) {
     // Allow to send object/json directly
     if (typeof this.configFile === 'object') {
       this.assets = this.configFile;
@@ -62,7 +63,11 @@ export default class YAMLContext {
         log.debug(`Loading YAML from ${fPath}`);
         Object.assign(
           this.assets,
-          yaml.load(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)) || {}
+          yaml.load(
+            opts.disableKeywordReplacement
+              ? fs.readFileSync(fPath, 'utf8')
+              : keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)
+          ) || {}
         );
       } catch (err) {
         log.debug(err.stack);
@@ -105,7 +110,7 @@ export default class YAMLContext {
           });
         } catch (err) {
           log.debug(err.stack);
-          throw new Error(`Problem deploying ${name}`);
+          throw new Error(`Problem deploying ${name}, ${err}`);
         }
       })
     );
@@ -116,7 +121,25 @@ export default class YAMLContext {
     log.info('Loading Auth0 Tenant Data');
     try {
       await auth0.loadAssetsFromAuth0();
-      this.assets = auth0.assets;
+
+      const shouldPreserveKeywords =
+        //@ts-ignore because the string=>boolean conversion may not have happened if passed-in as env var
+        this.config.AUTH0_PRESERVE_KEYWORDS === 'true' ||
+        this.config.AUTH0_PRESERVE_KEYWORDS === true;
+      if (shouldPreserveKeywords) {
+        await this.loadAssetsFromLocal({ disableKeywordReplacement: true }); //Need to disable keyword replacement to retrieve the raw keyword markers (ex: ##KEYWORD##)
+        const localAssets = { ...this.assets };
+        //@ts-ignore
+        delete this['assets'];
+
+        this.assets = preserveKeywords(
+          localAssets,
+          auth0.assets,
+          this.config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {}
+        );
+      } else {
+        this.assets = auth0.assets;
+      }
     } catch (err) {
       const docUrl =
         'https://auth0.com/docs/deploy/deploy-cli-tool/create-and-configure-the-deploy-cli-application#modify-deploy-cli-application-scopes';

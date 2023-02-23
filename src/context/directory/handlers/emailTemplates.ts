@@ -37,7 +37,10 @@ function parse(context: DirectoryContext): ParsedEmailTemplates {
         return [];
       } else {
         return {
-          ...loadJSON(meta, context.mappings),
+          ...loadJSON(meta, {
+            mappings: context.mappings,
+            disableKeywordReplacement: context.disableKeywordReplacement,
+          }),
           body: loadFileAndReplaceKeywords(html, context.mappings),
         };
       }

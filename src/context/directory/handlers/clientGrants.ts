@@ -24,7 +24,12 @@ function parse(context: DirectoryContext): ParsedClientGrants {
   const foundFiles = getFiles(grantsFolder, ['.json']);
 
   const clientGrants = foundFiles
-    .map((f) => loadJSON(f, context.mappings))
+    .map((f) =>
+      loadJSON(f, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      })
+    )
     .filter((p) => Object.keys(p).length > 0); // Filter out empty grants
 
   return {

@@ -16,7 +16,12 @@ function parse(context: DirectoryContext): ParsedResourceServers {
   const foundFiles = getFiles(resourceServersFolder, ['.json']);
 
   const resourceServers = foundFiles
-    .map((f) => loadJSON(f, context.mappings))
+    .map((f) =>
+      loadJSON(f, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      })
+    )
     .filter((p) => Object.keys(p).length > 0); // Filter out empty resourceServers
 
   return {

@@ -18,7 +18,12 @@ function parse(context: DirectoryContext): ParsedRules {
   const files: string[] = getFiles(rulesFolder, ['.json']);
 
   const rules = files.map((f) => {
-    const rule = { ...loadJSON(f, context.mappings) };
+    const rule = {
+      ...loadJSON(f, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      }),
+    };
     if (rule.script) {
       rule.script = context.loadFile(rule.script, constants.RULES_DIRECTORY);
     }

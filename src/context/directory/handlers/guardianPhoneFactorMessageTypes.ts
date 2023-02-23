@@ -19,7 +19,10 @@ function parse(context: DirectoryContext): ParsedGuardianFactorMessageTypes {
   }
 
   return {
-    guardianPhoneFactorMessageTypes: loadJSON(file, context.mappings),
+    guardianPhoneFactorMessageTypes: loadJSON(file, {
+      mappings: context.mappings,
+      disableKeywordReplacement: context.disableKeywordReplacement,
+    }),
   };
 }
 

@@ -15,7 +15,12 @@ function parse(context: DirectoryContext): ParsedRulesConfigs {
   const foundFiles: string[] = getFiles(rulesConfigsFolder, ['.json']);
 
   const rulesConfigs = foundFiles
-    .map((f) => loadJSON(f, context.mappings))
+    .map((f) =>
+      loadJSON(f, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      })
+    )
     .filter((p) => Object.keys(p).length > 0); // Filter out empty rulesConfigs
 
   return {

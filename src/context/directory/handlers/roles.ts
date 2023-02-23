@@ -17,7 +17,12 @@ function parse(context: DirectoryContext): ParsedRoles {
   const files = getFiles(rolesFolder, ['.json']);
 
   const roles = files.map((f) => {
-    const role = { ...loadJSON(f, context.mappings) };
+    const role = {
+      ...loadJSON(f, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      }),
+    };
     return role;
   });
 
