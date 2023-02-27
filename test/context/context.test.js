@@ -22,14 +22,14 @@ const config = {
 
 describe('#context loader validation', async () => {
   it('should error on bad file', async () => {
-    await expect(setupContext(config)).to.be.eventually.rejectedWith(Error);
+    await expect(setupContext(config), 'import').to.be.eventually.rejectedWith(Error);
   });
 
   it('should load directory context', async () => {
     /* Create empty directory */
     const dir = path.resolve(testDataDir, 'context');
     cleanThenMkdir(dir);
-    const loaded = await setupContext({ ...config, AUTH0_INPUT_FILE: dir });
+    const loaded = await setupContext({ ...config, AUTH0_INPUT_FILE: dir }, 'import');
     expect(loaded).to.be.an.instanceof(directoryContext);
   });
 
@@ -42,10 +42,10 @@ describe('#context loader validation', async () => {
     const yml = path.join(dir, 'empty.yml');
     fs.writeFileSync(yml, '');
 
-    const loaded = await setupContext({ ...config, AUTH0_INPUT_FILE: yaml });
+    const loaded = await setupContext({ ...config, AUTH0_INPUT_FILE: yaml }, 'import');
     expect(loaded).to.be.an.instanceof(yamlContext);
 
-    const loaded2 = await setupContext({ ...config, AUTH0_INPUT_FILE: yml });
+    const loaded2 = await setupContext({ ...config, AUTH0_INPUT_FILE: yml }, 'import');
     expect(loaded2).to.be.an.instanceof(yamlContext);
   });
 
@@ -57,7 +57,7 @@ describe('#context loader validation', async () => {
     const yaml = path.join(dir, 'empty.yaml');
     fs.writeFileSync(yaml, '');
 
-    const loaded = await setupContext({ ...config, AUTH0_INPUT_FILE: yaml });
+    const loaded = await setupContext({ ...config, AUTH0_INPUT_FILE: yaml }, 'import');
     expect(loaded).to.be.an.instanceof(yamlContext);
 
     const userAgent =
@@ -75,18 +75,21 @@ describe('#context loader validation', async () => {
     fs.writeFileSync(yaml, '');
 
     const loggerSpy = sinon.spy(logger, 'warn');
-    await setupContext({
-      ...config,
-      AUTH0_INPUT_FILE: yaml,
-      AUTH0_EXCLUDED_CLIENTS: ['connection-1', 'connection-2'],
-    });
+    await setupContext(
+      {
+        ...config,
+        AUTH0_INPUT_FILE: yaml,
+        AUTH0_EXCLUDED_CLIENTS: ['connection-1', 'connection-2'],
+      },
+      'import'
+    );
 
     expect(loggerSpy).to.have.been.calledWith(
       'Usage of the AUTH0_EXCLUDED_CLIENTS exclusion param is deprecated and may be removed from future major versions. See: https://github.com/auth0/auth0-deploy-cli/issues/451#user-content-deprecated-exclusion-props for details.'
     );
 
     loggerSpy.resetHistory(); // Reset history for following case
-    await setupContext({ ...config, AUTH0_INPUT_FILE: yaml });
+    await setupContext({ ...config, AUTH0_INPUT_FILE: yaml }, 'import');
     // eslint-disable-next-line no-unused-expressions
     expect(loggerSpy).to.not.have.been.called;
   });
@@ -99,22 +102,28 @@ describe('#context loader validation', async () => {
     fs.writeFileSync(yaml, '');
 
     await expect(
-      setupContext({
-        ...config,
-        AUTH0_INPUT_FILE: yaml,
-        AUTH0_EXCLUDED: ['actions', 'rules'],
-        AUTH0_INCLUDED_ONLY: ['tenant'],
-      })
+      setupContext(
+        {
+          ...config,
+          AUTH0_INPUT_FILE: yaml,
+          AUTH0_EXCLUDED: ['actions', 'rules'],
+          AUTH0_INCLUDED_ONLY: ['tenant'],
+        },
+        'import'
+      )
     ).to.be.rejectedWith(
       'Both AUTH0_EXCLUDED and AUTH0_INCLUDED_ONLY configuration values are defined'
     );
 
     await expect(
-      setupContext({
-        ...config,
-        AUTH0_INCLUDED_ONLY: ['tenant'],
-        AUTH0_INPUT_FILE: yaml,
-      })
+      setupContext(
+        {
+          ...config,
+          AUTH0_INCLUDED_ONLY: ['tenant'],
+          AUTH0_INPUT_FILE: yaml,
+        },
+        'import'
+      )
     ).to.be.not.rejected;
   });
 
@@ -126,11 +135,14 @@ describe('#context loader validation', async () => {
     fs.writeFileSync(yaml, '');
 
     await expect(
-      setupContext({
-        ...config,
-        AUTH0_INPUT_FILE: yaml,
-        AUTH0_INCLUDED_ONLY: [],
-      })
+      setupContext(
+        {
+          ...config,
+          AUTH0_INPUT_FILE: yaml,
+          AUTH0_INCLUDED_ONLY: [],
+        },
+        'import'
+      )
     ).to.be.rejectedWith(
       'Need to define at least one resource type in AUTH0_INCLUDED_ONLY configuration. See: https://github.com/auth0/auth0-deploy-cli/blob/master/docs/configuring-the-deploy-cli.md#auth0_included_only'
     );

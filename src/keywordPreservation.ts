@@ -178,6 +178,8 @@ export const preserveKeywords = (
   remoteAssets: object,
   keywordMappings: KeywordMappings
 ): object => {
+  if (Object.keys(keywordMappings).length === 0) return remoteAssets;
+
   const addresses = getPreservableFieldsFromAssets(localAssets, keywordMappings, '');
 
   let updatedRemoteAssets = cloneDeep(remoteAssets);

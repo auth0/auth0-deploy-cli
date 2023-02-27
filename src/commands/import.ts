@@ -42,7 +42,7 @@ export default async function importCMD(params: ImportParams) {
   nconf.overrides(overrides);
 
   // Setup context and load
-  const context = await setupContext(nconf.get());
+  const context = await setupContext(nconf.get(), 'import');
   await context.loadAssetsFromLocal();
 
   const config = configFactory();
