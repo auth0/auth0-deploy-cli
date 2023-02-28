@@ -23,6 +23,7 @@ export default class EmailTemplateHandler extends DefaultHandler {
     super({
       ...options,
       type: 'emailTemplates',
+      identifiers: ['template'],
       id: 'template',
     });
   }

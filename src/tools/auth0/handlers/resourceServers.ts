@@ -90,7 +90,7 @@ export default class ResourceServersHandler extends DefaultHandler {
       handler: this,
       assets: resourceServers,
       existing,
-      identifiers: ['id', 'identifier'],
+      identifiers: this.identifiers,
       allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
     });
   }

@@ -36,7 +36,6 @@ export default class OrganizationsHandler extends DefaultHandler {
       ...config,
       type: 'organizations',
       id: 'id',
-      identifiers: ['name'],
     });
   }
 
@@ -253,7 +252,7 @@ export default class OrganizationsHandler extends DefaultHandler {
       handler: this,
       assets: organizations,
       existing,
-      identifiers: ['id', 'name'],
+      identifiers: this.identifiers,
       allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
     });
 
