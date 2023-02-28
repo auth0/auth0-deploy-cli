@@ -55,7 +55,10 @@ function parse(context: DirectoryContext): ParsedPages {
         mappings: context.mappings,
         disableKeywordReplacement: context.disableKeywordReplacement,
       }),
-      html: loadFileAndReplaceKeywords(html, context.mappings),
+      html: loadFileAndReplaceKeywords(html, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      }),
     };
   });
 

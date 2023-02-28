@@ -34,7 +34,10 @@ async function parse(context: YAMLContext): Promise<ParsedBranding> {
       const markupFile = path.join(context.basePath, templateDefinition.body);
       return {
         template: templateDefinition.template,
-        body: loadFileAndReplaceKeywords(markupFile, context.mappings),
+        body: loadFileAndReplaceKeywords(markupFile, {
+          mappings: context.mappings,
+          disableKeywordReplacement: context.disableKeywordReplacement,
+        }),
       };
     }
   );

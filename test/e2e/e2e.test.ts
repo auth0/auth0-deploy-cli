@@ -386,6 +386,10 @@ describe('keyword preservation', () => {
 
     copySync(`${__dirname}/testdata/should-preserve-keywords/yaml`, workDirectory); //It is necessary to copy directory contents to work directory to prevent overwriting of Git-committed files
 
+    const emailTemplateHTML2 = fs
+      .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
+      .toString();
+
     await dump({
       output_folder: workDirectory,
       format: 'yaml',
@@ -402,10 +406,11 @@ describe('keyword preservation', () => {
 
     // expect(yaml.tenant.enabled_locales).to.equal('@@LANGUAGES@@'); TODO: enable @@ARRAY@@ keyword preservation in yaml formats
 
-    // const emailTemplateHTML = fs
-    //   .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
-    //   .toString();
-    // expect(emailTemplateHTML).to.contain('##TENANT##'); TODO: enable keyword preservation in auxillary template files
+    const emailTemplateHTML = fs
+      .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
+      .toString();
+    console.log({ emailTemplateHTML });
+    expect(emailTemplateHTML).to.contain('##TENANT_NAME##');
 
     recordingDone();
   });
@@ -442,10 +447,10 @@ describe('keyword preservation', () => {
     expect(emailTemplateJson.resultUrl).to.equal('https://##DOMAIN##/welcome');
     expect(emailTemplateJson.subject).to.not.equal('##THIS_SHOULD_NOT_BE_PRESERVED##');
 
-    // const emailTemplateHTML = fs
-    //   .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
-    //   .toString();
-    // expect(emailTemplateHTML).to.contain('##TENANT##'); TODO: enable keyword preservation in auxillary template files
+    const emailTemplateHTML = fs
+      .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
+      .toString();
+    expect(emailTemplateHTML).to.contain('##TENANT##'); //TODO: enable keyword preservation in auxillary template files
 
     recordingDone();
   });

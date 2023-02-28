@@ -43,7 +43,10 @@ function parse(context: DirectoryContext): ParsedConnections {
             `Passwordless email template purportedly located at ${htmlFileName} does not exist for connection. Ensure the existence of this file to proceed with deployment.`
           );
         }
-        connection.options.email.body = loadFileAndReplaceKeywords(htmlFileName, context.mappings);
+        connection.options.email.body = loadFileAndReplaceKeywords(htmlFileName, {
+          mappings: context.mappings,
+          disableKeywordReplacement: context.disableKeywordReplacement,
+        });
       }
 
       return connection;

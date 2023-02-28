@@ -40,7 +40,10 @@ function parse(context: DirectoryContext): ParsedBranding {
     });
     definition.body = loadFileAndReplaceKeywords(
       path.join(brandingTemplatesFolder, definition.body),
-      context.mappings
+      {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      }
     );
     return definition;
   }, {});

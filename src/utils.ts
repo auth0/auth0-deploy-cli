@@ -40,10 +40,10 @@ export function loadJSON(
   }
 ): any {
   try {
-    const content = loadFileAndReplaceKeywords(
-      file,
-      opts.disableKeywordReplacement ? {} : opts.mappings
-    );
+    const content = loadFileAndReplaceKeywords(file, {
+      mappings: opts.mappings,
+      disableKeywordReplacement: opts.disableKeywordReplacement,
+    });
     return JSON.parse(content);
   } catch (e) {
     throw new Error(`Error parsing JSON from metadata file: ${file}, because: ${e.message}`);
