@@ -1,8 +1,9 @@
 import { get as getByDotNotation, set as setByDotNotation } from 'dot-prop';
 import { keywordReplace } from './tools/utils';
-import { KeywordMappings } from './types';
+import { AssetTypes, KeywordMappings } from './types';
 import { keywordReplaceArrayRegExp, keywordReplaceStringRegExp } from './tools/utils';
 import { cloneDeep } from 'lodash';
+import APIHandler from './tools/auth0/handlers/default';
 
 /*
   RFC for Keyword Preservation: https://github.com/auth0/auth0-deploy-cli/issues/688
@@ -24,6 +25,7 @@ export const shouldFieldBePreserved = (
 export const getPreservableFieldsFromAssets = (
   asset: object,
   keywordMappings: KeywordMappings,
+  resourceSpecificIdentifiers: Partial<{ [key in AssetTypes]: string }>,
   address = ''
 ): string[] => {
   if (typeof asset === 'string') {
@@ -38,16 +40,17 @@ export const getPreservableFieldsFromAssets = (
   if (Array.isArray(asset)) {
     return asset
       .map((arrayItem) => {
-        // Using the `name` field as the primary unique identifier for array items
-        // TODO: expand the available identifier fields to encompass objects that lack name
-        const hasIdentifier = arrayItem.name !== undefined;
+        const resourceIdentifier = resourceSpecificIdentifiers[address];
+        if (resourceIdentifier === undefined) return []; // See if this specific resource type has an identifier
 
-        if (!hasIdentifier) return [];
+        const identifierFieldValue = arrayItem[resourceIdentifier];
+        if (identifierFieldValue === undefined) return []; // See if this specific array item possess the resource-specific identifier
 
         return getPreservableFieldsFromAssets(
           arrayItem,
           keywordMappings,
-          `${address}${shouldRenderDot ? '.' : ''}[name=${arrayItem.name}]`
+          resourceSpecificIdentifiers,
+          `${address}${shouldRenderDot ? '.' : ''}[${resourceIdentifier}=${identifierFieldValue}]`
         );
       })
       .flat();
@@ -62,6 +65,7 @@ export const getPreservableFieldsFromAssets = (
         return getPreservableFieldsFromAssets(
           value,
           keywordMappings,
+          resourceSpecificIdentifiers,
           `${address}${shouldRenderDot ? '.' : ''}${key}`
         );
       })
@@ -173,14 +177,37 @@ export const updateAssetsByAddress = (
 // preserveKeywords is the function that ultimately gets executed during export
 // to attempt to preserve keywords (ex: ##KEYWORD##) in local configuration files
 // from getting overwritten by remote values during export.
-export const preserveKeywords = (
-  localAssets: object,
-  remoteAssets: object,
-  keywordMappings: KeywordMappings
-): object => {
+export const preserveKeywords = ({
+  localAssets,
+  remoteAssets,
+  keywordMappings,
+  auth0Handlers,
+}: {
+  localAssets: object;
+  remoteAssets: object;
+  keywordMappings: KeywordMappings;
+  auth0Handlers: Pick<APIHandler, 'id' | 'identifiers' | 'type'>[];
+}): object => {
   if (Object.keys(keywordMappings).length === 0) return remoteAssets;
 
-  const addresses = getPreservableFieldsFromAssets(localAssets, keywordMappings, '');
+  const resourceSpecificIdentifiers = auth0Handlers.reduce(
+    (acc, handler): Partial<{ [key in AssetTypes]: string }> => {
+      return {
+        ...acc,
+        [handler.type]: handler.identifiers.filter((identifiers) => {
+          return identifiers !== handler.id;
+        })[0],
+      };
+    },
+    {}
+  );
+
+  const addresses = getPreservableFieldsFromAssets(
+    localAssets,
+    keywordMappings,
+    resourceSpecificIdentifiers,
+    ''
+  );
 
   let updatedRemoteAssets = cloneDeep(remoteAssets);
 

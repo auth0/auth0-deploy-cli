@@ -52,7 +52,7 @@ describe('#Keyword Preservation', () => {
     it('should retrieve all preservable fields from assets tree', () => {
       const fieldsToPreserve = getPreservableFieldsFromAssets(
         {
-          object: {
+          tenant: {
             friendly_name: 'Friendly name ##KEYWORD##',
             notInKeywordMapping: '##NOT_IN_KEYWORD_MAPPING##',
             number: 5,
@@ -60,24 +60,23 @@ describe('#Keyword Preservation', () => {
             nested: {
               nestedProperty: 'Nested property ##KEYWORD##',
             },
-          },
-          array: [
-            {
-              name: 'array-item-1',
-              nestedArray: [
-                {
-                  name: 'nested-array-item-1',
-                  value: 'Nested array value 1 ##KEYWORD##',
-                },
-                {
-                  name: 'nested-array-item-2',
-                  value: 'Nested array value 2 ##KEYWORD##',
-                },
-              ],
-              notInKeywordMapping: '##NOT_IN_KEYWORD_MAPPING##',
-              nested: {
-                nestedProperty: 'Another nested array property ##KEYWORD##',
+            nestedArray: [
+              {
+                name: 'nested-array-item-1',
+                value:
+                  "Even with ##KEYWORD##, this won't get preserved because this nested array item does not have a registered resource identifier",
               },
+            ],
+          },
+          actions: [
+            {
+              actionName: 'action-1',
+              value: 'Action 1 ##KEYWORD##',
+              notInKeywordMapping: '##NOT_IN_KEYWORD_MAPPING##',
+            },
+            {
+              actionName: 'action-2',
+              value: 'Action 2 ##KEYWORD##',
             },
           ],
           arrayReplace: '@@ARRAY_REPLACE_KEYWORD@@',
@@ -87,15 +86,15 @@ describe('#Keyword Preservation', () => {
         {
           KEYWORD: 'Travel0',
           ARRAY_REPLACE_KEYWORD: ['this value', 'that value'],
-        }
+        },
+        { actions: 'actionName' }
       );
 
       expect(fieldsToPreserve).to.have.members([
-        'object.friendly_name',
-        'object.nested.nestedProperty',
-        'array.[name=array-item-1].nestedArray.[name=nested-array-item-1].value',
-        'array.[name=array-item-1].nestedArray.[name=nested-array-item-2].value',
-        'array.[name=array-item-1].nested.nestedProperty',
+        'tenant.friendly_name',
+        'tenant.nested.nestedProperty',
+        'actions.[actionName=action-1].value',
+        'actions.[actionName=action-2].value',
         'arrayReplace',
       ]);
     });
@@ -292,6 +291,12 @@ describe('preserveKeywords', () => {
         },
       },
     ],
+    emailTemplates: [
+      {
+        template: 'welcome',
+        body: '<html>Welcome to ##ENV## ##COMPANY_NAME## Tenant</html>',
+      },
+    ],
     actions: [
       {
         name: 'action-1',
@@ -326,13 +331,42 @@ describe('preserveKeywords', () => {
         display_name: 'This action exists on remote but not local',
       },
     ],
+    emailTemplates: [
+      {
+        template: 'welcome',
+        body: '<html>Welcome to Production Travel0 Tenant</html>',
+      },
+    ],
   };
 
+  const auth0Handlers = [
+    {
+      id: 'id',
+      identifiers: ['id', 'name'],
+      type: 'actions',
+    },
+    {
+      id: 'id',
+      identifiers: ['id', 'name'],
+      type: 'connections',
+    },
+    {
+      id: 'id',
+      identifiers: ['template'],
+      type: 'emailTemplates',
+    },
+  ];
+
   it('should preserve keywords when they correlate to keyword mappings', () => {
-    const preservedAssets = preserveKeywords(mockLocalAssets, mockRemoteAssets, {
-      COMPANY_NAME: 'Travel0',
-      ALLOWED_LOGOUT_URLS: ['localhost:3000/logout', 'https://travel0.com/logout'],
-      ENV: 'Production',
+    const preservedAssets = preserveKeywords({
+      localAssets: mockLocalAssets,
+      remoteAssets: mockRemoteAssets,
+      keywordMappings: {
+        COMPANY_NAME: 'Travel0',
+        ALLOWED_LOGOUT_URLS: ['localhost:3000/logout', 'https://travel0.com/logout'],
+        ENV: 'Production',
+      },
+      auth0Handlers,
     });
 
     expect(preservedAssets).to.deep.equal(
@@ -341,13 +375,19 @@ describe('preserveKeywords', () => {
         //@ts-ignore
         expected.tenant = mockLocalAssets.tenant;
         expected.actions[0].display_name = '##ENV## Action 1';
+        expected.emailTemplates[0].body = '<html>Welcome to ##ENV## ##COMPANY_NAME## Tenant</html>';
         return expected;
       })()
     );
   });
 
   it('should not preserve keywords when no keyword mappings', () => {
-    const preservedAssets = preserveKeywords(mockLocalAssets, mockRemoteAssets, {});
+    const preservedAssets = preserveKeywords({
+      localAssets: mockLocalAssets,
+      remoteAssets: mockRemoteAssets,
+      keywordMappings: {},
+      auth0Handlers,
+    });
     expect(preservedAssets).to.deep.equal(mockRemoteAssets);
   });
 });

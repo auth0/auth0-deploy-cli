@@ -132,11 +132,12 @@ export default class YAMLContext {
         //@ts-ignore
         delete this['assets'];
 
-        this.assets = preserveKeywords(
+        this.assets = preserveKeywords({
           localAssets,
-          auth0.assets,
-          this.config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {}
-        );
+          remoteAssets: auth0.assets,
+          keywordMappings: this.config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {},
+          auth0Handlers: auth0.handlers,
+        });
       } else {
         this.assets = auth0.assets;
       }
