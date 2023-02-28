@@ -47,6 +47,7 @@ export default class ResourceServersHandler extends DefaultHandler {
     super({
       ...options,
       type: 'resourceServers',
+      identifiers: ['id', 'identifier'],
       stripUpdateFields: ['identifier'], // Fields not allowed in updates
     });
   }
