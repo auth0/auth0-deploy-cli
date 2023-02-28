@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import path from 'path';
 import fs from 'fs';
-import { copySync } from 'fs-extra';
+import { copySync, emptyDirSync } from 'fs-extra';
 import { getFiles, existsMustBeDir } from '../../src/utils';
 import { load as yamlLoad } from 'js-yaml';
 import { setupRecording, testNameToWorkingDirectory } from './e2e-utils';
@@ -384,12 +384,32 @@ describe('keyword preservation', () => {
       config,
     });
 
+    //Dumping without keyword preservation so we can assert that remote values will overwrite local values
+    await dump({
+      output_folder: workDirectory,
+      format: 'yaml',
+      config: {
+        ...config,
+        AUTH0_PRESERVE_KEYWORDS: false,
+      },
+    });
+    const yamlWithoutPreservation = yamlLoad(
+      fs.readFileSync(path.join(workDirectory, 'tenant.yaml'))
+    );
+    expect(yamlWithoutPreservation.tenant.friendly_name).to.equal(
+      'This tenant name should be preserved'
+    );
+    expect(yamlWithoutPreservation.tenant.support_email).to.equal('support@travel0.com');
+    expect(yamlWithoutPreservation.tenant.support_url).to.equal('https://travel0.com/support');
+    expect(
+      yamlWithoutPreservation.emailTemplates.find(({ template }) => template === 'welcome_email')
+        .resultUrl
+    ).to.equal('https://travel0.com/welcome');
+
+    emptyDirSync(workDirectory);
     copySync(`${__dirname}/testdata/should-preserve-keywords/yaml`, workDirectory); //It is necessary to copy directory contents to work directory to prevent overwriting of Git-committed files
 
-    const emailTemplateHTML2 = fs
-      .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
-      .toString();
-
+    //This dump will attempt to preserve keywords
     await dump({
       output_folder: workDirectory,
       format: 'yaml',
@@ -424,8 +444,39 @@ describe('keyword preservation', () => {
       config,
     });
 
+    //Dumping without keyword preservation so we can assert that remote values will overwrite local values
+    await dump({
+      output_folder: workDirectory,
+      format: 'directory',
+      config: {
+        ...config,
+        AUTH0_PRESERVE_KEYWORDS: false,
+      },
+    });
+
+    const jsonWithoutPreservation = JSON.parse(
+      fs.readFileSync(path.join(workDirectory, 'tenant.json')).toString()
+    );
+
+    expect(jsonWithoutPreservation.friendly_name).to.equal('This tenant name should be preserved');
+    expect(jsonWithoutPreservation.enabled_locales).to.deep.equal(['en', 'es']);
+    expect(jsonWithoutPreservation.support_email).to.equal('support@travel0.com');
+    expect(jsonWithoutPreservation.support_url).to.equal('https://travel0.com/support');
+
+    const emailTemplateJsonWithoutPreservation = JSON.parse(
+      fs.readFileSync(path.join(workDirectory, 'emails', 'welcome_email.json')).toString()
+    );
+
+    expect(emailTemplateJsonWithoutPreservation.resultUrl).to.equal('https://travel0.com/welcome');
+
+    expect(
+      fs.readFileSync(path.join(workDirectory, 'emails', 'welcome_email.html')).toString()
+    ).to.contain('This tenant name should be preserved');
+
+    emptyDirSync(workDirectory);
     copySync(`${__dirname}/testdata/should-preserve-keywords/directory`, workDirectory); //It is necessary to copy directory contents to work directory to prevent overwriting of Git-committed files
 
+    //This dump will attempt to preserve keywords
     await dump({
       output_folder: workDirectory,
       format: 'directory',
@@ -449,7 +500,7 @@ describe('keyword preservation', () => {
     const emailTemplateHTML = fs
       .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
       .toString();
-    expect(emailTemplateHTML).to.contain('##TENANT_NAME##'); //TODO: enable keyword preservation in auxillary template files
+    expect(emailTemplateHTML).to.contain('##TENANT_NAME##');
 
     recordingDone();
   });
