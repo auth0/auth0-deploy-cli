@@ -409,7 +409,6 @@ describe('keyword preservation', () => {
     const emailTemplateHTML = fs
       .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
       .toString();
-    console.log({ emailTemplateHTML });
     expect(emailTemplateHTML).to.contain('##TENANT_NAME##');
 
     recordingDone();
@@ -450,7 +449,7 @@ describe('keyword preservation', () => {
     const emailTemplateHTML = fs
       .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
       .toString();
-    expect(emailTemplateHTML).to.contain('##TENANT##'); //TODO: enable keyword preservation in auxillary template files
+    expect(emailTemplateHTML).to.contain('##TENANT_NAME##'); //TODO: enable keyword preservation in auxillary template files
 
     recordingDone();
   });
