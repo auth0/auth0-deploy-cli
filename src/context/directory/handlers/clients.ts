@@ -36,7 +36,10 @@ function parse(context: DirectoryContext): ParsedClients {
         const htmlFileName = path.join(clientsFolder, client.custom_login_page);
 
         if (isFile(htmlFileName)) {
-          client.custom_login_page = loadFileAndReplaceKeywords(htmlFileName, context.mappings);
+          client.custom_login_page = loadFileAndReplaceKeywords(htmlFileName, {
+            mappings: context.mappings,
+            disableKeywordReplacement: context.disableKeywordReplacement,
+          });
         }
       }
 

@@ -65,12 +65,18 @@ export function convertClientNamesToIds(names: string[], clients: Asset[]): stri
   return [...unresolved, ...result];
 }
 
-export function loadFileAndReplaceKeywords(file: string, mappings: KeywordMappings): string {
+export function loadFileAndReplaceKeywords(
+  file: string,
+  {
+    mappings,
+    disableKeywordReplacement = false,
+  }: { mappings: KeywordMappings; disableKeywordReplacement: boolean }
+): string {
   // Load file and replace keyword mappings
   const f = path.resolve(file);
   try {
     fs.accessSync(f, fsConstants.F_OK);
-    if (mappings) {
+    if (mappings && !disableKeywordReplacement) {
       return keywordReplace(fs.readFileSync(f, 'utf8'), mappings);
     }
     return fs.readFileSync(f, 'utf8');

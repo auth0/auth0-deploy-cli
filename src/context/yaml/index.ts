@@ -18,12 +18,14 @@ export default class YAMLContext {
   mappings: KeywordMappings;
   mgmtClient: Auth0APIClient;
   assets: Assets;
+  disableKeywordReplacement: boolean;
 
   constructor(config: Config, mgmtClient) {
     this.configFile = config.AUTH0_INPUT_FILE;
     this.config = config;
     this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {};
     this.mgmtClient = mgmtClient;
+    this.disableKeywordReplacement = false;
 
     //@ts-ignore because the assets property gets filled out throughout
     this.assets = {};
@@ -50,11 +52,15 @@ export default class YAMLContext {
       // try load not relative to yaml file
       toLoad = f;
     }
-    return loadFileAndReplaceKeywords(path.resolve(toLoad), this.mappings);
+    return loadFileAndReplaceKeywords(path.resolve(toLoad), {
+      mappings: this.mappings,
+      disableKeywordReplacement: this.disableKeywordReplacement,
+    });
   }
 
   async loadAssetsFromLocal(opts = { disableKeywordReplacement: false }) {
     // Allow to send object/json directly
+    this.disableKeywordReplacement = opts.disableKeywordReplacement;
     if (typeof this.configFile === 'object') {
       this.assets = this.configFile;
     } else {

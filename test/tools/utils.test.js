@@ -1,5 +1,6 @@
 import path from 'path';
 import { expect } from 'chai';
+import { readFileSync } from 'fs';
 import jsYaml from 'js-yaml';
 import * as utils from '../../src/tools/utils';
 import constants from '../../src/tools/constants';
@@ -30,15 +31,30 @@ const expectations = {
 };
 
 describe('#utils', function () {
-  it('should load file', () => {
+  it('should load file and replace keywords', () => {
     const file = path.resolve(__dirname, 'test.file.json');
-    const loaded = utils.loadFileAndReplaceKeywords(file, mappings);
+    const loaded = utils.loadFileAndReplaceKeywords(file, {
+      mappings,
+      disableKeywordReplacement: false,
+    });
     expect(JSON.parse(loaded)).to.deep.equal(expectations);
+  });
+
+  it('should load file and not replace keywords', () => {
+    const file = path.resolve(__dirname, 'test.file.json');
+    const loaded = utils.loadFileAndReplaceKeywords(file, {
+      mappings,
+      disableKeywordReplacement: true,
+    });
+    expect(loaded).to.deep.equal(readFileSync(file).toString());
   });
 
   it('should throw error if cannot load file', () => {
     expect(function () {
-      utils.loadFileAndReplaceKeywords('notexist.json', mappings);
+      utils.loadFileAndReplaceKeywords('notexist.json', {
+        mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      });
     }).to.throw(/Unable to load file.*/);
   });
 
