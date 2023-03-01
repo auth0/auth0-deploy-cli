@@ -396,6 +396,10 @@ describe('keyword preservation', () => {
     expect(yaml.tenant.friendly_name).to.equal('##TENANT_NAME##');
     expect(yaml.tenant.support_email).to.equal('support@##DOMAIN##');
     expect(yaml.tenant.support_url).to.equal('https://##DOMAIN##/support');
+    expect(
+      yaml.emailTemplates.find(({ template }) => template === 'welcome_email').resultUrl
+    ).to.equal('https://##DOMAIN##/welcome');
+
     // expect(yaml.tenant.enabled_locales).to.equal('@@LANGUAGES@@'); TODO: enable @@ARRAY@@ keyword preservation in yaml formats
 
     // const emailTemplateHTML = fs
@@ -430,6 +434,13 @@ describe('keyword preservation', () => {
     expect(json.enabled_locales).to.equal('@@LANGUAGES@@');
     expect(json.support_email).to.equal('support@##DOMAIN##');
     expect(json.support_url).to.equal('https://##DOMAIN##/support');
+
+    const emailTemplateJson = JSON.parse(
+      fs.readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.json')).toString()
+    );
+
+    expect(emailTemplateJson.resultUrl).to.equal('https://##DOMAIN##/welcome');
+    expect(emailTemplateJson.subject).to.not.equal('##THIS_SHOULD_NOT_BE_PRESERVED##');
 
     // const emailTemplateHTML = fs
     //   .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
