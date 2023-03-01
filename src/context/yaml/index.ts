@@ -4,7 +4,7 @@ import path from 'path';
 import {
   loadFileAndReplaceKeywords,
   keywordReplace,
-  escapeArrayReplaceSyntax,
+  escapeArrayReplaceMarkers,
   Auth0,
 } from '../../tools';
 
@@ -76,7 +76,7 @@ export default class YAMLContext {
           this.assets,
           yaml.load(
             opts.disableKeywordReplacement
-              ? escapeArrayReplaceSyntax(fs.readFileSync(fPath, 'utf8'), this.mappings)
+              ? escapeArrayReplaceMarkers(fs.readFileSync(fPath, 'utf8'), this.mappings)
               : keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)
           ) || {}
         );

@@ -45,7 +45,7 @@ export function keywordReplace(input: string, mappings: KeywordMappings): string
   return input;
 }
 
-export function escapeArrayReplaceSyntax(body: string, mappings: KeywordMappings): string {
+export function escapeArrayReplaceMarkers(body: string, mappings: KeywordMappings): string {
   let arrayReplacedBody = body;
   Object.keys(mappings).forEach((keyword) => {
     arrayReplacedBody = arrayReplacedBody.replace(

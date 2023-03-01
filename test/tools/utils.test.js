@@ -58,6 +58,33 @@ describe('#utils', function () {
     }).to.throw(/Unable to load file.*/);
   });
 
+  describe('escapeArrayReplaceMarkers', () => {
+    it('should wrap @@ARRAY_KEYWORD@@ markers in quotes', () => {
+      const yaml = `
+      property:
+      - name: some-item
+        value: @@VALID_ARRAY_KEYWORD@@`;
+
+      expect(
+        utils.escapeArrayReplaceMarkers(yaml, {
+          VALID_ARRAY_KEYWORD: [1, 2, 3],
+        })
+      ).to.equal(`
+      property:
+      - name: some-item
+        value: "@@VALID_ARRAY_KEYWORD@@"`);
+    });
+
+    it('should not wrap @@ARRAY_KEYWORD@@ markers in quotes if keyword does not exist in mapping', () => {
+      const yaml = `
+      property:
+      - name: some-item
+        value: @@VALID_ARRAY_KEYWORD@@`;
+
+      expect(utils.escapeArrayReplaceMarkers(yaml, {})).to.equal(yaml);
+    });
+  });
+
   it('should do keyword replacements', (done) => {
     const kwContents =
       '{ "a": 1, "string_key": @@string@@, "array_key": @@array@@, "object_key": @@object@@,' +

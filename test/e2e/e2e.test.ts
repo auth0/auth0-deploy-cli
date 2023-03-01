@@ -320,7 +320,7 @@ describe('#end-to-end keyword replacement', function () {
 
     const keywordMapping = {
       COMPANY_NAME: 'Travel0',
-      LANGUAGES: ['en', 'es'], //TODO: support array replacement for directory format
+      LANGUAGES: ['en', 'es'],
     };
 
     await deploy({
