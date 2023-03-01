@@ -47,6 +47,7 @@ export default class ResourceServersHandler extends DefaultHandler {
     super({
       ...options,
       type: 'resourceServers',
+      identifiers: ['id', 'identifier'],
       stripUpdateFields: ['identifier'], // Fields not allowed in updates
     });
   }
@@ -90,7 +91,7 @@ export default class ResourceServersHandler extends DefaultHandler {
       handler: this,
       assets: resourceServers,
       existing,
-      identifiers: ['id', 'identifier'],
+      identifiers: this.identifiers,
       allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
     });
   }

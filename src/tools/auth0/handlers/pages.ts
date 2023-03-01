@@ -41,6 +41,7 @@ export default class PagesHandler extends DefaultHandler {
     super({
       ...options,
       type: 'pages',
+      identifiers: ['name'],
     });
   }
 
