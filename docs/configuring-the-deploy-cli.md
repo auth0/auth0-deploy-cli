@@ -113,13 +113,11 @@ Mapping of specific keywords to facilities dynamic replacement. See also: [keywo
 
 ### `AUTH0_PRESERVE_KEYWORDS`
 
-Boolean. Default `false`. When enabled, will attempt to preserve keyword replacement markers in local resource files during export. Otherwise, the remote values will overwrite those manually-placed keyword markers.
+Boolean. When enabled, will attempt to preserve keyword replacement markers in local resource files during export. Otherwise, the remote values will overwrite those manually-placed keyword markers.
 
 This configuration requires the presence of local configuration files and defined keyword replace mappings via the `AUTH0_KEYWORD_REPLACE_MAPPINGS` configuration property.
 
 See also: [Preserving Keywords on Export](keyword-replacement.md#preserving-keywords-on-export).
-
-````
 
 ### `AUTH0_EXPORT_IDENTIFIERS`
 
@@ -135,7 +133,7 @@ Provides ability to exclude any unwanted properties from management.
 {
   "connections": ["options.twilio_token"]
 }
-````
+```
 
 ### `AUTH0_AUDIENCE`
 
