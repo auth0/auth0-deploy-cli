@@ -1,7 +1,12 @@
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import path from 'path';
-import { loadFileAndReplaceKeywords, keywordReplace, Auth0 } from '../../tools';
+import {
+  loadFileAndReplaceKeywords,
+  keywordReplace,
+  escapeArrayReplaceSyntax,
+  Auth0,
+} from '../../tools';
 
 import log from '../../logger';
 import { isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter } from '../../utils';
@@ -71,7 +76,7 @@ export default class YAMLContext {
           this.assets,
           yaml.load(
             opts.disableKeywordReplacement
-              ? fs.readFileSync(fPath, 'utf8')
+              ? escapeArrayReplaceSyntax(fs.readFileSync(fPath, 'utf8'), this.mappings)
               : keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)
           ) || {}
         );

@@ -45,6 +45,17 @@ export function keywordReplace(input: string, mappings: KeywordMappings): string
   return input;
 }
 
+export function escapeArrayReplaceSyntax(body: string, mappings: KeywordMappings): string {
+  let arrayReplacedBody = body;
+  Object.keys(mappings).forEach((keyword) => {
+    arrayReplacedBody = arrayReplacedBody.replace(
+      keywordReplaceArrayRegExp(keyword),
+      `"@@${keyword}@@"`
+    );
+  });
+  return arrayReplacedBody;
+}
+
 export function convertClientNameToId(name: string, clients: Asset[]): string {
   const found = clients.find((c) => c.name === name);
   return (found && found.client_id) || name;
