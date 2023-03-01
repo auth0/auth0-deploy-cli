@@ -209,8 +209,6 @@ export const preserveKeywords = ({
     ''
   );
 
-  console.log({ addresses });
-
   let updatedRemoteAssets = cloneDeep(remoteAssets);
 
   addresses.forEach((address) => {
