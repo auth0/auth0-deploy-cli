@@ -370,7 +370,7 @@ describe('keyword preservation', () => {
     AUTH0_KEYWORD_REPLACE_MAPPINGS: {
       TENANT_NAME: 'This tenant name should be preserved',
       DOMAIN: 'travel0.com',
-      LANGUAGES: ['en', 'es', 'fr'],
+      LANGUAGES: ['en', 'es'],
     },
   };
 
