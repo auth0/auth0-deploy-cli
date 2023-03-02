@@ -8,10 +8,9 @@ import constants from './constants';
 
 export const keywordReplaceArrayRegExp = (key) => {
   const pattern = `@@${key}@@`;
-  const patternWithSingleQuotes = `'${pattern}'`;
-  const patternWithDoubleQuotes = `"${pattern}"`;
+  const patternWithQuotes = `"${pattern}"`;
 
-  return new RegExp(`${patternWithSingleQuotes}|${patternWithDoubleQuotes}|${pattern}`, 'g');
+  return new RegExp(`${patternWithQuotes}|${pattern}`, 'g');
 };
 
 export const keywordReplaceStringRegExp = (key) => {
