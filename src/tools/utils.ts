@@ -45,15 +45,23 @@ export function keywordReplace(input: string, mappings: KeywordMappings): string
   return input;
 }
 
-export function escapeArrayReplaceMarkers(body: string, mappings: KeywordMappings): string {
-  let arrayReplacedBody = body;
+// escapeKeywordMarkersInStrings will wrap keyword replacement markers in quotes.
+// This is necessary for YAML format in the context of keyword replacement
+// to preserve the keyword markers while also maintaining valid YAML syntax.
+export function escapeKeywordMarkersInStrings(body: string, mappings: KeywordMappings): string {
+  let newBody = body;
   Object.keys(mappings).forEach((keyword) => {
-    arrayReplacedBody = arrayReplacedBody.replace(
-      keywordReplaceArrayRegExp(keyword),
+    newBody = newBody.replace(
+      new RegExp('(?<![\'"])@@' + keyword + '@@(?![\'"])'),
       `"@@${keyword}@@"`
     );
+    newBody = newBody.replace(
+      new RegExp('(?<![\'"])##' + keyword + '##(?![\'"])'),
+      `"##${keyword}##"`
+    );
+    // newBody = newBody.replace(new RegExp(`##${keyword}##`), `"##${keyword}##"`);
   });
-  return arrayReplacedBody;
+  return newBody;
 }
 
 export function convertClientNameToId(name: string, clients: Asset[]): string {

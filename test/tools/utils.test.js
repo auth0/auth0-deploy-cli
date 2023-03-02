@@ -58,7 +58,7 @@ describe('#utils', function () {
     }).to.throw(/Unable to load file.*/);
   });
 
-  describe('escapeArrayReplaceMarkers', () => {
+  describe('escapeKeywordMarkersInStrings', () => {
     it('should wrap @@ARRAY_KEYWORD@@ markers in quotes', () => {
       const yaml = `
       property:
@@ -66,7 +66,7 @@ describe('#utils', function () {
         value: @@VALID_ARRAY_KEYWORD@@`;
 
       expect(
-        utils.escapeArrayReplaceMarkers(yaml, {
+        utils.escapeKeywordMarkersInStrings(yaml, {
           VALID_ARRAY_KEYWORD: [1, 2, 3],
         })
       ).to.equal(`
@@ -75,13 +75,69 @@ describe('#utils', function () {
         value: "@@VALID_ARRAY_KEYWORD@@"`);
     });
 
+    it('should not wrap @@ARRAY_KEYWORD@@ markers in quotes if it is already wrapped', () => {
+      const yaml = `
+      property:
+      - name: some-item
+        value: "@@VALID_ARRAY_KEYWORD@@"`;
+
+      expect(
+        utils.escapeKeywordMarkersInStrings(yaml, {
+          VALID_ARRAY_KEYWORD: [1, 2, 3],
+        })
+      ).to.equal(`
+      property:
+      - name: some-item
+        value: "@@VALID_ARRAY_KEYWORD@@"`);
+    });
+
+    it('should wrap ##STRING_KEYWORD## markers in quotes', () => {
+      const yaml = `
+      property:
+      - name: some-item
+        value: ##STRING_KEYWORD##
+      - name: some-other-item
+        value: "this has preceding text ##STRING_KEYWORD##"`;
+
+      expect(
+        utils.escapeKeywordMarkersInStrings(yaml, {
+          STRING_KEYWORD: 'foo',
+        })
+      ).to.equal(`
+      property:
+      - name: some-item
+        value: "##STRING_KEYWORD##"
+      - name: some-other-item
+        value: "this has preceding text ##STRING_KEYWORD##"`);
+    });
+
+    it('should not wrap ##STRING_KEYWORD## markers in quotes if it is already wrapped in quotes', () => {
+      const yaml = `
+      property:
+      - name: already-wrapped-single-quotes
+        value: '##STRING_KEYWORD##'
+      - name: already-wrapped-double-quotes
+        value: "##STRING_KEYWORD##"`;
+
+      expect(
+        utils.escapeKeywordMarkersInStrings(yaml, {
+          STRING_KEYWORD: 'foo',
+        })
+      ).to.equal(`
+      property:
+      - name: already-wrapped-single-quotes
+        value: '##STRING_KEYWORD##'
+      - name: already-wrapped-double-quotes
+        value: "##STRING_KEYWORD##"`);
+    });
+
     it('should not wrap @@ARRAY_KEYWORD@@ markers in quotes if keyword does not exist in mapping', () => {
       const yaml = `
       property:
       - name: some-item
         value: @@VALID_ARRAY_KEYWORD@@`;
 
-      expect(utils.escapeArrayReplaceMarkers(yaml, {})).to.equal(yaml);
+      expect(utils.escapeKeywordMarkersInStrings(yaml, {})).to.equal(yaml);
     });
   });
 
