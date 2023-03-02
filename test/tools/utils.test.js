@@ -406,13 +406,26 @@ describe('#keywordReplacement', () => {
       });
     });
 
-    it('should replace @@ wrapped values, even when wrapped with quotes', () => {
+    it('should replace @@ wrapped values, even when wrapped with quotes in JSON format', () => {
       const inputWrappedInQuotes = '{ "foo": "@@ARRAY_REPLACEMENT@@", "bar": "OTHER_REPLACEMENT"}';
       const output = utils.keywordArrayReplace(inputWrappedInQuotes, mapping);
       const parsedOutput = JSON.parse(output);
       expect(parsedOutput).to.deep.equal({
         foo: mapping.ARRAY_REPLACEMENT,
         bar: 'OTHER_REPLACEMENT',
+      });
+    });
+
+    it('should replace @@ wrapped values, even when wrapped with quotes in YAML format', () => {
+      const inputWrappedInQuotes = `
+        singleQuotes: '@@ARRAY_REPLACEMENT@@'
+        doubleQuotes: "@@ARRAY_REPLACEMENT@@"`;
+
+      const output = utils.keywordArrayReplace(inputWrappedInQuotes, mapping);
+      const parsedOutput = jsYaml.load(output);
+      expect(parsedOutput).to.deep.equal({
+        singleQuotes: mapping.ARRAY_REPLACEMENT,
+        doubleQuotes: mapping.ARRAY_REPLACEMENT,
       });
     });
   });

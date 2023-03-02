@@ -8,9 +8,11 @@ import constants from './constants';
 
 export const keywordReplaceArrayRegExp = (key) => {
   const pattern = `@@${key}@@`;
-  const patternWithQuotes = `"${pattern}"`;
+  //YAML format supports both single and double quotes for strings
+  const patternWithSingleQuotes = `'${pattern}'`;
+  const patternWithDoubleQuotes = `"${pattern}"`;
 
-  return new RegExp(`${patternWithQuotes}|${pattern}`, 'g');
+  return new RegExp(`${patternWithSingleQuotes}|${patternWithDoubleQuotes}|${pattern}`, 'g');
 };
 
 export const keywordReplaceStringRegExp = (key) => {
