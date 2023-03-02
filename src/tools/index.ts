@@ -1,14 +1,18 @@
 import constants from './constants';
 import deploy from './deploy';
 import Auth0 from './auth0';
-import { keywordReplace, loadFileAndReplaceKeywords, escapeKeywordMarkersInStrings } from './utils';
+import {
+  keywordReplace,
+  loadFileAndReplaceKeywords,
+  wrapArrayReplaceMarkersInStrings,
+} from './utils';
 
 export default {
   constants,
   deploy,
   keywordReplace,
   loadFileAndReplaceKeywords,
-  escapeKeywordMarkersInStrings,
+  wrapArrayReplaceMarkersInStrings,
   Auth0,
 };
 
@@ -17,6 +21,6 @@ export {
   deploy,
   keywordReplace,
   loadFileAndReplaceKeywords,
-  escapeKeywordMarkersInStrings,
+  wrapArrayReplaceMarkersInStrings,
   Auth0,
 };

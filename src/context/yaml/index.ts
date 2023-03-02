@@ -4,7 +4,7 @@ import path from 'path';
 import {
   loadFileAndReplaceKeywords,
   keywordReplace,
-  escapeKeywordMarkersInStrings,
+  wrapArrayReplaceMarkersInStrings,
   Auth0,
 } from '../../tools';
 
@@ -74,9 +74,11 @@ export default class YAMLContext {
         log.debug(`Loading YAML from ${fPath}`);
         Object.assign(
           this.assets,
-          opts.disableKeywordReplacement
-            ? yaml.load(fs.readFileSync(fPath, 'utf8'), { skipInvalid: true })
-            : yaml.load(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)) || {}
+          yaml.load(
+            opts.disableKeywordReplacement
+              ? wrapArrayReplaceMarkersInStrings(fs.readFileSync(fPath, 'utf8'), this.mappings)
+              : keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)
+          ) || {}
         );
       } catch (err) {
         log.debug(err.stack);
@@ -107,7 +109,7 @@ export default class YAMLContext {
 
     // Run initial schema check to ensure valid YAML
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
-    //if (!opts.disableKeywordReplacement) await auth0.validate();
+    if (!opts.disableKeywordReplacement) await auth0.validate();
 
     // Allow handlers to process the assets such as loading files etc
     await Promise.all(
