@@ -63,32 +63,40 @@ describe('#utils', function () {
       const yaml = `
       property:
       - name: some-item
+        value: @@VALID_ARRAY_KEYWORD@@
+      - name: another-item
         value: @@VALID_ARRAY_KEYWORD@@`;
 
-      expect(
-        utils.escapeKeywordMarkersInStrings(yaml, {
-          VALID_ARRAY_KEYWORD: [1, 2, 3],
-        })
-      ).to.equal(`
+      const escapedYaml = utils.escapeKeywordMarkersInStrings(yaml, {
+        VALID_ARRAY_KEYWORD: [],
+      });
+      expect(escapedYaml).to.equal(`
       property:
       - name: some-item
+        value: "@@VALID_ARRAY_KEYWORD@@"
+      - name: another-item
         value: "@@VALID_ARRAY_KEYWORD@@"`);
+      expect(() => jsYaml.load(escapedYaml)).to.not.throw();
     });
 
     it('should not wrap @@ARRAY_KEYWORD@@ markers in quotes if it is already wrapped', () => {
       const yaml = `
       property:
       - name: some-item
+        value: "@@VALID_ARRAY_KEYWORD@@"
+      - name: another-item
         value: "@@VALID_ARRAY_KEYWORD@@"`;
 
-      expect(
-        utils.escapeKeywordMarkersInStrings(yaml, {
-          VALID_ARRAY_KEYWORD: [1, 2, 3],
-        })
-      ).to.equal(`
+      const escapedYaml = utils.escapeKeywordMarkersInStrings(yaml, {
+        VALID_ARRAY_KEYWORD: [],
+      });
+      expect(escapedYaml).to.equal(`
       property:
       - name: some-item
+        value: "@@VALID_ARRAY_KEYWORD@@"
+      - name: another-item
         value: "@@VALID_ARRAY_KEYWORD@@"`);
+      expect(() => jsYaml.load(escapedYaml)).to.not.throw();
     });
 
     it('should wrap ##STRING_KEYWORD## markers in quotes', () => {
@@ -97,18 +105,17 @@ describe('#utils', function () {
       - name: some-item
         value: ##STRING_KEYWORD##
       - name: some-other-item
-        value: "this has preceding text ##STRING_KEYWORD##"`;
-
-      expect(
-        utils.escapeKeywordMarkersInStrings(yaml, {
-          STRING_KEYWORD: 'foo',
-        })
-      ).to.equal(`
+        value: "this has preceding text ##STRING_KEYWORD## and text following"`;
+      const escapedYaml = utils.escapeKeywordMarkersInStrings(yaml, {
+        STRING_KEYWORD: 'foo',
+      });
+      expect(escapedYaml).to.equal(`
       property:
       - name: some-item
         value: "##STRING_KEYWORD##"
       - name: some-other-item
-        value: "this has preceding text ##STRING_KEYWORD##"`);
+        value: "this has preceding text ##STRING_KEYWORD## and text following"`);
+      expect(() => jsYaml.load(escapedYaml)).to.not.throw();
     });
 
     it('should not wrap ##STRING_KEYWORD## markers in quotes if it is already wrapped in quotes', () => {
@@ -118,17 +125,16 @@ describe('#utils', function () {
         value: '##STRING_KEYWORD##'
       - name: already-wrapped-double-quotes
         value: "##STRING_KEYWORD##"`;
-
-      expect(
-        utils.escapeKeywordMarkersInStrings(yaml, {
-          STRING_KEYWORD: 'foo',
-        })
-      ).to.equal(`
+      const escapedYaml = utils.escapeKeywordMarkersInStrings(yaml, {
+        STRING_KEYWORD: 'foo',
+      });
+      expect(escapedYaml).to.equal(`
       property:
       - name: already-wrapped-single-quotes
         value: '##STRING_KEYWORD##'
       - name: already-wrapped-double-quotes
         value: "##STRING_KEYWORD##"`);
+      expect(() => jsYaml.load(escapedYaml)).to.not.throw();
     });
 
     it('should not wrap @@ARRAY_KEYWORD@@ markers in quotes if keyword does not exist in mapping', () => {
@@ -137,7 +143,9 @@ describe('#utils', function () {
       - name: some-item
         value: @@VALID_ARRAY_KEYWORD@@`;
 
-      expect(utils.escapeKeywordMarkersInStrings(yaml, {})).to.equal(yaml);
+      const escapedYaml = utils.escapeKeywordMarkersInStrings(yaml, {});
+      expect(escapedYaml).to.equal(yaml);
+      expect(() => jsYaml.load(escapedYaml)).to.throw(); //Because it is invalid yaml
     });
   });
 

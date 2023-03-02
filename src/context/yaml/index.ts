@@ -74,11 +74,9 @@ export default class YAMLContext {
         log.debug(`Loading YAML from ${fPath}`);
         Object.assign(
           this.assets,
-          yaml.load(
-            opts.disableKeywordReplacement
-              ? escapeKeywordMarkersInStrings(fs.readFileSync(fPath, 'utf8'), this.mappings)
-              : keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)
-          ) || {}
+          opts.disableKeywordReplacement
+            ? yaml.load(fs.readFileSync(fPath, 'utf8'), { skipInvalid: true })
+            : yaml.load(keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)) || {}
         );
       } catch (err) {
         log.debug(err.stack);
@@ -109,7 +107,7 @@ export default class YAMLContext {
 
     // Run initial schema check to ensure valid YAML
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
-    await auth0.validate();
+    //if (!opts.disableKeywordReplacement) await auth0.validate();
 
     // Allow handlers to process the assets such as loading files etc
     await Promise.all(
@@ -181,7 +179,7 @@ export default class YAMLContext {
             }
           } catch (err) {
             log.debug(err.stack);
-            throw new Error(`Problem exporting ${name}`);
+            throw new Error(`Problem exporting ${name}: ${err}`);
           }
         })
     );

@@ -8,9 +8,10 @@ import constants from './constants';
 
 export const keywordReplaceArrayRegExp = (key) => {
   const pattern = `@@${key}@@`;
-  const patternWithQuotes = `"${pattern}"`;
+  const patternWithSingleQuotes = `'${pattern}'`;
+  const patternWithDoubleQuotes = `"${pattern}"`;
 
-  return new RegExp(`${patternWithQuotes}|${pattern}`, 'g');
+  return new RegExp(`${patternWithSingleQuotes}|${patternWithDoubleQuotes}|${pattern}`, 'g');
 };
 
 export const keywordReplaceStringRegExp = (key) => {
@@ -52,14 +53,13 @@ export function escapeKeywordMarkersInStrings(body: string, mappings: KeywordMap
   let newBody = body;
   Object.keys(mappings).forEach((keyword) => {
     newBody = newBody.replace(
-      new RegExp('(?<![\'"])@@' + keyword + '@@(?![\'"])'),
+      new RegExp('(?<![\'"])@@' + keyword + '@@(?![\'"])', 'g'),
       `"@@${keyword}@@"`
     );
     newBody = newBody.replace(
-      new RegExp('(?<![\'"])##' + keyword + '##(?![\'"])'),
+      new RegExp('(?<![\'"])##' + keyword + '##(?![\'"])', 'g'),
       `"##${keyword}##"`
     );
-    // newBody = newBody.replace(new RegExp(`##${keyword}##`), `"##${keyword}##"`);
   });
   return newBody;
 }
