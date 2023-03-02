@@ -107,11 +107,11 @@ describe('#utils', function () {
       const yaml = `
       property:
       - name: some-item
-        value: @@VALID_ARRAY_KEYWORD@@`;
+        value: @@NOT_IN_KEYWORD_MAPPINGS@@`;
 
       const escapedYaml = utils.wrapArrayReplaceMarkersInStrings(yaml, {});
       expect(escapedYaml).to.equal(yaml);
-      expect(() => jsYaml.load(escapedYaml)).to.throw(); //Because it is invalid yaml
+      expect(() => jsYaml.load(escapedYaml)).to.throw(); // Because it is invalid yaml
     });
   });
 
