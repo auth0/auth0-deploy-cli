@@ -47,7 +47,10 @@ export default class DirectoryContext {
       // try load not relative to yaml file
       toLoad = f;
     }
-    return loadFileAndReplaceKeywords(toLoad, this.mappings);
+    return loadFileAndReplaceKeywords(toLoad, {
+      mappings: this.mappings,
+      disableKeywordReplacement: this.disableKeywordReplacement,
+    });
   }
 
   async loadAssetsFromLocal(opts = { disableKeywordReplacement: false }): Promise<void> {

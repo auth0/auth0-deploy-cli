@@ -541,23 +541,18 @@ describe('#YAML context validation', () => {
     cleanThenMkdir(dir);
     const tenantFile = path.join(dir, 'tenant.yml');
 
-    const localAssets = {
-      tenant: {
-        friendly_name: '##ENV## Tenant',
-        enabled_locales: '@@LANGUAGES@@',
-      },
-      connections: [
-        {
-          name: 'connection-1',
-          strategy: 'waad',
-          options: {
-            tenant_domain: '##DOMAIN##',
-          },
-        },
-      ],
-    };
+    const localAssets = `
+    tenant:
+      friendly_name: "##ENV## Tenant"
+      enabled_locales: @@LANGUAGES@@
+    connections:
+      - name: connection-1
+        strategy: waad
+        options:
+          tenant_domain: "##DOMAIN##"
+    `;
 
-    fs.writeFileSync(tenantFile, jsYaml.dump(localAssets));
+    fs.writeFileSync(tenantFile, localAssets);
     const context = new Context(
       {
         AUTH0_INPUT_FILE: tenantFile,
@@ -597,6 +592,20 @@ describe('#YAML context validation', () => {
     await context.dump();
     const yaml = jsYaml.load(fs.readFileSync(tenantFile));
 
-    expect(yaml).to.deep.equal(localAssets);
+    expect(yaml).to.deep.equal({
+      tenant: {
+        enabled_locales: '@@LANGUAGES@@',
+        friendly_name: '##ENV## Tenant',
+      },
+      connections: [
+        {
+          name: 'connection-1',
+          strategy: 'waad',
+          options: {
+            tenant_domain: '##DOMAIN##',
+          },
+        },
+      ],
+    });
   });
 });
