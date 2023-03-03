@@ -58,9 +58,16 @@ clients:
     web_origins: [ "http://production-app.com", "https://production-app.com", ##GLOBAL_WEB_ORIGINS## ]
 ```
 
-## Uni-directional Limitation
+## Preserving Keywords on Export
 
-Currently, the Deploy CLI only preserves keywords during import. Once added, keywords are overwritten with subsequent exports. For this reason, it is recommended that if a workflow heavily depends on keyword replacement, to only perform imports in perpetuity. This limitation is noted in [this Github issue](https://github.com/auth0/auth0-deploy-cli/issues/328).
+Generally, the Deploy CLI works best when operating in a uni-directional workflow from your lower-level environments (ex: dev, test) up to your production environments. However, there will be times when it is necessary to export configuration from a higher-level environment onto your local configuration directory. By default, the remote values will overwrite your local values, **causing the deletion of your keyword markers**. However, keyword replacement preservation can be enabled through the `AUTH0_PRESERVE_KEYWORDS` boolean configuration property. By enabling this configuration, the Deploy CLI will attempt to preserve the keyword markers defined in your local configuration files during export.
+
+The keyword preservation functionality will attempt to preserve as many keywords while also maintaining the accuracy of your resource configuration files. And it the majority of cases, it will work without any intervention by the user. However, some key limitations exist:
+
+- In the case of a keyword-replaced configuration field with differing values between local and remote, the local configuration value will _always_ be favored. This will
+- Arrays without a specific identifiers are not eligible for preservation. Ex: `[ "http://site.com/logout", "localhost:3000/logout", "##LOGOUT_URL##" ]`. This is because the ordering of these values are non-deterministic. Alternatively, to preserve these values, it is recommended to leverage the `@@ARRAY_REPLACE@@` keyword replace syntax with the entire value.
+
+To learn more about the history and technical challenges of of keyword preservation, refer to [RFC: Keyword Preservation During Export](https://github.com/auth0/auth0-deploy-cli/issues/688).
 
 ---
 
