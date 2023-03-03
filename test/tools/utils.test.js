@@ -58,6 +58,63 @@ describe('#utils', function () {
     }).to.throw(/Unable to load file.*/);
   });
 
+  describe('wrapArrayReplaceMarkersInQuotes', () => {
+    it('should wrap @@ARRAY_KEYWORD@@ markers in quotes', () => {
+      const yaml = `
+      property:
+      - name: some-item
+        value: @@VALID_ARRAY_KEYWORD@@
+      - name: another-item
+        value: @@VALID_ARRAY_KEYWORD@@`;
+
+      const escapedYaml = utils.wrapArrayReplaceMarkersInQuotes(yaml, {
+        VALID_ARRAY_KEYWORD: [],
+      });
+      expect(escapedYaml).to.equal(`
+      property:
+      - name: some-item
+        value: "@@VALID_ARRAY_KEYWORD@@"
+      - name: another-item
+        value: "@@VALID_ARRAY_KEYWORD@@"`);
+      expect(() => jsYaml.load(escapedYaml)).to.not.throw();
+    });
+
+    it('should not wrap @@ARRAY_KEYWORD@@ markers in quotes if it is already wrapped', () => {
+      const yaml = `
+      property:
+      - name: some-item
+        value: "@@VALID_ARRAY_KEYWORD@@"
+      - name: some-single-quoted-item
+        value: '@@VALID_ARRAY_KEYWORD@@'
+      - name: another-item
+        value: "@@VALID_ARRAY_KEYWORD@@"`;
+
+      const escapedYaml = utils.wrapArrayReplaceMarkersInQuotes(yaml, {
+        VALID_ARRAY_KEYWORD: [],
+      });
+      expect(escapedYaml).to.equal(`
+      property:
+      - name: some-item
+        value: "@@VALID_ARRAY_KEYWORD@@"
+      - name: some-single-quoted-item
+        value: '@@VALID_ARRAY_KEYWORD@@'
+      - name: another-item
+        value: "@@VALID_ARRAY_KEYWORD@@"`);
+      expect(() => jsYaml.load(escapedYaml)).to.not.throw();
+    });
+
+    it('should not wrap @@ARRAY_KEYWORD@@ markers in quotes if keyword does not exist in mapping', () => {
+      const yaml = `
+      property:
+      - name: some-item
+        value: @@NOT_IN_KEYWORD_MAPPINGS@@`;
+
+      const escapedYaml = utils.wrapArrayReplaceMarkersInQuotes(yaml, {});
+      expect(escapedYaml).to.equal(yaml);
+      expect(() => jsYaml.load(escapedYaml)).to.throw(); // Because it is invalid yaml
+    });
+  });
+
   it('should do keyword replacements', (done) => {
     const kwContents =
       '{ "a": 1, "string_key": @@string@@, "array_key": @@array@@, "object_key": @@object@@,' +
@@ -349,13 +406,26 @@ describe('#keywordReplacement', () => {
       });
     });
 
-    it('should replace @@ wrapped values, even when wrapped with quotes', () => {
+    it('should replace @@ wrapped values, even when wrapped with quotes in JSON format', () => {
       const inputWrappedInQuotes = '{ "foo": "@@ARRAY_REPLACEMENT@@", "bar": "OTHER_REPLACEMENT"}';
       const output = utils.keywordArrayReplace(inputWrappedInQuotes, mapping);
       const parsedOutput = JSON.parse(output);
       expect(parsedOutput).to.deep.equal({
         foo: mapping.ARRAY_REPLACEMENT,
         bar: 'OTHER_REPLACEMENT',
+      });
+    });
+
+    it('should replace @@ wrapped values, even when wrapped with quotes in YAML format', () => {
+      const inputWrappedInQuotes = `
+        singleQuotes: '@@ARRAY_REPLACEMENT@@'
+        doubleQuotes: "@@ARRAY_REPLACEMENT@@"`;
+
+      const output = utils.keywordArrayReplace(inputWrappedInQuotes, mapping);
+      const parsedOutput = jsYaml.load(output);
+      expect(parsedOutput).to.deep.equal({
+        singleQuotes: mapping.ARRAY_REPLACEMENT,
+        doubleQuotes: mapping.ARRAY_REPLACEMENT,
       });
     });
   });

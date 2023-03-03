@@ -8,9 +8,11 @@ import constants from './constants';
 
 export const keywordReplaceArrayRegExp = (key) => {
   const pattern = `@@${key}@@`;
-  const patternWithQuotes = `"${pattern}"`;
+  //YAML format supports both single and double quotes for strings
+  const patternWithSingleQuotes = `'${pattern}'`;
+  const patternWithDoubleQuotes = `"${pattern}"`;
 
-  return new RegExp(`${patternWithQuotes}|${pattern}`, 'g');
+  return new RegExp(`${patternWithSingleQuotes}|${patternWithDoubleQuotes}|${pattern}`, 'g');
 };
 
 export const keywordReplaceStringRegExp = (key) => {
@@ -43,6 +45,20 @@ export function keywordReplace(input: string, mappings: KeywordMappings): string
     input = keywordStringReplace(input, mappings);
   }
   return input;
+}
+
+// wrapArrayReplaceMarkersInQuotes will wrap array replacement markers in quotes.
+// This is necessary for YAML format in the context of keyword replacement
+// to preserve the keyword markers while also maintaining valid YAML syntax.
+export function wrapArrayReplaceMarkersInQuotes(body: string, mappings: KeywordMappings): string {
+  let newBody = body;
+  Object.keys(mappings).forEach((keyword) => {
+    newBody = newBody.replace(
+      new RegExp('(?<![\'"])@@' + keyword + '@@(?![\'"])', 'g'),
+      `"@@${keyword}@@"`
+    );
+  });
+  return newBody;
 }
 
 export function convertClientNameToId(name: string, clients: Asset[]): string {

@@ -320,7 +320,7 @@ describe('#end-to-end keyword replacement', function () {
 
     const keywordMapping = {
       COMPANY_NAME: 'Travel0',
-      //LANGUAGES: ['en', 'es'], //TODO: support array replacement for directory format
+      LANGUAGES: ['en', 'es'],
     };
 
     await deploy({
@@ -424,7 +424,7 @@ describe('keyword preservation', () => {
       yaml.emailTemplates.find(({ template }) => template === 'welcome_email').resultUrl
     ).to.equal('https://##DOMAIN##/welcome');
 
-    // expect(yaml.tenant.enabled_locales).to.equal('@@LANGUAGES@@'); TODO: enable @@ARRAY@@ keyword preservation in yaml formats
+    expect(yaml.tenant.enabled_locales).to.equal('@@LANGUAGES@@');
 
     const emailTemplateHTML = fs
       .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
@@ -458,20 +458,30 @@ describe('keyword preservation', () => {
       fs.readFileSync(path.join(workDirectory, 'tenant.json')).toString()
     );
 
-    expect(jsonWithoutPreservation.friendly_name).to.equal('This tenant name should be preserved');
-    expect(jsonWithoutPreservation.enabled_locales).to.deep.equal(['en', 'es']);
-    expect(jsonWithoutPreservation.support_email).to.equal('support@travel0.com');
-    expect(jsonWithoutPreservation.support_url).to.equal('https://travel0.com/support');
+    expect(jsonWithoutPreservation.friendly_name).to.equal(
+      config.AUTH0_KEYWORD_REPLACE_MAPPINGS.TENANT_NAME
+    );
+    expect(jsonWithoutPreservation.enabled_locales).to.deep.equal(
+      config.AUTH0_KEYWORD_REPLACE_MAPPINGS.LANGUAGES
+    );
+    expect(jsonWithoutPreservation.support_email).to.equal(
+      `support@${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.DOMAIN}`
+    );
+    expect(jsonWithoutPreservation.support_url).to.equal(
+      `https://${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.DOMAIN}/support`
+    );
 
     const emailTemplateJsonWithoutPreservation = JSON.parse(
       fs.readFileSync(path.join(workDirectory, 'emails', 'welcome_email.json')).toString()
     );
 
-    expect(emailTemplateJsonWithoutPreservation.resultUrl).to.equal('https://travel0.com/welcome');
+    expect(emailTemplateJsonWithoutPreservation.resultUrl).to.equal(
+      `https://${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.DOMAIN}/welcome`
+    );
 
     expect(
       fs.readFileSync(path.join(workDirectory, 'emails', 'welcome_email.html')).toString()
-    ).to.contain('This tenant name should be preserved');
+    ).to.contain(config.AUTH0_KEYWORD_REPLACE_MAPPINGS.TENANT_NAME);
 
     emptyDirSync(workDirectory);
     copySync(`${__dirname}/testdata/should-preserve-keywords/directory`, workDirectory); //It is necessary to copy directory contents to work directory to prevent overwriting of Git-committed files
