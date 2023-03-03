@@ -64,7 +64,7 @@ Generally, the Deploy CLI works best when operating in a uni-directional workflo
 
 The keyword preservation functionality will attempt to preserve as many keywords while also maintaining the accuracy of your resource configuration files. And it the majority of cases, it will work without any intervention by the user. However, some key limitations exist:
 
-- In the case of a keyword-replaced configuration field with differing values between local and remote, the local configuration value will _always_ be favored. This will
+- In the case of a keyword-replaced configuration field with differing values between local and remote, the local configuration value will _always_ be favored. This will cause **any out-of-band changes on remote to be wiped away** if a keyword replace marker exists anywhere in that field's value in the resource definition file; there is no "intelligent" reconciliation.
 - Arrays without a specific identifiers are not eligible for preservation. Ex: `[ "http://site.com/logout", "localhost:3000/logout", "##LOGOUT_URL##" ]`. This is because the ordering of these values are non-deterministic. Alternatively, to preserve these values, it is recommended to leverage the `@@ARRAY_REPLACE@@` keyword replace syntax with the entire value.
 
 To learn more about the history and technical challenges of of keyword preservation, refer to [RFC: Keyword Preservation During Export](https://github.com/auth0/auth0-deploy-cli/issues/688).
