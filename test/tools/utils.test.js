@@ -58,7 +58,7 @@ describe('#utils', function () {
     }).to.throw(/Unable to load file.*/);
   });
 
-  describe('wrapArrayReplaceMarkersInStrings', () => {
+  describe('wrapArrayReplaceMarkersInQuotes', () => {
     it('should wrap @@ARRAY_KEYWORD@@ markers in quotes', () => {
       const yaml = `
       property:
@@ -67,7 +67,7 @@ describe('#utils', function () {
       - name: another-item
         value: @@VALID_ARRAY_KEYWORD@@`;
 
-      const escapedYaml = utils.wrapArrayReplaceMarkersInStrings(yaml, {
+      const escapedYaml = utils.wrapArrayReplaceMarkersInQuotes(yaml, {
         VALID_ARRAY_KEYWORD: [],
       });
       expect(escapedYaml).to.equal(`
@@ -89,7 +89,7 @@ describe('#utils', function () {
       - name: another-item
         value: "@@VALID_ARRAY_KEYWORD@@"`;
 
-      const escapedYaml = utils.wrapArrayReplaceMarkersInStrings(yaml, {
+      const escapedYaml = utils.wrapArrayReplaceMarkersInQuotes(yaml, {
         VALID_ARRAY_KEYWORD: [],
       });
       expect(escapedYaml).to.equal(`
@@ -109,7 +109,7 @@ describe('#utils', function () {
       - name: some-item
         value: @@NOT_IN_KEYWORD_MAPPINGS@@`;
 
-      const escapedYaml = utils.wrapArrayReplaceMarkersInStrings(yaml, {});
+      const escapedYaml = utils.wrapArrayReplaceMarkersInQuotes(yaml, {});
       expect(escapedYaml).to.equal(yaml);
       expect(() => jsYaml.load(escapedYaml)).to.throw(); // Because it is invalid yaml
     });

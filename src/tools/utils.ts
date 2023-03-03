@@ -47,10 +47,10 @@ export function keywordReplace(input: string, mappings: KeywordMappings): string
   return input;
 }
 
-// wrapArrayReplaceMarkersInStrings will wrap array replacement markers in quotes.
+// wrapArrayReplaceMarkersInQuotes will wrap array replacement markers in quotes.
 // This is necessary for YAML format in the context of keyword replacement
 // to preserve the keyword markers while also maintaining valid YAML syntax.
-export function wrapArrayReplaceMarkersInStrings(body: string, mappings: KeywordMappings): string {
+export function wrapArrayReplaceMarkersInQuotes(body: string, mappings: KeywordMappings): string {
   let newBody = body;
   Object.keys(mappings).forEach((keyword) => {
     newBody = newBody.replace(

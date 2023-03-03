@@ -4,7 +4,7 @@ import Auth0 from './auth0';
 import {
   keywordReplace,
   loadFileAndReplaceKeywords,
-  wrapArrayReplaceMarkersInStrings,
+  wrapArrayReplaceMarkersInQuotes,
 } from './utils';
 
 export default {
@@ -12,7 +12,7 @@ export default {
   deploy,
   keywordReplace,
   loadFileAndReplaceKeywords,
-  wrapArrayReplaceMarkersInStrings,
+  wrapArrayReplaceMarkersInQuotes,
   Auth0,
 };
 
@@ -21,6 +21,6 @@ export {
   deploy,
   keywordReplace,
   loadFileAndReplaceKeywords,
-  wrapArrayReplaceMarkersInStrings,
+  wrapArrayReplaceMarkersInQuotes,
   Auth0,
 };

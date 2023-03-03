@@ -4,7 +4,7 @@ import path from 'path';
 import {
   loadFileAndReplaceKeywords,
   keywordReplace,
-  wrapArrayReplaceMarkersInStrings,
+  wrapArrayReplaceMarkersInQuotes,
   Auth0,
 } from '../../tools';
 
@@ -76,7 +76,7 @@ export default class YAMLContext {
           this.assets,
           yaml.load(
             opts.disableKeywordReplacement
-              ? wrapArrayReplaceMarkersInStrings(fs.readFileSync(fPath, 'utf8'), this.mappings)
+              ? wrapArrayReplaceMarkersInQuotes(fs.readFileSync(fPath, 'utf8'), this.mappings)
               : keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)
           ) || {}
         );
@@ -109,7 +109,7 @@ export default class YAMLContext {
 
     // Run initial schema check to ensure valid YAML
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
-    if (!opts.disableKeywordReplacement) await auth0.validate();
+    if (!opts.disableKeywordReplacement) await auth0.validate(); //The schema validation needs to be disabled during keyword-preserved export because a field may be enforced as an array but will be expressed with an array replace marker (string).
 
     // Allow handlers to process the assets such as loading files etc
     await Promise.all(
