@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Keyword preservation on export to prevent overwriting of keyword markers in most instances. Enabled through the `AUTH0_PRESERVE_KEYWORDS` boolean configuration property. See also: [Preserving Keywords on Export](./docs/keyword-replacement.md#preserving-keywords-on-export) [#738],[#740],[#741],[#744],[#745],[#751],[#754],[#757],[#758],[#760]
+
+### Fixed
+
+- Enabled wrapping of `@@ARRAY_REPLACE@@` keyword markers with single quotes in YAML resource configuration files [#760]
+
 ## [7.16.1] - 2023-02-07
 
 ### Fixed
