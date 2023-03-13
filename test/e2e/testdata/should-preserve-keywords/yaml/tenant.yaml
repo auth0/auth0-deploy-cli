@@ -40,7 +40,3 @@ emailTemplates:
     subject: Welcome
     syntax: liquid
     urlLifetimeInSeconds: 3600
-pages:
-  - name: error_page
-    html: ./pages/error_page.html
-    url: https://##DOMAIN##/error
