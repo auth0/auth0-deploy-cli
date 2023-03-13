@@ -127,7 +127,7 @@ export default class DirectoryContext {
             await handler.dump(this);
           } catch (err) {
             log.debug(err.stack);
-            throw new Error(`Problem exporting ${name}: ${err}`);
+            throw new Error(`Problem exporting ${name}`);
           }
         })
     );
