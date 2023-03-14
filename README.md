@@ -76,7 +76,7 @@ In order for the Deploy CLI to call the Management API, a dedicated Auth0 applic
    c. Click “Authorize”
 
 > **Warning**
-> The Deploy CLI's own client grant is unconfigurable by itself to [prevent potentially destructive changes](./docs/resource-specific-documentation.md#client-grants).
+> The Deploy CLI's own client is unconfigurable by itself through the CLI to [prevent potentially destructive changes](./docs/resource-specific-documentation.md#client-grants).
 
 #### Client Scopes
 
@@ -96,17 +96,43 @@ These values can be found in the “Settings” tab within the Auth0 application
 
 ### Calling the Deploy CLI
 
-Finally, with above complete, the Deploy CLI export command can be run:
+Finally, with above complete, the Deploy CLI `export` command can be run, here using environemt variables:
 
 ```shell
 a0deploy export --format=yaml --output_folder=local
 ```
 
-Once the process completes, observe the resource configuration files generated in the `local` directory. Then, run the import command, which pushes configuration from the local machine to your Auth0 tenant:
+Once the process completes, observe the resource configuration files generated in the `local` directory. Then, run the `import` command, which pushes configuration from the local machine to your Auth0 tenant, here using a `config_file` instead of environment variables:
 
 ```shell
-a0deploy import -c=config.json --input_file local/tenant.yaml
+a0deploy import --config_file=config.json --input_file local/tenant.yaml --env=false
 ```
+
+## Help
+
+```sh
+a0deploy [import|export] [options]
+```
+
+### Options
+
+|||
+|---|---|
+| General | |
+| `-c`, `--config_file` | JSON file config instead of using environment variables (string) |
+| `--env` | Override the mappings in `--config_file` with environment variables. (boolean) (default: `true`) |
+| `-d`, `--debug` | Dump extra debug information. (boolean) (default: `false`) |
+| `-p`, `--proxy_url` | A url for proxying requests, only set this if you are behind a proxy. (string) |
+|||
+| Export |
+| `-f`, `--format` | Output format. `directory` output is in JSON. (string) (`yaml` or `directory`)
+| `-o`, `--output_folder` | The output directory. Automatically created. (string) |
+|||
+| Import |
+| `-i`, `--input_file` | The updates to deploy. Either a JSON file, or directory that contains the correct file layout. (string) |
+| `-x`, `--secret` | The client secret, this allows you to encrypt the secret in your build configuration instead of storing it in a config file. (string) |
+| `-e`, `--export_ids` | Export identifier field for each object type. (boolean) (default: `false`) |
+
 
 ## Feedback
 
