@@ -11,7 +11,11 @@ export default async function deploy(
   // Setup log level
   log.level = process.env.AUTH0_DEBUG === 'true' ? 'debug' : 'info';
 
-  log.info('Getting access token for ' + config('AUTH0_CLIENT_ID') + '/' + config('AUTH0_DOMAIN'));
+  log.info(
+    `Getting access token for ${
+      config('AUTH0_CLIENT_ID') !== undefined ? `${config('AUTH0_CLIENT_ID')}/` : ''
+    }${config('AUTH0_DOMAIN')}`
+  );
 
   const auth0 = new Auth0(client, assets, config);
 
