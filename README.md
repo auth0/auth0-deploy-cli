@@ -76,7 +76,7 @@ In order for the Deploy CLI to call the Management API, a dedicated Auth0 applic
    c. Click “Authorize”
 
 > **Warning**
-> The Deploy CLI's own client is unconfigurable by itself through the CLI to [prevent potentially destructive changes](./docs/resource-specific-documentation.md#client-grants).
+> The Deploy CLI's own client is unconfigurable by itself to [prevent potentially destructive changes](./docs/resource-specific-documentation.md#client-grants).
 
 #### Client Scopes
 
