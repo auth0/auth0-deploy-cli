@@ -56,7 +56,7 @@ export default class ClientHandler extends DefaultAPIHandler {
 
     // Always filter out the client we are using to access Auth0 Management API
     // As it could cause problems if it gets deleted or updated etc
-    const currentClient = this.config('AUTH0_CLIENT_ID');
+    const currentClient = this.config('AUTH0_CLIENT_ID') || '';
 
     const filterClients = (list) => {
       if (excludedClients.length) {
