@@ -1,5 +1,6 @@
 import * as path from 'path';
 import { loadFileAndReplaceKeywords, Auth0 } from '../../tools';
+import pagedClient from '../../tools/auth0/client';
 
 import cleanAssets from '../../readonly';
 import log from '../../logger';
@@ -24,7 +25,7 @@ export default class DirectoryContext {
     this.filePath = config.AUTH0_INPUT_FILE;
     this.config = config;
     this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {};
-    this.mgmtClient = mgmtClient;
+    this.mgmtClient = pagedClient(mgmtClient);
     this.disableKeywordReplacement = false;
 
     //@ts-ignore for now
