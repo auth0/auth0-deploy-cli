@@ -239,6 +239,8 @@ export default class PromptsHandler extends DefaultHandler {
   async processChanges(assets: Assets): Promise<void> {
     const { prompts } = assets;
 
+    console.log({ prompts });
+
     if (!prompts) return;
 
     const { customText, ...promptSettings } = prompts;
