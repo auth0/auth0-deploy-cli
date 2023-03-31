@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Human-readable filenames for client grants if more than fifty clients and fifty resource servers [#764]
+- Tenant-agnostic filenames for client grants if more than fifty clients and fifty resource servers [#764]
 - Unintentional exclusion of clients when injecting access token via `AUTH0_ACCESS_TOKEN` [#775]
 
 ## [7.17.0] - 2023-03-03
