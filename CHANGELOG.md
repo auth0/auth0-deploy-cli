@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.17.1] - 2023-03-31
+
+### Fixed
+
+- Tenant-agnostic filenames for client grants if more than fifty clients and fifty resource servers [#764]
+- Unintentional exclusion of clients when injecting access token via `AUTH0_ACCESS_TOKEN` [#775]
+
 ## [7.17.0] - 2023-03-03
 
 ### Added
@@ -903,7 +910,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#757]: https://github.com/auth0/auth0-deploy-cli/issues/757
 [#758]: https://github.com/auth0/auth0-deploy-cli/issues/758
 [#760]: https://github.com/auth0/auth0-deploy-cli/issues/760
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.0...HEAD
+[#764]: https://github.com/auth0/auth0-deploy-cli/issues/764
+[#775]: https://github.com/auth0/auth0-deploy-cli/issues/775
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.1...HEAD
+[7.17.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.0...v7.17.1
 [7.17.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.16.1...v7.17.0
 [7.16.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.16.0...v7.16.1
 [7.16.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.15.2...v7.16.0
