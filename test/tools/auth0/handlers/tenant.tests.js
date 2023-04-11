@@ -45,6 +45,7 @@ describe('#tenant handler', () => {
           updateSettings: (data) => {
             expect(data).to.be.an('object');
             expect(data.sandbox_version).to.equal('4');
+            expect(data.flags).to.equal(undefined);
             return Promise.resolve(data);
           },
         },
