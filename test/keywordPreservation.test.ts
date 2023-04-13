@@ -322,7 +322,7 @@ describe('preserveKeywords', () => {
     ],
     actions: [
       {
-        name: 'action-1-##ENV##',
+        name: 'action-1',
         display_name: '##ENV## Action 1',
       },
       {
@@ -352,8 +352,8 @@ describe('preserveKeywords', () => {
     connections: [], // Empty on remote but has local assets
     actions: [
       {
-        name: 'action-1 - Production',
-        display_name: 'Production Action 1 - Production',
+        name: 'action-1',
+        display_name: 'Production Action 1',
       },
       {
         name: 'action-3',
