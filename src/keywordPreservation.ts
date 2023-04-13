@@ -10,7 +10,7 @@ import APIHandler from './tools/auth0/handlers/default';
   Original Github Issue: https://github.com/auth0/auth0-deploy-cli/issues/328
 */
 
-export const shouldFieldBePreserved = (
+export const doesHaveKeywordMarker = (
   string: string,
   keywordMappings: KeywordMappings
 ): boolean => {
@@ -29,7 +29,7 @@ export const getPreservableFieldsFromAssets = (
   address = ''
 ): string[] => {
   if (typeof asset === 'string') {
-    if (shouldFieldBePreserved(asset, keywordMappings)) {
+    if (doesHaveKeywordMarker(asset, keywordMappings)) {
       return [address];
     }
     return [];
@@ -91,7 +91,7 @@ export const getAssetsValueByAddress = (address: string, assets: any): any => {
 
   // It is easier to handle an address piece-by-piece by
   // splitting on the period into separate "directions"
-  const directions = address.split('.');
+  const directions = address.split(/\.(?![^\[]*\])/g);
 
   // If the the next directions are the proprietary array syntax (ex: `[name=foo]`)
   // then perform lookup against unique array-item property
@@ -123,7 +123,7 @@ export const convertAddressToDotNotation = (
   address: string,
   finalAddressTrail = ''
 ): string | null => {
-  const directions = address.split('.');
+  const directions = address.split(/\.(?![^\[]*\])/g);
 
   if (directions[0] === '') return finalAddressTrail;
 
@@ -213,7 +213,15 @@ export const preserveKeywords = ({
 
   addresses.forEach((address) => {
     const localValue = getAssetsValueByAddress(address, localAssets);
-    const remoteValue = getAssetsValueByAddress(address, remoteAssets);
+
+    const remoteAssetsAddress = (() => {
+      const doesAddressHaveKeyword = doesHaveKeywordMarker(address, keywordMappings);
+      if (doesAddressHaveKeyword) {
+        return keywordReplace(address, keywordMappings);
+      }
+      return address;
+    })();
+    const remoteValue = getAssetsValueByAddress(remoteAssetsAddress, remoteAssets);
 
     const localValueWithReplacement = keywordReplace(localValue, keywordMappings);
 
@@ -230,7 +238,11 @@ export const preserveKeywords = ({
       );
     }
 
-    updatedRemoteAssets = updateAssetsByAddress(updatedRemoteAssets, address, localValue);
+    updatedRemoteAssets = updateAssetsByAddress(
+      updatedRemoteAssets,
+      remoteAssetsAddress,
+      localValue
+    );
   });
 
   return updatedRemoteAssets;
