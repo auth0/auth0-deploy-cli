@@ -491,6 +491,16 @@ describe('keyword preservation', () => {
       fs.readFileSync(path.join(workDirectory, 'emails', 'welcome_email.html')).toString()
     ).to.contain(config.AUTH0_KEYWORD_REPLACE_MAPPINGS.TENANT_NAME);
 
+    const clientsJsonWithoutPreservation = JSON.parse(
+      fs.readFileSync(path.join(workDirectory, 'clients', 'Auth0 CLI - dev.json')).toString()
+    );
+    expect(clientsJsonWithoutPreservation.name).to.equal(
+      `Auth0 CLI - ${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.ENV}`
+    );
+    expect(clientsJsonWithoutPreservation.logo_uri).to.equal(
+      `https://${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.ENV}.assets.com/photos/foo`
+    );
+
     emptyDirSync(workDirectory);
     copySync(`${__dirname}/testdata/should-preserve-keywords/directory`, workDirectory); //It is necessary to copy directory contents to work directory to prevent overwriting of Git-committed files
 
@@ -519,6 +529,12 @@ describe('keyword preservation', () => {
       .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
       .toString();
     expect(emailTemplateHTML).to.contain('##TENANT_NAME##');
+
+    const clientsJSON = JSON.parse(
+      fs.readFileSync(path.join(workDirectory, 'clients', 'Auth0 CLI - dev.json')).toString()
+    );
+    expect(clientsJSON.name).to.equal('Auth0 CLI - ##ENV##');
+    expect(clientsJSON.logo_uri).to.equal('https://##ENV##.assets.com/photos/foo');
 
     recordingDone();
   });
