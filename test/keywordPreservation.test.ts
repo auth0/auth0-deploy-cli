@@ -385,6 +385,13 @@ describe('preserveKeywords', () => {
         identifier: '##API_MAIN_IDENTIFIER##',
       },
     ],
+    customDomains: [
+      {
+        domain: '##COMPANY_NAME##.com',
+        primary: true,
+        status: 'ready',
+      },
+    ],
   };
 
   const mockRemoteAssets = {
@@ -421,6 +428,13 @@ describe('preserveKeywords', () => {
         identifier: 'https://travel0.com/api/v1',
       },
     ],
+    customDomains: [
+      {
+        domain: 'Travel0.com',
+        primary: true,
+        status: 'ready',
+      },
+    ],
   };
 
   const auth0Handlers = [
@@ -444,6 +458,7 @@ describe('preserveKeywords', () => {
       identifiers: ['id', 'identifier'],
       type: 'resourceServers',
     },
+    { id: 'id', identifiers: ['id', 'domain'], type: 'customDomains' },
   ];
 
   it('should preserve keywords when they correlate to keyword mappings', () => {
@@ -472,6 +487,7 @@ describe('preserveKeywords', () => {
             identifier: '##API_MAIN_IDENTIFIER##',
           },
         ];
+        expected.customDomains[0].domain = '##COMPANY_NAME##.com';
         return expected;
       })()
     );
