@@ -366,11 +366,12 @@ describe('keyword preservation', () => {
     AUTH0_CLIENT_SECRET,
     AUTH0_ACCESS_TOKEN,
     AUTH0_PRESERVE_KEYWORDS: true,
-    AUTH0_INCLUDED_ONLY: ['tenant', 'emailTemplates'] as AssetTypes[],
+    AUTH0_INCLUDED_ONLY: ['tenant', 'emailTemplates', 'clients'] as AssetTypes[],
     AUTH0_KEYWORD_REPLACE_MAPPINGS: {
       TENANT_NAME: 'This tenant name should be preserved',
       DOMAIN: 'travel0.com',
       LANGUAGES: ['en', 'es'],
+      ENV: 'dev',
     },
   };
 
@@ -430,6 +431,13 @@ describe('keyword preservation', () => {
       .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
       .toString();
     expect(emailTemplateHTML).to.contain('##TENANT_NAME##');
+
+    expect(
+      yaml.clients.some(
+        ({ name, logo_uri }) =>
+          name === 'Auth0 CLI - ##ENV##' && logo_uri === 'https://##ENV##.assets.com/photos/foo'
+      )
+    ).to.be.true;
 
     recordingDone();
   });
