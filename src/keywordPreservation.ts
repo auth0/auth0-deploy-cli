@@ -157,10 +157,21 @@ export const convertAddressToDotNotation = (
 
 export const updateAssetsByAddress = (
   assets: object,
-  address: string,
+  addresses: [string, string],
   newValue: string
 ): object => {
-  const dotNotationAddress = convertAddressToDotNotation(assets, address);
+  const dotNotationAddress = (() => {
+    //Two address possibilities are provided to account for cases when there is a keyword
+    //in both the resources's identifier field and another nested field. This is because
+    //when the resource identifier's field is preserved on the remote assets tree, it loses
+    //its identify, so we'll need to try two addresses: one where the identifier field has
+    //a keyword and one where the identifier field has the literal replaced value
+    const possibility1 = convertAddressToDotNotation(assets, addresses[0]);
+    const possibility2 = convertAddressToDotNotation(assets, addresses[1]);
+
+    if (possibility1 !== null) return possibility1;
+    return possibility2;
+  })();
 
   if (dotNotationAddress === null) return assets;
 
@@ -240,7 +251,7 @@ export const preserveKeywords = ({
 
     updatedRemoteAssets = updateAssetsByAddress(
       updatedRemoteAssets,
-      remoteAssetsAddress,
+      [address, remoteAssetsAddress], //
       localValue
     );
   });

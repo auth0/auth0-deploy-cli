@@ -263,7 +263,7 @@ describe('updateAssetsByAddress', () => {
     expect(
       updateAssetsByAddress(
         mockAssetTree,
-        'clients.[name=client-3].connections.[connection_name=connection-1].display_name',
+        ['clients.[name=client-3].connections.[connection_name=connection-1].display_name', '_'],
         'New connection display name'
       )
     ).to.deep.equal(
@@ -276,7 +276,11 @@ describe('updateAssetsByAddress', () => {
     );
 
     expect(
-      updateAssetsByAddress(mockAssetTree, 'tenant.display_name', 'This is the new display name')
+      updateAssetsByAddress(
+        mockAssetTree,
+        ['tenant.display_name', '_'],
+        'This is the new display name'
+      )
     ).to.deep.equal(
       (() => {
         const newAssets = mockAssetTree;
@@ -288,12 +292,57 @@ describe('updateAssetsByAddress', () => {
 
   it('should return unaltered assets tree if non-existent address provided', () => {
     expect(
-      updateAssetsByAddress(mockAssetTree, 'clients.[name=this-client-does-not-exist]', '_')
+      updateAssetsByAddress(mockAssetTree, ['clients.[name=this-client-does-not-exist]', '_'], '_')
     ).to.deep.equal(mockAssetTree);
 
     expect(
-      updateAssetsByAddress(mockAssetTree, 'tenant.this_property_does_not_exist', '_')
+      updateAssetsByAddress(mockAssetTree, ['tenant.this_property_does_not_exist', '_'], '_')
     ).to.deep.equal(mockAssetTree);
+  });
+
+  it('should update assets tree if identifier field is updated', () => {
+    expect(
+      updateAssetsByAddress(
+        {
+          actions: [
+            {
+              name: 'action-1-##ENV##',
+              display_name: '##ENV## Action 1',
+            },
+          ],
+        },
+        ['actions.[name=action-1-##ENV##].name', 'actions.[name=action-1-dev].name'],
+        'action-1-dev'
+      )
+    ).to.deep.equal({
+      actions: [
+        {
+          name: 'action-1-dev',
+          display_name: '##ENV## Action 1',
+        },
+      ],
+    });
+    expect(
+      updateAssetsByAddress(
+        {
+          actions: [
+            {
+              name: 'action-1-dev',
+              display_name: '##ENV## Action 1',
+            },
+          ],
+        },
+        ['actions.[name=action-1-##ENV##].name', 'actions.[name=action-1-dev].name'],
+        'action-1-dev'
+      )
+    ).to.deep.equal({
+      actions: [
+        {
+          name: 'action-1-dev',
+          display_name: '##ENV## Action 1',
+        },
+      ],
+    });
   });
 });
 
@@ -436,5 +485,90 @@ describe('preserveKeywords', () => {
       auth0Handlers,
     });
     expect(preservedAssets).to.deep.equal(mockRemoteAssets);
+  });
+
+  it('should preserve keywords in identifier fields', () => {
+    const mockLocalAssets = {
+      connections: [
+        {
+          name: '##ENV##-connection-1',
+          type: 'waad',
+          options: {
+            domain: '##ENV##.travel0.com',
+          },
+        },
+      ],
+      actions: [
+        {
+          name: 'action-1-##ENV##',
+          display_name: '##ENV## Action 1',
+        },
+        {
+          name: 'action-2-##ENV##',
+          display_name: "This action won't exist on remote, will be deleted",
+        },
+      ],
+      resourceServers: [
+        {
+          name: 'api-main',
+          identifier: 'https://##ENV##.travel0.com/api/v1',
+        },
+      ],
+    };
+
+    const preservedAssets = preserveKeywords({
+      localAssets: mockLocalAssets,
+      remoteAssets: {
+        connections: [
+          {
+            name: 'dev-connection-1',
+            type: 'waad',
+            options: {
+              domain: 'dev.travel0.com',
+            },
+          },
+        ],
+        actions: [
+          {
+            name: 'action-1-dev',
+            display_name: 'dev Action 1',
+          },
+        ],
+        resourceServers: [
+          {
+            name: 'api-main',
+            identifier: 'https://dev.travel0.com/api/v1',
+          },
+        ],
+      },
+      keywordMappings: {
+        ENV: 'dev',
+      },
+      auth0Handlers: [
+        {
+          id: 'id',
+          identifiers: ['id', 'name'],
+          type: 'actions',
+        },
+        {
+          id: 'id',
+          identifiers: ['id', 'name'],
+          type: 'connections',
+        },
+        {
+          id: 'id',
+          identifiers: ['id', 'identifier'],
+          type: 'resourceServers',
+        },
+      ],
+    });
+
+    const expected = (() => {
+      let expected = mockLocalAssets;
+      expected.actions = [mockLocalAssets.actions[0]];
+      return expected;
+    })();
+
+    expect(preservedAssets).to.deep.equal(expected);
   });
 });
