@@ -11,7 +11,7 @@ import {
   BaseAuth0APIClient,
 } from '../../types';
 
-const API_CONCURRENCY = 3;
+const API_CONCURRENCY = process.env.AUTH0_API_CONCURRENCY ? parseInt(process.env.AUTH0_API_CONCURRENCY, 10) : 3;
 // To ensure a complete deployment, limit the API requests generated to be 80% of the capacity
 // https://auth0.com/docs/policies/rate-limits#management-api-v2
 const API_FREQUENCY_PER_SECOND = 8;
