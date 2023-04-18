@@ -263,7 +263,7 @@ describe('updateAssetsByAddress', () => {
     expect(
       updateAssetsByAddress(
         mockAssetTree,
-        ['clients.[name=client-3].connections.[connection_name=connection-1].display_name', '_'],
+        'clients.[name=client-3].connections.[connection_name=connection-1].display_name',
         'New connection display name'
       )
     ).to.deep.equal(
@@ -276,11 +276,7 @@ describe('updateAssetsByAddress', () => {
     );
 
     expect(
-      updateAssetsByAddress(
-        mockAssetTree,
-        ['tenant.display_name', '_'],
-        'This is the new display name'
-      )
+      updateAssetsByAddress(mockAssetTree, 'tenant.display_name', 'This is the new display name')
     ).to.deep.equal(
       (() => {
         const newAssets = mockAssetTree;
@@ -292,11 +288,11 @@ describe('updateAssetsByAddress', () => {
 
   it('should return unaltered assets tree if non-existent address provided', () => {
     expect(
-      updateAssetsByAddress(mockAssetTree, ['clients.[name=this-client-does-not-exist]', '_'], '_')
+      updateAssetsByAddress(mockAssetTree, 'clients.[name=this-client-does-not-exist]', '_')
     ).to.deep.equal(mockAssetTree);
 
     expect(
-      updateAssetsByAddress(mockAssetTree, ['tenant.this_property_does_not_exist', '_'], '_')
+      updateAssetsByAddress(mockAssetTree, 'tenant.this_property_does_not_exist', '_')
     ).to.deep.equal(mockAssetTree);
   });
 
@@ -311,7 +307,7 @@ describe('updateAssetsByAddress', () => {
             },
           ],
         },
-        ['actions.[name=action-1-##ENV##].name', 'actions.[name=action-1-dev].name'],
+        'actions.[name=action-1-##ENV##].name',
         'action-1-dev'
       )
     ).to.deep.equal({
@@ -332,7 +328,7 @@ describe('updateAssetsByAddress', () => {
             },
           ],
         },
-        ['actions.[name=action-1-##ENV##].name', 'actions.[name=action-1-dev].name'],
+        'actions.[name=action-1-dev].name',
         'action-1-dev'
       )
     ).to.deep.equal({

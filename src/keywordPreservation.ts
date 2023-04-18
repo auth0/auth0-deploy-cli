@@ -157,19 +157,10 @@ export const convertAddressToDotNotation = (
 
 export const updateAssetsByAddress = (
   assets: object,
-  addresses: [string, string],
+  address: string,
   newValue: string
 ): object => {
-  const dotNotationAddress = (() => {
-    //Two address possibilities are provided to account for cases when there is a keyword
-    //in both the resources's identifier field and another nested field. This is because
-    //when the resource identifier's field is preserved on the remote assets tree, it loses
-    //its identify, so we'll need to try two addresses: one where the identifier field has
-    //a keyword and one where the identifier field has the literal replaced value
-    const possibility = convertAddressToDotNotation(assets, addresses[0]);
-    if (possibility !== null) return possibility;
-    return convertAddressToDotNotation(assets, addresses[1]);
-  })();
+  const dotNotationAddress = convertAddressToDotNotation(assets, address);
 
   if (dotNotationAddress === null) return assets;
 
@@ -247,9 +238,20 @@ export const preserveKeywords = ({
       );
     }
 
+    // Two address possibilities are provided to account for cases when there is a keyword
+    // in the resources's identifier field. When the resource identifier's field is preserved
+    // on the remote assets tree, it loses its identify, so we'll need to try two addresses:
+    // one where the identifier field has a keyword and one where the identifier field has
+    // the literal replaced value.
+    // Example: `customDomains.[domain=##DOMAIN].domain` and `customDomains.[domain=travel0.com].domain`
     updatedRemoteAssets = updateAssetsByAddress(
       updatedRemoteAssets,
-      [address, remoteAssetsAddress], //
+      address, //Two possible addresses need to be passed, one with identifier field keyword replaced and one where it is not replaced. Ex: `customDomains.[domain=##DOMAIN].domain` and `customDomains.[domain=travel0.com].domain`
+      localValue
+    );
+    updatedRemoteAssets = updateAssetsByAddress(
+      updatedRemoteAssets,
+      remoteAssetsAddress, //Two possible addresses need to be passed, one with identifier field keyword replaced and one where it is not replaced. Ex: `customDomains.[domain=##DOMAIN].domain` and `customDomains.[domain=travel0.com].domain`
       localValue
     );
   });
