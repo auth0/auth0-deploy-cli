@@ -587,4 +587,111 @@ describe('preserveKeywords', () => {
 
     expect(preservedAssets).to.deep.equal(expected);
   });
+
+  it('should not preserve keywords in identifier fields if keyword value is different than on remote', () => {
+    const mockLocalAssets = {
+      connections: [
+        {
+          name: '##ENV##-connection-1',
+          type: 'waad',
+          options: {
+            domain: '##ENV##.travel0.com',
+          },
+        },
+      ],
+      actions: [
+        {
+          name: 'action-1-##ENV##',
+          display_name: '##ENV## Action 1',
+        },
+        {
+          name: 'action-2-##ENV##',
+          display_name: "This action won't exist on remote, will be deleted",
+        },
+      ],
+      resourceServers: [
+        {
+          name: 'api-main',
+          identifier: 'https://##ENV##.travel0.com/api/v1',
+        },
+      ],
+    };
+
+    const preservedAssets = preserveKeywords({
+      localAssets: mockLocalAssets,
+      remoteAssets: {
+        connections: [
+          {
+            name: 'prod-connection-1',
+            type: 'waad',
+            options: {
+              domain: 'prod.travel0.com',
+            },
+          },
+        ],
+        actions: [
+          {
+            name: 'action-1-prod', // Note: prod is different than keyword mapping value of dev
+            display_name: 'prod Action 1',
+          },
+        ],
+        resourceServers: [
+          {
+            name: 'api-main',
+            identifier: 'https://prod.travel0.com/api/v1',
+          },
+        ],
+      },
+      keywordMappings: {
+        ENV: 'dev', // Note: different than remote value of prod
+      },
+      auth0Handlers: [
+        {
+          id: 'id',
+          identifiers: ['id', 'name'],
+          type: 'actions',
+        },
+        {
+          id: 'id',
+          identifiers: ['id', 'name'],
+          type: 'connections',
+        },
+        {
+          id: 'id',
+          identifiers: ['id', 'identifier'],
+          type: 'resourceServers',
+        },
+      ],
+    });
+
+    const expected = (() => {
+      let expected = mockLocalAssets;
+      expected.actions = [mockLocalAssets.actions[0]];
+      return expected;
+    })();
+
+    expect(preservedAssets).to.deep.equal({
+      connections: [
+        {
+          name: 'prod-connection-1',
+          type: 'waad',
+          options: {
+            domain: 'prod.travel0.com',
+          },
+        },
+      ],
+      actions: [
+        {
+          name: 'action-1-prod',
+          display_name: 'prod Action 1',
+        },
+      ],
+      resourceServers: [
+        {
+          name: 'api-main',
+          identifier: 'https://prod.travel0.com/api/v1',
+        },
+      ],
+    });
+  });
 });

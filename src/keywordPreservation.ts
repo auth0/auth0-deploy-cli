@@ -166,11 +166,9 @@ export const updateAssetsByAddress = (
     //when the resource identifier's field is preserved on the remote assets tree, it loses
     //its identify, so we'll need to try two addresses: one where the identifier field has
     //a keyword and one where the identifier field has the literal replaced value
-    const possibility1 = convertAddressToDotNotation(assets, addresses[0]);
-    const possibility2 = convertAddressToDotNotation(assets, addresses[1]);
-
-    if (possibility1 !== null) return possibility1;
-    return possibility2;
+    const possibility = convertAddressToDotNotation(assets, addresses[0]);
+    if (possibility !== null) return possibility;
+    return convertAddressToDotNotation(assets, addresses[1]);
   })();
 
   if (dotNotationAddress === null) return assets;
