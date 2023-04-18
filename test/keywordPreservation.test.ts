@@ -137,8 +137,6 @@ describe('getAssetsValueByAddress', () => {
       ],
     };
 
-    /* THE PROBLEM IS THAT PERIODS COULD BE IN THE ADDRESS VALUES */
-
     expect(getAssetsValueByAddress('tenant.display_name', mockAssetTree)).to.equal(
       'This is my tenant display name'
     );
