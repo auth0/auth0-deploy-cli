@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- API error when no tenant flags defined [#780]
+- Keyword preservation in a resource's identifier fields [#784]
+
 ## [7.17.1] - 2023-03-31
 
 ### Fixed
