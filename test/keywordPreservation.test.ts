@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { get as getDotNotation } from 'dot-prop';
 import {
-  shouldFieldBePreserved,
+  doesHaveKeywordMarker,
   getPreservableFieldsFromAssets,
   getAssetsValueByAddress,
   convertAddressToDotNotation,
@@ -11,15 +11,15 @@ import {
 import { cloneDeep } from 'lodash';
 
 describe('#Keyword Preservation', () => {
-  describe('shouldFieldBePreserved', () => {
+  describe('doesHaveKeywordMarker', () => {
     it('should return false when field does not contain keyword markers', () => {
       const keywordMappings = {
         BAR: 'bar',
       };
-      expect(shouldFieldBePreserved('', keywordMappings)).to.be.false;
-      expect(shouldFieldBePreserved('this is a field without a keyword marker', keywordMappings)).to
+      expect(doesHaveKeywordMarker('', keywordMappings)).to.be.false;
+      expect(doesHaveKeywordMarker('this is a field without a keyword marker', keywordMappings)).to
         .be.false;
-      expect(shouldFieldBePreserved('this field has an invalid @keyword@ marker', keywordMappings))
+      expect(doesHaveKeywordMarker('this field has an invalid @keyword@ marker', keywordMappings))
         .to.be.false;
     });
 
@@ -27,10 +27,9 @@ describe('#Keyword Preservation', () => {
       const keywordMappings = {
         BAR: 'bar',
       };
-      expect(shouldFieldBePreserved('##FOO##', keywordMappings)).to.be.false;
-      expect(shouldFieldBePreserved('@@FOO@@', keywordMappings)).to.be.false;
-      expect(shouldFieldBePreserved('this field has a @@FOO@@ marker', keywordMappings)).to.be
-        .false;
+      expect(doesHaveKeywordMarker('##FOO##', keywordMappings)).to.be.false;
+      expect(doesHaveKeywordMarker('@@FOO@@', keywordMappings)).to.be.false;
+      expect(doesHaveKeywordMarker('this field has a @@FOO@@ marker', keywordMappings)).to.be.false;
     });
 
     it('should return true when field contain keyword markers that exist in keyword mappings', () => {
@@ -39,11 +38,11 @@ describe('#Keyword Preservation', () => {
         BAR: 'bar keyword',
         ARRAY: ['foo', 'bar'],
       };
-      expect(shouldFieldBePreserved('##FOO##', keywordMappings)).to.be.true;
-      expect(shouldFieldBePreserved('@@FOO@@', keywordMappings)).to.be.true;
-      expect(shouldFieldBePreserved('this field has a ##FOO## marker', keywordMappings)).to.be.true;
+      expect(doesHaveKeywordMarker('##FOO##', keywordMappings)).to.be.true;
+      expect(doesHaveKeywordMarker('@@FOO@@', keywordMappings)).to.be.true;
+      expect(doesHaveKeywordMarker('this field has a ##FOO## marker', keywordMappings)).to.be.true;
       expect(
-        shouldFieldBePreserved('this field has both a ##FOO## and ##BAR## marker', keywordMappings)
+        doesHaveKeywordMarker('this field has both a ##FOO## and ##BAR## marker', keywordMappings)
       ).to.be.true;
     });
   });
@@ -107,6 +106,16 @@ describe('getAssetsValueByAddress', () => {
       tenant: {
         display_name: 'This is my tenant display name',
       },
+      resourceServers: [
+        {
+          identifier: 'https://travel0.com/api/v1',
+          name: 'API Main',
+        },
+        {
+          identifier: '##API_MAIN_IDENTIFIER##',
+          name: 'API Main',
+        },
+      ],
       clients: [
         {
           name: 'client-1',
@@ -149,6 +158,18 @@ describe('getAssetsValueByAddress', () => {
     expect(getAssetsValueByAddress('this.address.should.[not=exist]', mockAssetTree)).to.equal(
       undefined
     );
+    expect(
+      getAssetsValueByAddress(
+        'resourceServers.[identifier=##API_MAIN_IDENTIFIER##].identifier',
+        mockAssetTree
+      )
+    ).to.equal('##API_MAIN_IDENTIFIER##');
+    expect(
+      getAssetsValueByAddress(
+        'resourceServers.[identifier=https://travel0.com/api/v1].identifier',
+        mockAssetTree
+      )
+    ).to.equal('https://travel0.com/api/v1');
   });
 });
 
@@ -272,6 +293,51 @@ describe('updateAssetsByAddress', () => {
       updateAssetsByAddress(mockAssetTree, 'tenant.this_property_does_not_exist', '_')
     ).to.deep.equal(mockAssetTree);
   });
+
+  it('should update assets tree if identifier field is updated', () => {
+    expect(
+      updateAssetsByAddress(
+        {
+          actions: [
+            {
+              name: 'action-1-##ENV##',
+              display_name: '##ENV## Action 1',
+            },
+          ],
+        },
+        'actions.[name=action-1-##ENV##].name',
+        'action-1-dev'
+      )
+    ).to.deep.equal({
+      actions: [
+        {
+          name: 'action-1-dev',
+          display_name: '##ENV## Action 1',
+        },
+      ],
+    });
+    expect(
+      updateAssetsByAddress(
+        {
+          actions: [
+            {
+              name: 'action-1-dev',
+              display_name: '##ENV## Action 1',
+            },
+          ],
+        },
+        'actions.[name=action-1-dev].name',
+        'action-1-dev'
+      )
+    ).to.deep.equal({
+      actions: [
+        {
+          name: 'action-1-dev',
+          display_name: '##ENV## Action 1',
+        },
+      ],
+    });
+  });
 });
 
 describe('preserveKeywords', () => {
@@ -307,6 +373,19 @@ describe('preserveKeywords', () => {
         display_name: "This action won't exist on remote, will be deleted",
       },
     ],
+    resourceServers: [
+      {
+        name: 'api-main',
+        identifier: '##API_MAIN_IDENTIFIER##',
+      },
+    ],
+    customDomains: [
+      {
+        domain: '##COMPANY_NAME##.com',
+        primary: true,
+        status: 'ready',
+      },
+    ],
   };
 
   const mockRemoteAssets = {
@@ -337,6 +416,19 @@ describe('preserveKeywords', () => {
         body: '<html>Welcome to Production Travel0 Tenant</html>',
       },
     ],
+    resourceServers: [
+      {
+        name: 'api-main',
+        identifier: 'https://travel0.com/api/v1',
+      },
+    ],
+    customDomains: [
+      {
+        domain: 'Travel0.com',
+        primary: true,
+        status: 'ready',
+      },
+    ],
   };
 
   const auth0Handlers = [
@@ -355,6 +447,12 @@ describe('preserveKeywords', () => {
       identifiers: ['template'],
       type: 'emailTemplates',
     },
+    {
+      id: 'id',
+      identifiers: ['id', 'identifier'],
+      type: 'resourceServers',
+    },
+    { id: 'id', identifiers: ['id', 'domain'], type: 'customDomains' },
   ];
 
   it('should preserve keywords when they correlate to keyword mappings', () => {
@@ -365,6 +463,7 @@ describe('preserveKeywords', () => {
         COMPANY_NAME: 'Travel0',
         ALLOWED_LOGOUT_URLS: ['localhost:3000/logout', 'https://travel0.com/logout'],
         ENV: 'Production',
+        API_MAIN_IDENTIFIER: 'https://travel0.com/api/v1',
       },
       auth0Handlers,
     });
@@ -376,6 +475,13 @@ describe('preserveKeywords', () => {
         expected.tenant = mockLocalAssets.tenant;
         expected.actions[0].display_name = '##ENV## Action 1';
         expected.emailTemplates[0].body = '<html>Welcome to ##ENV## ##COMPANY_NAME## Tenant</html>';
+        expected.resourceServers = [
+          {
+            name: 'api-main',
+            identifier: '##API_MAIN_IDENTIFIER##',
+          },
+        ];
+        expected.customDomains[0].domain = '##COMPANY_NAME##.com';
         return expected;
       })()
     );
@@ -389,5 +495,197 @@ describe('preserveKeywords', () => {
       auth0Handlers,
     });
     expect(preservedAssets).to.deep.equal(mockRemoteAssets);
+  });
+
+  it('should preserve keywords in identifier fields', () => {
+    const mockLocalAssets = {
+      connections: [
+        {
+          name: '##ENV##-connection-1',
+          type: 'waad',
+          options: {
+            domain: '##ENV##.travel0.com',
+          },
+        },
+      ],
+      actions: [
+        {
+          name: 'action-1-##ENV##',
+          display_name: '##ENV## Action 1',
+        },
+        {
+          name: 'action-2-##ENV##',
+          display_name: "This action won't exist on remote, will be deleted",
+        },
+      ],
+      resourceServers: [
+        {
+          name: 'api-main',
+          identifier: 'https://##ENV##.travel0.com/api/v1',
+        },
+      ],
+    };
+
+    const preservedAssets = preserveKeywords({
+      localAssets: mockLocalAssets,
+      remoteAssets: {
+        connections: [
+          {
+            name: 'dev-connection-1',
+            type: 'waad',
+            options: {
+              domain: 'dev.travel0.com',
+            },
+          },
+        ],
+        actions: [
+          {
+            name: 'action-1-dev',
+            display_name: 'dev Action 1',
+          },
+        ],
+        resourceServers: [
+          {
+            name: 'api-main',
+            identifier: 'https://dev.travel0.com/api/v1',
+          },
+        ],
+      },
+      keywordMappings: {
+        ENV: 'dev',
+      },
+      auth0Handlers: [
+        {
+          id: 'id',
+          identifiers: ['id', 'name'],
+          type: 'actions',
+        },
+        {
+          id: 'id',
+          identifiers: ['id', 'name'],
+          type: 'connections',
+        },
+        {
+          id: 'id',
+          identifiers: ['id', 'identifier'],
+          type: 'resourceServers',
+        },
+      ],
+    });
+
+    const expected = (() => {
+      let expected = mockLocalAssets;
+      expected.actions = [mockLocalAssets.actions[0]];
+      return expected;
+    })();
+
+    expect(preservedAssets).to.deep.equal(expected);
+  });
+
+  it('should not preserve keywords in identifier fields if keyword value is different than on remote', () => {
+    const mockLocalAssets = {
+      connections: [
+        {
+          name: '##ENV##-connection-1',
+          type: 'waad',
+          options: {
+            domain: '##ENV##.travel0.com',
+          },
+        },
+      ],
+      actions: [
+        {
+          name: 'action-1-##ENV##',
+          display_name: '##ENV## Action 1',
+        },
+        {
+          name: 'action-2-##ENV##',
+          display_name: "This action won't exist on remote, will be deleted",
+        },
+      ],
+      resourceServers: [
+        {
+          name: 'api-main',
+          identifier: 'https://##ENV##.travel0.com/api/v1',
+        },
+      ],
+    };
+
+    const preservedAssets = preserveKeywords({
+      localAssets: mockLocalAssets,
+      remoteAssets: {
+        connections: [
+          {
+            name: 'prod-connection-1',
+            type: 'waad',
+            options: {
+              domain: 'prod.travel0.com',
+            },
+          },
+        ],
+        actions: [
+          {
+            name: 'action-1-prod', // Note: prod is different than keyword mapping value of dev
+            display_name: 'prod Action 1',
+          },
+        ],
+        resourceServers: [
+          {
+            name: 'api-main',
+            identifier: 'https://prod.travel0.com/api/v1',
+          },
+        ],
+      },
+      keywordMappings: {
+        ENV: 'dev', // Note: different than remote value of prod
+      },
+      auth0Handlers: [
+        {
+          id: 'id',
+          identifiers: ['id', 'name'],
+          type: 'actions',
+        },
+        {
+          id: 'id',
+          identifiers: ['id', 'name'],
+          type: 'connections',
+        },
+        {
+          id: 'id',
+          identifiers: ['id', 'identifier'],
+          type: 'resourceServers',
+        },
+      ],
+    });
+
+    const expected = (() => {
+      let expected = mockLocalAssets;
+      expected.actions = [mockLocalAssets.actions[0]];
+      return expected;
+    })();
+
+    expect(preservedAssets).to.deep.equal({
+      connections: [
+        {
+          name: 'prod-connection-1',
+          type: 'waad',
+          options: {
+            domain: 'prod.travel0.com',
+          },
+        },
+      ],
+      actions: [
+        {
+          name: 'action-1-prod',
+          display_name: 'prod Action 1',
+        },
+      ],
+      resourceServers: [
+        {
+          name: 'api-main',
+          identifier: 'https://prod.travel0.com/api/v1',
+        },
+      ],
+    });
   });
 });

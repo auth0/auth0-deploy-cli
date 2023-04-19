@@ -366,11 +366,12 @@ describe('keyword preservation', () => {
     AUTH0_CLIENT_SECRET,
     AUTH0_ACCESS_TOKEN,
     AUTH0_PRESERVE_KEYWORDS: true,
-    AUTH0_INCLUDED_ONLY: ['tenant', 'emailTemplates'] as AssetTypes[],
+    AUTH0_INCLUDED_ONLY: ['tenant', 'emailTemplates', 'clients'] as AssetTypes[],
     AUTH0_KEYWORD_REPLACE_MAPPINGS: {
       TENANT_NAME: 'This tenant name should be preserved',
       DOMAIN: 'travel0.com',
       LANGUAGES: ['en', 'es'],
+      ENV: 'dev',
     },
   };
 
@@ -431,6 +432,13 @@ describe('keyword preservation', () => {
       .toString();
     expect(emailTemplateHTML).to.contain('##TENANT_NAME##');
 
+    expect(
+      yaml.clients.some(
+        ({ name, logo_uri }) =>
+          name === 'Auth0 CLI - ##ENV##' && logo_uri === 'https://##ENV##.assets.com/photos/foo'
+      )
+    ).to.be.true;
+
     recordingDone();
   });
 
@@ -483,6 +491,16 @@ describe('keyword preservation', () => {
       fs.readFileSync(path.join(workDirectory, 'emails', 'welcome_email.html')).toString()
     ).to.contain(config.AUTH0_KEYWORD_REPLACE_MAPPINGS.TENANT_NAME);
 
+    const clientsJsonWithoutPreservation = JSON.parse(
+      fs.readFileSync(path.join(workDirectory, 'clients', 'Auth0 CLI - dev.json')).toString()
+    );
+    expect(clientsJsonWithoutPreservation.name).to.equal(
+      `Auth0 CLI - ${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.ENV}`
+    );
+    expect(clientsJsonWithoutPreservation.logo_uri).to.equal(
+      `https://${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.ENV}.assets.com/photos/foo`
+    );
+
     emptyDirSync(workDirectory);
     copySync(`${__dirname}/testdata/should-preserve-keywords/directory`, workDirectory); //It is necessary to copy directory contents to work directory to prevent overwriting of Git-committed files
 
@@ -511,6 +529,12 @@ describe('keyword preservation', () => {
       .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
       .toString();
     expect(emailTemplateHTML).to.contain('##TENANT_NAME##');
+
+    const clientsJSON = JSON.parse(
+      fs.readFileSync(path.join(workDirectory, 'clients', 'Auth0 CLI - dev.json')).toString()
+    );
+    expect(clientsJSON.name).to.equal('Auth0 CLI - ##ENV##');
+    expect(clientsJSON.logo_uri).to.equal('https://##ENV##.assets.com/photos/foo');
 
     recordingDone();
   });
