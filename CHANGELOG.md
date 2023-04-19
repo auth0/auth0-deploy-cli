@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.17.2] - 2023-04-19
+
 ### Fixed
 
 - API error when no tenant flags defined [#780]
@@ -917,7 +919,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#760]: https://github.com/auth0/auth0-deploy-cli/issues/760
 [#764]: https://github.com/auth0/auth0-deploy-cli/issues/764
 [#775]: https://github.com/auth0/auth0-deploy-cli/issues/775
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.1...HEAD
+[#780]: https://github.com/auth0/auth0-deploy-cli/issues/780
+[#784]: https://github.com/auth0/auth0-deploy-cli/issues/784
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.2...HEAD
+[7.17.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.1...v7.17.2
 [7.17.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.0...v7.17.1
 [7.17.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.16.1...v7.17.0
 [7.16.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.16.0...v7.16.1
