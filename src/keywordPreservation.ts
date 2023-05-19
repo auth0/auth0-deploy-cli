@@ -40,34 +40,32 @@ export const getPreservableFieldsFromAssets = (
   if (Array.isArray(asset)) {
     return asset
       .map((arrayItem) => {
-        const resourceIdentifier: string | string[] = resourceSpecificIdentifiers[address];
-        if (resourceIdentifier === undefined) return []; // See if this specific resource type has an identifier
+        const resourceIdentifiers: string[] = (() => {
+          const identifiers = resourceSpecificIdentifiers[address];
+          if (Array.isArray(identifiers)) {
+            return identifiers;
+          }
+          return [identifiers];
+        })();
 
-        if (Array.isArray(resourceIdentifier)) {
-          //Resource identifier can be array if compound identifiers are used (ex: client grants)
-          return resourceIdentifier
-            .map((identifier) => {
-              const identifierFieldValue = arrayItem[identifier];
-              if (identifierFieldValue === undefined) return []; // See if this specific array item possess the resource-specific identifier
-              return getPreservableFieldsFromAssets(
-                arrayItem,
-                keywordMappings,
-                resourceSpecificIdentifiers,
-                `${address}${shouldRenderDot ? '.' : ''}[${identifier}=${identifierFieldValue}]`
-              );
-            })
-            .flat();
-        }
+        return resourceIdentifiers
+          .map((resourceIdentifier) => {
+            resourceSpecificIdentifiers[address];
+            if (resourceIdentifier === undefined) return []; // See if this specific resource type has an identifier
 
-        const identifierFieldValue = arrayItem[resourceIdentifier];
-        if (identifierFieldValue === undefined) return []; // See if this specific array item possess the resource-specific identifier
+            const identifierFieldValue = arrayItem[resourceIdentifier];
+            if (identifierFieldValue === undefined) return []; // See if this specific array item possess the resource-specific identifier
 
-        return getPreservableFieldsFromAssets(
-          arrayItem,
-          keywordMappings,
-          resourceSpecificIdentifiers,
-          `${address}${shouldRenderDot ? '.' : ''}[${resourceIdentifier}=${identifierFieldValue}]`
-        );
+            return getPreservableFieldsFromAssets(
+              arrayItem,
+              keywordMappings,
+              resourceSpecificIdentifiers,
+              `${address}${
+                shouldRenderDot ? '.' : ''
+              }[${resourceIdentifier}=${identifierFieldValue}]`
+            );
+          })
+          .flat();
       })
       .flat();
   }
