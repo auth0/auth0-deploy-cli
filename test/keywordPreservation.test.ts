@@ -373,20 +373,6 @@ describe('preserveKeywords', () => {
         },
       },
     ],
-    clientGrants: [
-      {
-        client_id: 'API Explorer Application',
-        audience: '##API_MAIN_IDENTIFIER##',
-        scope: ['update:account'],
-        name: 'My M2M',
-      },
-      {
-        audience: 'https://test.auth0.com/api/v2/',
-        client_id: 'rFeR6vyzQcDEgSUsASPeF4tXr3xbZhxE',
-        id: 'cgr_0TLisL4eNHzhSR6j',
-        scope: ['read:logs'],
-      },
-    ],
     emailTemplates: [
       {
         template: 'welcome',
@@ -430,14 +416,6 @@ describe('preserveKeywords', () => {
     pages: undefined, //TODO: test these cases more thoroughly
     rules: null, //TODO: test these cases more thoroughly
     connections: [], // Empty on remote but has local assets
-    clientGrants: [
-      {
-        audience: 'https://travel0.com/api/v1',
-        client_id: 'rFeR6vyzQcDEgSUsASPeF4tXr3xbZhxE',
-        id: 'cgr_0TLisL4eNHzhSR6j',
-        scope: ['read:logs'],
-      },
-    ],
     actions: [
       {
         name: 'action-1',
@@ -491,11 +469,6 @@ describe('preserveKeywords', () => {
       type: 'resourceServers',
     },
     { id: 'id', identifiers: ['id', 'domain'], type: 'customDomains' },
-    {
-      type: 'clientGrants',
-      id: 'id',
-      identifiers: ['id', ['client_id', 'audience']],
-    },
   ];
 
   it('should preserve keywords when they correlate to keyword mappings', () => {
@@ -525,7 +498,6 @@ describe('preserveKeywords', () => {
           },
         ];
         expected.customDomains[0].domain = '##COMPANY_NAME##.com';
-        expected.clientGrants[0].audience = '##API_MAIN_IDENTIFIER##';
         return expected;
       })()
     );
@@ -550,6 +522,14 @@ describe('preserveKeywords', () => {
           options: {
             domain: '##ENV##.travel0.com',
           },
+        },
+      ],
+      clientGrants: [
+        {
+          client_id: 'API Explorer Application',
+          audience: 'https://##ENV##.travel0.com/api/v1',
+          scope: ['update:account'],
+          name: 'My M2M',
         },
       ],
       actions: [
@@ -580,6 +560,14 @@ describe('preserveKeywords', () => {
             options: {
               domain: 'dev.travel0.com',
             },
+          },
+        ],
+        clientGrants: [
+          {
+            client_id: 'API Explorer Application',
+            audience: 'https://dev.travel0.com/api/v1',
+            scope: ['update:account'],
+            name: 'My M2M',
           },
         ],
         actions: [
@@ -614,12 +602,18 @@ describe('preserveKeywords', () => {
           identifiers: ['id', 'identifier'],
           type: 'resourceServers',
         },
+        {
+          type: 'clientGrants',
+          id: 'id',
+          identifiers: ['id', ['client_id', 'audience']],
+        },
       ],
     });
 
     const expected = (() => {
       let expected = mockLocalAssets;
       expected.actions = [mockLocalAssets.actions[0]];
+      expected.clientGrants[0].audience = 'https://##ENV##.travel0.com/api/v1';
       return expected;
     })();
 
