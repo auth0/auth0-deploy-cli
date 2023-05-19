@@ -25,7 +25,7 @@ export const doesHaveKeywordMarker = (
 export const getPreservableFieldsFromAssets = (
   asset: object,
   keywordMappings: KeywordMappings,
-  resourceSpecificIdentifiers: Partial<{ [key in AssetTypes]: string }>,
+  resourceSpecificIdentifiers: Partial<{ [key in AssetTypes]: string | string[] }>,
   address = ''
 ): string[] => {
   if (typeof asset === 'string') {
@@ -40,8 +40,24 @@ export const getPreservableFieldsFromAssets = (
   if (Array.isArray(asset)) {
     return asset
       .map((arrayItem) => {
-        const resourceIdentifier = resourceSpecificIdentifiers[address];
+        const resourceIdentifier: string | string[] = resourceSpecificIdentifiers[address];
         if (resourceIdentifier === undefined) return []; // See if this specific resource type has an identifier
+
+        if (Array.isArray(resourceIdentifier)) {
+          //Resource identifier can be array if compound identifiers are used (ex: client grants)
+          return resourceIdentifier
+            .map((identifier) => {
+              const identifierFieldValue = arrayItem[identifier];
+              if (identifierFieldValue === undefined) return []; // See if this specific array item possess the resource-specific identifier
+              return getPreservableFieldsFromAssets(
+                arrayItem,
+                keywordMappings,
+                resourceSpecificIdentifiers,
+                `${address}${shouldRenderDot ? '.' : ''}[${identifier}=${identifierFieldValue}]`
+              );
+            })
+            .flat();
+        }
 
         const identifierFieldValue = arrayItem[resourceIdentifier];
         if (identifierFieldValue === undefined) return []; // See if this specific array item possess the resource-specific identifier
@@ -186,12 +202,14 @@ export const preserveKeywords = ({
   localAssets: object;
   remoteAssets: object;
   keywordMappings: KeywordMappings;
-  auth0Handlers: Pick<APIHandler, 'id' | 'identifiers' | 'type'>[];
+  auth0Handlers: (Pick<APIHandler, 'id' | 'type'> & {
+    identifiers: (string | string[])[];
+  })[];
 }): object => {
   if (Object.keys(keywordMappings).length === 0) return remoteAssets;
 
   const resourceSpecificIdentifiers = auth0Handlers.reduce(
-    (acc, handler): Partial<{ [key in AssetTypes]: string }> => {
+    (acc, handler): Partial<{ [key in AssetTypes]: string[] }> => {
       return {
         ...acc,
         [handler.type]: handler.identifiers.filter((identifiers) => {

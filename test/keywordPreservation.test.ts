@@ -67,6 +67,18 @@ describe('#Keyword Preservation', () => {
               },
             ],
           },
+          clientGrants: [
+            {
+              client_id: 'client-id',
+              audience: '##KEYWORD##',
+              name: 'Client grant name',
+            },
+            {
+              client_id: '##KEYWORD##',
+              audience: 'https://api.travel0.com',
+              name: 'Client grant name',
+            },
+          ],
           actions: [
             {
               actionName: 'action-1',
@@ -86,12 +98,16 @@ describe('#Keyword Preservation', () => {
           KEYWORD: 'Travel0',
           ARRAY_REPLACE_KEYWORD: ['this value', 'that value'],
         },
-        { actions: 'actionName' }
+        { actions: 'actionName', clientGrants: ['audience', 'client_id'] }
       );
 
       expect(fieldsToPreserve).to.have.members([
         'tenant.friendly_name',
         'tenant.nested.nestedProperty',
+        'clientGrants.[audience=##KEYWORD##].audience',
+        'clientGrants.[client_id=client-id].audience',
+        'clientGrants.[audience=https://api.travel0.com].client_id',
+        'clientGrants.[client_id=##KEYWORD##].client_id',
         'actions.[actionName=action-1].value',
         'actions.[actionName=action-2].value',
         'arrayReplace',
@@ -357,6 +373,20 @@ describe('preserveKeywords', () => {
         },
       },
     ],
+    clientGrants: [
+      {
+        client_id: 'API Explorer Application',
+        audience: '##API_MAIN_IDENTIFIER##',
+        scope: ['update:account'],
+        name: 'My M2M',
+      },
+      {
+        audience: 'https://test.auth0.com/api/v2/',
+        client_id: 'rFeR6vyzQcDEgSUsASPeF4tXr3xbZhxE',
+        id: 'cgr_0TLisL4eNHzhSR6j',
+        scope: ['read:logs'],
+      },
+    ],
     emailTemplates: [
       {
         template: 'welcome',
@@ -400,6 +430,14 @@ describe('preserveKeywords', () => {
     pages: undefined, //TODO: test these cases more thoroughly
     rules: null, //TODO: test these cases more thoroughly
     connections: [], // Empty on remote but has local assets
+    clientGrants: [
+      {
+        audience: 'https://travel0.com/api/v1',
+        client_id: 'rFeR6vyzQcDEgSUsASPeF4tXr3xbZhxE',
+        id: 'cgr_0TLisL4eNHzhSR6j',
+        scope: ['read:logs'],
+      },
+    ],
     actions: [
       {
         name: 'action-1',
@@ -453,6 +491,11 @@ describe('preserveKeywords', () => {
       type: 'resourceServers',
     },
     { id: 'id', identifiers: ['id', 'domain'], type: 'customDomains' },
+    {
+      type: 'clientGrants',
+      id: 'id',
+      identifiers: ['id', ['client_id', 'audience']],
+    },
   ];
 
   it('should preserve keywords when they correlate to keyword mappings', () => {
@@ -482,6 +525,7 @@ describe('preserveKeywords', () => {
           },
         ];
         expected.customDomains[0].domain = '##COMPANY_NAME##.com';
+        expected.clientGrants[0].audience = '##API_MAIN_IDENTIFIER##';
         return expected;
       })()
     );
@@ -657,12 +701,6 @@ describe('preserveKeywords', () => {
         },
       ],
     });
-
-    const expected = (() => {
-      let expected = mockLocalAssets;
-      expected.actions = [mockLocalAssets.actions[0]];
-      return expected;
-    })();
 
     expect(preservedAssets).to.deep.equal({
       connections: [
