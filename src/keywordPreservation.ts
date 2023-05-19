@@ -208,17 +208,15 @@ export const preserveKeywords = ({
 }): object => {
   if (Object.keys(keywordMappings).length === 0) return remoteAssets;
 
-  const resourceSpecificIdentifiers = auth0Handlers.reduce(
-    (acc, handler): Partial<{ [key in AssetTypes]: string[] }> => {
+  const resourceSpecificIdentifiers: Partial<{ [key in AssetTypes]: string[] }> =
+    auth0Handlers.reduce((acc, handler): Partial<{ [key in AssetTypes]: string[] }> => {
       return {
         ...acc,
         [handler.type]: handler.identifiers.filter((identifiers) => {
           return identifiers !== handler.id;
         })[0],
       };
-    },
-    {}
-  );
+    }, {});
 
   const addresses = getPreservableFieldsFromAssets(
     localAssets,
