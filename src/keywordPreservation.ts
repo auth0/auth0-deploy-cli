@@ -25,7 +25,7 @@ export const doesHaveKeywordMarker = (
 export const getPreservableFieldsFromAssets = (
   asset: object,
   keywordMappings: KeywordMappings,
-  resourceSpecificIdentifiers: Partial<{ [key in AssetTypes]: string }>,
+  resourceSpecificIdentifiers: Partial<{ [key in AssetTypes]: string | string[] }>,
   address = ''
 ): string[] => {
   if (typeof asset === 'string') {
@@ -40,18 +40,32 @@ export const getPreservableFieldsFromAssets = (
   if (Array.isArray(asset)) {
     return asset
       .map((arrayItem) => {
-        const resourceIdentifier = resourceSpecificIdentifiers[address];
-        if (resourceIdentifier === undefined) return []; // See if this specific resource type has an identifier
+        const resourceIdentifiers: string[] = (() => {
+          const identifiers = resourceSpecificIdentifiers[address];
+          if (Array.isArray(identifiers)) {
+            return identifiers;
+          }
+          return [identifiers];
+        })();
 
-        const identifierFieldValue = arrayItem[resourceIdentifier];
-        if (identifierFieldValue === undefined) return []; // See if this specific array item possess the resource-specific identifier
+        return resourceIdentifiers
+          .map((resourceIdentifier) => {
+            resourceSpecificIdentifiers[address];
+            if (resourceIdentifier === undefined) return []; // See if this specific resource type has an identifier
 
-        return getPreservableFieldsFromAssets(
-          arrayItem,
-          keywordMappings,
-          resourceSpecificIdentifiers,
-          `${address}${shouldRenderDot ? '.' : ''}[${resourceIdentifier}=${identifierFieldValue}]`
-        );
+            const identifierFieldValue = arrayItem[resourceIdentifier];
+            if (identifierFieldValue === undefined) return []; // See if this specific array item possess the resource-specific identifier
+
+            return getPreservableFieldsFromAssets(
+              arrayItem,
+              keywordMappings,
+              resourceSpecificIdentifiers,
+              `${address}${
+                shouldRenderDot ? '.' : ''
+              }[${resourceIdentifier}=${identifierFieldValue}]`
+            );
+          })
+          .flat();
       })
       .flat();
   }
@@ -186,21 +200,21 @@ export const preserveKeywords = ({
   localAssets: object;
   remoteAssets: object;
   keywordMappings: KeywordMappings;
-  auth0Handlers: Pick<APIHandler, 'id' | 'identifiers' | 'type'>[];
+  auth0Handlers: (Pick<APIHandler, 'id' | 'type'> & {
+    identifiers: (string | string[])[];
+  })[];
 }): object => {
   if (Object.keys(keywordMappings).length === 0) return remoteAssets;
 
-  const resourceSpecificIdentifiers = auth0Handlers.reduce(
-    (acc, handler): Partial<{ [key in AssetTypes]: string }> => {
+  const resourceSpecificIdentifiers: Partial<{ [key in AssetTypes]: string[] }> =
+    auth0Handlers.reduce((acc, handler): Partial<{ [key in AssetTypes]: string[] }> => {
       return {
         ...acc,
         [handler.type]: handler.identifiers.filter((identifiers) => {
           return identifiers !== handler.id;
         })[0],
       };
-    },
-    {}
-  );
+    }, {});
 
   const addresses = getPreservableFieldsFromAssets(
     localAssets,

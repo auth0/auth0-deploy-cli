@@ -67,6 +67,18 @@ describe('#Keyword Preservation', () => {
               },
             ],
           },
+          clientGrants: [
+            {
+              client_id: 'client-id',
+              audience: '##KEYWORD##',
+              name: 'Client grant name',
+            },
+            {
+              client_id: '##KEYWORD##',
+              audience: 'https://api.travel0.com',
+              name: 'Client grant name',
+            },
+          ],
           actions: [
             {
               actionName: 'action-1',
@@ -86,12 +98,16 @@ describe('#Keyword Preservation', () => {
           KEYWORD: 'Travel0',
           ARRAY_REPLACE_KEYWORD: ['this value', 'that value'],
         },
-        { actions: 'actionName' }
+        { actions: 'actionName', clientGrants: ['audience', 'client_id'] }
       );
 
       expect(fieldsToPreserve).to.have.members([
         'tenant.friendly_name',
         'tenant.nested.nestedProperty',
+        'clientGrants.[audience=##KEYWORD##].audience',
+        'clientGrants.[client_id=client-id].audience',
+        'clientGrants.[audience=https://api.travel0.com].client_id',
+        'clientGrants.[client_id=##KEYWORD##].client_id',
         'actions.[actionName=action-1].value',
         'actions.[actionName=action-2].value',
         'arrayReplace',
@@ -508,6 +524,14 @@ describe('preserveKeywords', () => {
           },
         },
       ],
+      clientGrants: [
+        {
+          client_id: 'API Explorer Application',
+          audience: 'https://##ENV##.travel0.com/api/v1',
+          scope: ['update:account'],
+          name: 'My M2M',
+        },
+      ],
       actions: [
         {
           name: 'action-1-##ENV##',
@@ -536,6 +560,14 @@ describe('preserveKeywords', () => {
             options: {
               domain: 'dev.travel0.com',
             },
+          },
+        ],
+        clientGrants: [
+          {
+            client_id: 'API Explorer Application',
+            audience: 'https://dev.travel0.com/api/v1',
+            scope: ['update:account'],
+            name: 'My M2M',
           },
         ],
         actions: [
@@ -570,12 +602,18 @@ describe('preserveKeywords', () => {
           identifiers: ['id', 'identifier'],
           type: 'resourceServers',
         },
+        {
+          type: 'clientGrants',
+          id: 'id',
+          identifiers: ['id', ['client_id', 'audience']],
+        },
       ],
     });
 
     const expected = (() => {
       let expected = mockLocalAssets;
       expected.actions = [mockLocalAssets.actions[0]];
+      expected.clientGrants[0].audience = 'https://##ENV##.travel0.com/api/v1';
       return expected;
     })();
 
@@ -657,12 +695,6 @@ describe('preserveKeywords', () => {
         },
       ],
     });
-
-    const expected = (() => {
-      let expected = mockLocalAssets;
-      expected.actions = [mockLocalAssets.actions[0]];
-      return expected;
-    })();
 
     expect(preservedAssets).to.deep.equal({
       connections: [
