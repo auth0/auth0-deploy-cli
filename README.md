@@ -11,7 +11,6 @@ The Auth0 Deploy CLI is a tool that helps you manage your Auth0 tenant configura
 
 **Supported resource types:** actions, branding, client grants, clients (applications), connections, custom domains, email templates, emails, grants, guardian, hook secrets, hooks, log streams, migrations, organizations, pages, prompts, resource servers (APIs), roles, rules, rules configs, tenant settings, themes.
 
-
 🎢 [Highlights](#highlights) • 📚 [Documentation](#documentation) • 🚀 [Getting Started](#getting-started) • 💬 [Feedback](#feedback)
 
 ---
@@ -44,7 +43,7 @@ This guide will help you to a working implementation of the Deploy CLI tool used
 3. [Calling the Deploy CLI](#calling-the-deploy-cli)
 
 > **Warning**
-> This tool can be destructive to your Auth0 tenant. 
+> This tool can be destructive to your Auth0 tenant.
 > It is recommended to be familiar with the [`AUTH0_ALLOW_DELETE` configuration](docs/configuring-the-deploy-cli.md#auth0allowdelete) and to test on development tenants prior to using in production.
 
 ### Prerequisites
@@ -96,43 +95,19 @@ These values can be found in the “Settings” tab within the Auth0 application
 
 ### Calling the Deploy CLI
 
-Finally, with above complete, the Deploy CLI `export` command can be run, here using environemt variables:
+Finally, with above complete, the Deploy CLI export command can be run:
 
 ```shell
 a0deploy export --format=yaml --output_folder=local
 ```
 
-Once the process completes, observe the resource configuration files generated in the `local` directory. Then, run the `import` command, which pushes configuration from the local machine to your Auth0 tenant, here using a `config_file` instead of environment variables:
+Once the process completes, observe the resource configuration files generated in the `local` directory. Then, run the import command, which pushes configuration from the local machine to your Auth0 tenant:
 
 ```shell
-a0deploy import --config_file=config.json --input_file local/tenant.yaml --env=false
+a0deploy import --config_file=config.json --input_file local/tenant.yaml
 ```
 
-## Help
-
-```sh
-a0deploy [import|export] [options]
-```
-
-### Options
-
-|||
-|---|---|
-| General | |
-| `-c`, `--config_file` | JSON file config instead of using environment variables (string) |
-| `--env` | Override the mappings in `--config_file` with environment variables. (boolean) (default: `true`) |
-| `-d`, `--debug` | Dump extra debug information. (boolean) (default: `false`) |
-| `-p`, `--proxy_url` | A url for proxying requests, only set this if you are behind a proxy. (string) |
-|||
-| Export |
-| `-f`, `--format` | Output format. `directory` output is in JSON. (string) (`yaml` or `directory`)
-| `-o`, `--output_folder` | The output directory. Automatically created. (string) |
-|||
-| Import |
-| `-i`, `--input_file` | The updates to deploy. Either a JSON file, or directory that contains the correct file layout. (string) |
-| `-x`, `--secret` | The client secret, this allows you to encrypt the secret in your build configuration instead of storing it in a config file. (string) |
-| `-e`, `--export_ids` | Export identifier field for each object type. (boolean) (default: `false`) |
-
+Refer to [Using as a CLI](./docs/using-as-cli.md) documentation for a comprehensive list of flags and options.
 
 ## Feedback
 

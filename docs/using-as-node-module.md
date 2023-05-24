@@ -1,6 +1,6 @@
 # Using as a Node Module
 
-The Deploy CLI can not only be used as a standalone CLI, but as a node module. Doing so allows you to manage Auth0 resources within expressive node scripts.
+The Deploy CLI can not only be used as a standalone CLI, but as a node module. Doing so allows you to manage Auth0 resources within expressive node scripts. Refer to the [Configuring the Deploy CLI](./configuring-the-deploy-cli.md) documentation for a comprehensive list of configuration settings.
 
 ## `dump` function
 
