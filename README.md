@@ -11,7 +11,6 @@ The Auth0 Deploy CLI is a tool that helps you manage your Auth0 tenant configura
 
 **Supported resource types:** actions, branding, client grants, clients (applications), connections, custom domains, email templates, emails, grants, guardian, hook secrets, hooks, log streams, migrations, organizations, pages, prompts, resource servers (APIs), roles, rules, rules configs, tenant settings, themes.
 
-
 🎢 [Highlights](#highlights) • 📚 [Documentation](#documentation) • 🚀 [Getting Started](#getting-started) • 💬 [Feedback](#feedback)
 
 ---
@@ -44,7 +43,7 @@ This guide will help you to a working implementation of the Deploy CLI tool used
 3. [Calling the Deploy CLI](#calling-the-deploy-cli)
 
 > **Warning**
-> This tool can be destructive to your Auth0 tenant. 
+> This tool can be destructive to your Auth0 tenant.
 > It is recommended to be familiar with the [`AUTH0_ALLOW_DELETE` configuration](docs/configuring-the-deploy-cli.md#auth0allowdelete) and to test on development tenants prior to using in production.
 
 ### Prerequisites
@@ -76,7 +75,7 @@ In order for the Deploy CLI to call the Management API, a dedicated Auth0 applic
    c. Click “Authorize”
 
 > **Warning**
-> The Deploy CLI's own client grant is unconfigurable by itself to [prevent potentially destructive changes](./docs/resource-specific-documentation.md#client-grants).
+> The Deploy CLI's own client is unconfigurable by itself to [prevent potentially destructive changes](./docs/resource-specific-documentation.md#client-grants).
 
 #### Client Scopes
 
@@ -105,8 +104,10 @@ a0deploy export --format=yaml --output_folder=local
 Once the process completes, observe the resource configuration files generated in the `local` directory. Then, run the import command, which pushes configuration from the local machine to your Auth0 tenant:
 
 ```shell
-a0deploy import -c=config.json --input_file local/tenant.yaml
+a0deploy import --config_file=config.json --input_file local/tenant.yaml
 ```
+
+Refer to [Using as a CLI](./docs/using-as-cli.md) documentation for a comprehensive list of flags and options.
 
 ## Feedback
 
