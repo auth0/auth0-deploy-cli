@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.17.3] - 2023-05-24
+
 ### Fixed
 
 - Keyword preservation for client grant `audience` field [#793]
@@ -925,7 +927,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#775]: https://github.com/auth0/auth0-deploy-cli/issues/775
 [#780]: https://github.com/auth0/auth0-deploy-cli/issues/780
 [#784]: https://github.com/auth0/auth0-deploy-cli/issues/784
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.2...HEAD
+[#793]: https://github.com/auth0/auth0-deploy-cli/issues/793
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.3...HEAD
+[7.17.3]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.2...v7.17.3
 [7.17.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.1...v7.17.2
 [7.17.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.0...v7.17.1
 [7.17.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.16.1...v7.17.0
