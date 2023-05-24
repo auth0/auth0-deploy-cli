@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Keyword preservation for client grant `audience` field [#793]
+
 ## [7.17.2] - 2023-04-19
 
 ### Fixed
