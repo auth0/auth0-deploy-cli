@@ -16,7 +16,7 @@ To use the keyword replacement, the `AUTH0_KEYWORD_REPLACEMENT_MAPPINGS` configu
   "AUTH0_CLIENT_SECRET": "BAR",
   "AUTH0_KEYWORD_REPLACE_MAPPINGS": {
     "ENVIRONMENT": "dev",
-    "ALLOWED_LOGOUTS": ["https://dev-test-site.com/logout", "localhost:3000/logout"],
+    "ALLOWED_LOGOUT_URLS": ["https://dev-test-site.com/logout", "localhost:3000/logout"],
     "ALLOWED_ORIGINS": ["https://dev-test-site.com", "localhost:3000"]
   }
 }
@@ -26,14 +26,23 @@ To use the keyword replacement, the `AUTH0_KEYWORD_REPLACEMENT_MAPPINGS` configu
 
 ```yaml
 tenant:
-  friendly_name: My ##ENVIRONMENT## tenant
-  allowed_logout_urls: @@ALLOWED_LOGOUTS@@
+  friendly_name: "##ENVIRONMENT## tenant"
+  allowed_logout_urls: @@ALLOWED_LOGOUT_URLS@@
   enabled_locales:
     - en
 clients:
   - name: Test App
     allowed_origins: @@ALLOWED_ORIGINS@@
-    allowed_logout_urls: @@ALLOWED_LOGOUTS@@
+    allowed_logout_urls: @@ALLOWED_LOGOUT_URLS@@
+```
+
+### Example `tenant.json`
+
+```json
+{
+  "friendly_name": "##ENVIRONMENT## tenant",
+  "allowed_logout_urls": "@@ALLOWED_LOGOUT_URLS@@"
+}
 ```
 
 ## Array Concatenation

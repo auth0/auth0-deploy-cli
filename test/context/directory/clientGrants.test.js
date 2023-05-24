@@ -126,28 +126,32 @@ describe('#directory context clientGrants', () => {
         ...mockMgmtClient(),
         clients: {
           getAll: () => [
-            {
-              client_id: 'client-id-1',
-              name: 'Primary M2M',
-            },
-            {
-              client_id: 'client-id-2',
-              name: 'Secondary M2M',
-            },
+            [
+              {
+                client_id: 'client-id-1',
+                name: 'Primary M2M',
+              },
+              {
+                client_id: 'client-id-2',
+                name: 'Secondary M2M',
+              },
+            ],
           ],
         },
         resourceServers: {
           getAll: () => [
-            {
-              id: 'resource-server-1',
-              name: 'Payments Service',
-              identifier: 'https://payments.travel0.com/api',
-            },
-            {
-              id: 'resource-server-2',
-              name: 'Auth0 Management API',
-              identifier: 'https://travel0.us.auth0.com/api/v2',
-            },
+            [
+              {
+                id: 'resource-server-1',
+                name: 'Payments Service',
+                identifier: 'https://payments.travel0.com/api',
+              },
+              {
+                id: 'resource-server-2',
+                name: 'Auth0 Management API',
+                identifier: 'https://travel0.us.auth0.com/api/v2',
+              },
+            ],
           ],
         },
       }

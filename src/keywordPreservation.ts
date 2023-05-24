@@ -10,7 +10,7 @@ import APIHandler from './tools/auth0/handlers/default';
   Original Github Issue: https://github.com/auth0/auth0-deploy-cli/issues/328
 */
 
-export const shouldFieldBePreserved = (
+export const doesHaveKeywordMarker = (
   string: string,
   keywordMappings: KeywordMappings
 ): boolean => {
@@ -25,11 +25,11 @@ export const shouldFieldBePreserved = (
 export const getPreservableFieldsFromAssets = (
   asset: object,
   keywordMappings: KeywordMappings,
-  resourceSpecificIdentifiers: Partial<{ [key in AssetTypes]: string }>,
+  resourceSpecificIdentifiers: Partial<{ [key in AssetTypes]: string | string[] }>,
   address = ''
 ): string[] => {
   if (typeof asset === 'string') {
-    if (shouldFieldBePreserved(asset, keywordMappings)) {
+    if (doesHaveKeywordMarker(asset, keywordMappings)) {
       return [address];
     }
     return [];
@@ -40,18 +40,32 @@ export const getPreservableFieldsFromAssets = (
   if (Array.isArray(asset)) {
     return asset
       .map((arrayItem) => {
-        const resourceIdentifier = resourceSpecificIdentifiers[address];
-        if (resourceIdentifier === undefined) return []; // See if this specific resource type has an identifier
+        const resourceIdentifiers: string[] = (() => {
+          const identifiers = resourceSpecificIdentifiers[address];
+          if (Array.isArray(identifiers)) {
+            return identifiers;
+          }
+          return [identifiers];
+        })();
 
-        const identifierFieldValue = arrayItem[resourceIdentifier];
-        if (identifierFieldValue === undefined) return []; // See if this specific array item possess the resource-specific identifier
+        return resourceIdentifiers
+          .map((resourceIdentifier) => {
+            resourceSpecificIdentifiers[address];
+            if (resourceIdentifier === undefined) return []; // See if this specific resource type has an identifier
 
-        return getPreservableFieldsFromAssets(
-          arrayItem,
-          keywordMappings,
-          resourceSpecificIdentifiers,
-          `${address}${shouldRenderDot ? '.' : ''}[${resourceIdentifier}=${identifierFieldValue}]`
-        );
+            const identifierFieldValue = arrayItem[resourceIdentifier];
+            if (identifierFieldValue === undefined) return []; // See if this specific array item possess the resource-specific identifier
+
+            return getPreservableFieldsFromAssets(
+              arrayItem,
+              keywordMappings,
+              resourceSpecificIdentifiers,
+              `${address}${
+                shouldRenderDot ? '.' : ''
+              }[${resourceIdentifier}=${identifierFieldValue}]`
+            );
+          })
+          .flat();
       })
       .flat();
   }
@@ -91,7 +105,7 @@ export const getAssetsValueByAddress = (address: string, assets: any): any => {
 
   // It is easier to handle an address piece-by-piece by
   // splitting on the period into separate "directions"
-  const directions = address.split('.');
+  const directions = address.split(/\.(?![^\[]*\])/g);
 
   // If the the next directions are the proprietary array syntax (ex: `[name=foo]`)
   // then perform lookup against unique array-item property
@@ -123,7 +137,7 @@ export const convertAddressToDotNotation = (
   address: string,
   finalAddressTrail = ''
 ): string | null => {
-  const directions = address.split('.');
+  const directions = address.split(/\.(?![^\[]*\])/g);
 
   if (directions[0] === '') return finalAddressTrail;
 
@@ -186,21 +200,21 @@ export const preserveKeywords = ({
   localAssets: object;
   remoteAssets: object;
   keywordMappings: KeywordMappings;
-  auth0Handlers: Pick<APIHandler, 'id' | 'identifiers' | 'type'>[];
+  auth0Handlers: (Pick<APIHandler, 'id' | 'type'> & {
+    identifiers: (string | string[])[];
+  })[];
 }): object => {
   if (Object.keys(keywordMappings).length === 0) return remoteAssets;
 
-  const resourceSpecificIdentifiers = auth0Handlers.reduce(
-    (acc, handler): Partial<{ [key in AssetTypes]: string }> => {
+  const resourceSpecificIdentifiers: Partial<{ [key in AssetTypes]: string[] }> =
+    auth0Handlers.reduce((acc, handler): Partial<{ [key in AssetTypes]: string[] }> => {
       return {
         ...acc,
         [handler.type]: handler.identifiers.filter((identifiers) => {
           return identifiers !== handler.id;
         })[0],
       };
-    },
-    {}
-  );
+    }, {});
 
   const addresses = getPreservableFieldsFromAssets(
     localAssets,
@@ -213,7 +227,15 @@ export const preserveKeywords = ({
 
   addresses.forEach((address) => {
     const localValue = getAssetsValueByAddress(address, localAssets);
-    const remoteValue = getAssetsValueByAddress(address, remoteAssets);
+
+    const remoteAssetsAddress = (() => {
+      const doesAddressHaveKeyword = doesHaveKeywordMarker(address, keywordMappings);
+      if (doesAddressHaveKeyword) {
+        return keywordReplace(address, keywordMappings);
+      }
+      return address;
+    })();
+    const remoteValue = getAssetsValueByAddress(remoteAssetsAddress, remoteAssets);
 
     const localValueWithReplacement = keywordReplace(localValue, keywordMappings);
 
@@ -230,7 +252,22 @@ export const preserveKeywords = ({
       );
     }
 
-    updatedRemoteAssets = updateAssetsByAddress(updatedRemoteAssets, address, localValue);
+    // Two address possibilities are provided to account for cases when there is a keyword
+    // in the resources's identifier field. When the resource identifier's field is preserved
+    // on the remote assets tree, it loses its identify, so we'll need to try two addresses:
+    // one where the identifier field has a keyword and one where the identifier field has
+    // the literal replaced value.
+    // Example: `customDomains.[domain=##DOMAIN].domain` and `customDomains.[domain=travel0.com].domain`
+    updatedRemoteAssets = updateAssetsByAddress(
+      updatedRemoteAssets,
+      address, //Two possible addresses need to be passed, one with identifier field keyword replaced and one where it is not replaced. Ex: `customDomains.[domain=##DOMAIN].domain` and `customDomains.[domain=travel0.com].domain`
+      localValue
+    );
+    updatedRemoteAssets = updateAssetsByAddress(
+      updatedRemoteAssets,
+      remoteAssetsAddress, //Two possible addresses need to be passed, one with identifier field keyword replaced and one where it is not replaced. Ex: `customDomains.[domain=##DOMAIN].domain` and `customDomains.[domain=travel0.com].domain`
+      localValue
+    );
   });
 
   return updatedRemoteAssets;

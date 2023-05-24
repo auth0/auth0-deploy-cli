@@ -49,10 +49,12 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   const allResourceServers = await context.mgmtClient.resourceServers.getAll({
     paginate: true,
+    include_totals: true,
   });
 
   const allClients = await context.mgmtClient.clients.getAll({
     paginate: true,
+    include_totals: true,
   });
 
   // Convert client_id to the client name for readability

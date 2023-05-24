@@ -67,11 +67,14 @@ export default class TenantHandler extends DefaultHandler {
 
     const updatedTenant = {
       ...tenant,
-      flags: sanitizeMigrationFlags({
+    };
+
+    if ('flags' in updatedTenant) {
+      updatedTenant.flags = sanitizeMigrationFlags({
         existingFlags: existingTenant.flags,
         proposedFlags: tenant.flags,
-      }),
-    };
+      });
+    }
 
     if (updatedTenant && Object.keys(updatedTenant).length > 0) {
       await this.client.tenant.updateSettings(updatedTenant);
@@ -91,7 +94,7 @@ export const sanitizeMigrationFlags = ({
   /*
   Tenants can only update migration flags that are already configured.
   If moving configuration from one tenant to another, there may be instances
-  where different migration flags exist and cause an error on update. This 
+  where different migration flags exist and cause an error on update. This
   function removes any migration flags that aren't already present on the target
   tenant. See: https://github.com/auth0/auth0-deploy-cli/issues/374
   */
