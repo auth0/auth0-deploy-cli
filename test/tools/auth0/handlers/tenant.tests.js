@@ -59,7 +59,10 @@ describe('#tenant handler', () => {
 
     it("should remove migration flags if don't exist on target tenant", async () => {
       const mockFlags = {
-        trust_azure_adfs_email_verified_connection_property: true, // Migration flag
+        trust_azure_adfs_email_verified_connection_property: true, // Migration flag not on
+        new_universal_login_experience_enabled: true, // Migration flag not on remote
+        require_signed_request_object: true, // Migration flag not on remote tenant
+        enforce_client_authentication_on_passwordless_start: true, // Migration flag that *IS* on remote tenant
         'some-flag-1': true,
         'some-flag-2': false,
       };
@@ -68,7 +71,9 @@ describe('#tenant handler', () => {
         tenant: {
           getSettings: async () => {
             const flags = { ...mockFlags };
-            delete flags.trust_azure_adfs_email_verified_connection_property;
+            delete flags.trust_azure_adfs_email_verified_connection_property; // NOT on remote
+            delete flags.new_universal_login_experience_enabled; // NOT on remote
+            delete flags.require_signed_request_object; // NOT on remote
             return Promise.resolve({
               friendly_name: 'Test',
               default_directory: 'users',
@@ -81,6 +86,9 @@ describe('#tenant handler', () => {
               (() => {
                 const flags = { ...mockFlags };
                 delete flags.trust_azure_adfs_email_verified_connection_property;
+                delete flags.new_universal_login_experience_enabled;
+                delete flags.require_signed_request_object;
+                //NOTE:
                 return flags;
               })()
             );
