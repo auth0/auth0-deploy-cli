@@ -112,7 +112,7 @@ describe('#tenant handler', () => {
       expect(result).to.deep.equal(flags);
     });
 
-    it("should not remove migration flag if proposed but doesn't exist currently", () => {
+    it("should remove migration flag if proposed but doesn't exist currently", () => {
       const existingFlags = {
         'some-flag-1': false,
         'some-flag-2': true,

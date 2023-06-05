@@ -105,6 +105,9 @@ export const sanitizeMigrationFlags = ({
     'trust_azure_adfs_email_verified_connection_property',
     'include_email_in_reset_pwd_redirect',
     'include_email_in_verify_email_redirect',
+    'new_universal_login_experience_enabled',
+    'require_signed_request_object',
+    'enforce_client_authentication_on_passwordless_start',
   ];
 
   return Object.keys(proposedFlags).reduce(
