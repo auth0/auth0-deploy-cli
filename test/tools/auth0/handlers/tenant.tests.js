@@ -88,7 +88,7 @@ describe('#tenant handler', () => {
                 delete flags.trust_azure_adfs_email_verified_connection_property;
                 delete flags.new_universal_login_experience_enabled;
                 delete flags.require_signed_request_object;
-                //NOTE:
+                // NOTE:
                 return flags;
               })()
             );
