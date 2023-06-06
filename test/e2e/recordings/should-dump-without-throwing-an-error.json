@@ -99,7 +99,6 @@
                 "allow_legacy_ro_grant_types": true,
                 "disable_impersonation": true,
                 "enable_sso": true,
-                "new_universal_login_experience_enabled": true,
                 "universal_login": true,
                 "revoke_refresh_token_grant": false,
                 "disable_clickjack_protection_headers": false
@@ -877,7 +876,6 @@
                 "allow_legacy_ro_grant_types": true,
                 "disable_impersonation": true,
                 "enable_sso": true,
-                "new_universal_login_experience_enabled": true,
                 "universal_login": true,
                 "revoke_refresh_token_grant": false,
                 "disable_clickjack_protection_headers": false
@@ -1403,7 +1401,6 @@
                 "allow_legacy_ro_grant_types": true,
                 "disable_impersonation": true,
                 "enable_sso": true,
-                "new_universal_login_experience_enabled": true,
                 "universal_login": true,
                 "revoke_refresh_token_grant": false,
                 "disable_clickjack_protection_headers": false
