@@ -97,7 +97,6 @@ describe('#tenant handler', () => {
       it('should not set `flags` property on request payload if no allowed flags proposed', async () => {
         const proposedFlags = {
           'unallowed-flag-1': true,
-          'unallowed-flag-2': false,
         };
 
         const auth0 = {

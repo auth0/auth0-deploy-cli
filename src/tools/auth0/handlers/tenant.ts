@@ -4,6 +4,7 @@ import DefaultHandler, { order } from './default';
 import { supportedPages, pageNameMap } from './pages';
 import { convertJsonToString } from '../../utils';
 import { Asset, Assets, Language } from '../../../types';
+import log from '../../../logger';
 
 export const schema = {
   type: 'object',
@@ -119,10 +120,14 @@ export const allowedTenantFlags = [
 ];
 
 export const removeUnallowedTenantFlags = (proposedFlags: Tenant['flags']): Tenant['flags'] => {
-  return Object.keys(proposedFlags).reduce(
+  const removedFlags: string[] = [];
+  const filteredFlags = Object.keys(proposedFlags).reduce(
     (acc: Tenant['flags'], proposedKey: string): Tenant['flags'] => {
       const isAllowedFlag = allowedTenantFlags.includes(proposedKey);
-      if (!isAllowedFlag) return acc;
+      if (!isAllowedFlag) {
+        removedFlags.push(proposedKey);
+        return acc;
+      }
       return {
         ...acc,
         [proposedKey]: proposedFlags[proposedKey],
@@ -130,4 +135,17 @@ export const removeUnallowedTenantFlags = (proposedFlags: Tenant['flags']): Tena
     },
     {}
   );
+
+  if (removedFlags.length > 0) {
+    log.warn(
+      `The following tenant flag${
+        removedFlags.length > 1 ? 's have not been' : ' has not been'
+      } updated because deemed incompatible with the target tenant: ${removedFlags.join(', ')}
+      ${
+        removedFlags.length > 1 ? 'These flags' : 'This flag'
+      } can likely be removed from the tenant definition file. If you believe this removal is an error, please report via a Github issue.`
+    );
+  }
+
+  return filteredFlags;
 };
