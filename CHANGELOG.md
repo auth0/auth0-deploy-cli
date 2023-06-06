@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Prevent tenant flag "Additional properties not allowed" error by only updating publicly-available feature flags [#797]
+
 ## [7.17.3] - 2023-05-24
 
 ### Fixed
