@@ -63,17 +63,15 @@ export default class TenantHandler extends DefaultHandler {
     // Do nothing if not set
     if (!tenant) return;
 
-    const existingTenant = this.existing || (await this.getType());
-
-    const updatedTenant = {
+    const updatedTenant: Partial<Tenant> = {
       ...tenant,
     };
 
     if ('flags' in updatedTenant) {
-      updatedTenant.flags = sanitizeMigrationFlags({
-        existingFlags: existingTenant.flags,
-        proposedFlags: tenant.flags,
-      });
+      updatedTenant.flags = removeUnallowedTenantFlags(tenant.flags);
+      if (Object.keys(updatedTenant.flags).length === 0) {
+        delete updatedTenant.flags;
+      }
     }
 
     if (updatedTenant && Object.keys(updatedTenant).length > 0) {
@@ -84,46 +82,51 @@ export default class TenantHandler extends DefaultHandler {
   }
 }
 
-export const sanitizeMigrationFlags = ({
-  existingFlags = {},
-  proposedFlags = {},
-}: {
-  existingFlags: Tenant['flags'];
-  proposedFlags: Tenant['flags'];
-}): Tenant['flags'] => {
-  /*
-  Tenants can only update migration flags that are already configured.
-  If moving configuration from one tenant to another, there may be instances
-  where different migration flags exist and cause an error on update. This
-  function removes any migration flags that aren't already present on the target
-  tenant. See: https://github.com/auth0/auth0-deploy-cli/issues/374
-  */
+/*
+ Tenant flags are used to facilitate a number of functionalities, some
+ public, some internal. The subset of flags that are allowed to be updated 
+ in the context of the Deploy CLI is based on wether they're publicly exposed
+ in the Auth0 API docs:
 
-  const tenantMigrationFlags = [
-    'disable_clickjack_protection_headers',
-    'enable_mgmt_api_v1',
-    'trust_azure_adfs_email_verified_connection_property',
-    'include_email_in_reset_pwd_redirect',
-    'include_email_in_verify_email_redirect',
-  ];
+ https://auth0.com/docs/api/management/v2#!/Tenants/patch_settings
+*/
+export const allowedTenantFlags = [
+  'change_pwd_flow_v1',
+  'enable_client_connections',
+  'enable_apis_section',
+  'enable_pipeline2',
+  'enable_dynamic_client_registration',
+  'enable_custom_domain_in_emails',
+  'allow_legacy_tokeninfo_endpoint',
+  'enable_legacy_profile',
+  'enable_idtoken_api2',
+  'enable_public_signup_user_exists_error',
+  'allow_legacy_delegation_grant_types',
+  'allow_legacy_ro_grant_types',
+  'enable_sso',
+  'disable_clickjack_protection_headers',
+  'no_disclose_enterprise_connections',
+  'disable_management_api_sms_obfuscation',
+  'enforce_client_authentication_on_passwordless_start',
+  'trust_azure_adfs_email_verified_connection_property',
+  'enable_adfs_waad_email_verification',
+  'revoke_refresh_token_grant',
+  'dashboard_log_streams_next',
+  'dashboard_insights_view',
+  'disable_fields_map_fix',
+  'require_pushed_authorization_requests',
+  'mfa_show_factor_list_on_enrollment',
+];
 
+export const removeUnallowedTenantFlags = (proposedFlags: Tenant['flags']): Tenant['flags'] => {
   return Object.keys(proposedFlags).reduce(
     (acc: Tenant['flags'], proposedKey: string): Tenant['flags'] => {
-      const isMigrationFlag = tenantMigrationFlags.includes(proposedKey);
-      if (!isMigrationFlag)
-        return {
-          ...acc,
-          [proposedKey]: proposedFlags[proposedKey],
-        };
-
-      const keyCurrentlyExists = existingFlags[proposedKey] !== undefined;
-      if (keyCurrentlyExists)
-        return {
-          ...acc,
-          [proposedKey]: proposedFlags[proposedKey],
-        };
-
-      return acc;
+      const isAllowedFlag = allowedTenantFlags.includes(proposedKey);
+      if (!isAllowedFlag) return acc;
+      return {
+        ...acc,
+        [proposedKey]: proposedFlags[proposedKey],
+      };
     },
     {}
   );
