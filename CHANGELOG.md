@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.17.4] - 2023-06-06
+
+### Fixed
+
+- Prevent tenant flag "Additional properties not allowed" error by only updating publicly-available feature flags [#797]
+
 ## [7.17.3] - 2023-05-24
 
 ### Fixed
@@ -928,7 +934,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#780]: https://github.com/auth0/auth0-deploy-cli/issues/780
 [#784]: https://github.com/auth0/auth0-deploy-cli/issues/784
 [#793]: https://github.com/auth0/auth0-deploy-cli/issues/793
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.3...HEAD
+[#797]: https://github.com/auth0/auth0-deploy-cli/issues/797
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.4...HEAD
+[7.17.4]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.3...v7.17.4
 [7.17.3]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.2...v7.17.3
 [7.17.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.1...v7.17.2
 [7.17.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.0...v7.17.1
