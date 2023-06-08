@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.17.5] - 2023-06-08
+
+### Fixed
+
+- Obfuscating sensitive log streams keys [#800]
+- Prevent exporting of disallowed tenant flags [#799]
+
 ## [7.17.4] - 2023-06-06
 
 ### Fixed
@@ -935,7 +942,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#784]: https://github.com/auth0/auth0-deploy-cli/issues/784
 [#793]: https://github.com/auth0/auth0-deploy-cli/issues/793
 [#797]: https://github.com/auth0/auth0-deploy-cli/issues/797
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.4...HEAD
+[#799]: https://github.com/auth0/auth0-deploy-cli/issues/799
+[#800]: https://github.com/auth0/auth0-deploy-cli/issues/800
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.5...HEAD
+[7.17.5]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.4...v7.17.5
 [7.17.4]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.3...v7.17.4
 [7.17.3]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.2...v7.17.3
 [7.17.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.1...v7.17.2
