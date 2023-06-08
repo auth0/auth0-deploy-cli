@@ -6,6 +6,14 @@ import tenantHandler, {
   removeUnallowedTenantFlags,
 } from '../../../../src/tools/auth0/handlers/tenant';
 
+const mockAllowedFlags = Object.values(allowedTenantFlags).reduce<Record<string, boolean>>(
+  (acc, cur) => {
+    acc[cur] = true;
+    return acc;
+  },
+  {}
+);
+
 describe('#tenant handler', () => {
   describe('#tenant validate', () => {
     it('should not allow pages in tenant config', async () => {
@@ -28,6 +36,11 @@ describe('#tenant handler', () => {
         getSettings: () => ({
           friendly_name: 'Test',
           default_directory: 'users',
+          flags: {
+            ...mockAllowedFlags,
+            'unallowed-flag-1': false,
+            'unallowed-flag-2': true,
+          },
         }),
       },
     };
@@ -38,6 +51,7 @@ describe('#tenant handler', () => {
     expect(data).to.deep.equal({
       friendly_name: 'Test',
       default_directory: 'users',
+      flags: mockAllowedFlags,
     });
   });
 
@@ -119,14 +133,6 @@ describe('#tenant handler', () => {
   });
 
   describe('#removeUnallowedTenantFlags function', () => {
-    const mockAllowedFlags = Object.values(allowedTenantFlags).reduce<Record<string, boolean>>(
-      (acc, cur) => {
-        acc[cur] = true;
-        return acc;
-      },
-      {}
-    );
-
     it('should not alter flags if all are included and allowed', () => {
       const result = removeUnallowedTenantFlags(mockAllowedFlags);
       expect(result).to.deep.equal(mockAllowedFlags);
