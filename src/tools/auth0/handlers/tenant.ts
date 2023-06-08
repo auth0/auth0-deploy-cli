@@ -121,7 +121,11 @@ export const allowedTenantFlags = [
   'mfa_show_factor_list_on_enrollment',
 ];
 
-export const removeUnallowedTenantFlags = (proposedFlags: Tenant['flags']): Tenant['flags'] => {
+export const removeUnallowedTenantFlags = (
+  proposedFlags: Tenant['flags'] | undefined
+): Tenant['flags'] => {
+  if (proposedFlags === undefined) return {};
+
   const removedFlags: string[] = [];
   const filteredFlags = Object.keys(proposedFlags).reduce(
     (acc: Tenant['flags'], proposedKey: string): Tenant['flags'] => {
