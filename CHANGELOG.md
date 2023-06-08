@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Obfuscating sensitive log streams keys [#800]
+- Prevent exporting of disallowed tenant flags [#799]
+
 ## [7.17.4] - 2023-06-06
 
 ### Fixed
