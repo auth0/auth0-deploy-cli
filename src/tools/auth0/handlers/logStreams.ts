@@ -41,7 +41,11 @@ export default class LogStreamsHandler extends DefaultAPIHandler {
       type: 'logStreams',
       stripUpdateFields: ['type'],
       stripCreateFields: ['status', 'sink.awsPartnerEventSource'],
-      sensitiveFieldsToObfuscate: ['sink.httpAuthorization'],
+      sensitiveFieldsToObfuscate: [
+        'sink.httpAuthorization',
+        'sink.splunkToken',
+        'sink.datadogApiKey',
+      ],
     });
   }
 

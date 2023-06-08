@@ -29,6 +29,16 @@ const mockLogStreams = [
   },
   {
     id: 'log-stream-3',
+    name: 'Datadog Log Stream',
+    type: 'datadog',
+    status: 'active',
+    sink: {
+      datadogApiKey: 'SOME_SENSITIVE_TOKEN',
+      datadogRegion: 'us',
+    },
+  },
+  {
+    id: 'log-stream-4',
     name: 'Suspended HTTP Log Stream',
     type: 'http',
     status: 'suspended',
@@ -71,7 +81,7 @@ describe('#logStreams handler', () => {
             sink: {
               splunkDomain: 'test-splunk.com',
               splunkPort: '8089',
-              splunkToken: '7b838bd0-028e-4d78-a82c-3564a2007770',
+              splunkToken: '_VALUE_NOT_SHOWN_', // secret obfuscated
               splunkSecure: false,
             },
           },
@@ -89,6 +99,16 @@ describe('#logStreams handler', () => {
           },
           {
             id: 'log-stream-3',
+            name: 'Datadog Log Stream',
+            type: 'datadog',
+            status: 'active',
+            sink: {
+              datadogApiKey: '_VALUE_NOT_SHOWN_', // secret obfuscated
+              datadogRegion: 'us',
+            },
+          },
+          {
+            id: 'log-stream-4',
             name: 'Suspended HTTP Log Stream',
             type: 'http',
             // status property omitted if suspended
