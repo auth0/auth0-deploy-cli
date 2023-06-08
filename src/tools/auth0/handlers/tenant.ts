@@ -31,6 +31,8 @@ export default class TenantHandler extends DefaultHandler {
   async getType(): Promise<Asset> {
     const tenant = await this.client.tenant.getSettings();
 
+    tenant.flags = removeUnallowedTenantFlags(tenant.flags);
+
     this.existing = tenant;
 
     blockPageKeys.forEach((key) => {
