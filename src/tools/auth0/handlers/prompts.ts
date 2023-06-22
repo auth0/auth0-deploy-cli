@@ -193,47 +193,47 @@ export default class PromptsHandler extends DefaultHandler {
         return enabled_locales;
       });
 
-    const data = await Promise.all(
-      supportedLanguages
-        .map((language) => {
-          return promptTypes.map((promptType) => {
-            return this.client.prompts
-              .getCustomTextByLanguage({
-                prompt: promptType,
+    return this.client.pool
+      .addEachTask({
+        data:
+          supportedLanguages
+            .map((language) => promptTypes.map((promptType) => ({ promptType, language })))
+            .reduce((acc, val) => acc.concat(val), []) || [],
+        generator: ({ promptType, language }) =>
+          this.client.prompts
+            .getCustomTextByLanguage({
+              prompt: promptType,
+              language,
+            })
+            .then((customTextData) => {
+              if (isEmpty(customTextData)) return null;
+              return {
                 language,
-              })
-              .then((customTextData) => {
-                if (isEmpty(customTextData)) return null;
-                return {
-                  language,
-                  [promptType]: {
-                    ...customTextData,
-                  },
-                };
-              });
-          });
-        })
-        .reduce((acc, val) => acc.concat(val), []) // TODO: replace .map().reduce() with .flatMap() once we officially eliminate Node v10 support
-    ).then((customTextData) => {
-      return customTextData
-        .filter((customTextData) => {
-          return customTextData !== null;
-        })
-        .reduce((acc: AllPromptsByLanguage, customTextItem) => {
-          if (customTextItem?.language === undefined) return acc;
+                [promptType]: {
+                  ...customTextData,
+                },
+              };
+            }),
+      })
+      .promise()
+      .then((customTextData) => {
+        return customTextData
+          .filter((customTextData) => {
+            return customTextData !== null;
+          })
+          .reduce((acc: AllPromptsByLanguage, customTextItem) => {
+            if (customTextItem?.language === undefined) return acc;
 
-          const { language, ...customTextSettings } = customTextItem;
+            const { language, ...customTextSettings } = customTextItem;
 
-          return {
-            ...acc,
-            [language]: !!acc[language]
-              ? { ...acc[language], ...customTextSettings }
-              : { ...customTextSettings },
-          };
-        }, {});
-    });
-
-    return data;
+            return {
+              ...acc,
+              [language]: !!acc[language]
+                ? { ...acc[language], ...customTextSettings }
+                : { ...customTextSettings },
+            };
+          }, {});
+      });
   }
 
   async processChanges(assets: Assets): Promise<void> {
