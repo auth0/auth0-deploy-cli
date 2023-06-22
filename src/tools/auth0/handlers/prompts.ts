@@ -259,21 +259,29 @@ export default class PromptsHandler extends DefaultHandler {
     */
     if (!customText) return;
 
-    await Promise.all(
-      Object.keys(customText).flatMap((language: Language) => {
-        const languageScreenTypes = customText[language];
+    await this.client.pool
+      .addEachTask({
+        data: Object.keys(customText).flatMap((language: Language) => {
+          const languageScreenTypes = customText[language];
 
-        if (!languageScreenTypes) return [];
+          if (!languageScreenTypes) return [];
 
-        return Object.keys(languageScreenTypes).map((prompt: PromptTypes) => {
-          const body = languageScreenTypes[prompt] || {};
-          return this.client.prompts.updateCustomTextByLanguage({
+          return Object.keys(languageScreenTypes).map((prompt: PromptTypes) => {
+            const body = languageScreenTypes[prompt] || {};
+            return {
+              body,
+              language,
+              prompt,
+            };
+          });
+        }),
+        generator: ({ prompt, language, body }) =>
+          this.client.prompts.updateCustomTextByLanguage({
             prompt,
             language,
             body,
-          });
-        });
+          }),
       })
-    );
+      .promise();
   }
 }
