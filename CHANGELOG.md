@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.17.6] - 2023-06-23
+
 ### Changed
 
 - Improve handling of custom text prompts, reducing high-volume errors and timeouts by leveraging connection pooling for controlled execution [#804]
@@ -949,7 +951,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#799]: https://github.com/auth0/auth0-deploy-cli/issues/799
 [#800]: https://github.com/auth0/auth0-deploy-cli/issues/800
 [#804]: https://github.com/auth0/auth0-deploy-cli/issues/804
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.5...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.6...HEAD
+[7.17.6]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.5...v7.17.6
 [7.17.5]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.4...v7.17.5
 [7.17.4]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.3...v7.17.4
 [7.17.3]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.2...v7.17.3
