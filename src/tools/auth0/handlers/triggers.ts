@@ -27,6 +27,11 @@ function isActionsDisabled(err): boolean {
   return err.statusCode === 403 && errorBody.errorCode === 'feature_not_enabled';
 }
 
+// sleep a given number of milliseconds.
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export default class TriggersHandler extends DefaultHandler {
   existing: {
     [key: string]: {
@@ -106,6 +111,11 @@ export default class TriggersHandler extends DefaultHandler {
           },
           display_name: binding.display_name,
         }));
+
+        // Add a 4 second delay as this service is
+        // slow to pick up newly deployed actions.
+        await sleep(4000);
+
         await this.client.actions.updateTriggerBindings({ trigger_id: name }, { bindings });
         this.didUpdate({ trigger_id: name });
         this.updated += 1;
