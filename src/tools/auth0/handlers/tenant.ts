@@ -87,7 +87,7 @@ export default class TenantHandler extends DefaultHandler {
 
 /*
  Tenant flags are used to facilitate a number of functionalities, some
- public, some internal. The subset of flags that are allowed to be updated 
+ public, some internal. The subset of flags that are allowed to be updated
  in the context of the Deploy CLI is based on wether they're publicly exposed
  in the Auth0 API docs:
 
@@ -119,6 +119,7 @@ export const allowedTenantFlags = [
   'disable_fields_map_fix',
   'require_pushed_authorization_requests',
   'mfa_show_factor_list_on_enrollment',
+  'enable_tenant_log_console_out',
 ];
 
 export const removeUnallowedTenantFlags = (

@@ -18,6 +18,7 @@ tenant:
     revoke_refresh_token_grant: false
     disable_clickjack_protection_headers: false
     enable_pipeline2: false
+    enable_tenant_log_console_out: false
   friendly_name: '##TENANT_NAME##'
   idle_session_lifetime: 1
   picture_url: https://unsplash.com/photos/8v1T2SCM6Ek

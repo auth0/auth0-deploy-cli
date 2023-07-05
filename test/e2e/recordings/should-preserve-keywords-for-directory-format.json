@@ -270,7 +270,8 @@
                 "enable_public_signup_user_exists_error": true,
                 "revoke_refresh_token_grant": false,
                 "disable_clickjack_protection_headers": false,
-                "enable_pipeline2": false
+                "enable_pipeline2": false,
+                "enable_tenant_log_console_out" : false
             },
             "friendly_name": "This tenant name should be preserved",
             "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
@@ -326,7 +327,8 @@
                 "use_scope_descriptions_for_consent": false,
                 "revoke_refresh_token_grant": false,
                 "disable_clickjack_protection_headers": false,
-                "enable_pipeline2": false
+                "enable_pipeline2": false,
+                "enable_tenant_log_console_out": false
             },
             "friendly_name": "This tenant name should be preserved",
             "guardian_mfa_page": {
@@ -542,7 +544,8 @@
                 "use_scope_descriptions_for_consent": false,
                 "revoke_refresh_token_grant": false,
                 "disable_clickjack_protection_headers": false,
-                "enable_pipeline2": false
+                "enable_pipeline2": false,
+                "enable_tenant_log_console_out": false
             },
             "friendly_name": "This tenant name should be preserved",
             "guardian_mfa_page": {
@@ -934,7 +937,8 @@
                 "use_scope_descriptions_for_consent": false,
                 "revoke_refresh_token_grant": false,
                 "disable_clickjack_protection_headers": false,
-                "enable_pipeline2": false
+                "enable_pipeline2": false,
+                "enable_tenant_log_console_out": false
             },
             "friendly_name": "This tenant name should be preserved",
             "guardian_mfa_page": {

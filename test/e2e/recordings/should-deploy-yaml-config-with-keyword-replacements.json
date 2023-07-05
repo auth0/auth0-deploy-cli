@@ -45,7 +45,8 @@
                 "use_scope_descriptions_for_consent": false,
                 "revoke_refresh_token_grant": false,
                 "disable_clickjack_protection_headers": false,
-                "enable_pipeline2": false
+                "enable_pipeline2": false,
+                "enable_tenant_log_console_out" : false
             },
             "friendly_name": "Tenant friendly name",
             "guardian_mfa_page": {
@@ -119,7 +120,8 @@
                 "use_scope_descriptions_for_consent": false,
                 "revoke_refresh_token_grant": false,
                 "disable_clickjack_protection_headers": false,
-                "enable_pipeline2": false
+                "enable_pipeline2": false,
+                "enable_tenant_log_console_out" : false
             },
             "friendly_name": "This is the Travel0 Tenant",
             "guardian_mfa_page": {
@@ -185,7 +187,8 @@
                 "use_scope_descriptions_for_consent": false,
                 "revoke_refresh_token_grant": false,
                 "disable_clickjack_protection_headers": false,
-                "enable_pipeline2": false
+                "enable_pipeline2": false,
+                "enable_tenant_log_console_out" : false
             },
             "friendly_name": "This is the Travel0 Tenant",
             "guardian_mfa_page": {
