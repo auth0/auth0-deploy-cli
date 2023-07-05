@@ -3,6 +3,7 @@ import DefaultHandler, { order } from './default';
 import constants from '../../constants';
 import log from '../../../logger';
 import { Assets } from '../../../types';
+import { sleep } from '../../utils';
 
 export const schema = {
   type: 'object',
@@ -25,11 +26,6 @@ function isActionsDisabled(err): boolean {
   const errorBody = _.get(err, 'originalError.response.body') || {};
 
   return err.statusCode === 403 && errorBody.errorCode === 'feature_not_enabled';
-}
-
-// sleep a given number of milliseconds.
-function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export default class TriggersHandler extends DefaultHandler {
@@ -101,7 +97,8 @@ export default class TriggersHandler extends DefaultHandler {
     // Do nothing if not set
     if (!triggers) return;
 
-    // Process each trigger
+    await sleep(2000); // Delay to allow newly-deployed actions to register in backend
+
     await Promise.all(
       Object.entries(triggers).map(async ([name, data]) => {
         const bindings = data.map((binding) => ({
@@ -111,10 +108,6 @@ export default class TriggersHandler extends DefaultHandler {
           },
           display_name: binding.display_name,
         }));
-
-        // Add a 4 second delay as this service is
-        // slow to pick up newly deployed actions.
-        await sleep(4000);
 
         await this.client.actions.updateTriggerBindings({ trigger_id: name }, { bindings });
         this.didUpdate({ trigger_id: name });

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import DefaultAPIHandler, { order } from './default';
 import log from '../../../logger';
-import { areArraysEquals } from '../../utils';
+import { areArraysEquals, sleep } from '../../utils';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 
 const MAX_ACTION_DEPLOY_RETRY_ATTEMPTS = 60; // 60 * 2s => 2 min timeout
@@ -80,10 +80,6 @@ export const schema = {
     },
   },
 };
-
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 function isActionsDisabled(err) {
   const errorBody = _.get(err, 'originalError.response.body') || {};
