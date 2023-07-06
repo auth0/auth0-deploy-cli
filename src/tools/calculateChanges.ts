@@ -93,13 +93,13 @@ export function calculateChanges({
 }: {
   handler: APIHandler;
   assets: Asset[];
-  existing: Asset[];
+  existing: Asset[] | null;
   identifiers: string[];
   allowDelete: boolean;
 }): CalculatedChanges {
   // Calculate the changes required between two sets of assets.
   const update: Asset[] = [];
-  let del: Asset[] = [...existing];
+  let del: Asset[] = [...(existing || [])];
   let create: Asset[] = [...assets];
   const conflicts: Asset[] = [];
 
@@ -178,7 +178,8 @@ export function calculateChanges({
       // If the conflicting item is going to be deleted then skip
       const inDeleted = del.filter((e) => e.name === a.name && e[uniqueID] !== a[uniqueID])[0];
       if (!inDeleted) {
-        const conflict = existing.filter(
+        console.log('existing', existing);
+        const conflict = (existing || []).filter(
           (e) => e.name === a.name && e[uniqueID] !== a[uniqueID]
         )[0];
         if (conflict) {
