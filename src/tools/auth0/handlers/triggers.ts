@@ -3,6 +3,7 @@ import DefaultHandler, { order } from './default';
 import constants from '../../constants';
 import log from '../../../logger';
 import { Assets } from '../../../types';
+import { sleep } from '../../utils';
 
 export const schema = {
   type: 'object',
@@ -96,7 +97,8 @@ export default class TriggersHandler extends DefaultHandler {
     // Do nothing if not set
     if (!triggers) return;
 
-    // Process each trigger
+    await sleep(2000); // Delay to allow newly-deployed actions to register in backend
+
     await Promise.all(
       Object.entries(triggers).map(async ([name, data]) => {
         const bindings = data.map((binding) => ({
@@ -106,6 +108,7 @@ export default class TriggersHandler extends DefaultHandler {
           },
           display_name: binding.display_name,
         }));
+
         await this.client.actions.updateTriggerBindings({ trigger_id: name }, { bindings });
         this.didUpdate({ trigger_id: name });
         this.updated += 1;

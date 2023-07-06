@@ -266,3 +266,7 @@ export const detectInsufficientScopeError = async <T>(
     throw err;
   }
 };
+
+export function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
