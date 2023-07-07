@@ -178,7 +178,6 @@ export function calculateChanges({
       // If the conflicting item is going to be deleted then skip
       const inDeleted = del.filter((e) => e.name === a.name && e[uniqueID] !== a[uniqueID])[0];
       if (!inDeleted) {
-        console.log('existing', existing);
         const conflict = (existing || []).filter(
           (e) => e.name === a.name && e[uniqueID] !== a[uniqueID]
         )[0];
