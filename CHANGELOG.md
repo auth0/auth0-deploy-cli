@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.17.7] - 2023-07-07
+
 ### Fixed
 
 - Delay processing of action triggers until deployed actions register [#809]
@@ -956,7 +958,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#799]: https://github.com/auth0/auth0-deploy-cli/issues/799
 [#800]: https://github.com/auth0/auth0-deploy-cli/issues/800
 [#804]: https://github.com/auth0/auth0-deploy-cli/issues/804
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.6...HEAD
+[#809]: https://github.com/auth0/auth0-deploy-cli/issues/809
+[#811]: https://github.com/auth0/auth0-deploy-cli/issues/811
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.7...HEAD
+[7.17.7]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.6...v7.17.7
 [7.17.6]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.5...v7.17.6
 [7.17.5]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.4...v7.17.5
 [7.17.4]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.3...v7.17.4
