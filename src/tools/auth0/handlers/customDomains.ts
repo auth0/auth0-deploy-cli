@@ -1,4 +1,4 @@
-import DefaultAPIHandler from './default';
+import DefaultAPIHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
 
 export const schema = {
@@ -65,6 +65,7 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
     }
   }
 
+  @order('50')
   async processChanges(assets: Assets): Promise<void> {
     const { customDomains } = assets;
 

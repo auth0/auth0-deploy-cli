@@ -1,4 +1,4 @@
-import DefaultHandler from './default';
+import DefaultHandler, { order } from './default';
 import constants from '../../constants';
 import log from '../../../logger';
 import { Asset, Assets } from '../../../types';
@@ -68,6 +68,7 @@ export default class BrandingHandler extends DefaultHandler {
     }
   }
 
+  @order('60') //Run after custom domains
   async processChanges(assets: Assets) {
     if (!assets.branding) return;
 
