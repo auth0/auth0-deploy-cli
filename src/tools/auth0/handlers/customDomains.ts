@@ -59,7 +59,6 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
         err.message ===
           'The account is not allowed to perform this operation, please contact our support team'
       ) {
-        console.log('CAUGHT!', err);
         return null;
       }
       throw err;
