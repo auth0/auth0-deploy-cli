@@ -19,7 +19,7 @@ const emailTemplates = {
   'welcome_email.html': '<html>some ##env## email</html>',
 };
 
-const emailTemplaesTarget = [
+const emailTemplatesTarget = [
   {
     body: '<html>some test email</html>',
     enabled: true,
@@ -44,7 +44,7 @@ describe('#directory context email templates', () => {
     const context = new Context(config, mockMgmtClient());
     await context.loadAssetsFromLocal();
 
-    expect(context.assets.emailTemplates).to.deep.equal(emailTemplaesTarget);
+    expect(context.assets.emailTemplates).to.deep.equal(emailTemplatesTarget);
   });
 
   it('should ignore unknown file', async () => {
@@ -62,7 +62,7 @@ describe('#directory context email templates', () => {
     const context = new Context(config, mockMgmtClient());
     await context.loadAssetsFromLocal();
 
-    expect(context.assets.emailTemplates).to.deep.equal(emailTemplaesTarget);
+    expect(context.assets.emailTemplates).to.deep.equal(emailTemplatesTarget);
   });
 
   it('should ignore bad email templates directory', async () => {
