@@ -30,12 +30,18 @@ export const setupContext = async (
   config: Config,
   command: 'import' | 'export'
 ): Promise<DirectoryContext | YAMLContext> => {
-  const missingParams: ('AUTH0_DOMAIN' | 'AUTH0_CLIENT_ID' | 'AUTH0_CLIENT_SECRET')[] = [];
+  const missingParams: (
+    | 'AUTH0_DOMAIN'
+    | 'AUTH0_CLIENT_ID'
+    | 'AUTH0_CLIENT_SECRET'
+    | 'AUTH0_CLIENT_SECRET or AUTH0_CLIENT_SIGNING_KEY'
+  )[] = [];
 
   if (!config.AUTH0_DOMAIN) missingParams.push('AUTH0_DOMAIN');
   if (!config.AUTH0_ACCESS_TOKEN) {
     if (!config.AUTH0_CLIENT_ID) missingParams.push('AUTH0_CLIENT_ID');
-    if (!config.AUTH0_CLIENT_SECRET) missingParams.push('AUTH0_CLIENT_SECRET');
+    if (!config.AUTH0_CLIENT_SECRET && !config.AUTH0_CLIENT_SIGNING_KEY)
+      missingParams.push('AUTH0_CLIENT_SECRET or AUTH0_CLIENT_SIGNING_KEY');
   }
 
   if (missingParams.length > 0) {
@@ -128,10 +134,38 @@ export const setupContext = async (
   const accessToken = await (async (): Promise<string> => {
     if (!!config.AUTH0_ACCESS_TOKEN) return config.AUTH0_ACCESS_TOKEN;
 
+    let clientOptions:
+      | {
+          clientSecret: string;
+        }
+      | {
+          clientAssertionSigningKey: string;
+          clientAssertionSigningAlg?: string;
+        }
+      | null = null;
+
+    if (!!config.AUTH0_CLIENT_SECRET) {
+      clientOptions = {
+        clientSecret: config.AUTH0_CLIENT_SECRET,
+      };
+    } else if (!!config.AUTH0_CLIENT_SIGNING_KEY) {
+      clientOptions = {
+        clientAssertionSigningKey: config.AUTH0_CLIENT_SIGNING_KEY,
+      };
+
+      if (!!config.AUTH0_CLIENT_SIGNING_ALGORITHM) {
+        clientOptions.clientAssertionSigningAlg = config.AUTH0_CLIENT_SIGNING_ALGORITHM;
+      }
+    }
+
+    if (!clientOptions) {
+      throw new Error(`Unable to establish configuration for client ID: ${config.AUTH0_CLIENT_ID}`);
+    }
+
     const authClient = new AuthenticationClient({
       domain: config.AUTH0_DOMAIN,
       clientId: config.AUTH0_CLIENT_ID,
-      clientSecret: config.AUTH0_CLIENT_SECRET,
+      ...clientOptions,
     });
 
     const clientCredentials = await authClient.clientCredentialsGrant({
