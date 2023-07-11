@@ -91,7 +91,14 @@ The Deploy CLI can be configured two ways, through a `config.json` file and thro
 - `AUTH0_CLIENT_ID`
 - `AUTH0_CLIENT_SECRET`
 
-These values can be found in the “Settings” tab within the Auth0 application created in the previous step.
+-or-
+
+- `AUTH0_DOMAIN`
+- `AUTH0_CLIENT_ID`
+- `AUTH0_CLIENT_SIGNING_KEY`
+- `AUTH0_CLIENT_SIGNING_ALG` (optional)
+
+These values can be found in the “Settings” and “Credentials“ tabs within the Auth0 application created in the previous step.
 
 ### Calling the Deploy CLI
 
