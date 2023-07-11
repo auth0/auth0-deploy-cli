@@ -32,6 +32,7 @@ describe('#triggers handler', () => {
         'post-user-registration': [],
         'post-change-password': [],
         'send-phone-message': [],
+        'password-reset-post-challenge': [],
       };
 
       await stageFn.apply(handler, [{ triggers: data }]);
@@ -47,6 +48,7 @@ describe('#triggers handler', () => {
         'post-user-registration': [],
         'post-change-password': [],
         'send-phone-message': [],
+        'password-reset-post-challenge': [],
       };
 
       const auth0 = {
@@ -76,6 +78,7 @@ describe('#triggers handler', () => {
         'post-user-registration': [{ action_name: 'action-one', display_name: 'email-user' }],
         'post-change-password': [{ action_name: 'action-two', display_name: 'log-to-logger' }],
         'send-phone-message': [{ action_name: 'action-three', display_name: 'slack-integration' }],
+        'password-reset-post-challenge': [{ action_name: 'action-two', display_name: 'log-to-logger' }],
       };
 
       const auth0 = {
@@ -90,6 +93,7 @@ describe('#triggers handler', () => {
               'post-user-registration',
               'post-change-password',
               'send-phone-message',
+              'password-reset-post-challenge',
             ]).to.include(trigger_id); // eslint-disable-line camelcase
             expect(bindings).to.be.an('array').that.is.empty; // eslint-disable-line no-unused-expressions
             timesUpdateTriggerBindingsCalled += 1;
@@ -112,11 +116,12 @@ describe('#triggers handler', () => {
             'post-user-registration': [],
             'post-change-password': [],
             'send-phone-message': [],
+            'password-reset-post-challenge': [],
           },
         },
       ]);
 
-      expect(timesUpdateTriggerBindingsCalled).to.equal(6);
+      expect(timesUpdateTriggerBindingsCalled).to.equal(7);
     });
 
     it('should not update triggers omitted from configuration', async () => {
@@ -134,6 +139,7 @@ describe('#triggers handler', () => {
         'post-user-registration': [{ action_name: 'action-one', display_name: 'email-user' }],
         'post-change-password': [{ action_name: 'action-two', display_name: 'log-to-logger' }],
         'send-phone-message': [{ action_name: 'action-three', display_name: 'slack-integration' }],
+        'password-reset-post-challenge': [{ action_name: 'action-two', display_name: 'log-to-logger' }],
       };
 
       const updatePayload = [
@@ -193,6 +199,7 @@ describe('#triggers handler', () => {
         'post-user-registration': [],
         'post-change-password': [],
         'send-phone-message': [],
+        'password-reset-post-challenge': [],
       };
 
       const auth0 = {
@@ -223,6 +230,9 @@ describe('#triggers handler', () => {
                 res = { bindings: [] };
                 break;
               case 'send-phone-message':
+                res = { bindings: [] };
+                break;
+              case 'password-reset-post-challenge':
                 res = { bindings: [] };
                 break;
               default:
