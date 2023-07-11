@@ -1,0 +1,11 @@
+{
+    "template": "welcome_email",
+    "body": "./welcome_email.html",
+    "from": "",
+    "resultUrl": "https://##DOMAIN##/welcome",
+    "subject": "Welcome",
+    "syntax": "liquid",
+    "urlLifetimeInSeconds": 3600,
+    "enabled": false
+  }
+  

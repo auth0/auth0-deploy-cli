@@ -57,7 +57,7 @@ export default async function exportCMD(params: ExportParams) {
   nconf.overrides(overrides);
 
   // Setup context and load
-  const context = await setupContext(nconf.get());
+  const context = await setupContext(nconf.get(), 'export');
   await context.dump();
   log.info('Export Successful');
 }

@@ -23,7 +23,7 @@ export default class EmailTemplateHandler extends DefaultHandler {
     super({
       ...options,
       type: 'emailTemplates',
-      id: 'template',
+      identifiers: ['template'],
     });
   }
 
@@ -49,7 +49,9 @@ export default class EmailTemplateHandler extends DefaultHandler {
 
   async updateOrCreate(emailTemplate): Promise<void> {
     try {
-      const params = { name: emailTemplate[this.id] };
+      const identifierField = this.identifiers[0];
+
+      const params = { name: emailTemplate[identifierField] };
       const updated = await this.client.emailTemplates.update(params, emailTemplate);
       delete updated.body;
       this.didUpdate(updated);

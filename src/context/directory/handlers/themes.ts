@@ -21,9 +21,12 @@ function parse(context: DirectoryContext): ParsedThemes {
   }
 
   const themes = themeDefinitionsFiles.map(
-    (themeDefinitionsFile) => loadJSON(themeDefinitionsFile, context.mappings) as Theme
+    (themeDefinitionsFile) =>
+      loadJSON(themeDefinitionsFile, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      }) as Theme
   );
-
   return { themes };
 }
 

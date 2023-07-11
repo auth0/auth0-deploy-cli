@@ -1,5 +1,6 @@
 import * as path from 'path';
 import { loadFileAndReplaceKeywords, Auth0 } from '../../tools';
+import pagedClient from '../../tools/auth0/client';
 
 import cleanAssets from '../../readonly';
 import log from '../../logger';
@@ -7,6 +8,7 @@ import handlers, { DirectoryHandler } from './handlers';
 import { isDirectory, isFile, stripIdentifiers, toConfigFn } from '../../utils';
 import { Assets, Auth0APIClient, Config, AssetTypes } from '../../types';
 import { filterOnlyIncludedResourceTypes } from '..';
+import { preserveKeywords } from '../../keywordPreservation';
 
 type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 
@@ -17,12 +19,14 @@ export default class DirectoryContext {
   mappings: KeywordMappings;
   mgmtClient: Auth0APIClient;
   assets: Assets;
+  disableKeywordReplacement: boolean;
 
   constructor(config: Config, mgmtClient: Auth0APIClient) {
     this.filePath = config.AUTH0_INPUT_FILE;
     this.config = config;
     this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {};
-    this.mgmtClient = mgmtClient;
+    this.mgmtClient = pagedClient(mgmtClient);
+    this.disableKeywordReplacement = false;
 
     //@ts-ignore for now
     this.assets = {};
@@ -44,10 +48,14 @@ export default class DirectoryContext {
       // try load not relative to yaml file
       toLoad = f;
     }
-    return loadFileAndReplaceKeywords(toLoad, this.mappings);
+    return loadFileAndReplaceKeywords(toLoad, {
+      mappings: this.mappings,
+      disableKeywordReplacement: this.disableKeywordReplacement,
+    });
   }
 
-  async load(): Promise<void> {
+  async loadAssetsFromLocal(opts = { disableKeywordReplacement: false }): Promise<void> {
+    this.disableKeywordReplacement = opts.disableKeywordReplacement;
     if (isDirectory(this.filePath)) {
       /* If this is a directory, look for each file in the directory */
       log.info(`Processing directory ${this.filePath}`);
@@ -72,8 +80,27 @@ export default class DirectoryContext {
   async dump(): Promise<void> {
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
     log.info('Loading Auth0 Tenant Data');
-    await auth0.loadAll();
-    this.assets = auth0.assets;
+    await auth0.loadAssetsFromAuth0();
+
+    const shouldPreserveKeywords =
+      //@ts-ignore because the string=>boolean conversion may not have happened if passed-in as env var
+      this.config.AUTH0_PRESERVE_KEYWORDS === 'true' ||
+      this.config.AUTH0_PRESERVE_KEYWORDS === true;
+    if (shouldPreserveKeywords) {
+      await this.loadAssetsFromLocal({ disableKeywordReplacement: true }); //Need to disable keyword replacement to retrieve the raw keyword markers (ex: ##KEYWORD##)
+      const localAssets = { ...this.assets };
+      //@ts-ignore
+      delete this['assets'];
+
+      this.assets = preserveKeywords({
+        localAssets,
+        remoteAssets: auth0.assets,
+        keywordMappings: this.config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {},
+        auth0Handlers: auth0.handlers,
+      });
+    } else {
+      this.assets = auth0.assets;
+    }
 
     // Clean known read only fields
     this.assets = cleanAssets(this.assets, this.config);

@@ -62,7 +62,7 @@ describe('#YAML context actions', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { replace: 'test-action' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
     expect(context.assets.actions).to.deep.equal(target);
   });
 

@@ -34,7 +34,7 @@ describe('#YAML context log streams', () => {
 
     const config = { AUTH0_INPUT_FILE: yamlFile };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.logStreams).to.deep.equal([
       {

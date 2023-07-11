@@ -21,7 +21,7 @@ describe('#directory context guardian policies provider', () => {
 
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.guardianPolicies).to.deep.equal({
       policies: ['all-applications'],

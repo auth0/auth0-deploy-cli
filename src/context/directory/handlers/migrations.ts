@@ -15,7 +15,10 @@ function parse(context: DirectoryContext): ParsedMigrations {
   if (!isFile(migrationsFile)) return { migrations: null };
 
   /* eslint-disable camelcase */
-  const migrations = loadJSON(migrationsFile, context.mappings);
+  const migrations = loadJSON(migrationsFile, {
+    mappings: context.mappings,
+    disableKeywordReplacement: context.disableKeywordReplacement,
+  });
 
   return { migrations };
 }

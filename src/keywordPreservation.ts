@@ -1,8 +1,16 @@
-import { get as getByDotNotation } from 'dot-prop';
-import { KeywordMappings } from './types';
+import { get as getByDotNotation, set as setByDotNotation } from 'dot-prop';
+import { keywordReplace } from './tools/utils';
+import { AssetTypes, KeywordMappings } from './types';
 import { keywordReplaceArrayRegExp, keywordReplaceStringRegExp } from './tools/utils';
+import { cloneDeep } from 'lodash';
+import APIHandler from './tools/auth0/handlers/default';
 
-export const shouldFieldBePreserved = (
+/*
+  RFC for Keyword Preservation: https://github.com/auth0/auth0-deploy-cli/issues/688
+  Original Github Issue: https://github.com/auth0/auth0-deploy-cli/issues/328
+*/
+
+export const doesHaveKeywordMarker = (
   string: string,
   keywordMappings: KeywordMappings
 ): boolean => {
@@ -15,12 +23,13 @@ export const shouldFieldBePreserved = (
 };
 
 export const getPreservableFieldsFromAssets = (
-  asset: any,
-  address: string,
-  keywordMappings: KeywordMappings
+  asset: object,
+  keywordMappings: KeywordMappings,
+  resourceSpecificIdentifiers: Partial<{ [key in AssetTypes]: string | string[] }>,
+  address = ''
 ): string[] => {
   if (typeof asset === 'string') {
-    if (shouldFieldBePreserved(asset, keywordMappings)) {
+    if (doesHaveKeywordMarker(asset, keywordMappings)) {
       return [address];
     }
     return [];
@@ -31,17 +40,32 @@ export const getPreservableFieldsFromAssets = (
   if (Array.isArray(asset)) {
     return asset
       .map((arrayItem) => {
-        // Using the `name` field as the primary unique identifier for array items
-        // TODO: expand the available identifier fields to encompass objects that lack name
-        const hasIdentifier = arrayItem.name !== undefined;
+        const resourceIdentifiers: string[] = (() => {
+          const identifiers = resourceSpecificIdentifiers[address];
+          if (Array.isArray(identifiers)) {
+            return identifiers;
+          }
+          return [identifiers];
+        })();
 
-        if (!hasIdentifier) return [];
+        return resourceIdentifiers
+          .map((resourceIdentifier) => {
+            resourceSpecificIdentifiers[address];
+            if (resourceIdentifier === undefined) return []; // See if this specific resource type has an identifier
 
-        return getPreservableFieldsFromAssets(
-          arrayItem,
-          `${address}${shouldRenderDot ? '.' : ''}[name=${arrayItem.name}]`,
-          keywordMappings
-        );
+            const identifierFieldValue = arrayItem[resourceIdentifier];
+            if (identifierFieldValue === undefined) return []; // See if this specific array item possess the resource-specific identifier
+
+            return getPreservableFieldsFromAssets(
+              arrayItem,
+              keywordMappings,
+              resourceSpecificIdentifiers,
+              `${address}${
+                shouldRenderDot ? '.' : ''
+              }[${resourceIdentifier}=${identifierFieldValue}]`
+            );
+          })
+          .flat();
       })
       .flat();
   }
@@ -54,8 +78,9 @@ export const getPreservableFieldsFromAssets = (
 
         return getPreservableFieldsFromAssets(
           value,
-          `${address}${shouldRenderDot ? '.' : ''}${key}`,
-          keywordMappings
+          keywordMappings,
+          resourceSpecificIdentifiers,
+          `${address}${shouldRenderDot ? '.' : ''}${key}`
         );
       })
       .flat();
@@ -80,7 +105,7 @@ export const getAssetsValueByAddress = (address: string, assets: any): any => {
 
   // It is easier to handle an address piece-by-piece by
   // splitting on the period into separate "directions"
-  const directions = address.split('.');
+  const directions = address.split(/\.(?![^\[]*\])/g);
 
   // If the the next directions are the proprietary array syntax (ex: `[name=foo]`)
   // then perform lookup against unique array-item property
@@ -101,4 +126,149 @@ export const getAssetsValueByAddress = (address: string, assets: any): any => {
     directions.slice(1).join('.'),
     getByDotNotation(assets, directions[0])
   );
+};
+
+// convertAddressToDotNotation will convert the proprietary address into conventional
+// JS object notation. Performing this conversion simplifies the process
+// of updating a specific property for a given asset tree using the dot-prop library
+// returns null if address value does not exist in asset tree
+export const convertAddressToDotNotation = (
+  assets: any,
+  address: string,
+  finalAddressTrail = ''
+): string | null => {
+  const directions = address.split(/\.(?![^\[]*\])/g);
+
+  if (directions[0] === '') return finalAddressTrail;
+
+  if (directions[0].charAt(0) === '[') {
+    const identifier = directions[0].substring(1, directions[0].length - 1).split('=')[0];
+    const identifierValue = directions[0].substring(1, directions[0].length - 1).split('=')[1];
+
+    let targetIndex = -1;
+
+    assets.forEach((item: any, index: number) => {
+      if (item[identifier] === identifierValue) {
+        targetIndex = index;
+      }
+    });
+
+    if (targetIndex === -1) return null; // No object of this address exists in the assets
+
+    return convertAddressToDotNotation(
+      assets[targetIndex],
+      directions.slice(1).join('.'),
+      `${finalAddressTrail}.${targetIndex}`
+    );
+  }
+
+  return convertAddressToDotNotation(
+    getByDotNotation(assets, directions[0]),
+    directions.slice(1).join('.'),
+    finalAddressTrail === '' ? directions[0] : `${finalAddressTrail}.${directions[0]}`
+  );
+};
+
+export const updateAssetsByAddress = (
+  assets: object,
+  address: string,
+  newValue: string
+): object => {
+  const dotNotationAddress = convertAddressToDotNotation(assets, address);
+
+  if (dotNotationAddress === null) return assets;
+
+  const doesPropertyExist = getByDotNotation(assets, dotNotationAddress) !== undefined;
+
+  if (!doesPropertyExist) {
+    return assets;
+  }
+
+  setByDotNotation(assets, dotNotationAddress, newValue);
+  return assets;
+};
+
+// preserveKeywords is the function that ultimately gets executed during export
+// to attempt to preserve keywords (ex: ##KEYWORD##) in local configuration files
+// from getting overwritten by remote values during export.
+export const preserveKeywords = ({
+  localAssets,
+  remoteAssets,
+  keywordMappings,
+  auth0Handlers,
+}: {
+  localAssets: object;
+  remoteAssets: object;
+  keywordMappings: KeywordMappings;
+  auth0Handlers: (Pick<APIHandler, 'id' | 'type'> & {
+    identifiers: (string | string[])[];
+  })[];
+}): object => {
+  if (Object.keys(keywordMappings).length === 0) return remoteAssets;
+
+  const resourceSpecificIdentifiers: Partial<{ [key in AssetTypes]: string[] }> =
+    auth0Handlers.reduce((acc, handler): Partial<{ [key in AssetTypes]: string[] }> => {
+      return {
+        ...acc,
+        [handler.type]: handler.identifiers.filter((identifiers) => {
+          return identifiers !== handler.id;
+        })[0],
+      };
+    }, {});
+
+  const addresses = getPreservableFieldsFromAssets(
+    localAssets,
+    keywordMappings,
+    resourceSpecificIdentifiers,
+    ''
+  );
+
+  let updatedRemoteAssets = cloneDeep(remoteAssets);
+
+  addresses.forEach((address) => {
+    const localValue = getAssetsValueByAddress(address, localAssets);
+
+    const remoteAssetsAddress = (() => {
+      const doesAddressHaveKeyword = doesHaveKeywordMarker(address, keywordMappings);
+      if (doesAddressHaveKeyword) {
+        return keywordReplace(address, keywordMappings);
+      }
+      return address;
+    })();
+    const remoteValue = getAssetsValueByAddress(remoteAssetsAddress, remoteAssets);
+
+    const localValueWithReplacement = keywordReplace(localValue, keywordMappings);
+
+    const localAndRemoteValuesAreEqual = (() => {
+      if (typeof remoteValue === 'string') {
+        return localValueWithReplacement === remoteValue;
+      }
+      //TODO: Account for non-string replacements via @@ syntax
+    })();
+
+    if (!localAndRemoteValuesAreEqual) {
+      console.warn(
+        `WARNING! The remote value with address of ${address} has value of "${remoteValue}" but will be preserved with "${localValueWithReplacement}" due to keyword preservation.`
+      );
+    }
+
+    // Two address possibilities are provided to account for cases when there is a keyword
+    // in the resources's identifier field. When the resource identifier's field is preserved
+    // on the remote assets tree, it loses its identify, so we'll need to try two addresses:
+    // one where the identifier field has a keyword and one where the identifier field has
+    // the literal replaced value.
+    // Example: `customDomains.[domain=##DOMAIN].domain` and `customDomains.[domain=travel0.com].domain`
+    updatedRemoteAssets = updateAssetsByAddress(
+      updatedRemoteAssets,
+      address, //Two possible addresses need to be passed, one with identifier field keyword replaced and one where it is not replaced. Ex: `customDomains.[domain=##DOMAIN].domain` and `customDomains.[domain=travel0.com].domain`
+      localValue
+    );
+    updatedRemoteAssets = updateAssetsByAddress(
+      updatedRemoteAssets,
+      remoteAssetsAddress, //Two possible addresses need to be passed, one with identifier field keyword replaced and one where it is not replaced. Ex: `customDomains.[domain=##DOMAIN].domain` and `customDomains.[domain=travel0.com].domain`
+      localValue
+    );
+  });
+
+  return updatedRemoteAssets;
 };

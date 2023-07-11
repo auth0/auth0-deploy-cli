@@ -23,7 +23,7 @@ describe('#YAML context rules configs', () => {
 
     const config = { AUTH0_INPUT_FILE: yamlFile };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.rulesConfigs).to.deep.equal(target);
   });

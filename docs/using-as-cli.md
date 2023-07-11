@@ -1,6 +1,6 @@
 # Using as a CLI
 
-The Deploy CLI can be used as a standalone command line utility. Doing so provides a simple way to manage your Auth0 tenant configuration in CI/CD workflows.
+The Deploy CLI can be used as a standalone command line utility. Doing so provides a simple way to manage your Auth0 tenant configuration in CI/CD workflows. Refer to the [Configuring the Deploy CLI](./configuring-the-deploy-cli.md) documentation for a comprehensive list of configuration settings.
 
 ## `export` command
 

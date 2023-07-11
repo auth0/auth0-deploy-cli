@@ -1,11 +1,11 @@
 import { expect } from 'chai';
 import path from 'path';
 import fs from 'fs';
+import { copySync, emptyDirSync } from 'fs-extra';
 import { getFiles, existsMustBeDir } from '../../src/utils';
 import { load as yamlLoad } from 'js-yaml';
 import { setupRecording, testNameToWorkingDirectory } from './e2e-utils';
 import { dump, deploy } from '../../src';
-import exp from 'constants';
 import { AssetTypes } from '../../src/types';
 
 const shouldUseRecordings = process.env['AUTH0_HTTP_RECORDINGS'] === 'lockdown';
@@ -320,7 +320,7 @@ describe('#end-to-end keyword replacement', function () {
 
     const keywordMapping = {
       COMPANY_NAME: 'Travel0',
-      //LANGUAGES: ['en', 'es'], //TODO: support array replacement for directory format
+      LANGUAGES: ['en', 'es'],
     };
 
     await deploy({
@@ -356,5 +356,236 @@ describe('#end-to-end keyword replacement', function () {
     expect(json.friendly_name).to.equal(`This is the ${keywordMapping.COMPANY_NAME} Tenant`);
 
     recordingDone();
+  });
+});
+
+describe('keyword preservation', () => {
+  const config = {
+    AUTH0_DOMAIN,
+    AUTH0_CLIENT_ID,
+    AUTH0_CLIENT_SECRET,
+    AUTH0_ACCESS_TOKEN,
+    AUTH0_PRESERVE_KEYWORDS: true,
+    AUTH0_INCLUDED_ONLY: ['tenant', 'emailTemplates', 'clients'] as AssetTypes[],
+    AUTH0_KEYWORD_REPLACE_MAPPINGS: {
+      TENANT_NAME: 'This tenant name should be preserved',
+      DOMAIN: 'travel0.com',
+      LANGUAGES: ['en', 'es'],
+      ENV: 'dev',
+    },
+  };
+
+  it('should preserve keywords for yaml format', async function () {
+    const workDirectory = testNameToWorkingDirectory(this.test?.title);
+
+    const { recordingDone } = await setupRecording(this.test?.title);
+
+    await deploy({
+      input_file: `${__dirname}/testdata/should-preserve-keywords/yaml/tenant.yaml`,
+      config,
+    });
+
+    //Dumping without keyword preservation so we can assert that remote values will overwrite local values
+    await dump({
+      output_folder: workDirectory,
+      format: 'yaml',
+      config: {
+        ...config,
+        AUTH0_PRESERVE_KEYWORDS: false,
+      },
+    });
+    const yamlWithoutPreservation = yamlLoad(
+      fs.readFileSync(path.join(workDirectory, 'tenant.yaml'))
+    );
+    expect(yamlWithoutPreservation.tenant.friendly_name).to.equal(
+      'This tenant name should be preserved'
+    );
+    expect(yamlWithoutPreservation.tenant.support_email).to.equal('support@travel0.com');
+    expect(yamlWithoutPreservation.tenant.support_url).to.equal('https://travel0.com/support');
+    expect(
+      yamlWithoutPreservation.emailTemplates.find(({ template }) => template === 'welcome_email')
+        .resultUrl
+    ).to.equal('https://travel0.com/welcome');
+
+    emptyDirSync(workDirectory);
+    copySync(`${__dirname}/testdata/should-preserve-keywords/yaml`, workDirectory); //It is necessary to copy directory contents to work directory to prevent overwriting of Git-committed files
+
+    //This dump will attempt to preserve keywords
+    await dump({
+      output_folder: workDirectory,
+      format: 'yaml',
+      config,
+    });
+
+    const yaml = yamlLoad(fs.readFileSync(path.join(workDirectory, 'tenant.yaml')));
+    expect(yaml.tenant.friendly_name).to.equal('##TENANT_NAME##');
+    expect(yaml.tenant.support_email).to.equal('support@##DOMAIN##');
+    expect(yaml.tenant.support_url).to.equal('https://##DOMAIN##/support');
+    expect(
+      yaml.emailTemplates.find(({ template }) => template === 'welcome_email').resultUrl
+    ).to.equal('https://##DOMAIN##/welcome');
+
+    expect(yaml.tenant.enabled_locales).to.equal('@@LANGUAGES@@');
+
+    const emailTemplateHTML = fs
+      .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
+      .toString();
+    expect(emailTemplateHTML).to.contain('##TENANT_NAME##');
+
+    expect(
+      yaml.clients.some(
+        ({ name, logo_uri }) =>
+          name === 'Auth0 CLI - ##ENV##' && logo_uri === 'https://##ENV##.assets.com/photos/foo'
+      )
+    ).to.be.true;
+
+    recordingDone();
+  });
+
+  it('should preserve keywords for directory format', async function () {
+    const workDirectory = testNameToWorkingDirectory(this.test?.title);
+
+    const { recordingDone } = await setupRecording(this.test?.title);
+
+    await deploy({
+      input_file: `${__dirname}/testdata/should-preserve-keywords/directory`,
+      config,
+    });
+
+    //Dumping without keyword preservation so we can assert that remote values will overwrite local values
+    await dump({
+      output_folder: workDirectory,
+      format: 'directory',
+      config: {
+        ...config,
+        AUTH0_PRESERVE_KEYWORDS: false,
+      },
+    });
+
+    const jsonWithoutPreservation = JSON.parse(
+      fs.readFileSync(path.join(workDirectory, 'tenant.json')).toString()
+    );
+
+    expect(jsonWithoutPreservation.friendly_name).to.equal(
+      config.AUTH0_KEYWORD_REPLACE_MAPPINGS.TENANT_NAME
+    );
+    expect(jsonWithoutPreservation.enabled_locales).to.deep.equal(
+      config.AUTH0_KEYWORD_REPLACE_MAPPINGS.LANGUAGES
+    );
+    expect(jsonWithoutPreservation.support_email).to.equal(
+      `support@${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.DOMAIN}`
+    );
+    expect(jsonWithoutPreservation.support_url).to.equal(
+      `https://${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.DOMAIN}/support`
+    );
+
+    const emailTemplateJsonWithoutPreservation = JSON.parse(
+      fs.readFileSync(path.join(workDirectory, 'emails', 'welcome_email.json')).toString()
+    );
+
+    expect(emailTemplateJsonWithoutPreservation.resultUrl).to.equal(
+      `https://${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.DOMAIN}/welcome`
+    );
+
+    expect(
+      fs.readFileSync(path.join(workDirectory, 'emails', 'welcome_email.html')).toString()
+    ).to.contain(config.AUTH0_KEYWORD_REPLACE_MAPPINGS.TENANT_NAME);
+
+    const clientsJsonWithoutPreservation = JSON.parse(
+      fs.readFileSync(path.join(workDirectory, 'clients', 'Auth0 CLI - dev.json')).toString()
+    );
+    expect(clientsJsonWithoutPreservation.name).to.equal(
+      `Auth0 CLI - ${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.ENV}`
+    );
+    expect(clientsJsonWithoutPreservation.logo_uri).to.equal(
+      `https://${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.ENV}.assets.com/photos/foo`
+    );
+
+    emptyDirSync(workDirectory);
+    copySync(`${__dirname}/testdata/should-preserve-keywords/directory`, workDirectory); //It is necessary to copy directory contents to work directory to prevent overwriting of Git-committed files
+
+    //This dump will attempt to preserve keywords
+    await dump({
+      output_folder: workDirectory,
+      format: 'directory',
+      config,
+    });
+
+    const json = JSON.parse(fs.readFileSync(path.join(workDirectory, 'tenant.json')).toString());
+
+    expect(json.friendly_name).to.equal('##TENANT_NAME##');
+    expect(json.enabled_locales).to.equal('@@LANGUAGES@@');
+    expect(json.support_email).to.equal('support@##DOMAIN##');
+    expect(json.support_url).to.equal('https://##DOMAIN##/support');
+
+    const emailTemplateJson = JSON.parse(
+      fs.readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.json')).toString()
+    );
+
+    expect(emailTemplateJson.resultUrl).to.equal('https://##DOMAIN##/welcome');
+    expect(emailTemplateJson.subject).to.not.equal('##THIS_SHOULD_NOT_BE_PRESERVED##');
+
+    const emailTemplateHTML = fs
+      .readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.html'))
+      .toString();
+    expect(emailTemplateHTML).to.contain('##TENANT_NAME##');
+
+    const clientsJSON = JSON.parse(
+      fs.readFileSync(path.join(workDirectory, 'clients', 'Auth0 CLI - dev.json')).toString()
+    );
+    expect(clientsJSON.name).to.equal('Auth0 CLI - ##ENV##');
+    expect(clientsJSON.logo_uri).to.equal('https://##ENV##.assets.com/photos/foo');
+
+    recordingDone();
+  });
+
+  it('should throw if attempting to preserve keywords but no keywords defined', async function () {
+    const workDirectory = testNameToWorkingDirectory(this.test?.title);
+    try {
+      //@ts-ignore
+      delete config['AUTH0_KEYWORD_REPLACE_MAPPINGS'];
+      await dump({
+        output_folder: workDirectory,
+        format: 'directory',
+        config,
+      });
+    } catch (err) {
+      expect(err.message).to.contain(
+        'Attempting to preserve keywords without defining keyword mappings. Doing so could result in unintentional overwriting of resource configurations. Either define keyword mappings via AUTH0_KEYWORD_REPLACE_MAPPINGS or disable AUTH0_PRESERVE_KEYWORDS.'
+      );
+      return;
+    }
+    throw new Error("The above should've thrown an exception");
+  });
+
+  it('should throw if attempting to preserve keywords without having local configuration files', async function () {
+    const workDirectory = testNameToWorkingDirectory(this.test?.title);
+
+    try {
+      await dump({
+        output_folder: workDirectory,
+        format: 'directory',
+        config,
+      });
+      throw new Error("The above should've thrown an exception");
+    } catch (err) {
+      expect(err.message).to.contain(
+        'Attempting to preserve keywords without defining keyword mappings. Doing so could result in unintentional overwriting of resource configurations. Either define keyword mappings via AUTH0_KEYWORD_REPLACE_MAPPINGS or disable AUTH0_PRESERVE_KEYWORDS.'
+      );
+    }
+
+    try {
+      await dump({
+        output_folder: workDirectory,
+        format: 'yaml',
+        config,
+      });
+    } catch (err) {
+      expect(err.message).to.contain(
+        'Attempting to preserve keywords without defining keyword mappings. Doing so could result in unintentional overwriting of resource configurations. Either define keyword mappings via AUTH0_KEYWORD_REPLACE_MAPPINGS or disable AUTH0_PRESERVE_KEYWORDS.'
+      );
+      return;
+    }
+    throw new Error("The above should've thrown an exception");
   });
 });

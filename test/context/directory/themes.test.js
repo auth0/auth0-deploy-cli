@@ -19,7 +19,7 @@ describe('#directory context themes', () => {
 
     const config = { AUTH0_INPUT_FILE: dir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { foo: 'bar' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.themes).to.be.an('Array');
     expect(context.assets.themes).to.deep.equal([theme]);
@@ -41,7 +41,7 @@ describe('#directory context themes', () => {
 
     const config = { AUTH0_INPUT_FILE: dir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { foo: 'bar' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.themes).to.be.an('Array');
     expect(context.assets.themes).to.deep.equal([theme1, theme2]);

@@ -13,6 +13,7 @@ import { LogStream } from './tools/auth0/handlers/logStreams';
 import { Client } from './tools/auth0/handlers/clients';
 import { ClientGrant } from './tools/auth0/handlers/clientGrants';
 import { ResourceServer } from './tools/auth0/handlers/resourceServers';
+import { PromisePoolExecutor } from 'promise-pool-executor';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -187,14 +188,7 @@ export type BaseAuth0APIClient = {
 }; // TODO: replace with a more accurate representation of the Auth0APIClient type
 
 export type Auth0APIClient = BaseAuth0APIClient & {
-  pool: {
-    addSingleTask: (arg0: { data: Object; generator: any }) => {
-      promise: () => Promise<ApiResponse>;
-    };
-    addEachTask: (arg0: { data: Object; generator: any }) => {
-      promise: () => Promise<Asset[][]>;
-    };
-  };
+  pool: PromisePoolExecutor;
 };
 
 export type Config = {
@@ -205,6 +199,7 @@ export type Config = {
   AUTH0_ALLOW_DELETE: boolean;
   AUTH0_EXCLUDED?: AssetTypes[];
   AUTH0_INCLUDED_ONLY?: AssetTypes[];
+  AUTH0_PRESERVE_KEYWORDS: boolean;
   EXTENSION_SECRET: string;
   AUTH0_ACCESS_TOKEN?: string;
   AUTH0_BASE_PATH?: string;

@@ -42,7 +42,7 @@ describe('#directory context clientGrants', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { var: 'something' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.clientGrants).to.deep.equal([
       {
@@ -88,7 +88,7 @@ describe('#directory context clientGrants', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { var: 'something' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     const target = [
       {
@@ -112,7 +112,7 @@ describe('#directory context clientGrants', () => {
     const context = new Context(config, mockMgmtClient());
 
     const errorMessage = `Expected ${dir} to be a folder but got a file?`;
-    await expect(context.load())
+    await expect(context.loadAssetsFromLocal())
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
   });
@@ -126,28 +126,32 @@ describe('#directory context clientGrants', () => {
         ...mockMgmtClient(),
         clients: {
           getAll: () => [
-            {
-              client_id: 'client-id-1',
-              name: 'Primary M2M',
-            },
-            {
-              client_id: 'client-id-2',
-              name: 'Secondary M2M',
-            },
+            [
+              {
+                client_id: 'client-id-1',
+                name: 'Primary M2M',
+              },
+              {
+                client_id: 'client-id-2',
+                name: 'Secondary M2M',
+              },
+            ],
           ],
         },
         resourceServers: {
           getAll: () => [
-            {
-              id: 'resource-server-1',
-              name: 'Payments Service',
-              identifier: 'https://payments.travel0.com/api',
-            },
-            {
-              id: 'resource-server-2',
-              name: 'Auth0 Management API',
-              identifier: 'https://travel0.us.auth0.com/api/v2',
-            },
+            [
+              {
+                id: 'resource-server-1',
+                name: 'Payments Service',
+                identifier: 'https://payments.travel0.com/api',
+              },
+              {
+                id: 'resource-server-2',
+                name: 'Auth0 Management API',
+                identifier: 'https://travel0.us.auth0.com/api/v2',
+              },
+            ],
           ],
         },
       }

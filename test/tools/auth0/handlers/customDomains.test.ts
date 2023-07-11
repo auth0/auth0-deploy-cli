@@ -44,7 +44,7 @@ describe('#customDomains handler', () => {
     expect(data).to.deep.equal({ customDomains });
   });
 
-  it('should handle error gracefully if custom domains not supported by tenant', async () => {
+  it('should return null when retrieving domains on unsupported tenant', async () => {
     const auth0ApiClientMock = {
       customDomains: {
         getAll: async () => {
@@ -53,6 +53,36 @@ describe('#customDomains handler', () => {
             message:
               'The account is not allowed to perform this operation, please contact our support team',
           };
+        },
+        create: async () => {},
+        update: async () => {},
+        delete: async () => {},
+      },
+      pool: new PromisePoolExecutor({
+        concurrencyLimit: 3,
+        frequencyLimit: 8,
+        frequencyWindow: 1000, // 1 sec
+      }),
+    };
+
+    //@ts-ignore
+    const handler = new customDomainsHandler({ client: auth0ApiClientMock });
+    const data = await handler.getType();
+
+    expect(data).to.equal(null);
+  });
+
+  const unsupportedTenantError = {
+    statusCode: 403,
+    message:
+      'The account is not allowed to perform this operation, please contact our support team',
+  };
+
+  it('should handle error gracefully if custom domains not supported by tenant', async () => {
+    const auth0ApiClientMock = {
+      customDomains: {
+        getAll: async () => {
+          throw unsupportedTenantError;
         },
         create: async () => {},
         update: async () => {},
@@ -87,6 +117,46 @@ describe('#customDomains handler', () => {
             type: customDomains[0].type,
             tls_policy: customDomains[0].tls_policy,
           });
+          return customDomains[0];
+        },
+        update: async () => {
+          didUpdateFunctionGetCalled = true;
+        },
+        delete: async () => {
+          didDeleteFunctionGetCalled = true;
+        },
+      },
+      pool: new PromisePoolExecutor({
+        concurrencyLimit: 3,
+        frequencyLimit: 8,
+        frequencyWindow: 1000, // 1 sec
+      }),
+    };
+
+    //@ts-ignore
+    const handler = new customDomainsHandler({
+      config: () => {},
+      client: auth0ApiClientMock as unknown as Auth0APIClient,
+    });
+
+    await handler.processChanges({ customDomains: customDomains });
+    expect(didCreateFunctionGetCalled).to.equal(true);
+    expect(didDeleteFunctionGetCalled).to.equal(false);
+    expect(didUpdateFunctionGetCalled).to.equal(false);
+  });
+
+  it('should not error if tenant does not support custom domains and trying to create one', async () => {
+    let didCreateFunctionGetCalled = false;
+    let didUpdateFunctionGetCalled = false;
+    let didDeleteFunctionGetCalled = false;
+
+    const auth0ApiClientMock = {
+      customDomains: {
+        getAll: async () => {
+          throw unsupportedTenantError;
+        },
+        create: async (args) => {
+          didCreateFunctionGetCalled = true;
           return customDomains[0];
         },
         update: async () => {

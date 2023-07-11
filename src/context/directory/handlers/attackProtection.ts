@@ -40,9 +40,18 @@ function parse(context: DirectoryContext): ParsedAttackProtection {
     };
   }
 
-  const breachedPasswordDetection = loadJSON(files.breachedPasswordDetection, context.mappings);
-  const bruteForceProtection = loadJSON(files.bruteForceProtection, context.mappings);
-  const suspiciousIpThrottling = loadJSON(files.suspiciousIpThrottling, context.mappings);
+  const breachedPasswordDetection = loadJSON(files.breachedPasswordDetection, {
+    mappings: context.mappings,
+    disableKeywordReplacement: context.disableKeywordReplacement,
+  });
+  const bruteForceProtection = loadJSON(files.bruteForceProtection, {
+    mappings: context.mappings,
+    disableKeywordReplacement: context.disableKeywordReplacement,
+  });
+  const suspiciousIpThrottling = loadJSON(files.suspiciousIpThrottling, {
+    mappings: context.mappings,
+    disableKeywordReplacement: context.disableKeywordReplacement,
+  });
 
   return {
     attackProtection: {

@@ -24,7 +24,12 @@ function parse(context: DirectoryContext): ParsedClientGrants {
   const foundFiles = getFiles(grantsFolder, ['.json']);
 
   const clientGrants = foundFiles
-    .map((f) => loadJSON(f, context.mappings))
+    .map((f) =>
+      loadJSON(f, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      })
+    )
     .filter((p) => Object.keys(p).length > 0); // Filter out empty grants
 
   return {
@@ -44,10 +49,12 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   const allResourceServers = await context.mgmtClient.resourceServers.getAll({
     paginate: true,
+    include_totals: true,
   });
 
   const allClients = await context.mgmtClient.clients.getAll({
     paginate: true,
+    include_totals: true,
   });
 
   // Convert client_id to the client name for readability

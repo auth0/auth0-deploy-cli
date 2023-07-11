@@ -19,7 +19,10 @@ function parse(context: DirectoryContext): ParsedGuardianPolicies {
   }
 
   return {
-    guardianPolicies: loadJSON(file, context.mappings),
+    guardianPolicies: loadJSON(file, {
+      mappings: context.mappings,
+      disableKeywordReplacement: context.disableKeywordReplacement,
+    }),
   };
 }
 

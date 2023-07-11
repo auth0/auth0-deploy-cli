@@ -1,5 +1,6 @@
 import path from 'path';
 import { expect } from 'chai';
+import { readFileSync } from 'fs';
 import jsYaml from 'js-yaml';
 import * as utils from '../../src/tools/utils';
 import constants from '../../src/tools/constants';
@@ -30,16 +31,88 @@ const expectations = {
 };
 
 describe('#utils', function () {
-  it('should load file', () => {
+  it('should load file and replace keywords', () => {
     const file = path.resolve(__dirname, 'test.file.json');
-    const loaded = utils.loadFileAndReplaceKeywords(file, mappings);
+    const loaded = utils.loadFileAndReplaceKeywords(file, {
+      mappings,
+      disableKeywordReplacement: false,
+    });
     expect(JSON.parse(loaded)).to.deep.equal(expectations);
+  });
+
+  it('should load file and not replace keywords', () => {
+    const file = path.resolve(__dirname, 'test.file.json');
+    const loaded = utils.loadFileAndReplaceKeywords(file, {
+      mappings,
+      disableKeywordReplacement: true,
+    });
+    expect(loaded).to.deep.equal(readFileSync(file).toString());
   });
 
   it('should throw error if cannot load file', () => {
     expect(function () {
-      utils.loadFileAndReplaceKeywords('notexist.json', mappings);
+      utils.loadFileAndReplaceKeywords('notexist.json', {
+        mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      });
     }).to.throw(/Unable to load file.*/);
+  });
+
+  describe('wrapArrayReplaceMarkersInQuotes', () => {
+    it('should wrap @@ARRAY_KEYWORD@@ markers in quotes', () => {
+      const yaml = `
+      property:
+      - name: some-item
+        value: @@VALID_ARRAY_KEYWORD@@
+      - name: another-item
+        value: @@VALID_ARRAY_KEYWORD@@`;
+
+      const escapedYaml = utils.wrapArrayReplaceMarkersInQuotes(yaml, {
+        VALID_ARRAY_KEYWORD: [],
+      });
+      expect(escapedYaml).to.equal(`
+      property:
+      - name: some-item
+        value: "@@VALID_ARRAY_KEYWORD@@"
+      - name: another-item
+        value: "@@VALID_ARRAY_KEYWORD@@"`);
+      expect(() => jsYaml.load(escapedYaml)).to.not.throw();
+    });
+
+    it('should not wrap @@ARRAY_KEYWORD@@ markers in quotes if it is already wrapped', () => {
+      const yaml = `
+      property:
+      - name: some-item
+        value: "@@VALID_ARRAY_KEYWORD@@"
+      - name: some-single-quoted-item
+        value: '@@VALID_ARRAY_KEYWORD@@'
+      - name: another-item
+        value: "@@VALID_ARRAY_KEYWORD@@"`;
+
+      const escapedYaml = utils.wrapArrayReplaceMarkersInQuotes(yaml, {
+        VALID_ARRAY_KEYWORD: [],
+      });
+      expect(escapedYaml).to.equal(`
+      property:
+      - name: some-item
+        value: "@@VALID_ARRAY_KEYWORD@@"
+      - name: some-single-quoted-item
+        value: '@@VALID_ARRAY_KEYWORD@@'
+      - name: another-item
+        value: "@@VALID_ARRAY_KEYWORD@@"`);
+      expect(() => jsYaml.load(escapedYaml)).to.not.throw();
+    });
+
+    it('should not wrap @@ARRAY_KEYWORD@@ markers in quotes if keyword does not exist in mapping', () => {
+      const yaml = `
+      property:
+      - name: some-item
+        value: @@NOT_IN_KEYWORD_MAPPINGS@@`;
+
+      const escapedYaml = utils.wrapArrayReplaceMarkersInQuotes(yaml, {});
+      expect(escapedYaml).to.equal(yaml);
+      expect(() => jsYaml.load(escapedYaml)).to.throw(); // Because it is invalid yaml
+    });
   });
 
   it('should do keyword replacements', (done) => {
@@ -333,13 +406,26 @@ describe('#keywordReplacement', () => {
       });
     });
 
-    it('should replace @@ wrapped values, even when wrapped with quotes', () => {
+    it('should replace @@ wrapped values, even when wrapped with quotes in JSON format', () => {
       const inputWrappedInQuotes = '{ "foo": "@@ARRAY_REPLACEMENT@@", "bar": "OTHER_REPLACEMENT"}';
       const output = utils.keywordArrayReplace(inputWrappedInQuotes, mapping);
       const parsedOutput = JSON.parse(output);
       expect(parsedOutput).to.deep.equal({
         foo: mapping.ARRAY_REPLACEMENT,
         bar: 'OTHER_REPLACEMENT',
+      });
+    });
+
+    it('should replace @@ wrapped values, even when wrapped with quotes in YAML format', () => {
+      const inputWrappedInQuotes = `
+        singleQuotes: '@@ARRAY_REPLACEMENT@@'
+        doubleQuotes: "@@ARRAY_REPLACEMENT@@"`;
+
+      const output = utils.keywordArrayReplace(inputWrappedInQuotes, mapping);
+      const parsedOutput = jsYaml.load(output);
+      expect(parsedOutput).to.deep.equal({
+        singleQuotes: mapping.ARRAY_REPLACEMENT,
+        doubleQuotes: mapping.ARRAY_REPLACEMENT,
       });
     });
   });

@@ -91,7 +91,7 @@ export default class RulesHandler extends DefaultHandler {
       handler: this,
       assets: rules,
       existing,
-      identifiers: ['id', 'name'],
+      identifiers: this.identifiers,
       allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
     });
     // Figure out the rules that need to be re-ordered

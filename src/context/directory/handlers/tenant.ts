@@ -33,7 +33,10 @@ function parse(context: DirectoryContext): ParsedTenant {
     session_lifetime?: number;
     idle_session_lifetime?: number;
     [key: string]: any;
-  } = loadJSON(tenantFile, context.mappings);
+  } = loadJSON(tenantFile, {
+    mappings: context.mappings,
+    disableKeywordReplacement: context.disableKeywordReplacement,
+  });
 
   clearTenantFlags(tenant);
 

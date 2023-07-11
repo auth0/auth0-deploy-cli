@@ -23,7 +23,7 @@ describe('#YAML context themes', () => {
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { foo: 'bar' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.themes).to.deep.equal([theme]);
   });
@@ -46,7 +46,7 @@ describe('#YAML context themes', () => {
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { foo: 'bar' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.themes).to.deep.equal([theme1, theme2]);
   });

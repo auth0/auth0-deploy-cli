@@ -8,9 +8,11 @@ import constants from './constants';
 
 export const keywordReplaceArrayRegExp = (key) => {
   const pattern = `@@${key}@@`;
-  const patternWithQuotes = `"${pattern}"`;
+  //YAML format supports both single and double quotes for strings
+  const patternWithSingleQuotes = `'${pattern}'`;
+  const patternWithDoubleQuotes = `"${pattern}"`;
 
-  return new RegExp(`${patternWithQuotes}|${pattern}`, 'g');
+  return new RegExp(`${patternWithSingleQuotes}|${patternWithDoubleQuotes}|${pattern}`, 'g');
 };
 
 export const keywordReplaceStringRegExp = (key) => {
@@ -45,6 +47,20 @@ export function keywordReplace(input: string, mappings: KeywordMappings): string
   return input;
 }
 
+// wrapArrayReplaceMarkersInQuotes will wrap array replacement markers in quotes.
+// This is necessary for YAML format in the context of keyword replacement
+// to preserve the keyword markers while also maintaining valid YAML syntax.
+export function wrapArrayReplaceMarkersInQuotes(body: string, mappings: KeywordMappings): string {
+  let newBody = body;
+  Object.keys(mappings).forEach((keyword) => {
+    newBody = newBody.replace(
+      new RegExp('(?<![\'"])@@' + keyword + '@@(?![\'"])', 'g'),
+      `"@@${keyword}@@"`
+    );
+  });
+  return newBody;
+}
+
 export function convertClientNameToId(name: string, clients: Asset[]): string {
   const found = clients.find((c) => c.name === name);
   return (found && found.client_id) || name;
@@ -65,12 +81,18 @@ export function convertClientNamesToIds(names: string[], clients: Asset[]): stri
   return [...unresolved, ...result];
 }
 
-export function loadFileAndReplaceKeywords(file: string, mappings: KeywordMappings): string {
+export function loadFileAndReplaceKeywords(
+  file: string,
+  {
+    mappings,
+    disableKeywordReplacement = false,
+  }: { mappings: KeywordMappings; disableKeywordReplacement: boolean }
+): string {
   // Load file and replace keyword mappings
   const f = path.resolve(file);
   try {
     fs.accessSync(f, fsConstants.F_OK);
-    if (mappings) {
+    if (mappings && !disableKeywordReplacement) {
       return keywordReplace(fs.readFileSync(f, 'utf8'), mappings);
     }
     return fs.readFileSync(f, 'utf8');
@@ -244,3 +266,7 @@ export const detectInsufficientScopeError = async <T>(
     throw err;
   }
 };
+
+export function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

@@ -86,7 +86,8 @@ async function dump(context: YAMLContext): Promise<ParsedActions> {
       runtime: action.runtime,
       dependencies: action.dependencies || [],
       status: action.status,
-      secrets: mapSecrets(action.secrets || []),
+      secrets:
+        typeof action.secrets === 'string' ? action.secrets : mapSecrets(action.secrets || []), //Enables keyword preservation to operate on action secrets
       supported_triggers: action.supported_triggers,
     })),
   };

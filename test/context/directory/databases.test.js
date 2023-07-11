@@ -32,7 +32,7 @@ describe('#directory context databases', () => {
 
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.databases).to.deep.equal([
       {
@@ -56,7 +56,7 @@ describe('#directory context databases', () => {
 
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.databases).to.deep.equal([]);
   });
@@ -71,7 +71,7 @@ describe('#directory context databases', () => {
     const context = new Context(config, mockMgmtClient());
 
     const errorMessage = `Expected ${dir} to be a folder but got a file?`;
-    await expect(context.load())
+    await expect(context.loadAssetsFromLocal())
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
   });
@@ -112,7 +112,7 @@ describe('#directory context databases', () => {
 
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.databases).to.deep.equal([
       {
@@ -144,7 +144,7 @@ describe('#directory context databases', () => {
 
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.databases).to.deep.equal([
       {

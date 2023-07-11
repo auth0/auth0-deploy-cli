@@ -89,7 +89,7 @@ export default class Auth0 {
     await this.runStage('validate');
   }
 
-  async loadAll(): Promise<void> {
+  async loadAssetsFromAuth0(): Promise<void> {
     // Populate assets from auth0 tenant
     await this.runStage('load');
   }

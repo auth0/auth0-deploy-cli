@@ -27,13 +27,19 @@ function parse(context: DirectoryContext): ParsedClients {
 
   const clients = foundFiles
     .map((f) => {
-      const client = loadJSON(f, context.mappings);
+      const client = loadJSON(f, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      });
 
       if (client.custom_login_page) {
         const htmlFileName = path.join(clientsFolder, client.custom_login_page);
 
         if (isFile(htmlFileName)) {
-          client.custom_login_page = loadFileAndReplaceKeywords(htmlFileName, context.mappings);
+          client.custom_login_page = loadFileAndReplaceKeywords(htmlFileName, {
+            mappings: context.mappings,
+            disableKeywordReplacement: context.disableKeywordReplacement,
+          });
         }
       }
 
