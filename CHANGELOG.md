@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Adds support for private key JWT authentication for the deploy-cli client
+### Added 
+
+- #813 Support for private key JWT authentication for the deploy-cli client
+-- Enables the deploy CLI client to authenticate with a private key instead of a secret 
+- #813 Tests to support new functionality for this issue.
+
 
 ## [7.17.7] - 2023-07-07
 
