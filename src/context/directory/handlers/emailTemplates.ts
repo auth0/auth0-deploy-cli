@@ -7,6 +7,7 @@ import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
+import { existsSync } from 'fs';
 
 type ParsedEmailTemplates = ParsedAsset<'emailTemplates', Asset[]>;
 
@@ -14,41 +15,43 @@ function parse(context: DirectoryContext): ParsedEmailTemplates {
   const emailsFolder = path.join(context.filePath, constants.EMAIL_TEMPLATES_DIRECTORY);
   if (!existsMustBeDir(emailsFolder)) return { emailTemplates: null }; // Skip
 
-  const files = getFiles(emailsFolder, ['.json', '.html']).filter(
+  const jsonFiles = getFiles(emailsFolder, ['.json']).filter(
     (f) => path.basename(f) !== 'provider.json'
   );
 
-  const sorted: { meta: string } | { html: string } | {} = {};
+  const emailTemplates = jsonFiles.flatMap((filePath: string) => {
+    const meta: { body: string | undefined } = loadJSON(filePath, {
+      mappings: context.mappings,
+      disableKeywordReplacement: context.disableKeywordReplacement,
+    });
 
-  files.forEach((file) => {
-    const { ext, name } = path.parse(file);
-    if (!sorted[name]) sorted[name] = {};
-    if (ext === '.json') sorted[name].meta = file;
-    if (ext === '.html') sorted[name].html = file;
-  });
-
-  const emailTemplates = Object.values(sorted).flatMap(
-    ({ meta, html }: { meta?: string; html?: string }) => {
-      if (!meta) {
-        log.warn(`Skipping email template file ${html} as missing the corresponding '.json' file`);
-        return [];
-      } else if (!html) {
-        log.warn(`Skipping email template file ${meta} as missing corresponding '.html' file`);
-        return [];
-      } else {
-        return {
-          ...loadJSON(meta, {
-            mappings: context.mappings,
-            disableKeywordReplacement: context.disableKeywordReplacement,
-          }),
-          body: loadFileAndReplaceKeywords(html, {
-            mappings: context.mappings,
-            disableKeywordReplacement: context.disableKeywordReplacement,
-          }),
-        };
+    const templateFilePath = (() => {
+      if (meta.body !== undefined) {
+        const explicitlyDefinedPath = path.join(emailsFolder, meta.body);
+        if (existsSync(explicitlyDefinedPath)) return explicitlyDefinedPath;
       }
+
+      const defaultPath = path.join(emailsFolder, path.parse(filePath).name + '.html');
+
+      if (existsSync(defaultPath)) return defaultPath;
+      return null;
+    })();
+
+    if (templateFilePath === null) {
+      log.warn(
+        `Skipping email template file ${meta.body} as missing the corresponding '.json' file`
+      );
+      return [];
     }
-  );
+
+    return {
+      ...meta,
+      body: loadFileAndReplaceKeywords(templateFilePath, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      }),
+    };
+  });
 
   return {
     emailTemplates,
