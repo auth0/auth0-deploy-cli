@@ -47,18 +47,6 @@ describe('#directory context email templates', () => {
     expect(context.assets.emailTemplates).to.deep.equal(emailTemplatesTarget);
   });
 
-  it('should process email templates', async () => {
-    const repoDir = path.join(testDataDir, 'directory', 'emailTemplates1');
-    const dir = path.join(repoDir);
-    createDir(dir, { [constants.EMAIL_TEMPLATES_DIRECTORY]: emailTemplates });
-
-    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
-    const context = new Context(config, mockMgmtClient());
-    await context.loadAssetsFromLocal();
-
-    expect(context.assets.emailTemplates).to.deep.equal(emailTemplatesTarget);
-  });
-
   it('should ignore unknown file', async () => {
     const files = {
       [constants.EMAIL_TEMPLATES_DIRECTORY]: {
