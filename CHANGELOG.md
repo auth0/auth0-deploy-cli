@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for `password-reset-post-challenge` action trigger [#818]
+
+### Fixed
+
+- Runtime error when attempting to preserve keyword on null remote assets [#822]
+- Respect email template `body` filepath definition [#820]
+
 ## [7.17.7] - 2023-07-07
 
 ### Fixed
