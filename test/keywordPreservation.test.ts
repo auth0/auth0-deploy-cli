@@ -187,6 +187,18 @@ describe('getAssetsValueByAddress', () => {
       )
     ).to.equal('https://travel0.com/api/v1');
   });
+
+  it('should handle a non-array assets value', () => {
+    [null, undefined, {}, false, 0, 'foo'].forEach((value) => {
+      expect(() => getAssetsValueByAddress('tenant.display_name', value)).to.not.throw();
+      expect(() =>
+        getAssetsValueByAddress('clientGrants.[client_id=foo]display_name', value)
+      ).to.not.throw();
+      expect(() =>
+        getAssetsValueByAddress('clientGrants.[client_id=##KEYWORD##]display_name', value)
+      ).to.not.throw();
+    });
+  });
 });
 
 describe('convertAddressToDotNotation', () => {
@@ -718,6 +730,30 @@ describe('preserveKeywords', () => {
           identifier: 'https://prod.travel0.com/api/v1',
         },
       ],
+    });
+  });
+
+  it('should not throw if locally-preserved keyword is on a null remote asset', () => {
+    const foo = preserveKeywords({
+      remoteAssets: {
+        connections: null,
+      },
+      localAssets: {
+        connections: [
+          {
+            name: 'connection-1',
+            someProperty: '##KEYWORD##',
+          },
+        ],
+      },
+      auth0Handlers,
+      keywordMappings: {
+        KEYWORD: 'example',
+      },
+    });
+
+    expect(foo).to.deep.equal({
+      connections: null,
     });
   });
 });
