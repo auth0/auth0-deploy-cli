@@ -141,6 +141,10 @@ describe('#connections handler', () => {
           enabled_clients: ['client1'],
           options: {
             passwordPolicy: 'testPolicy',
+            configuration: {
+              someArbitraryField1: 'foo',
+              someArbitraryField2: 5,
+            },
           },
         },
       ];
