@@ -12,14 +12,14 @@ import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../ut
 const emailTemplates = {
   'provider.json': '{"name": "smtp"}',
   'verify_email.json':
-    '{ "template": "verify_email", "enabled": true, "from": "test@##env##.com" }',
-  'verify_email.html': '<html>some ##env## email</html>',
+    '{ "template": "verify_email", "enabled": true, "from": "test@##env##.com" , "body" : "./verify_email.html.liquid" }',
+  'verify_email.html.liquid': '<html>some ##env## email</html>',
   'welcome_email.json':
     '{ "template": "welcome_email", "enabled": true, "from": "test@##env##.com" }',
   'welcome_email.html': '<html>some ##env## email</html>',
 };
 
-const emailTemplaesTarget = [
+const emailTemplatesTarget = [
   {
     body: '<html>some test email</html>',
     enabled: true,
@@ -35,7 +35,7 @@ const emailTemplaesTarget = [
 ];
 
 describe('#directory context email templates', () => {
-  it('should process email temples', async () => {
+  it('should process email templates', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'emailTemplates1');
     const dir = path.join(repoDir);
     createDir(dir, { [constants.EMAIL_TEMPLATES_DIRECTORY]: emailTemplates });
@@ -44,7 +44,7 @@ describe('#directory context email templates', () => {
     const context = new Context(config, mockMgmtClient());
     await context.loadAssetsFromLocal();
 
-    expect(context.assets.emailTemplates).to.deep.equal(emailTemplaesTarget);
+    expect(context.assets.emailTemplates).to.deep.equal(emailTemplatesTarget);
   });
 
   it('should ignore unknown file', async () => {
@@ -62,7 +62,7 @@ describe('#directory context email templates', () => {
     const context = new Context(config, mockMgmtClient());
     await context.loadAssetsFromLocal();
 
-    expect(context.assets.emailTemplates).to.deep.equal(emailTemplaesTarget);
+    expect(context.assets.emailTemplates).to.deep.equal(emailTemplatesTarget);
   });
 
   it('should ignore bad email templates directory', async () => {

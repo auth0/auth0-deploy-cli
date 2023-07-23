@@ -2,7 +2,7 @@ import { get as getByDotNotation, set as setByDotNotation } from 'dot-prop';
 import { keywordReplace } from './tools/utils';
 import { AssetTypes, KeywordMappings } from './types';
 import { keywordReplaceArrayRegExp, keywordReplaceStringRegExp } from './tools/utils';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isArray } from 'lodash';
 import APIHandler from './tools/auth0/handlers/default';
 
 /*
@@ -113,7 +113,7 @@ export const getAssetsValueByAddress = (address: string, assets: any): any => {
     const identifier = directions[0].substring(1, directions[0].length - 1).split('=')[0];
     const identifierValue = directions[0].substring(1, directions[0].length - 1).split('=')[1];
 
-    if (assets === undefined) return undefined;
+    if (!isArray(assets)) return undefined;
 
     const target = assets.find((item: any) => {
       return item[identifier] === identifierValue;
@@ -137,6 +137,8 @@ export const convertAddressToDotNotation = (
   address: string,
   finalAddressTrail = ''
 ): string | null => {
+  if (assets === null) return null; //Asset does not exist on remote
+
   const directions = address.split(/\.(?![^\[]*\])/g);
 
   if (directions[0] === '') return finalAddressTrail;

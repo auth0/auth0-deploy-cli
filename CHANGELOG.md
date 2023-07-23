@@ -13,6 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -- Enables the deploy CLI client to authenticate with a private key instead of a secret 
 - #813 Tests to support new functionality for this issue.
 
+## [7.18.0] - 2023-07-14
+
+### Added
+
+- Support for `password-reset-post-challenge` action trigger [#818]
+
+### Fixed
+
+- Runtime error when attempting to preserve keyword on null remote assets [#822]
+- Respect email template `body` filepath definition [#820]
+
 
 ## [7.17.7] - 2023-07-07
 
@@ -967,7 +978,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#804]: https://github.com/auth0/auth0-deploy-cli/issues/804
 [#809]: https://github.com/auth0/auth0-deploy-cli/issues/809
 [#811]: https://github.com/auth0/auth0-deploy-cli/issues/811
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.7...HEAD
+[#818]: https://github.com/auth0/auth0-deploy-cli/issues/818
+[#820]: https://github.com/auth0/auth0-deploy-cli/issues/820
+[#822]: https://github.com/auth0/auth0-deploy-cli/issues/822
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.18.0...HEAD
+[7.18.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.7...v7.18.0
 [7.17.7]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.6...v7.17.7
 [7.17.6]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.5...v7.17.6
 [7.17.5]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.4...v7.17.5

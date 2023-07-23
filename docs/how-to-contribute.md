@@ -20,17 +20,17 @@ In order to run the entire test suite, execute `npm run test`.
 To run a single test file or single test execute:
 
 ```shell
-npx ts-mocha --timeout=5000 -p tsconfig.json <PATH_TO_TEST_FILE> -g=<OPTIONAL_NAME_OF_TEST>
+npx ts-mocha --timeout=7500 -p tsconfig.json <PATH_TO_TEST_FILE> -g=<OPTIONAL_NAME_OF_TEST>
 ```
 
 ### Examples
 
 ```shell
 # Runs all tests within a file
-npx ts-mocha --timeout=5000 -p tsconfig.json test/tools/auth0/handlers/actions.tests.js
+npx ts-mocha --timeout=7500 -p tsconfig.json test/tools/auth0/handlers/actions.tests.js
 
 # Runs a single test within a file
-npx ts-mocha --timeout=5000 -p tsconfig.json \
+npx ts-mocha --timeout=7500 -p tsconfig.json \
 test/tools/auth0/handlers/actions.tests.js \
 -g="should create action"
 ```
