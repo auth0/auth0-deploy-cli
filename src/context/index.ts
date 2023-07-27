@@ -33,15 +33,14 @@ export const setupContext = async (
   const missingParams: (
     | 'AUTH0_DOMAIN'
     | 'AUTH0_CLIENT_ID'
-    | 'AUTH0_CLIENT_SECRET'
-    | 'AUTH0_CLIENT_SECRET or AUTH0_CLIENT_SIGNING_KEY'
+    | 'AUTH0_CLIENT_SECRET or AUTH0_CLIENT_SIGNING_KEY or AUTH0_ACCESS_TOKEN'
   )[] = [];
 
   if (!config.AUTH0_DOMAIN) missingParams.push('AUTH0_DOMAIN');
   if (!config.AUTH0_ACCESS_TOKEN) {
     if (!config.AUTH0_CLIENT_ID) missingParams.push('AUTH0_CLIENT_ID');
     if (!config.AUTH0_CLIENT_SECRET && !config.AUTH0_CLIENT_SIGNING_KEY)
-      missingParams.push('AUTH0_CLIENT_SECRET or AUTH0_CLIENT_SIGNING_KEY');
+      missingParams.push('AUTH0_CLIENT_SECRET or AUTH0_CLIENT_SIGNING_KEY or AUTH0_ACCESS_TOKEN');
   }
 
   if (missingParams.length > 0) {
@@ -132,41 +131,38 @@ export const setupContext = async (
   })(config);
 
   const accessToken = await (async (): Promise<string> => {
-    if (!!config.AUTH0_ACCESS_TOKEN) return config.AUTH0_ACCESS_TOKEN;
+    const {
+      AUTH0_DOMAIN,
+      AUTH0_CLIENT_ID,
+      AUTH0_ACCESS_TOKEN,
+      AUTH0_CLIENT_SECRET,
+      AUTH0_CLIENT_SIGNING_KEY,
+      AUTH0_CLIENT_SIGNING_ALGORITHM,
+    } = config;
 
-    let clientOptions:
-      | {
-          clientSecret: string;
-        }
-      | {
-          clientAssertionSigningKey: string;
-          clientAssertionSigningAlg?: string;
-        }
-      | null = null;
+    if (!!AUTH0_ACCESS_TOKEN) return AUTH0_ACCESS_TOKEN;
+    if (!AUTH0_CLIENT_SECRET && !AUTH0_CLIENT_SIGNING_KEY) {
+      throw new Error(
+        'need to supply either `AUTH0_ACCESS_TOKEN`, `AUTH0_CLIENT_SECRET` or `AUTH0_CLIENT_SIGNING_KEY`'
+      );
+    }
 
-    if (!!config.AUTH0_CLIENT_SECRET) {
-      clientOptions = {
-        clientSecret: config.AUTH0_CLIENT_SECRET,
-      };
-    } else if (!!config.AUTH0_CLIENT_SIGNING_KEY) {
-      clientOptions = {
-        clientAssertionSigningKey: config.AUTH0_CLIENT_SIGNING_KEY,
-      };
-
-      if (!!config.AUTH0_CLIENT_SIGNING_ALGORITHM) {
-        clientOptions.clientAssertionSigningAlg = config.AUTH0_CLIENT_SIGNING_ALGORITHM;
+    const authClient: AuthenticationClient = (() => {
+      if (!!AUTH0_CLIENT_SECRET) {
+        return new AuthenticationClient({
+          domain: AUTH0_DOMAIN,
+          clientId: AUTH0_CLIENT_ID,
+          clientSecret: AUTH0_CLIENT_SECRET,
+        });
       }
-    }
 
-    if (!clientOptions) {
-      throw new Error(`Unable to establish configuration for client ID: ${config.AUTH0_CLIENT_ID}`);
-    }
-
-    const authClient = new AuthenticationClient({
-      domain: config.AUTH0_DOMAIN,
-      clientId: config.AUTH0_CLIENT_ID,
-      ...clientOptions,
-    });
+      return new AuthenticationClient({
+        domain: AUTH0_DOMAIN,
+        clientId: AUTH0_CLIENT_ID,
+        clientAssertionSigningKey: AUTH0_CLIENT_SIGNING_KEY,
+        clientAssertionSigningAlg: undefined,
+      });
+    })();
 
     const clientCredentials = await authClient.clientCredentialsGrant({
       audience: config.AUTH0_AUDIENCE

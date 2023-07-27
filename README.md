@@ -25,6 +25,7 @@ The Auth0 Deploy CLI is a tool that helps you manage your Auth0 tenant configura
 
 - [Using as a CLI](docs/using-as-cli.md)
 - [Using as a Node Module](docs/using-as-node-module.md)
+- [Authenticating with Tenant](docs/authenticating-with-tenant.md)
 - [Configuring the Deploy CLI](docs/configuring-the-deploy-cli.md)
 - [Keyword Replacement](docs/keyword-replacement.md)
 - [Incorporating Into Multi-environment Workflows](docs/multi-environment-workflow.md)
@@ -90,13 +91,6 @@ The Deploy CLI can be configured two ways, through a `config.json` file and thro
 - `AUTH0_DOMAIN`
 - `AUTH0_CLIENT_ID`
 - `AUTH0_CLIENT_SECRET`
-
--or-
-
-- `AUTH0_DOMAIN`
-- `AUTH0_CLIENT_ID`
-- `AUTH0_CLIENT_SIGNING_KEY`
-- `AUTH0_CLIENT_SIGNING_ALG` (optional)
 
 These values can be found in the “Settings” and “Credentials“ tabs within the Auth0 application created in the previous step.
 

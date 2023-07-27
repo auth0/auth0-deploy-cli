@@ -9,3 +9,5 @@ config*.json
 .idea
 .npmrc
 yarn-error.log
+rs256.rsa
+rs256.rsa.pub
