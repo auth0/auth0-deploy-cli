@@ -66,13 +66,13 @@ String. The secret of the designated Auth0 application used to make API requests
 
 String. Short-lived access token for Management API from designated Auth0 application. Can be used in replacement to client ID and client secret combination.
 
-### `AUTH0_CLIENT_SIGNING_KEY`
+### `AUTH0_CLIENT_SIGNING_KEY_PATH`
 
-String. The private key used by the client when facilitating Private Key JWT authentication. Also note `AUTH0_CLIENT_SIGNING_ALGORITHM` for specifying signing algorithm.
+String. The path to the private key used by the client when facilitating Private Key JWT authentication. Path relative to the working directory. Also note `AUTH0_CLIENT_SIGNING_ALGORITHM` for specifying signing algorithm.
 
 ### `AUTH0_CLIENT_SIGNING_ALGORITHM`
 
-String. Specifies the JWT signing algorithms used by the client when facilitating Private Key JWT authentication. Only used in combination with `AUTH0_CLIENT_SIGNING_KEY`. Accepted values: `RS256`, `RS384`, `PS256`.
+String. Specifies the JWT signing algorithms used by the client when facilitating Private Key JWT authentication. Only used in combination with `AUTH0_CLIENT_SIGNING_KEY_PATH`. Accepted values: `RS256`, `RS384`, `PS256`.
 
 ### `AUTH0_ALLOW_DELETE`
 

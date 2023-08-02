@@ -33,14 +33,16 @@ export const setupContext = async (
   const missingParams: (
     | 'AUTH0_DOMAIN'
     | 'AUTH0_CLIENT_ID'
-    | 'AUTH0_CLIENT_SECRET or AUTH0_CLIENT_SIGNING_KEY or AUTH0_ACCESS_TOKEN'
+    | 'AUTH0_CLIENT_SECRET or AUTH0_CLIENT_SIGNING_KEY_PATH or AUTH0_ACCESS_TOKEN'
   )[] = [];
 
   if (!config.AUTH0_DOMAIN) missingParams.push('AUTH0_DOMAIN');
   if (!config.AUTH0_ACCESS_TOKEN) {
     if (!config.AUTH0_CLIENT_ID) missingParams.push('AUTH0_CLIENT_ID');
-    if (!config.AUTH0_CLIENT_SECRET && !config.AUTH0_CLIENT_SIGNING_KEY)
-      missingParams.push('AUTH0_CLIENT_SECRET or AUTH0_CLIENT_SIGNING_KEY or AUTH0_ACCESS_TOKEN');
+    if (!config.AUTH0_CLIENT_SECRET && !config.AUTH0_CLIENT_SIGNING_KEY_PATH)
+      missingParams.push(
+        'AUTH0_CLIENT_SECRET or AUTH0_CLIENT_SIGNING_KEY_PATH or AUTH0_ACCESS_TOKEN'
+      );
   }
 
   if (missingParams.length > 0) {
@@ -136,14 +138,14 @@ export const setupContext = async (
       AUTH0_CLIENT_ID,
       AUTH0_ACCESS_TOKEN,
       AUTH0_CLIENT_SECRET,
-      AUTH0_CLIENT_SIGNING_KEY,
+      AUTH0_CLIENT_SIGNING_KEY_PATH,
       AUTH0_CLIENT_SIGNING_ALGORITHM,
     } = config;
 
     if (!!AUTH0_ACCESS_TOKEN) return AUTH0_ACCESS_TOKEN;
-    if (!AUTH0_CLIENT_SECRET && !AUTH0_CLIENT_SIGNING_KEY) {
+    if (!AUTH0_CLIENT_SECRET && !AUTH0_CLIENT_SIGNING_KEY_PATH) {
       throw new Error(
-        'need to supply either `AUTH0_ACCESS_TOKEN`, `AUTH0_CLIENT_SECRET` or `AUTH0_CLIENT_SIGNING_KEY`'
+        'need to supply either `AUTH0_ACCESS_TOKEN`, `AUTH0_CLIENT_SECRET` or `AUTH0_CLIENT_SIGNING_KEY_PATH`'
       );
     }
 
@@ -159,8 +161,10 @@ export const setupContext = async (
       return new AuthenticationClient({
         domain: AUTH0_DOMAIN,
         clientId: AUTH0_CLIENT_ID,
-        clientAssertionSigningKey: AUTH0_CLIENT_SIGNING_KEY,
-        clientAssertionSigningAlg: undefined,
+        clientAssertionSigningKey: readFileSync(AUTH0_CLIENT_SIGNING_KEY_PATH),
+        clientAssertionSigningAlg: !!AUTH0_CLIENT_SIGNING_ALGORITHM
+          ? AUTH0_CLIENT_SIGNING_ALGORITHM
+          : undefined,
       });
     })();
 

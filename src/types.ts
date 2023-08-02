@@ -195,7 +195,7 @@ export type Config = {
   AUTH0_DOMAIN: string;
   AUTH0_CLIENT_ID: string;
   AUTH0_CLIENT_SECRET: string;
-  AUTH0_CLIENT_SIGNING_KEY: string;
+  AUTH0_CLIENT_SIGNING_KEY_PATH: string;
   AUTH0_CLIENT_SIGNING_ALGORITHM: string;
   AUTH0_INPUT_FILE: string;
   AUTH0_ALLOW_DELETE: boolean;
