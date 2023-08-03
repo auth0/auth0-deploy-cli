@@ -9,3 +9,5 @@ config*.json
 .idea
 .npmrc
 yarn-error.log
+*.pem
+*.pub
