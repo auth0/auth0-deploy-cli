@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { mapClientID2NameSorted, sanitize } from '../../../utils';
 import log from '../../../logger';
 import { YAMLHandler } from '.';

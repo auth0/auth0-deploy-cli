@@ -1,6 +1,6 @@
+import path from 'path';
 import fs from 'fs-extra';
 import rmdirSync from 'rmdir-sync';
-import path from 'path';
 import mkdirp from 'mkdirp';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';

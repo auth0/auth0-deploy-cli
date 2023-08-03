@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/directory';

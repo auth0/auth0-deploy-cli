@@ -1,6 +1,6 @@
+import path from 'path';
 import fs from 'fs-extra';
 import jsYaml from 'js-yaml';
-import path from 'path';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/yaml';

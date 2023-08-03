@@ -1,6 +1,6 @@
+import path from 'path';
 import { expect } from 'chai';
 import fs from 'fs-extra';
-import path from 'path';
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/branding';
 import { constants } from '../../../src/tools';
