@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support for Private Key JWT authentication for authenticating with private key instead of client secret [#813]
+- Support for Private Key JWT authentication for authenticating with private key instead of client secret [#817]
 
 ## [7.18.0] - 2023-07-14
 

@@ -541,12 +541,6 @@ describe('preserveKeywords', () => {
           client_id: 'API Explorer Application',
           audience: 'https://##ENV##.travel0.com/api/v1',
           scope: ['update:account'],
-          name: '@@API_EXPLORER_APPLICATION_SCOPES@@',
-        },
-        {
-          client_id: 'M2M Application',
-          audience: 'https://##ENV##.travel0.com/api/v1',
-          scope: ['create:users'],
           name: 'My M2M',
         },
       ],
@@ -587,12 +581,6 @@ describe('preserveKeywords', () => {
             scope: ['update:account'],
             name: 'My M2M',
           },
-          {
-            client_id: 'M2M Application',
-            audience: 'https:/dev.travel0.com/api/v1',
-            scope: ['create:users'],
-            name: 'My M2M',
-          },
         ],
         actions: [
           {
@@ -609,12 +597,6 @@ describe('preserveKeywords', () => {
       },
       keywordMappings: {
         ENV: 'dev',
-        API_EXPLORER_APPLICATION_SCOPES: [
-          'read:clients',
-          'update:clients',
-          'read:users',
-          'update:users',
-        ],
       },
       auth0Handlers: [
         {
