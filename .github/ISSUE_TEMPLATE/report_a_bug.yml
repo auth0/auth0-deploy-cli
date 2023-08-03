@@ -26,7 +26,7 @@ body:
           required: true
         - label: I have upgraded to the [latest version](https://github.com/auth0/auth0-deploy-cli/releases/latest) of this tool and the issue still persists.
           required: true
-        - label: I have searched the [Auth0 Community](https://community.auth0.com/c/sdks/5) forums and have not found a suitable solution or answer.
+        - label: I have searched the [Auth0 Community](https://community.auth0.com/tag/auth0-deploy-cli) forums and have not found a suitable solution or answer.
           required: true
         - label: I agree to the terms within the [Auth0 Code of Conduct](https://github.com/auth0/open-source-template/blob/master/CODE-OF-CONDUCT.md).
           required: true
