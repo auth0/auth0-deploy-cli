@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import sanitizeName from 'sanitize-filename';
 import dotProp from 'dot-prop';
 import { loadFileAndReplaceKeywords, Auth0 } from './tools';

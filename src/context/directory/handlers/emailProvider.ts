@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { constants } from '../../../tools';
 
 import { existsMustBeDir, isFile, dumpJSON, loadJSON } from '../../../utils';

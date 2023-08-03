@@ -1,6 +1,6 @@
 /* eslint-disable consistent-return */
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { constants } from '../../../tools';
 
 import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';

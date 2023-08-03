@@ -1,6 +1,6 @@
 import path from 'path';
-import { expect } from 'chai';
 import { readFileSync } from 'fs';
+import { expect } from 'chai';
 import jsYaml from 'js-yaml';
 import * as utils from '../../src/tools/utils';
 import constants from '../../src/tools/constants';
