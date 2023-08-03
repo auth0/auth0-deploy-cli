@@ -1,6 +1,6 @@
+import path from 'path';
 import { dump as toYaml } from 'js-yaml';
 import fs from 'fs-extra';
-import path from 'path';
 import { expect } from 'chai';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
