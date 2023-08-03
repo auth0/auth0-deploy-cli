@@ -7,11 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added 
+### Added
 
-- #813 Support for private key JWT authentication for the deploy-cli client
--- Enables the deploy CLI client to authenticate with a private key instead of a secret 
-- #813 Tests to support new functionality for this issue.
+- Support for Private Key JWT authentication for authenticating with private key instead of client secret [#813]
 
 ## [7.18.0] - 2023-07-14
 
@@ -23,7 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Runtime error when attempting to preserve keyword on null remote assets [#822]
 - Respect email template `body` filepath definition [#820]
-
 
 ## [7.17.7] - 2023-07-07
 
