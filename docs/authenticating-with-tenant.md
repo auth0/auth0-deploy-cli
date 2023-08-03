@@ -18,10 +18,10 @@ To utilize, pass the path of the private key through the `AUTH0_CLIENT_SIGNING_K
 
 **Example: **
 
-```
+```json
 {
-    "AUTH0_CLIENT_SIGNING_KEY_PATH": "./private.pem",
-    "
+  "AUTH0_CLIENT_SIGNING_KEY_PATH": "./private.pem",
+  "AUTH0_CLIENT_SIGNING_ALGORITHM": "RSA256"
 }
 ```
 
