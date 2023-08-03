@@ -9,7 +9,7 @@ import logger from '../../src/logger';
 import { setupContext, filterOnlyIncludedResourceTypes } from '../../src/context';
 import directoryContext from '../../src/context/directory';
 import yamlContext from '../../src/context/yaml';
-import { cleanThenMkdir, testDataDir } from '../utils';
+import { cleanThenMkdir, testDataDir, createDir } from '../utils';
 
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
@@ -23,6 +23,100 @@ const config = {
 describe('#context loader validation', async () => {
   it('should error on bad file', async () => {
     await expect(setupContext(config), 'import').to.be.eventually.rejectedWith(Error);
+  });
+
+  describe('authentication options', async () => {
+    let tmpConfig;
+
+    beforeEach(() => {
+      tmpConfig = {
+        AUTH0_CLIENT_ID: 'fake client ID',
+        ...config,
+      };
+      delete tmpConfig.AUTH0_ACCESS_TOKEN;
+    });
+
+    it('should error while attempting authentication, but pass validation with client secret', async () => {
+      /* Create empty directory */
+      const dir = path.resolve(testDataDir, 'context');
+      cleanThenMkdir(dir);
+
+      tmpConfig.AUTH0_CLIENT_SECRET = 'fake secret';
+
+      const result = await expect(
+        setupContext({ ...tmpConfig, AUTH0_INPUT_FILE: dir }),
+        'import'
+      ).to.be.eventually.rejectedWith(Error);
+
+      expect(result).to.be.an('object').that.has.property('name').which.eq('access_denied');
+    });
+
+    it('should error while attempting private key JWT generation, but pass validation with client signing key', async () => {
+      // Proves that config value AUTH0_CLIENT_SIGNING_KEY_PATH is being passed to Auth0 library
+      /* Create empty directory */
+      const dir = path.resolve(testDataDir, 'context');
+      cleanThenMkdir(dir);
+      createDir(dir, {
+        '.': {
+          'private.pem': 'some-invalid-private-key',
+        },
+      });
+
+      tmpConfig.AUTH0_CLIENT_SIGNING_KEY_PATH = path.join(dir, 'private.pem');
+
+      const result = await expect(
+        setupContext({ ...tmpConfig, AUTH0_INPUT_FILE: dir }),
+        'import'
+      ).to.be.eventually.rejectedWith(Error);
+
+      expect(result)
+        .to.be.an('Error')
+        .that.has.property('message')
+        .which.eq('secretOrPrivateKey must be an asymmetric key when using RS256');
+    });
+
+    it('should error while attempting private key JWT generation because of incorrect value for algorithm, but pass validation with client signing key', async () => {
+      // Proves that config value AUTH0_CLIENT_SIGNING_ALGORITHM is being passed to Auth0 library
+      /* Create empty directory */
+      const dir = path.resolve(testDataDir, 'context');
+      cleanThenMkdir(dir);
+      createDir(dir, {
+        '.': {
+          'private.pem': 'some-invalid-private-key',
+        },
+      });
+
+      tmpConfig.AUTH0_CLIENT_SIGNING_KEY_PATH = path.join(dir, 'private.pem');
+      tmpConfig.AUTH0_CLIENT_SIGNING_ALGORITHM = 'bad value for algorithm';
+
+      const result = await expect(
+        setupContext({ ...tmpConfig, AUTH0_INPUT_FILE: dir }),
+        'import'
+      ).to.be.eventually.rejectedWith(Error);
+
+      expect(result)
+        .to.be.an('Error')
+        .that.has.property('message')
+        .which.eq('"algorithm" must be a valid string enum value');
+    });
+
+    it('should error when secret, private key and auth token are all absent', async () => {
+      /* Create empty directory */
+      const dir = path.resolve(testDataDir, 'context');
+      cleanThenMkdir(dir);
+
+      const result = await expect(
+        setupContext({ ...tmpConfig, AUTH0_INPUT_FILE: dir }),
+        'import'
+      ).to.be.eventually.rejectedWith(Error);
+
+      expect(result)
+        .to.be.an('Error')
+        .that.has.property('message')
+        .which.eq(
+          'The following parameters were missing. Please add them to your config.json or as an environment variable. ["AUTH0_CLIENT_SECRET or AUTH0_CLIENT_SIGNING_KEY_PATH or AUTH0_ACCESS_TOKEN"]'
+        );
+    });
   });
 
   it('should load directory context', async () => {
