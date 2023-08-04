@@ -68,7 +68,7 @@ export default class BrandingHandler extends DefaultHandler {
     }
   }
 
-  @order('60') //Run after custom domains
+  @order('70') // Run after custom domains and themes.
   async processChanges(assets: Assets) {
     if (!assets.branding) return;
 
