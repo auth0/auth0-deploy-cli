@@ -1,6 +1,6 @@
 import { Assets } from '../../../types';
 import log from '../../../logger';
-import DefaultHandler from './default';
+import DefaultHandler, { order } from './default';
 
 export default class ThemesHandler extends DefaultHandler {
   existing: Theme[] | null;
@@ -25,6 +25,7 @@ export default class ThemesHandler extends DefaultHandler {
     return this.existing;
   }
 
+  @order('60') // Run after custom domains.
   async processChanges(assets: Assets): Promise<void> {
     const { themes } = assets;
 
