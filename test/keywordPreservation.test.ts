@@ -194,19 +194,78 @@ describe('getAssetsValueByAddress', () => {
 
   it('should find the value of the addressed property for multi-part identifiers', () => {
     const mockAssetTree = {
-      foo: [
+      clientGrants: [
         {
-          prop1: 'A',
-          prop2: 'A',
+          client_id: 'client-1',
+          audience: 'audience-1',
+          name: 'Client 1, Audience 1',
         },
         {
-          prop1: 'A',
-          prop2: 'B',
+          client_id: 'client-1',
+          audience: 'audience-2',
+          name: 'Client 1, Audience 2',
+        },
+        {
+          client_id: 'client-2',
+          audience: 'audience-2',
+          name: 'Client 2, Audience 2',
+        },
+        {
+          client_id: 'client-2',
+          audience: 'audience-1',
+          name: 'Client 2, Audience 1',
         },
       ],
     };
-    expect(getAssetsValueByAddress('foo.[prop1=A||prop2=A].prop2', mockAssetTree)).to.equal('A');
-    expect(getAssetsValueByAddress('foo.[prop1=A||prop2=B].prop2', mockAssetTree)).to.equal('B');
+    expect(
+      getAssetsValueByAddress(
+        'clientGrants.[client_id=client-1||audience=audience-1].name',
+        mockAssetTree
+      )
+    ).to.equal('Client 1, Audience 1');
+    expect(
+      getAssetsValueByAddress(
+        'clientGrants.[client_id=client-1||audience=audience-2].name',
+        mockAssetTree
+      )
+    ).to.equal('Client 1, Audience 2');
+    expect(
+      getAssetsValueByAddress(
+        'clientGrants.[client_id=client-2||audience=audience-1].name',
+        mockAssetTree
+      )
+    ).to.equal('Client 2, Audience 1');
+    expect(
+      getAssetsValueByAddress(
+        'clientGrants.[client_id=client-2||audience=audience-2].name',
+        mockAssetTree
+      )
+    ).to.equal('Client 2, Audience 2');
+
+    expect(
+      getAssetsValueByAddress(
+        'clientGrants.[client_id=client-1||audience=audience-1].audience',
+        mockAssetTree
+      )
+    ).to.equal('audience-1');
+    expect(
+      getAssetsValueByAddress(
+        'clientGrants.[client_id=client-1||audience=audience-2].audience',
+        mockAssetTree
+      )
+    ).to.equal('audience-2');
+    expect(
+      getAssetsValueByAddress(
+        'clientGrants.[client_id=client-1||audience=audience-1].client_id',
+        mockAssetTree
+      )
+    ).to.equal('client-1');
+    expect(
+      getAssetsValueByAddress(
+        'clientGrants.[client_id=client-1||audience=audience-2].client_id',
+        mockAssetTree
+      )
+    ).to.equal('client-1');
   });
 
   it('should handle a non-array assets value', () => {
