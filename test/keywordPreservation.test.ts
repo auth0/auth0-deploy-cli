@@ -74,6 +74,11 @@ describe('#Keyword Preservation', () => {
               name: 'Client grant name',
             },
             {
+              client_id: 'another-client-id',
+              audience: '##KEYWORD##',
+              name: 'Another client grant name',
+            },
+            {
               client_id: '##KEYWORD##',
               audience: 'https://api.travel0.com',
               name: 'Client grant name',
@@ -104,10 +109,9 @@ describe('#Keyword Preservation', () => {
       expect(fieldsToPreserve).to.have.members([
         'tenant.friendly_name',
         'tenant.nested.nestedProperty',
-        'clientGrants.[audience=##KEYWORD##].audience',
-        'clientGrants.[client_id=client-id].audience',
-        'clientGrants.[audience=https://api.travel0.com].client_id',
-        'clientGrants.[client_id=##KEYWORD##].client_id',
+        'clientGrants.[audience=##KEYWORD##||client_id=client-id].audience',
+        'clientGrants.[audience=##KEYWORD##||client_id=another-client-id].audience',
+        'clientGrants.[audience=https://api.travel0.com||client_id=##KEYWORD##].client_id',
         'actions.[actionName=action-1].value',
         'actions.[actionName=action-2].value',
         'arrayReplace',
@@ -186,6 +190,82 @@ describe('getAssetsValueByAddress', () => {
         mockAssetTree
       )
     ).to.equal('https://travel0.com/api/v1');
+  });
+
+  it('should find the value of the addressed property for multi-part identifiers', () => {
+    const mockAssetTree = {
+      clientGrants: [
+        {
+          client_id: 'client-1',
+          audience: 'audience-1',
+          name: 'Client 1, Audience 1',
+        },
+        {
+          client_id: 'client-1',
+          audience: 'audience-2',
+          name: 'Client 1, Audience 2',
+        },
+        {
+          client_id: 'client-2',
+          audience: 'audience-2',
+          name: 'Client 2, Audience 2',
+        },
+        {
+          client_id: 'client-2',
+          audience: 'audience-1',
+          name: 'Client 2, Audience 1',
+        },
+      ],
+    };
+    expect(
+      getAssetsValueByAddress(
+        'clientGrants.[client_id=client-1||audience=audience-1].name',
+        mockAssetTree
+      )
+    ).to.equal('Client 1, Audience 1');
+    expect(
+      getAssetsValueByAddress(
+        'clientGrants.[client_id=client-1||audience=audience-2].name',
+        mockAssetTree
+      )
+    ).to.equal('Client 1, Audience 2');
+    expect(
+      getAssetsValueByAddress(
+        'clientGrants.[client_id=client-2||audience=audience-1].name',
+        mockAssetTree
+      )
+    ).to.equal('Client 2, Audience 1');
+    expect(
+      getAssetsValueByAddress(
+        'clientGrants.[client_id=client-2||audience=audience-2].name',
+        mockAssetTree
+      )
+    ).to.equal('Client 2, Audience 2');
+
+    expect(
+      getAssetsValueByAddress(
+        'clientGrants.[client_id=client-1||audience=audience-1].audience',
+        mockAssetTree
+      )
+    ).to.equal('audience-1');
+    expect(
+      getAssetsValueByAddress(
+        'clientGrants.[client_id=client-1||audience=audience-2].audience',
+        mockAssetTree
+      )
+    ).to.equal('audience-2');
+    expect(
+      getAssetsValueByAddress(
+        'clientGrants.[client_id=client-1||audience=audience-1].client_id',
+        mockAssetTree
+      )
+    ).to.equal('client-1');
+    expect(
+      getAssetsValueByAddress(
+        'clientGrants.[client_id=client-1||audience=audience-2].client_id',
+        mockAssetTree
+      )
+    ).to.equal('client-1');
   });
 
   it('should handle a non-array assets value', () => {
@@ -536,14 +616,6 @@ describe('preserveKeywords', () => {
           },
         },
       ],
-      clientGrants: [
-        {
-          client_id: 'API Explorer Application',
-          audience: 'https://##ENV##.travel0.com/api/v1',
-          scope: ['update:account'],
-          name: 'My M2M',
-        },
-      ],
       actions: [
         {
           name: 'action-1-##ENV##',
@@ -572,14 +644,6 @@ describe('preserveKeywords', () => {
             options: {
               domain: 'dev.travel0.com',
             },
-          },
-        ],
-        clientGrants: [
-          {
-            client_id: 'API Explorer Application',
-            audience: 'https://dev.travel0.com/api/v1',
-            scope: ['update:account'],
-            name: 'My M2M',
           },
         ],
         actions: [
@@ -614,6 +678,71 @@ describe('preserveKeywords', () => {
           identifiers: ['id', 'identifier'],
           type: 'resourceServers',
         },
+      ],
+    });
+
+    const expected = (() => {
+      let expected = mockLocalAssets;
+      expected.actions = [mockLocalAssets.actions[0]];
+      return expected;
+    })();
+
+    expect(preservedAssets).to.deep.equal(expected);
+  });
+
+  it('should preserve keywords in identifier fields for resources with multiple identifiers', () => {
+    const mockLocalAssets = {
+      clientGrants: [
+        {
+          client_id: 'API Explorer Application',
+          audience: 'https://##ENV##.travel0.com/api/v1',
+          scope: ['update:account'],
+          name: 'API Explorer Application',
+        },
+        {
+          client_id: 'M2M Application',
+          audience: '##API_IDENTIFIER##',
+          scope: ['create:users', 'read:users'],
+          name: 'My M2M',
+        },
+        {
+          client_id: 'M2M Application',
+          audience: 'https://##ENV##.travel0.com/api/v1',
+          scope: ['update:account'],
+          name: 'My M2M',
+        },
+      ],
+    };
+
+    const preservedAssets = preserveKeywords({
+      localAssets: mockLocalAssets,
+      remoteAssets: {
+        clientGrants: [
+          {
+            client_id: 'API Explorer Application',
+            audience: 'https://dev.travel0.com/api/v1',
+            scope: ['update:account'],
+            name: 'API Explorer Application',
+          },
+          {
+            client_id: 'M2M Application',
+            audience: 'https://api.travel0.com/v1',
+            scope: ['create:users', 'read:users'],
+            name: 'My M2M',
+          },
+          {
+            client_id: 'M2M Application',
+            audience: 'https://dev.travel0.com/api/v1',
+            scope: ['update:account'],
+            name: 'My M2M',
+          },
+        ],
+      },
+      keywordMappings: {
+        ENV: 'dev',
+        API_IDENTIFIER: 'https://api.travel0.com/v1',
+      },
+      auth0Handlers: [
         {
           type: 'clientGrants',
           id: 'id',
@@ -624,8 +753,6 @@ describe('preserveKeywords', () => {
 
     const expected = (() => {
       let expected = mockLocalAssets;
-      expected.actions = [mockLocalAssets.actions[0]];
-      expected.clientGrants[0].audience = 'https://##ENV##.travel0.com/api/v1';
       return expected;
     })();
 

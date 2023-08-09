@@ -2,7 +2,7 @@ import { get as getByDotNotation, set as setByDotNotation } from 'dot-prop';
 import { keywordReplace } from './tools/utils';
 import { AssetTypes, KeywordMappings } from './types';
 import { keywordReplaceArrayRegExp, keywordReplaceStringRegExp } from './tools/utils';
-import { cloneDeep, isArray } from 'lodash';
+import { cloneDeep, forEach, isArray } from 'lodash';
 import APIHandler from './tools/auth0/handlers/default';
 
 /*
@@ -48,24 +48,33 @@ export const getPreservableFieldsFromAssets = (
           return [identifiers];
         })();
 
-        return resourceIdentifiers
-          .map((resourceIdentifier) => {
+        const specificAddress = resourceIdentifiers.reduce(
+          (aggregateAddress, resourceIdentifier) => {
             resourceSpecificIdentifiers[address];
-            if (resourceIdentifier === undefined) return []; // See if this specific resource type has an identifier
+            if (resourceIdentifier === undefined) return null; // See if this specific resource type has an identifier
 
             const identifierFieldValue = arrayItem[resourceIdentifier];
-            if (identifierFieldValue === undefined) return []; // See if this specific array item possess the resource-specific identifier
+            if (identifierFieldValue === undefined) return null; // See if this specific array item possess the resource-specific identifier
 
-            return getPreservableFieldsFromAssets(
-              arrayItem,
-              keywordMappings,
-              resourceSpecificIdentifiers,
-              `${address}${
-                shouldRenderDot ? '.' : ''
-              }[${resourceIdentifier}=${identifierFieldValue}]`
-            );
-          })
-          .flat();
+            if (aggregateAddress === '') {
+              return `${resourceIdentifier}=${identifierFieldValue}`;
+            }
+
+            return `${aggregateAddress}||${resourceIdentifier}=${identifierFieldValue}`;
+          },
+          ''
+        );
+
+        if (specificAddress === null) {
+          return [];
+        }
+
+        return getPreservableFieldsFromAssets(
+          arrayItem,
+          keywordMappings,
+          resourceSpecificIdentifiers,
+          `${address}${shouldRenderDot ? '.' : ''}[${specificAddress}]`
+        );
       })
       .flat();
   }
@@ -110,13 +119,17 @@ export const getAssetsValueByAddress = (address: string, assets: any): any => {
   // If the the next directions are the proprietary array syntax (ex: `[name=foo]`)
   // then perform lookup against unique array-item property
   if (directions[0].charAt(0) === '[') {
-    const identifier = directions[0].substring(1, directions[0].length - 1).split('=')[0];
-    const identifierValue = directions[0].substring(1, directions[0].length - 1).split('=')[1];
-
     if (!isArray(assets)) return undefined;
 
     const target = assets.find((item: any) => {
-      return item[identifier] === identifierValue;
+      const parts = directions[0].substring(1).slice(0, -1).split('||');
+
+      return parts.every((part) => {
+        const identifier = part.split('=')[0];
+        const identifierValue = part.split('=')[1];
+
+        return item[identifier] === identifierValue;
+      });
     });
 
     return getAssetsValueByAddress(directions.slice(1).join('.'), target);
@@ -144,13 +157,19 @@ export const convertAddressToDotNotation = (
   if (directions[0] === '') return finalAddressTrail;
 
   if (directions[0].charAt(0) === '[') {
-    const identifier = directions[0].substring(1, directions[0].length - 1).split('=')[0];
-    const identifierValue = directions[0].substring(1, directions[0].length - 1).split('=')[1];
+    const identifiers = directions[0].substring(1).slice(0, -1).split('||');
 
     let targetIndex = -1;
 
     assets.forEach((item: any, index: number) => {
-      if (item[identifier] === identifierValue) {
+      if (
+        identifiers.every((part) => {
+          const identifier = part.split('=')[0];
+          const identifierValue = part.split('=')[1];
+
+          return item[identifier] === identifierValue;
+        })
+      ) {
         targetIndex = index;
       }
     });
