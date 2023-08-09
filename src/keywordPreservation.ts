@@ -65,8 +65,6 @@ export const getPreservableFieldsFromAssets = (
           ''
         );
 
-        console.log({ specificAddress });
-
         if (specificAddress === null) {
           return [];
         }
