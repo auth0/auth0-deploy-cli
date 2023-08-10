@@ -260,7 +260,7 @@ export default class HooksHandler extends DefaultHandler {
     } catch (err) {
       if (isDeprecatedError(err)) {
         log.warn(
-          'Hooks not updated because functionality has been deprecated for favor of actions. See: https://auth0.com/docs/customize/actions/migrate/migrate-from-hooks-to-actions for more information.'
+          'Failed to update hooks because functionality has been deprecated in favor of actions. See: https://auth0.com/docs/customize/actions/migrate/migrate-from-hooks-to-actions for more information.'
         );
         return;
       }
