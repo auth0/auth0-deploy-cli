@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Support for Private Key JWT authentication for authenticating with private key instead of client secret [#817]
 
+### Fixed
+
+- Process branding changes after theme changes to prevent delay in dashboard preview [#836]
+- Handling eventual hooks and rules deprecation [#838]
+- Overwrites occurring when preserving keywords within multiple client grants [#837]
+
 ## [7.18.0] - 2023-07-14
 
 ### Added
