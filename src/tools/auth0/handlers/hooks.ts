@@ -243,7 +243,7 @@ export default class HooksHandler extends DefaultHandler {
     if (!hooks) return;
 
     log.warn(
-      'Hooks are deprecated and should be migrated to actions instead. See: https://auth0.com/docs/customize/actions/migrate/migrate-from-hooks-to-actions for more information.'
+      'Hooks are deprecated, migrate to using actions instead. See: https://auth0.com/docs/customize/actions/migrate/migrate-from-hooks-to-actions for more information.'
     );
 
     try {
