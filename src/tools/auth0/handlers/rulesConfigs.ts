@@ -54,7 +54,7 @@ export default class RulesConfigsHandler extends DefaultHandler {
       };
 
     log.warn(
-      'Rules are deprecated and should be migrated to actions instead. See: https://auth0.com/docs/customize/actions/migrate/migrate-from-hooks-to-actions for more information.'
+      'Rules are deprecated, migrate to using actions instead. See: https://auth0.com/docs/customize/actions/migrate/migrate-from-rules-to-actions for more information.'
     );
 
     // Intention is to not delete/cleanup old configRules, that needs to be handled manually.

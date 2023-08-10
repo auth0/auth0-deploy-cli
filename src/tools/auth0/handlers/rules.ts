@@ -202,7 +202,7 @@ export default class RulesHandler extends DefaultHandler {
     if (!rules) return;
 
     log.warn(
-      'Rules are deprecated and should be migrated to actions instead. See: https://auth0.com/docs/customize/actions/migrate/migrate-from-rules-to-actions for more information.'
+      'Rules are deprecated, migrate to using actions instead. See: https://auth0.com/docs/customize/actions/migrate/migrate-from-rules-to-actions for more information.'
     );
 
     try {
@@ -237,7 +237,7 @@ export default class RulesHandler extends DefaultHandler {
     } catch (err) {
       if (isDeprecatedError(err)) {
         log.warn(
-          'Rules not updated because functionality has been deprecated for favor of actions. See: https://auth0.com/docs/customize/actions/migrate/migrate-from-rules-to-actions for more information.'
+          'Failed to update rules not because functionality has been deprecated in favor of actions. See: https://auth0.com/docs/customize/actions/migrate/migrate-from-rules-to-actions for more information.'
         );
         return;
       }
