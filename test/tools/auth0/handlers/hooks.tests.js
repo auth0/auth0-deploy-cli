@@ -1,6 +1,7 @@
 import chai, { expect } from 'chai';
 import sinonChai from 'sinon-chai';
 import chaiAsPromised from 'chai-as-promised';
+
 const constants = require('../../../../src/tools/constants').default;
 const hooks = require('../../../../src/tools/auth0/handlers/hooks');
 
