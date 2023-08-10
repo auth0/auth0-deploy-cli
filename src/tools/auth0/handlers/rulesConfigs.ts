@@ -1,5 +1,7 @@
 import { Assets, Asset, CalculatedChanges } from '../../../types';
 import DefaultHandler from './default';
+import log from '../../../logger';
+import { isDeprecatedError } from '../../utils';
 
 export const schema = {
   type: 'array',
@@ -26,8 +28,13 @@ export default class RulesConfigsHandler extends DefaultHandler {
     });
   }
 
-  async getType(): Promise<Asset[]> {
-    return this.client.rulesConfigs.getAll();
+  async getType(): Promise<Asset[] | null> {
+    try {
+      return this.client.rulesConfigs.getAll();
+    } catch (err) {
+      if (isDeprecatedError(err)) return null;
+      throw err;
+    }
   }
 
   objString(item): string {
@@ -45,6 +52,10 @@ export default class RulesConfigsHandler extends DefaultHandler {
         create: [],
         conflicts: [],
       };
+
+    log.warn(
+      'Rules are deprecated and should be migrated to actions instead. See: https://auth0.com/docs/customize/actions/migrate/migrate-from-hooks-to-actions for more information.'
+    );
 
     // Intention is to not delete/cleanup old configRules, that needs to be handled manually.
     return {
