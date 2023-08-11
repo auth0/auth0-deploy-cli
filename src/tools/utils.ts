@@ -270,3 +270,8 @@ export const detectInsufficientScopeError = async <T>(
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+export const isDeprecatedError = (err: { message: string; statusCode: number }): boolean => {
+  if (!err) return false;
+  return !!(err.statusCode === 403 || err.message?.includes('deprecated feature'));
+};

@@ -80,7 +80,7 @@ Boolean. When enabled, will allow the tool to delete resources. Default: `false`
 
 ### `AUTH0_EXCLUDED`
 
-Array of strings. Excludes entire resource types from being managed, bi-directionally. See also: [excluding resources from management](excluding-from-management.md). Possible values: `actions`, `attackProtection`, `branding`, `clientGrants`, `clients`, `connections`, `customDomains`, `databases`, `emailProvider`, `emailTemplates`, `guardianFactorProviders`, `guardianFactorTemplates`, `guardianFactors`, `guardianPhoneFactorMessageTypes`, `guardianPhoneFactorSelectedProvider`, `guardianPolicies`, `hooks`, `logStreams`, `migrations`, `organizations`, `pages`, `prompts`, `resourceServers`, `roles`, `rules`, `rulesConfigs`, `tenant`, `triggers`.
+Array of strings. Excludes entire resource types from being managed, bi-directionally. See also: [excluding resources from management](excluding-from-management.md). Possible values: `actions`, `attackProtection`, `branding`, `clientGrants`, `clients`, `connections`, `customDomains`, `databases`, `emailProvider`, `emailTemplates`, `guardianFactorProviders`, `guardianFactorTemplates`, `guardianFactors`, `guardianPhoneFactorMessageTypes`, `guardianPhoneFactorSelectedProvider`, `guardianPolicies`, `logStreams`, `migrations`, `organizations`, `pages`, `prompts`, `resourceServers`, `roles`, `tenant`, `triggers`.
 
 Cannot be used simultaneously with `AUTH0_INCLUDED_ONLY`.
 
@@ -94,7 +94,7 @@ Cannot be used simultaneously with `AUTH0_INCLUDED_ONLY`.
 
 ### `AUTH0_INCLUDED_ONLY`
 
-Array of strings. Dictates which resource types to _only_ manage, bi-directionally. See also: [excluding resources from management](excluding-from-management.md). Possible values: `actions`, `attackProtection`, `branding`, `clientGrants`, `clients`, `connections`, `customDomains`, `databases`, `emailProvider`, `emailTemplates`, `guardianFactorProviders`, `guardianFactorTemplates`, `guardianFactors`, `guardianPhoneFactorMessageTypes`, `guardianPhoneFactorSelectedProvider`, `guardianPolicies`, `hooks`, `logStreams`, `migrations`, `organizations`, `pages`, `prompts`, `resourceServers`, `roles`, `rules`, `rulesConfigs`, `tenant`, `triggers`
+Array of strings. Dictates which resource types to _only_ manage, bi-directionally. See also: [excluding resources from management](excluding-from-management.md). Possible values: `actions`, `attackProtection`, `branding`, `clientGrants`, `clients`, `connections`, `customDomains`, `databases`, `emailProvider`, `emailTemplates`, `guardianFactorProviders`, `guardianFactorTemplates`, `guardianFactors`, `guardianPhoneFactorMessageTypes`, `guardianPhoneFactorSelectedProvider`, `guardianPolicies`, `logStreams`, `migrations`, `organizations`, `pages`, `prompts`, `resourceServers`, `roles`, `tenant`, `triggers`
 
 #### Example
 

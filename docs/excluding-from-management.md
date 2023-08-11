@@ -14,7 +14,7 @@ This type of exclusion is expressed by passing an array of resource names into e
 
 All supported resource values for exclusion:
 
-`actions`, `attackProtection`, `branding`, `clientGrants`, `clients`, `connections`, `customDomains`, `databases`, `emailProvider`, `emailTemplates`, `guardianFactorProviders`, `guardianFactorTemplates`, `guardianFactors`, `guardianPhoneFactorMessageTypes`, `guardianPhoneFactorSelectedProvider`, `guardianPolicies`, `hooks`, `logStreams`, `migrations`, `organizations`, `pages`, `prompts`, `resourceServers`, `roles`, `rules`, `rulesConfigs`, `tenant`, `triggers`
+`actions`, `attackProtection`, `branding`, `clientGrants`, `clients`, `connections`, `customDomains`, `databases`, `emailProvider`, `emailTemplates`, `guardianFactorProviders`, `guardianFactorTemplates`, `guardianFactors`, `guardianPhoneFactorMessageTypes`, `guardianPhoneFactorSelectedProvider`, `guardianPolicies`, `logStreams`, `migrations`, `organizations`, `pages`, `prompts`, `resourceServers`, `roles`, `tenant`, `triggers`
 
 ### Exclusion Example
 
@@ -30,13 +30,13 @@ The following example excludes `clients`, `connections`, `databases` and `organi
 
 ### Inclusion Example
 
-The following example dictates to _only_ manage `actions`, `hooks` and `rules` by the Deploy CLI.
+The following example dictates to _only_ manage `actions`, `clients` and `connections` by the Deploy CLI.
 
 ```json
 {
   "AUTH0_DOMAIN": "example-site.us.auth0.com",
   "AUTH0_CLIENT_ID": "<YOUR_AUTH0_CLIENT_ID>",
-  "AUTH0_INCLUDED_ONLY": ["actions", "hooks", "rules"]
+  "AUTH0_INCLUDED_ONLY": ["actions", "clients", "connections"]
 }
 ```
 

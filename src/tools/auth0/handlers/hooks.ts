@@ -1,6 +1,8 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
+import log from '../../../logger';
+import { isDeprecatedError } from '../../utils';
 
 const ALLOWED_TRIGGER_IDS = [
   'credentials-exchange',
@@ -96,6 +98,9 @@ export default class HooksHandler extends DefaultHandler {
 
   async processSecrets(hooks): Promise<void> {
     const allHooks = await this.getType(true);
+
+    if (allHooks === null) return;
+
     const changes: CalculatedChanges = {
       create: [],
       update: [],
@@ -155,7 +160,7 @@ export default class HooksHandler extends DefaultHandler {
   }
 
   //@ts-ignore because hooks use a special reload argument
-  async getType(reload: boolean): Promise<Asset[]> {
+  async getType(reload: boolean): Promise<Asset[] | null> {
     if (this.existing && !reload) {
       return this.existing;
     }
@@ -185,6 +190,9 @@ export default class HooksHandler extends DefaultHandler {
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 501) {
         return [];
+      }
+      if (isDeprecatedError(err)) {
+        return null;
       }
       throw err;
     }
@@ -234,15 +242,29 @@ export default class HooksHandler extends DefaultHandler {
     // Do nothing if not set
     if (!hooks) return;
 
-    // Figure out what needs to be updated vs created
-    const changes = await this.calcChanges(assets);
-    await super.processChanges(assets, {
-      del: changes.del,
-      create: changes.create,
-      update: changes.update,
-      conflicts: changes.conflicts,
-    });
+    log.warn(
+      'Hooks are deprecated, migrate to using actions instead. See: https://auth0.com/docs/customize/actions/migrate/migrate-from-hooks-to-actions for more information.'
+    );
 
-    await this.processSecrets(hooks);
+    try {
+      // Figure out what needs to be updated vs created
+      const changes = await this.calcChanges(assets);
+      await super.processChanges(assets, {
+        del: changes.del,
+        create: changes.create,
+        update: changes.update,
+        conflicts: changes.conflicts,
+      });
+
+      await this.processSecrets(hooks);
+    } catch (err) {
+      if (isDeprecatedError(err)) {
+        log.warn(
+          'Failed to update hooks because functionality has been deprecated in favor of actions. See: https://auth0.com/docs/customize/actions/migrate/migrate-from-hooks-to-actions for more information.'
+        );
+        return;
+      }
+      throw err;
+    }
   }
 }
