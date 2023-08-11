@@ -273,5 +273,5 @@ export function sleep(ms: number): Promise<void> {
 
 export const isDeprecatedError = (err: { message: string; statusCode: number }): boolean => {
   if (!err) return false;
-  return !!(err.statusCode === 403 || err.message?.includes('deprecated'));
+  return !!(err.statusCode === 403 || err.message?.includes('deprecated feature'));
 };
