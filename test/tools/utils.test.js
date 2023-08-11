@@ -623,3 +623,30 @@ describe('#detectInsufficientScopeError', () => {
     expect(didThrow).to.equal(true);
   });
 });
+
+describe('#isDeprecatedError', () => {
+  it('should return true if deprecated error', async () => {
+    const error = {
+      message: 'Insufficient privileges to use this deprecated feature',
+      statusCode: 403,
+    };
+    // eslint-disable-next-line no-unused-expressions
+    expect(utils.isDeprecatedError(error)).to.be.true;
+  });
+
+  it('should return false if not a deprecated error', async () => {
+    const error = {
+      message: 'Not found',
+      statusCode: 404,
+    };
+    // eslint-disable-next-line no-unused-expressions
+    expect(utils.isDeprecatedError(error)).to.be.false;
+  });
+
+  it('should return false error is not error types', async () => {
+    // eslint-disable-next-line no-unused-expressions
+    expect(utils.isDeprecatedError(undefined)).to.be.false;
+    // eslint-disable-next-line no-unused-expressions
+    expect(utils.isDeprecatedError({})).to.be.false;
+  });
+});
