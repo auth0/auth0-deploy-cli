@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.19.0] - 2023-08-11
+
 ### Added
 
 - Support for Private Key JWT authentication for authenticating with private key instead of client secret [#817]
+
+### Fixed
+
+- Process branding changes after theme changes to prevent delay in dashboard preview [#836]
+- Handling eventual hooks and rules deprecation [#838]
+- Overwrites occurring when preserving keywords within multiple client grants [#837]
 
 ## [7.18.0] - 2023-07-14
 
@@ -975,10 +983,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#804]: https://github.com/auth0/auth0-deploy-cli/issues/804
 [#809]: https://github.com/auth0/auth0-deploy-cli/issues/809
 [#811]: https://github.com/auth0/auth0-deploy-cli/issues/811
+[#817]: https://github.com/auth0/auth0-deploy-cli/issues/817
 [#818]: https://github.com/auth0/auth0-deploy-cli/issues/818
 [#820]: https://github.com/auth0/auth0-deploy-cli/issues/820
 [#822]: https://github.com/auth0/auth0-deploy-cli/issues/822
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.18.0...HEAD
+[#836]: https://github.com/auth0/auth0-deploy-cli/issues/836
+[#837]: https://github.com/auth0/auth0-deploy-cli/issues/837
+[#838]: https://github.com/auth0/auth0-deploy-cli/issues/838
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.19.0...HEAD
+[7.19.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.18.0...v7.19.0
 [7.18.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.7...v7.18.0
 [7.17.7]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.6...v7.17.7
 [7.17.6]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.5...v7.17.6
