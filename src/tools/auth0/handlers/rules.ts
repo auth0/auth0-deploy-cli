@@ -237,7 +237,7 @@ export default class RulesHandler extends DefaultHandler {
     } catch (err) {
       if (isDeprecatedError(err)) {
         log.warn(
-          'Failed to update rules not because functionality has been deprecated in favor of actions. See: https://auth0.com/docs/customize/actions/migrate/migrate-from-rules-to-actions for more information.'
+          'Failed to update rules because functionality has been deprecated in favor of actions. See: https://auth0.com/docs/customize/actions/migrate/migrate-from-rules-to-actions for more information.'
         );
         return;
       }
