@@ -924,4 +924,45 @@ describe('preserveKeywords', () => {
       connections: null,
     });
   });
+
+  it('`guardianFactorProviders` should have fields preserved', () => {
+    const preservedAssets = preserveKeywords({
+      localAssets: {
+        guardianFactorProviders: [
+          {
+            auth_token: '##AUTH_TOKEN##',
+            name: 'sms',
+          },
+        ],
+      },
+      remoteAssets: {
+        guardianFactorProviders: [
+          {
+            auth_token: 'auth_token',
+            name: 'sms',
+          },
+        ],
+      },
+      keywordMappings: {
+        AUTH_TOKEN: 'auth_token',
+      },
+      auth0Handlers: [
+        {
+          id: 'name',
+          // id: 'id', // (test-case passes)
+          identifiers: ['id', 'name'],
+          type: 'guardianFactorProviders',
+        },
+      ],
+    });
+
+    expect(preservedAssets).to.deep.equal({
+      guardianFactorProviders: [
+        {
+          auth_token: '##AUTH_TOKEN##',
+          name: 'sms',
+        },
+      ],
+    });
+  });
 });
