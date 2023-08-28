@@ -7,24 +7,24 @@
 
 ---
 
-## 🚀 Help Us Improve Auth0 Deploy CLI – Take Our Survey!
+## Help Us Improve Auth0 Deploy CLI – Take Our Survey!
 
 👋 Hello developers! We're on a mission to make Auth0 Deploy CLI the best it can be, and we need YOUR help. We've put together a brief survey to understand how you use Deploy CLI, what you love about it, and where you think we can do better.
 
-### 🎁 Why Should You Take the Survey?
+### Why Should You Take the Survey?
 
 - **Direct Impact:** Your feedback will directly influence the future of Deploy CLI. Ever wished for a feature or fix? Here's your chance to let us know.
 - **It's Quick:** The survey takes less than 10 minutes to complete.
 
-### 🛡️ Privacy
+### Privacy
 
 We care about your privacy. All data collected is anonymous and will only be used for improving Auth0 Deploy CLI.
 
-### 🗳️ Ready to Make a Difference?
+### Ready to Make a Difference?
 
 [Click here to take the survey](https://www.surveymonkey.com/r/LZKMPFN)
 
-Thank you for helping us make Auth0 Deploy CLI better for everyone! 🌟
+Thank you for helping us make Auth0 Deploy CLI better for everyone!
 
 ---
 
