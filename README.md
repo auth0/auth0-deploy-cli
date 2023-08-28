@@ -22,7 +22,7 @@ We care about your privacy. All data collected is anonymous and will only be use
 
 ### 🗳️ Ready to Make a Difference?
 
-[Click here](https://www.surveymonkey.com/r/LZKMPFN) to take the survey
+[Click here to take the survey](https://www.surveymonkey.com/r/LZKMPFN)
 
 Thank you for helping us make Auth0 Deploy CLI better for everyone! 🌟
 
