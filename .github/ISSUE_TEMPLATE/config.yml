@@ -6,3 +6,6 @@ contact_links:
   - name: 📖 Deploy CLI Documentation
     url: https://github.com/auth0/auth0-deploy-cli#documentation
     about: Check the Deploy CLI documentation for in-depth overview of all the available commands
+  - name: Take Our Survey!
+    url: https://www.surveymonkey.com/r/LZKMPFN
+    about: We're on a mission to make Auth0 Deploy CLI the best it can be, and we need YOUR help. We've put together a brief survey to understand how you use Deploy CLI, what you love about it, and where you think we can do better.
