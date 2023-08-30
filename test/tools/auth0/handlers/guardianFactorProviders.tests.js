@@ -62,7 +62,10 @@ describe('#guardianFactorProviders handler', () => {
     it('should get guardianFactorProviders', async () => {
       const auth0 = {
         guardian: {
-          getFactorProvider: (params) => ({ ...params, test: 'data' }),
+          getPhoneFactorProviderTwilio: (params) => ({ data: { ...params, test: 'data' } }),
+          getPushNotificationProviderAPNS: (params) => ({ data: { ...params, test: 'data' } }),
+          getPushNotificationProviderSNS: (params) => ({ data: { ...params, test: 'data' } }),
+          getSmsFactorProviderTwilio: (params) => ({ data: { ...params, test: 'data' } }),
         },
         pool,
       };

@@ -1,6 +1,7 @@
 /* eslint-disable consistent-return */
 const { expect } = require('chai');
 const connections = require('../../../../src/tools/auth0/handlers/connections');
+const { mockPagedData } = require('../../../utils');
 
 const pool = {
   addEachTask: (data) => {
@@ -63,14 +64,14 @@ describe('#connections handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someConnection');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          update: () => Promise.resolve([]),
-          delete: () => Promise.resolve([]),
-          getAll: () => [],
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'connections', []),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -86,13 +87,13 @@ describe('#connections handler', () => {
 
       const auth0 = {
         connections: {
-          getAll: () => [
+          getAll: (params) => mockPagedData(params, 'connections', [
             { strategy: 'github', name: 'github', enabled_clients: [clientId] },
             { strategy: 'auth0', name: 'db-should-be-ignored', enabled_clients: [] },
-          ],
+          ]),
         },
         clients: {
-          getAll: () => [{ name: 'test client', client_id: clientId }],
+          getAll: (params) => mockPagedData(params, 'clients', [{ name: 'test client', client_id: clientId }]),
         },
         pool,
       };
@@ -110,7 +111,7 @@ describe('#connections handler', () => {
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
@@ -121,13 +122,13 @@ describe('#connections handler', () => {
               options: { passwordPolicy: 'testPolicy' },
             });
 
-            return Promise.resolve({ ...params, ...data });
+            return Promise.resolve({ data: { ...params, ...data } });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => [{ name: 'someConnection', id: 'con1', strategy: 'custom' }],
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'connections', [{ name: 'someConnection', id: 'con1', strategy: 'custom' }]),
         },
         clients: {
-          getAll: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
+          getAll: (params) => mockPagedData(params, 'clients', [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
         },
         pool,
       };
@@ -166,7 +167,7 @@ describe('#connections handler', () => {
                 },
               },
             });
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
@@ -184,16 +185,16 @@ describe('#connections handler', () => {
               },
             });
 
-            return Promise.resolve({ ...params, ...data });
+            return Promise.resolve({ data: { ...params, ...data } });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => [{ name: 'someSamlConnection', id: 'con1', strategy: 'samlp' }],
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'connections', [{ name: 'someSamlConnection', id: 'con1', strategy: 'samlp' }]),
         },
         clients: {
-          getAll: () => [
+          getAll: (params) => mockPagedData(params, 'clients', [
             { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
             { name: 'idp-one', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Teb' },
-          ],
+          ]),
         },
         pool,
       };
@@ -250,7 +251,7 @@ describe('#connections handler', () => {
                 },
               },
             });
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
@@ -268,16 +269,16 @@ describe('#connections handler', () => {
               },
             });
 
-            return Promise.resolve({ ...params, ...data });
+            return Promise.resolve({ data: { ...params, ...data } });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => [{ name: 'someSamlConnection', id: 'con1', strategy: 'samlp' }],
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'connections', [{ name: 'someSamlConnection', id: 'con1', strategy: 'samlp' }]),
         },
         clients: {
-          getAll: () => [
+          getAll: (params) => mockPagedData(params, 'clients', [
             { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
             { name: 'idp-one', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Teb' },
-          ],
+          ]),
         },
         pool,
       };
@@ -324,7 +325,7 @@ describe('#connections handler', () => {
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
@@ -335,24 +336,24 @@ describe('#connections handler', () => {
               options: { passwordPolicy: 'testPolicy' },
             });
 
-            return Promise.resolve({ ...params, ...data });
+            return Promise.resolve({ data: { ...params, ...data } });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => [
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'connections',  [
             {
               name: 'someConnection',
               id: 'con1',
               strategy: 'custom',
               enabled_clients: ['excluded-one-id'],
             },
-          ],
+          ]),
         },
         clients: {
-          getAll: () => [
+          getAll: (params) => mockPagedData(params, 'clients', [
             { name: 'client1', client_id: 'client1-id' },
             { name: 'excluded-one', client_id: 'excluded-one-id' },
             { name: 'excluded-two', client_id: 'excluded-two-id' },
-          ],
+          ]),
         },
         pool,
       };
@@ -382,20 +383,20 @@ describe('#connections handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someConnection');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          update: () => Promise.resolve([]),
+          update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
 
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }],
+          getAll: (params) => mockPagedData(params, 'connections', [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }]),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -416,19 +417,19 @@ describe('#connections handler', () => {
       let removed = false;
       const auth0 = {
         connections: {
-          create: () => Promise.resolve([]),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
+          update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             removed = true;
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }],
+          getAll: (params) => mockPagedData(params, 'connections', [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }]),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -446,18 +447,18 @@ describe('#connections handler', () => {
         connections: {
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          update: () => Promise.resolve([]),
+          update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }],
+          getAll: (params) => mockPagedData(params, 'connections', [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }]),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -480,17 +481,17 @@ describe('#connections handler', () => {
       };
       const auth0 = {
         connections: {
-          create: () => Promise.resolve(),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: undefined }),
+          update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }],
+          getAll: (params) => mockPagedData(params, 'connections', [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }]),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -510,24 +511,24 @@ describe('#connections handler', () => {
         connections: {
           create: (params) => {
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
           update: (params) => {
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [
+          getAll: (params) => mockPagedData(params, 'connections', [
             { id: 'con1', name: 'existing1', strategy: 'custom' },
             { id: 'con2', name: 'existing2', strategy: 'custom' },
-          ],
+          ]),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };

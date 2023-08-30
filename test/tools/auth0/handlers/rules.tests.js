@@ -1,5 +1,6 @@
 const { expect } = require('chai');
 const rules = require('../../../../src/tools/auth0/handlers/rules');
+const { mockPagedData } = require('../../../utils');
 
 const pool = {
   addEachTask: (data) => {
@@ -23,7 +24,7 @@ describe('#rules handler', () => {
     it('should not allow same names', async () => {
       const auth0 = {
         rules: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'rules', []),
         },
       };
 
@@ -49,8 +50,8 @@ describe('#rules handler', () => {
     it('should not allow same order', async () => {
       const auth0 = {
         rules: {
-          getAll: () => [],
-        },
+          getAll: (params) => mockPagedData(params, 'rules', []),
+        }
       };
 
       const handler = new rules.default({ client: auth0, config });
@@ -79,16 +80,17 @@ describe('#rules handler', () => {
     it("should not have a rules' order collision when rules are reordered with future rule set no consecutive", async () => {
       const auth0 = {
         rules: {
-          getAll: () => [
-            {
-              name: 'Rule1',
-              order: 1,
-            },
-            {
-              name: 'Rule2',
-              order: 2,
-            },
-          ],
+          getAll: (params) =>
+            mockPagedData(params, 'rules', [
+              {
+                name: 'Rule1',
+                order: 1,
+              },
+              {
+                name: 'Rule2',
+                order: 2,
+              },
+            ]),
         },
       };
 
@@ -117,16 +119,17 @@ describe('#rules handler', () => {
     it("should not have a rules' order collision when rules are reordered with future rule set consecutive", async () => {
       const auth0 = {
         rules: {
-          getAll: () => [
-            {
-              name: 'Rule1',
-              order: 1,
-            },
-            {
-              name: 'Rule2',
-              order: 2,
-            },
-          ],
+          getAll: (params) =>
+            mockPagedData(params, 'rules', [
+              {
+                name: 'Rule1',
+                order: 1,
+              },
+              {
+                name: 'Rule2',
+                order: 2,
+              },
+            ]),
         },
       };
 
@@ -155,12 +158,13 @@ describe('#rules handler', () => {
     it('should not allow change stage', async () => {
       const auth0 = {
         rules: {
-          getAll: () => [
-            {
-              name: 'Rule1',
-              stage: 'some_stage',
-            },
-          ],
+          getAll: (params) =>
+            mockPagedData(params, 'rules', [
+              {
+                name: 'Rule1',
+                stage: 'some_stage',
+              },
+            ]),
         },
       };
 
@@ -184,7 +188,7 @@ describe('#rules handler', () => {
     it('should pass validation', async () => {
       const auth0 = {
         rules: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'rules', []),
         },
       };
 
@@ -209,11 +213,11 @@ describe('#rules handler', () => {
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someRule');
             expect(data.script).to.equal('rule_script');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          update: () => Promise.resolve([]),
-          delete: () => Promise.resolve([]),
-          getAll: () => [],
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'rules', []),
         },
         pool,
       };
@@ -245,7 +249,7 @@ describe('#rules handler', () => {
       ];
 
       const auth0 = {
-        rules: { getAll: () => rulesData },
+        rules: { getAll: (params) => mockPagedData(params, 'rules', rulesData) },
       };
 
       const handler = new rules.default({ client: auth0, config });
@@ -273,17 +277,17 @@ describe('#rules handler', () => {
     it('should update rule', async () => {
       const auth0 = {
         rules: {
-          create: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(data).to.be.an('object');
             expect(params.id).to.equal('rule1');
             expect(data.script).to.equal('new_script');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => [{ id: 'rule1', name: 'someRule', script: 'rule_script' }],
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'rules', [{ id: 'rule1', name: 'someRule', script: 'rule_script' }])
         },
         pool,
       };
@@ -297,14 +301,14 @@ describe('#rules handler', () => {
     it('should remove rule', async () => {
       const auth0 = {
         rules: {
-          create: () => Promise.resolve([]),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
+          update: () => Promise.resolve({ data: [] }),
           delete: (data) => {
             expect(data).to.be.an('object');
             expect(data.id).to.equal('rule1');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          getAll: () => [{ id: 'rule1', name: 'existingRule', order: '10' }],
+          getAll: (params) => mockPagedData(params, 'rules', [{ id: 'rule1', name: 'existingRule', order: '10' }])
         },
         pool,
       };
@@ -319,15 +323,15 @@ describe('#rules handler', () => {
       let removed = false;
       const auth0 = {
         rules: {
-          create: () => Promise.resolve([]),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
+          update: () => Promise.resolve({ data: [] }),
           delete: (data) => {
             expect(data).to.be.an('object');
             expect(data.id).to.equal('rule1');
             removed = true;
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          getAll: () => [{ id: 'rule1', name: 'existingRule', order: '10' }],
+          getAll: (params) => mockPagedData(params, 'rules', [{ id: 'rule1', name: 'existingRule', order: '10' }])
         },
         pool,
       };
@@ -347,15 +351,15 @@ describe('#rules handler', () => {
       let removed = false;
       const auth0 = {
         rules: {
-          create: () => Promise.resolve([]),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
+          update: () => Promise.resolve({ data: [] }),
           delete: (data) => {
             expect(data).to.be.an('object');
             expect(data.id).to.equal('rule1');
             removed = true;
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          getAll: () => [{ id: 'rule1', name: 'existingRule', order: '10' }],
+          getAll: (params) => mockPagedData(params, 'rules', [{ id: 'rule1', name: 'existingRule', order: '10' }])
         },
         pool,
       };
@@ -373,21 +377,22 @@ describe('#rules handler', () => {
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           delete: (data) => {
             expect(data).to.be.an('undefined');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          getAll: () => [
-            { id: 'rule1', script: 'rule-one-script', name: 'Rule1' },
-            { id: 'rile2', script: 'some-other-script', name: 'Rule2' },
-          ],
+          getAll: (params) =>
+            mockPagedData(params, 'rules', [
+              { id: 'rule1', script: 'rule-one-script', name: 'Rule1' },
+              { id: 'rile2', script: 'some-other-script', name: 'Rule2' },
+            ]),
         },
         pool,
       };

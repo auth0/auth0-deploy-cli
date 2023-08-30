@@ -1,5 +1,6 @@
 const { expect } = require('chai');
 const resourceServers = require('../../../../src/tools/auth0/handlers/resourceServers');
+const { mockPagedData } = require('../../../utils');
 
 const pool = {
   addEachTask: (data) => {
@@ -78,11 +79,11 @@ describe('#resourceServers handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someAPI');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          update: () => Promise.resolve([]),
-          delete: () => Promise.resolve([]),
-          getAll: () => [],
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'resource_servers', []),
         },
         pool,
       };
@@ -96,10 +97,14 @@ describe('#resourceServers handler', () => {
     it('should get resource servers', async () => {
       const auth0 = {
         resourceServers: {
-          getAll: () => [
-            { name: 'Auth0 Management API', identifier: 'https://test.auth0.com/api/v2/' },
-            { name: 'Company API', identifier: 'http://company.com/api' },
-          ],
+          getAll: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              {
+                name: 'Auth0 Management API',
+                identifier: 'https://test.auth0.com/api/v2/',
+              },
+              { name: 'Company API', identifier: 'http://company.com/api' },
+            ]),
         },
       };
 
@@ -117,10 +122,10 @@ describe('#resourceServers handler', () => {
             expect(data).to.be.an('object');
             expect(params.id).to.equal('rs1');
             expect(data.scope).to.equal('new:scope');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => [{ id: 'rs1', identifier: 'some-api', name: 'someAPI' }],
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'resource_servers', [{ id: 'rs1', identifier: 'some-api', name: 'someAPI' }]),
         },
         pool,
       };
@@ -142,16 +147,16 @@ describe('#resourceServers handler', () => {
             expect(data.name).to.equal('someAPI');
             expect(data.scope).to.equal('new:scope');
             expect(data.identifier).to.equal('another-api');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be('undefined');
             expect(data).to.be('undefined');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           delete: () => Promise.resolve([]),
-          getAll: () => [{ id: 'rs1', identifier: 'some-api', name: 'someAPI' }],
+          getAll: (params) => mockPagedData(params, 'resource_servers', [{ id: 'rs1', identifier: 'some-api', name: 'someAPI' }]),
         },
         pool,
       };
@@ -172,9 +177,9 @@ describe('#resourceServers handler', () => {
           delete: (data) => {
             expect(data).to.be.an('object');
             expect(data.id).to.equal('rs1');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          getAll: () => [{ id: 'rs1', identifier: 'some-api', name: 'someAPI' }],
+          getAll: (params) => mockPagedData(params, 'resource_servers', [{ id: 'rs1', identifier: 'some-api', name: 'someAPI' }]),
         },
         pool,
       };
@@ -189,15 +194,15 @@ describe('#resourceServers handler', () => {
       let removed = false;
       const auth0 = {
         resourceServers: {
-          create: () => Promise.resolve([]),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
+          update: () => Promise.resolve({ data: [] }),
           delete: (data) => {
             expect(data).to.be.an('object');
             expect(data.id).to.equal('rs1');
             removed = true;
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          getAll: () => [{ id: 'rs1', identifier: 'some-api', name: 'someAPI' }],
+          getAll: (params) => mockPagedData(params, 'resource_servers', [{ id: 'rs1', identifier: 'some-api', name: 'someAPI' }]),
         },
         pool,
       };
@@ -217,15 +222,15 @@ describe('#resourceServers handler', () => {
       let removed = false;
       const auth0 = {
         resourceServers: {
-          create: () => Promise.resolve([]),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
+          update: () => Promise.resolve({ data: [] }),
           delete: (data) => {
             expect(data).to.be.an('object');
             expect(data.id).to.equal('rs1');
             removed = true;
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          getAll: () => [{ id: 'rs1', identifier: 'some-api', name: 'someAPI' }],
+          getAll: (params) => mockPagedData(params, 'resource_servers', [{ id: 'rs1', identifier: 'some-api', name: 'someAPI' }]),
         },
         pool,
       };
@@ -244,16 +249,16 @@ describe('#resourceServers handler', () => {
           update: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           delete: (data) => {
             expect(data).to.be.an('undefined');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          getAll: () => [
+          getAll: (params) => mockPagedData(params, 'resource_servers', [
             { id: 'rs1', identifier: 'some-api', name: 'someAPI' },
             { id: 'rs2', identifier: 'some-other-api', name: 'someOtherAPI' },
-          ],
+          ]),
         },
         pool,
       };

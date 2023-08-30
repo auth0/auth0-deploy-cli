@@ -25,10 +25,10 @@ describe('#customDomains handler', () => {
   it('should get custom domains', async () => {
     const auth0ApiClientMock = {
       customDomains: {
-        getAll: async () => customDomains,
-        create: async () => customDomains[0],
-        update: async () => {},
-        delete: async () => {},
+        getAll: async () => ({ data: customDomains }),
+        create: async () => ({ data: customDomains[0] }),
+        update: async () => ({ data: {} }),
+        delete: async () => ({ data: {} }),
       },
       pool: new PromisePoolExecutor({
         concurrencyLimit: 3,
@@ -192,7 +192,7 @@ describe('#customDomains handler', () => {
 
     const auth0ApiClientMock = {
       customDomains: {
-        getAll: async () => customDomains,
+        getAll: async () => ({ data: customDomains }),
         create: async () => {
           didCreateFunctionGetCalled = true;
         },

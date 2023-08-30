@@ -1,5 +1,6 @@
 const { expect } = require('chai');
 const clients = require('../../../../src/tools/auth0/handlers/clients');
+const { mockPagedData } = require('../../../utils');
 
 const pool = {
   addEachTask: (data) => {
@@ -62,11 +63,11 @@ describe('#clients handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someClient');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          update: () => Promise.resolve([]),
-          delete: () => Promise.resolve([]),
-          getAll: () => [],
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'clients',[]),
         },
         pool,
       };
@@ -80,10 +81,10 @@ describe('#clients handler', () => {
     it('should get clients', async () => {
       const auth0 = {
         clients: {
-          getAll: () => [
+          getAll: (params) => mockPagedData(params, 'clients',  [
             { name: 'test client', client_id: 'FMfcgxvzLDvPsgpRFKkLVrnKqGgkHhQV' },
             { name: 'deploy client', client_id: 'client_id' },
-          ],
+          ]),
         },
         pool,
       };
@@ -103,7 +104,7 @@ describe('#clients handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('array');
             expect(data.length).to.equal(0);
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
@@ -112,15 +113,15 @@ describe('#clients handler', () => {
             expect(data).to.be.an('object');
             expect(data.description).to.equal('new description');
 
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => [
+          delete: () => Promise.resolve({ data: []}),
+          getAll: (params) => mockPagedData(params, 'clients', [
             {
               client_id: 'client1',
               name: 'someClient',
             },
-          ],
+          ]),
         },
         pool,
       };
@@ -147,19 +148,19 @@ describe('#clients handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someClient');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          update: () => Promise.resolve([]),
+          update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.client_id).to.equal('client1');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [
+          getAll: (params) => mockPagedData(params, 'clients', [
             { client_id: 'client1', name: 'existingClient' },
             { client_id: 'client_id', name: 'deploy client' },
-          ],
+          ]),
         },
         pool,
       };
@@ -174,19 +175,19 @@ describe('#clients handler', () => {
       let removed = false;
       const auth0 = {
         clients: {
-          create: () => Promise.resolve([]),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
+          update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.client_id).to.equal('client1');
             removed = true;
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [
+          getAll: (params) => mockPagedData(params, 'clients', [
             { client_id: 'client1', name: 'existingClient' },
             { client_id: 'client_id', name: 'deploy client' },
-          ],
+          ]),
         },
         pool,
       };
@@ -202,14 +203,14 @@ describe('#clients handler', () => {
       config.data.AUTH0_ALLOW_DELETE = false;
       const auth0 = {
         clients: {
-          create: () => Promise.resolve([]),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
+          update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [{ client_id: 'client1', name: 'existingClient' }],
+          getAll: (params) => mockPagedData(params, 'clients', [{ client_id: 'client1', name: 'existingClient' }]),
         },
         pool,
       };
@@ -226,18 +227,18 @@ describe('#clients handler', () => {
         clients: {
           create: (params) => {
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
           update: (params) => {
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => Promise.resolve([]),
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'clients', [])),
         },
         pool,
       };
@@ -262,17 +263,17 @@ describe('#clients handler', () => {
 
       const auth0 = {
         clients: {
-          create: () => Promise.resolve([]),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
+          update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [
+          getAll: (params) => mockPagedData(params, 'clients', [
             { client_id: 'client1', name: 'existingClient' },
             { client_id: 'client2', name: 'existingClient2' },
-          ],
+          ]),
         },
         pool,
       };
@@ -294,23 +295,23 @@ describe('#clients handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('Client 3');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: function (data) {
             wasUpdateCalled = true;
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.client_id).to.equal('client-1');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           delete: function (data) {
             wasDeleteCalled = true;
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.client_id).to.equal('client-2');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          getAll: () => [
+          getAll: (params) => mockPagedData(params, 'clients', [
             {
               client_id: 'client-1',
               name: 'Client 1',
@@ -319,7 +320,7 @@ describe('#clients handler', () => {
               client_id: 'client-2',
               name: 'Client 2',
             },
-          ],
+          ]),
         },
         pool,
       };

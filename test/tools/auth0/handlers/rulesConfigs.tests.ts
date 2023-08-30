@@ -37,7 +37,7 @@ describe('#rulesConfigs handler', () => {
     const rulesConfigData = [{ key: 'SOME_SECRET' }, { key: 'SOME_OTHER_SECRET' }];
 
     const auth0 = {
-      rulesConfigs: { getAll: () => rulesConfigData },
+      rulesConfigs: { getAll: () => ({ data: rulesConfigData }) },
     };
 
     const handler = new rulesConfigs({ client: auth0 });

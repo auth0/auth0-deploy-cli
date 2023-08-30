@@ -53,10 +53,10 @@ const mockLogStreams = [
 
 const auth0ApiClientMock = {
   logStreams: {
-    getAll: async () => mockLogStreams,
-    create: async () => mockLogStreams,
-    update: async () => mockLogStreams,
-    delete: async () => mockLogStreams,
+    getAll: async () => ({ data: mockLogStreams }),
+    create: async () => ({ data: mockLogStreams }),
+    update: async () => ({ data: mockLogStreams }),
+    delete: async () => ({ data: mockLogStreams }),
   },
   pool: new PromisePoolExecutor({
     concurrencyLimit: 3,
