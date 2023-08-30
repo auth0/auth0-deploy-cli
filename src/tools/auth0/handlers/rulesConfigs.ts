@@ -30,7 +30,8 @@ export default class RulesConfigsHandler extends DefaultHandler {
 
   async getType(): Promise<Asset[] | null> {
     try {
-      return this.client.rulesConfigs.getAll();
+      const { data } = await this.client.rulesConfigs.getAll();
+      return data;
     } catch (err) {
       if (isDeprecatedError(err)) return null;
       throw err;

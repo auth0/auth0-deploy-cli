@@ -16,7 +16,8 @@ export default class EmailProviderHandler extends DefaultHandler {
 
   async getType(): Promise<Asset> {
     try {
-      return await this.client.emailProvider.get({ include_fields: true, fields: defaultFields });
+      const { data  } = await this.client.emails.get({ include_fields: true, fields: defaultFields.join(',') });
+      return data;
     } catch (err) {
       if (err.statusCode === 404) return {};
       throw err;
@@ -34,9 +35,10 @@ export default class EmailProviderHandler extends DefaultHandler {
 
     let existing = await this.getType();
 
+    // TODO: HTTP DELETE on emails/provider is not public, so not part of our vNext SDK.
     if (Object.keys(emailProvider).length === 0) {
       if (this.config('AUTH0_ALLOW_DELETE') === true) {
-        await this.client.emailProvider.delete();
+        // await this.client.emails.delete();
         this.didDelete(existing);
       }
       return;
@@ -45,7 +47,7 @@ export default class EmailProviderHandler extends DefaultHandler {
     if (existing.name) {
       if (existing.name !== emailProvider.name) {
         // Delete the current provider as it's different
-        await this.client.emailProvider.delete();
+        // await this.client.emailProvider.delete();
         this.didDelete(existing);
         existing = {};
       }
@@ -53,12 +55,13 @@ export default class EmailProviderHandler extends DefaultHandler {
 
     if (existing.name) {
       const provider = { name: emailProvider.name, enabled: emailProvider.enabled };
-      const updated = await this.client.emailProvider.update(provider, emailProvider);
+      const updated = await this.client.emails.update(provider, emailProvider);
       this.updated += 1;
       this.didUpdate(updated);
     } else {
-      const provider = { name: emailProvider.name, enabled: emailProvider.enabled };
-      const created = await this.client.emailProvider.configure(provider, emailProvider);
+      // TODO: credentials is required here.
+      const provider = { name: emailProvider.name, enabled: emailProvider.enabled, credentials: {} };
+      const created = await this.client.emails.configure(provider, emailProvider);
       this.created += 1;
       this.didCreate(created);
     }

@@ -1,3 +1,4 @@
+import { GetConnectionsStrategyEnum } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import constants from '../../constants';
 import { filterExcluded, getEnabledClients } from '../../utils';
@@ -47,7 +48,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     // If we going to update database, we need to get current options first
     if (fn === 'update') {
       return (params, payload) =>
-        this.client.connections.get(params).then((connection) => {
+        this.client.connections.get(params).then(({ data: connection }) => {
           payload.options = { ...connection.options, ...payload.options };
           return this.client.connections.update(params, payload);
         });
@@ -58,11 +59,12 @@ export default class DatabaseHandler extends DefaultAPIHandler {
 
   async getType() {
     if (this.existing) return this.existing;
-    this.existing = this.client.connections.getAll({
-      strategy: 'auth0',
-      paginate: true,
+    // TODO: Bring back paginate: true
+     const { data: { connections } } = await this.client.connections.getAll({
+      strategy: [GetConnectionsStrategyEnum.auth0],
       include_totals: true,
     });
+    this.existing = connections;
 
     return this.existing;
   }
@@ -80,10 +82,11 @@ export default class DatabaseHandler extends DefaultAPIHandler {
       };
 
     // Convert enabled_clients by name to the id
-    const clients = await this.client.clients.getAll({ paginate: true, include_totals: true });
-    const existingDatabasesConnections = await this.client.connections.getAll({
-      strategy: 'auth0',
-      paginate: true,
+    // TODO: Bring back paginate: true
+    const { data: { clients } } = await this.client.clients.getAll({ include_totals: true });
+    // TODO: Bring back paginate: true
+    const { data: { connections: existingDatabasesConnections } } = await this.client.connections.getAll({
+      strategy: [GetConnectionsStrategyEnum.auth0],
       include_totals: true,
     });
     const formatted = databases.map((db) => {

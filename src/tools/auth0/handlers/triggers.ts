@@ -58,14 +58,15 @@ export default class TriggersHandler extends DefaultHandler {
 
     try {
       const res = await this.client.actions.getAllTriggers();
-      const triggers: string[] = _(res.triggers).map('id').uniq().value();
+      const triggers: string[] = _(res.data.triggers).map('id').uniq().value();
 
       for (let i = 0; i < triggers.length; i++) {
         const triggerId = triggers[i];
-        const { bindings } = await this.client.actions.getTriggerBindings({
-          trigger_id: triggerId,
+        const { data } = await this.client.actions.getTriggerBindings({
+          triggerId: triggerId,
         });
-        if (bindings.length > 0) {
+        const { bindings } = data;
+        if (bindings && bindings.length > 0) {
           triggerBindings[triggerId] = bindings.map((binding) => ({
             action_name: binding.action.name,
             display_name: binding.display_name,
@@ -109,7 +110,7 @@ export default class TriggersHandler extends DefaultHandler {
           display_name: binding.display_name,
         }));
 
-        await this.client.actions.updateTriggerBindings({ trigger_id: name }, { bindings });
+        await this.client.actions.updateTriggerBindings({ triggerId: name }, { bindings });
         this.didUpdate({ trigger_id: name });
         this.updated += 1;
       })

@@ -68,9 +68,9 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
       ]);
 
     this.existing = {
-      breachedPasswordDetection,
-      bruteForceProtection,
-      suspiciousIpThrottling,
+      breachedPasswordDetection: breachedPasswordDetection.data,
+      bruteForceProtection: bruteForceProtection.data,
+      suspiciousIpThrottling: suspiciousIpThrottling.data,
     };
 
     return this.existing;

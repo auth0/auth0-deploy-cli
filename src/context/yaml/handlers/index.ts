@@ -18,7 +18,6 @@ import guardianPhoneFactorSelectedProvider from './guardianPhoneFactorSelectedPr
 import guardianPolicies from './guardianPolicies';
 import roles from './roles';
 import organizations from './organizations';
-import migrations from './migrations';
 import actions from './actions';
 import triggers from './triggers';
 import attackProtection from './attackProtection';
@@ -53,7 +52,6 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   guardianFactorProviders,
   guardianFactorTemplates,
   roles,
-  migrations,
   guardianPhoneFactorMessageTypes,
   guardianPhoneFactorSelectedProvider,
   guardianPolicies,

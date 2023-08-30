@@ -17,7 +17,6 @@ import guardianPhoneFactorMessageTypes from './guardianPhoneFactorMessageTypes';
 import guardianPhoneFactorSelectedProvider from './guardianPhoneFactorSelectedProvider';
 import guardianPolicies from './guardianPolicies';
 import roles from './roles';
-import migrations from './migrations';
 import actions from './actions';
 import organizations from './organizations';
 import triggers from './triggers';
@@ -54,7 +53,6 @@ const directoryHandlers: {
   guardianFactors,
   guardianFactorProviders,
   guardianFactorTemplates,
-  migrations,
   guardianPhoneFactorMessageTypes,
   guardianPhoneFactorSelectedProvider,
   guardianPolicies,

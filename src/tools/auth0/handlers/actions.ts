@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { GetActions200ResponseActionsInner, PostActionRequest } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import log from '../../../logger';
 import { areArraysEquals, sleep } from '../../utils';
@@ -92,29 +93,34 @@ export function isMarketplaceAction(action: Action): boolean {
 }
 
 export default class ActionHandler extends DefaultAPIHandler {
-  existing: Action[] | null;
+  existing: GetActions200ResponseActionsInner[] | null;
 
   constructor(options: DefaultAPIHandler) {
     super({
       ...options,
       type: 'actions',
       functions: {
-        create: (action: Action) => this.createAction(action),
+        create: (action: PostActionRequest) => this.createAction(action),
         delete: (action: Action) => this.deleteAction(action),
       },
       stripUpdateFields: ['deployed', 'status'],
     });
   }
 
-  async createAction(action: Action) {
+  async createAction(action: PostActionRequest) {
     // Strip the deployed flag
     const addAction = { ...action };
-    delete addAction.deployed;
-    delete addAction.status;
-    const createdAction = await this.client.actions.create(addAction);
 
+    // TODO: Should we keep this?
+    delete (addAction as any).deployed;
+    delete (addAction as any).status;
+
+    const { data: createdAction } = await this.client.actions.create(addAction);
     // Add the action id so we can deploy it later
-    action.id = createdAction.id;
+
+    // TODO: Should we keep this?
+    (action as any).id = createdAction.id;
+
     return createdAction;
   }
 
@@ -202,7 +208,9 @@ export default class ActionHandler extends DefaultAPIHandler {
     // Actions API does not support include_totals param like the other paginate API's.
     // So we set it to false otherwise it will fail with "Additional properties not allowed: include_totals"
     try {
-      const actions = await this.client.actions.getAll({ paginate: true });
+      // TODO: bring back paginate: true
+      const { data } = await this.client.actions.getAll();
+      const { actions } = data;
       this.existing = actions;
       return actions;
     } catch (err) {

@@ -41,10 +41,10 @@ export default class RolesHandler extends DefaultHandler {
     const role = { ...data };
     delete role.permissions;
 
-    const created = await this.client.roles.create(role);
+    const { data: created } = await this.client.roles.create(role);
 
     if (typeof data.permissions !== 'undefined' && data.permissions.length > 0) {
-      await this.client.roles.permissions.create(
+      await this.client.roles.addPermissions(
         { id: created.id },
         { permissions: data.permissions }
       );
@@ -113,11 +113,11 @@ export default class RolesHandler extends DefaultHandler {
     await this.client.roles.update(params, data);
 
     if (typeof existingRole.permissions !== 'undefined' && existingRole.permissions.length > 0) {
-      await this.client.roles.permissions.delete(params, { permissions: existingRole.permissions });
+      await this.client.roles.deletePermissions(params, { permissions: existingRole.permissions });
     }
 
     if (typeof newPermissions !== 'undefined' && newPermissions.length > 0) {
-      await this.client.roles.permissions.create(params, { permissions: newPermissions });
+      await this.client.roles.addPermissions(params, { permissions: newPermissions });
     }
 
     return params;
@@ -151,10 +151,11 @@ export default class RolesHandler extends DefaultHandler {
     }
 
     try {
-      const roles = await this.client.roles.getAll({ paginate: true, include_totals: true });
+      // TODO: Bring back paginate: true
+      const { data: { roles } } = await this.client.roles.getAll({ include_totals: true });
       for (let index = 0; index < roles.length; index++) {
-        const permissions = await this.client.roles.permissions.getAll({
-          paginate: true,
+        // TODO: Bring back paginate: true
+        const { data: { permissions } } = await this.client.roles.getPermissions({
           include_totals: true,
           id: roles[index].id,
         });
@@ -165,7 +166,8 @@ export default class RolesHandler extends DefaultHandler {
             return permission;
           })
         );
-        roles[index].permissions = strippedPerms;
+        // TODO: Do we need this?
+        (roles[index] as any).permissions = strippedPerms;
       }
       this.existing = roles;
       return this.existing;

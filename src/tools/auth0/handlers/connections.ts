@@ -110,10 +110,11 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
 
   async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
-    const connections: Asset[] = await this.client.connections.getAll({
-      paginate: true,
+    // TODO: Bring back paginate: true
+    const { data } = await this.client.connections.getAll({
       include_totals: true,
     });
+    const { connections } = data;
     // Filter out database connections
     this.existing = connections.filter((c) => c.strategy !== 'auth0');
     if (this.existing === null) return [];
@@ -133,9 +134,10 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       };
 
     // Convert enabled_clients by name to the id
-    const clients = await this.client.clients.getAll({ paginate: true, include_totals: true });
-    const existingConnections = await this.client.connections.getAll({
-      paginate: true,
+    // TODO: Bring back paginate: true
+    const { data: { clients } } = await this.client.clients.getAll({ include_totals: true });
+    // TODO: Bring back paginate: true
+    const { data: { connections: existingConnections } } = await this.client.connections.getAll({
       include_totals: true,
     });
     const formatted = connections.map((connection) => ({

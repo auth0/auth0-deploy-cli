@@ -54,7 +54,7 @@ export default class ThemesHandler extends DefaultHandler {
     }
 
     const currentTheme = currentThemes[0];
-    await this.client.branding.deleteTheme({ id: currentTheme.themeId });
+    await this.client.branding.deleteTheme({ themeId: currentTheme.themeId });
 
     this.deleted += 1;
     this.didDelete(currentTheme);
@@ -81,7 +81,7 @@ export default class ThemesHandler extends DefaultHandler {
     } else {
       const currentTheme = currentThemes[0];
       // if theme exists, overwrite it otherwise create it
-      await this.client.branding.updateTheme({ id: currentTheme.themeId }, themeReqPayload);
+      await this.client.branding.updateTheme({ themeId: currentTheme.themeId }, themeReqPayload);
     }
 
     this.updated += 1;
@@ -90,7 +90,7 @@ export default class ThemesHandler extends DefaultHandler {
 
   async getThemes(): Promise<Theme[] | null> {
     try {
-      const theme = await this.client.branding.getDefaultTheme();
+      const { data: theme } = await this.client.branding.getDefaultTheme();
       return [theme];
     } catch (err) {
       if (err.statusCode === 404) return [];

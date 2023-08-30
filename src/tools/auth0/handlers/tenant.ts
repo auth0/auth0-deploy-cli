@@ -1,16 +1,16 @@
+import { TenantSettings, TenantSettingsFlags, TenantSettingsUpdate, TenantSettingsUpdateFlags } from 'auth0';
 import ValidationError from '../../validationError';
-
 import DefaultHandler, { order } from './default';
 import { supportedPages, pageNameMap } from './pages';
 import { convertJsonToString } from '../../utils';
-import { Asset, Assets, Language } from '../../../types';
+import { Asset, Assets } from '../../../types';
 import log from '../../../logger';
 
 export const schema = {
   type: 'object',
 };
 
-export type Tenant = Asset & { enabled_locales?: Language[]; flags: { [key: string]: boolean } };
+export type Tenant = TenantSettings;
 
 const blockPageKeys = [
   ...Object.keys(pageNameMap),
@@ -29,7 +29,7 @@ export default class TenantHandler extends DefaultHandler {
   }
 
   async getType(): Promise<Asset> {
-    const tenant = await this.client.tenant.getSettings();
+    const { data: tenant } = await this.client.tenants.getSettings();
 
     tenant.flags = removeUnallowedTenantFlags(tenant.flags);
 
@@ -66,19 +66,20 @@ export default class TenantHandler extends DefaultHandler {
     // Do nothing if not set
     if (!tenant) return;
 
-    const updatedTenant: Partial<Tenant> = {
-      ...tenant,
+    const updatedTenant: TenantSettingsUpdate = {
+      // TODO: What's wrong with the enums?
+      ...(tenant as any),
     };
 
     if ('flags' in updatedTenant) {
-      updatedTenant.flags = removeUnallowedTenantFlags(tenant.flags);
+      updatedTenant.flags = removeUnallowedTenantFlags(tenant.flags) as TenantSettingsUpdateFlags;
       if (Object.keys(updatedTenant.flags).length === 0) {
         delete updatedTenant.flags;
       }
     }
 
     if (updatedTenant && Object.keys(updatedTenant).length > 0) {
-      await this.client.tenant.updateSettings(updatedTenant);
+      await this.client.tenants.updateSettings(updatedTenant);
       this.updated += 1;
       this.didUpdate(updatedTenant);
     }
@@ -87,7 +88,7 @@ export default class TenantHandler extends DefaultHandler {
 
 /*
  Tenant flags are used to facilitate a number of functionalities, some
- public, some internal. The subset of flags that are allowed to be updated 
+ public, some internal. The subset of flags that are allowed to be updated
  in the context of the Deploy CLI is based on wether they're publicly exposed
  in the Auth0 API docs:
 
@@ -122,13 +123,13 @@ export const allowedTenantFlags = [
 ];
 
 export const removeUnallowedTenantFlags = (
-  proposedFlags: Tenant['flags'] | undefined
-): Tenant['flags'] => {
-  if (proposedFlags === undefined) return {};
+  proposedFlags: TenantSettingsFlags
+): TenantSettingsFlags => {
+  if (proposedFlags === undefined) return {} as unknown as TenantSettingsFlags;
 
   const removedFlags: string[] = [];
   const filteredFlags = Object.keys(proposedFlags).reduce(
-    (acc: Tenant['flags'], proposedKey: string): Tenant['flags'] => {
+    (acc: TenantSettingsFlags, proposedKey: string): TenantSettingsFlags => {
       const isAllowedFlag = allowedTenantFlags.includes(proposedKey);
       if (!isAllowedFlag) {
         removedFlags.push(proposedKey);
@@ -139,7 +140,7 @@ export const removeUnallowedTenantFlags = (
         [proposedKey]: proposedFlags[proposedKey],
       };
     },
-    {}
+    {} as unknown as TenantSettingsFlags
   );
 
   if (removedFlags.length > 0) {

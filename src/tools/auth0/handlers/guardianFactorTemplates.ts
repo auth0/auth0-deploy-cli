@@ -1,6 +1,7 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
-import { Assets, Asset, CalculatedChanges } from '../../../types';
+import { Assets, Asset } from '../../../types';
+import { TemplateMessages } from 'auth0';
 
 export const schema = {
   type: 'array',
@@ -29,8 +30,15 @@ export default class GuardianFactorTemplatesHandler extends DefaultHandler {
 
     const data = await Promise.all(
       constants.GUARDIAN_FACTOR_TEMPLATES.map(async (name) => {
-        const templates = await this.client.guardian.getFactorTemplates({ name });
-        return { name, ...templates };
+        // TODO: This is quite a change, needs to be validated for sure.
+        if (name === 'sms') {
+          const { data: templates } = await this.client.guardian.getSmsFactorTemplates();
+          return { name, ...templates };
+          // TODO: GUARDIAN_FACTOR_TEMPLATES only contains 'sms'. Is that expected? We also have 'phone'.
+        } else {
+          const { data: templates } = await this.client.guardian.getPhoneFactorTemplates();
+          return { name, ...templates };
+        }
       })
     );
 
@@ -48,10 +56,14 @@ export default class GuardianFactorTemplatesHandler extends DefaultHandler {
     // Process each factor templates
     await Promise.all(
       guardianFactorTemplates.map(async (fatorTemplates) => {
-        const data = { ...fatorTemplates };
+        const { name, ...data } = fatorTemplates;
         const params = { name: fatorTemplates.name };
-        delete data.name;
-        await this.client.guardian.updateFactorTemplates(params, data);
+        // TODO: This is quite a change, needs to be validated for sure.
+        if (name === 'sms') {
+          await this.client.guardian.setSmsFactorTemplates(data as TemplateMessages);
+        } else if (name ==='phone') {
+          await this.client.guardian.setPhoneFactorTemplates(data as TemplateMessages);
+        }
         this.didUpdate(params);
         this.updated += 1;
       })

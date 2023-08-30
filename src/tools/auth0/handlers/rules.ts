@@ -63,7 +63,9 @@ export default class RulesHandler extends DefaultHandler {
   async getType(): Promise<Asset[] | null> {
     try {
       if (this.existing) return this.existing;
-      this.existing = await this.client.rules.getAll({ paginate: true, include_totals: true });
+      // TODO: Bring back paginate: true
+      const { data } = await this.client.rules.getAll({ include_totals: true });
+      this.existing = data.rules;
       return this.existing;
     } catch (err) {
       if (isDeprecatedError(err)) {
