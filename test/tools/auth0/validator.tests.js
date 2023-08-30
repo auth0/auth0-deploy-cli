@@ -2,28 +2,29 @@ import { expect } from 'chai';
 import Auth0 from '../../../src/tools/auth0';
 import constants from '../../../src/tools/constants';
 import { mockTheme } from './handlers/themes.tests';
+import { mockPagedData } from '../../utils';
 
 const mockConfigFn = () => {};
 
 describe('#schema validation tests', () => {
   const client = {
     rules: {
-      getAll: async () => ({ rules: [] }),
+      getAll: async (params) => mockPagedData(params, 'rules', []),
     },
     clients: {
-      getAll: async () => ({ clients: [] }),
+      getAll: async (params) => mockPagedData(params, 'clients', []),
     },
     connections: {
-      getAll: async () => ({ connections: [] }),
+      getAll: async (params) => mockPagedData(params, 'connections', []),
     },
     resourceServers: {
-      getAll: async () => ({ resource_servers: [] }),
+      getAll: async (params) => mockPagedData(params, 'resource_servers', []),
     },
     clientGrants: {
-      getAll: async () => ({ client_grants: [] }),
+      getAll: async (params) => mockPagedData(params, 'client_grants', []),
     },
     roles: {
-      getAll: async () => ({ client_grants: [] }),
+      getAll: async (params) => mockPagedData(params, 'roles', []),
     },
   };
 
@@ -762,34 +763,6 @@ describe('#schema validation tests', () => {
       };
 
       checkPassed({ tenant: data }, done);
-    });
-  });
-
-  describe('#migrations validate', () => {
-    it('should fail validation if migrations is not an object', (done) => {
-      const data = '';
-
-      const auth0 = new Auth0({}, { migrations: data }, mockConfigFn);
-
-      auth0.validate().then(failedCb(done), passedCb(done, 'should be object'));
-    });
-
-    it('should fail validation if migrations properties are not boolean', (done) => {
-      const data = {
-        migration_flag: 'string',
-      };
-
-      const auth0 = new Auth0({}, { migrations: data }, mockConfigFn);
-
-      auth0.validate().then(failedCb(done), passedCb(done, 'should be boolean'));
-    });
-
-    it('should pass validation', (done) => {
-      const data = {
-        migration_flag: true,
-      };
-
-      checkPassed({ migrations: data }, done);
     });
   });
 

@@ -4,6 +4,7 @@ import chaiAsPromised from 'chai-as-promised';
 
 const constants = require('../../../../src/tools/constants').default;
 const hooks = require('../../../../src/tools/auth0/handlers/hooks');
+const { mockPagedData } = require('../../../utils');
 
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
@@ -30,7 +31,7 @@ describe('#hooks handler', () => {
     it('should not allow same names', (done) => {
       const auth0 = {
         hooks: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'hooks', []),
         },
       };
 
@@ -62,7 +63,7 @@ describe('#hooks handler', () => {
     it('should not allow more than one active hook for each triggerId', (done) => {
       const auth0 = {
         hooks: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'hooks', []),
         },
       };
 
@@ -98,7 +99,7 @@ describe('#hooks handler', () => {
     it('should pass validation', async () => {
       const auth0 = {
         hooks: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'hooks', []),
         },
       };
 
@@ -169,7 +170,7 @@ describe('#hooks handler', () => {
         hooks: {
           get: (params) => {
             expect(params.id).to.equal(hookId);
-            return Promise.resolve({ ...hook, id: hookId, secrets: undefined });
+            return Promise.resolve({ data: { ...hook, id: hookId, secrets: undefined } });
           },
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
@@ -177,23 +178,23 @@ describe('#hooks handler', () => {
             expect(data.name).to.equal('Hook');
             expect(data.code).to.equal('code');
             expect(data.triggerId).to.equal('credentials-exchange');
-            return Promise.resolve({ ...data, id: hookId });
+            return Promise.resolve({ data: { ...data, id: hookId } });
           },
-          update: () => Promise.resolve([]),
-          delete: () => Promise.resolve([]),
-          getAll: () => {
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => {
             if (!auth0.getAllCalled) {
               auth0.getAllCalled = true;
-              return Promise.resolve([]);
+              return Promise.resolve(mockPagedData(params, 'hooks', []));
             }
 
-            return Promise.resolve([{ name: hook.name, triggerId: hook.triggerId, id: hookId }]);
+            return Promise.resolve(mockPagedData(params, 'hooks', [{ name: hook.name, triggerId: hook.triggerId, id: hookId }]));
           },
-          getSecrets: () => Promise.resolve({}),
+          getSecrets: () => Promise.resolve({ data: {} }),
           addSecrets: (params, data) => {
             expect(params.id).to.equal(hookId);
             expect(data.SECRET).to.equal('secret-secret');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
         },
         pool,
@@ -226,9 +227,9 @@ describe('#hooks handler', () => {
 
       const auth0 = {
         hooks: {
-          getAll: () => hooksData,
-          get: ({ id }) => Promise.resolve({ ...hooksData[id], code }),
-          getSecrets: ({ id }) => Promise.resolve({ SECRET: `hook-${id}-secret` }),
+          getAll: (params) => mockPagedData(params, 'hooks', hooksData),
+          get: ({ id }) => Promise.resolve({ data: { ...hooksData[id], code }}),
+          getSecrets: ({ id }) => Promise.resolve({ data: { SECRET: `hook-${id}-secret` } }),
         },
       };
 
@@ -313,7 +314,7 @@ describe('#hooks handler', () => {
     it('should update hook', async () => {
       const auth0 = {
         hooks: {
-          create: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
@@ -323,16 +324,17 @@ describe('#hooks handler', () => {
             expect(data.code).to.equal('code');
             expect(data.name).to.equal('someHook');
             expect(data.triggerId).to.be.an('undefined');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => [
-            {
-              id: '1',
-              name: 'someHook',
-              triggerId: 'credentials-exchange',
-            },
-          ],
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) =>
+            mockPagedData(params, 'hooks', [
+              {
+                id: '1',
+                name: 'someHook',
+                triggerId: 'credentials-exchange',
+              },
+            ]),
           get: () =>
             Promise.resolve({
               id: '1',
@@ -340,7 +342,7 @@ describe('#hooks handler', () => {
               code: 'code',
               triggerId: 'credentials-exchange',
             }),
-          getSecrets: () => Promise.resolve({}),
+          getSecrets: () => Promise.resolve({ data: {} }),
         },
         pool,
       };
@@ -356,28 +358,28 @@ describe('#hooks handler', () => {
     it('should remove hook', async () => {
       const auth0 = {
         hooks: {
-          create: () => Promise.resolve([]),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
+          update: () => Promise.resolve({ data: [] }),
           delete: (data) => {
             expect(data).to.be.an('object');
             expect(data.id).to.equal('1');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          getAll: () => [
+          getAll: (params) => mockPagedData(params, 'hooks', [
             {
               id: '1',
               name: 'someHook',
               triggerId: 'credentials-exchange',
             },
-          ],
+          ]),
           get: () =>
-            Promise.resolve({
+            Promise.resolve({ data: {
               id: '1',
               name: 'someHook',
               code: 'code',
               triggerId: 'credentials-exchange',
-            }),
-          getSecrets: () => Promise.resolve({}),
+            } }),
+          getSecrets: () => Promise.resolve({ data: {} }),
         },
         pool,
       };
@@ -395,18 +397,18 @@ describe('#hooks handler', () => {
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           delete: (data) => {
             expect(data).to.be.an('undefined');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          getAll: () => [
+          getAll: (params) => mockPagedData(params, 'hooks', [
             {
               id: '1',
               code: 'hook-one-code',
@@ -419,7 +421,7 @@ describe('#hooks handler', () => {
               name: 'Hook2',
               triggerId: 'credentials-exchange',
             },
-          ],
+          ]),
         },
         pool,
       };
@@ -462,7 +464,7 @@ describe('#hooks handler', () => {
       const removeSecrets = ['TO_REMOVE_ONE', 'TO_REMOVE_TWO'];
       const auth0 = {
         hooks: {
-          create: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
@@ -472,35 +474,35 @@ describe('#hooks handler', () => {
             expect(data.code).to.equal('new-code');
             expect(data.name).to.equal('someHook');
             expect(data.triggerId).to.be.an('undefined');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => [hook],
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'hooks', [hook]),
           get: (params) => {
             expect(params.id).to.equal(hook.id);
-            return Promise.resolve({ ...hook, code: 'hook-code' });
+            return Promise.resolve({ data: { ...hook, code: 'hook-code' } });
           },
           getSecrets: (params) => {
             expect(params.id).to.equal(hook.id);
-            return Promise.resolve(existingSecrets);
+            return Promise.resolve({ data: existingSecrets });
           },
           addSecrets: (params, data) => {
             expect(params.id).to.equal(hook.id);
             expect(data).to.be.an('object');
             expect(data).to.deep.equal(createSecrets);
-            return Promise.resolve();
+            return Promise.resolve({ data: undefined });
           },
           updateSecrets: (params, data) => {
             expect(params.id).to.equal(hook.id);
             expect(data).to.be.an('object');
             expect(data).to.deep.equal(updateSecrets);
-            return Promise.resolve();
+            return Promise.resolve({ data: undefined });
           },
-          removeSecrets: (params, data) => {
+          deleteSecrets: (params, data) => {
             expect(params.id).to.equal(hook.id);
             expect(data).to.be.an('array');
             expect(data).to.deep.equal(removeSecrets);
-            return Promise.resolve();
+            return Promise.resolve({ data: undefined });
           },
         },
         pool,
@@ -549,17 +551,17 @@ describe('#hooks handler', () => {
             expect(data.code).to.equal('new-code');
             expect(data.name).to.equal('someHook');
             expect(data.triggerId).to.be.an('undefined');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => [hook],
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'hooks', [hook]),
           get: (params) => {
             expect(params.id).to.equal(hook.id);
-            return Promise.resolve({ ...hook, code: 'hook-code' });
+            return Promise.resolve({ data: { ...hook, code: 'hook-code' } });
           },
           getSecrets: (params) => {
             expect(params.id).to.equal(hook.id);
-            return Promise.resolve(existingSecrets);
+            return Promise.resolve({ data: existingSecrets });
           },
           updateSecrets: (params) => {
             expect(params).to.equal(undefined);

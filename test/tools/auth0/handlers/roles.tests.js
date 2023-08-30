@@ -1,5 +1,6 @@
 const { expect } = require('chai');
 const roles = require('../../../../src/tools/auth0/handlers/roles');
+const { mockPagedData } = require('../../../utils');
 
 const pool = {
   addEachTask: (data) => {
@@ -63,11 +64,11 @@ describe('#roles handler', () => {
             expect(data).to.be.an('object');
             expect(data.name).to.equal('myRole');
             expect(data.description).to.equal('myDescription');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          update: () => Promise.resolve([]),
-          delete: () => Promise.resolve([]),
-          getAll: () => Promise.resolve([]),
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'roles', []),
           permissions: {
             getAll: () =>
               Promise.resolve([
@@ -79,9 +80,9 @@ describe('#roles handler', () => {
               expect(data).to.be.an('object');
               expect(data.permissions).to.not.equal(null);
               expect(data.permissions).to.be.an('Array');
-              return Promise.resolve(data.permissions);
+              return Promise.resolve({ data: data.permissions });
             },
-            update: Promise.resolve([]),
+            update: Promise.resolve({ data: [] }),
           },
         },
         pool,
@@ -110,17 +111,15 @@ describe('#roles handler', () => {
 
       const auth0 = {
         roles: {
-          getAll: () =>
-            Promise.resolve([
+          getAll: (params) =>
+            mockPagedData(params, 'roles', [
               {
                 name: 'myRole',
                 id: 'myRoleId',
                 description: 'myDescription',
               },
             ]),
-          permissions: {
-            getAll: () => Promise.resolve(permissions),
-          },
+          getPermissions: (params) => mockPagedData(params, 'permissions', permissions),
         },
         pool,
       };
@@ -201,7 +200,7 @@ describe('#roles handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.length).to.equal(0);
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
@@ -211,38 +210,24 @@ describe('#roles handler', () => {
             expect(data.name).to.equal('myRole');
             expect(data.description).to.equal('myDescription');
 
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () =>
-            Promise.resolve([
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) =>
+            mockPagedData(params, 'roles', [
               {
                 name: 'myRole',
                 id: 'myRoleId',
                 description: 'myDescription',
               },
             ]),
-          permissions: {
-            getAll: () =>
-              Promise.resolve([
-                { permission_name: 'Create:cal_entry', resource_server_identifier: 'organise' },
-              ]),
-            create: (params, data) => {
-              expect(params).to.be.an('object');
-              expect(params.id).to.equal('myRoleId');
-              expect(data).to.be.an('object');
-              expect(data.permissions).to.not.equal(null);
-              expect(data.permissions).to.be.an('Array');
-              return Promise.resolve(data);
-            },
-            delete: function (params, data) {
-              (() => expect(this).to.not.be.undefined)();
-              expect(params).to.be.an('object');
-              expect(params.id).to.equal('myRoleId');
-              expect(data.permissions).to.be.an('Array');
-              return Promise.resolve(data.permissions);
-            },
-          },
+          getPermissions: (params) =>
+            mockPagedData(params, 'permissions', [
+              {
+                permission_name: 'Create:cal_entry',
+                resource_server_identifier: 'organise',
+              },
+            ]),
         },
         pool,
       };
@@ -272,24 +257,22 @@ describe('#roles handler', () => {
     it('should delete role', async () => {
       const auth0 = {
         roles: {
-          create: () => Promise.resolve([]),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
+          update: () => Promise.resolve({ data: [] }),
           delete: (data) => {
             expect(data).to.be.an('object');
             expect(data.id).to.equal('myRoleId');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          getAll: () =>
-            Promise.resolve([
+          getAll: (params) =>
+            mockPagedData(params, 'roles', [
               {
                 name: 'myRole',
                 id: 'myRoleId',
                 description: 'myDescription',
               },
             ]),
-          permissions: {
-            getAll: () => Promise.resolve([]),
-          },
+          getPermissions: (params) => mockPagedData(params, 'permissions', []),
         },
         pool,
       };

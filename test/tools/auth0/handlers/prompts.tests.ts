@@ -49,14 +49,14 @@ describe('#prompts handler', () => {
       }; // Has no prompts configured.
 
       const auth0 = {
-        tenant: {
+        tenants: {
           getSettings: () =>
-            Promise.resolve({
+            Promise.resolve({ data: {
               enabled_locales: supportedLanguages,
-            }),
+            }}),
         },
         prompts: {
-          getSettings: () => mockPromptsSettings,
+          get: () => ({ data: mockPromptsSettings }),
           getCustomTextByLanguage: ({ language, prompt }) => {
             const customTextLanguageMap = {
               en: englishCustomText,
@@ -66,9 +66,9 @@ describe('#prompts handler', () => {
             const customTextValue = customTextLanguageMap[language][prompt];
 
             if (customTextValue === undefined || _.isEmpty(customTextValue))
-              return Promise.resolve({});
+              return Promise.resolve({ data: {}});
 
-            return Promise.resolve(customTextValue);
+            return Promise.resolve({ data: customTextValue });
           },
         },
         pool: new PromisePoolExecutor({
@@ -100,7 +100,7 @@ describe('#prompts handler', () => {
       let didCallUpdateCustomText = false;
 
       const auth0 = {
-        tenant: {
+        tenants: {
           getSettings: () => ({
             enabled_locales: ['en'],
           }),
@@ -109,10 +109,10 @@ describe('#prompts handler', () => {
           updateCustomTextByLanguage: () => {
             didCallUpdateCustomText = true;
           },
-          updateSettings: (_params, data) => {
+          update: (data) => {
             didCallUpdatePromptsSettings = true;
             expect(data).to.deep.equal(mockPromptsSettings);
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
         },
       };
@@ -154,12 +154,12 @@ describe('#prompts handler', () => {
           updateCustomTextByLanguage: () => {
             didCallUpdateCustomText = true;
             numberOfUpdateCustomTextCalls++;
-            return Promise.resolve({});
+            return Promise.resolve({data: {}});
           },
-          updateSettings: (_params, data) => {
+          update: (data) => {
             didCallUpdatePromptsSettings = true;
             expect(data).to.deep.equal(mockPromptsSettings);
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
         },
         pool: new PromisePoolExecutor({
@@ -183,14 +183,16 @@ describe('#prompts handler', () => {
 
     it('should not fail if tenant languages undefined', async () => {
       const auth0 = {
-        tenant: {
+        tenants: {
           getSettings: () =>
             Promise.resolve({
-              enabled_locales: undefined,
+              data: {
+                enabled_locales: undefined,
+              }
             }),
         },
         prompts: {
-          getSettings: () => mockPromptsSettings,
+          get: () => ({ data: mockPromptsSettings }),
         },
         pool: new PromisePoolExecutor({
           concurrencyLimit: 3,

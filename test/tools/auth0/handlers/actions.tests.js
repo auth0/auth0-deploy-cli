@@ -2,6 +2,7 @@ import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 
 const actions = require('../../../../src/tools/auth0/handlers/actions');
+const { mockPagedData } = require('../../../utils');
 
 chai.use(chaiAsPromised);
 
@@ -27,7 +28,7 @@ describe('#actions handler', () => {
     it('should not allow same names', (done) => {
       const auth0 = {
         actions: {
-          getAll: () => [],
+          getAll: () => ({ data: [] }),
         },
       };
 
@@ -67,7 +68,7 @@ describe('#actions handler', () => {
     it('should pass validation', async () => {
       const auth0 = {
         actions: {
-          getAll: () => [],
+          getAll: () => ({ data: [] }),
         },
       };
 
@@ -129,7 +130,7 @@ describe('#actions handler', () => {
         actions: {
           get: (params) => {
             expect(params.id).to.equal(actionId);
-            return Promise.resolve({ ...action, id: actionId });
+            return Promise.resolve({ data: { ...action, id: actionId } });
           },
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
@@ -137,27 +138,29 @@ describe('#actions handler', () => {
             expect(data.name).to.equal('action-test');
             expect(data.supported_triggers[0].id).to.equal('post-login');
             expect(data.supported_triggers[0].version).to.equal('v1');
-            return Promise.resolve({ ...data, id: actionId });
+            return Promise.resolve({ data: { ...data, id: actionId }});
           },
-          update: () => Promise.resolve([]),
-          delete: () => Promise.resolve([]),
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
           getAll: () => {
             if (!auth0.getAllCalled) {
               auth0.getAllCalled = true;
-              return Promise.resolve([]);
+              return Promise.resolve({ data: [] });
             }
 
             return Promise.resolve({
-              actions: [
-                {
-                  name: action.name,
-                  supported_triggers: action.supported_triggers,
-                  id: actionId,
-                },
-              ],
+              data: {
+                actions: [
+                  {
+                    name: action.name,
+                    supported_triggers: action.supported_triggers,
+                    id: actionId,
+                  },
+                ],
+              }
             });
           },
-          createVersion: () => Promise.resolve(version),
+          createVersion: () => Promise.resolve({ data: version }),
         },
         pool,
         getAllCalled: false,
@@ -196,26 +199,26 @@ describe('#actions handler', () => {
         actions: {
           get: (params) => {
             expect(params.id).to.equal(actionId);
-            return Promise.resolve({ ...action, id: actionId });
+            return Promise.resolve({ data: { ...action, id: actionId } });
           },
-          create: (data) => Promise.resolve({ ...data, id: actionId }),
-          update: () => Promise.resolve([]),
-          delete: () => Promise.resolve([]),
+          create: (data) => Promise.resolve({ data: { ...data, id: actionId } }),
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
           getAll: () => {
             if (!auth0.getAllCalled) {
               auth0.getAllCalled = true;
-              return Promise.resolve([]);
+              return Promise.resolve(mockPagedData({ include_totals: true }, 'actions',  [] ));
             }
 
-            return Promise.resolve([
+            return Promise.resolve(mockPagedData({ include_totals: true }, 'actions',  [
               {
                 name: action.name,
                 supported_triggers: action.supported_triggers,
                 id: actionId,
               },
-            ]);
+            ] ));
           },
-          createVersion: () => Promise.resolve(version),
+          createVersion: () => Promise.resolve({ data: version }),
           deploy: (data) => {
             expect(data).to.deep.equal({ id: actionId });
             didDeployGetCalled = true;
@@ -256,7 +259,7 @@ describe('#actions handler', () => {
 
       const auth0 = {
         actions: {
-          getAll: () => actionsData,
+          getAll: () => mockPagedData({ include_totals: true}, 'actions', actionsData),
         },
       };
 
@@ -365,15 +368,15 @@ describe('#actions handler', () => {
     it('should remove action', async () => {
       const auth0 = {
         actions: {
-          create: () => Promise.resolve([]),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
+          update: () => Promise.resolve({ data: [] }),
           delete: (data) => {
             expect(data).to.be.an('object');
             expect(data.id).to.equal('action-1');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           getAll: () =>
-            Promise.resolve([
+            Promise.resolve({ data: [
               {
                 id: 'action-1',
                 name: 'action-test',
@@ -384,20 +387,22 @@ describe('#actions handler', () => {
                   },
                 ],
               },
-            ]),
+            ] }),
           getVersion: () =>
             Promise.resolve({
-              action: {},
-              code: "/** @type {PostLoginAction} */\nmodule.exports = async (event, context) => {\n    console.log('new version');\n    return {};\n  };\n  ",
-              dependencies: [],
-              runtime: 'node12',
-              id: '0906fe5b-f4d6-44ec-a8f1-3c05fc186483',
-              deployed: true,
-              number: 1,
-              built_at: '2020-12-03T15:20:54.413725492Z',
-              status: 'built',
-              created_at: '2020-12-03T15:20:52.094497448Z',
-              updated_at: '2020-12-03T15:20:54.415669983Z',
+              data: {
+                action: {},
+                code: "/** @type {PostLoginAction} */\nmodule.exports = async (event, context) => {\n    console.log('new version');\n    return {};\n  };\n  ",
+                dependencies: [],
+                runtime: 'node12',
+                id: '0906fe5b-f4d6-44ec-a8f1-3c05fc186483',
+                deployed: true,
+                number: 1,
+                built_at: '2020-12-03T15:20:54.413725492Z',
+                status: 'built',
+                created_at: '2020-12-03T15:20:52.094497448Z',
+                updated_at: '2020-12-03T15:20:54.415669983Z',
+              }
             }),
         },
         pool,
@@ -444,7 +449,7 @@ describe('#actions handler', () => {
 
       const auth0 = {
         actions: {
-          getAll: () => Promise.resolve([marketplaceAction]),
+          getAll: () => Promise.resolve({ data: [marketplaceAction] }),
           delete: () => {
             wasDeleteCalled = true;
           },

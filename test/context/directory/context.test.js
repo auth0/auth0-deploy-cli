@@ -156,12 +156,14 @@ describe('#directory context validation', () => {
         },
       },
       {
-        tenant: {
+        tenants: {
           getSettings: async () =>
             new Promise((res) =>
               res({
-                friendly_name: 'Production Tenant',
-                enabled_locales: ['en', 'es'],
+                data: {
+                  friendly_name: 'Production Tenant',
+                  enabled_locales: ['en', 'es'],
+                }
               })
             ),
         },

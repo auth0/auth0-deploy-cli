@@ -79,7 +79,7 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
     it('should get guardian phone factor selected provider', async () => {
       const auth0 = {
         guardian: {
-          getPhoneFactorSelectedProvider: () => ({ provider: 'twilio' }),
+          getPhoneFactorSelectedProvider: () => ({ data: { provider: 'twilio' } }),
         },
       };
 
@@ -112,9 +112,9 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
     it('should update guardian phone factor selected provider', async () => {
       const auth0 = {
         guardian: {
-          updatePhoneFactorSelectedProvider: (params, data) => {
+          updatePhoneFactorSelectedProvider: (data) => {
             expect(data).to.eql({ provider: 'twilio' });
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
         },
       };

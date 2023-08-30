@@ -4,7 +4,7 @@ import jsYaml from 'js-yaml';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/yaml';
-import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
+import { cleanThenMkdir, testDataDir, mockMgmtClient, mockPagedData } from '../../utils';
 
 describe('#YAML context validation', () => {
   it('should do nothing on empty yaml', async () => {
@@ -247,7 +247,6 @@ describe('#YAML context validation', () => {
       guardianFactors: [],
       guardianFactorProviders: [],
       guardianFactorTemplates: [],
-      migrations: {},
       guardianPhoneFactorMessageTypes: { message_types: ['sms'] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
@@ -359,7 +358,6 @@ describe('#YAML context validation', () => {
       guardianFactors: [],
       guardianFactorProviders: [],
       guardianFactorTemplates: [],
-      migrations: {},
       guardianPhoneFactorMessageTypes: { message_types: ['sms'] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
@@ -472,7 +470,6 @@ describe('#YAML context validation', () => {
       guardianFactors: [],
       guardianFactorProviders: [],
       guardianFactorTemplates: [],
-      migrations: {},
       guardianPhoneFactorMessageTypes: { message_types: ['sms'] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
@@ -565,18 +562,20 @@ describe('#YAML context validation', () => {
         },
       },
       {
-        tenant: {
+        tenants: {
           getSettings: async () =>
             new Promise((res) =>
               res({
-                friendly_name: 'Production Tenant',
-                enabled_locales: ['en', 'es'],
+                data: {
+                  friendly_name: 'Production Tenant',
+                  enabled_locales: ['en', 'es'],
+                },
               })
             ),
         },
         connections: {
-          getAll: () => ({
-            connections: [
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
               {
                 name: 'connection-1',
                 strategy: 'waad',
@@ -584,8 +583,7 @@ describe('#YAML context validation', () => {
                   tenant_domain: 'travel0.com',
                 },
               },
-            ],
-          }),
+            ]),
         },
       }
     );

@@ -1,6 +1,12 @@
-const { expect, assert } = require('chai');
+//import chai from "chai";
+
+const { expect, assert, use } = require('chai');
 const { omit, cloneDeep } = require('lodash');
 const { default: ThemesHandler } = require('../../../../src/tools/auth0/handlers/themes');
+
+const chaiAsPromised = require('chai-as-promised');
+
+use(chaiAsPromised);
 
 function stub() {
   const s = function (...args) {
@@ -126,7 +132,7 @@ describe('#themes handler', () => {
 
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(Promise.resolve(theme)),
+          getDefaultTheme: stub().returns(Promise.resolve({ data: theme })),
         },
       };
 
@@ -227,7 +233,7 @@ describe('#themes handler', () => {
 
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(theme),
+          getDefaultTheme: stub().returns({ data: theme }),
           createTheme: stub().returns(
             Promise.reject(new Error('updateTheme should not have been called'))
           ),
@@ -248,7 +254,7 @@ describe('#themes handler', () => {
       expect(auth0.branding.updateTheme.called).to.equal(true);
       expect(auth0.branding.updateTheme.callCount).to.equal(1);
       expect(
-        auth0.branding.updateTheme.calledWith({ id: 'myThemeId' }, omit(theme, 'themeId'))
+        auth0.branding.updateTheme.calledWith({ themeId: 'myThemeId' }, omit(theme, 'themeId'))
       ).to.deep.equal(true);
       expect(auth0.branding.createTheme.called).to.equal(false);
       expect(auth0.branding.deleteTheme.called).to.equal(false);
@@ -263,14 +269,14 @@ describe('#themes handler', () => {
 
     const auth0 = {
       branding: {
-        getDefaultTheme: stub().returns(Promise.resolve(theme)),
+        getDefaultTheme: stub().returns(Promise.resolve({ data: theme })),
         createTheme: stub().returns(
           Promise.reject(new Error('createTheme should not have been called'))
         ),
         updateTheme: stub().returns(
           Promise.reject(new Error('updateTheme should not have been called'))
         ),
-        deleteTheme: stub().returns(Promise.resolve()),
+        deleteTheme: stub().returns(Promise.resolve({ data: undefined })),
       },
     };
 
@@ -282,7 +288,7 @@ describe('#themes handler', () => {
     expect(auth0.branding.getDefaultTheme.called).to.equal(true);
     expect(auth0.branding.getDefaultTheme.callCount).to.equal(1);
     expect(auth0.branding.deleteTheme.callCount).to.equal(1);
-    expect(auth0.branding.deleteTheme.calledWith({ id: 'delete-me' })).to.equal(true);
+    expect(auth0.branding.deleteTheme.calledWith({ themeId: 'delete-me' })).to.equal(true);
     expect(auth0.branding.updateTheme.called).to.equal(false);
     expect(auth0.branding.createTheme.called).to.equal(false);
   });

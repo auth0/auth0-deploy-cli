@@ -1,5 +1,6 @@
 const { expect } = require('chai');
 const organizations = require('../../../../src/tools/auth0/handlers/organizations');
+const { mockPagedData } = require('../../../utils');
 
 const pool = {
   addEachTask: (data) => {
@@ -123,21 +124,21 @@ describe('#organizations handler', () => {
             expect(data.display_name).to.equal('Acme');
             expect(data.connections).to.equal(undefined);
             data.id = 'fake';
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          update: () => Promise.resolve([]),
-          delete: () => Promise.resolve([]),
-          getAll: () => Promise.resolve([]),
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [])),
           addEnabledConnection: (org, connection) => {
             expect(org.id).to.equal('fake');
             expect(connection).to.be.an('object');
             expect(connection.connection_id).to.equal('con_123');
             expect(connection.assign_membership_on_login).to.equal(true);
-            return Promise.resolve(connection);
+            return Promise.resolve({ data: connection });
           },
         },
         connections: {
-          getAll: () => [
+          getAll: (params) => mockPagedData(params, 'connections', [
             {
               id: sampleEnabledConnection.connection_id,
               name: sampleEnabledConnection.connection.name,
@@ -149,7 +150,7 @@ describe('#organizations handler', () => {
               options: {},
             },
             { id: 'con_999', name: 'Username', options: {} },
-          ],
+          ]),
         },
         pool,
       };
@@ -177,10 +178,8 @@ describe('#organizations handler', () => {
     it('should get organizations', async () => {
       const auth0 = {
         organizations: {
-          getAll: () => Promise.resolve([sampleOrg]),
-          connections: {
-            get: () => [sampleEnabledConnection],
-          },
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          getEnabledConnections: () => ({ data: [sampleEnabledConnection] }),
         },
         pool,
       };
@@ -202,10 +201,8 @@ describe('#organizations handler', () => {
 
       const auth0 = {
         organizations: {
-          getAll: () => Promise.resolve([...organizationsPage2, ...organizationsPage1]),
-          connections: {
-            get: () => Promise.resolve({}),
-          },
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [...organizationsPage2, ...organizationsPage1])),
+          getEnabledConnections: () => Promise.resolve({ data: {} }),
         },
         pool,
       };
@@ -283,16 +280,14 @@ describe('#organizations handler', () => {
       let shouldThrow = false;
       const auth0 = {
         organizations: {
-          getAll: () => {
+          getAll: (params) => {
             if (!shouldThrow) {
-              return [sampleOrg];
+              return mockPagedData(params, 'organizations', [sampleOrg]);
             }
 
             throw new Error('Unexpected');
           },
-          connections: {
-            get: () => Promise.resolve([]),
-          },
+          getEnabledConnections: () => Promise.resolve({ data: [] }),
         },
         pool,
       };
@@ -309,32 +304,30 @@ describe('#organizations handler', () => {
     it('should update organizations', async () => {
       const auth0 = {
         organizations: {
-          create: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
             expect(data.display_name).to.equal('Acme 2');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => Promise.resolve([sampleOrg]),
-          connections: {
-            get: () => [sampleEnabledConnection, sampleEnabledConnection2],
-          },
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          getEnabledConnections: () => ({ data: [sampleEnabledConnection, sampleEnabledConnection2] }),
           addEnabledConnection: (params, data) => {
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
             expect(data).to.be.an('object');
             expect(data.connection_id).to.equal('con_789');
             expect(data.assign_membership_on_login).to.equal(false);
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           removeEnabledConnection: (params) => {
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
             expect(params.connection_id).to.equal(sampleEnabledConnection2.connection_id);
-            return Promise.resolve();
+            return Promise.resolve({ data: undefined});
           },
           updateEnabledConnection: (params, data) => {
             expect(params).to.be.an('object');
@@ -342,11 +335,11 @@ describe('#organizations handler', () => {
             expect(params.connection_id).to.equal(sampleEnabledConnection.connection_id);
             expect(data).to.be.an('object');
             expect(data.assign_membership_on_login).to.equal(false);
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
         },
         connections: {
-          getAll: () => [
+          getAll: (params) => mockPagedData(params, 'connections', [
             {
               id: sampleEnabledConnection.connection_id,
               name: sampleEnabledConnection.connection.name,
@@ -358,7 +351,7 @@ describe('#organizations handler', () => {
               options: {},
             },
             { id: 'con_999', name: 'Username', options: {} },
-          ],
+          ]),
         },
         pool,
       };
@@ -386,30 +379,28 @@ describe('#organizations handler', () => {
     it('should add an enabled connection to the organizations', async () => {
       const auth0 = {
         organizations: {
-          create: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
             expect(data.display_name).to.equal('Acme 2');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => Promise.resolve([sampleOrg]),
-          connections: {
-            get: () => [],
-          },
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          getEnabledConnections: () => ( { data: [] }),
           addEnabledConnection: (params, data) => {
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
             expect(data).to.be.an('object');
             expect(data.connection_id).to.equal('con_123');
             expect(data.assign_membership_on_login).to.equal(false);
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
         },
         connections: {
-          getAll: () => [
+          getAll: (params) => mockPagedData(params, 'connections', [
             {
               id: sampleEnabledConnection.connection_id,
               name: sampleEnabledConnection.connection.name,
@@ -421,7 +412,7 @@ describe('#organizations handler', () => {
               options: {},
             },
             { id: 'con_999', name: 'Username', options: {} },
-          ],
+          ]),
         },
         pool,
       };
@@ -452,22 +443,20 @@ describe('#organizations handler', () => {
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
             expect(data.display_name).to.equal('Acme 2');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => Promise.resolve([sampleOrg]),
-          connections: {
-            get: () => [sampleEnabledConnection2],
-          },
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          getEnabledConnections: () => ({ data: [sampleEnabledConnection2] }),
           removeEnabledConnection: (params) => {
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
             expect(params.connection_id).to.equal(sampleEnabledConnection2.connection_id);
-            return Promise.resolve();
+            return Promise.resolve({ data: undefined });
           },
         },
         connections: {
-          getAll: () => [
+          getAll: (params) => mockPagedData(params, 'connections', [
             {
               id: sampleEnabledConnection.connection_id,
               name: sampleEnabledConnection.connection.name,
@@ -479,7 +468,7 @@ describe('#organizations handler', () => {
               options: {},
             },
             { id: 'con_999', name: 'Username', options: {} },
-          ],
+          ]),
         },
         pool,
       };
@@ -509,16 +498,14 @@ describe('#organizations handler', () => {
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
             expect(data.display_name).to.equal('Acme 2');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => Promise.resolve([sampleOrg]),
-          connections: {
-            get: () => [],
-          },
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          getEnabledConnections: () => ( { data : [] } ),
         },
         connections: {
-          getAll: () => [
+          getAll: (params) => mockPagedData(params, 'connections', [
             {
               id: sampleEnabledConnection.connection_id,
               name: sampleEnabledConnection.connection.name,
@@ -530,7 +517,7 @@ describe('#organizations handler', () => {
               options: {},
             },
             { id: 'con_999', name: 'Username', options: {} },
-          ],
+          ]),
         },
         pool,
       };
@@ -555,20 +542,18 @@ describe('#organizations handler', () => {
     it('should delete organizations', async () => {
       const auth0 = {
         organizations: {
-          create: () => Promise.resolve([]),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
+          update: () => Promise.resolve({ data: [] }),
           delete: (data) => {
             expect(data).to.be.an('object');
             expect(data.id).to.equal(sampleOrg.id);
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          getAll: () => Promise.resolve([sampleOrg]),
-          connections: {
-            get: () => [],
-          },
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations',[sampleOrg])),
+          getEnabledConnections: () => [],
         },
         connections: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'connections', []),
         },
         pool,
       };

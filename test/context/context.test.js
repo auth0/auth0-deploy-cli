@@ -10,6 +10,7 @@ import { setupContext, filterOnlyIncludedResourceTypes } from '../../src/context
 import directoryContext from '../../src/context/directory';
 import yamlContext from '../../src/context/yaml';
 import { cleanThenMkdir, testDataDir, createDir } from '../utils';
+import {AuthApiError} from "auth0";
 
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
@@ -19,6 +20,35 @@ const config = {
   AUTH0_DOMAIN: 'tenant.auth0.com',
   AUTH0_ACCESS_TOKEN: 'fake',
 };
+
+export const TEST_PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDx+hc8imR4soBV
+9WD9bRey14VqzZfCvEAYbSWctLeZz9xhz+kP+mWxHvv07wi3/ZiYcVYgOYIhxbnt
+ugNp78oCFUEsdRrdq2juHlqBtjaYpINQSOqNaKUBt3JRkPPxRLyhwCZ6HJVYy5Wp
+4bG6c8eimbglDY4ZwTfUxu1wk3TvMJr9H8tSLwox666NDpxx4ga6kJ06wromShQH
+bCS8WlQKI7CpMbnUSrgNJO6QOvu0N97Szl7UwHFVTEuSvDvMGuUPE+Bn4zbrQVSV
+Go4oqyTchSR7+9xBpzq36OzXM6zSZqmovJuSzMbCXbBjQlo4s61wvnOLhT3D8Z44
+c5VE52frAgMBAAECggEALCx3qXmqNc6AVzDgb+NGfEOT+5dkqQwst0jVoPHswouL
+s998sIoJnngFjwVEFjKZdNrb2i4lb3zlIFzg2qoHurGeoDsQmH7+PNoVs7BL7zm5
+LyLgjsgXt2SB3hoULmtZ9D1byNcG/JrNy6GEDIGuZCSj1T/QPStkwdc+6VpB8pgW
+E8D7jCt40Tik2neYQkDnY775kGAHGWEqpdPCwm+KOnuE1fHx/jk38lmUgYNjKq0h
+JK6Ncjen1X+ZsYfGx4dALWG4cqo3lE0YXXuHuvjJV3aVfzH8t7W4fuZ4+8xvdhhV
+F4br5FimWLbTe2qT4lSpadkbLm3aBlSUR7eAP0BlwQKBgQD5ayZpP5OMp1zfa4hA
+fM8nVUEaVLkRwFK5NChfjHGiaye2RjrnIorXMsFxXjEscgTn2Ux9CgcBhp1fTBhy
+6cmhkp1talAIqLBivNQJT0YTfA+uHrHTTyMfEUgsMzPiiAg7FV7BCG6xd/nsk3yg
+ZUfoXefrhq9LIHsJx7cK12VViQKBgQD4XKvwYmX5t7fZFBPd7dv5ZrcMHQnBMHd7
+is3QhgyKuEgVDzKQ9SA004I9iSvcI3dE/npj31P39N5bbuvYTh4WR/SR4VvXavNG
+AqUR7wm8jTlbiWEPgF9MxC24zaa07Kbxs+P8XT/7wWuijf6+baSFgxQMb80fUArv
+7guKikCo0wKBgCUn3DIDoZRrfj9eQo7wyN9gKPGmO2e0kd47MeSCBI+gjOrvbWjv
+UWWbjwu3b3Xiim6LhYR/EOoeRqViraW4xCvIrqEVHFUd5CDhZmj4oUTXz3It6mnD
+OUUwiuLiwdD2WNuMZHA3NF5FtDqVAhTW4a5xBtKkXsq/TPT5BoCb8+GZAoGAUWAD
+0gpbgTuJ2G10qPWDaq8V8Lke9haMP4VWNCmHuHfy3juRhN9cAxL+DG2CWmmgbZG3
+xjtpRsgLhwfL7J6DyyceYiHltqpLNTgun7ajiQz4qx5TGAImt39bv75aDdOwS2d2
+nrxq93EDdEp0Gi7QhhJRolWLbuQKAV0MmQL9dpMCgYEA5+ug3CDI/jyTHG4ZEVoG
+qmIg7QoHrVEmZrvCMiFw8bbuBvoMnvu1o1zfvAkNrDfibZyxYKHzSqgeVPQShvLa
+P6JCu67ieCGP8C8CMFiQhJ9n4sYGnkzkz67NpkHSzDPA6DfvG4pYuvBQRIefnhYh
+IDGpghhKHMV2DAyzeM4cDU8=
+-----END PRIVATE KEY-----`;
 
 describe('#context loader validation', async () => {
   it('should error on bad file', async () => {
@@ -46,9 +76,9 @@ describe('#context loader validation', async () => {
       const result = await expect(
         setupContext({ ...tmpConfig, AUTH0_INPUT_FILE: dir }),
         'import'
-      ).to.be.eventually.rejectedWith(Error);
+      ).to.be.eventually.rejectedWith(AuthApiError);
 
-      expect(result).to.be.an('object').that.has.property('name').which.eq('access_denied');
+      expect(result).to.be.an('error').that.has.property('error').which.eq('access_denied');
     });
 
     it('should error while attempting private key JWT generation, but pass validation with client signing key', async () => {
@@ -72,7 +102,7 @@ describe('#context loader validation', async () => {
       expect(result)
         .to.be.an('Error')
         .that.has.property('message')
-        .which.eq('secretOrPrivateKey must be an asymmetric key when using RS256');
+        .which.eq('"pkcs8" must be PKCS#8 formatted string');
     });
 
     it('should error while attempting private key JWT generation because of incorrect value for algorithm, but pass validation with client signing key', async () => {
@@ -82,7 +112,7 @@ describe('#context loader validation', async () => {
       cleanThenMkdir(dir);
       createDir(dir, {
         '.': {
-          'private.pem': 'some-invalid-private-key',
+          'private.pem': TEST_PRIVATE_KEY,
         },
       });
 
@@ -97,7 +127,7 @@ describe('#context loader validation', async () => {
       expect(result)
         .to.be.an('Error')
         .that.has.property('message')
-        .which.eq('"algorithm" must be a valid string enum value');
+        .which.eq('alg bad value for algorithm is not supported either by JOSE or your javascript runtime');
     });
 
     it('should error when secret, private key and auth token are all absent', async () => {
@@ -155,7 +185,7 @@ describe('#context loader validation', async () => {
     expect(loaded).to.be.an.instanceof(yamlContext);
 
     const userAgent =
-      loaded.mgmtClient.rules.resource.restClient.restClient.options.headers['User-agent'];
+      loaded.mgmtClient.configuration.headers['User-agent'];
 
     expect(userAgent).to.contain('deploy-cli');
     expect(userAgent).to.contain('node.js');
