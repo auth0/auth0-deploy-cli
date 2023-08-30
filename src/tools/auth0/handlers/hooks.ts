@@ -142,7 +142,7 @@ export default class HooksHandler extends DefaultHandler {
 
     await Promise.all(
       changes.del.map(async (data) => {
-        await this.client.hooks.removeSecrets({ id: data.hookId }, data.secrets);
+        await this.client.hooks.deleteSecrets({ id: data.hookId }, data.secrets);
       })
     );
 
@@ -171,17 +171,18 @@ export default class HooksHandler extends DefaultHandler {
     }
 
     try {
-      const hooks = await this.client.hooks.getAll({ paginate: true, include_totals: true });
+      // TODO: Bring back paginate: true
+      const { data: { hooks } } = await this.client.hooks.getAll({ include_totals: true });
 
       // hooks.getAll does not return code and secrets, we have to fetch hooks one-by-one
       this.existing = await Promise.all(
         hooks.map((hook: { id: string }) =>
           this.client.hooks
             .get({ id: hook.id })
-            .then((hookWithCode) =>
+            .then(({data: hookWithCode}) =>
               this.client.hooks
                 .getSecrets({ id: hook.id })
-                .then((secrets) => ({ ...hookWithCode, secrets }))
+                .then(({ data: secrets }) => ({ ...hookWithCode, secrets }))
             )
         )
       );

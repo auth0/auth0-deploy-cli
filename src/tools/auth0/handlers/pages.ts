@@ -50,9 +50,9 @@ export default class PagesHandler extends DefaultHandler {
   }
 
   async updateLoginPage(page): Promise<void> {
-    const globalClient = await this.client.clients.getAll({
+    // TODO: Bring back paginate: true
+    const { data: { clients: globalClient } } = await this.client.clients.getAll({
       is_global: true,
-      paginate: true,
       include_totals: true,
     });
 
@@ -61,7 +61,7 @@ export default class PagesHandler extends DefaultHandler {
     }
 
     await this.client.clients.update(
-      { client_id: globalClient[0].client_id },
+      { id: globalClient[0].client_id },
       {
         custom_login_page: page.html,
         custom_login_page_on: page.enabled,
@@ -86,7 +86,7 @@ export default class PagesHandler extends DefaultHandler {
     }, {});
 
     if (Object.keys(update).length) {
-      await this.client.tenant.updateSettings(update);
+      await this.client.tenants.updateSettings(update);
     }
 
     toUpdate.forEach((page) => {
@@ -103,9 +103,9 @@ export default class PagesHandler extends DefaultHandler {
     }[] = [];
 
     // Login page is handled via the global client
-    const globalClient = await this.client.clients.getAll({
+    // TODO: Bring back paginate: true
+    const { data: { clients: globalClient } } = await this.client.clients.getAll({
       is_global: true,
-      paginate: true,
       include_totals: true,
     });
     if (!globalClient[0]) {
@@ -120,7 +120,7 @@ export default class PagesHandler extends DefaultHandler {
       });
     }
 
-    const tenantSettings = await this.client.tenant.getSettings();
+    const { data: tenantSettings } = await this.client.tenants.getSettings();
 
     Object.entries(pageNameMap).forEach(([key, name]) => {
       const page = tenantSettings[name];

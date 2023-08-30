@@ -1,6 +1,7 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
+import { Factor, FactorNameEnum } from 'auth0';
 
 export const schema = {
   type: 'array',
@@ -26,7 +27,8 @@ export default class GuardianFactorsHandler extends DefaultHandler {
 
   async getType(): Promise<Asset[]> {
     if (this.existing) return this.existing;
-    this.existing = await this.client.guardian.getFactors();
+    const { data } = await this.client.guardian.getFactors();
+    this.existing = data;
     return this.existing;
   }
 
@@ -39,9 +41,9 @@ export default class GuardianFactorsHandler extends DefaultHandler {
 
     // Process each factor
     await Promise.all(
-      guardianFactors.map(async (factor) => {
+      guardianFactors.map(async (factor: Factor) => {
         const data = { ...factor };
-        const params = { name: factor.name };
+        const params = { name: factor.name as FactorNameEnum };
         delete data.name;
         await this.client.guardian.updateFactor(params, data);
         this.didUpdate(params);

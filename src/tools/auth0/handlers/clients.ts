@@ -82,11 +82,12 @@ export default class ClientHandler extends DefaultAPIHandler {
 
   async getType() {
     if (this.existing) return this.existing;
-    this.existing = await this.client.clients.getAll({
-      paginate: true,
+    // TODO: Bring back paginate: true
+    const { data } = await this.client.clients.getAll({
       include_totals: true,
       is_global: false,
     });
+    this.existing = data.clients;
     return this.existing;
   }
 }

@@ -1,10 +1,7 @@
+import { ManagementClient, ResourceServer } from 'auth0';
 import { Action } from './tools/auth0/handlers/actions';
 import {
-  PromptTypes,
-  ScreenTypes,
   Prompts,
-  PromptsCustomText,
-  PromptSettings,
 } from './tools/auth0/handlers/prompts';
 import { Tenant } from './tools/auth0/handlers/tenant';
 import { Theme } from './tools/auth0/handlers/themes';
@@ -12,7 +9,6 @@ import { Page } from './tools/auth0/handlers/pages';
 import { LogStream } from './tools/auth0/handlers/logStreams';
 import { Client } from './tools/auth0/handlers/clients';
 import { ClientGrant } from './tools/auth0/handlers/clientGrants';
-import { ResourceServer } from './tools/auth0/handlers/resourceServers';
 import { PromisePoolExecutor } from 'promise-pool-executor';
 
 type SharedPaginationParams = {
@@ -34,13 +30,6 @@ export type PagePaginationParams = SharedPaginationParams & {
   per_page: number;
 };
 
-type APIClientBaseFunctions = {
-  getAll: (arg0: SharedPaginationParams) => Promise<Asset[]>;
-  create: (arg0: { id: string }) => Promise<Asset>;
-  update: (arg0: {}, arg1: Asset) => Promise<Asset>;
-  delete: (arg0: Asset) => Promise<void>;
-};
-
 export type ApiResponse = {
   start: number;
   limit: number;
@@ -48,144 +37,7 @@ export type ApiResponse = {
   next?: string;
 } & { [key in AssetTypes]: Asset[] };
 
-export type BaseAuth0APIClient = {
-  actions: {
-    getAll: (arg0: SharedPaginationParams) => Promise<Action[]>;
-    create: (arg0: { id: string }) => Promise<Action>;
-    update: (arg0: {}, arg1: Action) => Promise<Action>;
-    delete: (arg0: Asset) => Promise<void>;
-    deploy: (arg0: { id: string }) => Promise<void>;
-    getAllTriggers: () => Promise<{ triggers: Asset[] }>;
-    getTriggerBindings: (arg0: { trigger_id: string }) => Promise<{ bindings: Asset[] }>;
-    updateTriggerBindings: (
-      arg0: { trigger_id: string },
-      arg1: { bindings: Object }
-    ) => Promise<{ bindings: Asset[] }>;
-  };
-  attackProtection: APIClientBaseFunctions & {
-    getBreachedPasswordDetectionConfig: () => Promise<Asset>;
-    getBruteForceConfig: () => Promise<Asset>;
-    getSuspiciousIpThrottlingConfig: () => Promise<Asset>;
-    updateBreachedPasswordDetectionConfig: ({}, arg1: Asset) => Promise<void>;
-    updateSuspiciousIpThrottlingConfig: ({}, arg1: Asset) => Promise<void>;
-    updateBruteForceConfig: ({}, arg1: Asset) => Promise<void>;
-  };
-  branding: APIClientBaseFunctions & {
-    getSettings: () => Promise<Asset>;
-    getUniversalLoginTemplate: () => Promise<Asset>;
-    updateSettings: ({}, Asset) => Promise<void>;
-    setUniversalLoginTemplate: ({}, Asset) => Promise<void>;
-    getDefaultTheme: () => Promise<Theme>;
-    updateTheme: (
-      arg0: { id: string },
-      arg1: Omit<Theme, 'themeId'>
-    ) => Promise<Omit<Theme, 'themeId'>>;
-    createTheme: (arg0: Omit<Theme, 'themeId'>) => Promise<Omit<Theme, 'themeId'>>;
-    deleteTheme: (arg0: { id: string }) => Promise<void>;
-  };
-  clients: {
-    getAll: (arg0: SharedPaginationParams) => Promise<Client[]>;
-    create: (arg0: { id: string }) => Promise<Client>;
-    update: (arg0: {}, arg1: Partial<Client>) => Promise<Client>;
-    delete: (arg0: Asset) => Promise<void>;
-  };
-  clientGrants: {
-    getAll: (arg0: SharedPaginationParams) => Promise<ClientGrant[]>;
-    create: (arg0: { id: string }) => Promise<ClientGrant>;
-    update: (arg0: {}, arg1: Partial<ClientGrant>) => Promise<ClientGrant>;
-    delete: (arg0: Asset) => Promise<void>;
-  };
-  connections: APIClientBaseFunctions & {
-    get: (arg0: Asset) => Promise<Asset>;
-    getAll: (arg0: PagePaginationParams | CheckpointPaginationParams) => Promise<Asset[]>;
-  };
-  customDomains: APIClientBaseFunctions & {
-    getAll: () => Promise<Asset[]>;
-  };
-  emailProvider: APIClientBaseFunctions & {
-    delete: () => Promise<void>;
-    get: (arg0: Asset) => Promise<Asset>;
-    configure: (arg0: Object, arg1: Object) => Promise<Asset>;
-  };
-  emailTemplates: APIClientBaseFunctions & {
-    get: (arg0: Asset) => Promise<Asset>;
-  };
-  guardian: APIClientBaseFunctions & {
-    getFactorProvider: (arg0: Asset) => Promise<Asset>;
-    updateFactorProvider: (arg0: {}, arg1: Asset) => Promise<void>;
-    getFactors: () => Promise<Asset[]>;
-    updateFactor: (arg0: {}, arg1: Asset) => Promise<void>;
-    getPolicies: () => Promise<Asset[]>;
-    updatePolicies: (arg0: {}, arg1: Asset) => Promise<void>;
-    getFactorTemplates: (arg0: { name: string }) => Promise<Asset[]>;
-    updateFactorTemplates: (arg0: {}, arg1: Asset) => Promise<void>;
-    updatePhoneFactorMessageTypes: (arg0: {}, arg1: Asset) => Promise<void>;
-    getPhoneFactorSelectedProvider: () => Promise<Asset[]>;
-    getPhoneFactorMessageTypes: () => Promise<Asset[]>;
-    updatePhoneFactorSelectedProvider: (arg0: {}, arg1: Asset) => Promise<void>;
-  };
-  hooks: APIClientBaseFunctions & {
-    get: (arg0: { id: string }) => Promise<Asset>;
-    removeSecrets: (arg0: {}, arg1: Asset) => Promise<void>;
-    updateSecrets: (arg0: {}, arg1: Asset) => Promise<void>;
-    getSecrets: (arg0: { id: string }) => Promise<Promise<Asset[]>>;
-    addSecrets: (arg0: {}, arg1: Asset) => Promise<void>;
-  };
-  logStreams: {
-    getAll: (arg0: SharedPaginationParams) => Promise<LogStream[]>;
-    create: (arg0: { id: string }) => Promise<LogStream>;
-    update: (arg0: {}, arg1: Partial<LogStream>) => Promise<LogStream>;
-    delete: (arg0: Asset) => Promise<void>;
-  };
-  migrations: APIClientBaseFunctions & {
-    getMigrations: () => Promise<{ flags: Asset[] }>;
-    updateMigrations: (arg0: { flags: Asset[] }) => Promise<void>;
-  };
-  organizations: APIClientBaseFunctions & {
-    updateEnabledConnection: (arg0: {}, arg1: Asset) => Promise<void>;
-    addEnabledConnection: (arg0: {}, arg1: Asset) => Promise<void>;
-    removeEnabledConnection: (arg0: Asset) => Promise<void>;
-    connections: {
-      get: (arg0: Asset) => Promise<Asset>;
-    };
-  };
-  prompts: {
-    updateCustomTextByLanguage: (arg0: {
-      prompt: PromptTypes;
-      language: Language;
-      body: Partial<{ [key in ScreenTypes]: { [key: string]: string } }>;
-    }) => Promise<void>;
-    getCustomTextByLanguage: (arg0: {
-      prompt: PromptTypes;
-      language: Language;
-    }) => Promise<Partial<PromptsCustomText>>;
-    getSettings: () => Promise<PromptSettings>;
-    updateSettings: (arg0: {}, arg1: Partial<PromptSettings>) => Promise<void>;
-  };
-  resourceServers: {
-    getAll: (arg0: SharedPaginationParams) => Promise<ResourceServer[]>;
-    create: (arg0: { id: string }) => Promise<ResourceServer>;
-    update: (arg0: {}, arg1: Partial<ResourceServer>) => Promise<ResourceServer>;
-    delete: (arg0: Asset) => Promise<void>;
-  };
-  roles: APIClientBaseFunctions & {
-    permissions: APIClientBaseFunctions & {
-      delete: (arg0: { id: string }, arg1: { permissions: Asset[] }) => Promise<void>;
-      create: (arg0: { id: string }, arg1: { permissions: Asset[] }) => Promise<Asset>;
-    };
-  };
-  rules: APIClientBaseFunctions;
-  rulesConfigs: APIClientBaseFunctions & {
-    getAll: () => Promise<Asset[]>;
-  };
-  tenant: APIClientBaseFunctions & {
-    getSettings: () => Promise<Tenant>;
-    updateSettings: (arg0: Partial<Tenant>) => Promise<Tenant>;
-  };
-  triggers: APIClientBaseFunctions & {
-    getTriggerBindings: () => Promise<Asset>;
-  };
-}; // TODO: replace with a more accurate representation of the Auth0APIClient type
+export type BaseAuth0APIClient = ManagementClient;
 
 export type Auth0APIClient = BaseAuth0APIClient & {
   pool: PromisePoolExecutor;
@@ -251,7 +103,7 @@ export type Assets = Partial<{
   } | null;
   guardianPhoneFactorSelectedProvider: Asset | null;
   guardianPolicies: {
-    policies: Asset[]; //TODO: eliminate this intermediate level for consistency
+    policies: string[]; //TODO: eliminate this intermediate level for consistency
   } | null;
   hooks: Asset[] | null;
   logStreams: LogStream[] | null;
@@ -296,7 +148,6 @@ export type AssetTypes =
   | 'guardianFactors'
   | 'guardianFactorProviders'
   | 'guardianFactorTemplates'
-  | 'migrations'
   | 'guardianPhoneFactorMessageTypes'
   | 'guardianPhoneFactorSelectedProvider'
   | 'guardianPolicies'

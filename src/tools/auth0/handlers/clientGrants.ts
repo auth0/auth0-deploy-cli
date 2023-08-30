@@ -1,6 +1,6 @@
 import DefaultHandler, { order } from './default';
 import { convertClientNamesToIds } from '../../utils';
-import { Asset, Assets, CalculatedChanges } from '../../../types';
+import { Assets, CalculatedChanges } from '../../../types';
 import DefaultAPIHandler from './default';
 
 export const schema = {
@@ -48,7 +48,9 @@ export default class ClientGrantsHandler extends DefaultHandler {
     if (this.existing) {
       return this.existing;
     }
-    this.existing = await this.client.clientGrants.getAll({ paginate: true, include_totals: true });
+    // TODO: Bring back paginate: true
+    const { data } = await this.client.clientGrants.getAll({ include_totals: true });
+    this.existing = data.client_grants;
 
     // Always filter out the client we are using to access Auth0 Management API
     // As it could cause problems if the grants are deleted or updated etc
@@ -67,7 +69,9 @@ export default class ClientGrantsHandler extends DefaultHandler {
     // Do nothing if not set
     if (!clientGrants) return;
 
-    const clients = await this.client.clients.getAll({ paginate: true, include_totals: true });
+    // TODO: Bring back paginate: true
+    const { data } = await this.client.clients.getAll({ include_totals: true });
+    const { clients } = data;
     const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
     const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
 

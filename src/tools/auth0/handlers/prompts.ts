@@ -175,7 +175,7 @@ export default class PromptsHandler extends DefaultHandler {
   }
 
   async getType(): Promise<Prompts | null> {
-    const promptsSettings = await this.client.prompts.getSettings();
+    const { data: promptsSettings } = await this.client.prompts.get();
 
     const customText = await this.getCustomTextSettings();
 
@@ -186,9 +186,9 @@ export default class PromptsHandler extends DefaultHandler {
   }
 
   async getCustomTextSettings(): Promise<AllPromptsByLanguage> {
-    const supportedLanguages = await this.client.tenant
+    const supportedLanguages = await this.client.tenants
       .getSettings()
-      .then(({ enabled_locales }) => {
+      .then(({ data: { enabled_locales } }) => {
         if (enabled_locales === undefined) return []; // In rare cases, private cloud tenants may not have `enabled_locales` defined
         return enabled_locales;
       });
@@ -205,7 +205,7 @@ export default class PromptsHandler extends DefaultHandler {
               prompt: promptType,
               language,
             })
-            .then((customTextData) => {
+            .then(({data: customTextData}) => {
               if (isEmpty(customTextData)) return null;
               return {
                 language,
@@ -244,7 +244,7 @@ export default class PromptsHandler extends DefaultHandler {
     const { customText, ...promptSettings } = prompts;
 
     if (!isEmpty(promptSettings)) {
-      await this.client.prompts.updateSettings({}, promptSettings);
+      await this.client.prompts.update(promptSettings);
     }
 
     await this.updateCustomTextSettings(customText);
@@ -276,11 +276,7 @@ export default class PromptsHandler extends DefaultHandler {
           });
         }),
         generator: ({ prompt, language, body }) =>
-          this.client.prompts.updateCustomTextByLanguage({
-            prompt,
-            language,
-            body,
-          }),
+          this.client.prompts.updateCustomTextByLanguage({ prompt, language }, body)
       })
       .promise();
   }

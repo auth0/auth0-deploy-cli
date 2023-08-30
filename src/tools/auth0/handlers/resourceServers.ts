@@ -1,3 +1,4 @@
+import { ResourceServer } from 'auth0';
 import ValidationError from '../../validationError';
 
 import constants from '../../constants';
@@ -34,12 +35,6 @@ export const schema = {
   },
 };
 
-export type ResourceServer = {
-  id: string;
-  name: string;
-  identifier: string;
-  scopes?: { description: string; value: string }[];
-};
 export default class ResourceServersHandler extends DefaultHandler {
   existing: ResourceServer[];
 
@@ -58,8 +53,8 @@ export default class ResourceServersHandler extends DefaultHandler {
 
   async getType(): Promise<ResourceServer[]> {
     if (this.existing) return this.existing;
-    const resourceServers = await this.client.resourceServers.getAll({
-      paginate: true,
+    // TODO: Bring back paginate: true
+    const { data: { resource_servers: resourceServers } } = await this.client.resourceServers.getAll({
       include_totals: true,
     });
     return resourceServers.filter(

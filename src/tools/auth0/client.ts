@@ -167,7 +167,7 @@ export default function pagedClient(client: BaseAuth0APIClient): Auth0APIClient 
       frequencyLimit: API_FREQUENCY_PER_SECOND,
       frequencyWindow: 1000, // 1 sec
     }),
-  };
+  } as unknown as Auth0APIClient;
 
   return pagedManager(clientWithPooling, clientWithPooling);
 }

@@ -1,3 +1,4 @@
+import { GetBranding200Response, GetUniversalLogin200ResponseOneOf } from 'auth0';
 import DefaultHandler, { order } from './default';
 import constants from '../../constants';
 import log from '../../../logger';
@@ -30,29 +31,25 @@ export default class BrandingHandler extends DefaultHandler {
   }
 
   async getType(): Promise<Asset> {
-    let branding: {
-      templates?: {
-        template: string;
-        body: string;
-      }[];
-    } = {};
+    let branding: GetBranding200Response = {} as any;
 
     try {
       // in case client version does not support branding
       if (this.client.branding && typeof this.client.branding.getSettings === 'function') {
-        branding = await this.client.branding.getSettings();
+        const response = await this.client.branding.getSettings();
+        branding = response.data;
       }
 
       // in case client version does not custom domains
       if (this.client.customDomains && typeof this.client.customDomains.getAll === 'function') {
-        const customDomains = await this.client.customDomains.getAll();
+        const { data: customDomains } = await this.client.customDomains.getAll();
         // templates are only supported if there's custom domains.
         if (customDomains && customDomains.length) {
-          const payload = await this.client.branding.getUniversalLoginTemplate();
+          const { data: payload } = await this.client.branding.getUniversalLoginTemplate();
           branding.templates = [
             {
               template: constants.UNIVERSAL_LOGIN_TEMPLATE,
-              body: payload.body,
+              body: (payload as GetUniversalLogin200ResponseOneOf).body,
             },
           ];
         }
@@ -80,7 +77,7 @@ export default class BrandingHandler extends DefaultHandler {
     }
 
     if (brandingSettings && Object.keys(brandingSettings).length) {
-      await this.client.branding.updateSettings({}, brandingSettings);
+      await this.client.branding.updateSettings(brandingSettings);
       this.updated += 1;
       this.didUpdate(brandingSettings);
     }
@@ -104,7 +101,6 @@ export default class BrandingHandler extends DefaultHandler {
       );
       if (templateDefinition && templateDefinition.body) {
         await this.client.branding.setUniversalLoginTemplate(
-          {},
           { template: templateDefinition.body }
         );
         this.updated += 1;

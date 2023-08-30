@@ -1,3 +1,5 @@
+import { GetEmailTemplatesByTemplateNameTemplateNameEnum } from 'auth0';
+
 const PAGE_GUARDIAN_MULTIFACTOR = 'guardian_multifactor';
 const PAGE_PASSWORD_RESET = 'password_reset';
 const PAGE_LOGIN = 'login';
@@ -53,7 +55,7 @@ const constants = {
     'change_password',
     'password_reset',
     'user_invitation',
-  ],
+  ] as GetEmailTemplatesByTemplateNameTemplateNameEnum[],
   ACTIONS_TRIGGERS: [
     'post-login',
     'credentials-exchange',

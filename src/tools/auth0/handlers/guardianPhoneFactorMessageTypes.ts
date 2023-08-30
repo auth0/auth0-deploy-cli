@@ -1,6 +1,7 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
+import { GetMessageTypes200Response } from 'auth0';
 
 export const schema = {
   type: 'object',
@@ -35,7 +36,7 @@ const isFeatureUnavailableError = (err): boolean => {
 };
 
 export default class GuardianPhoneMessageTypesHandler extends DefaultHandler {
-  existing: Asset[];
+  existing: Asset;
 
   constructor(options: DefaultHandler) {
     super({
@@ -56,7 +57,8 @@ export default class GuardianPhoneMessageTypesHandler extends DefaultHandler {
     if (this.existing) return this.existing;
 
     try {
-      this.existing = await this.client.guardian.getPhoneFactorMessageTypes();
+      const { data } = await this.client.guardian.getPhoneFactorMessageTypes();
+      this.existing = data;
     } catch (e) {
       if (isFeatureUnavailableError(e)) {
         // Gracefully skip processing this configuration value.
@@ -75,9 +77,8 @@ export default class GuardianPhoneMessageTypesHandler extends DefaultHandler {
     // Do nothing if not set
     if (!guardianPhoneFactorMessageTypes || !guardianPhoneFactorMessageTypes.message_types) return;
 
-    const params = {};
     const data = guardianPhoneFactorMessageTypes;
-    await this.client.guardian.updatePhoneFactorMessageTypes(params, data);
+    await this.client.guardian.updatePhoneFactorMessageTypes(data as unknown as GetMessageTypes200Response);
     this.updated += 1;
     this.didUpdate(guardianPhoneFactorMessageTypes);
   }
