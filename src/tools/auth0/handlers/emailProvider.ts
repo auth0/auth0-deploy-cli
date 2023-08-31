@@ -1,5 +1,6 @@
 import DefaultHandler from './default';
 import { Asset, Assets } from '../../../types';
+import { PostProviderRequest } from 'auth0';
 
 export const schema = { type: 'object' };
 
@@ -54,14 +55,11 @@ export default class EmailProviderHandler extends DefaultHandler {
     }
 
     if (existing.name) {
-      const provider = { name: emailProvider.name, enabled: emailProvider.enabled };
-      const updated = await this.client.emails.update(provider, emailProvider);
+      const updated = await this.client.emails.update(emailProvider);
       this.updated += 1;
       this.didUpdate(updated);
     } else {
-      // TODO: credentials is required here.
-      const provider = { name: emailProvider.name, enabled: emailProvider.enabled, credentials: {} };
-      const created = await this.client.emails.configure(provider, emailProvider);
+      const created = await this.client.emails.configure(emailProvider as PostProviderRequest);
       this.created += 1;
       this.didCreate(created);
     }

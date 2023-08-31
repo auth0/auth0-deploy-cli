@@ -125,7 +125,6 @@ branding:
 prompts:
   customText: {}
   universal_login_experience: new
-migrations: {}
 actions: []
 triggers: {}
 organizations: []
