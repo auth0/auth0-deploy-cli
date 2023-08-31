@@ -228,7 +228,7 @@ describe('#hooks handler', () => {
       const auth0 = {
         hooks: {
           getAll: (params) => mockPagedData(params, 'hooks', hooksData),
-          get: ({ id }) => Promise.resolve({ data: { ...hooksData[id], code }}),
+          get: ({ id }) => Promise.resolve({ data: { ...hooksData[id], code } }),
           getSecrets: ({ id }) => Promise.resolve({ data: { SECRET: `hook-${id}-secret` } }),
         },
       };

@@ -13,6 +13,18 @@ chai.use(chaiAsPromised);
 export const localDir = 'local';
 export const testDataDir = path.resolve(localDir, 'testData');
 
+export function mockPagedData(params, key, data) {
+  return params?.include_totals
+    ? {
+      data: {
+        [key]: data,
+      },
+    }
+    : {
+      data,
+    };
+}
+
 export function mockMgmtClient() {
   // Fake Mgmt Client. Bit hacky but good enough for now.
   return {
@@ -34,10 +46,10 @@ export function mockMgmtClient() {
     clientGrants: { getAll: (params) => (mockPagedData(params, 'client_grants', [])) },
     guardian: {
       getFactors: () => ({ data: [] }),
-      getSmsFactorProviderTwilio: () => ({data: []}),
-      getPushNotificationProviderSNS: () => ({data: []}),
-      getSmsFactorTemplates: () => ({data: []}),
-      getPhoneFactorMessageTypes: () => ({ data: { message_types: ['sms'] }}),
+      getSmsFactorProviderTwilio: () => ({ data: [] }),
+      getPushNotificationProviderSNS: () => ({ data: [] }),
+      getSmsFactorTemplates: () => ({ data: [] }),
+      getPhoneFactorMessageTypes: () => ({ data: { message_types: ['sms'] } }),
       getPhoneFactorSelectedProvider: () => ({ data: { provider: 'twilio' } }),
       getPolicies: () => ({ data: [] }),
     },
@@ -89,7 +101,7 @@ export function mockMgmtClient() {
             }
           })
         ),
-      getCustomTextByLanguage: () => Promise.resolve({data: {} }),
+      getCustomTextByLanguage: () => Promise.resolve({ data: {} }),
     },
     migrations: {
       getMigrations: () => ({
@@ -115,7 +127,7 @@ export function mockMgmtClient() {
         new Promise((res) => {
           res({ data: {} });
         }),
-      get: () => ({ data: {}}),
+      get: () => ({ data: {} }),
     },
     customDomains: { getAll: (params) => mockPagedData(params, 'custom_domains', []) },
   };
@@ -138,16 +150,4 @@ export function createDir(repoDir, files) {
       fs.writeFileSync(path.join(configDir, name), content);
     });
   });
-}
-
-export function mockPagedData(params, key, data) {
-  return params?.include_totals
-    ? {
-        data: {
-          [key]: data,
-        },
-      }
-    : {
-        data,
-      };
 }

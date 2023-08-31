@@ -327,7 +327,7 @@ describe('#organizations handler', () => {
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
             expect(params.connection_id).to.equal(sampleEnabledConnection2.connection_id);
-            return Promise.resolve({ data: undefined});
+            return Promise.resolve({ data: undefined });
           },
           updateEnabledConnection: (params, data) => {
             expect(params).to.be.an('object');
