@@ -89,7 +89,7 @@ In order for the Deploy CLI to call the Management API, a dedicated Auth0 applic
 2. Click “Create Application”
 3. On Create application page:
    a. Name it “Deploy CLI” or similar
-   b. Select “Machine to Machine Applications” as application type
+   b. Select “Machine to Machine Applications” as the application type
    c. Click “Create”
 4. On the “Authorize Machine to Machine Application” page
    a. Select “Auth0 Management API”
@@ -103,11 +103,11 @@ In order for the Deploy CLI to call the Management API, a dedicated Auth0 applic
 
 The designated application needs to be granted scopes in order to allow the Deploy CLI to execute Management operations.
 
-The principle of least privilege is abided, so it will operate within the set of permissions granted. At a minimum, `read:clients` need to be selected, but is is recommended to select `read:`, `create:` and `update:` permissions for all resource types within management purview. To enable deletions, the `delete:` scopes are also necessary.
+The principle of least privilege is abided by, so it will operate within the set of permissions granted. At a minimum, `read:clients` need to be selected, but is is recommended to select `read:`, `create:` and `update:` permissions for all resource types within management purview. To enable deletions, the `delete:` scopes are also necessary.
 
 ### Configure the Deploy CLI
 
-The Deploy CLI can be configured two ways, through a `config.json` file and through environment variables. The decision to choose one or both would depend on your specific use case and preferences. More comprehensive information about configuring the tool can be found on the [Configuring the Deploy CLI](docs/configuring-the-deploy-cli.md) page. However, for this example, the simplest way to get going is by setting the following environment variables:
+The Deploy CLI can be configured in two ways, through a `config.json` file and through environment variables. The decision to choose one or both would depend on your specific use case and preferences. More comprehensive information about configuring the tool can be found on the [Configuring the Deploy CLI](docs/configuring-the-deploy-cli.md) page. However, for this example, the simplest way to get going is by setting the following environment variables:
 
 - `AUTH0_DOMAIN`
 - `AUTH0_CLIENT_ID`
