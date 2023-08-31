@@ -115,7 +115,7 @@ describe('#clients handler', () => {
 
             return Promise.resolve({ data });
           },
-          delete: () => Promise.resolve({ data: []}),
+          delete: () => Promise.resolve({ data: [] }),
           getAll: (params) => mockPagedData(params, 'clients', [
             {
               client_id: 'client1',

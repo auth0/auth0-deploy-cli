@@ -138,7 +138,7 @@ describe('#actions handler', () => {
             expect(data.name).to.equal('action-test');
             expect(data.supported_triggers[0].id).to.equal('post-login');
             expect(data.supported_triggers[0].version).to.equal('v1');
-            return Promise.resolve({ data: { ...data, id: actionId }});
+            return Promise.resolve({ data: { ...data, id: actionId } });
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
@@ -259,7 +259,7 @@ describe('#actions handler', () => {
 
       const auth0 = {
         actions: {
-          getAll: () => mockPagedData({ include_totals: true}, 'actions', actionsData),
+          getAll: () => mockPagedData({ include_totals: true }, 'actions', actionsData),
         },
       };
 

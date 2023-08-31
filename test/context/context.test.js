@@ -1,4 +1,5 @@
 import path from 'path';
+import { AuthApiError } from 'auth0';
 import fs from 'fs-extra';
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
@@ -10,7 +11,6 @@ import { setupContext, filterOnlyIncludedResourceTypes } from '../../src/context
 import directoryContext from '../../src/context/directory';
 import yamlContext from '../../src/context/yaml';
 import { cleanThenMkdir, testDataDir, createDir } from '../utils';
-import {AuthApiError} from "auth0";
 
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
@@ -21,7 +21,7 @@ const config = {
   AUTH0_ACCESS_TOKEN: 'fake',
 };
 
-export const TEST_PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
+const TEST_PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDx+hc8imR4soBV
 9WD9bRey14VqzZfCvEAYbSWctLeZz9xhz+kP+mWxHvv07wi3/ZiYcVYgOYIhxbnt
 ugNp78oCFUEsdRrdq2juHlqBtjaYpINQSOqNaKUBt3JRkPPxRLyhwCZ6HJVYy5Wp

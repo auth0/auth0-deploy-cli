@@ -1,10 +1,7 @@
-//import chai from "chai";
-
 const { expect, assert, use } = require('chai');
 const { omit, cloneDeep } = require('lodash');
-const { default: ThemesHandler } = require('../../../../src/tools/auth0/handlers/themes');
-
 const chaiAsPromised = require('chai-as-promised');
+const { default: ThemesHandler } = require('../../../../src/tools/auth0/handlers/themes');
 
 use(chaiAsPromised);
 
