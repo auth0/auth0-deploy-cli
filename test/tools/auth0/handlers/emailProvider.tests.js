@@ -6,14 +6,12 @@ describe('#emailProvider handler', () => {
     it('should configure email provider', async () => {
       const auth0 = {
         emails: {
-          configure: (provider, data) => {
-            expect(provider).to.be.an('object');
+          configure: (data) => {
             expect(data).to.be.an('object');
-            expect(provider.name).to.equal('someProvider');
             expect(data.name).to.equal('someProvider');
-            return Promise.resolve({ data: { provider, data } });
+            return Promise.resolve({ data });
           },
-          update: (provider, data) => Promise.resolve({ data: { provider, data } }),
+          update: (data) => Promise.resolve({ data }),
           delete: () => Promise.resolve({ data: null }),
           get: () => ({ data: [] }),
         },
@@ -28,14 +26,9 @@ describe('#emailProvider handler', () => {
     it('should update email provider', async () => {
       const auth0 = {
         emails: {
-          configure: (provider, data) => {
-            expect(provider).to.be('undefined');
-            return Promise.resolve({ data });
-          },
-          update: (provider, data) => {
-            expect(provider).to.be.an('object');
+          configure: (data) => Promise.resolve({ data }),
+          update: (data) => {
             expect(data).to.be.an('object');
-            expect(provider.name).to.equal('someProvider');
             expect(data.name).to.equal('someProvider');
             expect(data.credentials).to.equal('password');
             return Promise.resolve({ data });
@@ -119,18 +112,13 @@ describe('#emailProvider handler', () => {
     it('should delete email provider and create another one instead', async () => {
       const auth0 = {
         emails: {
-          configure: (provider, data) => {
-            expect(provider).to.be.an('object');
+          configure: (data) => {
             expect(data).to.be.an('object');
-            expect(provider.name).to.equal('someProvider');
             expect(data.name).to.equal('someProvider');
             expect(data.credentials).to.equal('password');
             return Promise.resolve({ data });
           },
-          update: (provider, data) => {
-            expect(provider).to.be('undefined');
-            return Promise.resolve({ data });
-          },
+          update: (data) => Promise.resolve({ data }),
           delete: () => Promise.resolve({ data: null }),
           get: () => ({ data: { name: 'oldProvider', enabled: true } }),
         },
