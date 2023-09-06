@@ -7,6 +7,10 @@ import { load as yamlLoad } from 'js-yaml';
 import { setupRecording, testNameToWorkingDirectory } from './e2e-utils';
 import { dump, deploy } from '../../src';
 import { AssetTypes } from '../../src/types';
+import fetch from 'node-fetch';
+
+// Use node.http for recording library
+global.fetch = fetch;
 
 const shouldUseRecordings = process.env['AUTH0_HTTP_RECORDINGS'] === 'lockdown';
 const AUTH0_DOMAIN = shouldUseRecordings

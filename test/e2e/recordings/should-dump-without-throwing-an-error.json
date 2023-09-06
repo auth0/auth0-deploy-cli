@@ -2,7 +2,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/rules?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/rules?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -27,7 +27,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/hooks?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/hooks?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -42,7 +42,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?is_global=true&include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/clients?is_global=true&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -160,7 +160,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/resource-servers?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/resource-servers?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -749,7 +749,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?include_totals=true&is_global=false&page=0&per_page=100",
+        "path": "/api/v2/clients?include_totals=true&is_global=false",
         "body": "",
         "status": 200,
         "response": {
@@ -871,7 +871,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?strategy=auth0&include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?strategy=auth0&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -909,7 +909,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -1205,7 +1205,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/client-grants?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/client-grants?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -1463,7 +1463,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/guardian/factors/sms/selected-provider",
+        "path": "/api/v2/guardian/factors/phone/selected-provider",
         "body": "",
         "status": 200,
         "response": {
@@ -1487,7 +1487,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/roles?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -1876,7 +1876,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/actions?page=0&per_page=100",
+        "path": "/api/v2/actions/actions",
         "body": "",
         "status": 200,
         "response": {
@@ -2244,7 +2244,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/log-streams?paginate=false",
+        "path": "/api/v2/log-streams",
         "body": "",
         "status": 200,
         "response": [],
@@ -2254,7 +2254,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/custom-domains?paginate=false",
+        "path": "/api/v2/custom-domains",
         "body": "",
         "status": 200,
         "response": [],

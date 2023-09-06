@@ -61,7 +61,7 @@ export default class PagesHandler extends DefaultHandler {
     }
 
     await this.client.clients.update(
-      { id: globalClient[0].client_id },
+      { client_id: globalClient[0].client_id },
       {
         custom_login_page: page.html,
         custom_login_page_on: page.enabled,

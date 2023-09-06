@@ -72,7 +72,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/actions?page=0&per_page=100",
+        "path": "/api/v2/actions/actions",
         "body": "",
         "status": 200,
         "response": {

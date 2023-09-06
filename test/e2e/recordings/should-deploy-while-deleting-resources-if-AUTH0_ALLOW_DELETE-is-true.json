@@ -2,7 +2,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/rules?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/rules?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -26,7 +26,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/rules?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/rules?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -72,7 +72,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/hooks?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/hooks?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -87,7 +87,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/hooks?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/hooks?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -102,7 +102,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?is_global=true&include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/clients?is_global=true&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -185,6 +185,79 @@
             "client_id": "Isi93ibGHIGwmdYjsLwTOn7Gu7nwxU3V",
             "client_secret": "[REDACTED]",
             "custom_login_page_on": true
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+     {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/clients/GIW99EUCF9DFExh77WPMyTMzT8NN4J3A",
+        "body": {
+          "name": "Deploy CLI",
+          "app_type": "non_interactive",
+          "cross_origin_auth": false,
+          "custom_login_page_on": true,
+          "grant_types": ["client_credentials"],
+          "is_first_party": true,
+          "is_token_endpoint_ip_header_trusted": false,
+          "jwt_configuration": {
+            "alg": "RS256",
+            "lifetime_in_seconds": 36000
+          },
+          "oidc_conformant": true,
+          "refresh_token": {
+            "expiration_type": "non-expiring",
+            "leeway": 0,
+            "infinite_token_lifetime": true,
+            "infinite_idle_token_lifetime": true,
+            "token_lifetime": 31557600,
+            "idle_token_lifetime": 2592000,
+            "rotation_type": "non-rotating"
+          },
+          "sso_disabled": false,
+          "token_endpoint_auth_method": "client_secret_post"
+        },
+        "status": 200,
+        "response": {
+          "tenant": "auth0-deploy-cli-e2e",
+          "global": false,
+          "is_token_endpoint_ip_header_trusted": false,
+          "name": "Deploy CLI",
+          "is_first_party": true,
+          "oidc_conformant": true,
+          "sso_disabled": false,
+          "cross_origin_auth": false,
+          "refresh_token": {
+            "expiration_type": "non-expiring",
+            "leeway": 0,
+            "infinite_token_lifetime": true,
+            "infinite_idle_token_lifetime": true,
+            "token_lifetime": 31557600,
+            "idle_token_lifetime": 2592000,
+            "rotation_type": "non-rotating"
+          },
+          "signing_keys": [
+            {
+              "cert": "[REDACTED]",
+              "pkcs7": "[REDACTED]",
+              "subject": "deprecated"
+            }
+          ],
+          "client_id": "GIW99EUCF9DFExh77WPMyTMzT8NN4J3A",
+          "callback_url_template": false,
+          "client_secret": "[REDACTED]",
+          "jwt_configuration": {
+            "alg": "RS256",
+            "lifetime_in_seconds": 36000,
+            "secret_encoded": false
+          },
+          "token_endpoint_auth_method": "client_secret_post",
+          "app_type": "non_interactive",
+          "grant_types": [
+            "client_credentials"
+          ],
+          "custom_login_page_on": true
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -274,7 +347,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/resource-servers?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/resource-servers?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -863,7 +936,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?include_totals=true&is_global=false&page=0&per_page=100",
+        "path": "/api/v2/clients?include_totals=true&is_global=false",
         "body": "",
         "status": 200,
         "response": {
@@ -1348,7 +1421,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/clients/xLgpNb56pwyBvNmyd67xtoMb4G2xxy9W",
-        "body": {},
         "status": 204,
         "response": "",
         "rawHeaders": [],
@@ -2061,7 +2133,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/emails/provider?enabled=false&name=mandrill",
+        "path": "/api/v2/emails/provider",
         "body": {
             "name": "mandrill",
             "credentials": {
@@ -2324,7 +2396,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/log-streams?paginate=false",
+        "path": "/api/v2/log-streams",
         "body": "",
         "status": 200,
         "response": [
@@ -2546,7 +2618,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/clients?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -2995,7 +3067,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?strategy=auth0&include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?strategy=auth0&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -3080,7 +3152,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?strategy=auth0&include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?strategy=auth0&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -3166,7 +3238,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/connections/con_FJVIi5jt9aQXvioG",
-        "body": {},
         "status": 202,
         "response": {
             "deleted_at": "2023-08-03T13:40:23.710Z"
@@ -3335,7 +3406,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/clients?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -3784,7 +3855,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -3869,7 +3940,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -4052,7 +4123,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/clients?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -4501,7 +4572,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/client-grants?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/client-grants?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -5492,7 +5563,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/roles?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -5528,7 +5599,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles/rol_xTLwZuLtKXu0jnMc/permissions?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/roles/rol_xTLwZuLtKXu0jnMc/permissions?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -5543,7 +5614,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles/rol_ESfW6pVGwB3qwt5U/permissions?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/roles/rol_ESfW6pVGwB3qwt5U/permissions?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -5558,7 +5629,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles/rol_LVvLNdUbB9j5bxW9/permissions?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/roles/rol_LVvLNdUbB9j5bxW9/permissions?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -5573,7 +5644,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles/rol_JT0zo8zMuhZlvvnP/permissions?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/roles/rol_JT0zo8zMuhZlvvnP/permissions?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -5656,7 +5727,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/actions?page=0&per_page=100",
+        "path": "/api/v2/actions/actions",
         "body": "",
         "status": 200,
         "response": {
@@ -5786,7 +5857,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/actions?page=0&per_page=100",
+        "path": "/api/v2/actions/actions",
         "body": "",
         "status": 200,
         "response": {
@@ -5849,7 +5920,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "POST",
         "path": "/api/v2/actions/actions/5cb59b2c-b643-414a-b1f6-af7607f1fa08/deploy",
-        "body": {},
         "status": 200,
         "response": {
             "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
@@ -5969,7 +6039,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -6199,7 +6269,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/rules?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/rules?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -6223,7 +6293,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/rules?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/rules?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -6248,7 +6318,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/rules/rul_nJxB8AKfZ0pr4grS",
-        "body": {},
         "status": 204,
         "response": "",
         "rawHeaders": [],
@@ -6257,7 +6326,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/hooks?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/hooks?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -6272,7 +6341,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/hooks?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/hooks?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -6287,7 +6356,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/resource-servers?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/resource-servers?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -6876,7 +6945,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?include_totals=true&is_global=false&page=0&per_page=100",
+        "path": "/api/v2/clients?include_totals=true&is_global=false",
         "body": "",
         "status": 200,
         "response": {
@@ -7295,7 +7364,15 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/clients/uKnnc1YsLCvq2Wsegx1NRcchvFWYnQec",
-        "body": {},
+        "status": 204,
+        "response": "",
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "DELETE",
+        "path": "/api/v2/clients/GIW99EUCF9DFExh77WPMyTMzT8NN4J3A",
         "status": 204,
         "response": "",
         "rawHeaders": [],
@@ -7305,7 +7382,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/clients/NxYlj8noJQggPTwWiOwUgPmA3LEIiyaA",
-        "body": {},
         "status": 204,
         "response": "",
         "rawHeaders": [],
@@ -7315,7 +7391,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/clients/0QC0GcWTpHmnWDrqsDjwfG5hBxq0bGHX",
-        "body": {},
         "status": 204,
         "response": "",
         "rawHeaders": [],
@@ -7325,7 +7400,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/clients/XGPT8mgzUSbs9GrgnFm8D3QKjp7CZT1n",
-        "body": {},
         "status": 204,
         "response": "",
         "rawHeaders": [],
@@ -7335,7 +7409,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/clients/3mwBwDe6Y1AwyzC1g7qSto8vmDFKxVC1",
-        "body": {},
         "status": 204,
         "response": "",
         "rawHeaders": [],
@@ -7345,7 +7418,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/clients/W9DtiKy4raUFQUlYiXLf4eXuzWwneBcp",
-        "body": {},
         "status": 204,
         "response": "",
         "rawHeaders": [],
@@ -7355,7 +7427,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/clients/kxctQEaRpTc8pb8rq3DL2Eur02OKfaL9",
-        "body": {},
         "status": 204,
         "response": "",
         "rawHeaders": [],
@@ -7593,7 +7664,21 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/sms/selected-provider",
+        "path": "/api/v2/guardian/factors/phone/selected-provider",
+        "body": {
+            "provider": "auth0"
+        },
+        "status": 200,
+        "response": {
+            "provider": "auth0"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
+        "path": "/api/v2/guardian/factors/phone/selected-provider",
         "body": {
             "provider": "auth0"
         },
@@ -7636,7 +7721,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/log-streams?paginate=false",
+        "path": "/api/v2/log-streams",
         "body": "",
         "status": 200,
         "response": [
@@ -7804,7 +7889,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/log-streams/lst_0000000000011988",
-        "body": {},
         "status": 204,
         "response": "",
         "rawHeaders": [],
@@ -7814,7 +7898,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/log-streams/lst_0000000000011989",
-        "body": {},
         "status": 204,
         "response": "",
         "rawHeaders": [],
@@ -7823,7 +7906,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/clients?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -7952,7 +8035,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?strategy=auth0&include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?strategy=auth0&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -8013,7 +8096,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?strategy=auth0&include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?strategy=auth0&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -8075,7 +8158,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/connections/con_WTCElYGe42A3U2wC",
-        "body": {},
         "status": 202,
         "response": {
             "deleted_at": "2023-08-03T13:40:38.418Z"
@@ -8137,7 +8219,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/clients?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -8266,7 +8348,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -8322,7 +8404,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -8379,7 +8461,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/connections/con_CYO8cRRtMfH8H2TN",
-        "body": {},
         "status": 202,
         "response": {
             "deleted_at": "2023-08-03T13:40:39.353Z"
@@ -8390,7 +8471,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/clients?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -8519,7 +8600,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/client-grants?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/client-grants?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -8678,7 +8759,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/roles?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -8714,7 +8795,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles/rol_xTLwZuLtKXu0jnMc/permissions?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/roles/rol_xTLwZuLtKXu0jnMc/permissions?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -8729,7 +8810,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles/rol_ESfW6pVGwB3qwt5U/permissions?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/roles/rol_ESfW6pVGwB3qwt5U/permissions?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -8744,7 +8825,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles/rol_LVvLNdUbB9j5bxW9/permissions?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/roles/rol_LVvLNdUbB9j5bxW9/permissions?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -8759,7 +8840,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles/rol_JT0zo8zMuhZlvvnP/permissions?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/roles/rol_JT0zo8zMuhZlvvnP/permissions?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -8775,7 +8856,24 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/roles/rol_xTLwZuLtKXu0jnMc",
-        "body": {},
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "DELETE",
+        "path": "/api/v2/client-grants/cgr_iodSzvwxqm51tLZF",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "DELETE",
+        "path": "/api/v2/client-grants/cgr_iodSzvwxqm51tLZF",
         "status": 200,
         "response": {},
         "rawHeaders": [],
@@ -8785,7 +8883,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/roles/rol_ESfW6pVGwB3qwt5U",
-        "body": {},
         "status": 200,
         "response": {},
         "rawHeaders": [],
@@ -8795,7 +8892,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/roles/rol_LVvLNdUbB9j5bxW9",
-        "body": {},
         "status": 200,
         "response": {},
         "rawHeaders": [],
@@ -8805,7 +8901,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/roles/rol_JT0zo8zMuhZlvvnP",
-        "body": {},
         "status": 200,
         "response": {},
         "rawHeaders": [],
@@ -8814,7 +8909,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/actions?page=0&per_page=100",
+        "path": "/api/v2/actions/actions",
         "body": "",
         "status": 200,
         "response": {
@@ -8877,7 +8972,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/actions/actions/5cb59b2c-b643-414a-b1f6-af7607f1fa08?force=true",
-        "body": {},
         "status": 204,
         "response": "",
         "rawHeaders": [],
@@ -8886,7 +8980,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/actions?page=0&per_page=100",
+        "path": "/api/v2/actions/actions",
         "body": "",
         "status": 200,
         "response": {
@@ -8980,7 +9074,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -9019,7 +9113,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/organizations/org_Ni2g2n47tR56fXR8",
-        "body": {},
         "status": 204,
         "response": "",
         "rawHeaders": [],
@@ -9029,7 +9122,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "DELETE",
         "path": "/api/v2/organizations/org_z4Jobv6iLGqQROXe",
-        "body": {},
         "status": 204,
         "response": "",
         "rawHeaders": [],
@@ -9114,7 +9206,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/rules?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/rules?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -9139,7 +9231,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/hooks?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/hooks?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -9154,7 +9246,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?is_global=true&include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/clients?is_global=true&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -9272,7 +9364,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/resource-servers?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/resource-servers?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -9861,7 +9953,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?include_totals=true&is_global=false&page=0&per_page=100",
+        "path": "/api/v2/clients?include_totals=true&is_global=false",
         "body": "",
         "status": 200,
         "response": {
@@ -9959,7 +10051,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?strategy=auth0&include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?strategy=auth0&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -9997,7 +10089,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -10293,7 +10385,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/client-grants?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/client-grants?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -10551,7 +10643,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/guardian/factors/sms/selected-provider",
+        "path": "/api/v2/guardian/factors/phone/selected-provider",
         "body": "",
         "status": 200,
         "response": {
@@ -10575,7 +10667,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/roles?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -10964,7 +11056,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/actions?page=0&per_page=100",
+        "path": "/api/v2/actions/actions",
         "body": "",
         "status": 200,
         "response": {
@@ -11332,7 +11424,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/log-streams?paginate=false",
+        "path": "/api/v2/log-streams",
         "body": "",
         "status": 200,
         "response": [],
@@ -11342,7 +11434,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/custom-domains?paginate=false",
+        "path": "/api/v2/custom-domains",
         "body": "",
         "status": 200,
         "response": [],
