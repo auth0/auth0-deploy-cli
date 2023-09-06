@@ -2,7 +2,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/rules?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/rules?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -27,7 +27,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/hooks?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/hooks?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -42,7 +42,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?is_global=true&include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/clients?is_global=true&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -159,7 +159,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/resource-servers?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/resource-servers?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -748,7 +748,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?include_totals=true&is_global=false&page=0&per_page=100",
+        "path": "/api/v2/clients?include_totals=true&is_global=false",
         "body": "",
         "status": 200,
         "response": {
@@ -846,7 +846,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?strategy=auth0&include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?strategy=auth0&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -884,7 +884,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -1179,7 +1179,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/client-grants?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/client-grants?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -1437,7 +1437,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/guardian/factors/sms/selected-provider",
+        "path": "/api/v2/guardian/factors/phone/selected-provider",
         "body": "",
         "status": 200,
         "response": {
@@ -1461,7 +1461,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/roles?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -1849,7 +1849,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/actions?page=0&per_page=100",
+        "path": "/api/v2/actions/actions",
         "body": "",
         "status": 200,
         "response": {
@@ -2187,7 +2187,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/log-streams?paginate=false",
+        "path": "/api/v2/log-streams",
         "body": "",
         "status": 200,
         "response": [],
@@ -2197,7 +2197,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/custom-domains?paginate=false",
+        "path": "/api/v2/custom-domains",
         "body": "",
         "status": 200,
         "response": [],
@@ -2222,7 +2222,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/rules?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/rules?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -2237,7 +2237,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/rules?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/rules?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -2252,7 +2252,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/hooks?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/hooks?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -2267,7 +2267,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/hooks?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/hooks?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -2282,7 +2282,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?is_global=true&include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/clients?is_global=true&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -2370,6 +2370,91 @@
         "responseIsBinary": false
     },
     {
+      "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+      "method": "PATCH",
+      "path": "/api/v2/client-grants/cgr_iodSzvwxqm51tLZF",
+      "status": 200,
+      "body": {
+        "scope": ["read:client_grants", "create:client_grants", "delete:client_grants", "update:client_grants", "read:users", "update:users", "delete:users", "create:users", "read:users_app_metadata", "update:users_app_metadata", "delete:users_app_metadata", "create:users_app_metadata", "read:user_custom_blocks", "create:user_custom_blocks", "delete:user_custom_blocks", "create:user_tickets", "read:clients", "update:clients", "delete:clients", "create:clients", "read:client_keys", "update:client_keys", "delete:client_keys", "create:client_keys", "read:connections", "update:connections", "delete:connections", "create:connections", "read:resource_servers", "update:resource_servers", "delete:resource_servers", "create:resource_servers", "read:device_credentials", "update:device_credentials", "delete:device_credentials", "create:device_credentials", "read:rules", "update:rules", "delete:rules", "create:rules", "read:rules_configs", "update:rules_configs", "delete:rules_configs", "read:hooks", "update:hooks", "delete:hooks", "create:hooks", "read:actions", "update:actions", "delete:actions", "create:actions", "read:email_provider", "update:email_provider", "delete:email_provider", "create:email_provider", "blacklist:tokens", "read:stats", "read:insights", "read:tenant_settings", "update:tenant_settings", "read:logs", "read:logs_users", "read:shields", "create:shields", "update:shields", "delete:shields", "read:anomaly_blocks", "delete:anomaly_blocks", "update:triggers", "read:triggers", "read:grants", "delete:grants", "read:guardian_factors", "update:guardian_factors", "read:guardian_enrollments", "delete:guardian_enrollments", "create:guardian_enrollment_tickets", "read:user_idp_tokens", "create:passwords_checking_job", "delete:passwords_checking_job", "read:custom_domains", "delete:custom_domains", "create:custom_domains", "update:custom_domains", "read:email_templates", "create:email_templates", "update:email_templates", "read:mfa_policies", "update:mfa_policies", "read:roles", "create:roles", "delete:roles", "update:roles", "read:prompts", "update:prompts", "read:branding", "update:branding", "delete:branding", "read:log_streams", "create:log_streams", "delete:log_streams", "update:log_streams", "create:signing_keys", "read:signing_keys", "update:signing_keys", "read:limits", "update:limits", "create:role_members", "read:role_members", "delete:role_members", "read:entitlements", "read:attack_protection", "update:attack_protection", "read:organizations", "update:organizations", "create:organizations", "delete:organizations", "create:organization_members", "read:organization_members", "delete:organization_members", "create:organization_connections", "read:organization_connections", "update:organization_connections", "delete:organization_connections", "create:organization_member_roles", "read:organization_member_roles", "delete:organization_member_roles", "create:organization_invitations", "read:organization_invitations", "delete:organization_invitations", "read:organizations_summary", "create:actions_log_sessions", "create:authentication_methods", "read:authentication_methods", "update:authentication_methods", "delete:authentication_methods"]
+      },
+      "response": {},
+      "rawHeaders": [],
+      "responseIsBinary": false
+    },
+    {
+      "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+      "method": "PATCH",
+      "path": "/api/v2/clients/GIW99EUCF9DFExh77WPMyTMzT8NN4J3A",
+      "body": {
+        "name": "Deploy CLI",
+        "app_type": "non_interactive",
+        "cross_origin_auth": false,
+        "custom_login_page_on": true,
+        "grant_types": ["client_credentials"],
+        "is_first_party": true,
+        "is_token_endpoint_ip_header_trusted": false,
+        "jwt_configuration": {
+          "alg": "RS256",
+          "lifetime_in_seconds": 36000
+        },
+        "oidc_conformant": true,
+        "refresh_token": {
+          "expiration_type": "non-expiring",
+          "leeway": 0,
+          "infinite_token_lifetime": true,
+          "infinite_idle_token_lifetime": true,
+          "token_lifetime": 31557600,
+          "idle_token_lifetime": 2592000,
+          "rotation_type": "non-rotating"
+        },
+        "sso_disabled": false,
+        "token_endpoint_auth_method": "client_secret_post"
+      },
+      "status": 200,
+      "response": {
+        "tenant": "auth0-deploy-cli-e2e",
+        "global": false,
+        "is_token_endpoint_ip_header_trusted": false,
+        "name": "Deploy CLI",
+        "is_first_party": true,
+        "oidc_conformant": true,
+        "sso_disabled": false,
+        "cross_origin_auth": false,
+        "refresh_token": {
+          "expiration_type": "non-expiring",
+          "leeway": 0,
+          "infinite_token_lifetime": true,
+          "infinite_idle_token_lifetime": true,
+          "token_lifetime": 31557600,
+          "idle_token_lifetime": 2592000,
+          "rotation_type": "non-rotating"
+        },
+        "signing_keys": [
+          {
+            "cert": "[REDACTED]",
+            "pkcs7": "[REDACTED]",
+            "subject": "deprecated"
+          }
+        ],
+        "client_id": "GIW99EUCF9DFExh77WPMyTMzT8NN4J3A",
+        "callback_url_template": false,
+        "client_secret": "[REDACTED]",
+        "jwt_configuration": {
+          "alg": "RS256",
+          "lifetime_in_seconds": 36000,
+          "secret_encoded": false
+        },
+        "token_endpoint_auth_method": "client_secret_post",
+        "app_type": "non_interactive",
+        "grant_types": [
+          "client_credentials"
+        ],
+        "custom_login_page_on": true
+      },
+      "rawHeaders": [],
+      "responseIsBinary": false
+    },
+    {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
         "path": "/api/v2/tenants/settings",
@@ -2454,7 +2539,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/resource-servers?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/resource-servers?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -3043,7 +3128,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?include_totals=true&is_global=false&page=0&per_page=100",
+        "path": "/api/v2/clients?include_totals=true&is_global=false",
         "body": "",
         "status": 200,
         "response": {
@@ -3393,7 +3478,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/sms/selected-provider",
+        "path": "/api/v2/guardian/factors/phone/selected-provider",
         "body": {
             "provider": "auth0"
         },
@@ -3533,7 +3618,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/log-streams?paginate=false",
+        "path": "/api/v2/log-streams",
         "body": "",
         "status": 200,
         "response": [],
@@ -3543,7 +3628,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/custom-domains?paginate=false",
+        "path": "/api/v2/custom-domains",
         "body": "",
         "status": 200,
         "response": [],
@@ -3581,7 +3666,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/clients?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -3710,7 +3795,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?strategy=auth0&include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?strategy=auth0&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -3748,7 +3833,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?strategy=auth0&include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?strategy=auth0&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -3866,7 +3951,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/clients?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -3995,7 +4080,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -4033,7 +4118,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -4125,7 +4210,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/clients?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -4254,7 +4339,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/client-grants?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/client-grants?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -4413,7 +4498,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/roles?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -4428,7 +4513,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/actions?page=0&per_page=100",
+        "path": "/api/v2/actions/actions",
         "body": "",
         "status": 200,
         "response": {
@@ -4441,7 +4526,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/actions?page=0&per_page=100",
+        "path": "/api/v2/actions/actions",
         "body": "",
         "status": 200,
         "response": {
@@ -4481,7 +4566,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&page=0&per_page=100",
+        "path": "/api/v2/connections?include_totals=true",
         "body": "",
         "status": 200,
         "response": {
