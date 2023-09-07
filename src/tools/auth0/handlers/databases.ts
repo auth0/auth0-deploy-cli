@@ -83,6 +83,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
 
     // Convert enabled_clients by name to the id
     // TODO: Bring back paginate: true
+    // @ts-ignore-error TODO: add pagination overload to client.getAll
     const { data: { clients } } = await this.client.clients.getAll({ include_totals: true });
     // TODO: Bring back paginate: true
     const { data: { connections: existingDatabasesConnections } } = await this.client.connections.getAll({

@@ -71,6 +71,7 @@ export default class ClientGrantsHandler extends DefaultHandler {
 
     // TODO: Bring back paginate: true
     const { data } = await this.client.clients.getAll({ include_totals: true });
+    // @ts-ignore-error TODO: add pagination overload to client.getAll
     const { clients } = data;
     const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
     const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);

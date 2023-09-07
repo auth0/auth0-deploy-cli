@@ -87,6 +87,7 @@ export default class ClientHandler extends DefaultAPIHandler {
       include_totals: true,
       is_global: false,
     });
+    // @ts-ignore-error TODO: add pagination overload to client.getAll
     this.existing = data.clients;
     return this.existing;
   }
