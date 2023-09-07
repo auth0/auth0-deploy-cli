@@ -11,7 +11,7 @@ describe('#pages handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(data).to.be.an('object');
-            expect(params.id).to.equal('global1');
+            expect(params.client_id).to.equal('global1');
             expect(data.custom_login_page).to.equal('login_body');
             expect(data.custom_login_page_on).to.equal(true);
             return Promise.resolve({ data });
