@@ -53,6 +53,7 @@ async function dump(context: DirectoryContext): Promise<void> {
   });
 
   // TODO: Bring back paginate: true
+  // @ts-ignore-error TODO: add pagination overload to client.getAll
   const { data: { clients: allClients } } = await context.mgmtClient.clients.getAll({
     include_totals: true,
   });

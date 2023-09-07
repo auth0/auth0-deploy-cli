@@ -51,6 +51,7 @@ export default class PagesHandler extends DefaultHandler {
 
   async updateLoginPage(page): Promise<void> {
     // TODO: Bring back paginate: true
+    // @ts-ignore-error TODO: add pagination overload to client.getAll
     const { data: { clients: globalClient } } = await this.client.clients.getAll({
       is_global: true,
       include_totals: true,
@@ -104,6 +105,7 @@ export default class PagesHandler extends DefaultHandler {
 
     // Login page is handled via the global client
     // TODO: Bring back paginate: true
+    // @ts-ignore-error TODO: add pagination overload to client.getAll
     const { data: { clients: globalClient } } = await this.client.clients.getAll({
       is_global: true,
       include_totals: true,
