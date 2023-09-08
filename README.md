@@ -89,7 +89,7 @@ In order for the Deploy CLI to call the Management API, a dedicated Auth0 applic
 2. Click “Create Application”
 3. On Create application page:
    a. Name it “Deploy CLI” or similar
-   b. Select “Machine to Machine Applications” as application type
+   b. Select “Machine to Machine Applications” as the application type
    c. Click “Create”
 4. On the “Authorize Machine to Machine Application” page
    a. Select “Auth0 Management API”
