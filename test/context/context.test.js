@@ -48,8 +48,6 @@ describe('#context loader validation', async () => {
         'import'
       ).to.be.eventually.rejectedWith(Error);
 
-      console.log({ result });
-
       expect(result).to.be.an('object').that.has.property('name').which.eq('access_denied');
     });
 
