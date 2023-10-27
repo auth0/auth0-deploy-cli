@@ -16,7 +16,7 @@ chai.use(sinonChai);
 
 const config = {
   AUTH0_INPUT_FILE: path.resolve(testDataDir, 'notexist'),
-  AUTH0_DOMAIN: 'tenant.auth0.com',
+  AUTH0_DOMAIN: 'test.auth0.com',
   AUTH0_ACCESS_TOKEN: 'fake',
 };
 
@@ -47,6 +47,8 @@ describe('#context loader validation', async () => {
         setupContext({ ...tmpConfig, AUTH0_INPUT_FILE: dir }),
         'import'
       ).to.be.eventually.rejectedWith(Error);
+
+      console.log({ result });
 
       expect(result).to.be.an('object').that.has.property('name').which.eq('access_denied');
     });
