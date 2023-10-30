@@ -1763,6 +1763,16 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/prompts/login-id/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/prompts/login-password/custom-text/en",
         "body": "",
         "status": 200,
@@ -2583,20 +2593,12 @@
         "response": {
             "enabled": true,
             "shields": [
-                "admin_notification",
-                "block"
+                "block",
+                "user_notification"
             ],
+            "mode": "count_per_identifier_and_ip",
             "allowlist": [],
-            "stage": {
-                "pre-login": {
-                    "max_attempts": 100,
-                    "rate": 864000
-                },
-                "pre-user-registration": {
-                    "max_attempts": 50,
-                    "rate": 1200
-                }
-            }
+            "max_attempts": 10
         },
         "rawHeaders": [],
         "responseIsBinary": false

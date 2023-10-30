@@ -751,6 +751,48 @@
                     "tenant": "auth0-deploy-cli-e2e",
                     "global": false,
                     "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Default App",
+                    "callbacks": [],
+                    "cross_origin_auth": false,
+                    "is_first_party": true,
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "WM31waMImeHDtQnjVLPzg2uvu00vgdim",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
                     "name": "Deploy CLI",
                     "is_first_party": true,
                     "oidc_conformant": true,
@@ -952,12 +994,26 @@
         "method": "GET",
         "path": "/api/v2/emails/provider?include_fields=true&fields=name%2Cenabled%2Ccredentials%2Csettings%2Cdefault_from_address",
         "body": "",
-        "status": 404,
+        "status": 200,
         "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "There is not a configured email provider",
-            "errorCode": "inexistent_email_provider"
+            "name": "mandrill",
+            "credentials": {},
+            "default_from_address": "auth0-user@auth0.com",
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
+        "path": "/api/v2/guardian/factors/push-notification",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -980,6 +1036,62 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
         "path": "/api/v2/guardian/factors/webauthn-roaming",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
+        "path": "/api/v2/guardian/factors/duo",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
+        "path": "/api/v2/guardian/factors/webauthn-roaming",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
+        "path": "/api/v2/guardian/factors/otp",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
+        "path": "/api/v2/guardian/factors/recovery-code",
         "body": {
             "enabled": false
         },
@@ -1121,8 +1233,7 @@
         },
         "status": 200,
         "response": {
-            "universal_login_experience": "new",
-            "identifier_first": true
+            "universal_login_experience": "new"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -1211,14 +1322,19 @@
     },
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PATCH",
-        "path": "/api/v2/attack-protection/breached-password-detection",
-        "body": {
-            "enabled": false,
-            "shields": [],
-            "admin_notification_frequency": [],
-            "method": "standard"
-        },
+        "method": "GET",
+        "path": "/api/v2/log-streams?paginate=false",
+        "body": "",
+        "status": 200,
+        "response": [],
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/custom-domains",
+        "body": "",
         "status": 200,
         "response": {
             "enabled": false,
@@ -1237,16 +1353,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/custom-domains",
-        "body": "",
-        "status": 200,
-        "response": [],
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/clients?include_totals=true",
         "body": "",
         "status": 200,
@@ -1255,6 +1361,48 @@
             "start": 0,
             "limit": 100,
             "clients": [
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Default App",
+                    "callbacks": [],
+                    "cross_origin_auth": false,
+                    "is_first_party": true,
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "WM31waMImeHDtQnjVLPzg2uvu00vgdim",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
                 {
                     "tenant": "auth0-deploy-cli-e2e",
                     "global": false,
@@ -1606,6 +1754,48 @@
             "start": 0,
             "limit": 100,
             "clients": [
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Default App",
+                    "callbacks": [],
+                    "cross_origin_auth": false,
+                    "is_first_party": true,
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "WM31waMImeHDtQnjVLPzg2uvu00vgdim",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
                 {
                     "tenant": "auth0-deploy-cli-e2e",
                     "global": false,
@@ -1884,6 +2074,48 @@
             "start": 0,
             "limit": 100,
             "clients": [
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Default App",
+                    "callbacks": [],
+                    "cross_origin_auth": false,
+                    "is_first_party": true,
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "WM31waMImeHDtQnjVLPzg2uvu00vgdim",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
                 {
                     "tenant": "auth0-deploy-cli-e2e",
                     "global": false,
@@ -2342,7 +2574,7 @@
         "status": 200,
         "response": {
             "allowed_logout_urls": [
-                "https://mycompany.org/logoutCallback"
+                "https://travel0.com/logoutCallback"
             ],
             "change_password": {
                 "enabled": true,
@@ -2378,7 +2610,7 @@
                 "disable_clickjack_protection_headers": false,
                 "enable_pipeline2": false
             },
-            "friendly_name": "My Test Tenant",
+            "friendly_name": "This tenant name should be preserved",
             "guardian_mfa_page": {
                 "enabled": true,
                 "html": "<html>MFA</html>\n"
@@ -2387,8 +2619,8 @@
             "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
             "sandbox_version": "12",
             "session_lifetime": 3.0166666666666666,
-            "support_email": "support@mycompany.org",
-            "support_url": "https://mycompany.org/support",
+            "support_email": "support@travel0.com",
+            "support_url": "https://travel0.com/support",
             "universal_login": {
                 "colors": {
                     "primary": "#F8F8F2",

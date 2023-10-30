@@ -1528,16 +1528,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/guardian/factors/push-notification/providers/sns",
-        "body": "",
-        "status": 200,
-        "response": {},
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/guardian/factors/sms/providers/twilio",
         "body": "",
         "status": 200,
@@ -1547,6 +1537,16 @@
             "from": "from bar",
             "messaging_service_sid": "foo"
         },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/guardian/factors/push-notification/providers/sns",
+        "body": "",
+        "status": 200,
+        "response": {},
         "rawHeaders": [],
         "responseIsBinary": false
     },
@@ -1795,7 +1795,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login/custom-text/en",
+        "path": "/api/v2/prompts/login-id/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -1915,7 +1915,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa-voice/custom-text/en",
+        "path": "/api/v2/prompts/mfa-webauthn/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -1925,7 +1925,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa-webauthn/custom-text/en",
+        "path": "/api/v2/prompts/mfa-voice/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2089,17 +2089,6 @@
                 },
                 {
                     "id": "post-login",
-                    "version": "v2",
-                    "status": "DEPRECATED",
-                    "runtimes": [
-                        "node12",
-                        "node16"
-                    ],
-                    "default_runtime": "node16",
-                    "compatible_triggers": []
-                },
-                {
-                    "id": "post-login",
                     "version": "v3",
                     "status": "CURRENT",
                     "runtimes": [
@@ -2116,13 +2105,15 @@
                     ]
                 },
                 {
-                    "id": "credentials-exchange",
-                    "version": "v1",
+                    "id": "post-login",
+                    "version": "v2",
                     "status": "DEPRECATED",
                     "runtimes": [
-                        "node12"
+                        "node12",
+                        "node16",
+                        "node18"
                     ],
-                    "default_runtime": "node12",
+                    "default_runtime": "node16",
                     "compatible_triggers": []
                 },
                 {
@@ -2150,7 +2141,7 @@
                     "compatible_triggers": []
                 },
                 {
-                    "id": "pre-user-registration",
+                    "id": "credentials-exchange",
                     "version": "v1",
                     "status": "DEPRECATED",
                     "runtimes": [
@@ -3700,7 +3691,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/push-notification",
+        "path": "/api/v2/guardian/factors/email",
         "body": {
             "enabled": false
         },
@@ -3867,6 +3858,34 @@
         "response": {
             "universal_login_experience": "new",
             "identifier_first": true
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/attack-protection/brute-force-protection",
+        "body": {
+            "enabled": true,
+            "shields": [
+                "block",
+                "user_notification"
+            ],
+            "mode": "count_per_identifier_and_ip",
+            "allowlist": [],
+            "max_attempts": 10
+        },
+        "status": 200,
+        "response": {
+            "enabled": true,
+            "shields": [
+                "block",
+                "user_notification"
+            ],
+            "mode": "count_per_identifier_and_ip",
+            "allowlist": [],
+            "max_attempts": 10
         },
         "rawHeaders": [],
         "responseIsBinary": false
