@@ -12,7 +12,7 @@ export default async function exportCMD(params: ExportParams) {
   const {
     output_folder: outputFolder,
     base_path: basePath,
-    config_file: configFile,
+    config_file: configFile = "config.json",
     config: configObj,
     export_ids: exportIds,
     secret: clientSecret,

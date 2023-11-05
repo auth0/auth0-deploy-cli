@@ -9,7 +9,7 @@ export default async function importCMD(params: ImportParams) {
   const {
     input_file: inputFile,
     base_path: basePath,
-    config_file: configFile,
+    config_file: configFile= "config.json",
     config: configObj,
     env: shouldInheritEnv = false,
     secret: clientSecret,
