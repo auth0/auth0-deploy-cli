@@ -17,9 +17,14 @@ async function parse(context: YAMLContext): Promise<ParsedClientGrants> {
 }
 
 async function dump(context: YAMLContext): Promise<ParsedClientGrants> {
-  const { clientGrants, clients } = context.assets;
+  const { clientGrants } = context.assets;
 
   if (!clientGrants) return { clientGrants: null };
+
+  const clients = await context.mgmtClient.clients.getAll({
+    paginate: true,
+    include_totals: true,
+  })
 
   // Convert client_id to the client name for readability
   return {
