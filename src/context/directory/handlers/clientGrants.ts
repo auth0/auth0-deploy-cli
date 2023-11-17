@@ -57,8 +57,6 @@ async function dump(context: DirectoryContext): Promise<void> {
     include_totals: true,
   });
 
-  console.log({ allClients })
-
   // Convert client_id to the client name for readability
   clientGrants.forEach((grant: ClientGrant) => {
     const dumpGrant = { ...grant };
