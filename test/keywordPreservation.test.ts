@@ -494,6 +494,16 @@ describe('preserveKeywords', () => {
         status: 'ready',
       },
     ],
+    guardianFactorProviders: [
+      {
+        name: 'sms',
+        auth_token: '##AUTH_TOKEN##',
+        from: '##COMPANY_NAME##',
+        sid: '##TWILIO_SID##',
+        messaging_service_sid: '##TWILIO_SID##',
+        provider: 'twilio',
+      },
+    ],
   };
 
   const mockRemoteAssets = {
@@ -537,6 +547,16 @@ describe('preserveKeywords', () => {
         status: 'ready',
       },
     ],
+    guardianFactorProviders: [
+      {
+        name: 'sms',
+        auth_token: 'mock-twilio-auth-token',
+        from: 'travel0',
+        sid: 'twilio-sid',
+        messaging_service_sid: 'twilio-sid',
+        provider: 'twilio',
+      },
+    ],
   };
 
   const auth0Handlers = [
@@ -561,6 +581,7 @@ describe('preserveKeywords', () => {
       type: 'resourceServers',
     },
     { id: 'id', identifiers: ['id', 'domain'], type: 'customDomains' },
+    { id: 'id', identifiers: ['name'], type: 'guardianFactorProviders' },
   ];
 
   it('should preserve keywords when they correlate to keyword mappings', () => {
@@ -572,6 +593,8 @@ describe('preserveKeywords', () => {
         ALLOWED_LOGOUT_URLS: ['localhost:3000/logout', 'https://travel0.com/logout'],
         ENV: 'Production',
         API_MAIN_IDENTIFIER: 'https://travel0.com/api/v1',
+        AUTH_TOKEN: 'mock-twilio-auth-token',
+        TWILIO_SID: 'twilio-sid',
       },
       auth0Handlers,
     });
@@ -590,6 +613,10 @@ describe('preserveKeywords', () => {
           },
         ];
         expected.customDomains[0].domain = '##COMPANY_NAME##.com';
+        expected.guardianFactorProviders[0].sid = '##TWILIO_SID##';
+        expected.guardianFactorProviders[0].messaging_service_sid = '##TWILIO_SID##';
+        expected.guardianFactorProviders[0].auth_token = '##AUTH_TOKEN##';
+        expected.guardianFactorProviders[0].from = '##COMPANY_NAME##';
         return expected;
       })()
     );
@@ -691,6 +718,75 @@ describe('preserveKeywords', () => {
   });
 
   it('should preserve keywords in identifier fields for resources with multiple identifiers', () => {
+    const mockLocalAssets = {
+      clientGrants: [
+        {
+          client_id: 'API Explorer Application',
+          audience: 'https://##ENV##.travel0.com/api/v1',
+          scope: ['update:account'],
+          name: 'API Explorer Application',
+        },
+        {
+          client_id: 'M2M Application',
+          audience: '##API_IDENTIFIER##',
+          scope: ['create:users', 'read:users'],
+          name: 'My M2M',
+        },
+        {
+          client_id: 'M2M Application',
+          audience: 'https://##ENV##.travel0.com/api/v1',
+          scope: ['update:account'],
+          name: 'My M2M',
+        },
+      ],
+    };
+
+    const preservedAssets = preserveKeywords({
+      localAssets: mockLocalAssets,
+      remoteAssets: {
+        clientGrants: [
+          {
+            client_id: 'API Explorer Application',
+            audience: 'https://dev.travel0.com/api/v1',
+            scope: ['update:account'],
+            name: 'API Explorer Application',
+          },
+          {
+            client_id: 'M2M Application',
+            audience: 'https://api.travel0.com/v1',
+            scope: ['create:users', 'read:users'],
+            name: 'My M2M',
+          },
+          {
+            client_id: 'M2M Application',
+            audience: 'https://dev.travel0.com/api/v1',
+            scope: ['update:account'],
+            name: 'My M2M',
+          },
+        ],
+      },
+      keywordMappings: {
+        ENV: 'dev',
+        API_IDENTIFIER: 'https://api.travel0.com/v1',
+      },
+      auth0Handlers: [
+        {
+          type: 'clientGrants',
+          id: 'id',
+          identifiers: ['id', ['client_id', 'audience']],
+        },
+      ],
+    });
+
+    const expected = (() => {
+      let expected = mockLocalAssets;
+      return expected;
+    })();
+
+    expect(preservedAssets).to.deep.equal(expected);
+  });
+
+  it('should preserve keywords in resources ', () => {
     const mockLocalAssets = {
       clientGrants: [
         {
