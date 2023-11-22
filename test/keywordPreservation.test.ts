@@ -949,7 +949,6 @@ describe('preserveKeywords', () => {
       auth0Handlers: [
         {
           id: 'name',
-          // id: 'id', // (test-case passes)
           identifiers: ['id', 'name'],
           type: 'guardianFactorProviders',
         },
