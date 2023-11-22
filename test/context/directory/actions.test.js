@@ -111,6 +111,45 @@ describe('#directory context actions', () => {
     expect(context.assets.actions).to.deep.equal(actionsTarget);
   });
 
+  it('should process actions when code is stored in path relative to input file', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'test5');
+    const files = {
+      'separate-directory': {
+        'action-code.js':
+          '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log("test-action"); return {}; };',
+      },
+      [constants.ACTIONS_DIRECTORY]: {
+        'action-one.json': `{
+          "name": "action-one",
+          "code": "./separate-directory/action-code.js",
+          "runtime": "node12",
+          "dependencies": [
+            {
+              "name": "lodash",
+              "version": "4.17.20"
+            }
+          ],
+          "secrets": [],
+          "status": "built",
+          "supported_triggers": [
+            {
+              "id": "post-login",
+              "version": "v1"
+            }
+          ],
+          "deployed": true
+        }`,
+      },
+    };
+    createDir(repoDir, files);
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+    expect(context.assets.actions).to.deep.equal(actionsTarget);
+  });
+
   it('should ignore bad actions directory', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'test2');
     cleanThenMkdir(repoDir);
