@@ -28,9 +28,12 @@ function parse(context: DirectoryContext): ParsedActions {
     const actionFolder = path.join(constants.ACTIONS_DIRECTORY, `${action.name}`);
 
     if (action.code) {
-      const toUnixPath = (somePath) =>
-        somePath.replace(/[\\/]+/g, '/').replace(/^([a-zA-Z]+:|\.\/)/, '');
-      action.code = context.loadFile(toUnixPath(action.code), actionFolder);
+      const unixPath = action.code.replace(/[\\/]+/g, '/').replace(/^([a-zA-Z]+:|\.\/)/, '');
+      if (fs.existsSync(unixPath)) {
+        action.code = context.loadFile(unixPath, actionFolder);
+      } else {
+        action.code = context.loadFile(path.join(context.filePath, action.code), actionFolder);
+      }
     }
 
     return action;
