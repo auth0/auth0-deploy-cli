@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.20.0] - 2023-11-29
+
 ### Added
 
 - Relative path import support for actions directory handler [#866]
@@ -999,7 +1001,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#836]: https://github.com/auth0/auth0-deploy-cli/issues/836
 [#837]: https://github.com/auth0/auth0-deploy-cli/issues/837
 [#838]: https://github.com/auth0/auth0-deploy-cli/issues/838
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.19.0...HEAD
+[#864]: https://github.com/auth0/auth0-deploy-cli/issues/864
+[#865]: https://github.com/auth0/auth0-deploy-cli/issues/865
+[#866]: https://github.com/auth0/auth0-deploy-cli/issues/866
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.20.0...HEAD
+[7.20.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.19.0...v7.20.0
 [7.19.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.18.0...v7.19.0
 [7.18.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.7...v7.18.0
 [7.17.7]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.6...v7.17.7
