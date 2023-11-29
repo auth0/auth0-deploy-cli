@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Relative path import support for actions directory handler [#866]
+
+### Fixed
+
+- Keyword preservation for wider array of resources [#864]
+- Fetching clients if not defined when managing client grants in YAML format [#865]
+
 ## [7.19.0] - 2023-08-11
 
 ### Added
