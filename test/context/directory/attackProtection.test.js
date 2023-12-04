@@ -31,7 +31,7 @@ describe('#directory context attack-protection', () => {
     };
 
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     const target = {
       breachedPasswordDetection: {
@@ -84,7 +84,7 @@ describe('#directory context attack-protection', () => {
 
     const config = { AUTH0_INPUT_FILE: repoDir };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     const target = {
       breachedPasswordDetection: {

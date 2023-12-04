@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { constants } from '../../../tools';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
@@ -17,7 +17,12 @@ function parse(context: DirectoryContext): ParsedTriggers {
 
   const files = getFiles(triggersFolder, ['.json']);
 
-  const triggers = { ...loadJSON(files[0], context.mappings) };
+  const triggers = {
+    ...loadJSON(files[0], {
+      mappings: context.mappings,
+      disableKeywordReplacement: context.disableKeywordReplacement,
+    }),
+  };
 
   return { triggers };
 }

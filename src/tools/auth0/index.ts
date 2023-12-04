@@ -4,7 +4,7 @@ import pagedClient from './client';
 import schema from './schema';
 import handlers from './handlers';
 
-import { Assets, Auth0APIClient, BaseAuth0APIClient } from '../../types';
+import { Assets, AssetTypes, Auth0APIClient, BaseAuth0APIClient } from '../../types';
 import APIHandler from './handlers/default';
 import { ConfigFunction } from '../../configFactory';
 
@@ -43,8 +43,18 @@ export default class Auth0 {
         return new handler.default({ client: this.client, config: this.config });
       })
       .filter((handler) => {
-        const excludedAssetTypes = config('AUTH0_EXCLUDED') || [];
-        return !excludedAssetTypes.includes(handler.type);
+        const excludedAssetTypes: undefined | AssetTypes[] = config('AUTH0_EXCLUDED');
+
+        if (excludedAssetTypes === undefined) return true;
+
+        return !excludedAssetTypes.includes(handler.type as AssetTypes);
+      })
+      .filter((handler) => {
+        const onlyIncludedAssetTypes: undefined | AssetTypes[] = config('AUTH0_INCLUDED_ONLY');
+
+        if (onlyIncludedAssetTypes === undefined) return true;
+
+        return onlyIncludedAssetTypes.includes(handler.type as AssetTypes);
       });
   }
 
@@ -79,7 +89,7 @@ export default class Auth0 {
     await this.runStage('validate');
   }
 
-  async loadAll(): Promise<void> {
+  async loadAssetsFromAuth0(): Promise<void> {
     // Populate assets from auth0 tenant
     await this.runStage('load');
   }

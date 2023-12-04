@@ -1,4 +1,4 @@
-import DefaultHandler from './default';
+import DefaultHandler, { order } from './default';
 import constants from '../../constants';
 import log from '../../../logger';
 import { Asset, Assets } from '../../../types';
@@ -68,16 +68,17 @@ export default class BrandingHandler extends DefaultHandler {
     }
   }
 
+  @order('70') // Run after custom domains and themes.
   async processChanges(assets: Assets) {
-    const { branding } = assets;
+    if (!assets.branding) return;
 
-    // quit early if there's no branding to process.
-    if (!branding) return;
+    const { templates, ...brandingSettings } = assets.branding;
 
-    // remove templates, we only want top level branding settings for this API call
-    const brandingSettings = { ...branding };
-    delete brandingSettings.templates;
-    // Do nothing if not set
+    if (brandingSettings.logo_url === '') {
+      //Sometimes blank logo_url returned by API but is invalid on import. See: DXCDT-240
+      delete brandingSettings.logo_url;
+    }
+
     if (brandingSettings && Object.keys(brandingSettings).length) {
       await this.client.branding.updateSettings({}, brandingSettings);
       this.updated += 1;
@@ -85,8 +86,8 @@ export default class BrandingHandler extends DefaultHandler {
     }
 
     // handle templates
-    if (branding.templates && branding.templates.length) {
-      const unknownTemplates = branding.templates
+    if (templates && templates.length) {
+      const unknownTemplates = templates
         .filter((t) => !constants.SUPPORTED_BRANDING_TEMPLATES.includes(t.template))
         .map((t) => t.template);
       if (unknownTemplates.length) {
@@ -98,7 +99,7 @@ export default class BrandingHandler extends DefaultHandler {
         );
       }
 
-      const templateDefinition = branding.templates.find(
+      const templateDefinition = templates.find(
         (t) => t.template === constants.UNIVERSAL_LOGIN_TEMPLATE
       );
       if (templateDefinition && templateDefinition.body) {
@@ -107,7 +108,7 @@ export default class BrandingHandler extends DefaultHandler {
           { template: templateDefinition.body }
         );
         this.updated += 1;
-        this.didUpdate(branding.templates);
+        this.didUpdate(templates);
       }
     }
   }

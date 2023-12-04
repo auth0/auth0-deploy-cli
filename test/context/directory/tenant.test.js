@@ -32,7 +32,7 @@ describe('#directory context tenant', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.tenant).to.deep.equal(tenantTarget);
   });
@@ -58,7 +58,7 @@ describe('#directory context tenant', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.tenant).to.deep.equal(tenantTarget);
   });

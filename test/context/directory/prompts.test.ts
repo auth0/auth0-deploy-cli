@@ -59,7 +59,7 @@ describe('#directory context prompts', () => {
       },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.prompts).to.deep.equal({
       universal_login_experience: 'classic',
@@ -110,7 +110,7 @@ describe('#directory context prompts', () => {
         AUTH0_INPUT_FILE: promptsDirectory,
       };
       const context = new Context(config, mockMgmtClient());
-      await context.load();
+      await context.loadAssetsFromLocal();
 
       expect(context.assets.prompts).to.deep.equal({ ...mockPromptsSettings, customText: {} });
     });
@@ -127,7 +127,7 @@ describe('#directory context prompts', () => {
         AUTH0_INPUT_FILE: promptsDirectory,
       };
       const context = new Context(config, mockMgmtClient());
-      await context.load();
+      await context.loadAssetsFromLocal();
 
       expect(context.assets.prompts).to.deep.equal({ customText: {} });
     });

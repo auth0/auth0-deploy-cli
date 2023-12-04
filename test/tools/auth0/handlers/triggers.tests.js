@@ -26,12 +26,13 @@ describe('#triggers handler', () => {
       const handler = new triggers.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = {
-        'post-login': [{ action_name: 'action-one', display_name: 'dysplay-name' }],
+        'post-login': [{ action_name: 'action-one', display_name: 'display-name' }],
         'credentials-exchange': [],
         'pre-user-registration': [],
         'post-user-registration': [],
         'post-change-password': [],
         'send-phone-message': [],
+        'password-reset-post-challenge': [],
       };
 
       await stageFn.apply(handler, [{ triggers: data }]);
@@ -41,12 +42,13 @@ describe('#triggers handler', () => {
   describe('#triggers process', () => {
     it('should bind a trigger', async () => {
       const triggersBindings = {
-        'post-login': [{ action_name: 'action-one', display_name: 'dysplay-name' }],
+        'post-login': [{ action_name: 'action-one', display_name: 'display-name' }],
         'credentials-exchange': [],
         'pre-user-registration': [],
         'post-user-registration': [],
         'post-change-password': [],
         'send-phone-message': [],
+        'password-reset-post-challenge': [],
       };
 
       const auth0 = {
@@ -64,6 +66,131 @@ describe('#triggers handler', () => {
       await stageFn.apply(handler, [{ triggers: triggersBindings }]);
     });
 
+    it('should unbind triggers', async () => {
+      let timesUpdateTriggerBindingsCalled = 0;
+
+      const existingTriggerBindings = {
+        'post-login': [{ action_name: 'action-one', display_name: 'email-user' }],
+        'credentials-exchange': [{ action_name: 'action-two', display_name: 'log-to-logger' }],
+        'pre-user-registration': [
+          { action_name: 'action-three', display_name: 'slack-integration' },
+        ],
+        'post-user-registration': [{ action_name: 'action-one', display_name: 'email-user' }],
+        'post-change-password': [{ action_name: 'action-two', display_name: 'log-to-logger' }],
+        'send-phone-message': [{ action_name: 'action-three', display_name: 'slack-integration' }],
+        'password-reset-post-challenge': [{ action_name: 'action-two', display_name: 'log-to-logger' }],
+      };
+
+      const auth0 = {
+        actions: {
+          getAllTriggers: () => Promise.resolve(existingTriggerBindings),
+          // eslint-disable-next-line camelcase
+          updateTriggerBindings: ({ trigger_id }, { bindings }) => {
+            expect([
+              'post-login',
+              'credentials-exchange',
+              'pre-user-registration',
+              'post-user-registration',
+              'post-change-password',
+              'send-phone-message',
+              'password-reset-post-challenge',
+            ]).to.include(trigger_id); // eslint-disable-line camelcase
+            expect(bindings).to.be.an('array').that.is.empty; // eslint-disable-line no-unused-expressions
+            timesUpdateTriggerBindingsCalled += 1;
+            return Promise.resolve([]);
+          },
+        },
+        pool,
+        getAllCalled: false,
+      };
+
+      const handler = new triggers.default({ client: auth0, config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          triggers: {
+            'post-login': [],
+            'credentials-exchange': [],
+            'pre-user-registration': [],
+            'post-user-registration': [],
+            'post-change-password': [],
+            'send-phone-message': [],
+            'password-reset-post-challenge': [],
+          },
+        },
+      ]);
+
+      expect(timesUpdateTriggerBindingsCalled).to.equal(7);
+    });
+
+    it('should not update triggers omitted from configuration', async () => {
+      let timesUpdateTriggerBindingsCalled = 0;
+
+      const existingTriggerBindings = {
+        'post-login': [
+          { action_name: 'action-one', display_name: 'email-user' },
+          { action_name: 'action-two', display_name: 'log-to-logger' },
+        ],
+        'credentials-exchange': [{ action_name: 'action-two', display_name: 'log-to-logger' }],
+        'pre-user-registration': [
+          { action_name: 'action-three', display_name: 'slack-integration' },
+        ],
+        'post-user-registration': [{ action_name: 'action-one', display_name: 'email-user' }],
+        'post-change-password': [{ action_name: 'action-two', display_name: 'log-to-logger' }],
+        'send-phone-message': [{ action_name: 'action-three', display_name: 'slack-integration' }],
+        'password-reset-post-challenge': [{ action_name: 'action-two', display_name: 'log-to-logger' }],
+      };
+
+      const updatePayload = [
+        {
+          display_name: 'log-to-logger',
+          ref: {
+            type: 'action_name',
+            value: 'action-two',
+          },
+        },
+        {
+          display_name: 'slack-integration',
+          ref: {
+            type: 'action_name',
+            value: 'action-three',
+          },
+        },
+      ];
+
+      const auth0 = {
+        actions: {
+          getAllTriggers: () => Promise.resolve(existingTriggerBindings),
+          // eslint-disable-next-line camelcase
+          updateTriggerBindings: ({ trigger_id }, { bindings }) => {
+            expect(trigger_id).to.equal('post-login');
+            expect(bindings).to.deep.equal(updatePayload);
+            timesUpdateTriggerBindingsCalled += 1;
+            return Promise.resolve(updatePayload);
+          },
+        },
+        pool,
+        getAllCalled: false,
+      };
+
+      const handler = new triggers.default({ client: auth0, config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          triggers: {
+            'post-login': [
+              { action_name: 'action-two', display_name: 'log-to-logger' },
+              { action_name: 'action-three', display_name: 'slack-integration' },
+            ], // All other triggers omitted
+          },
+        },
+      ]);
+
+      expect(timesUpdateTriggerBindingsCalled).to.equal(1);
+    });
+
     it('should get all triggers', async () => {
       const triggersBindings = {
         'post-login': [{ action_name: 'action-one', display_name: 'display-name' }],
@@ -72,6 +199,7 @@ describe('#triggers handler', () => {
         'post-user-registration': [],
         'post-change-password': [],
         'send-phone-message': [],
+        'password-reset-post-challenge': [],
       };
 
       const auth0 = {
@@ -102,6 +230,9 @@ describe('#triggers handler', () => {
                 res = { bindings: [] };
                 break;
               case 'send-phone-message':
+                res = { bindings: [] };
+                break;
+              case 'password-reset-post-challenge':
                 res = { bindings: [] };
                 break;
               default:

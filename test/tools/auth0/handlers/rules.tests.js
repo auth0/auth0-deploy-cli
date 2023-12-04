@@ -253,6 +253,23 @@ describe('#rules handler', () => {
       expect(data).to.deep.equal(rulesData);
     });
 
+    it('should not throw if rules endpoint deprecated', async () => {
+      const auth0 = {
+        rules: {
+          getAll: () => {
+            const error = new Error();
+            error.statusCode = 403;
+            error.message = 'Insufficient privileges to use this deprecated feature';
+            throw error;
+          },
+        },
+      };
+
+      const handler = new rules.default({ client: auth0, config });
+      const data = await handler.getType();
+      expect(data).to.equal(null);
+    });
+
     it('should update rule', async () => {
       const auth0 = {
         rules: {
@@ -388,6 +405,31 @@ describe('#rules handler', () => {
       };
 
       await stageFn.apply(handler, [data]);
+    });
+
+    it('should not throw if attempted to update rules when deprecated for tenant', async () => {
+      const auth0 = {
+        rules: {
+          getAll: () => {
+            const error = new Error();
+            error.statusCode = 403;
+            error.message = 'Insufficient privileges to use this deprecated feature';
+            throw error;
+          },
+        },
+        pool,
+      };
+      const data = {
+        rules: [
+          { name: 'Rule1', script: 'new-rule-one-script' },
+          { name: 'Rule3', script: 'new-rule-three-script' },
+        ],
+      };
+
+      const handler = new rules.default({ client: auth0, config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await expect(stageFn.apply(handler, [data])).to.be.eventually.fulfilled;
     });
   });
 });

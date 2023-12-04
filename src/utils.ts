@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import sanitizeName from 'sanitize-filename';
 import dotProp from 'dot-prop';
 import { loadFileAndReplaceKeywords, Auth0 } from './tools';
@@ -32,9 +32,18 @@ export function getFiles(folder: string, exts: string[]): string[] {
   return [];
 }
 
-export function loadJSON(file: string, mappings: KeywordMappings): any {
+export function loadJSON(
+  file: string,
+  opts: { disableKeywordReplacement: boolean; mappings: KeywordMappings } = {
+    disableKeywordReplacement: false,
+    mappings: {},
+  }
+): any {
   try {
-    const content = loadFileAndReplaceKeywords(file, mappings);
+    const content = loadFileAndReplaceKeywords(file, {
+      mappings: opts.mappings,
+      disableKeywordReplacement: opts.disableKeywordReplacement,
+    });
     return JSON.parse(content);
   } catch (e) {
     throw new Error(`Error parsing JSON from metadata file: ${file}, because: ${e.message}`);

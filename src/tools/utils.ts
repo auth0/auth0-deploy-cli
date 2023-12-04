@@ -6,13 +6,24 @@ import log from '../logger';
 import { Asset, Assets, CalculatedChanges, KeywordMappings } from '../types';
 import constants from './constants';
 
+export const keywordReplaceArrayRegExp = (key) => {
+  const pattern = `@@${key}@@`;
+  //YAML format supports both single and double quotes for strings
+  const patternWithSingleQuotes = `'${pattern}'`;
+  const patternWithDoubleQuotes = `"${pattern}"`;
+
+  return new RegExp(`${patternWithSingleQuotes}|${patternWithDoubleQuotes}|${pattern}`, 'g');
+};
+
+export const keywordReplaceStringRegExp = (key) => {
+  return new RegExp(`##${key}##`, 'g');
+};
+
 export function keywordArrayReplace(input: string, mappings: KeywordMappings): string {
   Object.keys(mappings).forEach(function (key) {
     // Matching against two sets of patterns because a developer may provide their array replacement keyword with or without wrapping quotes. It is not obvious to the developer which to do depending if they're operating in YAML or JSON.
-    const pattern = `@@${key}@@`;
-    const patternWithQuotes = `"${pattern}"`;
+    const regex = keywordReplaceArrayRegExp(key);
 
-    const regex = new RegExp(`${patternWithQuotes}|${pattern}`, 'g');
     input = input.replace(regex, JSON.stringify(mappings[key]));
   });
   return input;
@@ -20,7 +31,7 @@ export function keywordArrayReplace(input: string, mappings: KeywordMappings): s
 
 export function keywordStringReplace(input: string, mappings: KeywordMappings): string {
   Object.keys(mappings).forEach(function (key) {
-    const regex = new RegExp(`##${key}##`, 'g');
+    const regex = keywordReplaceStringRegExp(key);
     // @ts-ignore TODO: come back and distinguish strings vs array replacement.
     input = input.replace(regex, mappings[key]);
   });
@@ -34,6 +45,20 @@ export function keywordReplace(input: string, mappings: KeywordMappings): string
     input = keywordStringReplace(input, mappings);
   }
   return input;
+}
+
+// wrapArrayReplaceMarkersInQuotes will wrap array replacement markers in quotes.
+// This is necessary for YAML format in the context of keyword replacement
+// to preserve the keyword markers while also maintaining valid YAML syntax.
+export function wrapArrayReplaceMarkersInQuotes(body: string, mappings: KeywordMappings): string {
+  let newBody = body;
+  Object.keys(mappings).forEach((keyword) => {
+    newBody = newBody.replace(
+      new RegExp('(?<![\'"])@@' + keyword + '@@(?![\'"])', 'g'),
+      `"@@${keyword}@@"`
+    );
+  });
+  return newBody;
 }
 
 export function convertClientNameToId(name: string, clients: Asset[]): string {
@@ -56,12 +81,18 @@ export function convertClientNamesToIds(names: string[], clients: Asset[]): stri
   return [...unresolved, ...result];
 }
 
-export function loadFileAndReplaceKeywords(file: string, mappings: KeywordMappings): string {
+export function loadFileAndReplaceKeywords(
+  file: string,
+  {
+    mappings,
+    disableKeywordReplacement = false,
+  }: { mappings: KeywordMappings; disableKeywordReplacement: boolean }
+): string {
   // Load file and replace keyword mappings
   const f = path.resolve(file);
   try {
     fs.accessSync(f, fsConstants.F_OK);
-    if (mappings) {
+    if (mappings && !disableKeywordReplacement) {
       return keywordReplace(fs.readFileSync(f, 'utf8'), mappings);
     }
     return fs.readFileSync(f, 'utf8');
@@ -103,8 +134,11 @@ export function getEnabledClients(
   connection: Asset,
   existing: Asset[],
   clients: Asset[]
-): string[] {
+): string[] | undefined {
   // Convert enabled_clients by name to the id
+
+  if (connection.enabled_clients === undefined) return undefined; // If no enabled clients passed in, explicitly ignore from management, preventing unintentional disabling of connection.
+
   const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
   const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
   const enabledClients = [
@@ -231,4 +265,13 @@ export const detectInsufficientScopeError = async <T>(
     }
     throw err;
   }
+};
+
+export function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export const isDeprecatedError = (err: { message: string; statusCode: number }): boolean => {
+  if (!err) return false;
+  return !!(err.statusCode === 403 || err.message?.includes('deprecated feature'));
 };

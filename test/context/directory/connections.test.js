@@ -1,6 +1,6 @@
+import path from 'path';
 import fs from 'fs-extra';
 
-import path from 'path';
 import { expect } from 'chai';
 import { constants } from '../../../src/tools';
 
@@ -29,7 +29,7 @@ describe('#directory context connections', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { secret: 'test secret', var: 'something' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     const target = [
       { name: 'myad-waad', strategy: 'waad', var: 'something' },
@@ -62,7 +62,7 @@ describe('#directory context connections', () => {
       AUTH0_CONNECTIONS_DIRECTORY: customConnectionDirectory,
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     const target = [{ name: 'A Connection' }];
 
@@ -85,7 +85,7 @@ describe('#directory context connections', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { var: 'something' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     const target = [{ name: 'myad-waad', strategy: 'waad', var: 'something' }];
 
@@ -102,7 +102,7 @@ describe('#directory context connections', () => {
     const context = new Context(config, mockMgmtClient());
 
     const errorMessage = `Expected ${dir} to be a folder but got a file?`;
-    await expect(context.load())
+    await expect(context.loadAssetsFromLocal())
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
   });
@@ -196,5 +196,33 @@ describe('#directory context connections', () => {
       'client2',
       'client3',
     ]);
+  });
+
+  it('should throw error and halt deployment if passwordless email template is missing', async () => {
+    const files = {
+      [constants.CONNECTIONS_DIRECTORY]: {
+        'email.json':
+          '{  "name": "email", "strategy": "email", "options": { "email": { "body": "./email.html" } } }',
+      },
+    };
+
+    const repoDir = path.join(testDataDir, 'directory', 'connections4');
+    createDir(repoDir, files);
+    // Intentionally skip creation of `./email.html` file
+
+    const context = new Context(
+      {
+        AUTH0_INPUT_FILE: repoDir,
+      },
+      mockMgmtClient()
+    );
+
+    await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(
+      `Passwordless email template purportedly located at ${path.join(
+        repoDir,
+        'connections',
+        'email.html'
+      )} does not exist for connection. Ensure the existence of this file to proceed with deployment.`
+    );
   });
 });

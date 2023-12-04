@@ -1,0 +1,6 @@
+#This configuration is to reset the tenant to a baseline state
+tenant:
+  friendly_name: Tenant friendly name
+  enabled_locales: ['en']
+  flags:
+    new_universal_login_experience_enabled: true

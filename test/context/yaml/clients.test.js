@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/yaml';
@@ -45,7 +45,7 @@ describe('#YAML context clients', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { appType: 'spa' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.clients).to.deep.equal(target);
   });

@@ -1,6 +1,5 @@
-import fs from 'fs-extra';
-
 import path from 'path';
+import fs from 'fs-extra';
 import { expect } from 'chai';
 import { constants } from '../../../src/tools';
 
@@ -43,7 +42,7 @@ describe('#directory context hooks', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { hello: 'goodbye' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.hooks).to.deep.equal(hooksTarget);
   });
@@ -58,7 +57,7 @@ describe('#directory context hooks', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { hello: 'goodbye' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.hooks).to.deep.equal(hooksTarget);
   });
@@ -71,7 +70,7 @@ describe('#directory context hooks', () => {
 
     const context = new Context({ AUTH0_INPUT_FILE: repoDir });
     const errorMessage = `Expected ${dir} to be a folder but got a file?`;
-    await expect(context.load())
+    await expect(context.loadAssetsFromLocal())
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
   });

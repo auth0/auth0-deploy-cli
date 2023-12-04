@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { expect } from 'chai';
 import { Auth0 } from '../src/tools';
 
@@ -61,12 +61,12 @@ describe('#utils', function () {
     ]);
   });
 
-  it('should load json', () => {
+  it('should load json and replace keywords', () => {
     const dir = path.join(testDataDir, 'utils', 'json');
     cleanThenMkdir(dir);
     const file = path.join(dir, 'test1.json');
     fs.writeFileSync(file, '{"test": "123", "env1": @@env1@@, "env2": "##env2##"}');
-    expect(loadJSON(file, { env1: 'test1', env2: 'test2' })).to.deep.equal({
+    expect(loadJSON(file, { mappings: { env1: 'test1', env2: 'test2' } })).to.deep.equal({
       env1: 'test1',
       env2: 'test2',
       test: '123',

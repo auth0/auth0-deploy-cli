@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { constants } from '../../../tools';
 
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
@@ -20,7 +20,12 @@ function parse(context: DirectoryContext): ParsedGuardianFactors {
   const foundFiles = getFiles(factorsFolder, ['.json']);
 
   const guardianFactors = foundFiles
-    .map((f) => loadJSON(f, context.mappings))
+    .map((f) =>
+      loadJSON(f, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      })
+    )
     .filter((p) => Object.keys(p).length > 0); // Filter out empty guardianFactors
 
   return {

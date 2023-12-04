@@ -7,6 +7,203 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.20.0] - 2023-11-29
+
+### Added
+
+- Relative path import support for actions directory handler [#866]
+
+### Fixed
+
+- Keyword preservation for wider array of resources [#864]
+- Fetching clients if not defined when managing client grants in YAML format [#865]
+
+## [7.19.0] - 2023-08-11
+
+### Added
+
+- Support for Private Key JWT authentication for authenticating with private key instead of client secret [#817]
+
+### Fixed
+
+- Process branding changes after theme changes to prevent delay in dashboard preview [#836]
+- Handling eventual hooks and rules deprecation [#838]
+- Overwrites occurring when preserving keywords within multiple client grants [#837]
+
+## [7.18.0] - 2023-07-14
+
+### Added
+
+- Support for `password-reset-post-challenge` action trigger [#818]
+
+### Fixed
+
+- Runtime error when attempting to preserve keyword on null remote assets [#822]
+- Respect email template `body` filepath definition [#820]
+
+## [7.17.7] - 2023-07-07
+
+### Fixed
+
+- Delay processing of action triggers until deployed actions register [#809]
+- Process custom domains prior to branding settings [#811]
+
+## [7.17.6] - 2023-06-23
+
+### Changed
+
+- Improve handling of custom text prompts, reducing high-volume errors and timeouts by leveraging connection pooling for controlled execution [#804]
+
+## [7.17.5] - 2023-06-08
+
+### Fixed
+
+- Obfuscating sensitive log streams keys [#800]
+- Prevent exporting of disallowed tenant flags [#799]
+
+## [7.17.4] - 2023-06-06
+
+### Fixed
+
+- Prevent tenant flag "Additional properties not allowed" error by only updating publicly-available feature flags [#797]
+
+## [7.17.3] - 2023-05-24
+
+### Fixed
+
+- Keyword preservation for client grant `audience` field [#793]
+
+## [7.17.2] - 2023-04-19
+
+### Fixed
+
+- API error when no tenant flags defined [#780]
+- Keyword preservation in a resource's identifier fields [#784]
+
+## [7.17.1] - 2023-03-31
+
+### Fixed
+
+- Tenant-agnostic filenames for client grants if more than fifty clients and fifty resource servers [#764]
+- Unintentional exclusion of clients when injecting access token via `AUTH0_ACCESS_TOKEN` [#775]
+
+## [7.17.0] - 2023-03-03
+
+### Added
+
+- Keyword preservation on export to prevent overwriting of keyword markers in most instances. Enabled through the `AUTH0_PRESERVE_KEYWORDS` boolean configuration property. See also: [Preserving Keywords on Export](./docs/keyword-replacement.md#preserving-keywords-on-export) [#738],[#740],[#741],[#744],[#745],[#751],[#754],[#757],[#758],[#760]
+
+### Fixed
+
+- Enabled wrapping of `@@ARRAY_REPLACE@@` keyword markers with single quotes in YAML resource configuration files [#760]
+
+## [7.16.1] - 2023-02-07
+
+### Fixed
+
+- Exporting of multiple client grants for a single client when using directory format [#729]
+- Tenant-agnostic client grant files when exporting using directory format [#729]
+
+## [7.16.0] - 2023-02-01
+
+### Added
+
+- `AUTH0_INCLUDED_ONLY` configuration property to express sole management of certain resource types [#726]
+- Suspended log stream management support [#725]
+- More descriptive errors when actions service is unavailable [#724]
+
+### Fixed
+
+- Remove configurable tenant `sandbox_version` property from readonly list [#683]
+- Handling of undefined tenant `enabled_locales` property [#727]
+
+## [7.15.2] - 2023-01-03
+
+### Fixed
+
+- Deletion of email provider when setting as empty object [#673]
+
+### Security
+
+- Upgraded `node-auth0` which addresses [vulnerability reported](https://github.com/advisories/GHSA-hjrf-2m68-5959) for `jsonwebtoken` package
+
+## [7.15.1] - 2022-10-19
+
+### Added
+
+- Warning about future fix that enables deletion of email provider; no significant changes to functionality [#672]
+
+### Fixed
+
+- Returning all branding setting when using YAML [#666]
+- Preventing empty `logo_url` from update tenant payload [#667]
+- Loading actions between different operating systems [#668]
+- Prevent writing undefined page templates files [#671]
+
+## [7.15.0] - 2022-10-11
+
+### Added
+
+- Ignoring management of marketplace actions because they are unsupported by the Management API [#660]
+
+### Fixed
+
+- Allowing partial attack protection configurations [#638]
+
+## [7.14.3] - 2022-08-24
+
+### Fixed
+
+- Reclassify select production dependencies as dev dependencies [#626]
+- Allowing certain page templates configuration to be modified even when absent of HTML [#629],[#630]
+
+## [7.14.2] - 2022-08-01
+
+### Fixed
+
+- Allowing updating of branding themes when used in conjunction with `--export_ids` flag [#603]
+- Halting deploy process if passwordless email template does not exist [#617]
+
+## [7.14.1] - 2022-06-29
+
+### Fixed
+
+- Reverting unreplaced keyword mapping detection that would trigger some false-positives [#597]
+
+## [7.14.0] - 2022-06-27
+
+### Added
+
+- Validation to detect unreplaced keyword mappings during import [#591]
+
+### Fixed
+
+- Detect and prevent `You are not allowed to set flag '<SOME_FLAG>' for this tenant.` errors when erroneously setting non-configurable migration flag [#590]
+- Crash when attempting to create page templates from undefined value [#592]
+
+## [7.13.1] - 2022-06-13
+
+### Fixed
+
+- Removing single usage of `flatMap` array method to prevent crashes with Node v10 [#577]
+
+## [7.13.0] - 2022-06-06
+
+### Added
+
+- Themes support (if supported by tenant) [#554]
+
+### Fixed
+
+- Omit `enabled_clients` from connection payload if not defined in resource configuration files [#563]
+
+## [7.12.3] - 2022-05-24
+
+### Fixed
+
+- Resource exclusion respected during import even if resource configuration exists [#545]
+- Environment variables ingested by default [#553]
+
 ## [7.12.2] - 2022-05-17
 
 ### Fixed
@@ -748,7 +945,89 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#532]: https://github.com/auth0/auth0-deploy-cli/issues/532
 [#541]: https://github.com/auth0/auth0-deploy-cli/issues/541
 [#542]: https://github.com/auth0/auth0-deploy-cli/issues/542
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.2...HEAD
+[#545]: https://github.com/auth0/auth0-deploy-cli/issues/545
+[#553]: https://github.com/auth0/auth0-deploy-cli/issues/553
+[#554]: https://github.com/auth0/auth0-deploy-cli/issues/554
+[#563]: https://github.com/auth0/auth0-deploy-cli/issues/563
+[#577]: https://github.com/auth0/auth0-deploy-cli/issues/577
+[#590]: https://github.com/auth0/auth0-deploy-cli/issues/590
+[#591]: https://github.com/auth0/auth0-deploy-cli/issues/591
+[#592]: https://github.com/auth0/auth0-deploy-cli/issues/592
+[#597]: https://github.com/auth0/auth0-deploy-cli/issues/597
+[#603]: https://github.com/auth0/auth0-deploy-cli/issues/603
+[#617]: https://github.com/auth0/auth0-deploy-cli/issues/617
+[#626]: https://github.com/auth0/auth0-deploy-cli/issues/626
+[#629]: https://github.com/auth0/auth0-deploy-cli/issues/629
+[#630]: https://github.com/auth0/auth0-deploy-cli/issues/630
+[#638]: https://github.com/auth0/auth0-deploy-cli/issues/638
+[#660]: https://github.com/auth0/auth0-deploy-cli/issues/660
+[#666]: https://github.com/auth0/auth0-deploy-cli/issues/666
+[#667]: https://github.com/auth0/auth0-deploy-cli/issues/667
+[#668]: https://github.com/auth0/auth0-deploy-cli/issues/668
+[#671]: https://github.com/auth0/auth0-deploy-cli/issues/671
+[#672]: https://github.com/auth0/auth0-deploy-cli/issues/672
+[#673]: https://github.com/auth0/auth0-deploy-cli/issues/673
+[#683]: https://github.com/auth0/auth0-deploy-cli/issues/683
+[#724]: https://github.com/auth0/auth0-deploy-cli/issues/724
+[#725]: https://github.com/auth0/auth0-deploy-cli/issues/725
+[#726]: https://github.com/auth0/auth0-deploy-cli/issues/726
+[#727]: https://github.com/auth0/auth0-deploy-cli/issues/727
+[#729]: https://github.com/auth0/auth0-deploy-cli/issues/729
+[#738]: https://github.com/auth0/auth0-deploy-cli/issues/738
+[#740]: https://github.com/auth0/auth0-deploy-cli/issues/740
+[#741]: https://github.com/auth0/auth0-deploy-cli/issues/741
+[#744]: https://github.com/auth0/auth0-deploy-cli/issues/744
+[#745]: https://github.com/auth0/auth0-deploy-cli/issues/745
+[#751]: https://github.com/auth0/auth0-deploy-cli/issues/751
+[#754]: https://github.com/auth0/auth0-deploy-cli/issues/754
+[#757]: https://github.com/auth0/auth0-deploy-cli/issues/757
+[#758]: https://github.com/auth0/auth0-deploy-cli/issues/758
+[#760]: https://github.com/auth0/auth0-deploy-cli/issues/760
+[#764]: https://github.com/auth0/auth0-deploy-cli/issues/764
+[#775]: https://github.com/auth0/auth0-deploy-cli/issues/775
+[#780]: https://github.com/auth0/auth0-deploy-cli/issues/780
+[#784]: https://github.com/auth0/auth0-deploy-cli/issues/784
+[#793]: https://github.com/auth0/auth0-deploy-cli/issues/793
+[#797]: https://github.com/auth0/auth0-deploy-cli/issues/797
+[#799]: https://github.com/auth0/auth0-deploy-cli/issues/799
+[#800]: https://github.com/auth0/auth0-deploy-cli/issues/800
+[#804]: https://github.com/auth0/auth0-deploy-cli/issues/804
+[#809]: https://github.com/auth0/auth0-deploy-cli/issues/809
+[#811]: https://github.com/auth0/auth0-deploy-cli/issues/811
+[#817]: https://github.com/auth0/auth0-deploy-cli/issues/817
+[#818]: https://github.com/auth0/auth0-deploy-cli/issues/818
+[#820]: https://github.com/auth0/auth0-deploy-cli/issues/820
+[#822]: https://github.com/auth0/auth0-deploy-cli/issues/822
+[#836]: https://github.com/auth0/auth0-deploy-cli/issues/836
+[#837]: https://github.com/auth0/auth0-deploy-cli/issues/837
+[#838]: https://github.com/auth0/auth0-deploy-cli/issues/838
+[#864]: https://github.com/auth0/auth0-deploy-cli/issues/864
+[#865]: https://github.com/auth0/auth0-deploy-cli/issues/865
+[#866]: https://github.com/auth0/auth0-deploy-cli/issues/866
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.20.0...HEAD
+[7.20.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.19.0...v7.20.0
+[7.19.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.18.0...v7.19.0
+[7.18.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.7...v7.18.0
+[7.17.7]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.6...v7.17.7
+[7.17.6]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.5...v7.17.6
+[7.17.5]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.4...v7.17.5
+[7.17.4]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.3...v7.17.4
+[7.17.3]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.2...v7.17.3
+[7.17.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.1...v7.17.2
+[7.17.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.0...v7.17.1
+[7.17.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.16.1...v7.17.0
+[7.16.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.16.0...v7.16.1
+[7.16.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.15.2...v7.16.0
+[7.15.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.15.1...v7.15.2
+[7.15.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.15.0...v7.15.1
+[7.15.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.3...v7.15.0
+[7.14.3]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.2...v7.14.3
+[7.14.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.1...v7.14.2
+[7.14.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.14.0...v7.14.1
+[7.14.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.13.1...v7.14.0
+[7.13.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.13.0...v7.13.1
+[7.13.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.3...v7.13.0
+[7.12.3]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.2...v7.12.3
 [7.12.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.1...v7.12.2
 [7.12.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.12.0...v7.12.1
 [7.12.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.11.1...v7.12.0

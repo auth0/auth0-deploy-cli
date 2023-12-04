@@ -1,6 +1,6 @@
+import path from 'path';
 import fs from 'fs-extra';
 import jsYaml from 'js-yaml';
-import path from 'path';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/yaml';
@@ -16,7 +16,7 @@ describe('#YAML context validation', () => {
 
     const config = { AUTH0_INPUT_FILE: yaml };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.rules).to.deep.equal(null);
     expect(context.assets.databases).to.deep.equal(null);
@@ -47,7 +47,7 @@ describe('#YAML context validation', () => {
     };
 
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.exclude.rules).to.deep.equal(['rule']);
     expect(context.assets.exclude.clients).to.deep.equal(['client']);
@@ -55,6 +55,82 @@ describe('#YAML context validation', () => {
     expect(context.assets.exclude.connections).to.deep.equal(['conn']);
     expect(context.assets.exclude.resourceServers).to.deep.equal(['api']);
     expect(context.assets.exclude.defaults).to.deep.equal(['emailProvider']);
+  });
+
+  it('should respect resource exclusion on import', async () => {
+    /* Create empty directory */
+    const dir = path.resolve(testDataDir, 'yaml', 'resource-exclusion');
+    cleanThenMkdir(dir);
+    const yaml = path.join(dir, 'resource-exclusion.yaml');
+    fs.writeFileSync(
+      yaml,
+      `
+      actions: []
+      rules: []
+      hooks: []
+    `
+    );
+
+    const exclusions = ['hooks', 'rules', 'prompts']; // Only actions are defined above but not excluded
+    const contextWithExclusion = new Context(
+      {
+        AUTH0_INPUT_FILE: yaml,
+        AUTH0_EXCLUDED: exclusions,
+      },
+      mockMgmtClient()
+    );
+
+    await contextWithExclusion.loadAssetsFromLocal();
+    exclusions.forEach((excludedResource) => {
+      expect(contextWithExclusion.assets[excludedResource]).to.equal(null); // Ensure all excluded resources, defined or not, are null
+    });
+    expect(contextWithExclusion.assets.actions).to.deep.equal([]); // Actions were not excluded
+
+    const contextWithoutExclusion = new Context(
+      {
+        AUTH0_INPUT_FILE: yaml,
+        AUTH0_EXCLUDED: [], // Not excluding any resources
+      },
+      mockMgmtClient()
+    );
+
+    await contextWithoutExclusion.loadAssetsFromLocal();
+    expect(contextWithoutExclusion.assets.actions).to.deep.equal([]);
+    expect(contextWithoutExclusion.assets.hooks).to.deep.equal([]);
+    expect(contextWithoutExclusion.assets.rules).to.deep.equal([]);
+  });
+
+  it('should respect resource inclusion on import', async () => {
+    /* Create empty directory */
+    const dir = path.resolve(testDataDir, 'yaml', 'resource-inclusion');
+    cleanThenMkdir(dir);
+    const yaml = path.join(dir, 'resource-inclusion.yaml');
+    fs.writeFileSync(
+      yaml,
+      `
+      actions: []
+      rules: []
+      tenant:
+        enabled_locales:
+          - en
+    `
+    );
+
+    const contextWithInclusion = new Context(
+      {
+        AUTH0_INPUT_FILE: yaml,
+        AUTH0_INCLUDED_ONLY: ['tenant'],
+      },
+      mockMgmtClient()
+    );
+
+    await contextWithInclusion.loadAssetsFromLocal();
+    expect(contextWithInclusion.assets.tenant).to.deep.equal({
+      enabled_locales: ['en'],
+    });
+
+    expect(contextWithInclusion.assets.actions).to.equal(null);
+    expect(contextWithInclusion.assets.rules).to.equal(null);
   });
 
   it('should error invalid schema', async () => {
@@ -65,14 +141,14 @@ describe('#YAML context validation', () => {
 
     const config = { AUTH0_INPUT_FILE: yaml };
     const context = new Context(config, mockMgmtClient());
-    await expect(context.load()).to.be.eventually.rejectedWith(Error);
+    await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(Error);
   });
 
   it('should error on bad file', async () => {
     const yaml = path.resolve(testDataDir, 'yaml', 'notexist.yml');
     const config = { AUTH0_INPUT_FILE: yaml };
     const context = new Context(config, mockMgmtClient());
-    await expect(context.load()).to.be.eventually.rejectedWith(Error);
+    await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(Error);
   });
 
   it('should load relative file', async () => {
@@ -208,6 +284,7 @@ describe('#YAML context validation', () => {
         customText: {},
       },
       customDomains: [],
+      themes: [],
     });
   });
 
@@ -319,6 +396,7 @@ describe('#YAML context validation', () => {
         customText: {},
       },
       customDomains: [],
+      themes: [],
     });
   });
 
@@ -431,6 +509,7 @@ describe('#YAML context validation', () => {
         customText: {},
       },
       customDomains: [],
+      themes: [],
     });
   });
 
@@ -455,5 +534,78 @@ describe('#YAML context validation', () => {
     expect(err).to.equal(
       'EXCLUDED_PROPS should NOT have any intersections with INCLUDED_PROPS. Intersections found: clients: client_secret, name'
     );
+  });
+
+  it('should preserve keywords when dumping', async () => {
+    const dir = path.resolve(testDataDir, 'yaml', 'dump');
+    cleanThenMkdir(dir);
+    const tenantFile = path.join(dir, 'tenant.yml');
+
+    const localAssets = `
+    tenant:
+      friendly_name: "##ENV## Tenant"
+      enabled_locales: @@LANGUAGES@@
+    connections:
+      - name: connection-1
+        strategy: waad
+        options:
+          tenant_domain: "##DOMAIN##"
+    `;
+
+    fs.writeFileSync(tenantFile, localAssets);
+    const context = new Context(
+      {
+        AUTH0_INPUT_FILE: tenantFile,
+        AUTH0_PRESERVE_KEYWORDS: true,
+        AUTH0_INCLUDED_ONLY: ['tenant', 'connections'],
+        AUTH0_KEYWORD_REPLACE_MAPPINGS: {
+          ENV: 'Production',
+          LANGUAGES: ['en', 'es'],
+          DOMAIN: 'travel0.com',
+        },
+      },
+      {
+        tenant: {
+          getSettings: async () =>
+            new Promise((res) =>
+              res({
+                friendly_name: 'Production Tenant',
+                enabled_locales: ['en', 'es'],
+              })
+            ),
+        },
+        connections: {
+          getAll: () => ({
+            connections: [
+              {
+                name: 'connection-1',
+                strategy: 'waad',
+                options: {
+                  tenant_domain: 'travel0.com',
+                },
+              },
+            ],
+          }),
+        },
+      }
+    );
+    await context.dump();
+    const yaml = jsYaml.load(fs.readFileSync(tenantFile));
+
+    expect(yaml).to.deep.equal({
+      tenant: {
+        enabled_locales: '@@LANGUAGES@@',
+        friendly_name: '##ENV## Tenant',
+      },
+      connections: [
+        {
+          name: 'connection-1',
+          strategy: 'waad',
+          options: {
+            tenant_domain: '##DOMAIN##',
+          },
+        },
+      ],
+    });
   });
 });

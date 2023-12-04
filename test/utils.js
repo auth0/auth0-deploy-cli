@@ -1,6 +1,6 @@
+import path from 'path';
 import fs from 'fs-extra';
 import rmdirSync from 'rmdir-sync';
-import path from 'path';
 import mkdirp from 'mkdirp';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -110,7 +110,14 @@ export function mockMgmtClient() {
       getBruteForceConfig: () => ({}),
       getSuspiciousIpThrottlingConfig: () => ({}),
     },
-    branding: { getSettings: () => ({}) },
+    branding: {
+      getSettings: () => ({}),
+      getDefaultTheme: () => {
+        const err = new Error('Not found');
+        err.statusCode = 404;
+        return Promise.reject(err);
+      },
+    },
     logStreams: { getAll: () => [] },
     prompts: {
       getCustomTextByLanguage: () =>

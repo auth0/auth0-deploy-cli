@@ -12,6 +12,14 @@ export const pageNameMap = {
   error_page: 'error_page',
 };
 
+export type Page = {
+  show_log_link?: boolean;
+  name: string;
+  enabled?: boolean;
+  html?: string;
+  url?: string;
+};
+
 // With this schema, we can only validate property types but not valid properties on per type basis
 export const schema = {
   type: 'array',
@@ -33,6 +41,7 @@ export default class PagesHandler extends DefaultHandler {
     super({
       ...options,
       type: 'pages',
+      identifiers: ['name'],
     });
   }
 
@@ -106,7 +115,7 @@ export default class PagesHandler extends DefaultHandler {
     if (globalClient[0].custom_login_page) {
       pages.push({
         name: 'login',
-        enabled: globalClient[0].custom_login_page_on,
+        enabled: !!globalClient[0].custom_login_page_on,
         html: globalClient[0].custom_login_page,
       });
     }

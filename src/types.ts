@@ -1,3 +1,4 @@
+import { Action } from './tools/auth0/handlers/actions';
 import {
   PromptTypes,
   ScreenTypes,
@@ -5,6 +6,14 @@ import {
   PromptsCustomText,
   PromptSettings,
 } from './tools/auth0/handlers/prompts';
+import { Tenant } from './tools/auth0/handlers/tenant';
+import { Theme } from './tools/auth0/handlers/themes';
+import { Page } from './tools/auth0/handlers/pages';
+import { LogStream } from './tools/auth0/handlers/logStreams';
+import { Client } from './tools/auth0/handlers/clients';
+import { ClientGrant } from './tools/auth0/handlers/clientGrants';
+import { ResourceServer } from './tools/auth0/handlers/resourceServers';
+import { PromisePoolExecutor } from 'promise-pool-executor';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -40,13 +49,17 @@ export type ApiResponse = {
 } & { [key in AssetTypes]: Asset[] };
 
 export type BaseAuth0APIClient = {
-  actions: APIClientBaseFunctions & {
-    deploy: ({ id: string }) => Promise<void>;
+  actions: {
+    getAll: (arg0: SharedPaginationParams) => Promise<Action[]>;
+    create: (arg0: { id: string }) => Promise<Action>;
+    update: (arg0: {}, arg1: Action) => Promise<Action>;
+    delete: (arg0: Asset) => Promise<void>;
+    deploy: (arg0: { id: string }) => Promise<void>;
     getAllTriggers: () => Promise<{ triggers: Asset[] }>;
-    getTriggerBindings: ({ trigger_id: string }) => Promise<{ bindings: Asset[] }>;
+    getTriggerBindings: (arg0: { trigger_id: string }) => Promise<{ bindings: Asset[] }>;
     updateTriggerBindings: (
-      { trigger_id: string },
-      { bindings: Object }
+      arg0: { trigger_id: string },
+      arg1: { bindings: Object }
     ) => Promise<{ bindings: Asset[] }>;
   };
   attackProtection: APIClientBaseFunctions & {
@@ -62,9 +75,26 @@ export type BaseAuth0APIClient = {
     getUniversalLoginTemplate: () => Promise<Asset>;
     updateSettings: ({}, Asset) => Promise<void>;
     setUniversalLoginTemplate: ({}, Asset) => Promise<void>;
+    getDefaultTheme: () => Promise<Theme>;
+    updateTheme: (
+      arg0: { id: string },
+      arg1: Omit<Theme, 'themeId'>
+    ) => Promise<Omit<Theme, 'themeId'>>;
+    createTheme: (arg0: Omit<Theme, 'themeId'>) => Promise<Omit<Theme, 'themeId'>>;
+    deleteTheme: (arg0: { id: string }) => Promise<void>;
   };
-  clients: APIClientBaseFunctions;
-  clientGrants: APIClientBaseFunctions;
+  clients: {
+    getAll: (arg0: SharedPaginationParams) => Promise<Client[]>;
+    create: (arg0: { id: string }) => Promise<Client>;
+    update: (arg0: {}, arg1: Partial<Client>) => Promise<Client>;
+    delete: (arg0: Asset) => Promise<void>;
+  };
+  clientGrants: {
+    getAll: (arg0: SharedPaginationParams) => Promise<ClientGrant[]>;
+    create: (arg0: { id: string }) => Promise<ClientGrant>;
+    update: (arg0: {}, arg1: Partial<ClientGrant>) => Promise<ClientGrant>;
+    delete: (arg0: Asset) => Promise<void>;
+  };
   connections: APIClientBaseFunctions & {
     get: (arg0: Asset) => Promise<Asset>;
     getAll: (arg0: PagePaginationParams | CheckpointPaginationParams) => Promise<Asset[]>;
@@ -95,13 +125,18 @@ export type BaseAuth0APIClient = {
     updatePhoneFactorSelectedProvider: (arg0: {}, arg1: Asset) => Promise<void>;
   };
   hooks: APIClientBaseFunctions & {
-    get: ({ id: string }) => Promise<Asset>;
+    get: (arg0: { id: string }) => Promise<Asset>;
     removeSecrets: (arg0: {}, arg1: Asset) => Promise<void>;
     updateSecrets: (arg0: {}, arg1: Asset) => Promise<void>;
-    getSecrets: ({ id: string }) => Promise<Promise<Asset[]>>;
+    getSecrets: (arg0: { id: string }) => Promise<Promise<Asset[]>>;
     addSecrets: (arg0: {}, arg1: Asset) => Promise<void>;
   };
-  logStreams: APIClientBaseFunctions;
+  logStreams: {
+    getAll: (arg0: SharedPaginationParams) => Promise<LogStream[]>;
+    create: (arg0: { id: string }) => Promise<LogStream>;
+    update: (arg0: {}, arg1: Partial<LogStream>) => Promise<LogStream>;
+    delete: (arg0: Asset) => Promise<void>;
+  };
   migrations: APIClientBaseFunctions & {
     getMigrations: () => Promise<{ flags: Asset[] }>;
     updateMigrations: (arg0: { flags: Asset[] }) => Promise<void>;
@@ -127,7 +162,12 @@ export type BaseAuth0APIClient = {
     getSettings: () => Promise<PromptSettings>;
     updateSettings: (arg0: {}, arg1: Partial<PromptSettings>) => Promise<void>;
   };
-  resourceServers: APIClientBaseFunctions;
+  resourceServers: {
+    getAll: (arg0: SharedPaginationParams) => Promise<ResourceServer[]>;
+    create: (arg0: { id: string }) => Promise<ResourceServer>;
+    update: (arg0: {}, arg1: Partial<ResourceServer>) => Promise<ResourceServer>;
+    delete: (arg0: Asset) => Promise<void>;
+  };
   roles: APIClientBaseFunctions & {
     permissions: APIClientBaseFunctions & {
       delete: (arg0: { id: string }, arg1: { permissions: Asset[] }) => Promise<void>;
@@ -139,8 +179,8 @@ export type BaseAuth0APIClient = {
     getAll: () => Promise<Asset[]>;
   };
   tenant: APIClientBaseFunctions & {
-    getSettings: () => Promise<Asset & { enabled_locales: Language[] }>;
-    updateSettings: (arg0: Asset) => Promise<void>;
+    getSettings: () => Promise<Tenant>;
+    updateSettings: (arg0: Partial<Tenant>) => Promise<Tenant>;
   };
   triggers: APIClientBaseFunctions & {
     getTriggerBindings: () => Promise<Asset>;
@@ -148,23 +188,20 @@ export type BaseAuth0APIClient = {
 }; // TODO: replace with a more accurate representation of the Auth0APIClient type
 
 export type Auth0APIClient = BaseAuth0APIClient & {
-  pool: {
-    addSingleTask: (arg0: { data: Object; generator: any }) => {
-      promise: () => Promise<ApiResponse>;
-    };
-    addEachTask: (arg0: { data: Object; generator: any }) => {
-      promise: () => Promise<Asset[][]>;
-    };
-  };
+  pool: PromisePoolExecutor;
 };
 
 export type Config = {
   AUTH0_DOMAIN: string;
   AUTH0_CLIENT_ID: string;
   AUTH0_CLIENT_SECRET: string;
+  AUTH0_CLIENT_SIGNING_KEY_PATH: string;
+  AUTH0_CLIENT_SIGNING_ALGORITHM: string;
   AUTH0_INPUT_FILE: string;
   AUTH0_ALLOW_DELETE: boolean;
-  AUTH0_EXCLUDED: AssetTypes[];
+  AUTH0_EXCLUDED?: AssetTypes[];
+  AUTH0_INCLUDED_ONLY?: AssetTypes[];
+  AUTH0_PRESERVE_KEYWORDS: boolean;
   EXTENSION_SECRET: string;
   AUTH0_ACCESS_TOKEN?: string;
   AUTH0_BASE_PATH?: string;
@@ -192,13 +229,15 @@ export type Config = {
 export type Asset = { [key: string]: any };
 
 export type Assets = Partial<{
-  actions: Asset[] | null;
+  actions: Action[] | null;
   attackProtection: Asset | null;
-  branding: {
-    templates?: { template: string; body: string }[] | null;
-  } | null;
-  clients: Asset[] | null;
-  clientGrants: Asset[] | null;
+  branding:
+    | (Asset & {
+        templates?: { template: string; body: string }[] | null;
+      })
+    | null;
+  clients: Client[] | null;
+  clientGrants: ClientGrant[] | null;
   connections: Asset[] | null;
   customDomains: Asset[] | null;
   databases: Asset[] | null;
@@ -215,22 +254,23 @@ export type Assets = Partial<{
     policies: Asset[]; //TODO: eliminate this intermediate level for consistency
   } | null;
   hooks: Asset[] | null;
-  logStreams: Asset[] | null;
+  logStreams: LogStream[] | null;
   migrations: Asset[] | null;
   organizations: Asset[] | null;
-  pages: Asset[] | null;
+  pages: Page[] | null;
   prompts: Prompts | null;
-  resourceServers: Asset[] | null;
+  resourceServers: ResourceServer[] | null;
   roles: Asset[] | null;
   rules: Asset[] | null;
   rulesConfigs: Asset[] | null;
-  tenant: Asset | null;
+  tenant: Tenant | null;
   triggers: Asset[] | null;
   //non-resource types
   exclude?: {
     [key: string]: string[];
   };
   clientsOrig: Asset[] | null;
+  themes: Theme[] | null;
 }>;
 
 export type CalculatedChanges = {
@@ -268,7 +308,8 @@ export type AssetTypes =
   | 'branding'
   | 'logStreams'
   | 'prompts'
-  | 'customDomains';
+  | 'customDomains'
+  | 'themes';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 
@@ -280,17 +321,21 @@ export const languages = [
   'ar',
   'bg',
   'bs',
+  'ca-ES',
   'cs',
+  'cy',
   'da',
   'de',
   'el',
   'en',
   'es',
   'et',
+  'eu-ES',
   'fi',
   'fr',
   'fr-CA',
   'fr-FR',
+  'gl-ES',
   'he',
   'hi',
   'hr',
@@ -304,6 +349,8 @@ export const languages = [
   'lv',
   'nb',
   'nl',
+  'nn',
+  'no',
   'pl',
   'pt',
   'pt-BR',

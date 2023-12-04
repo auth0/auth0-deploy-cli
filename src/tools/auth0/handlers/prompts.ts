@@ -188,12 +188,19 @@ export default class PromptsHandler extends DefaultHandler {
   async getCustomTextSettings(): Promise<AllPromptsByLanguage> {
     const supportedLanguages = await this.client.tenant
       .getSettings()
-      .then(({ enabled_locales }) => enabled_locales);
+      .then(({ enabled_locales }) => {
+        if (enabled_locales === undefined) return []; // In rare cases, private cloud tenants may not have `enabled_locales` defined
+        return enabled_locales;
+      });
 
-    const data = await Promise.all(
-      supportedLanguages.flatMap((language) => {
-        return promptTypes.map((promptType) => {
-          return this.client.prompts
+    return this.client.pool
+      .addEachTask({
+        data:
+          supportedLanguages
+            .map((language) => promptTypes.map((promptType) => ({ promptType, language })))
+            .reduce((acc, val) => acc.concat(val), []) || [],
+        generator: ({ promptType, language }) =>
+          this.client.prompts
             .getCustomTextByLanguage({
               prompt: promptType,
               language,
@@ -206,29 +213,27 @@ export default class PromptsHandler extends DefaultHandler {
                   ...customTextData,
                 },
               };
-            });
-        });
+            }),
       })
-    ).then((customTextData) => {
-      return customTextData
-        .filter((customTextData) => {
-          return customTextData !== null;
-        })
-        .reduce((acc: AllPromptsByLanguage, customTextItem) => {
-          if (customTextItem?.language === undefined) return acc;
+      .promise()
+      .then((customTextData) => {
+        return customTextData
+          .filter((customTextData) => {
+            return customTextData !== null;
+          })
+          .reduce((acc: AllPromptsByLanguage, customTextItem) => {
+            if (customTextItem?.language === undefined) return acc;
 
-          const { language, ...customTextSettings } = customTextItem;
+            const { language, ...customTextSettings } = customTextItem;
 
-          return {
-            ...acc,
-            [language]: !!acc[language]
-              ? { ...acc[language], ...customTextSettings }
-              : { ...customTextSettings },
-          };
-        }, {});
-    });
-
-    return data;
+            return {
+              ...acc,
+              [language]: !!acc[language]
+                ? { ...acc[language], ...customTextSettings }
+                : { ...customTextSettings },
+            };
+          }, {});
+      });
   }
 
   async processChanges(assets: Assets): Promise<void> {
@@ -254,21 +259,29 @@ export default class PromptsHandler extends DefaultHandler {
     */
     if (!customText) return;
 
-    await Promise.all(
-      Object.keys(customText).flatMap((language: Language) => {
-        const languageScreenTypes = customText[language];
+    await this.client.pool
+      .addEachTask({
+        data: Object.keys(customText).flatMap((language: Language) => {
+          const languageScreenTypes = customText[language];
 
-        if (!languageScreenTypes) return [];
+          if (!languageScreenTypes) return [];
 
-        return Object.keys(languageScreenTypes).map((prompt: PromptTypes) => {
-          const body = languageScreenTypes[prompt] || {};
-          return this.client.prompts.updateCustomTextByLanguage({
+          return Object.keys(languageScreenTypes).map((prompt: PromptTypes) => {
+            const body = languageScreenTypes[prompt] || {};
+            return {
+              body,
+              language,
+              prompt,
+            };
+          });
+        }),
+        generator: ({ prompt, language, body }) =>
+          this.client.prompts.updateCustomTextByLanguage({
             prompt,
             language,
             body,
-          });
-        });
+          }),
       })
-    );
+      .promise();
   }
 }

@@ -1,9 +1,10 @@
 import { convertClientIdToName } from '../../../utils';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset, ParsedAsset } from '../../../types';
+import { ParsedAsset } from '../../../types';
+import { ClientGrant } from '../../../tools/auth0/handlers/clientGrants';
 
-type ParsedClientGrants = ParsedAsset<'clientGrants', Asset[]>;
+type ParsedClientGrants = ParsedAsset<'clientGrants', ClientGrant[]>;
 
 async function parse(context: YAMLContext): Promise<ParsedClientGrants> {
   const { clientGrants } = context.assets;
@@ -16,9 +17,16 @@ async function parse(context: YAMLContext): Promise<ParsedClientGrants> {
 }
 
 async function dump(context: YAMLContext): Promise<ParsedClientGrants> {
-  const { clientGrants, clients } = context.assets;
+  let { clientGrants, clients } = context.assets;
 
   if (!clientGrants) return { clientGrants: null };
+
+  if (clients === undefined) {
+    clients = await context.mgmtClient.clients.getAll({
+      paginate: true,
+      include_totals: true,
+    });
+  }
 
   // Convert client_id to the client name for readability
   return {

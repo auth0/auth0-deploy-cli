@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/yaml';
@@ -44,7 +44,7 @@ describe('#YAML context databases', () => {
     fs.writeFileSync(yamlFile, yaml);
 
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.databases).to.deep.equal(target);
   });
@@ -93,7 +93,7 @@ describe('#YAML context databases', () => {
     fs.writeFileSync(yamlFile, yaml);
 
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.databases).to.deep.equal(target);
   });

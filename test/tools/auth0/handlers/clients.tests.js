@@ -237,18 +237,15 @@ describe('#clients handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve([]);
           },
-          getAll: () => [
-            { client_id: 'client1', name: 'existingClient' },
-            { client_id: 'client2', name: 'existingClient2' },
-          ],
+          getAll: () => Promise.resolve([]),
         },
         pool,
       };
 
       const assets = {
-        clients: [{ name: 'excludedClient' }, { name: 'existingClient' }],
+        clients: [{ name: 'Client 1' }, { name: 'Client 2' }],
         exclude: {
-          clients: ['excludedClient', 'existingClient', 'existingClient2'],
+          clients: ['Client 1', 'Client 2'],
         },
       };
 
@@ -284,6 +281,72 @@ describe('#clients handler', () => {
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ clients: [] }]);
+    });
+
+    it('should process clients even if AUTH0_CLIENT_ID is not defined', async () => {
+      let wasCreateCalled = false;
+      let wasUpdateCalled = false;
+      let wasDeleteCalled = false;
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            wasCreateCalled = true;
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('Client 3');
+            return Promise.resolve(data);
+          },
+          update: function (data) {
+            wasUpdateCalled = true;
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.client_id).to.equal('client-1');
+            return Promise.resolve(data);
+          },
+          delete: function (data) {
+            wasDeleteCalled = true;
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.client_id).to.equal('client-2');
+            return Promise.resolve(data);
+          },
+          getAll: () => [
+            {
+              client_id: 'client-1',
+              name: 'Client 1',
+            },
+            {
+              client_id: 'client-2',
+              name: 'Client 2',
+            },
+          ],
+        },
+        pool,
+      };
+
+      const handler = new clients.default({
+        client: auth0,
+        config: (key) =>
+          ({
+            // Notably omitted is AUTH0_CLIENT_ID which
+            AUTH0_ACCESS_TOKEN:
+              'some-fake-access-token-which-is-why-AUTH0_CLIENT_ID-does-not-exists',
+            AUTH0_ALLOW_DELETE: true,
+          }[key]),
+      });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [{ name: 'Client 1' }, { name: 'Client 3' }],
+        },
+      ]);
+      // eslint-disable-next-line no-unused-expressions
+      expect(wasCreateCalled).to.be.true;
+      // eslint-disable-next-line no-unused-expressions
+      expect(wasUpdateCalled).to.be.true;
+      // eslint-disable-next-line no-unused-expressions
+      expect(wasDeleteCalled).to.be.true;
     });
   });
 });

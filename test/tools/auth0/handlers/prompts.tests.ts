@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import promptsHandler from '../../../../src/tools/auth0/handlers/prompts';
 import { Language } from '../../../../src/types';
 import _ from 'lodash';
+import { PromisePoolExecutor } from 'promise-pool-executor';
 
 const mockPromptsSettings = {
   universal_login_experience: 'classic',
@@ -45,7 +46,7 @@ describe('#prompts handler', () => {
         login: {},
         'signup-password': {},
         'mfa-webauthn': {},
-      }; //Has no prompts configured
+      }; // Has no prompts configured.
 
       const auth0 = {
         tenant: {
@@ -70,6 +71,11 @@ describe('#prompts handler', () => {
             return Promise.resolve(customTextValue);
           },
         },
+        pool: new PromisePoolExecutor({
+          concurrencyLimit: 3,
+          frequencyLimit: 1000,
+          frequencyWindow: 1000, // 1 sec
+        }),
       };
 
       const handler = new promptsHandler({ client: auth0 });
@@ -125,27 +131,10 @@ describe('#prompts handler', () => {
       let didCallUpdateCustomText = false;
       let numberOfUpdateCustomTextCalls = 0;
 
-      const auth0 = {
-        prompts: {
-          updateCustomTextByLanguage: () => {
-            didCallUpdateCustomText = true;
-            numberOfUpdateCustomTextCalls++;
-          },
-          updateSettings: (_params, data) => {
-            didCallUpdatePromptsSettings = true;
-            expect(data).to.deep.equal(mockPromptsSettings);
-            return Promise.resolve(data);
-          },
-        },
-      };
-
-      const handler = new promptsHandler({ client: auth0 });
-      const stageFn = Object.getPrototypeOf(handler).processChanges;
-
       const customTextToSet = {
         en: {
           login: {
-            buttonText: 'button text',
+            buttonText: 'button text2',
             description: 'description text',
             title: 'title text',
           },
@@ -159,12 +148,63 @@ describe('#prompts handler', () => {
           },
         },
       };
+
+      const auth0 = {
+        prompts: {
+          updateCustomTextByLanguage: () => {
+            didCallUpdateCustomText = true;
+            numberOfUpdateCustomTextCalls++;
+            return Promise.resolve({});
+          },
+          updateSettings: (_params, data) => {
+            didCallUpdatePromptsSettings = true;
+            expect(data).to.deep.equal(mockPromptsSettings);
+            return Promise.resolve(data);
+          },
+        },
+        pool: new PromisePoolExecutor({
+          concurrencyLimit: 3,
+          frequencyLimit: 1000,
+          frequencyWindow: 1000, // 1 sec
+        }),
+      };
+
+      const handler = new promptsHandler({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+
       await stageFn.apply(handler, [
         { prompts: { ...mockPromptsSettings, customText: customTextToSet } },
       ]);
       expect(didCallUpdatePromptsSettings).to.equal(true);
       expect(didCallUpdateCustomText).to.equal(true);
       expect(numberOfUpdateCustomTextCalls).to.equal(3);
+    });
+
+    it('should not fail if tenant languages undefined', async () => {
+      const auth0 = {
+        tenant: {
+          getSettings: () =>
+            Promise.resolve({
+              enabled_locales: undefined,
+            }),
+        },
+        prompts: {
+          getSettings: () => mockPromptsSettings,
+        },
+        pool: new PromisePoolExecutor({
+          concurrencyLimit: 3,
+          frequencyLimit: 1000,
+          frequencyWindow: 1000, // 1 sec
+        }),
+      };
+
+      const handler = new promptsHandler({ client: auth0 });
+      const data = await handler.getType();
+      expect(data).to.deep.equal({
+        ...mockPromptsSettings,
+        customText: {}, // Custom text empty
+      });
     });
   });
 });

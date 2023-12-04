@@ -1,6 +1,12 @@
-const { expect } = require('chai');
+import chai, { expect } from 'chai';
+import sinonChai from 'sinon-chai';
+import chaiAsPromised from 'chai-as-promised';
+
 const constants = require('../../../../src/tools/constants').default;
 const hooks = require('../../../../src/tools/auth0/handlers/hooks');
+
+chai.use(chaiAsPromised);
+chai.use(sinonChai);
 
 const pool = {
   addEachTask: (data) => {
@@ -231,6 +237,23 @@ describe('#hooks handler', () => {
       expect(data).to.deep.equal(
         hooksData.map((hook) => ({ ...hook, code, secrets: { SECRET: `hook-${hook.id}-secret` } }))
       );
+    });
+
+    it('should return if trying to get hooks when deprecated for tenant', async () => {
+      const auth0 = {
+        hooks: {
+          getAll: () => {
+            const error = new Error();
+            error.statusCode = 403;
+            error.message = 'Insufficient privileges to use this deprecated feature';
+            throw error;
+          },
+        },
+      };
+
+      const handler = new hooks.default({ client: auth0, config });
+      const data = await handler.getType();
+      expect(data).to.equal(null);
     });
 
     it('should return an empty array for 501 status code', async () => {
@@ -560,6 +583,41 @@ describe('#hooks handler', () => {
       };
 
       await stageFn.apply(handler, [assets]);
+    });
+
+    it('should not throw if attempted to update hooks when deprecated for tenant', async () => {
+      const auth0 = {
+        hooks: {
+          getAll: () => {
+            const error = new Error();
+            error.statusCode = 403;
+            error.message = 'Insufficient privileges to use this deprecated feature';
+            throw error;
+          },
+          create: () => {
+            const error = new Error();
+            error.statusCode = 403;
+            error.message = 'Insufficient privileges to use this deprecated feature';
+            throw error;
+          },
+        },
+        pool,
+      };
+      const data = {
+        hooks: [
+          {
+            name: 'someHook',
+            code: 'new-code',
+            triggerId: 'credentials-exchange',
+            secrets: [],
+          },
+        ],
+      };
+
+      const handler = new hooks.default({ client: auth0, config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await expect(stageFn.apply(handler, [data])).to.be.eventually.fulfilled;
     });
   });
 });

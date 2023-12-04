@@ -14,7 +14,7 @@ import {
 
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset, ParsedAsset } from '../../../types';
+import { Asset, KeywordMappings, ParsedAsset } from '../../../types';
 
 type ParsedDatabases = ParsedAsset<'databases', Asset[]>;
 
@@ -31,12 +31,15 @@ type DatabaseMetadata = {
   };
 };
 
-function getDatabase(folder: string, mappings): {} {
+function getDatabase(
+  folder: string,
+  mappingOpts: { mappings: KeywordMappings; disableKeywordReplacement: boolean }
+): {} {
   const metaFile = path.join(folder, 'database.json');
 
   const metaData: DatabaseMetadata | {} = (() => {
     try {
-      return loadJSON(metaFile, mappings);
+      return loadJSON(metaFile, mappingOpts);
     } catch (err) {
       log.warn(`Skipping database folder ${folder} as cannot find or read ${metaFile}`);
       return {};
@@ -60,15 +63,14 @@ function getDatabase(folder: string, mappings): {} {
 
   // If any customScripts configured then load content of files
   if (database.options.customScripts) {
-    Object.entries(database.options.customScripts).forEach(([name, script]) => {
+    Object.entries(database.options.customScripts).forEach(([name, script]: [string, string]) => {
       if (!constants.DATABASE_SCRIPTS.includes(name)) {
         // skip invalid keys in customScripts object
         log.warn('Skipping invalid database configuration: ' + name);
       } else {
         database.options.customScripts[name] = loadFileAndReplaceKeywords(
-          //@ts-ignore
           path.join(folder, script),
-          mappings
+          mappingOpts
         );
       }
     });
@@ -87,7 +89,12 @@ function parse(context: DirectoryContext): ParsedDatabases {
     .filter((f) => isDirectory(f));
 
   const databases = folders
-    .map((f) => getDatabase(f, context.mappings))
+    .map((f) =>
+      getDatabase(f, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      })
+    )
     .filter((p) => Object.keys(p).length > 1);
 
   return {
@@ -125,13 +132,14 @@ async function dump(context: DirectoryContext): Promise<void> {
         // customScripts option only written if there are scripts
         ...(database.options.customScripts && {
           customScripts: Object.entries(database.options.customScripts)
-            //@ts-ignore
+            //@ts-ignore because we'll fix this in subsequent PR
             .sort(sortCustomScripts)
             .reduce((scripts, [name, script]) => {
               // Dump custom script to file
               const scriptName = sanitize(`${name}.js`);
               const scriptFile = path.join(dbFolder, scriptName);
               log.info(`Writing ${scriptFile}`);
+              //@ts-ignore because we'll fix this in subsequent PR
               fs.writeFileSync(scriptFile, script);
               scripts[name] = `./${scriptName}`;
               return scripts;

@@ -61,6 +61,7 @@ const constants = {
     'post-user-registration',
     'post-change-password',
     'send-phone-message',
+    'password-reset-post-challenge'
   ],
   EMAIL_TEMPLATES_DIRECTORY: 'emails',
   EMAIL_VERIFY,
@@ -169,6 +170,7 @@ const constants = {
   LOG_STREAMS_DIRECTORY: 'log-streams',
   PROMPTS_DIRECTORY: 'prompts',
   CUSTOM_DOMAINS_DIRECTORY: 'custom-domains',
+  THEMES_DIRECTORY: 'themes',
 };
 
 export default constants;

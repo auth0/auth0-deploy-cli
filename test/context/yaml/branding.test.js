@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/yaml';
@@ -20,6 +20,10 @@ describe('#YAML context branding templates', () => {
 
     const yaml = `
     branding:
+      colors:
+        page_background: '#0f5a1b'
+        primary: '#0f5a1b'
+      logo_url: https://mycompany.org/logo-5.png
       templates:
         - template: universal_login
           body: universalLogin.html
@@ -29,14 +33,20 @@ describe('#YAML context branding templates', () => {
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { foo: 'bar' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
-    expect(context.assets.branding).to.be.an('object');
-    expect(context.assets.branding.templates).to.deep.equal([
-      {
-        template: 'universal_login',
-        body: htmlTransformed,
+    await context.loadAssetsFromLocal();
+    expect(context.assets.branding).to.deep.equal({
+      colors: {
+        page_background: '#0f5a1b',
+        primary: '#0f5a1b',
       },
-    ]);
+      logo_url: 'https://mycompany.org/logo-5.png',
+      templates: [
+        {
+          template: 'universal_login',
+          body: htmlTransformed,
+        },
+      ],
+    });
   });
 
   it('should dump branding settings, including templates', async () => {
@@ -48,6 +58,11 @@ describe('#YAML context branding templates', () => {
     );
 
     context.assets.branding = {
+      colors: {
+        page_background: '#0f5a1b',
+        primary: '#0f5a1b',
+      },
+      logo_url: 'https://mycompany.org/logo-5.png',
       templates: [
         {
           template: 'universal_login',
@@ -59,6 +74,11 @@ describe('#YAML context branding templates', () => {
     const dumped = await handler.dump(context);
     expect(dumped).to.deep.equal({
       branding: {
+        colors: {
+          page_background: '#0f5a1b',
+          primary: '#0f5a1b',
+        },
+        logo_url: 'https://mycompany.org/logo-5.png',
         templates: [
           {
             template: 'universal_login',

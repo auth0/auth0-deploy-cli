@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { expect } from 'chai';
 import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/attackProtection';
@@ -77,7 +77,7 @@ describe('#YAML context attack-protection', () => {
 
     const config = { AUTH0_INPUT_FILE: yamlFile };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
     expect(context.assets.attackProtection).to.deep.equal(target);
   });
 

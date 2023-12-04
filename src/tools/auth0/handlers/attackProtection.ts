@@ -32,17 +32,27 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
   }
 
   objString(item: Asset): string {
-    return super.objString({
-      'breached-password-protection': {
-        enabled: item.breachedPasswordDetection.enabled,
-      },
-      'brute-force-protection': {
-        enabled: item.bruteForceProtection.enabled,
-      },
-      'suspicious-ip-throttling': {
-        enabled: item.suspiciousIpThrottling.enabled,
-      },
-    });
+    const objectString = (() => {
+      let obj = {};
+      if (item.breachedPasswordDetection?.enabled) {
+        obj['breached-password-protection'] = {
+          enabled: item.breachedPasswordDetection.enabled,
+        };
+      }
+      if (item.bruteForceProtection?.enabled) {
+        obj['brute-force-protection'] = {
+          enabled: item.bruteForceProtection.enabled,
+        };
+      }
+      if (item.suspiciousIpThrottling?.enabled) {
+        obj['suspicious-ip-throttling'] = {
+          enabled: item.suspiciousIpThrottling.enabled,
+        };
+      }
+      return obj;
+    })();
+
+    return super.objString(objectString);
   }
 
   async getType(): Promise<Asset> {

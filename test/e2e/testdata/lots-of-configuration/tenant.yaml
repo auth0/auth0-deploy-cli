@@ -1,0 +1,745 @@
+rules:
+  - name: my-rule
+    script: ./rules/my-rule.js
+    stage: login_success
+    enabled: true
+    order: 2
+rulesConfigs: []
+hooks: []
+pages:
+  - name: error_page
+    html: ./pages/error_page.html
+    show_log_link: false
+    url: https://mycompany.org/error
+  - name: guardian_multifactor
+    enabled: true
+    html: ./pages/guardian_multifactor.html
+  - name: login
+    enabled: true
+    html: ./pages/login.html
+  - name: password_reset
+    enabled: true
+    html: ./pages/password_reset.html
+resourceServers: []
+clients:
+  - name: API Explorer Application
+    allowed_clients: []
+    app_type: non_interactive
+    callbacks: []
+    client_aliases: []
+    client_metadata: {}
+    cross_origin_auth: false
+    custom_login_page_on: true
+    grant_types:
+      - client_credentials
+    is_first_party: true
+    is_token_endpoint_ip_header_trusted: false
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+      secret_encoded: false
+    native_social_login:
+      apple:
+        enabled: false
+      facebook:
+        enabled: false
+    oidc_conformant: true
+    refresh_token:
+      expiration_type: non-expiring
+      leeway: 0
+      infinite_token_lifetime: true
+      infinite_idle_token_lifetime: true
+      token_lifetime: 31557600
+      idle_token_lifetime: 2592000
+      rotation_type: non-rotating
+    sso_disabled: false
+    token_endpoint_auth_method: client_secret_post
+  - name: Node App
+    allowed_clients: []
+    allowed_logout_urls: []
+    allowed_origins: []
+    app_type: regular_web
+    callbacks: []
+    client_aliases: []
+    client_metadata: {}
+    cross_origin_auth: false
+    custom_login_page_on: true
+    grant_types:
+      - authorization_code
+      - implicit
+      - refresh_token
+      - client_credentials
+    is_first_party: true
+    is_token_endpoint_ip_header_trusted: false
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+      secret_encoded: false
+    native_social_login:
+      apple:
+        enabled: false
+      facebook:
+        enabled: false
+    oidc_conformant: true
+    refresh_token:
+      expiration_type: non-expiring
+      leeway: 0
+      infinite_token_lifetime: true
+      infinite_idle_token_lifetime: true
+      token_lifetime: 31557600
+      idle_token_lifetime: 2592000
+      rotation_type: non-rotating
+    sso_disabled: false
+    token_endpoint_auth_method: client_secret_post
+    web_origins: []
+  - name: Quickstarts API (Test Application)
+    app_type: non_interactive
+    client_metadata:
+      foo: bar
+    cross_origin_auth: false
+    custom_login_page_on: true
+    grant_types:
+      - client_credentials
+    is_first_party: true
+    is_token_endpoint_ip_header_trusted: false
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+      secret_encoded: false
+    oidc_conformant: true
+    refresh_token:
+      expiration_type: non-expiring
+      leeway: 0
+      infinite_token_lifetime: true
+      infinite_idle_token_lifetime: true
+      token_lifetime: 31557600
+      idle_token_lifetime: 2592000
+      rotation_type: non-rotating
+    sso_disabled: false
+    token_endpoint_auth_method: client_secret_post
+  - name: Terraform Provider
+    app_type: non_interactive
+    cross_origin_auth: false
+    custom_login_page_on: true
+    grant_types:
+      - client_credentials
+    is_first_party: true
+    is_token_endpoint_ip_header_trusted: false
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+      secret_encoded: false
+    oidc_conformant: true
+    refresh_token:
+      expiration_type: non-expiring
+      leeway: 0
+      infinite_token_lifetime: true
+      infinite_idle_token_lifetime: true
+      token_lifetime: 31557600
+      idle_token_lifetime: 2592000
+      rotation_type: non-rotating
+    sso_disabled: false
+    token_endpoint_auth_method: client_secret_post
+  - name: The Default App
+    allowed_clients: []
+    callbacks: []
+    client_aliases: []
+    client_metadata: {}
+    cross_origin_auth: false
+    custom_login_page_on: true
+    grant_types:
+      - authorization_code
+      - implicit
+      - refresh_token
+      - client_credentials
+    is_first_party: true
+    is_token_endpoint_ip_header_trusted: false
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+      secret_encoded: false
+    native_social_login:
+      apple:
+        enabled: false
+      facebook:
+        enabled: false
+    oidc_conformant: false
+    refresh_token:
+      expiration_type: non-expiring
+      leeway: 0
+      infinite_token_lifetime: true
+      infinite_idle_token_lifetime: true
+      token_lifetime: 2592000
+      idle_token_lifetime: 1296000
+      rotation_type: non-rotating
+    sso: false
+    sso_disabled: false
+    token_endpoint_auth_method: client_secret_post
+  - name: Test SPA
+    allowed_clients: []
+    allowed_logout_urls:
+      - http://localhost:3000
+    app_type: spa
+    callbacks:
+      - http://localhost:3000
+    client_aliases: []
+    client_metadata: {}
+    cross_origin_auth: false
+    custom_login_page_on: true
+    grant_types:
+      - authorization_code
+      - implicit
+      - refresh_token
+    is_first_party: true
+    is_token_endpoint_ip_header_trusted: false
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+      secret_encoded: false
+    native_social_login:
+      apple:
+        enabled: false
+      facebook:
+        enabled: false
+    oidc_conformant: true
+    refresh_token:
+      expiration_type: expiring
+      leeway: 0
+      token_lifetime: 2592000
+      idle_token_lifetime: 1296000
+      infinite_token_lifetime: false
+      infinite_idle_token_lifetime: false
+      rotation_type: rotating
+    sso_disabled: false
+    token_endpoint_auth_method: none
+    web_origins:
+      - http://localhost:3000
+  - name: auth0-deploy-cli-extension
+    allowed_clients: []
+    app_type: non_interactive
+    callbacks: []
+    client_aliases: []
+    client_metadata: {}
+    cross_origin_auth: false
+    custom_login_page_on: true
+    grant_types:
+      - client_credentials
+    is_first_party: true
+    is_token_endpoint_ip_header_trusted: false
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+      secret_encoded: false
+    native_social_login:
+      apple:
+        enabled: false
+      facebook:
+        enabled: false
+    oidc_conformant: true
+    refresh_token:
+      expiration_type: non-expiring
+      leeway: 0
+      infinite_token_lifetime: true
+      infinite_idle_token_lifetime: true
+      token_lifetime: 31557600
+      idle_token_lifetime: 2592000
+      rotation_type: non-rotating
+    sso_disabled: false
+    token_endpoint_auth_method: client_secret_post
+databases:
+  - name: boo-baz-db-connection-test
+    strategy: auth0
+    enabled_clients:
+      - auth0-deploy-cli-extension
+      - Node App
+    is_domain_connection: false
+    options:
+      mfa:
+        active: true
+        return_enroll_settings: true
+      import_mode: false
+      customScripts:
+        change_password: ./databases/boo-baz-db-connection-test/change_password.js
+        create: ./databases/boo-baz-db-connection-test/create.js
+        delete: ./databases/boo-baz-db-connection-test/delete.js
+        get_user: ./databases/boo-baz-db-connection-test/get_user.js
+        login: ./databases/boo-baz-db-connection-test/login.js
+        verify: ./databases/boo-baz-db-connection-test/verify.js
+      disable_signup: false
+      passwordPolicy: low
+      password_history:
+        size: 5
+        enable: false
+      strategy_version: 2
+      requires_username: true
+      password_dictionary:
+        enable: true
+        dictionary: []
+      brute_force_protection: true
+      password_no_personal_info:
+        enable: true
+      password_complexity_options:
+        min_length: 8
+      enabledDatabaseCustomization: true
+    realms:
+      - boo-baz-db-connection-test
+connections:
+  - name: google-oauth2
+    strategy: google-oauth2
+    enabled_clients:
+      - The Default App
+      - auth0-deploy-cli-extension
+    is_domain_connection: false
+    options:
+      email: true
+      scope:
+        - email
+        - profile
+      profile: true
+tenant:
+  allowed_logout_urls:
+    - https://mycompany.org/logoutCallback
+  enabled_locales:
+    - en
+  flags:
+    change_pwd_flow_v1: false
+    enable_apis_section: false
+    enable_client_connections: false
+    enable_custom_domain_in_emails: false
+    enable_dynamic_client_registration: false
+    enable_legacy_logs_search_v2: false
+    enable_public_signup_user_exists_error: true
+    new_universal_login_experience_enabled: true
+    universal_login: true
+    use_scope_descriptions_for_consent: false
+    revoke_refresh_token_grant: false
+    disable_clickjack_protection_headers: false
+    enable_pipeline2: false
+  friendly_name: My Test Tenant
+  idle_session_lifetime: 1
+  picture_url: >-
+    https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png
+  session_cookie:
+    mode: non-persistent
+  session_lifetime: 3.0166666666666666
+  support_email: support@mycompany.org
+  support_url: https://mycompany.org/support
+  universal_login:
+    colors:
+      primary: '#F8F8F2'
+      page_background: '#222221'
+emailProvider:
+  name: mandrill
+  credentials:
+    api_key: '##MANDRILL_API_KEY##'
+  default_from_address: auth0-user@auth0.com
+  enabled: false
+emailTemplates:
+  - template: verify_email
+    body: ./emailTemplates/verify_email.html
+    enabled: true
+    from: ''
+    subject: ''
+    syntax: liquid
+    urlLifetimeInSeconds: 432000
+  - template: welcome_email
+    body: ./emailTemplates/welcome_email.html
+    enabled: false
+    from: ''
+    resultUrl: https://example.com/welcome
+    subject: Welcome
+    syntax: liquid
+    urlLifetimeInSeconds: 3600
+clientGrants:
+  - client_id: API Explorer Application
+    audience: https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/
+    scope:
+      - read:client_grants
+      - create:client_grants
+      - delete:client_grants
+      - update:client_grants
+      - read:users
+      - update:users
+      - delete:users
+      - create:users
+      - read:users_app_metadata
+      - update:users_app_metadata
+      - delete:users_app_metadata
+      - create:users_app_metadata
+      - read:user_custom_blocks
+      - create:user_custom_blocks
+      - delete:user_custom_blocks
+      - create:user_tickets
+      - read:clients
+      - update:clients
+      - delete:clients
+      - create:clients
+      - read:client_keys
+      - update:client_keys
+      - delete:client_keys
+      - create:client_keys
+      - read:connections
+      - update:connections
+      - delete:connections
+      - create:connections
+      - read:resource_servers
+      - update:resource_servers
+      - delete:resource_servers
+      - create:resource_servers
+      - read:device_credentials
+      - update:device_credentials
+      - delete:device_credentials
+      - create:device_credentials
+      - read:rules
+      - update:rules
+      - delete:rules
+      - create:rules
+      - read:rules_configs
+      - update:rules_configs
+      - delete:rules_configs
+      - read:hooks
+      - update:hooks
+      - delete:hooks
+      - create:hooks
+      - read:actions
+      - update:actions
+      - delete:actions
+      - create:actions
+      - read:email_provider
+      - update:email_provider
+      - delete:email_provider
+      - create:email_provider
+      - blacklist:tokens
+      - read:stats
+      - read:insights
+      - read:tenant_settings
+      - update:tenant_settings
+      - read:logs
+      - read:logs_users
+      - read:shields
+      - create:shields
+      - update:shields
+      - delete:shields
+      - read:anomaly_blocks
+      - delete:anomaly_blocks
+      - update:triggers
+      - read:triggers
+      - read:grants
+      - delete:grants
+      - read:guardian_factors
+      - update:guardian_factors
+      - read:guardian_enrollments
+      - delete:guardian_enrollments
+      - create:guardian_enrollment_tickets
+      - read:user_idp_tokens
+      - create:passwords_checking_job
+      - delete:passwords_checking_job
+      - read:custom_domains
+      - delete:custom_domains
+      - create:custom_domains
+      - update:custom_domains
+      - read:email_templates
+      - create:email_templates
+      - update:email_templates
+      - read:mfa_policies
+      - update:mfa_policies
+      - read:roles
+      - create:roles
+      - delete:roles
+      - update:roles
+      - read:prompts
+      - update:prompts
+      - read:branding
+      - update:branding
+      - delete:branding
+      - read:log_streams
+      - create:log_streams
+      - delete:log_streams
+      - update:log_streams
+      - create:signing_keys
+      - read:signing_keys
+      - update:signing_keys
+      - read:limits
+      - update:limits
+      - create:role_members
+      - read:role_members
+      - delete:role_members
+      - read:entitlements
+      - read:attack_protection
+      - update:attack_protection
+      - read:organizations
+      - update:organizations
+      - create:organizations
+      - delete:organizations
+      - create:organization_members
+      - read:organization_members
+      - delete:organization_members
+      - create:organization_connections
+      - read:organization_connections
+      - update:organization_connections
+      - delete:organization_connections
+      - create:organization_member_roles
+      - read:organization_member_roles
+      - delete:organization_member_roles
+      - create:organization_invitations
+      - read:organization_invitations
+      - delete:organization_invitations
+  - client_id: Terraform Provider
+    audience: https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/
+    scope:
+      - read:client_grants
+      - create:client_grants
+      - delete:client_grants
+      - update:client_grants
+      - read:users
+      - update:users
+      - delete:users
+      - create:users
+      - read:users_app_metadata
+      - update:users_app_metadata
+      - delete:users_app_metadata
+      - create:users_app_metadata
+      - read:user_custom_blocks
+      - create:user_custom_blocks
+      - delete:user_custom_blocks
+      - create:user_tickets
+      - read:clients
+      - update:clients
+      - delete:clients
+      - create:clients
+      - read:client_keys
+      - update:client_keys
+      - delete:client_keys
+      - create:client_keys
+      - read:connections
+      - update:connections
+      - delete:connections
+      - create:connections
+      - read:resource_servers
+      - update:resource_servers
+      - delete:resource_servers
+      - create:resource_servers
+      - read:device_credentials
+      - update:device_credentials
+      - delete:device_credentials
+      - create:device_credentials
+      - read:rules
+      - update:rules
+      - delete:rules
+      - create:rules
+      - read:rules_configs
+      - update:rules_configs
+      - delete:rules_configs
+      - read:hooks
+      - update:hooks
+      - delete:hooks
+      - create:hooks
+      - read:actions
+      - update:actions
+      - delete:actions
+      - create:actions
+      - read:email_provider
+      - update:email_provider
+      - delete:email_provider
+      - create:email_provider
+      - blacklist:tokens
+      - read:stats
+      - read:insights
+      - read:tenant_settings
+      - update:tenant_settings
+      - read:logs
+      - read:logs_users
+      - read:shields
+      - create:shields
+      - update:shields
+      - delete:shields
+      - read:anomaly_blocks
+      - delete:anomaly_blocks
+      - update:triggers
+      - read:triggers
+      - read:grants
+      - delete:grants
+      - read:guardian_factors
+      - update:guardian_factors
+      - read:guardian_enrollments
+      - delete:guardian_enrollments
+      - create:guardian_enrollment_tickets
+      - read:user_idp_tokens
+      - create:passwords_checking_job
+      - delete:passwords_checking_job
+      - read:custom_domains
+      - delete:custom_domains
+      - create:custom_domains
+      - update:custom_domains
+      - read:email_templates
+      - create:email_templates
+      - update:email_templates
+      - read:mfa_policies
+      - update:mfa_policies
+      - read:roles
+      - create:roles
+      - delete:roles
+      - update:roles
+      - read:prompts
+      - update:prompts
+      - read:branding
+      - update:branding
+      - delete:branding
+      - read:log_streams
+      - create:log_streams
+      - delete:log_streams
+      - update:log_streams
+      - create:signing_keys
+      - read:signing_keys
+      - update:signing_keys
+      - read:limits
+      - update:limits
+      - create:role_members
+      - read:role_members
+      - delete:role_members
+      - read:entitlements
+      - read:attack_protection
+      - update:attack_protection
+      - read:organizations
+      - update:organizations
+      - create:organizations
+      - delete:organizations
+      - create:organization_members
+      - read:organization_members
+      - delete:organization_members
+      - create:organization_connections
+      - read:organization_connections
+      - update:organization_connections
+      - delete:organization_connections
+      - create:organization_member_roles
+      - read:organization_member_roles
+      - delete:organization_member_roles
+      - create:organization_invitations
+      - read:organization_invitations
+      - delete:organization_invitations
+guardianFactors:
+  - name: duo
+    enabled: false
+  - name: email
+    enabled: false
+  - name: otp
+    enabled: false
+  - name: push-notification
+    enabled: true
+  - name: recovery-code
+    enabled: false
+  - name: sms
+    enabled: false
+  - name: webauthn-platform
+    enabled: false
+  - name: webauthn-roaming
+    enabled: false
+guardianFactorProviders: []
+guardianFactorTemplates: []
+guardianPolicies:
+  policies:
+    - all-applications
+guardianPhoneFactorSelectedProvider:
+  provider: auth0
+guardianPhoneFactorMessageTypes:
+  message_types: []
+roles:
+  - name: Admin
+    description: Can read and write things
+    permissions: []
+  - name: Reader
+    description: Can only read things
+    permissions: []
+  - name: read_only
+    description: Read Only
+    permissions: []
+  - name: read_osnly
+    description: Readz Only
+    permissions: []
+prompts:
+  universal_login_experience: new
+  identifier_first: true
+migrations: {}
+actions:
+  - name: My Custom Action
+    code: ./actions/My Custom Action/code.js
+    dependencies: []
+    deployed: true
+    runtime: node16
+    secrets: []
+    status: built
+    supported_triggers:
+      - id: post-login
+        version: v2
+triggers: {}
+organizations:
+  - name: org1
+    branding:
+      colors:
+        page_background: '#fff5f5'
+        primary: '#57ddff'
+    connections: []
+    display_name: Organization
+  - name: org2
+    connections: []
+    display_name: Organization2
+attackProtection:
+  breachedPasswordDetection:
+    enabled: false
+    shields: []
+    admin_notification_frequency: []
+    method: standard
+  bruteForceProtection:
+    enabled: true
+    shields:
+      - block
+      - user_notification
+    mode: count_per_identifier_and_ip
+    allowlist: []
+    max_attempts: 66
+  suspiciousIpThrottling:
+    enabled: true
+    shields:
+      - admin_notification
+    allowlist:
+      - 127.0.0.1
+    stage:
+      pre-login:
+        max_attempts: 66
+        rate: 864000
+      pre-user-registration:
+        max_attempts: 66
+        rate: 1200
+logStreams:
+  - name: Amazon EventBridge
+    filters:
+      - type: category
+        name: auth.login.success
+      - type: category
+        name: auth.login.notification
+      - type: category
+        name: auth.login.fail
+      - type: category
+        name: auth.signup.success
+      - type: category
+        name: auth.logout.success
+      - type: category
+        name: auth.logout.fail
+      - type: category
+        name: auth.silent_auth.fail
+      - type: category
+        name: auth.silent_auth.success
+      - type: category
+        name: auth.token_exchange.fail
+    sink:
+      awsAccountId: '123456789012'
+      awsRegion: us-east-2
+      awsPartnerEventSource: >-
+        aws.partner/auth0.com/auth0-user-79f1a6de-7fc2-47de-9202-4b7b15c9d601/auth0.logs
+    status: active
+    type: eventbridge
+  - name: Suspended DD Log Stream
+    sink:
+      datadogApiKey: some-sensitive-api-key
+      datadogRegion: us
+    type: datadog

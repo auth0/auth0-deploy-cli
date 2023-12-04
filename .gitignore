@@ -4,8 +4,10 @@ local/
 node_modules/
 lib/
 /npm-debug.log
-config.json
+config*.json
 .env
 .idea
 .npmrc
 yarn-error.log
+*.pem
+*.pub

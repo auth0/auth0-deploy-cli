@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 
 import log from '../../../logger';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
@@ -17,7 +17,12 @@ function parse(context: DirectoryContext): ParsedOrganizations {
   const files = getFiles(organizationsFolder, ['.json']);
 
   const organizations = files.map((f) => {
-    const org = { ...loadJSON(f, context.mappings) };
+    const org = {
+      ...loadJSON(f, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      }),
+    };
     return org;
   });
 

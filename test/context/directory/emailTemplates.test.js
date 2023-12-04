@@ -1,6 +1,5 @@
-import fs from 'fs-extra';
-
 import path from 'path';
+import fs from 'fs-extra';
 import { expect } from 'chai';
 import { constants } from '../../../src/tools';
 
@@ -12,14 +11,14 @@ import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../ut
 const emailTemplates = {
   'provider.json': '{"name": "smtp"}',
   'verify_email.json':
-    '{ "template": "verify_email", "enabled": true, "from": "test@##env##.com" }',
-  'verify_email.html': '<html>some ##env## email</html>',
+    '{ "template": "verify_email", "enabled": true, "from": "test@##env##.com" , "body" : "./verify_email.html.liquid" }',
+  'verify_email.html.liquid': '<html>some ##env## email</html>',
   'welcome_email.json':
     '{ "template": "welcome_email", "enabled": true, "from": "test@##env##.com" }',
   'welcome_email.html': '<html>some ##env## email</html>',
 };
 
-const emailTemplaesTarget = [
+const emailTemplatesTarget = [
   {
     body: '<html>some test email</html>',
     enabled: true,
@@ -35,16 +34,16 @@ const emailTemplaesTarget = [
 ];
 
 describe('#directory context email templates', () => {
-  it('should process email temples', async () => {
+  it('should process email templates', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'emailTemplates1');
     const dir = path.join(repoDir);
     createDir(dir, { [constants.EMAIL_TEMPLATES_DIRECTORY]: emailTemplates });
 
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
-    expect(context.assets.emailTemplates).to.deep.equal(emailTemplaesTarget);
+    expect(context.assets.emailTemplates).to.deep.equal(emailTemplatesTarget);
   });
 
   it('should ignore unknown file', async () => {
@@ -60,9 +59,9 @@ describe('#directory context email templates', () => {
     createDir(dir, files);
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
-    expect(context.assets.emailTemplates).to.deep.equal(emailTemplaesTarget);
+    expect(context.assets.emailTemplates).to.deep.equal(emailTemplatesTarget);
   });
 
   it('should ignore bad email templates directory', async () => {
@@ -73,7 +72,7 @@ describe('#directory context email templates', () => {
 
     const context = new Context({ AUTH0_INPUT_FILE: repoDir });
     const errorMessage = `Expected ${dir} to be a folder but got a file?`;
-    await expect(context.load())
+    await expect(context.loadAssetsFromLocal())
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
   });

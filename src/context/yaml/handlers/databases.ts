@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { mapClientID2NameSorted, sanitize } from '../../../utils';
 import log from '../../../logger';
 import { YAMLHandler } from '.';
@@ -58,6 +58,7 @@ async function dump(context: YAMLContext): Promise<ParsedDatabases> {
           // customScripts option only written if there are scripts
           ...(database.options.customScripts && {
             customScripts: Object.entries(database.options.customScripts)
+              //@ts-ignore because we'll fix this in subsequent PR
               .sort(sortCustomScripts)
               .reduce((scripts, [name, script]) => {
                 // Create Database folder
@@ -69,6 +70,7 @@ async function dump(context: YAMLContext): Promise<ParsedDatabases> {
                 const scriptName = sanitize(name);
                 const scriptFile = path.join(dbFolder, `${scriptName}.js`);
                 log.info(`Writing ${scriptFile}`);
+                //@ts-ignore because we'll fix this in subsequent PR
                 fs.writeFileSync(scriptFile, script);
                 scripts[name] = `./databases/${dbName}/${scriptName}.js`;
                 return scripts;

@@ -1,5 +1,7 @@
 import path from 'path';
+import { readFileSync } from 'fs';
 import { expect } from 'chai';
+import jsYaml from 'js-yaml';
 import * as utils from '../../src/tools/utils';
 import constants from '../../src/tools/constants';
 
@@ -29,16 +31,88 @@ const expectations = {
 };
 
 describe('#utils', function () {
-  it('should load file', () => {
+  it('should load file and replace keywords', () => {
     const file = path.resolve(__dirname, 'test.file.json');
-    const loaded = utils.loadFileAndReplaceKeywords(file, mappings);
+    const loaded = utils.loadFileAndReplaceKeywords(file, {
+      mappings,
+      disableKeywordReplacement: false,
+    });
     expect(JSON.parse(loaded)).to.deep.equal(expectations);
+  });
+
+  it('should load file and not replace keywords', () => {
+    const file = path.resolve(__dirname, 'test.file.json');
+    const loaded = utils.loadFileAndReplaceKeywords(file, {
+      mappings,
+      disableKeywordReplacement: true,
+    });
+    expect(loaded).to.deep.equal(readFileSync(file).toString());
   });
 
   it('should throw error if cannot load file', () => {
     expect(function () {
-      utils.loadFileAndReplaceKeywords('notexist.json', mappings);
+      utils.loadFileAndReplaceKeywords('notexist.json', {
+        mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      });
     }).to.throw(/Unable to load file.*/);
+  });
+
+  describe('wrapArrayReplaceMarkersInQuotes', () => {
+    it('should wrap @@ARRAY_KEYWORD@@ markers in quotes', () => {
+      const yaml = `
+      property:
+      - name: some-item
+        value: @@VALID_ARRAY_KEYWORD@@
+      - name: another-item
+        value: @@VALID_ARRAY_KEYWORD@@`;
+
+      const escapedYaml = utils.wrapArrayReplaceMarkersInQuotes(yaml, {
+        VALID_ARRAY_KEYWORD: [],
+      });
+      expect(escapedYaml).to.equal(`
+      property:
+      - name: some-item
+        value: "@@VALID_ARRAY_KEYWORD@@"
+      - name: another-item
+        value: "@@VALID_ARRAY_KEYWORD@@"`);
+      expect(() => jsYaml.load(escapedYaml)).to.not.throw();
+    });
+
+    it('should not wrap @@ARRAY_KEYWORD@@ markers in quotes if it is already wrapped', () => {
+      const yaml = `
+      property:
+      - name: some-item
+        value: "@@VALID_ARRAY_KEYWORD@@"
+      - name: some-single-quoted-item
+        value: '@@VALID_ARRAY_KEYWORD@@'
+      - name: another-item
+        value: "@@VALID_ARRAY_KEYWORD@@"`;
+
+      const escapedYaml = utils.wrapArrayReplaceMarkersInQuotes(yaml, {
+        VALID_ARRAY_KEYWORD: [],
+      });
+      expect(escapedYaml).to.equal(`
+      property:
+      - name: some-item
+        value: "@@VALID_ARRAY_KEYWORD@@"
+      - name: some-single-quoted-item
+        value: '@@VALID_ARRAY_KEYWORD@@'
+      - name: another-item
+        value: "@@VALID_ARRAY_KEYWORD@@"`);
+      expect(() => jsYaml.load(escapedYaml)).to.not.throw();
+    });
+
+    it('should not wrap @@ARRAY_KEYWORD@@ markers in quotes if keyword does not exist in mapping', () => {
+      const yaml = `
+      property:
+      - name: some-item
+        value: @@NOT_IN_KEYWORD_MAPPINGS@@`;
+
+      const escapedYaml = utils.wrapArrayReplaceMarkersInQuotes(yaml, {});
+      expect(escapedYaml).to.equal(yaml);
+      expect(() => jsYaml.load(escapedYaml)).to.throw(); // Because it is invalid yaml
+    });
   });
 
   it('should do keyword replacements', (done) => {
@@ -222,6 +296,59 @@ describe('#keywordReplacement', () => {
     expect(outputNoWhitespace).to.equal(expected);
   });
 
+  describe('#array concatenation with keyword replacement', function () {
+    it('should concatenate string array values in directory format with workaround', () => {
+      const mapping = {
+        // prettier-ignore
+        GLOBAL_WEB_ORIGINS: "\"http://local.me:8080\", \"http://localhost\", \"http://localhost:3000\"", // eslint-disable-line
+      };
+
+      const inputJSON = `{ 
+      "web_origins": [
+        ##GLOBAL_WEB_ORIGINS##,
+        "http://production-app.com",
+        "https://production-app.com"
+      ]
+    }`;
+
+      const output = utils.keywordReplace(inputJSON, mapping);
+
+      expect(() => JSON.parse(output)).to.not.throw();
+
+      const parsed = JSON.parse(output);
+
+      expect(parsed.web_origins).to.deep.equal([
+        'http://local.me:8080',
+        'http://localhost',
+        'http://localhost:3000',
+        'http://production-app.com',
+        'https://production-app.com',
+      ]);
+    });
+
+    it('should concatenate string array values in YAML format with workaround', () => {
+      const mapping = {
+        // prettier-ignore
+        GLOBAL_WEB_ORIGINS: "\"http://local.me:8080\", \"http://localhost\", \"http://localhost:3000\"", // eslint-disable-line
+      };
+
+      const inputYAML =
+        'web_origins: [ ##GLOBAL_WEB_ORIGINS## , "http://production-app.com", "https://production-app.com"]';
+
+      const output = utils.keywordReplace(inputYAML, mapping);
+
+      const parsed = jsYaml.load(output);
+
+      expect(parsed.web_origins).to.deep.equal([
+        'http://local.me:8080',
+        'http://localhost',
+        'http://localhost:3000',
+        'http://production-app.com',
+        'https://production-app.com',
+      ]);
+    });
+  });
+
   describe('#keywordStringReplace', () => {
     const mapping = {
       STRING_REPLACEMENT: 'foo',
@@ -279,13 +406,26 @@ describe('#keywordReplacement', () => {
       });
     });
 
-    it('should replace @@ wrapped values, even when wrapped with quotes', () => {
+    it('should replace @@ wrapped values, even when wrapped with quotes in JSON format', () => {
       const inputWrappedInQuotes = '{ "foo": "@@ARRAY_REPLACEMENT@@", "bar": "OTHER_REPLACEMENT"}';
       const output = utils.keywordArrayReplace(inputWrappedInQuotes, mapping);
       const parsedOutput = JSON.parse(output);
       expect(parsedOutput).to.deep.equal({
         foo: mapping.ARRAY_REPLACEMENT,
         bar: 'OTHER_REPLACEMENT',
+      });
+    });
+
+    it('should replace @@ wrapped values, even when wrapped with quotes in YAML format', () => {
+      const inputWrappedInQuotes = `
+        singleQuotes: '@@ARRAY_REPLACEMENT@@'
+        doubleQuotes: "@@ARRAY_REPLACEMENT@@"`;
+
+      const output = utils.keywordArrayReplace(inputWrappedInQuotes, mapping);
+      const parsedOutput = jsYaml.load(output);
+      expect(parsedOutput).to.deep.equal({
+        singleQuotes: mapping.ARRAY_REPLACEMENT,
+        doubleQuotes: mapping.ARRAY_REPLACEMENT,
       });
     });
   });
@@ -481,5 +621,32 @@ describe('#detectInsufficientScopeError', () => {
     }
 
     expect(didThrow).to.equal(true);
+  });
+});
+
+describe('#isDeprecatedError', () => {
+  it('should return true if deprecated error', async () => {
+    const error = {
+      message: 'Insufficient privileges to use this deprecated feature',
+      statusCode: 403,
+    };
+    // eslint-disable-next-line no-unused-expressions
+    expect(utils.isDeprecatedError(error)).to.be.true;
+  });
+
+  it('should return false if not a deprecated error', async () => {
+    const error = {
+      message: 'Not found',
+      statusCode: 404,
+    };
+    // eslint-disable-next-line no-unused-expressions
+    expect(utils.isDeprecatedError(error)).to.be.false;
+  });
+
+  it('should return false error is not error types', async () => {
+    // eslint-disable-next-line no-unused-expressions
+    expect(utils.isDeprecatedError(undefined)).to.be.false;
+    // eslint-disable-next-line no-unused-expressions
+    expect(utils.isDeprecatedError({})).to.be.false;
   });
 });

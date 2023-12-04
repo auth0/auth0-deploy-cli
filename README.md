@@ -1,65 +1,164 @@
-# Auth0 Deploy CLI
+![Deploy CLI Banner](https://user-images.githubusercontent.com/28300158/215845643-0db6c97f-b090-40f7-b0a3-551d6973aeff.png)
 
-Auth0 supports continuous integration and deployment (CI/CD) of Auth0 Tenants and integration into existing CI/CD pipelines by using this **auth0-deploy-cli** tool.
+[![npm version](https://badge.fury.io/js/auth0-deploy-cli.svg)](https://badge.fury.io/js/auth0-deploy-cli)
+[![CircleCI](https://circleci.com/gh/auth0/auth0-deploy-cli/tree/master.svg?style=svg)](https://circleci.com/gh/auth0/auth0-deploy-cli/tree/master)
+[![codecov](https://codecov.io/gh/auth0/auth0-deploy-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/auth0/auth0-deploy-cli)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-The `auth0-deploy-cli` tool supports the importing and exporting of Auth0 Tenant configuration data.
+---
 
-Supported Auth0 Management API resources
+## Help Us Improve Auth0 Deploy CLI – Take Our Survey!
 
-- [x] [Actions](https://auth0.com/docs/api/management/v2/#!/Actions/get_actions)
-- [x] [Branding](https://auth0.com/docs/api/management/v2/#!/Branding/get_branding)
-- [x] [Clients (Applications)](https://auth0.com/docs/api/management/v2#!/Clients/get_clients)
-- [x] [Client Grants](https://auth0.com/docs/api/management/v2#!/Client_Grants/get_client_grants)
-- [x] [Connections](https://auth0.com/docs/api/management/v2#!/Connections/get_connections)
-- [ ] [Custom Domains](https://auth0.com/docs/api/management/v2#!/Custom_Domains/get_custom_domains)
-- [ ] [Device Credentials](https://auth0.com/docs/api/management/v2#!/Device_Credentials/get_device_credentials)
-- [x] [Grants](https://auth0.com/docs/api/management/v2#!/Grants/get_grants)
-- [x] [Hooks](https://auth0.com/docs/api/management/v2#!/Hooks/get_hooks)
-- [x] [Hook Secrets](https://auth0.com/docs/api/management/v2/#!/Hooks/get_secrets)
-- [x] [Log Streams](https://auth0.com/docs/api/management/v2#!/Log_Streams/get_log_streams)
-- [ ] [Logs](https://auth0.com/docs/api/management/v2#!/Logs/get_logs)
-- [x] [Organizations](https://auth0.com/docs/api/management/v2#!/Organizations/get_organizations)
-- [x] [Prompts](https://auth0.com/docs/api/management/v2#!/Prompts/get_prompts)
-- [x] [Resource Servers (APIs)](https://auth0.com/docs/api/management/v2#!/Resource_Servers/get_resource_servers)
-- [x] [Roles](https://auth0.com/docs/api/management/v2#!/Roles)
-- [x] [Rules](https://auth0.com/docs/api/management/v2#!/Rules/get_rules)
-- [x] [Rules Configs](https://auth0.com/docs/api/management/v2#!/Rules_Configs/get_rules_configs)
-- [ ] [User Blocks](https://auth0.com/docs/api/management/v2#!/User_Blocks/get_user_blocks)
-- [ ] [Users](https://auth0.com/docs/api/management/v2#!/Users/get_users)
-- [ ] [Users By Email](https://auth0.com/docs/api/management/v2#!/Users_By_Email/get_users_by_email)
-- [ ] [Blacklists](https://auth0.com/docs/api/management/v2#!/Blacklists/get_tokens)
-- [x] [Email Templates](https://auth0.com/docs/api/management/v2#!/Email_Templates/get_email_templates_by_templateName)
-- [x] [Emails](https://auth0.com/docs/api/management/v2#!/Emails/get_provider)
-- [x] [Guardian](https://auth0.com/docs/api/management/v2#!/Guardian/get_factors)
-- [ ] [Jobs](https://auth0.com/docs/api/management/v2#!/Jobs/get_jobs_by_id)
-- [ ] [Stats](https://auth0.com/docs/api/management/v2#!/Stats/get_active_users)
-- [x] [Tenants (Pages and Migrations)](https://auth0.com/docs/api/management/v2#!/Tenants/get_settings)
-- [ ] [Anomaly](https://auth0.com/docs/api/management/v2#!/Anomaly/get_ips_by_id)
-- [ ] [Tickets](https://auth0.com/docs/api/management/v2#!/Tickets/post_email_verification)
-- [ ] [Signing Keys](https://auth0.com/docs/api/management/v2#!/Keys/get_signing_keys)
+👋 Hello developers! We're on a mission to make Auth0 Deploy CLI the best it can be, and we need YOUR help. We've put together a brief survey to understand how you use Deploy CLI, what you love about it, and where you think we can do better.
 
-# Before you begin
+### Why Should You Take the Survey?
 
-- This tool can be destructive to your Auth0 tenant. Please ensure you have read the documentation and tested the tool on a development tenant before using it in production.
-- Entities created using this tool may share user data with or receive user data from 3rd parties. Please see the [documentation for the individual Management endpoints](https://auth0.com/docs/api/management/v2) for details.
+- **Direct Impact:** Your feedback will directly influence the future of Deploy CLI. Ever wished for a feature or fix? Here's your chance to let us know.
+- **It's Quick:** The survey takes less than 10 minutes to complete.
 
-# Documentation
+### Privacy
 
-Please visit Auth0 Doc for this [Deploy CLI Tool](https://auth0.com/docs/deploy/deploy-cli-tool)
+We care about your privacy. All data collected is anonymous and will only be used for improving Auth0 Deploy CLI.
 
-# Integrating with popular CI/CD pipelines
+### Ready to Make a Difference?
 
-Please visit Auth0 Marketplace Guide for:
+[Click here to take the survey](https://www.surveymonkey.com/r/LZKMPFN)
 
-- [Azure Pipelines](https://marketplace.auth0.com/integrations/azure-pipeline)
-- [Bitbucket Pipelines](https://marketplace.auth0.com/integrations/bitbucket-pipeline)
-- [GitLab Pipelines](https://marketplace.auth0.com/integrations/gitlab-pipeline)
-- [GitHub Actions](https://marketplace.auth0.com/integrations/github-actions)
+Thank you for helping us make Auth0 Deploy CLI better for everyone!
 
-# Known issues
+---
 
-See https://github.com/auth0/auth0-deploy-cli/issues
+The Auth0 Deploy CLI is a tool that helps you manage your Auth0 tenant configuration. It integrates into your development workflows as a standalone CLI or as a node module.
 
-# License
+**Supported resource types:** actions, branding, client grants, clients (applications), connections, custom domains, email templates, emails, grants, guardian, hook secrets, log streams, migrations, organizations, pages, prompts, resource servers (APIs), roles, tenant settings, themes.
 
-MIT
+🎢 [Highlights](#highlights) • 📚 [Documentation](#documentation) • 🚀 [Getting Started](#getting-started) • 💬 [Feedback](#feedback)
+
+---
+
+## Highlights
+
+- **Multi-Environment Oriented:** Designed to help you test your applications' Auth0 integrations from feature branch all the way to production.
+- **Keyword Replacement:** Shared resource configurations across all environments with dynamic keyword replacement.
+- **Versatile:** Integrate into your CI/CD workflows either as a CLI or as a Node module.
+
+## Documentation
+
+- [Using as a CLI](docs/using-as-cli.md)
+- [Using as a Node Module](docs/using-as-node-module.md)
+- [Authenticating with Tenant](docs/authenticating-with-tenant.md)
+- [Configuring the Deploy CLI](docs/configuring-the-deploy-cli.md)
+- [Keyword Replacement](docs/keyword-replacement.md)
+- [Incorporating Into Multi-environment Workflows](docs/multi-environment-workflow.md)
+- [Excluding Resources From Management](docs/excluding-from-management.md)
+- [Resource-specific Documentation](docs/resource-specific-documentation.md)
+- [Available Resource Formats](docs/available-resource-config-formats.md)
+- [Terraform Provider](docs/terraform-provider.md)
+- [How to Contribute](docs/how-to-contribute.md)
+
+## Getting Started
+
+This guide will help you to a working implementation of the Deploy CLI tool used as a standalone CLI. There are three main steps before the Deploy CLI can be run:
+
+1. [Create a Dedicated Auth0 Application](#create-a-dedicated-auth0-application)
+2. [Configure the Deploy CLI](#configure-the-deploy-cli)
+3. [Calling the Deploy CLI](#calling-the-deploy-cli)
+
+> **Warning**
+> This tool can be destructive to your Auth0 tenant.
+> It is recommended to be familiar with the [`AUTH0_ALLOW_DELETE` configuration](docs/configuring-the-deploy-cli.md#auth0allowdelete) and to test on development tenants prior to using in production.
+
+### Prerequisites
+
+- [Node](https://nodejs.dev/) version 10 or greater
+- [Auth0 Tenant](https://auth0.com/)
+
+### Install the Deploy CLI
+
+To run as a standalone command-line tool:
+
+```shell
+npm install -g auth0-deploy-cli
+```
+
+### Create a dedicated Auth0 Application
+
+In order for the Deploy CLI to call the Management API, a dedicated Auth0 application must be created to make calls on behalf of the tool.
+
+1. From the Auth0 dashboard, navigate to **Applications > Applications**
+2. Click “Create Application”
+3. On Create application page:
+   a. Name it “Deploy CLI” or similar
+   b. Select “Machine to Machine Applications” as application type
+   c. Click “Create”
+4. On the “Authorize Machine to Machine Application” page
+   a. Select “Auth0 Management API”
+   b. Select the appropriate permissions for the resources you wish to manage. Refer to the [Client Scopes](#client-scopes) section for more information.
+   c. Click “Authorize”
+
+> **Warning**
+> The Deploy CLI's own client is unconfigurable by itself to [prevent potentially destructive changes](./docs/resource-specific-documentation.md#client-grants).
+
+#### Client Scopes
+
+The designated application needs to be granted scopes in order to allow the Deploy CLI to execute Management operations.
+
+The principle of least privilege is abided, so it will operate within the set of permissions granted. At a minimum, `read:clients` need to be selected, but is is recommended to select `read:`, `create:` and `update:` permissions for all resource types within management purview. To enable deletions, the `delete:` scopes are also necessary.
+
+### Configure the Deploy CLI
+
+The Deploy CLI can be configured two ways, through a `config.json` file and through environment variables. The decision to choose one or both would depend on your specific use case and preferences. More comprehensive information about configuring the tool can be found on the [Configuring the Deploy CLI](docs/configuring-the-deploy-cli.md) page. However, for this example, the simplest way to get going is by setting the following environment variables:
+
+- `AUTH0_DOMAIN`
+- `AUTH0_CLIENT_ID`
+- `AUTH0_CLIENT_SECRET`
+
+These values can be found in the “Settings” and “Credentials“ tabs within the Auth0 application created in the previous step.
+
+### Calling the Deploy CLI
+
+Finally, with above complete, the Deploy CLI export command can be run:
+
+```shell
+a0deploy export --format=yaml --output_folder=local
+```
+
+Once the process completes, observe the resource configuration files generated in the `local` directory. Then, run the import command, which pushes configuration from the local machine to your Auth0 tenant:
+
+```shell
+a0deploy import --config_file=config.json --input_file local/tenant.yaml
+```
+
+Refer to [Using as a CLI](./docs/using-as-cli.md) documentation for a comprehensive list of flags and options.
+
+## Feedback
+
+### Contributing
+
+We appreciate feedback and contribution to this repo! Before you get started, please see the following:
+
+- [Contribution Guide](./CONTRIBUTING.md)
+- [Auth0's General Contribution Guidelines](https://github.com/auth0/open-source-template/blob/master/GENERAL-CONTRIBUTING.md)
+- [Auth0's Code of Conduct Guidelines](https://github.com/auth0/open-source-template/blob/master/CODE-OF-CONDUCT.md)
+
+### Raise an issue
+
+To provide feedback or report a bug, [please raise an issue on our issue tracker](https://github.com/auth0/auth0-deploy-cli/issues).
+
+### Vulnerability Reporting
+
+Please do not report security vulnerabilities on the public Github issue tracker. The [Responsible Disclosure Program](https://auth0.com/responsible-disclosure-policy) details the procedure for disclosing security issues.
+
+---
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="https://cdn.auth0.com/website/sdks/logos/auth0_light_mode.png" width="150">
+    <source media="(prefers-color-scheme: dark)" srcset="https://cdn.auth0.com/website/sdks/logos/auth0_dark_mode.png" width="150">
+    <img alt="Auth0 Logo" src="https://cdn.auth0.com/website/sdks/logos/auth0_light_mode.png" width="150">
+  </picture>
+</p>
+
+<p align="center">Auth0 is an easy to implement, adaptable authentication and authorization platform.<br />To learn more checkout <a href="https://auth0.com/why-auth0">Why Auth0?</a></p>
+
+<p align="center">This project is licensed under the MIT license. See the <a href="./LICENSE.md"> LICENSE</a> file for more info.</p>

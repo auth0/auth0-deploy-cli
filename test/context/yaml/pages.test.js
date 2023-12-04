@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/yaml';
@@ -78,7 +78,7 @@ describe('#YAML context pages', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { val1: 'env1', val2: 'env2' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.pages).to.deep.equal(target);
   });
@@ -133,6 +133,32 @@ describe('#YAML context pages', () => {
     expect(fs.readFileSync(path.join(pagesFolder, 'error_page.html'), 'utf8')).to.deep.equal(
       htmlValidation
     );
+  });
+
+  it('should not throw if page HTML is not defined', async () => {
+    // See: https://github.com/auth0/auth0-deploy-cli/issues/365
+    const dir = path.join(testDataDir, 'yaml', 'pagesDump');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, 'tennat.yaml') },
+      mockMgmtClient()
+    );
+
+    context.assets.pages = [
+      { name: 'login' }, // HTML property is not defined here
+    ];
+
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({
+      pages: [
+        {
+          name: 'login',
+        },
+      ],
+    });
+
+    const pagesFolder = path.join(dir, 'pages');
+    expect(fs.readdirSync(pagesFolder).length).to.equal(0);
   });
 
   it('should dump error_page with html undefined', async () => {
@@ -227,7 +253,7 @@ describe('#YAML context pages', () => {
 
     const config = { AUTH0_INPUT_FILE: yamlFile };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.pages).to.deep.equal(target);
   });

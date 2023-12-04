@@ -1,0 +1,5 @@
+tenant:
+  friendly_name: This is the ##COMPANY_NAME## Tenant
+  enabled_locales: @@LANGUAGES@@
+  flags:
+    new_universal_login_experience_enabled: true

@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { constants } from '../../../tools';
 import { existsMustBeDir, dumpJSON, loadJSON, isFile } from '../../../utils';
 import { DirectoryHandler } from '.';
@@ -19,7 +19,10 @@ function parse(context: DirectoryContext): ParsedGuardianFactorMessageTypes {
   }
 
   return {
-    guardianPhoneFactorMessageTypes: loadJSON(file, context.mappings),
+    guardianPhoneFactorMessageTypes: loadJSON(file, {
+      mappings: context.mappings,
+      disableKeywordReplacement: context.disableKeywordReplacement,
+    }),
   };
 }
 

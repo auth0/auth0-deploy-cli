@@ -1,5 +1,5 @@
 import ValidationError from '../../validationError';
-import { convertJsonToString, stripFields, duplicateItems } from '../../utils';
+import { convertJsonToString, stripFields, duplicateItems, isDeprecatedError } from '../../utils';
 import DefaultHandler from './default';
 import log from '../../../logger';
 import { calculateChanges } from '../../calculateChanges';
@@ -60,10 +60,17 @@ export default class RulesHandler extends DefaultHandler {
     });
   }
 
-  async getType(): Promise<Asset[]> {
-    if (this.existing) return this.existing;
-    this.existing = await this.client.rules.getAll({ paginate: true, include_totals: true });
-    return this.existing;
+  async getType(): Promise<Asset[] | null> {
+    try {
+      if (this.existing) return this.existing;
+      this.existing = await this.client.rules.getAll({ paginate: true, include_totals: true });
+      return this.existing;
+    } catch (err) {
+      if (isDeprecatedError(err)) {
+        return null;
+      }
+      throw err;
+    }
   }
 
   objString(rule): string {
@@ -79,6 +86,15 @@ export default class RulesHandler extends DefaultHandler {
     const excludedRules = (assets.exclude && assets.exclude.rules) || [];
 
     let existing = await this.getType();
+    if (existing === null) {
+      return {
+        del: [],
+        update: [],
+        conflicts: [],
+        create: [],
+        reOrder: [],
+      };
+    }
 
     // Filter excluded rules
     if (!includeExcluded) {
@@ -91,7 +107,7 @@ export default class RulesHandler extends DefaultHandler {
       handler: this,
       assets: rules,
       existing,
-      identifiers: ['id', 'name'],
+      identifiers: this.identifiers,
       allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
     });
     // Figure out the rules that need to be re-ordered
@@ -103,6 +119,7 @@ export default class RulesHandler extends DefaultHandler {
 
     //@ts-ignore because we know reOrder is Asset[]
     const reOrder: Asset[] = futureRules.reduce((accum: Asset[], r: Asset) => {
+      if (existing === null) return accum;
       const conflict = existing.find((f) => r.order === f.order && r.name !== f.name);
       if (conflict !== undefined) {
         nextOrderNo += 1;
@@ -155,6 +172,8 @@ export default class RulesHandler extends DefaultHandler {
 
     // Detect Rules that are changing stage as it's not allowed.
     const existing = await this.getType();
+    if (existing === null) return;
+
     const stateChanged = futureRules
       .reduce(
         (changed: Asset[], rule) => [
@@ -182,33 +201,47 @@ export default class RulesHandler extends DefaultHandler {
     // Do nothing if not set
     if (!rules) return;
 
-    // Figure out what needs to be updated vs created
-    const changes = await this.calcChanges(assets);
+    log.warn(
+      'Rules are deprecated, migrate to using actions instead. See: https://auth0.com/docs/customize/actions/migrate/migrate-from-rules-to-actions for more information.'
+    );
 
-    // Temporally re-order rules with conflicting ordering
-    await this.client.pool
-      .addEachTask({
-        data: changes.reOrder,
-        generator: (rule) =>
-          this.client.rules
-            .update({ id: rule.id }, stripFields(rule, this.stripUpdateFields))
-            .then(() => {
-              const updated = {
-                name: rule.name,
-                stage: rule.stage,
-                order: rule.order,
-                id: rule.id,
-              };
-              log.info(`Temporally re-order Rule ${convertJsonToString(updated)}`);
-            }),
-      })
-      .promise();
+    try {
+      // Figure out what needs to be updated vs created
+      const changes = await this.calcChanges(assets);
 
-    await super.processChanges(assets, {
-      del: changes.del,
-      create: changes.create,
-      update: changes.update,
-      conflicts: changes.conflicts,
-    });
+      // Temporally re-order rules with conflicting ordering
+      await this.client.pool
+        .addEachTask({
+          data: changes.reOrder,
+          generator: (rule) =>
+            this.client.rules
+              .update({ id: rule.id }, stripFields(rule, this.stripUpdateFields))
+              .then(() => {
+                const updated = {
+                  name: rule.name,
+                  stage: rule.stage,
+                  order: rule.order,
+                  id: rule.id,
+                };
+                log.info(`Temporally re-order Rule ${convertJsonToString(updated)}`);
+              }),
+        })
+        .promise();
+
+      await super.processChanges(assets, {
+        del: changes.del,
+        create: changes.create,
+        update: changes.update,
+        conflicts: changes.conflicts,
+      });
+    } catch (err) {
+      if (isDeprecatedError(err)) {
+        log.warn(
+          'Failed to update rules because functionality has been deprecated in favor of actions. See: https://auth0.com/docs/customize/actions/migrate/migrate-from-rules-to-actions for more information.'
+        );
+        return;
+      }
+      throw err;
+    }
   }
 }

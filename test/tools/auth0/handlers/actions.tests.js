@@ -1,5 +1,9 @@
-const { expect } = require('chai');
+import chai, { expect } from 'chai';
+import chaiAsPromised from 'chai-as-promised';
+
 const actions = require('../../../../src/tools/auth0/handlers/actions');
+
+chai.use(chaiAsPromised);
 
 const pool = {
   addEachTask: (data) => {
@@ -261,6 +265,25 @@ describe('#actions handler', () => {
       expect(data).to.deep.include({ ...actionsData[0], deployed: true });
     });
 
+    it('should throw informative error when actions service returns "An internal server error occurred" 500 error', async () => {
+      const auth0 = {
+        actions: {
+          getAll: () => {
+            const error = new Error();
+            error.statusCode = 500;
+            error.message = 'An internal server error occurred';
+            throw error;
+          },
+        },
+        pool,
+      };
+
+      const handler = new actions.default({ client: auth0, config });
+      await expect(handler.getType()).to.be.rejectedWith(
+        "Cannot process actions because the actions service is currently unavailable. Retrying may result in a successful operation. Alternatively, adding 'actions' to `AUTH0_EXCLUDED` configuration property will provide ability to skip until service is restored to actions service. This is not an issue with the Deploy CLI."
+      );
+    });
+
     it('should return an empty array for 501 status code', async () => {
       const auth0 = {
         actions: {
@@ -384,6 +407,56 @@ describe('#actions handler', () => {
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ actions: [] }]);
+    });
+
+    it('should not remove marketplace action', async () => {
+      let wasDeleteCalled = false;
+
+      const marketplaceAction = {
+        id: 'D1AF7CCF-7ZAB-417F-81C0-533595A926D8',
+        name: 'Travel0 Integration',
+        supported_triggers: [
+          {
+            id: 'post-login',
+            version: 'v1',
+          },
+        ],
+        created_at: '2022-08-22T23:57:45.856907897Z',
+        updated_at: '2022-08-22T23:57:45.856907897Z',
+        installed_integration_id: '73f156dc-e7aa-47b4-9dda-0ef741205c31',
+        integration: {
+          id: '046042e2-5732-48ef-9313-0a93778ea8b1',
+          catalog_id: 'travel0-action',
+          url_slug: 'travel0-sms',
+          partner_id: 'bea44019-d08d-47cd-b4f9-30074ca2ab69',
+          name: 'Travel0',
+          logo: 'https://cdn.auth0.com/travel0-logo.png',
+          updated_at: '2022-05-03T15:05:45.684007768Z',
+          created_at: '2021-08-24T20:49:30.446854653Z',
+          feature_type: 'action',
+          current_release: {
+            id: '',
+            semver: {},
+          },
+          all_changes_deployed: false,
+        },
+      };
+
+      const auth0 = {
+        actions: {
+          getAll: () => Promise.resolve([marketplaceAction]),
+          delete: () => {
+            wasDeleteCalled = true;
+          },
+        },
+        pool,
+      };
+
+      const handler = new actions.default({ client: auth0, config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ actions: [] }]);
+
+      expect(wasDeleteCalled).to.equal(false);
     });
   });
 });

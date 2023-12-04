@@ -1,12 +1,13 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { constants } from '../../../tools';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset, ParsedAsset } from '../../../types';
+import { ParsedAsset } from '../../../types';
+import { ResourceServer } from '../../../tools/auth0/handlers/resourceServers';
 
-type ParsedResourceServers = ParsedAsset<'resourceServers', Asset[]>;
+type ParsedResourceServers = ParsedAsset<'resourceServers', ResourceServer[]>;
 
 function parse(context: DirectoryContext): ParsedResourceServers {
   const resourceServersFolder = path.join(context.filePath, constants.RESOURCE_SERVERS_DIRECTORY);
@@ -15,7 +16,12 @@ function parse(context: DirectoryContext): ParsedResourceServers {
   const foundFiles = getFiles(resourceServersFolder, ['.json']);
 
   const resourceServers = foundFiles
-    .map((f) => loadJSON(f, context.mappings))
+    .map((f) =>
+      loadJSON(f, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      })
+    )
     .filter((p) => Object.keys(p).length > 0); // Filter out empty resourceServers
 
   return {

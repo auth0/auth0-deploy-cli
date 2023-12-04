@@ -36,7 +36,6 @@ export default class OrganizationsHandler extends DefaultHandler {
       ...config,
       type: 'organizations',
       id: 'id',
-      identifiers: ['name'],
     });
   }
 
@@ -44,7 +43,7 @@ export default class OrganizationsHandler extends DefaultHandler {
     await this.client.organizations.delete({ id: org.id });
   }
 
-  async deleteOrganizations(data): Promise<void> {
+  async deleteOrganizations(data: Asset[]): Promise<void> {
     if (
       this.config('AUTH0_ALLOW_DELETE') === 'true' ||
       this.config('AUTH0_ALLOW_DELETE') === true
@@ -253,7 +252,7 @@ export default class OrganizationsHandler extends DefaultHandler {
       handler: this,
       assets: organizations,
       existing,
-      identifiers: ['id', 'name'],
+      identifiers: this.identifiers,
       allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
     });
 
@@ -271,7 +270,7 @@ export default class OrganizationsHandler extends DefaultHandler {
       myChanges.map(async (change) => {
         switch (true) {
           case change.del && change.del.length > 0:
-            await this.deleteOrganizations(change.del);
+            await this.deleteOrganizations(change.del || []);
             break;
           case change.create && change.create.length > 0:
             await this.createOrganizations(changes.create);

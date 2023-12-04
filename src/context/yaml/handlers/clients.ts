@@ -5,9 +5,10 @@ import log from '../../../logger';
 import { isFile, sanitize, clearClientArrays } from '../../../utils';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset, ParsedAsset } from '../../../types';
+import { ParsedAsset } from '../../../types';
+import { Client } from '../../../tools/auth0/handlers/clients';
 
-type ParsedClients = ParsedAsset<'clients', Asset[]>;
+type ParsedClients = ParsedAsset<'clients', Client[]>;
 
 async function parse(context: YAMLContext): Promise<ParsedClients> {
   // Load the HTML file for custom_login_page
@@ -58,7 +59,7 @@ async function dump(context: YAMLContext): Promise<ParsedClients> {
           client.custom_login_page = `./${clientName}_custom_login_page.html`;
         }
 
-        return clearClientArrays(client);
+        return clearClientArrays(client) as Client;
       }),
     ],
   };

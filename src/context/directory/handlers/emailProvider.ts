@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { constants } from '../../../tools';
 
 import { existsMustBeDir, isFile, dumpJSON, loadJSON } from '../../../utils';
@@ -18,7 +18,10 @@ function parse(context: DirectoryContext): ParsedEmailProvider {
 
   if (isFile(providerFile)) {
     return {
-      emailProvider: loadJSON(providerFile, context.mappings),
+      emailProvider: loadJSON(providerFile, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      }),
     };
   }
 

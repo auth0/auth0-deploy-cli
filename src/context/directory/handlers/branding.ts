@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 import { dumpJSON, existsMustBeDir, getFiles, isFile, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
@@ -16,7 +16,10 @@ function parse(context: DirectoryContext): ParsedBranding {
 
   const brandingSettings = (() => {
     if (isFile(brandingFile)) {
-      return loadJSON(brandingFile, context.mappings);
+      return loadJSON(brandingFile, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      });
     }
 
     return null;
@@ -31,10 +34,16 @@ function parse(context: DirectoryContext): ParsedBranding {
 
   const templatesDefinitionFiles = getFiles(brandingTemplatesFolder, ['.json']);
   const templates = templatesDefinitionFiles.map((templateDefinitionFile) => {
-    const definition = loadJSON(templateDefinitionFile, context.mappings);
+    const definition = loadJSON(templateDefinitionFile, {
+      mappings: context.mappings,
+      disableKeywordReplacement: context.disableKeywordReplacement,
+    });
     definition.body = loadFileAndReplaceKeywords(
       path.join(brandingTemplatesFolder, definition.body),
-      context.mappings
+      {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      }
     );
     return definition;
   }, {});

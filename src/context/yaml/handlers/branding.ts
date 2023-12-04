@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
 import { YAMLHandler } from '.';
@@ -19,14 +19,6 @@ type ParsedBranding = ParsedAsset<
 >;
 
 async function parse(context: YAMLContext): Promise<ParsedBranding> {
-  // Load the HTML file for each page
-  if (!context.assets.branding)
-    return {
-      branding: {
-        templates: [],
-      },
-    };
-
   if (!context.assets.branding) return { branding: null };
 
   const {
@@ -42,7 +34,10 @@ async function parse(context: YAMLContext): Promise<ParsedBranding> {
       const markupFile = path.join(context.basePath, templateDefinition.body);
       return {
         template: templateDefinition.template,
-        body: loadFileAndReplaceKeywords(markupFile, context.mappings),
+        body: loadFileAndReplaceKeywords(markupFile, {
+          mappings: context.mappings,
+          disableKeywordReplacement: context.disableKeywordReplacement,
+        }),
       };
     }
   );
@@ -56,11 +51,11 @@ async function parse(context: YAMLContext): Promise<ParsedBranding> {
 }
 
 async function dump(context: YAMLContext): Promise<ParsedBranding> {
-  const { branding } = context.assets;
+  if (!context.assets.branding) return { branding: null };
 
-  if (!branding) return { branding: null };
+  const { templates: templateConfig, ...branding } = context.assets.branding;
 
-  let templates = branding.templates || [];
+  let templates = templateConfig || [];
 
   // create templates folder
   if (templates.length) {
@@ -91,7 +86,7 @@ async function dump(context: YAMLContext): Promise<ParsedBranding> {
     });
   }
 
-  return { branding: { templates } };
+  return { branding: { templates, ...branding } };
 }
 
 const brandingHandler: YAMLHandler<ParsedBranding> = {

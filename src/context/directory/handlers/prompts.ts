@@ -32,13 +32,19 @@ function parse(context: DirectoryContext): ParsedPrompts {
   const promptsSettings = (() => {
     const promptsSettingsFile = getPromptsSettingsFile(promptsDirectory);
     if (!isFile(promptsSettingsFile)) return {};
-    return loadJSON(promptsSettingsFile, context.mappings) as PromptSettings;
+    return loadJSON(promptsSettingsFile, {
+      mappings: context.mappings,
+      disableKeywordReplacement: context.disableKeywordReplacement,
+    }) as PromptSettings;
   })();
 
   const customText = (() => {
     const customTextFile = getCustomTextFile(promptsDirectory);
     if (!isFile(customTextFile)) return {};
-    return loadJSON(customTextFile, context.mappings) as AllPromptsByLanguage;
+    return loadJSON(customTextFile, {
+      mappings: context.mappings,
+      disableKeywordReplacement: context.disableKeywordReplacement,
+    }) as AllPromptsByLanguage;
   })();
 
   return {

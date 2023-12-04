@@ -34,7 +34,6 @@ export default class RolesHandler extends DefaultHandler {
       ...config,
       type: 'roles',
       id: 'id',
-      identifiers: ['name'],
     });
   }
 
@@ -190,7 +189,7 @@ export default class RolesHandler extends DefaultHandler {
       handler: this,
       assets: roles,
       existing,
-      identifiers: ['id', 'name'],
+      identifiers: this.identifiers,
       allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
     });
     log.debug(

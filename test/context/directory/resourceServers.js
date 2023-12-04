@@ -1,6 +1,5 @@
-import fs from 'fs-extra';
-
 import path from 'path';
+import fs from 'fs-extra';
 import { expect } from 'chai';
 import { constants } from '../../../src/tools';
 
@@ -32,7 +31,7 @@ describe('#directory context resourceServers', () => {
 
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.resourceServers).to.deep.equal(resourceServersTarget);
   });
@@ -46,7 +45,7 @@ describe('#directory context resourceServers', () => {
     createDir(repoDir, { [constants.RESOURCE_SERVERS_DIRECTORY]: invalid });
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.resourceServers).to.deep.equal(resourceServersTarget);
   });
@@ -61,7 +60,7 @@ describe('#directory context resourceServers', () => {
     const context = new Context(config, mockMgmtClient());
 
     const errorMessage = `Expected ${dir} to be a folder but got a file?`;
-    await expect(context.load())
+    await expect(context.loadAssetsFromLocal())
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
   });

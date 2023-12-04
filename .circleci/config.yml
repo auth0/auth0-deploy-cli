@@ -1,11 +1,28 @@
-# Javascript Node CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-javascript/ for more details
-#
 version: 2.1
 
+orbs:
+  codecov: codecov/codecov@3
+
 jobs:
-  test:
+  e2e_test_as_node_module:
+    docker:
+      - image: cimg/node:current
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run: npm ci
+      - run: AUTH0_HTTP_RECORDINGS="lockdown" npm run test:e2e:node-module
+
+  e2e_test_as_cli:
+    docker:
+      - image: cimg/node:current
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run: npm ci
+      - run: npm run test:e2e:cli
+
+  unit_test:
     parameters:
       v:
         type: string
@@ -25,10 +42,11 @@ jobs:
           paths:
             - node_modules
       - run: npm run lint
-      - run: npm test
+      - run: npm run test:coverage
       - persist_to_workspace:
           root: ~/repo
           paths: .
+      - codecov/upload
 
   deploy:
     parameters:
@@ -47,20 +65,44 @@ jobs:
       - run:
           name: Publish package
           command: npm publish
+
+  does_typescript_compile: 
+    docker:
+      - image: cimg/node:current
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run: npm ci
+      - run: npx tsc --noEmit
+
 workflows:
   version: 2
-  test:
+
+  e2e_test:
     jobs:
-      - test:
-          name: test_lts
+      - e2e_test_as_node_module:
+          name: E2E tests as Node module
+      - e2e_test_as_cli:
+          name: E2E tests as CLI
+          filters:
+            branches:
+              only: master
+
+  unit_test:
+    jobs:
+      - does_typescript_compile:
+          name: Does Typescript compile?
+      - unit_test:
+          name: Unit tests with Node LTS
           v: "lts"
-      - test:
-          name: test_current
-          v: "18.0.0"
+      - unit_test:
+          name: Unit tests with Node current
+          v: "current"
+
   test_and_deploy:
     jobs:
-      - test:
-          name: test_lts
+      - unit_test:
+          name: Unit tests with Node LTS
           v: "lts"
           filters:
             branches:
@@ -68,11 +110,14 @@ workflows:
             tags:
               only: /^v.*/
       - deploy:
+          name: Publish to NPM
           v: "lts"
           requires:
-            - test_lts
+            - Unit tests with Node LTS
           filters:
             branches:
               ignore: /.*/
             tags:
               only: /^v.*/
+          context:
+            - publish-npm

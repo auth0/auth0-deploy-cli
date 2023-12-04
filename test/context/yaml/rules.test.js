@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/yaml';
@@ -40,7 +40,7 @@ describe('#YAML context rules', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { hello: 'test' },
     };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.rules).to.deep.equal(target);
   });

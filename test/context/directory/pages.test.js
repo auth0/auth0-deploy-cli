@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { expect } from 'chai';
 import { constants } from '../../../src/tools';
 
@@ -39,9 +39,39 @@ describe('#directory context pages', () => {
 
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.pages).to.deep.equal(pagesTarget);
+  });
+
+  it('should process login and error pages without HTML files', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'pages4');
+
+    const pagesNoHtml = {
+      'login.json': '{ "name": "login", "enabled": false }',
+      'error_page.json':
+        '{ "name": "error_page", "url": "https://example.com/error", "show_log_link": false }',
+    };
+
+    createDir(repoDir, { [constants.PAGES_DIRECTORY]: pagesNoHtml });
+
+    const config = { AUTH0_INPUT_FILE: repoDir };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.pages).to.deep.equal([
+      {
+        html: '',
+        name: 'error_page',
+        show_log_link: false,
+        url: 'https://example.com/error',
+      },
+      {
+        html: '',
+        name: 'login',
+        enabled: false,
+      },
+    ]);
   });
 
   it('should ignore unknown file', async () => {
@@ -54,7 +84,7 @@ describe('#directory context pages', () => {
 
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' } };
     const context = new Context(config, mockMgmtClient());
-    await context.load();
+    await context.loadAssetsFromLocal();
 
     expect(context.assets.pages).to.deep.equal(pagesTarget);
   });
@@ -67,7 +97,7 @@ describe('#directory context pages', () => {
 
     const context = new Context({ AUTH0_INPUT_FILE: repoDir });
     const errorMessage = `Expected ${dir} to be a folder but got a file?`;
-    await expect(context.load())
+    await expect(context.loadAssetsFromLocal())
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
   });
@@ -82,12 +112,11 @@ describe('#directory context pages', () => {
 
     context.assets.pages = [
       { html: htmlValidation, name: 'login' },
-      { html: htmlValidation, name: 'password_reset' },
-      { enabled: false, html: htmlValidation, name: 'guardian_multifactor' },
+      { enabled: false, html: htmlValidation, name: 'password_reset' },
+      { name: 'guardian_multifactor' }, // No `html` property defined
       {
-        html: htmlValidation,
         name: 'error_page',
-        url: errorPageUrl,
+        url: errorPageUrl, // URL defined instead of `html` property
         show_log_link: false,
       },
     ];
@@ -107,32 +136,28 @@ describe('#directory context pages', () => {
     expect(loadJSON(path.join(pagesFolder, 'password_reset.json'))).to.deep.equal({
       html: './password_reset.html',
       name: 'password_reset',
+      enabled: false,
     });
     expect(fs.readFileSync(path.join(pagesFolder, 'password_reset.html'), 'utf8')).to.deep.equal(
       htmlValidation
     );
 
     expect(loadJSON(path.join(pagesFolder, 'guardian_multifactor.json'))).to.deep.equal({
-      html: './guardian_multifactor.html',
       name: 'guardian_multifactor',
-      enabled: false,
     });
-    expect(
-      fs.readFileSync(path.join(pagesFolder, 'guardian_multifactor.html'), 'utf8')
-    ).to.deep.equal(htmlValidation);
+    // eslint-disable-next-line no-unused-expressions
+    expect(fs.existsSync(path.join(pagesFolder, 'guardian_multifactor.html'), 'utf8')).to.be.false; // Should not dump template with no HTML
 
     expect(loadJSON(path.join(pagesFolder, 'error_page.json'))).to.deep.equal({
-      html: './error_page.html',
       name: 'error_page',
       url: errorPageUrl,
       show_log_link: false,
     });
-    expect(fs.readFileSync(path.join(pagesFolder, 'error_page.html'), 'utf8')).to.deep.equal(
-      htmlValidation
-    );
+    // eslint-disable-next-line no-unused-expressions
+    expect(fs.existsSync(path.join(pagesFolder, 'error_page.html'), 'utf8')).to.be.false; // Should not dump template with no HTML
   });
 
-  it('should dump error page without html', async () => {
+  it('should dump empty error page even if HTML is not set', async () => {
     const dir = path.join(testDataDir, 'directory', 'pagesDump');
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
@@ -143,6 +168,7 @@ describe('#directory context pages', () => {
         name: 'error_page',
         url: errorPageUrl,
         show_log_link: false,
+        html: '',
       },
     ];
 
@@ -153,7 +179,8 @@ describe('#directory context pages', () => {
       name: 'error_page',
       url: errorPageUrl,
       show_log_link: false,
+      html: './error_page.html',
     });
-    expect(fs.existsSync(path.join(pagesFolder, 'error_page.html'))).to.equal(false);
+    expect(fs.existsSync(path.join(pagesFolder, 'error_page.html'))).to.equal(true);
   });
 });

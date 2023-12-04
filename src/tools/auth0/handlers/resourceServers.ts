@@ -3,7 +3,7 @@ import ValidationError from '../../validationError';
 import constants from '../../constants';
 import DefaultHandler from './default';
 import { calculateChanges } from '../../calculateChanges';
-import { Asset, Assets, CalculatedChanges } from '../../../types';
+import { Assets, CalculatedChanges } from '../../../types';
 
 export const excludeSchema = {
   type: 'array',
@@ -34,13 +34,20 @@ export const schema = {
   },
 };
 
+export type ResourceServer = {
+  id: string;
+  name: string;
+  identifier: string;
+  scopes?: { description: string; value: string }[];
+};
 export default class ResourceServersHandler extends DefaultHandler {
-  existing: Asset[];
+  existing: ResourceServer[];
 
   constructor(options: DefaultHandler) {
     super({
       ...options,
       type: 'resourceServers',
+      identifiers: ['id', 'identifier'],
       stripUpdateFields: ['identifier'], // Fields not allowed in updates
     });
   }
@@ -49,7 +56,7 @@ export default class ResourceServersHandler extends DefaultHandler {
     return super.objString({ name: resourceServer.name, identifier: resourceServer.identifier });
   }
 
-  async getType(): Promise<Asset[]> {
+  async getType(): Promise<ResourceServer[]> {
     if (this.existing) return this.existing;
     const resourceServers = await this.client.resourceServers.getAll({
       paginate: true,
@@ -84,7 +91,7 @@ export default class ResourceServersHandler extends DefaultHandler {
       handler: this,
       assets: resourceServers,
       existing,
-      identifiers: ['id', 'identifier'],
+      identifiers: this.identifiers,
       allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
     });
   }

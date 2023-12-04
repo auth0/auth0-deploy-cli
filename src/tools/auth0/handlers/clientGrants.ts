@@ -20,8 +20,14 @@ export const schema = {
   },
 };
 
+export type ClientGrant = {
+  client_id: string;
+  audience: string;
+  scope: string[];
+};
+
 export default class ClientGrantsHandler extends DefaultHandler {
-  existing: Asset[] | null;
+  existing: ClientGrant[] | null;
 
   constructor(config: DefaultAPIHandler) {
     super({
@@ -38,7 +44,7 @@ export default class ClientGrantsHandler extends DefaultHandler {
     return super.objString({ id: item.id, client_id: item.client_id, audience: item.audience });
   }
 
-  async getType(): Promise<Asset> {
+  async getType(): Promise<ClientGrant[]> {
     if (this.existing) {
       return this.existing;
     }
