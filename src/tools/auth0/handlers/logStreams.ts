@@ -40,7 +40,7 @@ export default class LogStreamsHandler extends DefaultAPIHandler {
       ...config,
       type: 'logStreams',
       stripUpdateFields: ['type'],
-      stripCreateFields: ['status', 'sink.awsPartnerEventSource'],
+      stripCreateFields: ['status', 'sink.awsPartnerEventSource', 'sink.azurePartnerTopic'],
       sensitiveFieldsToObfuscate: [
         'sink.httpAuthorization',
         'sink.splunkToken',
