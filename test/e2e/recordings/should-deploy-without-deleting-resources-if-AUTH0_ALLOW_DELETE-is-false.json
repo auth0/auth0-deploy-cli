@@ -1993,36 +1993,39 @@
     },
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/log-streams?paginate=false",
-        "body": "",
+        "method": "PATCH",
+        "path": "/api/v2/attack-protection/brute-force-protection",
+        "body": {
+            "enabled": true,
+            "shields": [
+                "block",
+                "user_notification"
+            ],
+            "mode": "count_per_identifier_and_ip",
+            "allowlist": [],
+            "max_attempts": 66
+        },
         "status": 200,
-        "response": [],
+        "response": {
+            "enabled": true,
+            "shields": [
+                "block",
+                "user_notification"
+            ],
+            "mode": "count_per_identifier_and_ip",
+            "allowlist": [],
+            "max_attempts": 66
+        },
         "rawHeaders": [],
         "responseIsBinary": false
     },
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PATCH",
-        "path": "/api/v2/attack-protection/breached-password-detection",
-        "body": {
-            "enabled": false,
-            "shields": [],
-            "admin_notification_frequency": [],
-            "method": "standard"
-        },
+        "method": "GET",
+        "path": "/api/v2/log-streams?paginate=false",
+        "body": "",
         "status": 200,
-        "response": {
-            "enabled": false,
-            "shields": [],
-            "admin_notification_frequency": [],
-            "method": "standard",
-            "stage": {
-                "pre-user-registration": {
-                    "shields": []
-                }
-            }
-        },
+        "response": [],
         "rawHeaders": [],
         "responseIsBinary": false
     },
@@ -2085,27 +2088,24 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/attack-protection/brute-force-protection",
+        "path": "/api/v2/attack-protection/breached-password-detection",
         "body": {
-            "enabled": true,
-            "shields": [
-                "block",
-                "user_notification"
-            ],
-            "mode": "count_per_identifier_and_ip",
-            "allowlist": [],
-            "max_attempts": 66
+            "enabled": false,
+            "shields": [],
+            "admin_notification_frequency": [],
+            "method": "standard"
         },
         "status": 200,
         "response": {
-            "enabled": true,
-            "shields": [
-                "block",
-                "user_notification"
-            ],
-            "mode": "count_per_identifier_and_ip",
-            "allowlist": [],
-            "max_attempts": 66
+            "enabled": false,
+            "shields": [],
+            "admin_notification_frequency": [],
+            "method": "standard",
+            "stage": {
+                "pre-user-registration": {
+                    "shields": []
+                }
+            }
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -2342,14 +2342,6 @@
                     "client_metadata": {},
                     "cross_origin_auth": false,
                     "is_first_party": true,
-                    "native_social_login": {
-                        "apple": {
-                            "enabled": false
-                        },
-                        "facebook": {
-                            "enabled": false
-                        }
-                    },
                     "oidc_conformant": true,
                     "refresh_token": {
                         "expiration_type": "non-expiring",
@@ -2376,7 +2368,6 @@
                         "lifetime_in_seconds": 36000,
                         "secret_encoded": false
                     },
-                    "client_aliases": [],
                     "token_endpoint_auth_method": "client_secret_post",
                     "app_type": "non_interactive",
                     "grant_types": [
@@ -3064,14 +3055,6 @@
                     "client_metadata": {},
                     "cross_origin_auth": false,
                     "is_first_party": true,
-                    "native_social_login": {
-                        "apple": {
-                            "enabled": false
-                        },
-                        "facebook": {
-                            "enabled": false
-                        }
-                    },
                     "oidc_conformant": true,
                     "refresh_token": {
                         "expiration_type": "non-expiring",
@@ -3098,7 +3081,6 @@
                         "lifetime_in_seconds": 36000,
                         "secret_encoded": false
                     },
-                    "client_aliases": [],
                     "token_endpoint_auth_method": "client_secret_post",
                     "app_type": "non_interactive",
                     "grant_types": [
@@ -3892,14 +3874,6 @@
                     "client_metadata": {},
                     "cross_origin_auth": false,
                     "is_first_party": true,
-                    "native_social_login": {
-                        "apple": {
-                            "enabled": false
-                        },
-                        "facebook": {
-                            "enabled": false
-                        }
-                    },
                     "oidc_conformant": true,
                     "refresh_token": {
                         "expiration_type": "non-expiring",
@@ -3926,7 +3900,6 @@
                         "lifetime_in_seconds": 36000,
                         "secret_encoded": false
                     },
-                    "client_aliases": [],
                     "token_endpoint_auth_method": "client_secret_post",
                     "app_type": "non_interactive",
                     "grant_types": [
@@ -6410,14 +6383,6 @@
                     "client_metadata": {},
                     "cross_origin_auth": false,
                     "is_first_party": true,
-                    "native_social_login": {
-                        "apple": {
-                            "enabled": false
-                        },
-                        "facebook": {
-                            "enabled": false
-                        }
-                    },
                     "oidc_conformant": true,
                     "refresh_token": {
                         "expiration_type": "non-expiring",
@@ -6444,7 +6409,6 @@
                         "lifetime_in_seconds": 36000,
                         "secret_encoded": false
                     },
-                    "client_aliases": [],
                     "token_endpoint_auth_method": "client_secret_post",
                     "app_type": "non_interactive",
                     "grant_types": [
@@ -6904,7 +6868,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/recovery-code",
+        "path": "/api/v2/guardian/factors/duo",
         "body": {
             "enabled": false
         },
@@ -8155,14 +8119,6 @@
                     "client_metadata": {},
                     "cross_origin_auth": false,
                     "is_first_party": true,
-                    "native_social_login": {
-                        "apple": {
-                            "enabled": false
-                        },
-                        "facebook": {
-                            "enabled": false
-                        }
-                    },
                     "oidc_conformant": true,
                     "refresh_token": {
                         "expiration_type": "non-expiring",
@@ -8189,7 +8145,6 @@
                         "lifetime_in_seconds": 36000,
                         "secret_encoded": false
                     },
-                    "client_aliases": [],
                     "token_endpoint_auth_method": "client_secret_post",
                     "app_type": "non_interactive",
                     "grant_types": [
@@ -8925,14 +8880,6 @@
                     "client_metadata": {},
                     "cross_origin_auth": false,
                     "is_first_party": true,
-                    "native_social_login": {
-                        "apple": {
-                            "enabled": false
-                        },
-                        "facebook": {
-                            "enabled": false
-                        }
-                    },
                     "oidc_conformant": true,
                     "refresh_token": {
                         "expiration_type": "non-expiring",
@@ -8959,7 +8906,6 @@
                         "lifetime_in_seconds": 36000,
                         "secret_encoded": false
                     },
-                    "client_aliases": [],
                     "token_endpoint_auth_method": "client_secret_post",
                     "app_type": "non_interactive",
                     "grant_types": [
@@ -11240,14 +11186,6 @@
                     "client_metadata": {},
                     "cross_origin_auth": false,
                     "is_first_party": true,
-                    "native_social_login": {
-                        "apple": {
-                            "enabled": false
-                        },
-                        "facebook": {
-                            "enabled": false
-                        }
-                    },
                     "oidc_conformant": true,
                     "refresh_token": {
                         "expiration_type": "non-expiring",
@@ -11274,7 +11212,6 @@
                         "lifetime_in_seconds": 36000,
                         "secret_encoded": false
                     },
-                    "client_aliases": [],
                     "token_endpoint_auth_method": "client_secret_post",
                     "app_type": "non_interactive",
                     "grant_types": [
@@ -12999,6 +12936,16 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/prompts/login-password/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/prompts/login-email-verification/custom-text/en",
         "body": "",
         "status": 200,
@@ -13049,7 +12996,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/consent/custom-text/en",
+        "path": "/api/v2/prompts/mfa-push/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -13069,7 +13016,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa-push/custom-text/en",
+        "path": "/api/v2/prompts/consent/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -13317,7 +13264,6 @@
                     "runtimes": [
                         "node12",
                         "node16",
-                        "node18",
                         "node18-actions"
                     ],
                     "default_runtime": "node18-actions",
@@ -13344,23 +13290,12 @@
                     "status": "DEPRECATED",
                     "runtimes": [
                         "node12",
-                        "node16",
-                        "node18"
+                        "node16"
                     ],
                     "default_runtime": "node16",
                     "compatible_triggers": []
                 },
                 {
-                    "id": "post-login",
-                    "version": "v1",
-                    "status": "DEPRECATED",
-                    "runtimes": [
-                        "node12"
-                    ],
-                    "default_runtime": "node12",
-                    "compatible_triggers": []
-                },
-                {
                     "id": "credentials-exchange",
                     "version": "v1",
                     "status": "DEPRECATED",
@@ -13455,7 +13390,6 @@
                     "runtimes": [
                         "node12",
                         "node16",
-                        "node18",
                         "node18-actions"
                     ],
                     "default_runtime": "node18-actions",
@@ -13477,7 +13411,6 @@
                     "runtimes": [
                         "node12",
                         "node16",
-                        "node18",
                         "node18-actions"
                     ],
                     "default_runtime": "node18-actions",
@@ -13489,7 +13422,6 @@
                     "status": "CURRENT",
                     "runtimes": [
                         "node16",
-                        "node18",
                         "node18-actions"
                     ],
                     "default_runtime": "node18-actions",
@@ -13824,16 +13756,6 @@
                         "name": "auth.token_exchange.fail"
                     }
                 ]
-            },
-            {
-                "id": "lst_0000000000013778",
-                "name": "Suspended DD Log Stream",
-                "type": "datadog",
-                "status": "active",
-                "sink": {
-                    "datadogApiKey": "some-sensitive-api-key",
-                    "datadogRegion": "us"
-                }
             }
         ],
         "rawHeaders": [],

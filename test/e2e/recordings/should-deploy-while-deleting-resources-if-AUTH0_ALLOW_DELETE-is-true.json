@@ -6,7 +6,7 @@
         "body": "",
         "status": 200,
         "response": {
-            "total": 0,
+            "total": 1,
             "start": 0,
             "limit": 100,
             "rules": [
@@ -30,7 +30,7 @@
         "body": "",
         "status": 200,
         "response": {
-            "total": 0,
+            "total": 1,
             "start": 0,
             "limit": 100,
             "rules": [
@@ -54,11 +54,10 @@
         "body": {
             "name": "my-rule",
             "script": "function (user, context, callback) {\n  callback(null, user, context);\n}\n",
-            "stage": "login_success",
             "enabled": true,
             "order": 2
         },
-        "status": 201,
+        "status": 200,
         "response": {
             "id": "rul_lr4Xo8OyXNEz4R6v",
             "enabled": true,
@@ -1032,7 +1031,7 @@
         "body": "",
         "status": 200,
         "response": {
-            "total": 2,
+            "total": 9,
             "start": 0,
             "limit": 100,
             "clients": [
@@ -1700,8 +1699,7 @@
             "is_token_endpoint_ip_header_trusted": false,
             "jwt_configuration": {
                 "alg": "RS256",
-                "lifetime_in_seconds": 36000,
-                "secret_encoded": false
+                "lifetime_in_seconds": 36000
             },
             "native_social_login": {
                 "apple": {
@@ -1725,7 +1723,7 @@
             "token_endpoint_auth_method": "client_secret_post",
             "web_origins": []
         },
-        "status": 201,
+        "status": 200,
         "response": {
             "tenant": "auth0-deploy-cli-e2e",
             "global": false,
@@ -1756,11 +1754,9 @@
                 "rotation_type": "non-rotating"
             },
             "sso_disabled": false,
-            "encrypted": true,
             "signing_keys": [
                 {
                     "cert": "[REDACTED]",
-                    "key": "[REDACTED]",
                     "pkcs7": "[REDACTED]",
                     "subject": "/CN=auth0-deploy-cli-e2e.us.auth0.com"
                 }
@@ -1811,8 +1807,7 @@
             "is_token_endpoint_ip_header_trusted": false,
             "jwt_configuration": {
                 "alg": "RS256",
-                "lifetime_in_seconds": 36000,
-                "secret_encoded": false
+                "lifetime_in_seconds": 36000
             },
             "native_social_login": {
                 "apple": {
@@ -1836,7 +1831,7 @@
             "sso_disabled": false,
             "token_endpoint_auth_method": "client_secret_post"
         },
-        "status": 201,
+        "status": 200,
         "response": {
             "tenant": "auth0-deploy-cli-e2e",
             "global": false,
@@ -1867,11 +1862,9 @@
             },
             "sso": false,
             "sso_disabled": false,
-            "encrypted": true,
             "signing_keys": [
                 {
                     "cert": "[REDACTED]",
-                    "key": "[REDACTED]",
                     "pkcs7": "[REDACTED]",
                     "subject": "/CN=auth0-deploy-cli-e2e.us.auth0.com"
                 }
@@ -1999,8 +1992,7 @@
             "is_token_endpoint_ip_header_trusted": false,
             "jwt_configuration": {
                 "alg": "RS256",
-                "lifetime_in_seconds": 36000,
-                "secret_encoded": false
+                "lifetime_in_seconds": 36000
             },
             "native_social_login": {
                 "apple": {
@@ -2026,7 +2018,7 @@
                 "http://localhost:3000"
             ]
         },
-        "status": 201,
+        "status": 200,
         "response": {
             "tenant": "auth0-deploy-cli-e2e",
             "global": false,
@@ -2061,11 +2053,9 @@
                 "rotation_type": "rotating"
             },
             "sso_disabled": false,
-            "encrypted": true,
             "signing_keys": [
                 {
                     "cert": "[REDACTED]",
-                    "key": "[REDACTED]",
                     "pkcs7": "[REDACTED]",
                     "subject": "/CN=auth0-deploy-cli-e2e.us.auth0.com"
                 }
@@ -2114,8 +2104,7 @@
             "is_token_endpoint_ip_header_trusted": false,
             "jwt_configuration": {
                 "alg": "RS256",
-                "lifetime_in_seconds": 36000,
-                "secret_encoded": false
+                "lifetime_in_seconds": 36000
             },
             "native_social_login": {
                 "apple": {
@@ -2138,7 +2127,7 @@
             "sso_disabled": false,
             "token_endpoint_auth_method": "client_secret_post"
         },
-        "status": 201,
+        "status": 200,
         "response": {
             "tenant": "auth0-deploy-cli-e2e",
             "global": false,
@@ -2168,11 +2157,9 @@
                 "rotation_type": "non-rotating"
             },
             "sso_disabled": false,
-            "encrypted": true,
             "signing_keys": [
                 {
                     "cert": "[REDACTED]",
-                    "key": "[REDACTED]",
                     "pkcs7": "[REDACTED]",
                     "subject": "/CN=auth0-deploy-cli-e2e.us.auth0.com"
                 }
@@ -2201,12 +2188,12 @@
         "method": "GET",
         "path": "/api/v2/emails/provider?include_fields=true&fields=name%2Cenabled%2Ccredentials%2Csettings%2Cdefault_from_address",
         "body": "",
-        "status": 404,
+        "status": 200,
         "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "There is not a configured email provider",
-            "errorCode": "inexistent_email_provider"
+            "name": "mandrill",
+            "credentials": {},
+            "default_from_address": "auth0-user@auth0.com",
+            "enabled": false
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -2223,7 +2210,7 @@
             "default_from_address": "auth0-user@auth0.com",
             "enabled": false
         },
-        "status": 201,
+        "status": 200,
         "response": {
             "name": "mandrill",
             "credentials": {},
@@ -2651,11 +2638,7 @@
                     "name": "auth.token_exchange.fail"
                 }
             ],
-            "sink": {
-                "awsAccountId": "123456789012",
-                "awsRegion": "us-east-2"
-            },
-            "type": "eventbridge"
+            "status": "active"
         },
         "status": 200,
         "response": {
@@ -3046,7 +3029,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "ShABsGq1S5Sbd8eva2qpG8PyeEn5VN61",
+                    "client_id": "FRxIplFoWIhKqwDz5Qo3MvuJowBbsXxJ",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3060,6 +3043,46 @@
                         "authorization_code",
                         "implicit",
                         "refresh_token",
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Terraform Provider",
+                    "cross_origin_auth": false,
+                    "is_first_party": true,
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "LKpF9l0hv7A0v8UjXfFZ1zn2J7ZxVu3K",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
                         "client_credentials"
                     ],
                     "custom_login_page_on": true
@@ -3222,7 +3245,7 @@
         "body": "",
         "status": 200,
         "response": {
-            "total": 1,
+            "total": 2,
             "start": 0,
             "limit": 100,
             "connections": [
@@ -3333,7 +3356,7 @@
         "body": "",
         "status": 200,
         "response": {
-            "total": 1,
+            "total": 2,
             "start": 0,
             "limit": 100,
             "connections": [
@@ -3526,6 +3549,8 @@
         "body": {
             "name": "boo-baz-db-connection-test",
             "strategy": "auth0",
+            "name": "boo-baz-db-connection-test",
+            "is_domain_connection": false,
             "enabled_clients": [
                 "4MgHIXo0wZ7u90rrycMN8I11XmbbC0Ax",
                 "PFX8PjbMn07NXLHgVjr8aZaAEpupYtyN"
@@ -3583,7 +3608,7 @@
                 "boo-baz-db-connection-test"
             ]
         },
-        "status": 201,
+        "status": 200,
         "response": {
             "id": "con_K5DvCabszfTqFX2a",
             "options": {
@@ -3591,15 +3616,14 @@
                     "active": true,
                     "return_enroll_settings": true
                 },
-                "passwordPolicy": "low",
                 "import_mode": false,
                 "customScripts": {
-                    "change_password": "function changePassword(email, newPassword, callback) {\n  // This script should change the password stored for the current user in your\n  // database. It is executed when the user clicks on the confirmation link\n  // after a reset password request.\n  // The content and behavior of password confirmation emails can be customized\n  // here: https://manage.auth0.com/#/emails\n  // The `newPassword` parameter of this function is in plain text. It must be\n  // hashed/salted to match whatever is stored in your database.\n  //\n  // There are three ways that this script can finish:\n  // 1. The user's password was updated successfully:\n  //     callback(null, true);\n  // 2. The user's password was not updated:\n  //     callback(null, false);\n  // 3. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n  //\n  // If an error is returned, it will be passed to the query string of the page\n  // where the user is being redirected to after clicking the confirmation link.\n  // For example, returning `callback(new Error(\"error\"))` and redirecting to\n  // https://example.com would redirect to the following URL:\n  //     https://example.com?email=alice%40example.com&message=error&success=false\n\n  const msg =\n    'Please implement the Change Password script for this database ' +\n    'connection at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                    "login": "function login(email, password, callback) {\n  // This script should authenticate a user against the credentials stored in\n  // your database.\n  // It is executed when a user attempts to log in or immediately after signing\n  // up (as a verification that the user was successfully signed up).\n  //\n  // Everything returned by this script will be set as part of the user profile\n  // and will be visible by any of the tenant admins. Avoid adding attributes\n  // with values such as passwords, keys, secrets, etc.\n  //\n  // The `password` parameter of this function is in plain text. It must be\n  // hashed/salted to match whatever is stored in your database. For example:\n  //\n  //     var bcrypt = require('bcrypt@0.8.5');\n  //     bcrypt.compare(password, dbPasswordHash, function(err, res)) { ... }\n  //\n  // There are three ways this script can finish:\n  // 1. The user's credentials are valid. The returned user profile should be in\n  // the following format: https://auth0.com/docs/users/normalized/auth0/normalized-user-profile-schema\n  //     var profile = {\n  //       user_id: ..., // user_id is mandatory\n  //       email: ...,\n  //       [...]\n  //     };\n  //     callback(null, profile);\n  // 2. The user's credentials are invalid\n  //     callback(new WrongUsernameOrPasswordError(email, \"my error message\"));\n  // 3. Something went wrong while trying to reach your database\n  //     callback(new Error(\"my error message\"));\n  //\n  // A list of Node.js modules which can be referenced is available here:\n  //\n  //    https://tehsis.github.io/webtaskio-canirequire/\n  console.log('AYYYYYE');\n\n  const msg =\n    'Please implement the Login script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
                     "create": "function create(user, callback) {\n  // This script should create a user entry in your existing database. It will\n  // be executed when a user attempts to sign up, or when a user is created\n  // through the Auth0 dashboard or API.\n  // When this script has finished executing, the Login script will be\n  // executed immediately afterwards, to verify that the user was created\n  // successfully.\n  //\n  // The user object will always contain the following properties:\n  // * email: the user's email\n  // * password: the password entered by the user, in plain text\n  // * tenant: the name of this Auth0 account\n  // * client_id: the client ID of the application where the user signed up, or\n  //              API key if created through the API or Auth0 dashboard\n  // * connection: the name of this database connection\n  //\n  // There are three ways this script can finish:\n  // 1. A user was successfully created\n  //     callback(null);\n  // 2. This user already exists in your database\n  //     callback(new ValidationError(\"user_exists\", \"my error message\"));\n  // 3. Something went wrong while trying to reach your database\n  //     callback(new Error(\"my error message\"));\n\n  const msg =\n    'Please implement the Create script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
                     "delete": "function remove(id, callback) {\n  // This script remove a user from your existing database.\n  // It is executed whenever a user is deleted from the API or Auth0 dashboard.\n  //\n  // There are two ways that this script can finish:\n  // 1. The user was removed successfully:\n  //     callback(null);\n  // 2. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n\n  const msg =\n    'Please implement the Delete script for this database ' +\n    'connection at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                    "verify": "function verify(email, callback) {\n  // This script should mark the current user's email address as verified in\n  // your database.\n  // It is executed whenever a user clicks the verification link sent by email.\n  // These emails can be customized at https://manage.auth0.com/#/emails.\n  // It is safe to assume that the user's email already exists in your database,\n  // because verification emails, if enabled, are sent immediately after a\n  // successful signup.\n  //\n  // There are two ways that this script can finish:\n  // 1. The user's email was verified successfully\n  //     callback(null, true);\n  // 2. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n  //\n  // If an error is returned, it will be passed to the query string of the page\n  // where the user is being redirected to after clicking the verification link.\n  // For example, returning `callback(new Error(\"error\"))` and redirecting to\n  // https://example.com would redirect to the following URL:\n  //     https://example.com?email=alice%40example.com&message=error&success=false\n\n  const msg =\n    'Please implement the Verify script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
                     "get_user": "function getByEmail(email, callback) {\n  // This script should retrieve a user profile from your existing database,\n  // without authenticating the user.\n  // It is used to check if a user exists before executing flows that do not\n  // require authentication (signup and password reset).\n  //\n  // There are three ways this script can finish:\n  // 1. A user was successfully found. The profile should be in the following\n  // format: https://auth0.com/docs/users/normalized/auth0/normalized-user-profile-schema.\n  //     callback(null, profile);\n  // 2. A user was not found\n  //     callback(null);\n  // 3. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n\n  const msg =\n    'Please implement the Get User script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
-                    "login": "function login(email, password, callback) {\n  // This script should authenticate a user against the credentials stored in\n  // your database.\n  // It is executed when a user attempts to log in or immediately after signing\n  // up (as a verification that the user was successfully signed up).\n  //\n  // Everything returned by this script will be set as part of the user profile\n  // and will be visible by any of the tenant admins. Avoid adding attributes\n  // with values such as passwords, keys, secrets, etc.\n  //\n  // The `password` parameter of this function is in plain text. It must be\n  // hashed/salted to match whatever is stored in your database. For example:\n  //\n  //     var bcrypt = require('bcrypt@0.8.5');\n  //     bcrypt.compare(password, dbPasswordHash, function(err, res)) { ... }\n  //\n  // There are three ways this script can finish:\n  // 1. The user's credentials are valid. The returned user profile should be in\n  // the following format: https://auth0.com/docs/users/normalized/auth0/normalized-user-profile-schema\n  //     var profile = {\n  //       user_id: ..., // user_id is mandatory\n  //       email: ...,\n  //       [...]\n  //     };\n  //     callback(null, profile);\n  // 2. The user's credentials are invalid\n  //     callback(new WrongUsernameOrPasswordError(email, \"my error message\"));\n  // 3. Something went wrong while trying to reach your database\n  //     callback(new Error(\"my error message\"));\n  //\n  // A list of Node.js modules which can be referenced is available here:\n  //\n  //    https://tehsis.github.io/webtaskio-canirequire/\n  console.log('AYYYYYE');\n\n  const msg =\n    'Please implement the Login script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
-                    "verify": "function verify(email, callback) {\n  // This script should mark the current user's email address as verified in\n  // your database.\n  // It is executed whenever a user clicks the verification link sent by email.\n  // These emails can be customized at https://manage.auth0.com/#/emails.\n  // It is safe to assume that the user's email already exists in your database,\n  // because verification emails, if enabled, are sent immediately after a\n  // successful signup.\n  //\n  // There are two ways that this script can finish:\n  // 1. The user's email was verified successfully\n  //     callback(null, true);\n  // 2. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n  //\n  // If an error is returned, it will be passed to the query string of the page\n  // where the user is being redirected to after clicking the verification link.\n  // For example, returning `callback(new Error(\"error\"))` and redirecting to\n  // https://example.com would redirect to the following URL:\n  //     https://example.com?email=alice%40example.com&message=error&success=false\n\n  const msg =\n    'Please implement the Verify script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n"
+                    "change_password": "function changePassword(email, newPassword, callback) {\n  // This script should change the password stored for the current user in your\n  // database. It is executed when the user clicks on the confirmation link\n  // after a reset password request.\n  // The content and behavior of password confirmation emails can be customized\n  // here: https://manage.auth0.com/#/emails\n  // The `newPassword` parameter of this function is in plain text. It must be\n  // hashed/salted to match whatever is stored in your database.\n  //\n  // There are three ways that this script can finish:\n  // 1. The user's password was updated successfully:\n  //     callback(null, true);\n  // 2. The user's password was not updated:\n  //     callback(null, false);\n  // 3. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n  //\n  // If an error is returned, it will be passed to the query string of the page\n  // where the user is being redirected to after clicking the confirmation link.\n  // For example, returning `callback(new Error(\"error\"))` and redirecting to\n  // https://example.com would redirect to the following URL:\n  //     https://example.com?email=alice%40example.com&message=error&success=false\n\n  const msg =\n    'Please implement the Change Password script for this database ' +\n    'connection at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n"
                 },
                 "disable_signup": false,
                 "passwordPolicy": "low",
@@ -3985,7 +4009,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "ShABsGq1S5Sbd8eva2qpG8PyeEn5VN61",
+                    "client_id": "FRxIplFoWIhKqwDz5Qo3MvuJowBbsXxJ",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3999,6 +4023,46 @@
                         "authorization_code",
                         "implicit",
                         "refresh_token",
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Terraform Provider",
+                    "cross_origin_auth": false,
+                    "is_first_party": true,
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "LKpF9l0hv7A0v8UjXfFZ1zn2J7ZxVu3K",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
                         "client_credentials"
                     ],
                     "custom_login_page_on": true
@@ -4161,7 +4225,7 @@
         "body": "",
         "status": 200,
         "response": {
-            "total": 1,
+            "total": 2,
             "start": 0,
             "limit": 100,
             "connections": [
@@ -4259,7 +4323,7 @@
         "body": "",
         "status": 200,
         "response": {
-            "total": 1,
+            "total": 2,
             "start": 0,
             "limit": 100,
             "connections": [
@@ -4355,8 +4419,6 @@
         "method": "PATCH",
         "path": "/api/v2/connections/con_F6FupkR2JVv0xmQV",
         "body": {
-            "name": "google-oauth2",
-            "strategy": "google-oauth2",
             "enabled_clients": [
                 "FRxIplFoWIhKqwDz5Qo3MvuJowBbsXxJ",
                 "PFX8PjbMn07NXLHgVjr8aZaAEpupYtyN"
@@ -4371,7 +4433,7 @@
                 "profile": true
             }
         },
-        "status": 201,
+        "status": 200,
         "response": {
             "id": "con_F6FupkR2JVv0xmQV",
             "options": {
@@ -4786,7 +4848,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "ShABsGq1S5Sbd8eva2qpG8PyeEn5VN61",
+                    "client_id": "FRxIplFoWIhKqwDz5Qo3MvuJowBbsXxJ",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -4800,6 +4862,46 @@
                         "authorization_code",
                         "implicit",
                         "refresh_token",
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Terraform Provider",
+                    "cross_origin_auth": false,
+                    "is_first_party": true,
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "LKpF9l0hv7A0v8UjXfFZ1zn2J7ZxVu3K",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
                         "client_credentials"
                     ],
                     "custom_login_page_on": true
@@ -4962,7 +5064,7 @@
         "body": "",
         "status": 200,
         "response": {
-            "total": 1,
+            "total": 3,
             "start": 0,
             "limit": 100,
             "client_grants": [
@@ -5415,8 +5517,6 @@
         "method": "PATCH",
         "path": "/api/v2/client-grants/cgr_gTGj8tQZaiX5UlSe",
         "body": {
-            "client_id": "aIN78DlIth5F3iFxZF6BGdWFMst5Qsv5",
-            "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
             "scope": [
                 "read:client_grants",
                 "create:client_grants",
@@ -5550,7 +5650,7 @@
                 "delete:organization_invitations"
             ]
         },
-        "status": 201,
+        "status": 200,
         "response": {
             "id": "cgr_gTGj8tQZaiX5UlSe",
             "client_id": "RISe90DMj8TYCqt0dX14Qp9Mh2JNqC1A",
@@ -5696,8 +5796,6 @@
         "method": "PATCH",
         "path": "/api/v2/client-grants/cgr_oq3uveZxzwc7wss0",
         "body": {
-            "client_id": "0JvkloSYOQ58IJ7bfA5RhXJprbcmPhda",
-            "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
             "scope": [
                 "read:client_grants",
                 "create:client_grants",
@@ -5831,7 +5929,7 @@
                 "delete:organization_invitations"
             ]
         },
-        "status": 201,
+        "status": 200,
         "response": {
             "id": "cgr_oq3uveZxzwc7wss0",
             "client_id": "LKpF9l0hv7A0v8UjXfFZ1zn2J7ZxVu3K",
@@ -6339,7 +6437,7 @@
             "dependencies": [],
             "id": "499c9883-f19b-4144-90aa-03f09d13273e",
             "deployed": false,
-            "number": 1,
+            "number": 2,
             "secrets": [],
             "status": "built",
             "created_at": "2023-12-22T14:46:00.330514258Z",
@@ -6395,7 +6493,7 @@
             ],
             "start": 0,
             "limit": 50,
-            "total": 0
+            "total": 2
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -6552,7 +6650,6 @@
         "method": "PATCH",
         "path": "/api/v2/organizations/org_X3jse0Pb1WGt3TwO",
         "body": {
-            "name": "org1",
             "branding": {
                 "colors": {
                     "page_background": "#fff5f5",
@@ -6561,9 +6658,8 @@
             },
             "display_name": "Organization"
         },
-        "status": 201,
+        "status": 200,
         "response": {
-            "name": "org1",
             "branding": {
                 "colors": {
                     "page_background": "#fff5f5",
@@ -6572,7 +6668,7 @@
             },
             "id": "org_X3jse0Pb1WGt3TwO",
             "display_name": "Organization",
-            "id": "org_AvcDY3hlJsPXIrF6"
+            "name": "org1"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -6582,14 +6678,13 @@
         "method": "PATCH",
         "path": "/api/v2/organizations/org_SfCOLMvgKxL7kirf",
         "body": {
-            "name": "org2",
             "display_name": "Organization2"
         },
-        "status": 201,
+        "status": 200,
         "response": {
             "id": "org_SfCOLMvgKxL7kirf",
             "display_name": "Organization2",
-            "id": "org_6JCwlF8xQAPNoP8s"
+            "name": "org2"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -7797,7 +7892,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "ShABsGq1S5Sbd8eva2qpG8PyeEn5VN61",
+                    "client_id": "FRxIplFoWIhKqwDz5Qo3MvuJowBbsXxJ",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -7811,6 +7906,46 @@
                         "authorization_code",
                         "implicit",
                         "refresh_token",
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Terraform Provider",
+                    "cross_origin_auth": false,
+                    "is_first_party": true,
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "LKpF9l0hv7A0v8UjXfFZ1zn2J7ZxVu3K",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
                         "client_credentials"
                     ],
                     "custom_login_page_on": true
@@ -8451,101 +8586,6 @@
                 "pre-user-registration": {
                     "max_attempts": 50,
                     "rate": 1200
-                }
-            }
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/log-streams?paginate=false",
-        "body": "",
-        "status": 200,
-        "response": [
-            {
-                "id": "lst_0000000000013776",
-                "name": "Suspended DD Log Stream",
-                "type": "datadog",
-                "status": "active",
-                "sink": {
-                    "datadogApiKey": "some-sensitive-api-key",
-                    "datadogRegion": "us"
-                }
-            },
-            {
-                "id": "lst_0000000000013777",
-                "name": "Amazon EventBridge",
-                "type": "eventbridge",
-                "status": "active",
-                "sink": {
-                    "awsAccountId": "123456789012",
-                    "awsRegion": "us-east-2",
-                    "awsPartnerEventSource": "aws.partner/auth0.com/auth0-deploy-cli-e2e-79a58600-ea32-48ae-bd81-e289c20ed37f/auth0.logs"
-                },
-                "filters": [
-                    {
-                        "type": "category",
-                        "name": "auth.login.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.login.notification"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.login.fail"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.signup.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.logout.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.logout.fail"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.silent_auth.fail"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.silent_auth.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.token_exchange.fail"
-                    }
-                ]
-            }
-        ],
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PATCH",
-        "path": "/api/v2/attack-protection/breached-password-detection",
-        "body": {
-            "enabled": false,
-            "shields": [],
-            "admin_notification_frequency": [],
-            "method": "standard"
-        },
-        "status": 200,
-        "response": {
-            "enabled": false,
-            "shields": [],
-            "admin_notification_frequency": [],
-            "method": "standard",
-            "stage": {
-                "pre-user-registration": {
-                    "shields": []
                 }
             }
         },
@@ -11783,16 +11823,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login/custom-text/en",
-        "body": "",
-        "status": 200,
-        "response": {},
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/prompts/signup/custom-text/en",
         "body": "",
         "status": 200,
@@ -11873,7 +11903,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa-phone/custom-text/en",
+        "path": "/api/v2/prompts/mfa-voice/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -11973,16 +12003,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/status/custom-text/en",
-        "body": "",
-        "status": 200,
-        "response": {},
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/prompts/email-otp-challenge/custom-text/en",
         "body": "",
         "status": 200,
@@ -12057,22 +12077,11 @@
             "triggers": [
                 {
                     "id": "post-login",
-                    "version": "v1",
-                    "status": "DEPRECATED",
-                    "runtimes": [
-                        "node12"
-                    ],
-                    "default_runtime": "node12",
-                    "compatible_triggers": []
-                },
-                {
-                    "id": "post-login",
                     "version": "v2",
                     "status": "DEPRECATED",
                     "runtimes": [
                         "node12",
-                        "node16",
-                        "node18"
+                        "node16"
                     ],
                     "default_runtime": "node16",
                     "compatible_triggers": []
@@ -12084,7 +12093,6 @@
                     "runtimes": [
                         "node12",
                         "node16",
-                        "node18",
                         "node18-actions"
                     ],
                     "default_runtime": "node18-actions",
@@ -12096,6 +12104,16 @@
                     ]
                 },
                 {
+                    "id": "post-login",
+                    "version": "v1",
+                    "status": "DEPRECATED",
+                    "runtimes": [
+                        "node12"
+                    ],
+                    "default_runtime": "node12",
+                    "compatible_triggers": []
+                },
+                {
                     "id": "credentials-exchange",
                     "version": "v1",
                     "status": "DEPRECATED",
@@ -12176,13 +12194,12 @@
                     "compatible_triggers": []
                 },
                 {
-                    "id": "post-change-password",
+                    "id": "post-user-registration",
                     "version": "v2",
                     "status": "CURRENT",
                     "runtimes": [
                         "node12",
                         "node16",
-                        "node18",
                         "node18-actions"
                     ],
                     "default_runtime": "node18-actions",
@@ -12237,7 +12254,6 @@
                     "status": "CURRENT",
                     "runtimes": [
                         "node16",
-                        "node18",
                         "node18-actions"
                     ],
                     "default_runtime": "node18-actions",
@@ -12383,25 +12399,6 @@
         "status": 200,
         "response": {
             "organizations": []
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/attack-protection/brute-force-protection",
-        "body": "",
-        "status": 200,
-        "response": {
-            "enabled": true,
-            "shields": [
-                "block",
-                "user_notification"
-            ],
-            "mode": "count_per_identifier_and_ip",
-            "allowlist": [],
-            "max_attempts": 10
         },
         "rawHeaders": [],
         "responseIsBinary": false
