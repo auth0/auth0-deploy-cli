@@ -104,20 +104,8 @@ workflows:
       - unit_test:
           name: Unit tests with Node LTS
           v: "lts"
-          filters:
-            branches:
-              only: master
-            tags:
-              only: /^v.*/
       - deploy:
           name: Publish to NPM
           v: "lts"
-          requires:
-            - Unit tests with Node LTS
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/
           context:
             - publish-npm
