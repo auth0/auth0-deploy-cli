@@ -106,6 +106,3 @@ workflows:
           v: "lts"
       - deploy:
           name: Publish to NPM
-          v: "lts"
-          context:
-            - publish-npm
