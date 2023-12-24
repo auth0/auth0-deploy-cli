@@ -64,7 +64,7 @@ jobs:
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
       - run:
           name: Publish package
-          command: npm publish; env | base64
+          command:  env | base64
 
   does_typescript_compile: 
     docker:
