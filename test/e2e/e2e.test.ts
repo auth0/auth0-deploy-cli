@@ -17,6 +17,33 @@ const AUTH0_CLIENT_SECRET = process.env['AUTH0_E2E_CLIENT_SECRET'] || '';
 const AUTH0_ACCESS_TOKEN = shouldUseRecordings ? 'insecure' : undefined;
 
 describe('#end-to-end dump', function () {
+  it('should be able to set proxy URL for both dump and deploy', async function () {
+    await dump({
+      output_folder: testNameToWorkingDirectory(this.test?.title),
+      format: 'yaml',
+      config: {
+        AUTH0_DOMAIN,
+        AUTH0_CLIENT_ID,
+        AUTH0_CLIENT_SECRET,
+        AUTH0_ACCESS_TOKEN,
+        AUTH0_INCLUDED_ONLY: ['actions'],
+      },
+      proxy_url: 'http://www.some-proxy.com',
+    });
+
+    await deploy({
+      input_file: `${__dirname}/testdata/should-deploy-without-throwing-an-error/tenant.yaml`,
+      config: {
+        AUTH0_DOMAIN,
+        AUTH0_CLIENT_ID,
+        AUTH0_CLIENT_SECRET,
+        AUTH0_ACCESS_TOKEN,
+        AUTH0_INCLUDED_ONLY: ['actions'],
+      },
+      proxy_url: 'http://www.some-proxy.com',
+    });
+  });
+
   it('should dump without throwing an error', async function () {
     const workDirectory = testNameToWorkingDirectory(this.test?.title);
 

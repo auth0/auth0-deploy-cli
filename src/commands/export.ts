@@ -3,7 +3,7 @@ import nconf from 'nconf';
 import mkdirp from 'mkdirp';
 
 import log from '../logger';
-import { isDirectory } from '../utils';
+import { isDirectory, setupProxy } from '../utils';
 import { setupContext } from '../context/index';
 import { Config } from '../types';
 import { ExportParams } from '../args';
@@ -17,6 +17,7 @@ export default async function exportCMD(params: ExportParams) {
     export_ids: exportIds,
     secret: clientSecret,
     env: shouldInheritEnv = false,
+    proxy_url: proxyUrl,
   } = params;
 
   if (shouldInheritEnv) {
@@ -55,6 +56,8 @@ export default async function exportCMD(params: ExportParams) {
   }
 
   nconf.overrides(overrides);
+
+  setupProxy(proxyUrl);
 
   // Setup context and load
   const context = await setupContext(nconf.get(), 'export');

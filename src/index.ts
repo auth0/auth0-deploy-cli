@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-import { bootstrap } from 'global-agent';
-
 import { getParams, CliParams } from './args';
 import log from './logger';
 import tools from './tools';
@@ -12,20 +10,6 @@ import exportCMD from './commands/export';
 async function run(params: CliParams): Promise<void> {
   // Run command
   const command = params._[0];
-
-  const proxy = params.proxy_url;
-
-  if (proxy) {
-    const MAJOR_NODEJS_VERSION = parseInt(process.version.slice(1).split('.')[0], 10);
-
-    if (MAJOR_NODEJS_VERSION < 10) {
-      // `global-agent` works with Node.js v10 and above.
-      throw new Error('The --proxy_url option is only supported on Node >= 10');
-    }
-
-    process.env.GLOBAL_AGENT_HTTP_PROXY = proxy;
-    bootstrap();
-  }
 
   log.debug(`Start command ${command}`);
   if (['deploy', 'import'].includes(command) && 'input_file' in params) {

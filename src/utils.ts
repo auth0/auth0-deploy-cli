@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import sanitizeName from 'sanitize-filename';
 import dotProp from 'dot-prop';
+import { bootstrap } from 'global-agent';
 import { loadFileAndReplaceKeywords, Auth0 } from './tools';
 import log from './logger';
 import { Asset, Assets, Config, KeywordMappings } from './types';
@@ -205,3 +206,17 @@ export function mapClientID2NameSorted(enabledClients: string[], knownClients: A
     ...(enabledClients || []).map((clientId) => convertClientIdToName(clientId, knownClients)),
   ].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 }
+
+export const setupProxy = (proxyUrl: string | undefined) => {
+  if (proxyUrl === undefined) return;
+
+  const MAJOR_NODEJS_VERSION = parseInt(process.version.slice(1).split('.')[0], 10);
+
+  if (MAJOR_NODEJS_VERSION < 10) {
+    // `global-agent` works with Node.js v10 and above.
+    throw new Error('The --proxy_url option is only supported on Node >= 10');
+  }
+
+  process.env.GLOBAL_AGENT_HTTP_PROXY = proxyUrl;
+  bootstrap();
+};
