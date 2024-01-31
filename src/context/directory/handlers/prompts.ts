@@ -9,6 +9,7 @@ import {
   Prompts,
   PromptSettings,
   AllPromptsByLanguage,
+  CustomPromptsConfig,
 } from '../../../tools/auth0/handlers/prompts';
 
 type ParsedPrompts = ParsedAsset<'prompts', Prompts>;
@@ -23,6 +24,10 @@ const getPromptsSettingsFile = (promptsDirectory: string) => {
 
 const getCustomTextFile = (promptsDirectory: string) => {
   return path.join(promptsDirectory, 'custom-text.json');
+};
+
+const getPartialsFile = (promptsDirectory: string) => {
+  return path.join(promptsDirectory, 'partials.json');
 };
 
 function parse(context: DirectoryContext): ParsedPrompts {
@@ -47,10 +52,33 @@ function parse(context: DirectoryContext): ParsedPrompts {
     }) as AllPromptsByLanguage;
   })();
 
+  const partials = (() => {
+    const partialsFile = getPartialsFile(promptsDirectory);
+    if (!isFile(partialsFile)) return {};
+    const partialsFileContent = loadJSON(partialsFile, {
+      mappings: context.mappings,
+      disableKeywordReplacement: context.disableKeywordReplacement,
+    }) as CustomPromptsConfig;
+
+    Object.entries(partialsFileContent).forEach(([promptName, partialsArray]) => {
+      partialsArray.forEach((partialConfig, i) => {
+        if (partialConfig.template) {
+          partialsFileContent[promptName][i].template = context.loadFile(
+            path.join(promptsDirectory, partialConfig.template),
+            promptsDirectory
+          );
+        }
+      });
+    });
+
+    return partialsFileContent;
+  })();
+
   return {
     prompts: {
       ...promptsSettings,
       customText,
+      partials,
     },
   };
 }
@@ -60,7 +88,7 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   if (!prompts) return;
 
-  const { customText, ...promptsSettings } = prompts;
+  const { customText, partials, ...promptsSettings } = prompts;
 
   const promptsDirectory = getPromptsDirectory(context.filePath);
   ensureDirSync(promptsDirectory);
@@ -72,6 +100,10 @@ async function dump(context: DirectoryContext): Promise<void> {
   if (!customText) return;
   const customTextFile = getCustomTextFile(promptsDirectory);
   dumpJSON(customTextFile, customText);
+
+  if (!partials) return;
+  const partialsFile = getPartialsFile(promptsDirectory);
+  dumpJSON(partialsFile, partials);
 }
 
 const promptsHandler: DirectoryHandler<ParsedPrompts> = {

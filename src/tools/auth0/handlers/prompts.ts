@@ -153,12 +153,63 @@ export type PromptsCustomText = {
 export type Prompts = Partial<
   PromptSettings & {
     customText: AllPromptsByLanguage;
+    partials: CustomPromptPartials;
   }
 >;
 
 export type AllPromptsByLanguage = Partial<{
   [key in Language]: Partial<PromptsCustomText>;
 }>;
+
+const customPromptsPromptTypes = [
+  'login',
+  'login-id',
+  'login-password',
+  'signup',
+  'signup-id',
+  'signup-password',
+] as const;
+
+export type CustomPromptsPromptTypes = typeof customPromptsPromptTypes[number];
+
+const customPromptsScreenTypes = [
+  'login',
+  'login-id',
+  'login-password',
+  'signup',
+  'signup-id',
+  'signup-password',
+] as const;
+
+export type CustomPromptsScreenTypes = typeof customPromptsPromptTypes[number];
+
+export type CustomPromptsInsertionPoints =
+  | 'form-content-start'
+  | 'form-content-end'
+  | 'form-footer-start'
+  | 'form-footer-end'
+  | 'secondary-actions-start'
+  | 'secondary-actions-end';
+
+
+export type CustomPromptPartialsScreens = Partial<{
+  [screen in CustomPromptsScreenTypes]: Partial<{
+    [insertionPoint in CustomPromptsInsertionPoints]: string;
+  }>;
+}>;
+
+export type CustomPromptPartials = Partial<{
+  [prompt in CustomPromptsPromptTypes]: CustomPromptPartialsScreens;
+}>;
+
+export type CustomPromptsConfig = {
+  [prompt in CustomPromptsPromptTypes]: [
+    {
+      name: string;
+      template: string;
+    }
+  ];
+};
 
 export default class PromptsHandler extends DefaultHandler {
   existing: Prompts;
@@ -179,9 +230,12 @@ export default class PromptsHandler extends DefaultHandler {
 
     const customText = await this.getCustomTextSettings();
 
+    const partials = await this.getCustomPromptsPartials();
+
     return {
       ...promptsSettings,
       customText,
+      partials,
     };
   }
 
@@ -236,18 +290,56 @@ export default class PromptsHandler extends DefaultHandler {
       });
   }
 
+  async getCustomPromptsPartials(): Promise<CustomPromptPartials> {
+    return this.client.pool
+      .addEachTask({
+        data: customPromptsPromptTypes.map((promptType) => ({ promptType })),
+        generator: ({ promptType }) =>
+          this.client.prompts
+            .getPartials({
+              prompt: promptType,
+            })
+            .then((partialsData: CustomPromptPartials) => {
+              if (isEmpty(partialsData)) return null;
+              return {
+                [promptType]: {
+                  ...partialsData,
+                },
+              };
+            }),
+      })
+      .promise()
+      .then((partialsDataWithNulls) =>
+        partialsDataWithNulls
+          .filter(Boolean)
+          .reduce(
+            (
+              acc: CustomPromptPartials,
+              partialsData: { [prompt: string]: CustomPromptPartials }
+            ) => {
+              const [promptName] = Object.keys(partialsData);
+              acc[promptName] = partialsData[promptName];
+              return acc;
+            },
+            {}
+          )
+      );
+  }
+
   async processChanges(assets: Assets): Promise<void> {
     const { prompts } = assets;
 
     if (!prompts) return;
 
-    const { customText, ...promptSettings } = prompts;
+    const { partials, customText, ...promptSettings } = prompts;
 
     if (!isEmpty(promptSettings)) {
       await this.client.prompts.updateSettings({}, promptSettings);
     }
 
     await this.updateCustomTextSettings(customText);
+
+    await this.updateCustomPromptsPartials(partials);
 
     this.updated += 1;
     this.didUpdate(prompts);
@@ -281,6 +373,26 @@ export default class PromptsHandler extends DefaultHandler {
             language,
             body,
           }),
+      })
+      .promise();
+  }
+
+  async updateCustomPromptsPartials(partials: Prompts['partials']): Promise<void> {
+    /*
+      Note: deletes are not currently supported
+    */
+    if (!partials) return;
+
+    await this.client.pool
+      .addEachTask({
+        data: Object.keys(partials).map((prompt: CustomPromptsPromptTypes) => {
+          const body = partials[prompt] || {};
+          return {
+            body,
+            prompt,
+          };
+        }),
+        generator: ({ prompt, body }) => this.client.prompts.updatePartials({ prompt }, body),
       })
       .promise();
   }

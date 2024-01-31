@@ -124,6 +124,7 @@ export function mockMgmtClient() {
         new Promise((res) => {
           res({});
         }),
+      getPartials: async () => ({}),
       getSettings: () => {},
     },
     customDomains: { getAll: () => [] },

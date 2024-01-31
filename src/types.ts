@@ -5,6 +5,9 @@ import {
   Prompts,
   PromptsCustomText,
   PromptSettings,
+  CustomPromptPartials,
+  CustomPromptsPromptTypes,
+  CustomPromptPartialsScreens,
 } from './tools/auth0/handlers/prompts';
 import { Tenant } from './tools/auth0/handlers/tenant';
 import { Theme } from './tools/auth0/handlers/themes';
@@ -159,6 +162,14 @@ export type BaseAuth0APIClient = {
       prompt: PromptTypes;
       language: Language;
     }) => Promise<Partial<PromptsCustomText>>;
+    updatePartials: (arg0: {
+      prompt: CustomPromptsPromptTypes;
+    },
+      body: CustomPromptPartialsScreens
+    ) => Promise<void>;
+    getPartials: (arg0: {
+      prompt: CustomPromptsPromptTypes;
+    }) => Promise<CustomPromptPartials>;
     getSettings: () => Promise<PromptSettings>;
     updateSettings: (arg0: {}, arg1: Partial<PromptSettings>) => Promise<void>;
   };

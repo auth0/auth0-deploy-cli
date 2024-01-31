@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import promptsHandler from '../../../../src/tools/auth0/handlers/prompts';
+import promptsHandler, { Prompts } from '../../../../src/tools/auth0/handlers/prompts';
 import { Language } from '../../../../src/types';
 import _ from 'lodash';
 import { PromisePoolExecutor } from 'promise-pool-executor';
@@ -11,7 +11,7 @@ const mockPromptsSettings = {
 
 describe('#prompts handler', () => {
   describe('#prompts process', () => {
-    it('should get prompts settings and prompts custom text', async () => {
+    it('should get prompts settings, custom texts and template partials', async () => {
       const supportedLanguages: Language[] = ['es', 'fr', 'en'];
 
       const englishCustomText = {
@@ -47,6 +47,18 @@ describe('#prompts handler', () => {
         'signup-password': {},
         'mfa-webauthn': {},
       }; // Has no prompts configured.
+      const templatePartials: Prompts['partials'] = {
+        login: {
+          login: {
+            'form-content-start': '<div>TEST</div>',
+          },
+        },
+        'signup-id': {
+          'signup-id': {
+            'form-content-start': '<div>TEST</div>',
+          },
+        },
+      };
 
       const auth0 = {
         tenant: {
@@ -70,6 +82,8 @@ describe('#prompts handler', () => {
 
             return Promise.resolve(customTextValue);
           },
+          getPartials: ({ prompt }) => Promise.resolve(_.cloneDeep(templatePartials[prompt])),
+          updatePartials: ({ prompt }, body) => Promise.resolve(body),
         },
         pool: new PromisePoolExecutor({
           concurrencyLimit: 3,
@@ -80,6 +94,7 @@ describe('#prompts handler', () => {
 
       const handler = new promptsHandler({ client: auth0 });
       const data = await handler.getType();
+
       expect(data).to.deep.equal({
         ...mockPromptsSettings,
         customText: {
@@ -92,12 +107,14 @@ describe('#prompts handler', () => {
           },
           //does not have spanish custom text because all responses returned empty objects
         },
+        partials: templatePartials,
       });
     });
 
-    it('should update prompts settings but not custom text settings if not set', async () => {
+    it('should update prompts settings but not custom text/partials settings if not set', async () => {
       let didCallUpdatePromptsSettings = false;
       let didCallUpdateCustomText = false;
+      let didCallUpdatePartials = false;
 
       const auth0 = {
         tenant: {
@@ -106,6 +123,9 @@ describe('#prompts handler', () => {
           }),
         },
         prompts: {
+          updatePartials: () => {
+            didCallUpdatePartials = true;
+          },
           updateCustomTextByLanguage: () => {
             didCallUpdateCustomText = true;
           },
@@ -124,12 +144,15 @@ describe('#prompts handler', () => {
       await stageFn.apply(handler, [{ prompts: { ...mockPromptsSettings, customText } }]);
       expect(didCallUpdatePromptsSettings).to.equal(true);
       expect(didCallUpdateCustomText).to.equal(false);
+      expect(didCallUpdatePartials).to.equal(false);
     });
 
-    it('should update prompts settings and custom text settings when both are set', async () => {
+    it('should update prompts settings and custom text/partials settings when set', async () => {
       let didCallUpdatePromptsSettings = false;
       let didCallUpdateCustomText = false;
+      let didCallUpdatePartials = false;
       let numberOfUpdateCustomTextCalls = 0;
+      let numberOfUpdatePartialsCalls = 0;
 
       const customTextToSet = {
         en: {
@@ -149,8 +172,31 @@ describe('#prompts handler', () => {
         },
       };
 
+      const partialsToSet: Prompts['partials'] = {
+        login: {
+          login: {
+            'form-content-start': '<div>TEST</div>',
+          },
+        },
+        'signup-id': {
+          'signup-id': {
+            'form-content-start': '<div>TEST</div>',
+          },
+        },
+        'signup-password': {
+          'signup-password': {
+            'form-content-start': '<div>TEST</div>',
+          },
+        },
+      };
+
       const auth0 = {
         prompts: {
+          updatePartials: () => {
+            didCallUpdatePartials = true;
+            numberOfUpdatePartialsCalls++;
+            return Promise.resolve({});
+          },
           updateCustomTextByLanguage: () => {
             didCallUpdateCustomText = true;
             numberOfUpdateCustomTextCalls++;
@@ -172,16 +218,17 @@ describe('#prompts handler', () => {
       const handler = new promptsHandler({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-
       await stageFn.apply(handler, [
-        { prompts: { ...mockPromptsSettings, customText: customTextToSet } },
+        { prompts: { ...mockPromptsSettings, customText: customTextToSet, partials: partialsToSet } },
       ]);
       expect(didCallUpdatePromptsSettings).to.equal(true);
       expect(didCallUpdateCustomText).to.equal(true);
+      expect(didCallUpdatePartials).to.equal(true);
       expect(numberOfUpdateCustomTextCalls).to.equal(3);
+      expect(numberOfUpdatePartialsCalls).to.equal(3);
     });
 
-    it('should not fail if tenant languages undefined', async () => {
+    it('should not fail if tenant languages or partials are undefined', async () => {
       const auth0 = {
         tenant: {
           getSettings: () =>
@@ -191,6 +238,7 @@ describe('#prompts handler', () => {
         },
         prompts: {
           getSettings: () => mockPromptsSettings,
+          getPartials: async () => {},
         },
         pool: new PromisePoolExecutor({
           concurrencyLimit: 3,
@@ -204,6 +252,7 @@ describe('#prompts handler', () => {
       expect(data).to.deep.equal({
         ...mockPromptsSettings,
         customText: {}, // Custom text empty
+        partials: {}, // Partials empty
       });
     });
   });
