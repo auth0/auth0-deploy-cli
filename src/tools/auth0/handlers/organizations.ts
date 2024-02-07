@@ -20,6 +20,7 @@ export const schema = {
           properties: {
             connection_id: { type: 'string' },
             assign_membership_on_login: { type: 'boolean' },
+            show_as_button: { type: 'boolean' },
           },
         },
       },
@@ -126,7 +127,8 @@ export default class OrganizationsHandler extends DefaultHandler {
       existingConnections.find(
         (x) =>
           x.connection_id === c.connection_id &&
-          x.assign_membership_on_login !== c.assign_membership_on_login
+          (x.assign_membership_on_login !== c.assign_membership_on_login ||
+            x.show_as_button !== c.show_as_button)
       )
     );
 
@@ -136,7 +138,10 @@ export default class OrganizationsHandler extends DefaultHandler {
         this.client.organizations
           .updateEnabledConnection(
             { connection_id: conn.connection_id, ...params },
-            { assign_membership_on_login: conn.assign_membership_on_login }
+            {
+              assign_membership_on_login: conn.assign_membership_on_login,
+              show_as_button: conn.show_as_button,
+            }
           )
           .catch(() => {
             throw new Error(

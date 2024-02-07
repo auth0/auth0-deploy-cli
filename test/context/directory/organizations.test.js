@@ -12,9 +12,9 @@ describe('#directory context organizations', () => {
     const files = {
       organizations: {
         'acme.json':
-          '{ "name": "acme", "display_name": "acme", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "name": "google", "assign_membership_on_login": false }]}',
+          '{ "name": "acme", "display_name": "acme", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "name": "google", "assign_membership_on_login": false, "show_as_button": false }]}',
         'contoso.json':
-          '{ "name": "contoso", "display_name": "contoso", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "name": "google", "assign_membership_on_login": false }]}',
+          '{ "name": "contoso", "display_name": "contoso", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "name": "google", "assign_membership_on_login": false, "show_as_button": false }]}',
       },
     };
 
@@ -39,6 +39,7 @@ describe('#directory context organizations', () => {
           {
             name: 'google',
             assign_membership_on_login: false,
+            show_as_button: false,
           },
         ],
       },
@@ -55,6 +56,7 @@ describe('#directory context organizations', () => {
           {
             name: 'google',
             assign_membership_on_login: false,
+            show_as_button: false,
           },
         ],
       },
@@ -112,6 +114,7 @@ describe('#directory context organizations', () => {
           {
             name: 'google',
             assign_membership_on_login: false,
+            show_as_button: false,
           },
         ],
       },
@@ -128,6 +131,7 @@ describe('#directory context organizations', () => {
           {
             name: 'google',
             assign_membership_on_login: false,
+            show_as_button: false,
           },
         ],
       },
