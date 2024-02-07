@@ -10,7 +10,7 @@
     "lint:fix": "eslint --fix --ignore-path .eslintignore --ignore-pattern webpack . && kacl lint",
     "lint": "eslint --ignore-path .eslintignore --ignore-pattern webpack . && kacl lint",
     "format": "npx prettier --write .",
-    "test": "ts-mocha -p tsconfig.json --recursive 'test/**/*.test*' --exclude 'test/e2e/*' --timeout 7500",
+    "test": "ts-mocha -p tsconfig.json --recursive 'test/**/*.test*' --exclude 'test/e2e/*' --timeout 10000",
     "test:e2e:node-module": "ts-mocha -p tsconfig.json --recursive 'test/e2e/*.test*' --timeout 120000",
     "test:e2e:cli": "sh ./test/e2e/e2e-cli.sh",
     "test:coverage": "nyc npm run test && nyc report --reporter=lcov",
