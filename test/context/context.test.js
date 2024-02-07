@@ -36,6 +36,21 @@ describe('#context loader validation', async () => {
       delete tmpConfig.AUTH0_ACCESS_TOKEN;
     });
 
+    it.skip('should error while attempting authentication, but pass validation with client secret', async () => {
+      /* Create empty directory */
+      const dir = path.resolve(testDataDir, 'context');
+      cleanThenMkdir(dir);
+
+      tmpConfig.AUTH0_CLIENT_SECRET = 'fake secret';
+
+      const result = await expect(
+        setupContext({ ...tmpConfig, AUTH0_INPUT_FILE: dir }),
+        'import'
+      ).to.be.eventually.rejectedWith(Error);
+
+      expect(result).to.be.an('object').that.has.property('name').which.eq('access_denied');
+    });
+
     it('should error while attempting private key JWT generation, but pass validation with client signing key', async () => {
       // Proves that config value AUTH0_CLIENT_SIGNING_KEY_PATH is being passed to Auth0 library
       /* Create empty directory */
