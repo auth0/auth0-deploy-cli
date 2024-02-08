@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { expect } from 'chai';
+import { cloneDeep } from 'lodash';
 
 import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/organizations';
@@ -21,6 +22,7 @@ describe('#YAML context organizations', () => {
         connections:
           - connection_id: con_123
             assign_membership_on_login: false
+            show_as_button: false
         display_name: acme
       - name: contoso
         branding:
@@ -30,6 +32,7 @@ describe('#YAML context organizations', () => {
         connections:
           - connection_id: con_456
             assign_membership_on_login: true
+            show_as_button: true
         display_name: contoso
     `;
 
@@ -47,6 +50,7 @@ describe('#YAML context organizations', () => {
           {
             connection_id: 'con_123',
             assign_membership_on_login: false,
+            show_as_button: false,
           },
         ],
       },
@@ -63,6 +67,7 @@ describe('#YAML context organizations', () => {
           {
             connection_id: 'con_456',
             assign_membership_on_login: true,
+            show_as_button: true,
           },
         ],
       },
@@ -93,6 +98,7 @@ describe('#YAML context organizations', () => {
           {
             connection_id: 'con_123',
             assign_membership_on_login: false,
+            show_as_button: false,
             connection: {
               name: 'foo',
               strategy: 'auth0',
@@ -101,11 +107,13 @@ describe('#YAML context organizations', () => {
         ],
       },
     ];
-    context.assets.organizations = organizations;
-
+    context.assets.organizations = cloneDeep(organizations);
     const dumped = await handler.dump(context);
 
+    organizations[0].connections[0].name = organizations[0].connections[0].connection.name;
     delete organizations[0].connections[0].connection;
+    delete organizations[0].connections[0].connection_id;
+
     expect(dumped).to.deep.equal({ organizations });
   });
 });
