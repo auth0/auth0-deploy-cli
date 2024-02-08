@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `show_as_button` management support for organization connections [#889]
+
+### Fixed
+
+- Strip `sink.azurePartnerTopic` field from payload when creating log stream [#876]
+
 ## [7.20.0] - 2023-11-29
 
 ### Added
