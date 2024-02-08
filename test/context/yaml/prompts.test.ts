@@ -62,6 +62,13 @@ describe('#YAML context prompts', () => {
                 passwordSecurityText: 'Your password must contain:'
                 title: Create Your Account!
                 usernamePlaceholder: Username
+        customPrompts:
+          login:
+            - name: form-content-start
+              template: ./templatePartials/login/form-content-start.liquid
+          signup:
+            - name: form-content-end
+              template:  ./templatePartials/signup/form-content-end.liquid
     `;
 
     const yamlFile = path.join(dir, 'config.yaml');
@@ -131,6 +138,20 @@ describe('#YAML context prompts', () => {
       },
       identifier_first: true,
       universal_login_experience: 'classic',
+      customPrompts: {
+        login: [
+          {
+            name: 'form-content-start',
+            template: './templatePartials/login/form-content-start.liquid',
+          },
+        ],
+        signup: [
+          {
+            name: 'form-content-end',
+            template: './templatePartials/signup/form-content-end.liquid',
+          },
+        ],
+      },
     });
   });
 
@@ -170,6 +191,20 @@ describe('#YAML context prompts', () => {
             },
           },
         },
+      },
+      customPrompts: {
+        login: [
+          {
+            name: 'form-content-start',
+            template: './templatePartials/login/form-content-start.liquid',
+          },
+        ],
+        signup: [
+          {
+            name: 'form-content-end',
+            template: './templatePartials/signup/form-content-end.liquid',
+          },
+        ],
       },
     };
 
