@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.21.0] - 2024-02-08
+
+### Added
+
+- `show_as_button` management support for organization connections [#889]
+
+### Fixed
+
+- Strip `sink.azurePartnerTopic` field from payload when creating log stream [#876]
+
 ## [7.20.0] - 2023-11-29
 
 ### Added
@@ -1004,7 +1014,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#864]: https://github.com/auth0/auth0-deploy-cli/issues/864
 [#865]: https://github.com/auth0/auth0-deploy-cli/issues/865
 [#866]: https://github.com/auth0/auth0-deploy-cli/issues/866
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.20.0...HEAD
+[#876]: https://github.com/auth0/auth0-deploy-cli/issues/876
+[#889]: https://github.com/auth0/auth0-deploy-cli/issues/889
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.21.0...HEAD
+[7.21.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.20.0...v7.21.0
 [7.20.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.19.0...v7.20.0
 [7.19.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.18.0...v7.19.0
 [7.18.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.7...v7.18.0
