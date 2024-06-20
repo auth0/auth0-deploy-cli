@@ -19,6 +19,7 @@ const sampleEnabledConnection = {
   connection_id: 'con_123',
   assign_membership_on_login: true,
   show_as_button: false,
+  is_signup_enabled: true,
   connection: {
     name: 'Username-Password-Login',
     strategy: 'auth0',
@@ -135,6 +136,7 @@ describe('#organizations handler', () => {
             expect(connection.connection_id).to.equal('con_123');
             expect(connection.assign_membership_on_login).to.equal(true);
             expect(connection.show_as_button).to.equal(false);
+            expect(connection.is_signup_enabled).to.equal(true);
             return Promise.resolve(connection);
           },
         },
@@ -169,6 +171,7 @@ describe('#organizations handler', () => {
                   name: 'Username-Password-Login',
                   assign_membership_on_login: true,
                   show_as_button: false,
+                  is_signup_enabled: true
                 },
               ],
             },
@@ -333,6 +336,7 @@ describe('#organizations handler', () => {
               expect(data).to.be.an('object');
               expect(data.assign_membership_on_login).to.equal(false);
               expect(data.show_as_button).to.equal(true);
+              expect(data.is_signup_enabled).to.equal(false);
             } else {
               expect(params).to.be.an('object');
               expect(params.id).to.equal('123');
@@ -377,6 +381,7 @@ describe('#organizations handler', () => {
                   name: 'Username-Password-Login',
                   assign_membership_on_login: false,
                   show_as_button: true,
+                  is_signup_enabled: false
                 },
                 { name: 'facebook', assign_membership_on_login: true, show_as_button: false },
               ],
@@ -409,6 +414,7 @@ describe('#organizations handler', () => {
             expect(data.connection_id).to.equal('con_123');
             expect(data.assign_membership_on_login).to.equal(false);
             expect(data.show_as_button).to.equal(false);
+            expect(data.is_signup_enabled).to.equal(false);
             return Promise.resolve(data);
           },
         },
@@ -445,6 +451,7 @@ describe('#organizations handler', () => {
                   name: 'Username-Password-Login',
                   assign_membership_on_login: false,
                   show_as_button: false,
+                  is_signup_enabled: false
                 },
               ],
             },
