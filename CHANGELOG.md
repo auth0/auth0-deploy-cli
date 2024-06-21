@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Management support for `is_signup_enabled` in organization connections [#905]
+- Management support for `captcha_widget_theme` in theme colors [#906]
+
+### Security
+- Updated `chai` from 4.3.7 to 4.4.1 to fix Chaijs/get-func-name vulnerability to ReDoS.
+- Updated `braces` from 3.0.2 to 3.0.3 to fix uncontrolled resource consumption in braces.
+- Updated `follow-redirects` from 1.15.3 to 1.15.6 to fix Follow Redirects improperly handling URLs in the `url.parse()` function and Proxy-Authorization header being kept across hosts.
+- Updated `jose` from 4.11.2 to 4.15.7 to fix jose vulnerability to resource exhaustion via specifically crafted JWE with compressed plaintext.
+
 ## [7.21.0] - 2024-02-08
 
 ### Added
