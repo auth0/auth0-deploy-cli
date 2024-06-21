@@ -23,6 +23,7 @@ describe('#YAML context organizations', () => {
           - connection_id: con_123
             assign_membership_on_login: false
             show_as_button: false
+            is_signup_enabled: false
         display_name: acme
       - name: contoso
         branding:
@@ -33,6 +34,7 @@ describe('#YAML context organizations', () => {
           - connection_id: con_456
             assign_membership_on_login: true
             show_as_button: true
+            is_signup_enabled: true
         display_name: contoso
     `;
 
@@ -51,6 +53,7 @@ describe('#YAML context organizations', () => {
             connection_id: 'con_123',
             assign_membership_on_login: false,
             show_as_button: false,
+            is_signup_enabled: false
           },
         ],
       },
@@ -68,6 +71,7 @@ describe('#YAML context organizations', () => {
             connection_id: 'con_456',
             assign_membership_on_login: true,
             show_as_button: true,
+            is_signup_enabled: true
           },
         ],
       },
@@ -99,6 +103,7 @@ describe('#YAML context organizations', () => {
             connection_id: 'con_123',
             assign_membership_on_login: false,
             show_as_button: false,
+            is_signup_enabled: false,
             connection: {
               name: 'foo',
               strategy: 'auth0',
