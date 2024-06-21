@@ -295,6 +295,7 @@ export const schema = {
           'success',
           'widget_background',
           'widget_border',
+          'captcha_widget_theme'
         ],
         type: 'object',
       },
