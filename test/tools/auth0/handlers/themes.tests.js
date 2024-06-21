@@ -1,6 +1,9 @@
-const { expect, assert } = require('chai');
+import chai, { expect ,assert} from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 const { omit, cloneDeep } = require('lodash');
 const { default: ThemesHandler } = require('../../../../src/tools/auth0/handlers/themes');
+
+chai.use(chaiAsPromised);
 
 function stub() {
   const s = function (...args) {
@@ -56,6 +59,7 @@ const mockTheme = ({ withThemeId } = {}) => {
       header: '#FF00CC',
       icons: '#FF00CC',
       input_background: '#FF00CC',
+      captcha_widget_theme: 'dark',
       input_border: '#FF00CC',
       input_filled_text: '#FF00CC',
       input_labels_placeholders: '#FF00CC',

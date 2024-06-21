@@ -195,6 +195,11 @@ export const schema = {
             pattern: '^#(([0-9a-fA-F]{3}){1,2}|([0-9a-fA-F]{4}){1,2})$',
             type: 'string',
           },
+          captcha_widget_theme: {
+            description: 'Captcha Widget Theme',
+            pattern: '^(auto|light|dark)$',
+            type: 'string',
+          },
           error: {
             description: 'Error',
             pattern: '^#(([0-9a-fA-F]{3}){1,2}|([0-9a-fA-F]{4}){1,2})$',
@@ -288,6 +293,7 @@ export const schema = {
           'success',
           'widget_background',
           'widget_border',
+          'captcha_widget_theme'
         ],
         type: 'object',
       },
@@ -520,6 +526,7 @@ export interface Colors {
   links_focused_components: string;
   header: string;
   body_text: string;
+  captcha_widget_theme:string;
   widget_background: string;
   widget_border: string;
   input_labels_placeholders: string;
