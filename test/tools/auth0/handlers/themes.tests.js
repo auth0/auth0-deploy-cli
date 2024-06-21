@@ -67,6 +67,7 @@ const mockTheme = ({ withThemeId } = {}) => {
       success: '#FF00CC',
       widget_background: '#FF00CC',
       widget_border: '#FF00CC',
+      captcha_widget_theme: 'auto'
     },
     fonts: {
       body_text: {
