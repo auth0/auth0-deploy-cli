@@ -423,15 +423,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - [IDS-3074] Updated structure when dumping orgs (#369)
-  
+
   Fixes an issue when exporting organizations as a directory, connections are not structured in the right way, causing the import to remove any connection on the organizations.
+
 - [DXEX-1721] Fix client metadata property deletion
-  
+
   Fixes an inconsistency between how we calculate changes on deep metadata-like objects and with how APIv2 expects such changes to be expressed when a property is deleted.
+
 - Bump js-yaml from 3.x to 4.x and move to kacl (#371)
-  
+
   This PR bumps js-yaml from 3.x to 4.x in accordance with its migration guide. This bump means that we're able to use the default safe behaviour for both exports and imports.
-  
+
   Notably, this means that we won't end up with values like !<tag:yaml.org,2002:js/undefined> '' that are not at all human friendly and were problematic when we used the .safeLoad functionality.
 
 ## [7.2.0] - 2021-07-14
@@ -640,7 +642,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Removed several unused dependencies:
-  
+
   - ajv
   - e6-template-strings
   - node-storage
@@ -1023,7 +1025,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#889]: https://github.com/auth0/auth0-deploy-cli/issues/889
 [#905]: https://github.com/auth0/auth0-deploy-cli/issues/905
 [#906]: https://github.com/auth0/auth0-deploy-cli/issues/906
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.22.0...HEAD
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.22.0...HEAD
 [7.22.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.21.0...v7.22.0
 [7.21.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.20.0...v7.21.0
 [7.20.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.19.0...v7.20.0
@@ -1095,6 +1097,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [5.1.5]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.4...v5.1.5
 [5.1.4]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.3...v5.1.4
 [5.1.3]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.3...v5.1.3
+[5.1.3]: https://github.com/auth0/auth0-deploy-cli/compare/v5.1.0...v5.1.3
 [5.1.0]: https://github.com/auth0/auth0-deploy-cli/compare/v5.0.0...v5.1.0
 [5.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v4.3.1...v5.0.0
 [4.3.1]: https://github.com/auth0/auth0-deploy-cli/compare/v4.3.0...v4.3.1
