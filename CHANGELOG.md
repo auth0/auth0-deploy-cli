@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Made `captcha_widget_theme` an optional field in the `colors` property within the `themes` schema [#911]
+
 ## [7.22.0] - 2024-06-21
 
 ### Added
