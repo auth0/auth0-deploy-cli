@@ -293,7 +293,6 @@ export const schema = {
           'success',
           'widget_background',
           'widget_border',
-          'captcha_widget_theme'
         ],
         type: 'object',
       },
@@ -526,7 +525,7 @@ export interface Colors {
   links_focused_components: string;
   header: string;
   body_text: string;
-  captcha_widget_theme:string;
+  captcha_widget_theme: string;
   widget_background: string;
   widget_border: string;
   input_labels_placeholders: string;
