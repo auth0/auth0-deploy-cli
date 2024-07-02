@@ -161,19 +161,19 @@ export const setupContext = async (
       return new AuthenticationClient({
         domain: AUTH0_DOMAIN,
         clientId: AUTH0_CLIENT_ID,
-        clientAssertionSigningKey: readFileSync(AUTH0_CLIENT_SIGNING_KEY_PATH),
+        clientAssertionSigningKey: readFileSync(AUTH0_CLIENT_SIGNING_KEY_PATH, 'utf-8'),
         clientAssertionSigningAlg: !!AUTH0_CLIENT_SIGNING_ALGORITHM
           ? AUTH0_CLIENT_SIGNING_ALGORITHM
           : undefined,
       });
     })();
-
-    const clientCredentials = await authClient.clientCredentialsGrant({
+    
+    const clientCredentials = await authClient.oauth.clientCredentialsGrant({
       audience: config.AUTH0_AUDIENCE
         ? config.AUTH0_AUDIENCE
         : `https://${config.AUTH0_DOMAIN}/api/v2/`,
     });
-    return clientCredentials.access_token;
+    return clientCredentials.data.access_token;
   })();
 
   const mgmtClient = new ManagementClient({

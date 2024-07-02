@@ -12,6 +12,7 @@ const promptsDirectory = path.join(dir, constants.PROMPTS_DIRECTORY);
 
 const promptsSettingsFile = 'prompts.json';
 const customTextFile = 'custom-text.json';
+const partialsFile = 'partials.json';
 
 describe('#directory context prompts', () => {
   it('should parse prompts', async () => {
@@ -45,11 +46,38 @@ describe('#directory context prompts', () => {
             },
           },
         }),
+        [partialsFile]: JSON.stringify({
+          login: [
+            {
+              name: 'form-content-start',
+              template: './partials/login/form-content-start.liquid',
+            },
+          ],
+          signup: [
+            {
+              name: 'form-content-end',
+              template: './partials/signup/form-content-end.liquid',
+            },
+          ],
+        }),
       },
     };
 
-    const repoDir = path.join(testDataDir, 'directory', 'prompts');
+    const repoDir = path.join(testDataDir, 'directory');
+
     createDir(repoDir, files);
+
+    const partialsDir = path.join(
+      repoDir,
+      constants.PROMPTS_DIRECTORY,
+      'partials'
+    );
+    const partialsFiles = {
+      login: { 'form-content-start.liquid': '<div>TEST</div>' },
+      signup: { 'form-content-end.liquid': '<div>TEST AGAIN</div>' },
+    };
+
+    createDir(partialsDir, partialsFiles);
 
     const config = {
       AUTH0_INPUT_FILE: repoDir,
@@ -64,6 +92,20 @@ describe('#directory context prompts', () => {
     expect(context.assets.prompts).to.deep.equal({
       universal_login_experience: 'classic',
       identifier_first: true,
+      partials: {
+        login: [
+          {
+            name: 'form-content-start',
+            template: '<div>TEST</div>',
+          },
+        ],
+        signup: [
+          {
+            name: 'form-content-end',
+            template: '<div>TEST AGAIN</div>',
+          },
+        ],
+      },
       customText: {
         en: {
           login: {
@@ -91,7 +133,7 @@ describe('#directory context prompts', () => {
     });
   });
 
-  describe('should parse prompts even if one or both files are absent', async () => {
+  describe('should parse prompts even if one or more files are absent', async () => {
     it('should parse even if custom text file is absent', async () => {
       cleanThenMkdir(promptsDirectory);
       const mockPromptsSettings = {
@@ -101,6 +143,7 @@ describe('#directory context prompts', () => {
       const promptsDirectoryNoCustomTextFile = {
         [constants.PROMPTS_DIRECTORY]: {
           [promptsSettingsFile]: JSON.stringify(mockPromptsSettings),
+          [partialsFile]: JSON.stringify({}),
         },
       };
 
@@ -112,10 +155,42 @@ describe('#directory context prompts', () => {
       const context = new Context(config, mockMgmtClient());
       await context.loadAssetsFromLocal();
 
-      expect(context.assets.prompts).to.deep.equal({ ...mockPromptsSettings, customText: {} });
+      expect(context.assets.prompts).to.deep.equal({
+        ...mockPromptsSettings,
+        customText: {},
+        partials: {},
+      });
     });
 
-    it('should parse even if both files are absent', async () => {
+    it('should parse even if custom prompts file is absent', async () => {
+      cleanThenMkdir(promptsDirectory);
+      const mockPromptsSettings = {
+        universal_login_experience: 'classic',
+        identifier_first: true,
+      };
+      const promptsDirectoryNoPartialsFile = {
+        [constants.PROMPTS_DIRECTORY]: {
+          [promptsSettingsFile]: JSON.stringify(mockPromptsSettings),
+          [customTextFile]: JSON.stringify({}),
+        },
+      };
+
+      createDir(promptsDirectory, promptsDirectoryNoPartialsFile);
+
+      const config = {
+        AUTH0_INPUT_FILE: promptsDirectory,
+      };
+      const context = new Context(config, mockMgmtClient());
+      await context.loadAssetsFromLocal();
+
+      expect(context.assets.prompts).to.deep.equal({
+        ...mockPromptsSettings,
+        customText: {},
+        partials: {},
+      });
+    });
+
+    it('should parse even if all files are absent', async () => {
       cleanThenMkdir(promptsDirectory);
       const emptyPromptsDirectory = {
         [constants.PROMPTS_DIRECTORY]: {},
@@ -129,7 +204,7 @@ describe('#directory context prompts', () => {
       const context = new Context(config, mockMgmtClient());
       await context.loadAssetsFromLocal();
 
-      expect(context.assets.prompts).to.deep.equal({ customText: {} });
+      expect(context.assets.prompts).to.deep.equal({ customText: {}, partials: {} });
     });
   });
 
@@ -182,6 +257,20 @@ describe('#directory context prompts', () => {
           },
         },
       },
+      partials: {
+        login: [
+          {
+            name: 'form-content-start',
+            template: './partials/login/form-content-start.liquid',
+          },
+        ],
+        signup: [
+          {
+            name: 'form-content-end',
+            template: './partials/signup/form-content-end.liquid',
+          },
+        ],
+      },
     };
 
     await promptsHandler.dump(context);
@@ -190,11 +279,15 @@ describe('#directory context prompts', () => {
 
     expect(dumpedFiles).to.deep.equal([
       path.join(promptsDirectory, customTextFile),
+      path.join(promptsDirectory, partialsFile),
       path.join(promptsDirectory, promptsSettingsFile),
     ]);
 
     expect(loadJSON(path.join(promptsDirectory, customTextFile), {})).to.deep.equal(
-      context.assets.prompts.customText
+      context.assets.prompts?.customText
+    );
+    expect(loadJSON(path.join(promptsDirectory, partialsFile), {})).to.deep.equal(
+      context.assets.prompts?.partials
     );
     expect(loadJSON(path.join(promptsDirectory, promptsSettingsFile), {})).to.deep.equal({
       universal_login_experience: context.assets.prompts.universal_login_experience,
