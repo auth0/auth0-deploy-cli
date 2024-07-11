@@ -60,4 +60,16 @@ export default async function exportCMD(params: ExportParams) {
   const context = await setupContext(nconf.get(), 'export');
   await context.dump();
   log.info('Export Successful');
+
+  log.info(`
+  ================================================
+  ======= Help us improve Auth0 Deploy CLI =======
+  ================================================
+  We're on a mission to make Auth0 Deploy CLI the best it can be, and we need YOUR help.
+  We've put together a brief survey to understand how you use Deploy CLI, what you love about it, and where you think we can do better.
+
+  ===> https://www.surveymonkey.com/r/LZKMPFN  <===
+
+  Thank you for helping us make Auth0 Deploy CLI better for everyone!
+  ================================================`);
 }
