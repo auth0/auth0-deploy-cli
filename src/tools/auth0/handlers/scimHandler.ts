@@ -167,7 +167,7 @@ export default class ScimHandler {
 	 * Updates an existing `SCIM` configuration.
 	 */
 	async updateScimConfiguration({ id: connection_id }: scimRequestParams, { user_id_attribute, mapping }: scimBodyParams): Promise<AxiosResponse> {
-		log.debug(`Getting SCIM configuration on connection ${ connection_id }`);
+		log.debug(`Updating SCIM configuration on connection ${ connection_id }`);
 		const url = this.getScimEndpoint(connection_id);
 		return (await this.scimHttpRequest('patch', [ url, { user_id_attribute, mapping } ])).data;
 	}
@@ -176,7 +176,7 @@ export default class ScimHandler {
 	 * Deletes an existing `SCIM` configuration.
 	 */
 	async deleteScimConfiguration({ id: connection_id }: scimRequestParams): Promise<AxiosResponse>  {
-		log.debug(`Getting SCIM configuration of connection ${ connection_id }`);
+		log.debug(`Deleting SCIM configuration of connection ${ connection_id }`);
 		const url = this.getScimEndpoint(connection_id);
 		return (await this.scimHttpRequest('delete', [ url ])).data;
 	}
