@@ -15,10 +15,10 @@ beforeEach(() => {
   };
 
   scimHandler = new ScimHandler(
-    function() { return "https://test-host.auth0.com" }, 
+    function() { return 'https://test-host.auth0.com'; }, 
     {
       getAccessToken: async function () {
-        return 'mock_access_token'
+        return 'mock_access_token';
       }
     },
     connectionsManagerMock
@@ -29,11 +29,13 @@ describe('ScimHandler', () => {
   describe('#isScimStrategy', () => {
     it('should return true for SCIM strategy', () => {
       const response = scimHandler.isScimStrategy('samlp');
+      // eslint-disable-next-line no-unused-expressions
       expect(response).to.be.true;
     });
 
     it('should return false for non-SCIM strategy', () => {
       const response = scimHandler.isScimStrategy('oauth');
+      // eslint-disable-next-line no-unused-expressions
       expect(response).to.be.false;
     });
   });
@@ -51,9 +53,13 @@ describe('ScimHandler', () => {
       getScimConfigurationStub.withArgs({ id: 'con_d3tmuoAkaUQgxN1f' }).rejects({ response: { data: { statusCode: 404 } } });
 
       await scimHandler.createIdMap(connections);
-      
+      // eslint-disable-next-line no-unused-expressions
       expect(scimHandler.idMap.get('con_KYp633cmKtnEQ31C')).to.deep.equal({ strategy: 'samlp', hasConfig: true });
+
+      // eslint-disable-next-line no-unused-expressions
       expect(scimHandler.idMap.get('con_Njd1bxE3QTqTRwAk')).to.be.undefined; // Because, it's a Non-SCIM connection.
+
+      // eslint-disable-next-line no-unused-expressions
       expect(scimHandler.idMap.get('con_d3tmuoAkaUQgxN1f')).to.be.undefined;
 
       getScimConfigurationStub.restore();
@@ -74,8 +80,13 @@ describe('ScimHandler', () => {
 
       await scimHandler.applyScimConfiguration(connections);
 
+      // eslint-disable-next-line no-unused-expressions
       expect(connections[0].scim_configuration).to.deep.equal({ user_id_attribute: 'externalId-1', mapping: [{ auth0: 'auth0_key', scim: 'scim_key' }] });
+
+      // eslint-disable-next-line no-unused-expressions
       expect(connections[1].scim_configuration).to.deep.equal({ user_id_attribute: 'externalId-2', mapping: [{ auth0: 'auth0_key', scim: 'scim_key' }] });
+      
+      // eslint-disable-next-line no-unused-expressions
       expect(connections[2].scim_configuration).to.be.undefined;
 
       getScimConfigurationStub.restore();
@@ -85,14 +96,16 @@ describe('ScimHandler', () => {
   describe('#scimHttpRequest', () => {
     it('should make HTTP request with correct authorization header', async () => {
       const accessToken = 'mock_access_token';
-      const tokenProviderMock = {
-        getAccessToken: sinon.stub().resolves(accessToken)
-      };
       const axiosStub = sinon.stub(axios, 'get').resolves({ data: {} });
       const response = await scimHandler.scimHttpRequest('get', ['https://mock-domain/api/v2/connections/1/scim-configuration']);
-
+      
+      // eslint-disable-next-line no-unused-expressions
       expect(response).to.exist;
+
+      // eslint-disable-next-line no-unused-expressions
       expect(axiosStub.calledOnce).to.be.true;
+
+      // eslint-disable-next-line no-unused-expressions
       expect(axiosStub.firstCall.args[1].headers.Authorization).to.equal(`Bearer ${accessToken}`);
 
       axiosStub.restore();
@@ -101,20 +114,20 @@ describe('ScimHandler', () => {
 
   describe('#getScimConfiguration', () => {
     it('should return SCIM configuration for existing connection', async () => {
-      const requestParams = { id: 'con_KYp633cmKtnEQ31C' }
+      const requestParams = { id: 'con_KYp633cmKtnEQ31C' };
       const scimConfiguration = {
         connection_id: 'con_KYp633cmKtnEQ31C',
         connection_name: 'okta',
         strategy: 'okta',
         tenant_name: 'test-tenant',
-        user_id_attribute: "externalId-1",
+        user_id_attribute: 'externalId-1',
         mapping: [
           {
-            scim: "scim_id",
-            auth0: "auth0_id"
+            scim: 'scim_id',
+            auth0: 'auth0_id'
           }
         ]
-      }
+      };
 
       const axiosStub = sinon.stub(axios, 'get').resolves({ data: scimConfiguration, status: 201 });
       const response = await scimHandler.getScimConfiguration(requestParams);
@@ -160,7 +173,7 @@ describe('ScimHandler', () => {
       ...payload,
       created_at: new Date().getTime(),
       updated_on: new Date().getTime()
-    }
+    };
 
     it('should create new SCIM configuration', async () => {
       const axiosStub = sinon.stub(axios, 'post').resolves({ data: responseBody, status: 201 });
@@ -197,7 +210,7 @@ describe('ScimHandler', () => {
         ...payload,
         created_at: new Date().getTime(),
         updated_on: new Date().getTime()
-      }
+      };
       const axiosStub = sinon.stub(axios, 'patch').resolves({ data: responseBody, status: 200 });
       const response = await scimHandler.updateScimConfiguration(requestParams, payload);
 
@@ -214,15 +227,16 @@ describe('ScimHandler', () => {
       const requestParams = {
         id: 'con_PKp644cmKtnEB11J'
       };
-      const axiosStub = sinon.stub(axios, 'delete').resolves({ status: 204 });
+      const axiosStub = sinon.stub(axios, 'delete').resolves({ data: {}, status: 204 });
       const response = await scimHandler.deleteScimConfiguration(requestParams);
+      expect(response).to.deep.equal({});
 
       axiosStub.restore();
     });
   });
 
   describe('#updateOverride', () => {
-    it('should "update" connection and "update" SCIM configuration', async () => {
+    it('should \'update\' connection and \'update\' SCIM configuration', async () => {
       const requestParams = { id: 'con_PKp644cmKtnEB11J' };
       const bodyParams = {
         id: 'con_PKp644cmKtnEB11J',
@@ -245,17 +259,19 @@ describe('ScimHandler', () => {
       idMapMock.set(requestParams.id, idMapEntry);
       scimHandler.idMap = idMapMock;
 
-
       const updateScimStub = sinon.stub(scimHandler, 'updateScimConfiguration').resolves({ data: {} });
       const response = await scimHandler.updateOverride(requestParams, bodyParams);
   
+      // eslint-disable-next-line no-unused-expressions
       expect(response).to.deep.equal(connectionUpdatePayload);
+
+      // eslint-disable-next-line no-unused-expressions
       expect(updateScimStub.calledOnceWith(requestParams, scimConfiguration)).to.be.true;
   
       updateScimStub.restore();
     });
 
-    it('should "update" connection and "create" SCIM configuration', async () => {
+    it('should \'update\' connection and \'create\' SCIM configuration', async () => {
       const requestParams = { id: 'con_PKp644cmKtnEB11J' };
       const bodyParams = {
         id: 'con_PKp644cmKtnEB11J',
@@ -281,13 +297,16 @@ describe('ScimHandler', () => {
       const createScimStub = sinon.stub(scimHandler, 'createScimConfiguration').resolves({ data: {} });
       const response = await scimHandler.updateOverride(requestParams, bodyParams);
   
+      // eslint-disable-next-line no-unused-expressions
       expect(response).to.deep.equal(connectionUpdatePayload);
+
+      // eslint-disable-next-line no-unused-expressions
       expect(createScimStub.calledOnceWith(requestParams, scimConfiguration)).to.be.true;
   
       createScimStub.restore();
     });
 
-    it('should "update" connection and "delete" SCIM configuration', async () => {
+    it('should \'update\' connection and \'delete\' SCIM configuration', async () => {
       const requestParams = { id: 'con_PKp644cmKtnEB11J' };
       const bodyParams = {
         id: 'con_PKp644cmKtnEB11J',
@@ -309,7 +328,10 @@ describe('ScimHandler', () => {
       const deleteScimStub = sinon.stub(scimHandler, 'deleteScimConfiguration').resolves({ data: {} });
       const response = await scimHandler.updateOverride(requestParams, bodyParams);
   
+      // eslint-disable-next-line no-unused-expressions
       expect(response).to.deep.equal(connectionUpdatePayload);
+
+      // eslint-disable-next-line no-unused-expressions
       expect(deleteScimStub.calledOnceWith(requestParams)).to.be.true;
   
       deleteScimStub.restore();
@@ -317,7 +339,7 @@ describe('ScimHandler', () => {
   });
   
   describe('#createOverride', () => {
-    it('should "create" connection and "create" SCIM configuration', async () => {
+    it('should \'create\' connection and \'create\' SCIM configuration', async () => {
       const requestParams = { id: 'con_PKp644cmKtnEB11J' };
       const bodyParams = {
         id: 'con_PKp644cmKtnEB11J',
@@ -343,13 +365,16 @@ describe('ScimHandler', () => {
       const createScimStub = sinon.stub(scimHandler, 'createScimConfiguration').resolves({ data: {} });
       const response = await scimHandler.createOverride(bodyParams);
   
+      // eslint-disable-next-line no-unused-expressions
       expect(response).to.deep.equal(connectionCreatePayload);
+
+      // eslint-disable-next-line no-unused-expressions
       expect(createScimStub.calledOnceWith(requestParams, scimConfiguration)).to.be.true;
   
       createScimStub.restore();
     });
 
-    it('should "create" connection without SCIM configuration', async () => {
+    it('should \'create\' connection without SCIM configuration', async () => {
       const requestParams = { id: 'con_PKp644cmKtnEB11J' };
       const bodyParams = {
         id: 'con_PKp644cmKtnEB11J',
@@ -367,11 +392,13 @@ describe('ScimHandler', () => {
       idMapMock.set(requestParams.id, idMapEntry);
       scimHandler.idMap = idMapMock;
 
-
       const createScimStub = sinon.stub(scimHandler, 'createScimConfiguration').resolves({ data: {} });
       const response = await scimHandler.createOverride(requestParams, bodyParams);
   
+      // eslint-disable-next-line no-unused-expressions
       expect(response).to.deep.equal(connectionUpdatePayload);
+
+      // eslint-disable-next-line no-unused-expressions
       expect(createScimStub.calledOnce).to.be.false;
   
       createScimStub.restore();

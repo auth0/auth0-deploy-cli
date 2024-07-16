@@ -1,7 +1,7 @@
 /* eslint-disable consistent-return */
 const { expect } = require('chai');
-const connections = require('../../../../src/tools/auth0/handlers/connections');
 const sinon = require('sinon');
+const connections = require('../../../../src/tools/auth0/handlers/connections');
 
 const pool = {
   addEachTask: (data) => {
@@ -67,11 +67,11 @@ describe('#connections handler', () => {
           connection_name: 'okta',
           strategy: 'okta',
           tenant_name: 'test-tenant',
-          user_id_attribute: "externalId-1",
+          user_id_attribute: 'externalId-1',
           mapping: [
             {
-              scim: "scim_id",
-              auth0: "auth0_id"
+              scim: 'scim_id',
+              auth0: 'auth0_id'
             }
           ]
         }),

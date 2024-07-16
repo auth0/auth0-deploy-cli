@@ -70,7 +70,7 @@ export default class ScimHandler {
 
 				// To avoid rate limiter error, we making API requests with a small delay.
 				// TODO: However, this logic needs to be re-worked.
-				await this.wait(200);
+				await this.wait(500);
 			} catch (err) {
 				// Skip the connection if it returns 404. This can happen if `SCIM` is not enabled on a `SCIM` connection. 
 				if (err !== 'SCIM_NOT_FOUND') throw err;
@@ -96,7 +96,7 @@ export default class ScimHandler {
 
 				// To avoid rate limiter error, we making API requests with a small delay.
 				// TODO: However, this logic needs to be re-worked.
-				await this.wait(200);
+				await this.wait(500);
 			} catch (err) {
 				// Skip the connection if it returns 404. This can happen if `SCIM` is not enabled on a `SCIM` connection. 
 				if (err !== 'SCIM_NOT_FOUND') throw err;

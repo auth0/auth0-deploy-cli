@@ -6,6 +6,7 @@ import sinon from 'sinon';
 
 import Context from '../../../src/context/yaml';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
+import ScimHandler from '../../../src/tools/auth0/handlers/scimHandler';
 
 describe('#YAML context validation', () => {
   it('should do nothing on empty yaml', async () => {
@@ -538,11 +539,8 @@ describe('#YAML context validation', () => {
   });
 
   it('should preserve keywords when dumping', async () => {
-    const scimHandlerMock = {
-      applyScimConfiguration: (connections) => connections
-    }
-    const ScimHandler = require('../../../src/tools/auth0/handlers/scimHandler');
-    sinon.stub(ScimHandler, 'default').returns(scimHandlerMock);
+    const applyScimConfiguration = (connections) => connections;
+    sinon.stub(ScimHandler.prototype, 'applyScimConfiguration').returns(applyScimConfiguration);
 
     const dir = path.resolve(testDataDir, 'yaml', 'dump');
     cleanThenMkdir(dir);
