@@ -34,7 +34,6 @@
   "dependencies": {
     "ajv": "^6.12.6",
     "auth0": "^3.0.0",
-    "axios": "^1.7.2",
     "dot-prop": "^5.2.0",
     "fs-extra": "^10.1.0",
     "global-agent": "^2.1.12",

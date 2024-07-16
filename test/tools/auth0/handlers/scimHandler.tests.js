@@ -1,4 +1,5 @@
 const { expect } = require('chai');
+// eslint-disable-next-line import/no-extraneous-dependencies
 const axios = require('axios');
 const sinon = require('sinon');
 const ScimHandler = require('../../../../src/tools/auth0/handlers/scimHandler').default;
