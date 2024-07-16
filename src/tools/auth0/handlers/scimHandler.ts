@@ -199,7 +199,12 @@ export default class ScimHandler {
 			if (scimBodyParams) {
 				await this.updateScimConfiguration(requestParams, scimBodyParams);
 			} else {
-				await this.deleteScimConfiguration(requestParams);
+				if (this.config('AUTH0_ALLOW_DELETE')) {
+					log.warn(`Deleting scim_configuration on connection ${ requestParams.id }.`);
+					await this.deleteScimConfiguration(requestParams);
+				} else {
+					log.debug('Skipping DELETE scim_configuration. Enable deletes by setting AUTH0_ALLOW_DELETE to true in your config.');
+				}
 			}
 		} else if (scimBodyParams) {
 			await this.createScimConfiguration(requestParams, scimBodyParams);
