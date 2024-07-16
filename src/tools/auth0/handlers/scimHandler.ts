@@ -1,5 +1,6 @@
 import { Asset } from '../../../types';
 import axios, { AxiosResponse } from 'axios';
+import log from '../../../logger';
 
 interface IdMapValue {
   strategy: string;
@@ -24,13 +25,21 @@ export default class ScimHandler {
 	private readonly scimStrategies = ['samlp', 'oidc', 'okta', 'waad'];
 	private tokenProvider: any;
 	private config: any;
-	connectionsManager: any;
+	private connectionsManager: any;
     
 	constructor(config, tokenProvider, connectionsManager) {
 		this.config = config;
 		this.tokenProvider = tokenProvider;
 		this.connectionsManager = connectionsManager;
 		this.idMap = new Map<string, IdMapValue>();
+	}
+
+	async wait (duration: number = 200) {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				resolve(true);
+			}, duration);
+		});
 	}
 
 	/**
@@ -51,21 +60,22 @@ export default class ScimHandler {
 	async createIdMap(connections: Asset[]) {
 		this.idMap.clear();
 
-		await Promise.all(
-			connections.map(async (connection) => {
-				if (this.isScimStrategy(connection.strategy)) {
-					this.idMap.set(connection.id, { strategy: connection.strategy, hasConfig: false });
-					try {
-						await this.getScimConfiguration({ id: connection.id });
-						this.idMap.set(connection.id, { ...this.idMap.get(connection.id)!, hasConfig: true });
-					} catch (err) {
-						if (!err.response || +err.response.status !== 404) throw err;
-					}
-				}
+		for (let connection of connections) {
+			if (!this.isScimStrategy(connection.strategy)) continue;
+			
+			try {
+				this.idMap.set(connection.id, { strategy: connection.strategy, hasConfig: false });
+				await this.getScimConfiguration({ id: connection.id });
+				this.idMap.set(connection.id, { ...this.idMap.get(connection.id)!, hasConfig: true });
 
-				return connection;
-			})
-		)
+				// To avoid rate limiter error, we making API requests with a small delay.
+				// TODO: However, this logic needs to be re-worked.
+				await this.wait(200);
+			} catch (err) {
+				// Skip the connection if it returns 404. This can happen if `SCIM` is not enabled on a `SCIM` connection. 
+				if (err !== 'SCIM_NOT_FOUND') throw err;
+			}
+		}
 	}
 
 	/**
@@ -77,33 +87,61 @@ export default class ScimHandler {
 	 * This method mutates the incoming `connections`.
 	 */
 	async applyScimConfiguration(connections: Asset[]) {
-		await Promise.all(connections.map(async (connection) => {
-      if (this.isScimStrategy(connection.strategy)) {
-        try {
-          const { user_id_attribute, mapping } = await this.getScimConfiguration({ id: connection.id });
-          connection.scim_configuration = { user_id_attribute, mapping }
-        } catch (err) {
-					// Skip the connection if it returns 404. This can happen if `SCIM` is not enabled on a `SCIM` connection. 
-          if (!err.response || +err.response.status !== 404) throw err;
-        }
-      }
+		for (let connection of connections) {
+			if (!this.isScimStrategy(connection.strategy)) continue;
 
-      return connection;
-    }));
+			try {
+				const { user_id_attribute, mapping } = await this.getScimConfiguration({ id: connection.id });
+				connection.scim_configuration = { user_id_attribute, mapping }
+
+				// To avoid rate limiter error, we making API requests with a small delay.
+				// TODO: However, this logic needs to be re-worked.
+				await this.wait(200);
+			} catch (err) {
+				// Skip the connection if it returns 404. This can happen if `SCIM` is not enabled on a `SCIM` connection. 
+				if (err !== 'SCIM_NOT_FOUND') throw err;
+
+				const warningMessage = `SCIM configuration not found on connection \"${connection.id}\".`;
+				log.warn(warningMessage);
+			}
+		}
 	}
 
 	/** 
 	 * HTTP request wrapper on axios.
 	 */
 	private async scimHttpRequest(method: string, options: [string, ...Record<string, any>[]]): Promise<AxiosResponse> {
-		// @ts-ignore
-		const accessToken = await this.tokenProvider.getAccessToken();
-		const headers = { 
-			'Accept': 'application/json',
-			'Authorization': `Bearer ${ accessToken }`
+		return await this.withErrorHandling(async () => {
+			// @ts-ignore
+			const accessToken = await this.tokenProvider?.getAccessToken();
+			const headers = { 
+				'Accept': 'application/json',
+				'Authorization': `Bearer ${ accessToken }`
+			}
+			options = [...options, { headers }];
+
+			return await axios[method](...options);
+		});
+	}
+
+	/**
+	 * Error handler wrapper.
+	 */
+	async withErrorHandling(callback) {
+		try {
+			return await callback();
+		} catch (error) {
+			const errorData = error?.response?.data;
+			if (errorData?.statusCode === 404) throw "SCIM_NOT_FOUND";
+
+			const statusCode = errorData?.statusCode || error?.response?.status;
+			const errorCode = errorData?.errorCode || errorData?.error || error?.response?.statusText;
+			const errorMessage = errorData?.message || error?.response?.statusText;
+			const message = `SCIM request failed with statusCode ${ statusCode } (${ errorCode }). ${ errorMessage }.`;
+
+			log.error(message);
+			throw error;
 		}
-		options = [...options, { headers }];
-		return await axios[method](...options);
 	}
 
 	/**
@@ -118,14 +156,16 @@ export default class ScimHandler {
 	 * Creates a new `SCIM` configuration.
 	 */
 	async createScimConfiguration({ id: connection_id }: scimRequestParams, { user_id_attribute, mapping }: scimBodyParams): Promise<AxiosResponse> {
+		log.debug(`Creating SCIM configuration for connection ${ connection_id }`);
 		const url = this.getScimEndpoint(connection_id);
-		return await this.scimHttpRequest('post', [ url, { user_id_attribute, mapping } ]);
+		return (await this.scimHttpRequest('post', [ url, { user_id_attribute, mapping } ])).data;
 	}
 
 	/**
 	 * Retrieves `SCIM` configuration of an enterprise connection.
 	 */
 	async getScimConfiguration({ id: connection_id }: scimRequestParams): Promise<scimBodyParams> {
+		log.debug(`Getting SCIM configuration from connection ${ connection_id }`);
 		const url = this.getScimEndpoint(connection_id);
 		return (await this.scimHttpRequest('get', [ url ])).data;
 	}
@@ -134,16 +174,18 @@ export default class ScimHandler {
 	 * Updates an existing `SCIM` configuration.
 	 */
 	async updateScimConfiguration({ id: connection_id }: scimRequestParams, { user_id_attribute, mapping }: scimBodyParams): Promise<AxiosResponse> {
+		log.debug(`Getting SCIM configuration on connection ${ connection_id }`);
 		const url = this.getScimEndpoint(connection_id);
-		return await this.scimHttpRequest('patch', [ url, { user_id_attribute, mapping } ]);
+		return (await this.scimHttpRequest('patch', [ url, { user_id_attribute, mapping } ])).data;
 	}
 
 	/**
 	 * Deletes an existing `SCIM` configuration.
 	 */
 	async deleteScimConfiguration({ id: connection_id }: scimRequestParams): Promise<AxiosResponse>  {
+		log.debug(`Getting SCIM configuration of connection ${ connection_id }`);
 		const url = this.getScimEndpoint(connection_id);
-		return await this.scimHttpRequest('delete', [ url ]);
+		return (await this.scimHttpRequest('delete', [ url ])).data;
 	}
   
 	async updateOverride(requestParams: scimRequestParams, bodyParams: Asset) {
@@ -162,7 +204,7 @@ export default class ScimHandler {
 		// If `scim_configuration` exists in local but remote -> createScimConfiguration(...)
 		if (idMapEntry?.hasConfig) {
 			if (scimBodyParams) {
-				await this.updateScimConfiguration(requestParams, scimBodyParams);
+				const x = await this.updateScimConfiguration(requestParams, scimBodyParams);
 			} else {
 				await this.deleteScimConfiguration(requestParams);
 			}
