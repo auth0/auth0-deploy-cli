@@ -4,6 +4,7 @@ import DefaultAPIHandler, { order } from './default';
 import { filterExcluded, convertClientNameToId, getEnabledClients } from '../../utils';
 import { CalculatedChanges, Asset, Assets } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
+import ScimHandler from './scimHandler';
 
 export const schema = {
   type: 'array',
@@ -16,6 +17,15 @@ export const schema = {
       enabled_clients: { type: 'array', items: { type: 'string' } },
       realms: { type: 'array', items: { type: 'string' } },
       metadata: { type: 'object' },
+      scim_configuration: {
+        type: 'object',
+        properties: {
+          connection_name: { type: 'string' },
+          mapping: { type: 'array', items: { type: 'object', properties: { scim: { type: 'string' }, auth0: { type: 'string' } } } },
+          user_id_attribute: { type: 'string' }
+        },
+        required: ['mapping', 'user_id_attribute'],
+      }
     },
     required: ['name', 'strategy'],
   },
@@ -79,13 +89,26 @@ export const addExcludedConnectionPropertiesToChanges = ({
 
 export default class ConnectionsHandler extends DefaultAPIHandler {
   existing: Asset[] | null;
+  scimHandler: ScimHandler;
 
   constructor(config: DefaultAPIHandler) {
     super({
       ...config,
       type: 'connections',
       stripUpdateFields: ['strategy', 'name'],
+      functions: {
+        // When `connections` is updated, it can result in `update`,`create` or `delete` action on SCIM.
+        // Because, `scim_configuration` is inside `connections`.
+        update: async (requestParams, bodyParams) => await this.scimHandler.updateOverride(requestParams, bodyParams),
+
+        // When a new `connection` is created. We can perform only `create` option on SCIM.
+        // When a connection is `deleted`. `scim_configuration` is also deleted along with it; no action on SCIM is required.
+        create: async (bodyParams) => await this.scimHandler.createOverride(bodyParams)
+      },
     });
+
+    // @ts-ignore
+    this.scimHandler = new ScimHandler(this.config, this.client.tokenProvider, this.client.connections);
   }
 
   objString(connection): string {
@@ -114,9 +137,14 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       paginate: true,
       include_totals: true,
     });
+
     // Filter out database connections
     this.existing = connections.filter((c) => c.strategy !== 'auth0');
     if (this.existing === null) return [];
+    
+    // Apply `scim_configuration` to all the relevant `SCIM` connections. This method mutates `this.existing`.
+    await this.scimHandler.applyScimConfiguration(this.existing);
+    
     return this.existing;
   }
 
@@ -138,6 +166,10 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       paginate: true,
       include_totals: true,
     });
+
+    // Prepare an id map. We'll use this map later to get the `strategy` and SCIM enable status of the connections.
+    await this.scimHandler.createIdMap(existingConnections);
+
     const formatted = connections.map((connection) => ({
       ...connection,
       ...this.getFormattedOptions(connection, clients),

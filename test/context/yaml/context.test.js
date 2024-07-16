@@ -2,9 +2,11 @@ import path from 'path';
 import fs from 'fs-extra';
 import jsYaml from 'js-yaml';
 import { expect } from 'chai';
+import sinon from 'sinon';
 
 import Context from '../../../src/context/yaml';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
+import ScimHandler from '../../../src/tools/auth0/handlers/scimHandler';
 
 describe('#YAML context validation', () => {
   it('should do nothing on empty yaml', async () => {
@@ -537,6 +539,9 @@ describe('#YAML context validation', () => {
   });
 
   it('should preserve keywords when dumping', async () => {
+    const applyScimConfiguration = (connections) => connections;
+    sinon.stub(ScimHandler.prototype, 'applyScimConfiguration').returns(applyScimConfiguration);
+
     const dir = path.resolve(testDataDir, 'yaml', 'dump');
     cleanThenMkdir(dir);
     const tenantFile = path.join(dir, 'tenant.yml');
@@ -585,10 +590,11 @@ describe('#YAML context validation', () => {
                 },
               },
             ],
-          }),
-        },
+          })
+        }
       }
     );
+    
     await context.dump();
     const yaml = jsYaml.load(fs.readFileSync(tenantFile));
 
@@ -607,5 +613,6 @@ describe('#YAML context validation', () => {
         },
       ],
     });
+    sinon.restore(); 
   });
 });

@@ -1,5 +1,6 @@
 /* eslint-disable consistent-return */
 const { expect } = require('chai');
+const sinon = require('sinon');
 const connections = require('../../../../src/tools/auth0/handlers/connections');
 
 const pool = {
@@ -56,6 +57,32 @@ describe('#connections handler', () => {
   });
 
   describe('#connections process', () => {
+    let scimHandlerMock;
+
+    beforeEach(() => {
+      scimHandlerMock = {
+        createIdMap: sinon.stub().resolves(new Map()),
+        getScimConfiguration: sinon.stub().resolves({
+          connection_id: 'con_KYp633cmKtnEQ31C',
+          connection_name: 'okta',
+          strategy: 'okta',
+          tenant_name: 'test-tenant',
+          user_id_attribute: 'externalId-1',
+          mapping: [
+            {
+              scim: 'scim_id',
+              auth0: 'auth0_id'
+            }
+          ]
+        }),
+        applyScimConfiguration: sinon.stub().resolves(undefined)
+      };
+    });
+
+    afterEach(() => {
+      sinon.restore();
+    });
+
     it('should create connection', async () => {
       const auth0 = {
         connections: {
@@ -199,6 +226,7 @@ describe('#connections handler', () => {
       };
 
       const handler = new connections.default({ client: auth0, config });
+      handler.scimHandler = scimHandlerMock;
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -283,6 +311,7 @@ describe('#connections handler', () => {
       };
 
       const handler = new connections.default({ client: auth0, config });
+      handler.scimHandler = scimHandlerMock;
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
