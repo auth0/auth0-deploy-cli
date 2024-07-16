@@ -204,7 +204,7 @@ export default class ScimHandler {
 		// If `scim_configuration` exists in local but remote -> createScimConfiguration(...)
 		if (idMapEntry?.hasConfig) {
 			if (scimBodyParams) {
-				const x = await this.updateScimConfiguration(requestParams, scimBodyParams);
+				await this.updateScimConfiguration(requestParams, scimBodyParams);
 			} else {
 				await this.deleteScimConfiguration(requestParams);
 			}
