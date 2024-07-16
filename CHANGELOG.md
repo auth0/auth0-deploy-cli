@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Management support for `scim_configuration` in connections handler [#921]
+
 ## [7.22.1] - 2024-06-24
 
 ### Fixed
