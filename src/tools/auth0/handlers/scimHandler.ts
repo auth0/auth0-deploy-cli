@@ -1,6 +1,7 @@
 import { Asset } from '../../../types';
 import axios, { AxiosResponse } from 'axios';
 import log from '../../../logger';
+import { sleep } from '../../utils';
 
 interface IdMapValue {
   strategy: string;
@@ -34,14 +35,6 @@ export default class ScimHandler {
 		this.idMap = new Map<string, IdMapValue>();
 	}
 
-	async wait (duration: number = 200) {
-		return new Promise((resolve) => {
-			setTimeout(() => {
-				resolve(true);
-			}, duration);
-		});
-	}
-
 	/**
 	 * Check if the connection strategy is SCIM supported.
 	 * Only few of the enterprise connections are SCIM supported.
@@ -70,7 +63,7 @@ export default class ScimHandler {
 
 				// To avoid rate limiter error, we making API requests with a small delay.
 				// TODO: However, this logic needs to be re-worked.
-				await this.wait(500);
+				await sleep(500);
 			} catch (err) {
 				// Skip the connection if it returns 404. This can happen if `SCIM` is not enabled on a `SCIM` connection. 
 				if (err !== 'SCIM_NOT_FOUND') throw err;
@@ -96,7 +89,7 @@ export default class ScimHandler {
 
 				// To avoid rate limiter error, we making API requests with a small delay.
 				// TODO: However, this logic needs to be re-worked.
-				await this.wait(500);
+				await sleep(500);
 			} catch (err) {
 				// Skip the connection if it returns 404. This can happen if `SCIM` is not enabled on a `SCIM` connection. 
 				if (err !== 'SCIM_NOT_FOUND') throw err;
