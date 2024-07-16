@@ -592,6 +592,7 @@ describe('#YAML context validation', () => {
         },
       }
     );
+
     await context.dump();
     const yaml = jsYaml.load(fs.readFileSync(tenantFile));
 
