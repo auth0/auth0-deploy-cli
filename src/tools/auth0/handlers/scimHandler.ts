@@ -27,6 +27,7 @@ export default class ScimHandler {
 	private tokenProvider: any;
 	private config: any;
 	private connectionsManager: any;
+  private currentConnectionId: string | undefined = undefined;
     
 	constructor(config, tokenProvider, connectionsManager) {
 		this.config = config;
@@ -55,19 +56,16 @@ export default class ScimHandler {
 
 		for (let connection of connections) {
 			if (!this.isScimStrategy(connection.strategy)) continue;
-			
-			try {
-				this.idMap.set(connection.id, { strategy: connection.strategy, hasConfig: false });
-				await this.getScimConfiguration({ id: connection.id });
-				this.idMap.set(connection.id, { ...this.idMap.get(connection.id)!, hasConfig: true });
+      
+      // To avoid rate limiter error, we making API requests with a small delay.
+      // TODO: However, this logic needs to be re-worked.
+      await sleep(500);
 
-				// To avoid rate limiter error, we making API requests with a small delay.
-				// TODO: However, this logic needs to be re-worked.
-				await sleep(500);
-			} catch (err) {
-				// Skip the connection if it returns 404. This can happen if `SCIM` is not enabled on a `SCIM` connection. 
-				if (err !== 'SCIM_NOT_FOUND') throw err;
-			}
+      this.idMap.set(connection.id, { strategy: connection.strategy, hasConfig: false });
+      const scimConfiguration = await this.getScimConfiguration({ id: connection.id });
+      if (!scimConfiguration) continue;
+
+      this.idMap.set(connection.id, { ...this.idMap.get(connection.id)!, hasConfig: true });
 		}
 	}
 
@@ -83,20 +81,15 @@ export default class ScimHandler {
 		for (let connection of connections) {
 			if (!this.isScimStrategy(connection.strategy)) continue;
 
-			try {
-				const { user_id_attribute, mapping } = await this.getScimConfiguration({ id: connection.id });
-				connection.scim_configuration = { user_id_attribute, mapping }
+      // To avoid rate limiter error, we making API requests with a small delay.
+      // TODO: However, this logic needs to be re-worked.
+      await sleep(500);
 
-				// To avoid rate limiter error, we making API requests with a small delay.
-				// TODO: However, this logic needs to be re-worked.
-				await sleep(500);
-			} catch (err) {
-				// Skip the connection if it returns 404. This can happen if `SCIM` is not enabled on a `SCIM` connection. 
-				if (err !== 'SCIM_NOT_FOUND') throw err;
+      const scimConfiguration = await this.getScimConfiguration({ id: connection.id });
+      if (!scimConfiguration) continue;
 
-				const warningMessage = `SCIM configuration not found on connection \"${connection.id}\".`;
-				log.warn(warningMessage);
-			}
+      const { user_id_attribute, mapping } = scimConfiguration;
+      connection.scim_configuration = { user_id_attribute, mapping };
 		}
 	}
 
@@ -112,7 +105,6 @@ export default class ScimHandler {
 				'Authorization': `Bearer ${ accessToken }`
 			}
 			options = [...options, { headers }];
-
 			return await axios[method](...options);
 		});
 	}
@@ -125,7 +117,19 @@ export default class ScimHandler {
 			return await callback();
 		} catch (error) {
 			const errorData = error?.response?.data;
-			if (errorData?.statusCode === 404) throw "SCIM_NOT_FOUND";
+      // Skip the connection if it returns 404. This can happen if `SCIM` is not enabled on a `SCIM` connection.
+			if (errorData?.statusCode === 404) {
+        const warningMessage = `SCIM configuration is not enabled on connection \"${ this.currentConnectionId }\".`;
+        log.warn(warningMessage);
+        return { data: null };
+      };
+
+      // Skip the connection if it returns 403. Looks like "scim_config" permissions are not enabled on Management API. 
+			if (errorData?.statusCode === 403) {
+        const warningMessage = `SCIM configuration is not enabled on connection \"${ this.currentConnectionId }\".`;
+        log.warn(warningMessage);
+        return { data: null };
+      }
 
 			const statusCode = errorData?.statusCode || error?.response?.status;
 			const errorCode = errorData?.errorCode || errorData?.error || error?.response?.statusText;
@@ -141,6 +145,8 @@ export default class ScimHandler {
 	 * Returns formatted endpoint url.
 	 */
 	private getScimEndpoint(connection_id: string) {
+    this.currentConnectionId = connection_id;
+
 		// Call `scim-configuration` endpoint directly to support `SCIM` features.
 		return `https://${ this.config('AUTH0_DOMAIN') }/api/v2/connections/${ connection_id }/scim-configuration`;
 	}
