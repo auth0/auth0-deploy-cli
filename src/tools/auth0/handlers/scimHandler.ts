@@ -126,7 +126,7 @@ export default class ScimHandler {
 
       // Skip the connection if it returns 403. Looks like "scim_config" permissions are not enabled on Management API. 
 			if (errorData?.statusCode === 403) {
-        const warningMessage = `SCIM configuration is not enabled on connection \"${ this.currentConnectionId }\".`;
+        const warningMessage = `Insufficient scope, expected any of: read:scim_config. Looks like "scim_config" permissions are not enabled for api on \"${ this.currentConnectionId }\".`;
         log.warn(warningMessage);
         return { data: null };
       }
