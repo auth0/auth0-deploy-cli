@@ -46,7 +46,7 @@ describe('ScimHandler', () => {
       const connections = [
         { id: 'con_KYp633cmKtnEQ31C', strategy: 'samlp' }, // SCIM connection.
         { id: 'con_Njd1bxE3QTqTRwAk', strategy: 'auth0' }, // Non-SCIM connection.
-        { id: 'con_d3tmuoAkaUQgxN1f', strategy: 'gmail' } // Connection which doesn't exist.
+        { id: 'con_d3tmuoAkaUQgxN1f', strategy: 'gmail' }, // Connection which doesn't exist.
       ];
       const getScimConfigurationStub = sinon.stub(scimHandler, 'getScimConfiguration');
       getScimConfigurationStub.withArgs({ id: 'con_KYp633cmKtnEQ31C' }).resolves({ user_id_attribute: 'externalId-115', mapping: [{ auth0: 'auth0_key', scim: 'scim_key' }] });
@@ -77,7 +77,7 @@ describe('ScimHandler', () => {
       const getScimConfigurationStub = sinon.stub(scimHandler, 'getScimConfiguration');
       getScimConfigurationStub.withArgs({ id: 'con_KYp633cmKtnEQ31C' }).resolves({ user_id_attribute: 'externalId-1', mapping: [{ auth0: 'auth0_key', scim: 'scim_key' }] });
       getScimConfigurationStub.withArgs({ id: 'con_Njd1bxE3QTqTRwAk' }).resolves({ user_id_attribute: 'externalId-2', mapping: [{ auth0: 'auth0_key', scim: 'scim_key' }] });
-      getScimConfigurationStub.withArgs({ id: 'con_d3tmuoAkaUQgxN1f' }).rejects({ response: { status: 404 } });
+      getScimConfigurationStub.withArgs({ id: 'con_d3tmuoAkaUQgxN1f' }).rejects({ response: { data: { statusCode: 404 } } });
 
       await scimHandler.applyScimConfiguration(connections);
 
@@ -132,6 +132,7 @@ describe('ScimHandler', () => {
 
       const axiosStub = sinon.stub(axios, 'get').resolves({ data: scimConfiguration, status: 201 });
       const response = await scimHandler.getScimConfiguration(requestParams);
+      // eslint-disable-next-line no-unused-expressions
       expect(response).to.deep.equal(scimConfiguration);
 
       axiosStub.restore();
@@ -139,14 +140,26 @@ describe('ScimHandler', () => {
 
     it('should throw error for non-existing SCIM configuration', async () => {
       const requestParams = { id: 'con_KYp633cmKtnEQ31C' };
-      const axiosStub = sinon.stub(axios, 'get').rejects({ response: { status: 404, errorCode: 'not-found', statusText: 'The connection does not exist' } });
+      const axiosStub = sinon.stub(axios, 'get').rejects({ response: { status: 404, errorCode: 'not_found', statusText: 'The connection does not exist.' } });
 
       try {
         await scimHandler.getScimConfiguration(requestParams);
         expect.fail('Expected getScimConfiguration to throw an error');
       } catch (error) {
+        // eslint-disable-next-line no-unused-expressions
         expect(error.response.status).to.equal(404);
       }
+
+      axiosStub.restore();
+    });
+
+    it('should not throw error for scim connections when SCIM permissions disabled.', async () => {
+      const requestParams = { id: 'con_KYp633cmKtnEQ31C' };
+      const axiosStub = sinon.stub(axios, 'get').rejects({ response: { data: { statusCode: 403, errorCode: 'insufficient_scope', statusText: 'Insufficient scope, expected any of: read:scim_config.' } } });
+
+      const data = await scimHandler.getScimConfiguration(requestParams);
+      // eslint-disable-next-line no-unused-expressions
+      expect(data).to.be.null;
 
       axiosStub.restore();
     });
