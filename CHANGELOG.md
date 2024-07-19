@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix `429`(`too_many_requests`) and `403`(`insufficient_scope`) errors in the SCIM handler [#925]
+
 ## [7.23.0] - 2024-07-16
 
 ### Added
