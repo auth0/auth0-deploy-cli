@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.23.1] - 2024-07-19
+
+### Fixed
+
+- Fix `429`(`too_many_requests`) and `403`(`insufficient_scope`) errors in the SCIM handler [#925]
+
 ## [7.23.0] - 2024-07-16
 
 ### Added
@@ -1039,7 +1045,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#906]: https://github.com/auth0/auth0-deploy-cli/issues/906
 [#911]: https://github.com/auth0/auth0-deploy-cli/issues/911
 [#921]: https://github.com/auth0/auth0-deploy-cli/issues/921
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.23.0...HEAD
+[#925]: https://github.com/auth0/auth0-deploy-cli/issues/925
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.23.1...HEAD
+[7.23.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.23.0...v7.23.1
 [7.23.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.22.1...v7.23.0
 [7.22.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.22.0...v7.22.1
 [7.22.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.21.0...v7.22.0
