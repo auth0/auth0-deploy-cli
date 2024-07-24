@@ -179,7 +179,7 @@ describe('#YAML context validation', () => {
     const dir = path.resolve(testDataDir, 'yaml', 'dump');
     cleanThenMkdir(dir);
     const tenantFile = path.join(dir, 'tenant.yml');
-    const context = new Context({ AUTH0_INPUT_FILE: tenantFile }, mockMgmtClient());
+    const context = new Context({ AUTH0_INPUT_FILE: tenantFile , AUTH0_EXCLUDED: ['prompts'] }, mockMgmtClient());
     await context.dump();
     const yaml = jsYaml.load(fs.readFileSync(tenantFile));
 
@@ -282,9 +282,6 @@ describe('#YAML context validation', () => {
         suspiciousIpThrottling: {},
       },
       logStreams: [],
-      prompts: {
-        customText: {},
-      },
       customDomains: [],
       themes: [],
     });
@@ -297,6 +294,7 @@ describe('#YAML context validation', () => {
     const config = {
       AUTH0_INPUT_FILE: tenantFile,
       AUTH0_EXCLUDED_DEFAULTS: ['emailProvider'],
+      AUTH0_EXCLUDED: ['prompts'],
     };
     const context = new Context(config, mockMgmtClient());
     await context.dump();
@@ -394,9 +392,6 @@ describe('#YAML context validation', () => {
         suspiciousIpThrottling: {},
       },
       logStreams: [],
-      prompts: {
-        customText: {},
-      },
       customDomains: [],
       themes: [],
     });
@@ -410,6 +405,7 @@ describe('#YAML context validation', () => {
       AUTH0_INPUT_FILE: tenantFile,
       INCLUDED_PROPS: { clients: ['client_secret'] },
       EXCLUDED_PROPS: { clients: ['name'], emailProvider: ['credentials'] },
+      AUTH0_EXCLUDED: ['prompts'],
     };
     const context = new Context(config, mockMgmtClient());
     await context.dump();
@@ -507,9 +503,6 @@ describe('#YAML context validation', () => {
         suspiciousIpThrottling: {},
       },
       logStreams: [],
-      prompts: {
-        customText: {},
-      },
       customDomains: [],
       themes: [],
     });
@@ -522,6 +515,7 @@ describe('#YAML context validation', () => {
     const config = {
       AUTH0_INPUT_FILE: tenantFile,
       INCLUDED_PROPS: { clients: ['client_secret', 'name'] },
+      AUTH0_EXCLUDED: ['prompts'],
       EXCLUDED_PROPS: { clients: ['client_secret', 'name'] },
     };
     const context = new Context(config, mockMgmtClient());
@@ -594,7 +588,7 @@ describe('#YAML context validation', () => {
         }
       }
     );
-    
+
     await context.dump();
     const yaml = jsYaml.load(fs.readFileSync(tenantFile));
 
@@ -613,6 +607,6 @@ describe('#YAML context validation', () => {
         },
       ],
     });
-    sinon.restore(); 
+    sinon.restore();
   });
 });

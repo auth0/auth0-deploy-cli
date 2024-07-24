@@ -144,7 +144,8 @@ export function createDir(repoDir, files) {
     const configDir = path.resolve(repoDir, type);
     cleanThenMkdir(configDir);
     Object.entries(files[type]).forEach(([name, content]) => {
-      fs.writeFileSync(path.join(configDir, name), content);
+      const filePath = path.join(configDir, name);
+      fs.writeFileSync(filePath, content);
     });
   });
 }
