@@ -92,7 +92,7 @@ describe('#directory context prompts', () => {
       identifier_first: true,
       partials: {
         login: {
-          login:{
+          login: {
             'form-content-start': '<div>TEST</div>',
           }
         },

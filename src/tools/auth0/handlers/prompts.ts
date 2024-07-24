@@ -350,7 +350,7 @@ export default class PromptsHandler extends DefaultHandler {
         return { data: null };
       }
 
-      if(errorData?.statusCode === 400 && errorData?.message === 'This feature requires at least one custom domain to be configured for the tenant.') {
+      if (errorData?.statusCode === 400 && errorData?.message === 'This feature requires at least one custom domain to be configured for the tenant.') {
         log.warn('Partial Prompts feature requires at least one custom domain to be configured for the tenant');
         this.IsFeatureSupported = false;
         return { data: null };
@@ -471,7 +471,7 @@ export default class PromptsHandler extends DefaultHandler {
             prompt,
           };
         }),
-        generator: ({ prompt, body }) => this.updateCustomPartials({ prompt ,body } ),
+        generator: ({ prompt, body }) => this.updateCustomPartials({ prompt, body }),
       })
       .promise();
   }

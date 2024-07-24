@@ -179,7 +179,7 @@ describe('#YAML context validation', () => {
     const dir = path.resolve(testDataDir, 'yaml', 'dump');
     cleanThenMkdir(dir);
     const tenantFile = path.join(dir, 'tenant.yml');
-    const context = new Context({ AUTH0_INPUT_FILE: tenantFile , AUTH0_EXCLUDED: ['prompts'] }, mockMgmtClient());
+    const context = new Context({ AUTH0_INPUT_FILE: tenantFile, AUTH0_EXCLUDED: ['prompts'] }, mockMgmtClient());
     await context.dump();
     const yaml = jsYaml.load(fs.readFileSync(tenantFile));
 

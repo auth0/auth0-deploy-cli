@@ -55,7 +55,7 @@ describe('#prompts handler', () => {
         'mfa-webauthn': {},
       }; // Has no prompts configured.
 
-      const loginPartial =  {
+      const loginPartial = {
         login: {
           'form-content-end': '<div>TEST</div>',
         },
@@ -98,7 +98,7 @@ describe('#prompts handler', () => {
 
       const handler = new promptsHandler(
         {
-          client: auth0 ,
+          client: auth0,
         }
       );
 
@@ -124,11 +124,11 @@ describe('#prompts handler', () => {
           // does not have spanish custom text because all responses returned empty objects
         },
         partials: {
-          login:{
-            login:loginPartial.login,
+          login: {
+            login: loginPartial.login,
           },
           signup: {
-            signup:signupPartial.signup,
+            signup: signupPartial.signup,
           }
         },
       });
@@ -159,7 +159,7 @@ describe('#prompts handler', () => {
 
       const handler = new promptsHandler(
         {
-          client: auth0 ,
+          client: auth0,
         }
       );
       sinon.stub(handler, 'updateCustomPartials').callsFake(() => {
@@ -238,7 +238,8 @@ describe('#prompts handler', () => {
         }),
       };
 
-      const handler = new promptsHandler({ client: auth0,
+      const handler = new promptsHandler({
+        client: auth0,
       });
 
       sinon.stub(handler, 'updateCustomPartials').callsFake(() => {
@@ -297,9 +298,10 @@ describe('#prompts handler', () => {
     it('should check if getPartialsEndpoint and putPartialsEndpoint give correct domain', () => {
       const handler = new promptsHandler(
         {
-          config: function() { return 'test-host.auth0.com'; } , } as any);
+          config: function () { return 'test-host.auth0.com'; },
+        } as any);
 
-      expect(handler.getPartialsEndpoint('login' )).to.equal('https://test-host.auth0.com/api/v2/prompts/login/partials');
+      expect(handler.getPartialsEndpoint('login')).to.equal('https://test-host.auth0.com/api/v2/prompts/login/partials');
       expect(handler.putPartialsEndpoint('login')).to.equal('https://test-host.auth0.com/api/v2/prompts/login/partials');
     });
   });
