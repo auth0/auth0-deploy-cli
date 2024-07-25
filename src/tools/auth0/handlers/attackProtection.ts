@@ -83,19 +83,16 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
       return;
     }
 
-    Promise.all([
+    await Promise.all([
       this.client.attackProtection.updateBreachedPasswordDetectionConfig(
-        {},
         attackProtection.breachedPasswordDetection
       ),
       this.client.attackProtection.updateSuspiciousIpThrottlingConfig(
-        {},
         attackProtection.suspiciousIpThrottling
       ),
       this.client.attackProtection.updateBruteForceConfig(
-        {},
         attackProtection.bruteForceProtection
-      ),
+      )
     ]);
 
     this.updated += 1;
