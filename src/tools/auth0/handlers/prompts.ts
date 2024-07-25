@@ -138,11 +138,15 @@ export type CustomPromptPartials = Partial<{
   [prompt in CustomPartialsPromptTypes]: CustomPromptPartialsScreens;
 }>;
 
+export interface ScreenConfig {
+  name: string;
+  template: string;
+}
+
 export type CustomPartialsConfig = {
   [prompt in CustomPartialsPromptTypes]: [
     {
-      name: string;
-      template: string;
+      [screen in CustomPartialsScreenTypes]: ScreenConfig[];
     }
   ];
 };

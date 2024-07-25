@@ -5,7 +5,7 @@ import { constants } from '../../../src/tools';
 import Context from '../../../src/context/directory';
 import promptsHandler from '../../../src/context/directory/handlers/prompts';
 import { getFiles, loadJSON } from '../../../src/utils';
-import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
+import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient, createDirWithNestedDir } from '../../utils';
 
 const dir = path.join(testDataDir, 'directory', 'promptsDump');
 const promptsDirectory = path.join(dir, constants.PROMPTS_DIRECTORY);
@@ -49,15 +49,23 @@ describe('#directory context prompts', () => {
         [partialsFile]: JSON.stringify({
           login: [
             {
-              name: 'form-content-start',
-              template: 'partials/login/form-content-start.liquid',
-            },
+              login: [
+                {
+                  name: 'form-content-start',
+                  template: 'partials/login/login/form-content-start.liquid',
+                },
+              ]
+            }
           ],
           signup: [
             {
-              name: 'form-content-end',
-              template: 'partials/signup/form-content-end.liquid',
-            },
+              signup: [
+                {
+                  name: 'form-content-end',
+                  template: 'partials/signup/signup/form-content-end.liquid',
+                },
+              ]
+            }
           ],
         }),
       },
@@ -71,12 +79,21 @@ describe('#directory context prompts', () => {
       constants.PROMPTS_DIRECTORY,
       constants.PARTIALS_DIRECTORY
     );
+
     const partialsFiles = {
-      login: { 'form-content-start.liquid': '<div>TEST</div>' },
-      signup: { 'form-content-end.liquid': '<div>TEST AGAIN</div>' },
+      login: {
+        login: {
+          'form-content-start.liquid': '<div>TEST</div>',
+        }
+      },
+      signup: {
+        signup: {
+          'form-content-end.liquid': '<div>TEST AGAIN</div>',
+        },
+      }
     };
 
-    createDir(partialsDir, partialsFiles);
+    createDirWithNestedDir(partialsDir, partialsFiles);
 
     const config = {
       AUTH0_INPUT_FILE: repoDir,

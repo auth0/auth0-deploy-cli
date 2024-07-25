@@ -8,11 +8,14 @@ import { ParsedAsset } from '../../../types';
 import {
   AllPromptsByLanguage,
   CustomPartialsConfig,
+  CustomPartialsInsertionPoints,
   CustomPartialsPromptTypes,
+  CustomPartialsScreenTypes,
+  CustomPromptPartialsScreens,
   Prompts,
-  PromptSettings
+  PromptSettings,
+  ScreenConfig
 } from '../../../tools/auth0/handlers/prompts';
-import log from '../../../logger';
 
 type ParsedPrompts = ParsedAsset<'prompts', Prompts>;
 
@@ -22,9 +25,7 @@ const getPromptsSettingsFile = (promptsDirectory: string) => path.join(promptsDi
 
 const getCustomTextFile = (promptsDirectory: string) => path.join(promptsDirectory, 'custom-text.json');
 
-const getPartialsFile = (promptsDirectory: string) => {
-  return path.join(promptsDirectory, 'partials.json');
-};
+const getPartialsFile = (promptsDirectory: string) => path.join(promptsDirectory, 'partials.json');
 
 function parse(context: DirectoryContext): ParsedPrompts {
   const promptsDirectory = getPromptsDirectory(context.filePath);
@@ -56,25 +57,18 @@ function parse(context: DirectoryContext): ParsedPrompts {
       disableKeywordReplacement: context.disableKeywordReplacement,
     }) as CustomPartialsConfig;
 
-    return Object.entries(partialsFileContent).reduce((acc, [promptName, items]) => {
-      acc[promptName] = items.reduce((screenAcc, { name, template }) => {
-        if (!screenAcc[promptName]) {
-          screenAcc[promptName] = {};
-        }
-
-        // Read template content from the file
-        const templateFilePath = path.join(promptsDirectory, template);
-        if (isFile(templateFilePath)) {
-          const templateContent = readFileSync(templateFilePath, 'utf8');
-          if (templateContent.trim()) {
-            screenAcc[promptName][name] = templateContent;
-          }
-        }
-
+    return Object.entries(partialsFileContent).reduce((acc, [promptName, screensArray]) => {
+      const screensObject = screensArray[0] as Record<CustomPartialsScreenTypes, ScreenConfig[]>;
+      acc[promptName as CustomPartialsPromptTypes] = Object.entries(screensObject).reduce((screenAcc, [screenName, items]) => {
+        screenAcc[screenName as CustomPartialsScreenTypes] = items.reduce((insertionAcc, { name, template }) => {
+          const templateFilePath = path.join(promptsDirectory, template);
+          insertionAcc[name] = isFile(templateFilePath) ? readFileSync(templateFilePath, 'utf8').trim() : '';
+          return insertionAcc;
+        }, {} as Record<string, string>);
         return screenAcc;
-      }, {} as Record<string, Record<string, string>>);
+      }, {} as Record<CustomPartialsScreenTypes, Record<string, string>>);
       return acc;
-    }, {} as Record<CustomPartialsPromptTypes, Record<string, Record<string, string>>>);
+    }, {} as Record<CustomPartialsPromptTypes, Record<CustomPartialsScreenTypes, Record<string, string>>>);
   })();
 
   return {
@@ -107,17 +101,21 @@ async function dump(context: DirectoryContext): Promise<void> {
   if (!partials) return;
   const partialsFile = getPartialsFile(promptsDirectory);
 
-  // Transform the partials data back to CustomPartialsConfig format
   const transformedPartials = Object.entries(partials).reduce((acc, [promptName, screens]) => {
-    acc[promptName] = Object.entries(screens).map(([, insertionPoints]) => Object.entries(insertionPoints).map(([insertionPoint, template]) => {
-      const templateFilePath = path.join(promptsDirectory, 'partials', promptName, `${insertionPoint}.liquid`);
-      ensureDirSync(path.dirname(templateFilePath));
-      writeFileSync(templateFilePath, template, 'utf8');
-      return {
-        name: insertionPoint,
-        template: path.relative(promptsDirectory, templateFilePath) // Path relative to `promptsDirectory`
-      };
-    })).flat(); // Flatten the nested arrays into a single array
+    acc[promptName as CustomPartialsPromptTypes] = [
+      Object.entries(screens as CustomPromptPartialsScreens).reduce((screenAcc, [screenName, insertionPoints]) => {
+        screenAcc[screenName as CustomPartialsScreenTypes] = Object.entries(insertionPoints as Partial<Record<CustomPartialsInsertionPoints, string>>).map(([insertionPoint, template]) => {
+          const templateFilePath = path.join(promptsDirectory, 'partials', promptName, screenName, `${insertionPoint}.liquid`);
+          ensureDirSync(path.dirname(templateFilePath));
+          writeFileSync(templateFilePath, template, 'utf8');
+          return {
+            name: insertionPoint,
+            template: path.relative(promptsDirectory, templateFilePath) // Path relative to `promptsDirectory`
+          };
+        });
+        return screenAcc;
+      }, {} as Record<CustomPartialsScreenTypes, ScreenConfig[]>)
+    ];
     return acc;
   }, {} as CustomPartialsConfig);
 
