@@ -3,12 +3,20 @@ import fs from 'fs-extra';
 import jsYaml from 'js-yaml';
 import { expect } from 'chai';
 import sinon from 'sinon';
-
+import handlers from '../../../src/tools/auth0/handlers';
 import Context from '../../../src/context/yaml';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 import ScimHandler from '../../../src/tools/auth0/handlers/scimHandler';
 
 describe('#YAML context validation', () => {
+  beforeEach(() => {
+    sinon.stub(handlers.prompts.default.prototype, 'getCustomPartial').resolves({});
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
   it('should do nothing on empty yaml', async () => {
     /* Create empty directory */
     const dir = path.resolve(testDataDir, 'yaml', 'empty');
@@ -179,7 +187,7 @@ describe('#YAML context validation', () => {
     const dir = path.resolve(testDataDir, 'yaml', 'dump');
     cleanThenMkdir(dir);
     const tenantFile = path.join(dir, 'tenant.yml');
-    const context = new Context({ AUTH0_INPUT_FILE: tenantFile, AUTH0_EXCLUDED: ['prompts'] }, mockMgmtClient());
+    const context = new Context({ AUTH0_INPUT_FILE: tenantFile }, mockMgmtClient());
     await context.dump();
     const yaml = jsYaml.load(fs.readFileSync(tenantFile));
 
@@ -281,6 +289,10 @@ describe('#YAML context validation', () => {
         bruteForceProtection: {},
         suspiciousIpThrottling: {},
       },
+      prompts: {
+        customText: {},
+        partials: {}
+      },
       logStreams: [],
       customDomains: [],
       themes: [],
@@ -294,7 +306,6 @@ describe('#YAML context validation', () => {
     const config = {
       AUTH0_INPUT_FILE: tenantFile,
       AUTH0_EXCLUDED_DEFAULTS: ['emailProvider'],
-      AUTH0_EXCLUDED: ['prompts'],
     };
     const context = new Context(config, mockMgmtClient());
     await context.dump();
@@ -391,6 +402,10 @@ describe('#YAML context validation', () => {
         bruteForceProtection: {},
         suspiciousIpThrottling: {},
       },
+      prompts: {
+        customText: {},
+        partials: {}
+      },
       logStreams: [],
       customDomains: [],
       themes: [],
@@ -405,7 +420,6 @@ describe('#YAML context validation', () => {
       AUTH0_INPUT_FILE: tenantFile,
       INCLUDED_PROPS: { clients: ['client_secret'] },
       EXCLUDED_PROPS: { clients: ['name'], emailProvider: ['credentials'] },
-      AUTH0_EXCLUDED: ['prompts'],
     };
     const context = new Context(config, mockMgmtClient());
     await context.dump();
@@ -501,6 +515,10 @@ describe('#YAML context validation', () => {
         breachedPasswordDetection: {},
         bruteForceProtection: {},
         suspiciousIpThrottling: {},
+      },
+      prompts: {
+        customText: {},
+        partials: {}
       },
       logStreams: [],
       customDomains: [],
