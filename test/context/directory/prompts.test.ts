@@ -271,15 +271,15 @@ describe('#directory context prompts', () => {
       },
       partials: {
         login: {
-          'login': {
-            'form-content-start': './partials/login/form-content-start.liquid',
-          },
+          login: {
+            'form-content-start': '<div>TEST</div>',
+          }
         },
         signup: {
-          'signup': {
-            'form-content-end': './partials/signup/form-content-end.liquid',
+          signup: {
+            'form-content-end': '<div>TEST AGAIN</div>',
           },
-        },
+        }
       },
     };
 
@@ -295,6 +295,30 @@ describe('#directory context prompts', () => {
 
     expect(loadJSON(path.join(promptsDirectory, customTextFile), {})).to.deep.equal(
       context.assets.prompts.customText
+    );
+    expect(loadJSON(path.join(promptsDirectory, partialsFile), {})).to.deep.equal(
+      {
+        login: [
+          {
+            login: [
+              {
+                name: 'form-content-start',
+                template: 'partials/login/login/form-content-start.liquid',
+              },
+            ]
+          }
+        ],
+        signup: [
+          {
+            signup: [
+              {
+                name: 'form-content-end',
+                template: 'partials/signup/signup/form-content-end.liquid',
+              },
+            ]
+          }
+        ],
+      }
     );
     expect(loadJSON(path.join(promptsDirectory, promptsSettingsFile), {})).to.deep.equal({
       universal_login_experience: context.assets.prompts.universal_login_experience,
