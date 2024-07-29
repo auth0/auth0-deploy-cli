@@ -358,38 +358,32 @@ export default class PromptsHandler extends DefaultHandler {
   }
 
   async getCustomPromptsPartials(): Promise<CustomPromptPartials> {
-    return this.client.pool
+    const partialsDataWithNulls = await this.client.pool
       .addEachTask({
-        data: customPartialsPromptTypes.map((promptType) => ({ promptType })),
-        generator: ({ promptType }) =>
+        data: customPartialsPromptTypes,
+        generator: (promptType) =>
           this.getCustomPartial({
             prompt: promptType,
-          })
-            .then((partialsData: CustomPromptPartials) => {
-              if (isEmpty(partialsData)) return null;
-              return {
-                [promptType]: {
-                  ...partialsData,
-                },
-              };
-            }),
+          }).then((partialsData: CustomPromptPartials) => {
+            if (isEmpty(partialsData)) return null;
+            return { promptType, partialsData };
+          }),
       })
-      .promise()
-      .then((partialsDataWithNulls) =>
-        partialsDataWithNulls
-          .filter(Boolean)
-          .reduce(
-            (
-              acc: CustomPromptPartials,
-              partialsData: { [prompt: string]: CustomPromptPartials }
-            ) => {
-              const [promptName] = Object.keys(partialsData);
-              acc[promptName] = partialsData[promptName];
-              return acc;
-            },
-            {}
-          )
-      );
+      .promise();
+
+    return partialsDataWithNulls.reduce(
+      (
+        acc: CustomPromptPartials,
+        partialData: { promptType: string, partialsData: CustomPromptPartials }
+      ) => {
+        if (partialData) {
+          const { promptType, partialsData } = partialData;
+          acc[promptType] = partialsData;
+        }
+        return acc;
+      },
+      {}
+    );
   }
 
   async processChanges(assets: Assets): Promise<void> {

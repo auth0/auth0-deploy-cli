@@ -165,6 +165,12 @@ describe('#directory context validation', () => {
               })
             ),
         },
+        prompts:{
+          _getRestClient: (endpoint) => ({
+            get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            put: (...options) => Promise.resolve({ endpoint, method: 'put', options }),
+          }),
+        },
         actions: {
           getSettings: async () => new Promise((res) => res([])),
         },

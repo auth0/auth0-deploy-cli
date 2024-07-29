@@ -2,7 +2,14 @@ import { expect } from 'chai';
 import Auth0 from '../../../src/tools/auth0';
 import { Auth0APIClient, Assets } from '../../../src/types';
 
-const mockEmptyClient = {} as Auth0APIClient;
+const mockEmptyClient = {
+  prompts: {
+    _getRestClient: (endpoint) => ({
+      get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+      put: (...options) => Promise.resolve({ endpoint, method: 'put', options }),
+    }),
+  }
+} as Auth0APIClient;
 const mockEmptyAssets = {} as Assets;
 
 describe('#Auth0 class', () => {

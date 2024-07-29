@@ -553,7 +553,6 @@ describe('#YAML context validation', () => {
   it('should preserve keywords when dumping', async () => {
     const applyScimConfiguration = (connections) => connections;
     sinon.stub(ScimHandler.prototype, 'applyScimConfiguration').returns(applyScimConfiguration);
-
     const dir = path.resolve(testDataDir, 'yaml', 'dump');
     cleanThenMkdir(dir);
     const tenantFile = path.join(dir, 'tenant.yml');
@@ -603,10 +602,15 @@ describe('#YAML context validation', () => {
               },
             ],
           })
+        },
+        prompts:{
+          _getRestClient: (endpoint) => ({
+            get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            put: (...options) => Promise.resolve({ endpoint, method: 'put', options }),
+          })
         }
       }
     );
-
     await context.dump();
     const yaml = jsYaml.load(fs.readFileSync(tenantFile));
 
