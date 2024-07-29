@@ -62,6 +62,7 @@ export default class ScimHandler {
 	 */
 	async createIdMap(connections: Asset[]) {
 		this.idMap.clear();
+    log.info('Reviewing connections for SCIM support. This may take a while...');
 
 		await this.poolClient.addEachTask({
 			data: connections || [],
@@ -94,43 +95,27 @@ export default class ScimHandler {
 	 * This method mutates the incoming `connections`.
 	 */
 	async applyScimConfiguration(connections: Asset[]) {
-		const poolData: Asset[] = [];
+    // If `this.idMap` is empty, it means we haven't created the idMap yet. Create it.
+    // If `this.scimScopes.read` is false, it means we don't have `read:scim_config` scope. Return connections as is.
+    if (this.idMap.size === 0) {
+      if (!this.scimScopes.read) return connections;
 
-		for (let connection of connections) {
-			if (!this.scimScopes.read) return connections;
-			if (!this.isScimStrategy(connection.strategy)) continue;
-      if (this.idMap.size && !this.idMap.get(connection.id)?.scimConfiguration) continue;
+      await this.createIdMap(connections);
+    }
 
-      const scimConfiguration : any = this.idMap.get(connection.id)?.scimConfiguration;
-			if (scimConfiguration) {
-				const { mapping, user_id_attribute } = scimConfiguration;
-				connection.scim_configuration = { user_id_attribute, mapping };
-			} else {
-				poolData.push(connection);
-			}
-		}
+    for (const connection of connections) {
+      const { scimConfiguration } = this.idMap.get(connection.id) || {};
 
-		await this.poolClient.addEachTask({
-			data: poolData || [],
-			generator: (connection) => {
-				return this.getScimConfiguration({ id: connection.id }).then((scimConfiguration) => {
-					if (scimConfiguration) {
-						const { mapping, user_id_attribute } = scimConfiguration;
-						connection.scim_configuration = { user_id_attribute, mapping };
-					}
-				}).catch((error) => {
-					throw new Error(
-						`Problem fetching SCIM configurations while running \"getType\".\n${ error }`
-					);
-				});
-			}
-		}).promise();
+      if (scimConfiguration) {
+        connection.scim_configuration = scimConfiguration;
+      }
+    }
 	}
   
 	/** 
-   * HTTP request wrapper on axios.
+   * Wrapper over scimClient methods.
   */
-  private async useScimClient(method: string, options: [{ id: string }, ...Record<string, any>[]]): Promise<Asset> {
+  private async useScimClient(method: string, options: [ScimRequestParams, ...Record<string, any>[]]): Promise<Asset> {
     return await this.withErrorHandling(async () => {
       return await this.scimClient[method](...options);
     }, method, options[0].id);
@@ -143,41 +128,47 @@ export default class ScimHandler {
 		try {
 			return await callback();
 		} catch (error) {
-
-      // Skip the connection if it returns 404. This can happen if `SCIM` is not enabled on a `SCIM` connection.
-			if (error && error.statusCode === 404) {
-        log.debug(`SCIM configuration is not enabled on connection \"${ connectionId }\".`);
-        return null;
-      };
-
-      // Skip the connection if it returns 403. Looks like "scim_config" permissions are not enabled on Management API. 
-			if (error && error.statusCode === 403) {
-				const scope = this.scopeMethodMap[method];
-				this.scimScopes[scope] = false;
-
-				const warningMessage = `Insufficient scope, \"${ scope }:scim_config\". Required \"read:scim_config\", \"create:scim_config\", \"update:scim_config\" and \"delete:scim_config\".`;
-				const suggestionText = `If you are not using SCIM, you can keep these permissions disabled and ignore this warning.`;
-
-        log.warn(`${ warningMessage }\n${ suggestionText }\n`);
-        return null;
-      }
-
-			// Skip the connection if it returns 400. This can happen if `SCIM` configuration already exists on a `SCIM` connection.
-			if (error && error.statusCode === 400 && error.message?.includes('already exists')) {
-				log.warn(`SCIM configuration already exists on connection \"${ connectionId }\".`);
-				return null;
-			}
-
-			// Rate limiting errors should be mostly handled by `scimClient`. But, in the worst case scenario also we don;t want to break the pipeline.
-			if (error && error.statusCode === 429) {
-				log.error(`The global rate limit has been exceeded, resulting in a ${ error.statusCode } error. ${ error.message }. Although this is an error, it is not blocking the pipeline.`);
-				return null;
-			}
-
-			log.error(`SCIM request failed with statusCode ${ error.statusCode }. ${ error.message || error.toString() }.`);
-			throw error;
+      return this.handleExpectedErrors(error, method, connectionId);
 		}
 	}
+  
+  /**
+  * Handle expected errors.
+  */
+  handleExpectedErrors(error, method: string, connectionId: string) {
+     // Skip the connection if it returns 404. This can happen if `SCIM` is not enabled on a `SCIM` connection.
+     if (error && error.statusCode === 404) {
+      log.debug(`SCIM configuration is not enabled on connection \"${ connectionId }\".`);
+      return null;
+    };
+
+    // Skip the connection if it returns 403. Looks like "scim_config" permissions are not enabled on Management API. 
+    if (error && error.statusCode === 403) {
+      const scope = this.scopeMethodMap[method];
+      this.scimScopes[scope] = false;
+
+      const warningMessage = `Insufficient scope, \"${ scope }:scim_config\". Required \"read:scim_config\", \"create:scim_config\", \"update:scim_config\" and \"delete:scim_config\".`;
+      const suggestionText = `If you are not using SCIM, you can keep these permissions disabled and ignore this warning.`;
+
+      log.warn(`${ warningMessage }\n${ suggestionText }\n`);
+      return null;
+    }
+
+    // Skip the connection if it returns 400. This can happen if `SCIM` configuration already exists on a `SCIM` connection.
+    if (error && error.statusCode === 400 && error.message?.includes('already exists')) {
+      log.warn(`SCIM configuration already exists on connection \"${ connectionId }\".`);
+      return null;
+    }
+
+    // Rate limiting errors should be mostly handled by `scimClient`. But, in the worst case scenario also we don;t want to break the pipeline.
+    if (error && error.statusCode === 429) {
+      log.error(`The global rate limit has been exceeded, resulting in a ${ error.statusCode } error. ${ error.message }. Although this is an error, it is not blocking the pipeline.`);
+      return null;
+    }
+
+    log.error(`SCIM request failed with statusCode ${ error.statusCode }. ${ error.message || error.toString() }.`);
+    throw error;
+  }
 
 	/**
 	 * Creates a new `SCIM` configuration.
