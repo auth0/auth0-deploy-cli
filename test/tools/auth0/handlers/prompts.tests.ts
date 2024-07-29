@@ -2,12 +2,11 @@ import { expect } from 'chai';
 import _ from 'lodash';
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import sinon from 'sinon';
-import axios, { AxiosResponse } from 'axios';
 import promptsHandler, { Prompts } from '../../../../src/tools/auth0/handlers/prompts';
 import { Language } from '../../../../src/types';
 import log from '../../../../src/logger';
-import PromptsHandler, {
-  CustomPartialsPromptTypes, CustomPromptPartials,
+import {
+  CustomPartialsPromptTypes,
   CustomPromptPartialsScreens
 } from '../../../../lib/tools/auth0/handlers/prompts';
 
@@ -87,7 +86,10 @@ describe('#prompts handler', () => {
 
             return Promise.resolve(customTextValue);
           },
-          // updatePartials: ({ prompt ,body } ) => Promise.resolve(body),
+          _getRestClient: (endpoint) => ({
+            get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            put: (...options) => Promise.resolve({ endpoint, method: 'put', options }),
+          })
         },
         pool: new PromisePoolExecutor({
           concurrencyLimit: 3,
@@ -154,6 +156,10 @@ describe('#prompts handler', () => {
             expect(data).to.deep.equal(mockPromptsSettings);
             return Promise.resolve(data);
           },
+          _getRestClient: (endpoint) => ({
+            get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            put: (...options) => Promise.resolve({ endpoint, method: 'put', options }),
+          })
         },
       };
 
@@ -230,6 +236,10 @@ describe('#prompts handler', () => {
             expect(data).to.deep.equal(mockPromptsSettings);
             return Promise.resolve(data);
           },
+          _getRestClient: (endpoint) => ({
+            get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            put: (...options) => Promise.resolve({ endpoint, method: 'put', options }),
+          })
         },
         pool: new PromisePoolExecutor({
           concurrencyLimit: 3,
@@ -270,6 +280,10 @@ describe('#prompts handler', () => {
         },
         prompts: {
           getSettings: () => mockPromptsSettings,
+          _getRestClient: (endpoint) => ({
+            get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            put: (...options) => Promise.resolve({ endpoint, method: 'put', options }),
+          })
         },
         pool: new PromisePoolExecutor({
           concurrencyLimit: 3,
@@ -294,16 +308,6 @@ describe('#prompts handler', () => {
         partials: {}, // Partials empty
       });
     });
-
-    it('should check if getPartialsEndpoint and putPartialsEndpoint give correct domain', () => {
-      const handler = new promptsHandler(
-        {
-          config: function () { return 'test-host.auth0.com'; },
-        } as any);
-
-      expect(handler.getPartialsEndpoint('login')).to.equal('https://test-host.auth0.com/api/v2/prompts/login/partials');
-      expect(handler.putPartialsEndpoint('login')).to.equal('https://test-host.auth0.com/api/v2/prompts/login/partials');
-    });
   });
   describe('withErrorHandling', () => {
     let handler: any;
@@ -316,6 +320,12 @@ describe('#prompts handler', () => {
           getAccessToken: async function () {
             return 'test-access-token';
           },
+        },
+        prompts: {
+          _getRestClient: (endpoint) => ({
+            get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            put: (...options) => Promise.resolve({ endpoint, method: 'put', options }),
+          })
         },
       };
       handler = new promptsHandler({ client: auth0 });
@@ -333,37 +343,42 @@ describe('#prompts handler', () => {
 
     it('should handle 403 error and set IsFeatureSupported to false', async () => {
       const error = {
-        response: {
-          data: {
-            statusCode: 403,
-          },
-        },
+        statusCode: 403,
       };
       const callback = sandbox.stub().rejects(error);
       const logWarn = sandbox.stub(log, 'warn');
 
       const result = await handler.withErrorHandling(callback);
-      expect(result).to.deep.equal({ data: null });
+      expect(result).to.deep.equal(null);
       expect(handler.IsFeatureSupported).to.be.false;
       expect(logWarn.calledWith('Partial Prompts feature is not supported for the tenant')).to.be.true;
     });
 
     it('should handle 400 error with specific message and set IsFeatureSupported to false', async () => {
       const error = {
-        response: {
-          data: {
-            statusCode: 400,
-            message: 'This feature requires at least one custom domain to be configured for the tenant.',
-          },
-        },
+        statusCode: 400,
+        message: 'This feature requires at least one custom domain to be configured for the tenant.',
       };
       const callback = sandbox.stub().rejects(error);
       const logWarn = sandbox.stub(log, 'warn');
 
       const result = await handler.withErrorHandling(callback);
-      expect(result).to.deep.equal({ data: null });
+      expect(result).to.deep.equal(null);
       expect(handler.IsFeatureSupported).to.be.false;
       expect(logWarn.calledWith('Partial Prompts feature requires at least one custom domain to be configured for the tenant')).to.be.true;
+    });
+
+    it('should handle 429 error and log the appropriate message', async () => {
+      const error = {
+        statusCode: 429,
+        message: 'Rate limit exceeded',
+      };
+      const callback = sandbox.stub().rejects(error);
+      const logError = sandbox.stub(log, 'error');
+
+      const result = await handler.withErrorHandling(callback);
+      expect(result).to.be.null;
+      expect(logError.calledWith(`The global rate limit has been exceeded, resulting in a ${ error.statusCode } error. ${ error.message }. Although this is an error, it is not blocking the pipeline.`)).to.be.true;
     });
 
     it('should rethrow other errors', async () => {
@@ -378,35 +393,28 @@ describe('#prompts handler', () => {
       }
     });
 
-    it('should make an HTTP request with the correct headers', async () => {
-      const url = 'https://example.com';
-      const body = { key: 'value' };
-      const axiosStub = sandbox.stub(axios, 'put').resolves({ data: 'response' } as AxiosResponse);
-
-      const result = await handler.partialHttpRequest('put', [url, body]);
-      expect(axiosStub.calledOnce).to.be.true;
-      const { args } = axiosStub.getCall(0);
-      expect(args[0]).to.equal(url);
-      expect(args[1]).to.deep.equal(body);
-      expect(args[2]).to.deep.include({
-        headers: {
-          Accept: 'application/json',
-          Authorization: 'Bearer test-access-token',
-        },
-      });
-      expect(result).to.deep.equal({ data: 'response' });
-    });
-
-    it('should handle errors correctly', async () => {
+    it('should handle errors correctly in partialHttpRequest', async () => {
+      const method = 'put';
+      const options = [{ prompt: 'test-prompt' }, { key: 'value' }];
       const error = new Error('Request failed');
-      sandbox.stub(axios, 'put').rejects(error);
+      sandbox.stub(handler.promptClient, method).rejects(error);
 
       try {
-        await handler.partialHttpRequest('put', ['https://example.com', {}]);
+        await handler.partialHttpRequest(method, options);
         throw new Error('Expected method to throw.');
       } catch (err) {
         expect(err).to.equal(error);
       }
+    });
+
+    it('should make an HTTP request with the correct headers', async () => {
+      const method = 'put';
+      const options = [{ prompt: 'test-prompt' }, { key: 'value' }];
+      const mockResponse = { data: 'response' };
+      sandbox.stub(handler.promptClient, method).resolves(mockResponse);
+
+      const result = await handler.partialHttpRequest(method, options);
+      expect(result).to.deep.equal(mockResponse);
     });
 
     it('should not make a request if the feature is not supported', async () => {
@@ -420,9 +428,7 @@ describe('#prompts handler', () => {
 
     it('should make a request if the feature is supported', async () => {
       handler.IsFeatureSupported = true;
-      const url = 'https://example.com';
       const body = { key: 'value' };
-      sandbox.stub(handler, 'putPartialsEndpoint').returns(url);
       const putStub = sandbox.stub(handler, 'partialHttpRequest').resolves();
 
       await handler.updateCustomPartials({ prompt: 'login', body });
@@ -430,7 +436,7 @@ describe('#prompts handler', () => {
       expect(putStub.calledOnce).to.be.true;
       const { args } = putStub.getCall(0);
       expect(args[0]).to.equal('put');
-      expect(args[1]).to.deep.equal([url, body]);
+      expect(args[1]).to.deep.equal([{ prompt: 'login' }, body]);
     });
 
     it('should return empty object if feature is not supported', async () => {
@@ -444,27 +450,20 @@ describe('#prompts handler', () => {
       handler.IsFeatureSupported = true;
 
       const mockResponse = {
-        data: {
-          'form-content-end': '<div>TEST</div>'
-        }
-      } as unknown as AxiosResponse<CustomPromptPartials>;
-
-      const url = 'https://test-host.auth0.com/api/v2/prompts/login/partials';
-      sandbox.stub(handler, 'getPartialsEndpoint').returns(url);
+        'form-content-end': '<div>TEST</div>'
+      };
       sandbox.stub(handler, 'partialHttpRequest').resolves(mockResponse);
 
-      const result = await handler.getCustomPartial({ prompt: 'login' as CustomPartialsPromptTypes });
+      const result = await handler.getCustomPartial({ prompt: 'login' });
 
-      expect(result).to.deep.equal(mockResponse.data);
-      expect(handler.getPartialsEndpoint.calledOnceWith('login')).to.be.true;
-      expect(handler.partialHttpRequest.calledOnceWith('get', [url])).to.be.true;
+      expect(result).to.deep.equal(mockResponse);
+      expect(handler.partialHttpRequest.calledOnceWith('get', [{ prompt: 'login' }])).to.be.true;
     });
+
 
     it('should handle errors correctly', async () => {
       handler.IsFeatureSupported = true;
 
-      const url = 'https://test-host.auth0.com/api/v2/prompts/login/partials';
-      sandbox.stub(handler, 'getPartialsEndpoint').returns(url);
       const error = new Error('Request failed');
       sandbox.stub(handler, 'partialHttpRequest').rejects(error);
 

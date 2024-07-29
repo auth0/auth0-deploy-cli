@@ -1,7 +1,6 @@
 import { isEmpty } from 'lodash';
-import axios, { AxiosResponse } from 'axios';
 import DefaultHandler from './default';
-import { Assets, Language, languages } from '../../../types';
+import { Asset, Assets, Language, languages } from '../../../types';
 import log from '../../../logger';
 
 const promptTypes = [
@@ -102,7 +101,7 @@ const customPartialsPromptTypes = [
   'signup',
   'signup-id',
   'signup-password',
-] as const;
+];
 
 export type CustomPartialsPromptTypes = typeof customPartialsPromptTypes[number];
 
@@ -242,16 +241,6 @@ export default class PromptsHandler extends DefaultHandler {
   /**
    * Returns formatted endpoint url.
    */
-  private getPartialsEndpoint(promptType: CustomPartialsPromptTypes) {
-    return `https://${this.config('AUTH0_DOMAIN')}/api/v2/prompts/${promptType}/partials`;
-  }
-
-  /**
-   * Returns formatted endpoint url.
-   */
-  private putPartialsEndpoint(promptType: CustomPartialsPromptTypes) {
-    return `https://${this.config('AUTH0_DOMAIN')}/api/v2/prompts/${promptType}/partials`;
-  }
 
   constructor(options: DefaultHandler) {
     super({
@@ -325,17 +314,12 @@ export default class PromptsHandler extends DefaultHandler {
         }, {}));
   }
 
-  private async partialHttpRequest(method: string, options: [string, ...Record<string, any>[]]): Promise<AxiosResponse> {
-    return this.withErrorHandling(async () => {
-      // @ts-ignore
-      const accessToken = await this.client.tokenProvider?.getAccessToken();
-      const headers = {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
-      };
-      options = [...options, { headers }];
-      return axios[method](...options);
-    },);
+  private promptClient = this.client.prompts._getRestClient('/prompts/:prompt/partials');
+
+  private async partialHttpRequest(method: string, options: [{ prompt: string }, ...Record<string, any>[]]): Promise<Asset> {
+    return this.withErrorHandling(async () =>
+      this.promptClient[method](...options)
+    );
   }
 
   /**
@@ -347,27 +331,30 @@ export default class PromptsHandler extends DefaultHandler {
     } catch (error) {
 
       // Extract error data
-      const errorData = error?.response?.data;
-      if (errorData?.statusCode === 403) {
+      if (error && error?.statusCode === 403) {
         log.warn('Partial Prompts feature is not supported for the tenant');
         this.IsFeatureSupported = false;
-        return { data: null };
+        return null;
       }
 
-      if (errorData?.statusCode === 400 && errorData?.message === 'This feature requires at least one custom domain to be configured for the tenant.') {
+      if (error && error?.statusCode === 400 && error.message?.includes('feature requires at least one custom domain')) {
         log.warn('Partial Prompts feature requires at least one custom domain to be configured for the tenant');
         this.IsFeatureSupported = false;
-        return { data: null };
+        return null;
       }
+
+      if (error && error.statusCode === 429) {
+        log.error(`The global rate limit has been exceeded, resulting in a ${ error.statusCode } error. ${ error.message }. Although this is an error, it is not blocking the pipeline.`);
+        return null;
+      }
+
       throw error;
     }
   }
 
   async getCustomPartial({ prompt }: { prompt: CustomPartialsPromptTypes }): Promise<CustomPromptPartials> {
     if (!this.IsFeatureSupported) return {};
-    const url = this.getPartialsEndpoint(prompt); // Implement this method to return the correct endpoint URL
-    const response = await this.partialHttpRequest('get', [url]); // Implement this method for making HTTP requests
-    return response.data;
+    return this.partialHttpRequest('get', [{ prompt:prompt }]); // Implement this method for making HTTP requests
   }
 
   async getCustomPromptsPartials(): Promise<CustomPromptPartials> {
@@ -457,8 +444,7 @@ export default class PromptsHandler extends DefaultHandler {
 
   async updateCustomPartials({ prompt, body }: { prompt: CustomPartialsPromptTypes; body: CustomPromptPartialsScreens }): Promise<void> {
     if (!this.IsFeatureSupported) return;
-    const url = this.putPartialsEndpoint(prompt); // Implement this method to return the correct endpoint URL
-    await this.partialHttpRequest('put', [url, body]); // Implement this method for making HTTP requests
+    await this.partialHttpRequest('put', [ { prompt:prompt },body]); // Implement this method for making HTTP requests
   }
 
   async updateCustomPromptsPartials(partials: Prompts['partials']): Promise<void> {

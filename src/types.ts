@@ -1,3 +1,4 @@
+import { PromisePoolExecutor } from 'promise-pool-executor';
 import { Action } from './tools/auth0/handlers/actions';
 import {
   PromptTypes,
@@ -13,7 +14,6 @@ import { LogStream } from './tools/auth0/handlers/logStreams';
 import { Client } from './tools/auth0/handlers/clients';
 import { ClientGrant } from './tools/auth0/handlers/clientGrants';
 import { ResourceServer } from './tools/auth0/handlers/resourceServers';
-import { PromisePoolExecutor } from 'promise-pool-executor';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -150,6 +150,7 @@ export type BaseAuth0APIClient = {
     };
   };
   prompts: {
+    _getRestClient(endpoint: string): Promise<Asset>;
     updateCustomTextByLanguage: (arg0: {
       prompt: PromptTypes;
       language: Language;
