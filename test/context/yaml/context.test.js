@@ -590,7 +590,8 @@ describe('#YAML context validation', () => {
                 },
               },
             ],
-          })
+          }),
+          _getRestClient: (path) => ({})
         }
       }
     );

@@ -40,7 +40,7 @@ export default class ScimHandler {
   constructor(config, connectionsManager, poolClient: PromisePoolExecutor) {
     this.config = config;
     this.connectionsManager = connectionsManager;
-    this.scimClient = connectionsManager._getRestClient('/connections/:id/scim-configuration');
+    this.scimClient = connectionsManager?._getRestClient('/connections/:id/scim-configuration');
     this.poolClient = poolClient;
     this.idMap = new Map<string, IdMapValue>();
   }
@@ -166,7 +166,7 @@ export default class ScimHandler {
       return null;
     }
 
-    log.error(`SCIM request failed with statusCode ${ error.statusCode }. ${ error.message || error.toString() }.`);
+    log.error(`SCIM request failed with status code ${ error.statusCode }. ${ error.message || error.toString() }.`);
     throw error;
   }
 

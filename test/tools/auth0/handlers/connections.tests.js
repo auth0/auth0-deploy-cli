@@ -95,6 +95,7 @@ describe('#connections handler', () => {
           update: () => Promise.resolve([]),
           delete: () => Promise.resolve([]),
           getAll: () => [],
+          _getRestClient: (path) => ({}),
         },
         clients: {
           getAll: () => [],
@@ -117,6 +118,7 @@ describe('#connections handler', () => {
             { strategy: 'github', name: 'github', enabled_clients: [clientId] },
             { strategy: 'auth0', name: 'db-should-be-ignored', enabled_clients: [] },
           ],
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: () => [{ name: 'test client', client_id: clientId }],
@@ -152,6 +154,7 @@ describe('#connections handler', () => {
           },
           delete: () => Promise.resolve([]),
           getAll: () => [{ name: 'someConnection', id: 'con1', strategy: 'custom' }],
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
@@ -215,6 +218,7 @@ describe('#connections handler', () => {
           },
           delete: () => Promise.resolve([]),
           getAll: () => [{ name: 'someSamlConnection', id: 'con1', strategy: 'samlp' }],
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: () => [
@@ -300,6 +304,7 @@ describe('#connections handler', () => {
           },
           delete: () => Promise.resolve([]),
           getAll: () => [{ name: 'someSamlConnection', id: 'con1', strategy: 'samlp' }],
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: () => [
@@ -375,6 +380,7 @@ describe('#connections handler', () => {
               enabled_clients: ['excluded-one-id'],
             },
           ],
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: () => [
@@ -422,6 +428,7 @@ describe('#connections handler', () => {
             return Promise.resolve([]);
           },
           getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }],
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: () => [],
@@ -455,6 +462,7 @@ describe('#connections handler', () => {
             return Promise.resolve([]);
           },
           getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }],
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: () => [],
@@ -484,6 +492,7 @@ describe('#connections handler', () => {
             return Promise.resolve([]);
           },
           getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }],
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: () => [],
@@ -517,6 +526,7 @@ describe('#connections handler', () => {
             return Promise.resolve([]);
           },
           getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }],
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: () => [],
@@ -554,6 +564,7 @@ describe('#connections handler', () => {
             { id: 'con1', name: 'existing1', strategy: 'custom' },
             { id: 'con2', name: 'existing2', strategy: 'custom' },
           ],
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: () => [],
