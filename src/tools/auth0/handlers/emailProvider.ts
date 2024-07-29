@@ -1,6 +1,7 @@
+import { EmailProviderCreate } from 'auth0';
 import DefaultHandler from './default';
 import { Asset, Assets } from '../../../types';
-import { PostProviderRequest } from 'auth0';
+import log from '../../../logger';
 
 export const schema = { type: 'object' };
 
@@ -34,13 +35,19 @@ export default class EmailProviderHandler extends DefaultHandler {
 
     if (!emailProvider) return;
 
-    let existing = await this.getType();
+    const existing = await this.getType();
 
-    // TODO: HTTP DELETE on emails/provider is not public, so not part of our vNext SDK.
+    // HTTP DELETE on emails/provider is not public, so not part of our vNext SDK.
     if (Object.keys(emailProvider).length === 0) {
       if (this.config('AUTH0_ALLOW_DELETE') === true) {
         // await this.client.emails.delete();
-        this.didDelete(existing);
+        log.warn(
+          'Delete email providers are deprecated, It has been disabled instead.'
+        );
+        existing.enabled = false;
+        const updated = await this.client.emails.update(existing);
+        this.updated += 1;
+        this.didUpdate(updated);
       }
       return;
     }
@@ -49,8 +56,10 @@ export default class EmailProviderHandler extends DefaultHandler {
       if (existing.name !== emailProvider.name) {
         // Delete the current provider as it's different
         // await this.client.emailProvider.delete();
-        this.didDelete(existing);
-        existing = {};
+        log.warn(
+          'Delete email providers are deprecated, It has been disabled instead.'
+        );
+        existing.enabled = false;
       }
     }
 
@@ -59,7 +68,7 @@ export default class EmailProviderHandler extends DefaultHandler {
       this.updated += 1;
       this.didUpdate(updated);
     } else {
-      const created = await this.client.emails.configure(emailProvider as PostProviderRequest);
+      const created = await this.client.emails.configure(emailProvider as EmailProviderCreate);
       this.created += 1;
       this.didCreate(created);
     }
