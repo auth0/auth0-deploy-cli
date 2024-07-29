@@ -136,8 +136,8 @@ export default class ScimHandler {
   * Handle expected errors.
   */
   handleExpectedErrors(error, method: string, connectionId: string) {
-     // Skip the connection if it returns 404. This can happen if `SCIM` is not enabled on a `SCIM` connection.
-     if (error && error.statusCode === 404) {
+    // Skip the connection if it returns 404. This can happen if `SCIM` is not enabled on a `SCIM` connection.
+    if (error && error.statusCode === 404) {
       log.debug(`SCIM configuration is not enabled on connection \"${ connectionId }\".`);
       return null;
     };
