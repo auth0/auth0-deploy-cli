@@ -169,9 +169,9 @@ export const schema = {
         ...acc,
         [language]: {
           type: 'object',
-          properties: promptTypes.reduce((acc, customPartialsPromptTypes) => ({
+          properties: promptTypes.reduce((acc, promptTypes) => ({
             ...acc,
-            [customPartialsPromptTypes]: {
+            [promptTypes]: {
               type: 'object',
               properties: screenTypes.reduce((acc, screenTypes) => ({
                 ...acc,
