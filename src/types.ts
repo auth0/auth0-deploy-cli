@@ -151,8 +151,9 @@ export type BaseAuth0APIClient = {
   };
   prompts: {
     _getRestClient : (arg0: string) => {
-      get: (arg0: string) => Promise<any>;
-      put: (arg0: string, arg1: any) => Promise<any>;
+      get: (arg0: string) => Promise<Asset>;
+      put: (arg0: string, arg1: any) => Promise<Asset>;
+      invoke: (arg0: string, arg1: any) => Promise<Asset>;
     };
     updateCustomTextByLanguage: (arg0: {
       prompt: PromptTypes;

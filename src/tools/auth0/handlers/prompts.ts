@@ -317,9 +317,12 @@ export default class PromptsHandler extends DefaultHandler {
   private promptClient = this.client.prompts._getRestClient('/prompts/:prompt/partials');
 
   private async partialHttpRequest(method: string, options: [{ prompt: string }, ...Record<string, any>[]]): Promise<Asset> {
-    return this.withErrorHandling(async () =>
-      this.promptClient[method](...options)
-    );
+    return this.withErrorHandling(async () =>{
+      if (method === 'put') {
+        return this.promptClient.invoke('wrappedProvider', [method,options]);
+      }
+      return this.promptClient[method](...options);
+    });
   }
 
   /**

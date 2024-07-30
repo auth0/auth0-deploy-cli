@@ -325,6 +325,7 @@ describe('#prompts handler', () => {
           _getRestClient: (endpoint) => ({
             get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
             put: (...options) => Promise.resolve({ endpoint, method: 'put', options }),
+            invoke: (...options) => Promise.resolve({ endpoint, method: 'put', options }),
           })
         },
       };
@@ -393,9 +394,9 @@ describe('#prompts handler', () => {
       }
     });
 
-    it('should handle errors correctly in partialHttpRequest', async () => {
-      const method = 'put';
-      const options = [{ prompt: 'test-prompt' }, { key: 'value' }];
+    it('should handle errors correctly in partialHttpRequest with Get Method', async () => {
+      const method = 'get';
+      const options = [{ prompt: 'test-prompt' }];
       const error = new Error('Request failed');
       sandbox.stub(handler.promptClient, method).rejects(error);
 
@@ -407,11 +408,37 @@ describe('#prompts handler', () => {
       }
     });
 
-    it('should make an HTTP request with the correct headers', async () => {
+
+
+    it('should handle errors correctly in partialHttpRequest with Put Method', async () => {
+      const method = 'put';
+      const options = [{ prompt: 'test-prompt' }, { key: 'value' }];
+      const error = new Error('Request failed');
+      sandbox.stub(handler.promptClient, 'invoke').rejects(error);
+
+      try {
+        await handler.partialHttpRequest(method, options);
+        throw new Error('Expected method to throw.');
+      } catch (err) {
+        expect(err).to.equal(error);
+      }
+    });
+
+    it('should make an HTTP request with the correct headers with Get Method', async () => {
+      const method = 'get';
+      const options = [{ prompt: 'test-prompt' }];
+      const mockResponse = { data: 'response' };
+      sandbox.stub(handler.promptClient, method).resolves(mockResponse);
+
+      const result = await handler.partialHttpRequest(method, options);
+      expect(result).to.deep.equal(mockResponse);
+    });
+
+    it('should make an HTTP request with the correct headers with Put Method', async () => {
       const method = 'put';
       const options = [{ prompt: 'test-prompt' }, { key: 'value' }];
       const mockResponse = { data: 'response' };
-      sandbox.stub(handler.promptClient, method).resolves(mockResponse);
+      sandbox.stub(handler.promptClient, 'invoke').resolves(mockResponse);
 
       const result = await handler.partialHttpRequest(method, options);
       expect(result).to.deep.equal(mockResponse);
