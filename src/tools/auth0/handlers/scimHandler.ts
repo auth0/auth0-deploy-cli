@@ -80,7 +80,7 @@ export default class ScimHandler {
           }
         }).catch((error) => {
           throw new Error(
-            `Problem fetching SCIM configurations while running \"calcChanges\".\n${ error }`
+            `Problem fetching SCIM configurations while running \"createIdMap\".\n${ error }`
           );
         });
       },

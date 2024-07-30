@@ -3,6 +3,7 @@ const { PromisePoolExecutor } = require('promise-pool-executor');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 const chai = require('chai');
+const log = require('../../../../src/logger').default;
 const ScimHandler = require('../../../../src/tools/auth0/handlers/scimHandler').default;
 
 const { expect } = chai.use(chaiAsPromised);
@@ -286,4 +287,45 @@ describe('ScimHandler', () => {
       await expect(handler.createOverride(bodyParams)).to.be.rejectedWith('Unexpected error');
     });
   });
+
+  describe('handleExpectedErrors', () => {
+    it('should handle 404 errors and return null', async () => {
+      const mockCallback = sinon.stub().rejects({ statusCode: 404 });
+      const result = await handler.withErrorHandling(mockCallback, 'get', 'con_kzpLY0Afi4I8lvwM');
+      expect(result).to.be.null;
+      expect(mockCallback.calledOnce).to.be.true;
+    });
+  
+    it('should handle 403 errors, log a warning, and return null', async () => {
+      const mockCallback = sinon.stub().rejects({ statusCode: 403 });
+      const logWarnSpy = sinon.spy(log, 'warn');
+      const result = await handler.withErrorHandling(mockCallback, 'get', 'con_kzpLY0Afi4I8lvwM');
+      expect(result).to.be.null;
+      expect(mockCallback.calledOnce).to.be.true;
+      expect(logWarnSpy.calledOnce).to.be.true;
+      expect(logWarnSpy.firstCall.args[0]).to.include('Insufficient scope');
+      logWarnSpy.restore();
+    });
+  
+    it('should handle 400 errors with "already exists" message and return null', async () => {
+      const mockCallback = sinon.stub().rejects({ statusCode: 400, message: 'SCIM configuration already exists' });
+      const result = await handler.withErrorHandling(mockCallback, 'create', 'con_kzpLY0Afi4I8lvwM');
+      expect(result).to.be.null;
+      expect(mockCallback.calledOnce).to.be.true;
+    });
+  
+    it('should handle 429 errors and return null', async () => {
+      const mockCallback = sinon.stub().rejects({ statusCode: 429, message: 'Rate limit exceeded' });
+      const result = await handler.withErrorHandling(mockCallback, 'create', 'con_kzpLY0Afi4I8lvwM');
+      expect(result).to.be.null;
+      expect(mockCallback.calledOnce).to.be.true;
+    });
+  
+    it('should rethrow unexpected errors', async () => {
+      const mockCallback = sinon.stub().rejects(new Error('Unexpected error'));
+      await expect(handler.withErrorHandling(mockCallback, 'create', 'con_kzpLY0Afi4I8lvwM')).to.be.rejectedWith('Unexpected error');
+      expect(mockCallback.calledOnce).to.be.true;
+    });
+  });
+  
 });
