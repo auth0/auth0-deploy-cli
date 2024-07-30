@@ -95,7 +95,7 @@ describe('#connections handler', () => {
           update: () => Promise.resolve([]),
           delete: () => Promise.resolve([]),
           getAll: () => [],
-          _getRestClient: (path) => ({}),
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: () => [],

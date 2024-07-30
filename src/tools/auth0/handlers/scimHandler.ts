@@ -1,6 +1,8 @@
 import { Asset } from '../../../types';
 import log from '../../../logger';
 import { PromisePoolExecutor } from 'promise-pool-executor';
+import { BaseAuth0APIClient } from '../../../types';
+import { ConfigFunction } from '../../../configFactory';
 
 interface IdMapValue {
   strategy: string;
@@ -25,8 +27,8 @@ interface ScimScopes { read: boolean; create: boolean; update: boolean; delete: 
 export default class ScimHandler {
   private idMap: Map<string, IdMapValue>;
   private readonly scimStrategies = ['samlp', 'oidc', 'okta', 'waad'];
-  private config: any;
-  private connectionsManager: any;
+  private config: ConfigFunction;
+  private connectionsManager: BaseAuth0APIClient['connections'];
   private scimScopes: ScimScopes = { read: true, create: true, update: true, delete: true };
   private scopeMethodMap = {
     get: 'read',

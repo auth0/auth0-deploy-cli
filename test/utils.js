@@ -20,7 +20,7 @@ export function mockMgmtClient() {
     hooks: { getAll: () => ({ hooks: [] }) },
     actions: { getAll: () => ({ actions: [] }) },
     databases: { getAll: () => ({ databases: [] }) },
-    connections: { getAll: () => ({ connections: [] }), _getRestClient: (path) => ({}) },
+    connections: { getAll: () => ({ connections: [] }), _getRestClient: () => ({}) },
     resourceServers: { getAll: () => ({ resourceServers: [] }) },
     rulesConfigs: { getAll: () => ({ rulesConfigs: [] }) },
     emailProvider: {

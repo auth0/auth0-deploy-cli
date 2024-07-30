@@ -2,8 +2,8 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const { omit, cloneDeep } = require('lodash');
 const { default: ThemesHandler } = require('../../../../src/tools/auth0/handlers/themes');
-chai.use(chaiAsPromised);
 
+chai.use(chaiAsPromised);
 const { expect, assert } = chai;
 
 function stub() {

@@ -15,7 +15,7 @@ describe('#schema validation tests', () => {
     },
     connections: {
       getAll: async () => ({ connections: [] }),
-      _getRestClient: (path) => ({}),
+      _getRestClient: () => ({}),
     },
     resourceServers: {
       getAll: async () => ({ resource_servers: [] }),
