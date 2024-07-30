@@ -5,7 +5,13 @@ import { constants } from '../../../src/tools';
 import Context from '../../../src/context/directory';
 import promptsHandler from '../../../src/context/directory/handlers/prompts';
 import { getFiles, loadJSON } from '../../../src/utils';
-import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient, createDirWithNestedDir } from '../../utils';
+import {
+  cleanThenMkdir,
+  testDataDir,
+  createDir,
+  mockMgmtClient,
+  createDirWithNestedDir,
+} from '../../utils';
 
 const dir = path.join(testDataDir, 'directory', 'promptsDump');
 const promptsDirectory = path.join(dir, constants.PROMPTS_DIRECTORY);
@@ -54,8 +60,8 @@ describe('#directory context prompts', () => {
                   name: 'form-content-start',
                   template: 'partials/login/login/form-content-start.liquid',
                 },
-              ]
-            }
+              ],
+            },
           ],
           signup: [
             {
@@ -64,8 +70,8 @@ describe('#directory context prompts', () => {
                   name: 'form-content-end',
                   template: 'partials/signup/signup/form-content-end.liquid',
                 },
-              ]
-            }
+              ],
+            },
           ],
         }),
       },
@@ -84,13 +90,13 @@ describe('#directory context prompts', () => {
       login: {
         login: {
           'form-content-start.liquid': '<div>TEST</div>',
-        }
+        },
       },
       signup: {
         signup: {
           'form-content-end.liquid': '<div>TEST AGAIN</div>',
         },
-      }
+      },
     };
 
     createDirWithNestedDir(partialsDir, partialsFiles);
@@ -111,13 +117,13 @@ describe('#directory context prompts', () => {
         login: {
           login: {
             'form-content-start': '<div>TEST</div>',
-          }
+          },
         },
         signup: {
           signup: {
             'form-content-end': '<div>TEST AGAIN</div>',
           },
-        }
+        },
       },
       customText: {
         en: {
@@ -273,13 +279,13 @@ describe('#directory context prompts', () => {
         login: {
           login: {
             'form-content-start': '<div>TEST</div>',
-          }
+          },
         },
         signup: {
           signup: {
             'form-content-end': '<div>TEST AGAIN</div>',
           },
-        }
+        },
       },
     };
 
@@ -296,30 +302,28 @@ describe('#directory context prompts', () => {
     expect(loadJSON(path.join(promptsDirectory, customTextFile), {})).to.deep.equal(
       context.assets.prompts.customText
     );
-    expect(loadJSON(path.join(promptsDirectory, partialsFile), {})).to.deep.equal(
-      {
-        login: [
-          {
-            login: [
-              {
-                name: 'form-content-start',
-                template: 'partials/login/login/form-content-start.liquid',
-              },
-            ]
-          }
-        ],
-        signup: [
-          {
-            signup: [
-              {
-                name: 'form-content-end',
-                template: 'partials/signup/signup/form-content-end.liquid',
-              },
-            ]
-          }
-        ],
-      }
-    );
+    expect(loadJSON(path.join(promptsDirectory, partialsFile), {})).to.deep.equal({
+      login: [
+        {
+          login: [
+            {
+              name: 'form-content-start',
+              template: 'partials/login/login/form-content-start.liquid',
+            },
+          ],
+        },
+      ],
+      signup: [
+        {
+          signup: [
+            {
+              name: 'form-content-end',
+              template: 'partials/signup/signup/form-content-end.liquid',
+            },
+          ],
+        },
+      ],
+    });
     expect(loadJSON(path.join(promptsDirectory, promptsSettingsFile), {})).to.deep.equal({
       universal_login_experience: context.assets.prompts.universal_login_experience,
       identifier_first: context.assets.prompts.identifier_first,

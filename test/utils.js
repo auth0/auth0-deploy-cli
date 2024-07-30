@@ -122,7 +122,7 @@ export function mockMgmtClient() {
     prompts: {
       _getRestClient: (endpoint) => ({
         get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-        put: (...options) => Promise.resolve({ endpoint, method: 'put', options }),
+
       }),
       getCustomTextByLanguage: () =>
         new Promise((res) => {

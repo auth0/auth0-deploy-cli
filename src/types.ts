@@ -66,15 +66,15 @@ export type BaseAuth0APIClient = {
     getBreachedPasswordDetectionConfig: () => Promise<Asset>;
     getBruteForceConfig: () => Promise<Asset>;
     getSuspiciousIpThrottlingConfig: () => Promise<Asset>;
-    updateBreachedPasswordDetectionConfig: ({}, arg1: Asset) => Promise<void>;
-    updateSuspiciousIpThrottlingConfig: ({}, arg1: Asset) => Promise<void>;
-    updateBruteForceConfig: ({}, arg1: Asset) => Promise<void>;
+    updateBreachedPasswordDetectionConfig: ({ }, arg1: Asset) => Promise<void>;
+    updateSuspiciousIpThrottlingConfig: ({ }, arg1: Asset) => Promise<void>;
+    updateBruteForceConfig: ({ }, arg1: Asset) => Promise<void>;
   };
   branding: APIClientBaseFunctions & {
     getSettings: () => Promise<Asset>;
     getUniversalLoginTemplate: () => Promise<Asset>;
-    updateSettings: ({}, Asset) => Promise<void>;
-    setUniversalLoginTemplate: ({}, Asset) => Promise<void>;
+    updateSettings: ({ }, Asset) => Promise<void>;
+    setUniversalLoginTemplate: ({ }, Asset) => Promise<void>;
     getDefaultTheme: () => Promise<Theme>;
     updateTheme: (
       arg0: { id: string },
@@ -150,9 +150,8 @@ export type BaseAuth0APIClient = {
     };
   };
   prompts: {
-    _getRestClient : (arg0: string) => {
+    _getRestClient: (arg0: string) => {
       get: (arg0: string) => Promise<Asset>;
-      put: (arg0: string, arg1: any) => Promise<Asset>;
       invoke: (arg0: string, arg1: any) => Promise<Asset>;
     };
     updateCustomTextByLanguage: (arg0: {
@@ -237,10 +236,10 @@ export type Assets = Partial<{
   actions: Action[] | null;
   attackProtection: Asset | null;
   branding:
-    | (Asset & {
-        templates?: { template: string; body: string }[] | null;
-      })
-    | null;
+  | (Asset & {
+    templates?: { template: string; body: string }[] | null;
+  })
+  | null;
   clients: Client[] | null;
   clientGrants: ClientGrant[] | null;
   connections: Asset[] | null;

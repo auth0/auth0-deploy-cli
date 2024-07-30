@@ -7,7 +7,7 @@ import { Language } from '../../../../src/types';
 import log from '../../../../src/logger';
 import {
   CustomPartialsPromptTypes,
-  CustomPromptPartialsScreens
+  CustomPromptPartialsScreens,
 } from '../../../../lib/tools/auth0/handlers/prompts';
 
 const mockPromptsSettings = {
@@ -88,8 +88,7 @@ describe('#prompts handler', () => {
           },
           _getRestClient: (endpoint) => ({
             get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-            put: (...options) => Promise.resolve({ endpoint, method: 'put', options }),
-          })
+          }),
         },
         pool: new PromisePoolExecutor({
           concurrencyLimit: 3,
@@ -98,11 +97,9 @@ describe('#prompts handler', () => {
         }),
       };
 
-      const handler = new promptsHandler(
-        {
-          client: auth0,
-        }
-      );
+      const handler = new promptsHandler({
+        client: auth0,
+      });
 
       const getCustomPartial = sinon.stub(handler, 'getCustomPartial');
       getCustomPartial.withArgs({ prompt: 'login' }).resolves(loginPartial);
@@ -131,7 +128,7 @@ describe('#prompts handler', () => {
           },
           signup: {
             signup: signupPartial.signup,
-          }
+          },
         },
       });
     });
@@ -158,16 +155,13 @@ describe('#prompts handler', () => {
           },
           _getRestClient: (endpoint) => ({
             get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-            put: (...options) => Promise.resolve({ endpoint, method: 'put', options }),
-          })
+          }),
         },
       };
 
-      const handler = new promptsHandler(
-        {
-          client: auth0,
-        }
-      );
+      const handler = new promptsHandler({
+        client: auth0,
+      });
       sinon.stub(handler, 'updateCustomPartials').callsFake(() => {
         didCallUpdatePartials = true;
         return Promise.resolve({});
@@ -175,7 +169,9 @@ describe('#prompts handler', () => {
 
       const stageFn = handler.processChanges.bind(handler);
       const customText = undefined;
-      await stageFn.apply(handler, [{ prompts: { ...mockPromptsSettings, customText }, partials: undefined }]);
+      await stageFn.apply(handler, [
+        { prompts: { ...mockPromptsSettings, customText }, partials: undefined },
+      ]);
       expect(didCallUpdatePromptsSettings).to.equal(true);
       expect(didCallUpdateCustomText).to.equal(false);
       expect(didCallUpdatePartials).to.equal(false);
@@ -238,8 +234,7 @@ describe('#prompts handler', () => {
           },
           _getRestClient: (endpoint) => ({
             get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-            put: (...options) => Promise.resolve({ endpoint, method: 'put', options }),
-          })
+          }),
         },
         pool: new PromisePoolExecutor({
           concurrencyLimit: 3,
@@ -261,7 +256,9 @@ describe('#prompts handler', () => {
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
-        { prompts: { ...mockPromptsSettings, customText: customTextToSet, partials: partialsToSet } },
+        {
+          prompts: { ...mockPromptsSettings, customText: customTextToSet, partials: partialsToSet },
+        },
       ]);
       expect(didCallUpdatePromptsSettings).to.equal(true);
       expect(didCallUpdateCustomText).to.equal(true);
@@ -282,8 +279,7 @@ describe('#prompts handler', () => {
           getSettings: () => mockPromptsSettings,
           _getRestClient: (endpoint) => ({
             get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-            put: (...options) => Promise.resolve({ endpoint, method: 'put', options }),
-          })
+          }),
         },
         pool: new PromisePoolExecutor({
           concurrencyLimit: 3,
@@ -324,9 +320,9 @@ describe('#prompts handler', () => {
         prompts: {
           _getRestClient: (endpoint) => ({
             get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-            put: (...options) => Promise.resolve({ endpoint, method: 'put', options }),
+
             invoke: (...options) => Promise.resolve({ endpoint, method: 'put', options }),
-          })
+          }),
         },
       };
       handler = new promptsHandler({ client: auth0 });
@@ -352,13 +348,15 @@ describe('#prompts handler', () => {
       const result = await handler.withErrorHandling(callback);
       expect(result).to.deep.equal(null);
       expect(handler.IsFeatureSupported).to.be.false;
-      expect(logWarn.calledWith('Partial Prompts feature is not supported for the tenant')).to.be.true;
+      expect(logWarn.calledWith('Partial Prompts feature is not supported for the tenant')).to.be
+        .true;
     });
 
     it('should handle 400 error with specific message and set IsFeatureSupported to false', async () => {
       const error = {
         statusCode: 400,
-        message: 'This feature requires at least one custom domain to be configured for the tenant.',
+        message:
+          'This feature requires at least one custom domain to be configured for the tenant.',
       };
       const callback = sandbox.stub().rejects(error);
       const logWarn = sandbox.stub(log, 'warn');
@@ -366,7 +364,11 @@ describe('#prompts handler', () => {
       const result = await handler.withErrorHandling(callback);
       expect(result).to.deep.equal(null);
       expect(handler.IsFeatureSupported).to.be.false;
-      expect(logWarn.calledWith('Partial Prompts feature requires at least one custom domain to be configured for the tenant')).to.be.true;
+      expect(
+        logWarn.calledWith(
+          'Partial Prompts feature requires at least one custom domain to be configured for the tenant'
+        )
+      ).to.be.true;
     });
 
     it('should handle 429 error and log the appropriate message', async () => {
@@ -379,7 +381,11 @@ describe('#prompts handler', () => {
 
       const result = await handler.withErrorHandling(callback);
       expect(result).to.be.null;
-      expect(logError.calledWith(`The global rate limit has been exceeded, resulting in a ${ error.statusCode } error. ${ error.message }. Although this is an error, it is not blocking the pipeline.`)).to.be.true;
+      expect(
+        logError.calledWith(
+          `The global rate limit has been exceeded, resulting in a ${error.statusCode} error. ${error.message}. Although this is an error, it is not blocking the pipeline.`
+        )
+      ).to.be.true;
     });
 
     it('should rethrow other errors', async () => {
@@ -407,8 +413,6 @@ describe('#prompts handler', () => {
         expect(err).to.equal(error);
       }
     });
-
-
 
     it('should handle errors correctly in partialHttpRequest with Put Method', async () => {
       const method = 'put';
@@ -448,7 +452,10 @@ describe('#prompts handler', () => {
       handler.IsFeatureSupported = false;
       const putStub = sandbox.stub(handler, 'partialHttpRequest');
 
-      await handler.updateCustomPartials({ prompt: 'login', body: {} as CustomPromptPartialsScreens });
+      await handler.updateCustomPartials({
+        prompt: 'login',
+        body: {} as CustomPromptPartialsScreens,
+      });
 
       expect(putStub.called).to.be.false;
     });
@@ -469,7 +476,9 @@ describe('#prompts handler', () => {
     it('should return empty object if feature is not supported', async () => {
       handler.IsFeatureSupported = false;
 
-      const result = await handler.getCustomPartial({ prompt: 'login' as CustomPartialsPromptTypes });
+      const result = await handler.getCustomPartial({
+        prompt: 'login' as CustomPartialsPromptTypes,
+      });
       expect(result).to.deep.equal({});
     });
 
@@ -477,7 +486,7 @@ describe('#prompts handler', () => {
       handler.IsFeatureSupported = true;
 
       const mockResponse = {
-        'form-content-end': '<div>TEST</div>'
+        'form-content-end': '<div>TEST</div>',
       };
       sandbox.stub(handler, 'partialHttpRequest').resolves(mockResponse);
 
@@ -486,7 +495,6 @@ describe('#prompts handler', () => {
       expect(result).to.deep.equal(mockResponse);
       expect(handler.partialHttpRequest.calledOnceWith('get', [{ prompt: 'login' }])).to.be.true;
     });
-
 
     it('should handle errors correctly', async () => {
       handler.IsFeatureSupported = true;

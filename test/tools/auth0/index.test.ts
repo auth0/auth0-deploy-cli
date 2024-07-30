@@ -6,9 +6,8 @@ const mockEmptyClient = {
   prompts: {
     _getRestClient: (endpoint) => ({
       get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-      put: (...options) => Promise.resolve({ endpoint, method: 'put', options }),
     }),
-  }
+  },
 } as Auth0APIClient;
 const mockEmptyAssets = {} as Assets;
 

@@ -291,7 +291,7 @@ describe('#YAML context validation', () => {
       },
       prompts: {
         customText: {},
-        partials: {}
+        partials: {},
       },
       logStreams: [],
       customDomains: [],
@@ -404,7 +404,7 @@ describe('#YAML context validation', () => {
       },
       prompts: {
         customText: {},
-        partials: {}
+        partials: {},
       },
       logStreams: [],
       customDomains: [],
@@ -518,7 +518,7 @@ describe('#YAML context validation', () => {
       },
       prompts: {
         customText: {},
-        partials: {}
+        partials: {},
       },
       logStreams: [],
       customDomains: [],
@@ -601,14 +601,13 @@ describe('#YAML context validation', () => {
                 },
               },
             ],
-          })
+          }),
         },
-        prompts:{
+        prompts: {
           _getRestClient: (endpoint) => ({
             get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-            put: (...options) => Promise.resolve({ endpoint, method: 'put', options }),
-          })
-        }
+          }),
+        },
       }
     );
     await context.dump();

@@ -238,9 +238,16 @@ export default class PromptsHandler extends DefaultHandler {
 
   private IsFeatureSupported: boolean = true;
 
-  /**
-   * Returns formatted endpoint url.
-   */
+  private promptClient = this.client.prompts._getRestClient('/prompts/:prompt/partials');
+
+  private async partialHttpRequest(method: string, options: [{ prompt: string }, ...Record<string, any>[]]): Promise<Asset> {
+    return this.withErrorHandling(async () => {
+      if (method === 'put') {
+        return this.promptClient.invoke('wrappedProvider', [method, options]);
+      }
+      return this.promptClient[method](...options);
+    });
+  }
 
   constructor(options: DefaultHandler) {
     super({
@@ -314,17 +321,6 @@ export default class PromptsHandler extends DefaultHandler {
         }, {}));
   }
 
-  private promptClient = this.client.prompts._getRestClient('/prompts/:prompt/partials');
-
-  private async partialHttpRequest(method: string, options: [{ prompt: string }, ...Record<string, any>[]]): Promise<Asset> {
-    return this.withErrorHandling(async () =>{
-      if (method === 'put') {
-        return this.promptClient.invoke('wrappedProvider', [method,options]);
-      }
-      return this.promptClient[method](...options);
-    });
-  }
-
   /**
    * Error handler wrapper.
    */
@@ -347,7 +343,7 @@ export default class PromptsHandler extends DefaultHandler {
       }
 
       if (error && error.statusCode === 429) {
-        log.error(`The global rate limit has been exceeded, resulting in a ${ error.statusCode } error. ${ error.message }. Although this is an error, it is not blocking the pipeline.`);
+        log.error(`The global rate limit has been exceeded, resulting in a ${error.statusCode} error. ${error.message}. Although this is an error, it is not blocking the pipeline.`);
         return null;
       }
 
@@ -357,7 +353,7 @@ export default class PromptsHandler extends DefaultHandler {
 
   async getCustomPartial({ prompt }: { prompt: CustomPartialsPromptTypes }): Promise<CustomPromptPartials> {
     if (!this.IsFeatureSupported) return {};
-    return this.partialHttpRequest('get', [{ prompt:prompt }]); // Implement this method for making HTTP requests
+    return this.partialHttpRequest('get', [{ prompt: prompt }]); // Implement this method for making HTTP requests
   }
 
   async getCustomPromptsPartials(): Promise<CustomPromptPartials> {
@@ -441,7 +437,7 @@ export default class PromptsHandler extends DefaultHandler {
 
   async updateCustomPartials({ prompt, body }: { prompt: CustomPartialsPromptTypes; body: CustomPromptPartialsScreens }): Promise<void> {
     if (!this.IsFeatureSupported) return;
-    await this.partialHttpRequest('put', [ { prompt:prompt },body]); // Implement this method for making HTTP requests
+    await this.partialHttpRequest('put', [{ prompt: prompt }, body]); // Implement this method for making HTTP requests
   }
 
   async updateCustomPromptsPartials(partials: Prompts['partials']): Promise<void> {
