@@ -165,46 +165,58 @@ export const schema = {
     },
     customText: {
       type: 'object',
-      properties: languages.reduce((acc, language) => ({
-        ...acc,
-        [language]: {
-          type: 'object',
-          properties: promptTypes.reduce((acc, promptTypes) => ({
-            ...acc,
-            [promptTypes]: {
-              type: 'object',
-              properties: screenTypes.reduce((acc, screenTypes) => ({
-                ...acc,
-                [screenTypes]: {
+      properties: languages.reduce((acc, language) => {
+        return {
+          ...acc,
+          [language]: {
+            type: 'object',
+            properties: promptTypes.reduce((promptAcc, promptType) => {
+              return {
+                ...promptAcc,
+                [promptType]: {
                   type: 'object',
+                  properties: screenTypes.reduce((screenAcc, screenType) => {
+                    return {
+                      ...screenAcc,
+                      [screenType]: {
+                        type: 'object',
+                      },
+                    };
+                  }, {}),
                 },
-              }), {}),
-            },
-          }), {}),
-        },
-      }), {}),
+              };
+            }, {}),
+          },
+        };
+      }, {}),
     },
     partials: {
       type: 'object',
-      properties: customPartialsPromptTypes.reduce((acc, customPartialsPromptTypes) => ({
-        ...acc,
-        [customPartialsPromptTypes]: {
-          type: 'object',
-          properties: customPartialsScreenTypes.reduce((acc, customPartialsScreenTypes) => ({
-            ...acc,
-            [customPartialsScreenTypes]: {
-              type: 'object',
-              properties: customPartialsInsertionPoints.reduce((acc, customPartialsInsertionPoints) => ({
-                ...acc,
-                [customPartialsInsertionPoints]: {
-                  type: 'string',
+      properties: customPartialsPromptTypes.reduce((acc, customPartialsPromptType) => {
+        return {
+          ...acc,
+          [customPartialsPromptType]: {
+            type: 'object',
+            properties: customPartialsScreenTypes.reduce((screenAcc, customPartialsScreenType) => {
+              return {
+                ...screenAcc,
+                [customPartialsScreenType]: {
+                  type: 'object',
+                  properties: customPartialsInsertionPoints.reduce((insertionAcc, customPartialsInsertionPoint) => {
+                    return {
+                      ...insertionAcc,
+                      [customPartialsInsertionPoint]: {
+                        type: 'string',
+                      },
+                    };
+                  }, {}),
                 },
-              }), {}),
-            },
-          }), {}),
-        },
-      }), {}),
-    }
+              };
+            }, {}),
+          },
+        };
+      }, {}),
+    },
   },
 };
 
@@ -240,7 +252,10 @@ export default class PromptsHandler extends DefaultHandler {
 
   private promptClient = this.client.prompts._getRestClient('/prompts/:prompt/partials');
 
-  private async partialHttpRequest(method: string, options: [{ prompt: string }, ...Record<string, any>[]]): Promise<Asset> {
+  private async partialHttpRequest(
+    method: string,
+    options: [{ prompt: string }, ...Record<string, any>[]]
+  ): Promise<Asset> {
     return this.withErrorHandling(async () => {
       if (method === 'put') {
         return this.promptClient.invoke('wrappedProvider', [method, options]);
@@ -270,7 +285,7 @@ export default class PromptsHandler extends DefaultHandler {
     return {
       ...promptsSettings,
       customText,
-      partials
+      partials,
     };
   }
 
@@ -305,20 +320,22 @@ export default class PromptsHandler extends DefaultHandler {
             }),
       })
       .promise()
-      .then((customTextData) => customTextData
-        .filter((customTextData) => customTextData !== null)
-        .reduce((acc: AllPromptsByLanguage, customTextItem) => {
-          if (customTextItem?.language === undefined) return acc;
+      .then((customTextData) =>
+        customTextData
+          .filter((customTextData) => customTextData !== null)
+          .reduce((acc: AllPromptsByLanguage, customTextItem) => {
+            if (customTextItem?.language === undefined) return acc;
 
-          const { language, ...customTextSettings } = customTextItem;
+            const { language, ...customTextSettings } = customTextItem;
 
-          return {
-            ...acc,
-            [language]: acc[language]
-              ? { ...acc[language], ...customTextSettings }
-              : { ...customTextSettings },
-          };
-        }, {}));
+            return {
+              ...acc,
+              [language]: acc[language]
+                ? { ...acc[language], ...customTextSettings }
+                : { ...customTextSettings },
+            };
+          }, {})
+      );
   }
 
   /**
@@ -328,7 +345,6 @@ export default class PromptsHandler extends DefaultHandler {
     try {
       return await callback();
     } catch (error) {
-
       // Extract error data
       if (error && error?.statusCode === 403) {
         log.warn('Partial Prompts feature is not supported for the tenant');
@@ -336,14 +352,22 @@ export default class PromptsHandler extends DefaultHandler {
         return null;
       }
 
-      if (error && error?.statusCode === 400 && error.message?.includes('feature requires at least one custom domain')) {
-        log.warn('Partial Prompts feature requires at least one custom domain to be configured for the tenant');
+      if (
+        error &&
+        error?.statusCode === 400 &&
+        error.message?.includes('feature requires at least one custom domain')
+      ) {
+        log.warn(
+          'Partial Prompts feature requires at least one custom domain to be configured for the tenant'
+        );
         this.IsFeatureSupported = false;
         return null;
       }
 
       if (error && error.statusCode === 429) {
-        log.error(`The global rate limit has been exceeded, resulting in a ${error.statusCode} error. ${error.message}. Although this is an error, it is not blocking the pipeline.`);
+        log.error(
+          `The global rate limit has been exceeded, resulting in a ${error.statusCode} error. ${error.message}. Although this is an error, it is not blocking the pipeline.`
+        );
         return null;
       }
 
@@ -351,7 +375,11 @@ export default class PromptsHandler extends DefaultHandler {
     }
   }
 
-  async getCustomPartial({ prompt }: { prompt: CustomPartialsPromptTypes }): Promise<CustomPromptPartials> {
+  async getCustomPartial({
+    prompt,
+  }: {
+    prompt: CustomPartialsPromptTypes;
+  }): Promise<CustomPromptPartials> {
     if (!this.IsFeatureSupported) return {};
     return this.partialHttpRequest('get', [{ prompt: prompt }]); // Implement this method for making HTTP requests
   }
@@ -369,11 +397,11 @@ export default class PromptsHandler extends DefaultHandler {
           }),
       })
       .promise();
-
-    return partialsDataWithNulls.reduce(
+    const validPartialsData = partialsDataWithNulls.filter(Boolean);
+    return validPartialsData.reduce(
       (
         acc: CustomPromptPartials,
-        partialData: { promptType: string, partialsData: CustomPromptPartials }
+        partialData: { promptType: string; partialsData: CustomPromptPartials }
       ) => {
         if (partialData) {
           const { promptType, partialsData } = partialData;
@@ -435,7 +463,13 @@ export default class PromptsHandler extends DefaultHandler {
       .promise();
   }
 
-  async updateCustomPartials({ prompt, body }: { prompt: CustomPartialsPromptTypes; body: CustomPromptPartialsScreens }): Promise<void> {
+  async updateCustomPartials({
+    prompt,
+    body,
+  }: {
+    prompt: CustomPartialsPromptTypes;
+    body: CustomPromptPartialsScreens;
+  }): Promise<void> {
     if (!this.IsFeatureSupported) return;
     await this.partialHttpRequest('put', [{ prompt: prompt }, body]); // Implement this method for making HTTP requests
   }
