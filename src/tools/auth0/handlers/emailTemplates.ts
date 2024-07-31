@@ -53,17 +53,17 @@ export default class EmailTemplateHandler extends DefaultHandler {
 
       const params = { templateName: emailTemplate[identifierField] };
       const { data: updated } = await this.client.emailTemplates.update(params, emailTemplate);
-      // TODO: Should we revisit this?
-      delete (updated as any ).body;
-      this.didUpdate(updated);
+      // Remove body from the response
+      const { body, ...excludedBody } = updated;
+      this.didUpdate(excludedBody);
       this.updated += 1;
     } catch (err) {
       if (err.statusCode === 404) {
         // Create if it does not exist
         const { data: created } = await this.client.emailTemplates.create(emailTemplate);
-        // TODO: Should we revisit this?
-        delete (created as any).body;
-        this.didCreate(created);
+        // Remove body from the response
+        const { body, ...excludedBody } = created;
+        this.didCreate(excludedBody);
         this.created += 1;
       } else {
         throw err;
