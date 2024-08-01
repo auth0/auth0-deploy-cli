@@ -62,6 +62,15 @@ describe('#YAML context prompts', () => {
                 passwordSecurityText: 'Your password must contain:'
                 title: Create Your Account!
                 usernamePlaceholder: Username
+        partials:
+          login:
+            login:
+              form-content-end: >-
+                <div>TEST</div>
+          login-id:
+            login-id:
+              form-content-end: >-
+                <div>TEST</div>
     `;
 
     const yamlFile = path.join(dir, 'config.yaml');
@@ -130,6 +139,18 @@ describe('#YAML context prompts', () => {
         },
       },
       identifier_first: true,
+      partials: {
+        login: {
+          login: {
+            'form-content-end': '<div>TEST</div>',
+          },
+        },
+        'login-id': {
+          'login-id': {
+            'form-content-end': '<div>TEST</div>',
+          },
+        },
+      },
       universal_login_experience: 'classic',
     });
   });
@@ -168,6 +189,18 @@ describe('#YAML context prompts', () => {
               buttonText: 'French login button text',
               description: 'French login description',
             },
+          },
+        },
+      },
+      partials: {
+        login: {
+          login: {
+            'form-content-end': '<div>TEST</div>',
+          },
+        },
+        'login-id': {
+          'login-id': {
+            'form-content-end': '<div>TEST</div>',
           },
         },
       },

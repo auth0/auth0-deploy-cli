@@ -3,7 +3,7 @@ import Auth0 from '../../../src/tools/auth0';
 import constants from '../../../src/tools/constants';
 import { mockTheme } from './handlers/themes.tests';
 
-const mockConfigFn = () => {};
+const mockConfigFn = () => { };
 
 describe('#schema validation tests', () => {
   const client = {
@@ -25,6 +25,11 @@ describe('#schema validation tests', () => {
     roles: {
       getAll: async () => ({ client_grants: [] }),
     },
+    prompts: {
+      _getRestClient: (endpoint) => ({
+        get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+      }),
+    },
   };
 
   const failedCb = (done) => (err) => done(err || 'test failed');
@@ -42,7 +47,17 @@ describe('#schema validation tests', () => {
   };
 
   const checkRequired = (field, data, done) => {
-    const auth0 = new Auth0({}, data, mockConfigFn);
+    const auth0 = new Auth0(
+      {
+        prompts: {
+          _getRestClient: (endpoint) => ({
+            get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+          }),
+        },
+      },
+      data,
+      mockConfigFn
+    );
 
     auth0
       .validate()
@@ -50,7 +65,17 @@ describe('#schema validation tests', () => {
   };
 
   const checkEnum = (data, done) => {
-    const auth0 = new Auth0({}, data, mockConfigFn);
+    const auth0 = new Auth0(
+      {
+        prompts: {
+          _getRestClient: (endpoint) => ({
+            get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+          }),
+        },
+      },
+      data,
+      mockConfigFn
+    );
 
     auth0
       .validate()
@@ -58,7 +83,17 @@ describe('#schema validation tests', () => {
   };
 
   const checkTypeError = (field, expectedType, data, done) => {
-    const auth0 = new Auth0({}, data, mockConfigFn);
+    const auth0 = new Auth0(
+      {
+        prompts: {
+          _getRestClient: (endpoint) => ({
+            get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+          }),
+        },
+      },
+      data,
+      mockConfigFn
+    );
 
     auth0.validate().then(failedCb(done), passedCb(done, `should be ${expectedType}`, field));
   };
@@ -71,7 +106,17 @@ describe('#schema validation tests', () => {
         },
       ];
 
-      const auth0 = new Auth0({}, { branding: data }, mockConfigFn);
+      const auth0 = new Auth0(
+        {
+          prompts: {
+            _getRestClient: (endpoint) => ({
+              get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            }),
+          },
+        },
+        { branding: data },
+        mockConfigFn
+      );
 
       auth0.validate().then(failedCb(done), passedCb(done, 'should be object'));
     });
@@ -127,7 +172,17 @@ describe('#schema validation tests', () => {
         },
       ];
 
-      const auth0 = new Auth0({}, { clientGrants: data }, mockConfigFn);
+      const auth0 = new Auth0(
+        {
+          prompts: {
+            _getRestClient: (endpoint) => ({
+              get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            }),
+          },
+        },
+        { clientGrants: data },
+        mockConfigFn
+      );
 
       auth0.validate().then(failedCb(done), passedCb(done, 'should be array'));
     });
@@ -163,7 +218,17 @@ describe('#schema validation tests', () => {
         },
       ];
 
-      const auth0 = new Auth0({}, { clients: data }, mockConfigFn);
+      const auth0 = new Auth0(
+        {
+          prompts: {
+            _getRestClient: (endpoint) => ({
+              get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            }),
+          },
+        },
+        { clients: data },
+        mockConfigFn
+      );
 
       auth0
         .validate()
@@ -256,7 +321,17 @@ describe('#schema validation tests', () => {
         },
       ];
 
-      const auth0 = new Auth0({}, { emailProvider: data }, mockConfigFn);
+      const auth0 = new Auth0(
+        {
+          prompts: {
+            _getRestClient: (endpoint) => ({
+              get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            }),
+          },
+        },
+        { emailProvider: data },
+        mockConfigFn
+      );
 
       auth0.validate().then(failedCb(done), passedCb(done, 'should be object'));
     });
@@ -545,7 +620,17 @@ describe('#schema validation tests', () => {
         },
       ];
 
-      const auth0 = new Auth0({}, { prompts: data }, mockConfigFn);
+      const auth0 = new Auth0(
+        {
+          prompts: {
+            _getRestClient: (endpoint) => ({
+              get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            }),
+          },
+        },
+        { prompts: data },
+        mockConfigFn
+      );
 
       auth0.validate().then(failedCb(done), passedCb(done, 'should be object'));
     });
@@ -610,7 +695,17 @@ describe('#schema validation tests', () => {
         },
       ];
 
-      const auth0 = new Auth0({}, { rules: data }, mockConfigFn);
+      const auth0 = new Auth0(
+        {
+          prompts: {
+            _getRestClient: (endpoint) => ({
+              get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            }),
+          },
+        },
+        { rules: data },
+        mockConfigFn
+      );
 
       auth0.validate().then(failedCb(done), passedCb(done, 'should match pattern'));
     });
@@ -668,7 +763,17 @@ describe('#schema validation tests', () => {
         },
       ];
 
-      const auth0 = new Auth0({}, { rulesConfigs: data }, mockConfigFn);
+      const auth0 = new Auth0(
+        {
+          prompts: {
+            _getRestClient: (endpoint) => ({
+              get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            }),
+          },
+        },
+        { rulesConfigs: data },
+        mockConfigFn
+      );
 
       auth0.validate().then(failedCb(done), passedCb(done, 'should match pattern'));
     });
@@ -703,7 +808,17 @@ describe('#schema validation tests', () => {
         },
       ];
 
-      const auth0 = new Auth0({}, { hooks: data }, mockConfigFn);
+      const auth0 = new Auth0(
+        {
+          prompts: {
+            _getRestClient: (endpoint) => ({
+              get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            }),
+          },
+        },
+        { hooks: data },
+        mockConfigFn
+      );
 
       auth0.validate().then(failedCb(done), passedCb(done, 'should match pattern'));
     });
@@ -751,7 +866,17 @@ describe('#schema validation tests', () => {
         },
       ];
 
-      const auth0 = new Auth0({}, { tenant: data }, mockConfigFn);
+      const auth0 = new Auth0(
+        {
+          prompts: {
+            _getRestClient: (endpoint) => ({
+              get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            }),
+          },
+        },
+        { tenant: data },
+        mockConfigFn
+      );
 
       auth0.validate().then(failedCb(done), passedCb(done, 'should be object'));
     });
@@ -769,7 +894,17 @@ describe('#schema validation tests', () => {
     it('should fail validation if migrations is not an object', (done) => {
       const data = '';
 
-      const auth0 = new Auth0({}, { migrations: data }, mockConfigFn);
+      const auth0 = new Auth0(
+        {
+          prompts: {
+            _getRestClient: (endpoint) => ({
+              get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            }),
+          },
+        },
+        { migrations: data },
+        mockConfigFn
+      );
 
       auth0.validate().then(failedCb(done), passedCb(done, 'should be object'));
     });
@@ -779,7 +914,17 @@ describe('#schema validation tests', () => {
         migration_flag: 'string',
       };
 
-      const auth0 = new Auth0({}, { migrations: data }, mockConfigFn);
+      const auth0 = new Auth0(
+        {
+          prompts: {
+            _getRestClient: (endpoint) => ({
+              get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            }),
+          },
+        },
+        { migrations: data },
+        mockConfigFn
+      );
 
       auth0.validate().then(failedCb(done), passedCb(done, 'should be boolean'));
     });

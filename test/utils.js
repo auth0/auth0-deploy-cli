@@ -120,11 +120,15 @@ export function mockMgmtClient() {
     },
     logStreams: { getAll: () => [] },
     prompts: {
+      _getRestClient: (endpoint) => ({
+        get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+
+      }),
       getCustomTextByLanguage: () =>
         new Promise((res) => {
           res({});
         }),
-      getSettings: () => {},
+      getSettings: () => { },
     },
     customDomains: { getAll: () => [] },
   };
@@ -144,7 +148,34 @@ export function createDir(repoDir, files) {
     const configDir = path.resolve(repoDir, type);
     cleanThenMkdir(configDir);
     Object.entries(files[type]).forEach(([name, content]) => {
-      fs.writeFileSync(path.join(configDir, name), content);
+      const filePath = path.join(configDir, name);
+      fs.writeFileSync(filePath, content);
+    });
+  });
+}
+
+export function createDirWithNestedDir(repoDir, files) {
+  Object.keys(files).forEach((type) => {
+    const typeDir = path.resolve(repoDir, type);
+    cleanThenMkdir(typeDir);
+
+    Object.entries(files[type]).forEach(([subtype, content]) => {
+      const subtypeDir = path.join(typeDir, subtype);
+
+      if (typeof content === 'string') {
+        fs.writeFileSync(subtypeDir, content);
+      } else if (typeof content === 'object') {
+        cleanThenMkdir(subtypeDir);
+        Object.entries(content).forEach(([fileName, fileContent]) => {
+          const filePath = path.join(subtypeDir, fileName);
+          if (typeof fileContent !== 'string') {
+            throw new TypeError(`Expected content to be a string, but received ${typeof fileContent}`);
+          }
+          fs.writeFileSync(filePath, fileContent);
+        });
+      } else {
+        throw new TypeError(`Expected content to be a string or object, but received ${typeof content}`);
+      }
     });
   });
 }
