@@ -196,23 +196,33 @@ export const schema = {
         return {
           ...acc,
           [customPartialsPromptType]: {
-            type: 'object',
-            properties: customPartialsScreenTypes.reduce((screenAcc, customPartialsScreenType) => {
-              return {
-                ...screenAcc,
-                [customPartialsScreenType]: {
-                  type: 'object',
-                  properties: customPartialsInsertionPoints.reduce((insertionAcc, customPartialsInsertionPoint) => {
-                    return {
-                      ...insertionAcc,
-                      [customPartialsInsertionPoint]: {
-                        type: 'string',
-                      },
-                    };
-                  }, {}),
-                },
-              };
-            }, {}),
+            oneOf: [
+              {
+                type: 'object',
+                properties: customPartialsScreenTypes.reduce((screenAcc, customPartialsScreenType) => {
+                  return {
+                    ...screenAcc,
+                    [customPartialsScreenType]: {
+                      oneOf: [
+                        {
+                          type: 'object',
+                          properties: customPartialsInsertionPoints.reduce((insertionAcc, customPartialsInsertionPoint) => {
+                            return {
+                              ...insertionAcc,
+                              [customPartialsInsertionPoint]: {
+                                type: 'string',
+                              },
+                            };
+                          }, {}),
+                        },
+                        { type: 'null' }
+                      ],
+                    },
+                  };
+                }, {}),
+              },
+              { type: 'null' }
+            ],
           },
         };
       }, {}),
@@ -420,6 +430,7 @@ export default class PromptsHandler extends DefaultHandler {
 
     const { partials, customText, ...promptSettings } = prompts;
 
+    console.log(partials);
     if (!isEmpty(promptSettings)) {
       await this.client.prompts.updateSettings({}, promptSettings);
     }
@@ -478,7 +489,9 @@ export default class PromptsHandler extends DefaultHandler {
     /*
       Note: deletes are not currently supported
     */
+    console.log(partials);
     if (!partials) return;
+    console.log(partials);
     await this.client.pool
       .addEachTask({
         data: Object.keys(partials).map((prompt: CustomPartialsPromptTypes) => {
