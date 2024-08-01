@@ -50,14 +50,18 @@ describe('#emailProvider handler', () => {
     });
 
     // THIS IS NO LONGER SUPPORTED
-    it('should delete email provider if set to empty object and AUTH0_ALLOW_DELETE is true', async () => {
+    it('should disable instead of delete email provider if set to empty object and AUTH0_ALLOW_DELETE is true', async () => {
       const AUTH0_ALLOW_DELETE = true;
       let wasDeleteCalled = false;
-
+      let wasUpdateCalled = false;
       const auth0 = {
         emails: {
           delete: () => {
             wasDeleteCalled = true;
+            return Promise.resolve({ data: {} });
+          },
+          update: () => {
+            wasUpdateCalled = true;
             return Promise.resolve({ data: {} });
           },
           get: () => ({ data: { name: 'someProvider', enabled: true } }),
@@ -72,8 +76,8 @@ describe('#emailProvider handler', () => {
 
       await stageFn.apply(handler, [{ emailProvider: {} }]);
 
-      // TODO: This isnt called anymore so I changed it to false
       expect(wasDeleteCalled).to.equal(false);
+      expect(wasUpdateCalled).to.equal(true);
     });
 
     it('should not delete email provider if set to empty object and if AUTH0_ALLOW_DELETE is false', async () => {
