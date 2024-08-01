@@ -33,7 +33,7 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
 
   objString(item: Asset): string {
     const objectString = (() => {
-      let obj = {};
+      const obj = {};
       if (item.breachedPasswordDetection?.enabled) {
         obj['breached-password-protection'] = {
           enabled: item.breachedPasswordDetection.enabled,
