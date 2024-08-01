@@ -80,7 +80,7 @@ describe('#attackProtection handler', () => {
     it('should update attack protection settings', async () => {
       const auth0 = {
         attackProtection: {
-          updateBreachedPasswordDetectionConfig: (params, data) => {
+          updateBreachedPasswordDetectionConfig: (data) => {
             expect(data).to.be.an('object');
             expect(data).to.deep.equal({
               admin_notification_frequency: [],
@@ -90,7 +90,7 @@ describe('#attackProtection handler', () => {
             });
             return Promise.resolve(data);
           },
-          updateSuspiciousIpThrottlingConfig: (params, data) => {
+          updateSuspiciousIpThrottlingConfig: (data) => {
             expect(data).to.be.an('object');
             expect(data).to.deep.equal({
               allowlist: ['127.0.0.1'],
@@ -109,7 +109,7 @@ describe('#attackProtection handler', () => {
             });
             return Promise.resolve(data);
           },
-          updateBruteForceConfig: (params, data) => {
+          updateBruteForceConfig: (data) => {
             expect(data).to.be.an('object');
             expect(data).to.deep.equal({
               allowlist: [],
