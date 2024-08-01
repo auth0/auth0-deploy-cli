@@ -85,7 +85,6 @@ describe('#prompts handler', () => {
 
             return Promise.resolve({ data: customTextValue });
           },
-
         },
         pool: new PromisePoolExecutor({
           concurrencyLimit: 3,
@@ -151,6 +150,9 @@ describe('#prompts handler', () => {
             expect(data).to.deep.equal(mockPromptsSettings);
             return Promise.resolve({ data });
           },
+          _getRestClient: (endpoint) => ({
+            get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+          }),
         },
       };
 

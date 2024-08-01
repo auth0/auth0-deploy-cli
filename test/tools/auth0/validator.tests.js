@@ -29,6 +29,11 @@ describe('#schema validation tests', () => {
         get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
       }),
     },
+    prompts: {
+      _getRestClient: (endpoint) => ({
+        get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+      }),
+    },
   };
 
   const failedCb = (done) => (err) => done(err || 'test failed');
