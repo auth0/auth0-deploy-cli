@@ -430,7 +430,6 @@ export default class PromptsHandler extends DefaultHandler {
 
     const { partials, customText, ...promptSettings } = prompts;
 
-    console.log(partials);
     if (!isEmpty(promptSettings)) {
       await this.client.prompts.updateSettings({}, promptSettings);
     }
@@ -489,9 +488,7 @@ export default class PromptsHandler extends DefaultHandler {
     /*
       Note: deletes are not currently supported
     */
-    console.log(partials);
     if (!partials) return;
-    console.log(partials);
     await this.client.pool
       .addEachTask({
         data: Object.keys(partials).map((prompt: CustomPartialsPromptTypes) => {
