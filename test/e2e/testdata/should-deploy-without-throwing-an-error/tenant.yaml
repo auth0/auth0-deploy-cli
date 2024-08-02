@@ -124,6 +124,7 @@ branding:
   templates: []
 prompts:
   customText: {}
+  partials: {}
   universal_login_experience: new
 migrations: {}
 actions: []

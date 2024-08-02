@@ -1,3 +1,4 @@
+import { PromisePoolExecutor } from 'promise-pool-executor';
 import { Action } from './tools/auth0/handlers/actions';
 import {
   PromptTypes,
@@ -13,7 +14,6 @@ import { LogStream } from './tools/auth0/handlers/logStreams';
 import { Client } from './tools/auth0/handlers/clients';
 import { ClientGrant } from './tools/auth0/handlers/clientGrants';
 import { ResourceServer } from './tools/auth0/handlers/resourceServers';
-import { PromisePoolExecutor } from 'promise-pool-executor';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -66,15 +66,15 @@ export type BaseAuth0APIClient = {
     getBreachedPasswordDetectionConfig: () => Promise<Asset>;
     getBruteForceConfig: () => Promise<Asset>;
     getSuspiciousIpThrottlingConfig: () => Promise<Asset>;
-    updateBreachedPasswordDetectionConfig: ({}, arg1: Asset) => Promise<void>;
-    updateSuspiciousIpThrottlingConfig: ({}, arg1: Asset) => Promise<void>;
-    updateBruteForceConfig: ({}, arg1: Asset) => Promise<void>;
+    updateBreachedPasswordDetectionConfig: ({ }, arg1: Asset) => Promise<void>;
+    updateSuspiciousIpThrottlingConfig: ({ }, arg1: Asset) => Promise<void>;
+    updateBruteForceConfig: ({ }, arg1: Asset) => Promise<void>;
   };
   branding: APIClientBaseFunctions & {
     getSettings: () => Promise<Asset>;
     getUniversalLoginTemplate: () => Promise<Asset>;
-    updateSettings: ({}, Asset) => Promise<void>;
-    setUniversalLoginTemplate: ({}, Asset) => Promise<void>;
+    updateSettings: ({ }, Asset) => Promise<void>;
+    setUniversalLoginTemplate: ({ }, Asset) => Promise<void>;
     getDefaultTheme: () => Promise<Theme>;
     updateTheme: (
       arg0: { id: string },
@@ -151,6 +151,10 @@ export type BaseAuth0APIClient = {
     };
   };
   prompts: {
+    _getRestClient: (arg0: string) => {
+      get: (arg0: string) => Promise<Asset>;
+      invoke: (arg0: string, arg1: any) => Promise<Asset>;
+    };
     updateCustomTextByLanguage: (arg0: {
       prompt: PromptTypes;
       language: Language;
@@ -233,10 +237,10 @@ export type Assets = Partial<{
   actions: Action[] | null;
   attackProtection: Asset | null;
   branding:
-    | (Asset & {
-        templates?: { template: string; body: string }[] | null;
-      })
-    | null;
+  | (Asset & {
+    templates?: { template: string; body: string }[] | null;
+  })
+  | null;
   clients: Client[] | null;
   clientGrants: ClientGrant[] | null;
   connections: Asset[] | null;

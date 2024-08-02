@@ -12749,6 +12749,66 @@
         "responseIsBinary": false
     },
     {
+      "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+      "method": "GET",
+      "path": "/api/v2/prompts/login/partials",
+      "body": "",
+      "status": 200,
+      "response": {},
+      "rawHeaders": [],
+      "responseIsBinary": false
+    },
+    {
+      "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+      "method": "GET",
+      "path": "/api/v2/prompts/login-id/partials",
+      "body": "",
+      "status": 200,
+      "response": {},
+      "rawHeaders": [],
+      "responseIsBinary": false
+    },
+    {
+      "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+      "method": "GET",
+      "path": "/api/v2/prompts/login-password/partials",
+      "body": "",
+      "status": 200,
+      "response": {},
+      "rawHeaders": [],
+      "responseIsBinary": false
+    },
+    {
+      "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+      "method": "GET",
+      "path": "/api/v2/prompts/signup/partials",
+      "body": "",
+      "status": 200,
+      "response": {},
+      "rawHeaders": [],
+      "responseIsBinary": false
+    },
+    {
+      "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+      "method": "GET",
+      "path": "/api/v2/prompts/signup-id/partials",
+      "body": "",
+      "status": 200,
+      "response": {},
+      "rawHeaders": [],
+      "responseIsBinary": false
+    },
+    {
+      "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+      "method": "GET",
+      "path": "/api/v2/prompts/signup-password/partials",
+      "body": "",
+      "status": 200,
+      "response": {},
+      "rawHeaders": [],
+      "responseIsBinary": false
+    },
+    {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/prompts/login-id/custom-text/en",
