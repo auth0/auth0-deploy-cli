@@ -108,7 +108,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     });
 
     // @ts-ignore
-    this.scimHandler = new ScimHandler(this.config, this.client.tokenProvider, this.client.connections);
+    this.scimHandler = new ScimHandler(this.config, this.client.connections, this.client.pool);
   }
 
   objString(connection): string {
@@ -182,11 +182,6 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       existingConnections,
       config: this.config,
     });
-
-    // We add the expected changes to the scimHandler so it can track the progress of the SCIM changes.
-    // This is necessary because import / deploy actions are concurrent and we need to know when all updates are complete.
-    const { update, create, conflicts } = proposedChangesWithExcludedProperties;
-    this.scimHandler.expectedChanges = update.length + create.length + conflicts.length;
 
     return proposedChangesWithExcludedProperties;
   }

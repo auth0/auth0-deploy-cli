@@ -98,6 +98,7 @@ export type BaseAuth0APIClient = {
   connections: APIClientBaseFunctions & {
     get: (arg0: Asset) => Promise<Asset>;
     getAll: (arg0: PagePaginationParams | CheckpointPaginationParams) => Promise<Asset[]>;
+    create: (arg0: Asset) => Promise<Asset>;
   };
   customDomains: APIClientBaseFunctions & {
     getAll: () => Promise<Asset[]>;

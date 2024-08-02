@@ -602,6 +602,7 @@ describe('#YAML context validation', () => {
               },
             ],
           }),
+          _getRestClient: () => ({})
         },
         prompts: {
           _getRestClient: (endpoint) => ({
