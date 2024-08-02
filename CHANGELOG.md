@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.24.0] - 2024-08-02
+
+### Added
+
+- Management support for `partials` in `prompts` handler [#930]
+
+### Changed
+
+- Reduced latency while performing `SCIM` CRUD operations [#933]
+
 ## [7.23.1] - 2024-07-19
 
 ### Fixed
@@ -1046,7 +1056,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#911]: https://github.com/auth0/auth0-deploy-cli/issues/911
 [#921]: https://github.com/auth0/auth0-deploy-cli/issues/921
 [#925]: https://github.com/auth0/auth0-deploy-cli/issues/925
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.23.1...HEAD
+[#930]: https://github.com/auth0/auth0-deploy-cli/issues/930
+[#933]: https://github.com/auth0/auth0-deploy-cli/issues/933
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.0...HEAD
+[7.24.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.23.1...v7.24.0
 [7.23.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.23.0...v7.23.1
 [7.23.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.22.1...v7.23.0
 [7.22.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.22.0...v7.22.1
