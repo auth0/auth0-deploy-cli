@@ -7,11 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## Added
+### Added
 
 - Management support for `partials` in `prompts` handler [#930]
 
-## Changed
+### Changed
 
 - Reduced latency while performing `SCIM` CRUD operations [#933]
 
