@@ -110,7 +110,6 @@ describe('ScimHandler', () => {
       handler.getScimConfiguration = sinon.stub().rejects(new Error('Unexpected error'));
       await expect(handler.createIdMap(connections)).to.be.rejectedWith('Unexpected error');
     });
-  });
 
   describe('applyScimConfiguration', () => {
     it('should apply SCIM configuration to SCIM connections', async () => {
