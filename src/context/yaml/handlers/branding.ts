@@ -5,6 +5,7 @@ import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
+import log from '../../../logger';
 
 type BrandingTemplate = {
   template: string;
@@ -31,7 +32,12 @@ async function parse(context: YAMLContext): Promise<ParsedBranding> {
 
   const parsedTemplates: BrandingTemplate[] = templates.map(
     (templateDefinition: BrandingTemplate): BrandingTemplate => {
-      const markupFile = path.join(context.basePath, templateDefinition.body);
+      const brandingTemplatesFolder = path.join(
+        context.basePath,
+        constants.BRANDING_TEMPLATES_YAML_DIRECTORY
+      );
+      const file = `${templateDefinition.template}.html`;
+      const markupFile = path.join(brandingTemplatesFolder, file);
       return {
         template: templateDefinition.template,
         body: loadFileAndReplaceKeywords(markupFile, {
@@ -68,6 +74,7 @@ async function dump(context: YAMLContext): Promise<ParsedBranding> {
     templates = templates.map((templateDefinition) => {
       const file = `${templateDefinition.template}.html`;
       const templateMarkupFile = path.join(brandingTemplatesFolder, file);
+      log.info(`Writing ${templateMarkupFile}`);
       const markup = templateDefinition.body;
       try {
         fs.writeFileSync(templateMarkupFile, markup);
@@ -78,10 +85,8 @@ async function dump(context: YAMLContext): Promise<ParsedBranding> {
       }
 
       // save the location as relative file.
-      templateDefinition.body = `.${path.sep}${path.join(
-        constants.BRANDING_TEMPLATES_YAML_DIRECTORY,
-        file
-      )}`;
+      templateDefinition.body = `./${constants.BRANDING_TEMPLATES_YAML_DIRECTORY}/${file}`;
+
       return templateDefinition;
     });
   }
