@@ -45,9 +45,9 @@ export default class GuardianFactorProvidersHandler extends DefaultHandler {
         if (m.name === 'phone' && m.provider === 'twilio') {
           provider = await this.client.guardian.getPhoneFactorProviderTwilio();
         } else if (m.name === 'sms' && m.provider === 'twilio') {
-            provider = await this.client.guardian.getSmsFactorProviderTwilio();
+          provider = await this.client.guardian.getSmsFactorProviderTwilio();
         } else if (m.name === 'push-notification' && m.provider === 'apns') {
-            provider = await this.client.guardian.getPushNotificationProviderAPNS();
+          provider = await this.client.guardian.getPushNotificationProviderAPNS();
         } else if (m.name === 'push-notification' && m.provider === 'sns') {
           provider = await this.client.guardian.getPushNotificationProviderSNS();
         }
