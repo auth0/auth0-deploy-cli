@@ -1,3 +1,4 @@
+import { GetOrganizationMemberRoles200ResponseOneOfInner } from 'auth0';
 import DefaultHandler, { order } from './default';
 import { calculateChanges } from '../../calculateChanges';
 import log from '../../../logger';
@@ -44,10 +45,7 @@ export default class RolesHandler extends DefaultHandler {
     const { data: created } = await this.client.roles.create(role);
 
     if (typeof data.permissions !== 'undefined' && data.permissions.length > 0) {
-      await this.client.roles.addPermissions(
-        { id: created.id },
-        { permissions: data.permissions }
-      );
+      await this.client.roles.addPermissions({ id: created.id }, { permissions: data.permissions });
     }
 
     return created;
@@ -151,13 +149,27 @@ export default class RolesHandler extends DefaultHandler {
     }
 
     try {
-      // TODO: Bring back paginate: true
-      const { data: { roles } } = await this.client.roles.getAll({ include_totals: true });
-      for (let index = 0; index < roles.length; index++) {
+      const allRoles: GetOrganizationMemberRoles200ResponseOneOfInner[] = [];
+      let page: number = 0;
+      // paginate through all roles
+      while (true) {
+        const {
+          data: { roles, total },
+        } = await this.client.roles.getAll({ include_totals: true, page: page });
+        allRoles.push(...roles);
+        page += 1;
+        if (allRoles.length === total) {
+          break;
+        }
+      }
+
+      for (let index = 0; index < allRoles.length; index++) {
         // TODO: Bring back paginate: true
-        const { data: { permissions } } = await this.client.roles.getPermissions({
+        const {
+          data: { permissions },
+        } = await this.client.roles.getPermissions({
           include_totals: true,
-          id: roles[index].id,
+          id: allRoles[index].id,
         });
         const strippedPerms = await Promise.all(
           permissions.map(async (permission) => {
@@ -167,9 +179,9 @@ export default class RolesHandler extends DefaultHandler {
           })
         );
         // TODO: Do we need this?
-        (roles[index] as any).permissions = strippedPerms;
+        (allRoles[index] as any).permissions = strippedPerms;
       }
-      this.existing = roles;
+      this.existing = allRoles;
       return this.existing;
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 501) {
@@ -209,7 +221,7 @@ export default class RolesHandler extends DefaultHandler {
             if (change.del) await this.deleteRoles(change.del);
             break;
           case change.create && change.create.length > 0:
-            await this.createRoles(changes.create); //TODO: fix this tho change.create
+            if (change.create) await this.createRoles(changes.create);
             break;
           case change.update && change.update.length > 0:
             if (change.update) await this.updateRoles(change.update, existing);
