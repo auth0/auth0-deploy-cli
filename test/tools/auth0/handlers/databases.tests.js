@@ -423,18 +423,18 @@ describe('#databases handler', () => {
     it('should update database when attributes are passed', async () => {
       const auth0 = {
         connections: {
-          get: function(params) {
+          get: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             return Promise.resolve({ options: { someOldOption: true } });
           },
-          create: function(data) {
+          create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
             return Promise.resolve(data);
           },
-          update: function(params, data) {
+          update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
@@ -491,7 +491,7 @@ describe('#databases handler', () => {
           name: 'someDatabase',
           strategy: 'auth0',
           options: { passwordPolicy: 'testPolicy' },
-          attributes:{
+          attributes: {
             'email': {
               'signup': {
                 'status': 'required',
@@ -530,23 +530,23 @@ describe('#databases handler', () => {
     it('should update database when require username and validation are passed', async () => {
       const auth0 = {
         connections: {
-          get: function(params) {
+          get: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             return Promise.resolve({ options: { someOldOption: true } });
           },
-          create: function(data) {
+          create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
             return Promise.resolve(data);
           },
-          update: function(params, data) {
+          update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
-              validation:{
+              validation: {
                 'username': {
                   'max': 15,
                   'min': 1
@@ -574,7 +574,7 @@ describe('#databases handler', () => {
           name: 'someDatabase',
           strategy: 'auth0',
           options: { passwordPolicy: 'testPolicy' },
-          validation:{
+          validation: {
             'username': {
               'max': 15,
               'min': 1
@@ -592,20 +592,21 @@ describe('#databases handler', () => {
       const updateStub = sinon.stub().resolves();
       const logWarnSpy = sinon.spy(console, 'warn');
       const deleteStub = sinon.stub().resolves([]);
-      const getAllStub = sinon.stub().resolves([{ name: 'someDatabase', id: 'con1', strategy: 'auth0' ,validation:{
-        'username': {
-          'max': 15,
-          'min': 1
-        }
-      },
-      requires_username: true
+      const getAllStub = sinon.stub().resolves([{
+        name: 'someDatabase', id: 'con1', strategy: 'auth0', validation: {
+          'username': {
+            'max': 15,
+            'min': 1
+          }
+        },
+        requires_username: true
       }]);
       const auth0 = {
         connections: {
           get: getStub,
           update: updateStub,
           delete: deleteStub,
-          getAll:getAllStub
+          getAll: getAllStub
         },
         clients: {
           getAll: sinon.stub().resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }])
@@ -711,29 +712,34 @@ describe('#databases handler', () => {
     });
 
     it('should update database with attributes and remove validation from the update request if validation is in the get response but attributes are in the update request', async () => {
-      const getStub = sinon.stub().resolves({ options: { someOldOption: true ,validation: {
-        'username': {
-          'max': 15,
-          'min': 1
-        }
-      } } });
-      const updateStub = sinon.stub().resolves();
-      const deleteStub = sinon.stub().resolves([]);
-      const getAllStub = sinon.stub().resolves([{ name: 'someDatabase', id: 'con1', strategy: 'auth0' ,options:{
-        validation: {
-          'username': {
-            'max': 15,
-            'min': 1
+      const getStub = sinon.stub().resolves({
+        options: {
+          someOldOption: true, validation: {
+            'username': {
+              'max': 15,
+              'min': 1
+            }
           }
         }
-      }
+      });
+      const updateStub = sinon.stub().resolves();
+      const deleteStub = sinon.stub().resolves([]);
+      const getAllStub = sinon.stub().resolves([{
+        name: 'someDatabase', id: 'con1', strategy: 'auth0', options: {
+          validation: {
+            'username': {
+              'max': 15,
+              'min': 1
+            }
+          }
+        }
       }]);
       const auth0 = {
         connections: {
           get: getStub,
           update: updateStub,
           delete: deleteStub,
-          getAll:getAllStub
+          getAll: getAllStub
         },
         clients: {
           getAll: sinon.stub().resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }])
@@ -826,80 +832,84 @@ describe('#databases handler', () => {
     });
 
     it('should update database with validation & require username and remove attributes from the update request if attributes is in the get response but validation and require username are in the update request', async () => {
-      const getStub = sinon.stub().resolves({ options: { someOldOption: true ,            attributes: {
-        email: {
-          signup: {
-            status: 'required',
-            verification: {
-              active: false,
+      const getStub = sinon.stub().resolves({
+        options: {
+          someOldOption: true, attributes: {
+            email: {
+              signup: {
+                status: 'required',
+                verification: {
+                  active: false,
+                },
+              },
+              identifier: {
+                active: true,
+              },
+              profile_required: true,
+            },
+            username: {
+              signup: {
+                status: 'required',
+              },
+              identifier: {
+                active: true,
+              },
+              validation: {
+                max_length: 15,
+                min_length: 1,
+                allowed_types: {
+                  email: false,
+                  phone_number: false,
+                },
+              },
+              profile_required: true,
             },
           },
-          identifier: {
-            active: true,
-          },
-          profile_required: true,
-        },
-        username: {
-          signup: {
-            status: 'required',
-          },
-          identifier: {
-            active: true,
-          },
-          validation: {
-            max_length: 15,
-            min_length: 1,
-            allowed_types: {
-              email: false,
-              phone_number: false,
-            },
-          },
-          profile_required: true,
-        },
-      },
-      } });
+        }
+      });
       const updateStub = sinon.stub().resolves();
       const deleteStub = sinon.stub().resolves([]);
-      const getAllStub = sinon.stub().resolves([{ name: 'someDatabase', id: 'con1', strategy: 'auth0' ,options:{
-        attributes: {
-          email: {
-            signup: {
-              status: 'required',
-              verification: {
-                active: false,
+      const getAllStub = sinon.stub().resolves([{
+        name: 'someDatabase', id: 'con1', strategy: 'auth0', options: {
+          attributes: {
+            email: {
+              signup: {
+                status: 'required',
+                verification: {
+                  active: false,
+                },
               },
-            },
-            identifier: {
-              active: true,
-            },
-            profile_required: true,
-          },
-          username: {
-            signup: {
-              status: 'required',
-            },
-            identifier: {
-              active: true,
-            },
-            validation: {
-              max_length: 15,
-              min_length: 1,
-              allowed_types: {
-                email: false,
-                phone_number: false,
+              identifier: {
+                active: true,
               },
+              profile_required: true,
             },
-            profile_required: true,
+            username: {
+              signup: {
+                status: 'required',
+              },
+              identifier: {
+                active: true,
+              },
+              validation: {
+                max_length: 15,
+                min_length: 1,
+                allowed_types: {
+                  email: false,
+                  phone_number: false,
+                },
+              },
+              profile_required: true,
+            },
           },
-        },
-      }
+        }
       }]);
       const auth0 = {
         connections: {
           get: getStub,
           update: updateStub,
           delete: deleteStub,
-          getAll:getAllStub
+          getAll: getAllStub
         },
         clients: {
           getAll: sinon.stub().resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }])
@@ -948,7 +958,7 @@ describe('#databases handler', () => {
           strategy: 'auth0',
           options: {
             passwordPolicy: 'testPolicy',
-            validation:{
+            validation: {
               'username': {
                 'max': 15,
                 'min': 1
