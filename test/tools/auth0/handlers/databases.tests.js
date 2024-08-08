@@ -1,5 +1,4 @@
 const { expect } = require('chai');
-const { error } = require('winston');
 const sinon = require('sinon');
 const databases = require('../../../../src/tools/auth0/handlers/databases');
 
@@ -589,7 +588,9 @@ describe('#databases handler', () => {
 
     it('should fail to update database when require username and validation and attributes are passed', async () => {
       const getStub = sinon.stub().resolves({ options: { someOldOption: true } });
-      const updateStub = sinon.stub().resolves();
+      const updateStub = sinon.stub().resolves({
+        id: 'con1',
+      });
       const logWarnSpy = sinon.spy(console, 'warn');
       const deleteStub = sinon.stub().resolves([]);
       const getAllStub = sinon.stub().resolves([{
@@ -702,7 +703,9 @@ describe('#databases handler', () => {
         expect(err.message).to.include('Cannot set both attributes and requires_username or validation');
       }
 
+      // eslint-disable-next-line no-unused-expressions
       expect(logWarnSpy.calledOnce).to.be.true;
+      // eslint-disable-next-line no-unused-expressions
       expect(logWarnSpy.calledWith('Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.')).to.be.true;
 
       sinon.assert.calledOnce(getStub);
@@ -722,7 +725,9 @@ describe('#databases handler', () => {
           }
         }
       });
-      const updateStub = sinon.stub().resolves();
+      const updateStub = sinon.stub().resolves({
+        id: 'con1',
+      });
       const deleteStub = sinon.stub().resolves([]);
       const getAllStub = sinon.stub().resolves([{
         name: 'someDatabase', id: 'con1', strategy: 'auth0', options: {
@@ -827,7 +832,10 @@ describe('#databases handler', () => {
       sinon.assert.calledOnce(getStub);
       sinon.assert.calledOnce(updateStub);
       const updateArgs = updateStub.firstCall.args[1];
+
+      // eslint-disable-next-line no-unused-expressions
       expect(updateArgs.options.attributes).to.exist;
+      // eslint-disable-next-line no-unused-expressions
       expect(updateArgs.options.validation).to.not.exist;
     });
 
@@ -867,7 +875,9 @@ describe('#databases handler', () => {
           },
         }
       });
-      const updateStub = sinon.stub().resolves();
+      const updateStub = sinon.stub().resolves({
+        id: 'con1',
+      });
       const deleteStub = sinon.stub().resolves([]);
       const getAllStub = sinon.stub().resolves([{
         name: 'someDatabase', id: 'con1', strategy: 'auth0', options: {
@@ -924,7 +934,7 @@ describe('#databases handler', () => {
             this.client.connections.get(params).then((connection) => {
               const attributes = payload?.options?.attributes;
               const requiresUsername = payload?.options?.requires_username;
-              const validation = payload?.options?.validation
+              const validation = payload?.options?.validation;
 
               if (attributes && (requiresUsername || validation)) {
                 console.warn('Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.');
@@ -974,8 +984,14 @@ describe('#databases handler', () => {
       sinon.assert.calledOnce(getStub);
       sinon.assert.calledOnce(updateStub);
       const updateArgs = updateStub.firstCall.args[1];
+
+      // eslint-disable-next-line no-unused-expressions
       expect(updateArgs.options.attributes).to.not.exist;
+
+      // eslint-disable-next-line no-unused-expressions
       expect(updateArgs.options.validation).to.exist;
+
+      // eslint-disable-next-line no-unused-expressions
       expect(updateArgs.options.requires_username).to.exist;
     });
   });
