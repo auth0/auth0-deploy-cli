@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.24.1] - 2024-08-09
+
+### Fixed
+
+- Fix `branding` template `path` on export/import as Yaml [#939]
+- Fix `databases` handler to handle `options` property correctly for flexible identifiers [#937]
+
 ## [7.24.0] - 2024-08-02
 
 ### Added
@@ -1058,7 +1065,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#925]: https://github.com/auth0/auth0-deploy-cli/issues/925
 [#930]: https://github.com/auth0/auth0-deploy-cli/issues/930
 [#933]: https://github.com/auth0/auth0-deploy-cli/issues/933
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.0...HEAD
+[#937]: https://github.com/auth0/auth0-deploy-cli/issues/937
+[#939]: https://github.com/auth0/auth0-deploy-cli/issues/939
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.1...HEAD
+[7.24.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.0...v7.24.1
 [7.24.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.23.1...v7.24.0
 [7.23.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.23.0...v7.23.1
 [7.23.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.22.1...v7.23.0
