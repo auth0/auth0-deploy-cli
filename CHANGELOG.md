@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix `branding` template `path` on export/import as Yaml [#939]
+- Fix `databases` handler to handle `options` property correctly for flexible identifiers [#937]
+
 ## [7.24.0] - 2024-08-02
 
 ### Added
