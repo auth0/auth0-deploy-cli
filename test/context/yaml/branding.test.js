@@ -34,6 +34,7 @@ describe('#YAML context branding templates', () => {
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { foo: 'bar' } };
     const context = new Context(config, mockMgmtClient());
+    context.basePath = baseDir;
     await context.loadAssetsFromLocal();
     expect(context.assets.branding).to.deep.equal({
       colors: {
