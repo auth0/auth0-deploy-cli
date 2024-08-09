@@ -2,6 +2,7 @@ import DefaultAPIHandler, { order } from './default';
 import constants from '../../constants';
 import { filterExcluded, getEnabledClients } from '../../utils';
 import { CalculatedChanges, Assets } from '../../../types';
+import log from '../../../logger';
 
 export const schema = {
   type: 'array',
@@ -48,6 +49,23 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     if (fn === 'update') {
       return (params, payload) =>
         this.client.connections.get(params).then((connection) => {
+          const attributes = payload?.options?.attributes;
+          const requiresUsername = payload?.options?.requires_username;
+          const validation = payload?.options?.validation;
+
+          if (attributes && (requiresUsername || validation)) {
+            log.warn('Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.');
+          }
+
+          else if (attributes) {
+            delete connection.options.validation;
+            delete connection.options.requires_username;
+          }
+
+          else if (requiresUsername || validation) {
+            delete connection.options.attributes;
+          }
+
           payload.options = { ...connection.options, ...payload.options };
           return this.client.connections.update(params, payload);
         });
