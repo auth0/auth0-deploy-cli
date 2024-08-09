@@ -11,10 +11,11 @@ const htmlTransformed = '<html>bar</html>';
 
 describe('#YAML context branding templates', () => {
   it('should process branding settings, including templates', async () => {
-    const dir = path.join(testDataDir, 'yaml', 'branding-process');
+    const baseDir = path.join(testDataDir, 'yaml', 'branding-process');
+    const dir = path.join(baseDir, 'branding_templates');
     cleanThenMkdir(dir);
 
-    const htmlFile = path.join(dir, 'universalLogin.html');
+    const htmlFile = path.join(dir, 'universal_login.html');
 
     fs.writeFileSync(htmlFile, html);
 
@@ -26,13 +27,14 @@ describe('#YAML context branding templates', () => {
       logo_url: https://mycompany.org/logo-5.png
       templates:
         - template: universal_login
-          body: universalLogin.html
+          body: universal_login.html
     `;
     const yamlFile = path.join(dir, 'config.yaml');
     fs.writeFileSync(yamlFile, yaml);
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { foo: 'bar' } };
     const context = new Context(config, mockMgmtClient());
+    context.basePath = baseDir;
     await context.loadAssetsFromLocal();
     expect(context.assets.branding).to.deep.equal({
       colors: {
