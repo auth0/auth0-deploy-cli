@@ -36,8 +36,7 @@ async function parse(context: YAMLContext): Promise<ParsedBranding> {
         context.basePath,
         constants.BRANDING_TEMPLATES_YAML_DIRECTORY
       );
-      const file = `${templateDefinition.template}.html`;
-      const markupFile = path.join(brandingTemplatesFolder, file);
+      const markupFile = path.join(brandingTemplatesFolder, templateDefinition.body);
       return {
         template: templateDefinition.template,
         body: loadFileAndReplaceKeywords(markupFile, {
