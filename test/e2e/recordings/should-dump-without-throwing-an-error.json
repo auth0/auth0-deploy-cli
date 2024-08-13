@@ -1713,6 +1713,16 @@
     {
       "scope": "https://deploy-cli-dev.eu.auth0.com:443",
       "method": "GET",
+      "path": "/api/v2/prompts/login-passwordless/partials",
+      "body": "",
+      "status": 200,
+      "response": {},
+      "rawHeaders": [],
+      "responseIsBinary": false
+    },
+    {
+      "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+      "method": "GET",
       "path": "/api/v2/prompts/signup/partials",
       "body": "",
       "status": 200,

@@ -149,23 +149,23 @@ String. Separate value from audience value while retrieving an access token for 
 
 ### `AUTH0_EXCLUDED_RULES`
 
-Array of strings. Excludes the management of specific rules by ID. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
+Array of strings. Excludes the management of specific rules by name. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
 
 ### `AUTH0_EXCLUDED_CLIENTS`
 
-Array of strings. Excludes the management of specific clients by ID. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
+Array of strings. Excludes the management of specific clients by name. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
 
 ### `AUTH0_EXCLUDED_DATABASES`
 
-Array of strings. Excludes the management of specific databases by ID. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
+Array of strings. Excludes the management of specific databases by name. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
 
 ### `AUTH0_EXCLUDED_CONNECTIONS`
 
-Array of strings. Excludes the management of specific connections by ID. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
+Array of strings. Excludes the management of specific connections by name. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
 
 ### `AUTH0_EXCLUDED_RESOURCE_SERVERS`
 
-Array of strings. Excludes the management of specific resource servers by ID. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
+Array of strings. Excludes the management of specific resource servers by name. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
 
 ---
 
