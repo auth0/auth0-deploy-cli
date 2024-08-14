@@ -1,4 +1,4 @@
-import { GetOrganizationMemberRoles200ResponseOneOfInner } from 'auth0';
+import { GetOrganizationMemberRoles200ResponseOneOfInner, Permission } from 'auth0';
 import DefaultHandler, { order } from './default';
 import { calculateChanges } from '../../calculateChanges';
 import log from '../../../logger';
@@ -25,6 +25,10 @@ export const schema = {
     },
     required: ['name'],
   },
+};
+
+type RolePermissions = GetOrganizationMemberRoles200ResponseOneOfInner & {
+  permissions?: Permission[];
 };
 
 export default class RolesHandler extends DefaultHandler {
@@ -149,7 +153,7 @@ export default class RolesHandler extends DefaultHandler {
     }
 
     try {
-      const allRoles: GetOrganizationMemberRoles200ResponseOneOfInner[] = [];
+      const allRoles: RolePermissions[] = [];
       let page: number = 0;
       // paginate through all roles
       while (true) {
@@ -164,22 +168,32 @@ export default class RolesHandler extends DefaultHandler {
       }
 
       for (let index = 0; index < allRoles.length; index++) {
-        // TODO: Bring back paginate: true
-        const {
-          data: { permissions },
-        } = await this.client.roles.getPermissions({
-          include_totals: true,
-          id: allRoles[index].id,
-        });
+        // paginate through all permissions for each role
+        const allPesmission: Permission[] = [];
+        page = 0;
+        while (true) {
+          const {
+            data: { permissions, total },
+          } = await this.client.roles.getPermissions({
+            include_totals: true,
+            id: allRoles[index].id,
+            page: page,
+          });
+          allPesmission.push(...permissions);
+          page += 1;
+          if (allPesmission.length === total) {
+            break;
+          }
+        }
         const strippedPerms = await Promise.all(
-          permissions.map(async (permission) => {
+          allPesmission.map(async (permission) => {
             delete permission.resource_server_name;
             delete permission.description;
             return permission;
           })
         );
-        // TODO: Do we need this?
-        (allRoles[index] as any).permissions = strippedPerms;
+
+        allRoles[index].permissions = strippedPerms;
       }
       this.existing = allRoles;
       return this.existing;
