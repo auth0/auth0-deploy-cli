@@ -208,11 +208,21 @@ export default class ActionHandler extends DefaultAPIHandler {
     // Actions API does not support include_totals param like the other paginate API's.
     // So we set it to false otherwise it will fail with "Additional properties not allowed: include_totals"
     try {
-      // TODO: bring back paginate: true
-      const { data } = await this.client.actions.getAll();
-      const { actions } = data;
-      this.existing = actions;
-      return actions;
+      const allActions: GetActions200ResponseActionsInner[] = [];
+      let page: number = 0;
+      // paginate through all actions
+      while (true) {
+        const {
+          data: { actions, total },
+        } = await await this.client.actions.getAll({ page: page });
+        allActions.push(...actions);
+        page += 1;
+        if (allActions.length === total) {
+          break;
+        }
+      }
+      this.existing = allActions;
+      return allActions;
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 501) {
         return null;
