@@ -1,3 +1,4 @@
+import { Hook } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
@@ -171,15 +172,27 @@ export default class HooksHandler extends DefaultHandler {
     }
 
     try {
-      // TODO: Bring back paginate: true
-      const { data: { hooks } } = await this.client.hooks.getAll({ include_totals: true });
+      const allHooks: Hook[] = [];
+      let page: number = 0;
+
+      // paginate through all hooks
+      while (true) {
+        const {
+          data: { hooks, total },
+        } = await this.client.hooks.getAll({ include_totals: true, page: page });
+        allHooks.push(...hooks);
+        page += 1;
+        if (allHooks.length === total) {
+          break;
+        }
+      }
 
       // hooks.getAll does not return code and secrets, we have to fetch hooks one-by-one
       this.existing = await Promise.all(
-        hooks.map((hook: { id: string }) =>
+        allHooks.map((hook: { id: string }) =>
           this.client.hooks
             .get({ id: hook.id })
-            .then(({data: hookWithCode}) =>
+            .then(({ data: hookWithCode }) =>
               this.client.hooks
                 .getSecrets({ id: hook.id })
                 .then(({ data: secrets }) => ({ ...hookWithCode, secrets }))
