@@ -1,3 +1,4 @@
+import { Client } from 'auth0';
 import DefaultHandler, { order } from './default';
 import { convertClientNamesToIds } from '../../utils';
 import { Assets, CalculatedChanges } from '../../../types';
@@ -48,9 +49,21 @@ export default class ClientGrantsHandler extends DefaultHandler {
     if (this.existing) {
       return this.existing;
     }
-    // TODO: Bring back paginate: true
-    const { data } = await this.client.clientGrants.getAll({ include_totals: true });
-    this.existing = data.client_grants;
+
+    const allClientGrants: ClientGrant[] = [];
+    let page: number = 0;
+    // paginate through all client grants
+    while (true) {
+      const {
+        data: { client_grants: clientGrants, total },
+      } = await this.client.clientGrants.getAll({ include_totals: true, page: page });
+      allClientGrants.push(...clientGrants);
+      page += 1;
+      if (allClientGrants.length === total) {
+        break;
+      }
+    }
+    this.existing = allClientGrants;
 
     // Always filter out the client we are using to access Auth0 Management API
     // As it could cause problems if the grants are deleted or updated etc
@@ -69,17 +82,27 @@ export default class ClientGrantsHandler extends DefaultHandler {
     // Do nothing if not set
     if (!clientGrants) return;
 
-    // TODO: Bring back paginate: true
-    const { data } = await this.client.clients.getAll({ include_totals: true });
-    // @ts-ignore-error TODO: add pagination overload to client.getAll
-    const { clients } = data;
+    const allClients: Client[] = [];
+    let page: number = 0;
+    // paginate through all clients
+    while (true) {
+      const {
+        data: { clients, total },
+      } = await this.client.clients.getAll({ include_totals: true, page: page });
+      allClients.push(...clients);
+      page += 1;
+      if (allClients.length === total) {
+        break;
+      }
+    }
+
     const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
-    const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
+    const excludedClients = convertClientNamesToIds(excludedClientsByNames, allClients);
 
     // Convert clients by name to the id
     const formatted = clientGrants.map((clientGrant) => {
       const grant = { ...clientGrant };
-      const found = clients.find((c) => c.name === grant.client_id);
+      const found = allClients.find((c) => c.name === grant.client_id);
       if (found) grant.client_id = found.client_id;
       return grant;
     });
@@ -92,6 +115,7 @@ export default class ClientGrantsHandler extends DefaultHandler {
       clientGrants: formatted,
     });
 
+    // eslint-disable-next-line camelcase
     const filterGrants = (list: { client_id: string }[]) => {
       if (excludedClients.length) {
         return list.filter(
