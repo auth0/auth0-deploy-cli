@@ -1,3 +1,4 @@
+import { Client } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
@@ -50,12 +51,23 @@ export default class PagesHandler extends DefaultHandler {
   }
 
   async updateLoginPage(page): Promise<void> {
-    // TODO: Bring back paginate: true
-    // @ts-ignore-error TODO: add pagination overload to client.getAll
-    const { data: { clients: globalClient } } = await this.client.clients.getAll({
-      is_global: true,
-      include_totals: true,
-    });
+    const globalClient: Client[] = [];
+    let pageNumber: number = 0;
+    // paginate through all clients
+    while (true) {
+      const {
+        data: { clients, total },
+      } = await this.client.clients.getAll({
+        is_global: true,
+        include_totals: true,
+        page: pageNumber,
+      });
+      globalClient.push(...clients);
+      pageNumber += 1;
+      if (globalClient.length === total) {
+        break;
+      }
+    }
 
     if (!globalClient[0]) {
       throw new Error('Unable to find global client id when trying to update the login page');
@@ -104,12 +116,24 @@ export default class PagesHandler extends DefaultHandler {
     }[] = [];
 
     // Login page is handled via the global client
-    // TODO: Bring back paginate: true
-    // @ts-ignore-error TODO: add pagination overload to client.getAll
-    const { data: { clients: globalClient } } = await this.client.clients.getAll({
-      is_global: true,
-      include_totals: true,
-    });
+
+    const globalClient: Client[] = [];
+    let pageNumber: number = 0;
+    // paginate through all clients
+    while (true) {
+      const {
+        data: { clients, total },
+      } = await this.client.clients.getAll({
+        is_global: true,
+        include_totals: true,
+        page: pageNumber,
+      });
+      globalClient.push(...clients);
+      pageNumber += 1;
+      if (globalClient.length === total) {
+        break;
+      }
+    }
     if (!globalClient[0]) {
       throw new Error('Unable to find global client id when trying to dump the login page');
     }
