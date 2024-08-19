@@ -214,7 +214,7 @@ export default class ActionHandler extends DefaultAPIHandler {
       while (true) {
         const {
           data: { actions, total },
-        } = await await this.client.actions.getAll({ page: page });
+        } = await this.client.actions.getAll({ page: page });
         allActions.push(...actions);
         page += 1;
         if (allActions.length === total) {
@@ -251,20 +251,17 @@ export default class ActionHandler extends DefaultAPIHandler {
     if (!actions) return;
     const changes = await this.calcChanges(assets);
 
-    //Management of marketplace actions not currently supported, see ESD-23225.
-    const changesWithMarketplaceActionsFiltered: CalculatedChanges = (() => {
-      return {
-        ...changes,
-        del: changes.del.filter((action: Action) => !isMarketplaceAction(action)),
-      };
-    })();
+    // Management of marketplace actions not currently supported, see ESD-23225.
+    const changesWithMarketplaceActionsFiltered: CalculatedChanges = (() => ({
+      ...changes,
+      del: changes.del.filter((action: Action) => !isMarketplaceAction(action)),
+    }))();
 
     await super.processChanges(assets, changesWithMarketplaceActionsFiltered);
 
     const postProcessedActions = await (async () => {
-      this.existing = null; //Clear the cache
-      const actions = await this.getType();
-      return actions;
+      this.existing = null; // Clear the cache
+      return this.getType();
     })();
 
     // Deploy actions
@@ -273,9 +270,9 @@ export default class ActionHandler extends DefaultAPIHandler {
         .filter((action) => action.deployed)
         .map((actionWithoutId) => {
           // Add IDs to just-created actions
-          const actionId = postProcessedActions?.find((postProcessedAction) => {
-            return postProcessedAction.name === actionWithoutId.name;
-          })?.id;
+          const actionId = postProcessedActions?.find(
+            (postProcessedAction) => postProcessedAction.name === actionWithoutId.name
+          )?.id;
 
           const actionWithId = {
             ...actionWithoutId,
