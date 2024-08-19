@@ -82,13 +82,23 @@ export default class ClientHandler extends DefaultAPIHandler {
 
   async getType() {
     if (this.existing) return this.existing;
-    // TODO: Bring back paginate: true
-    const { data } = await this.client.clients.getAll({
-      include_totals: true,
-      is_global: false,
-    });
-    // @ts-ignore-error TODO: add pagination overload to client.getAll
-    this.existing = data.clients;
+
+    const allClients: Client[] = [];
+    let page: number = 0;
+
+    // paginate through all clients
+    while (true) {
+      const {
+        data: { clients, total },
+      } = await this.client.clients.getAll({ include_totals: true, is_global: false, page: page });
+      allClients.push(...clients);
+      page += 1;
+      if (allClients.length === total) {
+        break;
+      }
+    }
+
+    this.existing = allClients;
     return this.existing;
   }
 }
