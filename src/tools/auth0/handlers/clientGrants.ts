@@ -35,7 +35,7 @@ export default class ClientGrantsHandler extends DefaultHandler {
       ...config,
       type: 'clientGrants',
       id: 'id',
-      //@ts-ignore because not sure why two-dimensional array passed in
+      // @ts-ignore because not sure why two-dimensional array passed in
       identifiers: ['id', ['client_id', 'audience']],
       stripUpdateFields: ['audience', 'client_id'],
     });
@@ -129,13 +129,13 @@ export default class ClientGrantsHandler extends DefaultHandler {
     };
 
     const changes: CalculatedChanges = {
-      //@ts-ignore because this expects `client_id` and that's not yet typed on Asset
+      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
       del: filterGrants(del),
-      //@ts-ignore because this expects `client_id` and that's not yet typed on Asset
+      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
       update: filterGrants(update),
-      //@ts-ignore because this expects `client_id` and that's not yet typed on Asset
+      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
       create: filterGrants(create),
-      //@ts-ignore because this expects `client_id` and that's not yet typed on Asset
+      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
       conflicts: filterGrants(conflicts),
     };
 
