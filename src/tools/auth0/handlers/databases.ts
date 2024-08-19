@@ -1,4 +1,4 @@
-import { GetConnectionsStrategyEnum } from 'auth0';
+import { Client, Connection, GetConnectionsStrategyEnum } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import constants from '../../constants';
 import { filterExcluded, getEnabledClients } from '../../utils';
@@ -59,12 +59,27 @@ export default class DatabaseHandler extends DefaultAPIHandler {
 
   async getType() {
     if (this.existing) return this.existing;
-    // TODO: Bring back paginate: true
-     const { data: { connections } } = await this.client.connections.getAll({
-      strategy: [GetConnectionsStrategyEnum.auth0],
-      include_totals: true,
-    });
-    this.existing = connections;
+
+    const allConnections: Connection[] = [];
+    let page: number = 0;
+
+    // paginate through all connections
+    while (true) {
+      const {
+        data: { connections, total },
+      } = await this.client.connections.getAll({
+        strategy: [GetConnectionsStrategyEnum.auth0],
+        include_totals: true,
+        page: page,
+      });
+      allConnections.push(...connections);
+      page += 1;
+      if (allConnections.length === total) {
+        break;
+      }
+    }
+
+    this.existing = allConnections;
 
     return this.existing;
   }
@@ -82,19 +97,50 @@ export default class DatabaseHandler extends DefaultAPIHandler {
       };
 
     // Convert enabled_clients by name to the id
-    // TODO: Bring back paginate: true
-    // @ts-ignore-error TODO: add pagination overload to client.getAll
-    const { data: { clients } } = await this.client.clients.getAll({ include_totals: true });
-    // TODO: Bring back paginate: true
-    const { data: { connections: existingDatabasesConnections } } = await this.client.connections.getAll({
-      strategy: [GetConnectionsStrategyEnum.auth0],
-      include_totals: true,
-    });
+
+    const allClients: Client[] = [];
+    let page: number = 0;
+    // paginate through all clients
+    while (true) {
+      const {
+        data: { clients, total },
+      } = await this.client.clients.getAll({ include_totals: true, page: page });
+      allClients.push(...clients);
+      page += 1;
+      if (allClients.length === total) {
+        break;
+      }
+    }
+
+    const allExistingDatabasesConnections: Connection[] = [];
+    page = 0;
+
+    // paginate through all connections
+    while (true) {
+      const {
+        data: { connections, total },
+      } = await this.client.connections.getAll({
+        strategy: [GetConnectionsStrategyEnum.auth0],
+        include_totals: true,
+        page: page,
+      });
+      allExistingDatabasesConnections.push(...connections);
+      page += 1;
+      if (allExistingDatabasesConnections.length === total) {
+        break;
+      }
+    }
+
     const formatted = databases.map((db) => {
       if (db.enabled_clients) {
         return {
           ...db,
-          enabled_clients: getEnabledClients(assets, db, existingDatabasesConnections, clients),
+          enabled_clients: getEnabledClients(
+            assets,
+            db,
+            allExistingDatabasesConnections,
+            allClients
+          ),
         };
       }
 
