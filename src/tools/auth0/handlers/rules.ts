@@ -1,3 +1,4 @@
+import { Rule } from 'auth0';
 import ValidationError from '../../validationError';
 import { convertJsonToString, stripFields, duplicateItems, isDeprecatedError } from '../../utils';
 import DefaultHandler from './default';
@@ -63,9 +64,22 @@ export default class RulesHandler extends DefaultHandler {
   async getType(): Promise<Asset[] | null> {
     try {
       if (this.existing) return this.existing;
-      // TODO: Bring back paginate: true
-      const { data } = await this.client.rules.getAll({ include_totals: true });
-      this.existing = data.rules;
+
+      const allRules: Rule[] = [];
+      let page: number = 0;
+      // paginate through all rules
+      while (true) {
+        const {
+          data: { rules, total },
+        } = await this.client.rules.getAll({ include_totals: true, page: page });
+        allRules.push(...rules);
+        page += 1;
+        if (allRules.length === total) {
+          break;
+        }
+      }
+
+      this.existing = allRules;
       return this.existing;
     } catch (err) {
       if (isDeprecatedError(err)) {
