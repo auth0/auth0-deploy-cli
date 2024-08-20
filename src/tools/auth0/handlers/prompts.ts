@@ -98,6 +98,7 @@ const customPartialsPromptTypes = [
   'login',
   'login-id',
   'login-password',
+  'login-passwordless',
   'signup',
   'signup-id',
   'signup-password',
@@ -112,6 +113,8 @@ const customPartialsScreenTypes = [
   'signup',
   'signup-id',
   'signup-password',
+  'login-passwordless-sms-otp',
+  'login-passwordless-email-code'
 ] as const;
 
 export type CustomPartialsScreenTypes = typeof customPartialsPromptTypes[number];
