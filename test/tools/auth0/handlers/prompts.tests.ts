@@ -105,6 +105,7 @@ describe('#prompts handler', () => {
       getCustomPartial.withArgs({ prompt: 'login' }).resolves(loginPartial);
       getCustomPartial.withArgs({ prompt: 'login-id' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'login-password' }).resolves({});
+      getCustomPartial.withArgs({ prompt: 'login-passwordless' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup-password' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup-id' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup' }).resolves(signupPartial);
@@ -293,6 +294,7 @@ describe('#prompts handler', () => {
       getCustomPartial.withArgs({ prompt: 'login' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'login-id' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'login-password' }).resolves({});
+      getCustomPartial.withArgs({ prompt: 'login-passwordless' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup-password' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup-id' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup' }).resolves({});
