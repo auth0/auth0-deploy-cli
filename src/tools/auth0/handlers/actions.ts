@@ -208,21 +208,11 @@ export default class ActionHandler extends DefaultAPIHandler {
     // Actions API does not support include_totals param like the other paginate API's.
     // So we set it to false otherwise it will fail with "Additional properties not allowed: include_totals"
     try {
-      const allActions: GetActions200ResponseActionsInner[] = [];
-      let page: number = 0;
-      // paginate through all actions
-      while (true) {
-        const {
-          data: { actions, total },
-        } = await this.client.actions.getAll({ page: page });
-        allActions.push(...actions);
-        page += 1;
-        if (allActions.length === total) {
-          break;
-        }
-      }
-      this.existing = allActions;
-      return allActions;
+      // TODO: bring back paginate: true
+      const { data } = await this.client.actions.getAll();
+      const { actions } = data;
+      this.existing = actions;
+      return actions;
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 501) {
         return null;
@@ -251,17 +241,20 @@ export default class ActionHandler extends DefaultAPIHandler {
     if (!actions) return;
     const changes = await this.calcChanges(assets);
 
-    // Management of marketplace actions not currently supported, see ESD-23225.
-    const changesWithMarketplaceActionsFiltered: CalculatedChanges = (() => ({
-      ...changes,
-      del: changes.del.filter((action: Action) => !isMarketplaceAction(action)),
-    }))();
+    //Management of marketplace actions not currently supported, see ESD-23225.
+    const changesWithMarketplaceActionsFiltered: CalculatedChanges = (() => {
+      return {
+        ...changes,
+        del: changes.del.filter((action: Action) => !isMarketplaceAction(action)),
+      };
+    })();
 
     await super.processChanges(assets, changesWithMarketplaceActionsFiltered);
 
     const postProcessedActions = await (async () => {
-      this.existing = null; // Clear the cache
-      return this.getType();
+      this.existing = null; //Clear the cache
+      const actions = await this.getType();
+      return actions;
     })();
 
     // Deploy actions
@@ -270,9 +263,9 @@ export default class ActionHandler extends DefaultAPIHandler {
         .filter((action) => action.deployed)
         .map((actionWithoutId) => {
           // Add IDs to just-created actions
-          const actionId = postProcessedActions?.find(
-            (postProcessedAction) => postProcessedAction.name === actionWithoutId.name
-          )?.id;
+          const actionId = postProcessedActions?.find((postProcessedAction) => {
+            return postProcessedAction.name === actionWithoutId.name;
+          })?.id;
 
           const actionWithId = {
             ...actionWithoutId,

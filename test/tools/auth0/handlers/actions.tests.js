@@ -145,18 +145,20 @@ describe('#actions handler', () => {
           getAll: () => {
             if (!auth0.getAllCalled) {
               auth0.getAllCalled = true;
-              return Promise.resolve(mockPagedData({ include_totals: true }, 'actions', []));
+              return Promise.resolve({ data: [] });
             }
 
-            return Promise.resolve(
-              mockPagedData({ include_totals: true }, 'actions', [
-                {
-                  name: action.name,
-                  supported_triggers: action.supported_triggers,
-                  id: actionId,
-                },
-              ])
-            );
+            return Promise.resolve({
+              data: {
+                actions: [
+                  {
+                    name: action.name,
+                    supported_triggers: action.supported_triggers,
+                    id: actionId,
+                  },
+                ],
+              }
+            });
           },
           createVersion: () => Promise.resolve({ data: version }),
         },
@@ -205,18 +207,16 @@ describe('#actions handler', () => {
           getAll: () => {
             if (!auth0.getAllCalled) {
               auth0.getAllCalled = true;
-              return Promise.resolve(mockPagedData({ include_totals: true }, 'actions', []));
+              return Promise.resolve(mockPagedData({ include_totals: true }, 'actions',  [] ));
             }
 
-            return Promise.resolve(
-              mockPagedData({ include_totals: true }, 'actions', [
-                {
-                  name: action.name,
-                  supported_triggers: action.supported_triggers,
-                  id: actionId,
-                },
-              ])
-            );
+            return Promise.resolve(mockPagedData({ include_totals: true }, 'actions',  [
+              {
+                name: action.name,
+                supported_triggers: action.supported_triggers,
+                id: actionId,
+              },
+            ] ));
           },
           createVersion: () => Promise.resolve({ data: version }),
           deploy: (data) => {
@@ -376,20 +376,18 @@ describe('#actions handler', () => {
             return Promise.resolve({ data });
           },
           getAll: () =>
-            Promise.resolve(
-              mockPagedData({ include_totals: true }, 'actions', [
-                {
-                  id: 'action-1',
-                  name: 'action-test',
-                  supported_triggers: [
-                    {
-                      id: 'post-login',
-                      version: 'v1',
-                    },
-                  ],
-                },
-              ])
-            ),
+            Promise.resolve({ data: [
+              {
+                id: 'action-1',
+                name: 'action-test',
+                supported_triggers: [
+                  {
+                    id: 'post-login',
+                    version: 'v1',
+                  },
+                ],
+              },
+            ] }),
           getVersion: () =>
             Promise.resolve({
               data: {
@@ -404,7 +402,7 @@ describe('#actions handler', () => {
                 status: 'built',
                 created_at: '2020-12-03T15:20:52.094497448Z',
                 updated_at: '2020-12-03T15:20:54.415669983Z',
-              },
+              }
             }),
         },
         pool,
@@ -451,10 +449,7 @@ describe('#actions handler', () => {
 
       const auth0 = {
         actions: {
-          getAll: () =>
-            Promise.resolve(
-              mockPagedData({ include_totals: true }, 'actions', [marketplaceAction])
-            ),
+          getAll: () => Promise.resolve({ data: [marketplaceAction] }),
           delete: () => {
             wasDeleteCalled = true;
           },

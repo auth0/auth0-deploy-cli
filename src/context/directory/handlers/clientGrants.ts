@@ -1,6 +1,5 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { Client, ResourceServer } from 'auth0';
 import { constants } from '../../../tools';
 
 import {
@@ -48,39 +47,16 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   if (clientGrants.length === 0) return;
 
-  const allResourceServers: ResourceServer[] = [];
-  let page: number = 0;
-  // paginate through all resource servers
-  while (true) {
-    const {
-      data: { resource_servers: resourceServers, total },
-    } = await context.mgmtClient.resourceServers.getAll({
-      include_totals: true,
-      page: page,
-    });
-    allResourceServers.push(...resourceServers);
-    page += 1;
-    if (allResourceServers.length === total) {
-      break;
-    }
-  }
+  // TODO: Bring back paginate: true
+  const { data: { resource_servers: allResourceServers } } = await context.mgmtClient.resourceServers.getAll({
+    include_totals: true,
+  });
 
-  // paginate through all clients
-  const allClients: Client[] = [];
-  page = 0;
-  while (true) {
-    const {
-      data: { clients, total },
-    } = await context.mgmtClient.clients.getAll({
-      include_totals: true,
-      page: page,
-    });
-    allClients.push(...clients);
-    page += 1;
-    if (allClients.length === total) {
-      break;
-    }
-  }
+  // TODO: Bring back paginate: true
+  // @ts-ignore-error TODO: add pagination overload to client.getAll
+  const { data: { clients: allClients } } = await context.mgmtClient.clients.getAll({
+    include_totals: true,
+  });
 
   // Convert client_id to the client name for readability
   clientGrants.forEach((grant: ClientGrant) => {
@@ -91,7 +67,9 @@ async function dump(context: DirectoryContext): Promise<void> {
     }
 
     const clientName = (() => {
-      const associatedClient = allClients.find((client) => client.client_id === grant.client_id);
+      const associatedClient = allClients.find((client) => {
+        return client.client_id === grant.client_id;
+      });
 
       if (associatedClient === undefined) return grant.client_id;
 
@@ -99,9 +77,9 @@ async function dump(context: DirectoryContext): Promise<void> {
     })();
 
     const apiName = (() => {
-      const associatedAPI = allResourceServers.find(
-        (resourceServer) => resourceServer.identifier === grant.audience
-      );
+      const associatedAPI = allResourceServers.find((resourceServer) => {
+        return resourceServer.identifier === grant.audience;
+      });
 
       if (associatedAPI === undefined) return grant.audience;
 

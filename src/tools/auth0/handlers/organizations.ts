@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Connection, PostEnabledConnectionsRequest } from 'auth0';
+import { PostEnabledConnectionsRequest } from 'auth0';
 import DefaultHandler, { order } from './default';
 import { calculateChanges } from '../../calculateChanges';
 import log from '../../../logger';
@@ -229,24 +229,10 @@ export default class OrganizationsHandler extends DefaultHandler {
     if (!organizations) return;
     // Gets organizations from destination tenant
     const existing = await this.getType();
-
-    const allExistingConnections: Connection[] = [];
-    let page: number = 0;
-
-    // paginate through all connections
-    while (true) {
-      const {
-        data: { connections, total },
-      } = await this.client.connections.getAll({
-        include_totals: true,
-        page: page,
-      });
-      allExistingConnections.push(...connections);
-      page += 1;
-      if (allExistingConnections.length === total) {
-        break;
-      }
-    }
+    // TODO: Bring back paginate: true
+    const { data: { connections: existingConnections } } = await this.client.connections.getAll({
+      include_totals: true,
+    });
 
     // We need to get the connection ids for the names configured so we can link them together
     organizations.forEach((org) => {
@@ -257,7 +243,7 @@ export default class OrganizationsHandler extends DefaultHandler {
 
           return {
             ...connection,
-            connection_id: (allExistingConnections.find((c) => c.name === name) || {}).id,
+            connection_id: (existingConnections.find((c) => c.name === name) || {}).id,
           };
         })
         .filter((connection) => !!connection.connection_id);

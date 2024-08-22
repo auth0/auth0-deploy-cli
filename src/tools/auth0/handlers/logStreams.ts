@@ -58,7 +58,7 @@ export default class LogStreamsHandler extends DefaultAPIHandler {
       return this.existing;
     }
 
-    // Does not suport paginate
+    // TODO: Bring back paginate: false
     const logStreams = await this.client.logStreams.getAll().then(({ data: logStreams }) =>
       logStreams.map((logStream) => {
         // TODO: Do we need to keep this
