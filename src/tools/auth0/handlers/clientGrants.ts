@@ -1,4 +1,3 @@
-import { Client } from 'auth0';
 import DefaultHandler, { order } from './default';
 import { convertClientNamesToIds } from '../../utils';
 import { Assets, CalculatedChanges } from '../../../types';
@@ -35,7 +34,7 @@ export default class ClientGrantsHandler extends DefaultHandler {
       ...config,
       type: 'clientGrants',
       id: 'id',
-      // @ts-ignore because not sure why two-dimensional array passed in
+      //@ts-ignore because not sure why two-dimensional array passed in
       identifiers: ['id', ['client_id', 'audience']],
       stripUpdateFields: ['audience', 'client_id'],
     });
@@ -49,21 +48,9 @@ export default class ClientGrantsHandler extends DefaultHandler {
     if (this.existing) {
       return this.existing;
     }
-
-    const allClientGrants: ClientGrant[] = [];
-    let page: number = 0;
-    // paginate through all client grants
-    while (true) {
-      const {
-        data: { client_grants: clientGrants, total },
-      } = await this.client.clientGrants.getAll({ include_totals: true, page: page });
-      allClientGrants.push(...clientGrants);
-      page += 1;
-      if (allClientGrants.length === total) {
-        break;
-      }
-    }
-    this.existing = allClientGrants;
+    // TODO: Bring back paginate: true
+    const { data } = await this.client.clientGrants.getAll({ include_totals: true });
+    this.existing = data.client_grants;
 
     // Always filter out the client we are using to access Auth0 Management API
     // As it could cause problems if the grants are deleted or updated etc
@@ -82,27 +69,17 @@ export default class ClientGrantsHandler extends DefaultHandler {
     // Do nothing if not set
     if (!clientGrants) return;
 
-    const allClients: Client[] = [];
-    let page: number = 0;
-    // paginate through all clients
-    while (true) {
-      const {
-        data: { clients, total },
-      } = await this.client.clients.getAll({ include_totals: true, page: page });
-      allClients.push(...clients);
-      page += 1;
-      if (allClients.length === total) {
-        break;
-      }
-    }
-
+    // TODO: Bring back paginate: true
+    const { data } = await this.client.clients.getAll({ include_totals: true });
+    // @ts-ignore-error TODO: add pagination overload to client.getAll
+    const { clients } = data;
     const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
-    const excludedClients = convertClientNamesToIds(excludedClientsByNames, allClients);
+    const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
 
     // Convert clients by name to the id
     const formatted = clientGrants.map((clientGrant) => {
       const grant = { ...clientGrant };
-      const found = allClients.find((c) => c.name === grant.client_id);
+      const found = clients.find((c) => c.name === grant.client_id);
       if (found) grant.client_id = found.client_id;
       return grant;
     });
@@ -115,7 +92,6 @@ export default class ClientGrantsHandler extends DefaultHandler {
       clientGrants: formatted,
     });
 
-    // eslint-disable-next-line camelcase
     const filterGrants = (list: { client_id: string }[]) => {
       if (excludedClients.length) {
         return list.filter(
@@ -129,13 +105,13 @@ export default class ClientGrantsHandler extends DefaultHandler {
     };
 
     const changes: CalculatedChanges = {
-      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
+      //@ts-ignore because this expects `client_id` and that's not yet typed on Asset
       del: filterGrants(del),
-      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
+      //@ts-ignore because this expects `client_id` and that's not yet typed on Asset
       update: filterGrants(update),
-      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
+      //@ts-ignore because this expects `client_id` and that's not yet typed on Asset
       create: filterGrants(create),
-      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
+      //@ts-ignore because this expects `client_id` and that's not yet typed on Asset
       conflicts: filterGrants(conflicts),
     };
 

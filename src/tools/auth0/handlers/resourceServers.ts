@@ -53,24 +53,11 @@ export default class ResourceServersHandler extends DefaultHandler {
 
   async getType(): Promise<ResourceServer[]> {
     if (this.existing) return this.existing;
-
-    const allResourceServers: ResourceServer[] = [];
-    let page: number = 0;
-    // paginate through all resource servers
-    while (true) {
-      const {
-        data: { resource_servers: resourceServers, total },
-      } = await this.client.resourceServers.getAll({
-        include_totals: true,
-        page: page,
-      });
-      allResourceServers.push(...resourceServers);
-      page += 1;
-      if (allResourceServers.length === total) {
-        break;
-      }
-    }
-    return allResourceServers.filter(
+    // TODO: Bring back paginate: true
+    const { data: { resource_servers: resourceServers } } = await this.client.resourceServers.getAll({
+      include_totals: true,
+    });
+    return resourceServers.filter(
       (rs) => rs.name !== constants.RESOURCE_SERVERS_MANAGEMENT_API_NAME
     );
   }

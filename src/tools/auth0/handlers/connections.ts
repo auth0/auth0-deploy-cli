@@ -1,6 +1,5 @@
 import dotProp from 'dot-prop';
 import _ from 'lodash';
-import { Client, Connection } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import { filterExcluded, convertClientNameToId, getEnabledClients } from '../../utils';
 import { CalculatedChanges, Asset, Assets } from '../../../types';
@@ -111,27 +110,13 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
 
   async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
-
-    const allConnections: Connection[] = [];
-    let page: number = 0;
-
-    // paginate through all connections
-    while (true) {
-      const {
-        data: { connections, total },
-      } = await this.client.connections.getAll({
-        include_totals: true,
-        page: page,
-      });
-      allConnections.push(...connections);
-      page += 1;
-      if (allConnections.length === total) {
-        break;
-      }
-    }
-
+    // TODO: Bring back paginate: true
+    const { data } = await this.client.connections.getAll({
+      include_totals: true,
+    });
+    const { connections } = data;
     // Filter out database connections
-    this.existing = allConnections.filter((c) => c.strategy !== 'auth0');
+    this.existing = connections.filter((c) => c.strategy !== 'auth0');
     if (this.existing === null) return [];
     return this.existing;
   }
@@ -149,50 +134,23 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       };
 
     // Convert enabled_clients by name to the id
-
-    const allClients: Client[] = [];
-    let page: number = 0;
-
-    // paginate through all clients
-    while (true) {
-      const {
-        data: { clients, total },
-      } = await this.client.clients.getAll({ include_totals: true, is_global: false, page: page });
-      allClients.push(...clients);
-      page += 1;
-      if (allClients.length === total) {
-        break;
-      }
-    }
-
-    const allExistingConnections: Connection[] = [];
-    page = 0;
-
-    // paginate through all existing connections
-    while (true) {
-      const {
-        data: { connections: existingConnections, total },
-      } = await this.client.connections.getAll({
-        include_totals: true,
-        page: page,
-      });
-      allExistingConnections.push(...existingConnections);
-      page += 1;
-      if (allExistingConnections.length === total) {
-        break;
-      }
-    }
-
+    // TODO: Bring back paginate: true
+    // @ts-ignore-error TODO: add pagination overload to client.getAll
+    const { data: { clients } } = await this.client.clients.getAll({ include_totals: true });
+    // TODO: Bring back paginate: true
+    const { data: { connections: existingConnections } } = await this.client.connections.getAll({
+      include_totals: true,
+    });
     const formatted = connections.map((connection) => ({
       ...connection,
-      ...this.getFormattedOptions(connection, allClients),
-      enabled_clients: getEnabledClients(assets, connection, allExistingConnections, allClients),
+      ...this.getFormattedOptions(connection, clients),
+      enabled_clients: getEnabledClients(assets, connection, existingConnections, clients),
     }));
     const proposedChanges = await super.calcChanges({ ...assets, connections: formatted });
 
     const proposedChangesWithExcludedProperties = addExcludedConnectionPropertiesToChanges({
       proposedChanges,
-      existingConnections: allExistingConnections,
+      existingConnections,
       config: this.config,
     });
 
