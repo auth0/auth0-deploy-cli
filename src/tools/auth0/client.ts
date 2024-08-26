@@ -1,6 +1,7 @@
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import _ from 'lodash';
 
+import { ManagementClient } from 'auth0';
 import { flatten } from '../utils';
 import {
   Asset,
@@ -8,7 +9,6 @@ import {
   Auth0APIClient,
   CheckpointPaginationParams,
   PagePaginationParams,
-  BaseAuth0APIClient,
 } from '../../types';
 
 const API_CONCURRENCY = 3;
@@ -159,7 +159,7 @@ function pagedManager(client: Auth0APIClient, manager: Auth0APIClient) {
 }
 
 // Warp around the ManagementClient and detect when requesting specific pages to return all
-export default function pagedClient(client: BaseAuth0APIClient): Auth0APIClient {
+export default function pagedClient(client: ManagementClient): Auth0APIClient {
   const clientWithPooling: Auth0APIClient = {
     ...client,
     pool: new PromisePoolExecutor({
@@ -167,7 +167,7 @@ export default function pagedClient(client: BaseAuth0APIClient): Auth0APIClient 
       frequencyLimit: API_FREQUENCY_PER_SECOND,
       frequencyWindow: 1000, // 1 sec
     }),
-  } as unknown as Auth0APIClient;
+  } as Auth0APIClient;
 
   return pagedManager(clientWithPooling, clientWithPooling);
 }

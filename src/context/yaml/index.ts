@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import path from 'path';
+import { ManagementClient } from 'auth0';
 import {
   loadFileAndReplaceKeywords,
   keywordReplace,
@@ -15,6 +16,7 @@ import cleanAssets from '../../readonly';
 import { Assets, Config, Auth0APIClient, AssetTypes, KeywordMappings } from '../../types';
 import { filterOnlyIncludedResourceTypes } from '..';
 import { preserveKeywords } from '../../keywordPreservation';
+import pagedClient from '../../tools/auth0/client';
 
 export default class YAMLContext {
   basePath: string;
@@ -25,11 +27,11 @@ export default class YAMLContext {
   assets: Assets;
   disableKeywordReplacement: boolean;
 
-  constructor(config: Config, mgmtClient) {
+  constructor(config: Config, mgmtClient: ManagementClient) {
     this.configFile = config.AUTH0_INPUT_FILE;
     this.config = config;
     this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {};
-    this.mgmtClient = mgmtClient;
+    this.mgmtClient =  pagedClient(mgmtClient);
     this.disableKeywordReplacement = false;
 
     //@ts-ignore because the assets property gets filled out throughout

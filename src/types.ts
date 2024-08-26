@@ -37,9 +37,9 @@ export type ApiResponse = {
   next?: string;
 } & { [key in AssetTypes]: Asset[] };
 
-export type BaseAuth0APIClient = ManagementClient;
+// export type BaseAuth0APIClient = ManagementClient;
 
-export type Auth0APIClient = BaseAuth0APIClient & {
+export type Auth0APIClient = ManagementClient & {
   pool: PromisePoolExecutor;
 };
 

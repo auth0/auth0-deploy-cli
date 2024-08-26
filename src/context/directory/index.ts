@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { ManagementClient } from 'auth0';
 import { loadFileAndReplaceKeywords, Auth0 } from '../../tools';
 import pagedClient from '../../tools/auth0/client';
 
@@ -6,7 +7,7 @@ import cleanAssets from '../../readonly';
 import log from '../../logger';
 import handlers, { DirectoryHandler } from './handlers';
 import { isDirectory, isFile, stripIdentifiers, toConfigFn } from '../../utils';
-import { Assets, Auth0APIClient, Config, AssetTypes, BaseAuth0APIClient } from '../../types';
+import { Assets, Auth0APIClient, Config, AssetTypes } from '../../types';
 import { filterOnlyIncludedResourceTypes } from '..';
 import { preserveKeywords } from '../../keywordPreservation';
 
@@ -21,7 +22,7 @@ export default class DirectoryContext {
   assets: Assets;
   disableKeywordReplacement: boolean;
 
-  constructor(config: Config, mgmtClient: BaseAuth0APIClient) {
+  constructor(config: Config, mgmtClient: ManagementClient) {
     this.filePath = config.AUTH0_INPUT_FILE;
     this.config = config;
     this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {};

@@ -4,7 +4,7 @@ import pagedClient from './client';
 import schema from './schema';
 import handlers from './handlers';
 
-import { Assets, AssetTypes, Auth0APIClient, BaseAuth0APIClient } from '../../types';
+import { Assets, AssetTypes, Auth0APIClient } from '../../types';
 import APIHandler from './handlers/default';
 import { ConfigFunction } from '../../configFactory';
 
@@ -32,7 +32,7 @@ export default class Auth0 {
   assets: Assets;
   handlers: APIHandler[];
 
-  constructor(client: BaseAuth0APIClient, assets: Assets, config: ConfigFunction) {
+  constructor(client: Auth0APIClient, assets: Assets, config: ConfigFunction) {
     this.client = pagedClient(client);
     this.config = config;
     this.assets = assets;
