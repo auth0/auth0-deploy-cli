@@ -1,7 +1,7 @@
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import _ from 'lodash';
 
-import { ManagementClient } from 'auth0';
+import { JSONApiResponse, ManagementClient } from 'auth0';
 import { flatten } from '../utils';
 import {
   Asset,
@@ -92,15 +92,15 @@ function pagePaginator(
     delete newArgs[0].paginate;
 
     // Run the first request to get the total number of entity items
-    const rsp = await client.pool
+    const rsp: JSONApiResponse<ApiResponse> = await client.pool
       .addSingleTask({
         data: _.cloneDeep(newArgs),
         generator: (pageArgs) => target[name](...pageArgs),
       })
       .promise();
 
-    data.push(...getEntity(rsp));
-    const total = rsp.total || 0;
+    data.push(...getEntity(rsp.data));
+    const total = rsp.data?.total || 0;
     const pagesLeft = Math.ceil(total / perPage) - 1;
     // Setup pool to get the rest of the pages
     if (pagesLeft > 0) {
@@ -111,7 +111,7 @@ function pagePaginator(
             const pageArgs = _.cloneDeep(newArgs);
             pageArgs[0].page = page + 1;
 
-            return target[name](...pageArgs).then((r) => getEntity(r));
+            return target[name](...pageArgs).then((r) => getEntity(r.data));
           },
         })
         .promise();
