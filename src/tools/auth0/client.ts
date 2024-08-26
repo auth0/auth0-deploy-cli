@@ -171,3 +171,9 @@ export default function pagedClient(client: ManagementClient): Auth0APIClient {
 
   return pagedManager(clientWithPooling, clientWithPooling);
 }
+
+export async function paginate<T>(fetchFunc: any, args: PagePaginationParams): Promise<T[]> {
+  // override default <T>.getAll() behaviour using pagedClient
+  const allItems = await fetchFunc(args) as unknown as T[];
+  return allItems;
+}

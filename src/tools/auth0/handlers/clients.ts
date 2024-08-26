@@ -1,4 +1,5 @@
-import { Assets, PagePaginationParams } from '../../../types';
+import { ApiResponse, Assets, PagePaginationParams } from '../../../types';
+import { paginate } from '../client';
 import DefaultAPIHandler from './default';
 
 export const schema = {
@@ -82,14 +83,14 @@ export default class ClientHandler extends DefaultAPIHandler {
 
   async getType() {
     if (this.existing) return this.existing;
-    // paginate: override client.getAll return type for pagedClient
-    const client = (await this.client.clients.getAll({
+    // paginate: true
+    const clients = await paginate<Client>(this.client.clients.getAll, {
       paginate: true,
       include_totals: true,
       is_global: false,
-    } as PagePaginationParams)) as unknown as Client[];
+    });
 
-    this.existing = client;
+    this.existing = clients;
     return this.existing;
   }
 }

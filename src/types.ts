@@ -1,4 +1,5 @@
 import { ManagementClient, ResourceServer } from 'auth0';
+import { PromisePoolExecutor } from 'promise-pool-executor';
 import { Action } from './tools/auth0/handlers/actions';
 import {
   Prompts,
@@ -9,7 +10,6 @@ import { Page } from './tools/auth0/handlers/pages';
 import { LogStream } from './tools/auth0/handlers/logStreams';
 import { Client } from './tools/auth0/handlers/clients';
 import { ClientGrant } from './tools/auth0/handlers/clientGrants';
-import { PromisePoolExecutor } from 'promise-pool-executor';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -26,8 +26,8 @@ export type CheckpointPaginationParams = SharedPaginationParams & {
 };
 
 export type PagePaginationParams = SharedPaginationParams & {
-  page: number;
-  per_page: number;
+  page?: number;
+  per_page?: number;
 };
 
 export type ApiResponse = {
