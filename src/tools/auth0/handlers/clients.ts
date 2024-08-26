@@ -1,4 +1,4 @@
-import { Asset, Assets } from '../../../types';
+import { Assets, PagePaginationParams } from '../../../types';
 import DefaultAPIHandler from './default';
 
 export const schema = {
@@ -20,7 +20,7 @@ export type Client = {
 };
 
 export default class ClientHandler extends DefaultAPIHandler {
-  existing: Asset[] | null;
+  existing: Client[];
 
   constructor(config: DefaultAPIHandler) {
     super({
@@ -82,13 +82,14 @@ export default class ClientHandler extends DefaultAPIHandler {
 
   async getType() {
     if (this.existing) return this.existing;
-    // TODO: Bring back paginate: true
-    const { data } = await this.client.clients.getAll({
+    // paginate: override client.getAll return type for pagedClient
+    const client = (await this.client.clients.getAll({
+      paginate: true,
       include_totals: true,
       is_global: false,
-    });
-    // @ts-ignore-error TODO: add pagination overload to client.getAll
-    this.existing = data.clients;
+    } as PagePaginationParams)) as unknown as Client[];
+
+    this.existing = client;
     return this.existing;
   }
 }
