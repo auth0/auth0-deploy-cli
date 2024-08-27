@@ -1,5 +1,6 @@
 import nconf from 'nconf';
 import { configFactory } from '../configFactory';
+import { setupProxy } from '../utils';
 import { deploy as toolsDeploy } from '../tools';
 import log from '../logger';
 import { setupContext } from '../context';
@@ -13,6 +14,7 @@ export default async function importCMD(params: ImportParams) {
     config: configObj,
     env: shouldInheritEnv = false,
     secret: clientSecret,
+    proxy_url: proxyUrl,
   } = params;
 
   if (shouldInheritEnv) {
@@ -40,6 +42,8 @@ export default async function importCMD(params: ImportParams) {
   }
 
   nconf.overrides(overrides);
+
+  setupProxy(proxyUrl);
 
   // Setup context and load
   const context = await setupContext(nconf.get(), 'import');
