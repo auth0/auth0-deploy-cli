@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.24.2] - 2024-08-28
+
+### Added
+
+- Add support for `login-passwordless` prompt on `partials` in prompts handler[#946]
+
+### Fixed
+
+- Fix `branding` template `path` on export/import [#943]
+- Fix docs for support `exclusions of individual resource` [#944]
+
 ## [7.24.1] - 2024-08-09
 
 ### Fixed
