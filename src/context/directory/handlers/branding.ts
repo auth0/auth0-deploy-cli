@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
-import { dumpJSON, existsMustBeDir, getFiles, isFile, loadJSON } from '../../../utils';
+import { dumpJSON, existsMustBeDir, getFiles, isFile, loadJSON, nomalizedYAMLPath } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
@@ -38,8 +38,10 @@ function parse(context: DirectoryContext): ParsedBranding {
       mappings: context.mappings,
       disableKeywordReplacement: context.disableKeywordReplacement,
     });
+
+    const normalizedPathArray = nomalizedYAMLPath(definition.body);
     definition.body = loadFileAndReplaceKeywords(
-      path.join(brandingTemplatesFolder, definition.body),
+      path.join(brandingTemplatesFolder, ...normalizedPathArray),
       {
         mappings: context.mappings,
         disableKeywordReplacement: context.disableKeywordReplacement,
@@ -94,7 +96,7 @@ const dumpBrandingTemplates = ({ filePath, assets }: DirectoryContext): void => 
     }
 
     // save the location as relative file.
-    templateDefinition.body = `.${path.sep}${templateDefinition.template}.html`;
+    templateDefinition.body = `./${templateDefinition.template}.html`;
     dumpJSON(
       path.join(brandingTemplatesFolder, `${templateDefinition.template}.json`),
       templateDefinition

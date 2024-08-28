@@ -205,3 +205,29 @@ export function mapClientID2NameSorted(enabledClients: string[], knownClients: A
     ...(enabledClients || []).map((clientId) => convertClientIdToName(clientId, knownClients)),
   ].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 }
+
+export function nomalizedYAMLPath(filePath: string): string[] {
+  // Trim any leading or trailing whitespace
+  filePath = filePath.trim();
+
+  // Handle empty path cases
+  if (filePath === '') {
+    return [];
+  }
+
+  // Normalize the path by replacing backslashes with forward slashes
+  const normalizedPath = filePath.replace(/\\/g, '/');
+
+  // Split the path using the forward slash as the separator
+  let pathSplit = normalizedPath.split('/');
+
+  // Remove empty components resulting from leading or redundant slashes
+  pathSplit = pathSplit.filter(component => component !== '');
+
+  // Remove the first '.' if it's the first component
+  if (pathSplit.length > 0 && pathSplit[0] === '.') {
+    pathSplit.shift();
+  }
+
+  return pathSplit;
+}

@@ -6,6 +6,7 @@ import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
 import log from '../../../logger';
+import { nomalizedYAMLPath } from '../../../utils';
 
 type BrandingTemplate = {
   template: string;
@@ -32,12 +33,8 @@ async function parse(context: YAMLContext): Promise<ParsedBranding> {
 
   const parsedTemplates: BrandingTemplate[] = templates.map(
     (templateDefinition: BrandingTemplate): BrandingTemplate => {
-      const brandingTemplatesFolder = path.join(
-        context.basePath,
-        constants.BRANDING_TEMPLATES_YAML_DIRECTORY
-      );
-      const file = `${templateDefinition.template}.html`;
-      const markupFile = path.join(brandingTemplatesFolder, file);
+      const normalizedPathArray = nomalizedYAMLPath(templateDefinition.body);
+      const markupFile = path.join(context.basePath, ...normalizedPathArray);
       return {
         template: templateDefinition.template,
         body: loadFileAndReplaceKeywords(markupFile, {
