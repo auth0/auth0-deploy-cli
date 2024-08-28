@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.24.2] - 2024-08-28
+
+### Added
+
+- Add support for `login-passwordless` prompt on `partials` in prompts handler [#946]
+
+### Fixed
+
+- Fix `branding` template `path` on export/import [#943]
+- Fix docs for support `exclusions of individual resource` [#944]
+
 ## [7.24.1] - 2024-08-09
 
 ### Fixed
@@ -1067,7 +1078,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#933]: https://github.com/auth0/auth0-deploy-cli/issues/933
 [#937]: https://github.com/auth0/auth0-deploy-cli/issues/937
 [#939]: https://github.com/auth0/auth0-deploy-cli/issues/939
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.1...HEAD
+[#943]: https://github.com/auth0/auth0-deploy-cli/issues/943
+[#944]: https://github.com/auth0/auth0-deploy-cli/issues/944
+[#946]: https://github.com/auth0/auth0-deploy-cli/issues/946
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.2...HEAD
+[7.24.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.1...v7.24.2
 [7.24.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.0...v7.24.1
 [7.24.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.23.1...v7.24.0
 [7.23.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.23.0...v7.23.1
