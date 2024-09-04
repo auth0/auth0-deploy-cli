@@ -1,8 +1,8 @@
 import { get as getByDotNotation, set as setByDotNotation } from 'dot-prop';
+import { cloneDeep, isArray } from 'lodash';
 import { keywordReplace } from './tools/utils';
 import { AssetTypes, KeywordMappings } from './types';
 import { keywordReplaceArrayRegExp, keywordReplaceStringRegExp } from './tools/utils';
-import { cloneDeep, forEach, isArray } from 'lodash';
 import APIHandler from './tools/auth0/handlers/default';
 
 /*
