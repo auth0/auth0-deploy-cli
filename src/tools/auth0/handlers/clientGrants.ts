@@ -2,6 +2,7 @@ import DefaultHandler, { order } from './default';
 import { convertClientNamesToIds } from '../../utils';
 import { Assets, CalculatedChanges } from '../../../types';
 import DefaultAPIHandler from './default';
+import { paginate } from '../client';
 
 export const schema = {
   type: 'array',
@@ -48,9 +49,14 @@ export default class ClientGrantsHandler extends DefaultHandler {
     if (this.existing) {
       return this.existing;
     }
-    // TODO: Bring back paginate: true
-    const { data } = await this.client.clientGrants.getAll({ include_totals: true });
-    this.existing = data.client_grants;
+
+    // paginate: true
+    const clientGrants = await paginate<ClientGrant>(this.client.clientGrants.getAll, {
+      paginate: true,
+      include_totals: true,
+    });
+
+    this.existing = clientGrants;
 
     // Always filter out the client we are using to access Auth0 Management API
     // As it could cause problems if the grants are deleted or updated etc

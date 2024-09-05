@@ -1,3 +1,5 @@
+import pageClient from '../../../../src/tools/auth0/client';
+
 const { expect } = require('chai');
 const clientGrants = require('../../../../src/tools/auth0/handlers/clientGrants');
 const { mockPagedData } = require('../../../utils');
@@ -75,7 +77,7 @@ describe('#clientGrants handler', () => {
         pool,
       };
 
-      const handler = new clientGrants.default({ client: auth0, config });
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -104,7 +106,7 @@ describe('#clientGrants handler', () => {
         pool,
       };
 
-      const handler = new clientGrants.default({ client: auth0, config });
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([clientGrant]);
     });
@@ -129,7 +131,7 @@ describe('#clientGrants handler', () => {
         pool,
       };
 
-      const handler = new clientGrants.default({ client: auth0, config });
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -169,7 +171,7 @@ describe('#clientGrants handler', () => {
         pool,
       };
 
-      const handler = new clientGrants.default({ client: auth0, config });
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -208,7 +210,7 @@ describe('#clientGrants handler', () => {
         pool,
       };
 
-      const handler = new clientGrants.default({ client: auth0, config });
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -248,7 +250,7 @@ describe('#clientGrants handler', () => {
         pool,
       };
 
-      const handler = new clientGrants.default({ client: auth0, config });
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -282,7 +284,7 @@ describe('#clientGrants handler', () => {
         pool,
       };
 
-      const handler = new clientGrants.default({ client: auth0, config });
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ clientGrants: [] }]);
@@ -312,7 +314,7 @@ describe('#clientGrants handler', () => {
         pool,
       };
 
-      const handler = new clientGrants.default({ client: auth0, config });
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ clientGrants: [] }]);
@@ -356,7 +358,7 @@ describe('#clientGrants handler', () => {
         pool,
       };
 
-      const handler = new clientGrants.default({ client: auth0, config });
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       const assets = {
@@ -444,7 +446,7 @@ describe('#clientGrants handler', () => {
       pool,
     };
 
-    const handler = new clientGrants.default({ client: auth0, config });
+    const handler = new clientGrants.default({ client: pageClient(auth0), config });
     const stageFn = Object.getPrototypeOf(handler).processChanges;
 
     const assets = {
