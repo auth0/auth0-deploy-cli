@@ -1,9 +1,11 @@
 import dotProp from 'dot-prop';
 import _ from 'lodash';
+import { Client, Connection } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import { filterExcluded, convertClientNameToId, getEnabledClients } from '../../utils';
 import { CalculatedChanges, Asset, Assets } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
+import { paginate } from '../client';
 
 export const schema = {
   type: 'array',
@@ -110,11 +112,11 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
 
   async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
-    // TODO: Bring back paginate: true
-    const { data } = await this.client.connections.getAll({
+    // paginate: true
+    const connections = await paginate<Connection>(this.client.connections.getAll, {
+      paginate: true,
       include_totals: true,
     });
-    const { connections } = data;
     // Filter out database connections
     this.existing = connections.filter((c) => c.strategy !== 'auth0');
     if (this.existing === null) return [];
@@ -134,11 +136,15 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       };
 
     // Convert enabled_clients by name to the id
-    // TODO: Bring back paginate: true
-    // @ts-ignore-error TODO: add pagination overload to client.getAll
-    const { data: { clients } } = await this.client.clients.getAll({ include_totals: true });
-    // TODO: Bring back paginate: true
-    const { data: { connections: existingConnections } } = await this.client.connections.getAll({
+    // paginate: true
+    const clients = await paginate<Client>(this.client.clients.getAll, {
+      paginate: true,
+      include_totals: true,
+    });
+
+    // paginate: true
+    const existingConnections = await paginate<Connection>(this.client.connections.getAll, {
+      paginate: true,
       include_totals: true,
     });
     const formatted = connections.map((connection) => ({
