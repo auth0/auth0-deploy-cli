@@ -1,4 +1,4 @@
-import { ManagementClient, ResourceServer } from 'auth0';
+import { GetConnectionsStrategyEnum, ManagementClient, ResourceServer } from 'auth0';
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { Action } from './tools/auth0/handlers/actions';
 import {
@@ -17,7 +17,7 @@ type SharedPaginationParams = {
   is_global?: boolean;
   include_totals?: boolean;
   id?: string;
-  strategy?: 'auth0';
+  strategy?: GetConnectionsStrategyEnum[];
 };
 
 export type CheckpointPaginationParams = SharedPaginationParams & {
