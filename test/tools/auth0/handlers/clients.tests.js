@@ -1,3 +1,5 @@
+import pageClient from '../../../../src/tools/auth0/client';
+
 const { expect } = require('chai');
 const clients = require('../../../../src/tools/auth0/handlers/clients');
 const { mockPagedData } = require('../../../utils');
@@ -72,7 +74,7 @@ describe('#clients handler', () => {
         pool,
       };
 
-      const handler = new clients.default({ client: auth0, config });
+      const handler = new clients.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ clients: [{ name: 'someClient' }] }]);
@@ -81,15 +83,16 @@ describe('#clients handler', () => {
     it('should get clients', async () => {
       const auth0 = {
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients',  [
-            { name: 'test client', client_id: 'FMfcgxvzLDvPsgpRFKkLVrnKqGgkHhQV' },
-            { name: 'deploy client', client_id: 'client_id' },
-          ]),
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              { name: 'test client', client_id: 'FMfcgxvzLDvPsgpRFKkLVrnKqGgkHhQV' },
+              { name: 'deploy client', client_id: 'client_id' },
+            ]),
         },
         pool,
       };
 
-      const handler = new clients.default({ client: auth0, config });
+      const handler = new clients.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([
         { client_id: 'FMfcgxvzLDvPsgpRFKkLVrnKqGgkHhQV', name: 'test client' },
@@ -116,17 +119,18 @@ describe('#clients handler', () => {
             return Promise.resolve({ data });
           },
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'clients', [
-            {
-              client_id: 'client1',
-              name: 'someClient',
-            },
-          ]),
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'someClient',
+              },
+            ]),
         },
         pool,
       };
 
-      const handler = new clients.default({ client: auth0, config });
+      const handler = new clients.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
@@ -157,15 +161,16 @@ describe('#clients handler', () => {
             expect(params.client_id).to.equal('client1');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => mockPagedData(params, 'clients', [
-            { client_id: 'client1', name: 'existingClient' },
-            { client_id: 'client_id', name: 'deploy client' },
-          ]),
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              { client_id: 'client1', name: 'existingClient' },
+              { client_id: 'client_id', name: 'deploy client' },
+            ]),
         },
         pool,
       };
 
-      const handler = new clients.default({ client: auth0, config });
+      const handler = new clients.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ clients: [{ name: 'someClient' }] }]);
@@ -184,15 +189,16 @@ describe('#clients handler', () => {
             removed = true;
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => mockPagedData(params, 'clients', [
-            { client_id: 'client1', name: 'existingClient' },
-            { client_id: 'client_id', name: 'deploy client' },
-          ]),
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              { client_id: 'client1', name: 'existingClient' },
+              { client_id: 'client_id', name: 'deploy client' },
+            ]),
         },
         pool,
       };
 
-      const handler = new clients.default({ client: auth0, config });
+      const handler = new clients.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ clients: [] }]);
@@ -210,12 +216,13 @@ describe('#clients handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => mockPagedData(params, 'clients', [{ client_id: 'client1', name: 'existingClient' }]),
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [{ client_id: 'client1', name: 'existingClient' }]),
         },
         pool,
       };
 
-      const handler = new clients.default({ client: auth0, config });
+      const handler = new clients.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ clients: [{ name: 'newClient' }] }]);
@@ -250,7 +257,7 @@ describe('#clients handler', () => {
         },
       };
 
-      const handler = new clients.default({ client: auth0, config });
+      const handler = new clients.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [assets]);
@@ -270,15 +277,16 @@ describe('#clients handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => mockPagedData(params, 'clients', [
-            { client_id: 'client1', name: 'existingClient' },
-            { client_id: 'client2', name: 'existingClient2' },
-          ]),
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              { client_id: 'client1', name: 'existingClient' },
+              { client_id: 'client2', name: 'existingClient2' },
+            ]),
         },
         pool,
       };
 
-      const handler = new clients.default({ client: auth0, config });
+      const handler = new clients.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ clients: [] }]);
@@ -311,22 +319,23 @@ describe('#clients handler', () => {
             expect(data.client_id).to.equal('client-2');
             return Promise.resolve({ data });
           },
-          getAll: (params) => mockPagedData(params, 'clients', [
-            {
-              client_id: 'client-1',
-              name: 'Client 1',
-            },
-            {
-              client_id: 'client-2',
-              name: 'Client 2',
-            },
-          ]),
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client-1',
+                name: 'Client 1',
+              },
+              {
+                client_id: 'client-2',
+                name: 'Client 2',
+              },
+            ]),
         },
         pool,
       };
 
       const handler = new clients.default({
-        client: auth0,
+        client: pageClient(auth0),
         config: (key) =>
           ({
             // Notably omitted is AUTH0_CLIENT_ID which
