@@ -1,3 +1,4 @@
+import { Client } from 'auth0';
 import DefaultHandler, { order } from './default';
 import { convertClientNamesToIds } from '../../utils';
 import { Assets, CalculatedChanges } from '../../../types';
@@ -75,10 +76,11 @@ export default class ClientGrantsHandler extends DefaultHandler {
     // Do nothing if not set
     if (!clientGrants) return;
 
-    // TODO: Bring back paginate: true
-    const { data } = await this.client.clients.getAll({ include_totals: true });
-    // @ts-ignore-error TODO: add pagination overload to client.getAll
-    const { clients } = data;
+    // paginate: true
+    const clients = await paginate<Client>(this.client.clients.getAll, {
+      paginate: true,
+      include_totals: true,
+    });
     const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
     const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
 
