@@ -1,3 +1,5 @@
+import pageClient from '../../../../src/tools/auth0/client';
+
 const { expect } = require('chai');
 const databases = require('../../../../src/tools/auth0/handlers/databases');
 const { mockPagedData } = require('../../../utils');
@@ -70,7 +72,7 @@ describe('#databases handler', () => {
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ databases: [{ name: 'someDatabase' }] }]);
@@ -94,7 +96,7 @@ describe('#databases handler', () => {
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([{ strategy: 'auth0', name: 'db', enabled_clients: [clientId] }]);
     });
@@ -133,7 +135,7 @@ describe('#databases handler', () => {
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -193,7 +195,7 @@ describe('#databases handler', () => {
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -241,7 +243,7 @@ describe('#databases handler', () => {
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -279,7 +281,7 @@ describe('#databases handler', () => {
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -312,7 +314,7 @@ describe('#databases handler', () => {
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ databases: [] }]);
@@ -338,7 +340,7 @@ describe('#databases handler', () => {
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -371,7 +373,7 @@ describe('#databases handler', () => {
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ databases: [] }]);
@@ -408,7 +410,7 @@ describe('#databases handler', () => {
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const assets = {
         exclude: {
