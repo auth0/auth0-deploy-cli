@@ -4,6 +4,7 @@ import DefaultAPIHandler, { order } from './default';
 import log from '../../../logger';
 import { areArraysEquals, sleep } from '../../utils';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
+import { paginate } from '../client';
 
 const MAX_ACTION_DEPLOY_RETRY_ATTEMPTS = 60; // 60 * 2s => 2 min timeout
 
@@ -208,9 +209,14 @@ export default class ActionHandler extends DefaultAPIHandler {
     // Actions API does not support include_totals param like the other paginate API's.
     // So we set it to false otherwise it will fail with "Additional properties not allowed: include_totals"
     try {
-      // TODO: bring back paginate: true
-      const { data } = await this.client.actions.getAll();
-      const { actions } = data;
+      // paginate: true
+      const actions = await paginate<GetActions200ResponseActionsInner>(
+        this.client.actions.getAll,
+        {
+          paginate: true,
+        }
+      );
+
       this.existing = actions;
       return actions;
     } catch (err) {
