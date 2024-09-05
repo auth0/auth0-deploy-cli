@@ -1,3 +1,5 @@
+import pageClient from '../../../../src/tools/auth0/client';
+
 /* eslint-disable consistent-return */
 const { expect } = require('chai');
 const connections = require('../../../../src/tools/auth0/handlers/connections');
@@ -76,7 +78,7 @@ describe('#connections handler', () => {
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ connections: [{ name: 'someConnection' }] }]);
@@ -98,7 +100,7 @@ describe('#connections handler', () => {
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([
         { strategy: 'github', name: 'github', enabled_clients: [clientId] },
@@ -133,7 +135,7 @@ describe('#connections handler', () => {
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -199,7 +201,7 @@ describe('#connections handler', () => {
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -283,7 +285,7 @@ describe('#connections handler', () => {
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -358,7 +360,7 @@ describe('#connections handler', () => {
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -401,7 +403,7 @@ describe('#connections handler', () => {
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -434,7 +436,7 @@ describe('#connections handler', () => {
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ connections: [] }]);
@@ -463,7 +465,7 @@ describe('#connections handler', () => {
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -496,7 +498,7 @@ describe('#connections handler', () => {
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ connections: [] }]);
@@ -533,7 +535,7 @@ describe('#connections handler', () => {
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const assets = {
         exclude: {
