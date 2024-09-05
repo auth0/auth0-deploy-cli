@@ -1,5 +1,6 @@
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import pageClient from '../../../../src/tools/auth0/client';
 
 const actions = require('../../../../src/tools/auth0/handlers/actions');
 const { mockPagedData } = require('../../../utils');
@@ -32,7 +33,7 @@ describe('#actions handler', () => {
         },
       };
 
-      const handler = new actions.default({ client: auth0, config });
+      const handler = new actions.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = [
         {
@@ -72,7 +73,7 @@ describe('#actions handler', () => {
         },
       };
 
-      const handler = new actions.default({ client: auth0, config });
+      const handler = new actions.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = [
         {
@@ -147,7 +148,6 @@ describe('#actions handler', () => {
               auth0.getAllCalled = true;
               return Promise.resolve({ data: [] });
             }
-
             return Promise.resolve({
               data: {
                 actions: [
@@ -163,10 +163,10 @@ describe('#actions handler', () => {
           createVersion: () => Promise.resolve({ data: version }),
         },
         pool,
-        getAllCalled: false,
+        getAllCalled: true,
       };
 
-      const handler = new actions.default({ client: auth0, config });
+      const handler = new actions.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ actions: [action] }]);
@@ -228,7 +228,7 @@ describe('#actions handler', () => {
         getAllCalled: false,
       };
 
-      const handler = new actions.default({ client: auth0, config });
+      const handler = new actions.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ actions: [action] }]);
@@ -263,7 +263,7 @@ describe('#actions handler', () => {
         },
       };
 
-      const handler = new actions.default({ client: auth0, config });
+      const handler = new actions.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.include({ ...actionsData[0], deployed: true });
     });
@@ -281,7 +281,7 @@ describe('#actions handler', () => {
         pool,
       };
 
-      const handler = new actions.default({ client: auth0, config });
+      const handler = new actions.default({ client: pageClient(auth0), config });
       await expect(handler.getType()).to.be.rejectedWith(
         "Cannot process actions because the actions service is currently unavailable. Retrying may result in a successful operation. Alternatively, adding 'actions' to `AUTH0_EXCLUDED` configuration property will provide ability to skip until service is restored to actions service. This is not an issue with the Deploy CLI."
       );
@@ -299,7 +299,7 @@ describe('#actions handler', () => {
         pool,
       };
 
-      const handler = new actions.default({ client: auth0, config });
+      const handler = new actions.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal(null);
     });
@@ -316,7 +316,7 @@ describe('#actions handler', () => {
         pool,
       };
 
-      const handler = new actions.default({ client: auth0, config });
+      const handler = new actions.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal(null);
     });
@@ -340,7 +340,7 @@ describe('#actions handler', () => {
         pool,
       };
 
-      const handler = new actions.default({ client: auth0, config });
+      const handler = new actions.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal(null);
     });
@@ -357,7 +357,7 @@ describe('#actions handler', () => {
         pool,
       };
 
-      const handler = new actions.default({ client: auth0, config });
+      const handler = new actions.default({ client: pageClient(auth0), config });
       try {
         await handler.getType();
       } catch (error) {
@@ -375,19 +375,18 @@ describe('#actions handler', () => {
             expect(data.id).to.equal('action-1');
             return Promise.resolve({ data });
           },
-          getAll: () =>
-            Promise.resolve({ data: [
-              {
-                id: 'action-1',
-                name: 'action-test',
-                supported_triggers: [
-                  {
-                    id: 'post-login',
-                    version: 'v1',
-                  },
-                ],
-              },
-            ] }),
+          getAll: () => mockPagedData({ include_totals: true }, 'actions', [
+            {
+              id: 'action-1',
+              name: 'action-test',
+              supported_triggers: [
+                {
+                  id: 'post-login',
+                  version: 'v1',
+                },
+              ],
+            },
+          ]),
           getVersion: () =>
             Promise.resolve({
               data: {
@@ -408,7 +407,7 @@ describe('#actions handler', () => {
         pool,
       };
 
-      const handler = new actions.default({ client: auth0, config });
+      const handler = new actions.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ actions: [] }]);
@@ -449,7 +448,7 @@ describe('#actions handler', () => {
 
       const auth0 = {
         actions: {
-          getAll: () => Promise.resolve({ data: [marketplaceAction] }),
+          getAll: () =>  Promise.resolve({ data: { actions: [marketplaceAction] } }),
           delete: () => {
             wasDeleteCalled = true;
           },
@@ -457,7 +456,7 @@ describe('#actions handler', () => {
         pool,
       };
 
-      const handler = new actions.default({ client: auth0, config });
+      const handler = new actions.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       await stageFn.apply(handler, [{ actions: [] }]);
 
