@@ -1,3 +1,5 @@
+import pageClient from '../../../../src/tools/auth0/client';
+
 const { expect } = require('chai');
 const rules = require('../../../../src/tools/auth0/handlers/rules');
 const { mockPagedData } = require('../../../utils');
@@ -28,7 +30,7 @@ describe('#rules handler', () => {
         },
       };
 
-      const handler = new rules.default({ client: auth0, config });
+      const handler = new rules.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = [
         {
@@ -54,7 +56,7 @@ describe('#rules handler', () => {
         }
       };
 
-      const handler = new rules.default({ client: auth0, config });
+      const handler = new rules.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = [
         {
@@ -94,7 +96,7 @@ describe('#rules handler', () => {
         },
       };
 
-      const handler = new rules.default({ client: auth0, config });
+      const handler = new rules.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).calcChanges;
       const data = [
         {
@@ -133,7 +135,7 @@ describe('#rules handler', () => {
         },
       };
 
-      const handler = new rules.default({ client: auth0, config });
+      const handler = new rules.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).calcChanges;
       const data = [
         {
@@ -168,7 +170,7 @@ describe('#rules handler', () => {
         },
       };
 
-      const handler = new rules.default({ client: auth0, config });
+      const handler = new rules.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = [
         {
@@ -192,7 +194,7 @@ describe('#rules handler', () => {
         },
       };
 
-      const handler = new rules.default({ client: auth0, config });
+      const handler = new rules.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = [
         {
@@ -222,7 +224,7 @@ describe('#rules handler', () => {
         pool,
       };
 
-      const handler = new rules.default({ client: auth0, config });
+      const handler = new rules.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ rules: [{ name: 'someRule', script: 'rule_script' }] }]);
@@ -252,7 +254,7 @@ describe('#rules handler', () => {
         rules: { getAll: (params) => mockPagedData(params, 'rules', rulesData) },
       };
 
-      const handler = new rules.default({ client: auth0, config });
+      const handler = new rules.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal(rulesData);
     });
@@ -269,7 +271,7 @@ describe('#rules handler', () => {
         },
       };
 
-      const handler = new rules.default({ client: auth0, config });
+      const handler = new rules.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.equal(null);
     });
@@ -292,7 +294,7 @@ describe('#rules handler', () => {
         pool,
       };
 
-      const handler = new rules.default({ client: auth0, config });
+      const handler = new rules.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ rules: [{ name: 'someRule', script: 'new_script' }] }]);
@@ -313,7 +315,7 @@ describe('#rules handler', () => {
         pool,
       };
 
-      const handler = new rules.default({ client: auth0, config });
+      const handler = new rules.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ rules: [{}] }]);
@@ -336,7 +338,7 @@ describe('#rules handler', () => {
         pool,
       };
 
-      const handler = new rules.default({ client: auth0, config });
+      const handler = new rules.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ rules: [] }]);
@@ -364,7 +366,7 @@ describe('#rules handler', () => {
         pool,
       };
 
-      const handler = new rules.default({ client: auth0, config });
+      const handler = new rules.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ rules: [] }]);
@@ -397,7 +399,7 @@ describe('#rules handler', () => {
         pool,
       };
 
-      const handler = new rules.default({ client: auth0, config });
+      const handler = new rules.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = {
         rules: [
@@ -431,7 +433,7 @@ describe('#rules handler', () => {
         ],
       };
 
-      const handler = new rules.default({ client: auth0, config });
+      const handler = new rules.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await expect(stageFn.apply(handler, [data])).to.be.eventually.fulfilled;
