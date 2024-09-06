@@ -1,3 +1,5 @@
+import pageClient from '../../../../src/tools/auth0/client';
+
 const { expect } = require('chai');
 const pages = require('../../../../src/tools/auth0/handlers/pages');
 const { mockPagedData } = require('../../../utils');
@@ -20,7 +22,7 @@ describe('#pages handler', () => {
         },
       };
 
-      const handler = new pages.default({ client: auth0 });
+      const handler = new pages.default({ client: pageClient(auth0) });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
@@ -55,7 +57,7 @@ describe('#pages handler', () => {
         },
       };
 
-      const handler = new pages.default({ client: auth0 });
+      const handler = new pages.default({ client: pageClient(auth0) });
       const data = await handler.getType();
       expect(data).to.deep.equal([
         { enabled: true, html: html, name: 'login' },
@@ -83,7 +85,7 @@ describe('#pages handler', () => {
         },
       };
 
-      const handler = new pages.default({ client: auth0 });
+      const handler = new pages.default({ client: pageClient(auth0) });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
@@ -107,7 +109,7 @@ describe('#pages handler', () => {
         },
       };
 
-      const handler = new pages.default({ client: auth0 });
+      const handler = new pages.default({ client: pageClient(auth0) });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
