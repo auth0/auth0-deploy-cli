@@ -1,9 +1,14 @@
 import _ from 'lodash';
-import { PostEnabledConnectionsRequest } from 'auth0';
+import {
+  Connection,
+  GetOrganizations200ResponseOneOfInner,
+  PostEnabledConnectionsRequest,
+} from 'auth0';
 import DefaultHandler, { order } from './default';
 import { calculateChanges } from '../../calculateChanges';
 import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
+import { paginate } from '../client';
 
 export const schema = {
   type: 'array',
@@ -150,7 +155,13 @@ export default class OrganizationsHandler extends DefaultHandler {
     await Promise.all(
       connectionsToAdd.map((conn) =>
         this.client.organizations
-          .addEnabledConnection(params, _.omit<PostEnabledConnectionsRequest>(conn, 'connection') as PostEnabledConnectionsRequest)
+          .addEnabledConnection(
+            params,
+            _.omit<PostEnabledConnectionsRequest>(
+              conn,
+              'connection'
+            ) as PostEnabledConnectionsRequest
+          )
           .catch(() => {
             throw new Error(
               `Problem adding Enabled Connection ${conn.connection_id} for organizations ${params.id}`
@@ -201,10 +212,15 @@ export default class OrganizationsHandler extends DefaultHandler {
     }
 
     try {
-      // TODO: Bring back checkpoint: true
-      const { data: { organizations } } = await this.client.organizations.getAll({
-        include_totals: true,
-      });
+      // paginate: true
+      const organizations = await paginate<GetOrganizations200ResponseOneOfInner>(
+        this.client.organizations.getAll,
+        {
+          paginate: true,
+          include_totals: true,
+        }
+      );
+
       for (let index = 0; index < organizations.length; index++) {
         const { data: connections } = await this.client.organizations.getEnabledConnections({
           id: organizations[index].id,
@@ -229,8 +245,10 @@ export default class OrganizationsHandler extends DefaultHandler {
     if (!organizations) return;
     // Gets organizations from destination tenant
     const existing = await this.getType();
-    // TODO: Bring back paginate: true
-    const { data: { connections: existingConnections } } = await this.client.connections.getAll({
+
+    // paginate: true
+    const existingConnections = await paginate<Connection>(this.client.connections.getAll, {
+      paginate: true,
       include_totals: true,
     });
 
