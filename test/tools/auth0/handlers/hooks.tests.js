@@ -1,6 +1,7 @@
 import chai, { expect } from 'chai';
 import sinonChai from 'sinon-chai';
 import chaiAsPromised from 'chai-as-promised';
+import pageClient from '../../../../src/tools/auth0/client';
 
 const constants = require('../../../../src/tools/constants').default;
 const hooks = require('../../../../src/tools/auth0/handlers/hooks');
@@ -35,7 +36,7 @@ describe('#hooks handler', () => {
         },
       };
 
-      const handler = new hooks.default({ client: auth0, config });
+      const handler = new hooks.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = [
         {
@@ -67,7 +68,7 @@ describe('#hooks handler', () => {
         },
       };
 
-      const handler = new hooks.default({ client: auth0, config });
+      const handler = new hooks.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = [
         {
@@ -103,7 +104,7 @@ describe('#hooks handler', () => {
         },
       };
 
-      const handler = new hooks.default({ client: auth0, config });
+      const handler = new hooks.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = [
         {
@@ -201,7 +202,7 @@ describe('#hooks handler', () => {
         getAllCalled: false,
       };
 
-      const handler = new hooks.default({ client: auth0, config });
+      const handler = new hooks.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ hooks: [hook] }]);
@@ -233,7 +234,7 @@ describe('#hooks handler', () => {
         },
       };
 
-      const handler = new hooks.default({ client: auth0, config });
+      const handler = new hooks.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal(
         hooksData.map((hook) => ({ ...hook, code, secrets: { SECRET: `hook-${hook.id}-secret` } }))
@@ -252,7 +253,7 @@ describe('#hooks handler', () => {
         },
       };
 
-      const handler = new hooks.default({ client: auth0, config });
+      const handler = new hooks.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.equal(null);
     });
@@ -269,7 +270,7 @@ describe('#hooks handler', () => {
         pool,
       };
 
-      const handler = new hooks.default({ client: auth0, config });
+      const handler = new hooks.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([]);
     });
@@ -286,7 +287,7 @@ describe('#hooks handler', () => {
         pool,
       };
 
-      const handler = new hooks.default({ client: auth0, config });
+      const handler = new hooks.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([]);
     });
@@ -303,7 +304,7 @@ describe('#hooks handler', () => {
         pool,
       };
 
-      const handler = new hooks.default({ client: auth0, config });
+      const handler = new hooks.default({ client: pageClient(auth0), config });
       try {
         await handler.getType();
       } catch (error) {
@@ -347,7 +348,7 @@ describe('#hooks handler', () => {
         pool,
       };
 
-      const handler = new hooks.default({ client: auth0, config });
+      const handler = new hooks.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
@@ -384,7 +385,7 @@ describe('#hooks handler', () => {
         pool,
       };
 
-      const handler = new hooks.default({ client: auth0, config });
+      const handler = new hooks.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ hooks: [{}] }]);
@@ -426,7 +427,7 @@ describe('#hooks handler', () => {
         pool,
       };
 
-      const handler = new hooks.default({ client: auth0, config });
+      const handler = new hooks.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = {
         hooks: [
@@ -508,7 +509,7 @@ describe('#hooks handler', () => {
         pool,
       };
 
-      const handler = new hooks.default({ client: auth0, config });
+      const handler = new hooks.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const assets = {
         hooks: [
@@ -571,7 +572,7 @@ describe('#hooks handler', () => {
         pool,
       };
 
-      const handler = new hooks.default({ client: auth0, config });
+      const handler = new hooks.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const assets = {
         hooks: [
@@ -616,7 +617,7 @@ describe('#hooks handler', () => {
         ],
       };
 
-      const handler = new hooks.default({ client: auth0, config });
+      const handler = new hooks.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await expect(stageFn.apply(handler, [data])).to.be.eventually.fulfilled;

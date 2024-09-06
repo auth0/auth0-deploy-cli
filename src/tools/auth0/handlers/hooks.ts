@@ -1,8 +1,10 @@
+import { Hook } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import log from '../../../logger';
 import { isDeprecatedError } from '../../utils';
+import { paginate } from '../client';
 
 const ALLOWED_TRIGGER_IDS = [
   'credentials-exchange',
@@ -171,15 +173,18 @@ export default class HooksHandler extends DefaultHandler {
     }
 
     try {
-      // TODO: Bring back paginate: true
-      const { data: { hooks } } = await this.client.hooks.getAll({ include_totals: true });
+      // paginate: true
+      const hooks = await paginate<Hook>(this.client.hooks.getAll, {
+        paginate: true,
+        include_totals: true,
+      });
 
       // hooks.getAll does not return code and secrets, we have to fetch hooks one-by-one
       this.existing = await Promise.all(
         hooks.map((hook: { id: string }) =>
           this.client.hooks
             .get({ id: hook.id })
-            .then(({data: hookWithCode}) =>
+            .then(({ data: hookWithCode }) =>
               this.client.hooks
                 .getSecrets({ id: hook.id })
                 .then(({ data: secrets }) => ({ ...hookWithCode, secrets }))
