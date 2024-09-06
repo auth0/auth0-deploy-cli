@@ -48,7 +48,7 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
         return this.existing;
       }
 
-      // TODO: Bring back paginate: false
+      // paginate: false (as not supported by SDK/API)
       const { data: customDomains } = await this.client.customDomains.getAll();
 
       this.existing = customDomains;
