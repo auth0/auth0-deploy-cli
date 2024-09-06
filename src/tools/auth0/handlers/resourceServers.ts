@@ -5,6 +5,7 @@ import constants from '../../constants';
 import DefaultHandler from './default';
 import { calculateChanges } from '../../calculateChanges';
 import { Assets, CalculatedChanges } from '../../../types';
+import { paginate } from '../client';
 
 export const excludeSchema = {
   type: 'array',
@@ -53,8 +54,9 @@ export default class ResourceServersHandler extends DefaultHandler {
 
   async getType(): Promise<ResourceServer[]> {
     if (this.existing) return this.existing;
-    // TODO: Bring back paginate: true
-    const { data: { resource_servers: resourceServers } } = await this.client.resourceServers.getAll({
+    // paginate: true
+    const resourceServers = await paginate<ResourceServer>(this.client.resourceServers.getAll, {
+      paginate: true,
       include_totals: true,
     });
     return resourceServers.filter(

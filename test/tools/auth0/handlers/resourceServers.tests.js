@@ -1,3 +1,5 @@
+import pageClient from '../../../../src/tools/auth0/client';
+
 const { expect } = require('chai');
 const resourceServers = require('../../../../src/tools/auth0/handlers/resourceServers');
 const { mockPagedData } = require('../../../utils');
@@ -88,7 +90,7 @@ describe('#resourceServers handler', () => {
         pool,
       };
 
-      const handler = new resourceServers.default({ client: auth0, config });
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ resourceServers: [{ name: 'someAPI' }] }]);
@@ -108,7 +110,7 @@ describe('#resourceServers handler', () => {
         },
       };
 
-      const handler = new resourceServers.default({ client: auth0, config });
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([{ name: 'Company API', identifier: 'http://company.com/api' }]);
     });
@@ -130,7 +132,7 @@ describe('#resourceServers handler', () => {
         pool,
       };
 
-      const handler = new resourceServers.default({ client: auth0, config });
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
@@ -161,7 +163,7 @@ describe('#resourceServers handler', () => {
         pool,
       };
 
-      const handler = new resourceServers.default({ client: auth0, config });
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
@@ -184,7 +186,7 @@ describe('#resourceServers handler', () => {
         pool,
       };
 
-      const handler = new resourceServers.default({ client: auth0, config });
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ resourceServers: [{}] }]);
@@ -207,7 +209,7 @@ describe('#resourceServers handler', () => {
         pool,
       };
 
-      const handler = new resourceServers.default({ client: auth0, config });
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ resourceServers: [] }]);
@@ -235,7 +237,7 @@ describe('#resourceServers handler', () => {
         pool,
       };
 
-      const handler = new resourceServers.default({ client: auth0, config });
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ resourceServers: [] }]);
@@ -263,7 +265,7 @@ describe('#resourceServers handler', () => {
         pool,
       };
 
-      const handler = new resourceServers.default({ client: auth0, config });
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = {
         resourceServers: [{ name: 'someAPI', identifier: 'some-api', scope: 'new:scope' }],
