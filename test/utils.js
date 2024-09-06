@@ -18,6 +18,7 @@ export function mockPagedData(params, key, data) {
     ? {
       data: {
         [key]: data,
+        total: data?.length || 0,
       },
     }
     : {

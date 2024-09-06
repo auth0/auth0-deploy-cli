@@ -1,3 +1,5 @@
+import pageClient from '../../../../src/tools/auth0/client';
+
 const { expect } = require('chai');
 const roles = require('../../../../src/tools/auth0/handlers/roles');
 const { mockPagedData } = require('../../../utils');
@@ -87,7 +89,7 @@ describe('#roles handler', () => {
         },
         pool,
       };
-      const handler = new roles.default({ client: auth0, config });
+      const handler = new roles.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       await stageFn.apply(handler, [
         {
@@ -112,19 +114,20 @@ describe('#roles handler', () => {
       const auth0 = {
         roles: {
           getAll: (params) =>
-            mockPagedData(params, 'roles', [
+            mockPagedData({ ...params, include_totals: true }, 'roles', [
               {
                 name: 'myRole',
                 id: 'myRoleId',
                 description: 'myDescription',
               },
             ]),
-          getPermissions: (params) => mockPagedData(params, 'permissions', permissions),
+          getPermissions: (params) =>
+            mockPagedData({ ...params, include_totals: true }, 'permissions', permissions),
         },
         pool,
       };
 
-      const handler = new roles.default({ client: auth0, config });
+      const handler = new roles.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([
         {
@@ -151,7 +154,7 @@ describe('#roles handler', () => {
         pool,
       };
 
-      const handler = new roles.default({ client: auth0, config });
+      const handler = new roles.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([]);
     });
@@ -168,7 +171,7 @@ describe('#roles handler', () => {
         pool,
       };
 
-      const handler = new roles.default({ client: auth0, config });
+      const handler = new roles.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([]);
     });
@@ -185,7 +188,7 @@ describe('#roles handler', () => {
         pool,
       };
 
-      const handler = new roles.default({ client: auth0, config });
+      const handler = new roles.default({ client: pageClient(auth0), config });
       try {
         await handler.getType();
       } catch (error) {
@@ -228,11 +231,21 @@ describe('#roles handler', () => {
                 resource_server_identifier: 'organise',
               },
             ]),
+          deletePermissions: function (params) {
+            expect(params).to.be.an('object');
+            expect(params.id).to.equal('myRoleId');
+            return Promise.resolve({ data: [] });
+          },
+          addPermissions: function (params) {
+            expect(params).to.be.an('object');
+            expect(params.id).to.equal('myRoleId');
+            return Promise.resolve({ data: [] });
+          },
         },
         pool,
       };
 
-      const handler = new roles.default({ client: auth0, config });
+      const handler = new roles.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
@@ -276,7 +289,7 @@ describe('#roles handler', () => {
         },
         pool,
       };
-      const handler = new roles.default({ client: auth0, config });
+      const handler = new roles.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       await stageFn.apply(handler, [{ roles: [{}] }]);
     });
