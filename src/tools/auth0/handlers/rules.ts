@@ -1,9 +1,11 @@
+import { Rule } from 'auth0';
 import ValidationError from '../../validationError';
 import { convertJsonToString, stripFields, duplicateItems, isDeprecatedError } from '../../utils';
 import DefaultHandler from './default';
 import log from '../../../logger';
 import { calculateChanges } from '../../calculateChanges';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
+import { paginate } from '../client';
 
 export const excludeSchema = {
   type: 'array',
@@ -63,9 +65,13 @@ export default class RulesHandler extends DefaultHandler {
   async getType(): Promise<Asset[] | null> {
     try {
       if (this.existing) return this.existing;
-      // TODO: Bring back paginate: true
-      const { data } = await this.client.rules.getAll({ include_totals: true });
-      this.existing = data.rules;
+
+      // paginate: true
+      const rules = await paginate<Rule>(this.client.rules.getAll, {
+        paginate: true,
+        include_totals: true,
+      });
+      this.existing = rules;
       return this.existing;
     } catch (err) {
       if (isDeprecatedError(err)) {
