@@ -1,6 +1,8 @@
+import { Client } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
+import { paginate } from '../client';
 
 export const supportedPages = constants.PAGE_NAMES.filter((p) => p.includes('.json')).map((p) =>
   p.replace('.json', '')
@@ -50,11 +52,11 @@ export default class PagesHandler extends DefaultHandler {
   }
 
   async updateLoginPage(page): Promise<void> {
-    // TODO: Bring back paginate: true
-    // @ts-ignore-error TODO: add pagination overload to client.getAll
-    const { data: { clients: globalClient } } = await this.client.clients.getAll({
-      is_global: true,
+    // paginate: true
+    const globalClient = await paginate<Client>(this.client.clients.getAll, {
+      paginate: true,
       include_totals: true,
+      is_global: true,
     });
 
     if (!globalClient[0]) {
@@ -104,11 +106,11 @@ export default class PagesHandler extends DefaultHandler {
     }[] = [];
 
     // Login page is handled via the global client
-    // TODO: Bring back paginate: true
-    // @ts-ignore-error TODO: add pagination overload to client.getAll
-    const { data: { clients: globalClient } } = await this.client.clients.getAll({
-      is_global: true,
+    // paginate: true
+    const globalClient = await paginate<Client>(this.client.clients.getAll, {
+      paginate: true,
       include_totals: true,
+      is_global: true,
     });
     if (!globalClient[0]) {
       throw new Error('Unable to find global client id when trying to dump the login page');
