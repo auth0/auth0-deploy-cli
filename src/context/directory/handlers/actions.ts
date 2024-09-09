@@ -74,7 +74,7 @@ function mapToAction(filePath, action): Partial<Action> {
     runtime: action.runtime,
     status: action.status,
     dependencies: action.dependencies,
-    secrets: mapSecrets(action.secrets),
+    secrets: typeof action.secrets === 'string' ? action.secrets : mapSecrets(action.secrets || []),
     supported_triggers: action.supported_triggers,
     deployed: action.deployed || action.all_changes_deployed,
     installed_integration_id: action.installed_integration_id,
