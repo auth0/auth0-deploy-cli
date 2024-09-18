@@ -212,7 +212,6 @@ export default class OrganizationsHandler extends DefaultHandler {
     }
 
     try {
-      // paginate: true
       const organizations = await paginate<GetOrganizations200ResponseOneOfInner>(
         this.client.organizations.getAll,
         {
@@ -246,7 +245,6 @@ export default class OrganizationsHandler extends DefaultHandler {
     // Gets organizations from destination tenant
     const existing = await this.getType();
 
-    // paginate: true
     const existingConnections = await paginate<Connection>(this.client.connections.getAll, {
       paginate: true,
       include_totals: true,

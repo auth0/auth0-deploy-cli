@@ -173,7 +173,11 @@ export const setupContext = async (
         ? config.AUTH0_AUDIENCE
         : `https://${config.AUTH0_DOMAIN}/api/v2/`,
     });
-    return clientCredentials.data?.access_token;
+    const clientAccessToken = clientCredentials.data?.access_token;
+    if (!clientAccessToken) {
+      throw new Error('Failed to retrieve access token.');
+    }
+    return clientAccessToken;
   })();
 
   const mgmtClient = new ManagementClient({

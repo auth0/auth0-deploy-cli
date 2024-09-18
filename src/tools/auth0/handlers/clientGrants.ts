@@ -51,7 +51,6 @@ export default class ClientGrantsHandler extends DefaultHandler {
       return this.existing;
     }
 
-    // paginate: true
     const clientGrants = await paginate<ClientGrant>(this.client.clientGrants.getAll, {
       paginate: true,
       include_totals: true,
@@ -76,7 +75,6 @@ export default class ClientGrantsHandler extends DefaultHandler {
     // Do nothing if not set
     if (!clientGrants) return;
 
-    // paginate: true
     const clients = await paginate<Client>(this.client.clients.getAll, {
       paginate: true,
       include_totals: true,

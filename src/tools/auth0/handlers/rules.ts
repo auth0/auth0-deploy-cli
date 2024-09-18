@@ -66,7 +66,6 @@ export default class RulesHandler extends DefaultHandler {
     try {
       if (this.existing) return this.existing;
 
-      // paginate: true
       const rules = await paginate<Rule>(this.client.rules.getAll, {
         paginate: true,
         include_totals: true,

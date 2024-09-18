@@ -61,7 +61,6 @@ export default class DatabaseHandler extends DefaultAPIHandler {
   async getType() {
     if (this.existing) return this.existing;
 
-    // paginate: true
     const connections = await paginate<Connection>(this.client.connections.getAll, {
       strategy: [GetConnectionsStrategyEnum.auth0],
       paginate: true,
@@ -86,13 +85,11 @@ export default class DatabaseHandler extends DefaultAPIHandler {
 
     // Convert enabled_clients by name to the id
 
-    // paginate: true
     const clients = await paginate<Client>(this.client.clients.getAll, {
       paginate: true,
       include_totals: true,
     });
 
-    // paginate: true
     const existingDatabasesConnections = await paginate<Connection>(
       this.client.connections.getAll,
       {

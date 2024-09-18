@@ -49,7 +49,6 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   if (clientGrants.length === 0) return;
 
-  // paginate: true
   const allResourceServers = await paginate<ResourceServer>(
     context.mgmtClient.resourceServers.getAll,
     {
@@ -58,7 +57,6 @@ async function dump(context: DirectoryContext): Promise<void> {
     }
   );
 
-  // paginate: true
   const allClients = await paginate<Client>(context.mgmtClient.clients.getAll, {
     paginate: true,
     include_totals: true,
