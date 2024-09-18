@@ -173,7 +173,6 @@ export default class HooksHandler extends DefaultHandler {
     }
 
     try {
-      // paginate: true
       const hooks = await paginate<Hook>(this.client.hooks.getAll, {
         paginate: true,
         include_totals: true,

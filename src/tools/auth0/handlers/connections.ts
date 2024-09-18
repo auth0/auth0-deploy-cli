@@ -112,7 +112,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
 
   async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
-    // paginate: true
+
     const connections = await paginate<Connection>(this.client.connections.getAll, {
       paginate: true,
       include_totals: true,
@@ -136,13 +136,11 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       };
 
     // Convert enabled_clients by name to the id
-    // paginate: true
     const clients = await paginate<Client>(this.client.clients.getAll, {
       paginate: true,
       include_totals: true,
     });
 
-    // paginate: true
     const existingConnections = await paginate<Connection>(this.client.connections.getAll, {
       paginate: true,
       include_totals: true,

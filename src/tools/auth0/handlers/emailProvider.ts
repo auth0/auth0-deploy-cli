@@ -41,9 +41,6 @@ export default class EmailProviderHandler extends DefaultHandler {
     if (Object.keys(emailProvider).length === 0) {
       if (this.config('AUTH0_ALLOW_DELETE') === true) {
         // await this.client.emails.delete();
-        log.warn(
-          'Delete email providers are deprecated, It has been disabled instead.'
-        );
         existing.enabled = false;
         const updated = await this.client.emails.update(existing);
         this.updated += 1;
@@ -56,9 +53,6 @@ export default class EmailProviderHandler extends DefaultHandler {
       if (existing.name !== emailProvider.name) {
         // Delete the current provider as it's different
         // await this.client.emailProvider.delete();
-        log.warn(
-          'Delete email providers are deprecated, It has been disabled instead.'
-        );
         existing.enabled = false;
       }
     }

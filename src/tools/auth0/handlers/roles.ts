@@ -151,7 +151,6 @@ export default class RolesHandler extends DefaultHandler {
     }
 
     try {
-      // paginate: true
       const roles = await paginate<GetOrganizationMemberRoles200ResponseOneOfInner>(
         this.client.roles.getAll,
         {
@@ -161,7 +160,7 @@ export default class RolesHandler extends DefaultHandler {
       );
 
       for (let index = 0; index < roles.length; index++) {
-        // paginate: true (without paginate<T> helper as this is not getAll but getPermissions)
+        // paginate without paginate<T> helper as this is not getAll but getPermissions
         // paginate through all permissions for each role
         const allPermission: Permission[] = [];
         let page = 0;
@@ -193,7 +192,7 @@ export default class RolesHandler extends DefaultHandler {
             return permission;
           })
         );
-        // TODO: Do we need this?
+
         (roles[index] as any).permissions = strippedPerms;
       }
       this.existing = roles;

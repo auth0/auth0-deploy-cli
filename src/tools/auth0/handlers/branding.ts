@@ -31,7 +31,7 @@ export default class BrandingHandler extends DefaultHandler {
   }
 
   async getType(): Promise<Asset> {
-    let branding: GetBranding200Response = {} as any;
+    let branding: GetBranding200Response = {};
 
     try {
       // in case client version does not support branding

@@ -52,7 +52,6 @@ export default class PagesHandler extends DefaultHandler {
   }
 
   async updateLoginPage(page): Promise<void> {
-    // paginate: true
     const globalClient = await paginate<Client>(this.client.clients.getAll, {
       paginate: true,
       include_totals: true,
@@ -106,7 +105,6 @@ export default class PagesHandler extends DefaultHandler {
     }[] = [];
 
     // Login page is handled via the global client
-    // paginate: true
     const globalClient = await paginate<Client>(this.client.clients.getAll, {
       paginate: true,
       include_totals: true,

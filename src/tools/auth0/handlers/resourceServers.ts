@@ -54,7 +54,7 @@ export default class ResourceServersHandler extends DefaultHandler {
 
   async getType(): Promise<ResourceServer[]> {
     if (this.existing) return this.existing;
-    // paginate: true
+    
     const resourceServers = await paginate<ResourceServer>(this.client.resourceServers.getAll, {
       paginate: true,
       include_totals: true,
