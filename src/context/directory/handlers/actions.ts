@@ -43,6 +43,9 @@ function parse(context: DirectoryContext): ParsedActions {
 }
 
 function mapSecrets(secrets) {
+  if (typeof secrets === 'string') {
+    return secrets;
+  }
   if (secrets && secrets.length > 0) {
     return secrets.map((secret) => ({ name: secret.name, value: secret.value }));
   }
@@ -74,7 +77,7 @@ function mapToAction(filePath, action): Partial<Action> {
     runtime: action.runtime,
     status: action.status,
     dependencies: action.dependencies,
-    secrets: typeof action.secrets === 'string' ? action.secrets : mapSecrets(action.secrets || []),
+    secrets: mapSecrets(action.secrets),
     supported_triggers: action.supported_triggers,
     deployed: action.deployed || action.all_changes_deployed,
     installed_integration_id: action.installed_integration_id,
