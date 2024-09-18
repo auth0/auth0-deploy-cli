@@ -58,7 +58,7 @@ export default class LogStreamsHandler extends DefaultAPIHandler {
       return this.existing;
     }
 
-    // paginate: false (as not supported by SDK/API)
+
     const logStreams = await this.client.logStreams.getAll().then(({ data: logStreams }) =>
       logStreams.map((logStream) => {
         if (logStream.status === 'suspended') delete (logStream as any).status;

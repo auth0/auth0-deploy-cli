@@ -1,4 +1,9 @@
-import { TenantSettings, TenantSettingsFlags, TenantSettingsUpdate, TenantSettingsUpdateFlags } from 'auth0';
+import {
+  TenantSettings,
+  TenantSettingsFlags,
+  TenantSettingsUpdate,
+  TenantSettingsUpdateFlags,
+} from 'auth0';
 import ValidationError from '../../validationError';
 import DefaultHandler, { order } from './default';
 import { supportedPages, pageNameMap } from './pages';
@@ -17,74 +22,6 @@ const blockPageKeys = [
   ...Object.values(pageNameMap),
   ...supportedPages,
 ];
-
-export default class TenantHandler extends DefaultHandler {
-  existing: Tenant;
-
-  constructor(options: DefaultHandler) {
-    super({
-      ...options,
-      type: 'tenant',
-    });
-  }
-
-  async getType(): Promise<Asset> {
-    const { data: tenant } = await this.client.tenants.getSettings();
-
-    tenant.flags = removeUnallowedTenantFlags(tenant.flags);
-
-    this.existing = tenant;
-
-    blockPageKeys.forEach((key) => {
-      if (tenant[key]) delete tenant[key];
-    });
-
-    return tenant;
-  }
-
-  async validate(assets: Assets): Promise<void> {
-    const { tenant } = assets;
-
-    // Nothing to validate?
-    if (!tenant) return;
-
-    const pageKeys = Object.keys(tenant).filter((k) => blockPageKeys.includes(k));
-    if (pageKeys.length > 0) {
-      throw new ValidationError(
-        `The following pages ${convertJsonToString(
-          pageKeys
-        )} were found in tenant settings. Pages should be set separately. Please refer to the documentation.`
-      );
-    }
-  }
-
-  // Run after other updates so objected can be referenced such as default directory
-  @order('100')
-  async processChanges(assets: Assets): Promise<void> {
-    const { tenant } = assets;
-
-    // Do nothing if not set
-    if (!tenant) return;
-
-    const updatedTenant: TenantSettingsUpdate = {
-      // TODO: What's wrong with the enums?
-      ...(tenant as any),
-    };
-
-    if ('flags' in updatedTenant) {
-      updatedTenant.flags = removeUnallowedTenantFlags(tenant.flags) as TenantSettingsUpdateFlags;
-      if (Object.keys(updatedTenant.flags).length === 0) {
-        delete updatedTenant.flags;
-      }
-    }
-
-    if (updatedTenant && Object.keys(updatedTenant).length > 0) {
-      await this.client.tenants.updateSettings(updatedTenant);
-      this.updated += 1;
-      this.didUpdate(updatedTenant);
-    }
-  }
-}
 
 /*
  Tenant flags are used to facilitate a number of functionalities, some
@@ -156,3 +93,71 @@ export const removeUnallowedTenantFlags = (
 
   return filteredFlags;
 };
+
+export default class TenantHandler extends DefaultHandler {
+  existing: Tenant;
+
+  constructor(options: DefaultHandler) {
+    super({
+      ...options,
+      type: 'tenant',
+    });
+  }
+
+  async getType(): Promise<Asset> {
+    const { data: tenant } = await this.client.tenants.getSettings();
+
+    tenant.flags = removeUnallowedTenantFlags(tenant.flags);
+
+    this.existing = tenant;
+
+    blockPageKeys.forEach((key) => {
+      if (tenant[key]) delete tenant[key];
+    });
+
+    return tenant;
+  }
+
+  async validate(assets: Assets): Promise<void> {
+    const { tenant } = assets;
+
+    // Nothing to validate?
+    if (!tenant) return;
+
+    const pageKeys = Object.keys(tenant).filter((k) => blockPageKeys.includes(k));
+    if (pageKeys.length > 0) {
+      throw new ValidationError(
+        `The following pages ${convertJsonToString(
+          pageKeys
+        )} were found in tenant settings. Pages should be set separately. Please refer to the documentation.`
+      );
+    }
+  }
+
+  // Run after other updates so objected can be referenced such as default directory
+  @order('100')
+  async processChanges(assets: Assets): Promise<void> {
+    const { tenant } = assets;
+
+    // Do nothing if not set
+    if (!tenant) return;
+
+    const updatedTenant: TenantSettingsUpdate = {
+      ...tenant,
+      flags: tenant.flags
+        ? (removeUnallowedTenantFlags(tenant.flags) as TenantSettingsUpdateFlags) : undefined
+    };
+
+    if ('flags' in updatedTenant ) {
+      if (updatedTenant.flags === undefined || Object.keys(updatedTenant.flags).length === 0) {
+        delete updatedTenant.flags;
+      }
+    }
+
+    if (updatedTenant && Object.keys(updatedTenant).length > 0) {
+      await this.client.tenants.updateSettings(updatedTenant);
+      this.updated += 1;
+      this.didUpdate(updatedTenant);
+    }
+  }
+}
