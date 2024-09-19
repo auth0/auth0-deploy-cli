@@ -32,6 +32,10 @@ export type Action = {
   integration?: Object;
 };
 
+type PostActionRequestWithId = PostActionRequest & {
+  id: string;
+};
+
 // With this schema, we can only validate property types but not valid properties on per type basis
 export const schema = {
   type: 'array',
@@ -101,14 +105,14 @@ export default class ActionHandler extends DefaultAPIHandler {
       ...options,
       type: 'actions',
       functions: {
-        create: (action: PostActionRequest) => this.createAction(action),
+        create: (action: PostActionRequestWithId) => this.createAction(action),
         delete: (action: Action) => this.deleteAction(action),
       },
       stripUpdateFields: ['deployed', 'status'],
     });
   }
 
-  async createAction(action: PostActionRequest) {
+  async createAction(action: PostActionRequestWithId ) {
     // Strip the deployed flag
     const addAction = { ...action };
 
@@ -211,7 +215,6 @@ export default class ActionHandler extends DefaultAPIHandler {
     // Actions API does not support include_totals param like the other paginate API's.
     // So we set it to false otherwise it will fail with "Additional properties not allowed: include_totals"
     try {
-
       const actions = await paginate<GetActions200ResponseActionsInner>(
         this.client.actions.getAll,
         {
@@ -259,7 +262,7 @@ export default class ActionHandler extends DefaultAPIHandler {
 
     const postProcessedActions = await (async () => {
       this.existing = null; // Clear the cache
-      return this.getType();;
+      return this.getType();
     })();
 
     // Deploy actions
@@ -268,7 +271,9 @@ export default class ActionHandler extends DefaultAPIHandler {
         .filter((action) => action.deployed)
         .map((actionWithoutId) => {
           // Add IDs to just-created actions
-          const actionId = postProcessedActions?.find((postProcessedAction) => postProcessedAction.name === actionWithoutId.name)?.id;
+          const actionId = postProcessedActions?.find(
+            (postProcessedAction) => postProcessedAction.name === actionWithoutId.name
+          )?.id;
 
           const actionWithId = {
             ...actionWithoutId,
