@@ -5,11 +5,11 @@ import {
   Prompts,
 } from './tools/auth0/handlers/prompts';
 import { Tenant } from './tools/auth0/handlers/tenant';
-import { Theme } from './tools/auth0/handlers/themes';
 import { Page } from './tools/auth0/handlers/pages';
 import { LogStream } from './tools/auth0/handlers/logStreams';
 import { Client } from './tools/auth0/handlers/clients';
 import { ClientGrant } from './tools/auth0/handlers/clientGrants';
+import { Theme } from './tools/auth0/handlers/themes';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;

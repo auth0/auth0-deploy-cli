@@ -17,7 +17,6 @@ import cleanAssets from '../../readonly';
 import { Assets, Config, Auth0APIClient, AssetTypes, KeywordMappings } from '../../types';
 import { filterOnlyIncludedResourceTypes } from '..';
 import { preserveKeywords } from '../../keywordPreservation';
-import pagedClient from '../../tools/auth0/client';
 
 export default class YAMLContext {
   basePath: string;

@@ -114,7 +114,7 @@ const customPartialsScreenTypes = [
   'signup-id',
   'signup-password',
   'login-passwordless-sms-otp',
-  'login-passwordless-email-code'
+  'login-passwordless-email-code',
 ] as const;
 
 export type CustomPartialsScreenTypes = typeof customPartialsPromptTypes[number];
@@ -202,29 +202,35 @@ export const schema = {
             oneOf: [
               {
                 type: 'object',
-                properties: customPartialsScreenTypes.reduce((screenAcc, customPartialsScreenType) => {
-                  return {
-                    ...screenAcc,
-                    [customPartialsScreenType]: {
-                      oneOf: [
-                        {
-                          type: 'object',
-                          properties: customPartialsInsertionPoints.reduce((insertionAcc, customPartialsInsertionPoint) => {
-                            return {
-                              ...insertionAcc,
-                              [customPartialsInsertionPoint]: {
-                                type: 'string',
+                properties: customPartialsScreenTypes.reduce(
+                  (screenAcc, customPartialsScreenType) => {
+                    return {
+                      ...screenAcc,
+                      [customPartialsScreenType]: {
+                        oneOf: [
+                          {
+                            type: 'object',
+                            properties: customPartialsInsertionPoints.reduce(
+                              (insertionAcc, customPartialsInsertionPoint) => {
+                                return {
+                                  ...insertionAcc,
+                                  [customPartialsInsertionPoint]: {
+                                    type: 'string',
+                                  },
+                                };
                               },
-                            };
-                          }, {}),
-                        },
-                        { type: 'null' }
-                      ],
-                    },
-                  };
-                }, {}),
+                              {}
+                            ),
+                          },
+                          { type: 'null' },
+                        ],
+                      },
+                    };
+                  },
+                  {}
+                ),
               },
-              { type: 'null' }
+              { type: 'null' },
             ],
           },
         };
@@ -263,6 +269,7 @@ export default class PromptsHandler extends DefaultHandler {
 
   private IsFeatureSupported: boolean = true;
 
+  // eslint-disable-next-line no-underscore-dangle
   private promptClient = this.client.prompts._getRestClient('/prompts/:prompt/partials');
 
   private async partialHttpRequest(
@@ -322,7 +329,7 @@ export default class PromptsHandler extends DefaultHandler {
               prompt: promptType,
               language,
             })
-            .then(({data: customTextData}) => {
+            .then(({ data: customTextData }) => {
               if (isEmpty(customTextData)) return null;
               return {
                 language,
@@ -467,7 +474,7 @@ export default class PromptsHandler extends DefaultHandler {
           });
         }),
         generator: ({ prompt, language, body }) =>
-          this.client.prompts.updateCustomTextByLanguage({ prompt, language }, body)
+          this.client.prompts.updateCustomTextByLanguage({ prompt, language }, body),
       })
       .promise();
   }

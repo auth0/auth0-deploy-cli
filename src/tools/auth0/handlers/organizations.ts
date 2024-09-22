@@ -147,7 +147,7 @@ export default class OrganizationsHandler extends DefaultHandler {
       connectionsToUpdate.map((conn) =>
         this.client.organizations
           .updateEnabledConnection(
-            { connection_id: conn.connection_id, ...params },
+            { connectionId: conn.connection_id, ...params },
             {
               assign_membership_on_login: conn.assign_membership_on_login,
               show_as_button: conn.show_as_button,
