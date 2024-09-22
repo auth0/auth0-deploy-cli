@@ -1,17 +1,15 @@
+import { PromisePoolExecutor } from 'promise-pool-executor';
 import pageClient from '../../../../src/tools/auth0/client';
 
 const { expect } = require('chai');
 const organizations = require('../../../../src/tools/auth0/handlers/organizations');
 const { mockPagedData } = require('../../../utils');
 
-const pool = {
-  addEachTask: (data) => {
-    if (data.data && data.data.length) {
-      data.generator(data.data[0]);
-    }
-    return { promise: () => null };
-  },
-};
+const pool = new PromisePoolExecutor({
+  concurrencyLimit: 3,
+  frequencyLimit: 1000,
+  frequencyWindow: 1000, // 1 sec
+});
 
 const sampleOrg = {
   id: '123',
@@ -22,6 +20,8 @@ const sampleOrg = {
 const sampleEnabledConnection = {
   connection_id: 'con_123',
   assign_membership_on_login: true,
+  show_as_button: false,
+  is_signup_enabled: true,
   connection: {
     name: 'Username-Password-Login',
     strategy: 'auth0',
@@ -30,6 +30,7 @@ const sampleEnabledConnection = {
 const sampleEnabledConnection2 = {
   connection_id: 'con_456',
   assign_membership_on_login: false,
+  show_as_button: true,
   connection: {
     name: 'facebook',
     strategy: 'facebook',
@@ -136,6 +137,8 @@ describe('#organizations handler', () => {
             expect(connection).to.be.an('object');
             expect(connection.connection_id).to.equal('con_123');
             expect(connection.assign_membership_on_login).to.equal(true);
+            expect(connection.show_as_button).to.equal(false);
+            expect(connection.is_signup_enabled).to.equal(true);
             return Promise.resolve({ data: connection });
           },
         },
@@ -170,6 +173,8 @@ describe('#organizations handler', () => {
                 {
                   name: 'Username-Password-Login',
                   assign_membership_on_login: true,
+                  show_as_button: false,
+                  is_signup_enabled: true
                 },
               ],
             },
@@ -341,12 +346,23 @@ describe('#organizations handler', () => {
             return Promise.resolve({ data: undefined });
           },
           updateEnabledConnection: (params, data) => {
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('123');
-            expect(params.connectionId).to.equal(sampleEnabledConnection.connection_id);
-            expect(data).to.be.an('object');
-            expect(data.assign_membership_on_login).to.equal(false);
-            return Promise.resolve({ data });
+            if (params.connection_id === sampleEnabledConnection.connection_id) {
+              expect(params).to.be.an('object');
+              expect(params.id).to.equal('123');
+              expect(params.connection_id).to.equal(sampleEnabledConnection.connection_id);
+              expect(data).to.be.an('object');
+              expect(data.assign_membership_on_login).to.equal(false);
+              expect(data.show_as_button).to.equal(true);
+              expect(data.is_signup_enabled).to.equal(false);
+            } else {
+              expect(params).to.be.an('object');
+              expect(params.id).to.equal('123');
+              expect(params.connection_id).to.equal(sampleEnabledConnection2.connection_id);
+              expect(data).to.be.an('object');
+              expect(data.assign_membership_on_login).to.equal(true);
+              expect(data.show_as_button).to.equal(false);
+            }
+            return Promise.resolve(data);
           },
         },
         connections: {
@@ -379,8 +395,13 @@ describe('#organizations handler', () => {
               name: 'acme',
               display_name: 'Acme 2',
               connections: [
-                { name: 'Username-Password-Login', assign_membership_on_login: false },
-                { name: 'facebook', assign_membership_on_login: false },
+                {
+                  name: 'Username-Password-Login',
+                  assign_membership_on_login: false,
+                  show_as_button: true,
+                  is_signup_enabled: false
+                },
+                { name: 'facebook', assign_membership_on_login: true, show_as_button: false },
               ],
             },
           ],
@@ -408,6 +429,8 @@ describe('#organizations handler', () => {
             expect(data).to.be.an('object');
             expect(data.connection_id).to.equal('con_123');
             expect(data.assign_membership_on_login).to.equal(false);
+            expect(data.show_as_button).to.equal(false);
+            expect(data.is_signup_enabled).to.equal(false);
             return Promise.resolve({ data });
           },
         },
@@ -440,7 +463,14 @@ describe('#organizations handler', () => {
               id: '123',
               name: 'acme',
               display_name: 'Acme 2',
-              connections: [{ name: 'Username-Password-Login', assign_membership_on_login: false }],
+              connections: [
+                {
+                  name: 'Username-Password-Login',
+                  assign_membership_on_login: false,
+                  show_as_button: false,
+                  is_signup_enabled: false
+                },
+              ],
             },
           ],
         },

@@ -8,6 +8,7 @@ import {
   wrapArrayReplaceMarkersInQuotes,
   Auth0,
 } from '../../tools';
+import pagedClient from '../../tools/auth0/client';
 
 import log from '../../logger';
 import { isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter } from '../../utils';

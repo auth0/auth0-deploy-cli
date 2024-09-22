@@ -42,6 +42,7 @@
                 "enable_public_signup_user_exists_error": true,
                 "enable_sso": true,
                 "enforce_client_authentication_on_passwordless_start": true,
+                "new_universal_login_experience_enabled": true,
                 "universal_login": true,
                 "use_scope_descriptions_for_consent": false,
                 "revoke_refresh_token_grant": false,
@@ -110,6 +111,7 @@
                 "enable_public_signup_user_exists_error": true,
                 "enable_sso": true,
                 "enforce_client_authentication_on_passwordless_start": true,
+                "new_universal_login_experience_enabled": true,
                 "universal_login": true,
                 "use_scope_descriptions_for_consent": false,
                 "revoke_refresh_token_grant": false,
@@ -170,6 +172,7 @@
                 "enable_legacy_logs_search_v2": false,
                 "enable_public_signup_user_exists_error": true,
                 "enable_sso": true,
+                "new_universal_login_experience_enabled": true,
                 "universal_login": true,
                 "use_scope_descriptions_for_consent": false,
                 "revoke_refresh_token_grant": false,
@@ -192,6 +195,7 @@
                 "mode": "non-persistent"
             },
             "sandbox_versions_available": [
+                "18",
                 "16",
                 "12"
             ]

@@ -657,6 +657,7 @@ roles:
     description: Readz Only
     permissions: []
 prompts:
+  partials: {}
   universal_login_experience: new
   identifier_first: true
 actions:

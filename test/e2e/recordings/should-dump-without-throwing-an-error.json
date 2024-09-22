@@ -67,7 +67,8 @@
                     },
                     "owners": [
                         "mr|samlp|okta|will.vedder@auth0.com",
-                        "mr|google-oauth2|102002633619863830825"
+                        "mr|google-oauth2|102002633619863830825",
+                        "mr|samlp|okta|frederik.prijck@auth0.com"
                     ],
                     "custom_login_page": "<html>TEST123</html>\n",
                     "signing_keys": [
@@ -94,14 +95,15 @@
         "status": 200,
         "response": {
             "allowed_logout_urls": [
-                "https://mycompany.org/logoutCallback"
+                "https://travel0.com/logoutCallback"
             ],
             "change_password": {
                 "enabled": true,
                 "html": "<html>Change Password</html>\n"
             },
             "enabled_locales": [
-                "en"
+                "en",
+                "es"
             ],
             "error_page": {
                 "html": "<html>Error Page</html>\n",
@@ -128,7 +130,7 @@
                 "disable_clickjack_protection_headers": false,
                 "enable_pipeline2": false
             },
-            "friendly_name": "My Test Tenant",
+            "friendly_name": "This tenant name should be preserved",
             "guardian_mfa_page": {
                 "enabled": true,
                 "html": "<html>MFA</html>\n"
@@ -137,8 +139,8 @@
             "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
             "sandbox_version": "12",
             "session_lifetime": 3.0166666666666666,
-            "support_email": "support@mycompany.org",
-            "support_url": "https://mycompany.org/support",
+            "support_email": "support@travel0.com",
+            "support_url": "https://travel0.com/support",
             "universal_login": {
                 "colors": {
                     "primary": "#F8F8F2",
@@ -631,6 +633,26 @@
                             "value": "update:attack_protection"
                         },
                         {
+                            "description": "Read organization summary",
+                            "value": "read:organizations_summary"
+                        },
+                        {
+                            "description": "Create Authentication Methods",
+                            "value": "create:authentication_methods"
+                        },
+                        {
+                            "description": "Read Authentication Methods",
+                            "value": "read:authentication_methods"
+                        },
+                        {
+                            "description": "Update Authentication Methods",
+                            "value": "update:authentication_methods"
+                        },
+                        {
+                            "description": "Delete Authentication Methods",
+                            "value": "delete:authentication_methods"
+                        },
+                        {
                             "description": "Read Organizations",
                             "value": "read:organizations"
                         },
@@ -699,28 +721,80 @@
                             "value": "delete:organization_invitations"
                         },
                         {
-                            "description": "Read organization summary",
-                            "value": "read:organizations_summary"
+                            "description": "Read SCIM configuration",
+                            "value": "read:scim_config"
                         },
                         {
-                            "description": "Create Actions Log Sessions",
-                            "value": "create:actions_log_sessions"
+                            "description": "Create SCIM configuration",
+                            "value": "create:scim_config"
                         },
                         {
-                            "description": "Create Authentication Methods",
-                            "value": "create:authentication_methods"
+                            "description": "Update SCIM configuration",
+                            "value": "update:scim_config"
                         },
                         {
-                            "description": "Read Authentication Methods",
-                            "value": "read:authentication_methods"
+                            "description": "Delete SCIM configuration",
+                            "value": "delete:scim_config"
                         },
                         {
-                            "description": "Update Authentication Methods",
-                            "value": "update:authentication_methods"
+                            "description": "Create SCIM token",
+                            "value": "create:scim_token"
                         },
                         {
-                            "description": "Delete Authentication Methods",
-                            "value": "delete:authentication_methods"
+                            "description": "Read SCIM token",
+                            "value": "read:scim_token"
+                        },
+                        {
+                            "description": "Delete SCIM token",
+                            "value": "delete:scim_token"
+                        },
+                        {
+                            "description": "Delete a Phone Notification Provider",
+                            "value": "delete:phone_providers"
+                        },
+                        {
+                            "description": "Create a Phone Notification Provider",
+                            "value": "create:phone_providers"
+                        },
+                        {
+                            "description": "Read a Phone Notification Provider",
+                            "value": "read:phone_providers"
+                        },
+                        {
+                            "description": "Update a Phone Notification Provider",
+                            "value": "update:phone_providers"
+                        },
+                        {
+                            "description": "Delete a Phone Notification Template",
+                            "value": "delete:phone_templates"
+                        },
+                        {
+                            "description": "Create a Phone Notification Template",
+                            "value": "create:phone_templates"
+                        },
+                        {
+                            "description": "Read a Phone Notification Template",
+                            "value": "read:phone_templates"
+                        },
+                        {
+                            "description": "Update a Phone Notification Template",
+                            "value": "update:phone_templates"
+                        },
+                        {
+                            "description": "Create encryption keys",
+                            "value": "create:encryption_keys"
+                        },
+                        {
+                            "description": "Read encryption keys",
+                            "value": "read:encryption_keys"
+                        },
+                        {
+                            "description": "Update encryption keys",
+                            "value": "update:encryption_keys"
+                        },
+                        {
+                            "description": "Delete encryption keys",
+                            "value": "delete:encryption_keys"
                         },
                         {
                             "value": "read:client_credentials",
@@ -761,6 +835,48 @@
                     "tenant": "auth0-deploy-cli-e2e",
                     "global": false,
                     "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Default App",
+                    "callbacks": [],
+                    "cross_origin_auth": false,
+                    "is_first_party": true,
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "WM31waMImeHDtQnjVLPzg2uvu00vgdim",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
                     "name": "Deploy CLI",
                     "is_first_party": true,
                     "oidc_conformant": true,
@@ -782,7 +898,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "GIW99EUCF9DFExh77WPMyTMzT8NN4J3A",
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -793,72 +909,6 @@
                     "token_endpoint_auth_method": "client_secret_post",
                     "app_type": "non_interactive",
                     "grant_types": [
-                        "client_credentials"
-                    ],
-                    "custom_login_page_on": true
-                },
-                {
-                    "tenant": "auth0-deploy-cli-e2e",
-                    "global": false,
-                    "is_token_endpoint_ip_header_trusted": false,
-                    "name": "Default App",
-                    "callbacks": [],
-                    "cross_origin_auth": false,
-                    "is_first_party": true,
-                    "oidc_conformant": true,
-                    "refresh_token": {
-                        "expiration_type": "non-expiring",
-                        "leeway": 0,
-                        "infinite_token_lifetime": true,
-                        "infinite_idle_token_lifetime": true,
-                        "token_lifetime": 2592000,
-                        "idle_token_lifetime": 1296000,
-                        "rotation_type": "non-rotating"
-                    },
-                    "sso_disabled": false,
-                    "addons": {
-                        "salesforce_api": {
-                            "clientid": "consumer-key",
-                            "principal": "principal-property"
-                        },
-                        "azure_sb": {
-                            "expiration": 5,
-                            "namespace": "namespace",
-                            "entityPath": "entity",
-                            "sasKeyName": "adsfasdf",
-                            "sasKey": "asdfasdf"
-                        }
-                    },
-                    "allowed_clients": [],
-                    "native_social_login": {
-                        "apple": {
-                            "enabled": false
-                        },
-                        "facebook": {
-                            "enabled": false
-                        }
-                    },
-                    "signing_keys": [
-                        {
-                            "cert": "[REDACTED]",
-                            "pkcs7": "[REDACTED]",
-                            "subject": "deprecated"
-                        }
-                    ],
-                    "client_id": "xLgpNb56pwyBvNmyd67xtoMb4G2xxy9W",
-                    "callback_url_template": false,
-                    "client_secret": "[REDACTED]",
-                    "jwt_configuration": {
-                        "alg": "RS256",
-                        "lifetime_in_seconds": 36000,
-                        "secret_encoded": false
-                    },
-                    "client_aliases": [],
-                    "token_endpoint_auth_method": "client_secret_post",
-                    "grant_types": [
-                        "authorization_code",
-                        "implicit",
-                        "refresh_token",
                         "client_credentials"
                     ],
                     "custom_login_page_on": true
@@ -880,7 +930,7 @@
             "limit": 100,
             "connections": [
                 {
-                    "id": "con_FJVIi5jt9aQXvioG",
+                    "id": "con_tPtALYZ6wQWOFos3",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -897,8 +947,7 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "GIW99EUCF9DFExh77WPMyTMzT8NN4J3A",
-                        "xLgpNb56pwyBvNmyd67xtoMb4G2xxy9W"
+                        "WM31waMImeHDtQnjVLPzg2uvu00vgdim"
                     ]
                 }
             ]
@@ -918,7 +967,7 @@
             "limit": 100,
             "connections": [
                 {
-                    "id": "con_FJVIi5jt9aQXvioG",
+                    "id": "con_tPtALYZ6wQWOFos3",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -935,8 +984,7 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "GIW99EUCF9DFExh77WPMyTMzT8NN4J3A",
-                        "xLgpNb56pwyBvNmyd67xtoMb4G2xxy9W"
+                        "WM31waMImeHDtQnjVLPzg2uvu00vgdim"
                     ]
                 }
             ]
@@ -952,14 +1000,15 @@
         "status": 200,
         "response": {
             "allowed_logout_urls": [
-                "https://mycompany.org/logoutCallback"
+                "https://travel0.com/logoutCallback"
             ],
             "change_password": {
                 "enabled": true,
                 "html": "<html>Change Password</html>\n"
             },
             "enabled_locales": [
-                "en"
+                "en",
+                "es"
             ],
             "error_page": {
                 "html": "<html>Error Page</html>\n",
@@ -986,7 +1035,7 @@
                 "disable_clickjack_protection_headers": false,
                 "enable_pipeline2": false
             },
-            "friendly_name": "My Test Tenant",
+            "friendly_name": "This tenant name should be preserved",
             "guardian_mfa_page": {
                 "enabled": true,
                 "html": "<html>MFA</html>\n"
@@ -995,8 +1044,8 @@
             "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
             "sandbox_version": "12",
             "session_lifetime": 3.0166666666666666,
-            "support_email": "support@mycompany.org",
-            "support_url": "https://mycompany.org/support",
+            "support_email": "support@travel0.com",
+            "support_url": "https://travel0.com/support",
             "universal_login": {
                 "colors": {
                     "primary": "#F8F8F2",
@@ -1020,12 +1069,12 @@
         "method": "GET",
         "path": "/api/v2/emails/provider?include_fields=true&fields=name%2Cenabled%2Ccredentials%2Csettings%2Cdefault_from_address",
         "body": "",
-        "status": 404,
+        "status": 200,
         "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "There is not a configured email provider",
-            "errorCode": "inexistent_email_provider"
+            "name": "mandrill",
+            "credentials": {},
+            "default_from_address": "auth0-user@auth0.com",
+            "enabled": false
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -1034,6 +1083,36 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/email-templates/verify_email_by_code",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/mfa_oob_code",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/enrollment_email",
         "body": "",
         "status": 404,
         "response": {
@@ -1078,7 +1157,56 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/reset_email",
+        "path": "/api/v2/email-templates/stolen_credentials",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/welcome_email",
+        "body": "",
+        "status": 200,
+        "response": {
+            "template": "welcome_email",
+            "body": "<html>\n  <body>\n    <h1>Welcome to This tenant name should be preserved!</h1>\n  </body>\n</html>\n",
+            "from": "",
+            "resultUrl": "https://travel0.com/welcome",
+            "subject": "Welcome",
+            "syntax": "liquid",
+            "urlLifetimeInSeconds": 3600,
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/password_reset",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/user_invitation",
         "body": "",
         "status": 404,
         "response": {
@@ -1111,86 +1239,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/welcome_email",
-        "body": "",
-        "status": 200,
-        "response": {
-            "template": "welcome_email",
-            "body": "<html>\n  <body>\n    <h1>Welcome!</h1>\n  </body>\n</html>\n",
-            "from": "",
-            "resultUrl": "https://example.com/welcome",
-            "subject": "Welcome",
-            "syntax": "liquid",
-            "urlLifetimeInSeconds": 3600,
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/enrollment_email",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/stolen_credentials",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/user_invitation",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/mfa_oob_code",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/password_reset",
+        "path": "/api/v2/email-templates/reset_email",
         "body": "",
         "status": 404,
         "response": {
@@ -1214,8 +1263,8 @@
             "limit": 100,
             "client_grants": [
                 {
-                    "id": "cgr_iodSzvwxqm51tLZF",
-                    "client_id": "GIW99EUCF9DFExh77WPMyTMzT8NN4J3A",
+                    "id": "cgr_Uvfv2anWyTWpI1qQ",
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
                     "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
                     "scope": [
                         "read:client_grants",
@@ -1331,6 +1380,11 @@
                         "read:entitlements",
                         "read:attack_protection",
                         "update:attack_protection",
+                        "read:organizations_summary",
+                        "create:authentication_methods",
+                        "read:authentication_methods",
+                        "update:authentication_methods",
+                        "delete:authentication_methods",
                         "read:organizations",
                         "update:organizations",
                         "create:organizations",
@@ -1348,12 +1402,29 @@
                         "create:organization_invitations",
                         "read:organization_invitations",
                         "delete:organization_invitations",
-                        "read:organizations_summary",
-                        "create:actions_log_sessions",
-                        "create:authentication_methods",
-                        "read:authentication_methods",
-                        "update:authentication_methods",
-                        "delete:authentication_methods"
+                        "read:scim_config",
+                        "create:scim_config",
+                        "update:scim_config",
+                        "delete:scim_config",
+                        "create:scim_token",
+                        "read:scim_token",
+                        "delete:scim_token",
+                        "delete:phone_providers",
+                        "create:phone_providers",
+                        "read:phone_providers",
+                        "update:phone_providers",
+                        "delete:phone_templates",
+                        "create:phone_templates",
+                        "read:phone_templates",
+                        "update:phone_templates",
+                        "create:encryption_keys",
+                        "read:encryption_keys",
+                        "update:encryption_keys",
+                        "delete:encryption_keys",
+                        "read:client_credentials",
+                        "create:client_credentials",
+                        "update:client_credentials",
+                        "delete:client_credentials"
                     ]
                 }
             ]
@@ -1415,6 +1486,16 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/guardian/factors/push-notification/providers/sns",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/guardian/factors/sms/providers/twilio",
         "body": "",
         "status": 200,
@@ -1424,16 +1505,6 @@
             "from": "from bar",
             "messaging_service_sid": "foo"
         },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/guardian/factors/push-notification/providers/sns",
-        "body": "",
-        "status": 200,
-        "response": {},
         "rawHeaders": [],
         "responseIsBinary": false
     },
@@ -1532,8 +1603,7 @@
         "body": "",
         "status": 200,
         "response": {
-            "universal_login_experience": "new",
-            "identifier_first": true
+            "universal_login_experience": "new"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -1546,14 +1616,15 @@
         "status": 200,
         "response": {
             "allowed_logout_urls": [
-                "https://mycompany.org/logoutCallback"
+                "https://travel0.com/logoutCallback"
             ],
             "change_password": {
                 "enabled": true,
                 "html": "<html>Change Password</html>\n"
             },
             "enabled_locales": [
-                "en"
+                "en",
+                "es"
             ],
             "error_page": {
                 "html": "<html>Error Page</html>\n",
@@ -1580,7 +1651,7 @@
                 "disable_clickjack_protection_headers": false,
                 "enable_pipeline2": false
             },
-            "friendly_name": "My Test Tenant",
+            "friendly_name": "This tenant name should be preserved",
             "guardian_mfa_page": {
                 "enabled": true,
                 "html": "<html>MFA</html>\n"
@@ -1589,8 +1660,8 @@
             "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
             "sandbox_version": "12",
             "session_lifetime": 3.0166666666666666,
-            "support_email": "support@mycompany.org",
-            "support_url": "https://mycompany.org/support",
+            "support_email": "support@travel0.com",
+            "support_url": "https://travel0.com/support",
             "universal_login": {
                 "colors": {
                     "primary": "#F8F8F2",
@@ -1606,6 +1677,86 @@
                 "12"
             ]
         },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+      "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+      "method": "GET",
+      "path": "/api/v2/prompts/login/partials",
+      "body": "",
+      "status": 200,
+      "response": {},
+      "rawHeaders": [],
+      "responseIsBinary": false
+    },
+    {
+      "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+      "method": "GET",
+      "path": "/api/v2/prompts/login-id/partials",
+      "body": "",
+      "status": 200,
+      "response": {},
+      "rawHeaders": [],
+      "responseIsBinary": false
+    },
+    {
+      "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+      "method": "GET",
+      "path": "/api/v2/prompts/login-password/partials",
+      "body": "",
+      "status": 200,
+      "response": {},
+      "rawHeaders": [],
+      "responseIsBinary": false
+    },
+    {
+      "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+      "method": "GET",
+      "path": "/api/v2/prompts/login-passwordless/partials",
+      "body": "",
+      "status": 200,
+      "response": {},
+      "rawHeaders": [],
+      "responseIsBinary": false
+    },
+    {
+      "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+      "method": "GET",
+      "path": "/api/v2/prompts/signup/partials",
+      "body": "",
+      "status": 200,
+      "response": {},
+      "rawHeaders": [],
+      "responseIsBinary": false
+    },
+    {
+      "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+      "method": "GET",
+      "path": "/api/v2/prompts/signup-id/partials",
+      "body": "",
+      "status": 200,
+      "response": {},
+      "rawHeaders": [],
+      "responseIsBinary": false
+    },
+    {
+      "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+      "method": "GET",
+      "path": "/api/v2/prompts/signup-password/partials",
+      "body": "",
+      "status": 200,
+      "response": {},
+      "rawHeaders": [],
+      "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/login-id/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
         "rawHeaders": [],
         "responseIsBinary": false
     },
@@ -1632,16 +1783,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login-id/custom-text/en",
-        "body": "",
-        "status": 200,
-        "response": {},
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/prompts/login-email-verification/custom-text/en",
         "body": "",
         "status": 200,
@@ -1652,7 +1793,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/signup-id/custom-text/en",
+        "path": "/api/v2/prompts/signup/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -1662,7 +1803,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/signup/custom-text/en",
+        "path": "/api/v2/prompts/signup-id/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -1692,16 +1833,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa-otp/custom-text/en",
-        "body": "",
-        "status": 200,
-        "response": {},
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/prompts/consent/custom-text/en",
         "body": "",
         "status": 200,
@@ -1713,6 +1844,26 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/prompts/mfa-push/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/mfa-otp/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/mfa-voice/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -1742,16 +1893,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa-voice/custom-text/en",
-        "body": "",
-        "status": 200,
-        "response": {},
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/prompts/mfa-sms/custom-text/en",
         "body": "",
         "status": 200,
@@ -1772,7 +1913,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa/custom-text/en",
+        "path": "/api/v2/prompts/mfa-recovery-code/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -1782,7 +1923,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa-recovery-code/custom-text/en",
+        "path": "/api/v2/prompts/mfa/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -1802,7 +1943,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/email-otp-challenge/custom-text/en",
+        "path": "/api/v2/prompts/device-flow/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -1822,7 +1963,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/invitation/custom-text/en",
+        "path": "/api/v2/prompts/email-otp-challenge/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -1842,7 +1983,27 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/device-flow/custom-text/en",
+        "path": "/api/v2/prompts/invitation/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/login/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/login-id/custom-text/es",
         "body": "",
         "status": 200,
         "response": {},
@@ -1853,6 +2014,236 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/prompts/common/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/login-email-verification/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/login-password/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/signup/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/signup-id/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/signup-password/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/consent/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/reset-password/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/mfa-push/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/mfa-otp/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/mfa-voice/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/mfa-phone/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/mfa-webauthn/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/mfa-sms/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/mfa-recovery-code/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/mfa/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/mfa-email/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/status/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/device-flow/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/email-verification/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/email-otp-challenge/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/organizations/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/common/custom-text/es",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/invitation/custom-text/es",
         "body": "",
         "status": 200,
         "response": {},
@@ -1896,21 +2287,12 @@
             "triggers": [
                 {
                     "id": "post-login",
-                    "version": "v1",
-                    "status": "DEPRECATED",
-                    "runtimes": [
-                        "node12"
-                    ],
-                    "default_runtime": "node12",
-                    "compatible_triggers": []
-                },
-                {
-                    "id": "post-login",
                     "version": "v3",
                     "status": "CURRENT",
                     "runtimes": [
                         "node12",
                         "node16",
+                        "node18",
                         "node18-actions"
                     ],
                     "default_runtime": "node18-actions",
@@ -1923,44 +2305,44 @@
                 },
                 {
                     "id": "post-login",
+                    "version": "v1",
+                    "status": "DEPRECATED",
+                    "runtimes": [
+                        "node12"
+                    ],
+                    "default_runtime": "node12",
+                    "compatible_triggers": []
+                },
+                {
+                    "id": "post-login",
                     "version": "v2",
                     "status": "DEPRECATED",
                     "runtimes": [
                         "node12",
-                        "node16"
+                        "node16",
+                        "node18"
                     ],
                     "default_runtime": "node16",
                     "compatible_triggers": []
                 },
                 {
                     "id": "credentials-exchange",
-                    "version": "v2",
-                    "status": "CURRENT",
+                    "version": "v1",
+                    "status": "DEPRECATED",
                     "runtimes": [
-                        "node12",
-                        "node16",
-                        "node18-actions"
+                        "node12"
                     ],
-                    "default_runtime": "node18-actions",
+                    "default_runtime": "node12",
                     "compatible_triggers": []
                 },
                 {
                     "id": "credentials-exchange",
-                    "version": "v1",
-                    "status": "DEPRECATED",
-                    "runtimes": [
-                        "node12"
-                    ],
-                    "default_runtime": "node12",
-                    "compatible_triggers": []
-                },
-                {
-                    "id": "pre-user-registration",
                     "version": "v2",
                     "status": "CURRENT",
                     "runtimes": [
                         "node12",
                         "node16",
+                        "node18",
                         "node18-actions"
                     ],
                     "default_runtime": "node18-actions",
@@ -1977,6 +2359,19 @@
                     "compatible_triggers": []
                 },
                 {
+                    "id": "pre-user-registration",
+                    "version": "v2",
+                    "status": "CURRENT",
+                    "runtimes": [
+                        "node12",
+                        "node16",
+                        "node18",
+                        "node18-actions"
+                    ],
+                    "default_runtime": "node18-actions",
+                    "compatible_triggers": []
+                },
+                {
                     "id": "post-user-registration",
                     "version": "v1",
                     "status": "DEPRECATED",
@@ -1993,6 +2388,7 @@
                     "runtimes": [
                         "node12",
                         "node16",
+                        "node18",
                         "node18-actions"
                     ],
                     "default_runtime": "node18-actions",
@@ -2015,18 +2411,7 @@
                     "runtimes": [
                         "node12",
                         "node16",
-                        "node18-actions"
-                    ],
-                    "default_runtime": "node18-actions",
-                    "compatible_triggers": []
-                },
-                {
-                    "id": "send-phone-message",
-                    "version": "v2",
-                    "status": "CURRENT",
-                    "runtimes": [
-                        "node12",
-                        "node16",
+                        "node18",
                         "node18-actions"
                     ],
                     "default_runtime": "node18-actions",
@@ -2039,6 +2424,19 @@
                     "runtimes": [
                         "node12"
                     ],
+                    "compatible_triggers": []
+                },
+                {
+                    "id": "send-phone-message",
+                    "version": "v2",
+                    "status": "CURRENT",
+                    "runtimes": [
+                        "node12",
+                        "node16",
+                        "node18",
+                        "node18-actions"
+                    ],
+                    "default_runtime": "node18-actions",
                     "compatible_triggers": []
                 },
                 {
@@ -2047,6 +2445,7 @@
                     "status": "CURRENT",
                     "runtimes": [
                         "node16",
+                        "node18",
                         "node18-actions"
                     ],
                     "default_runtime": "node18-actions",
@@ -2178,18 +2577,26 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/attack-protection/brute-force-protection",
+        "path": "/api/v2/attack-protection/suspicious-ip-throttling",
         "body": "",
         "status": 200,
         "response": {
             "enabled": true,
             "shields": [
-                "block",
-                "user_notification"
+                "admin_notification",
+                "block"
             ],
-            "mode": "count_per_identifier_and_ip",
             "allowlist": [],
-            "max_attempts": 10
+            "stage": {
+                "pre-login": {
+                    "max_attempts": 100,
+                    "rate": 864000
+                },
+                "pre-user-registration": {
+                    "max_attempts": 50,
+                    "rate": 1200
+                }
+            }
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -2217,26 +2624,18 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/attack-protection/suspicious-ip-throttling",
+        "path": "/api/v2/attack-protection/brute-force-protection",
         "body": "",
         "status": 200,
         "response": {
             "enabled": true,
             "shields": [
-                "admin_notification",
-                "block"
+                "block",
+                "user_notification"
             ],
+            "mode": "count_per_identifier_and_ip",
             "allowlist": [],
-            "stage": {
-                "pre-login": {
-                    "max_attempts": 100,
-                    "rate": 864000
-                },
-                "pre-user-registration": {
-                    "max_attempts": 50,
-                    "rate": 1200
-                }
-            }
+            "max_attempts": 10
         },
         "rawHeaders": [],
         "responseIsBinary": false

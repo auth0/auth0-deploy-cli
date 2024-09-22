@@ -9,6 +9,7 @@ export function decodeBuffer(recordingResponse: Definition['response']) {
     if (!isArray) return recordingResponse; // Some Auth0 Management API endpoints aren't gzipped, we can tell this if they are an array or not
     if (recordingResponse.length === 0) return []; // Empty arrays can be piped through as-is too
 
+    if (recordingResponse[0] === 'all-applications') return recordingResponse;
     const decoded = Buffer.from(recordingResponse.join(''), 'hex');
     const unzipped = zlib.gunzipSync(decoded).toString('utf-8');
     return JSON.parse(unzipped);

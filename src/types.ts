@@ -84,10 +84,10 @@ export type Assets = Partial<{
   actions: Action[] | null;
   attackProtection: Asset | null;
   branding:
-    | (Asset & {
-        templates?: { template: string; body: string }[] | null;
-      })
-    | null;
+  | (Asset & {
+    templates?: { template: string; body: string }[] | null;
+  })
+  | null;
   clients: Client[] | null;
   clientGrants: ClientGrant[] | null;
   connections: Asset[] | null;

@@ -2,6 +2,7 @@ import pageClient from '../../../../src/tools/auth0/client';
 
 /* eslint-disable consistent-return */
 const { expect } = require('chai');
+const sinon = require('sinon');
 const connections = require('../../../../src/tools/auth0/handlers/connections');
 const { mockPagedData } = require('../../../utils');
 
@@ -59,6 +60,32 @@ describe('#connections handler', () => {
   });
 
   describe('#connections process', () => {
+    let scimHandlerMock;
+
+    beforeEach(() => {
+      scimHandlerMock = {
+        createIdMap: sinon.stub().resolves(new Map()),
+        getScimConfiguration: sinon.stub().resolves({
+          connection_id: 'con_KYp633cmKtnEQ31C',
+          connection_name: 'okta',
+          strategy: 'okta',
+          tenant_name: 'test-tenant',
+          user_id_attribute: 'externalId-1',
+          mapping: [
+            {
+              scim: 'scim_id',
+              auth0: 'auth0_id'
+            }
+          ]
+        }),
+        applyScimConfiguration: sinon.stub().resolves(undefined)
+      };
+    });
+
+    afterEach(() => {
+      sinon.restore();
+    });
+
     it('should create connection', async () => {
       const auth0 = {
         connections: {
@@ -71,6 +98,7 @@ describe('#connections handler', () => {
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
           getAll: (params) => mockPagedData(params, 'connections', []),
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: (params) => mockPagedData(params, 'clients', []),
@@ -93,6 +121,7 @@ describe('#connections handler', () => {
             { strategy: 'github', name: 'github', enabled_clients: [clientId] },
             { strategy: 'auth0', name: 'db-should-be-ignored', enabled_clients: [] },
           ]),
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: (params) => mockPagedData(params, 'clients', [{ name: 'test client', client_id: clientId }]),
@@ -128,6 +157,7 @@ describe('#connections handler', () => {
           },
           delete: () => Promise.resolve({ data: [] }),
           getAll: (params) => mockPagedData(params, 'connections', [{ name: 'someConnection', id: 'con1', strategy: 'custom' }]),
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: (params) => mockPagedData(params, 'clients', [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
@@ -191,6 +221,7 @@ describe('#connections handler', () => {
           },
           delete: () => Promise.resolve({ data: [] }),
           getAll: (params) => mockPagedData(params, 'connections', [{ name: 'someSamlConnection', id: 'con1', strategy: 'samlp' }]),
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: (params) => mockPagedData(params, 'clients', [
@@ -202,6 +233,7 @@ describe('#connections handler', () => {
       };
 
       const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -275,6 +307,7 @@ describe('#connections handler', () => {
           },
           delete: () => Promise.resolve({ data: [] }),
           getAll: (params) => mockPagedData(params, 'connections', [{ name: 'someSamlConnection', id: 'con1', strategy: 'samlp' }]),
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: (params) => mockPagedData(params, 'clients', [
@@ -286,6 +319,7 @@ describe('#connections handler', () => {
       };
 
       const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -349,6 +383,7 @@ describe('#connections handler', () => {
               enabled_clients: ['excluded-one-id'],
             },
           ]),
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: (params) => mockPagedData(params, 'clients', [
@@ -396,6 +431,7 @@ describe('#connections handler', () => {
             return Promise.resolve({ data: [] });
           },
           getAll: (params) => mockPagedData(params, 'connections', [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }]),
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: (params) => mockPagedData(params, 'clients', []),
@@ -429,6 +465,7 @@ describe('#connections handler', () => {
             return Promise.resolve({ data: [] });
           },
           getAll: (params) => mockPagedData(params, 'connections', [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }]),
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: (params) => mockPagedData(params, 'clients', []),
@@ -458,6 +495,7 @@ describe('#connections handler', () => {
             return Promise.resolve({ data: [] });
           },
           getAll: (params) => mockPagedData(params, 'connections', [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }]),
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: (params) => mockPagedData(params, 'clients', []),
@@ -491,6 +529,7 @@ describe('#connections handler', () => {
             return Promise.resolve({ data: [] });
           },
           getAll: (params) => mockPagedData(params, 'connections', [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }]),
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: (params) => mockPagedData(params, 'clients', []),
@@ -528,6 +567,7 @@ describe('#connections handler', () => {
             { id: 'con1', name: 'existing1', strategy: 'custom' },
             { id: 'con2', name: 'existing2', strategy: 'custom' },
           ]),
+          _getRestClient: () => ({}),
         },
         clients: {
           getAll: (params) => mockPagedData(params, 'clients', []),
