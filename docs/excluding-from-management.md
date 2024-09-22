@@ -42,7 +42,7 @@ The following example dictates to _only_ manage `actions`, `clients` and `connec
 
 ## Excluding single resources by ID
 
-Some resource types support exclusions of individual resource by name. This is primarily useful if you work in a multi-environment context and wish to omit a production single, specific resource from your lower-level environments. The by-Name method of exclusion is supported for rules, clients, databases, connections and resource servers with the `AUTH0_EXCLUDED_RULES` ,`AUTH0_EXCLUDED_CLIENTS`, `AUTH0_EXCLUDED_DATABASES`, `AUTH0_EXCLUDED_CONNECTIONS`, `AUTH0_EXCLUDED_RESOURCE_SERVERS` configuration values respectively.
+Some resource types support exclusions of individual resource by name. This is primarily useful if you work in a multi-environment context and wish to omit a production single, specific resource from your lower-level environments. The by-Name method of exclusion is supported for rules, clients, databases, connections and resource servers with the ,`AUTH0_EXCLUDED_CLIENTS`, `AUTH0_EXCLUDED_DATABASES`, `AUTH0_EXCLUDED_CONNECTIONS`, `AUTH0_EXCLUDED_RESOURCE_SERVERS` configuration values respectively.
 
 ```json
 {
@@ -85,7 +85,6 @@ For non-set-based resource configuration like tenant, email provider and brandin
 #### Example of emptiness
 
 ```yaml
-hooks: [] # Empty hooks
 connections: [] # Empty connections
 tenant: {} # Effectively a no-op, cannot delete tenant
 emailProvider: {} # Will delete email provider

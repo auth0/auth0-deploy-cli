@@ -144,7 +144,6 @@ describe('#end-to-end deploy', function () {
     const yaml = yamlLoad(fs.readFileSync(files[0]));
 
     expect(yaml.emailTemplates.length).to.be.above(0);
-    expect(yaml.rules.length).to.be.above(0);
     expect(yaml.pages.length).to.be.above(0);
     expect(yaml.clients.length).to.be.above(0);
     expect(yaml.databases.length).to.be.above(0);

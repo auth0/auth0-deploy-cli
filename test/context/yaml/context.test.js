@@ -28,14 +28,12 @@ describe('#YAML context validation', () => {
     const context = new Context(config, mockMgmtClient());
     await context.loadAssetsFromLocal();
 
-    expect(context.assets.rules).to.deep.equal(null);
     expect(context.assets.databases).to.deep.equal(null);
     expect(context.assets.pages).to.deep.equal(null);
     expect(context.assets.clients).to.deep.equal(null);
     expect(context.assets.resourceServers).to.deep.equal(null);
     expect(context.assets.clientGrants).to.deep.equal(null);
     expect(context.assets.connections).to.deep.equal(null);
-    expect(context.assets.rulesConfigs).to.deep.equal(null);
     expect(context.assets.organizations).to.deep.equal(null);
   });
 
@@ -48,7 +46,6 @@ describe('#YAML context validation', () => {
 
     const config = {
       AUTH0_INPUT_FILE: yaml,
-      AUTH0_EXCLUDED_RULES: ['rule'],
       AUTH0_EXCLUDED_CLIENTS: ['client'],
       AUTH0_EXCLUDED_DATABASES: ['db'],
       AUTH0_EXCLUDED_CONNECTIONS: ['conn'],
@@ -59,7 +56,6 @@ describe('#YAML context validation', () => {
     const context = new Context(config, mockMgmtClient());
     await context.loadAssetsFromLocal();
 
-    expect(context.assets.exclude.rules).to.deep.equal(['rule']);
     expect(context.assets.exclude.clients).to.deep.equal(['client']);
     expect(context.assets.exclude.databases).to.deep.equal(['db']);
     expect(context.assets.exclude.connections).to.deep.equal(['conn']);
@@ -76,12 +72,10 @@ describe('#YAML context validation', () => {
       yaml,
       `
       actions: []
-      rules: []
-      hooks: []
     `
     );
 
-    const exclusions = ['hooks', 'rules', 'prompts']; // Only actions are defined above but not excluded
+    const exclusions = ['prompts']; // Only actions are defined above but not excluded
     const contextWithExclusion = new Context(
       {
         AUTH0_INPUT_FILE: yaml,
@@ -107,7 +101,6 @@ describe('#YAML context validation', () => {
     await contextWithoutExclusion.loadAssetsFromLocal();
     expect(contextWithoutExclusion.assets.actions).to.deep.equal([]);
     expect(contextWithoutExclusion.assets.hooks).to.deep.equal([]);
-    expect(contextWithoutExclusion.assets.rules).to.deep.equal([]);
   });
 
   it('should respect resource inclusion on import', async () => {
@@ -140,7 +133,7 @@ describe('#YAML context validation', () => {
     });
 
     expect(contextWithInclusion.assets.actions).to.equal(null);
-    expect(contextWithInclusion.assets.rules).to.equal(null);
+  
   });
 
   it('should error invalid schema', async () => {

@@ -14,7 +14,6 @@ const nonPrimitiveProps: (keyof Config)[] = [
   // List of properties that are arrays or objects. This list
   // enables decoding of string env variables for these configurations.
   'AUTH0_KEYWORD_REPLACE_MAPPINGS',
-  'AUTH0_EXCLUDED_RULES',
   'AUTH0_EXCLUDED_CLIENTS',
   'AUTH0_EXCLUDED_DATABASES',
   'AUTH0_EXCLUDED_CONNECTIONS',
@@ -112,7 +111,6 @@ export const setupContext = async (
   ((config: Config) => {
     // Detect and warn on usage of deprecated exclusion params. See: https://github.com/auth0/auth0-deploy-cli/issues/451#user-content-deprecated-exclusion-props
     const deprecatedExclusionParams: (keyof Config)[] = [
-      'AUTH0_EXCLUDED_RULES',
       'AUTH0_EXCLUDED_CLIENTS',
       'AUTH0_EXCLUDED_DATABASES',
       'AUTH0_EXCLUDED_CONNECTIONS',

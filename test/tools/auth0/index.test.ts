@@ -19,7 +19,7 @@ describe('#Auth0 class', () => {
         return config[key];
       });
 
-      const AUTH0_EXCLUDED = ['rules', 'organizations', 'connections'];
+      const AUTH0_EXCLUDED = ['organizations', 'connections'];
       const auth0WithExclusions = new Auth0(mockEmptyClient, mockEmptyAssets, (key) => {
         const config = { AUTH0_EXCLUDED };
         return config[key];
@@ -46,7 +46,7 @@ describe('#Auth0 class', () => {
 
   describe('#resource inclusion', () => {
     it('should include only the handlers listed in AUTH0_INCLUDED_ONLY from Auth0 class', () => {
-      const AUTH0_INCLUDED_ONLY = ['rules', 'organizations', 'connections'];
+      const AUTH0_INCLUDED_ONLY = ['organizations', 'connections'];
       const auth0WithInclusions = new Auth0(mockEmptyClient, mockEmptyAssets, (key) => {
         const config = { AUTH0_INCLUDED_ONLY };
         return config[key];

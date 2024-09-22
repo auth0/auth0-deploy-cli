@@ -29,13 +29,10 @@ export function mockPagedData(params, key, data) {
 export function mockMgmtClient() {
   // Fake Mgmt Client. Bit hacky but good enough for now.
   return {
-    rules: { getAll: (params) => (mockPagedData(params, 'rules', [])) },
-    hooks: { getAll: (params) => (mockPagedData(params, 'hooks', [])) },
     actions: { getAll: () => (mockPagedData({ include_totals: true }, 'actions', [])) },
     databases: { getAll: (params) => (mockPagedData(params, 'databases', [])) },
     connections: { getAll: (params) => (mockPagedData(params, 'connections', [])) },
     resourceServers: { getAll: (params) => (mockPagedData(params, 'resource_servers', [])) },
-    rulesConfigs: { getAll: (params) => (mockPagedData(params, 'rules_configs', [])) },
     emails: {
       get: () => ({
         data: {

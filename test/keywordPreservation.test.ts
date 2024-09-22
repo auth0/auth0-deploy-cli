@@ -521,7 +521,6 @@ describe('preserveKeywords', () => {
       universal_login_enabled: true,
       customText: {},
     },
-    rules: null, //TODO: test these cases more thoroughly
     connections: [], // Empty on remote but has local assets
     actions: [
       {

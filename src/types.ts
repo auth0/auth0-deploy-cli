@@ -70,7 +70,6 @@ export type Config = {
   };
   AUTH0_IGNORE_UNAVAILABLE_MIGRATIONS?: boolean;
   // Eventually deprecate. See: https://github.com/auth0/auth0-deploy-cli/issues/451#user-content-deprecated-exclusion-props
-  AUTH0_EXCLUDED_RULES?: string[];
   AUTH0_EXCLUDED_CLIENTS?: string[];
   AUTH0_EXCLUDED_DATABASES?: string[];
   AUTH0_EXCLUDED_CONNECTIONS?: string[];
@@ -105,7 +104,6 @@ export type Assets = Partial<{
   guardianPolicies: {
     policies: string[]; //TODO: eliminate this intermediate level for consistency
   } | null;
-  hooks: Asset[] | null;
   logStreams: LogStream[] | null;
   migrations: Asset[] | null;
   organizations: Asset[] | null;
@@ -113,8 +111,6 @@ export type Assets = Partial<{
   prompts: Prompts | null;
   resourceServers: ResourceServer[] | null;
   roles: Asset[] | null;
-  rules: Asset[] | null;
-  rulesConfigs: Asset[] | null;
   tenant: Tenant | null;
   triggers: Asset[] | null;
   //non-resource types
@@ -133,9 +129,6 @@ export type CalculatedChanges = {
 };
 
 export type AssetTypes =
-  | 'rules'
-  | 'rulesConfigs'
-  | 'hooks'
   | 'pages'
   | 'databases'
   | 'clientGrants'

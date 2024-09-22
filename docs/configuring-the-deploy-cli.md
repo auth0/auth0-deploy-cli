@@ -88,7 +88,7 @@ Cannot be used simultaneously with `AUTH0_INCLUDED_ONLY`.
 
 ```json
 {
-  "AUTH0_EXCLUDED": ["organizations", "connections", "hooks"]
+  "AUTH0_EXCLUDED": ["organizations", "connections"]
 }
 ```
 
@@ -146,10 +146,6 @@ Provides ability to exclude any unwanted properties from management.
 ### `AUTH0_AUDIENCE`
 
 String. Separate value from audience value while retrieving an access token for management API. Useful when default Management API endpoints are not publicly exposed.
-
-### `AUTH0_EXCLUDED_RULES`
-
-Array of strings. Excludes the management of specific rules by name. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
 
 ### `AUTH0_EXCLUDED_CLIENTS`
 
