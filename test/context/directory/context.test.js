@@ -19,7 +19,6 @@ describe('#directory context validation', () => {
     Object.keys(context.assets).forEach((key) => {
       if (key === 'exclude') {
         expect(context.assets[key]).to.deep.equal({
-          rules: [],
           clients: [],
           databases: [],
           connections: [],

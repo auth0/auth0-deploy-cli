@@ -1,4 +1,5 @@
 import { PromisePoolExecutor } from 'promise-pool-executor';
+import { ConnectionCreate } from 'auth0';
 import { Asset, Auth0APIClient } from '../../../types';
 import log from '../../../logger';
 import { ConfigFunction } from '../../../configFactory';
@@ -53,8 +54,6 @@ export default class ScimHandler {
   constructor(config, connectionsManager, poolClient: PromisePoolExecutor) {
     this.config = config;
     this.connectionsManager = connectionsManager;
-    // eslint-disable-next-line no-underscore-dangle
-    this.scimClient = connectionsManager?._getRestClient('/connections/:id/scim-configuration');
     this.poolClient = poolClient;
     this.idMap = new Map<string, IdMapValue>();
   }
@@ -135,6 +134,7 @@ export default class ScimHandler {
   /**
    * Wrapper over scimClient methods.
    */
+  /*
   private async useScimClient(
     method: string,
     options: [ScimRequestParams, ...Record<string, any>[]]
@@ -147,6 +147,7 @@ export default class ScimHandler {
       options[0].id
     );
   }
+  */
 
   /**
    * Error handler wrapper.
@@ -175,7 +176,7 @@ export default class ScimHandler {
       this.scimScopes[scope] = false;
 
       const warningMessage = `Insufficient scope, \"${scope}:scim_config\". Required \"read:scim_config\", \"create:scim_config\", \"update:scim_config\" and \"delete:scim_config\".`;
-      const suggestionText = `If you are not using SCIM, you can keep these permissions disabled and ignore this warning.`;
+      const suggestionText = 'If you are not using SCIM, you can keep these permissions disabled and ignore this warning.';
 
       log.warn(`${warningMessage}\n${suggestionText}\n`);
       return null;
@@ -207,44 +208,62 @@ export default class ScimHandler {
    * Creates a new `SCIM` configuration.
    */
   async createScimConfiguration(
-    { id: connection_id }: ScimRequestParams,
+    { id }: ScimRequestParams,
+    // eslint-disable-next-line camelcase
     { user_id_attribute, mapping }: ScimBodyParams
   ): Promise<Asset | null> {
-    log.debug(`Creating SCIM configuration on connection ${connection_id}`);
-    return await this.useScimClient('create', [
-      { id: connection_id },
-      { user_id_attribute, mapping },
-    ]);
+    log.debug(`Creating SCIM configuration on connection ${id}`);
+
+    return this.withErrorHandling(
+      async () =>
+        this.connectionsManager.createScimConfiguration({ id }, { user_id_attribute, mapping }),
+      'create',
+      id
+    );
   }
 
   /**
    * Retrieves `SCIM` configuration of an enterprise connection.
    */
-  async getScimConfiguration({ id: connection_id }: ScimRequestParams): Promise<Asset | null> {
-    log.debug(`Getting SCIM configuration from connection ${connection_id}`);
-    return await this.useScimClient('get', [{ id: connection_id }]);
+  async getScimConfiguration({ id }: ScimRequestParams): Promise<Asset | null> {
+    log.debug(`Getting SCIM configuration from connection ${id}`);
+
+    return this.withErrorHandling(
+      async () => this.connectionsManager.getScimConfiguration({ id }),
+      'get',
+      id
+    );
   }
 
   /**
    * Updates an existing `SCIM` configuration.
    */
   async updateScimConfiguration(
-    { id: connection_id }: ScimRequestParams,
+    { id }: ScimRequestParams,
+    // eslint-disable-next-line camelcase
     { user_id_attribute, mapping }: ScimBodyParams
   ): Promise<Asset | null> {
-    log.debug(`Updating SCIM configuration on connection ${connection_id}`);
-    return await this.useScimClient('patch', [
-      { id: connection_id },
-      { user_id_attribute, mapping },
-    ]);
+    log.debug(`Updating SCIM configuration on connection ${id}`);
+
+    return this.withErrorHandling(
+      async () =>
+        this.connectionsManager.updateScimConfiguration({ id }, { user_id_attribute, mapping }),
+      'patch',
+      id
+    );
   }
 
   /**
    * Deletes an existing `SCIM` configuration.
    */
-  async deleteScimConfiguration({ id: connection_id }: ScimRequestParams): Promise<Asset | null> {
-    log.debug(`Deleting SCIM configuration on connection ${connection_id}`);
-    return await this.useScimClient('delete', [{ id: connection_id }]);
+  async deleteScimConfiguration({ id }: ScimRequestParams): Promise<Asset | null> {
+    log.debug(`Deleting SCIM configuration on connection ${id}`);
+
+    return this.withErrorHandling(
+      async () => this.connectionsManager.deleteScimConfiguration({ id }),
+      'delete',
+      id
+    );
   }
 
   async updateOverride(requestParams: ScimRequestParams, bodyParams: Asset) {
@@ -267,16 +286,14 @@ export default class ScimHandler {
         if (this.scimScopes.update) {
           await this.updateScimConfiguration(requestParams, scimBodyParams);
         }
-      } else {
-        if (this.config('AUTH0_ALLOW_DELETE')) {
-          if (this.scimScopes.delete) {
-            await this.deleteScimConfiguration(requestParams);
-          }
-        } else {
-          log.warn(
-            `Skipping DELETE scim_configuration on \"${requestParams.id}\". Enable deletes by setting \"AUTH0_ALLOW_DELETE\" to true in your config.`
-          );
+      } else if (this.config('AUTH0_ALLOW_DELETE')) {
+        if (this.scimScopes.delete) {
+          await this.deleteScimConfiguration(requestParams);
         }
+      } else {
+        log.warn(
+          `Skipping DELETE scim_configuration on \"${requestParams.id}\". Enable deletes by setting \"AUTH0_ALLOW_DELETE\" to true in your config.`
+        );
       }
     } else if (scimBodyParams && this.scimScopes.create) {
       await this.createScimConfiguration(requestParams, scimBodyParams);
@@ -293,14 +310,14 @@ export default class ScimHandler {
     delete bodyParams.scim_configuration;
 
     // First, create the new `connection`.
-    const created = await this.connectionsManager.create(bodyParams);
+    const { data } = await this.connectionsManager.create(bodyParams as ConnectionCreate);
 
     if (scimBodyParams && this.scimScopes.create) {
       // Now, create the `scim_configuration` for newly created `connection`.
-      await this.createScimConfiguration({ id: created.id }, scimBodyParams);
+      await this.createScimConfiguration({ id: data.id }, scimBodyParams);
     }
 
     // Return response from connections.create(...).
-    return created;
+    return data;
   }
 }

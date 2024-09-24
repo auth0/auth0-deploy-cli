@@ -1,4 +1,5 @@
 import { isEmpty } from 'lodash';
+import { GetPartialsPromptEnum, GetPartialsRequest, PutPartialsPromptEnum, PutPartialsRequest } from 'auth0';
 import DefaultHandler from './default';
 import { Asset, Assets, Language, languages } from '../../../types';
 import log from '../../../logger';
@@ -168,73 +169,61 @@ export const schema = {
     },
     customText: {
       type: 'object',
-      properties: languages.reduce((acc, language) => {
-        return {
-          ...acc,
-          [language]: {
-            type: 'object',
-            properties: promptTypes.reduce((promptAcc, promptType) => {
-              return {
-                ...promptAcc,
-                [promptType]: {
+      properties: languages.reduce((acc, language) => ({
+        ...acc,
+        [language]: {
+          type: 'object',
+          properties: promptTypes.reduce((promptAcc, promptType) => ({
+            ...promptAcc,
+            [promptType]: {
+              type: 'object',
+              properties: screenTypes.reduce((screenAcc, screenType) => ({
+                ...screenAcc,
+                [screenType]: {
                   type: 'object',
-                  properties: screenTypes.reduce((screenAcc, screenType) => {
-                    return {
-                      ...screenAcc,
-                      [screenType]: {
-                        type: 'object',
-                      },
-                    };
-                  }, {}),
                 },
-              };
-            }, {}),
-          },
-        };
-      }, {}),
+              }), {}),
+            },
+          }), {}),
+        },
+      }), {}),
     },
     partials: {
       type: 'object',
-      properties: customPartialsPromptTypes.reduce((acc, customPartialsPromptType) => {
-        return {
-          ...acc,
-          [customPartialsPromptType]: {
-            oneOf: [
-              {
-                type: 'object',
-                properties: customPartialsScreenTypes.reduce(
-                  (screenAcc, customPartialsScreenType) => {
-                    return {
-                      ...screenAcc,
-                      [customPartialsScreenType]: {
-                        oneOf: [
-                          {
-                            type: 'object',
-                            properties: customPartialsInsertionPoints.reduce(
-                              (insertionAcc, customPartialsInsertionPoint) => {
-                                return {
-                                  ...insertionAcc,
-                                  [customPartialsInsertionPoint]: {
-                                    type: 'string',
-                                  },
-                                };
-                              },
-                              {}
-                            ),
-                          },
-                          { type: 'null' },
-                        ],
+      properties: customPartialsPromptTypes.reduce((acc, customPartialsPromptType) => ({
+        ...acc,
+        [customPartialsPromptType]: {
+          oneOf: [
+            {
+              type: 'object',
+              properties: customPartialsScreenTypes.reduce(
+                (screenAcc, customPartialsScreenType) => ({
+                  ...screenAcc,
+                  [customPartialsScreenType]: {
+                    oneOf: [
+                      {
+                        type: 'object',
+                        properties: customPartialsInsertionPoints.reduce(
+                          (insertionAcc, customPartialsInsertionPoint) => ({
+                            ...insertionAcc,
+                            [customPartialsInsertionPoint]: {
+                              type: 'string',
+                            },
+                          }),
+                          {}
+                        ),
                       },
-                    };
+                      { type: 'null' },
+                    ],
                   },
-                  {}
-                ),
-              },
-              { type: 'null' },
-            ],
-          },
-        };
-      }, {}),
+                }),
+                {}
+              ),
+            },
+            { type: 'null' },
+          ],
+        },
+      }), {}),
     },
   },
 };
@@ -268,21 +257,6 @@ export default class PromptsHandler extends DefaultHandler {
   existing: Prompts;
 
   private IsFeatureSupported: boolean = true;
-
-  // eslint-disable-next-line no-underscore-dangle
-  private promptClient = this.client.prompts._getRestClient('/prompts/:prompt/partials');
-
-  private async partialHttpRequest(
-    method: string,
-    options: [{ prompt: string }, ...Record<string, any>[]]
-  ): Promise<Asset> {
-    return this.withErrorHandling(async () => {
-      if (method === 'put') {
-        return this.promptClient.invoke('wrappedProvider', [method, options]);
-      }
-      return this.promptClient[method](...options);
-    });
-  }
 
   constructor(options: DefaultHandler) {
     super({
@@ -398,10 +372,10 @@ export default class PromptsHandler extends DefaultHandler {
   async getCustomPartial({
     prompt,
   }: {
-    prompt: CustomPartialsPromptTypes;
+    prompt: GetPartialsPromptEnum;
   }): Promise<CustomPromptPartials> {
     if (!this.IsFeatureSupported) return {};
-    return this.partialHttpRequest('get', [{ prompt: prompt }]); // Implement this method for making HTTP requests
+    return this.withErrorHandling(async () => this.client.prompts.getPartials({ prompt }));
   }
 
   async getCustomPromptsPartials(): Promise<CustomPromptPartials> {
@@ -410,7 +384,7 @@ export default class PromptsHandler extends DefaultHandler {
         data: customPartialsPromptTypes,
         generator: (promptType) =>
           this.getCustomPartial({
-            prompt: promptType,
+            prompt: promptType as GetPartialsPromptEnum,
           }).then((partialsData: CustomPromptPartials) => {
             if (isEmpty(partialsData)) return null;
             return { promptType, partialsData };
@@ -487,7 +461,7 @@ export default class PromptsHandler extends DefaultHandler {
     body: CustomPromptPartialsScreens;
   }): Promise<void> {
     if (!this.IsFeatureSupported) return;
-    await this.partialHttpRequest('put', [{ prompt: prompt }, body]); // Implement this method for making HTTP requests
+    await this.withErrorHandling(async () => this.client.prompts.updatePartials({ prompt } as PutPartialsRequest, body));
   }
 
   async updateCustomPromptsPartials(partials: Prompts['partials']): Promise<void> {
