@@ -100,7 +100,6 @@ describe('#YAML context validation', () => {
 
     await contextWithoutExclusion.loadAssetsFromLocal();
     expect(contextWithoutExclusion.assets.actions).to.deep.equal([]);
-    expect(contextWithoutExclusion.assets.hooks).to.deep.equal([]);
   });
 
   it('should respect resource inclusion on import', async () => {
@@ -133,7 +132,7 @@ describe('#YAML context validation', () => {
     });
 
     expect(contextWithInclusion.assets.actions).to.equal(null);
-  
+
   });
 
   it('should error invalid schema', async () => {
@@ -254,11 +253,8 @@ describe('#YAML context validation', () => {
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
       resourceServers: [],
-      rules: [],
-      hooks: [],
       actions: [],
       triggers: [],
-      rulesConfigs: [],
       roles: [
         {
           name: 'App Admin',
@@ -366,11 +362,8 @@ describe('#YAML context validation', () => {
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
       resourceServers: [],
-      rules: [],
-      hooks: [],
       actions: [],
       triggers: [],
-      rulesConfigs: [],
       roles: [
         {
           name: 'App Admin',
@@ -479,11 +472,8 @@ describe('#YAML context validation', () => {
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
       resourceServers: [],
-      rules: [],
-      hooks: [],
       actions: [],
       triggers: [],
-      rulesConfigs: [],
       roles: [
         {
           name: 'App Admin',

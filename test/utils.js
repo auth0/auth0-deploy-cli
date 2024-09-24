@@ -101,11 +101,6 @@ export function mockMgmtClient() {
         ),
       getCustomTextByLanguage: () => Promise.resolve({ data: {} }),
     },
-    migrations: {
-      getMigrations: () => ({
-        migration_flag: true,
-      }),
-    },
     attackProtection: {
       getBreachedPasswordDetectionConfig: () => ({ data: {} }),
       getBruteForceConfig: () => ({ data: {} }),
