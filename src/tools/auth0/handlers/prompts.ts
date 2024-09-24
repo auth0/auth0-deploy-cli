@@ -1,7 +1,10 @@
 import { isEmpty } from 'lodash';
-import { GetPartialsPromptEnum, GetPartialsRequest, PutPartialsPromptEnum, PutPartialsRequest } from 'auth0';
+import {
+  GetPartialsPromptEnum,
+  PutPartialsRequest,
+} from 'auth0';
 import DefaultHandler from './default';
-import { Asset, Assets, Language, languages } from '../../../types';
+import { Assets, Language, languages } from '../../../types';
 import log from '../../../logger';
 
 const promptTypes = [
@@ -169,61 +172,73 @@ export const schema = {
     },
     customText: {
       type: 'object',
-      properties: languages.reduce((acc, language) => ({
-        ...acc,
-        [language]: {
-          type: 'object',
-          properties: promptTypes.reduce((promptAcc, promptType) => ({
-            ...promptAcc,
-            [promptType]: {
-              type: 'object',
-              properties: screenTypes.reduce((screenAcc, screenType) => ({
-                ...screenAcc,
-                [screenType]: {
+      properties: languages.reduce(
+        (acc, language) => ({
+          ...acc,
+          [language]: {
+            type: 'object',
+            properties: promptTypes.reduce(
+              (promptAcc, promptType) => ({
+                ...promptAcc,
+                [promptType]: {
                   type: 'object',
+                  properties: screenTypes.reduce(
+                    (screenAcc, screenType) => ({
+                      ...screenAcc,
+                      [screenType]: {
+                        type: 'object',
+                      },
+                    }),
+                    {}
+                  ),
                 },
-              }), {}),
-            },
-          }), {}),
-        },
-      }), {}),
+              }),
+              {}
+            ),
+          },
+        }),
+        {}
+      ),
     },
     partials: {
       type: 'object',
-      properties: customPartialsPromptTypes.reduce((acc, customPartialsPromptType) => ({
-        ...acc,
-        [customPartialsPromptType]: {
-          oneOf: [
-            {
-              type: 'object',
-              properties: customPartialsScreenTypes.reduce(
-                (screenAcc, customPartialsScreenType) => ({
-                  ...screenAcc,
-                  [customPartialsScreenType]: {
-                    oneOf: [
-                      {
-                        type: 'object',
-                        properties: customPartialsInsertionPoints.reduce(
-                          (insertionAcc, customPartialsInsertionPoint) => ({
-                            ...insertionAcc,
-                            [customPartialsInsertionPoint]: {
-                              type: 'string',
-                            },
-                          }),
-                          {}
-                        ),
-                      },
-                      { type: 'null' },
-                    ],
-                  },
-                }),
-                {}
-              ),
-            },
-            { type: 'null' },
-          ],
-        },
-      }), {}),
+      properties: customPartialsPromptTypes.reduce(
+        (acc, customPartialsPromptType) => ({
+          ...acc,
+          [customPartialsPromptType]: {
+            oneOf: [
+              {
+                type: 'object',
+                properties: customPartialsScreenTypes.reduce(
+                  (screenAcc, customPartialsScreenType) => ({
+                    ...screenAcc,
+                    [customPartialsScreenType]: {
+                      oneOf: [
+                        {
+                          type: 'object',
+                          properties: customPartialsInsertionPoints.reduce(
+                            (insertionAcc, customPartialsInsertionPoint) => ({
+                              ...insertionAcc,
+                              [customPartialsInsertionPoint]: {
+                                type: 'string',
+                              },
+                            }),
+                            {}
+                          ),
+                        },
+                        { type: 'null' },
+                      ],
+                    },
+                  }),
+                  {}
+                ),
+              },
+              { type: 'null' },
+            ],
+          },
+        }),
+        {}
+      ),
     },
   },
 };
@@ -386,8 +401,8 @@ export default class PromptsHandler extends DefaultHandler {
           this.getCustomPartial({
             prompt: promptType as GetPartialsPromptEnum,
           }).then((partialsData: CustomPromptPartials) => {
-            if (isEmpty(partialsData)) return null;
-            return { promptType, partialsData };
+            if (isEmpty(partialsData?.data)) return null;
+            return { promptType, partialsData: partialsData.data };
           }),
       })
       .promise();
@@ -461,7 +476,9 @@ export default class PromptsHandler extends DefaultHandler {
     body: CustomPromptPartialsScreens;
   }): Promise<void> {
     if (!this.IsFeatureSupported) return;
-    await this.withErrorHandling(async () => this.client.prompts.updatePartials({ prompt } as PutPartialsRequest, body));
+    await this.withErrorHandling(async () =>
+      this.client.prompts.updatePartials({ prompt } as PutPartialsRequest, body)
+    );
   }
 
   async updateCustomPromptsPartials(partials: Prompts['partials']): Promise<void> {
