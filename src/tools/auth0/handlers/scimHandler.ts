@@ -86,7 +86,8 @@ export default class ScimHandler {
 
           this.idMap.set(connection.id, { strategy: connection.strategy });
           return this.getScimConfiguration({ id: connection.id })
-            .then((scimConfiguration) => {
+            .then((response) => {
+              const scimConfiguration = response?.data;
               if (scimConfiguration) {
                 const { mapping, user_id_attribute, connection_id } = scimConfiguration;
                 this.idMap.set(connection_id, {
@@ -176,7 +177,8 @@ export default class ScimHandler {
       this.scimScopes[scope] = false;
 
       const warningMessage = `Insufficient scope, \"${scope}:scim_config\". Required \"read:scim_config\", \"create:scim_config\", \"update:scim_config\" and \"delete:scim_config\".`;
-      const suggestionText = 'If you are not using SCIM, you can keep these permissions disabled and ignore this warning.';
+      const suggestionText =
+        'If you are not using SCIM, you can keep these permissions disabled and ignore this warning.';
 
       log.warn(`${warningMessage}\n${suggestionText}\n`);
       return null;
