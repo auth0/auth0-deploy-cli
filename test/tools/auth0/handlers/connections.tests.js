@@ -78,7 +78,9 @@ describe('#connections handler', () => {
             }
           ]
         }),
-        applyScimConfiguration: sinon.stub().resolves(undefined)
+        applyScimConfiguration: sinon.stub().resolves(undefined),
+        createOverride: sinon.stub().resolves(new Map()),
+        updateOverride: sinon.stub().resolves(new Map())
       };
     });
 
@@ -221,7 +223,6 @@ describe('#connections handler', () => {
           },
           delete: () => Promise.resolve({ data: [] }),
           getAll: (params) => mockPagedData(params, 'connections', [{ name: 'someSamlConnection', id: 'con1', strategy: 'samlp' }]),
-          _getRestClient: () => ({}),
         },
         clients: {
           getAll: (params) => mockPagedData(params, 'clients', [

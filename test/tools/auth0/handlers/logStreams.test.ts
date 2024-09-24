@@ -178,7 +178,7 @@ describe('#logStreams handler', () => {
           ...auth0ApiClientMock,
           logStreams: {
             ...auth0ApiClientMock.logStreams,
-            getAll: async () => [],
+            getAll: async () => ({ data: [] }),
           },
         },
         functions: {

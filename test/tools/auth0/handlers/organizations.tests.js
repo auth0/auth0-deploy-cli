@@ -346,10 +346,10 @@ describe('#organizations handler', () => {
             return Promise.resolve({ data: undefined });
           },
           updateEnabledConnection: (params, data) => {
-            if (params.connection_id === sampleEnabledConnection.connection_id) {
+            if (params.connectionId === sampleEnabledConnection.connection_id) {
               expect(params).to.be.an('object');
               expect(params.id).to.equal('123');
-              expect(params.connection_id).to.equal(sampleEnabledConnection.connection_id);
+              expect(params.connectionId).to.equal(sampleEnabledConnection.connection_id);
               expect(data).to.be.an('object');
               expect(data.assign_membership_on_login).to.equal(false);
               expect(data.show_as_button).to.equal(true);
@@ -357,7 +357,7 @@ describe('#organizations handler', () => {
             } else {
               expect(params).to.be.an('object');
               expect(params.id).to.equal('123');
-              expect(params.connection_id).to.equal(sampleEnabledConnection2.connection_id);
+              expect(params.connectionId).to.equal(sampleEnabledConnection2.connection_id);
               expect(data).to.be.an('object');
               expect(data.assign_membership_on_login).to.equal(true);
               expect(data.show_as_button).to.equal(false);
