@@ -38,10 +38,10 @@ export default class ThemesHandler extends DefaultHandler {
 
     // Empty array means themes should be deleted
     if (themes.length === 0) {
-      this.deleteThemes();
+      return this.deleteThemes();
     }
 
-    this.updateThemes(themes);
+    return this.updateThemes(themes);
   }
 
   async deleteThemes(): Promise<void> {
