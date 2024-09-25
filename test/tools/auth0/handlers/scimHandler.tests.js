@@ -70,7 +70,7 @@ describe('ScimHandler', () => {
         user_id_attribute: response.user_id_attribute,
       };
 
-      handler.getScimConfiguration = sinon.stub().resolves(response);
+      handler.getScimConfiguration = sinon.stub().resolves({ data:response });
       await handler.createIdMap(connections);
       expect(handler.idMap.size).to.equal(1);
       expect(handler.idMap.get('con_kzpLY0Afi4I8lvwM')).to.have.property('strategy', 'samlp');
