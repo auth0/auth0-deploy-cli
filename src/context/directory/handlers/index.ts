@@ -1,6 +1,4 @@
 import pages from './pages';
-import rules from './rules';
-import hooks from './hooks';
 import clients from './clients';
 import tenant from './tenant';
 import emailProvider from './emailProvider';
@@ -8,7 +6,6 @@ import connections from './connections';
 import databases from './databases';
 import emailTemplates from './emailTemplates';
 import clientGrants from './clientGrants';
-import rulesConfigs from './rulesConfigs';
 import resourceServers from './resourceServers';
 import guardianFactors from './guardianFactors';
 import guardianFactorProviders from './guardianFactorProviders';
@@ -38,9 +35,6 @@ export type DirectoryHandler<T> = {
 const directoryHandlers: {
   [key in AssetTypes]: DirectoryHandler<{ [key: string]: Asset | Asset[] | null }>;
 } = {
-  rules,
-  rulesConfigs,
-  hooks,
   pages,
   databases,
   clientGrants,

@@ -4,7 +4,7 @@ import { expect } from 'chai';
 
 import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/clientGrants';
-import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
+import { cleanThenMkdir, testDataDir, mockMgmtClient, mockPagedData } from '../../utils';
 
 describe('#YAML context client grants', () => {
   it('should process client grants', async () => {
@@ -40,11 +40,67 @@ describe('#YAML context client grants', () => {
   it('should dump client grants', async () => {
     const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
     const clientGrants = [
-      { audience: 'https://test.myapp.com/api/v1', client_id: 'My M2M', scope: ['update:account'] },
+      {
+        audience: 'https://test.myapp.com/api/v1',
+        client_id: 'client-id',
+        scope: ['update:account'],
+      },
     ];
     context.assets.clientGrants = clientGrants;
 
     const dumped = await handler.dump(context);
     expect(dumped).to.deep.equal({ clientGrants });
+  });
+
+  it('should dump client grants and replace client ID with client name if clients in assets', async () => {
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+    const clientGrants = [
+      {
+        audience: 'https://test.myapp.com/api/v1',
+        client_id: 'client-id-1',
+        scope: ['update:account'],
+      },
+    ];
+    context.assets.clientGrants = clientGrants;
+    context.assets.clients = [{ client_id: 'client-id-1', name: 'Client 1' }];
+
+    const dumped = await handler.dump(context);
+    const expected = (() => {
+      const ret = clientGrants;
+      ret[0].client_id = 'Client 1';
+      return { clientGrants: ret };
+    })();
+    expect(dumped).to.deep.equal(expected);
+  });
+
+  it('should dump client grants and replace client ID with client name even if clients not in assets', async () => {
+    const mockMgmt = mockMgmtClient();
+
+    mockMgmt.clients.getAll = (params) => {
+      const client = {
+        client_id: 'client-id-1',
+        name: 'Client 1',
+      };
+
+      return mockPagedData(params, 'clients', [client]);
+    };
+
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmt);
+    const clientGrants = [
+      {
+        audience: 'https://test.myapp.com/api/v1',
+        client_id: 'client-id-1',
+        scope: ['update:account'],
+      },
+    ];
+    context.assets.clientGrants = clientGrants;
+
+    const dumped = await handler.dump(context);
+    const expected = (() => {
+      const ret = clientGrants;
+      ret[0].client_id = 'Client 1';
+      return { clientGrants: ret };
+    })();
+    expect(dumped).to.deep.equal(expected);
   });
 });

@@ -6,7 +6,7 @@ orbs:
 jobs:
   e2e_test_as_node_module:
     docker:
-      - image: cimg/node:current
+      - image: cimg/node:22.4.1
     working_directory: ~/repo
     steps:
       - checkout
@@ -15,7 +15,7 @@ jobs:
 
   e2e_test_as_cli:
     docker:
-      - image: cimg/node:current
+      - image: cimg/node:22.4.1
     working_directory: ~/repo
     steps:
       - checkout
@@ -66,9 +66,9 @@ jobs:
           name: Publish package
           command: npm publish
 
-  does_typescript_compile: 
+  does_typescript_compile:
     docker:
-      - image: cimg/node:current
+      - image: cimg/node:22.4.1
     working_directory: ~/repo
     steps:
       - checkout
@@ -97,7 +97,7 @@ workflows:
           v: "lts"
       - unit_test:
           name: Unit tests with Node current
-          v: "current"
+          v: "22.4.1"
 
   test_and_deploy:
     jobs:

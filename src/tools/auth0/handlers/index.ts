@@ -1,7 +1,3 @@
-//TODO:
-import * as rules from './rules';
-import * as rulesConfigs from './rulesConfigs';
-import * as hooks from './hooks';
 import * as pages from './pages';
 import * as resourceServers from './resourceServers';
 import * as databases from './databases';
@@ -32,9 +28,6 @@ import { AssetTypes } from '../../../types';
 import APIHandler from './default';
 
 const auth0ApiHandlers: { [key in AssetTypes]: any } = {
-  rules,
-  rulesConfigs,
-  hooks,
   pages,
   resourceServers,
   clients,

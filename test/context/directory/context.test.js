@@ -19,7 +19,6 @@ describe('#directory context validation', () => {
     Object.keys(context.assets).forEach((key) => {
       if (key === 'exclude') {
         expect(context.assets[key]).to.deep.equal({
-          rules: [],
           clients: [],
           databases: [],
           connections: [],
@@ -39,7 +38,6 @@ describe('#directory context validation', () => {
 
     const config = {
       AUTH0_INPUT_FILE: dir,
-      AUTH0_EXCLUDED_RULES: ['rule'],
       AUTH0_EXCLUDED_CLIENTS: ['client'],
       AUTH0_EXCLUDED_DATABASES: ['db'],
       AUTH0_EXCLUDED_CONNECTIONS: ['conn'],
@@ -49,7 +47,6 @@ describe('#directory context validation', () => {
     const context = new Context(config);
     await context.loadAssetsFromLocal();
 
-    expect(context.assets.exclude.rules).to.deep.equal(['rule']);
     expect(context.assets.exclude.clients).to.deep.equal(['client']);
     expect(context.assets.exclude.databases).to.deep.equal(['db']);
     expect(context.assets.exclude.connections).to.deep.equal(['conn']);
@@ -166,6 +163,11 @@ describe('#directory context validation', () => {
                 }
               })
             ),
+        },
+        prompts: {
+          _getRestClient: (endpoint) => ({
+            get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+          }),
         },
         actions: {
           getSettings: async () => new Promise((res) => res([])),

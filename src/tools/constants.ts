@@ -171,6 +171,7 @@ const constants = {
   SUPPORTED_BRANDING_TEMPLATES: [UNIVERSAL_LOGIN_TEMPLATE],
   LOG_STREAMS_DIRECTORY: 'log-streams',
   PROMPTS_DIRECTORY: 'prompts',
+  PARTIALS_DIRECTORY: 'partials',
   CUSTOM_DOMAINS_DIRECTORY: 'custom-domains',
   THEMES_DIRECTORY: 'themes',
 };

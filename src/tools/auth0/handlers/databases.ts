@@ -4,6 +4,7 @@ import constants from '../../constants';
 import { filterExcluded, getEnabledClients } from '../../utils';
 import { CalculatedChanges, Assets } from '../../../types';
 import { paginate } from '../client';
+import log from '../../../logger';
 
 export const schema = {
   type: 'array',
@@ -49,7 +50,25 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     // If we going to update database, we need to get current options first
     if (fn === 'update') {
       return (params, payload) =>
-        this.client.connections.get(params).then(({ data: connection }) => {
+        this.client.connections.get(params).then((response) => {
+          const connection = response.data;
+          const attributes = payload?.options?.attributes;
+          const requiresUsername = payload?.options?.requires_username;
+          const validation = payload?.options?.validation;
+
+          if (attributes && (requiresUsername || validation)) {
+            log.warn('Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.');
+          }
+
+          else if (attributes) {
+            delete connection.options.validation;
+            delete connection.options.requires_username;
+          }
+
+          else if (requiresUsername || validation) {
+            delete connection.options.attributes;
+          }
+
           payload.options = { ...connection.options, ...payload.options };
           return this.client.connections.update(params, payload);
         });

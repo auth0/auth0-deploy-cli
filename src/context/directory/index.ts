@@ -33,7 +33,6 @@ export default class DirectoryContext {
     this.assets = {};
     // Get excluded rules
     this.assets.exclude = {
-      rules: config.AUTH0_EXCLUDED_RULES || [],
       clients: config.AUTH0_EXCLUDED_CLIENTS || [],
       databases: config.AUTH0_EXCLUDED_DATABASES || [],
       connections: config.AUTH0_EXCLUDED_CONNECTIONS || [],

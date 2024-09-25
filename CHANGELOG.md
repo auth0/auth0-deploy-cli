@@ -7,6 +7,80 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.24.2] - 2024-08-28
+
+### Added
+
+- Add support for `login-passwordless` prompt on `partials` in prompts handler [#946]
+
+### Fixed
+
+- Fix `branding` template `path` on export/import [#943]
+- Fix docs for support `exclusions of individual resource` [#944]
+
+## [7.24.1] - 2024-08-09
+
+### Fixed
+
+- Fix `branding` template `path` on export/import as Yaml [#939]
+- Fix `databases` handler to handle `options` property correctly for flexible identifiers [#937]
+
+## [7.24.0] - 2024-08-02
+
+### Added
+
+- Management support for `partials` in `prompts` handler [#930]
+
+### Changed
+
+- Reduced latency while performing `SCIM` CRUD operations [#933]
+
+## [7.23.1] - 2024-07-19
+
+### Fixed
+
+- Fix `429`(`too_many_requests`) and `403`(`insufficient_scope`) errors in the SCIM handler [#925]
+
+## [7.23.0] - 2024-07-16
+
+### Added
+
+- Management support for `scim_configuration` in connections handler [#921]
+
+## [7.22.1] - 2024-06-24
+
+### Fixed
+
+- Made `captcha_widget_theme` an optional field in the `colors` property within the `themes` schema [#911]
+
+## [7.22.0] - 2024-06-21
+
+### Added
+
+- Management support for `is_signup_enabled` in organization connections [#905]
+- Management support for `captcha_widget_theme` in theme colors [#906]
+
+## [7.21.0] - 2024-02-08
+
+### Added
+
+- `show_as_button` management support for organization connections [#889]
+
+### Fixed
+
+- Strip `sink.azurePartnerTopic` field from payload when creating log stream [#876]
+
+## [7.20.0] - 2023-11-29
+
+### Added
+
+- Relative path import support for actions directory handler [#866]
+
+### Fixed
+
+- Keyword preservation for wider array of resources [#864]
+- Fetching clients if not defined when managing client grants in YAML format [#865]
+
 ## [7.19.0] - 2023-08-11
 
 ### Added
@@ -990,7 +1064,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#836]: https://github.com/auth0/auth0-deploy-cli/issues/836
 [#837]: https://github.com/auth0/auth0-deploy-cli/issues/837
 [#838]: https://github.com/auth0/auth0-deploy-cli/issues/838
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.19.0...HEAD
+[#864]: https://github.com/auth0/auth0-deploy-cli/issues/864
+[#865]: https://github.com/auth0/auth0-deploy-cli/issues/865
+[#866]: https://github.com/auth0/auth0-deploy-cli/issues/866
+[#876]: https://github.com/auth0/auth0-deploy-cli/issues/876
+[#889]: https://github.com/auth0/auth0-deploy-cli/issues/889
+[#905]: https://github.com/auth0/auth0-deploy-cli/issues/905
+[#906]: https://github.com/auth0/auth0-deploy-cli/issues/906
+[#911]: https://github.com/auth0/auth0-deploy-cli/issues/911
+[#921]: https://github.com/auth0/auth0-deploy-cli/issues/921
+[#925]: https://github.com/auth0/auth0-deploy-cli/issues/925
+[#930]: https://github.com/auth0/auth0-deploy-cli/issues/930
+[#933]: https://github.com/auth0/auth0-deploy-cli/issues/933
+[#937]: https://github.com/auth0/auth0-deploy-cli/issues/937
+[#939]: https://github.com/auth0/auth0-deploy-cli/issues/939
+[#943]: https://github.com/auth0/auth0-deploy-cli/issues/943
+[#944]: https://github.com/auth0/auth0-deploy-cli/issues/944
+[#946]: https://github.com/auth0/auth0-deploy-cli/issues/946
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.2...HEAD
+[7.24.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.1...v7.24.2
+[7.24.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.0...v7.24.1
+[7.24.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.23.1...v7.24.0
+[7.23.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.23.0...v7.23.1
+[7.23.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.22.1...v7.23.0
+[7.22.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.22.0...v7.22.1
+[7.22.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.21.0...v7.22.0
+[7.21.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.20.0...v7.21.0
+[7.20.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.19.0...v7.20.0
 [7.19.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.18.0...v7.19.0
 [7.18.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.7...v7.18.0
 [7.17.7]: https://github.com/auth0/auth0-deploy-cli/compare/v7.17.6...v7.17.7

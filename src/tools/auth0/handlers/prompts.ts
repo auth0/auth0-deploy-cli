@@ -1,6 +1,11 @@
+import { isEmpty } from 'lodash';
+import {
+  GetPartialsPromptEnum,
+  PutPartialsRequest,
+} from 'auth0';
 import DefaultHandler from './default';
 import { Assets, Language, languages } from '../../../types';
-import { isEmpty } from 'lodash';
+import log from '../../../logger';
 
 const promptTypes = [
   'login',
@@ -93,6 +98,65 @@ const screenTypes = [
 
 export type ScreenTypes = typeof screenTypes[number];
 
+const customPartialsPromptTypes = [
+  'login',
+  'login-id',
+  'login-password',
+  'login-passwordless',
+  'signup',
+  'signup-id',
+  'signup-password',
+];
+
+export type CustomPartialsPromptTypes = typeof customPartialsPromptTypes[number];
+
+const customPartialsScreenTypes = [
+  'login',
+  'login-id',
+  'login-password',
+  'signup',
+  'signup-id',
+  'signup-password',
+  'login-passwordless-sms-otp',
+  'login-passwordless-email-code',
+] as const;
+
+export type CustomPartialsScreenTypes = typeof customPartialsPromptTypes[number];
+
+const customPartialsInsertionPoints = [
+  'form-content-start',
+  'form-content-end',
+  'form-footer-start',
+  'form-footer-end',
+  'secondary-actions-start',
+  'secondary-actions-end',
+] as const;
+
+export type CustomPartialsInsertionPoints = typeof customPartialsInsertionPoints[number];
+
+export type CustomPromptPartialsScreens = Partial<{
+  [screen in CustomPartialsScreenTypes]: Partial<{
+    [insertionPoint in CustomPartialsInsertionPoints]: string;
+  }>;
+}>;
+
+export type CustomPromptPartials = Partial<{
+  [prompt in CustomPartialsPromptTypes]: CustomPromptPartialsScreens;
+}>;
+
+export interface ScreenConfig {
+  name: string;
+  template: string;
+}
+
+export type CustomPartialsConfig = {
+  [prompt in CustomPartialsPromptTypes]: [
+    {
+      [screen in CustomPartialsScreenTypes]: ScreenConfig[];
+    }
+  ];
+};
+
 export const schema = {
   type: 'object',
   properties: {
@@ -108,30 +172,73 @@ export const schema = {
     },
     customText: {
       type: 'object',
-      properties: languages.reduce((acc, language) => {
-        return {
+      properties: languages.reduce(
+        (acc, language) => ({
           ...acc,
           [language]: {
             type: 'object',
-            properties: promptTypes.reduce((acc, promptTypes) => {
-              return {
-                ...acc,
-                [promptTypes]: {
+            properties: promptTypes.reduce(
+              (promptAcc, promptType) => ({
+                ...promptAcc,
+                [promptType]: {
                   type: 'object',
-                  properties: screenTypes.reduce((acc, screenTypes) => {
-                    return {
-                      ...acc,
-                      [screenTypes]: {
+                  properties: screenTypes.reduce(
+                    (screenAcc, screenType) => ({
+                      ...screenAcc,
+                      [screenType]: {
                         type: 'object',
                       },
-                    };
-                  }, {}),
+                    }),
+                    {}
+                  ),
                 },
-              };
-            }, {}),
+              }),
+              {}
+            ),
           },
-        };
-      }, {}),
+        }),
+        {}
+      ),
+    },
+    partials: {
+      type: 'object',
+      properties: customPartialsPromptTypes.reduce(
+        (acc, customPartialsPromptType) => ({
+          ...acc,
+          [customPartialsPromptType]: {
+            oneOf: [
+              {
+                type: 'object',
+                properties: customPartialsScreenTypes.reduce(
+                  (screenAcc, customPartialsScreenType) => ({
+                    ...screenAcc,
+                    [customPartialsScreenType]: {
+                      oneOf: [
+                        {
+                          type: 'object',
+                          properties: customPartialsInsertionPoints.reduce(
+                            (insertionAcc, customPartialsInsertionPoint) => ({
+                              ...insertionAcc,
+                              [customPartialsInsertionPoint]: {
+                                type: 'string',
+                              },
+                            }),
+                            {}
+                          ),
+                        },
+                        { type: 'null' },
+                      ],
+                    },
+                  }),
+                  {}
+                ),
+              },
+              { type: 'null' },
+            ],
+          },
+        }),
+        {}
+      ),
     },
   },
 };
@@ -150,18 +257,21 @@ export type PromptsCustomText = {
   }>;
 };
 
-export type Prompts = Partial<
-  PromptSettings & {
-    customText: AllPromptsByLanguage;
-  }
->;
-
 export type AllPromptsByLanguage = Partial<{
   [key in Language]: Partial<PromptsCustomText>;
 }>;
 
+export type Prompts = Partial<
+  PromptSettings & {
+    customText: AllPromptsByLanguage;
+    partials: CustomPromptPartials;
+  }
+>;
+
 export default class PromptsHandler extends DefaultHandler {
   existing: Prompts;
+
+  private IsFeatureSupported: boolean = true;
 
   constructor(options: DefaultHandler) {
     super({
@@ -171,7 +281,7 @@ export default class PromptsHandler extends DefaultHandler {
   }
 
   objString({ customText }: Prompts): string {
-    return `Prompts settings${!!customText ? ' and prompts custom text' : ''}`;
+    return `Prompts settings${customText ? ' and prompts custom text' : ''}`;
   }
 
   async getType(): Promise<Prompts | null> {
@@ -179,9 +289,12 @@ export default class PromptsHandler extends DefaultHandler {
 
     const customText = await this.getCustomTextSettings();
 
+    const partials = await this.getCustomPromptsPartials();
+
     return {
       ...promptsSettings,
       customText,
+      partials,
     };
   }
 
@@ -205,7 +318,7 @@ export default class PromptsHandler extends DefaultHandler {
               prompt: promptType,
               language,
             })
-            .then(({data: customTextData}) => {
+            .then(({ data: customTextData }) => {
               if (isEmpty(customTextData)) return null;
               return {
                 language,
@@ -216,11 +329,9 @@ export default class PromptsHandler extends DefaultHandler {
             }),
       })
       .promise()
-      .then((customTextData) => {
-        return customTextData
-          .filter((customTextData) => {
-            return customTextData !== null;
-          })
+      .then((customTextData) =>
+        customTextData
+          .filter((customTextData) => customTextData !== null)
           .reduce((acc: AllPromptsByLanguage, customTextItem) => {
             if (customTextItem?.language === undefined) return acc;
 
@@ -228,12 +339,87 @@ export default class PromptsHandler extends DefaultHandler {
 
             return {
               ...acc,
-              [language]: !!acc[language]
+              [language]: acc[language]
                 ? { ...acc[language], ...customTextSettings }
                 : { ...customTextSettings },
             };
-          }, {});
-      });
+          }, {})
+      );
+  }
+
+  /**
+   * Error handler wrapper.
+   */
+  async withErrorHandling(callback) {
+    try {
+      return await callback();
+    } catch (error) {
+      // Extract error data
+      if (error && error?.statusCode === 403) {
+        log.warn('Partial Prompts feature is not supported for the tenant');
+        this.IsFeatureSupported = false;
+        return null;
+      }
+
+      if (
+        error &&
+        error?.statusCode === 400 &&
+        error.message?.includes('feature requires at least one custom domain')
+      ) {
+        log.warn(
+          'Partial Prompts feature requires at least one custom domain to be configured for the tenant'
+        );
+        this.IsFeatureSupported = false;
+        return null;
+      }
+
+      if (error && error.statusCode === 429) {
+        log.error(
+          `The global rate limit has been exceeded, resulting in a ${error.statusCode} error. ${error.message}. Although this is an error, it is not blocking the pipeline.`
+        );
+        return null;
+      }
+
+      throw error;
+    }
+  }
+
+  async getCustomPartial({
+    prompt,
+  }: {
+    prompt: GetPartialsPromptEnum;
+  }): Promise<CustomPromptPartials> {
+    if (!this.IsFeatureSupported) return {};
+    return this.withErrorHandling(async () => this.client.prompts.getPartials({ prompt }));
+  }
+
+  async getCustomPromptsPartials(): Promise<CustomPromptPartials> {
+    const partialsDataWithNulls = await this.client.pool
+      .addEachTask({
+        data: customPartialsPromptTypes,
+        generator: (promptType) =>
+          this.getCustomPartial({
+            prompt: promptType as GetPartialsPromptEnum,
+          }).then((partialsData: CustomPromptPartials) => {
+            if (isEmpty(partialsData?.data)) return null;
+            return { promptType, partialsData: partialsData.data };
+          }),
+      })
+      .promise();
+    const validPartialsData = partialsDataWithNulls.filter(Boolean);
+    return validPartialsData.reduce(
+      (
+        acc: CustomPromptPartials,
+        partialData: { promptType: string; partialsData: CustomPromptPartials }
+      ) => {
+        if (partialData) {
+          const { promptType, partialsData } = partialData;
+          acc[promptType] = partialsData;
+        }
+        return acc;
+      },
+      {}
+    );
   }
 
   async processChanges(assets: Assets): Promise<void> {
@@ -241,13 +427,14 @@ export default class PromptsHandler extends DefaultHandler {
 
     if (!prompts) return;
 
-    const { customText, ...promptSettings } = prompts;
+    const { partials, customText, ...promptSettings } = prompts;
 
     if (!isEmpty(promptSettings)) {
       await this.client.prompts.update(promptSettings);
     }
 
     await this.updateCustomTextSettings(customText);
+    await this.updateCustomPromptsPartials(partials);
 
     this.updated += 1;
     this.didUpdate(prompts);
@@ -276,7 +463,39 @@ export default class PromptsHandler extends DefaultHandler {
           });
         }),
         generator: ({ prompt, language, body }) =>
-          this.client.prompts.updateCustomTextByLanguage({ prompt, language }, body)
+          this.client.prompts.updateCustomTextByLanguage({ prompt, language }, body),
+      })
+      .promise();
+  }
+
+  async updateCustomPartials({
+    prompt,
+    body,
+  }: {
+    prompt: CustomPartialsPromptTypes;
+    body: CustomPromptPartialsScreens;
+  }): Promise<void> {
+    if (!this.IsFeatureSupported) return;
+    await this.withErrorHandling(async () =>
+      this.client.prompts.updatePartials({ prompt } as PutPartialsRequest, body)
+    );
+  }
+
+  async updateCustomPromptsPartials(partials: Prompts['partials']): Promise<void> {
+    /*
+      Note: deletes are not currently supported
+    */
+    if (!partials) return;
+    await this.client.pool
+      .addEachTask({
+        data: Object.keys(partials).map((prompt: CustomPartialsPromptTypes) => {
+          const body = partials[prompt] || {};
+          return {
+            body,
+            prompt,
+          };
+        }),
+        generator: ({ prompt, body }) => this.updateCustomPartials({ prompt, body }),
       })
       .promise();
   }

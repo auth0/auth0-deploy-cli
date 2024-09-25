@@ -42,14 +42,14 @@ The following example dictates to _only_ manage `actions`, `clients` and `connec
 
 ## Excluding single resources by ID
 
-Some resource types support exclusions of individual resource by ID. This is primarily useful if you work in a multi-environment context and wish to omit a production single, specific resource from your lower-level environments. The by-ID method of exclusion is supported for rules, clients, databases, connections and resource servers with the `AUTH0_EXCLUDED_RULES` ,`AUTH0_EXCLUDED_CLIENTS`, `AUTH0_EXCLUDED_DATABASES`, `AUTH0_EXCLUDED_CONNECTIONS`, `AUTH0_EXCLUDED_RESOURCE_SERVERS` configuration values respectively.
+Some resource types support exclusions of individual resource by name. This is primarily useful if you work in a multi-environment context and wish to omit a production single, specific resource from your lower-level environments. The by-Name method of exclusion is supported for rules, clients, databases, connections and resource servers with the ,`AUTH0_EXCLUDED_CLIENTS`, `AUTH0_EXCLUDED_DATABASES`, `AUTH0_EXCLUDED_CONNECTIONS`, `AUTH0_EXCLUDED_RESOURCE_SERVERS` configuration values respectively.
 
 ```json
 {
   "AUTH0_DOMAIN": "example-site.us.auth0.com",
   "AUTH0_CLIENT_ID": "<YOUR_AUTH0_CLIENT_ID>",
-  "AUTH0_EXCLUDED_CLIENTS": ["PdmQpGy72sHksV6ueVNZVrV4GDlDDm76"],
-  "AUTH0_EXCLUDED_CONNECTIONS": ["con_O1H3KyRMFP1IWRq3", "con_9avEYuj19ihqKBOs"]
+  "AUTH0_EXCLUDED_CLIENTS": ["Your Application Name"],
+  "AUTH0_EXCLUDED_CONNECTIONS": ["Your Connection Name"]
 }
 ```
 
@@ -85,7 +85,6 @@ For non-set-based resource configuration like tenant, email provider and brandin
 #### Example of emptiness
 
 ```yaml
-hooks: [] # Empty hooks
 connections: [] # Empty connections
 tenant: {} # Effectively a no-op, cannot delete tenant
 emailProvider: {} # Will delete email provider

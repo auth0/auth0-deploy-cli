@@ -494,6 +494,22 @@ describe('preserveKeywords', () => {
         status: 'ready',
       },
     ],
+    guardianFactorProviders: [
+      {
+        name: 'sms',
+        auth_token: '##AUTH_TOKEN##',
+        from: '##COMPANY_NAME##',
+        sid: '##TWILIO_SID##',
+        messaging_service_sid: '##TWILIO_SID##',
+        provider: 'twilio',
+      },
+    ],
+    pages: [
+      {
+        name: 'error_page',
+        url: '##URL##/error',
+      },
+    ],
   };
 
   const mockRemoteAssets = {
@@ -505,8 +521,6 @@ describe('preserveKeywords', () => {
       universal_login_enabled: true,
       customText: {},
     },
-    pages: undefined, //TODO: test these cases more thoroughly
-    rules: null, //TODO: test these cases more thoroughly
     connections: [], // Empty on remote but has local assets
     actions: [
       {
@@ -537,6 +551,22 @@ describe('preserveKeywords', () => {
         status: 'ready',
       },
     ],
+    guardianFactorProviders: [
+      {
+        name: 'sms',
+        auth_token: 'mock-twilio-auth-token',
+        from: 'travel0',
+        sid: 'twilio-sid',
+        messaging_service_sid: 'twilio-sid',
+        provider: 'twilio',
+      },
+    ],
+    pages: [
+      {
+        name: 'error_page',
+        url: 'https://travel0.com/error',
+      },
+    ],
   };
 
   const auth0Handlers = [
@@ -561,6 +591,8 @@ describe('preserveKeywords', () => {
       type: 'resourceServers',
     },
     { id: 'id', identifiers: ['id', 'domain'], type: 'customDomains' },
+    { id: 'name', identifiers: ['id', 'name'], type: 'guardianFactorProviders' },
+    { id: 'id', identifiers: ['name'], type: 'pages' },
   ];
 
   it('should preserve keywords when they correlate to keyword mappings', () => {
@@ -569,9 +601,12 @@ describe('preserveKeywords', () => {
       remoteAssets: mockRemoteAssets,
       keywordMappings: {
         COMPANY_NAME: 'Travel0',
+        URL: 'https://trave0.com',
         ALLOWED_LOGOUT_URLS: ['localhost:3000/logout', 'https://travel0.com/logout'],
         ENV: 'Production',
         API_MAIN_IDENTIFIER: 'https://travel0.com/api/v1',
+        AUTH_TOKEN: 'mock-twilio-auth-token',
+        TWILIO_SID: 'twilio-sid',
       },
       auth0Handlers,
     });
@@ -590,6 +625,11 @@ describe('preserveKeywords', () => {
           },
         ];
         expected.customDomains[0].domain = '##COMPANY_NAME##.com';
+        expected.guardianFactorProviders[0].sid = '##TWILIO_SID##';
+        expected.guardianFactorProviders[0].messaging_service_sid = '##TWILIO_SID##';
+        expected.guardianFactorProviders[0].auth_token = '##AUTH_TOKEN##';
+        expected.guardianFactorProviders[0].from = '##COMPANY_NAME##';
+        expected.pages[0].url = '##URL##/error';
         return expected;
       })()
     );
@@ -881,6 +921,46 @@ describe('preserveKeywords', () => {
 
     expect(foo).to.deep.equal({
       connections: null,
+    });
+  });
+
+  it('`guardianFactorProviders` should have fields preserved', () => {
+    const preservedAssets = preserveKeywords({
+      localAssets: {
+        guardianFactorProviders: [
+          {
+            auth_token: '##AUTH_TOKEN##',
+            name: 'sms',
+          },
+        ],
+      },
+      remoteAssets: {
+        guardianFactorProviders: [
+          {
+            auth_token: 'auth_token',
+            name: 'sms',
+          },
+        ],
+      },
+      keywordMappings: {
+        AUTH_TOKEN: 'auth_token',
+      },
+      auth0Handlers: [
+        {
+          id: 'name',
+          identifiers: ['id', 'name'],
+          type: 'guardianFactorProviders',
+        },
+      ],
+    });
+
+    expect(preservedAssets).to.deep.equal({
+      guardianFactorProviders: [
+        {
+          auth_token: '##AUTH_TOKEN##',
+          name: 'sms',
+        },
+      ],
     });
   });
 });

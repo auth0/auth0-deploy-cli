@@ -7,10 +7,6 @@
     "ENV": "DEV"
   },
   "AUTH0_ALLOW_DELETE": false,
-  "AUTH0_EXCLUDED_RULES": [
-    "rule-1-name",
-    "rule-2-name"
-  ],
   "INCLUDED_PROPS": {
     "clients": [ "client_secret" ]
   },

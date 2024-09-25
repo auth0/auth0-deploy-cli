@@ -2,7 +2,13 @@ import { expect } from 'chai';
 import Auth0 from '../../../src/tools/auth0';
 import { Auth0APIClient, Assets } from '../../../src/types';
 
-const mockEmptyClient = {} as Auth0APIClient;
+const mockEmptyClient = {
+  prompts: {
+    _getRestClient: (endpoint) => ({
+      get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+    }),
+  },
+} as Auth0APIClient;
 const mockEmptyAssets = {} as Assets;
 
 describe('#Auth0 class', () => {
@@ -13,7 +19,7 @@ describe('#Auth0 class', () => {
         return config[key];
       });
 
-      const AUTH0_EXCLUDED = ['rules', 'organizations', 'connections'];
+      const AUTH0_EXCLUDED = ['organizations', 'connections'];
       const auth0WithExclusions = new Auth0(mockEmptyClient, mockEmptyAssets, (key) => {
         const config = { AUTH0_EXCLUDED };
         return config[key];
@@ -40,7 +46,7 @@ describe('#Auth0 class', () => {
 
   describe('#resource inclusion', () => {
     it('should include only the handlers listed in AUTH0_INCLUDED_ONLY from Auth0 class', () => {
-      const AUTH0_INCLUDED_ONLY = ['rules', 'organizations', 'connections'];
+      const AUTH0_INCLUDED_ONLY = ['organizations', 'connections'];
       const auth0WithInclusions = new Auth0(mockEmptyClient, mockEmptyAssets, (key) => {
         const config = { AUTH0_INCLUDED_ONLY };
         return config[key];

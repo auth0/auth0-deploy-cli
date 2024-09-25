@@ -25,7 +25,7 @@ export const doesHaveKeywordMarker = (
 export const getPreservableFieldsFromAssets = (
   asset: object,
   keywordMappings: KeywordMappings,
-  resourceSpecificIdentifiers: Partial<{ [key in AssetTypes]: string | string[] }>,
+  resourceSpecificIdentifiers: Partial<Record<AssetTypes, string | string[]>>,
   address = ''
 ): string[] => {
   if (typeof asset === 'string') {
@@ -41,20 +41,26 @@ export const getPreservableFieldsFromAssets = (
     return asset
       .map((arrayItem) => {
         const resourceIdentifiers: string[] = (() => {
-          const identifiers = resourceSpecificIdentifiers[address];
-          if (Array.isArray(identifiers)) {
-            return identifiers;
+          const identifierOrIdentifiers = resourceSpecificIdentifiers[address as AssetTypes];
+
+          if (Array.isArray(identifierOrIdentifiers)) {
+            return identifierOrIdentifiers;
           }
-          return [identifiers];
+
+          if (identifierOrIdentifiers === undefined) {
+            return [];
+          }
+
+          return [identifierOrIdentifiers];
         })();
 
         const specificAddress = resourceIdentifiers.reduce(
           (aggregateAddress, resourceIdentifier) => {
             resourceSpecificIdentifiers[address];
-            if (resourceIdentifier === undefined) return null; // See if this specific resource type has an identifier
+            if (resourceIdentifier === undefined) return ''; // See if this specific resource type has an identifier
 
             const identifierFieldValue = arrayItem[resourceIdentifier];
-            if (identifierFieldValue === undefined) return null; // See if this specific array item possess the resource-specific identifier
+            if (identifierFieldValue === undefined) return ''; // See if this specific array item possess the resource-specific identifier
 
             if (aggregateAddress === '') {
               return `${resourceIdentifier}=${identifierFieldValue}`;
@@ -65,7 +71,7 @@ export const getPreservableFieldsFromAssets = (
           ''
         );
 
-        if (specificAddress === null) {
+        if (specificAddress.length === 0) {
           return [];
         }
 
@@ -227,15 +233,13 @@ export const preserveKeywords = ({
 }): object => {
   if (Object.keys(keywordMappings).length === 0) return remoteAssets;
 
-  const resourceSpecificIdentifiers: Partial<{ [key in AssetTypes]: string[] }> =
-    auth0Handlers.reduce((acc, handler): Partial<{ [key in AssetTypes]: string[] }> => {
-      return {
-        ...acc,
-        [handler.type]: handler.identifiers.filter((identifiers) => {
-          return identifiers !== handler.id;
-        })[0],
-      };
-    }, {});
+  const resourceSpecificIdentifiers: Partial<Record<AssetTypes, string[]>> = auth0Handlers.reduce(
+    (acc, handler) => {
+      acc[handler.type] = handler.identifiers.flat();
+      return acc;
+    },
+    {}
+  );
 
   const addresses = getPreservableFieldsFromAssets(
     localAssets,

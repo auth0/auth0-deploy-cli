@@ -2,11 +2,21 @@ import path from 'path';
 import fs from 'fs-extra';
 import jsYaml from 'js-yaml';
 import { expect } from 'chai';
-
+import sinon from 'sinon';
+import handlers from '../../../src/tools/auth0/handlers';
 import Context from '../../../src/context/yaml';
 import { cleanThenMkdir, testDataDir, mockMgmtClient, mockPagedData } from '../../utils';
+import ScimHandler from '../../../src/tools/auth0/handlers/scimHandler';
 
 describe('#YAML context validation', () => {
+  beforeEach(() => {
+    sinon.stub(handlers.prompts.default.prototype, 'getCustomPartial').resolves({});
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
   it('should do nothing on empty yaml', async () => {
     /* Create empty directory */
     const dir = path.resolve(testDataDir, 'yaml', 'empty');
@@ -18,14 +28,12 @@ describe('#YAML context validation', () => {
     const context = new Context(config, mockMgmtClient());
     await context.loadAssetsFromLocal();
 
-    expect(context.assets.rules).to.deep.equal(null);
     expect(context.assets.databases).to.deep.equal(null);
     expect(context.assets.pages).to.deep.equal(null);
     expect(context.assets.clients).to.deep.equal(null);
     expect(context.assets.resourceServers).to.deep.equal(null);
     expect(context.assets.clientGrants).to.deep.equal(null);
     expect(context.assets.connections).to.deep.equal(null);
-    expect(context.assets.rulesConfigs).to.deep.equal(null);
     expect(context.assets.organizations).to.deep.equal(null);
   });
 
@@ -38,7 +46,6 @@ describe('#YAML context validation', () => {
 
     const config = {
       AUTH0_INPUT_FILE: yaml,
-      AUTH0_EXCLUDED_RULES: ['rule'],
       AUTH0_EXCLUDED_CLIENTS: ['client'],
       AUTH0_EXCLUDED_DATABASES: ['db'],
       AUTH0_EXCLUDED_CONNECTIONS: ['conn'],
@@ -49,7 +56,6 @@ describe('#YAML context validation', () => {
     const context = new Context(config, mockMgmtClient());
     await context.loadAssetsFromLocal();
 
-    expect(context.assets.exclude.rules).to.deep.equal(['rule']);
     expect(context.assets.exclude.clients).to.deep.equal(['client']);
     expect(context.assets.exclude.databases).to.deep.equal(['db']);
     expect(context.assets.exclude.connections).to.deep.equal(['conn']);
@@ -66,12 +72,10 @@ describe('#YAML context validation', () => {
       yaml,
       `
       actions: []
-      rules: []
-      hooks: []
     `
     );
 
-    const exclusions = ['hooks', 'rules', 'prompts']; // Only actions are defined above but not excluded
+    const exclusions = ['prompts']; // Only actions are defined above but not excluded
     const contextWithExclusion = new Context(
       {
         AUTH0_INPUT_FILE: yaml,
@@ -96,8 +100,6 @@ describe('#YAML context validation', () => {
 
     await contextWithoutExclusion.loadAssetsFromLocal();
     expect(contextWithoutExclusion.assets.actions).to.deep.equal([]);
-    expect(contextWithoutExclusion.assets.hooks).to.deep.equal([]);
-    expect(contextWithoutExclusion.assets.rules).to.deep.equal([]);
   });
 
   it('should respect resource inclusion on import', async () => {
@@ -130,7 +132,7 @@ describe('#YAML context validation', () => {
     });
 
     expect(contextWithInclusion.assets.actions).to.equal(null);
-    expect(contextWithInclusion.assets.rules).to.equal(null);
+
   });
 
   it('should error invalid schema', async () => {
@@ -251,11 +253,8 @@ describe('#YAML context validation', () => {
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
       resourceServers: [],
-      rules: [],
-      hooks: [],
       actions: [],
       triggers: [],
-      rulesConfigs: [],
       roles: [
         {
           name: 'App Admin',
@@ -278,10 +277,11 @@ describe('#YAML context validation', () => {
         bruteForceProtection: {},
         suspiciousIpThrottling: {},
       },
-      logStreams: [],
       prompts: {
         customText: {},
+        partials: {},
       },
+      logStreams: [],
       customDomains: [],
       themes: [],
     });
@@ -362,11 +362,8 @@ describe('#YAML context validation', () => {
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
       resourceServers: [],
-      rules: [],
-      hooks: [],
       actions: [],
       triggers: [],
-      rulesConfigs: [],
       roles: [
         {
           name: 'App Admin',
@@ -389,10 +386,11 @@ describe('#YAML context validation', () => {
         bruteForceProtection: {},
         suspiciousIpThrottling: {},
       },
-      logStreams: [],
       prompts: {
         customText: {},
+        partials: {},
       },
+      logStreams: [],
       customDomains: [],
       themes: [],
     });
@@ -474,11 +472,8 @@ describe('#YAML context validation', () => {
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
       resourceServers: [],
-      rules: [],
-      hooks: [],
       actions: [],
       triggers: [],
-      rulesConfigs: [],
       roles: [
         {
           name: 'App Admin',
@@ -501,10 +496,11 @@ describe('#YAML context validation', () => {
         bruteForceProtection: {},
         suspiciousIpThrottling: {},
       },
-      logStreams: [],
       prompts: {
         customText: {},
+        partials: {},
       },
+      logStreams: [],
       customDomains: [],
       themes: [],
     });
@@ -517,6 +513,7 @@ describe('#YAML context validation', () => {
     const config = {
       AUTH0_INPUT_FILE: tenantFile,
       INCLUDED_PROPS: { clients: ['client_secret', 'name'] },
+      AUTH0_EXCLUDED: ['prompts'],
       EXCLUDED_PROPS: { clients: ['client_secret', 'name'] },
     };
     const context = new Context(config, mockMgmtClient());
@@ -534,6 +531,8 @@ describe('#YAML context validation', () => {
   });
 
   it('should preserve keywords when dumping', async () => {
+    const applyScimConfiguration = (connections) => connections;
+    sinon.stub(ScimHandler.prototype, 'applyScimConfiguration').returns(applyScimConfiguration);
     const dir = path.resolve(testDataDir, 'yaml', 'dump');
     cleanThenMkdir(dir);
     const tenantFile = path.join(dir, 'tenant.yml');
@@ -584,6 +583,12 @@ describe('#YAML context validation', () => {
                 },
               },
             ]),
+          _getRestClient: () => ({})
+        },
+        prompts: {
+          _getRestClient: (endpoint) => ({
+            get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+          }),
         },
       }
     );
@@ -605,5 +610,6 @@ describe('#YAML context validation', () => {
         },
       ],
     });
+    sinon.restore();
   });
 });

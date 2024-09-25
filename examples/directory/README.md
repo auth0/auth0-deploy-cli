@@ -40,13 +40,6 @@ repository =>
   resource-servers
     resource_server1.json
     resource_server2.json
-  rules
-    rule1.js
-    rule1.json
-    rule2.js
-  rules-configs
-    env_param1.json
-    some_secret1.json
   guardian
     factors
       sms.json
@@ -76,7 +69,7 @@ You can export your current tenant configuration. For example the following comm
 
 > NOTE: The config value `AUTH0_EXPORT_IDENTIFIERS: true` (or `--export_ids` option) can be used to export the identifier fields to the Auth0 objects. This means you won't be able to import these objects as the tool cannot find the existing objects by their id.
 
-> NOTE: Some of the settings cannot be exported for example emailProvider credentials, rulesConfigs values and others. After export you may need to update the `tenant.yaml` values if you experience schema errors on import.
+> NOTE: Some of the settings cannot be exported for example emailProvider credentials values and others. After export you may need to update the `tenant.yaml` values if you experience schema errors on import.
 
 
 ## Example Import
@@ -120,7 +113,6 @@ Here is the example of a config.json:
   "EXCLUDED_PROPS": {
     "connections": [ "options.client_secret" ]
   },
-  "AUTH0_EXCLUDED_RULES": [ "auth0-account-link-extension" ],
   "AUTH0_EXCLUDED_CLIENTS": [ "auth0-account-link" ],
   "AUTH0_EXCLUDED_RESOURCE_SERVERS": [ "SSO Dashboard API" ],
   "AUTH0_EXCLUDED_DEFAULTS": ["emailProvider"]

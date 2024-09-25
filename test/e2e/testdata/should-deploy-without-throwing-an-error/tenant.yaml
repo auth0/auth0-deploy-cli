@@ -1,6 +1,3 @@
-rules: []
-rulesConfigs: []
-hooks: []
 pages: []
 resourceServers: []
 clients:
@@ -124,6 +121,7 @@ branding:
   templates: []
 prompts:
   customText: {}
+  partials: {}
   universal_login_experience: new
 actions: []
 triggers: {}

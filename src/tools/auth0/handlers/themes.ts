@@ -1,7 +1,9 @@
+import { PostBrandingTheme200Response } from 'auth0';
 import { Assets } from '../../../types';
 import log from '../../../logger';
 import DefaultHandler, { order } from './default';
 
+export type Theme = PostBrandingTheme200Response
 export default class ThemesHandler extends DefaultHandler {
   existing: Theme[] | null;
 
@@ -193,6 +195,11 @@ export const schema = {
           body_text: {
             description: 'Body text',
             pattern: '^#(([0-9a-fA-F]{3}){1,2}|([0-9a-fA-F]{4}){1,2})$',
+            type: 'string',
+          },
+          captcha_widget_theme: {
+            description: 'Captcha Widget Theme',
+            pattern: '^(auto|light|dark)$',
             type: 'string',
           },
           error: {
@@ -507,94 +514,3 @@ export const schema = {
     type: 'object',
   },
 };
-
-/**
- * Utility types
- */
-
-export interface Colors {
-  primary_button: string;
-  primary_button_label: string;
-  secondary_button_border: string;
-  secondary_button_label: string;
-  links_focused_components: string;
-  header: string;
-  body_text: string;
-  widget_background: string;
-  widget_border: string;
-  input_labels_placeholders: string;
-  input_filled_text: string;
-  input_border: string;
-  input_background: string;
-  icons: string;
-  error: string;
-  success: string;
-  base_focus_color?: string;
-  base_hover_color?: string;
-}
-
-export interface Fonts {
-  font_url: string;
-  reference_text_size: number;
-  title: {
-    size: number;
-    bold: boolean;
-  };
-  subtitle: {
-    size: number;
-    bold: boolean;
-  };
-  body_text: {
-    size: number;
-    bold: boolean;
-  };
-  buttons_text: {
-    size: number;
-    bold: boolean;
-  };
-  input_labels: {
-    size: number;
-    bold: boolean;
-  };
-  links: {
-    size: number;
-    bold: boolean;
-  };
-  links_style: 'normal' | 'underlined';
-}
-
-export interface Borders {
-  button_border_weight: number;
-  buttons_style: 'sharp' | 'pill' | 'rounded';
-  button_border_radius: number;
-  input_border_weight: number;
-  inputs_style: 'sharp' | 'pill' | 'rounded';
-  input_border_radius: number;
-  widget_corner_radius: number;
-  widget_border_weight: number;
-  show_widget_shadow: boolean;
-}
-
-export interface Widget {
-  logo_position: 'left' | 'center' | 'right' | 'none';
-  logo_url: string;
-  logo_height: number;
-  header_text_alignment: 'left' | 'center' | 'right';
-  social_buttons_layout: 'top' | 'bottom';
-}
-
-export interface PageBackground {
-  page_layout: 'left' | 'center' | 'right';
-  background_color: string;
-  background_image_url: string;
-}
-
-export interface Theme {
-  colors: Colors;
-  fonts: Fonts;
-  borders: Borders;
-  widget: Widget;
-  page_background: PageBackground;
-  themeId: string;
-  displayName?: string;
-}

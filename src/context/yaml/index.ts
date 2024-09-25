@@ -8,6 +8,7 @@ import {
   wrapArrayReplaceMarkersInQuotes,
   Auth0,
 } from '../../tools';
+import pagedClient from '../../tools/auth0/client';
 
 import log from '../../logger';
 import { isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter } from '../../utils';
@@ -16,7 +17,6 @@ import cleanAssets from '../../readonly';
 import { Assets, Config, Auth0APIClient, AssetTypes, KeywordMappings } from '../../types';
 import { filterOnlyIncludedResourceTypes } from '..';
 import { preserveKeywords } from '../../keywordPreservation';
-import pagedClient from '../../tools/auth0/client';
 
 export default class YAMLContext {
   basePath: string;
@@ -38,7 +38,6 @@ export default class YAMLContext {
     this.assets = {};
     // Get excluded rules
     this.assets.exclude = {
-      rules: config.AUTH0_EXCLUDED_RULES || [],
       clients: config.AUTH0_EXCLUDED_CLIENTS || [],
       databases: config.AUTH0_EXCLUDED_DATABASES || [],
       connections: config.AUTH0_EXCLUDED_CONNECTIONS || [],
