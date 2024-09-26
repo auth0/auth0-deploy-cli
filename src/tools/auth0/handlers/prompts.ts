@@ -240,43 +240,6 @@ export const schema = {
         {}
       ),
     },
-    partials: {
-      type: 'object',
-      properties: customPartialsPromptTypes.reduce((acc, customPartialsPromptType) => {
-        return {
-          ...acc,
-          [customPartialsPromptType]: {
-            oneOf: [
-              {
-                type: 'object',
-                properties: customPartialsScreenTypes.reduce((screenAcc, customPartialsScreenType) => {
-                  return {
-                    ...screenAcc,
-                    [customPartialsScreenType]: {
-                      oneOf: [
-                        {
-                          type: 'object',
-                          properties: customPartialsInsertionPoints.reduce((insertionAcc, customPartialsInsertionPoint) => {
-                            return {
-                              ...insertionAcc,
-                              [customPartialsInsertionPoint]: {
-                                type: 'string',
-                              },
-                            };
-                          }, {}),
-                        },
-                        { type: 'null' }
-                      ],
-                    },
-                  };
-                }, {}),
-              },
-              { type: 'null' }
-            ],
-          },
-        };
-      }, {}),
-    },
   },
 };
 
@@ -516,36 +479,6 @@ export default class PromptsHandler extends DefaultHandler {
     await this.withErrorHandling(async () =>
       this.client.prompts.updatePartials({ prompt } as PutPartialsRequest, body)
     );
-  }
-
-  async updateCustomPromptsPartials(partials: Prompts['partials']): Promise<void> {
-    /*
-      Note: deletes are not currently supported
-    */
-    if (!partials) return;
-    await this.client.pool
-      .addEachTask({
-        data: Object.keys(partials).map((prompt: CustomPartialsPromptTypes) => {
-          const body = partials[prompt] || {};
-          return {
-            body,
-            prompt,
-          };
-        }),
-        generator: ({ prompt, body }) => this.updateCustomPartials({ prompt, body }),
-      })
-      .promise();
-  }
-
-  async updateCustomPartials({
-    prompt,
-    body,
-  }: {
-    prompt: CustomPartialsPromptTypes;
-    body: CustomPromptPartialsScreens;
-  }): Promise<void> {
-    if (!this.IsFeatureSupported) return;
-    await this.partialHttpRequest('put', [{ prompt: prompt }, body]); // Implement this method for making HTTP requests
   }
 
   async updateCustomPromptsPartials(partials: Prompts['partials']): Promise<void> {
