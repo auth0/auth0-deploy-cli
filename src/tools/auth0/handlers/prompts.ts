@@ -1,8 +1,5 @@
 import { isEmpty } from 'lodash';
-import {
-  GetPartialsPromptEnum,
-  PutPartialsRequest,
-} from 'auth0';
+import { GetPartialsPromptEnum, PutPartialsRequest } from 'auth0';
 import DefaultHandler from './default';
 import { Assets, Language, languages } from '../../../types';
 import log from '../../../logger';

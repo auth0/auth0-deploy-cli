@@ -29,11 +29,6 @@ describe('#schema validation tests', () => {
         get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
       }),
     },
-    prompts: {
-      _getRestClient: (endpoint) => ({
-        get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-      }),
-    },
   };
 
   const failedCb = (done) => (err) => done(err || 'test failed');
@@ -680,8 +675,6 @@ describe('#schema validation tests', () => {
       checkPassed({ resourceServers: data }, done);
     });
   });
-
-
 
   describe('#tenant validate', () => {
     it('should fail validation if tenant is not an object', (done) => {

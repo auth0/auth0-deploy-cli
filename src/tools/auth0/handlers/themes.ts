@@ -3,7 +3,7 @@ import { Assets } from '../../../types';
 import log from '../../../logger';
 import DefaultHandler, { order } from './default';
 
-export type Theme = PostBrandingTheme200Response
+export type Theme = PostBrandingTheme200Response;
 export default class ThemesHandler extends DefaultHandler {
   existing: Theme[] | null;
 

@@ -25,7 +25,12 @@ interface ScimScopes {
   delete: boolean;
 }
 
-interface ScimScopes { read: boolean; create: boolean; update: boolean; delete: boolean }
+interface ScimScopes {
+  read: boolean;
+  create: boolean;
+  update: boolean;
+  delete: boolean;
+}
 
 /**
  * The current version of this sdk use `node-auth0` v3. But `SCIM` features are not natively supported by v3.
