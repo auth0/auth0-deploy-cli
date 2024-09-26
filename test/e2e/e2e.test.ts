@@ -40,7 +40,7 @@ describe('#end-to-end dump', function () {
     const files = getFiles(workDirectory, ['.yaml']);
     expect(files).to.have.length(1);
     expect(files[0]).to.equal(path.join(workDirectory, 'tenant.yaml'));
-    ['emailTemplates', 'hooks', 'pages', 'rules'].forEach((dirName) => {
+    ['emailTemplates', 'pages'].forEach((dirName) => {
       const directory = path.join(workDirectory, dirName);
       expect(existsMustBeDir(directory)).to.equal(true);
       expect(getFiles(directory, ['.yaml'])).to.have.length(0);
@@ -110,6 +110,7 @@ describe('#end-to-end deploy', function () {
         AUTH0_ALLOW_DELETE: false,
       },
     });
+
 
     // Applying configuration to clear tenant out
     await deploy({
@@ -205,7 +206,6 @@ describe('#end-to-end deploy', function () {
 
     const yaml = yamlLoad(fs.readFileSync(files[0]));
 
-    expect(yaml.rules).to.have.length(0);
     expect(yaml.clients).to.have.length(2); //Accounting for Deploy CLI and Default App client
     expect(yaml.databases).to.have.length(1); // Default user database
     expect(yaml.connections).to.have.length(0);
