@@ -1,3 +1,8 @@
+## Commits
+All commits should be signed to enhance security, authorship, trust and compliance.
+
+[About commit signature verification](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification)
+
 ## Versioning
 
 Versioning is managed by npm. Npm versioning will execute scripts that uses kacl to manage the CHANGELOG.
