@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import path from 'path';
+import { ManagementClient } from 'auth0';
 import {
   loadFileAndReplaceKeywords,
   keywordReplace,
@@ -26,18 +27,17 @@ export default class YAMLContext {
   assets: Assets;
   disableKeywordReplacement: boolean;
 
-  constructor(config: Config, mgmtClient) {
+  constructor(config: Config, mgmtClient: ManagementClient) {
     this.configFile = config.AUTH0_INPUT_FILE;
     this.config = config;
     this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {};
-    this.mgmtClient = pagedClient(mgmtClient);
+    this.mgmtClient =  pagedClient(mgmtClient);
     this.disableKeywordReplacement = false;
 
     //@ts-ignore because the assets property gets filled out throughout
     this.assets = {};
     // Get excluded rules
     this.assets.exclude = {
-      rules: config.AUTH0_EXCLUDED_RULES || [],
       clients: config.AUTH0_EXCLUDED_CLIENTS || [],
       databases: config.AUTH0_EXCLUDED_DATABASES || [],
       connections: config.AUTH0_EXCLUDED_CONNECTIONS || [],

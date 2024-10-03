@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { ManagementClient } from 'auth0';
 import { loadFileAndReplaceKeywords, Auth0 } from '../../tools';
 import pagedClient from '../../tools/auth0/client';
 
@@ -21,7 +22,7 @@ export default class DirectoryContext {
   assets: Assets;
   disableKeywordReplacement: boolean;
 
-  constructor(config: Config, mgmtClient: Auth0APIClient) {
+  constructor(config: Config, mgmtClient: ManagementClient) {
     this.filePath = config.AUTH0_INPUT_FILE;
     this.config = config;
     this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {};
@@ -32,7 +33,6 @@ export default class DirectoryContext {
     this.assets = {};
     // Get excluded rules
     this.assets.exclude = {
-      rules: config.AUTH0_EXCLUDED_RULES || [],
       clients: config.AUTH0_EXCLUDED_CLIENTS || [],
       databases: config.AUTH0_EXCLUDED_DATABASES || [],
       connections: config.AUTH0_EXCLUDED_CONNECTIONS || [],

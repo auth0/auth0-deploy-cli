@@ -1,6 +1,7 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
+import { GetPhoneProviders200Response } from 'auth0';
 
 export const schema = {
   type: 'object',
@@ -32,7 +33,7 @@ const isFeatureUnavailableError = (err) => {
 };
 
 export default class GuardianPhoneSelectedProviderHandler extends DefaultHandler {
-  existing: Asset[];
+  existing: Asset;
 
   constructor(options) {
     super({
@@ -53,7 +54,8 @@ export default class GuardianPhoneSelectedProviderHandler extends DefaultHandler
     if (this.existing) return this.existing;
 
     try {
-      this.existing = await this.client.guardian.getPhoneFactorSelectedProvider();
+      const { data } = await this.client.guardian.getPhoneFactorSelectedProvider();
+      this.existing = data;
     } catch (e) {
       if (isFeatureUnavailableError(e)) {
         // Gracefully skip processing this configuration value.
@@ -73,9 +75,8 @@ export default class GuardianPhoneSelectedProviderHandler extends DefaultHandler
     if (!guardianPhoneFactorSelectedProvider || !guardianPhoneFactorSelectedProvider.provider)
       return;
 
-    const params = {};
     const data = guardianPhoneFactorSelectedProvider;
-    await this.client.guardian.updatePhoneFactorSelectedProvider(params, data);
+    await this.client.guardian.updatePhoneFactorSelectedProvider(data as GetPhoneProviders200Response);
     this.updated += 1;
     this.didUpdate(guardianPhoneFactorSelectedProvider);
   }

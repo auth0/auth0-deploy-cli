@@ -40,8 +40,19 @@ export default class GuardianFactorProvidersHandler extends DefaultHandler {
 
     const data = await Promise.all(
       mappings.map(async (m) => {
-        const provider = await this.client.guardian.getFactorProvider(m);
-        return { ...m, ...provider };
+        let provider;
+        // TODO: This is quite a change, needs to be validated for sure.
+        if (m.name === 'phone' && m.provider === 'twilio') {
+          provider = await this.client.guardian.getPhoneFactorProviderTwilio();
+        } else if (m.name === 'sms' && m.provider === 'twilio') {
+          provider = await this.client.guardian.getSmsFactorProviderTwilio();
+        } else if (m.name === 'push-notification' && m.provider === 'apns') {
+          provider = await this.client.guardian.getPushNotificationProviderAPNS();
+        } else if (m.name === 'push-notification' && m.provider === 'sns') {
+          provider = await this.client.guardian.getPushNotificationProviderSNS();
+        }
+
+        return { ...m, ...provider.data };
       })
     );
 
@@ -59,11 +70,18 @@ export default class GuardianFactorProvidersHandler extends DefaultHandler {
     // Process each factor
     await Promise.all(
       guardianFactorProviders.map(async (factorProvider) => {
-        const data = { ...factorProvider };
+        const { name, provider, ...data } = factorProvider;
         const params = { name: factorProvider.name, provider: factorProvider.provider };
-        delete data.name;
-        delete data.provider;
-        await this.client.guardian.updateFactorProvider(params, data);
+        // TODO: This is quite a change, needs to be validated for sure.
+        if (name === 'phone' && provider === 'twilio') {
+          await this.client.guardian.updatePhoneFactorProviderTwilio(data);
+        } else if (name === 'push-notification' && provider === 'apns') {
+          await this.client.guardian.updatePushNotificationProviderAPNS(data);
+        } else if (name === 'push-notification' && provider === 'fcm') {
+          await this.client.guardian.updatePushNotificationProviderFCM(data);
+        } else if (name === 'push-notification' && provider === 'sns') {
+          await this.client.guardian.updatePushNotificationProviderSNS(data);
+        }
         this.didUpdate(params);
         this.updated += 1;
       })

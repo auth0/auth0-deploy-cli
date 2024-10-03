@@ -1,6 +1,8 @@
+import { Client } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
+import { paginate } from '../client';
 
 export const supportedPages = constants.PAGE_NAMES.filter((p) => p.includes('.json')).map((p) =>
   p.replace('.json', '')
@@ -50,10 +52,10 @@ export default class PagesHandler extends DefaultHandler {
   }
 
   async updateLoginPage(page): Promise<void> {
-    const globalClient = await this.client.clients.getAll({
-      is_global: true,
+    const globalClient = await paginate<Client>(this.client.clients.getAll, {
       paginate: true,
       include_totals: true,
+      is_global: true,
     });
 
     if (!globalClient[0]) {
@@ -86,7 +88,7 @@ export default class PagesHandler extends DefaultHandler {
     }, {});
 
     if (Object.keys(update).length) {
-      await this.client.tenant.updateSettings(update);
+      await this.client.tenants.updateSettings(update);
     }
 
     toUpdate.forEach((page) => {
@@ -103,10 +105,10 @@ export default class PagesHandler extends DefaultHandler {
     }[] = [];
 
     // Login page is handled via the global client
-    const globalClient = await this.client.clients.getAll({
-      is_global: true,
+    const globalClient = await paginate<Client>(this.client.clients.getAll, {
       paginate: true,
       include_totals: true,
+      is_global: true,
     });
     if (!globalClient[0]) {
       throw new Error('Unable to find global client id when trying to dump the login page');
@@ -120,7 +122,7 @@ export default class PagesHandler extends DefaultHandler {
       });
     }
 
-    const tenantSettings = await this.client.tenant.getSettings();
+    const { data: tenantSettings } = await this.client.tenants.getSettings();
 
     Object.entries(pageNameMap).forEach(([key, name]) => {
       const page = tenantSettings[name];

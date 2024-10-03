@@ -1,6 +1,3 @@
-rules: []
-rulesConfigs: []
-hooks: []
 pages: []
 resourceServers: []
 clients:
@@ -109,7 +106,6 @@ branding:
   templates: []
 prompts:
   universal_login_experience: new
-migrations: {}
 actions: []
 triggers: {}
 organizations: []

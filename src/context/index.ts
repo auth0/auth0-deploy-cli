@@ -14,7 +14,6 @@ const nonPrimitiveProps: (keyof Config)[] = [
   // List of properties that are arrays or objects. This list
   // enables decoding of string env variables for these configurations.
   'AUTH0_KEYWORD_REPLACE_MAPPINGS',
-  'AUTH0_EXCLUDED_RULES',
   'AUTH0_EXCLUDED_CLIENTS',
   'AUTH0_EXCLUDED_DATABASES',
   'AUTH0_EXCLUDED_CONNECTIONS',
@@ -112,7 +111,6 @@ export const setupContext = async (
   ((config: Config) => {
     // Detect and warn on usage of deprecated exclusion params. See: https://github.com/auth0/auth0-deploy-cli/issues/451#user-content-deprecated-exclusion-props
     const deprecatedExclusionParams: (keyof Config)[] = [
-      'AUTH0_EXCLUDED_RULES',
       'AUTH0_EXCLUDED_CLIENTS',
       'AUTH0_EXCLUDED_DATABASES',
       'AUTH0_EXCLUDED_CONNECTIONS',
@@ -161,19 +159,23 @@ export const setupContext = async (
       return new AuthenticationClient({
         domain: AUTH0_DOMAIN,
         clientId: AUTH0_CLIENT_ID,
-        clientAssertionSigningKey: readFileSync(AUTH0_CLIENT_SIGNING_KEY_PATH),
+        clientAssertionSigningKey: readFileSync(AUTH0_CLIENT_SIGNING_KEY_PATH, 'utf8'),
         clientAssertionSigningAlg: !!AUTH0_CLIENT_SIGNING_ALGORITHM
           ? AUTH0_CLIENT_SIGNING_ALGORITHM
           : undefined,
       });
     })();
 
-    const clientCredentials = await authClient.clientCredentialsGrant({
+    const clientCredentials = await authClient.oauth.clientCredentialsGrant({
       audience: config.AUTH0_AUDIENCE
         ? config.AUTH0_AUDIENCE
         : `https://${config.AUTH0_DOMAIN}/api/v2/`,
     });
-    return clientCredentials.access_token;
+    const clientAccessToken = clientCredentials.data?.access_token;
+    if (!clientAccessToken) {
+      throw new Error('Failed to retrieve access token.');
+    }
+    return clientAccessToken;
   })();
 
   const mgmtClient = new ManagementClient({

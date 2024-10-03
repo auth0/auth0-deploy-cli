@@ -1,7 +1,9 @@
+import { PostBrandingTheme200Response } from 'auth0';
 import { Assets } from '../../../types';
 import log from '../../../logger';
 import DefaultHandler, { order } from './default';
 
+export type Theme = PostBrandingTheme200Response;
 export default class ThemesHandler extends DefaultHandler {
   existing: Theme[] | null;
 
@@ -54,7 +56,7 @@ export default class ThemesHandler extends DefaultHandler {
     }
 
     const currentTheme = currentThemes[0];
-    await this.client.branding.deleteTheme({ id: currentTheme.themeId });
+    await this.client.branding.deleteTheme({ themeId: currentTheme.themeId });
 
     this.deleted += 1;
     this.didDelete(currentTheme);
@@ -81,7 +83,7 @@ export default class ThemesHandler extends DefaultHandler {
     } else {
       const currentTheme = currentThemes[0];
       // if theme exists, overwrite it otherwise create it
-      await this.client.branding.updateTheme({ id: currentTheme.themeId }, themeReqPayload);
+      await this.client.branding.updateTheme({ themeId: currentTheme.themeId }, themeReqPayload);
     }
 
     this.updated += 1;
@@ -90,7 +92,7 @@ export default class ThemesHandler extends DefaultHandler {
 
   async getThemes(): Promise<Theme[] | null> {
     try {
-      const theme = await this.client.branding.getDefaultTheme();
+      const { data: theme } = await this.client.branding.getDefaultTheme();
       return [theme];
     } catch (err) {
       if (err.statusCode === 404) return [];
@@ -512,95 +514,3 @@ export const schema = {
     type: 'object',
   },
 };
-
-/**
- * Utility types
- */
-
-export interface Colors {
-  primary_button: string;
-  primary_button_label: string;
-  secondary_button_border: string;
-  secondary_button_label: string;
-  links_focused_components: string;
-  header: string;
-  body_text: string;
-  captcha_widget_theme: string;
-  widget_background: string;
-  widget_border: string;
-  input_labels_placeholders: string;
-  input_filled_text: string;
-  input_border: string;
-  input_background: string;
-  icons: string;
-  error: string;
-  success: string;
-  base_focus_color?: string;
-  base_hover_color?: string;
-}
-
-export interface Fonts {
-  font_url: string;
-  reference_text_size: number;
-  title: {
-    size: number;
-    bold: boolean;
-  };
-  subtitle: {
-    size: number;
-    bold: boolean;
-  };
-  body_text: {
-    size: number;
-    bold: boolean;
-  };
-  buttons_text: {
-    size: number;
-    bold: boolean;
-  };
-  input_labels: {
-    size: number;
-    bold: boolean;
-  };
-  links: {
-    size: number;
-    bold: boolean;
-  };
-  links_style: 'normal' | 'underlined';
-}
-
-export interface Borders {
-  button_border_weight: number;
-  buttons_style: 'sharp' | 'pill' | 'rounded';
-  button_border_radius: number;
-  input_border_weight: number;
-  inputs_style: 'sharp' | 'pill' | 'rounded';
-  input_border_radius: number;
-  widget_corner_radius: number;
-  widget_border_weight: number;
-  show_widget_shadow: boolean;
-}
-
-export interface Widget {
-  logo_position: 'left' | 'center' | 'right' | 'none';
-  logo_url: string;
-  logo_height: number;
-  header_text_alignment: 'left' | 'center' | 'right';
-  social_buttons_layout: 'top' | 'bottom';
-}
-
-export interface PageBackground {
-  page_layout: 'left' | 'center' | 'right';
-  background_color: string;
-  background_image_url: string;
-}
-
-export interface Theme {
-  colors: Colors;
-  fonts: Fonts;
-  borders: Borders;
-  widget: Widget;
-  page_background: PageBackground;
-  themeId: string;
-  displayName?: string;
-}

@@ -6,16 +6,12 @@
         "body": "",
         "status": 200,
         "response": {
-            "allowed_logout_urls": [
-                "https://travel0.com/logoutCallback"
-            ],
             "change_password": {
                 "enabled": true,
                 "html": "<html>Change Password</html>\n"
             },
             "enabled_locales": [
-                "en",
-                "es"
+                "en"
             ],
             "error_page": {
                 "html": "<html>Error Page</html>\n",
@@ -26,46 +22,34 @@
                 "allow_changing_enable_sso": false,
                 "allow_legacy_delegation_grant_types": true,
                 "allow_legacy_ro_grant_types": true,
-                "change_pwd_flow_v1": false,
                 "disable_impersonation": true,
-                "enable_apis_section": false,
-                "enable_client_connections": false,
-                "enable_custom_domain_in_emails": false,
-                "enable_dynamic_client_registration": false,
-                "enable_legacy_logs_search_v2": false,
-                "enable_public_signup_user_exists_error": true,
+                "enable_dynamic_client_registration": true,
                 "enable_sso": true,
                 "new_universal_login_experience_enabled": true,
                 "universal_login": true,
-                "use_scope_descriptions_for_consent": false,
                 "revoke_refresh_token_grant": false,
-                "disable_clickjack_protection_headers": false,
-                "enable_pipeline2": false
+                "dashboard_new_onboarding": false,
+                "mfa_show_factor_list_on_enrollment": false,
+                "disable_clickjack_protection_headers": false
             },
-            "friendly_name": "This tenant name should be preserved",
             "guardian_mfa_page": {
                 "enabled": true,
                 "html": "<html>MFA</html>\n"
             },
-            "idle_session_lifetime": 1,
-            "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
-            "sandbox_version": "12",
-            "session_lifetime": 3.0166666666666666,
-            "support_email": "support@travel0.com",
-            "support_url": "https://travel0.com/support",
+            "picture_url": "https://cdn.auth0.com/manhattan/versions/1.3935.0/assets/badge.png",
+            "sandbox_version": "18",
+            "oidc_logout": {
+                "rp_logout_end_session_endpoint_discovery": true
+            },
             "universal_login": {
                 "colors": {
-                    "primary": "#F8F8F2",
-                    "page_background": "#222221"
+                    "page_background": "#000000",
+                    "primary": "#5ce4ff"
                 }
-            },
-            "session_cookie": {
-                "mode": "non-persistent"
             },
             "sandbox_versions_available": [
                 "18",
-                "16",
-                "12"
+                "16"
             ]
         },
         "rawHeaders": [],
@@ -78,7 +62,121 @@
         "body": "",
         "status": 200,
         "response": {
-            "actions": [],
+            "actions": [
+                {
+                    "id": "e105b5a8-cdea-4292-b588-383cb12bdbcc",
+                    "name": "k-flow",
+                    "supported_triggers": [
+                        {
+                            "id": "post-login",
+                            "version": "v3"
+                        }
+                    ],
+                    "created_at": "2024-08-11T18:43:54.559933482Z",
+                    "updated_at": "2024-09-26T07:32:36.751347258Z",
+                    "code": "/**\n* Handler that will be called during the execution of a PostLogin flow.\n*\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n*/\nexports.onExecutePostLogin = async (event, api) => {\n  console.log(event.secrets)\n  // if (event.user.nickname != \"kushal.shit\"){\n  //    api.access.deny(\"Unknown user!!\")\n  // }\n};\n\n\n/**\n* Handler that will be invoked when this action is resuming after an external redirect. If your\n* onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n*\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n*/\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
+                    "dependencies": [],
+                    "runtime": "node18-actions",
+                    "status": "built",
+                    "secrets": [
+                        {
+                            "name": "my_secret_url",
+                            "updated_at": "2024-09-18T09:55:00.423293831Z"
+                        },
+                        {
+                            "name": "sec_1",
+                            "updated_at": "2024-09-18T09:55:00.423293831Z"
+                        }
+                    ],
+                    "current_version": {
+                        "id": "44dd594d-c57d-490f-b22b-5fb499b81afd",
+                        "code": "/**\n* Handler that will be called during the execution of a PostLogin flow.\n*\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n*/\nexports.onExecutePostLogin = async (event, api) => {\n  console.log(event.secrets)\n  // if (event.user.nickname != \"kushal.shit\"){\n  //    api.access.deny(\"Unknown user!!\")\n  // }\n};\n\n\n/**\n* Handler that will be invoked when this action is resuming after an external redirect. If your\n* onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n*\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n*/\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
+                        "runtime": "node18-actions",
+                        "status": "BUILT",
+                        "number": 51,
+                        "build_time": "2024-09-26T07:32:46.544296361Z",
+                        "created_at": "2024-09-26T07:32:46.472453906Z",
+                        "updated_at": "2024-09-26T07:32:46.544910189Z"
+                    },
+                    "deployed_version": {
+                        "code": "/**\n* Handler that will be called during the execution of a PostLogin flow.\n*\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n*/\nexports.onExecutePostLogin = async (event, api) => {\n  console.log(event.secrets)\n  // if (event.user.nickname != \"kushal.shit\"){\n  //    api.access.deny(\"Unknown user!!\")\n  // }\n};\n\n\n/**\n* Handler that will be invoked when this action is resuming after an external redirect. If your\n* onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n*\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n*/\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
+                        "dependencies": [],
+                        "id": "44dd594d-c57d-490f-b22b-5fb499b81afd",
+                        "deployed": true,
+                        "number": 51,
+                        "built_at": "2024-09-26T07:32:46.544296361Z",
+                        "secrets": [
+                            {
+                                "name": "my_secret_url",
+                                "updated_at": "2024-09-18T09:55:00.423293831Z"
+                            },
+                            {
+                                "name": "sec_1",
+                                "updated_at": "2024-09-18T09:55:00.423293831Z"
+                            }
+                        ],
+                        "status": "built",
+                        "created_at": "2024-09-26T07:32:46.472453906Z",
+                        "updated_at": "2024-09-26T07:32:46.544910189Z",
+                        "runtime": "node18-actions",
+                        "supported_triggers": [
+                            {
+                                "id": "post-login",
+                                "version": "v3"
+                            }
+                        ]
+                    },
+                    "all_changes_deployed": true
+                },
+                {
+                    "id": "4301ffb3-fc3f-40cb-9b0b-2bb23f090327",
+                    "name": "post-login-onbording",
+                    "supported_triggers": [
+                        {
+                            "id": "post-login",
+                            "version": "v3"
+                        }
+                    ],
+                    "created_at": "2024-08-12T11:09:42.970451051Z",
+                    "updated_at": "2024-09-26T07:32:37.762276179Z",
+                    "code": "/**\n* Handler that will be called during the execution of a PostLogin flow.\n*\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n*/\nexports.onExecutePostLogin = async (event, api) => {\n  const FORM_ID = 'ap_vHcEKGZJ5oaTYTePwe2W1T';\n\n  api.prompt.render(FORM_ID);\n};\nexports.onContinuePostLogin = async (event, api) => {}\n\n/**\n* Handler that will be invoked when this action is resuming after an external redirect. If your\n* onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n*\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n*/\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
+                    "dependencies": [],
+                    "runtime": "node18-actions",
+                    "status": "built",
+                    "secrets": [],
+                    "current_version": {
+                        "id": "7a9f26f0-d5d7-45e5-b9a0-eaa9a6430299",
+                        "code": "/**\n* Handler that will be called during the execution of a PostLogin flow.\n*\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n*/\nexports.onExecutePostLogin = async (event, api) => {\n  const FORM_ID = 'ap_vHcEKGZJ5oaTYTePwe2W1T';\n\n  api.prompt.render(FORM_ID);\n};\nexports.onContinuePostLogin = async (event, api) => {}\n\n/**\n* Handler that will be invoked when this action is resuming after an external redirect. If your\n* onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n*\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n*/\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
+                        "runtime": "node18-actions",
+                        "status": "BUILT",
+                        "number": 46,
+                        "build_time": "2024-09-26T07:32:38.298040484Z",
+                        "created_at": "2024-09-26T07:32:38.223235246Z",
+                        "updated_at": "2024-09-26T07:32:38.299546854Z"
+                    },
+                    "deployed_version": {
+                        "code": "/**\n* Handler that will be called during the execution of a PostLogin flow.\n*\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n*/\nexports.onExecutePostLogin = async (event, api) => {\n  const FORM_ID = 'ap_vHcEKGZJ5oaTYTePwe2W1T';\n\n  api.prompt.render(FORM_ID);\n};\nexports.onContinuePostLogin = async (event, api) => {}\n\n/**\n* Handler that will be invoked when this action is resuming after an external redirect. If your\n* onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n*\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n*/\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
+                        "dependencies": [],
+                        "id": "7a9f26f0-d5d7-45e5-b9a0-eaa9a6430299",
+                        "deployed": true,
+                        "number": 46,
+                        "built_at": "2024-09-26T07:32:38.298040484Z",
+                        "secrets": [],
+                        "status": "built",
+                        "created_at": "2024-09-26T07:32:38.223235246Z",
+                        "updated_at": "2024-09-26T07:32:38.299546854Z",
+                        "runtime": "node18-actions",
+                        "supported_triggers": [
+                            {
+                                "id": "post-login",
+                                "version": "v3"
+                            }
+                        ]
+                    },
+                    "all_changes_deployed": true
+                }
+            ],
+            "total": 2,
             "per_page": 100
         },
         "rawHeaders": [],

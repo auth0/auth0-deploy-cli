@@ -1,9 +1,11 @@
 import dotProp from 'dot-prop';
 import _ from 'lodash';
+import { Client, Connection } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import { filterExcluded, convertClientNameToId, getEnabledClients } from '../../utils';
 import { CalculatedChanges, Asset, Assets } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
+import { paginate } from '../client';
 import ScimHandler from './scimHandler';
 
 export const schema = {
@@ -133,7 +135,8 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
 
   async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
-    const connections: Asset[] = await this.client.connections.getAll({
+
+    const connections = await paginate<Connection>(this.client.connections.getAll, {
       paginate: true,
       include_totals: true,
     });
@@ -141,10 +144,10 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     // Filter out database connections
     this.existing = connections.filter((c) => c.strategy !== 'auth0');
     if (this.existing === null) return [];
-    
+
     // Apply `scim_configuration` to all the relevant `SCIM` connections. This method mutates `this.existing`.
     await this.scimHandler.applyScimConfiguration(this.existing);
-    
+
     return this.existing;
   }
 
@@ -161,8 +164,12 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       };
 
     // Convert enabled_clients by name to the id
-    const clients = await this.client.clients.getAll({ paginate: true, include_totals: true });
-    const existingConnections = await this.client.connections.getAll({
+    const clients = await paginate<Client>(this.client.clients.getAll, {
+      paginate: true,
+      include_totals: true,
+    });
+
+    const existingConnections = await paginate<Connection>(this.client.connections.getAll, {
       paginate: true,
       include_totals: true,
     });

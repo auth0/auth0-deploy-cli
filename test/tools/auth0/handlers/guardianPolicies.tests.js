@@ -18,7 +18,7 @@ describe('#guardianPolicies handler', () => {
     it('should get guardian policies', async () => {
       const auth0 = {
         guardian: {
-          getPolicies: () => ['all-applications'],
+          getPolicies: () => ({ data: ['all-applications'] }),
         },
       };
 
@@ -34,10 +34,10 @@ describe('#guardianPolicies handler', () => {
     it('should update guardian policies settings', async () => {
       const auth0 = {
         guardian: {
-          updatePolicies: (params, data) => {
+          updatePolicies: (data) => {
             expect(data).to.be.an('array');
             expect(data[0]).to.equal('all-applications');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
         },
       };

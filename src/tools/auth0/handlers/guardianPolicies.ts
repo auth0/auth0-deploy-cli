@@ -1,6 +1,6 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
-import { Asset, Assets } from '../../../types';
+import { Assets } from '../../../types';
 
 export const schema = {
   type: 'object',
@@ -18,7 +18,7 @@ export const schema = {
 
 export default class GuardianPoliciesHandler extends DefaultHandler {
   existing: {
-    policies: Asset[];
+    policies: string[];
   };
 
   constructor(options) {
@@ -36,7 +36,7 @@ export default class GuardianPoliciesHandler extends DefaultHandler {
     }
 
     if (this.existing) return this.existing;
-    const policies = await this.client.guardian.getPolicies();
+    const { data: policies } = await this.client.guardian.getPolicies();
     this.existing = { policies };
     return this.existing;
   }
@@ -48,9 +48,8 @@ export default class GuardianPoliciesHandler extends DefaultHandler {
     // Do nothing if not set
     if (!guardianPolicies || !guardianPolicies.policies) return;
 
-    const params = {};
     const data = guardianPolicies.policies;
-    await this.client.guardian.updatePolicies(params, data);
+    await this.client.guardian.updatePolicies(data);
     this.updated += 1;
     this.didUpdate(guardianPolicies);
   }

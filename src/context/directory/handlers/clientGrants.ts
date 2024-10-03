@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
+import { Client, ResourceServer } from 'auth0';
 import { constants } from '../../../tools';
 
 import {
@@ -14,6 +15,7 @@ import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { ParsedAsset } from '../../../types';
 import { ClientGrant } from '../../../tools/auth0/handlers/clientGrants';
+import { paginate } from '../../../tools/auth0/client';
 
 type ParsedClientGrants = ParsedAsset<'clientGrants', ClientGrant[]>;
 
@@ -47,12 +49,15 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   if (clientGrants.length === 0) return;
 
-  const allResourceServers = await context.mgmtClient.resourceServers.getAll({
-    paginate: true,
-    include_totals: true,
-  });
+  const allResourceServers = await paginate<ResourceServer>(
+    context.mgmtClient.resourceServers.getAll,
+    {
+      paginate: true,
+      include_totals: true,
+    }
+  );
 
-  const allClients = await context.mgmtClient.clients.getAll({
+  const allClients = await paginate<Client>(context.mgmtClient.clients.getAll, {
     paginate: true,
     include_totals: true,
   });

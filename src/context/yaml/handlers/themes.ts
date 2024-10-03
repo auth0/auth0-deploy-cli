@@ -1,7 +1,7 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { ParsedAsset } from '../../../types';
 import { Theme } from '../../../tools/auth0/handlers/themes';
+import { ParsedAsset } from '../../../types';
 
 type ParsedThemes = ParsedAsset<'themes', Theme[]>;
 
