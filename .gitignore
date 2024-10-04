@@ -11,3 +11,4 @@ config*.json
 yarn-error.log
 *.pem
 *.pub
+Makefile
