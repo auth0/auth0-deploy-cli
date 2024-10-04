@@ -145,6 +145,8 @@ describe('#end-to-end deploy', function () {
     expect(yaml.databases.length).to.be.above(0);
     expect(yaml.connections.length).to.be.above(0);
     expect(yaml.roles.length).to.be.above(0);
+    expect(yaml.guardianFactorProviders.length).to.be.above(0);
+    expect(yaml.guardianFactorTemplates.length).to.be.above(0);
     expect(yaml.actions.length).to.be.above(0);
     expect(yaml.organizations.length).to.be.above(0);
     expect(yaml.logStreams.length).to.be.above(0);
@@ -200,7 +202,7 @@ describe('#end-to-end deploy', function () {
     const yaml = yamlLoad(fs.readFileSync(files[0]));
 
     expect(yaml.rules).to.have.length(0);
-    expect(yaml.clients).to.have.length(3); // Accounting for Deploy CLI and Default App client
+    expect(yaml.clients).to.have.length(2); // Accounting for Deploy CLI and Default App client
     expect(yaml.databases).to.have.length(1); // Default user database
     expect(yaml.connections).to.have.length(0);
     expect(yaml.roles).to.have.length(0);
