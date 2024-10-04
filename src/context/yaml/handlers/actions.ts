@@ -36,7 +36,10 @@ async function parse(context: YAMLContext): Promise<ParsedActions> {
   };
 }
 
-function mapSecrets(secrets: { name: string; value: string }[]): Secret[] {
+function mapSecrets(secrets) {
+  if (typeof secrets === 'string') {
+    return secrets; //Enables keyword preservation to operate on action secrets
+  }
   if (secrets && secrets.length > 0) {
     return secrets.map((secret) => ({ name: secret.name, value: secret.value }));
   }
@@ -86,8 +89,7 @@ async function dump(context: YAMLContext): Promise<ParsedActions> {
       runtime: action.runtime,
       dependencies: action.dependencies || [],
       status: action.status,
-      secrets:
-        typeof action.secrets === 'string' ? action.secrets : mapSecrets(action.secrets || []), //Enables keyword preservation to operate on action secrets
+      secrets: mapSecrets(action.secrets),
       supported_triggers: action.supported_triggers,
     })),
   };

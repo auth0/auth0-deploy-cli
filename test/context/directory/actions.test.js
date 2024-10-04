@@ -266,4 +266,34 @@ describe('#directory context actions', () => {
 
     expect(dumpedFiles).to.have.length(0);
   });
+
+  it('should process actions secrets with AUTH0_PRESERVE_KEYWORDS: true', async () => {
+    const dir = path.join(testDataDir, 'directory', 'test6');
+    const actionsDir = path.join(dir, 'actions');
+    cleanThenMkdir(actionsDir);
+
+    const json = `{
+      "name": "action-one",
+      "secrets": "@@SECRETS@@"
+    }`;
+    const jsonFile = path.join(actionsDir, 'action-one.json');
+
+    fs.writeFileSync(jsonFile, json);
+
+    const target = [
+      {
+        name: 'action-one',
+        secrets: { name: 'SECRETNAME', value: 'SECRETVALUE' }
+      },
+    ];
+
+    const config = {
+      AUTH0_INPUT_FILE: dir,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { SECRETS: { name: 'SECRETNAME', value: 'SECRETVALUE' } },
+      AUTH0_PRESERVE_KEYWORDS: true,
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+    expect(context.assets.actions).to.deep.equal(target);
+  });
 });
