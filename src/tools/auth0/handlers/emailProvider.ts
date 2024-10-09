@@ -1,7 +1,7 @@
 import { EmailProviderCreate } from 'auth0';
+import { isEmpty } from 'lodash';
 import DefaultHandler from './default';
 import { Asset, Assets } from '../../../types';
-import log from '../../../logger';
 
 export const schema = { type: 'object' };
 
@@ -18,7 +18,10 @@ export default class EmailProviderHandler extends DefaultHandler {
 
   async getType(): Promise<Asset> {
     try {
-      const { data  } = await this.client.emails.get({ include_fields: true, fields: defaultFields.join(',') });
+      const { data } = await this.client.emails.get({
+        include_fields: true,
+        fields: defaultFields.join(','),
+      });
       return data;
     } catch (err) {
       if (err.statusCode === 404) return {};
@@ -42,6 +45,9 @@ export default class EmailProviderHandler extends DefaultHandler {
       if (this.config('AUTH0_ALLOW_DELETE') === true) {
         // await this.client.emails.delete();
         existing.enabled = false;
+        if (isEmpty(existing.credentials)) {
+          delete existing.credentials;
+        }
         const updated = await this.client.emails.update(existing);
         this.updated += 1;
         this.didUpdate(updated);
