@@ -1,6 +1,6 @@
 import path from 'path';
-import { ensureDirSync, readFileSync, writeFileSync } from 'fs-extra';
-import { constants } from '../../../tools';
+import { ensureDirSync, writeFileSync } from 'fs-extra';
+import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 import { dumpJSON, existsMustBeDir, isFile, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
@@ -67,7 +67,10 @@ function parse(context: DirectoryContext): ParsedPrompts {
             (insertionAcc, { name, template }) => {
               const templateFilePath = path.join(promptsDirectory, template);
               insertionAcc[name] = isFile(templateFilePath)
-                ? readFileSync(templateFilePath, 'utf8').trim()
+                ? loadFileAndReplaceKeywords(templateFilePath, {
+                  mappings: context.mappings,
+                  disableKeywordReplacement: context.disableKeywordReplacement,
+                }).trim()
                 : '';
               return insertionAcc;
             },
