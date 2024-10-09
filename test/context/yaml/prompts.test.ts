@@ -70,13 +70,20 @@ describe('#YAML context prompts', () => {
           login-id:
             login-id:
               form-content-end: >-
-                <div>TEST</div>
+                <div>Hello, ##SOME_REPLACED_KEYWORD##!</div>
     `;
 
     const yamlFile = path.join(dir, 'config.yaml');
     fs.writeFileSync(yamlFile, yaml);
 
-    const config = { AUTH0_INPUT_FILE: yamlFile };
+    const mappings = {
+      SOME_REPLACED_KEYWORD: 'world',
+    };
+
+    const config = {
+      AUTH0_INPUT_FILE: yamlFile,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: mappings,
+    };
     const context = new Context(config, mockMgmtClient());
     await context.loadAssetsFromLocal();
 
@@ -147,7 +154,7 @@ describe('#YAML context prompts', () => {
         },
         'login-id': {
           'login-id': {
-            'form-content-end': '<div>TEST</div>',
+            'form-content-end': '<div>Hello, world!</div>',
           },
         },
       },

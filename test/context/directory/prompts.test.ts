@@ -94,7 +94,7 @@ describe('#directory context prompts', () => {
       },
       signup: {
         signup: {
-          'form-content-end.liquid': '<div>TEST AGAIN</div>',
+          'form-content-end.liquid': '<div>Hello, ##SOME_REPLACED_KEYWORD##!</div>',
         },
       },
     };
@@ -106,6 +106,7 @@ describe('#directory context prompts', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: {
         BUTTON_TEXT_FRENCH: 'French button text',
         BUTTON_TEXT_ENGLISH: 'English button text',
+        SOME_REPLACED_KEYWORD: 'world',
       },
     };
     const context = new Context(config, mockMgmtClient());
@@ -121,7 +122,7 @@ describe('#directory context prompts', () => {
         },
         signup: {
           signup: {
-            'form-content-end': '<div>TEST AGAIN</div>',
+            'form-content-end': '<div>Hello, world!</div>',
           },
         },
       },
