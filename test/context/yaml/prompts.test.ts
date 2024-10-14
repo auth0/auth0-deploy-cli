@@ -70,20 +70,13 @@ describe('#YAML context prompts', () => {
           login-id:
             login-id:
               form-content-end: >-
-                <div>Hello, ##SOME_REPLACED_KEYWORD##!</div>
+                <div>TEST</div>
     `;
 
     const yamlFile = path.join(dir, 'config.yaml');
     fs.writeFileSync(yamlFile, yaml);
 
-    const mappings = {
-      SOME_REPLACED_KEYWORD: 'world',
-    };
-
-    const config = {
-      AUTH0_INPUT_FILE: yamlFile,
-      AUTH0_KEYWORD_REPLACE_MAPPINGS: mappings,
-    };
+    const config = { AUTH0_INPUT_FILE: yamlFile };
     const context = new Context(config, mockMgmtClient());
     await context.loadAssetsFromLocal();
 
@@ -154,7 +147,75 @@ describe('#YAML context prompts', () => {
         },
         'login-id': {
           'login-id': {
-            'form-content-end': '<div>Hello, world!</div>',
+            'form-content-end': '<div>TEST</div>',
+          },
+        },
+      },
+      universal_login_experience: 'classic',
+    });
+  });
+
+  it('should replace keywords', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'prompts');
+    cleanThenMkdir(dir);
+
+    const yaml = `
+      prompts:
+        identifier_first: true
+        universal_login_experience: classic
+        customText:
+          en:
+            login:
+              login:
+                description: text in english
+                title: Hello, ##SOME_REPLACED_LITERAL##!
+                buttonText: Button text
+        partials:
+          login:
+            login:
+              form-content-end: >-
+                <p>Hello, ##SOME_REPLACED_LITERAL##!</p>
+          login-id:
+            login-id:
+              form-content-end: >-
+                <script>const someArray = @@SOME_REPLACED_ARRAY@@;</script>
+    `;
+
+    const yamlFile = path.join(dir, 'config.yaml');
+    fs.writeFileSync(yamlFile, yaml);
+
+    const config = {
+      AUTH0_INPUT_FILE: yamlFile,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: {
+        SOME_REPLACED_LITERAL: 'world',
+        SOME_REPLACED_ARRAY: ['foo', 'bar', 'baz'],
+      },
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.prompts).to.deep.equal({
+      customText: {
+        en: {
+          login: {
+            login: {
+              buttonText: 'Button text',
+              description: 'text in english',
+              title: 'Hello, world!',
+            },
+          },
+        },
+      },
+      identifier_first: true,
+      partials: {
+        login: {
+          login: {
+            'form-content-end': '<p>Hello, world!</p>',
+          },
+        },
+        'login-id': {
+          'login-id': {
+            'form-content-end': '<script>const someArray = ["foo","bar","baz"];</script>',
           },
         },
       },

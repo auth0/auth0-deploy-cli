@@ -94,7 +94,7 @@ describe('#directory context prompts', () => {
       },
       signup: {
         signup: {
-          'form-content-end.liquid': '<div>Hello, ##SOME_REPLACED_KEYWORD##!</div>',
+          'form-content-end.liquid': '<div>TEST AGAIN</div>',
         },
       },
     };
@@ -106,7 +106,6 @@ describe('#directory context prompts', () => {
       AUTH0_KEYWORD_REPLACE_MAPPINGS: {
         BUTTON_TEXT_FRENCH: 'French button text',
         BUTTON_TEXT_ENGLISH: 'English button text',
-        SOME_REPLACED_KEYWORD: 'world',
       },
     };
     const context = new Context(config, mockMgmtClient());
@@ -122,7 +121,7 @@ describe('#directory context prompts', () => {
         },
         signup: {
           signup: {
-            'form-content-end': '<div>Hello, world!</div>',
+            'form-content-end': '<div>TEST AGAIN</div>',
           },
         },
       },
@@ -146,6 +145,109 @@ describe('#directory context prompts', () => {
             login: {
               buttonText: `${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.BUTTON_TEXT_FRENCH}`,
               description: 'french login description text',
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it('should replace keywords', async () => {
+    const files = {
+      [constants.PROMPTS_DIRECTORY]: {
+        [promptsSettingsFile]: JSON.stringify({
+          universal_login_experience: 'classic',
+          identifier_first: true,
+        }),
+        [customTextFile]: JSON.stringify({
+          en: {
+            login: {
+              login: {
+                buttonText: 'Hello, ##SOME_REPLACED_LITERAL##!',
+                description: 'english login description text',
+              },
+            },
+          },
+        }),
+        [partialsFile]: JSON.stringify({
+          login: [
+            {
+              login: [
+                {
+                  name: 'form-content-start',
+                  template: 'partials/login/login/form-content-start.liquid',
+                },
+              ],
+            },
+          ],
+          signup: [
+            {
+              signup: [
+                {
+                  name: 'form-content-end',
+                  template: 'partials/signup/signup/form-content-end.liquid',
+                },
+              ],
+            },
+          ],
+        }),
+      },
+    };
+
+    const repoDir = path.join(testDataDir, 'directory', 'prompts');
+    createDir(repoDir, files);
+
+    const partialsDir = path.join(
+      repoDir,
+      constants.PROMPTS_DIRECTORY,
+      constants.PARTIALS_DIRECTORY
+    );
+
+    const partialsFiles = {
+      login: {
+        login: {
+          'form-content-start.liquid': '<p>Hello, ##SOME_REPLACED_LITERAL##!</p>',
+        },
+      },
+      signup: {
+        signup: {
+          'form-content-end.liquid': '<script>const someArray = @@SOME_REPLACED_ARRAY@@;</script>',
+        },
+      },
+    };
+
+    createDirWithNestedDir(partialsDir, partialsFiles);
+
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: {
+        SOME_REPLACED_LITERAL: 'world',
+        SOME_REPLACED_ARRAY: ['foo', 'bar', 'baz'],
+      },
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+    expect(context.assets.prompts).to.deep.equal({
+      universal_login_experience: 'classic',
+      identifier_first: true,
+      partials: {
+        login: {
+          login: {
+            'form-content-start': '<p>Hello, world!</p>',
+          },
+        },
+        signup: {
+          signup: {
+            'form-content-end': '<script>const someArray = ["foo","bar","baz"];</script>',
+          },
+        },
+      },
+      customText: {
+        en: {
+          login: {
+            login: {
+              buttonText: 'Hello, world!',
+              description: 'english login description text',
             },
           },
         },
