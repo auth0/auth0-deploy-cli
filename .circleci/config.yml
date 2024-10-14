@@ -82,6 +82,9 @@ workflows:
     jobs:
       - e2e_test_as_node_module:
           name: E2E tests as Node module
+          filters:
+            branches:
+              ignore: /pull\/[0-9]+/ # Forked pull requests
       - e2e_test_as_cli:
           name: E2E tests as CLI
           filters:
