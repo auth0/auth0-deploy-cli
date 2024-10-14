@@ -43,6 +43,9 @@ function parse(context: DirectoryContext): ParsedActions {
 }
 
 function mapSecrets(secrets) {
+  if (typeof secrets === 'string') {
+    return secrets;
+  }
   if (secrets && secrets.length > 0) {
     return secrets.map((secret) => ({ name: secret.name, value: secret.value }));
   }
