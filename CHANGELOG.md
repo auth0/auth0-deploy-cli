@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix keyword replacement for `actions secrets` using the directory format [#954]
+- Fix keyword replacement for `custom prompts` using the directory format [#963]
+
 ## [7.24.2] - 2024-08-28
 
 ### Added
