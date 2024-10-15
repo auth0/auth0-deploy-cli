@@ -58,7 +58,7 @@
         "status": 200,
         "response": {
             "allowed_logout_urls": [
-                "https://mycompany.org/logoutCallback"
+                "https://travel0.com/logoutCallback"
             ],
             "change_password": {
                 "enabled": true,
@@ -92,7 +92,7 @@
                 "disable_clickjack_protection_headers": false,
                 "enable_pipeline2": false
             },
-            "friendly_name": "My Test Tenant",
+            "friendly_name": "This tenant name should be preserved",
             "guardian_mfa_page": {
                 "enabled": true,
                 "html": "<html>MFA</html>\n"
@@ -101,8 +101,8 @@
             "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
             "sandbox_version": "12",
             "session_lifetime": 3.0166666666666666,
-            "support_email": "support@mycompany.org",
-            "support_url": "https://mycompany.org/support",
+            "support_email": "support@travel0.com",
+            "support_url": "https://travel0.com/support",
             "universal_login": {
                 "colors": {
                     "primary": "#F8F8F2",
@@ -1600,7 +1600,7 @@
         "status": 200,
         "response": {
             "allowed_logout_urls": [
-                "https://mycompany.org/logoutCallback"
+                "https://travel0.com/logoutCallback"
             ],
             "change_password": {
                 "enabled": true,
@@ -1634,7 +1634,7 @@
                 "disable_clickjack_protection_headers": false,
                 "enable_pipeline2": false
             },
-            "friendly_name": "My Test Tenant",
+            "friendly_name": "This tenant name should be preserved",
             "guardian_mfa_page": {
                 "enabled": true,
                 "html": "<html>MFA</html>\n"
@@ -1643,8 +1643,8 @@
             "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
             "sandbox_version": "12",
             "session_lifetime": 3.0166666666666666,
-            "support_email": "support@mycompany.org",
-            "support_url": "https://mycompany.org/support",
+            "support_email": "support@travel0.com",
+            "support_url": "https://travel0.com/support",
             "universal_login": {
                 "colors": {
                     "primary": "#F8F8F2",
@@ -1838,13 +1838,9 @@
         "body": "",
         "status": 200,
         "response": {
-            "template": "welcome_email",
-            "body": "<html>\n  <body>\n    <h1>Welcome!</h1>\n  </body>\n</html>\n",
-            "from": "",
-            "resultUrl": "https://example.com/welcome",
-            "subject": "Welcome",
-            "syntax": "liquid",
-            "urlLifetimeInSeconds": 3600,
+            "name": "mandrill",
+            "credentials": {},
+            "default_from_address": "auth0-user@auth0.com",
             "enabled": false
         },
         "rawHeaders": [],
@@ -2571,7 +2567,7 @@
         "status": 200,
         "response": {
             "allowed_logout_urls": [
-                "https://mycompany.org/logoutCallback"
+                "https://travel0.com/logoutCallback"
             ],
             "change_password": {
                 "enabled": true,
@@ -2605,7 +2601,7 @@
                 "disable_clickjack_protection_headers": false,
                 "enable_pipeline2": false
             },
-            "friendly_name": "My Test Tenant",
+            "friendly_name": "This tenant name should be preserved",
             "guardian_mfa_page": {
                 "enabled": true,
                 "html": "<html>MFA</html>\n"
@@ -2614,8 +2610,8 @@
             "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
             "sandbox_version": "12",
             "session_lifetime": 3.0166666666666666,
-            "support_email": "support@mycompany.org",
-            "support_url": "https://mycompany.org/support",
+            "support_email": "support@travel0.com",
+            "support_url": "https://travel0.com/support",
             "universal_login": {
                 "colors": {
                     "primary": "#F8F8F2",
@@ -2707,7 +2703,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/reset-password/custom-text/en",
+        "path": "/api/v2/prompts/consent/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2717,7 +2713,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/consent/custom-text/en",
+        "path": "/api/v2/prompts/reset-password/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2768,6 +2764,16 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/prompts/mfa-webauthn/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/mfa-phone/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -3064,6 +3070,18 @@
                             "version": "v2"
                         }
                     ]
+                },
+                {
+                    "id": "post-login",
+                    "version": "v2",
+                    "status": "DEPRECATED",
+                    "runtimes": [
+                        "node12",
+                        "node16"
+                    ],
+                    "default_runtime": "node16",
+                    "binding_policy": "trigger-bound",
+                    "compatible_triggers": []
                 },
                 {
                     "id": "credentials-exchange",
@@ -3455,25 +3473,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/attack-protection/brute-force-protection",
-        "body": "",
-        "status": 200,
-        "response": {
-            "enabled": true,
-            "shields": [
-                "block",
-                "user_notification"
-            ],
-            "mode": "count_per_identifier_and_ip",
-            "allowlist": [],
-            "max_attempts": 10
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/attack-protection/suspicious-ip-throttling",
         "body": "",
         "status": 200,
@@ -3715,7 +3714,7 @@
         "status": 200,
         "response": {
             "allowed_logout_urls": [
-                "https://mycompany.org/logoutCallback"
+                "https://travel0.com/logoutCallback"
             ],
             "change_password": {
                 "enabled": true,
@@ -3751,7 +3750,7 @@
                 "disable_clickjack_protection_headers": false,
                 "enable_pipeline2": false
             },
-            "friendly_name": "My Test Tenant",
+            "friendly_name": "This tenant name should be preserved",
             "guardian_mfa_page": {
                 "enabled": true,
                 "html": "<html>MFA</html>\n"
@@ -3760,8 +3759,8 @@
             "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
             "sandbox_version": "12",
             "session_lifetime": 3.0166666666666666,
-            "support_email": "support@mycompany.org",
-            "support_url": "https://mycompany.org/support",
+            "support_email": "support@travel0.com",
+            "support_url": "https://travel0.com/support",
             "universal_login": {
                 "colors": {
                     "primary": "#F8F8F2",
@@ -5810,7 +5809,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/duo",
+        "path": "/api/v2/guardian/factors/sms",
         "body": {
             "enabled": false
         },
@@ -5985,6 +5984,108 @@
         "response": {
             "universal_login_experience": "new",
             "identifier_first": true
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/log-streams?paginate=false",
+        "body": "",
+        "status": 200,
+        "response": [
+            {
+                "id": "lst_0000000000017950",
+                "name": "Suspended DD Log Stream",
+                "type": "datadog",
+                "status": "active",
+                "sink": {
+                    "datadogApiKey": "some-sensitive-api-key",
+                    "datadogRegion": "us"
+                },
+                "isPriority": false
+            },
+            {
+                "id": "lst_0000000000017951",
+                "name": "Amazon EventBridge",
+                "type": "eventbridge",
+                "status": "active",
+                "sink": {
+                    "awsAccountId": "123456789012",
+                    "awsRegion": "us-east-2",
+                    "awsPartnerEventSource": "aws.partner/auth0.com/auth0-deploy-cli-e2e-11b6995b-a49b-4a0f-bfaf-88cefc5ba0b3/auth0.logs"
+                },
+                "filters": [
+                    {
+                        "type": "category",
+                        "name": "auth.login.success"
+                    },
+                    {
+                        "type": "category",
+                        "name": "auth.login.notification"
+                    },
+                    {
+                        "type": "category",
+                        "name": "auth.login.fail"
+                    },
+                    {
+                        "type": "category",
+                        "name": "auth.signup.success"
+                    },
+                    {
+                        "type": "category",
+                        "name": "auth.logout.success"
+                    },
+                    {
+                        "type": "category",
+                        "name": "auth.logout.fail"
+                    },
+                    {
+                        "type": "category",
+                        "name": "auth.silent_auth.fail"
+                    },
+                    {
+                        "type": "category",
+                        "name": "auth.silent_auth.success"
+                    },
+                    {
+                        "type": "category",
+                        "name": "auth.token_exchange.fail"
+                    }
+                ],
+                "isPriority": false
+            }
+        ],
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/attack-protection/breached-password-detection",
+        "body": {
+            "enabled": false,
+            "shields": [],
+            "admin_notification_frequency": [],
+            "method": "standard",
+            "stage": {
+                "pre-user-registration": {
+                    "shields": []
+                }
+            }
+        },
+        "status": 200,
+        "response": {
+            "enabled": false,
+            "shields": [],
+            "admin_notification_frequency": [],
+            "method": "standard",
+            "stage": {
+                "pre-user-registration": {
+                    "shields": []
+                }
+            }
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -8175,10 +8276,10 @@
         "path": "/api/v2/email-templates/welcome_email",
         "body": {
             "template": "welcome_email",
-            "body": "<html>\n  <body>\n    <h1>Welcome!</h1>\n  </body>\n</html>\n",
+            "body": "<html>\n  <body>\n    <h1>Welcome to This tenant name should be preserved!</h1>\n  </body>\n</html>\n",
             "enabled": false,
             "from": "",
-            "resultUrl": "https://example.com/welcome",
+            "resultUrl": "https://travel0.com/welcome",
             "subject": "Welcome",
             "syntax": "liquid",
             "urlLifetimeInSeconds": 3600
@@ -8186,9 +8287,9 @@
         "status": 200,
         "response": {
             "template": "welcome_email",
-            "body": "<html>\n  <body>\n    <h1>Welcome!</h1>\n  </body>\n</html>\n",
+            "body": "<html>\n  <body>\n    <h1>Welcome to This tenant name should be preserved!</h1>\n  </body>\n</html>\n",
             "from": "",
-            "resultUrl": "https://example.com/welcome",
+            "resultUrl": "https://travel0.com/welcome",
             "subject": "Welcome",
             "syntax": "liquid",
             "urlLifetimeInSeconds": 3600,
@@ -10359,7 +10460,7 @@
         "path": "/api/v2/tenants/settings",
         "body": {
             "allowed_logout_urls": [
-                "https://mycompany.org/logoutCallback"
+                "https://travel0.com/logoutCallback"
             ],
             "enabled_locales": [
                 "en"
@@ -10377,14 +10478,14 @@
                 "disable_clickjack_protection_headers": false,
                 "enable_pipeline2": false
             },
-            "friendly_name": "My Test Tenant",
+            "friendly_name": "This tenant name should be preserved",
             "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
             "sandbox_version": "12",
             "session_cookie": {
                 "mode": "non-persistent"
             },
-            "support_email": "support@mycompany.org",
-            "support_url": "https://mycompany.org/support",
+            "support_email": "support@travel0.com",
+            "support_url": "https://travel0.com/support",
             "universal_login": {
                 "colors": {
                     "primary": "#F8F8F2",
@@ -10397,7 +10498,7 @@
         "status": 200,
         "response": {
             "allowed_logout_urls": [
-                "https://mycompany.org/logoutCallback"
+                "https://travel0.com/logoutCallback"
             ],
             "change_password": {
                 "enabled": true,
@@ -10433,7 +10534,7 @@
                 "disable_clickjack_protection_headers": false,
                 "enable_pipeline2": false
             },
-            "friendly_name": "My Test Tenant",
+            "friendly_name": "This tenant name should be preserved",
             "guardian_mfa_page": {
                 "enabled": true,
                 "html": "<html>MFA</html>\n"
@@ -10442,8 +10543,8 @@
             "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
             "sandbox_version": "12",
             "session_lifetime": 3.0166666666666666,
-            "support_email": "support@mycompany.org",
-            "support_url": "https://mycompany.org/support",
+            "support_email": "support@travel0.com",
+            "support_url": "https://travel0.com/support",
             "universal_login": {
                 "colors": {
                     "primary": "#F8F8F2",
