@@ -93,6 +93,7 @@ describe('#utils', function () {
   it('should strip identifiers', () => {
     const assets = {
       clients: [{ name: 'some client', client_id: 'test' }],
+      rulesConfigs: [{ key: 'test', value: 'test' }],
     };
 
     const auth0 = new Auth0(mockMgmtClient(), {}, mockConfigFn);
@@ -101,6 +102,12 @@ describe('#utils', function () {
       clients: [
         {
           name: 'some client',
+        },
+      ],
+      rulesConfigs: [
+        {
+          key: 'test',
+          value: 'test',
         },
       ],
     });

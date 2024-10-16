@@ -291,6 +291,7 @@ describe('#YAML context validation', () => {
       logStreams: [],
       prompts: {
         customText: {},
+        partials: {}
       },
       customDomains: [],
       themes: [],
@@ -402,6 +403,7 @@ describe('#YAML context validation', () => {
       logStreams: [],
       prompts: {
         customText: {},
+        partials: {}
       },
       customDomains: [],
       themes: [],

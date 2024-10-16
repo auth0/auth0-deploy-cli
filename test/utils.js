@@ -35,6 +35,7 @@ export function mockMgmtClient() {
     databases: { getAll: (params) => (mockPagedData(params, 'databases', [])) },
     connections: { getAll: (params) => (mockPagedData(params, 'connections', [])) },
     resourceServers: { getAll: (params) => (mockPagedData(params, 'resource_servers', [])) },
+    rulesConfigs: { getAll: (params) => (mockPagedData(params, 'rules_configs', [])) },
     emails: {
       get: () => ({
         data: {

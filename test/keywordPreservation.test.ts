@@ -522,6 +522,7 @@ describe('preserveKeywords', () => {
       customText: {},
     },
     connections: [], // Empty on remote but has local assets
+    rules: null, // TODO: test these cases more thoroughly
     actions: [
       {
         name: 'action-1',
