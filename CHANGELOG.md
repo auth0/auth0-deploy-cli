@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.24.3] - 2024-10-15
+
+### Fixed
+
+- Fix keyword replacement for `actions secrets` using the directory format [#954]
+- Fix keyword replacement for `custom prompts` using the directory format [#963]
+
 ## [7.24.2] - 2024-08-28
 
 ### Added
@@ -1081,7 +1088,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#943]: https://github.com/auth0/auth0-deploy-cli/issues/943
 [#944]: https://github.com/auth0/auth0-deploy-cli/issues/944
 [#946]: https://github.com/auth0/auth0-deploy-cli/issues/946
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.2...HEAD
+[#954]: https://github.com/auth0/auth0-deploy-cli/issues/954
+[#963]: https://github.com/auth0/auth0-deploy-cli/issues/963
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.3...HEAD
+[7.24.3]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.2...v7.24.3
 [7.24.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.1...v7.24.2
 [7.24.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.0...v7.24.1
 [7.24.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.23.1...v7.24.0
