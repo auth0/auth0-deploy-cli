@@ -1,3 +1,11 @@
+rules:
+  - name: my-rule
+    script: ./rules/my-rule.js
+    stage: login_success
+    enabled: true
+    order: 2
+rulesConfigs: []
+hooks: []
 pages:
   - name: error_page
     html: ./pages/error_page.html

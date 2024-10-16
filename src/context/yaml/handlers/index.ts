@@ -23,6 +23,9 @@ import logStreams from './logStreams';
 import prompts from './prompts';
 import customDomains from './customDomains';
 import themes from './themes';
+import rules from './rules';
+import rulesConfigs from './rulesConfigs';
+import hooks from './hooks';
 
 import YAMLContext from '..';
 import { AssetTypes } from '../../../types';
@@ -33,6 +36,9 @@ export type YAMLHandler<T> = {
 };
 
 const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown }> } = {
+  rules,
+  rulesConfigs,
+  hooks,
   pages,
   databases,
   clientGrants,

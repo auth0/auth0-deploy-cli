@@ -23,6 +23,9 @@ import logStreams from './logStreams';
 import prompts from './prompts';
 import customDomains from './customDomains';
 import themes from './themes';
+import rules from './rules';
+import hooks from './hooks';
+import rulesConfigs from './rulesConfigs';
 
 import DirectoryContext from '..';
 import { AssetTypes, Asset } from '../../../types';
@@ -35,6 +38,9 @@ export type DirectoryHandler<T> = {
 const directoryHandlers: {
   [key in AssetTypes]: DirectoryHandler<{ [key: string]: Asset | Asset[] | null }>;
 } = {
+  rules,
+  rulesConfigs,
+  hooks,
   pages,
   databases,
   clientGrants,

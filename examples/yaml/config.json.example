@@ -10,6 +10,10 @@
   "INCLUDED_PROPS": {
     "clients": [ "client_secret" ]
   },
+  "AUTH0_EXCLUDED_RULES": [
+    "rule-1-name",
+    "rule-2-name"
+  ],
   "EXCLUDED_PROPS": {
     "connections": [ "options.client_secret" ]
   }

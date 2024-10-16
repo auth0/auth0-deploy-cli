@@ -81,6 +81,7 @@ export function stripIdentifiers(auth0: Auth0, assets: Assets) {
   // Don't strip these object id's
   const ignore = [
     'actions',
+    'rulesConfigs',
     'emailTemplates',
     'guardianFactors',
     'guardianFactorProviders',

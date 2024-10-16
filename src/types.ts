@@ -1,9 +1,7 @@
 import { GetConnectionsStrategyEnum, ManagementClient, ResourceServer } from 'auth0';
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { Action } from './tools/auth0/handlers/actions';
-import {
-  Prompts,
-} from './tools/auth0/handlers/prompts';
+import { Prompts } from './tools/auth0/handlers/prompts';
 import { Tenant } from './tools/auth0/handlers/tenant';
 import { Page } from './tools/auth0/handlers/pages';
 import { LogStream } from './tools/auth0/handlers/logStreams';
@@ -83,10 +81,10 @@ export type Assets = Partial<{
   actions: Action[] | null;
   attackProtection: Asset | null;
   branding:
-  | (Asset & {
-    templates?: { template: string; body: string }[] | null;
-  })
-  | null;
+    | (Asset & {
+        templates?: { template: string; body: string }[] | null;
+      })
+    | null;
   clients: Client[] | null;
   clientGrants: ClientGrant[] | null;
   connections: Asset[] | null;
@@ -104,6 +102,7 @@ export type Assets = Partial<{
   guardianPolicies: {
     policies: string[]; //TODO: eliminate this intermediate level for consistency
   } | null;
+  hooks: Asset[] | null;
   logStreams: LogStream[] | null;
   migrations: Asset[] | null;
   organizations: Asset[] | null;
@@ -111,6 +110,8 @@ export type Assets = Partial<{
   prompts: Prompts | null;
   resourceServers: ResourceServer[] | null;
   roles: Asset[] | null;
+  rules: Asset[] | null;
+  rulesConfigs: Asset[] | null;
   tenant: Tenant | null;
   triggers: Asset[] | null;
   //non-resource types
@@ -129,6 +130,9 @@ export type CalculatedChanges = {
 };
 
 export type AssetTypes =
+  | 'rules'
+  | 'rulesConfigs'
+  | 'hooks'
   | 'pages'
   | 'databases'
   | 'clientGrants'
