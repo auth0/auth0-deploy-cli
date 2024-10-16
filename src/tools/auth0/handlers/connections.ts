@@ -23,11 +23,17 @@ export const schema = {
         type: 'object',
         properties: {
           connection_name: { type: 'string' },
-          mapping: { type: 'array', items: { type: 'object', properties: { scim: { type: 'string' }, auth0: { type: 'string' } } } },
-          user_id_attribute: { type: 'string' }
+          mapping: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: { scim: { type: 'string' }, auth0: { type: 'string' } },
+            },
+          },
+          user_id_attribute: { type: 'string' },
         },
         required: ['mapping', 'user_id_attribute'],
-      }
+      },
     },
     required: ['name', 'strategy'],
   },
@@ -101,11 +107,12 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       functions: {
         // When `connections` is updated, it can result in `update`,`create` or `delete` action on SCIM.
         // Because, `scim_configuration` is inside `connections`.
-        update: async (requestParams, bodyParams) => await this.scimHandler.updateOverride(requestParams, bodyParams),
+        update: async (requestParams, bodyParams) =>
+          await this.scimHandler.updateOverride(requestParams, bodyParams),
 
         // When a new `connection` is created. We can perform only `create` option on SCIM.
         // When a connection is `deleted`. `scim_configuration` is also deleted along with it; no action on SCIM is required.
-        create: async (bodyParams) => await this.scimHandler.createOverride(bodyParams)
+        create: async (bodyParams) => await this.scimHandler.createOverride(bodyParams),
       },
     });
 

@@ -42,7 +42,7 @@ describe('#tenant handler', () => {
               'unallowed-flag-1': false,
               'unallowed-flag-2': true,
             },
-          }
+          },
         }),
       },
     };
@@ -65,7 +65,7 @@ describe('#tenant handler', () => {
             data: {
               friendly_name: 'Test',
               default_directory: 'users',
-            }
+            },
           }),
           updateSettings: (data) => {
             expect(data).to.be.an('object');

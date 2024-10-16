@@ -12,7 +12,7 @@ describe('#attackProtection handler', () => {
               enabled: true,
               method: 'standard',
               shields: [],
-            }
+            },
           }),
           getBruteForceConfig: () => ({
             data: {
@@ -21,7 +21,7 @@ describe('#attackProtection handler', () => {
               max_attempts: 10,
               mode: 'count_per_identifier_and_ip',
               shields: ['block', 'user_notification'],
-            }
+            },
           }),
           getSuspiciousIpThrottlingConfig: () => ({
             data: {
@@ -37,7 +37,7 @@ describe('#attackProtection handler', () => {
                   max_attempts: 50,
                   rate: 1200,
                 },
-              }
+              },
             },
           }),
         },

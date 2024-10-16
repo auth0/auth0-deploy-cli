@@ -69,7 +69,7 @@ describe('#clients handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'clients',[]),
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };

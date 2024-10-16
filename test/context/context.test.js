@@ -127,7 +127,9 @@ describe('#context loader validation', async () => {
       expect(result)
         .to.be.an('Error')
         .that.has.property('message')
-        .which.eq('alg bad value for algorithm is not supported either by JOSE or your javascript runtime');
+        .which.eq(
+          'alg bad value for algorithm is not supported either by JOSE or your javascript runtime'
+        );
     });
 
     it('should error when secret, private key and auth token are all absent', async () => {
@@ -184,8 +186,7 @@ describe('#context loader validation', async () => {
     const loaded = await setupContext({ ...config, AUTH0_INPUT_FILE: yaml }, 'import');
     expect(loaded).to.be.an.instanceof(yamlContext);
 
-    const userAgent =
-      loaded.mgmtClient.configuration.headers['User-agent'];
+    const userAgent = loaded.mgmtClient.configuration.headers['User-agent'];
 
     expect(userAgent).to.contain('deploy-cli');
     expect(userAgent).to.contain('node.js');

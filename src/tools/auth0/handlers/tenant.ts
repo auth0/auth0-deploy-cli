@@ -145,10 +145,11 @@ export default class TenantHandler extends DefaultHandler {
     const updatedTenant: TenantSettingsUpdate = {
       ...tenant,
       flags: tenant.flags
-        ? (removeUnallowedTenantFlags(tenant.flags) as TenantSettingsUpdateFlags) : undefined
+        ? (removeUnallowedTenantFlags(tenant.flags) as TenantSettingsUpdateFlags)
+        : undefined,
     };
 
-    if ('flags' in updatedTenant ) {
+    if ('flags' in updatedTenant) {
       if (updatedTenant.flags === undefined || Object.keys(updatedTenant.flags).length === 0) {
         delete updatedTenant.flags;
       }

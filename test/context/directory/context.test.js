@@ -163,7 +163,7 @@ describe('#directory context validation', () => {
                 data: {
                   friendly_name: 'Production Tenant',
                   enabled_locales: ['en', 'es'],
-                }
+                },
               })
             ),
         },

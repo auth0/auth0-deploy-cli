@@ -111,7 +111,6 @@ describe('#end-to-end deploy', function () {
       },
     });
 
-
     // Applying configuration to clear tenant out
     await deploy({
       input_file: `${__dirname}/testdata/empty-tenant/tenant.yaml`,

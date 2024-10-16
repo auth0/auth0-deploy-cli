@@ -69,7 +69,7 @@ describe('#guardianFactors handler', () => {
 
       const auth0 = {
         guardian: {
-          getFactors: () => ({ data:  [...factors] }),
+          getFactors: () => ({ data: [...factors] }),
         },
         pool,
       };

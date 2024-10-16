@@ -78,7 +78,9 @@ export default class GuardianPhoneMessageTypesHandler extends DefaultHandler {
     if (!guardianPhoneFactorMessageTypes || !guardianPhoneFactorMessageTypes.message_types) return;
 
     const data = guardianPhoneFactorMessageTypes;
-    await this.client.guardian.updatePhoneFactorMessageTypes(data as unknown as GetMessageTypes200Response);
+    await this.client.guardian.updatePhoneFactorMessageTypes(
+      data as unknown as GetMessageTypes200Response
+    );
     this.updated += 1;
     this.didUpdate(guardianPhoneFactorMessageTypes);
   }

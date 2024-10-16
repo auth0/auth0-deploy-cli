@@ -112,7 +112,7 @@ export default class ActionHandler extends DefaultAPIHandler {
     });
   }
 
-  async createAction(action: PostActionRequestWithId ) {
+  async createAction(action: PostActionRequestWithId) {
     // Strip the deployed flag
     const addAction = { ...action };
 

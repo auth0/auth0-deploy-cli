@@ -61,7 +61,7 @@ export default class GuardianFactorTemplatesHandler extends DefaultHandler {
         // TODO: This is quite a change, needs to be validated for sure.
         if (name === 'sms') {
           await this.client.guardian.setSmsFactorTemplates(data as TemplateMessages);
-        } else if (name ==='phone') {
+        } else if (name === 'phone') {
           await this.client.guardian.setPhoneFactorTemplates(data as TemplateMessages);
         }
         this.didUpdate(params);

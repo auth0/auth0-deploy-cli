@@ -57,15 +57,13 @@ export default class DatabaseHandler extends DefaultAPIHandler {
           const validation = payload?.options?.validation;
 
           if (attributes && (requiresUsername || validation)) {
-            log.warn('Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.');
-          }
-
-          else if (attributes) {
+            log.warn(
+              'Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.'
+            );
+          } else if (attributes) {
             delete connection.options.validation;
             delete connection.options.requires_username;
-          }
-
-          else if (requiresUsername || validation) {
+          } else if (requiresUsername || validation) {
             delete connection.options.attributes;
           }
 

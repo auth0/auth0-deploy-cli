@@ -291,7 +291,7 @@ describe('#YAML context validation', () => {
       logStreams: [],
       prompts: {
         customText: {},
-        partials: {}
+        partials: {},
       },
       customDomains: [],
       themes: [],
@@ -403,7 +403,7 @@ describe('#YAML context validation', () => {
       logStreams: [],
       prompts: {
         customText: {},
-        partials: {}
+        partials: {},
       },
       customDomains: [],
       themes: [],
@@ -600,7 +600,7 @@ describe('#YAML context validation', () => {
                 },
               },
             ]),
-          _getRestClient: () => ({})
+          _getRestClient: () => ({}),
         },
         prompts: {
           _getRestClient: (endpoint) => ({

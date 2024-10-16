@@ -67,7 +67,7 @@ export type Config = {
     [key: string]: string[];
   };
   AUTH0_IGNORE_UNAVAILABLE_MIGRATIONS?: boolean;
-   // Eventually deprecate. See: https://github.com/auth0/auth0-deploy-cli/issues/451#user-content-deprecated-exclusion-props
+  // Eventually deprecate. See: https://github.com/auth0/auth0-deploy-cli/issues/451#user-content-deprecated-exclusion-props
   AUTH0_EXCLUDED_RULES?: string[];
   AUTH0_EXCLUDED_CLIENTS?: string[];
   AUTH0_EXCLUDED_DATABASES?: string[];

@@ -67,9 +67,9 @@ const mockLogStreams = [
     type: 'eventbridge',
     status: 'active',
     sink: {
-      awsRegion: "some region",
-      awsAccountId: "some id",
-      awsPartnerEventSource: "some source",
+      awsRegion: 'some region',
+      awsAccountId: 'some id',
+      awsPartnerEventSource: 'some source',
     },
   },
 ];
@@ -160,9 +160,9 @@ describe('#logStreams handler', () => {
             type: 'eventbridge',
             status: 'active',
             sink: {
-              awsRegion: "some region",
-		          awsAccountId: "some id",
-              awsPartnerEventSource: "some source",
+              awsRegion: 'some region',
+              awsAccountId: 'some id',
+              awsPartnerEventSource: 'some source',
             },
           },
         ],

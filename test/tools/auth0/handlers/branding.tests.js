@@ -11,7 +11,7 @@ describe('#branding handler', () => {
           getSettings: () => ({
             data: {
               logo_url: 'https://example.com/logo.png',
-            }
+            },
           }),
           getUniversalLoginTemplate: () => ({
             body: html,
@@ -71,7 +71,7 @@ describe('#branding handler', () => {
           getSettings: () => ({
             data: {
               logo_url: 'https://example.com/logo.png',
-            }
+            },
           }),
           getUniversalLoginTemplate: () => ({
             body: html,

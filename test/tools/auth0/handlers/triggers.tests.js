@@ -78,7 +78,9 @@ describe('#triggers handler', () => {
         'post-user-registration': [{ action_name: 'action-one', display_name: 'email-user' }],
         'post-change-password': [{ action_name: 'action-two', display_name: 'log-to-logger' }],
         'send-phone-message': [{ action_name: 'action-three', display_name: 'slack-integration' }],
-        'password-reset-post-challenge': [{ action_name: 'action-two', display_name: 'log-to-logger' }],
+        'password-reset-post-challenge': [
+          { action_name: 'action-two', display_name: 'log-to-logger' },
+        ],
       };
 
       const auth0 = {
@@ -139,7 +141,9 @@ describe('#triggers handler', () => {
         'post-user-registration': [{ action_name: 'action-one', display_name: 'email-user' }],
         'post-change-password': [{ action_name: 'action-two', display_name: 'log-to-logger' }],
         'send-phone-message': [{ action_name: 'action-three', display_name: 'slack-integration' }],
-        'password-reset-post-challenge': [{ action_name: 'action-two', display_name: 'log-to-logger' }],
+        'password-reset-post-challenge': [
+          { action_name: 'action-two', display_name: 'log-to-logger' },
+        ],
       };
 
       const updatePayload = [

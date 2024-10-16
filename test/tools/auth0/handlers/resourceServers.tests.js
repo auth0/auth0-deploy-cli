@@ -127,7 +127,10 @@ describe('#resourceServers handler', () => {
             return Promise.resolve({ data });
           },
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'resource_servers', [{ id: 'rs1', identifier: 'some-api', name: 'someAPI' }]),
+          getAll: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              { id: 'rs1', identifier: 'some-api', name: 'someAPI' },
+            ]),
         },
         pool,
       };
@@ -158,7 +161,10 @@ describe('#resourceServers handler', () => {
             return Promise.resolve({ data });
           },
           delete: () => Promise.resolve([]),
-          getAll: (params) => mockPagedData(params, 'resource_servers', [{ id: 'rs1', identifier: 'some-api', name: 'someAPI' }]),
+          getAll: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              { id: 'rs1', identifier: 'some-api', name: 'someAPI' },
+            ]),
         },
         pool,
       };
@@ -181,7 +187,10 @@ describe('#resourceServers handler', () => {
             expect(data.id).to.equal('rs1');
             return Promise.resolve({ data });
           },
-          getAll: (params) => mockPagedData(params, 'resource_servers', [{ id: 'rs1', identifier: 'some-api', name: 'someAPI' }]),
+          getAll: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              { id: 'rs1', identifier: 'some-api', name: 'someAPI' },
+            ]),
         },
         pool,
       };
@@ -204,7 +213,10 @@ describe('#resourceServers handler', () => {
             removed = true;
             return Promise.resolve({ data });
           },
-          getAll: (params) => mockPagedData(params, 'resource_servers', [{ id: 'rs1', identifier: 'some-api', name: 'someAPI' }]),
+          getAll: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              { id: 'rs1', identifier: 'some-api', name: 'someAPI' },
+            ]),
         },
         pool,
       };
@@ -232,7 +244,10 @@ describe('#resourceServers handler', () => {
             removed = true;
             return Promise.resolve({ data });
           },
-          getAll: (params) => mockPagedData(params, 'resource_servers', [{ id: 'rs1', identifier: 'some-api', name: 'someAPI' }]),
+          getAll: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              { id: 'rs1', identifier: 'some-api', name: 'someAPI' },
+            ]),
         },
         pool,
       };
@@ -257,10 +272,11 @@ describe('#resourceServers handler', () => {
             expect(data).to.be.an('undefined');
             return Promise.resolve({ data });
           },
-          getAll: (params) => mockPagedData(params, 'resource_servers', [
-            { id: 'rs1', identifier: 'some-api', name: 'someAPI' },
-            { id: 'rs2', identifier: 'some-other-api', name: 'someOtherAPI' },
-          ]),
+          getAll: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              { id: 'rs1', identifier: 'some-api', name: 'someAPI' },
+              { id: 'rs2', identifier: 'some-other-api', name: 'someOtherAPI' },
+            ]),
         },
         pool,
       };

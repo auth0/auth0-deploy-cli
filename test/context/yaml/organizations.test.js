@@ -53,7 +53,7 @@ describe('#YAML context organizations', () => {
             connection_id: 'con_123',
             assign_membership_on_login: false,
             show_as_button: false,
-            is_signup_enabled: false
+            is_signup_enabled: false,
           },
         ],
       },
@@ -71,7 +71,7 @@ describe('#YAML context organizations', () => {
             connection_id: 'con_456',
             assign_membership_on_login: true,
             show_as_button: true,
-            is_signup_enabled: true
+            is_signup_enabled: true,
           },
         ],
       },

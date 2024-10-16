@@ -76,7 +76,9 @@ export default class GuardianPhoneSelectedProviderHandler extends DefaultHandler
       return;
 
     const data = guardianPhoneFactorSelectedProvider;
-    await this.client.guardian.updatePhoneFactorSelectedProvider(data as GetPhoneProviders200Response);
+    await this.client.guardian.updatePhoneFactorSelectedProvider(
+      data as GetPhoneProviders200Response
+    );
     this.updated += 1;
     this.didUpdate(guardianPhoneFactorSelectedProvider);
   }

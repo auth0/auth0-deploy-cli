@@ -283,7 +283,7 @@ describe('#directory context actions', () => {
     const target = [
       {
         name: 'action-one',
-        secrets: { name: 'SECRETNAME', value: 'SECRETVALUE' }
+        secrets: { name: 'SECRETNAME', value: 'SECRETVALUE' },
       },
     ];
 

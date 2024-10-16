@@ -31,7 +31,7 @@ export default class YAMLContext {
     this.configFile = config.AUTH0_INPUT_FILE;
     this.config = config;
     this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {};
-    this.mgmtClient =  pagedClient(mgmtClient);
+    this.mgmtClient = pagedClient(mgmtClient);
     this.disableKeywordReplacement = false;
 
     //@ts-ignore because the assets property gets filled out throughout

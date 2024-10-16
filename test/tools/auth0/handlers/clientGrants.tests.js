@@ -101,7 +101,8 @@ describe('#clientGrants handler', () => {
           getAll: (params) => mockPagedData(params, 'client_grants', [clientGrant]),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', [{ name: 'test client', client_id: clientId }]),
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [{ name: 'test client', client_id: clientId }]),
         },
         pool,
       };
@@ -126,7 +127,8 @@ describe('#clientGrants handler', () => {
           getAll: (params) => mockPagedData(params, 'client_grants', []),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', [{ client_id: 'client_id', name: 'client_name' }]),
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [{ client_id: 'client_id', name: 'client_name' }]),
         },
         pool,
       };
@@ -163,7 +165,10 @@ describe('#clientGrants handler', () => {
             return Promise.resolve({ data });
           },
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'client_grants', [{ id: 'cg1', client_id: 'client1', audience: 'audience' }]),
+          getAll: (params) =>
+            mockPagedData(params, 'client_grants', [
+              { id: 'cg1', client_id: 'client1', audience: 'audience' },
+            ]),
         },
         clients: {
           getAll: (params) => mockPagedData(params, 'clients', []),
@@ -202,7 +207,10 @@ describe('#clientGrants handler', () => {
 
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => mockPagedData(params, 'client_grants', [{ id: 'cg1', client_id: 'client1', audience: 'audience1' }]),
+          getAll: (params) =>
+            mockPagedData(params, 'client_grants', [
+              { id: 'cg1', client_id: 'client1', audience: 'audience1' },
+            ]),
         },
         clients: {
           getAll: (params) => mockPagedData(params, 'clients', []),
@@ -242,7 +250,10 @@ describe('#clientGrants handler', () => {
 
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => mockPagedData(params, 'client_grants', [{ id: 'id', client_id: 'client_id', audience: 'audience' }]),
+          getAll: (params) =>
+            mockPagedData(params, 'client_grants', [
+              { id: 'id', client_id: 'client_id', audience: 'audience' },
+            ]),
         },
         clients: {
           getAll: (params) => mockPagedData(params, 'clients', []),
@@ -276,7 +287,10 @@ describe('#clientGrants handler', () => {
             removed = true;
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => mockPagedData(params, 'client_grants', [{ id: 'cg1', client_id: 'client1', audience: 'audience1' }]),
+          getAll: (params) =>
+            mockPagedData(params, 'client_grants', [
+              { id: 'cg1', client_id: 'client1', audience: 'audience1' },
+            ]),
         },
         clients: {
           getAll: (params) => mockPagedData(params, 'clients', []),
@@ -306,7 +320,10 @@ describe('#clientGrants handler', () => {
 
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => mockPagedData(params, 'client_grants', [{ id: 'cg1', client_id: 'client1', audience: 'audience1' }]),
+          getAll: (params) =>
+            mockPagedData(params, 'client_grants', [
+              { id: 'cg1', client_id: 'client1', audience: 'audience1' },
+            ]),
         },
         clients: {
           getAll: (params) => mockPagedData(params, 'clients', []),
@@ -343,17 +360,19 @@ describe('#clientGrants handler', () => {
 
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => mockPagedData(params, 'client_grants', [
-            { id: 'cg1', client_id: 'client1', audience: 'audience1' },
-            { id: 'cg2', client_id: 'client2', audience: 'audience2' },
-          ]),
+          getAll: (params) =>
+            mockPagedData(params, 'client_grants', [
+              { id: 'cg1', client_id: 'client1', audience: 'audience1' },
+              { id: 'cg2', client_id: 'client2', audience: 'audience2' },
+            ]),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', [
-            { name: 'client_delete', client_id: 'client1', audience: 'audience1' },
-            { name: 'client_update', client_id: 'client2', audience: 'audience2' },
-            { name: 'client_create', client_id: 'client3', audience: 'audience3' },
-          ]),
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              { name: 'client_delete', client_id: 'client1', audience: 'audience1' },
+              { name: 'client_update', client_id: 'client2', audience: 'audience2' },
+              { name: 'client_create', client_id: 'client3', audience: 'audience3' },
+            ]),
         },
         pool,
       };
@@ -399,49 +418,51 @@ describe('#clientGrants handler', () => {
 
           return Promise.resolve({ data: [] });
         },
-        getAll: (params) => mockPagedData(params, 'client_grants', [
-          {
-            client_id: '123',
-            audience: 'a',
-            id: '1',
-          },
-          {
-            client_id: '123',
-            audience: 'a',
-            id: '2',
-          },
-          {
-            client_id: '123',
-            audience: 'a',
-            id: '3',
-          },
-          {
-            client_id: '456',
-            audience: 'a',
-            id: '4',
-          },
-          {
-            client_id: '456',
-            audience: 'a',
-            id: '5',
-          },
-        ]),
+        getAll: (params) =>
+          mockPagedData(params, 'client_grants', [
+            {
+              client_id: '123',
+              audience: 'a',
+              id: '1',
+            },
+            {
+              client_id: '123',
+              audience: 'a',
+              id: '2',
+            },
+            {
+              client_id: '123',
+              audience: 'a',
+              id: '3',
+            },
+            {
+              client_id: '456',
+              audience: 'a',
+              id: '4',
+            },
+            {
+              client_id: '456',
+              audience: 'a',
+              id: '5',
+            },
+          ]),
       },
       clients: {
-        getAll: (params) => mockPagedData(params, 'clients', [
-          {
-            name: 'abc',
-            client_id: 'abc',
-          },
-          {
-            name: 'foo_client',
-            client_id: '123',
-          },
-          {
-            name: 'foo_client',
-            client_id: '456',
-          },
-        ]),
+        getAll: (params) =>
+          mockPagedData(params, 'clients', [
+            {
+              name: 'abc',
+              client_id: 'abc',
+            },
+            {
+              name: 'foo_client',
+              client_id: '123',
+            },
+            {
+              name: 'foo_client',
+              client_id: '456',
+            },
+          ]),
       },
       pool,
     };

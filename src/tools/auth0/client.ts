@@ -173,7 +173,10 @@ export default function pagedClient(client: ManagementClient): Auth0APIClient {
 }
 
 // eslint-disable-next-line no-unused-vars
-export async function paginate<T>(fetchFunc: (...paginateArgs: any) => any, args: PagePaginationParams): Promise<T[]> {
+export async function paginate<T>(
+  fetchFunc: (...paginateArgs: any) => any,
+  args: PagePaginationParams
+): Promise<T[]> {
   // override default <T>.getAll() behaviour using pagedClient
   const allItems = (await fetchFunc(args)) as unknown as T[];
   return allItems;

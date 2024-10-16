@@ -5,9 +5,7 @@ import sinon from 'sinon';
 import promptsHandler, { Prompts } from '../../../../src/tools/auth0/handlers/prompts';
 import { Language } from '../../../../src/types';
 import log from '../../../../src/logger';
-import {
-  CustomPartialsPromptTypes,
-} from '../../../../lib/tools/auth0/handlers/prompts';
+import { CustomPartialsPromptTypes } from '../../../../lib/tools/auth0/handlers/prompts';
 
 const mockPromptsSettings = {
   universal_login_experience: 'classic',
@@ -66,9 +64,11 @@ describe('#prompts handler', () => {
       const auth0 = {
         tenants: {
           getSettings: () =>
-            Promise.resolve({ data: {
-              enabled_locales: supportedLanguages,
-            }}),
+            Promise.resolve({
+              data: {
+                enabled_locales: supportedLanguages,
+              },
+            }),
         },
         prompts: {
           get: () => ({ data: mockPromptsSettings }),
@@ -81,7 +81,7 @@ describe('#prompts handler', () => {
             const customTextValue = customTextLanguageMap[language][prompt];
 
             if (customTextValue === undefined || _.isEmpty(customTextValue))
-              return Promise.resolve({ data: {}});
+              return Promise.resolve({ data: {} });
 
             return Promise.resolve({ data: customTextValue });
           },
@@ -222,7 +222,7 @@ describe('#prompts handler', () => {
           updateCustomTextByLanguage: () => {
             didCallUpdateCustomText = true;
             numberOfUpdateCustomTextCalls++;
-            return Promise.resolve({data: {}});
+            return Promise.resolve({ data: {} });
           },
           update: (data) => {
             didCallUpdatePromptsSettings = true;
@@ -271,7 +271,7 @@ describe('#prompts handler', () => {
             Promise.resolve({
               data: {
                 enabled_locales: undefined,
-              }
+              },
             }),
         },
         prompts: {
@@ -409,6 +409,5 @@ describe('#prompts handler', () => {
       });
       expect(result).to.deep.equal({});
     });
-
   });
 });

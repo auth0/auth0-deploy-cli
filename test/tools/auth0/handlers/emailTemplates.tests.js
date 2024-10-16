@@ -42,7 +42,7 @@ describe('#emailTemplates handler', () => {
               template: template.templateName,
               enabled: true,
               body: '<html>some email</html>',
-            }
+            },
           }),
         },
       };

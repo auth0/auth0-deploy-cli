@@ -16,35 +16,35 @@ export const testDataDir = path.resolve(localDir, 'testData');
 export function mockPagedData(params, key, data) {
   return params?.include_totals
     ? {
-      data: {
-        [key]: data,
-        total: data?.length || 0,
-      },
-    }
+        data: {
+          [key]: data,
+          total: data?.length || 0,
+        },
+      }
     : {
-      data,
-    };
+        data,
+      };
 }
 
 export function mockMgmtClient() {
   // Fake Mgmt Client. Bit hacky but good enough for now.
   return {
-    rules: { getAll: (params) => (mockPagedData(params, 'rules', [])) },
-    hooks: { getAll: (params) => (mockPagedData(params, 'hooks', [])) },
-    actions: { getAll: () => (mockPagedData({ include_totals: true }, 'actions', [])) },
-    databases: { getAll: (params) => (mockPagedData(params, 'databases', [])) },
-    connections: { getAll: (params) => (mockPagedData(params, 'connections', [])) },
-    resourceServers: { getAll: (params) => (mockPagedData(params, 'resource_servers', [])) },
-    rulesConfigs: { getAll: (params) => (mockPagedData(params, 'rules_configs', [])) },
+    rules: { getAll: (params) => mockPagedData(params, 'rules', []) },
+    hooks: { getAll: (params) => mockPagedData(params, 'hooks', []) },
+    actions: { getAll: () => mockPagedData({ include_totals: true }, 'actions', []) },
+    databases: { getAll: (params) => mockPagedData(params, 'databases', []) },
+    connections: { getAll: (params) => mockPagedData(params, 'connections', []) },
+    resourceServers: { getAll: (params) => mockPagedData(params, 'resource_servers', []) },
+    rulesConfigs: { getAll: (params) => mockPagedData(params, 'rules_configs', []) },
     emails: {
       get: () => ({
         data: {
           name: 'smtp',
           enabled: true,
-        }
+        },
       }),
     },
-    clientGrants: { getAll: (params) => (mockPagedData(params, 'client_grants', [])) },
+    clientGrants: { getAll: (params) => mockPagedData(params, 'client_grants', []) },
     guardian: {
       getFactors: () => ({ data: [] }),
       getSmsFactorProviderTwilio: () => ({ data: [] }),
@@ -60,7 +60,7 @@ export function mockMgmtClient() {
           template: template.templateName,
           enabled: true,
           body: 'fake template',
-        }
+        },
       }),
     },
     clients: {
@@ -77,19 +77,21 @@ export function mockMgmtClient() {
       },
     },
     roles: {
-      getAll: (params) => mockPagedData(params, 'roles', [
-        {
-          name: 'App Admin',
-          id: 'myRoleId',
-          description: 'Admin of app',
-        },
-      ]),
-      getPermissions: (params) => mockPagedData(params, 'permissions', [
-        {
-          permission_name: 'create:data',
-          resource_server_identifier: 'urn:ref',
-        },
-      ]),
+      getAll: (params) =>
+        mockPagedData(params, 'roles', [
+          {
+            name: 'App Admin',
+            id: 'myRoleId',
+            description: 'Admin of app',
+          },
+        ]),
+      getPermissions: (params) =>
+        mockPagedData(params, 'permissions', [
+          {
+            permission_name: 'create:data',
+            resource_server_identifier: 'urn:ref',
+          },
+        ]),
     },
     tenants: {
       getSettings: async () =>
@@ -99,7 +101,7 @@ export function mockMgmtClient() {
               friendly_name: 'Test',
               default_directory: 'users',
               enabled_locales: ['en'],
-            }
+            },
           })
         ),
       getCustomTextByLanguage: () => Promise.resolve({ data: {} }),
@@ -117,11 +119,10 @@ export function mockMgmtClient() {
         return Promise.reject(err);
       },
     },
-    logStreams: { getAll: (params) => mockPagedData(params, 'log_streams',[]) },
+    logStreams: { getAll: (params) => mockPagedData(params, 'log_streams', []) },
     prompts: {
       _getRestClient: (endpoint) => ({
         get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-
       }),
       getCustomTextByLanguage: () =>
         new Promise((res) => {
@@ -168,12 +169,16 @@ export function createDirWithNestedDir(repoDir, files) {
         Object.entries(content).forEach(([fileName, fileContent]) => {
           const filePath = path.join(subtypeDir, fileName);
           if (typeof fileContent !== 'string') {
-            throw new TypeError(`Expected content to be a string, but received ${typeof fileContent}`);
+            throw new TypeError(
+              `Expected content to be a string, but received ${typeof fileContent}`
+            );
           }
           fs.writeFileSync(filePath, fileContent);
         });
       } else {
-        throw new TypeError(`Expected content to be a string or object, but received ${typeof content}`);
+        throw new TypeError(
+          `Expected content to be a string or object, but received ${typeof content}`
+        );
       }
     });
   });

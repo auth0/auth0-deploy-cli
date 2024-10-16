@@ -174,7 +174,7 @@ describe('#organizations handler', () => {
                   name: 'Username-Password-Login',
                   assign_membership_on_login: true,
                   show_as_button: false,
-                  is_signup_enabled: true
+                  is_signup_enabled: true,
                 },
               ],
             },
@@ -399,7 +399,7 @@ describe('#organizations handler', () => {
                   name: 'Username-Password-Login',
                   assign_membership_on_login: false,
                   show_as_button: true,
-                  is_signup_enabled: false
+                  is_signup_enabled: false,
                 },
                 { name: 'facebook', assign_membership_on_login: true, show_as_button: false },
               ],
@@ -468,7 +468,7 @@ describe('#organizations handler', () => {
                   name: 'Username-Password-Login',
                   assign_membership_on_login: false,
                   show_as_button: false,
-                  is_signup_enabled: false
+                  is_signup_enabled: false,
                 },
               ],
             },

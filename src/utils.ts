@@ -222,7 +222,7 @@ export function nomalizedYAMLPath(filePath: string): string[] {
   let pathSplit = normalizedPath.split('/');
 
   // Remove empty components resulting from leading or redundant slashes
-  pathSplit = pathSplit.filter(component => component !== '');
+  pathSplit = pathSplit.filter((component) => component !== '');
 
   // Remove the first '.' if it's the first component
   if (pathSplit.length > 0 && pathSplit[0] === '.') {

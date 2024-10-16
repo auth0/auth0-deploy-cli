@@ -4,7 +4,7 @@ import constants from '../../../src/tools/constants';
 import { mockTheme } from './handlers/themes.tests';
 import { mockPagedData } from '../../utils';
 
-const mockConfigFn = () => { };
+const mockConfigFn = () => {};
 
 describe('#schema validation tests', () => {
   const client = {

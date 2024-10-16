@@ -90,9 +90,7 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
       this.client.attackProtection.updateSuspiciousIpThrottlingConfig(
         attackProtection.suspiciousIpThrottling
       ),
-      this.client.attackProtection.updateBruteForceConfig(
-        attackProtection.bruteForceProtection
-      )
+      this.client.attackProtection.updateBruteForceConfig(attackProtection.bruteForceProtection),
     ]);
 
     this.updated += 1;
