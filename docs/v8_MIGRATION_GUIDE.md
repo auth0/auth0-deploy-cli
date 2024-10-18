@@ -33,9 +33,9 @@ Node 18 LTS and newer LTS releases are supported.
 | resourceServers  | No change                     | Same as `7.x`                                 |
 | migrations       | removed support               | Not supported on auth0 `4.x`                  |
 | roles            | No change                     | Same as `7.x`                                 |
-| rules            | Read only                     | Will be deprecated soon, migrate to actions   |
-| rulesConfigs     | Read only                     | Will be deprecated soon, migrate to actions   |
-| hooks            | Read only                     | Will be deprecated soon, migrate to actions   |
+| rules            | No change                     | Will be deprecated soon, migrate to actions   |
+| rulesConfigs     | No change                     | Will be deprecated soon, migrate to actions   |
+| hooks            | No change                     | Will be deprecated soon, migrate to actions   |
 | tenant           | No change                     | Same as `7.x`                                 |
 | themes           | No change                     | Same as `7.x`                                 |
 | triggers         | No change                     | Same as `7.x`                                 |
