@@ -105,7 +105,6 @@ export type Assets = Partial<{
   } | null;
   hooks: Asset[] | null;
   logStreams: LogStream[] | null;
-  migrations: Asset[] | null;
   organizations: Asset[] | null;
   pages: Page[] | null;
   prompts: Prompts | null;
