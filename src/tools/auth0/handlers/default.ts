@@ -1,3 +1,4 @@
+import { JSONApiResponse } from 'auth0';
 import ValidationError from '../../validationError';
 
 import {
@@ -98,11 +99,19 @@ export default class APIHandler {
   }
 
   didCreate(item: Asset): void {
-    log.info(`Created [${this.type}]: ${this.objString(item)}`);
+    if (typeof item === 'object' && item instanceof JSONApiResponse) {
+      log.info(`Created [${this.type}]: ${this.objString(item?.data)}`);
+    } else {
+      log.info(`Created [${this.type}]: ${this.objString(item)}`);
+    }
   }
 
   didUpdate(item: Asset): void {
-    log.info(`Updated [${this.type}]: ${this.objString(item)}`);
+    if (typeof item === 'object' && item instanceof JSONApiResponse) {
+      log.info(`Updated [${this.type}]: ${this.objString(item?.data)}`);
+    } else {
+      log.info(`Updated [${this.type}]: ${this.objString(item)}`);
+    }
   }
 
   objString(item: Asset): string {

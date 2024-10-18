@@ -15,7 +15,7 @@ Node 18 LTS and newer LTS releases are supported.
 ## Management Resources
 
 | Resource         | Change                        | Description                                   |
-|------------------|-------------------------------|-----------------------------------------------|
+| ---------------- | ----------------------------- | --------------------------------------------- |
 | actions          | No change                     | Same as `7.x`                                 |
 | attackProtection | No change                     | Same as `7.x`                                 |
 | branding         | No change                     | Same as `7.x`                                 |
