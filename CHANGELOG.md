@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Auth0 [v4.X](https://github.com/auth0/node-auth0/releases/tag/v4.10.0) migration
+- The `delete` operation on the `emailProvider` resource will disable the email provider instead of deleting it.
+
+### Deprecated
+
+- Migration resource operation
+
+### Security
+
+- Security fixes from dependencies
+- Node 18 LTS and newer LTS releases are supported.
+
+Doc: [v8 Migartion](./docs/v8_MIGRATION_GUIDE.md)
+
 ## [7.24.3] - 2024-10-15
 
 ### Fixed
