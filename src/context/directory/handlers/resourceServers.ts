@@ -1,3 +1,4 @@
+import { ResourceServer } from 'auth0';
 import path from 'path';
 import fs from 'fs-extra';
 import { constants } from '../../../tools';
@@ -5,7 +6,6 @@ import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../.
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { ParsedAsset } from '../../../types';
-import { ResourceServer } from '../../../tools/auth0/handlers/resourceServers';
 
 type ParsedResourceServers = ParsedAsset<'resourceServers', ResourceServer[]>;
 

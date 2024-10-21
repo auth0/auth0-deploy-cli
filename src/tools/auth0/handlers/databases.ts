@@ -1,7 +1,9 @@
+import { Client, Connection, GetConnectionsStrategyEnum } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import constants from '../../constants';
 import { filterExcluded, getEnabledClients } from '../../utils';
 import { CalculatedChanges, Assets } from '../../../types';
+import { paginate } from '../client';
 import log from '../../../logger';
 
 export const schema = {
@@ -48,21 +50,20 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     // If we going to update database, we need to get current options first
     if (fn === 'update') {
       return (params, payload) =>
-        this.client.connections.get(params).then((connection) => {
+        this.client.connections.get(params).then((response) => {
+          const connection = response.data;
           const attributes = payload?.options?.attributes;
           const requiresUsername = payload?.options?.requires_username;
           const validation = payload?.options?.validation;
 
           if (attributes && (requiresUsername || validation)) {
-            log.warn('Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.');
-          }
-
-          else if (attributes) {
+            log.warn(
+              'Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.'
+            );
+          } else if (attributes) {
             delete connection.options.validation;
             delete connection.options.requires_username;
-          }
-
-          else if (requiresUsername || validation) {
+          } else if (requiresUsername || validation) {
             delete connection.options.attributes;
           }
 
@@ -76,11 +77,13 @@ export default class DatabaseHandler extends DefaultAPIHandler {
 
   async getType() {
     if (this.existing) return this.existing;
-    this.existing = this.client.connections.getAll({
-      strategy: 'auth0',
+
+    const connections = await paginate<Connection>(this.client.connections.getAll, {
+      strategy: [GetConnectionsStrategyEnum.auth0],
       paginate: true,
       include_totals: true,
     });
+    this.existing = connections;
 
     return this.existing;
   }
@@ -98,12 +101,20 @@ export default class DatabaseHandler extends DefaultAPIHandler {
       };
 
     // Convert enabled_clients by name to the id
-    const clients = await this.client.clients.getAll({ paginate: true, include_totals: true });
-    const existingDatabasesConnections = await this.client.connections.getAll({
-      strategy: 'auth0',
+
+    const clients = await paginate<Client>(this.client.clients.getAll, {
       paginate: true,
       include_totals: true,
     });
+
+    const existingDatabasesConnections = await paginate<Connection>(
+      this.client.connections.getAll,
+      {
+        strategy: [GetConnectionsStrategyEnum.auth0],
+        paginate: true,
+        include_totals: true,
+      }
+    );
     const formatted = databases.map((db) => {
       if (db.enabled_clients) {
         return {

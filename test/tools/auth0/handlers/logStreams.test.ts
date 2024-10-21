@@ -67,19 +67,19 @@ const mockLogStreams = [
     type: 'eventbridge',
     status: 'active',
     sink: {
-      awsRegion: "some region",
-      awsAccountId: "some id",
-      awsPartnerEventSource: "some source",
+      awsRegion: 'some region',
+      awsAccountId: 'some id',
+      awsPartnerEventSource: 'some source',
     },
   },
 ];
 
 const auth0ApiClientMock = {
   logStreams: {
-    getAll: async () => mockLogStreams,
-    create: async () => mockLogStreams,
-    update: async () => mockLogStreams,
-    delete: async () => mockLogStreams,
+    getAll: async () => ({ data: mockLogStreams }),
+    create: async () => ({ data: mockLogStreams }),
+    update: async () => ({ data: mockLogStreams }),
+    delete: async () => ({ data: mockLogStreams }),
   },
   pool: new PromisePoolExecutor({
     concurrencyLimit: 3,
@@ -160,9 +160,9 @@ describe('#logStreams handler', () => {
             type: 'eventbridge',
             status: 'active',
             sink: {
-              awsRegion: "some region",
-		          awsAccountId: "some id",
-              awsPartnerEventSource: "some source",
+              awsRegion: 'some region',
+              awsAccountId: 'some id',
+              awsPartnerEventSource: 'some source',
             },
           },
         ],
@@ -178,7 +178,7 @@ describe('#logStreams handler', () => {
           ...auth0ApiClientMock,
           logStreams: {
             ...auth0ApiClientMock.logStreams,
-            getAll: async () => [],
+            getAll: async () => ({ data: [] }),
           },
         },
         functions: {

@@ -1,6 +1,9 @@
+import pageClient from '../../../../src/tools/auth0/client';
+
 const { expect } = require('chai');
 const sinon = require('sinon');
 const databases = require('../../../../src/tools/auth0/handlers/databases');
+const { mockPagedData } = require('../../../utils');
 
 const pool = {
   addEachTask: (data) => {
@@ -58,19 +61,19 @@ describe('#databases handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someDatabase');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          update: () => Promise.resolve([]),
-          delete: () => Promise.resolve([]),
-          getAll: () => [],
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'connections', []),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ databases: [{ name: 'someDatabase' }] }]);
@@ -80,21 +83,23 @@ describe('#databases handler', () => {
       const clientId = 'rFeR6vyzQcDEgSUsASPeF4tXr3xbZhxE';
       const auth0 = {
         connections: {
-          getAll: function () {
+          getAll: function (params) {
             (() => expect(this).to.not.be.undefined)();
-            return [{ strategy: 'auth0', name: 'db', enabled_clients: [clientId] }];
+            return mockPagedData(params, 'connections', [
+              { strategy: 'auth0', name: 'db', enabled_clients: [clientId] },
+            ]);
           },
         },
         clients: {
-          getAll: function () {
+          getAll: function (params) {
             (() => expect(this).to.not.be.undefined)();
-            return [{ name: 'test client', client_id: clientId }];
+            return mockPagedData(params, 'clients', [{ name: 'test client', client_id: clientId }]);
           },
         },
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([{ strategy: 'auth0', name: 'db', enabled_clients: [clientId] }]);
     });
@@ -106,12 +111,12 @@ describe('#databases handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
-            return Promise.resolve({ options: { someOldOption: true } });
+            return Promise.resolve({ data: { options: { someOldOption: true } } });
           },
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
@@ -122,18 +127,24 @@ describe('#databases handler', () => {
               options: { passwordPolicy: 'testPolicy', someOldOption: true },
             });
 
-            return Promise.resolve({ ...params, ...data });
+            return Promise.resolve({ data: { ...params, ...data } });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => [{ name: 'someDatabase', id: 'con1', strategy: 'auth0' }],
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someDatabase', id: 'con1', strategy: 'auth0' },
+            ]),
         },
         clients: {
-          getAll: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
+            ]),
         },
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -155,12 +166,12 @@ describe('#databases handler', () => {
           get: (params) => {
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
-            return Promise.resolve({ options: { someOldOption: true } });
+            return Promise.resolve({ data: { options: { someOldOption: true } } });
           },
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
@@ -171,29 +182,31 @@ describe('#databases handler', () => {
               options: { passwordPolicy: 'testPolicy', someOldOption: true },
             });
 
-            return Promise.resolve({ ...params, ...data });
+            return Promise.resolve({ data: { ...params, ...data } });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => [
-            {
-              name: 'someDatabase',
-              id: 'con1',
-              strategy: 'auth0',
-              enabled_clients: ['excluded-one-id'],
-            },
-          ],
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              {
+                name: 'someDatabase',
+                id: 'con1',
+                strategy: 'auth0',
+                enabled_clients: ['excluded-one-id'],
+              },
+            ]),
         },
         clients: {
-          getAll: () => [
-            { name: 'client1', client_id: 'client1-id' },
-            { name: 'excluded-one', client_id: 'excluded-one-id' },
-            { name: 'excluded-two', client_id: 'excluded-two-id' },
-          ],
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              { name: 'client1', client_id: 'client1-id' },
+              { name: 'excluded-one', client_id: 'excluded-one-id' },
+              { name: 'excluded-two', client_id: 'excluded-two-id' },
+            ]),
         },
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -215,12 +228,12 @@ describe('#databases handler', () => {
           get: (params) => {
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
-            return Promise.resolve({});
+            return Promise.resolve({ data: {} });
           },
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
@@ -230,18 +243,24 @@ describe('#databases handler', () => {
               options: { passwordPolicy: 'testPolicy' },
             });
 
-            return Promise.resolve({ ...params, ...data });
+            return Promise.resolve({ data: { ...params, ...data } });
           },
           delete: () => Promise.resolve([]),
-          getAll: () => [{ name: 'someDatabase', id: 'con1', strategy: 'auth0' }],
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someDatabase', id: 'con1', strategy: 'auth0' },
+            ]),
         },
         clients: {
-          getAll: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
+            ]),
         },
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -261,7 +280,7 @@ describe('#databases handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someDatabase');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: () => Promise.resolve([]),
           delete: function (params) {
@@ -269,17 +288,20 @@ describe('#databases handler', () => {
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
 
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'auth0' }],
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con1', name: 'existingConnection', strategy: 'auth0' },
+            ]),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -295,24 +317,27 @@ describe('#databases handler', () => {
       let removed = false;
       const auth0 = {
         connections: {
-          create: () => Promise.resolve([]),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
+          update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             removed = true;
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'auth0' }],
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con1', name: 'existingConnection', strategy: 'auth0' },
+            ]),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ databases: [] }]);
@@ -328,17 +353,20 @@ describe('#databases handler', () => {
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'auth0' }],
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con1', name: 'existingConnection', strategy: 'auth0' },
+            ]),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -356,22 +384,25 @@ describe('#databases handler', () => {
       };
       const auth0 = {
         connections: {
-          create: () => Promise.resolve(),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: undefined }),
+          update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'auth0' }],
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con1', name: 'existingConnection', strategy: 'auth0' },
+            ]),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ databases: [] }]);
@@ -386,29 +417,30 @@ describe('#databases handler', () => {
         connections: {
           create: (params) => {
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
           update: (params) => {
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [
-            { id: 'con1', name: 'existing1', strategy: 'auth0' },
-            { id: 'con2', name: 'existing2', strategy: 'auth0' },
-          ],
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con1', name: 'existing1', strategy: 'auth0' },
+              { id: 'con2', name: 'existing2', strategy: 'auth0' },
+            ]),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
 
-      const handler = new databases.default({ client: auth0, config });
+      const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const assets = {
         exclude: {
@@ -439,34 +471,34 @@ describe('#databases handler', () => {
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
               attributes: {
-                'email': {
-                  'signup': {
-                    'status': 'required',
-                    'verification': {
-                      'active': false
-                    }
+                email: {
+                  signup: {
+                    status: 'required',
+                    verification: {
+                      active: false,
+                    },
                   },
-                  'identifier': {
-                    'active': true
+                  identifier: {
+                    active: true,
                   },
-                  'profile_required': true
+                  profile_required: true,
                 },
-                'username': {
-                  'signup': {
-                    'status': 'required'
+                username: {
+                  signup: {
+                    status: 'required',
                   },
-                  'identifier': {
-                    'active': true
+                  identifier: {
+                    active: true,
                   },
-                  'validation': {
-                    'max_length': 15,
-                    'min_length': 1,
-                    'allowed_types': {
-                      'email': false,
-                      'phone_number': false
-                    }
+                  validation: {
+                    max_length: 15,
+                    min_length: 1,
+                    allowed_types: {
+                      email: false,
+                      phone_number: false,
+                    },
                   },
-                  'profile_required': true
+                  profile_required: true,
                 },
               },
               options: { passwordPolicy: 'testPolicy', someOldOption: true },
@@ -491,36 +523,36 @@ describe('#databases handler', () => {
           strategy: 'auth0',
           options: { passwordPolicy: 'testPolicy' },
           attributes: {
-            'email': {
-              'signup': {
-                'status': 'required',
-                'verification': {
-                  'active': false
-                }
+            email: {
+              signup: {
+                status: 'required',
+                verification: {
+                  active: false,
+                },
               },
-              'identifier': {
-                'active': true
+              identifier: {
+                active: true,
               },
-              'profile_required': true
+              profile_required: true,
             },
-            'username': {
-              'signup': {
-                'status': 'required'
+            username: {
+              signup: {
+                status: 'required',
               },
-              'identifier': {
-                'active': true
+              identifier: {
+                active: true,
               },
-              'validation': {
-                'max_length': 15,
-                'min_length': 1,
-                'allowed_types': {
-                  'email': false,
-                  'phone_number': false
-                }
+              validation: {
+                max_length: 15,
+                min_length: 1,
+                allowed_types: {
+                  email: false,
+                  phone_number: false,
+                },
               },
-              'profile_required': true
+              profile_required: true,
             },
-          }
+          },
         },
       ];
 
@@ -546,10 +578,10 @@ describe('#databases handler', () => {
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
               validation: {
-                'username': {
-                  'max': 15,
-                  'min': 1
-                }
+                username: {
+                  max: 15,
+                  min: 1,
+                },
               },
               requires_username: true,
               options: { passwordPolicy: 'testPolicy', someOldOption: true },
@@ -574,10 +606,10 @@ describe('#databases handler', () => {
           strategy: 'auth0',
           options: { passwordPolicy: 'testPolicy' },
           validation: {
-            'username': {
-              'max': 15,
-              'min': 1
-            }
+            username: {
+              max: 15,
+              min: 1,
+            },
           },
           requires_username: true,
         },
@@ -593,26 +625,33 @@ describe('#databases handler', () => {
       });
       const logWarnSpy = sinon.spy(console, 'warn');
       const deleteStub = sinon.stub().resolves([]);
-      const getAllStub = sinon.stub().resolves([{
-        name: 'someDatabase', id: 'con1', strategy: 'auth0', validation: {
-          'username': {
-            'max': 15,
-            'min': 1
-          }
+      const getAllStub = sinon.stub().resolves([
+        {
+          name: 'someDatabase',
+          id: 'con1',
+          strategy: 'auth0',
+          validation: {
+            username: {
+              max: 15,
+              min: 1,
+            },
+          },
+          requires_username: true,
         },
-        requires_username: true
-      }]);
+      ]);
       const auth0 = {
         connections: {
           get: getStub,
           update: updateStub,
           delete: deleteStub,
-          getAll: getAllStub
+          getAll: getAllStub,
         },
         clients: {
-          getAll: sinon.stub().resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }])
+          getAll: sinon
+            .stub()
+            .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
         },
-        pool: pool
+        pool: pool,
       };
 
       const handler = new databases.default({ client: auth0, config });
@@ -625,7 +664,9 @@ describe('#databases handler', () => {
               const validation = payload?.options?.validation;
 
               if (attributes && (requiresUsername || validation)) {
-                console.warn('Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.');
+                console.warn(
+                  'Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.'
+                );
                 throw new Error('Cannot set both attributes and requires_username or validation');
               }
 
@@ -700,13 +741,19 @@ describe('#databases handler', () => {
         await stageFn.apply(handler, [{ databases: data }]);
       } catch (err) {
         expect(err).to.be.an('object');
-        expect(err.message).to.include('Cannot set both attributes and requires_username or validation');
+        expect(err.message).to.include(
+          'Cannot set both attributes and requires_username or validation'
+        );
       }
 
       // eslint-disable-next-line no-unused-expressions
       expect(logWarnSpy.calledOnce).to.be.true;
       // eslint-disable-next-line no-unused-expressions
-      expect(logWarnSpy.calledWith('Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.')).to.be.true;
+      expect(
+        logWarnSpy.calledWith(
+          'Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.'
+        )
+      ).to.be.true;
 
       sinon.assert.calledOnce(getStub);
       sinon.assert.notCalled(updateStub);
@@ -717,39 +764,47 @@ describe('#databases handler', () => {
     it('should update database with attributes and remove validation from the update request if validation is in the get response but attributes are in the update request', async () => {
       const getStub = sinon.stub().resolves({
         options: {
-          someOldOption: true, validation: {
-            'username': {
-              'max': 15,
-              'min': 1
-            }
-          }
-        }
+          someOldOption: true,
+          validation: {
+            username: {
+              max: 15,
+              min: 1,
+            },
+          },
+        },
       });
       const updateStub = sinon.stub().resolves({
         id: 'con1',
       });
       const deleteStub = sinon.stub().resolves([]);
-      const getAllStub = sinon.stub().resolves([{
-        name: 'someDatabase', id: 'con1', strategy: 'auth0', options: {
-          validation: {
-            'username': {
-              'max': 15,
-              'min': 1
-            }
-          }
-        }
-      }]);
+      const getAllStub = sinon.stub().resolves([
+        {
+          name: 'someDatabase',
+          id: 'con1',
+          strategy: 'auth0',
+          options: {
+            validation: {
+              username: {
+                max: 15,
+                min: 1,
+              },
+            },
+          },
+        },
+      ]);
       const auth0 = {
         connections: {
           get: getStub,
           update: updateStub,
           delete: deleteStub,
-          getAll: getAllStub
+          getAll: getAllStub,
         },
         clients: {
-          getAll: sinon.stub().resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }])
+          getAll: sinon
+            .stub()
+            .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
         },
-        pool: pool
+        pool: pool,
       };
 
       const handler = new databases.default({ client: auth0, config });
@@ -761,7 +816,9 @@ describe('#databases handler', () => {
               const requiresUsername = payload?.options?.requires_username;
               const validation = payload?.options?.validation;
               if (attributes && (requiresUsername || validation)) {
-                console.warn('Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.');
+                console.warn(
+                  'Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.'
+                );
                 throw new Error('Cannot set both attributes and requires_username or validation');
               }
 
@@ -842,45 +899,7 @@ describe('#databases handler', () => {
     it('should update database with validation & require username and remove attributes from the update request if attributes is in the get response but validation and require username are in the update request', async () => {
       const getStub = sinon.stub().resolves({
         options: {
-          someOldOption: true, attributes: {
-            email: {
-              signup: {
-                status: 'required',
-                verification: {
-                  active: false,
-                },
-              },
-              identifier: {
-                active: true,
-              },
-              profile_required: true,
-            },
-            username: {
-              signup: {
-                status: 'required',
-              },
-              identifier: {
-                active: true,
-              },
-              validation: {
-                max_length: 15,
-                min_length: 1,
-                allowed_types: {
-                  email: false,
-                  phone_number: false,
-                },
-              },
-              profile_required: true,
-            },
-          },
-        }
-      });
-      const updateStub = sinon.stub().resolves({
-        id: 'con1',
-      });
-      const deleteStub = sinon.stub().resolves([]);
-      const getAllStub = sinon.stub().resolves([{
-        name: 'someDatabase', id: 'con1', strategy: 'auth0', options: {
+          someOldOption: true,
           attributes: {
             email: {
               signup: {
@@ -912,19 +931,65 @@ describe('#databases handler', () => {
               profile_required: true,
             },
           },
-        }
-      }]);
+        },
+      });
+      const updateStub = sinon.stub().resolves({
+        id: 'con1',
+      });
+      const deleteStub = sinon.stub().resolves([]);
+      const getAllStub = sinon.stub().resolves([
+        {
+          name: 'someDatabase',
+          id: 'con1',
+          strategy: 'auth0',
+          options: {
+            attributes: {
+              email: {
+                signup: {
+                  status: 'required',
+                  verification: {
+                    active: false,
+                  },
+                },
+                identifier: {
+                  active: true,
+                },
+                profile_required: true,
+              },
+              username: {
+                signup: {
+                  status: 'required',
+                },
+                identifier: {
+                  active: true,
+                },
+                validation: {
+                  max_length: 15,
+                  min_length: 1,
+                  allowed_types: {
+                    email: false,
+                    phone_number: false,
+                  },
+                },
+                profile_required: true,
+              },
+            },
+          },
+        },
+      ]);
       const auth0 = {
         connections: {
           get: getStub,
           update: updateStub,
           delete: deleteStub,
-          getAll: getAllStub
+          getAll: getAllStub,
         },
         clients: {
-          getAll: sinon.stub().resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }])
+          getAll: sinon
+            .stub()
+            .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
         },
-        pool: pool
+        pool: pool,
       };
 
       const handler = new databases.default({ client: auth0, config });
@@ -937,7 +1002,9 @@ describe('#databases handler', () => {
               const validation = payload?.options?.validation;
 
               if (attributes && (requiresUsername || validation)) {
-                console.warn('Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.');
+                console.warn(
+                  'Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.'
+                );
                 throw new Error('Cannot set both attributes and requires_username or validation');
               }
 
@@ -969,10 +1036,620 @@ describe('#databases handler', () => {
           options: {
             passwordPolicy: 'testPolicy',
             validation: {
-              'username': {
-                'max': 15,
-                'min': 1
+              username: {
+                max: 15,
+                min: 1,
+              },
+            },
+            requires_username: true,
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ databases: data }]);
+
+      sinon.assert.calledOnce(getStub);
+      sinon.assert.calledOnce(updateStub);
+      const updateArgs = updateStub.firstCall.args[1];
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(updateArgs.options.attributes).to.not.exist;
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(updateArgs.options.validation).to.exist;
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(updateArgs.options.requires_username).to.exist;
+    });
+    it('should update database when attributes are passed', async () => {
+      const auth0 = {
+        connections: {
+          get: function (params) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(params).to.be.an('object');
+            expect(params.id).to.equal('con1');
+            return Promise.resolve({ options: { someOldOption: true } });
+          },
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('undefined');
+            return Promise.resolve(data);
+          },
+          update: function (params, data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(params).to.be.an('object');
+            expect(params.id).to.equal('con1');
+            expect(data).to.deep.equal({
+              attributes: {
+                email: {
+                  signup: {
+                    status: 'required',
+                    verification: {
+                      active: false,
+                    },
+                  },
+                  identifier: {
+                    active: true,
+                  },
+                  profile_required: true,
+                },
+                username: {
+                  signup: {
+                    status: 'required',
+                  },
+                  identifier: {
+                    active: true,
+                  },
+                  validation: {
+                    max_length: 15,
+                    min_length: 1,
+                    allowed_types: {
+                      email: false,
+                      phone_number: false,
+                    },
+                  },
+                  profile_required: true,
+                },
+              },
+              options: { passwordPolicy: 'testPolicy', someOldOption: true },
+            });
+
+            return Promise.resolve({ ...params, ...data });
+          },
+          delete: () => Promise.resolve([]),
+          getAll: () => [{ name: 'someDatabase', id: 'con1', strategy: 'auth0' }],
+        },
+        clients: {
+          getAll: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: auth0, config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          name: 'someDatabase',
+          strategy: 'auth0',
+          options: { passwordPolicy: 'testPolicy' },
+          attributes: {
+            email: {
+              signup: {
+                status: 'required',
+                verification: {
+                  active: false,
+                },
+              },
+              identifier: {
+                active: true,
+              },
+              profile_required: true,
+            },
+            username: {
+              signup: {
+                status: 'required',
+              },
+              identifier: {
+                active: true,
+              },
+              validation: {
+                max_length: 15,
+                min_length: 1,
+                allowed_types: {
+                  email: false,
+                  phone_number: false,
+                },
+              },
+              profile_required: true,
+            },
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ databases: data }]);
+    });
+    it('should update database when require username and validation are passed', async () => {
+      const auth0 = {
+        connections: {
+          get: function (params) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(params).to.be.an('object');
+            expect(params.id).to.equal('con1');
+            return Promise.resolve({ options: { someOldOption: true } });
+          },
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('undefined');
+            return Promise.resolve(data);
+          },
+          update: function (params, data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(params).to.be.an('object');
+            expect(params.id).to.equal('con1');
+            expect(data).to.deep.equal({
+              validation: {
+                username: {
+                  max: 15,
+                  min: 1,
+                },
+              },
+              requires_username: true,
+              options: { passwordPolicy: 'testPolicy', someOldOption: true },
+            });
+
+            return Promise.resolve({ ...params, ...data });
+          },
+          delete: () => Promise.resolve([]),
+          getAll: () => [{ name: 'someDatabase', id: 'con1', strategy: 'auth0' }],
+        },
+        clients: {
+          getAll: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: auth0, config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          name: 'someDatabase',
+          strategy: 'auth0',
+          options: { passwordPolicy: 'testPolicy' },
+          validation: {
+            username: {
+              max: 15,
+              min: 1,
+            },
+          },
+          requires_username: true,
+        },
+      ];
+
+      await stageFn.apply(handler, [{ databases: data }]);
+    });
+
+    it('should fail to update database when require username and validation and attributes are passed', async () => {
+      const getStub = sinon.stub().resolves({ options: { someOldOption: true } });
+      const updateStub = sinon.stub().resolves({
+        id: 'con1',
+      });
+      const logWarnSpy = sinon.spy(console, 'warn');
+      const deleteStub = sinon.stub().resolves([]);
+      const getAllStub = sinon.stub().resolves([
+        {
+          name: 'someDatabase',
+          id: 'con1',
+          strategy: 'auth0',
+          validation: {
+            username: {
+              max: 15,
+              min: 1,
+            },
+          },
+          requires_username: true,
+        },
+      ]);
+      const auth0 = {
+        connections: {
+          get: getStub,
+          update: updateStub,
+          delete: deleteStub,
+          getAll: getAllStub,
+        },
+        clients: {
+          getAll: sinon
+            .stub()
+            .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        pool: pool,
+      };
+
+      const handler = new databases.default({ client: auth0, config });
+      handler.getClientFN = function (fn) {
+        if (fn === 'update') {
+          return (params, payload) =>
+            this.client.connections.get(params).then((connection) => {
+              const attributes = payload?.options?.attributes;
+              const requiresUsername = payload?.options?.requires_username;
+              const validation = payload?.options?.validation;
+
+              if (attributes && (requiresUsername || validation)) {
+                console.warn(
+                  'Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.'
+                );
+                throw new Error('Cannot set both attributes and requires_username or validation');
               }
+
+              if (attributes) {
+                delete connection.options.validation;
+                delete connection.options.requires_username;
+              }
+
+              if (requiresUsername || validation) {
+                delete connection.options.attributes;
+              }
+
+              payload.options = { ...connection.options, ...payload.options };
+              return this.client.connections.update(params, payload);
+            });
+        }
+
+        return this.client.connections[fn].bind(this.client.connections);
+      };
+
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      const data = [
+        {
+          name: 'someDatabase',
+          strategy: 'auth0',
+          options: {
+            passwordPolicy: 'testPolicy',
+            attributes: {
+              email: {
+                signup: {
+                  status: 'required',
+                  verification: {
+                    active: false,
+                  },
+                },
+                identifier: {
+                  active: true,
+                },
+                profile_required: true,
+              },
+              username: {
+                signup: {
+                  status: 'required',
+                },
+                identifier: {
+                  active: true,
+                },
+                validation: {
+                  max_length: 15,
+                  min_length: 1,
+                  allowed_types: {
+                    email: false,
+                    phone_number: false,
+                  },
+                },
+                profile_required: true,
+              },
+            },
+            validation: {
+              username: {
+                max: 15,
+                min: 1,
+              },
+            },
+            requires_username: true,
+          },
+        },
+      ];
+
+      try {
+        await stageFn.apply(handler, [{ databases: data }]);
+      } catch (err) {
+        expect(err).to.be.an('object');
+        expect(err.message).to.include(
+          'Cannot set both attributes and requires_username or validation'
+        );
+      }
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(logWarnSpy.calledOnce).to.be.true;
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        logWarnSpy.calledWith(
+          'Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.'
+        )
+      ).to.be.true;
+
+      sinon.assert.calledOnce(getStub);
+      sinon.assert.notCalled(updateStub);
+
+      logWarnSpy.restore();
+    });
+
+    it('should update database with attributes and remove validation from the update request if validation is in the get response but attributes are in the update request', async () => {
+      const getStub = sinon.stub().resolves({
+        options: {
+          someOldOption: true,
+          validation: {
+            username: {
+              max: 15,
+              min: 1,
+            },
+          },
+        },
+      });
+      const updateStub = sinon.stub().resolves({
+        id: 'con1',
+      });
+      const deleteStub = sinon.stub().resolves([]);
+      const getAllStub = sinon.stub().resolves([
+        {
+          name: 'someDatabase',
+          id: 'con1',
+          strategy: 'auth0',
+          options: {
+            validation: {
+              username: {
+                max: 15,
+                min: 1,
+              },
+            },
+          },
+        },
+      ]);
+      const auth0 = {
+        connections: {
+          get: getStub,
+          update: updateStub,
+          delete: deleteStub,
+          getAll: getAllStub,
+        },
+        clients: {
+          getAll: sinon
+            .stub()
+            .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        pool: pool,
+      };
+
+      const handler = new databases.default({ client: auth0, config });
+      handler.getClientFN = function (fn) {
+        if (fn === 'update') {
+          return (params, payload) =>
+            this.client.connections.get(params).then((connection) => {
+              const attributes = payload?.options?.attributes;
+              const requiresUsername = payload?.options?.requires_username;
+              const validation = payload?.options?.validation;
+              if (attributes && (requiresUsername || validation)) {
+                console.warn(
+                  'Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.'
+                );
+                throw new Error('Cannot set both attributes and requires_username or validation');
+              }
+
+              if (attributes) {
+                console.info('Info: "Removed Validation from Connection Payload"');
+                delete connection.options.validation;
+                delete connection.options.requires_username;
+              }
+
+              if (requiresUsername || validation) {
+                console.info('Info: "Removed Attributes from Connection Payload"');
+                delete connection.options.attributes;
+              }
+
+              payload.options = { ...connection.options, ...payload.options };
+              return this.client.connections.update(params, payload);
+            });
+        }
+
+        return this.client.connections[fn].bind(this.client.connections);
+      };
+
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      const data = [
+        {
+          name: 'someDatabase',
+          strategy: 'auth0',
+          options: {
+            passwordPolicy: 'testPolicy',
+            attributes: {
+              email: {
+                signup: {
+                  status: 'required',
+                  verification: {
+                    active: false,
+                  },
+                },
+                identifier: {
+                  active: true,
+                },
+                profile_required: true,
+              },
+              username: {
+                signup: {
+                  status: 'required',
+                },
+                identifier: {
+                  active: true,
+                },
+                validation: {
+                  max_length: 15,
+                  min_length: 1,
+                  allowed_types: {
+                    email: false,
+                    phone_number: false,
+                  },
+                },
+                profile_required: true,
+              },
+            },
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ databases: data }]);
+
+      sinon.assert.calledOnce(getStub);
+      sinon.assert.calledOnce(updateStub);
+      const updateArgs = updateStub.firstCall.args[1];
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(updateArgs.options.attributes).to.exist;
+      // eslint-disable-next-line no-unused-expressions
+      expect(updateArgs.options.validation).to.not.exist;
+    });
+
+    it('should update database with validation & require username and remove attributes from the update request if attributes is in the get response but validation and require username are in the update request', async () => {
+      const getStub = sinon.stub().resolves({
+        options: {
+          someOldOption: true,
+          attributes: {
+            email: {
+              signup: {
+                status: 'required',
+                verification: {
+                  active: false,
+                },
+              },
+              identifier: {
+                active: true,
+              },
+              profile_required: true,
+            },
+            username: {
+              signup: {
+                status: 'required',
+              },
+              identifier: {
+                active: true,
+              },
+              validation: {
+                max_length: 15,
+                min_length: 1,
+                allowed_types: {
+                  email: false,
+                  phone_number: false,
+                },
+              },
+              profile_required: true,
+            },
+          },
+        },
+      });
+      const updateStub = sinon.stub().resolves({
+        id: 'con1',
+      });
+      const deleteStub = sinon.stub().resolves([]);
+      const getAllStub = sinon.stub().resolves([
+        {
+          name: 'someDatabase',
+          id: 'con1',
+          strategy: 'auth0',
+          options: {
+            attributes: {
+              email: {
+                signup: {
+                  status: 'required',
+                  verification: {
+                    active: false,
+                  },
+                },
+                identifier: {
+                  active: true,
+                },
+                profile_required: true,
+              },
+              username: {
+                signup: {
+                  status: 'required',
+                },
+                identifier: {
+                  active: true,
+                },
+                validation: {
+                  max_length: 15,
+                  min_length: 1,
+                  allowed_types: {
+                    email: false,
+                    phone_number: false,
+                  },
+                },
+                profile_required: true,
+              },
+            },
+          },
+        },
+      ]);
+      const auth0 = {
+        connections: {
+          get: getStub,
+          update: updateStub,
+          delete: deleteStub,
+          getAll: getAllStub,
+        },
+        clients: {
+          getAll: sinon
+            .stub()
+            .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        pool: pool,
+      };
+
+      const handler = new databases.default({ client: auth0, config });
+      handler.getClientFN = function (fn) {
+        if (fn === 'update') {
+          return (params, payload) =>
+            this.client.connections.get(params).then((connection) => {
+              const attributes = payload?.options?.attributes;
+              const requiresUsername = payload?.options?.requires_username;
+              const validation = payload?.options?.validation;
+
+              if (attributes && (requiresUsername || validation)) {
+                console.warn(
+                  'Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.'
+                );
+                throw new Error('Cannot set both attributes and requires_username or validation');
+              }
+
+              if (attributes) {
+                console.info('Info: "Removed Validation from Connection Payload"');
+                delete connection.options.validation;
+                delete connection.options.requires_username;
+              }
+
+              if (requiresUsername || validation) {
+                console.info('Info: "Removed Attributes from Connection Payload"');
+                delete connection.options.attributes;
+              }
+
+              payload.options = { ...connection.options, ...payload.options };
+              return this.client.connections.update(params, payload);
+            });
+        }
+
+        return this.client.connections[fn].bind(this.client.connections);
+      };
+
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      const data = [
+        {
+          name: 'someDatabase',
+          strategy: 'auth0',
+          options: {
+            passwordPolicy: 'testPolicy',
+            validation: {
+              username: {
+                max: 15,
+                min: 1,
+              },
             },
             requires_username: true,
           },

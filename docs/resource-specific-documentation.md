@@ -57,12 +57,12 @@ Folder structure when in YAML mode.
 
 ./databases/
     /Username-Password-Authentication
-        /change_password.js   
-        /create.js   
-        /delete.js   
-        /get_user.js   
-        /login.js   
-        /verify.js   
+        /change_password.js
+        /create.js
+        /delete.js
+        /get_user.js
+        /login.js
+        /verify.js
 ./tenant.yaml
 ```
 
@@ -98,8 +98,8 @@ Folder structure when in directory mode.
         ./verify.js
 ```
 
-
 Contents of `database.json`
+
 ```json
 {
   "options": {
@@ -169,8 +169,8 @@ Folder structure when in directory mode.
     ./password_reset.json
 ```
 
-
 Contents of `login.json`
+
 ```json
 {
   "name": "login",
@@ -180,6 +180,7 @@ Contents of `login.json`
 ```
 
 Contents of `error_page.json`
+
 ```json
 {
   "html": "./error_page.html",
@@ -190,6 +191,7 @@ Contents of `error_page.json`
 ```
 
 Contents of `guardian_multifactor.json`
+
 ```json
 {
   "enabled": true,
@@ -199,6 +201,7 @@ Contents of `guardian_multifactor.json`
 ```
 
 Contents of `password_reset.json`
+
 ```json
 {
   "enabled": true,

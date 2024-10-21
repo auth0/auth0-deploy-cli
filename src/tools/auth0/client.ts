@@ -1,6 +1,7 @@
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import _ from 'lodash';
 
+import { JSONApiResponse, ManagementClient } from 'auth0';
 import { flatten } from '../utils';
 import {
   Asset,
@@ -8,7 +9,6 @@ import {
   Auth0APIClient,
   CheckpointPaginationParams,
   PagePaginationParams,
-  BaseAuth0APIClient,
 } from '../../types';
 
 const API_CONCURRENCY = 3;
@@ -92,15 +92,15 @@ function pagePaginator(
     delete newArgs[0].paginate;
 
     // Run the first request to get the total number of entity items
-    const rsp = await client.pool
+    const rsp: JSONApiResponse<ApiResponse> = await client.pool
       .addSingleTask({
         data: _.cloneDeep(newArgs),
         generator: (pageArgs) => target[name](...pageArgs),
       })
       .promise();
 
-    data.push(...getEntity(rsp));
-    const total = rsp.total || 0;
+    data.push(...getEntity(rsp.data));
+    const total = rsp.data?.total || 0;
     const pagesLeft = Math.ceil(total / perPage) - 1;
     // Setup pool to get the rest of the pages
     if (pagesLeft > 0) {
@@ -111,7 +111,7 @@ function pagePaginator(
             const pageArgs = _.cloneDeep(newArgs);
             pageArgs[0].page = page + 1;
 
-            return target[name](...pageArgs).then((r) => getEntity(r));
+            return target[name](...pageArgs).then((r) => getEntity(r.data));
           },
         })
         .promise();
@@ -159,7 +159,7 @@ function pagedManager(client: Auth0APIClient, manager: Auth0APIClient) {
 }
 
 // Warp around the ManagementClient and detect when requesting specific pages to return all
-export default function pagedClient(client: BaseAuth0APIClient): Auth0APIClient {
+export default function pagedClient(client: ManagementClient): Auth0APIClient {
   const clientWithPooling: Auth0APIClient = {
     ...client,
     pool: new PromisePoolExecutor({
@@ -167,7 +167,17 @@ export default function pagedClient(client: BaseAuth0APIClient): Auth0APIClient 
       frequencyLimit: API_FREQUENCY_PER_SECOND,
       frequencyWindow: 1000, // 1 sec
     }),
-  };
+  } as Auth0APIClient;
 
   return pagedManager(clientWithPooling, clientWithPooling);
+}
+
+// eslint-disable-next-line no-unused-vars
+export async function paginate<T>(
+  fetchFunc: (...paginateArgs: any) => any,
+  args: PagePaginationParams
+): Promise<T[]> {
+  // override default <T>.getAll() behaviour using pagedClient
+  const allItems = (await fetchFunc(args)) as unknown as T[];
+  return allItems;
 }

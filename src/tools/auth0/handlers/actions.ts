@@ -1,8 +1,10 @@
 import _ from 'lodash';
+import { GetActions200ResponseActionsInner, PostActionRequest } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import log from '../../../logger';
 import { areArraysEquals, sleep } from '../../utils';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
+import { paginate } from '../client';
 
 const MAX_ACTION_DEPLOY_RETRY_ATTEMPTS = 60; // 60 * 2s => 2 min timeout
 
@@ -28,6 +30,10 @@ export type Action = {
   all_changes_deployed?: boolean;
   installed_integration_id?: string;
   integration?: Object;
+};
+
+type PostActionRequestWithId = PostActionRequest & {
+  id: string;
 };
 
 // With this schema, we can only validate property types but not valid properties on per type basis
@@ -92,29 +98,36 @@ export function isMarketplaceAction(action: Action): boolean {
 }
 
 export default class ActionHandler extends DefaultAPIHandler {
-  existing: Action[] | null;
+  existing: GetActions200ResponseActionsInner[] | null;
 
   constructor(options: DefaultAPIHandler) {
     super({
       ...options,
       type: 'actions',
       functions: {
-        create: (action: Action) => this.createAction(action),
+        create: (action: PostActionRequestWithId) => this.createAction(action),
         delete: (action: Action) => this.deleteAction(action),
       },
       stripUpdateFields: ['deployed', 'status'],
     });
   }
 
-  async createAction(action: Action) {
+  async createAction(action: PostActionRequestWithId) {
     // Strip the deployed flag
     const addAction = { ...action };
-    delete addAction.deployed;
-    delete addAction.status;
-    const createdAction = await this.client.actions.create(addAction);
+
+    if ('deployed' in addAction) {
+      delete addAction.deployed;
+    }
+    if ('status' in addAction) {
+      delete addAction.status;
+    }
+
+    const { data: createdAction } = await this.client.actions.create(addAction);
 
     // Add the action id so we can deploy it later
     action.id = createdAction.id;
+
     return createdAction;
   }
 
@@ -202,7 +215,13 @@ export default class ActionHandler extends DefaultAPIHandler {
     // Actions API does not support include_totals param like the other paginate API's.
     // So we set it to false otherwise it will fail with "Additional properties not allowed: include_totals"
     try {
-      const actions = await this.client.actions.getAll({ paginate: true });
+      const actions = await paginate<GetActions200ResponseActionsInner>(
+        this.client.actions.getAll,
+        {
+          paginate: true,
+        }
+      );
+
       this.existing = actions;
       return actions;
     } catch (err) {
@@ -233,20 +252,17 @@ export default class ActionHandler extends DefaultAPIHandler {
     if (!actions) return;
     const changes = await this.calcChanges(assets);
 
-    //Management of marketplace actions not currently supported, see ESD-23225.
-    const changesWithMarketplaceActionsFiltered: CalculatedChanges = (() => {
-      return {
-        ...changes,
-        del: changes.del.filter((action: Action) => !isMarketplaceAction(action)),
-      };
-    })();
+    // Management of marketplace actions not currently supported, see ESD-23225.
+    const changesWithMarketplaceActionsFiltered: CalculatedChanges = (() => ({
+      ...changes,
+      del: changes.del.filter((action: Action) => !isMarketplaceAction(action)),
+    }))();
 
     await super.processChanges(assets, changesWithMarketplaceActionsFiltered);
 
     const postProcessedActions = await (async () => {
-      this.existing = null; //Clear the cache
-      const actions = await this.getType();
-      return actions;
+      this.existing = null; // Clear the cache
+      return this.getType();
     })();
 
     // Deploy actions
@@ -255,9 +271,9 @@ export default class ActionHandler extends DefaultAPIHandler {
         .filter((action) => action.deployed)
         .map((actionWithoutId) => {
           // Add IDs to just-created actions
-          const actionId = postProcessedActions?.find((postProcessedAction) => {
-            return postProcessedAction.name === actionWithoutId.name;
-          })?.id;
+          const actionId = postProcessedActions?.find(
+            (postProcessedAction) => postProcessedAction.name === actionWithoutId.name
+          )?.id;
 
           const actionWithId = {
             ...actionWithoutId,

@@ -5,10 +5,7 @@ import sinon from 'sinon';
 import promptsHandler, { Prompts } from '../../../../src/tools/auth0/handlers/prompts';
 import { Language } from '../../../../src/types';
 import log from '../../../../src/logger';
-import {
-  CustomPartialsPromptTypes,
-  CustomPromptPartialsScreens,
-} from '../../../../lib/tools/auth0/handlers/prompts';
+import { CustomPartialsPromptTypes } from '../../../../lib/tools/auth0/handlers/prompts';
 
 const mockPromptsSettings = {
   universal_login_experience: 'classic',
@@ -65,14 +62,16 @@ describe('#prompts handler', () => {
         },
       };
       const auth0 = {
-        tenant: {
+        tenants: {
           getSettings: () =>
             Promise.resolve({
-              enabled_locales: supportedLanguages,
+              data: {
+                enabled_locales: supportedLanguages,
+              },
             }),
         },
         prompts: {
-          getSettings: () => mockPromptsSettings,
+          get: () => ({ data: mockPromptsSettings }),
           getCustomTextByLanguage: ({ language, prompt }) => {
             const customTextLanguageMap = {
               en: englishCustomText,
@@ -82,13 +81,10 @@ describe('#prompts handler', () => {
             const customTextValue = customTextLanguageMap[language][prompt];
 
             if (customTextValue === undefined || _.isEmpty(customTextValue))
-              return Promise.resolve({});
+              return Promise.resolve({ data: {} });
 
-            return Promise.resolve(customTextValue);
+            return Promise.resolve({ data: customTextValue });
           },
-          _getRestClient: (endpoint) => ({
-            get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-          }),
         },
         pool: new PromisePoolExecutor({
           concurrencyLimit: 3,
@@ -102,13 +98,13 @@ describe('#prompts handler', () => {
       });
 
       const getCustomPartial = sinon.stub(handler, 'getCustomPartial');
-      getCustomPartial.withArgs({ prompt: 'login' }).resolves(loginPartial);
+      getCustomPartial.withArgs({ prompt: 'login' }).resolves({ data: loginPartial });
       getCustomPartial.withArgs({ prompt: 'login-id' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'login-password' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'login-passwordless' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup-password' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup-id' }).resolves({});
-      getCustomPartial.withArgs({ prompt: 'signup' }).resolves(signupPartial);
+      getCustomPartial.withArgs({ prompt: 'signup' }).resolves({ data: signupPartial });
 
       const data = await handler.getType();
       expect(data).to.deep.equal({
@@ -140,7 +136,7 @@ describe('#prompts handler', () => {
       let didCallUpdatePartials = false;
 
       const auth0 = {
-        tenant: {
+        tenants: {
           getSettings: () => ({
             enabled_locales: ['en'],
           }),
@@ -149,10 +145,10 @@ describe('#prompts handler', () => {
           updateCustomTextByLanguage: () => {
             didCallUpdateCustomText = true;
           },
-          updateSettings: (_params, data) => {
+          update: (data) => {
             didCallUpdatePromptsSettings = true;
             expect(data).to.deep.equal(mockPromptsSettings);
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           _getRestClient: (endpoint) => ({
             get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
@@ -226,12 +222,12 @@ describe('#prompts handler', () => {
           updateCustomTextByLanguage: () => {
             didCallUpdateCustomText = true;
             numberOfUpdateCustomTextCalls++;
-            return Promise.resolve({});
+            return Promise.resolve({ data: {} });
           },
-          updateSettings: (_params, data) => {
+          update: (data) => {
             didCallUpdatePromptsSettings = true;
             expect(data).to.deep.equal(mockPromptsSettings);
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           _getRestClient: (endpoint) => ({
             get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
@@ -270,13 +266,16 @@ describe('#prompts handler', () => {
 
     it('should not fail if tenant languages or partials are undefined', async () => {
       const auth0 = {
-        tenant: {
+        tenants: {
           getSettings: () =>
             Promise.resolve({
-              enabled_locales: undefined,
+              data: {
+                enabled_locales: undefined,
+              },
             }),
         },
         prompts: {
+          get: () => ({ data: mockPromptsSettings }),
           getSettings: () => mockPromptsSettings,
           _getRestClient: (endpoint) => ({
             get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
@@ -402,79 +401,6 @@ describe('#prompts handler', () => {
       }
     });
 
-    it('should handle errors correctly in partialHttpRequest with Get Method', async () => {
-      const method = 'get';
-      const options = [{ prompt: 'test-prompt' }];
-      const error = new Error('Request failed');
-      sandbox.stub(handler.promptClient, method).rejects(error);
-
-      try {
-        await handler.partialHttpRequest(method, options);
-        throw new Error('Expected method to throw.');
-      } catch (err) {
-        expect(err).to.equal(error);
-      }
-    });
-
-    it('should handle errors correctly in partialHttpRequest with Put Method', async () => {
-      const method = 'put';
-      const options = [{ prompt: 'test-prompt' }, { key: 'value' }];
-      const error = new Error('Request failed');
-      sandbox.stub(handler.promptClient, 'invoke').rejects(error);
-
-      try {
-        await handler.partialHttpRequest(method, options);
-        throw new Error('Expected method to throw.');
-      } catch (err) {
-        expect(err).to.equal(error);
-      }
-    });
-
-    it('should make an HTTP request with the correct headers with Get Method', async () => {
-      const method = 'get';
-      const options = [{ prompt: 'test-prompt' }];
-      const mockResponse = { data: 'response' };
-      sandbox.stub(handler.promptClient, method).resolves(mockResponse);
-
-      const result = await handler.partialHttpRequest(method, options);
-      expect(result).to.deep.equal(mockResponse);
-    });
-
-    it('should make an HTTP request with the correct headers with Put Method', async () => {
-      const method = 'put';
-      const options = [{ prompt: 'test-prompt' }, { key: 'value' }];
-      const mockResponse = { data: 'response' };
-      sandbox.stub(handler.promptClient, 'invoke').resolves(mockResponse);
-
-      const result = await handler.partialHttpRequest(method, options);
-      expect(result).to.deep.equal(mockResponse);
-    });
-
-    it('should not make a request if the feature is not supported', async () => {
-      handler.IsFeatureSupported = false;
-      const putStub = sandbox.stub(handler, 'partialHttpRequest');
-
-      await handler.updateCustomPartials({
-        prompt: 'login',
-        body: {} as CustomPromptPartialsScreens,
-      });
-
-      expect(putStub.called).to.be.false;
-    });
-
-    it('should make a request if the feature is supported', async () => {
-      handler.IsFeatureSupported = true;
-      const body = { key: 'value' };
-      const putStub = sandbox.stub(handler, 'partialHttpRequest').resolves();
-
-      await handler.updateCustomPartials({ prompt: 'login', body });
-
-      expect(putStub.calledOnce).to.be.true;
-      const { args } = putStub.getCall(0);
-      expect(args[0]).to.equal('put');
-      expect(args[1]).to.deep.equal([{ prompt: 'login' }, body]);
-    });
-
     it('should return empty object if feature is not supported', async () => {
       handler.IsFeatureSupported = false;
 
@@ -482,34 +408,6 @@ describe('#prompts handler', () => {
         prompt: 'login' as CustomPartialsPromptTypes,
       });
       expect(result).to.deep.equal({});
-    });
-
-    it('should return custom partial data if feature is supported', async () => {
-      handler.IsFeatureSupported = true;
-
-      const mockResponse = {
-        'form-content-end': '<div>TEST</div>',
-      };
-      sandbox.stub(handler, 'partialHttpRequest').resolves(mockResponse);
-
-      const result = await handler.getCustomPartial({ prompt: 'login' });
-
-      expect(result).to.deep.equal(mockResponse);
-      expect(handler.partialHttpRequest.calledOnceWith('get', [{ prompt: 'login' }])).to.be.true;
-    });
-
-    it('should handle errors correctly', async () => {
-      handler.IsFeatureSupported = true;
-
-      const error = new Error('Request failed');
-      sandbox.stub(handler, 'partialHttpRequest').rejects(error);
-
-      try {
-        await handler.getCustomPartial({ prompt: 'login' as CustomPartialsPromptTypes });
-        throw new Error('Expected method to throw.');
-      } catch (err) {
-        expect(err).to.equal(error);
-      }
     });
   });
 });

@@ -7,6 +7,10 @@ import { load as yamlLoad } from 'js-yaml';
 import { setupRecording, testNameToWorkingDirectory } from './e2e-utils';
 import { dump, deploy } from '../../src';
 import { AssetTypes } from '../../src/types';
+import fetch from 'node-fetch';
+
+// Use node.http for recording library
+global.fetch = fetch;
 
 const shouldUseRecordings = process.env['AUTH0_HTTP_RECORDINGS'] === 'lockdown';
 const AUTH0_DOMAIN = shouldUseRecordings
@@ -36,7 +40,7 @@ describe('#end-to-end dump', function () {
     const files = getFiles(workDirectory, ['.yaml']);
     expect(files).to.have.length(1);
     expect(files[0]).to.equal(path.join(workDirectory, 'tenant.yaml'));
-    ['emailTemplates', 'hooks', 'pages', 'rules'].forEach((dirName) => {
+    ['emailTemplates', 'pages'].forEach((dirName) => {
       const directory = path.join(workDirectory, dirName);
       expect(existsMustBeDir(directory)).to.equal(true);
       expect(getFiles(directory, ['.yaml'])).to.have.length(0);
@@ -201,8 +205,7 @@ describe('#end-to-end deploy', function () {
 
     const yaml = yamlLoad(fs.readFileSync(files[0]));
 
-    expect(yaml.rules).to.have.length(0);
-    expect(yaml.clients).to.have.length(2); // Accounting for Deploy CLI and Default App client
+    expect(yaml.clients).to.have.length(2); //Accounting for Deploy CLI and Default App client
     expect(yaml.databases).to.have.length(1); // Default user database
     expect(yaml.connections).to.have.length(0);
     expect(yaml.roles).to.have.length(0);

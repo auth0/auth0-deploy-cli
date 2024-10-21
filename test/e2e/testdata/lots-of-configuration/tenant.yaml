@@ -660,7 +660,6 @@ prompts:
   partials: {}
   universal_login_experience: new
   identifier_first: true
-migrations: {}
 actions:
   - name: My Custom Action
     code: ./actions/My Custom Action/code.js

@@ -79,7 +79,7 @@ describe('#guardianPhoneFactorMessageTypes handler', () => {
     it('should get guardian phone factor message types', async () => {
       const auth0 = {
         guardian: {
-          getPhoneFactorMessageTypes: () => ({ message_types: ['sms', 'voice'] }),
+          getPhoneFactorMessageTypes: () => ({ data: { message_types: ['sms', 'voice'] } }),
         },
       };
 
@@ -112,9 +112,9 @@ describe('#guardianPhoneFactorMessageTypes handler', () => {
     it('should update guardian phone factor message types', async () => {
       const auth0 = {
         guardian: {
-          updatePhoneFactorMessageTypes: (params, data) => {
+          updatePhoneFactorMessageTypes: (data) => {
             expect(data).to.eql({ message_types: ['sms', 'voice'] });
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
         },
       };

@@ -29,9 +29,9 @@ export default class EmailTemplateHandler extends DefaultHandler {
 
   async getType(): Promise<Asset> {
     const emailTemplates = await Promise.all(
-      constants.EMAIL_TEMPLATES_TYPES.map(async (name) => {
+      constants.EMAIL_TEMPLATES_TYPES.map(async (templateName) => {
         try {
-          const template = await this.client.emailTemplates.get({ name });
+          const { data: template } = await this.client.emailTemplates.get({ templateName });
           return template;
         } catch (err) {
           // Ignore if not found, else throw error
@@ -51,17 +51,19 @@ export default class EmailTemplateHandler extends DefaultHandler {
     try {
       const identifierField = this.identifiers[0];
 
-      const params = { name: emailTemplate[identifierField] };
-      const updated = await this.client.emailTemplates.update(params, emailTemplate);
-      delete updated.body;
-      this.didUpdate(updated);
+      const params = { templateName: emailTemplate[identifierField] };
+      const { data: updated } = await this.client.emailTemplates.update(params, emailTemplate);
+      // Remove body from the response
+      const { body, ...excludedBody } = updated;
+      this.didUpdate(excludedBody);
       this.updated += 1;
     } catch (err) {
       if (err.statusCode === 404) {
         // Create if it does not exist
-        const created = await this.client.emailTemplates.create(emailTemplate);
-        delete created.body;
-        this.didCreate(created);
+        const { data: created } = await this.client.emailTemplates.create(emailTemplate);
+        // Remove body from the response
+        const { body, ...excludedBody } = created;
+        this.didCreate(excludedBody);
         this.created += 1;
       } else {
         throw err;

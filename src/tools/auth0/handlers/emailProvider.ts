@@ -1,3 +1,5 @@
+import { EmailProviderCreate } from 'auth0';
+import { isEmpty } from 'lodash';
 import DefaultHandler from './default';
 import { Asset, Assets } from '../../../types';
 
@@ -16,7 +18,11 @@ export default class EmailProviderHandler extends DefaultHandler {
 
   async getType(): Promise<Asset> {
     try {
-      return await this.client.emailProvider.get({ include_fields: true, fields: defaultFields });
+      const { data } = await this.client.emails.get({
+        include_fields: true,
+        fields: defaultFields.join(','),
+      });
+      return data;
     } catch (err) {
       if (err.statusCode === 404) return {};
       throw err;
@@ -32,12 +38,19 @@ export default class EmailProviderHandler extends DefaultHandler {
 
     if (!emailProvider) return;
 
-    let existing = await this.getType();
+    const existing = await this.getType();
 
+    // HTTP DELETE on emails/provider is not public, so not part of our vNext SDK.
     if (Object.keys(emailProvider).length === 0) {
       if (this.config('AUTH0_ALLOW_DELETE') === true) {
-        await this.client.emailProvider.delete();
-        this.didDelete(existing);
+        // await this.client.emails.delete();
+        existing.enabled = false;
+        if (isEmpty(existing.credentials)) {
+          delete existing.credentials;
+        }
+        const updated = await this.client.emails.update(existing);
+        this.updated += 1;
+        this.didUpdate(updated);
       }
       return;
     }
@@ -45,20 +58,17 @@ export default class EmailProviderHandler extends DefaultHandler {
     if (existing.name) {
       if (existing.name !== emailProvider.name) {
         // Delete the current provider as it's different
-        await this.client.emailProvider.delete();
-        this.didDelete(existing);
-        existing = {};
+        // await this.client.emailProvider.delete();
+        existing.enabled = false;
       }
     }
 
     if (existing.name) {
-      const provider = { name: emailProvider.name, enabled: emailProvider.enabled };
-      const updated = await this.client.emailProvider.update(provider, emailProvider);
+      const updated = await this.client.emails.update(emailProvider);
       this.updated += 1;
       this.didUpdate(updated);
     } else {
-      const provider = { name: emailProvider.name, enabled: emailProvider.enabled };
-      const created = await this.client.emailProvider.configure(provider, emailProvider);
+      const created = await this.client.emails.configure(emailProvider as EmailProviderCreate);
       this.created += 1;
       this.didCreate(created);
     }

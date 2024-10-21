@@ -5,7 +5,7 @@ import { constants } from '../../../src/tools';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/clientGrants';
-import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient } from '../../utils';
+import { cleanThenMkdir, testDataDir, createDir, mockMgmtClient, mockPagedData } from '../../utils';
 import { getFiles, loadJSON } from '../../../src/utils';
 
 describe('#directory context clientGrants', () => {
@@ -124,8 +124,8 @@ describe('#directory context clientGrants', () => {
       {
         ...mockMgmtClient(),
         clients: {
-          getAll: () => [
-            [
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
               {
                 client_id: 'client-id-1',
                 name: 'Primary M2M',
@@ -134,12 +134,11 @@ describe('#directory context clientGrants', () => {
                 client_id: 'client-id-2',
                 name: 'Secondary M2M',
               },
-            ],
-          ],
+            ]),
         },
         resourceServers: {
-          getAll: () => [
-            [
+          getAll: (params) =>
+            mockPagedData(params, 'resource_servers', [
               {
                 id: 'resource-server-1',
                 name: 'Payments Service',
@@ -150,8 +149,7 @@ describe('#directory context clientGrants', () => {
                 name: 'Auth0 Management API',
                 identifier: 'https://travel0.us.auth0.com/api/v2',
               },
-            ],
-          ],
+            ]),
         },
       }
     );

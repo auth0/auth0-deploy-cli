@@ -77,7 +77,7 @@ describe('#directory context organizations', () => {
             assign_membership_on_login: true,
             show_as_button: true,
             is_signup_enabled: true,
-          }
+          },
         ],
       },
     ];

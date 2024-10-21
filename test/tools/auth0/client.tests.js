@@ -19,12 +19,14 @@ describe('#schema validation tests', async () => {
             const localArgs = { ...args };
             setTimeout(() => {
               resolve({
-                start: localArgs.page * localArgs.per_page,
-                total: expectedNbClients,
-                clients: clients.slice(
-                  localArgs.page * localArgs.per_page,
-                  (localArgs.page + 1) * localArgs.per_page
-                ),
+                data: {
+                  start: localArgs.page * localArgs.per_page,
+                  total: expectedNbClients,
+                  clients: clients.slice(
+                    localArgs.page * localArgs.per_page,
+                    (localArgs.page + 1) * localArgs.per_page
+                  ),
+                },
               });
             }, 10);
           }),
@@ -53,12 +55,14 @@ describe('#schema validation tests', async () => {
         permissions: {
           getAll: async (localArgs) =>
             Promise.resolve({
-              start: localArgs.page * localArgs.per_page,
-              total: expectedNbItems,
-              permissions: permissions.slice(
-                localArgs.page * localArgs.per_page,
-                (localArgs.page + 1) * localArgs.per_page
-              ),
+              data: {
+                start: localArgs.page * localArgs.per_page,
+                total: expectedNbItems,
+                permissions: permissions.slice(
+                  localArgs.page * localArgs.per_page,
+                  (localArgs.page + 1) * localArgs.per_page
+                ),
+              },
             }),
         },
       },

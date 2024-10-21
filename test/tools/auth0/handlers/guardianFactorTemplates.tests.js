@@ -59,7 +59,7 @@ describe('#guardianFactorTemplates handler', () => {
     it('should get guardianFactorTemplates', async () => {
       const auth0 = {
         guardian: {
-          getFactorTemplates: (params) => ({ ...params, enrollment_message: 'test' }),
+          getSmsFactorTemplates: (params) => ({ data: { ...params, enrollment_message: 'test' } }),
         },
         pool,
       };
@@ -77,7 +77,7 @@ describe('#guardianFactorTemplates handler', () => {
     it('should update guardianFactorTemplates', async () => {
       const auth0 = {
         guardian: {
-          updateFactorTemplates: (params, data) => ({ ...data }),
+          setSmsFactorTemplates: (params, data) => ({ data }),
         },
         pool,
       };

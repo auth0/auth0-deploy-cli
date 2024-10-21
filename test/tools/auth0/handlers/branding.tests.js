@@ -9,7 +9,9 @@ describe('#branding handler', () => {
       const auth0 = {
         branding: {
           getSettings: () => ({
-            logo_url: 'https://example.com/logo.png',
+            data: {
+              logo_url: 'https://example.com/logo.png',
+            },
           }),
           getUniversalLoginTemplate: () => ({
             body: html,
@@ -31,16 +33,22 @@ describe('#branding handler', () => {
       const auth0 = {
         branding: {
           getSettings: () => ({
-            logo_url: 'https://example.com/logo.png',
+            data: {
+              logo_url: 'https://example.com/logo.png',
+            },
           }),
           getUniversalLoginTemplate: () => ({
-            body: html,
+            data: {
+              body: html,
+            },
           }),
         },
         customDomains: {
-          getAll: () => [
-            {}, // mock one custom domain.
-          ],
+          getAll: () => ({
+            data: [
+              {}, // mock one custom domain.
+            ],
+          }),
         },
       };
 
@@ -61,7 +69,9 @@ describe('#branding handler', () => {
       const auth0 = {
         branding: {
           getSettings: () => ({
-            logo_url: 'https://example.com/logo.png',
+            data: {
+              logo_url: 'https://example.com/logo.png',
+            },
           }),
           getUniversalLoginTemplate: () => ({
             body: html,
@@ -86,7 +96,7 @@ describe('#branding handler', () => {
     it('should update branding settings without templates if no templates set', (done) => {
       const auth0 = {
         branding: {
-          updateSettings: (params, data) => {
+          updateSettings: (data) => {
             try {
               expect(data).to.be.an('object');
               expect(data.templates).to.equal(undefined);
@@ -117,7 +127,7 @@ describe('#branding handler', () => {
     it('should update branding settings and templates if templates set', (done) => {
       const auth0 = {
         branding: {
-          updateSettings: (params, data) => {
+          updateSettings: (data) => {
             try {
               expect(data).to.be.an('object');
               expect(data.templates).to.equal(undefined);
@@ -126,7 +136,7 @@ describe('#branding handler', () => {
               done(err);
             }
           },
-          setUniversalLoginTemplate: (params, data) => {
+          setUniversalLoginTemplate: (data) => {
             try {
               expect(data).to.be.an('object');
               expect(data.template).to.equal(html);
@@ -161,7 +171,7 @@ describe('#branding handler', () => {
 
       const auth0 = {
         branding: {
-          updateSettings: (_params, data) => {
+          updateSettings: (data) => {
             expect(data).to.deep.equal({
               colors: {
                 primary: '#F8F8F2',

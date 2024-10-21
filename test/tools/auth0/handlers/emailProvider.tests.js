@@ -5,17 +5,15 @@ describe('#emailProvider handler', () => {
   describe('#emailProvider process', () => {
     it('should configure email provider', async () => {
       const auth0 = {
-        emailProvider: {
-          configure: (provider, data) => {
-            expect(provider).to.be.an('object');
+        emails: {
+          configure: (data) => {
             expect(data).to.be.an('object');
-            expect(provider.name).to.equal('someProvider');
             expect(data.name).to.equal('someProvider');
-            return Promise.resolve({ provider, data });
+            return Promise.resolve({ data });
           },
-          update: (provider, data) => Promise.resolve({ provider, data }),
-          delete: () => Promise.resolve(null),
-          get: () => [],
+          update: (data) => Promise.resolve({ data }),
+          delete: () => Promise.resolve({ data: null }),
+          get: () => ({ data: [] }),
         },
       };
 
@@ -27,21 +25,16 @@ describe('#emailProvider handler', () => {
 
     it('should update email provider', async () => {
       const auth0 = {
-        emailProvider: {
-          configure: (provider, data) => {
-            expect(provider).to.be('undefined');
-            return Promise.resolve(data);
-          },
-          update: (provider, data) => {
-            expect(provider).to.be.an('object');
+        emails: {
+          configure: (data) => Promise.resolve({ data }),
+          update: (data) => {
             expect(data).to.be.an('object');
-            expect(provider.name).to.equal('someProvider');
             expect(data.name).to.equal('someProvider');
             expect(data.credentials).to.equal('password');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          delete: () => Promise.resolve(null),
-          get: () => ({ name: 'someProvider', enabled: false }),
+          delete: () => Promise.resolve({ data: null }),
+          get: () => ({ data: { name: 'someProvider', enabled: false } }),
         },
       };
 
@@ -56,17 +49,22 @@ describe('#emailProvider handler', () => {
       await stageFn.apply(handler, [{ emailProvider: data }]);
     });
 
-    it('should delete email provider if set to empty object and AUTH0_ALLOW_DELETE is true', async () => {
+    // THIS IS NO LONGER SUPPORTED
+    it('should disable instead of delete email provider if set to empty object and AUTH0_ALLOW_DELETE is true', async () => {
       const AUTH0_ALLOW_DELETE = true;
       let wasDeleteCalled = false;
-
+      let wasUpdateCalled = false;
       const auth0 = {
-        emailProvider: {
+        emails: {
           delete: () => {
             wasDeleteCalled = true;
-            return Promise.resolve({});
+            return Promise.resolve({ data: {} });
           },
-          get: () => ({ name: 'someProvider', enabled: true }),
+          update: () => {
+            wasUpdateCalled = true;
+            return Promise.resolve({ data: {} });
+          },
+          get: () => ({ data: { name: 'someProvider', enabled: true } }),
         },
       };
 
@@ -78,18 +76,19 @@ describe('#emailProvider handler', () => {
 
       await stageFn.apply(handler, [{ emailProvider: {} }]);
 
-      expect(wasDeleteCalled).to.equal(true);
+      expect(wasDeleteCalled).to.equal(false);
+      expect(wasUpdateCalled).to.equal(true);
     });
 
     it('should not delete email provider if set to empty object and if AUTH0_ALLOW_DELETE is false', async () => {
       const AUTH0_ALLOW_DELETE = false;
 
       const auth0 = {
-        emailProvider: {
+        emails: {
           delete: () => {
             throw new Error('was not expecting delete to be called');
           },
-          get: () => ({ name: 'someProvider', enabled: true }),
+          get: () => ({ data: { name: 'someProvider', enabled: true } }),
         },
       };
 
@@ -104,8 +103,8 @@ describe('#emailProvider handler', () => {
 
     it('should get email provider', async () => {
       const auth0 = {
-        emailProvider: {
-          get: () => ({ name: 'smtp', enabled: true }),
+        emails: {
+          get: () => ({ data: { name: 'smtp', enabled: true } }),
         },
       };
 
@@ -116,21 +115,16 @@ describe('#emailProvider handler', () => {
 
     it('should delete email provider and create another one instead', async () => {
       const auth0 = {
-        emailProvider: {
-          configure: (provider, data) => {
-            expect(provider).to.be.an('object');
+        emails: {
+          configure: (data) => {
             expect(data).to.be.an('object');
-            expect(provider.name).to.equal('someProvider');
             expect(data.name).to.equal('someProvider');
             expect(data.credentials).to.equal('password');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          update: (provider, data) => {
-            expect(provider).to.be('undefined');
-            return Promise.resolve(data);
-          },
-          delete: () => Promise.resolve(null),
-          get: () => ({ name: 'oldProvider', enabled: true }),
+          update: (data) => Promise.resolve({ data }),
+          delete: () => Promise.resolve({ data: null }),
+          get: () => ({ data: { name: 'oldProvider', enabled: true } }),
         },
       };
 

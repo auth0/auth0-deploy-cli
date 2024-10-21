@@ -78,14 +78,16 @@ describe('#triggers handler', () => {
         'post-user-registration': [{ action_name: 'action-one', display_name: 'email-user' }],
         'post-change-password': [{ action_name: 'action-two', display_name: 'log-to-logger' }],
         'send-phone-message': [{ action_name: 'action-three', display_name: 'slack-integration' }],
-        'password-reset-post-challenge': [{ action_name: 'action-two', display_name: 'log-to-logger' }],
+        'password-reset-post-challenge': [
+          { action_name: 'action-two', display_name: 'log-to-logger' },
+        ],
       };
 
       const auth0 = {
         actions: {
           getAllTriggers: () => Promise.resolve(existingTriggerBindings),
           // eslint-disable-next-line camelcase
-          updateTriggerBindings: ({ trigger_id }, { bindings }) => {
+          updateTriggerBindings: ({ triggerId }, { bindings }) => {
             expect([
               'post-login',
               'credentials-exchange',
@@ -94,7 +96,7 @@ describe('#triggers handler', () => {
               'post-change-password',
               'send-phone-message',
               'password-reset-post-challenge',
-            ]).to.include(trigger_id); // eslint-disable-line camelcase
+            ]).to.include(triggerId); // eslint-disable-line camelcase
             expect(bindings).to.be.an('array').that.is.empty; // eslint-disable-line no-unused-expressions
             timesUpdateTriggerBindingsCalled += 1;
             return Promise.resolve([]);
@@ -139,7 +141,9 @@ describe('#triggers handler', () => {
         'post-user-registration': [{ action_name: 'action-one', display_name: 'email-user' }],
         'post-change-password': [{ action_name: 'action-two', display_name: 'log-to-logger' }],
         'send-phone-message': [{ action_name: 'action-three', display_name: 'slack-integration' }],
-        'password-reset-post-challenge': [{ action_name: 'action-two', display_name: 'log-to-logger' }],
+        'password-reset-post-challenge': [
+          { action_name: 'action-two', display_name: 'log-to-logger' },
+        ],
       };
 
       const updatePayload = [
@@ -163,8 +167,8 @@ describe('#triggers handler', () => {
         actions: {
           getAllTriggers: () => Promise.resolve(existingTriggerBindings),
           // eslint-disable-next-line camelcase
-          updateTriggerBindings: ({ trigger_id }, { bindings }) => {
-            expect(trigger_id).to.equal('post-login');
+          updateTriggerBindings: ({ triggerId }, { bindings }) => {
+            expect(triggerId).to.equal('post-login');
             expect(bindings).to.deep.equal(updatePayload);
             timesUpdateTriggerBindingsCalled += 1;
             return Promise.resolve(updatePayload);

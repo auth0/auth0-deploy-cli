@@ -40,13 +40,6 @@ repository =>
   resource-servers
     resource_server1.json
     resource_server2.json
-  rules
-    rule1.js
-    rule1.json
-    rule2.js
-  rules-configs
-    env_param1.json
-    some_secret1.json
   guardian
     factors
       sms.json

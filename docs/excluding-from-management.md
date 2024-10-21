@@ -85,7 +85,6 @@ For non-set-based resource configuration like tenant, email provider and brandin
 #### Example of emptiness
 
 ```yaml
-hooks: [] # Empty hooks
 connections: [] # Empty connections
 tenant: {} # Effectively a no-op, cannot delete tenant
 emailProvider: {} # Will delete email provider

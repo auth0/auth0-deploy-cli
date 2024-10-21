@@ -4,8 +4,8 @@ import { getFiles, dumpJSON, loadJSON, existsMustBeDir } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { ParsedAsset } from '../../../types';
-import { Theme } from '../../../tools/auth0/handlers/themes';
 import { constants } from '../../../tools';
+import { Theme } from '../../../tools/auth0/handlers/themes';
 
 type ParsedThemes = ParsedAsset<'themes', Theme[]>;
 

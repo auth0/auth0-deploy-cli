@@ -1,7 +1,9 @@
 import { PromisePoolExecutor } from 'promise-pool-executor';
+import pageClient from '../../../../src/tools/auth0/client';
 
 const { expect } = require('chai');
 const organizations = require('../../../../src/tools/auth0/handlers/organizations');
+const { mockPagedData } = require('../../../utils');
 
 const pool = new PromisePoolExecutor({
   concurrencyLimit: 3,
@@ -109,7 +111,7 @@ describe('#organizations handler', () => {
         pool,
       };
 
-      const handler = new organizations.default({ client: auth0, config });
+      const handler = new organizations.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const response = await stageFn.apply(handler, [{}]);
       expect(response).to.equal(undefined);
@@ -125,11 +127,11 @@ describe('#organizations handler', () => {
             expect(data.display_name).to.equal('Acme');
             expect(data.connections).to.equal(undefined);
             data.id = 'fake';
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          update: () => Promise.resolve([]),
-          delete: () => Promise.resolve([]),
-          getAll: () => Promise.resolve([]),
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [])),
           addEnabledConnection: (org, connection) => {
             expect(org.id).to.equal('fake');
             expect(connection).to.be.an('object');
@@ -137,28 +139,29 @@ describe('#organizations handler', () => {
             expect(connection.assign_membership_on_login).to.equal(true);
             expect(connection.show_as_button).to.equal(false);
             expect(connection.is_signup_enabled).to.equal(true);
-            return Promise.resolve(connection);
+            return Promise.resolve({ data: connection });
           },
         },
         connections: {
-          getAll: () => [
-            {
-              id: sampleEnabledConnection.connection_id,
-              name: sampleEnabledConnection.connection.name,
-              options: {},
-            },
-            {
-              id: sampleEnabledConnection2.connection_id,
-              name: sampleEnabledConnection2.connection.name,
-              options: {},
-            },
-            { id: 'con_999', name: 'Username', options: {} },
-          ],
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              {
+                id: sampleEnabledConnection.connection_id,
+                name: sampleEnabledConnection.connection.name,
+                options: {},
+              },
+              {
+                id: sampleEnabledConnection2.connection_id,
+                name: sampleEnabledConnection2.connection.name,
+                options: {},
+              },
+              { id: 'con_999', name: 'Username', options: {} },
+            ]),
         },
         pool,
       };
 
-      const handler = new organizations.default({ client: auth0, config });
+      const handler = new organizations.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       await stageFn.apply(handler, [
         {
@@ -171,7 +174,7 @@ describe('#organizations handler', () => {
                   name: 'Username-Password-Login',
                   assign_membership_on_login: true,
                   show_as_button: false,
-                  is_signup_enabled: true
+                  is_signup_enabled: true,
                 },
               ],
             },
@@ -183,15 +186,13 @@ describe('#organizations handler', () => {
     it('should get organizations', async () => {
       const auth0 = {
         organizations: {
-          getAll: () => Promise.resolve([sampleOrg]),
-          connections: {
-            get: () => [sampleEnabledConnection],
-          },
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          getEnabledConnections: () => ({ data: [sampleEnabledConnection] }),
         },
         pool,
       };
 
-      const handler = new organizations.default({ client: auth0, config });
+      const handler = new organizations.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([{ ...sampleOrg, connections: [sampleEnabledConnection] }]);
     });
@@ -208,15 +209,16 @@ describe('#organizations handler', () => {
 
       const auth0 = {
         organizations: {
-          getAll: () => Promise.resolve([...organizationsPage2, ...organizationsPage1]),
-          connections: {
-            get: () => Promise.resolve({}),
-          },
+          getAll: (params) =>
+            Promise.resolve(
+              mockPagedData(params, 'organizations', [...organizationsPage2, ...organizationsPage1])
+            ),
+          getEnabledConnections: () => Promise.resolve({ data: {} }),
         },
         pool,
       };
 
-      const handler = new organizations.default({ client: auth0, config });
+      const handler = new organizations.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.have.length(90);
     });
@@ -226,7 +228,7 @@ describe('#organizations handler', () => {
         pool,
       };
 
-      const handler = new organizations.default({ client: auth0, config });
+      const handler = new organizations.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([]);
     });
@@ -243,7 +245,7 @@ describe('#organizations handler', () => {
         pool,
       };
 
-      const handler = new organizations.default({ client: auth0, config });
+      const handler = new organizations.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([]);
     });
@@ -260,7 +262,7 @@ describe('#organizations handler', () => {
         pool,
       };
 
-      const handler = new organizations.default({ client: auth0, config });
+      const handler = new organizations.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([]);
     });
@@ -277,7 +279,7 @@ describe('#organizations handler', () => {
         pool,
       };
 
-      const handler = new organizations.default({ client: auth0, config });
+      const handler = new organizations.default({ client: pageClient(auth0), config });
       try {
         await handler.getType();
       } catch (error) {
@@ -289,21 +291,19 @@ describe('#organizations handler', () => {
       let shouldThrow = false;
       const auth0 = {
         organizations: {
-          getAll: () => {
+          getAll: (params) => {
             if (!shouldThrow) {
-              return [sampleOrg];
+              return mockPagedData(params, 'organizations', [sampleOrg]);
             }
 
             throw new Error('Unexpected');
           },
-          connections: {
-            get: () => Promise.resolve([]),
-          },
+          getEnabledConnections: () => Promise.resolve({ data: [] }),
         },
         pool,
       };
 
-      const handler = new organizations.default({ client: auth0, config });
+      const handler = new organizations.default({ client: pageClient(auth0), config });
       let data = await handler.getType();
       expect(data).to.deep.equal([sampleOrg]);
 
@@ -315,24 +315,41 @@ describe('#organizations handler', () => {
     it('should update organizations', async () => {
       const auth0 = {
         organizations: {
-          create: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
             expect(data.display_name).to.equal('Acme 2');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => Promise.resolve([sampleOrg]),
-          connections: {
-            get: () => [sampleEnabledConnection, sampleEnabledConnection2],
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) =>
+            Promise.resolve(
+              mockPagedData({ ...params, include_totals: true }, 'organizations', [sampleOrg])
+            ),
+          getEnabledConnections: () => ({
+            data: [sampleEnabledConnection, sampleEnabledConnection2],
+          }),
+          addEnabledConnection: (params, data) => {
+            expect(params).to.be.an('object');
+            expect(params.id).to.equal('123');
+            expect(data).to.be.an('object');
+            expect(data.connection_id).to.equal('con_789');
+            expect(data.assign_membership_on_login).to.equal(false);
+            return Promise.resolve({ data });
+          },
+          removeEnabledConnection: (params) => {
+            expect(params).to.be.an('object');
+            expect(params.id).to.equal('123');
+            expect(params.connection_id).to.equal(sampleEnabledConnection2.connection_id);
+            return Promise.resolve({ data: undefined });
           },
           updateEnabledConnection: (params, data) => {
-            if (params.connection_id === sampleEnabledConnection.connection_id) {
+            if (params.connectionId === sampleEnabledConnection.connection_id) {
               expect(params).to.be.an('object');
               expect(params.id).to.equal('123');
-              expect(params.connection_id).to.equal(sampleEnabledConnection.connection_id);
+              expect(params.connectionId).to.equal(sampleEnabledConnection.connection_id);
               expect(data).to.be.an('object');
               expect(data.assign_membership_on_login).to.equal(false);
               expect(data.show_as_button).to.equal(true);
@@ -340,7 +357,7 @@ describe('#organizations handler', () => {
             } else {
               expect(params).to.be.an('object');
               expect(params.id).to.equal('123');
-              expect(params.connection_id).to.equal(sampleEnabledConnection2.connection_id);
+              expect(params.connectionId).to.equal(sampleEnabledConnection2.connection_id);
               expect(data).to.be.an('object');
               expect(data.assign_membership_on_login).to.equal(true);
               expect(data.show_as_button).to.equal(false);
@@ -349,24 +366,25 @@ describe('#organizations handler', () => {
           },
         },
         connections: {
-          getAll: () => [
-            {
-              id: sampleEnabledConnection.connection_id,
-              name: sampleEnabledConnection.connection.name,
-              options: {},
-            },
-            {
-              id: sampleEnabledConnection2.connection_id,
-              name: sampleEnabledConnection2.connection.name,
-              options: {},
-            },
-            { id: 'con_999', name: 'Username', options: {} },
-          ],
+          getAll: (params) =>
+            mockPagedData({ ...params, include_totals: true }, 'connections', [
+              {
+                id: sampleEnabledConnection.connection_id,
+                name: sampleEnabledConnection.connection.name,
+                options: {},
+              },
+              {
+                id: sampleEnabledConnection2.connection_id,
+                name: sampleEnabledConnection2.connection.name,
+                options: {},
+              },
+              { id: 'con_999', name: 'Username', options: {} },
+            ]),
         },
         pool,
       };
 
-      const handler = new organizations.default({ client: auth0, config });
+      const handler = new organizations.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
@@ -381,7 +399,7 @@ describe('#organizations handler', () => {
                   name: 'Username-Password-Login',
                   assign_membership_on_login: false,
                   show_as_button: true,
-                  is_signup_enabled: false
+                  is_signup_enabled: false,
                 },
                 { name: 'facebook', assign_membership_on_login: true, show_as_button: false },
               ],
@@ -394,19 +412,17 @@ describe('#organizations handler', () => {
     it('should add an enabled connection to the organizations', async () => {
       const auth0 = {
         organizations: {
-          create: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
             expect(data.display_name).to.equal('Acme 2');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => Promise.resolve([sampleOrg]),
-          connections: {
-            get: () => [],
-          },
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          getEnabledConnections: () => ({ data: [] }),
           addEnabledConnection: (params, data) => {
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
@@ -415,28 +431,29 @@ describe('#organizations handler', () => {
             expect(data.assign_membership_on_login).to.equal(false);
             expect(data.show_as_button).to.equal(false);
             expect(data.is_signup_enabled).to.equal(false);
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
         },
         connections: {
-          getAll: () => [
-            {
-              id: sampleEnabledConnection.connection_id,
-              name: sampleEnabledConnection.connection.name,
-              options: {},
-            },
-            {
-              id: sampleEnabledConnection2.connection_id,
-              name: sampleEnabledConnection2.connection.name,
-              options: {},
-            },
-            { id: 'con_999', name: 'Username', options: {} },
-          ],
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              {
+                id: sampleEnabledConnection.connection_id,
+                name: sampleEnabledConnection.connection.name,
+                options: {},
+              },
+              {
+                id: sampleEnabledConnection2.connection_id,
+                name: sampleEnabledConnection2.connection.name,
+                options: {},
+              },
+              { id: 'con_999', name: 'Username', options: {} },
+            ]),
         },
         pool,
       };
 
-      const handler = new organizations.default({ client: auth0, config });
+      const handler = new organizations.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
@@ -451,7 +468,7 @@ describe('#organizations handler', () => {
                   name: 'Username-Password-Login',
                   assign_membership_on_login: false,
                   show_as_button: false,
-                  is_signup_enabled: false
+                  is_signup_enabled: false,
                 },
               ],
             },
@@ -469,39 +486,43 @@ describe('#organizations handler', () => {
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
             expect(data.display_name).to.equal('Acme 2');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => Promise.resolve([sampleOrg]),
-          connections: {
-            get: () => [sampleEnabledConnection2],
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          getEnabledConnections: () => ({ data: [sampleEnabledConnection2] }),
+          deleteEnabledConnection: (params) => {
+            expect(params).to.be.an('object');
+            expect(params.connectionId).to.equal(sampleEnabledConnection2.connection_id);
+            return Promise.resolve({ data: [] });
           },
           removeEnabledConnection: (params) => {
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
             expect(params.connection_id).to.equal(sampleEnabledConnection2.connection_id);
-            return Promise.resolve();
+            return Promise.resolve({ data: undefined });
           },
         },
         connections: {
-          getAll: () => [
-            {
-              id: sampleEnabledConnection.connection_id,
-              name: sampleEnabledConnection.connection.name,
-              options: {},
-            },
-            {
-              id: sampleEnabledConnection2.connection_id,
-              name: sampleEnabledConnection2.connection.name,
-              options: {},
-            },
-            { id: 'con_999', name: 'Username', options: {} },
-          ],
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              {
+                id: sampleEnabledConnection.connection_id,
+                name: sampleEnabledConnection.connection.name,
+                options: {},
+              },
+              {
+                id: sampleEnabledConnection2.connection_id,
+                name: sampleEnabledConnection2.connection.name,
+                options: {},
+              },
+              { id: 'con_999', name: 'Username', options: {} },
+            ]),
         },
         pool,
       };
 
-      const handler = new organizations.default({ client: auth0, config });
+      const handler = new organizations.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
@@ -526,33 +547,32 @@ describe('#organizations handler', () => {
             expect(params).to.be.an('object');
             expect(params.id).to.equal('123');
             expect(data.display_name).to.equal('Acme 2');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => Promise.resolve([sampleOrg]),
-          connections: {
-            get: () => [],
-          },
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          getEnabledConnections: () => ({ data: [] }),
         },
         connections: {
-          getAll: () => [
-            {
-              id: sampleEnabledConnection.connection_id,
-              name: sampleEnabledConnection.connection.name,
-              options: {},
-            },
-            {
-              id: sampleEnabledConnection2.connection_id,
-              name: sampleEnabledConnection2.connection.name,
-              options: {},
-            },
-            { id: 'con_999', name: 'Username', options: {} },
-          ],
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              {
+                id: sampleEnabledConnection.connection_id,
+                name: sampleEnabledConnection.connection.name,
+                options: {},
+              },
+              {
+                id: sampleEnabledConnection2.connection_id,
+                name: sampleEnabledConnection2.connection.name,
+                options: {},
+              },
+              { id: 'con_999', name: 'Username', options: {} },
+            ]),
         },
         pool,
       };
 
-      const handler = new organizations.default({ client: auth0, config });
+      const handler = new organizations.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
@@ -572,24 +592,22 @@ describe('#organizations handler', () => {
     it('should delete organizations', async () => {
       const auth0 = {
         organizations: {
-          create: () => Promise.resolve([]),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
+          update: () => Promise.resolve({ data: [] }),
           delete: (data) => {
             expect(data).to.be.an('object');
             expect(data.id).to.equal(sampleOrg.id);
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          getAll: () => Promise.resolve([sampleOrg]),
-          connections: {
-            get: () => [],
-          },
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          getEnabledConnections: () => [],
         },
         connections: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'connections', []),
         },
         pool,
       };
-      const handler = new organizations.default({ client: auth0, config });
+      const handler = new organizations.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       await stageFn.apply(handler, [{ organizations: [{}] }]);
     });

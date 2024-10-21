@@ -1,5 +1,8 @@
+import pageClient from '../../../../src/tools/auth0/client';
+
 const { expect } = require('chai');
 const clientGrants = require('../../../../src/tools/auth0/handlers/clientGrants');
+const { mockPagedData } = require('../../../utils');
 
 const pool = {
   addEachTask: (data) => {
@@ -62,19 +65,19 @@ describe('#clientGrants handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someClientGrant');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          update: () => Promise.resolve([]),
-          delete: () => Promise.resolve([]),
-          getAll: () => [],
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'client_grants', []),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
 
-      const handler = new clientGrants.default({ client: auth0, config });
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -95,15 +98,16 @@ describe('#clientGrants handler', () => {
       };
       const auth0 = {
         clientGrants: {
-          getAll: () => [clientGrant],
+          getAll: (params) => mockPagedData(params, 'client_grants', [clientGrant]),
         },
         clients: {
-          getAll: () => [{ name: 'test client', client_id: clientId }],
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [{ name: 'test client', client_id: clientId }]),
         },
         pool,
       };
 
-      const handler = new clientGrants.default({ client: auth0, config });
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([clientGrant]);
     });
@@ -116,19 +120,20 @@ describe('#clientGrants handler', () => {
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someClientGrant');
             expect(data.client_id).to.equal('client_id');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          update: () => Promise.resolve([]),
-          delete: () => Promise.resolve([]),
-          getAll: () => [],
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'client_grants', []),
         },
         clients: {
-          getAll: () => [{ client_id: 'client_id', name: 'client_name' }],
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [{ client_id: 'client_id', name: 'client_name' }]),
         },
         pool,
       };
 
-      const handler = new clientGrants.default({ client: auth0, config });
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -147,7 +152,7 @@ describe('#clientGrants handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data).to.equal({});
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
@@ -157,18 +162,21 @@ describe('#clientGrants handler', () => {
             expect(data.scope).to.be.an('array');
             expect(data.scope[0]).to.equal('read:messages');
 
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => [{ id: 'cg1', client_id: 'client1', audience: 'audience' }],
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) =>
+            mockPagedData(params, 'client_grants', [
+              { id: 'cg1', client_id: 'client1', audience: 'audience' },
+            ]),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
 
-      const handler = new clientGrants.default({ client: auth0, config });
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -189,25 +197,28 @@ describe('#clientGrants handler', () => {
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someClientGrant');
             expect(data.client_id).to.equal('client2');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          update: () => Promise.resolve([]),
+          update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('cg1');
 
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [{ id: 'cg1', client_id: 'client1', audience: 'audience1' }],
+          getAll: (params) =>
+            mockPagedData(params, 'client_grants', [
+              { id: 'cg1', client_id: 'client1', audience: 'audience1' },
+            ]),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
 
-      const handler = new clientGrants.default({ client: auth0, config });
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -226,28 +237,31 @@ describe('#clientGrants handler', () => {
           create: (params) => {
             expect(params).to.be.an('undefined');
 
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
           update: (params) => {
             expect(params).to.be.an('undefined');
 
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
 
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [{ id: 'id', client_id: 'client_id', audience: 'audience' }],
+          getAll: (params) =>
+            mockPagedData(params, 'client_grants', [
+              { id: 'id', client_id: 'client_id', audience: 'audience' },
+            ]),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
 
-      const handler = new clientGrants.default({ client: auth0, config });
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -264,24 +278,27 @@ describe('#clientGrants handler', () => {
       let removed = false;
       const auth0 = {
         clientGrants: {
-          create: () => Promise.resolve([]),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
+          update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('cg1');
             removed = true;
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [{ id: 'cg1', client_id: 'client1', audience: 'audience1' }],
+          getAll: (params) =>
+            mockPagedData(params, 'client_grants', [
+              { id: 'cg1', client_id: 'client1', audience: 'audience1' },
+            ]),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
 
-      const handler = new clientGrants.default({ client: auth0, config });
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ clientGrants: [] }]);
@@ -295,23 +312,26 @@ describe('#clientGrants handler', () => {
 
       const auth0 = {
         clientGrants: {
-          create: () => Promise.resolve([]),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
+          update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
 
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [{ id: 'cg1', client_id: 'client1', audience: 'audience1' }],
+          getAll: (params) =>
+            mockPagedData(params, 'client_grants', [
+              { id: 'cg1', client_id: 'client1', audience: 'audience1' },
+            ]),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
 
-      const handler = new clientGrants.default({ client: auth0, config });
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ clientGrants: [] }]);
@@ -327,35 +347,37 @@ describe('#clientGrants handler', () => {
           create: (params) => {
             expect(params).to.be.an('undefined');
 
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
           update: (params) => {
             expect(params).to.be.an('undefined');
 
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
 
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [
-            { id: 'cg1', client_id: 'client1', audience: 'audience1' },
-            { id: 'cg2', client_id: 'client2', audience: 'audience2' },
-          ],
+          getAll: (params) =>
+            mockPagedData(params, 'client_grants', [
+              { id: 'cg1', client_id: 'client1', audience: 'audience1' },
+              { id: 'cg2', client_id: 'client2', audience: 'audience2' },
+            ]),
         },
         clients: {
-          getAll: () => [
-            { name: 'client_delete', client_id: 'client1', audience: 'audience1' },
-            { name: 'client_update', client_id: 'client2', audience: 'audience2' },
-            { name: 'client_create', client_id: 'client3', audience: 'audience3' },
-          ],
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              { name: 'client_delete', client_id: 'client1', audience: 'audience1' },
+              { name: 'client_update', client_id: 'client2', audience: 'audience2' },
+              { name: 'client_create', client_id: 'client3', audience: 'audience3' },
+            ]),
         },
         pool,
       };
 
-      const handler = new clientGrants.default({ client: auth0, config });
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       const assets = {
@@ -383,67 +405,69 @@ describe('#clientGrants handler', () => {
         create: (params) => {
           expect(params).to.be.an('undefined');
 
-          return Promise.resolve([]);
+          return Promise.resolve({ data: [] });
         },
         update: (params) => {
           expect(params).to.be.an('undefined');
 
-          return Promise.resolve([]);
+          return Promise.resolve({ data: [] });
         },
         delete: function (params) {
           (() => expect(this).to.not.be.undefined)();
           expect(params).to.be.an('undefined');
 
-          return Promise.resolve([]);
+          return Promise.resolve({ data: [] });
         },
-        getAll: () => [
-          {
-            client_id: '123',
-            audience: 'a',
-            id: '1',
-          },
-          {
-            client_id: '123',
-            audience: 'a',
-            id: '2',
-          },
-          {
-            client_id: '123',
-            audience: 'a',
-            id: '3',
-          },
-          {
-            client_id: '456',
-            audience: 'a',
-            id: '4',
-          },
-          {
-            client_id: '456',
-            audience: 'a',
-            id: '5',
-          },
-        ],
+        getAll: (params) =>
+          mockPagedData(params, 'client_grants', [
+            {
+              client_id: '123',
+              audience: 'a',
+              id: '1',
+            },
+            {
+              client_id: '123',
+              audience: 'a',
+              id: '2',
+            },
+            {
+              client_id: '123',
+              audience: 'a',
+              id: '3',
+            },
+            {
+              client_id: '456',
+              audience: 'a',
+              id: '4',
+            },
+            {
+              client_id: '456',
+              audience: 'a',
+              id: '5',
+            },
+          ]),
       },
       clients: {
-        getAll: () => [
-          {
-            name: 'abc',
-            client_id: 'abc',
-          },
-          {
-            name: 'foo_client',
-            client_id: '123',
-          },
-          {
-            name: 'foo_client',
-            client_id: '456',
-          },
-        ],
+        getAll: (params) =>
+          mockPagedData(params, 'clients', [
+            {
+              name: 'abc',
+              client_id: 'abc',
+            },
+            {
+              name: 'foo_client',
+              client_id: '123',
+            },
+            {
+              name: 'foo_client',
+              client_id: '456',
+            },
+          ]),
       },
       pool,
     };
 
-    const handler = new clientGrants.default({ client: auth0, config });
+    const handler = new clientGrants.default({ client: pageClient(auth0), config });
     const stageFn = Object.getPrototypeOf(handler).processChanges;
 
     const assets = {

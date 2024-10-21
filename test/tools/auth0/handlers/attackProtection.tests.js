@@ -7,30 +7,36 @@ describe('#attackProtection handler', () => {
       const auth0 = {
         attackProtection: {
           getBreachedPasswordDetectionConfig: () => ({
-            admin_notification_frequency: [],
-            enabled: true,
-            method: 'standard',
-            shields: [],
+            data: {
+              admin_notification_frequency: [],
+              enabled: true,
+              method: 'standard',
+              shields: [],
+            },
           }),
           getBruteForceConfig: () => ({
-            allowlist: [],
-            enabled: true,
-            max_attempts: 10,
-            mode: 'count_per_identifier_and_ip',
-            shields: ['block', 'user_notification'],
+            data: {
+              allowlist: [],
+              enabled: true,
+              max_attempts: 10,
+              mode: 'count_per_identifier_and_ip',
+              shields: ['block', 'user_notification'],
+            },
           }),
           getSuspiciousIpThrottlingConfig: () => ({
-            allowlist: ['127.0.0.1'],
-            enabled: true,
-            shields: ['block', 'admin_notification'],
-            stage: {
-              'pre-login': {
-                max_attempts: 100,
-                rate: 864000,
-              },
-              'pre-user-registration': {
-                max_attempts: 50,
-                rate: 1200,
+            data: {
+              allowlist: ['127.0.0.1'],
+              enabled: true,
+              shields: ['block', 'admin_notification'],
+              stage: {
+                'pre-login': {
+                  max_attempts: 100,
+                  rate: 864000,
+                },
+                'pre-user-registration': {
+                  max_attempts: 50,
+                  rate: 1200,
+                },
               },
             },
           }),
@@ -74,7 +80,7 @@ describe('#attackProtection handler', () => {
     it('should update attack protection settings', async () => {
       const auth0 = {
         attackProtection: {
-          updateBreachedPasswordDetectionConfig: (params, data) => {
+          updateBreachedPasswordDetectionConfig: (data) => {
             expect(data).to.be.an('object');
             expect(data).to.deep.equal({
               admin_notification_frequency: [],
@@ -84,7 +90,7 @@ describe('#attackProtection handler', () => {
             });
             return Promise.resolve(data);
           },
-          updateSuspiciousIpThrottlingConfig: (params, data) => {
+          updateSuspiciousIpThrottlingConfig: (data) => {
             expect(data).to.be.an('object');
             expect(data).to.deep.equal({
               allowlist: ['127.0.0.1'],
@@ -103,7 +109,7 @@ describe('#attackProtection handler', () => {
             });
             return Promise.resolve(data);
           },
-          updateBruteForceConfig: (params, data) => {
+          updateBruteForceConfig: (data) => {
             expect(data).to.be.an('object');
             expect(data).to.deep.equal({
               allowlist: [],

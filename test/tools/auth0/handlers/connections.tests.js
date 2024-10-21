@@ -1,7 +1,10 @@
+import pageClient from '../../../../src/tools/auth0/client';
+
 /* eslint-disable consistent-return */
 const { expect } = require('chai');
 const sinon = require('sinon');
 const connections = require('../../../../src/tools/auth0/handlers/connections');
+const { mockPagedData } = require('../../../utils');
 
 const pool = {
   addEachTask: (data) => {
@@ -71,11 +74,13 @@ describe('#connections handler', () => {
           mapping: [
             {
               scim: 'scim_id',
-              auth0: 'auth0_id'
-            }
-          ]
+              auth0: 'auth0_id',
+            },
+          ],
         }),
-        applyScimConfiguration: sinon.stub().resolves(undefined)
+        applyScimConfiguration: sinon.stub().resolves(undefined),
+        createOverride: sinon.stub().resolves(new Map()),
+        updateOverride: sinon.stub().resolves(new Map()),
       };
     });
 
@@ -90,20 +95,20 @@ describe('#connections handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someConnection');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          update: () => Promise.resolve([]),
-          delete: () => Promise.resolve([]),
-          getAll: () => [],
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'connections', []),
           _getRestClient: () => ({}),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ connections: [{ name: 'someConnection' }] }]);
@@ -114,19 +119,21 @@ describe('#connections handler', () => {
 
       const auth0 = {
         connections: {
-          getAll: () => [
-            { strategy: 'github', name: 'github', enabled_clients: [clientId] },
-            { strategy: 'auth0', name: 'db-should-be-ignored', enabled_clients: [] },
-          ],
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { strategy: 'github', name: 'github', enabled_clients: [clientId] },
+              { strategy: 'auth0', name: 'db-should-be-ignored', enabled_clients: [] },
+            ]),
           _getRestClient: () => ({}),
         },
         clients: {
-          getAll: () => [{ name: 'test client', client_id: clientId }],
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [{ name: 'test client', client_id: clientId }]),
         },
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([
         { strategy: 'github', name: 'github', enabled_clients: [clientId] },
@@ -139,7 +146,7 @@ describe('#connections handler', () => {
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
@@ -150,19 +157,25 @@ describe('#connections handler', () => {
               options: { passwordPolicy: 'testPolicy' },
             });
 
-            return Promise.resolve({ ...params, ...data });
+            return Promise.resolve({ data: { ...params, ...data } });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => [{ name: 'someConnection', id: 'con1', strategy: 'custom' }],
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someConnection', id: 'con1', strategy: 'custom' },
+            ]),
           _getRestClient: () => ({}),
         },
         clients: {
-          getAll: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
+            ]),
         },
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -196,7 +209,7 @@ describe('#connections handler', () => {
                 },
               },
             });
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
@@ -214,22 +227,25 @@ describe('#connections handler', () => {
               },
             });
 
-            return Promise.resolve({ ...params, ...data });
+            return Promise.resolve({ data: { ...params, ...data } });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => [{ name: 'someSamlConnection', id: 'con1', strategy: 'samlp' }],
-          _getRestClient: () => ({}),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someSamlConnection', id: 'con1', strategy: 'samlp' },
+            ]),
         },
         clients: {
-          getAll: () => [
-            { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
-            { name: 'idp-one', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Teb' },
-          ],
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
+              { name: 'idp-one', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Teb' },
+            ]),
         },
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       handler.scimHandler = scimHandlerMock;
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
@@ -282,7 +298,7 @@ describe('#connections handler', () => {
                 },
               },
             });
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
@@ -300,22 +316,26 @@ describe('#connections handler', () => {
               },
             });
 
-            return Promise.resolve({ ...params, ...data });
+            return Promise.resolve({ data: { ...params, ...data } });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => [{ name: 'someSamlConnection', id: 'con1', strategy: 'samlp' }],
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someSamlConnection', id: 'con1', strategy: 'samlp' },
+            ]),
           _getRestClient: () => ({}),
         },
         clients: {
-          getAll: () => [
-            { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
-            { name: 'idp-one', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Teb' },
-          ],
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
+              { name: 'idp-one', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Teb' },
+            ]),
         },
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       handler.scimHandler = scimHandlerMock;
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
@@ -358,7 +378,7 @@ describe('#connections handler', () => {
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
@@ -369,30 +389,32 @@ describe('#connections handler', () => {
               options: { passwordPolicy: 'testPolicy' },
             });
 
-            return Promise.resolve({ ...params, ...data });
+            return Promise.resolve({ data: { ...params, ...data } });
           },
-          delete: () => Promise.resolve([]),
-          getAll: () => [
-            {
-              name: 'someConnection',
-              id: 'con1',
-              strategy: 'custom',
-              enabled_clients: ['excluded-one-id'],
-            },
-          ],
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              {
+                name: 'someConnection',
+                id: 'con1',
+                strategy: 'custom',
+                enabled_clients: ['excluded-one-id'],
+              },
+            ]),
           _getRestClient: () => ({}),
         },
         clients: {
-          getAll: () => [
-            { name: 'client1', client_id: 'client1-id' },
-            { name: 'excluded-one', client_id: 'excluded-one-id' },
-            { name: 'excluded-two', client_id: 'excluded-two-id' },
-          ],
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              { name: 'client1', client_id: 'client1-id' },
+              { name: 'excluded-one', client_id: 'excluded-one-id' },
+              { name: 'excluded-two', client_id: 'excluded-two-id' },
+            ]),
         },
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -417,26 +439,29 @@ describe('#connections handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someConnection');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          update: () => Promise.resolve([]),
+          update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
 
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }],
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con1', name: 'existingConnection', strategy: 'custom' },
+            ]),
           _getRestClient: () => ({}),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -452,25 +477,28 @@ describe('#connections handler', () => {
       let removed = false;
       const auth0 = {
         connections: {
-          create: () => Promise.resolve([]),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: [] }),
+          update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             removed = true;
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }],
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con1', name: 'existingConnection', strategy: 'custom' },
+            ]),
           _getRestClient: () => ({}),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ connections: [] }]);
@@ -483,24 +511,27 @@ describe('#connections handler', () => {
         connections: {
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
-          update: () => Promise.resolve([]),
+          update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }],
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con1', name: 'existingConnection', strategy: 'custom' },
+            ]),
           _getRestClient: () => ({}),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {
@@ -518,23 +549,26 @@ describe('#connections handler', () => {
       };
       const auth0 = {
         connections: {
-          create: () => Promise.resolve(),
-          update: () => Promise.resolve([]),
+          create: () => Promise.resolve({ data: undefined }),
+          update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [{ id: 'con1', name: 'existingConnection', strategy: 'custom' }],
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con1', name: 'existingConnection', strategy: 'custom' },
+            ]),
           _getRestClient: () => ({}),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ connections: [] }]);
@@ -549,30 +583,31 @@ describe('#connections handler', () => {
         connections: {
           create: (params) => {
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
           update: (params) => {
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('undefined');
-            return Promise.resolve([]);
+            return Promise.resolve({ data: [] });
           },
-          getAll: () => [
-            { id: 'con1', name: 'existing1', strategy: 'custom' },
-            { id: 'con2', name: 'existing2', strategy: 'custom' },
-          ],
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con1', name: 'existing1', strategy: 'custom' },
+              { id: 'con2', name: 'existing2', strategy: 'custom' },
+            ]),
           _getRestClient: () => ({}),
         },
         clients: {
-          getAll: () => [],
+          getAll: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
 
-      const handler = new connections.default({ client: auth0, config });
+      const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const assets = {
         exclude: {

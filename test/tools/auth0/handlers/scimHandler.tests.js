@@ -20,20 +20,21 @@ describe('ScimHandler', () => {
   beforeEach(() => {
     mockConfig = sinon.stub();
     mockConnectionsManager = {
-      _getRestClient: sinon.stub().returns({
-        get: sinon.stub(),
-        create: sinon.stub(),
-        patch: sinon.stub(),
-        delete: sinon.stub(),
-      }),
+      get: sinon.stub(),
+      patch: sinon.stub(),
+      delete: sinon.stub(),
       getAll: sinon.stub(),
       update: sinon.stub(),
       create: sinon.stub(),
+      getScimConfiguration: sinon.stub(),
+      createScimConfiguration: sinon.stub(),
+      deleteScimConfiguration: sinon.stub(),
+      updateScimConfiguration: sinon.stub(),
     };
     handler = new ScimHandler(mockConfig, mockConnectionsManager, mockPoolClient);
   });
 
-  afterEach(() =>{
+  afterEach(() => {
     sinon.restore();
   });
 
@@ -44,7 +45,7 @@ describe('ScimHandler', () => {
       expect(handler.isScimStrategy('okta')).to.be.true;
       expect(handler.isScimStrategy('waad')).to.be.true;
     });
-    
+
     it('should return false for unsupported strategies', () => {
       expect(handler.isScimStrategy('google-auth')).to.be.false;
       expect(handler.isScimStrategy('auth0')).to.be.false;
@@ -60,17 +61,22 @@ describe('ScimHandler', () => {
       ];
 
       const response = {
-        mapping: [{ scim: 'userName', auth0: 'preferred_username' }], 
+        mapping: [{ scim: 'userName', auth0: 'preferred_username' }],
         user_id_attribute: 'externalId',
-        connection_id: 'con_kzpLY0Afi4I8lvwM'
+        connection_id: 'con_kzpLY0Afi4I8lvwM',
       };
-      const expectedScimConfiguration = { mapping: response.mapping, user_id_attribute: response.user_id_attribute };
+      const expectedScimConfiguration = {
+        mapping: response.mapping,
+        user_id_attribute: response.user_id_attribute,
+      };
 
-      handler.getScimConfiguration = sinon.stub().resolves(response);
+      handler.getScimConfiguration = sinon.stub().resolves({ data: response });
       await handler.createIdMap(connections);
       expect(handler.idMap.size).to.equal(1);
       expect(handler.idMap.get('con_kzpLY0Afi4I8lvwM')).to.have.property('strategy', 'samlp');
-      expect(handler.idMap.get('con_kzpLY0Afi4I8lvwM')).to.have.property('scimConfiguration').that.deep.equals(expectedScimConfiguration);
+      expect(handler.idMap.get('con_kzpLY0Afi4I8lvwM'))
+        .to.have.property('scimConfiguration')
+        .that.deep.equals(expectedScimConfiguration);
       expect(handler.idMap.get('con_ilYXDjpVjU6GMnmk')).to.be.undefined;
     });
 
@@ -90,12 +96,12 @@ describe('ScimHandler', () => {
       await expect(handler.createIdMap(connections));
       expect(handler.idMap.get('con_kzpLY0Afi4I8lvwM')).to.have.property('strategy', 'samlp');
       expect(handler.idMap.get('con_kzpLY0Afi4I8lvwM')).to.not.have.property('scimConfiguration');
-      
+
       handler.getScimConfiguration = sinon.stub().rejects({ statusCode: 403 });
       await expect(handler.createIdMap(connections));
       expect(handler.idMap.get('con_kzpLY0Afi4I8lvwM')).to.have.property('strategy', 'samlp');
       expect(handler.idMap.get('con_kzpLY0Afi4I8lvwM')).to.not.have.property('scimConfiguration');
-      
+
       handler.getScimConfiguration = sinon.stub().rejects({ statusCode: 429 });
       await expect(handler.createIdMap(connections));
       expect(handler.idMap.get('con_kzpLY0Afi4I8lvwM')).to.have.property('strategy', 'samlp');
@@ -110,13 +116,18 @@ describe('ScimHandler', () => {
     it('should apply SCIM configuration to SCIM connections', async () => {
       const connections = [{ id: 'con_kzpLY0Afi4I8lvwM', strategy: 'samlp' }];
       const expectedScimConfiguration = {
-        mapping: [{ scim: 'userName', auth0: 'preferred_username' }], 
-        user_id_attribute: 'externalId'
+        mapping: [{ scim: 'userName', auth0: 'preferred_username' }],
+        user_id_attribute: 'externalId',
       };
 
-      handler.idMap.set('con_kzpLY0Afi4I8lvwM', { strategy: 'samlp', scimConfiguration: expectedScimConfiguration });
+      handler.idMap.set('con_kzpLY0Afi4I8lvwM', {
+        strategy: 'samlp',
+        scimConfiguration: expectedScimConfiguration,
+      });
       await handler.applyScimConfiguration(connections);
-      expect(connections[0]).to.have.property('scim_configuration').that.deep.equals(expectedScimConfiguration);
+      expect(connections[0])
+        .to.have.property('scim_configuration')
+        .that.deep.equals(expectedScimConfiguration);
     });
 
     it('should not modify connections if idMap is empty', async () => {
@@ -132,7 +143,8 @@ describe('ScimHandler', () => {
       const params = { id: 'con_kzpLY0Afi4I8lvwM' };
       const body = { user_id_attribute: 'id', mapping: [] };
 
-      mockConnectionsManager._getRestClient().create.resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
+      handler.createScimConfiguration = sinon.stub().resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
+      mockConnectionsManager.create.resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
       const result = await handler.createScimConfiguration(params, body);
       expect(result).to.deep.equal({ id: 'con_kzpLY0Afi4I8lvwM' });
     });
@@ -141,8 +153,11 @@ describe('ScimHandler', () => {
       const params = { id: 'con_kzpLY0Afi4I8lvwM' };
       const body = { user_id_attribute: 'id', mapping: [] };
 
-      mockConnectionsManager._getRestClient().create.rejects(new Error('Unexpected error'));
-      await expect(handler.createScimConfiguration(params, body)).to.be.rejectedWith('Unexpected error');
+      handler.createScimConfiguration = sinon.stub().rejects(new Error('Unexpected error'));
+      mockConnectionsManager.create.rejects(new Error('Unexpected error'));
+      await expect(handler.createScimConfiguration(params, body)).to.be.rejectedWith(
+        'Unexpected error'
+      );
     });
   });
 
@@ -150,7 +165,10 @@ describe('ScimHandler', () => {
     it('should retrieve SCIM configuration', async () => {
       const params = { id: 'con_kzpLY0Afi4I8lvwM' };
 
-      mockConnectionsManager._getRestClient().get.resolves({ mapping: [], user_id_attribute: 'id' });
+      handler.getScimConfiguration = sinon
+        .stub()
+        .resolves({ mapping: [], user_id_attribute: 'id' });
+      mockConnectionsManager.get.resolves({ mapping: [], user_id_attribute: 'id' });
 
       const result = await handler.getScimConfiguration(params);
       expect(result).to.deep.equal({ mapping: [], user_id_attribute: 'id' });
@@ -159,7 +177,8 @@ describe('ScimHandler', () => {
     it('should handle errors during retrieval', async () => {
       const params = { id: 'con_kzpLY0Afi4I8lvwM' };
 
-      mockConnectionsManager._getRestClient().get.rejects(new Error('Unexpected error'));
+      handler.getScimConfiguration = sinon.stub().rejects(new Error('Unexpected error'));
+      mockConnectionsManager.get.rejects(new Error('Unexpected error'));
       await expect(handler.getScimConfiguration(params)).to.be.rejectedWith('Unexpected error');
     });
   });
@@ -169,7 +188,8 @@ describe('ScimHandler', () => {
       const params = { id: 'con_kzpLY0Afi4I8lvwM' };
       const body = { user_id_attribute: 'id', mapping: [] };
 
-      mockConnectionsManager._getRestClient().patch.resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
+      handler.updateScimConfiguration = sinon.stub().resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
+      mockConnectionsManager.patch.resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
 
       const result = await handler.updateScimConfiguration(params, body);
       expect(result).to.deep.equal({ id: 'con_kzpLY0Afi4I8lvwM' });
@@ -179,8 +199,11 @@ describe('ScimHandler', () => {
       const params = { id: 'con_kzpLY0Afi4I8lvwM' };
       const body = { user_id_attribute: 'id', mapping: [] };
 
-      mockConnectionsManager._getRestClient().patch.rejects(new Error('Unexpected error'));
-      await expect(handler.updateScimConfiguration(params, body)).to.be.rejectedWith('Unexpected error');
+      handler.updateScimConfiguration = sinon.stub().rejects(new Error('Unexpected error'));
+      mockConnectionsManager.patch.rejects(new Error('Unexpected error'));
+      await expect(handler.updateScimConfiguration(params, body)).to.be.rejectedWith(
+        'Unexpected error'
+      );
     });
   });
 
@@ -188,7 +211,8 @@ describe('ScimHandler', () => {
     it('should delete SCIM configuration', async () => {
       const params = { id: 'con_kzpLY0Afi4I8lvwM' };
 
-      mockConnectionsManager._getRestClient().delete.resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
+      handler.deleteScimConfiguration = sinon.stub().resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
+      mockConnectionsManager.delete.resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
 
       const result = await handler.deleteScimConfiguration(params);
       expect(result).to.deep.equal({ id: 'con_kzpLY0Afi4I8lvwM' });
@@ -197,7 +221,9 @@ describe('ScimHandler', () => {
     it('should handle errors during deletion', async () => {
       const params = { id: 'con_kzpLY0Afi4I8lvwM' };
 
-      mockConnectionsManager._getRestClient().delete.rejects(new Error('Unexpected error'));
+      handler.deleteScimConfiguration = sinon.stub().rejects(new Error('Unexpected error'));
+
+      mockConnectionsManager.delete.rejects(new Error('Unexpected error'));
       await expect(handler.deleteScimConfiguration(params)).to.be.rejectedWith('Unexpected error');
     });
   });
@@ -208,8 +234,13 @@ describe('ScimHandler', () => {
       const bodyParams = { scim_configuration: { mapping: [], user_id_attribute: 'id' } };
 
       mockConnectionsManager.update.resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
-      handler.updateScimConfiguration = sinon.stub().resolves({ connection_id: 'con_kzpLY0Afi4I8lvwM' });
-      handler.idMap.set('con_kzpLY0Afi4I8lvwM', { strategy: 'samlp', scimConfiguration: bodyParams.scim_configuration });
+      handler.updateScimConfiguration = sinon
+        .stub()
+        .resolves({ connection_id: 'con_kzpLY0Afi4I8lvwM' });
+      handler.idMap.set('con_kzpLY0Afi4I8lvwM', {
+        strategy: 'samlp',
+        scimConfiguration: bodyParams.scim_configuration,
+      });
 
       await handler.updateOverride(requestParams, bodyParams);
       expect(mockConnectionsManager.update.calledOnce).to.be.true;
@@ -221,8 +252,10 @@ describe('ScimHandler', () => {
       const bodyParams = { scim_configuration: { mapping: [], user_id_attribute: 'id' } };
 
       mockConnectionsManager.update.resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
-      handler.createScimConfiguration = sinon.stub().resolves({ connection_id: 'con_kzpLY0Afi4I8lvwM' });
-      
+      handler.createScimConfiguration = sinon
+        .stub()
+        .resolves({ connection_id: 'con_kzpLY0Afi4I8lvwM' });
+
       await handler.updateOverride(requestParams, bodyParams);
       expect(mockConnectionsManager.update.calledOnce).to.be.true;
       expect(handler.createScimConfiguration.calledOnce).to.be.true;
@@ -233,24 +266,34 @@ describe('ScimHandler', () => {
       const bodyParams = {};
 
       mockConnectionsManager.update.resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
-      handler.idMap.set('con_kzpLY0Afi4I8lvwM', { strategy: 'samlp', scimConfiguration: { mapping: [], user_id_attribute: 'id' } });
-      handler.deleteScimConfiguration = sinon.stub().resolves({ connection_id: 'con_kzpLY0Afi4I8lvwM' });
+      handler.idMap.set('con_kzpLY0Afi4I8lvwM', {
+        strategy: 'samlp',
+        scimConfiguration: { mapping: [], user_id_attribute: 'id' },
+      });
+      handler.deleteScimConfiguration = sinon
+        .stub()
+        .resolves({ connection_id: 'con_kzpLY0Afi4I8lvwM' });
       handler.config.returns(true); // Setting `AUTH0_ALLOW_DELETE` to true.
-      
+
       await handler.updateOverride(requestParams, bodyParams);
       expect(mockConnectionsManager.update.calledOnce).to.be.true;
       expect(handler.deleteScimConfiguration.calledOnce).to.be.true;
     });
-    
+
     it('should not delete SCIM configuration when updating connection during updateOverride when AUTH0_ALLOW_DELETE is false', async () => {
       const requestParams = { id: 'con_kzpLY0Afi4I8lvwM' };
       const bodyParams = {};
 
       mockConnectionsManager.update.resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
-      handler.idMap.set('con_kzpLY0Afi4I8lvwM', { strategy: 'samlp', scimConfiguration: { mapping: [], user_id_attribute: 'id' } });
-      handler.deleteScimConfiguration = sinon.stub().resolves({ connection_id: 'con_kzpLY0Afi4I8lvwM' });
+      handler.idMap.set('con_kzpLY0Afi4I8lvwM', {
+        strategy: 'samlp',
+        scimConfiguration: { mapping: [], user_id_attribute: 'id' },
+      });
+      handler.deleteScimConfiguration = sinon
+        .stub()
+        .resolves({ connection_id: 'con_kzpLY0Afi4I8lvwM' });
       handler.config.returns(false); // Setting `AUTH0_ALLOW_DELETE` to false.
-      
+
       await handler.updateOverride(requestParams, bodyParams);
       expect(mockConnectionsManager.update.calledOnce).to.be.true;
       expect(handler.deleteScimConfiguration.called).to.be.false;
@@ -259,11 +302,15 @@ describe('ScimHandler', () => {
     it('should handle errors gracefully during updateOverride', async () => {
       const requestParams = { id: 'con_kzpLY0Afi4I8lvwM' };
       const bodyParams = { scim_configuration: { mapping: [], user_id_attribute: 'id' } };
-  
+
       mockConnectionsManager.update.rejects(new Error('Unexpected error'));
-      handler.updateScimConfiguration = sinon.stub().resolves({ connection_id: 'con_kzpLY0Afi4I8lvwM' });
-      
-      await expect(handler.updateOverride(requestParams, bodyParams)).to.be.rejectedWith('Unexpected error');
+      handler.updateScimConfiguration = sinon
+        .stub()
+        .resolves({ connection_id: 'con_kzpLY0Afi4I8lvwM' });
+
+      await expect(handler.updateOverride(requestParams, bodyParams)).to.be.rejectedWith(
+        'Unexpected error'
+      );
       expect(handler.updateScimConfiguration.called).to.be.false;
     });
   });
@@ -272,7 +319,7 @@ describe('ScimHandler', () => {
     it('should create SCIM configuration when creating connection', async () => {
       const bodyParams = { scim_configuration: { mapping: [], user_id_attribute: 'id' } };
 
-      mockConnectionsManager.create.resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
+      mockConnectionsManager.create.resolves({ data: { id: 'con_kzpLY0Afi4I8lvwM' } });
       handler.createScimConfiguration = sinon.stub().resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
 
       await handler.createOverride(bodyParams);
@@ -295,7 +342,7 @@ describe('ScimHandler', () => {
       expect(result).to.be.null;
       expect(mockCallback.calledOnce).to.be.true;
     });
-  
+
     it('should handle 403 errors, log a warning, and return null', async () => {
       const mockCallback = sinon.stub().rejects({ statusCode: 403 });
       const logWarnSpy = sinon.spy(log, 'warn');
@@ -306,26 +353,39 @@ describe('ScimHandler', () => {
       expect(logWarnSpy.firstCall.args[0]).to.include('Insufficient scope');
       logWarnSpy.restore();
     });
-  
+
     it('should handle 400 errors with "already exists" message and return null', async () => {
-      const mockCallback = sinon.stub().rejects({ statusCode: 400, message: 'SCIM configuration already exists' });
-      const result = await handler.withErrorHandling(mockCallback, 'create', 'con_kzpLY0Afi4I8lvwM');
+      const mockCallback = sinon
+        .stub()
+        .rejects({ statusCode: 400, message: 'SCIM configuration already exists' });
+      const result = await handler.withErrorHandling(
+        mockCallback,
+        'create',
+        'con_kzpLY0Afi4I8lvwM'
+      );
       expect(result).to.be.null;
       expect(mockCallback.calledOnce).to.be.true;
     });
-  
+
     it('should handle 429 errors and return null', async () => {
-      const mockCallback = sinon.stub().rejects({ statusCode: 429, message: 'Rate limit exceeded' });
-      const result = await handler.withErrorHandling(mockCallback, 'create', 'con_kzpLY0Afi4I8lvwM');
+      const mockCallback = sinon
+        .stub()
+        .rejects({ statusCode: 429, message: 'Rate limit exceeded' });
+      const result = await handler.withErrorHandling(
+        mockCallback,
+        'create',
+        'con_kzpLY0Afi4I8lvwM'
+      );
       expect(result).to.be.null;
       expect(mockCallback.calledOnce).to.be.true;
     });
-  
+
     it('should rethrow unexpected errors', async () => {
       const mockCallback = sinon.stub().rejects(new Error('Unexpected error'));
-      await expect(handler.withErrorHandling(mockCallback, 'create', 'con_kzpLY0Afi4I8lvwM')).to.be.rejectedWith('Unexpected error');
+      await expect(
+        handler.withErrorHandling(mockCallback, 'create', 'con_kzpLY0Afi4I8lvwM')
+      ).to.be.rejectedWith('Unexpected error');
       expect(mockCallback.calledOnce).to.be.true;
     });
   });
-  
 });

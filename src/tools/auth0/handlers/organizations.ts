@@ -1,8 +1,14 @@
 import _ from 'lodash';
+import {
+  Connection,
+  GetOrganizations200ResponseOneOfInner,
+  PostEnabledConnectionsRequest,
+} from 'auth0';
 import DefaultHandler, { order } from './default';
 import { calculateChanges } from '../../calculateChanges';
 import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
+import { paginate } from '../client';
 
 export const schema = {
   type: 'array',
@@ -21,7 +27,7 @@ export const schema = {
             connection_id: { type: 'string' },
             assign_membership_on_login: { type: 'boolean' },
             show_as_button: { type: 'boolean' },
-            is_signup_enabled: { type: 'boolean' }
+            is_signup_enabled: { type: 'boolean' },
           },
         },
       },
@@ -74,7 +80,7 @@ export default class OrganizationsHandler extends DefaultHandler {
     const organization = { ...org };
     delete organization.connections;
 
-    const created = await this.client.organizations.create(organization);
+    const { data: created } = await this.client.organizations.create(organization);
 
     if (typeof org.connections !== 'undefined' && org.connections.length > 0) {
       await Promise.all(
@@ -128,11 +134,9 @@ export default class OrganizationsHandler extends DefaultHandler {
       existingConnections.find(
         (x) =>
           x.connection_id === c.connection_id &&
-          (
-            x.assign_membership_on_login !== c.assign_membership_on_login ||
+          (x.assign_membership_on_login !== c.assign_membership_on_login ||
             x.show_as_button !== c.show_as_button ||
-            x.is_signup_enabled !== c.is_signup_enabled
-          )
+            x.is_signup_enabled !== c.is_signup_enabled)
       )
     );
 
@@ -141,11 +145,11 @@ export default class OrganizationsHandler extends DefaultHandler {
       connectionsToUpdate.map((conn) =>
         this.client.organizations
           .updateEnabledConnection(
-            { connection_id: conn.connection_id, ...params },
+            { connectionId: conn.connection_id, ...params },
             {
               assign_membership_on_login: conn.assign_membership_on_login,
               show_as_button: conn.show_as_button,
-              is_signup_enabled: conn.is_signup_enabled
+              is_signup_enabled: conn.is_signup_enabled,
             }
           )
           .catch(() => {
@@ -159,7 +163,13 @@ export default class OrganizationsHandler extends DefaultHandler {
     await Promise.all(
       connectionsToAdd.map((conn) =>
         this.client.organizations
-          .addEnabledConnection(params, _.omit(conn, 'connection'))
+          .addEnabledConnection(
+            params,
+            _.omit<PostEnabledConnectionsRequest>(
+              conn,
+              'connection'
+            ) as PostEnabledConnectionsRequest
+          )
           .catch(() => {
             throw new Error(
               `Problem adding Enabled Connection ${conn.connection_id} for organizations ${params.id}`
@@ -171,7 +181,7 @@ export default class OrganizationsHandler extends DefaultHandler {
     await Promise.all(
       connectionsToRemove.map((conn) =>
         this.client.organizations
-          .removeEnabledConnection({ connection_id: conn.connection_id, ...params })
+          .deleteEnabledConnection({ connectionId: conn.connection_id, ...params })
           .catch(() => {
             throw new Error(
               `Problem removing Enabled Connection ${conn.connection_id} for organizations ${params.id}`
@@ -210,12 +220,16 @@ export default class OrganizationsHandler extends DefaultHandler {
     }
 
     try {
-      const organizations = await this.client.organizations.getAll({
-        checkpoint: true,
-        include_totals: true,
-      });
+      const organizations = await paginate<GetOrganizations200ResponseOneOfInner>(
+        this.client.organizations.getAll,
+        {
+          paginate: true,
+          include_totals: true,
+        }
+      );
+
       for (let index = 0; index < organizations.length; index++) {
-        const connections = await this.client.organizations.connections.get({
+        const { data: connections } = await this.client.organizations.getEnabledConnections({
           id: organizations[index].id,
         });
         organizations[index].connections = connections;
@@ -238,7 +252,8 @@ export default class OrganizationsHandler extends DefaultHandler {
     if (!organizations) return;
     // Gets organizations from destination tenant
     const existing = await this.getType();
-    const existingConnections = await this.client.connections.getAll({
+
+    const existingConnections = await paginate<Connection>(this.client.connections.getAll, {
       paginate: true,
       include_totals: true,
     });

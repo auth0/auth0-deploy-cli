@@ -1,4 +1,3 @@
-//TODO:
 import * as rules from './rules';
 import * as rulesConfigs from './rulesConfigs';
 import * as hooks from './hooks';
@@ -20,7 +19,6 @@ import * as guardianPhoneFactorMessageTypes from './guardianPhoneFactorMessageTy
 import * as roles from './roles';
 import * as branding from './branding';
 import * as prompts from './prompts';
-import * as migrations from './migrations';
 import * as actions from './actions';
 import * as triggers from './triggers';
 import * as organizations from './organizations';
@@ -55,7 +53,6 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   branding,
   //@ts-ignore because prompts have not been universally implemented yet
   prompts,
-  migrations,
   actions,
   triggers,
   organizations,

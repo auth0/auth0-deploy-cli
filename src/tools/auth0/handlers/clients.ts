@@ -1,4 +1,5 @@
-import { Asset, Assets } from '../../../types';
+import { ApiResponse, Assets, PagePaginationParams } from '../../../types';
+import { paginate } from '../client';
 import DefaultAPIHandler from './default';
 
 export const schema = {
@@ -20,7 +21,7 @@ export type Client = {
 };
 
 export default class ClientHandler extends DefaultAPIHandler {
-  existing: Asset[] | null;
+  existing: Client[];
 
   constructor(config: DefaultAPIHandler) {
     super({
@@ -82,11 +83,14 @@ export default class ClientHandler extends DefaultAPIHandler {
 
   async getType() {
     if (this.existing) return this.existing;
-    this.existing = await this.client.clients.getAll({
+
+    const clients = await paginate<Client>(this.client.clients.getAll, {
       paginate: true,
       include_totals: true,
       is_global: false,
     });
+
+    this.existing = clients;
     return this.existing;
   }
 }

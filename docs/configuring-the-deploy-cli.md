@@ -149,7 +149,7 @@ String. Separate value from audience value while retrieving an access token for 
 
 ### `AUTH0_EXCLUDED_RULES`
 
-Array of strings. Excludes the management of specific rules by name. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
+Array of strings. Excludes the management of specific rules by ID. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
 
 ### `AUTH0_EXCLUDED_CLIENTS`
 

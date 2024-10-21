@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 import handlers from '../../../src/tools/auth0/handlers';
 import Context from '../../../src/context/yaml';
-import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
+import { cleanThenMkdir, testDataDir, mockMgmtClient, mockPagedData } from '../../utils';
 import ScimHandler from '../../../src/tools/auth0/handlers/scimHandler';
 
 describe('#YAML context validation', () => {
@@ -257,7 +257,6 @@ describe('#YAML context validation', () => {
       guardianFactors: [],
       guardianFactorProviders: [],
       guardianFactorTemplates: [],
-      migrations: {},
       guardianPhoneFactorMessageTypes: { message_types: ['sms'] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
@@ -289,11 +288,11 @@ describe('#YAML context validation', () => {
         bruteForceProtection: {},
         suspiciousIpThrottling: {},
       },
+      logStreams: [],
       prompts: {
         customText: {},
         partials: {},
       },
-      logStreams: [],
       customDomains: [],
       themes: [],
     });
@@ -370,7 +369,6 @@ describe('#YAML context validation', () => {
       guardianFactors: [],
       guardianFactorProviders: [],
       guardianFactorTemplates: [],
-      migrations: {},
       guardianPhoneFactorMessageTypes: { message_types: ['sms'] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
@@ -402,11 +400,11 @@ describe('#YAML context validation', () => {
         bruteForceProtection: {},
         suspiciousIpThrottling: {},
       },
+      logStreams: [],
       prompts: {
         customText: {},
         partials: {},
       },
-      logStreams: [],
       customDomains: [],
       themes: [],
     });
@@ -484,7 +482,6 @@ describe('#YAML context validation', () => {
       guardianFactors: [],
       guardianFactorProviders: [],
       guardianFactorTemplates: [],
-      migrations: {},
       guardianPhoneFactorMessageTypes: { message_types: ['sms'] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
@@ -581,18 +578,20 @@ describe('#YAML context validation', () => {
         },
       },
       {
-        tenant: {
+        tenants: {
           getSettings: async () =>
             new Promise((res) =>
               res({
-                friendly_name: 'Production Tenant',
-                enabled_locales: ['en', 'es'],
+                data: {
+                  friendly_name: 'Production Tenant',
+                  enabled_locales: ['en', 'es'],
+                },
               })
             ),
         },
         connections: {
-          getAll: () => ({
-            connections: [
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
               {
                 name: 'connection-1',
                 strategy: 'waad',
@@ -600,9 +599,8 @@ describe('#YAML context validation', () => {
                   tenant_domain: 'travel0.com',
                 },
               },
-            ],
-          }),
-          _getRestClient: () => ({})
+            ]),
+          _getRestClient: () => ({}),
         },
         prompts: {
           _getRestClient: (endpoint) => ({

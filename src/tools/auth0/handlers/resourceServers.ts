@@ -1,9 +1,11 @@
+import { ResourceServer } from 'auth0';
 import ValidationError from '../../validationError';
 
 import constants from '../../constants';
 import DefaultHandler from './default';
 import { calculateChanges } from '../../calculateChanges';
 import { Assets, CalculatedChanges } from '../../../types';
+import { paginate } from '../client';
 
 export const excludeSchema = {
   type: 'array',
@@ -34,12 +36,6 @@ export const schema = {
   },
 };
 
-export type ResourceServer = {
-  id: string;
-  name: string;
-  identifier: string;
-  scopes?: { description: string; value: string }[];
-};
 export default class ResourceServersHandler extends DefaultHandler {
   existing: ResourceServer[];
 
@@ -58,7 +54,8 @@ export default class ResourceServersHandler extends DefaultHandler {
 
   async getType(): Promise<ResourceServer[]> {
     if (this.existing) return this.existing;
-    const resourceServers = await this.client.resourceServers.getAll({
+
+    const resourceServers = await paginate<ResourceServer>(this.client.resourceServers.getAll, {
       paginate: true,
       include_totals: true,
     });

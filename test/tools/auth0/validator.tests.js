@@ -2,29 +2,27 @@ import { expect } from 'chai';
 import Auth0 from '../../../src/tools/auth0';
 import constants from '../../../src/tools/constants';
 import { mockTheme } from './handlers/themes.tests';
+import { mockPagedData } from '../../utils';
 
-const mockConfigFn = () => { };
+const mockConfigFn = () => {};
 
 describe('#schema validation tests', () => {
   const client = {
-    rules: {
-      getAll: async () => ({ rules: [] }),
-    },
     clients: {
-      getAll: async () => ({ clients: [] }),
+      getAll: async (params) => mockPagedData(params, 'clients', []),
     },
     connections: {
-      getAll: async () => ({ connections: [] }),
+      getAll: async (params) => mockPagedData(params, 'connections', []),
       _getRestClient: () => ({}),
     },
     resourceServers: {
-      getAll: async () => ({ resource_servers: [] }),
+      getAll: async (params) => mockPagedData(params, 'resource_servers', []),
     },
     clientGrants: {
-      getAll: async () => ({ client_grants: [] }),
+      getAll: async (params) => mockPagedData(params, 'client_grants', []),
     },
     roles: {
-      getAll: async () => ({ client_grants: [] }),
+      getAll: async (params) => mockPagedData(params, 'roles', []),
     },
     prompts: {
       _getRestClient: (endpoint) => ({
@@ -678,187 +676,6 @@ describe('#schema validation tests', () => {
     });
   });
 
-  describe('#rules validate', () => {
-    it('should fail validation if no "name" provided', (done) => {
-      const data = [
-        {
-          anything: 'anything',
-        },
-      ];
-
-      checkRequired('name', { rules: data }, done);
-    });
-
-    it('should fail validation if bad "name" provided', (done) => {
-      const data = [
-        {
-          name: '-rule-',
-        },
-      ];
-
-      const auth0 = new Auth0(
-        {
-          prompts: {
-            _getRestClient: (endpoint) => ({
-              get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-            }),
-          },
-        },
-        { rules: data },
-        mockConfigFn
-      );
-
-      auth0.validate().then(failedCb(done), passedCb(done, 'should match pattern'));
-    });
-
-    it('should fail validation if bad "stage" provided', (done) => {
-      const data = [
-        {
-          name: 'rule',
-          stage: 'stage',
-        },
-      ];
-
-      checkEnum({ rules: data }, done);
-    });
-
-    it('should pass validation', (done) => {
-      const data = [
-        {
-          name: 'name',
-          order: 1,
-          stage: 'login_failure',
-        },
-      ];
-
-      checkPassed({ rules: data }, done);
-    });
-  });
-
-  describe('#rulesConfigs validate', () => {
-    it('should fail validation if no "key" provided', (done) => {
-      const data = [
-        {
-          anything: 'anything',
-        },
-      ];
-
-      checkRequired('key', { rulesConfigs: data }, done);
-    });
-
-    it('should fail validation if no "value" provided', (done) => {
-      const data = [
-        {
-          key: 'key',
-        },
-      ];
-
-      checkRequired('value', { rulesConfigs: data }, done);
-    });
-
-    it('should fail validation if bad "key" provided', (done) => {
-      const data = [
-        {
-          key: ':-?',
-          value: 'value',
-        },
-      ];
-
-      const auth0 = new Auth0(
-        {
-          prompts: {
-            _getRestClient: (endpoint) => ({
-              get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-            }),
-          },
-        },
-        { rulesConfigs: data },
-        mockConfigFn
-      );
-
-      auth0.validate().then(failedCb(done), passedCb(done, 'should match pattern'));
-    });
-
-    it('should pass validation', (done) => {
-      const data = [
-        {
-          key: 'key',
-          value: 'value',
-        },
-      ];
-
-      checkPassed({ rulesConfigs: data }, done);
-    });
-  });
-
-  describe('#hooks validate', () => {
-    it('should fail validation if no "name" provided', (done) => {
-      const data = [
-        {
-          anything: 'anything',
-        },
-      ];
-
-      checkRequired('name', { hooks: data }, done);
-    });
-
-    it('should fail validation if bad "name" provided', (done) => {
-      const data = [
-        {
-          name: '-hook-',
-        },
-      ];
-
-      const auth0 = new Auth0(
-        {
-          prompts: {
-            _getRestClient: (endpoint) => ({
-              get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-            }),
-          },
-        },
-        { hooks: data },
-        mockConfigFn
-      );
-
-      auth0.validate().then(failedCb(done), passedCb(done, 'should match pattern'));
-    });
-
-    it('should fail validation if no "triggerId" provided', (done) => {
-      const data = [
-        {
-          name: 'name',
-          script: 'script content',
-        },
-      ];
-
-      checkRequired('triggerId', { hooks: data }, done);
-    });
-
-    it('should fail validation if bad "triggerId" provided', (done) => {
-      const data = [
-        {
-          name: 'rule',
-          triggerId: 'invalid triggerId',
-        },
-      ];
-
-      checkEnum({ hooks: data }, done);
-    });
-
-    it('should pass validation', (done) => {
-      const data = [
-        {
-          name: 'name',
-          script: 'script content',
-          triggerId: 'post-change-password',
-        },
-      ];
-
-      checkPassed({ hooks: data }, done);
-    });
-  });
-
   describe('#tenant validate', () => {
     it('should fail validation if tenant is not an object', (done) => {
       const data = [
@@ -888,54 +705,6 @@ describe('#schema validation tests', () => {
       };
 
       checkPassed({ tenant: data }, done);
-    });
-  });
-
-  describe('#migrations validate', () => {
-    it('should fail validation if migrations is not an object', (done) => {
-      const data = '';
-
-      const auth0 = new Auth0(
-        {
-          prompts: {
-            _getRestClient: (endpoint) => ({
-              get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-            }),
-          },
-        },
-        { migrations: data },
-        mockConfigFn
-      );
-
-      auth0.validate().then(failedCb(done), passedCb(done, 'should be object'));
-    });
-
-    it('should fail validation if migrations properties are not boolean', (done) => {
-      const data = {
-        migration_flag: 'string',
-      };
-
-      const auth0 = new Auth0(
-        {
-          prompts: {
-            _getRestClient: (endpoint) => ({
-              get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-            }),
-          },
-        },
-        { migrations: data },
-        mockConfigFn
-      );
-
-      auth0.validate().then(failedCb(done), passedCb(done, 'should be boolean'));
-    });
-
-    it('should pass validation', (done) => {
-      const data = {
-        migration_flag: true,
-      };
-
-      checkPassed({ migrations: data }, done);
     });
   });
 

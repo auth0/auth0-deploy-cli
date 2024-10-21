@@ -12,16 +12,16 @@ describe('#emailTemplates handler', () => {
         emailTemplates: {
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(data).to.be.an('object');
-            expect(params.name).to.equal('verify_email');
+            expect(params.templateName).to.equal('verify_email');
             expect(data.template).to.equal('verify_email');
             expect(data.body).to.equal('body');
-            return Promise.resolve({ params, data });
+            return Promise.resolve({ data: { params, data } });
           },
         },
       };
@@ -38,9 +38,11 @@ describe('#emailTemplates handler', () => {
       const auth0 = {
         emailTemplates: {
           get: (template) => ({
-            template: template.name,
-            enabled: true,
-            body: '<html>some email</html>',
+            data: {
+              template: template.templateName,
+              enabled: true,
+              body: '<html>some email</html>',
+            },
           }),
         },
       };
@@ -64,7 +66,7 @@ describe('#emailTemplates handler', () => {
             expect(data).to.be.an('object');
             expect(data.template).to.equal('verify_email');
             expect(data.body).to.equal('body');
-            return Promise.resolve(data);
+            return Promise.resolve({ data });
           },
           update: () => {
             const error = new Error('test');

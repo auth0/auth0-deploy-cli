@@ -33,7 +33,7 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
 
   objString(item: Asset): string {
     const objectString = (() => {
-      let obj = {};
+      const obj = {};
       if (item.breachedPasswordDetection?.enabled) {
         obj['breached-password-protection'] = {
           enabled: item.breachedPasswordDetection.enabled,
@@ -68,9 +68,9 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
       ]);
 
     this.existing = {
-      breachedPasswordDetection,
-      bruteForceProtection,
-      suspiciousIpThrottling,
+      breachedPasswordDetection: breachedPasswordDetection.data,
+      bruteForceProtection: bruteForceProtection.data,
+      suspiciousIpThrottling: suspiciousIpThrottling.data,
     };
 
     return this.existing;
@@ -83,19 +83,14 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
       return;
     }
 
-    Promise.all([
+    await Promise.all([
       this.client.attackProtection.updateBreachedPasswordDetectionConfig(
-        {},
         attackProtection.breachedPasswordDetection
       ),
       this.client.attackProtection.updateSuspiciousIpThrottlingConfig(
-        {},
         attackProtection.suspiciousIpThrottling
       ),
-      this.client.attackProtection.updateBruteForceConfig(
-        {},
-        attackProtection.bruteForceProtection
-      ),
+      this.client.attackProtection.updateBruteForceConfig(attackProtection.bruteForceProtection),
     ]);
 
     this.updated += 1;

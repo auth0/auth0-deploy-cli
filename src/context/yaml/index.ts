@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import path from 'path';
+import { ManagementClient } from 'auth0';
 import {
   loadFileAndReplaceKeywords,
   keywordReplace,
@@ -26,7 +27,7 @@ export default class YAMLContext {
   assets: Assets;
   disableKeywordReplacement: boolean;
 
-  constructor(config: Config, mgmtClient) {
+  constructor(config: Config, mgmtClient: ManagementClient) {
     this.configFile = config.AUTH0_INPUT_FILE;
     this.config = config;
     this.mappings = config.AUTH0_KEYWORD_REPLACE_MAPPINGS || {};

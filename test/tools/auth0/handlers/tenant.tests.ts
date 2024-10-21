@@ -32,14 +32,16 @@ describe('#tenant handler', () => {
 
   it('should get tenant', async () => {
     const auth0 = {
-      tenant: {
+      tenants: {
         getSettings: () => ({
-          friendly_name: 'Test',
-          default_directory: 'users',
-          flags: {
-            ...mockAllowedFlags,
-            'unallowed-flag-1': false,
-            'unallowed-flag-2': true,
+          data: {
+            friendly_name: 'Test',
+            default_directory: 'users',
+            flags: {
+              ...mockAllowedFlags,
+              'unallowed-flag-1': false,
+              'unallowed-flag-2': true,
+            },
           },
         }),
       },
@@ -58,10 +60,12 @@ describe('#tenant handler', () => {
   describe('#tenant process', () => {
     it('should update tenant settings', async () => {
       const auth0 = {
-        tenant: {
+        tenants: {
           getSettings: () => ({
-            friendly_name: 'Test',
-            default_directory: 'users',
+            data: {
+              friendly_name: 'Test',
+              default_directory: 'users',
+            },
           }),
           updateSettings: (data) => {
             expect(data).to.be.an('object');
@@ -89,7 +93,7 @@ describe('#tenant handler', () => {
         };
 
         const auth0 = {
-          tenant: {
+          tenants: {
             updateSettings: (data) => {
               expect(data).to.be.an('object');
               expect(data.flags).to.deep.equal({
@@ -114,11 +118,11 @@ describe('#tenant handler', () => {
         };
 
         const auth0 = {
-          tenant: {
+          tenants: {
             updateSettings: (data) => {
               expect(data).to.be.an('object');
               expect(data.flags).to.be.undefined;
-              return Promise.resolve(data);
+              return Promise.resolve({ data });
             },
           },
         };
