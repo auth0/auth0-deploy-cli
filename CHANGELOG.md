@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.0.0] - 2024-10-21
+
+### Changed
+
+- Auth0 [v4.X](https://github.com/auth0/node-auth0/releases/tag/v4.10.0) migration
+- The `delete` operation on the `emailProvider` resource will disable the email provider instead of deleting it.
+
+### Deprecated
+
+- Migration resource operation
+
+### Security
+
+- Security fixes from dependencies
+- Node 18 LTS and newer LTS releases are supported.
+
+  Doc: [v8 Migartion](./docs/v8_MIGRATION_GUIDE.md)
+
 ## [7.24.3] - 2024-10-15
 
 ### Fixed
@@ -1090,7 +1108,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#946]: https://github.com/auth0/auth0-deploy-cli/issues/946
 [#954]: https://github.com/auth0/auth0-deploy-cli/issues/954
 [#963]: https://github.com/auth0/auth0-deploy-cli/issues/963
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.3...HEAD
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.0.0...HEAD
+[8.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.3...v8.0.0
 [7.24.3]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.2...v7.24.3
 [7.24.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.1...v7.24.2
 [7.24.1]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.0...v7.24.1
