@@ -125,7 +125,7 @@ export type Assets = Partial<{
   themes: Theme[] | null;
   forms: Form[] | null;
   flows: Flow[] | null;
-  flowVaults: FlowVault[] | null;
+  flowVaults: FlowVault | null;
 }>;
 
 export type CalculatedChanges = {

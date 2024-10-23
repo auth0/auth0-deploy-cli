@@ -197,6 +197,9 @@ const constants = {
     'WHATSAPP',
     'ZAPIER',
   ],
+  FORMS_DIRECTORY: 'forms',
+  FLOWS_DIRECTORY: 'flows',
+  FLOWS_VAULT_DIRECTORY: 'flow-vaults',
 };
 
 export default constants;

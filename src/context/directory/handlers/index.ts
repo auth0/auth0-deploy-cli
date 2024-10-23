@@ -26,6 +26,9 @@ import themes from './themes';
 import rules from './rules';
 import hooks from './hooks';
 import rulesConfigs from './rulesConfigs';
+import forms from './forms';
+import flows from './flows';
+import flowVaults from './flowVaults';
 
 import DirectoryContext from '..';
 import { AssetTypes, Asset } from '../../../types';
@@ -66,6 +69,9 @@ const directoryHandlers: {
   prompts,
   customDomains,
   themes,
+  forms,
+  flows,
+  flowVaults,
 };
 
 export default directoryHandlers;
