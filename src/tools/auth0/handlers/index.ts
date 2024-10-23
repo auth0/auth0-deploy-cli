@@ -26,6 +26,7 @@ import * as attackProtection from './attackProtection';
 import * as logStreams from './logStreams';
 import * as customDomains from './customDomains';
 import * as themes from './themes';
+import * as selfServiceProfiles from './selfServiceProfiles';
 
 import { AssetTypes } from '../../../types';
 import APIHandler from './default';
@@ -60,6 +61,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   logStreams,
   customDomains,
   themes,
+  selfServiceProfiles,
 };
 
 export default auth0ApiHandlers as {

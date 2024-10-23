@@ -174,6 +174,7 @@ const constants = {
   PARTIALS_DIRECTORY: 'partials',
   CUSTOM_DOMAINS_DIRECTORY: 'custom-domains',
   THEMES_DIRECTORY: 'themes',
+  SELF_SERVICE_PROFILE_DIRECTORY: 'self-service-profiles',
 };
 
 export default constants;

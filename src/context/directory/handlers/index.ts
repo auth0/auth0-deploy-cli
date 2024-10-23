@@ -29,6 +29,7 @@ import rulesConfigs from './rulesConfigs';
 
 import DirectoryContext from '..';
 import { AssetTypes, Asset } from '../../../types';
+import selfServiceProfiles from './selfServiceProfiles';
 
 export type DirectoryHandler<T> = {
   dump: (context: DirectoryContext) => void;
@@ -66,6 +67,7 @@ const directoryHandlers: {
   prompts,
   customDomains,
   themes,
+  selfServiceProfiles,
 };
 
 export default directoryHandlers;

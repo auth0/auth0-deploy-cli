@@ -1,4 +1,4 @@
-import { GetConnectionsStrategyEnum, ManagementClient, ResourceServer } from 'auth0';
+import { GetConnectionsStrategyEnum, ManagementClient, ResourceServer, SsProfile } from 'auth0';
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { Action } from './tools/auth0/handlers/actions';
 import { Prompts } from './tools/auth0/handlers/prompts';
@@ -8,6 +8,7 @@ import { LogStream } from './tools/auth0/handlers/logStreams';
 import { Client } from './tools/auth0/handlers/clients';
 import { ClientGrant } from './tools/auth0/handlers/clientGrants';
 import { Theme } from './tools/auth0/handlers/themes';
+import { SelfServiceProfile } from './tools/auth0/handlers/selfServiceProfiles';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -120,6 +121,7 @@ export type Assets = Partial<{
   };
   clientsOrig: Asset[] | null;
   themes: Theme[] | null;
+  selfServiceProfiles: SelfServiceProfile[];
 }>;
 
 export type CalculatedChanges = {
@@ -157,7 +159,8 @@ export type AssetTypes =
   | 'logStreams'
   | 'prompts'
   | 'customDomains'
-  | 'themes';
+  | 'themes'
+  | 'selfServiceProfiles';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 
