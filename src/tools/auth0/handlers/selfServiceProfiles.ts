@@ -4,26 +4,6 @@ import log from '../../../logger';
 import DefaultAPIHandler from './default';
 import { calculateChanges } from '../../calculateChanges';
 
-// TODO: replace with a more accurate representation SsProfile from 'auth0'
-export type SelfServiceProfile = {
-  id: string;
-  name: string;
-  description?: string;
-  user_attributes?: {
-    name: string;
-    description: string;
-    is_optional: boolean;
-  }[];
-  branding?: {
-    logo_url: string;
-    colors: {
-      primary: string;
-    };
-  };
-  allowed_strategies?: string[];
-  created_at?: string;
-  updated_at?: string;
-};
 export const schema = {
   type: 'array',
   items: {

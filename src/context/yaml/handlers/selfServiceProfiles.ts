@@ -2,9 +2,8 @@ import { SsProfile } from 'auth0';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
-import { SelfServiceProfile } from '../../../tools/auth0/handlers/selfServiceProfiles';
 
-type ParsedSelfServiceProfiles = ParsedAsset<'selfServiceProfiles', SelfServiceProfile[]>;
+type ParsedSelfServiceProfiles = ParsedAsset<'selfServiceProfiles', Partial<SsProfile>[]>;
 
 async function parse(context: YAMLContext): Promise<ParsedSelfServiceProfiles> {
   const { selfServiceProfiles } = context.assets;
@@ -23,7 +22,7 @@ async function dump(context: YAMLContext): Promise<ParsedSelfServiceProfiles> {
   selfServiceProfiles = selfServiceProfiles.map((profile) => {
     delete profile.created_at;
     delete profile.updated_at;
-    delete profile.allowed_strategies;
+
     return {
       ...profile,
     };

@@ -8,7 +8,6 @@ import { LogStream } from './tools/auth0/handlers/logStreams';
 import { Client } from './tools/auth0/handlers/clients';
 import { ClientGrant } from './tools/auth0/handlers/clientGrants';
 import { Theme } from './tools/auth0/handlers/themes';
-import { SelfServiceProfile } from './tools/auth0/handlers/selfServiceProfiles';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -121,7 +120,7 @@ export type Assets = Partial<{
   };
   clientsOrig: Asset[] | null;
   themes: Theme[] | null;
-  selfServiceProfiles: SelfServiceProfile[];
+  selfServiceProfiles: SsProfile[];
 }>;
 
 export type CalculatedChanges = {

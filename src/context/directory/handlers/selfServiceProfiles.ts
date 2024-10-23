@@ -1,16 +1,15 @@
 import path from 'path';
 import fs from 'fs-extra';
+import { SsProfile } from 'auth0';
 import { constants } from '../../../tools';
 import log from '../../../logger';
 
 import { existsMustBeDir, isFile, dumpJSON, loadJSON, sanitize } from '../../../utils';
-import { emailProviderDefaults } from '../../defaults';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
-import { SelfServiceProfile } from '../../../tools/auth0/handlers/selfServiceProfiles';
 
-type ParsedSelfServiceProfiles = ParsedAsset<'selfServiceProfiles', SelfServiceProfile[]>;
+type ParsedSelfServiceProfiles = ParsedAsset<'selfServiceProfiles', Partial<SsProfile>[]>;
 
 function parse(context: DirectoryContext): ParsedSelfServiceProfiles {
   const { selfServiceProfiles } = context.assets;
@@ -38,7 +37,6 @@ async function dump(context: DirectoryContext): Promise<void> {
 
     delete profile.created_at;
     delete profile.updated_at;
-    delete profile.allowed_strategies;
 
     dumpJSON(ssProfileFile, profile);
   });
