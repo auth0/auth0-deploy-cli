@@ -1,25 +1,41 @@
 import path from 'path';
 import fs from 'fs-extra';
+import dotProp from 'dot-prop';
 
 import log from '../../../logger';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { ParsedAsset } from '../../../types';
 import { Form } from '../../../tools/auth0/handlers/forms';
+import { loadJSON, sanitize } from '../../../utils';
+import constants from '../../../tools/constants';
 
-type ParsedForms = ParsedAsset<'forms', Form[]>;
+type ParsedForms = ParsedAsset<'forms', Partial<Form>[]>;
 
 async function parse(context: YAMLContext): Promise<ParsedForms> {
   const { forms } = context.assets;
 
   if (!forms) return { forms: null };
 
+  const parsedForms = forms.map((form: Form) => {
+    const formFile = path.join(context.basePath, form.body);
+
+    const parsedFormBody = loadJSON(formFile, {
+      mappings: context.mappings,
+      disableKeywordReplacement: context.disableKeywordReplacement,
+    });
+
+    // Remove the body from the form object
+    delete parsedFormBody.body;
+
+    return {
+      name: form.name,
+      ...parsedFormBody,
+    };
+  });
+
   return {
-    forms: [
-      ...forms.map((form) => ({
-        ...form,
-      })),
-    ],
+    forms: [...parsedForms],
   };
 }
 
@@ -30,20 +46,37 @@ async function dump(context: YAMLContext): Promise<ParsedForms> {
     return { forms: null };
   }
 
-  const pagesFolder = path.join(context.basePath, 'forms');
+  const pagesFolder = path.join(context.basePath, constants.FORMS_DIRECTORY);
   fs.ensureDirSync(pagesFolder);
+
+  // Check if there is any duplicate form name
+  const formNames = forms.map((form) => form.name);
+  const duplicateFormNames = formNames.filter((name, index) => formNames.indexOf(name) !== index);
+
+  if (duplicateFormNames.length > 0) {
+    log.error(
+      `Duplicate form names found: [${duplicateFormNames.join(
+        ', '
+      )}] , make sure to rename them to avoid conflicts`
+    );
+    throw new Error(`Duplicate form names found: ${duplicateFormNames.join(', ')}`);
+  }
 
   forms = forms.map((form) => {
     if (form.name === undefined) {
       return form;
     }
 
-    const jsonFile = path.join(pagesFolder, `${form.name}.json`);
+    const formName = sanitize(form.name);
+
+    const jsonFile = path.join(pagesFolder, `${formName}.json`);
     log.info(`Writing ${jsonFile}`);
-    fs.writeFileSync(jsonFile, form.name);
+
+    const jsonBody = JSON.stringify(form, null, 2);
+    fs.writeFileSync(jsonFile, jsonBody);
     return {
-      ...form,
-      html: `./forms/${form.name}.json`,
+      name: form.name,
+      body: `./forms/${formName}.json`,
     };
   });
 

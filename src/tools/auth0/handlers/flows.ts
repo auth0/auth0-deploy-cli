@@ -6,6 +6,7 @@ import { Asset, Assets } from '../../../types';
 
 export type Flow = {
   name: string;
+  body: string;
 };
 
 export const schema = {
@@ -36,8 +37,34 @@ export default class FlowHandler extends DefaultHandler {
     if (this.existing) {
       return this.existing;
     }
+    // TODO: Implement pagination
+    const { data: flows } = await this.client.flows.getFlows();
+
+    const allFlows = await Promise.all(
+      flows.map(async (f) => {
+        try {
+          const { data: flow } = await this.client.flows.getFlowsById({ id: f.id });
+          return flow;
+        } catch (err) {
+          // Ignore if not found, else throw error
+          if (err.statusCode !== 404) {
+            throw err;
+          }
+        }
+      })
+    );
+
+    this.existing = allFlows;
     return this.existing;
   }
 
-  async processChanges(assets: Assets): Promise<void> {}
+  async processChanges(assets: Assets): Promise<void> {
+    const { flows } = assets;
+
+    // Do nothing if not set
+    if (!flows) return;
+
+    const { del, update, create, conflicts } = await this.calcChanges(assets);
+    console.log('Flows processChanges', del, update, create, conflicts);
+  }
 }
