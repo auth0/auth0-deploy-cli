@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import {
+  Client,
   Connection,
   GetOrganizations200ResponseOneOfInner,
   PostEnabledConnectionsRequest,
@@ -9,6 +10,7 @@ import { calculateChanges } from '../../calculateChanges';
 import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
+import { convertClientIdToName } from '../../../utils';
 
 export const schema = {
   type: 'array',
@@ -28,6 +30,16 @@ export const schema = {
             assign_membership_on_login: { type: 'boolean' },
             show_as_button: { type: 'boolean' },
             is_signup_enabled: { type: 'boolean' },
+          },
+        },
+      },
+      client_grants: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            grant_id: { type: 'string' },
+            client_id: { type: 'string' },
           },
         },
       },
@@ -228,12 +240,28 @@ export default class OrganizationsHandler extends DefaultHandler {
         }
       );
 
+      const clients = await paginate<Client>(this.client.clients.getAll, {
+        paginate: true,
+        include_totals: true,
+      });
+
       for (let index = 0; index < organizations.length; index++) {
         const { data: connections } = await this.client.organizations.getEnabledConnections({
           id: organizations[index].id,
         });
         organizations[index].connections = connections;
+
+        const { data: organizationClientGrants } =
+          await this.client.organizations.getOrganizationClientGrants({
+            id: organizations[index].id,
+          });
+
+        organizations[index].client_grants = organizationClientGrants?.map((clientGrant) => ({
+          grant_id: clientGrant.id, // TODO: remove this after development
+          client_id: convertClientIdToName(clientGrant.client_id, clients),
+        }));
       }
+
       this.existing = organizations;
       return this.existing;
     } catch (err) {
