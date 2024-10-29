@@ -2,6 +2,7 @@ import _ from 'lodash';
 import {
   Client,
   Connection,
+  GetOrganizationClientGrants200ResponseOneOfInner,
   GetOrganizations200ResponseOneOfInner,
   PostEnabledConnectionsRequest,
 } from 'auth0';
@@ -251,10 +252,9 @@ export default class OrganizationsHandler extends DefaultHandler {
         });
         organizations[index].connections = connections;
 
-        const { data: organizationClientGrants } =
-          await this.client.organizations.getOrganizationClientGrants({
-            id: organizations[index].id,
-          });
+        const organizationClientGrants = await this.getOrganizationClientGrants(
+          organizations[index].id
+        );
 
         organizations[index].client_grants = organizationClientGrants?.map((clientGrant) => ({
           grant_id: clientGrant.id, // TODO: remove this after development
@@ -336,5 +336,16 @@ export default class OrganizationsHandler extends DefaultHandler {
         }
       })
     );
+  }
+
+  async getOrganizationClientGrants(
+    organizationId: string
+  ): Promise<GetOrganizationClientGrants200ResponseOneOfInner[]> {
+    const { data: organizationClientGrants } =
+      await this.client.organizations.getOrganizationClientGrants({
+        id: organizationId,
+      });
+
+    return organizationClientGrants;
   }
 }
