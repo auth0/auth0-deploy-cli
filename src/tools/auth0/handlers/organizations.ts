@@ -13,7 +13,6 @@ import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import { convertClientIdToName } from '../../../utils';
-import { cli } from 'winston/lib/winston/config';
 
 export const schema = {
   type: 'array',
@@ -52,7 +51,9 @@ export const schema = {
 };
 
 type FormattedClientGrants = {
+  // eslint-disable-next-line camelcase
   grant_id: string;
+  // eslint-disable-next-line camelcase
   client_id: string;
 };
 
