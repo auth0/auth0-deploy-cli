@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import {
   Client,
+  ClientGrant,
   Connection,
   GetOrganizationClientGrants200ResponseOneOfInner,
   GetOrganizations200ResponseOneOfInner,
@@ -12,6 +13,7 @@ import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import { convertClientIdToName } from '../../../utils';
+import { cli } from 'winston/lib/winston/config';
 
 export const schema = {
   type: 'array',
@@ -39,18 +41,25 @@ export const schema = {
         items: {
           type: 'object',
           properties: {
-            grant_id: { type: 'string' },
             client_id: { type: 'string' },
           },
         },
+        default: [],
       },
     },
     required: ['name'],
   },
 };
 
+type FormattedClientGrants = {
+  grant_id: string;
+  client_id: string;
+};
+
 export default class OrganizationsHandler extends DefaultHandler {
   existing: Asset[];
+
+  formattedClientGrants: FormattedClientGrants[];
 
   constructor(config: DefaultHandler) {
     super({
@@ -92,6 +101,7 @@ export default class OrganizationsHandler extends DefaultHandler {
   async createOrganization(org): Promise<Asset> {
     const organization = { ...org };
     delete organization.connections;
+    delete organization.client_grants;
 
     const { data: created } = await this.client.organizations.create(organization);
 
@@ -103,6 +113,16 @@ export default class OrganizationsHandler extends DefaultHandler {
       );
     }
 
+    if (typeof org.client_grants !== 'undefined' && org.client_grants.length > 0) {
+      await Promise.all(
+        org.client_grants.map((organizationClientGrants) =>
+          this.createOrganizationClientGrants(
+            created.id,
+            this.getClientGrantIDByClientName(organizationClientGrants.client_id)
+          )
+        )
+      );
+    }
     return created;
   }
 
@@ -124,19 +144,20 @@ export default class OrganizationsHandler extends DefaultHandler {
   }
 
   async updateOrganization(org, organizations) {
-    const { connections: existingConnections } = await organizations.find(
-      (orgToUpdate) => orgToUpdate.name === org.name
-    );
+    const { connections: existingConnections, client_grants: existingClientGrants } =
+      await organizations.find((orgToUpdate) => orgToUpdate.name === org.name);
 
     const params = { id: org.id };
-    const { connections } = org;
+    const { connections, client_grants: organizationClientGrants } = org;
 
     delete org.connections;
     delete org.name;
     delete org.id;
+    delete org.client_grants;
 
     await this.client.organizations.update(params, org);
 
+    // organization connections
     const connectionsToRemove = existingConnections.filter(
       (c) => !connections.find((x) => x.connection_id === c.connection_id)
     );
@@ -203,7 +224,71 @@ export default class OrganizationsHandler extends DefaultHandler {
       )
     );
 
+    // organization client_grants
+    const orgClientGrantsToRemove =
+      existingClientGrants
+        ?.filter((c) => !organizationClientGrants?.find((x) => x.client_id === c.client_id))
+        ?.map((clientGrant) => ({
+          grant_id: this.getClientGrantIDByClientName(clientGrant.client_id),
+        })) || [];
+
+    const orgClientGrantsToAdd =
+      organizationClientGrants
+        ?.filter((c) => !existingClientGrants?.find((x) => x.client_id === c.client_id))
+        ?.map((clientGrant) => ({
+          grant_id: this.getClientGrantIDByClientName(clientGrant.client_id),
+        })) || [];
+
+    // Handle updates first
+    await Promise.all(
+      orgClientGrantsToAdd.map((orgClientGrant) =>
+        this.createOrganizationClientGrants(params.id, orgClientGrant.grant_id).catch(() => {
+          throw new Error(
+            `Problem adding organization clientGrant ${orgClientGrant.grant_id} for organizations ${params.id}`
+          );
+        })
+      )
+    );
+
+    await Promise.all(
+      orgClientGrantsToRemove.map((orgClientGrant) =>
+        this.deleteOrganizationClientGrants(params.id, orgClientGrant.grant_id).catch(() => {
+          throw new Error(
+            `Problem removing organization clientGrant ${orgClientGrant.grant_id} for organizations ${params.id}`
+          );
+        })
+      )
+    );
+
     return params;
+  }
+
+  getClientGrantIDByClientName(clientsName: string): string {
+    const found = this.formattedClientGrants.find((c) => c.client_id === clientsName);
+    return found?.grant_id || '';
+  }
+
+  async getFormattedClientGrants(): Promise<FormattedClientGrants[]> {
+    const [clients, clientGrants] = await Promise.all([
+      paginate<Client>(this.client.clients.getAll, {
+        paginate: true,
+        include_totals: true,
+      }),
+      paginate<ClientGrant>(this.client.clientGrants.getAll, {
+        paginate: true,
+        include_totals: true,
+      }),
+    ]);
+
+    // Convert clients by name to the id and store it in the formattedClientGrants
+    const formattedClientGrantsMapping = clientGrants?.map((clientGrant) => {
+      const { id, client_id: clientName } = clientGrant;
+      const grant = { grant_id: id, client_id: clientName };
+      const found = clients.find((c) => c.client_id === grant.client_id);
+      if (found) grant.client_id = found.name;
+      return grant;
+    });
+    return formattedClientGrantsMapping;
   }
 
   async updateOrganizations(updates: CalculatedChanges['update'], orgs: Asset[]): Promise<void> {
@@ -257,7 +342,6 @@ export default class OrganizationsHandler extends DefaultHandler {
         );
 
         organizations[index].client_grants = organizationClientGrants?.map((clientGrant) => ({
-          grant_id: clientGrant.id, // TODO: remove this after development
           client_id: convertClientIdToName(clientGrant.client_id, clients),
         }));
       }
@@ -300,6 +384,9 @@ export default class OrganizationsHandler extends DefaultHandler {
         })
         .filter((connection) => !!connection.connection_id);
     });
+
+    // store formated client_grants->client_id to client grant->grant_id mapping
+    this.formattedClientGrants = await this.getFormattedClientGrants();
 
     const changes = calculateChanges({
       handler: this,
@@ -347,5 +434,31 @@ export default class OrganizationsHandler extends DefaultHandler {
       });
 
     return organizationClientGrants;
+  }
+
+  async createOrganizationClientGrants(
+    organizationId: string,
+    grantId: string
+  ): Promise<GetOrganizationClientGrants200ResponseOneOfInner> {
+    log.debug(`Creating organization client grant ${grantId} for organization ${organizationId}`);
+    const { data: organizationClientGrants } =
+      await this.client.organizations.postOrganizationClientGrants(
+        {
+          id: organizationId,
+        },
+        {
+          grant_id: grantId,
+        }
+      );
+
+    return organizationClientGrants;
+  }
+
+  async deleteOrganizationClientGrants(organizationId: string, grantId: string): Promise<void> {
+    log.debug(`Deleting organization client grant ${grantId} for organization ${organizationId}`);
+    await this.client.organizations.deleteClientGrantsByGrantId({
+      id: organizationId,
+      grant_id: grantId,
+    });
   }
 }
