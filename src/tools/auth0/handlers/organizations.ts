@@ -319,18 +319,16 @@ export default class OrganizationsHandler extends DefaultHandler {
     }
 
     try {
-      const organizations = await paginate<GetOrganizations200ResponseOneOfInner>(
-        this.client.organizations.getAll,
-        {
+      const [organizations, clients] = await Promise.all([
+        paginate<GetOrganizations200ResponseOneOfInner>(this.client.organizations.getAll, {
           paginate: true,
           include_totals: true,
-        }
-      );
-
-      const clients = await paginate<Client>(this.client.clients.getAll, {
-        paginate: true,
-        include_totals: true,
-      });
+        }),
+        paginate<Client>(this.client.clients.getAll, {
+          paginate: true,
+          include_totals: true,
+        }),
+      ]);
 
       for (let index = 0; index < organizations.length; index++) {
         const { data: connections } = await this.client.organizations.getEnabledConnections({
