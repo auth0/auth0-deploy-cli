@@ -168,6 +168,7 @@ describe('#organizations handler', () => {
             expect(clientGrants[0].client_id).to.equal('abc_123');
             return Promise.resolve({ data: clientGrants });
           },
+          postOrganizationClientGrants: () => Promise.resolve({ data: sampleClientGrant }),
         },
         connections: {
           getAll: (params) =>
@@ -210,6 +211,7 @@ describe('#organizations handler', () => {
                   is_signup_enabled: true,
                 },
               ],
+              client_grants: sampleOrgClientGrants,
             },
           ],
         },
