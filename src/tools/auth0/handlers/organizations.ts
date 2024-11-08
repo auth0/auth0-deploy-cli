@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _, { isArray } from 'lodash';
 import {
   Client,
   ClientGrant,
@@ -427,12 +427,34 @@ export default class OrganizationsHandler extends DefaultHandler {
   async getOrganizationClientGrants(
     organizationId: string
   ): Promise<GetOrganizationClientGrants200ResponseOneOfInner[]> {
-    const { data: organizationClientGrants } =
-      await this.client.organizations.getOrganizationClientGrants({
+    // paginate without paginate<T> helper as this is not getAll but getOrganizationClientGrants
+    // paginate through all oranizaion client grants for oranizaion id
+    const allOrganizationClientGrants: GetOrganizationClientGrants200ResponseOneOfInner[] = [];
+    let page = 0;
+    while (true) {
+      const {
+        data: { client_grants: organizationClientGrants, total },
+      } = await this.client.organizations.getOrganizationClientGrants({
         id: organizationId,
+        page: page,
+        per_page: 100,
+        include_totals: true,
       });
 
-    return organizationClientGrants;
+      // if we get an unexpected response, break the loop to avoid infinite loop
+      if (!isArray(organizationClientGrants) || typeof total !== 'number') {
+        break;
+      }
+
+      allOrganizationClientGrants.push(...organizationClientGrants);
+      page += 1;
+
+      if (allOrganizationClientGrants.length === total) {
+        break;
+      }
+    }
+
+    return allOrganizationClientGrants;
   }
 
   async createOrganizationClientGrants(
