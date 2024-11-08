@@ -15,6 +15,7 @@ const sampleOrg = {
   id: '123',
   name: 'acme',
   display_name: 'Acme Inc',
+  client_grants: [],
 };
 
 const sampleEnabledConnection = {
@@ -27,6 +28,7 @@ const sampleEnabledConnection = {
     strategy: 'auth0',
   },
 };
+
 const sampleEnabledConnection2 = {
   connection_id: 'con_456',
   assign_membership_on_login: false,
@@ -35,6 +37,24 @@ const sampleEnabledConnection2 = {
     name: 'facebook',
     strategy: 'facebook',
   },
+};
+
+const sampleOrgClientGrants = [
+  {
+    client_id: 'abc_123',
+  },
+];
+
+const sampleClients = [
+  { name: 'test client', client_id: 'abc_123' },
+  { name: 'deploy client', client_id: 'xyz_123' },
+];
+
+const sampleClientGrant = {
+  audience: 'https://test.auth0.com/api/v2/',
+  client_id: 'abc_123',
+  id: 'cgr_0TLisL4eNHzhSR6j',
+  scope: ['read:logs'],
 };
 
 describe('#organizations handler', () => {
@@ -141,6 +161,14 @@ describe('#organizations handler', () => {
             expect(connection.is_signup_enabled).to.equal(true);
             return Promise.resolve({ data: connection });
           },
+          createOrganizationClientGrants: (orgId, clientGrants) => {
+            expect(orgId).to.equal('fake');
+            expect(clientGrants).to.be.an('array');
+            expect(clientGrants).to.have.length(1);
+            expect(clientGrants[0].client_id).to.equal('abc_123');
+            return Promise.resolve({ data: clientGrants });
+          },
+          postOrganizationClientGrants: () => Promise.resolve({ data: sampleClientGrant }),
         },
         connections: {
           getAll: (params) =>
@@ -157,6 +185,12 @@ describe('#organizations handler', () => {
               },
               { id: 'con_999', name: 'Username', options: {} },
             ]),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
         },
         pool,
       };
@@ -177,6 +211,7 @@ describe('#organizations handler', () => {
                   is_signup_enabled: true,
                 },
               ],
+              client_grants: sampleOrgClientGrants,
             },
           ],
         },
@@ -188,6 +223,10 @@ describe('#organizations handler', () => {
         organizations: {
           getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
           getEnabledConnections: () => ({ data: [sampleEnabledConnection] }),
+          getOrganizationClientGrants: () => ({ data: sampleOrgClientGrants }),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         pool,
       };
@@ -214,6 +253,10 @@ describe('#organizations handler', () => {
               mockPagedData(params, 'organizations', [...organizationsPage2, ...organizationsPage1])
             ),
           getEnabledConnections: () => Promise.resolve({ data: {} }),
+          getOrganizationClientGrants: () => ({ data: [] }),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         pool,
       };
@@ -242,6 +285,9 @@ describe('#organizations handler', () => {
             throw error;
           },
         },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
         pool,
       };
 
@@ -258,6 +304,9 @@ describe('#organizations handler', () => {
             error.statusCode = 404;
             throw error;
           },
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         pool,
       };
@@ -299,6 +348,10 @@ describe('#organizations handler', () => {
             throw new Error('Unexpected');
           },
           getEnabledConnections: () => Promise.resolve({ data: [] }),
+          getOrganizationClientGrants: () => ({ data: [] }),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         pool,
       };
@@ -364,6 +417,7 @@ describe('#organizations handler', () => {
             }
             return Promise.resolve(data);
           },
+          getOrganizationClientGrants: () => ({ data: [] }),
         },
         connections: {
           getAll: (params) =>
@@ -380,6 +434,12 @@ describe('#organizations handler', () => {
               },
               { id: 'con_999', name: 'Username', options: {} },
             ]),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
         },
         pool,
       };
@@ -433,6 +493,7 @@ describe('#organizations handler', () => {
             expect(data.is_signup_enabled).to.equal(false);
             return Promise.resolve({ data });
           },
+          getOrganizationClientGrants: () => ({ data: [] }),
         },
         connections: {
           getAll: (params) =>
@@ -449,6 +510,12 @@ describe('#organizations handler', () => {
               },
               { id: 'con_999', name: 'Username', options: {} },
             ]),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
         },
         pool,
       };
@@ -502,6 +569,7 @@ describe('#organizations handler', () => {
             expect(params.connection_id).to.equal(sampleEnabledConnection2.connection_id);
             return Promise.resolve({ data: undefined });
           },
+          getOrganizationClientGrants: () => ({ data: [] }),
         },
         connections: {
           getAll: (params) =>
@@ -518,6 +586,12 @@ describe('#organizations handler', () => {
               },
               { id: 'con_999', name: 'Username', options: {} },
             ]),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
         },
         pool,
       };
@@ -552,6 +626,7 @@ describe('#organizations handler', () => {
           delete: () => Promise.resolve({ data: [] }),
           getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
           getEnabledConnections: () => ({ data: [] }),
+          getOrganizationClientGrants: () => ({ data: [] }),
         },
         connections: {
           getAll: (params) =>
@@ -568,6 +643,12 @@ describe('#organizations handler', () => {
               },
               { id: 'con_999', name: 'Username', options: {} },
             ]),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
         },
         pool,
       };
@@ -601,9 +682,16 @@ describe('#organizations handler', () => {
           },
           getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
           getEnabledConnections: () => [],
+          getOrganizationClientGrants: () => ({ data: [] }),
         },
         connections: {
           getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
         },
         pool,
       };

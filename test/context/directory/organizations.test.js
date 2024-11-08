@@ -12,11 +12,13 @@ describe('#directory context organizations', () => {
     const files = {
       organizations: {
         'acme.json':
-          '{ "name": "acme", "display_name": "acme", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "name": "google", "assign_membership_on_login": false, "show_as_button": false }]}',
+          '{ "name": "acme", "display_name": "acme", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "name": "google", "assign_membership_on_login": false, "show_as_button": false }], "client_grants": []}',
         'contoso.json':
-          '{ "name": "contoso", "display_name": "contoso", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "name": "google", "assign_membership_on_login": false, "show_as_button": false }]}',
+          '{ "name": "contoso", "display_name": "contoso", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "name": "google", "assign_membership_on_login": false, "show_as_button": false }], "client_grants": []}',
         'tast-org.json':
-          '{ "name": "atko", "display_name": "Atko", "branding": { "colors": { "primary": "#ededed", "page_background": "#191919" } }, "connections":[{ "name": "Username-Password-Authentication", "assign_membership_on_login": true, "show_as_button": true, "is_signup_enabled": true }]}',
+          '{ "name": "atko", "display_name": "Atko", "branding": { "colors": { "primary": "#ededed", "page_background": "#191919" } }, "connections":[{ "name": "Username-Password-Authentication", "assign_membership_on_login": true, "show_as_button": true, "is_signup_enabled": true }], "client_grants": []}',
+        'test-org-snow.json':
+          '{ "name": "org-snow", "display_name": "snow", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "name": "google", "assign_membership_on_login": false, "show_as_button": false }], "client_grants": [ { "client_id": "Org Snow app" }]}',
       },
     };
 
@@ -44,6 +46,7 @@ describe('#directory context organizations', () => {
             show_as_button: false,
           },
         ],
+        client_grants: [],
       },
       {
         name: 'contoso',
@@ -61,6 +64,7 @@ describe('#directory context organizations', () => {
             show_as_button: false,
           },
         ],
+        client_grants: [],
       },
       {
         name: 'atko',
@@ -77,6 +81,29 @@ describe('#directory context organizations', () => {
             assign_membership_on_login: true,
             show_as_button: true,
             is_signup_enabled: true,
+          },
+        ],
+        client_grants: [],
+      },
+      {
+        name: 'org-snow',
+        display_name: 'snow',
+        branding: {
+          colors: {
+            primary: '#3678e2',
+            page_background: '#9c4949',
+          },
+        },
+        connections: [
+          {
+            name: 'google',
+            assign_membership_on_login: false,
+            show_as_button: false,
+          },
+        ],
+        client_grants: [
+          {
+            client_id: 'Org Snow app',
           },
         ],
       },
