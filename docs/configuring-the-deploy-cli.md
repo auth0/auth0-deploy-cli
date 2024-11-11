@@ -48,6 +48,14 @@ export AUTH0_KEYWORD_REPLACE_MAPPINGS='{"ENVIRONMENT":"dev"}'
 a0deploy export -c=config.json --format=yaml --output_folder=local
 ```
 
+### Free Tier
+
+Certain Auth0 resources require a paid plan with a verified credit card on file to manage. On free tier tenants, logStreams need to be excluded in `config.json`. You can also exclude customDomains, if you don't want to add credit card information.
+
+```json
+"AUTH0_EXCLUDED": ["logStreams", "customDomains"]
+```
+
 ## Available Configuration Properties
 
 ### `AUTH0_DOMAIN`
