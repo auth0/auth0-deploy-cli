@@ -28,7 +28,7 @@ import rulesConfigs from './rulesConfigs';
 import hooks from './hooks';
 import forms from './forms';
 import flows from './flows';
-import flowVaults from './flowVaults';
+import flowVaultConnections from './flowVaultConnections';
 
 import YAMLContext from '..';
 import { AssetTypes } from '../../../types';
@@ -69,7 +69,7 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   themes,
   forms,
   flows,
-  flowVaults,
+  flowVaultConnections,
 };
 
 export default yamlHandlers;

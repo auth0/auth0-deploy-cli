@@ -28,10 +28,11 @@ import hooks from './hooks';
 import rulesConfigs from './rulesConfigs';
 import forms from './forms';
 import flows from './flows';
-import flowVaults from './flowVaults';
+import flowVaultConnections from './flowVaultConnections';
 
 import DirectoryContext from '..';
 import { AssetTypes, Asset } from '../../../types';
+
 
 export type DirectoryHandler<T> = {
   dump: (context: DirectoryContext) => void;
@@ -71,7 +72,7 @@ const directoryHandlers: {
   themes,
   forms,
   flows,
-  flowVaults,
+  flowVaultConnections,
 };
 
 export default directoryHandlers;

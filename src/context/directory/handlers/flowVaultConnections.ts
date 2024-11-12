@@ -9,10 +9,10 @@ import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { ParsedAsset } from '../../../types';
 
-import { FlowVault } from '../../../tools/auth0/handlers/flowVaults';
+import { FlowVaultConnection } from '../../../tools/auth0/handlers/flowVaultConnections';
 
-type ParsedFlowVaults = ParsedAsset<'flowVaults', FlowVault>;
-const FLOWS_VAULT_CONNECTIONS_DIRECTORY = 'connections';
+type ParsedFlowVaults = ParsedAsset<'flowVaultConnections', FlowVaultConnection[]>;
+const FLOWS_VAULT_CONNECTIONS_DIRECTORY = 'flow-vault-connections';
 
 function parse(context: DirectoryContext): ParsedFlowVaults {
   const flowVaultsFolder = path.join(
@@ -20,11 +20,11 @@ function parse(context: DirectoryContext): ParsedFlowVaults {
     constants.FLOWS_VAULT_DIRECTORY,
     FLOWS_VAULT_CONNECTIONS_DIRECTORY
   );
-  if (!existsMustBeDir(flowVaultsFolder)) return { flowVaults: null }; // Skip
+  if (!existsMustBeDir(flowVaultsFolder)) return { flowVaultConnections: null }; // Skip
 
   const files = getFiles(flowVaultsFolder, ['.json']);
 
-  const flowVaultsConnections = files.map((f) => {
+  const flowVaultConnections = files.map((f) => {
     const connection = {
       ...loadJSON(f, {
         mappings: context.mappings,
@@ -34,19 +34,15 @@ function parse(context: DirectoryContext): ParsedFlowVaults {
     return connection;
   });
 
-  const flowVaults = {
-    connections: flowVaultsConnections,
-  };
-
   return {
-    flowVaults,
+    flowVaultConnections,
   };
 }
 
 async function dump(context: DirectoryContext) {
-  const { flowVaults } = context.assets;
+  const { flowVaultConnections } = context.assets;
 
-  if (!flowVaults || isEmpty(flowVaults.connections)) return; // Skip, nothing to dump
+  if (!flowVaultConnections || isEmpty(flowVaultConnections)) return; // Skip, nothing to dump
 
   const flowVaultsFolder = path.join(
     context.filePath,
@@ -55,7 +51,7 @@ async function dump(context: DirectoryContext) {
   );
   fs.ensureDirSync(flowVaultsFolder);
 
-  flowVaults.connections.forEach((connection) => {
+  flowVaultConnections.forEach((connection) => {
     const connectionFile = path.join(flowVaultsFolder, sanitize(`${connection.name}.json`));
     log.info(`Writing ${connectionFile}`);
 

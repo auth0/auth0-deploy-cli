@@ -1,14 +1,17 @@
 import _ from 'lodash';
+import { GetForms200ResponseOneOfInner, PostForms201Response } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import log from '../../../logger';
-import { Asset, Assets } from '../../../types';
+import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 
 export type Form = {
   name: string;
   body: string;
 };
+
+export type FormResponse = PostForms201Response;
 
 export const schema = {
   type: 'array',
@@ -31,30 +34,27 @@ export default class FormsHandler extends DefaultHandler {
       ...options,
       type: 'forms',
       id: 'id',
+      
     });
   }
 
-  async getType(): Promise<DefaultHandler['existing']> {
+  async getType(): Promise<Asset> {
     if (this.existing) {
       return this.existing;
     }
 
-    // TODO: Implement pagination
-    const { data: forms } = await this.client.forms.getForms();
+    const forms = await paginate<GetForms200ResponseOneOfInner>(this.client.forms.getAll, {
+      paginate: true,
+      include_totals: true,
+    });
 
     const allForms = await Promise.all(
-      forms.map(async (f) => {
-        try {
-          const { data: form } = await this.client.forms.getFormsById({ id: f.id });
-          return form;
-        } catch (err) {
-          // Ignore if not found, else throw error
-          if (err.statusCode !== 404) {
-            throw err;
-          }
-        }
+      forms.map(async (from) => {
+        const { data: form } = await this.client.forms.get({ id: from.id });
+        return form;
       })
     );
+
     this.existing = allForms;
     return this.existing;
   }
@@ -66,6 +66,16 @@ export default class FormsHandler extends DefaultHandler {
     if (!forms) return;
 
     const { del, update, create, conflicts } = await this.calcChanges(assets);
-    console.log('Forms processChanges', del, update, create, conflicts);
+
+    const changes: CalculatedChanges = {
+      del: del,
+      update: update,
+      create: create,
+      conflicts: conflicts,
+    };
+
+    await super.processChanges(assets, {
+      ...changes,
+    });
   }
 }

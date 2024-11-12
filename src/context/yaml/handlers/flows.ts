@@ -71,6 +71,13 @@ async function dump(context: YAMLContext): Promise<ParsedFlows> {
     const jsonFile = path.join(pagesFolder, `${flowName}.json`);
     log.info(`Writing ${jsonFile}`);
 
+    const removeKeysFromOutput = ['id', 'created_at', 'updated_at'];
+    removeKeysFromOutput.forEach((key) => {
+      if (key in flow) {
+        delete flow[key];
+      }
+    });
+
     const jsonBody = JSON.stringify(flow, null, 2);
     fs.writeFileSync(jsonFile, jsonBody);
 

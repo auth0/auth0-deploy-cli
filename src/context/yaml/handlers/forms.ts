@@ -1,6 +1,5 @@
 import path from 'path';
 import fs from 'fs-extra';
-import dotProp from 'dot-prop';
 
 import log from '../../../logger';
 import { YAMLHandler } from '.';
@@ -71,6 +70,13 @@ async function dump(context: YAMLContext): Promise<ParsedForms> {
 
     const jsonFile = path.join(pagesFolder, `${formName}.json`);
     log.info(`Writing ${jsonFile}`);
+
+    const removeKeysFromOutput = ['id', 'created_at', 'updated_at'];
+    removeKeysFromOutput.forEach((key) => {
+      if (key in form) {
+        delete form[key];
+      }
+    });
 
     const jsonBody = JSON.stringify(form, null, 2);
     fs.writeFileSync(jsonFile, jsonBody);

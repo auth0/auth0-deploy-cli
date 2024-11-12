@@ -1,8 +1,8 @@
 import _ from 'lodash';
+import { GetFlows200ResponseOneOfInner } from 'auth0';
 import DefaultHandler, { order } from './default';
-import constants from '../../constants';
-import log from '../../../logger';
-import { Asset, Assets } from '../../../types';
+import { Asset, Assets, CalculatedChanges } from '../../../types';
+import { paginate } from '../client';
 
 export type Flow = {
   name: string;
@@ -15,9 +15,9 @@ export const schema = {
     type: 'object',
     properties: {
       name: { type: 'string' },
-      body: { type: 'string', default: '' },
+      body: { type: 'string' },
     },
-    required: ['name', 'body'],
+    required: ['name'],
   },
   additionalProperties: false,
 };
@@ -33,24 +33,20 @@ export default class FlowHandler extends DefaultHandler {
     });
   }
 
-  async getType(): Promise<DefaultHandler['existing']> {
+  async getType(): Promise<Asset> {
     if (this.existing) {
       return this.existing;
     }
-    // TODO: Implement pagination
-    const { data: flows } = await this.client.flows.getFlows();
+
+    const flows = await paginate<GetFlows200ResponseOneOfInner>(this.client.flows.getAll, {
+      paginate: true,
+      include_totals: true,
+    });
 
     const allFlows = await Promise.all(
       flows.map(async (f) => {
-        try {
-          const { data: flow } = await this.client.flows.getFlowsById({ id: f.id });
-          return flow;
-        } catch (err) {
-          // Ignore if not found, else throw error
-          if (err.statusCode !== 404) {
-            throw err;
-          }
-        }
+        const { data: flow } = await this.client.flows.get({ id: f.id });
+        return flow;
       })
     );
 
@@ -65,6 +61,16 @@ export default class FlowHandler extends DefaultHandler {
     if (!flows) return;
 
     const { del, update, create, conflicts } = await this.calcChanges(assets);
-    console.log('Flows processChanges', del, update, create, conflicts);
+
+    const changes: CalculatedChanges = {
+      del: del,
+      update: update,
+      create: create,
+      conflicts: conflicts,
+    };
+
+    await super.processChanges(assets, {
+      ...changes,
+    });
   }
 }
