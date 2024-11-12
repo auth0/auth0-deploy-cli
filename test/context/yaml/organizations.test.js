@@ -25,6 +25,7 @@ describe('#YAML context organizations', () => {
             show_as_button: false
             is_signup_enabled: false
         display_name: acme
+        client_grants: []
       - name: contoso
         branding:
           colors:
@@ -36,6 +37,20 @@ describe('#YAML context organizations', () => {
             show_as_button: true
             is_signup_enabled: true
         display_name: contoso
+        client_grants: []
+      - name: org-snow
+        branding:
+          colors:
+            primary: '#3678e2'
+            page_background: '#9c4949'
+        connections:
+          - connection_id: con_458
+            assign_membership_on_login: true
+            show_as_button: true
+            is_signup_enabled: true
+        display_name: snow
+        client_grants:
+          - client_id: Org Snow app
     `;
 
     const target = [
@@ -56,6 +71,7 @@ describe('#YAML context organizations', () => {
             is_signup_enabled: false,
           },
         ],
+        client_grants: [],
       },
       {
         name: 'contoso',
@@ -72,6 +88,30 @@ describe('#YAML context organizations', () => {
             assign_membership_on_login: true,
             show_as_button: true,
             is_signup_enabled: true,
+          },
+        ],
+        client_grants: [],
+      },
+      {
+        name: 'org-snow',
+        display_name: 'snow',
+        branding: {
+          colors: {
+            primary: '#3678e2',
+            page_background: '#9c4949',
+          },
+        },
+        connections: [
+          {
+            connection_id: 'con_458',
+            assign_membership_on_login: true,
+            show_as_button: true,
+            is_signup_enabled: true,
+          },
+        ],
+        client_grants: [
+          {
+            client_id: 'Org Snow app',
           },
         ],
       },

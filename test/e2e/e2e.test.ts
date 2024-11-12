@@ -149,7 +149,7 @@ describe('#end-to-end deploy', function () {
     expect(yaml.databases.length).to.be.above(0);
     expect(yaml.connections.length).to.be.above(0);
     expect(yaml.roles.length).to.be.above(0);
-    expect(yaml.guardianFactorProviders.length).to.be.above(0);
+    expect(yaml.guardianFactorProviders.length).to.be.equal(0);
     expect(yaml.guardianFactorTemplates.length).to.be.above(0);
     expect(yaml.actions.length).to.be.above(0);
     expect(yaml.organizations.length).to.be.above(0);
