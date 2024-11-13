@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import sanitizeName from 'sanitize-filename';
 import dotProp from 'dot-prop';
+import { forOwn, isObject } from 'lodash';
 import { loadFileAndReplaceKeywords, Auth0 } from './tools';
 import log from './logger';
 import { Asset, Assets, Config, KeywordMappings } from './types';
@@ -231,3 +232,30 @@ export function nomalizedYAMLPath(filePath: string): string[] {
 
   return pathSplit;
 }
+
+export const findKeyPathWithValue = (obj: any, findKey: string, parentPath: string = '') => {
+  // Results array to hold found instances of 'findKey'
+  const results: { path: string; value: any }[] = [];
+
+  // Exit early if the object is not an object (edge case for null or primitive values)
+  if (!isObject(obj)) return results;
+
+  // Iterate over all keys in the object
+  forOwn(obj, (value, key) => {
+    // Construct the full path for the current key
+    const currentPath = parentPath ? `${parentPath}.${key}` : key;
+
+    // If the key matches 'findKey', add its path and value to the results
+    if (key === findKey) {
+      results.push({ path: currentPath, value });
+    }
+
+    // If the value is an object (not null), recurse deeper into it
+    if (isObject(value)) {
+      // Recurse and accumulate results
+      results.push(...findKeyPathWithValue(value, findKey, currentPath));
+    }
+  });
+
+  return results;
+};

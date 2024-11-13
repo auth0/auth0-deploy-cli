@@ -1,10 +1,14 @@
-import _ from 'lodash';
-import { GetForms200ResponseOneOfInner, PostForms201Response } from 'auth0';
+import {
+  GetFlows200ResponseOneOfInner,
+  GetForms200ResponseOneOfInner,
+  PostForms201Response,
+} from 'auth0';
+import dotProp from 'dot-prop';
 import DefaultHandler from './default';
-import constants from '../../constants';
 import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
+import { findKeyPathWithValue } from '../../../utils';
 
 export type Form = {
   name: string;
@@ -34,6 +38,8 @@ export default class FormsHandler extends DefaultHandler {
       ...options,
       type: 'forms',
       id: 'id',
+      stripCreateFields: ['created_at', 'updated_at', 'submitted_at', 'embedded_at'],
+      stripUpdateFields: ['created_at', 'updated_at', 'submitted_at', 'embedded_at'],
     });
   }
 
@@ -54,8 +60,68 @@ export default class FormsHandler extends DefaultHandler {
       })
     );
 
-    this.existing = allForms;
+    const allFlows = await paginate<GetFlows200ResponseOneOfInner>(this.client.flows.getAll, {
+      paginate: true,
+      include_totals: true,
+    });
+
+    // create a map for id to name from allFlows
+    const flowIdMap = {};
+    allFlows.forEach((f) => {
+      flowIdMap[f.id] = f.name;
+    });
+
+    this.existing = await this.formateFormFlowId(allForms, flowIdMap);
+
     return this.existing;
+  }
+
+  async formateFormFlowId(forms, flowIdMap): Promise<Asset> {
+    // replace flow_id with flow names
+    await Promise.all(
+      forms.map(async (form) => {
+        const flows = findKeyPathWithValue(form, 'flow_id');
+        await Promise.all(
+          flows.map(async (f) => {
+            const flowId = (dotProp.get(form, f.path) || '') as string;
+            const flowName = flowIdMap[flowId];
+            if (!flowName) {
+              log.warn(
+                `Flow: ${flowId} not found for form:${form.name}, please verify the flow id.`
+              );
+            }
+            dotProp.set(form, f.path, flowName);
+          })
+        );
+        return form;
+      })
+    );
+
+    return forms;
+  }
+
+  async pargeFormFlowName(forms, flowNameMap): Promise<Form[]> {
+    // replace flow names with flow_id
+    await Promise.all(
+      forms.map(async (form) => {
+        const flows = findKeyPathWithValue(form, 'flow_id');
+        await Promise.all(
+          flows.map(async (f) => {
+            const flowName = (dotProp.get(form, f.path) || '') as string;
+            const flowId = flowNameMap[flowName];
+            if (!flowId) {
+              log.error(
+                `Flow: ${flowName} not found for form:${form.name}, please verify the flow name.`
+              );
+            }
+            dotProp.set(form, f.path, flowNameMap[flowName]);
+          })
+        );
+        return form;
+      })
+    );
+
+    return forms;
   }
 
   async processChanges(assets: Assets): Promise<void> {
@@ -63,6 +129,19 @@ export default class FormsHandler extends DefaultHandler {
 
     // Do nothing if not set
     if (!forms) return;
+
+    const allFlows = await paginate<GetFlows200ResponseOneOfInner>(this.client.flows.getAll, {
+      paginate: true,
+      include_totals: true,
+    });
+
+    // create a map for id to name from allFlows
+    const flowNamMap = {};
+    allFlows.forEach((f) => {
+      flowNamMap[f.name] = f.id;
+    });
+
+    assets.forms = await this.pargeFormFlowName(forms, flowNamMap);
 
     const { del, update, create, conflicts } = await this.calcChanges(assets);
 
