@@ -40,11 +40,35 @@ async function dump(context: DirectoryContext) {
   const formsFolder = path.join(context.filePath, constants.FORMS_DIRECTORY);
   fs.ensureDirSync(formsFolder);
 
-  forms.forEach((from) => {
-    const formFile = path.join(formsFolder, sanitize(`${from.name}.json`));
+  // Check if there is any duplicate form name
+  const formNames = forms.map((form) => form.name);
+  const duplicateFormNames = formNames.filter((name, index) => formNames.indexOf(name) !== index);
+
+  if (duplicateFormNames.length > 0) {
+    log.error(
+      `Duplicate form names found: [${duplicateFormNames.join(
+        ', '
+      )}] , make sure to rename them to avoid conflicts`
+    );
+    throw new Error(`Duplicate form names found: ${duplicateFormNames.join(', ')}`);
+  }
+
+  forms.forEach((form) => {
+    if (form.name === undefined) {
+      return ;
+    }
+
+    const formFile = path.join(formsFolder, sanitize(`${form.name}.json`));
     log.info(`Writing ${formFile}`);
 
-    dumpJSON(formFile, from);
+    const removeKeysFromOutput = ['id', 'created_at', 'updated_at'];
+    removeKeysFromOutput.forEach((key) => {
+      if (key in form) {
+        delete form[key];
+      }
+    });
+
+    dumpJSON(formFile, form);
   });
 }
 
