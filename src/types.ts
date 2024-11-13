@@ -10,7 +10,7 @@ import { ClientGrant } from './tools/auth0/handlers/clientGrants';
 import { Theme } from './tools/auth0/handlers/themes';
 import { Form } from './tools/auth0/handlers/forms';
 import { Flow } from './tools/auth0/handlers/flows';
-import { FlowVault, FlowVaultConnection } from './tools/auth0/handlers/flowVaultConnections';
+import { FlowVaultConnection } from './tools/auth0/handlers/flowVaultConnections';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;

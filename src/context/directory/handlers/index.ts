@@ -33,7 +33,6 @@ import flowVaultConnections from './flowVaultConnections';
 import DirectoryContext from '..';
 import { AssetTypes, Asset } from '../../../types';
 
-
 export type DirectoryHandler<T> = {
   dump: (context: DirectoryContext) => void;
   parse: (context: DirectoryContext) => T;

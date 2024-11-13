@@ -34,7 +34,6 @@ export default class FormsHandler extends DefaultHandler {
       ...options,
       type: 'forms',
       id: 'id',
-      
     });
   }
 
