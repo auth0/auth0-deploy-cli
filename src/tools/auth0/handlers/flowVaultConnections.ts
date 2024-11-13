@@ -52,33 +52,7 @@ export default class FlowVaultHandler extends DefaultHandler {
       return this.existing;
     }
 
-    const allFlowConnections: GetFlowsVaultConnections200ResponseOneOfInner[] = [];
-    // paginate without paginate<T> helper as this is not getAll but getAllConnections
-    // paginate through all flow connections
-    let page = 0;
-    while (true) {
-      const {
-        data: { connections, total },
-      } = await this.client.flows.getAllConnections({
-        page: page,
-        per_page: 100,
-        include_totals: true,
-      });
-
-      // if we get an unexpected response, break the loop to avoid infinite loop
-      if (!isArray(allFlowConnections) || typeof total !== 'number') {
-        break;
-      }
-
-      allFlowConnections.push(...connections);
-      page += 1;
-
-      if (allFlowConnections.length === total) {
-        break;
-      }
-    }
-
-    this.existing = allFlowConnections;
+    this.existing = await this.getAllFlowConnections();
 
     return this.existing;
   }
@@ -114,6 +88,36 @@ export default class FlowVaultHandler extends DefaultHandler {
         }
       })
     );
+  }
+
+  async getAllFlowConnections(): Promise<GetFlowsVaultConnections200ResponseOneOfInner[]> {
+    const allFlowConnections: GetFlowsVaultConnections200ResponseOneOfInner[] = [];
+    // paginate without paginate<T> helper as this is not getAll but getAllConnections
+    // paginate through all flow connections
+    let page = 0;
+    while (true) {
+      const {
+        data: { connections, total },
+      } = await this.client.flows.getAllConnections({
+        page: page,
+        per_page: 100,
+        include_totals: true,
+      });
+
+      // if we get an unexpected response, break the loop to avoid infinite loop
+      if (!isArray(allFlowConnections) || typeof total !== 'number') {
+        break;
+      }
+
+      allFlowConnections.push(...connections);
+      page += 1;
+
+      if (allFlowConnections.length === total) {
+        break;
+      }
+    }
+
+    return allFlowConnections;
   }
 
   async createVaultConnection(conn): Promise<Asset> {

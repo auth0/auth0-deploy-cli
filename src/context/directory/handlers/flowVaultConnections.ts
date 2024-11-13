@@ -12,14 +12,9 @@ import { ParsedAsset } from '../../../types';
 import { FlowVaultConnection } from '../../../tools/auth0/handlers/flowVaultConnections';
 
 type ParsedFlowVaults = ParsedAsset<'flowVaultConnections', FlowVaultConnection[]>;
-const FLOWS_VAULT_CONNECTIONS_DIRECTORY = 'flow-vault-connections';
 
 function parse(context: DirectoryContext): ParsedFlowVaults {
-  const flowVaultsFolder = path.join(
-    context.filePath,
-    constants.FLOWS_VAULT_DIRECTORY,
-    FLOWS_VAULT_CONNECTIONS_DIRECTORY
-  );
+  const flowVaultsFolder = path.join(context.filePath, constants.FLOWS_VAULT_DIRECTORY);
   if (!existsMustBeDir(flowVaultsFolder)) return { flowVaultConnections: null }; // Skip
 
   const files = getFiles(flowVaultsFolder, ['.json']);
@@ -44,12 +39,38 @@ async function dump(context: DirectoryContext) {
 
   if (!flowVaultConnections || isEmpty(flowVaultConnections)) return; // Skip, nothing to dump
 
-  const flowVaultsFolder = path.join(
-    context.filePath,
-    constants.FLOWS_VAULT_DIRECTORY,
-    FLOWS_VAULT_CONNECTIONS_DIRECTORY
+  // Check if there is any duplicate form name
+  const vaultConnectionsNames = flowVaultConnections.map((form) => form.name);
+  const duplicateVaultConnectionsNames = vaultConnectionsNames.filter(
+    (name, index) => vaultConnectionsNames.indexOf(name) !== index
   );
+
+  if (duplicateVaultConnectionsNames.length > 0) {
+    log.error(
+      `Duplicate form names found: [${duplicateVaultConnectionsNames.join(
+        ', '
+      )}] , make sure to rename them to avoid conflicts`
+    );
+    throw new Error(
+      `Duplicate flow vault connections names found: ${duplicateVaultConnectionsNames.join(', ')}`
+    );
+  }
+
+  const flowVaultsFolder = path.join(context.filePath, constants.FLOWS_VAULT_DIRECTORY);
   fs.ensureDirSync(flowVaultsFolder);
+
+  const removeKeysFromOutput = ['id', 'created_at', 'updated_at', 'refreshed_at', 'fingerprint'];
+  flowVaultConnections.forEach((connection) => {
+    removeKeysFromOutput.forEach((key) => {
+      if (key in connection) {
+        delete connection[key];
+      }
+    });
+  });
+
+  console.warn(
+    'WARNING! Flow vault connections `setup` key does not support keyword preservation, `export` or `dump` commmand will not preserve `setup` key in local configuration file.'
+  );
 
   flowVaultConnections.forEach((connection) => {
     const connectionFile = path.join(flowVaultsFolder, sanitize(`${connection.name}.json`));

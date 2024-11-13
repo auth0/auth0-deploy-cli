@@ -55,7 +55,7 @@ async function dump(context: DirectoryContext) {
 
   forms.forEach((form) => {
     if (form.name === undefined) {
-      return ;
+      return;
     }
 
     const formFile = path.join(formsFolder, sanitize(`${form.name}.json`));

@@ -29,8 +29,8 @@ async function dump(context: YAMLContext): Promise<ParsedParsedFlowVaults> {
   }
 
   const removeKeysFromOutput = ['id', 'created_at', 'updated_at', 'refreshed_at', 'fingerprint'];
-  removeKeysFromOutput.forEach((key) => {
-    flowVaultConnections.forEach((connection) => {
+  flowVaultConnections.forEach((connection) => {
+    removeKeysFromOutput.forEach((key) => {
       if (key in connection) {
         delete connection[key];
       }

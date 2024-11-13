@@ -199,7 +199,7 @@ const constants = {
   ],
   FORMS_DIRECTORY: 'forms',
   FLOWS_DIRECTORY: 'flows',
-  FLOWS_VAULT_DIRECTORY: 'flow-vaults',
+  FLOWS_VAULT_DIRECTORY: 'flow-vault-connections',
 };
 
 export default constants;

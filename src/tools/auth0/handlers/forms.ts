@@ -89,8 +89,9 @@ export default class FormsHandler extends DefaultHandler {
               log.warn(
                 `Flow: ${flowId} not found for form:${form.name}, please verify the flow id.`
               );
+            } else {
+              dotProp.set(form, f.path, flowName);
             }
-            dotProp.set(form, f.path, flowName);
           })
         );
         return form;
@@ -113,8 +114,9 @@ export default class FormsHandler extends DefaultHandler {
               log.error(
                 `Flow: ${flowName} not found for form:${form.name}, please verify the flow name.`
               );
+            } else {
+              dotProp.set(form, f.path, flowNameMap[flowName]);
             }
-            dotProp.set(form, f.path, flowNameMap[flowName]);
           })
         );
         return form;
