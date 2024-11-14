@@ -16,14 +16,14 @@ export const testDataDir = path.resolve(localDir, 'testData');
 export function mockPagedData(params, key, data) {
   return params?.include_totals
     ? {
-      data: {
-        [key]: data,
-        total: data?.length || 0,
-      },
-    }
+        data: {
+          [key]: data,
+          total: data?.length || 0,
+        },
+      }
     : {
-      data,
-    };
+        data,
+      };
 }
 
 export function mockMgmtClient() {
@@ -131,6 +131,11 @@ export function mockMgmtClient() {
       get: () => ({ data: {} }),
     },
     customDomains: { getAll: (params) => mockPagedData(params, 'custom_domains', []) },
+    forms: { getAll: (params) => mockPagedData(params, 'forms', []) },
+    flows: {
+      getAll: (params) => mockPagedData(params, 'flows', []),
+      getAllConnections: (params) => mockPagedData(params, 'connections', []),
+    },
   };
 }
 
