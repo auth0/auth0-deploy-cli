@@ -44,10 +44,13 @@ export default class FlowHandler extends DefaultHandler {
       return this.existing;
     }
 
-    const flows = await paginate<GetFlows200ResponseOneOfInner>(this.client.flows.getAll, {
-      paginate: true,
-      include_totals: true,
-    });
+    const [flows, allFlowConnections] = await Promise.all([
+      paginate<GetFlows200ResponseOneOfInner>(this.client.flows.getAll, {
+        paginate: true,
+        include_totals: true,
+      }),
+      this.getAllFlowConnections(),
+    ]);
 
     const allFlows = await Promise.all(
       flows.map(async (f) => {
@@ -55,8 +58,6 @@ export default class FlowHandler extends DefaultHandler {
         return flow;
       })
     );
-
-    const allFlowConnections = await this.getAllFlowConnections();
 
     // create a map for id to name from allFlowConnections
     const connectionIdMap = {};

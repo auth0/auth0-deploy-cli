@@ -48,11 +48,18 @@ export default class FormsHandler extends DefaultHandler {
       return this.existing;
     }
 
-    const forms = await paginate<GetForms200ResponseOneOfInner>(this.client.forms.getAll, {
-      paginate: true,
-      include_totals: true,
-    });
+    const [forms, flows] = await Promise.all([
+      paginate<GetForms200ResponseOneOfInner>(this.client.forms.getAll, {
+        paginate: true,
+        include_totals: true,
+      }),
+      paginate<GetFlows200ResponseOneOfInner>(this.client.flows.getAll, {
+        paginate: true,
+        include_totals: true,
+      }),
+    ]);
 
+    // get more details for each form
     const allForms = await Promise.all(
       forms.map(async (from) => {
         const { data: form } = await this.client.forms.get({ id: from.id });
@@ -60,14 +67,9 @@ export default class FormsHandler extends DefaultHandler {
       })
     );
 
-    const allFlows = await paginate<GetFlows200ResponseOneOfInner>(this.client.flows.getAll, {
-      paginate: true,
-      include_totals: true,
-    });
-
     // create a map for id to name from allFlows
     const flowIdMap = {};
-    allFlows.forEach((f) => {
+    flows.forEach((f) => {
       flowIdMap[f.id] = f.name;
     });
 
@@ -132,14 +134,14 @@ export default class FormsHandler extends DefaultHandler {
     // Do nothing if not set
     if (!forms) return;
 
-    const allFlows = await paginate<GetFlows200ResponseOneOfInner>(this.client.flows.getAll, {
+    const flows = await paginate<GetFlows200ResponseOneOfInner>(this.client.flows.getAll, {
       paginate: true,
       include_totals: true,
     });
 
-    // create a map for id to name from allFlows
+    // create a map for id to name from flows
     const flowNamMap = {};
-    allFlows.forEach((f) => {
+    flows.forEach((f) => {
       flowNamMap[f.name] = f.id;
     });
 
