@@ -105,29 +105,6 @@ describe('#flows handler', () => {
     });
 
     it('should create flows with connections', async () => {
-      const sampleFlowWthConnectionWithID = {
-        id: 'af_7AXxPP59pJx5ZtA471cSAw',
-        name: 'Sample Flow Wth connection',
-        actions: [
-          {
-            id: 'update_user_PmSa',
-            alias: 'user meta data name',
-            type: 'AUTH0',
-            action: 'UPDATE_USER',
-            allow_failure: false,
-            mask_output: false,
-            params: {
-              connection_id: sampleConnectionWithID.id,
-              user_id: '{{context.user.user_id}}',
-              changes: {
-                user_metadata: {
-                  full_name: '{{fields.full_name}}',
-                },
-              },
-            },
-          },
-        ],
-      };
       const sampleFlowWthFlowFormatedNew = {
         id: 'af_7AXxPP59pJx5ZtA471cSAw',
         name: 'Sample Flow Wth connection',

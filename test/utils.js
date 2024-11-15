@@ -16,14 +16,14 @@ export const testDataDir = path.resolve(localDir, 'testData');
 export function mockPagedData(params, key, data) {
   return params?.include_totals
     ? {
-        data: {
-          [key]: data,
-          total: data?.length || 0,
-        },
-      }
+      data: {
+        [key]: data,
+        total: data?.length || 0,
+      },
+    }
     : {
-        data,
-      };
+      data,
+    };
 }
 
 export function mockMgmtClient() {
