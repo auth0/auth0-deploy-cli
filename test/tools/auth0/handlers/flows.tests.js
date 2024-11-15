@@ -304,7 +304,7 @@ describe('#flows handler', () => {
       config.data.AUTH0_ALLOW_DELETE = true;
 
       const newFlow = {
-        name: sampleFlowWthID.name + ' updated',
+        name: sampleFlowWthID.name + ' new',
       };
       const auth0 = {
         flows: {
