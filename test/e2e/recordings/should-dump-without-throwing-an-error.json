@@ -1762,7 +1762,52 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/email-templates/stolen_credentials",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/enrollment_email",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/email-templates/reset_email",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/change_password",
         "body": "",
         "status": 404,
         "response": {
@@ -1796,7 +1841,37 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/email-templates/password_reset",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/email-templates/verify_email_by_code",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/user_invitation",
         "body": "",
         "status": 404,
         "response": {
@@ -1827,81 +1902,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/email-templates/blocked_account",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/user_invitation",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/enrollment_email",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/change_password",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/stolen_credentials",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/password_reset",
         "body": "",
         "status": 404,
         "response": {
@@ -2744,16 +2744,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login-id/custom-text/en",
-        "body": "",
-        "status": 200,
-        "response": {},
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/prompts/login/custom-text/en",
         "body": "",
         "status": 200,
@@ -2765,6 +2755,16 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/prompts/login-password/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/login-id/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2804,6 +2804,16 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/prompts/signup-password/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/prompts/reset-password/custom-text/en",
         "body": "",
         "status": 200,
@@ -2814,7 +2824,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/signup-password/custom-text/en",
+        "path": "/api/v2/prompts/mfa-otp/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2835,16 +2845,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/prompts/mfa-push/custom-text/en",
-        "body": "",
-        "status": 200,
-        "response": {},
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/prompts/mfa-otp/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2884,7 +2884,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa-email/custom-text/en",
+        "path": "/api/v2/prompts/mfa-sms/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2894,7 +2894,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa-sms/custom-text/en",
+        "path": "/api/v2/prompts/mfa-email/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -3004,7 +3004,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login/partials",
+        "path": "/api/v2/prompts/login-password/partials",
         "body": "",
         "status": 200,
         "response": {},
@@ -3014,7 +3014,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login-password/partials",
+        "path": "/api/v2/prompts/login/partials",
         "body": "",
         "status": 200,
         "response": {},
@@ -3133,6 +3133,24 @@
             "triggers": [
                 {
                     "id": "post-login",
+                    "version": "v3",
+                    "status": "CURRENT",
+                    "runtimes": [
+                        "node12",
+                        "node16",
+                        "node18-actions"
+                    ],
+                    "default_runtime": "node18-actions",
+                    "binding_policy": "trigger-bound",
+                    "compatible_triggers": [
+                        {
+                            "id": "post-login",
+                            "version": "v2"
+                        }
+                    ]
+                },
+                {
+                    "id": "post-login",
                     "version": "v1",
                     "status": "DEPRECATED",
                     "runtimes": [
@@ -3155,35 +3173,6 @@
                     "compatible_triggers": []
                 },
                 {
-                    "id": "post-login",
-                    "version": "v3",
-                    "status": "CURRENT",
-                    "runtimes": [
-                        "node12",
-                        "node16",
-                        "node18-actions"
-                    ],
-                    "default_runtime": "node18-actions",
-                    "binding_policy": "trigger-bound",
-                    "compatible_triggers": [
-                        {
-                            "id": "post-login",
-                            "version": "v2"
-                        }
-                    ]
-                },
-                {
-                    "id": "credentials-exchange",
-                    "version": "v1",
-                    "status": "DEPRECATED",
-                    "runtimes": [
-                        "node12"
-                    ],
-                    "default_runtime": "node12",
-                    "binding_policy": "trigger-bound",
-                    "compatible_triggers": []
-                },
-                {
                     "id": "credentials-exchange",
                     "version": "v2",
                     "status": "CURRENT",
@@ -3193,6 +3182,17 @@
                         "node18-actions"
                     ],
                     "default_runtime": "node18-actions",
+                    "binding_policy": "trigger-bound",
+                    "compatible_triggers": []
+                },
+                {
+                    "id": "credentials-exchange",
+                    "version": "v1",
+                    "status": "DEPRECATED",
+                    "runtimes": [
+                        "node12"
+                    ],
+                    "default_runtime": "node12",
                     "binding_policy": "trigger-bound",
                     "compatible_triggers": []
                 },
@@ -3270,6 +3270,16 @@
                 },
                 {
                     "id": "send-phone-message",
+                    "version": "v1",
+                    "status": "DEPRECATED",
+                    "runtimes": [
+                        "node12"
+                    ],
+                    "binding_policy": "trigger-bound",
+                    "compatible_triggers": []
+                },
+                {
+                    "id": "send-phone-message",
                     "version": "v2",
                     "status": "CURRENT",
                     "runtimes": [
@@ -3278,16 +3288,6 @@
                         "node18-actions"
                     ],
                     "default_runtime": "node18-actions",
-                    "binding_policy": "trigger-bound",
-                    "compatible_triggers": []
-                },
-                {
-                    "id": "send-phone-message",
-                    "version": "v1",
-                    "status": "DEPRECATED",
-                    "runtimes": [
-                        "node12"
-                    ],
                     "binding_policy": "trigger-bound",
                     "compatible_triggers": []
                 },
@@ -4080,6 +4080,25 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/attack-protection/brute-force-protection",
+        "body": "",
+        "status": 200,
+        "response": {
+            "enabled": true,
+            "shields": [
+                "block",
+                "user_notification"
+            ],
+            "mode": "count_per_identifier_and_ip",
+            "allowlist": [],
+            "max_attempts": 10
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/attack-protection/breached-password-detection",
         "body": "",
         "status": 200,
@@ -4093,25 +4112,6 @@
                     "shields": []
                 }
             }
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/attack-protection/brute-force-protection",
-        "body": "",
-        "status": 200,
-        "response": {
-            "enabled": true,
-            "shields": [
-                "block",
-                "user_notification"
-            ],
-            "mode": "count_per_identifier_and_ip",
-            "allowlist": [],
-            "max_attempts": 10
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -4236,6 +4236,81 @@
             "error": "Not Found",
             "message": "There was an error retrieving branding settings: invalid theme ID",
             "errorCode": "theme_not_found"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/forms?page=0&per_page=100&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 100,
+            "start": 0,
+            "total": 0,
+            "forms": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/flows?page=0&per_page=100&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 100,
+            "start": 0,
+            "total": 0,
+            "flows": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/flows?page=0&per_page=100&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 100,
+            "start": 0,
+            "total": 0,
+            "flows": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/flows/vault/connections?page=0&per_page=100&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 100,
+            "start": 0,
+            "total": 0,
+            "connections": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/flows/vault/connections?page=0&per_page=100&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 100,
+            "start": 0,
+            "total": 0,
+            "connections": []
         },
         "rawHeaders": [],
         "responseIsBinary": false
