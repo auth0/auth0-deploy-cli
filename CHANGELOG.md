@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Management support for `forms`, `flows` and `flowVaultConnections` [#982]
+
+### Fixed
+
+- Fix docs to support free tier usage [#978]
+
 ## [8.1.0] - 2024-11-08
 
 ### Added
