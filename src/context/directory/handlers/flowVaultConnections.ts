@@ -40,20 +40,23 @@ async function dump(context: DirectoryContext) {
   if (!flowVaultConnections || isEmpty(flowVaultConnections)) return; // Skip, nothing to dump
 
   // Check if there is any duplicate form name
-  const vaultConnectionsNames = flowVaultConnections.map((form) => form.name);
-  const duplicateVaultConnectionsNames = vaultConnectionsNames.filter(
-    (name, index) => vaultConnectionsNames.indexOf(name) !== index
-  );
+  const vaultConnectionsNamesSet = new Set<string>();
+  const duplicateVaultConnectionsNames = new Set<string>();
 
-  if (duplicateVaultConnectionsNames.length > 0) {
+  flowVaultConnections.forEach((form) => {
+    if (vaultConnectionsNamesSet.has(form.name)) {
+      duplicateVaultConnectionsNames.add(form.name);
+    } else {
+      vaultConnectionsNamesSet.add(form.name);
+    }
+  });
+
+  if (duplicateVaultConnectionsNames.size > 0) {
+    const duplicatesArray = Array.from(duplicateVaultConnectionsNames);
     log.error(
-      `Duplicate form names found: [${duplicateVaultConnectionsNames.join(
-        ', '
-      )}] , make sure to rename them to avoid conflicts`
+      `Duplicate flow vault connections names found: [${duplicatesArray}] , make sure to rename them to avoid conflicts`
     );
-    throw new Error(
-      `Duplicate flow vault connections names found: ${duplicateVaultConnectionsNames.join(', ')}`
-    );
+    throw new Error(`Duplicate flow vault connections names found: ${duplicatesArray}`);
   }
 
   const flowVaultsFolder = path.join(context.filePath, constants.FLOWS_VAULT_DIRECTORY);

@@ -41,16 +41,23 @@ async function dump(context: DirectoryContext) {
   fs.ensureDirSync(formsFolder);
 
   // Check if there is any duplicate form name
-  const formNames = forms.map((form) => form.name);
-  const duplicateFormNames = formNames.filter((name, index) => formNames.indexOf(name) !== index);
+  const formNameSet = new Set();
+  const duplicateFormNames = new Set();
 
-  if (duplicateFormNames.length > 0) {
+  forms.forEach((form) => {
+    if (formNameSet.has(form.name)) {
+      duplicateFormNames.add(form.name);
+    } else {
+      formNameSet.add(form.name);
+    }
+  });
+
+  if (duplicateFormNames.size > 0) {
+    const duplicateNamesArray = Array.from(duplicateFormNames).join(', ');
     log.error(
-      `Duplicate form names found: [${duplicateFormNames.join(
-        ', '
-      )}] , make sure to rename them to avoid conflicts`
+      `Duplicate form names found: [${duplicateNamesArray}] , make sure to rename them to avoid conflicts`
     );
-    throw new Error(`Duplicate form names found: ${duplicateFormNames.join(', ')}`);
+    throw new Error(`Duplicate form names found: ${duplicateNamesArray}`);
   }
 
   forms.forEach((form) => {

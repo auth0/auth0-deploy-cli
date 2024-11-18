@@ -12,20 +12,23 @@ async function dump(context: YAMLContext): Promise<ParsedParsedFlowVaults> {
   if (!flowVaultConnections) return { flowVaultConnections: null };
 
   // Check if there is any duplicate form name
-  const vaultConnectionsNames = flowVaultConnections.map((form) => form.name);
-  const duplicateVaultConnectionsNames = vaultConnectionsNames.filter(
-    (name, index) => vaultConnectionsNames.indexOf(name) !== index
-  );
+  const vaultConnectionsNames = new Set();
+  const duplicateVaultConnectionsNames = new Set();
 
-  if (duplicateVaultConnectionsNames.length > 0) {
+  flowVaultConnections.forEach((form) => {
+    if (vaultConnectionsNames.has(form.name)) {
+      duplicateVaultConnectionsNames.add(form.name);
+    } else {
+      vaultConnectionsNames.add(form.name);
+    }
+  });
+
+  if (duplicateVaultConnectionsNames.size > 0) {
+    const duplicatesArray = Array.from(duplicateVaultConnectionsNames).join(', ');
     log.error(
-      `Duplicate form names found: [${duplicateVaultConnectionsNames.join(
-        ', '
-      )}] , make sure to rename them to avoid conflicts`
+      `Duplicate flow vault connections names found: [${duplicatesArray}] , make sure to rename them to avoid conflicts`
     );
-    throw new Error(
-      `Duplicate flow vault connections names found: ${duplicateVaultConnectionsNames.join(', ')}`
-    );
+    throw new Error(`Duplicate flow vault connections names found: ${duplicatesArray}`);
   }
 
   const removeKeysFromOutput = ['id', 'created_at', 'updated_at', 'refreshed_at', 'fingerprint'];

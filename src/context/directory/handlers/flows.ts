@@ -41,16 +41,23 @@ async function dump(context: DirectoryContext) {
   fs.ensureDirSync(flowsFolder);
 
   // Check if there is any duplicate flow name
-  const flowNames = flows.map((flow) => flow.name);
-  const duplicateFlowNames = flowNames.filter((name, index) => flowNames.indexOf(name) !== index);
+  const flowNameSet = new Set();
+  const duplicateFlowNames = new Set();
 
-  if (duplicateFlowNames.length > 0) {
+  flows.forEach((flow) => {
+    if (flowNameSet.has(flow.name)) {
+      duplicateFlowNames.add(flow.name);
+    } else {
+      flowNameSet.add(flow.name);
+    }
+  });
+
+  if (duplicateFlowNames.size > 0) {
+    const duplicateNamesArray = Array.from(duplicateFlowNames).join(', ');
     log.error(
-      `Duplicate form names found: [${duplicateFlowNames.join(
-        ', '
-      )}] , make sure to rename them to avoid conflicts`
+      `Duplicate flow names found: [${duplicateNamesArray}] , make sure to rename them to avoid conflicts`
     );
-    throw new Error(`Duplicate flow names found: ${duplicateFlowNames.join(', ')}`);
+    throw new Error(`Duplicate flow names found: ${duplicateNamesArray}`);
   }
 
   flows.forEach((flow) => {
