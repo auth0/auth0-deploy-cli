@@ -131,6 +131,11 @@ export function mockMgmtClient() {
       get: () => ({ data: {} }),
     },
     customDomains: { getAll: (params) => mockPagedData(params, 'custom_domains', []) },
+    forms: { getAll: (params) => mockPagedData(params, 'forms', []) },
+    flows: {
+      getAll: (params) => mockPagedData(params, 'flows', []),
+      getAllConnections: (params) => mockPagedData(params, 'connections', []),
+    },
   };
 }
 
