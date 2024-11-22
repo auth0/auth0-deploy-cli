@@ -2246,6 +2246,77 @@
     },
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/clients/Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+        "body": {
+            "name": "Deploy CLI",
+            "app_type": "non_interactive",
+            "cross_origin_auth": false,
+            "custom_login_page_on": true,
+            "grant_types": ["client_credentials"],
+            "is_first_party": true,
+            "is_token_endpoint_ip_header_trusted": false,
+            "jwt_configuration": { "alg": "RS256", "lifetime_in_seconds": 36000 },
+            "oidc_conformant": true,
+            "refresh_token": {
+                "expiration_type": "non-expiring",
+                "leeway": 0,
+                "infinite_token_lifetime": true,
+                "infinite_idle_token_lifetime": true,
+                "token_lifetime": 31557600,
+                "idle_token_lifetime": 2592000,
+                "rotation_type": "non-rotating"
+            },
+            "sso_disabled": false,
+            "token_endpoint_auth_method": "client_secret_post"
+        },
+        "status": 200,
+        "response": {
+            "tenant": "auth0-deploy-cli-e2e",
+            "global": false,
+            "is_token_endpoint_ip_header_trusted": false,
+            "name": "Deploy CLI",
+            "is_first_party": true,
+            "oidc_conformant": true,
+            "sso_disabled": false,
+            "cross_origin_auth": false,
+            "refresh_token": {
+                "expiration_type": "non-expiring",
+                "leeway": 0,
+                "infinite_token_lifetime": true,
+                "infinite_idle_token_lifetime": true,
+                "token_lifetime": 31557600,
+                "idle_token_lifetime": 2592000,
+                "rotation_type": "non-rotating"
+            },
+            "cross_origin_authentication": true,
+            "signing_keys": [
+                {
+                    "cert": "[REDACTED]",
+                    "pkcs7": "[REDACTED]",
+                    "subject": "deprecated"
+                }
+            ],
+            "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+            "callback_url_template": false,
+            "client_secret": "[REDACTED]",
+            "jwt_configuration": {
+                "alg": "RS256",
+                "lifetime_in_seconds": 36000,
+                "secret_encoded": false
+            },
+            "token_endpoint_auth_method": "client_secret_post",
+            "app_type": "non_interactive",
+            "grant_types": [
+                "client_credentials"
+            ],
+            "custom_login_page_on": true
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/emails/provider?fields=name%2Cenabled%2Ccredentials%2Csettings%2Cdefault_from_address&include_fields=true",
         "body": "",
@@ -9405,6 +9476,26 @@
     },
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "DELETE",
+        "path": "/api/v2/clients/Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+        "body": "",
+        "status": 204,
+        "response": "",
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "DELETE",
+        "path": "/api/v2/client-grants/cgr_t3j1isctGZmOVylt",
+        "body": "",
+        "status": 204,
+        "response": "",
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "POST",
         "path": "/api/v2/clients",
         "body": {
@@ -10862,6 +10953,16 @@
                 }
             ]
         },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "DELETE",
+        "path": "/api/v2/client-grants/cgr_t3j1isctGZmOVylt",
+        "body": "",
+        "status": 204,
+        "response": "",
         "rawHeaders": [],
         "responseIsBinary": false
     },
