@@ -121,7 +121,7 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
     if (this.existing) return this.existing;
 
     const { data: selfServiceProfiles } =
-      await this.client.selfServiceProfiles.getSelfServiceProfiles();
+      await this.client.selfServiceProfiles.getAll();
 
     this.existing = selfServiceProfiles;
     return this.existing;

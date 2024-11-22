@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.2.0] - 2024-11-18
+
+### Added
+
+- Management support for `forms`, `flows` and `flowVaultConnections` [#982]
+
+### Fixed
+
+- Fix docs to support free tier usage [#978]
+
+## [8.1.0] - 2024-11-08
+
+### Added
+
+- Client Credentials (M2M) support in `organizations` and `clientGrants` [#975]
+
 ## [8.0.0] - 2024-10-21
 
 ### Changed
@@ -1108,7 +1124,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#946]: https://github.com/auth0/auth0-deploy-cli/issues/946
 [#954]: https://github.com/auth0/auth0-deploy-cli/issues/954
 [#963]: https://github.com/auth0/auth0-deploy-cli/issues/963
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.0.0...HEAD
+[#975]: https://github.com/auth0/auth0-deploy-cli/issues/975
+[#978]: https://github.com/auth0/auth0-deploy-cli/issues/978
+[#982]: https://github.com/auth0/auth0-deploy-cli/issues/982
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.2.0...HEAD
+[8.2.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.1.0...v8.2.0
+[8.1.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.0.0...v8.1.0
 [8.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.3...v8.0.0
 [7.24.3]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.2...v7.24.3
 [7.24.2]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.1...v7.24.2

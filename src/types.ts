@@ -8,6 +8,9 @@ import { LogStream } from './tools/auth0/handlers/logStreams';
 import { Client } from './tools/auth0/handlers/clients';
 import { ClientGrant } from './tools/auth0/handlers/clientGrants';
 import { Theme } from './tools/auth0/handlers/themes';
+import { Form } from './tools/auth0/handlers/forms';
+import { Flow } from './tools/auth0/handlers/flows';
+import { FlowVaultConnection } from './tools/auth0/handlers/flowVaultConnections';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -120,7 +123,10 @@ export type Assets = Partial<{
   };
   clientsOrig: Asset[] | null;
   themes: Theme[] | null;
-  selfServiceProfiles: SsProfile[];
+  forms: Form[] | null;
+  flows: Flow[] | null;
+  flowVaultConnections: FlowVaultConnection[] | null;
+  selfServiceProfiles: SsProfile[] | null;
 }>;
 
 export type CalculatedChanges = {
@@ -159,6 +165,9 @@ export type AssetTypes =
   | 'prompts'
   | 'customDomains'
   | 'themes'
+  | 'forms'
+  | 'flows'
+  | 'flowVaultConnections'
   | 'selfServiceProfiles';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };

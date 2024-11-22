@@ -35,9 +35,6 @@ async function dump(context: DirectoryContext): Promise<void> {
     const ssProfileFile = path.join(selfServiceProfilesFolder, sanitize(`${profile.name}.json`));
     log.info(`Writing ${ssProfileFile}`);
 
-    delete profile.created_at;
-    delete profile.updated_at;
-
     dumpJSON(ssProfileFile, profile);
   });
 }

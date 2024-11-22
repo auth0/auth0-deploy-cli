@@ -26,6 +26,9 @@ import * as attackProtection from './attackProtection';
 import * as logStreams from './logStreams';
 import * as customDomains from './customDomains';
 import * as themes from './themes';
+import * as forms from './forms';
+import * as flows from './flows';
+import * as flowVaultConnections from './flowVaultConnections';
 import * as selfServiceProfiles from './selfServiceProfiles';
 
 import { AssetTypes } from '../../../types';
@@ -61,6 +64,9 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   logStreams,
   customDomains,
   themes,
+  forms,
+  flows,
+  flowVaultConnections,
   selfServiceProfiles,
 };
 

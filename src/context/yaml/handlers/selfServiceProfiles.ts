@@ -16,17 +16,17 @@ async function parse(context: YAMLContext): Promise<ParsedSelfServiceProfiles> {
 }
 
 async function dump(context: YAMLContext): Promise<ParsedSelfServiceProfiles> {
-  let { selfServiceProfiles } = context.assets;
+  const { selfServiceProfiles } = context.assets;
   if (!selfServiceProfiles) return { selfServiceProfiles: null };
 
-  selfServiceProfiles = selfServiceProfiles.map((profile) => {
-    delete profile.created_at;
-    delete profile.updated_at;
+  // selfServiceProfiles = selfServiceProfiles.map((profile) => {
+  //   delete profile.created_at;
+  //   delete profile.updated_at;
 
-    return {
-      ...profile,
-    };
-  });
+  //   return {
+  //     ...profile,
+  //   };
+  // });
 
   return {
     selfServiceProfiles,

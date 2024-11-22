@@ -295,6 +295,9 @@ describe('#YAML context validation', () => {
       },
       customDomains: [],
       themes: [],
+      flowVaultConnections: [],
+      flows: [],
+      forms: [],
     });
   });
 
@@ -407,6 +410,9 @@ describe('#YAML context validation', () => {
       },
       customDomains: [],
       themes: [],
+      flowVaultConnections: [],
+      flows: [],
+      forms: [],
     });
   });
 
@@ -520,6 +526,9 @@ describe('#YAML context validation', () => {
       logStreams: [],
       customDomains: [],
       themes: [],
+      flowVaultConnections: [],
+      flows: [],
+      forms: [],
     });
   });
 
