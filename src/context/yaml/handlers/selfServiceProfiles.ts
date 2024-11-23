@@ -1,9 +1,12 @@
-import { SsProfile } from 'auth0';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset, ParsedAsset } from '../../../types';
+import { ParsedAsset } from '../../../types';
+import { SsProfileWithCustomText } from '../../../tools/auth0/handlers/selfServiceProfiles';
 
-type ParsedSelfServiceProfiles = ParsedAsset<'selfServiceProfiles', Partial<SsProfile>[]>;
+type ParsedSelfServiceProfiles = ParsedAsset<
+  'selfServiceProfiles',
+  Partial<SsProfileWithCustomText>[]
+>;
 
 async function parse(context: YAMLContext): Promise<ParsedSelfServiceProfiles> {
   const { selfServiceProfiles } = context.assets;
@@ -16,17 +19,22 @@ async function parse(context: YAMLContext): Promise<ParsedSelfServiceProfiles> {
 }
 
 async function dump(context: YAMLContext): Promise<ParsedSelfServiceProfiles> {
-  const { selfServiceProfiles } = context.assets;
+  let { selfServiceProfiles } = context.assets;
   if (!selfServiceProfiles) return { selfServiceProfiles: null };
 
-  // selfServiceProfiles = selfServiceProfiles.map((profile) => {
-  //   delete profile.created_at;
-  //   delete profile.updated_at;
+  selfServiceProfiles = selfServiceProfiles.map((profile) => {
+    if ('created_at' in profile) {
+      delete profile.created_at;
+    }
 
-  //   return {
-  //     ...profile,
-  //   };
-  // });
+    if ('updated_at' in profile) {
+      delete profile.updated_at;
+    }
+
+    return {
+      ...profile,
+    };
+  });
 
   return {
     selfServiceProfiles,

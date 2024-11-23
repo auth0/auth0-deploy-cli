@@ -73,7 +73,7 @@ const directoryHandlers: {
   forms,
   flows,
   flowVaultConnections,
-  selfServiceProfiles
+  selfServiceProfiles,
 };
 
 export default directoryHandlers;

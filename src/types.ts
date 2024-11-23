@@ -11,6 +11,7 @@ import { Theme } from './tools/auth0/handlers/themes';
 import { Form } from './tools/auth0/handlers/forms';
 import { Flow } from './tools/auth0/handlers/flows';
 import { FlowVaultConnection } from './tools/auth0/handlers/flowVaultConnections';
+import { SsProfileWithCustomText } from './tools/auth0/handlers/selfServiceProfiles';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -126,7 +127,7 @@ export type Assets = Partial<{
   forms: Form[] | null;
   flows: Flow[] | null;
   flowVaultConnections: FlowVaultConnection[] | null;
-  selfServiceProfiles: SsProfile[] | null;
+  selfServiceProfiles: SsProfileWithCustomText[] | null;
 }>;
 
 export type CalculatedChanges = {
