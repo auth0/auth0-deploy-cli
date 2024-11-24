@@ -1,9 +1,4 @@
-rules:
-  - name: my-rule
-    script: ./rules/my-rule.js
-    stage: login_success
-    enabled: true
-    order: 2
+rules: []
 rulesConfigs: []
 hooks: []
 pages:
