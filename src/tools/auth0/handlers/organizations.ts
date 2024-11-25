@@ -321,7 +321,7 @@ export default class OrganizationsHandler extends DefaultHandler {
     try {
       const [organizations, clients] = await Promise.all([
         paginate<GetOrganizations200ResponseOneOfInner>(this.client.organizations.getAll, {
-          paginate: true,
+          checkpoint: true,
           include_totals: true,
         }),
         paginate<Client>(this.client.clients.getAll, {
