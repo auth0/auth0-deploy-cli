@@ -23,8 +23,8 @@ type SharedPaginationParams = {
 };
 
 export type CheckpointPaginationParams = SharedPaginationParams & {
-  from: string;
-  take: number;
+  from?: string;
+  take?: number;
 };
 
 export type PagePaginationParams = SharedPaginationParams & {
