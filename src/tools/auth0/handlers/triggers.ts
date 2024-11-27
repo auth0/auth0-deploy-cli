@@ -88,7 +88,7 @@ export default class TriggersHandler extends DefaultHandler {
       }
 
       if (err.message === "cannot list action bindings for an entity-bound trigger") {
-          logger_1.default.warn(`${err.message.charAt(0).toUpperCase()}${err.message.slice(1)} (${triggerId})`);
+          log.warn(`${err.message.charAt(0).toUpperCase()}${err.message.slice(1)} (${triggerId})`);
           return {};
       }
 
