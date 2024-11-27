@@ -59,7 +59,7 @@ export default class TriggersHandler extends DefaultHandler {
     try {
       const res = await this.client.actions.getAllTriggers();
       const triggers: string[] = _(res.data.triggers).map('id').uniq().value();
-      let triggerId;
+      let triggerId: string;
 
       for (let i = 0; i < triggers.length; i++) {
         triggerId = triggers[i];
