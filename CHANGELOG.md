@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Management support for `selfServiceProfiles` [#989]
+
+### Fixed
+
+- Fix checkpoint pagination to get all organizations [#984]
+- Fix error handling for trigger bindings [#991]
+
 ## [8.2.0] - 2024-11-18
 
 ### Added
