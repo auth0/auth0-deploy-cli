@@ -29,6 +29,7 @@ import * as themes from './themes';
 import * as forms from './forms';
 import * as flows from './flows';
 import * as flowVaultConnections from './flowVaultConnections';
+import * as selfServiceProfiles from './selfServiceProfiles';
 
 import { AssetTypes } from '../../../types';
 import APIHandler from './default';
@@ -66,6 +67,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   forms,
   flows,
   flowVaultConnections,
+  selfServiceProfiles,
 };
 
 export default auth0ApiHandlers as {
