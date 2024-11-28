@@ -32,6 +32,7 @@ import flowVaultConnections from './flowVaultConnections';
 
 import YAMLContext from '..';
 import { AssetTypes } from '../../../types';
+import selfServiceProfiles from './selfServiceProfiles';
 
 export type YAMLHandler<T> = {
   dump: (context: YAMLContext) => Promise<T>;
@@ -70,6 +71,7 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   forms,
   flows,
   flowVaultConnections,
+  selfServiceProfiles,
 };
 
 export default yamlHandlers;

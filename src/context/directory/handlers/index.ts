@@ -32,6 +32,7 @@ import flowVaultConnections from './flowVaultConnections';
 
 import DirectoryContext from '..';
 import { AssetTypes, Asset } from '../../../types';
+import selfServiceProfiles from './selfServiceProfiles';
 
 export type DirectoryHandler<T> = {
   dump: (context: DirectoryContext) => void;
@@ -72,6 +73,7 @@ const directoryHandlers: {
   forms,
   flows,
   flowVaultConnections,
+  selfServiceProfiles,
 };
 
 export default directoryHandlers;

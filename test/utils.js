@@ -136,6 +136,9 @@ export function mockMgmtClient() {
       getAll: (params) => mockPagedData(params, 'flows', []),
       getAllConnections: (params) => mockPagedData(params, 'connections', []),
     },
+    selfServiceProfiles: {
+      getAll: (params) => mockPagedData(params, 'selfServiceProfiles', []),
+    },
   };
 }
 

@@ -1,0 +1,57 @@
+{
+  "name": "Blank-form",
+  "languages": {
+    "primary": "en"
+  },
+  "nodes": [
+    {
+      "id": "step_ggeX",
+      "type": "STEP",
+      "coordinates": {
+        "x": 500,
+        "y": 0
+      },
+      "alias": "New step",
+      "config": {
+        "components": [
+          {
+            "id": "full_name",
+            "category": "FIELD",
+            "type": "TEXT",
+            "label": "Your Name",
+            "required": true,
+            "sensitive": false,
+            "config": {
+              "multiline": false,
+              "min_length": 1,
+              "max_length": 50
+            }
+          },
+          {
+            "id": "next_button_3FbA",
+            "category": "BLOCK",
+            "type": "NEXT_BUTTON",
+            "config": {
+              "text": "Continue"
+            }
+          }
+        ],
+        "next_node": "$ending"
+      }
+    }
+  ],
+  "start": {
+    "next_node": "step_ggeX",
+    "coordinates": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "ending": {
+    "resume_flow": true,
+    "coordinates": {
+      "x": 1250,
+      "y": 0
+    }
+  }
+}

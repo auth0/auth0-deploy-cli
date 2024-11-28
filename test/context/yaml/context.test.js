@@ -298,6 +298,7 @@ describe('#YAML context validation', () => {
       flowVaultConnections: [],
       flows: [],
       forms: [],
+      selfServiceProfiles: [],
     });
   });
 
@@ -413,6 +414,7 @@ describe('#YAML context validation', () => {
       flowVaultConnections: [],
       flows: [],
       forms: [],
+      selfServiceProfiles: [],
     });
   });
 
@@ -529,6 +531,7 @@ describe('#YAML context validation', () => {
       flowVaultConnections: [],
       flows: [],
       forms: [],
+      selfServiceProfiles: [],
     });
   });
 

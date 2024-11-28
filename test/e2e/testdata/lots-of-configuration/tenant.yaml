@@ -738,3 +738,23 @@ logStreams:
       datadogApiKey: some-sensitive-api-key
       datadogRegion: us
     type: datadog
+forms:
+  - name: Blank-form
+    body: ./forms/Blank-form.json
+selfServiceProfiles:
+  - name: self-service-profile-1
+    allowed_strategies:
+      - google-apps
+      - okta
+    branding:
+      colors:
+        primary: '#19aecc'
+    description: test description self-service-profile-1
+    user_attributes:
+      - name: email
+        description: Email of the User
+        is_optional: false
+      - name: name
+        description: Name of the User
+        is_optional: true
+
