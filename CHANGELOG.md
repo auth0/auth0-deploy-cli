@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.3.0] - 2024-11-28
+
+### Added
+
+- Management support for `selfServiceProfiles` [#989]
+
+### Fixed
+
+- Fix checkpoint pagination to get all organizations [#984]
+- Fix error handling for trigger bindings [#991]
+
 ## [8.2.0] - 2024-11-18
 
 ### Added
@@ -1127,7 +1138,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#975]: https://github.com/auth0/auth0-deploy-cli/issues/975
 [#978]: https://github.com/auth0/auth0-deploy-cli/issues/978
 [#982]: https://github.com/auth0/auth0-deploy-cli/issues/982
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.2.0...HEAD
+[#984]: https://github.com/auth0/auth0-deploy-cli/issues/984
+[#989]: https://github.com/auth0/auth0-deploy-cli/issues/989
+[#991]: https://github.com/auth0/auth0-deploy-cli/issues/991
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.3.0...HEAD
+[8.3.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.2.0...v8.3.0
 [8.2.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.1.0...v8.2.0
 [8.1.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.0.0...v8.1.0
 [8.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v7.24.3...v8.0.0
