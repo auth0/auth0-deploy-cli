@@ -62,10 +62,21 @@ export default class TriggersHandler extends DefaultHandler {
 
       for (let i = 0; i < triggers.length; i++) {
         const triggerId = triggers[i];
-        const { data } = await this.client.actions.getTriggerBindings({
-          triggerId: triggerId,
-        });
-        const { bindings } = data;
+        let bindings;
+        try {
+          const { data } = await this.client.actions.getTriggerBindings({
+            triggerId: triggerId,
+          });
+
+          bindings = data?.bindings;
+        } catch (err) {
+          log.warn(
+            `${err.message} (trigger: ${triggerId}). Skipping this trigger and continuing.`
+          );
+
+          continue;
+        }
+
         if (bindings && bindings.length > 0) {
           triggerBindings[triggerId] = bindings.map((binding) => ({
             action_name: binding.action.name,
