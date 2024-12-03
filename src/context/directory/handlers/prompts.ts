@@ -12,9 +12,9 @@ import {
   CustomPartialsPromptTypes,
   CustomPartialsScreenTypes,
   CustomPromptPartialsScreens,
-  Prompts,
-  PromptSettings,
-  ScreenConfig,
+  Prompts, PromptScreenRenderSettings, PromptScreenSettings,
+  PromptSettings, PromptTypes,
+  ScreenConfig, ScreenTypes,
 } from '../../../tools/auth0/handlers/prompts';
 
 type ParsedPrompts = ParsedAsset<'prompts', Prompts>;
@@ -28,6 +28,8 @@ const getCustomTextFile = (promptsDirectory: string) =>
   path.join(promptsDirectory, 'custom-text.json');
 
 const getPartialsFile = (promptsDirectory: string) => path.join(promptsDirectory, 'partials.json');
+
+const getPromptScreenSettingsFile = (promptsDirectory: string) => path.join(promptsDirectory, 'promptScreenSettings.json');
 
 function parse(context: DirectoryContext): ParsedPrompts {
   const promptsDirectory = getPromptsDirectory(context.filePath);
@@ -68,9 +70,9 @@ function parse(context: DirectoryContext): ParsedPrompts {
               const templateFilePath = path.join(promptsDirectory, template);
               insertionAcc[name] = isFile(templateFilePath)
                 ? loadFileAndReplaceKeywords(templateFilePath, {
-                    mappings: context.mappings,
-                    disableKeywordReplacement: context.disableKeywordReplacement,
-                  }).trim()
+                  mappings: context.mappings,
+                  disableKeywordReplacement: context.disableKeywordReplacement,
+                }).trim()
                 : '';
               return insertionAcc;
             },
@@ -84,11 +86,45 @@ function parse(context: DirectoryContext): ParsedPrompts {
     }, {} as Record<CustomPartialsPromptTypes, Record<CustomPartialsScreenTypes, Record<string, string>>>);
   })();
 
+  // const promptScreenSettings = (() => {
+  //   const screenSettingsFile = getPromptScreenSettingsFile(promptsDirectory);
+  //   if (!isFile(screenSettingsFile)) return {};
+  //   const settingsFileContent = loadJSON(screenSettingsFile, {
+  //     mappings: context.mappings,
+  //     disableKeywordReplacement: context.disableKeywordReplacement,
+  //   }) as PromptScreenRenderSettings;
+
+  //   return Object.entries(settingsFileContent).reduce((acc, [promptName, screensArray]) => {
+  //     const screensObject = screensArray[0] as Record<ScreenTypes, PromptScreenRenderSettings[]>;
+  //     acc[promptName as PromptTypes] = Object.entries(screensObject).reduce(
+  //       (screenAcc, [screenName, items]) => {
+  //         screenAcc[screenName as ScreenTypes] = items.reduce(
+  //           (insertionAcc, { name, body }) => {
+  //             const templateFilePath = path.join(promptsDirectory, body);
+  //             insertionAcc[name] = isFile(templateFilePath)
+  //               ? loadFileAndReplaceKeywords(templateFilePath, {
+  //                 mappings: context.mappings,
+  //                 disableKeywordReplacement: context.disableKeywordReplacement,
+  //               }).trim()
+  //               : '';
+  //             return insertionAcc;
+  //           },
+  //           {} as Record<string, string>
+  //         );
+  //         return screenAcc;
+  //       },
+  //       {} as Record<CustomPartialsScreenTypes, Record<string, string>>
+  //     );
+  //     return acc;
+  //   }, {} as Record<PromptTypes, Record<ScreenTypes, PromptScreenSettings[]>>);
+  // })();
+
   return {
     prompts: {
       ...promptsSettings,
       customText,
       partials,
+      // ...promptScreenSettings
     },
   };
 }

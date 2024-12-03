@@ -1,5 +1,5 @@
 import { isEmpty } from 'lodash';
-import { GetPartialsPromptEnum, PutPartialsRequest } from 'auth0';
+import { GetPartialsPromptEnum,GetRenderingScreenEnum, PutPartialsRequest } from 'auth0';
 import DefaultHandler from './default';
 import { Assets, Language, languages } from '../../../types';
 import log from '../../../logger';
@@ -91,6 +91,9 @@ const screenTypes = [
   'redeem-ticket',
   'organization-selection',
   'accept-invitation',
+  'login-passwordless-email-code',
+  'login-passwordless-email-link',
+  'login-passwordless-sms-otp',
 ] as const;
 
 export type ScreenTypes = typeof screenTypes[number];
@@ -104,6 +107,22 @@ const customPartialsPromptTypes = [
   'signup-id',
   'signup-password',
 ];
+
+type PromptScreenMapping = {
+  [prompt: string]: string[] // Array of screens for each prompt
+}
+
+const PromptScreenMap: PromptScreenMapping = {
+  "signup":                      ["signup"],
+  "signup-id":                   ["signup-id"],
+  "signup-password":             ["signup-password"],
+  "login":                       ["login"],
+  "login-id":                    ["login-id"],
+  "login-password":              ["login-password"],
+  "login-passwordless":          ["login-passwordless-email-code", "login-passwordless-email-link", "login-passwordless-sms-otp"],
+  "login-email-verification":    ["login-email-verification"],
+  "common":                      ["redeem-ticket"],
+}
 
 export type CustomPartialsPromptTypes = typeof customPartialsPromptTypes[number];
 
@@ -154,6 +173,19 @@ export type CustomPartialsConfig = {
   ];
 };
 
+export type PromptScreenRenderSettings = {
+  name: string;
+  body: string;
+};
+
+export type PromptScreenSettings = {
+  [prompt in PromptTypes]: [
+    {
+      [screen in ScreenTypes]: PromptScreenRenderSettings;
+    }
+  ];
+};
+
 export const schema = {
   type: 'object',
   properties: {
@@ -197,6 +229,7 @@ export const schema = {
         {}
       ),
     },
+    promptScreenRenderSettings:{},
     partials: {
       type: 'object',
       properties: customPartialsPromptTypes.reduce(
@@ -260,9 +293,10 @@ export type AllPromptsByLanguage = Partial<{
 
 export type Prompts = Partial<
   PromptSettings & {
-    customText: AllPromptsByLanguage;
-    partials: CustomPromptPartials;
-  }
+  customText: AllPromptsByLanguage;
+  partials: CustomPromptPartials;
+  screenRenderer:PromptScreenSettings;
+}
 >;
 
 export default class PromptsHandler extends DefaultHandler {
@@ -288,10 +322,13 @@ export default class PromptsHandler extends DefaultHandler {
 
     const partials = await this.getCustomPromptsPartials();
 
+    const screenRenderer = await this.getPromptScreenSettings();
+
     return {
       ...promptsSettings,
       customText,
       partials,
+      screenRenderer,
     };
   }
 
@@ -382,8 +419,8 @@ export default class PromptsHandler extends DefaultHandler {
   }
 
   async getCustomPartial({
-    prompt,
-  }: {
+                           prompt,
+                         }: {
     prompt: GetPartialsPromptEnum;
   }): Promise<CustomPromptPartials> {
     if (!this.IsFeatureSupported) return {};
@@ -418,6 +455,67 @@ export default class PromptsHandler extends DefaultHandler {
       {}
     );
   }
+
+  async getPromptScreenSettings(): Promise<PromptScreenSettings|undefined> {
+    // Create combinations of prompt and screens
+    const promptScreenCombinations = Object.entries(PromptScreenMap)
+      .flatMap(([promptType, screens]) =>
+        screens.map(screen => ({
+          promptName: promptType,
+          screenName: screen,
+          // name: `${promptType}_${screen}` // Generate name as promptName_screenName
+        }))
+      );
+
+    // console.log(promptScreenCombinations)
+
+    await this.client.pool
+      .addEachTask({
+        data: promptScreenCombinations,
+        generator: ({ promptName, screenName }) =>
+          this.client.prompts
+            .getRendering({
+              prompt: promptName as GetPartialsPromptEnum,
+              screen: screenName as GetRenderingScreenEnum,
+            })
+            .then(({ data: customRenderingSettings }) => {
+              // console.log(customRenderingSettings)
+              if (isEmpty(customRenderingSettings)) return null;
+              return customRenderingSettings
+            }),
+      })
+      .promise()
+      .then((data) => {
+        // customRenderingSettings
+        //   .filter((item) => item !== null)
+        //   .reduce((acc: PromptScreenSettings, item) => {
+        //     if (item?.prompt === undefined || item?.screen === undefined) return acc;
+        //     const { prompt, screen, customTextData } = item;
+        //     return {
+        //       ...acc,
+        //       [prompt]: {
+        //         ...(acc[prompt] || {}),
+        //         [screen]: customTextData
+        //       },
+        //     };
+        //   }, {})
+        console.log(data)
+
+
+
+
+        // return customRenderingSettings
+      });
+
+    return
+
+  }
+
+
+
+
+
+
 
   async processChanges(assets: Assets): Promise<void> {
     const { prompts } = assets;
@@ -466,9 +564,9 @@ export default class PromptsHandler extends DefaultHandler {
   }
 
   async updateCustomPartials({
-    prompt,
-    body,
-  }: {
+                               prompt,
+                               body,
+                             }: {
     prompt: CustomPartialsPromptTypes;
     body: CustomPromptPartialsScreens;
   }): Promise<void> {
