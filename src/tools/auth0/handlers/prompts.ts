@@ -112,17 +112,41 @@ type PromptScreenMapping = {
   [prompt: string]: string[] // Array of screens for each prompt
 }
 
-const PromptScreenMap: PromptScreenMapping = {
-  "signup":                      ["signup"],
-  "signup-id":                   ["signup-id"],
-  "signup-password":             ["signup-password"],
-  "login":                       ["login"],
-  "login-id":                    ["login-id"],
-  "login-password":              ["login-password"],
-  "login-passwordless":          ["login-passwordless-email-code", "login-passwordless-email-link", "login-passwordless-sms-otp"],
-  "login-email-verification":    ["login-email-verification"],
-  "common":                      ["redeem-ticket"],
-}
+const PromptScreenMap = {
+  'signup': ['signup'],
+  'signup-id': ['signup-id'],
+  'signup-password': ['signup-password'],
+  'login': ['login'],
+  'login-id': ['login-id'],
+  'login-password': ['login-password'],
+  'login-passwordless': ['login-passwordless-email-code', 'login-passwordless-email-link', 'login-passwordless-sms-otp'],
+  'login-email-verification': ['login-email-verification'],
+  'phone-identifier-enrollment': ['phone-identifier-enrollment'],
+  'phone-identifier-challenge': ['phone-identifier-challenge'],
+  'email-identifier-challenge': ['email-identifier-challenge'],
+  'reset-password': ['reset-password-request', 'reset-password-email', 'reset-password', 'reset-password-success', 'reset-password-error', 'reset-password-mfa-email-challenge', 'reset-password-mfa-otp-challenge', 'reset-password-mfa-phone-challenge', 'reset-password-mfa-push-challenge-push', 'reset-password-mfa-recovery-code-challenge', 'reset-password-mfa-sms-challenge', 'reset-password-mfa-voice-challenge', 'reset-password-mfa-webauthn-platform-challenge', 'reset-password-mfa-webauthn-roaming-challenge'],
+  'custom-form': ['custom-form'],
+  'consent': ['consent'],
+  'logout': ['logout', 'logout-complete', 'logout-aborted'],
+  'mfa-push': ['mfa-push-welcome', 'mfa-push-enrollment-qr', 'mfa-push-enrollment-code', 'mfa-push-success', 'mfa-push-challenge-push', 'mfa-push-list'],
+  'mfa-otp': ['mfa-otp-enrollment-qr', 'mfa-otp-enrollment-code', 'mfa-otp-challenge'],
+  'mfa-voice': ['mfa-voice-enrollment', 'mfa-voice-challenge'],
+  'mfa-phone': ['mfa-phone-enrollment', 'mfa-phone-challenge'],
+  'mfa-webauthn': ['mfa-webauthn-platform-enrollment', 'mfa-webauthn-roaming-enrollment', 'mfa-webauthn-platform-challenge', 'mfa-webauthn-roaming-challenge', 'mfa-webauthn-change-key-nickname', 'mfa-webauthn-enrollment-success', 'mfa-webauthn-error', 'mfa-webauthn-not-available-error'],
+  'mfa-sms': ['mfa-sms-enrollment', 'mfa-sms-challenge', 'mfa-sms-list', 'mfa-country-codes'],
+  'mfa-email': ['mfa-email-challenge', 'mfa-email-list'],
+  'mfa-recovery-code': ['mfa-recovery-code-enrollment', 'mfa-recovery-code-challenge'],
+  'mfa': ['mfa-detect-browser-capabilities', 'mfa-enroll-result', 'mfa-login-options', 'mfa-begin-enroll-options'],
+  'status': ['status'],
+  'device-flow': ['device-code-activation', 'device-code-activation-allowed', 'device-code-activation-denied', 'device-code-confirmation'],
+  'email-verification': ['email-verification-result'],
+  'email-otp-challenge': ['email-otp-challenge'],
+  'organizations': ['organization-selection', 'organization-picker'],
+  'invitation': ['accept-invitation'],
+  'passkeys': ['passkey-enrollment', 'passkey-enrollment-local'],
+  'captcha': ['interstitial-captcha'],
+  'common': ['redeem-ticket'],
+} as PromptScreenMapping;
 
 export type CustomPartialsPromptTypes = typeof customPartialsPromptTypes[number];
 
@@ -179,11 +203,9 @@ export type PromptScreenRenderSettings = {
 };
 
 export type PromptScreenSettings = {
-  [prompt in PromptTypes]: [
-    {
+  [prompt in PromptTypes]: Partial<{
       [screen in ScreenTypes]: PromptScreenRenderSettings;
-    }
-  ];
+    }>
 };
 
 export const schema = {
@@ -229,7 +251,6 @@ export const schema = {
         {}
       ),
     },
-    promptScreenRenderSettings:{},
     partials: {
       type: 'object',
       properties: customPartialsPromptTypes.reduce(
@@ -265,6 +286,27 @@ export const schema = {
               },
               { type: 'null' },
             ],
+          },
+        }),
+        {}
+      ),
+    },
+    screenRenderer:{
+      type: 'object',
+      properties: promptTypes.reduce(
+        (promptAcc, promptType) => ({
+          ...promptAcc,
+          [promptType]: {
+            type: 'object',
+            properties: screenTypes.reduce(
+              (screenAcc, screenType) => ({
+                ...screenAcc,
+                [screenType]: {
+                  type: 'object',
+                },
+              }),
+              {}
+            ),
           },
         }),
         {}
@@ -419,8 +461,8 @@ export default class PromptsHandler extends DefaultHandler {
   }
 
   async getCustomPartial({
-                           prompt,
-                         }: {
+    prompt,
+  }: {
     prompt: GetPartialsPromptEnum;
   }): Promise<CustomPromptPartials> {
     if (!this.IsFeatureSupported) return {};
@@ -456,20 +498,18 @@ export default class PromptsHandler extends DefaultHandler {
     );
   }
 
-  async getPromptScreenSettings(): Promise<PromptScreenSettings|undefined> {
+  async getPromptScreenSettings(): Promise<PromptScreenSettings> {
     // Create combinations of prompt and screens
-    const promptScreenCombinations = Object.entries(PromptScreenMap)
-      .flatMap(([promptType, screens]) =>
-        screens.map(screen => ({
+    const promptScreenCombinations = Object.entries(PromptScreenMap).flatMap(
+      ([promptType, screens]) =>
+        screens.map((screen) => ({
           promptName: promptType,
           screenName: screen,
           // name: `${promptType}_${screen}` // Generate name as promptName_screenName
         }))
-      );
+    );
 
-    // console.log(promptScreenCombinations)
-
-    await this.client.pool
+    const renderSettings = await this.client.pool
       .addEachTask({
         data: promptScreenCombinations,
         generator: ({ promptName, screenName }) =>
@@ -478,44 +518,27 @@ export default class PromptsHandler extends DefaultHandler {
               prompt: promptName as GetPartialsPromptEnum,
               screen: screenName as GetRenderingScreenEnum,
             })
-            .then(({ data: customRenderingSettings }) => {
-              // console.log(customRenderingSettings)
-              if (isEmpty(customRenderingSettings)) return null;
-              return customRenderingSettings
+            .then(({ data: renderingSettings }) => {
+              if (isEmpty(renderingSettings)) return null;
+              return renderingSettings;
             }),
       })
-      .promise()
-      .then((data) => {
-        // customRenderingSettings
-        //   .filter((item) => item !== null)
-        //   .reduce((acc: PromptScreenSettings, item) => {
-        //     if (item?.prompt === undefined || item?.screen === undefined) return acc;
-        //     const { prompt, screen, customTextData } = item;
-        //     return {
-        //       ...acc,
-        //       [prompt]: {
-        //         ...(acc[prompt] || {}),
-        //         [screen]: customTextData
-        //       },
-        //     };
-        //   }, {})
-        console.log(data)
+      .promise();
 
+    const customRenderingRes = renderSettings.filter((item) => item !== null).reduce(
+      (acc, customRenderingItem) => {
+        if (customRenderingItem) {
+          const { prompt, screen, tenant, ...others } = customRenderingItem;
+          acc[prompt] = acc[prompt] || {};
+          acc[prompt][screen] = others;
+        }
+        return acc as PromptScreenSettings;
+      },
+      {}
+    );
 
-
-
-        // return customRenderingSettings
-      });
-
-    return
-
+    return customRenderingRes as PromptScreenSettings;
   }
-
-
-
-
-
-
 
   async processChanges(assets: Assets): Promise<void> {
     const { prompts } = assets;
@@ -564,9 +587,9 @@ export default class PromptsHandler extends DefaultHandler {
   }
 
   async updateCustomPartials({
-                               prompt,
-                               body,
-                             }: {
+    prompt,
+    body,
+  }: {
     prompt: CustomPartialsPromptTypes;
     body: CustomPromptPartialsScreens;
   }): Promise<void> {

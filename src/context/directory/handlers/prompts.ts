@@ -1,7 +1,8 @@
 import path from 'path';
+import fs from 'fs-extra';
 import { ensureDirSync, writeFileSync } from 'fs-extra';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
-import { dumpJSON, existsMustBeDir, isFile, loadJSON } from '../../../utils';
+import {getFiles, dumpJSON, existsMustBeDir, isFile, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { ParsedAsset } from '../../../types';
@@ -12,9 +13,7 @@ import {
   CustomPartialsPromptTypes,
   CustomPartialsScreenTypes,
   CustomPromptPartialsScreens,
-  Prompts, PromptScreenRenderSettings, PromptScreenSettings,
-  PromptSettings, PromptTypes,
-  ScreenConfig, ScreenTypes,
+  Prompts, PromptScreenRenderSettings, PromptSettings, ScreenConfig,
 } from '../../../tools/auth0/handlers/prompts';
 
 type ParsedPrompts = ParsedAsset<'prompts', Prompts>;
@@ -86,14 +85,64 @@ function parse(context: DirectoryContext): ParsedPrompts {
     }, {} as Record<CustomPartialsPromptTypes, Record<CustomPartialsScreenTypes, Record<string, string>>>);
   })();
 
-  // const promptScreenSettings = (() => {
-  //   const screenSettingsFile = getPromptScreenSettingsFile(promptsDirectory);
+  const promptScreenSettings = (() => {
+    const screenSettingsDir = path.join(context.filePath, 'renderSettings');
+    if (!existsMustBeDir(screenSettingsDir)) return {};
+
+    const screenSettingsFiles = getFiles(screenSettingsDir, ['.json']);
+
+    const renderSettings = screenSettingsFiles.map((f) => {
+      const renderSetting = {
+        ...loadJSON(f, {
+          mappings: context.mappings,
+          disableKeywordReplacement: context.disableKeywordReplacement,
+        }) as PromptScreenRenderSettings
+      };
+      return renderSetting as PromptScreenRenderSettings;
+    });
+
+    return Object.entries(renderSettings).reduce((acc, [promptName, screens]) => {
+      console.log('Current promptName:', promptName);
+      console.log('Initial acc:', JSON.stringify(acc, null, 2));
+
+      // Create an object to collect screens for this prompt type
+      const promptScreens: Record<string, any> = {};
+
+      // Iterate over the screens object directly
+      Object.entries(screens).forEach(([screenName, filePath]) => {
+        console.log('Current screenName:', screenName);
+        console.log('File path:', filePath);
+
+        let fileContent = {};
+        try {
+          const fileData = fs.readFileSync(filePath, 'utf-8');
+          fileContent = JSON.parse(fileData);
+        } catch (error) {
+          console.error(`Error reading or parsing file at ${filePath}:`, error);
+          fileContent = { error: `Failed to load ${filePath}` }; // Fallback content
+        }
+
+        console.log('File content:', JSON.stringify(fileContent, null, 2));
+
+        // Store the file content under the screen name
+        promptScreens[screenName] = fileContent;
+      });
+
+      // Modify the accumulator to be an object instead of pushing to an array
+      acc[promptName] = promptScreens;
+      console.log('Updated acc:', JSON.stringify(acc, null, 2));
+
+      return acc;
+    }, {} as PromptScreenRenderSettings);
+  })();
+
+  console.log('Final partials:', JSON.stringify(partials, null, 2));
   //   if (!isFile(screenSettingsFile)) return {};
   //   const settingsFileContent = loadJSON(screenSettingsFile, {
   //     mappings: context.mappings,
   //     disableKeywordReplacement: context.disableKeywordReplacement,
   //   }) as PromptScreenRenderSettings;
-
+  //
   //   return Object.entries(settingsFileContent).reduce((acc, [promptName, screensArray]) => {
   //     const screensObject = screensArray[0] as Record<ScreenTypes, PromptScreenRenderSettings[]>;
   //     acc[promptName as PromptTypes] = Object.entries(screensObject).reduce(
@@ -124,7 +173,7 @@ function parse(context: DirectoryContext): ParsedPrompts {
       ...promptsSettings,
       customText,
       partials,
-      // ...promptScreenSettings
+      ...promptScreenSettings,
     },
   };
 }
@@ -134,7 +183,7 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   if (!prompts) return;
 
-  const { customText, partials, ...promptsSettings } = prompts;
+  const { customText, partials, screenRenderer, ...promptsSettings } = prompts;
 
   const promptsDirectory = getPromptsDirectory(context.filePath);
   ensureDirSync(promptsDirectory);
@@ -180,6 +229,46 @@ async function dump(context: DirectoryContext): Promise<void> {
   }, {} as CustomPartialsConfig);
 
   dumpJSON(partialsFile, transformedPartials);
+
+  if (!screenRenderer) return ;
+  const screenSettingsFile =  getPromptScreenSettingsFile(promptsDirectory);
+
+  const transformedScreenSettings = Object.entries(screenRenderer).reduce((acc, [promptName, screens]) => {
+    // Create the directory for render settings if it doesn't exist
+    const renderSettingsDir = path.join(context.filePath, 'renderSettings');
+    ensureDirSync(renderSettingsDir);
+
+    console.log(screenRenderer);
+
+    // Iterate through screens for this prompt
+    Object.entries(screens).forEach(([screenName, screenSettings]) => {
+      // Generate the file path with the format: [promptName]_[screenName].json
+
+      const screenSettingsFilePath = path.join(renderSettingsDir, `${promptName}_${screenName}.json`);
+      console.log(`Writing ${screenSettingsFilePath}`);
+
+      // Write the screen settings to a JSON file
+      try {
+        writeFileSync(
+          screenSettingsFilePath,
+          JSON.stringify(screenSettings, null, 2),
+          'utf8'
+        );
+
+        // Track the file path in the accumulator
+        if (!acc[promptName]) {
+          acc[promptName] = {};
+        }
+        acc[promptName][screenName] = path.relative(context.filePath, screenSettingsFilePath);
+      } catch (error) {
+        console.error(`Error writing screen settings for ${promptName}/${screenName}:`, error);
+      }
+    });
+
+    return acc;
+  }, {} as Record<string, Record<string, string>>);
+
+  dumpJSON(screenSettingsFile, transformedScreenSettings);
 }
 
 const promptsHandler: DirectoryHandler<ParsedPrompts> = {
