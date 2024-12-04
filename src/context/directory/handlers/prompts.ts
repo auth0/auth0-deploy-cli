@@ -1,8 +1,7 @@
 import path from 'path';
-import fs from 'fs-extra';
 import { ensureDirSync, writeFileSync } from 'fs-extra';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
-import {getFiles, dumpJSON, existsMustBeDir, isFile, loadJSON } from '../../../utils';
+import { getFiles, dumpJSON, existsMustBeDir, isFile, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { ParsedAsset } from '../../../types';
@@ -13,7 +12,10 @@ import {
   CustomPartialsPromptTypes,
   CustomPartialsScreenTypes,
   CustomPromptPartialsScreens,
-  Prompts, PromptScreenRenderSettings, PromptSettings, ScreenConfig,
+  Prompts,
+  PromptSettings,
+  ScreenConfig,
+  ScreenRenderer,
 } from '../../../tools/auth0/handlers/prompts';
 
 type ParsedPrompts = ParsedAsset<'prompts', Prompts>;
@@ -28,7 +30,8 @@ const getCustomTextFile = (promptsDirectory: string) =>
 
 const getPartialsFile = (promptsDirectory: string) => path.join(promptsDirectory, 'partials.json');
 
-const getPromptScreenSettingsFile = (promptsDirectory: string) => path.join(promptsDirectory, 'promptScreenSettings.json');
+const getScreenRenderSettingsDir = (promptsDirectory: string) =>
+  path.join(promptsDirectory, 'screenRenderSettings');
 
 function parse(context: DirectoryContext): ParsedPrompts {
   const promptsDirectory = getPromptsDirectory(context.filePath);
@@ -69,9 +72,9 @@ function parse(context: DirectoryContext): ParsedPrompts {
               const templateFilePath = path.join(promptsDirectory, template);
               insertionAcc[name] = isFile(templateFilePath)
                 ? loadFileAndReplaceKeywords(templateFilePath, {
-                  mappings: context.mappings,
-                  disableKeywordReplacement: context.disableKeywordReplacement,
-                }).trim()
+                    mappings: context.mappings,
+                    disableKeywordReplacement: context.disableKeywordReplacement,
+                  }).trim()
                 : '';
               return insertionAcc;
             },
@@ -85,95 +88,31 @@ function parse(context: DirectoryContext): ParsedPrompts {
     }, {} as Record<CustomPartialsPromptTypes, Record<CustomPartialsScreenTypes, Record<string, string>>>);
   })();
 
-  const promptScreenSettings = (() => {
-    const screenSettingsDir = path.join(context.filePath, 'renderSettings');
-    if (!existsMustBeDir(screenSettingsDir)) return {};
+  const screenRenderers = (() => {
+    const screenRenderSettingsDir = getScreenRenderSettingsDir(promptsDirectory);
+    if (!existsMustBeDir(screenRenderSettingsDir)) return [];
 
-    const screenSettingsFiles = getFiles(screenSettingsDir, ['.json']);
+    const screenSettingsFiles = getFiles(screenRenderSettingsDir, ['.json']);
 
-    const renderSettings = screenSettingsFiles.map((f) => {
+    const renderSettings: ScreenRenderer[] = screenSettingsFiles.map((f) => {
       const renderSetting = {
         ...loadJSON(f, {
           mappings: context.mappings,
           disableKeywordReplacement: context.disableKeywordReplacement,
-        }) as PromptScreenRenderSettings
+        }),
       };
-      return renderSetting as PromptScreenRenderSettings;
+      return renderSetting as ScreenRenderer;
     });
 
-    return Object.entries(renderSettings).reduce((acc, [promptName, screens]) => {
-      console.log('Current promptName:', promptName);
-      console.log('Initial acc:', JSON.stringify(acc, null, 2));
-
-      // Create an object to collect screens for this prompt type
-      const promptScreens: Record<string, any> = {};
-
-      // Iterate over the screens object directly
-      Object.entries(screens).forEach(([screenName, filePath]) => {
-        console.log('Current screenName:', screenName);
-        console.log('File path:', filePath);
-
-        let fileContent = {};
-        try {
-          const fileData = fs.readFileSync(filePath, 'utf-8');
-          fileContent = JSON.parse(fileData);
-        } catch (error) {
-          console.error(`Error reading or parsing file at ${filePath}:`, error);
-          fileContent = { error: `Failed to load ${filePath}` }; // Fallback content
-        }
-
-        console.log('File content:', JSON.stringify(fileContent, null, 2));
-
-        // Store the file content under the screen name
-        promptScreens[screenName] = fileContent;
-      });
-
-      // Modify the accumulator to be an object instead of pushing to an array
-      acc[promptName] = promptScreens;
-      console.log('Updated acc:', JSON.stringify(acc, null, 2));
-
-      return acc;
-    }, {} as PromptScreenRenderSettings);
+    return renderSettings as ScreenRenderer[];
   })();
-
-  console.log('Final partials:', JSON.stringify(partials, null, 2));
-  //   if (!isFile(screenSettingsFile)) return {};
-  //   const settingsFileContent = loadJSON(screenSettingsFile, {
-  //     mappings: context.mappings,
-  //     disableKeywordReplacement: context.disableKeywordReplacement,
-  //   }) as PromptScreenRenderSettings;
-  //
-  //   return Object.entries(settingsFileContent).reduce((acc, [promptName, screensArray]) => {
-  //     const screensObject = screensArray[0] as Record<ScreenTypes, PromptScreenRenderSettings[]>;
-  //     acc[promptName as PromptTypes] = Object.entries(screensObject).reduce(
-  //       (screenAcc, [screenName, items]) => {
-  //         screenAcc[screenName as ScreenTypes] = items.reduce(
-  //           (insertionAcc, { name, body }) => {
-  //             const templateFilePath = path.join(promptsDirectory, body);
-  //             insertionAcc[name] = isFile(templateFilePath)
-  //               ? loadFileAndReplaceKeywords(templateFilePath, {
-  //                 mappings: context.mappings,
-  //                 disableKeywordReplacement: context.disableKeywordReplacement,
-  //               }).trim()
-  //               : '';
-  //             return insertionAcc;
-  //           },
-  //           {} as Record<string, string>
-  //         );
-  //         return screenAcc;
-  //       },
-  //       {} as Record<CustomPartialsScreenTypes, Record<string, string>>
-  //     );
-  //     return acc;
-  //   }, {} as Record<PromptTypes, Record<ScreenTypes, PromptScreenSettings[]>>);
-  // })();
 
   return {
     prompts: {
       ...promptsSettings,
       customText,
       partials,
-      ...promptScreenSettings,
+      screenRenderers,
     },
   };
 }
@@ -183,7 +122,7 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   if (!prompts) return;
 
-  const { customText, partials, screenRenderer, ...promptsSettings } = prompts;
+  const { customText, partials, screenRenderers, ...promptsSettings } = prompts;
 
   const promptsDirectory = getPromptsDirectory(context.filePath);
   ensureDirSync(promptsDirectory);
@@ -230,45 +169,18 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   dumpJSON(partialsFile, transformedPartials);
 
-  if (!screenRenderer) return ;
-  const screenSettingsFile =  getPromptScreenSettingsFile(promptsDirectory);
+  if (!screenRenderers) return;
+  const screenRenderSettingsDir = getScreenRenderSettingsDir(promptsDirectory);
+  ensureDirSync(screenRenderSettingsDir);
 
-  const transformedScreenSettings = Object.entries(screenRenderer).reduce((acc, [promptName, screens]) => {
-    // Create the directory for render settings if it doesn't exist
-    const renderSettingsDir = path.join(context.filePath, 'renderSettings');
-    ensureDirSync(renderSettingsDir);
+  for (let index = 0; index < screenRenderers.length; index++) {
+    const screenRenderersSetting = screenRenderers[index];
+    delete screenRenderersSetting.tenant;
+    const fileName = `${screenRenderersSetting.prompt}_${screenRenderersSetting.screen}.json`;
+    const screenSettingsFilePath = path.join(screenRenderSettingsDir, fileName);
 
-    console.log(screenRenderer);
-
-    // Iterate through screens for this prompt
-    Object.entries(screens).forEach(([screenName, screenSettings]) => {
-      // Generate the file path with the format: [promptName]_[screenName].json
-
-      const screenSettingsFilePath = path.join(renderSettingsDir, `${promptName}_${screenName}.json`);
-      console.log(`Writing ${screenSettingsFilePath}`);
-
-      // Write the screen settings to a JSON file
-      try {
-        writeFileSync(
-          screenSettingsFilePath,
-          JSON.stringify(screenSettings, null, 2),
-          'utf8'
-        );
-
-        // Track the file path in the accumulator
-        if (!acc[promptName]) {
-          acc[promptName] = {};
-        }
-        acc[promptName][screenName] = path.relative(context.filePath, screenSettingsFilePath);
-      } catch (error) {
-        console.error(`Error writing screen settings for ${promptName}/${screenName}:`, error);
-      }
-    });
-
-    return acc;
-  }, {} as Record<string, Record<string, string>>);
-
-  dumpJSON(screenSettingsFile, transformedScreenSettings);
+    dumpJSON(screenSettingsFilePath, screenRenderersSetting);
+  }
 }
 
 const promptsHandler: DirectoryHandler<ParsedPrompts> = {
