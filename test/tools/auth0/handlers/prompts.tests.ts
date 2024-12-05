@@ -14,7 +14,7 @@ const mockPromptsSettings = {
 
 describe('#prompts handler', () => {
   describe('#prompts process', () => {
-    it('should get prompts settings, custom texts and template partials', async () => {
+    it('should get prompts settings, custom texts, template partials and screen renderer', async () => {
       const supportedLanguages: Language[] = ['es', 'fr', 'en'];
 
       const englishCustomText = {
@@ -61,6 +61,31 @@ describe('#prompts handler', () => {
           'form-content-end': '<div>TEST</div>',
         },
       };
+
+      const sampleScreenRenderSignUp = {
+        prompt: 'signup',
+        screen: 'signup',
+        rendering_mode: 'standard',
+      };
+
+      const sampleScreenRenderLogin = {
+        prompt: 'login',
+        screen: 'login',
+        rendering_mode: 'advanced',
+        default_head_tags_disabled: false,
+        head_tags: [
+          {
+            tag: 'script',
+            attributes: {
+              src: 'URL_TO_YOUR_ASSET',
+              async: true,
+              defer: true,
+              integrity: ['ASSET_SHA'],
+            },
+          },
+        ],
+      };
+
       const auth0 = {
         tenants: {
           getSettings: () =>
@@ -106,6 +131,9 @@ describe('#prompts handler', () => {
       getCustomPartial.withArgs({ prompt: 'signup-id' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup' }).resolves({ data: signupPartial });
 
+      const getPromptScreenSettings = sinon.stub(handler, 'getPromptScreenSettings');
+      getPromptScreenSettings.resolves([sampleScreenRenderLogin, sampleScreenRenderSignUp]);
+
       const data = await handler.getType();
       expect(data).to.deep.equal({
         ...mockPromptsSettings,
@@ -127,6 +155,7 @@ describe('#prompts handler', () => {
             signup: signupPartial.signup,
           },
         },
+        screenRenderers: [sampleScreenRenderLogin, sampleScreenRenderSignUp],
       });
     });
 
@@ -174,12 +203,13 @@ describe('#prompts handler', () => {
       expect(didCallUpdatePartials).to.equal(false);
     });
 
-    it('should update prompts settings and custom text/partials settings when set', async () => {
+    it('should update prompts settings and custom text/partials, screen renderer settings when set', async () => {
       let didCallUpdatePromptsSettings = false;
       let didCallUpdateCustomText = false;
       let didCallUpdatePartials = false;
       let numberOfUpdateCustomTextCalls = 0;
       let numberOfUpdatePartialsCalls = 0;
+      let didCallUpdateScreenRenderer = false;
 
       const customTextToSet = {
         en: {
@@ -216,6 +246,26 @@ describe('#prompts handler', () => {
           },
         },
       };
+      const screenRenderersToSet: Prompts['screenRenderers'] = [
+        {
+          prompt: 'login',
+          screen: 'login',
+          rendering_mode: 'advanced',
+          context_configuration: ['branding.settings', 'branding.themes.default'],
+          default_head_tags_disabled: false,
+          head_tags: [
+            {
+              tag: 'script',
+              attributes: {
+                src: 'URL_TO_YOUR_ASSET',
+                async: true,
+                defer: true,
+                integrity: ['ASSET_SHA'],
+              },
+            },
+          ],
+        },
+      ];
 
       const auth0 = {
         prompts: {
@@ -228,6 +278,10 @@ describe('#prompts handler', () => {
             didCallUpdatePromptsSettings = true;
             expect(data).to.deep.equal(mockPromptsSettings);
             return Promise.resolve({ data });
+          },
+          updateRendering: () => {
+            didCallUpdateScreenRenderer = true;
+            return Promise.resolve({ data: {} });
           },
           _getRestClient: (endpoint) => ({
             get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
@@ -254,12 +308,18 @@ describe('#prompts handler', () => {
 
       await stageFn.apply(handler, [
         {
-          prompts: { ...mockPromptsSettings, customText: customTextToSet, partials: partialsToSet },
+          prompts: {
+            ...mockPromptsSettings,
+            customText: customTextToSet,
+            partials: partialsToSet,
+            screenRenderers: screenRenderersToSet,
+          },
         },
       ]);
       expect(didCallUpdatePromptsSettings).to.equal(true);
       expect(didCallUpdateCustomText).to.equal(true);
       expect(didCallUpdatePartials).to.equal(true);
+      expect(didCallUpdateScreenRenderer).to.equal(true);
       expect(numberOfUpdateCustomTextCalls).to.equal(3);
       expect(numberOfUpdatePartialsCalls).to.equal(3);
     });
@@ -280,6 +340,7 @@ describe('#prompts handler', () => {
           _getRestClient: (endpoint) => ({
             get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
           }),
+          getRendering: () => Promise.resolve({ data: {} }),
         },
         pool: new PromisePoolExecutor({
           concurrencyLimit: 3,
@@ -303,6 +364,7 @@ describe('#prompts handler', () => {
         ...mockPromptsSettings,
         customText: {}, // Custom text empty
         partials: {}, // Partials empty
+        screenRenderers: [],
       });
     });
   });

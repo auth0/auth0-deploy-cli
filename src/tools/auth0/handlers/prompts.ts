@@ -579,19 +579,6 @@ export default class PromptsHandler extends DefaultHandler {
       .promise();
 
     const customRenderingRes = renderSettings.filter((item) => item !== null);
-
-    // .reduce(
-    //   (acc, customRenderingItem) => {
-    //     if (customRenderingItem) {
-    //       const { prompt, screen, tenant, ...others } = customRenderingItem;
-    //       acc[prompt] = acc[prompt] || {};
-    //       acc[prompt][screen] = others;
-    //     }
-    //     return acc as PromptScreenSettings;
-    //   },
-    //   {}
-    // );
-
     return customRenderingRes;
   }
 
