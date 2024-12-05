@@ -3,6 +3,8 @@ import {
   GetPartialsPromptEnum,
   GetRendering200Response,
   GetRenderingScreenEnum,
+  PatchRenderingRequest,
+  PatchRenderingRequestRenderingModeEnum,
   PutPartialsRequest,
 } from 'auth0';
 import DefaultHandler from './default';
@@ -607,8 +609,8 @@ export default class PromptsHandler extends DefaultHandler {
     await this.updateCustomTextSettings(customText);
     await this.updateCustomPromptsPartials(partials);
 
-    // TODO: Update screen renderers
-    console.log('[processChanges] Screen renderers:', screenRenderers);
+    // Update screen renderers
+    await this.updateScreenRenderers(screenRenderers);
 
     this.updated += 1;
     this.didUpdate(prompts);
@@ -670,6 +672,51 @@ export default class PromptsHandler extends DefaultHandler {
           };
         }),
         generator: ({ prompt, body }) => this.updateCustomPartials({ prompt, body }),
+      })
+      .promise();
+  }
+
+  async updateScreenRenderer(screenRenderer: ScreenRenderer): Promise<void> {
+    const { prompt, screen, rendering_mode, ...updatePrams } = screenRenderer;
+
+    if (!prompt || !screen) return;
+
+    let updatePayload: PatchRenderingRequest = {};
+
+    if (rendering_mode === PatchRenderingRequestRenderingModeEnum.standard) {
+      updatePayload = {
+        rendering_mode,
+      };
+    } else {
+      updatePayload = {
+        ...updatePrams,
+      };
+    }
+
+    try {
+      await this.client.prompts.updateRendering(
+        {
+          prompt: prompt as GetPartialsPromptEnum,
+          screen: screen as GetRenderingScreenEnum,
+        },
+        {
+          ...updatePayload,
+        }
+      );
+    } catch (error) {
+      const errorMessage = `Problem updating ${this.type} screen renderers  ${prompt}:${screen}\n${error}`;
+      log.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+  }
+
+  async updateScreenRenderers(screenRenderers: Prompts['screenRenderers']): Promise<void> {
+    if (isEmpty(screenRenderers) || !screenRenderers) return;
+
+    await this.client.pool
+      .addEachTask({
+        data: screenRenderers,
+        generator: (updateParams) => this.updateScreenRenderer(updateParams),
       })
       .promise();
   }
