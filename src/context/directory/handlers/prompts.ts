@@ -72,9 +72,9 @@ function parse(context: DirectoryContext): ParsedPrompts {
               const templateFilePath = path.join(promptsDirectory, template);
               insertionAcc[name] = isFile(templateFilePath)
                 ? loadFileAndReplaceKeywords(templateFilePath, {
-                    mappings: context.mappings,
-                    disableKeywordReplacement: context.disableKeywordReplacement,
-                  }).trim()
+                  mappings: context.mappings,
+                  disableKeywordReplacement: context.disableKeywordReplacement,
+                }).trim()
                 : '';
               return insertionAcc;
             },

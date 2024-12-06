@@ -664,7 +664,7 @@ export default class PromptsHandler extends DefaultHandler {
   }
 
   async updateScreenRenderer(screenRenderer: ScreenRenderer): Promise<void> {
-    const { prompt, screen, rendering_mode, ...updatePrams } = screenRenderer;
+    const { prompt, screen, rendering_mode, tenant, ...updatePrams } = screenRenderer;
 
     if (!prompt || !screen) return;
 

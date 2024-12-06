@@ -1,11 +1,13 @@
 import path from 'path';
-import {ensureDirSync } from 'fs-extra';
+import { ensureDirSync } from 'fs-extra';
 import fs from 'fs';
+import { GetRendering200Response } from 'auth0';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { constants } from '../../../tools';
 import { ParsedAsset } from '../../../types';
 import { Prompts } from '../../../tools/auth0/handlers/prompts';
+import { existsMustBeDir } from '../../../utils';
 
 const getPromptsDirectory = (filePath: string) => path.join(filePath, constants.PROMPTS_DIRECTORY);
 
@@ -18,10 +20,55 @@ type ScreenRenderArray = Array<{
   }
 }>;
 
+const loadScreenRenderers = (screenRenderArray: ScreenRenderArray, inputDir: string): GetRendering200Response[] => {
+  // Array to store loaded renderers
+  const loadedRenderers: GetRendering200Response[] = [];
+
+  // Iterate through each entry in the ScreenRenderArray
+  screenRenderArray.forEach(promptEntry => {
+    // Get the prompt (there will be only one key in each entry)
+    const prompt = Object.keys(promptEntry)[0];
+
+    // Get the screens for this prompt
+    const screens = promptEntry[prompt];
+
+    // Iterate through each screen for this prompt
+    Object.entries(screens).forEach(([, fileName]) => {
+      // Construct full file path
+      const filePath =  fileName;
+
+      try {
+        // Read and parse the JSON file
+        const fileContent = fs.readFileSync(filePath, 'utf8');
+        const rendererData = JSON.parse(fileContent);
+
+        // Add to the loadedRenderers array
+        loadedRenderers.push(rendererData);
+      } catch (error) {
+        console.error(`Error loading file ${fileName}:`, error);
+      }
+    });
+  });
+
+  return loadedRenderers;
+};
+
 async function parse(context: YAMLContext): Promise<ParsedPrompts> {
   const { prompts } = context.assets;
-
   if (!prompts) return { prompts: null };
+
+  const promptsDirectory = getPromptsDirectory(context.basePath);
+  const renderSettingsDir = path.join(promptsDirectory, 'renderSettings');
+
+  if (!existsMustBeDir(renderSettingsDir)) {
+    prompts.screenRenderers = [];
+    return { prompts: null };
+  } // Skip
+
+  const a = prompts.screenRenderers as ScreenRenderArray;
+  console.log(a);
+
+  prompts.screenRenderers = loadScreenRenderers(a,renderSettingsDir);
 
   return {
     prompts,
