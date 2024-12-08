@@ -63,12 +63,13 @@ async function parse(context: YAMLContext): Promise<ParsedPrompts> {
 
   if (!existsMustBeDir(renderSettingsDir)) {
     prompts.screenRenderers = [];
-    return { prompts: null };
   } // Skip
 
   const screenRendersYAML = prompts.screenRenderers as ScreenRenderYAML;
 
-  prompts.screenRenderers = loadScreenRenderers(context, screenRendersYAML);
+  if (prompts.screenRenderers && prompts.screenRenderers.length > 0) {
+    prompts.screenRenderers = loadScreenRenderers(context, screenRendersYAML);
+  }
 
   return {
     prompts,
@@ -121,6 +122,9 @@ async function dump(context: YAMLContext): Promise<ParsedPrompts> {
   // Create the directory for render settings if it doesn't exist
   const renderSettingsDir = path.join(promptsDirectory, 'renderSettings');
   ensureDirSync(renderSettingsDir);
+
+  console.log('renderSettingsDir', renderSettingsDir);
+  console.log(prompts.screenRenderers);
 
   if (prompts.screenRenderers && prompts.screenRenderers.length > 0) {
     prompts.screenRenderers = dumpScreenRenderers(prompts.screenRenderers, renderSettingsDir);

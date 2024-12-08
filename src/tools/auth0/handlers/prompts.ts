@@ -307,7 +307,7 @@ export type Prompts = Partial<
   PromptSettings & {
     customText: AllPromptsByLanguage;
     partials: CustomPromptPartials;
-    screenRenderers: ScreenRenderer[];
+    screenRenderers?: ScreenRenderer[];
   }
 >;
 
