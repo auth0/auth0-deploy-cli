@@ -1,51 +1,52 @@
 import path from 'path';
-import { ensureDirSync } from 'fs-extra';
-import fs from 'fs';
+import { ensureDirSync, writeFileSync } from 'fs-extra';
 import { GetRendering200Response } from 'auth0';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { constants } from '../../../tools';
 import { ParsedAsset } from '../../../types';
-import { Prompts } from '../../../tools/auth0/handlers/prompts';
-import { existsMustBeDir } from '../../../utils';
-
-const getPromptsDirectory = (filePath: string) => path.join(filePath, constants.PROMPTS_DIRECTORY);
+import { Prompts, ScreenRenderer } from '../../../tools/auth0/handlers/prompts';
+import { existsMustBeDir, loadJSON } from '../../../utils';
+import log from '../../../logger';
 
 type ParsedPrompts = ParsedAsset<'prompts', Prompts>;
-
 // Type for the screen render array
 type ScreenRenderYAML = Array<{
   [prompt: string]: {
-    [screen: string]: string // filename
-  }
+    [screen: string]: string; // filename
+  };
 }>;
 
-const loadScreenRenderers = (screenRenderArray: ScreenRenderYAML, inputDir: string): GetRendering200Response[] => {
+const getPromptsDirectory = (filePath: string) => path.join(filePath, constants.PROMPTS_DIRECTORY);
+
+const loadScreenRenderers = (
+  context: YAMLContext,
+  screenRenderArray: ScreenRenderYAML
+): GetRendering200Response[] => {
   // Array to store loaded renderers
   const loadedRenderers: GetRendering200Response[] = [];
 
-  // Iterate through each entry in the ScreenRenderArray
-  screenRenderArray.forEach(promptEntry => {
+  screenRenderArray.forEach((promptEntry) => {
     // Get the prompt (there will be only one key in each entry)
     const prompt = Object.keys(promptEntry)[0];
 
-    // Get the screens for this prompt
     const screens = promptEntry[prompt];
 
-    // Iterate through each screen for this prompt
     Object.entries(screens).forEach(([, fileName]) => {
-      // Construct full file path
-      const filePath =  fileName;
+      const filePath = fileName;
 
       try {
-        // Read and parse the JSON file
-        const fileContent = fs.readFileSync(filePath, 'utf8');
-        const rendererData = JSON.parse(fileContent);
+        const rendererFile = path.join(context.basePath, filePath);
+
+        const rendererData = loadJSON(rendererFile, {
+          mappings: context.mappings,
+          disableKeywordReplacement: context.disableKeywordReplacement,
+        });
 
         // Add to the loadedRenderers array
         loadedRenderers.push(rendererData);
       } catch (error) {
-        console.error(`Error loading file ${fileName}:`, error);
+        log.error(`Error loading file ${fileName}:`, error);
       }
     });
   });
@@ -65,39 +66,45 @@ async function parse(context: YAMLContext): Promise<ParsedPrompts> {
     return { prompts: null };
   } // Skip
 
-  const a = prompts.screenRenderers as ScreenRenderYAML;
+  const screenRendersYAML = prompts.screenRenderers as ScreenRenderYAML;
 
-  prompts.screenRenderers = loadScreenRenderers(a,renderSettingsDir);
+  prompts.screenRenderers = loadScreenRenderers(context, screenRendersYAML);
 
   return {
     prompts,
   };
 }
 
-const dumpScreenRenderers = (screenRenderers: any[], outputDir: string) => {
-  // Resulting ScreenRenderArray to be returned
+const dumpScreenRenderers = (screenRenderers: ScreenRenderer[], outputDir: string) => {
   const screenRenderArray: ScreenRenderYAML = [];
 
-  // Process each renderer
-  screenRenderers.forEach(renderer => {
-    // Create filename in the format: promptName_screenName.json
+  screenRenderers.forEach((renderer) => {
+    const { tenant, ...screenRendererConfig } = renderer;
+    if (!renderer.prompt || !renderer.screen) {
+      log.error('Invalid screen renderer:', renderer);
+      return;
+    }
     const fileName = `${renderer.prompt}_${renderer.screen}.json`;
     const filePath = path.join(outputDir, fileName);
 
+    log.info(`Writing ${filePath}`);
+
     // Write individual file
-    fs.writeFileSync(filePath, JSON.stringify(renderer, null, 2));
+    writeFileSync(filePath, JSON.stringify(screenRendererConfig, null, 2));
 
     // Find or create entry for this prompt in the screenRenderArray
-    let promptEntry = screenRenderArray.find(entry => entry[renderer.prompt]);
+    let promptEntry = screenRenderArray.find((entry) => entry[renderer.prompt as string]);
 
     if (!promptEntry) {
       // If no entry exists for this prompt, create a new one
-      promptEntry = { [renderer.prompt]: {} };
+      promptEntry = { [renderer.prompt as string]: {} };
       screenRenderArray.push(promptEntry);
     }
 
     // Add screen to the prompt entry
-    promptEntry[renderer.prompt][renderer.screen] = filePath;
+    promptEntry[renderer.prompt as string][
+      renderer.screen as string
+    ] = `./prompts/renderSettings/${fileName}`;
   });
 
   return screenRenderArray;
@@ -115,9 +122,9 @@ async function dump(context: YAMLContext): Promise<ParsedPrompts> {
   const renderSettingsDir = path.join(promptsDirectory, 'renderSettings');
   ensureDirSync(renderSettingsDir);
 
-  // @ts-ignore
-  prompts.screenRenderers = dumpScreenRenderers(prompts.screenRenderers,renderSettingsDir);
-
+  if (prompts.screenRenderers && prompts.screenRenderers.length > 0) {
+    prompts.screenRenderers = dumpScreenRenderers(prompts.screenRenderers, renderSettingsDir);
+  }
   return {
     prompts,
   };

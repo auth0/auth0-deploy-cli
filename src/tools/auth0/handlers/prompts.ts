@@ -323,8 +323,15 @@ export default class PromptsHandler extends DefaultHandler {
     });
   }
 
-  objString({ customText }: Prompts): string {
-    return `Prompts settings${customText ? ' and prompts custom text' : ''}`;
+  objString({ customText, screenRenderers }: Prompts): string {
+    let description = 'Prompts settings';
+    if (customText) {
+      description += ' and prompts custom text';
+    }
+    if (screenRenderers && screenRenderers.length > 0) {
+      description += ' and screen renderers';
+    }
+    return description;
   }
 
   async getType(): Promise<Prompts | null> {
@@ -469,6 +476,8 @@ export default class PromptsHandler extends DefaultHandler {
   }
 
   async getPromptScreenSettings(): Promise<ScreenRenderer[]> {
+    log.info('Loading Prompt Screen Renderers. This may take a while...');
+
     // Create combinations of prompt and screens
     const promptScreenCombinations = Object.entries(constants.PromptScreenMap).flatMap(
       ([promptType, screens]) =>
