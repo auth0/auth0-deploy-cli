@@ -292,7 +292,7 @@ describe('#YAML context validation', () => {
       prompts: {
         customText: {},
         partials: {},
-        screenRenderers:[],
+        screenRenderers: [],
       },
       customDomains: [],
       themes: [],
@@ -409,7 +409,7 @@ describe('#YAML context validation', () => {
       prompts: {
         customText: {},
         partials: {},
-        screenRenderers:[],
+        screenRenderers: [],
       },
       customDomains: [],
       themes: [],
@@ -526,7 +526,7 @@ describe('#YAML context validation', () => {
       prompts: {
         customText: {},
         partials: {},
-        screenRenderers:[]
+        screenRenderers: [],
       },
       logStreams: [],
       customDomains: [],

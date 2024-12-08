@@ -282,7 +282,7 @@ describe('#directory context prompts', () => {
         ...mockPromptsSettings,
         customText: {},
         partials: {},
-        screenRenderers: []
+        screenRenderers: [],
       });
     });
 
@@ -311,7 +311,7 @@ describe('#directory context prompts', () => {
         ...mockPromptsSettings,
         customText: {},
         partials: {},
-        screenRenderers: []
+        screenRenderers: [],
       });
     });
 
@@ -329,7 +329,11 @@ describe('#directory context prompts', () => {
       const context = new Context(config, mockMgmtClient());
       await context.loadAssetsFromLocal();
 
-      expect(context.assets.prompts).to.deep.equal({ customText: {}, partials: {}, screenRenderers: [] });
+      expect(context.assets.prompts).to.deep.equal({
+        customText: {},
+        partials: {},
+        screenRenderers: [],
+      });
     });
   });
 
