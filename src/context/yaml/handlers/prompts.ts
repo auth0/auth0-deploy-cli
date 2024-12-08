@@ -14,13 +14,13 @@ const getPromptsDirectory = (filePath: string) => path.join(filePath, constants.
 type ParsedPrompts = ParsedAsset<'prompts', Prompts>;
 
 // Type for the screen render array
-type ScreenRenderArray = Array<{
+type ScreenRenderYAML = Array<{
   [prompt: string]: {
     [screen: string]: string // filename
   }
 }>;
 
-const loadScreenRenderers = (screenRenderArray: ScreenRenderArray, inputDir: string): GetRendering200Response[] => {
+const loadScreenRenderers = (screenRenderArray: ScreenRenderYAML, inputDir: string): GetRendering200Response[] => {
   // Array to store loaded renderers
   const loadedRenderers: GetRendering200Response[] = [];
 
@@ -65,8 +65,7 @@ async function parse(context: YAMLContext): Promise<ParsedPrompts> {
     return { prompts: null };
   } // Skip
 
-  const a = prompts.screenRenderers as ScreenRenderArray;
-  console.log(a);
+  const a = prompts.screenRenderers as ScreenRenderYAML;
 
   prompts.screenRenderers = loadScreenRenderers(a,renderSettingsDir);
 
@@ -75,11 +74,9 @@ async function parse(context: YAMLContext): Promise<ParsedPrompts> {
   };
 }
 
-const processScreenRenderers = (screenRenderers: any[], outputDir: string) => {
+const dumpScreenRenderers = (screenRenderers: any[], outputDir: string) => {
   // Resulting ScreenRenderArray to be returned
-  const screenRenderArray: ScreenRenderArray = [];
-
-  console.log(outputDir);
+  const screenRenderArray: ScreenRenderYAML = [];
 
   // Process each renderer
   screenRenderers.forEach(renderer => {
@@ -119,7 +116,7 @@ async function dump(context: YAMLContext): Promise<ParsedPrompts> {
   ensureDirSync(renderSettingsDir);
 
   // @ts-ignore
-  prompts.screenRenderers = processScreenRenderers(prompts.screenRenderers,renderSettingsDir);
+  prompts.screenRenderers = dumpScreenRenderers(prompts.screenRenderers,renderSettingsDir);
 
   return {
     prompts,

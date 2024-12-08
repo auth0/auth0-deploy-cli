@@ -8,6 +8,7 @@ import {
   PutPartialsRequest,
 } from 'auth0';
 import DefaultHandler from './default';
+import constants from '../../constants';
 import { Assets, Language, languages } from '../../../types';
 import log from '../../../logger';
 
@@ -114,91 +115,6 @@ const customPartialsPromptTypes = [
   'signup-id',
   'signup-password',
 ];
-
-type PromptScreenMapping = {
-  [prompt: string]: string[]; // Array of screens for each prompt
-};
-
-const PromptScreenMap = {
-  // signup: ['signup'],
-  'signup-id': ['signup-id'],
-  'signup-password': ['signup-password'],
-  // login: ['login'],
-  'login-id': ['login-id'],
-  'login-password': ['login-password'],
-  'login-passwordless': [
-    'login-passwordless-email-code',
-    // 'login-passwordless-email-link',
-    'login-passwordless-sms-otp',
-  ],
-  // 'login-email-verification': ['login-email-verification'],
-  'phone-identifier-enrollment': ['phone-identifier-enrollment'],
-  'phone-identifier-challenge': ['phone-identifier-challenge'],
-  'email-identifier-challenge': ['email-identifier-challenge'],
-  // 'reset-password': [
-  //   'reset-password-request',
-  //   'reset-password-email',
-  //   'reset-password',
-  //   'reset-password-success',
-  //   'reset-password-error',
-  //   'reset-password-mfa-email-challenge',
-  //   'reset-password-mfa-otp-challenge',
-  //   'reset-password-mfa-phone-challenge',
-  //   'reset-password-mfa-push-challenge-push',
-  //   'reset-password-mfa-recovery-code-challenge',
-  //   'reset-password-mfa-sms-challenge',
-  //   'reset-password-mfa-voice-challenge',
-  //   'reset-password-mfa-webauthn-platform-challenge',
-  //   'reset-password-mfa-webauthn-roaming-challenge',
-  // ],
-  // 'custom-form': ['custom-form'],
-  // consent: ['consent'],
-  // logout: ['logout', 'logout-complete', 'logout-aborted'],
-  // 'mfa-push': [
-  //   'mfa-push-welcome',
-  //   'mfa-push-enrollment-qr',
-  //   'mfa-push-enrollment-code',
-  //   'mfa-push-success',
-  //   'mfa-push-challenge-push',
-  //   'mfa-push-list',
-  // ],
-  // 'mfa-otp': ['mfa-otp-enrollment-qr', 'mfa-otp-enrollment-code', 'mfa-otp-challenge'],
-  // 'mfa-voice': ['mfa-voice-enrollment', 'mfa-voice-challenge'],
-  // 'mfa-phone': ['mfa-phone-enrollment', 'mfa-phone-challenge'],
-  // 'mfa-webauthn': [
-  //   'mfa-webauthn-platform-enrollment',
-  //   'mfa-webauthn-roaming-enrollment',
-  //   'mfa-webauthn-platform-challenge',
-  //   'mfa-webauthn-roaming-challenge',
-  //   'mfa-webauthn-change-key-nickname',
-  //   'mfa-webauthn-enrollment-success',
-  //   'mfa-webauthn-error',
-  //   'mfa-webauthn-not-available-error',
-  // ],
-  // 'mfa-sms': ['mfa-sms-enrollment', 'mfa-sms-challenge', 'mfa-sms-list', 'mfa-country-codes'],
-  // 'mfa-email': ['mfa-email-challenge', 'mfa-email-list'],
-  // 'mfa-recovery-code': ['mfa-recovery-code-enrollment', 'mfa-recovery-code-challenge'],
-  // mfa: [
-  //   'mfa-detect-browser-capabilities',
-  //   'mfa-enroll-result',
-  //   'mfa-login-options',
-  //   'mfa-begin-enroll-options',
-  // ],
-  // status: ['status'],
-  // 'device-flow': [
-  //   'device-code-activation',
-  //   'device-code-activation-allowed',
-  //   'device-code-activation-denied',
-  //   'device-code-confirmation',
-  // ],
-  // 'email-verification': ['email-verification-result'],
-  // 'email-otp-challenge': ['email-otp-challenge'],
-  // organizations: ['organization-selection', 'organization-picker'],
-  // invitation: ['accept-invitation'],
-  passkeys: ['passkey-enrollment', 'passkey-enrollment-local'],
-  captcha: ['interstitial-captcha'],
-  // common: ['redeem-ticket'],
-} as PromptScreenMapping;
 
 export type CustomPartialsPromptTypes = typeof customPartialsPromptTypes[number];
 
@@ -554,7 +470,7 @@ export default class PromptsHandler extends DefaultHandler {
 
   async getPromptScreenSettings(): Promise<ScreenRenderer[]> {
     // Create combinations of prompt and screens
-    const promptScreenCombinations = Object.entries(PromptScreenMap).flatMap(
+    const promptScreenCombinations = Object.entries(constants.PromptScreenMap).flatMap(
       ([promptType, screens]) =>
         screens.map((screen) => ({
           promptName: promptType,

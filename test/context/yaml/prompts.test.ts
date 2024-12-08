@@ -152,6 +152,7 @@ describe('#YAML context prompts', () => {
         },
       },
       universal_login_experience: 'classic',
+      screenRenderers: []
     });
   });
 
@@ -220,6 +221,7 @@ describe('#YAML context prompts', () => {
         },
       },
       universal_login_experience: 'classic',
+      screenRenderers: [],
     });
   });
 
@@ -272,6 +274,11 @@ describe('#YAML context prompts', () => {
           },
         },
       },
+      screenRenderers: [{
+        'signup-id': {
+          'signup-id': 'local/prompts/renderSettings/signup-id_signup-id.json'
+        }
+      }]
     };
 
     const dumped = await promptsHandler.dump(context);
