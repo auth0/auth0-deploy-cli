@@ -1,6 +1,14 @@
 import { isEmpty } from 'lodash';
-import { GetPartialsPromptEnum, PutPartialsRequest } from 'auth0';
+import {
+  GetPartialsPromptEnum,
+  GetRendering200Response,
+  GetRenderingScreenEnum,
+  PatchRenderingRequest,
+  PatchRenderingRequestRenderingModeEnum,
+  PutPartialsRequest,
+} from 'auth0';
 import DefaultHandler from './default';
+import constants from '../../constants';
 import { Assets, Language, languages } from '../../../types';
 import log from '../../../logger';
 
@@ -91,6 +99,9 @@ const screenTypes = [
   'redeem-ticket',
   'organization-selection',
   'accept-invitation',
+  'login-passwordless-email-code',
+  'login-passwordless-email-link',
+  'login-passwordless-sms-otp',
 ] as const;
 
 export type ScreenTypes = typeof screenTypes[number];
@@ -152,6 +163,17 @@ export type CustomPartialsConfig = {
       [screen in CustomPartialsScreenTypes]: ScreenConfig[];
     }
   ];
+};
+
+export type PromptScreenRenderSettings = {
+  name: string;
+  body: string;
+};
+
+export type PromptScreenSettings = {
+  [prompt in PromptTypes]: Partial<{
+    [screen in ScreenTypes]: PromptScreenRenderSettings;
+  }>;
 };
 
 export const schema = {
@@ -237,6 +259,27 @@ export const schema = {
         {}
       ),
     },
+    screenRenderers: {
+      type: 'array',
+      properties: promptTypes.reduce(
+        (promptAcc, promptType) => ({
+          ...promptAcc,
+          [promptType]: {
+            type: 'array',
+            properties: screenTypes.reduce(
+              (screenAcc, screenType) => ({
+                ...screenAcc,
+                [screenType]: {
+                  type: 'string',
+                },
+              }),
+              {}
+            ),
+          },
+        }),
+        {}
+      ),
+    },
   },
 };
 
@@ -258,10 +301,13 @@ export type AllPromptsByLanguage = Partial<{
   [key in Language]: Partial<PromptsCustomText>;
 }>;
 
+export type ScreenRenderer = Partial<GetRendering200Response>;
+
 export type Prompts = Partial<
   PromptSettings & {
     customText: AllPromptsByLanguage;
     partials: CustomPromptPartials;
+    screenRenderers?: ScreenRenderer[];
   }
 >;
 
@@ -277,8 +323,15 @@ export default class PromptsHandler extends DefaultHandler {
     });
   }
 
-  objString({ customText }: Prompts): string {
-    return `Prompts settings${customText ? ' and prompts custom text' : ''}`;
+  objString({ customText, screenRenderers }: Prompts): string {
+    let description = 'Prompts settings';
+    if (customText) {
+      description += ' and prompts custom text';
+    }
+    if (screenRenderers && screenRenderers.length > 0) {
+      description += ' and screen renderers';
+    }
+    return description;
   }
 
   async getType(): Promise<Prompts | null> {
@@ -288,11 +341,20 @@ export default class PromptsHandler extends DefaultHandler {
 
     const partials = await this.getCustomPromptsPartials();
 
-    return {
+    const prompts: Prompts = {
       ...promptsSettings,
       customText,
       partials,
     };
+
+    try {
+      const screenRenderers = await this.getPromptScreenSettings();
+      prompts.screenRenderers = screenRenderers;
+    } catch (error) {
+      log.warn(`Unable to fetch screen renderers: ${error}`);
+    }
+
+    return prompts;
   }
 
   async getCustomTextSettings(): Promise<AllPromptsByLanguage> {
@@ -419,12 +481,44 @@ export default class PromptsHandler extends DefaultHandler {
     );
   }
 
+  async getPromptScreenSettings(): Promise<ScreenRenderer[]> {
+    log.info('Loading Prompt Screen Renderers. This may take a while...');
+
+    // Create combinations of prompt and screens
+    const promptScreenCombinations = Object.entries(constants.PROMPT_SCREEN_MAPPINGS).flatMap(
+      ([promptType, screens]) =>
+        screens.map((screen) => ({
+          promptName: promptType,
+          screenName: screen,
+        }))
+    );
+
+    const renderSettings = await this.client.pool
+      .addEachTask({
+        data: promptScreenCombinations,
+        generator: ({ promptName, screenName }) =>
+          this.client.prompts
+            .getRendering({
+              prompt: promptName as GetPartialsPromptEnum,
+              screen: screenName as GetRenderingScreenEnum,
+            })
+            .then(({ data: renderingSettings }) => {
+              if (isEmpty(renderingSettings)) return null;
+              return renderingSettings;
+            }),
+      })
+      .promise();
+
+    const customRenderingRes = renderSettings.filter((item) => item !== null);
+    return customRenderingRes;
+  }
+
   async processChanges(assets: Assets): Promise<void> {
     const { prompts } = assets;
 
     if (!prompts) return;
 
-    const { partials, customText, ...promptSettings } = prompts;
+    const { partials, customText, screenRenderers, ...promptSettings } = prompts;
 
     if (!isEmpty(promptSettings)) {
       await this.client.prompts.update(promptSettings);
@@ -432,6 +526,9 @@ export default class PromptsHandler extends DefaultHandler {
 
     await this.updateCustomTextSettings(customText);
     await this.updateCustomPromptsPartials(partials);
+
+    // Update screen renderers
+    await this.updateScreenRenderers(screenRenderers);
 
     this.updated += 1;
     this.didUpdate(prompts);
@@ -493,6 +590,51 @@ export default class PromptsHandler extends DefaultHandler {
           };
         }),
         generator: ({ prompt, body }) => this.updateCustomPartials({ prompt, body }),
+      })
+      .promise();
+  }
+
+  async updateScreenRenderer(screenRenderer: ScreenRenderer): Promise<void> {
+    const { prompt, screen, rendering_mode, tenant, ...updatePrams } = screenRenderer;
+
+    if (!prompt || !screen) return;
+
+    let updatePayload: PatchRenderingRequest = {};
+
+    if (rendering_mode === PatchRenderingRequestRenderingModeEnum.standard) {
+      updatePayload = {
+        rendering_mode,
+      };
+    } else {
+      updatePayload = {
+        ...updatePrams,
+      };
+    }
+
+    try {
+      await this.client.prompts.updateRendering(
+        {
+          prompt: prompt as GetPartialsPromptEnum,
+          screen: screen as GetRenderingScreenEnum,
+        },
+        {
+          ...updatePayload,
+        }
+      );
+    } catch (error) {
+      const errorMessage = `Problem updating ${this.type} screen renderers  ${prompt}:${screen}\n${error}`;
+      log.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+  }
+
+  async updateScreenRenderers(screenRenderers: Prompts['screenRenderers']): Promise<void> {
+    if (isEmpty(screenRenderers) || !screenRenderers) return;
+
+    await this.client.pool
+      .addEachTask({
+        data: screenRenderers,
+        generator: (updateParams) => this.updateScreenRenderer(updateParams),
       })
       .promise();
   }

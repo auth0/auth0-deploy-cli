@@ -71,10 +71,19 @@ describe('#YAML context prompts', () => {
             login-id:
               form-content-end: >-
                 <div>TEST</div>
+        screenRenderers:
+          - signup-id:
+              signup-id: ./screenRenderSettings/signup-id_signup-id.json
     `;
 
     const yamlFile = path.join(dir, 'config.yaml');
     fs.writeFileSync(yamlFile, yaml);
+    const screenRendererPath = path.join(dir, 'screenRenderSettings');
+    fs.ensureDirSync(screenRendererPath);
+    fs.writeFileSync(
+      path.join(screenRendererPath, 'signup-id_signup-id.json'),
+      '{"prompt":"signup-id","screen":"signup-id","rendering_mode":"standard","context_configuration":[],"default_head_tags_disabled":false,"head_tags":[{"tag":"script","attributes":{"src":"URL_TO_YOUR_ASSET","async":true,"defer":true,"integrity":["ASSET_SHA"]}}]}'
+    );
 
     const config = { AUTH0_INPUT_FILE: yamlFile };
     const context = new Context(config, mockMgmtClient());
@@ -152,6 +161,26 @@ describe('#YAML context prompts', () => {
         },
       },
       universal_login_experience: 'classic',
+      screenRenderers: [
+        {
+          prompt: 'signup-id',
+          screen: 'signup-id',
+          rendering_mode: 'standard',
+          context_configuration: [],
+          default_head_tags_disabled: false,
+          head_tags: [
+            {
+              tag: 'script',
+              attributes: {
+                src: 'URL_TO_YOUR_ASSET',
+                async: true,
+                defer: true,
+                integrity: ['ASSET_SHA'],
+              },
+            },
+          ],
+        },
+      ],
     });
   });
 
@@ -223,8 +252,14 @@ describe('#YAML context prompts', () => {
     });
   });
 
-  it('should dump prompts settings and prompts custom text', async () => {
-    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+  it('should dump prompts settings, prompts custom text and screen renderers', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'prompts');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, './test.yml') },
+      mockMgmtClient()
+    );
+
     context.assets.prompts = {
       universal_login_experience: 'classic',
       identifier_first: true,
@@ -272,9 +307,53 @@ describe('#YAML context prompts', () => {
           },
         },
       },
+      screenRenderers: [
+        {
+          prompt: 'signup-id',
+          screen: 'signup-id',
+          rendering_mode: 'standard',
+          context_configuration: [],
+          default_head_tags_disabled: false,
+          head_tags: [
+            {
+              tag: 'script',
+              attributes: {
+                src: 'URL_TO_YOUR_ASSET',
+                async: true,
+                defer: true,
+                integrity: ['ASSET_SHA'],
+              },
+            },
+          ],
+        },
+      ],
     };
+
+    const renderSettingsFolder = path.join(dir, 'prompts', 'screenRenderSettings');
 
     const dumped = await promptsHandler.dump(context);
     expect(dumped).to.deep.equal({ prompts: context.assets.prompts });
+    expect(
+      JSON.parse(
+        fs.readFileSync(path.join(renderSettingsFolder, 'signup-id_signup-id.json'), 'utf8')
+      )
+    ).to.deep.equal({
+      prompt: 'signup-id',
+      screen: 'signup-id',
+      rendering_mode: 'standard',
+      context_configuration: [],
+      default_head_tags_disabled: false,
+      head_tags: [
+        {
+          tag: 'script',
+          attributes: {
+            src: 'URL_TO_YOUR_ASSET',
+            async: true,
+            defer: true,
+            integrity: ['ASSET_SHA'],
+          },
+        },
+      ],
+    });
   });
 });

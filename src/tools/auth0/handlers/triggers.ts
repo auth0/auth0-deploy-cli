@@ -70,9 +70,7 @@ export default class TriggersHandler extends DefaultHandler {
 
           bindings = data?.bindings;
         } catch (err) {
-          log.warn(
-            `${err.message} (trigger: ${triggerId}). Skipping this trigger and continuing.`
-          );
+          log.warn(`${err.message} (trigger: ${triggerId}). Skipping this trigger and continuing.`);
 
           continue;
         }

@@ -1,7 +1,7 @@
 import path from 'path';
 import { ensureDirSync, writeFileSync } from 'fs-extra';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
-import { dumpJSON, existsMustBeDir, isFile, loadJSON } from '../../../utils';
+import { getFiles, dumpJSON, existsMustBeDir, isFile, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { ParsedAsset } from '../../../types';
@@ -15,6 +15,7 @@ import {
   Prompts,
   PromptSettings,
   ScreenConfig,
+  ScreenRenderer,
 } from '../../../tools/auth0/handlers/prompts';
 
 type ParsedPrompts = ParsedAsset<'prompts', Prompts>;
@@ -28,6 +29,9 @@ const getCustomTextFile = (promptsDirectory: string) =>
   path.join(promptsDirectory, 'custom-text.json');
 
 const getPartialsFile = (promptsDirectory: string) => path.join(promptsDirectory, 'partials.json');
+
+const getScreenRenderSettingsDir = (promptsDirectory: string) =>
+  path.join(promptsDirectory, constants.PROMPTS_SCREEN_RENDER_DIRECTORY);
 
 function parse(context: DirectoryContext): ParsedPrompts {
   const promptsDirectory = getPromptsDirectory(context.filePath);
@@ -84,11 +88,31 @@ function parse(context: DirectoryContext): ParsedPrompts {
     }, {} as Record<CustomPartialsPromptTypes, Record<CustomPartialsScreenTypes, Record<string, string>>>);
   })();
 
+  const screenRenderers = (() => {
+    const screenRenderSettingsDir = getScreenRenderSettingsDir(promptsDirectory);
+    if (!existsMustBeDir(screenRenderSettingsDir)) return [];
+
+    const screenSettingsFiles = getFiles(screenRenderSettingsDir, ['.json']);
+
+    const renderSettings: ScreenRenderer[] = screenSettingsFiles.map((f) => {
+      const renderSetting = {
+        ...loadJSON(f, {
+          mappings: context.mappings,
+          disableKeywordReplacement: context.disableKeywordReplacement,
+        }),
+      };
+      return renderSetting as ScreenRenderer;
+    });
+
+    return renderSettings as ScreenRenderer[];
+  })();
+
   return {
     prompts: {
       ...promptsSettings,
       customText,
       partials,
+      screenRenderers,
     },
   };
 }
@@ -98,7 +122,7 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   if (!prompts) return;
 
-  const { customText, partials, ...promptsSettings } = prompts;
+  const { customText, partials, screenRenderers, ...promptsSettings } = prompts;
 
   const promptsDirectory = getPromptsDirectory(context.filePath);
   ensureDirSync(promptsDirectory);
@@ -144,6 +168,19 @@ async function dump(context: DirectoryContext): Promise<void> {
   }, {} as CustomPartialsConfig);
 
   dumpJSON(partialsFile, transformedPartials);
+
+  if (!screenRenderers) return;
+  const screenRenderSettingsDir = getScreenRenderSettingsDir(promptsDirectory);
+  ensureDirSync(screenRenderSettingsDir);
+
+  for (let index = 0; index < screenRenderers.length; index++) {
+    const screenRenderersSetting = screenRenderers[index];
+    delete screenRenderersSetting.tenant;
+    const fileName = `${screenRenderersSetting.prompt}_${screenRenderersSetting.screen}.json`;
+    const screenSettingsFilePath = path.join(screenRenderSettingsDir, fileName);
+
+    dumpJSON(screenSettingsFilePath, screenRenderersSetting);
+  }
 }
 
 const promptsHandler: DirectoryHandler<ParsedPrompts> = {

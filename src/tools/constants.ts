@@ -24,6 +24,10 @@ const UNIVERSAL_LOGIN_TEMPLATE = 'universal_login';
 
 const OBFUSCATED_SECRET_VALUE = '_VALUE_NOT_SHOWN_';
 
+type PromptScreenMapping = {
+  [prompt: string]: string[]; // Array of screens for each prompt
+};
+
 const constants = {
   CONCURRENT_CALLS: 5,
   RULES_DIRECTORY: 'rules',
@@ -171,6 +175,7 @@ const constants = {
   SUPPORTED_BRANDING_TEMPLATES: [UNIVERSAL_LOGIN_TEMPLATE],
   LOG_STREAMS_DIRECTORY: 'log-streams',
   PROMPTS_DIRECTORY: 'prompts',
+  PROMPTS_SCREEN_RENDER_DIRECTORY: 'screenRenderSettings',
   PARTIALS_DIRECTORY: 'partials',
   CUSTOM_DOMAINS_DIRECTORY: 'custom-domains',
   THEMES_DIRECTORY: 'themes',
@@ -201,6 +206,18 @@ const constants = {
   FLOWS_DIRECTORY: 'flows',
   FLOWS_VAULT_DIRECTORY: 'flow-vault-connections',
   SELF_SERVICE_PROFILE_DIRECTORY: 'self-service-profiles',
+  PROMPT_SCREEN_MAPPINGS: {
+    'signup-id': ['signup-id'],
+    'signup-password': ['signup-password'],
+    'login-id': ['login-id'],
+    'login-password': ['login-password'],
+    'login-passwordless': ['login-passwordless-email-code', 'login-passwordless-sms-otp'],
+    'phone-identifier-enrollment': ['phone-identifier-enrollment'],
+    'phone-identifier-challenge': ['phone-identifier-challenge'],
+    'email-identifier-challenge': ['email-identifier-challenge'],
+    passkeys: ['passkey-enrollment', 'passkey-enrollment-local'],
+    captcha: ['interstitial-captcha'],
+  } as PromptScreenMapping,
 };
 
 export default constants;
