@@ -68,8 +68,15 @@ async function parse(context: YAMLContext): Promise<ParsedPrompts> {
   };
 }
 
-const dumpScreenRenderers = (screenRenderers: ScreenRenderer[], outputDir: string) => {
+const dumpScreenRenderers = (context: YAMLContext, screenRenderers: ScreenRenderer[]) => {
   const screenRenderArray: ScreenRenderYAML = [];
+
+  const promptsDirectory = getPromptsDirectory(context.basePath);
+  ensureDirSync(promptsDirectory);
+
+  // Create the directory for render settings if it doesn't exist
+  const renderSettingsDir = path.join(promptsDirectory, constants.PROMPTS_SCREEN_RENDER_DIRECTORY);
+  ensureDirSync(renderSettingsDir);
 
   screenRenderers.forEach((renderer) => {
     const { tenant, ...screenRendererConfig } = renderer;
@@ -78,7 +85,7 @@ const dumpScreenRenderers = (screenRenderers: ScreenRenderer[], outputDir: strin
       return;
     }
     const fileName = `${renderer.prompt}_${renderer.screen}.json`;
-    const filePath = path.join(outputDir, fileName);
+    const filePath = path.join(renderSettingsDir, fileName);
 
     log.info(`Writing ${filePath}`);
 
@@ -108,15 +115,8 @@ async function dump(context: YAMLContext): Promise<ParsedPrompts> {
 
   if (!prompts) return { prompts: null };
 
-  const promptsDirectory = getPromptsDirectory(context.basePath);
-  ensureDirSync(promptsDirectory);
-
-  // Create the directory for render settings if it doesn't exist
-  const renderSettingsDir = path.join(promptsDirectory, constants.PROMPTS_SCREEN_RENDER_DIRECTORY);
-  ensureDirSync(renderSettingsDir);
-
   if (prompts.screenRenderers && prompts.screenRenderers.length > 0) {
-    prompts.screenRenderers = dumpScreenRenderers(prompts.screenRenderers, renderSettingsDir);
+    prompts.screenRenderers = dumpScreenRenderers(context, prompts.screenRenderers);
   }
 
   return {

@@ -341,14 +341,20 @@ export default class PromptsHandler extends DefaultHandler {
 
     const partials = await this.getCustomPromptsPartials();
 
-    const screenRenderers = await this.getPromptScreenSettings();
-
-    return {
+    const prompts: Prompts = {
       ...promptsSettings,
       customText,
       partials,
-      screenRenderers,
     };
+
+    try {
+      const screenRenderers = await this.getPromptScreenSettings();
+      prompts.screenRenderers = screenRenderers;
+    } catch (error) {
+      log.error(`Error fetching screen renderers: ${error}`);
+    }
+
+    return prompts;
   }
 
   async getCustomTextSettings(): Promise<AllPromptsByLanguage> {
