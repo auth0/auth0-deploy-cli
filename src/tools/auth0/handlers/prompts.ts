@@ -259,18 +259,18 @@ export const schema = {
         {}
       ),
     },
-    screenRenderer: {
-      type: 'object',
+    screenRenderers: {
+      type: 'array',
       properties: promptTypes.reduce(
         (promptAcc, promptType) => ({
           ...promptAcc,
           [promptType]: {
-            type: 'object',
+            type: 'array',
             properties: screenTypes.reduce(
               (screenAcc, screenType) => ({
                 ...screenAcc,
                 [screenType]: {
-                  type: 'object',
+                  type: 'string',
                 },
               }),
               {}

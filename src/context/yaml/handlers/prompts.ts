@@ -6,7 +6,7 @@ import YAMLContext from '..';
 import { constants } from '../../../tools';
 import { ParsedAsset } from '../../../types';
 import { Prompts, ScreenRenderer } from '../../../tools/auth0/handlers/prompts';
-import { existsMustBeDir, loadJSON } from '../../../utils';
+import { loadJSON } from '../../../utils';
 import log from '../../../logger';
 
 type ParsedPrompts = ParsedAsset<'prompts', Prompts>;
@@ -58,16 +58,8 @@ async function parse(context: YAMLContext): Promise<ParsedPrompts> {
   const { prompts } = context.assets;
   if (!prompts) return { prompts: null };
 
-  const promptsDirectory = getPromptsDirectory(context.basePath);
-  const renderSettingsDir = path.join(promptsDirectory, 'renderSettings');
-
-  if (!existsMustBeDir(renderSettingsDir)) {
-    prompts.screenRenderers = [];
-  } // Skip
-
-  const screenRendersYAML = prompts.screenRenderers as ScreenRenderYAML;
-
   if (prompts.screenRenderers && prompts.screenRenderers.length > 0) {
+    const screenRendersYAML = prompts.screenRenderers as ScreenRenderYAML;
     prompts.screenRenderers = loadScreenRenderers(context, screenRendersYAML);
   }
 
@@ -123,12 +115,10 @@ async function dump(context: YAMLContext): Promise<ParsedPrompts> {
   const renderSettingsDir = path.join(promptsDirectory, 'renderSettings');
   ensureDirSync(renderSettingsDir);
 
-  console.log('renderSettingsDir', renderSettingsDir);
-  console.log(prompts.screenRenderers);
-
   if (prompts.screenRenderers && prompts.screenRenderers.length > 0) {
     prompts.screenRenderers = dumpScreenRenderers(prompts.screenRenderers, renderSettingsDir);
   }
+
   return {
     prompts,
   };
