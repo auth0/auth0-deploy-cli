@@ -351,7 +351,7 @@ export default class PromptsHandler extends DefaultHandler {
       const screenRenderers = await this.getPromptScreenSettings();
       prompts.screenRenderers = screenRenderers;
     } catch (error) {
-      log.error(`Error fetching screen renderers: ${error}`);
+      log.warn(`Unable to fetch screen renderers: ${error}`);
     }
 
     return prompts;
