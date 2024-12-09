@@ -485,7 +485,7 @@ export default class PromptsHandler extends DefaultHandler {
     log.info('Loading Prompt Screen Renderers. This may take a while...');
 
     // Create combinations of prompt and screens
-    const promptScreenCombinations = Object.entries(constants.PromptScreenMap).flatMap(
+    const promptScreenCombinations = Object.entries(constants.PROMPT_SCREEN_MAPPINGS).flatMap(
       ([promptType, screens]) =>
         screens.map((screen) => ({
           promptName: promptType,

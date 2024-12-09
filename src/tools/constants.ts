@@ -206,7 +206,7 @@ const constants = {
   FLOWS_DIRECTORY: 'flows',
   FLOWS_VAULT_DIRECTORY: 'flow-vault-connections',
   SELF_SERVICE_PROFILE_DIRECTORY: 'self-service-profiles',
-  PromptScreenMap: {
+  PROMPT_SCREEN_MAPPINGS: {
     // signup: ['signup'],
     'signup-id': ['signup-id'],
     'signup-password': ['signup-password'],
