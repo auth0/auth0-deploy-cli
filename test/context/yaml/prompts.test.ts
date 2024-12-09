@@ -73,12 +73,12 @@ describe('#YAML context prompts', () => {
                 <div>TEST</div>
         screenRenderers:
           - signup-id:
-              signup-id: ./renderSettings/signup-id_signup-id.json
+              signup-id: ./screenRenderSettings/signup-id_signup-id.json
     `;
 
     const yamlFile = path.join(dir, 'config.yaml');
     fs.writeFileSync(yamlFile, yaml);
-    const screenRendererPath = path.join(dir, 'renderSettings');
+    const screenRendererPath = path.join(dir, 'screenRenderSettings');
     fs.ensureDirSync(screenRendererPath);
     fs.writeFileSync(
       path.join(screenRendererPath, 'signup-id_signup-id.json'),
@@ -329,7 +329,7 @@ describe('#YAML context prompts', () => {
       ],
     };
 
-    const renderSettingsFolder = path.join(dir, 'prompts', 'renderSettings');
+    const renderSettingsFolder = path.join(dir, 'prompts', 'screenRenderSettings');
 
     const dumped = await promptsHandler.dump(context);
     expect(dumped).to.deep.equal({ prompts: context.assets.prompts });

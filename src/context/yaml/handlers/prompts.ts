@@ -97,7 +97,7 @@ const dumpScreenRenderers = (screenRenderers: ScreenRenderer[], outputDir: strin
     // Add screen to the prompt entry
     promptEntry[renderer.prompt as string][
       renderer.screen as string
-    ] = `./prompts/renderSettings/${fileName}`;
+    ] = `./prompts/${constants.PROMPTS_SCREEN_RENDER_DIRECTORY}/${fileName}`;
   });
 
   return screenRenderArray;
@@ -112,7 +112,7 @@ async function dump(context: YAMLContext): Promise<ParsedPrompts> {
   ensureDirSync(promptsDirectory);
 
   // Create the directory for render settings if it doesn't exist
-  const renderSettingsDir = path.join(promptsDirectory, 'renderSettings');
+  const renderSettingsDir = path.join(promptsDirectory, constants.PROMPTS_SCREEN_RENDER_DIRECTORY);
   ensureDirSync(renderSettingsDir);
 
   if (prompts.screenRenderers && prompts.screenRenderers.length > 0) {

@@ -31,7 +31,7 @@ const getCustomTextFile = (promptsDirectory: string) =>
 const getPartialsFile = (promptsDirectory: string) => path.join(promptsDirectory, 'partials.json');
 
 const getScreenRenderSettingsDir = (promptsDirectory: string) =>
-  path.join(promptsDirectory, 'screenRenderSettings');
+  path.join(promptsDirectory, constants.PROMPTS_SCREEN_RENDER_DIRECTORY);
 
 function parse(context: DirectoryContext): ParsedPrompts {
   const promptsDirectory = getPromptsDirectory(context.filePath);
