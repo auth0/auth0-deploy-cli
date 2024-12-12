@@ -3,7 +3,7 @@ import {
   PatchFlowsVaultConnectionsByIdRequest,
 } from 'auth0';
 import { isArray, isEmpty } from 'lodash';
-import DefaultHandler from './default';
+import DefaultHandler, { order } from './default';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import constants from '../../constants';
 import log from '../../../logger';
@@ -57,6 +57,7 @@ export default class FlowVaultHandler extends DefaultHandler {
     return this.existing;
   }
 
+  @order('50')
   async processChanges(assets: Assets): Promise<void> {
     const { flowVaultConnections } = assets;
 
@@ -123,6 +124,9 @@ export default class FlowVaultHandler extends DefaultHandler {
   async createVaultConnection(conn): Promise<Asset> {
     if ('ready' in conn) {
       delete conn.ready;
+    }
+    if ('account_name' in conn) {
+      delete conn.account_name;
     }
     const { data: created } = await this.client.flows.createConnection(conn);
     return created;

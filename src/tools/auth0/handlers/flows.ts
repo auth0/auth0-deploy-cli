@@ -69,6 +69,7 @@ export default class FlowHandler extends DefaultHandler {
     return this.existing;
   }
 
+  @order('60')
   async processChanges(assets: Assets): Promise<void> {
     const { flows } = assets;
 

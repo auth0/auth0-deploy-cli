@@ -15,6 +15,7 @@ const sampleFlowVaultConnections = {
   id: 'ac_9AXxPP59pJx5ZtA471cSAy',
   name: 'Sample Connection',
   app_id: 'HTTP',
+  account_name: 'Sample Account name',
   ready: false,
 };
 
