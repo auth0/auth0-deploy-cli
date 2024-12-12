@@ -125,6 +125,9 @@ export default class FlowVaultHandler extends DefaultHandler {
     if ('ready' in conn) {
       delete conn.ready;
     }
+    if ('account_name' in conn) {
+      delete conn.account_name;
+    }
     const { data: created } = await this.client.flows.createConnection(conn);
     return created;
   }
