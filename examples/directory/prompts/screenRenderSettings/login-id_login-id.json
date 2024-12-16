@@ -1,0 +1,33 @@
+{
+  "prompt": "login-id",
+  "screen": "login-id",
+  "rendering_mode": "advanced",
+  "context_configuration": [
+    "branding.settings",
+    "branding.themes.default"
+  ],
+  "default_head_tags_disabled": true,
+  "head_tags": [
+    {
+      "tag": "script",
+      "attributes": {
+        "src": "http://127.0.0.1:8090/index.js",
+        "defer": true
+      }
+    },
+    {
+      "tag": "link",
+      "attributes": {
+        "rel": "stylesheet",
+        "href": "http://127.0.0.1:8090/index.css"
+      }
+    },
+    {
+      "tag": "meta",
+      "attributes": {
+        "name": "viewport",
+        "content": "width=device-width, initial-scale=1"
+      }
+    }
+  ]
+}

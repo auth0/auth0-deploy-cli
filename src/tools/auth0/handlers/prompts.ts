@@ -608,6 +608,7 @@ export default class PromptsHandler extends DefaultHandler {
     } else {
       updatePayload = {
         ...updatePrams,
+        rendering_mode
       };
     }
 
