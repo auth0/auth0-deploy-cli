@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.4.1] - 2024-12-16
+
+### Fixed
+
+- Fix importing forms, flows and flow vault connections dependencies[#1001]
+- Fix docs for support of rendering `prompt` screen's settings [#1002]
+
 ## [8.4.0] - 2024-12-09
 
 ### Added
@@ -1148,7 +1155,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#989]: https://github.com/auth0/auth0-deploy-cli/issues/989
 [#991]: https://github.com/auth0/auth0-deploy-cli/issues/991
 [#998]: https://github.com/auth0/auth0-deploy-cli/issues/998
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.0...HEAD
+[#1001]: https://github.com/auth0/auth0-deploy-cli/issues/1001
+[#1002]: https://github.com/auth0/auth0-deploy-cli/issues/1002
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.1...HEAD
+[8.4.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.0...v8.4.1
 [8.4.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.3.0...v8.4.0
 [8.3.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.2.0...v8.3.0
 [8.2.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.1.0...v8.2.0
