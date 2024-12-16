@@ -36,6 +36,8 @@ export default class FlowHandler extends DefaultHandler {
       ...options,
       type: 'flows',
       id: 'id',
+      stripCreateFields: ['created_at', 'updated_at', 'executed_at'],
+      stripUpdateFields: ['created_at', 'updated_at', 'executed_at'],
     });
   }
 
