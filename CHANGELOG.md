@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix importing forms, flows and flow vault connections dependencies[#1001]
+- Fix docs for support of rendering `prompt` screen's settings [#1002]
+
 ## [8.4.0] - 2024-12-09
 
 ### Added
