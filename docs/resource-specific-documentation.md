@@ -12,6 +12,8 @@ The Deploy CLI's own client grant is intentionally not exported nor configurable
 
 Multilingual custom text prompts follow a particular hierarchy. Under the root-level `prompts` resource property is a proprietary `customText` property that is used to bundle custom text translations with other prompts settings. Underneath `customText` is the two-character language code. Thirdly is the prompt ID, followed by the screen ID, followed by text ID.
 
+RenderSettings of a prompt-screen follow a particular hierarchy. Under the root-level `prompts` we store `screenRenderers` property that is used to configure the rendering settings of a given prompt & screen. Thirdly is the prompt Name, followed by the screen Name mapped to the respective renderer configs file. Refer [more](https://auth0.com/docs/customize/login-pages/advanced-customizations/getting-started/configure-acul-screens) on this.
+
 **Hierarchy**
 
 ```yaml
@@ -21,11 +23,29 @@ prompts:
       <PROMPT_ID>: # prompt ID
         <SCREEN_ID>: # prompt screen ID
           <TEXT_ID>: 'Some text'
+    screenRenderers:
+      - <PROMPT-NAME>:
+          <SCREEN-NAME>: ./prompts/screenRenderSettings/promptName_screenName.json #Add the renderer configs for a given prompt & a given screen
 ```
 
-**Example**
+**YAML Example**
+
+```
+Folder structure when in YAML mode.
+
+./prompts/
+    /screenRenderSettings
+        /signup-id_signup-id.json
+        /login-id_login-id.json
+        /login-passwordless_login-passwordless-email-code.json
+        /login-passwordless_login-passwordless-sms-otp.json
+        /login-password_login-password.json
+        /signup-password_signup-password.json
+./tenant.yaml
+```
 
 ```yaml
+# Contents of ./tenant.yaml
 prompts:
   identifier_first: true
   universal_login_experience: classic
@@ -43,7 +63,60 @@ prompts:
         mfa-login-options:
           pageTitle: 'Log in to ${clientName}'
           authenticatorNamesSMS: 'SMS'
+  screenRenderers:
+    - signup-id:
+        signup-id: ./prompts/screenRenderSettings/signup-id_signup-id.json
+    - login-passwordless:
+        login-passwordless-email-code: ./prompts/screenRenderSettings/login-passwordless_login-passwordless-email-code.json
+        login-passwordless-sms-otp: ./prompts/screenRenderSettings/login-passwordless_login-passwordless-sms-otp.json
 ```
+
+**Directory Example**
+
+```
+Folder structure when in directory mode.
+
+./prompts/
+    /screenRenderSettings
+        /signup-id_signup-id.json
+        /login-id_login-id.json
+        /login-passwordless_login-passwordless-email-code.json
+        /login-passwordless_login-passwordless-sms-otp.json
+        /login-password_login-password.json
+        /signup-password_signup-password.json
+    /custom-text.json
+    /prompts.json
+```
+
+Contents of `promptName_screenName.json`
+
+```json
+{
+  "prompt": "signup-id",
+  "screen": "signup-id",
+  "rendering_mode": "advanced",
+  "context_configuration": [
+    "branding.settings",
+    "branding.themes.default"
+  ],
+  "default_head_tags_disabled": false,
+  "head_tags": [
+    {
+      "tag": "script",
+      "attributes": {
+        "src": "URL_TO_YOUR_ASSET",
+        "async": true,
+        "defer": true,
+        "integrity": [
+          "ASSET_SHA"
+        ]
+      }
+    }
+  ]
+}
+```
+
+
 
 ## Databases
 

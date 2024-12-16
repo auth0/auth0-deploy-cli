@@ -253,7 +253,7 @@ describe('#YAML context prompts', () => {
   });
 
   it('should dump prompts settings, prompts custom text and screen renderers', async () => {
-    const dir = path.join(testDataDir, 'yaml', 'prompts');
+    const dir = path.join(testDataDir, 'yaml');
     cleanThenMkdir(dir);
     const context = new Context(
       { AUTH0_INPUT_FILE: path.join(dir, './test.yml') },
