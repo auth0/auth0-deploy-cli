@@ -4,7 +4,7 @@ import {
   PostForms201Response,
 } from 'auth0';
 import dotProp from 'dot-prop';
-import DefaultHandler from './default';
+import DefaultHandler, { order } from './default';
 import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
@@ -128,6 +128,7 @@ export default class FormsHandler extends DefaultHandler {
     return forms;
   }
 
+  @order('70')
   async processChanges(assets: Assets): Promise<void> {
     const { forms } = assets;
 

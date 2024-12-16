@@ -36,6 +36,8 @@ export default class FlowHandler extends DefaultHandler {
       ...options,
       type: 'flows',
       id: 'id',
+      stripCreateFields: ['created_at', 'updated_at', 'executed_at'],
+      stripUpdateFields: ['created_at', 'updated_at', 'executed_at'],
     });
   }
 
@@ -69,6 +71,7 @@ export default class FlowHandler extends DefaultHandler {
     return this.existing;
   }
 
+  @order('60')
   async processChanges(assets: Assets): Promise<void> {
     const { flows } = assets;
 
