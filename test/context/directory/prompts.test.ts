@@ -15,10 +15,13 @@ import {
 
 const dir = path.join(testDataDir, 'directory', 'promptsDump');
 const promptsDirectory = path.join(dir, constants.PROMPTS_DIRECTORY);
+const promptsScreenSettingsDirectory = path.join(promptsDirectory, constants.PROMPTS_SCREEN_RENDER_DIRECTORY);
 
 const promptsSettingsFile = 'prompts.json';
 const customTextFile = 'custom-text.json';
 const partialsFile = 'partials.json';
+const signupIdSettingsFile = 'signup-id_signup-id.json';
+const loginIdSettingsFile = 'login-id_login-id.json';
 
 describe('#directory context prompts', () => {
   it('should parse prompts', async () => {
@@ -77,8 +80,66 @@ describe('#directory context prompts', () => {
       },
     };
 
+    const settingsfiles = {
+      [constants.PROMPTS_SCREEN_RENDER_DIRECTORY]: {
+        [signupIdSettingsFile]: JSON.stringify({
+          'prompt': 'signup-id',
+          'screen': 'signup-id',
+          'rendering_mode': 'standard',
+          'context_configuration': [],
+          'default_head_tags_disabled': false,
+          'head_tags': [
+            {
+              'tag': 'script',
+              'attributes': {
+                'src': 'URL_TO_YOUR_ASSET',
+                'async': true,
+                'defer': true,
+                'integrity': [
+                  'ASSET_SHA'
+                ]
+              }
+            }
+          ]
+        }),
+        [loginIdSettingsFile]: JSON.stringify({
+          'prompt': 'login-id',
+          'screen': 'login-id',
+          'rendering_mode': 'advanced',
+          'context_configuration': [],
+          'default_head_tags_disabled': false,
+          'head_tags': [
+            {
+              'tag': 'script',
+              'attributes': {
+                'src': 'http://127.0.0.1:8080/index.js',
+                'defer': true
+              }
+            },
+            {
+              'tag': 'link',
+              'attributes': {
+                'rel': 'stylesheet',
+                'href': 'http://127.0.0.1:8090/index.css'
+              }
+            },
+            {
+              'tag': 'meta',
+              'attributes': {
+                'name': 'viewport',
+                'content': 'width=device-width, initial-scale=1'
+              }
+            }
+          ]
+        }),
+      }
+    };
+
     const repoDir = path.join(testDataDir, 'directory', 'prompts');
     createDir(repoDir, files);
+
+    const settingsDir = path.join(repoDir,constants.PROMPTS_DIRECTORY, 'screenRenderSettings');
+    createDir(settingsDir, settingsfiles);
 
     const partialsDir = path.join(
       repoDir,
@@ -100,6 +161,21 @@ describe('#directory context prompts', () => {
     };
 
     createDirWithNestedDir(partialsDir, partialsFiles);
+
+    const screenSettingsDir = path.join(
+      repoDir,
+      constants.PROMPTS_DIRECTORY,
+      constants.PROMPTS_SCREEN_RENDER_DIRECTORY
+    );
+
+    const signupIdSettingsFiles = {
+      'signup-id_signup-id.json': '{ "prompt": "signup-id", "screen": "signup-id", "rendering_mode": "advanced","default_head_tags_disabled": false,' +
+        '"context_configuration": [ "branding.settings", "branding.themes.default"],  "head_tags": [{"attributes": {"async": true,  "defer": true , ' +
+        '"integrity": ["sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="], "src": "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"}, "tag": "script"}]}',
+      'login-id_login-id.json': '{ "prompt": "login-id", "screen": "login-id", "rendering_mode": "standard", "context_configuration": [],"default_head_tags_disabled": false}',
+    };
+
+    createDir(repoDir, { [screenSettingsDir]:signupIdSettingsFiles });
 
     const config = {
       AUTH0_INPUT_FILE: repoDir,
@@ -149,7 +225,35 @@ describe('#directory context prompts', () => {
           },
         },
       },
-      screenRenderers: [],
+      screenRenderers: [
+        {
+          'prompt': 'login-id',
+          'screen': 'login-id',
+          'rendering_mode': 'standard',
+          'context_configuration': [],
+          'default_head_tags_disabled': false,
+        },
+        {
+          'prompt': 'signup-id',
+          'screen': 'signup-id',
+          'rendering_mode': 'advanced',
+          'context_configuration': ['branding.settings','branding.themes.default'],
+          'default_head_tags_disabled': false,
+          'head_tags': [
+            {
+              'tag': 'script',
+              'attributes': {
+                'src': 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js',
+                'async': true,
+                'defer': true,
+                'integrity': [
+                  'sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=='
+                ]
+              }
+            }
+          ]
+        }
+      ],
     });
   });
 
@@ -360,7 +464,7 @@ describe('#directory context prompts', () => {
     expect(dumpedFiles).to.have.length(0);
   });
 
-  it('should dump prompts settings and prompts custom text when API responses are empty', async () => {
+  it('should dump prompts settings, prompts custom text when API responses are empty and screen renderers', async () => {
     cleanThenMkdir(dir);
 
     const context = new Context({ AUTH0_INPUT_FILE: dir });
@@ -398,16 +502,51 @@ describe('#directory context prompts', () => {
           },
         },
       },
+      screenRenderers: [
+        {
+          'prompt': 'login-id',
+          'screen': 'login-id',
+          'rendering_mode': 'standard',
+          'context_configuration': [],
+          'default_head_tags_disabled': false,
+        },
+        {
+          'prompt': 'signup-id',
+          'screen': 'signup-id',
+          'rendering_mode': 'advanced',
+          'context_configuration': ['branding.settings','branding.themes.default'],
+          'default_head_tags_disabled': false,
+          'head_tags': [
+            {
+              'tag': 'script',
+              'attributes': {
+                'src': 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js',
+                'async': true,
+                'defer': true,
+                'integrity': [
+                  'sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=='
+                ]
+              }
+            }
+          ]
+        }
+      ],
     };
 
     await promptsHandler.dump(context);
 
     const dumpedFiles = getFiles(promptsDirectory, ['.json']);
+    const dumpedScreenSettingsFiles = getFiles(promptsScreenSettingsDirectory, ['.json']);
 
     expect(dumpedFiles).to.deep.equal([
       path.join(promptsDirectory, customTextFile),
       path.join(promptsDirectory, partialsFile),
       path.join(promptsDirectory, promptsSettingsFile),
+    ]);
+
+    expect(dumpedScreenSettingsFiles).to.deep.equal([
+      path.join(promptsScreenSettingsDirectory, loginIdSettingsFile),
+      path.join(promptsScreenSettingsDirectory, signupIdSettingsFile),
     ]);
 
     expect(loadJSON(path.join(promptsDirectory, customTextFile), {})).to.deep.equal(
@@ -438,6 +577,35 @@ describe('#directory context prompts', () => {
     expect(loadJSON(path.join(promptsDirectory, promptsSettingsFile), {})).to.deep.equal({
       universal_login_experience: context.assets.prompts.universal_login_experience,
       identifier_first: context.assets.prompts.identifier_first,
+    });
+
+    expect(loadJSON(path.join(promptsScreenSettingsDirectory, loginIdSettingsFile), {})).to.deep.equal({
+      'prompt': 'login-id',
+      'screen': 'login-id',
+      'rendering_mode': 'standard',
+      'context_configuration': [],
+      'default_head_tags_disabled': false,
+    });
+
+    expect(loadJSON(path.join(promptsScreenSettingsDirectory, signupIdSettingsFile), {})).to.deep.equal({
+      'prompt': 'signup-id',
+      'screen': 'signup-id',
+      'rendering_mode': 'advanced',
+      'context_configuration': ['branding.settings','branding.themes.default'],
+      'default_head_tags_disabled': false,
+      'head_tags': [
+        {
+          'tag': 'script',
+          'attributes': {
+            'src': 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js',
+            'async': true,
+            'defer': true,
+            'integrity': [
+              'sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=='
+            ]
+          }
+        }
+      ]
     });
   });
 });

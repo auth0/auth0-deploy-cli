@@ -1,0 +1,20 @@
+{
+  "prompt": "signup-id",
+  "screen": "signup-id",
+  "rendering_mode": "advanced",
+  "context_configuration": [],
+  "default_head_tags_disabled": false,
+  "head_tags": [
+    {
+      "tag": "script",
+      "attributes": {
+        "src": "URL_TO_YOUR_ASSET",
+        "async": true,
+        "defer": true,
+        "integrity": [
+          "ASSET_SHA"
+        ]
+      }
+    }
+  ]
+}
