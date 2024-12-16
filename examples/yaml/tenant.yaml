@@ -184,3 +184,19 @@ triggers:
   post-user-registration: []
   pre-user-registration: []
   send-phone-message: []
+
+prompts:
+  customText:
+    en:
+      login-id:
+        login-id:
+          invalid-email-format: Email is not valid.
+  enable_ulp_wcag_compliance: false
+  identifier_first: false
+  partials: {}
+  screenRenderers:
+    - signup-id:
+        signup-id: ./prompts/screenRenderSettings/signup-id_signup-id.json
+    - login-passwordless:
+        login-passwordless-email-code: ./prompts/screenRenderSettings/login-passwordless_login-passwordless-email-code.json
+        login-passwordless-sms-otp: ./prompts/screenRenderSettings/login-passwordless_login-passwordless-sms-otp.json

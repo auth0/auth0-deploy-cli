@@ -11,6 +11,7 @@ The Deploy CLI's own client grant is intentionally not exported nor configurable
 ## Prompts
 
 Multilingual custom text prompts follow a particular hierarchy. Under the root-level `prompts` resource property is a proprietary `customText` property that is used to bundle custom text translations with other prompts settings. Underneath `customText` is the two-character language code. Thirdly is the prompt ID, followed by the screen ID, followed by text ID.
+
 RenderSettings of a prompt-screen follow a particular hierarchy. Under the root-level `prompts` we store `screenRenderers` property that is used to configure the rendering settings of a given prompt & screen. Thirdly is the prompt Name, followed by the screen Name mapped to the respective renderer configs file. Refer [more](https://auth0.com/docs/customize/login-pages/advanced-customizations/getting-started/configure-acul-screens) on this.
 
 **Hierarchy**

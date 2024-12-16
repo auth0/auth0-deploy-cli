@@ -138,7 +138,7 @@ describe('#directory context prompts', () => {
     const repoDir = path.join(testDataDir, 'directory', 'prompts');
     createDir(repoDir, files);
 
-    const settingsDir = path.join(repoDir,constants.PROMPTS_DIRECTORY, 'screenRenderSettings');
+    const settingsDir = path.join(repoDir,constants.PROMPTS_DIRECTORY, constants.PROMPTS_SCREEN_RENDER_DIRECTORY);
     createDir(settingsDir, settingsfiles);
 
     const partialsDir = path.join(
