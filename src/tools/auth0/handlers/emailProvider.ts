@@ -1,6 +1,6 @@
 import { EmailProviderCreate } from 'auth0';
 import { isEmpty } from 'lodash';
-import DefaultHandler from './default';
+import DefaultHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
 
 export const schema = { type: 'object' };
@@ -33,6 +33,7 @@ export default class EmailProviderHandler extends DefaultHandler {
     return super.objString({ name: provider.name, enabled: provider.enabled });
   }
 
+  @order('60')
   async processChanges(assets: Assets): Promise<void> {
     const { emailProvider } = assets;
 

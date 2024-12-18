@@ -72,7 +72,7 @@ export default class EmailTemplateHandler extends DefaultHandler {
   }
 
   // Run after email provider changes
-  @order('60')
+  @order('70')
   async processChanges(assets: Assets): Promise<void> {
     const { emailTemplates } = assets;
 

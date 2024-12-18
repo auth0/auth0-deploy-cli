@@ -244,7 +244,7 @@ export default class ActionHandler extends DefaultAPIHandler {
     }
   }
 
-  @order('60')
+  @order('50')
   async processChanges(assets: Assets) {
     const { actions } = assets;
 
