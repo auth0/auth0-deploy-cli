@@ -75,6 +75,8 @@ export default class GuardianFactorProvidersHandler extends DefaultHandler {
         // TODO: This is quite a change, needs to be validated for sure.
         if (name === 'phone' && provider === 'twilio') {
           await this.client.guardian.updatePhoneFactorProviderTwilio(data);
+        } else if (name === 'sms' && provider === 'twilio') {
+          await this.client.guardian.setSmsFactorProviderTwilio(data);
         } else if (name === 'push-notification' && provider === 'apns') {
           await this.client.guardian.updatePushNotificationProviderAPNS(data);
         } else if (name === 'push-notification' && provider === 'fcm') {
