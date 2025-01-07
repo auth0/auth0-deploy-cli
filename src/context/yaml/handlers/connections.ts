@@ -9,6 +9,7 @@ import {
   ensureProp,
   convertClientIdToName,
   mapClientID2NameSorted,
+  encodeCertStringToBase64,
 } from '../../../utils';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
@@ -90,6 +91,17 @@ async function dump(context: YAMLContext): Promise<ParsedConnections> {
         dumpedConnection.options.email.body = `./${connectionName}.html`;
       }
 
+      if (dumpedConnection.strategy === 'samlp' && dumpedConnection.options) {
+        if ('cert' in dumpedConnection.options) {
+          dumpedConnection.options.cert = encodeCertStringToBase64(dumpedConnection.options.cert);
+        }
+
+        if ('signingCert' in dumpedConnection.options) {
+          dumpedConnection.options.signingCert = encodeCertStringToBase64(
+            dumpedConnection.options.signingCert
+          );
+        }
+      }
       return dumpedConnection;
     }),
   };
