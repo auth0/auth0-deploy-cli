@@ -19,6 +19,7 @@ import {
   sanitize,
   stripIdentifiers,
   toConfigFn,
+  encodeCertStringToBase64,
 } from '../src/utils';
 
 const mockConfigFn = () => {};
@@ -267,6 +268,25 @@ describe('#utils', function () {
 
     it('should return empty list upon invalid input', () => {
       expect(mapClientID2NameSorted(null, null)).deep.equal([]);
+    });
+  });
+
+  describe('encodeCertStringToBase64', () => {
+    it('should encode certificate string to Base64', () => {
+      const cert =
+        '-----BEGIN CERTIFICATE-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7\n-----END CERTIFICATE-----';
+      const expectedBase64 = Buffer.from(cert).toString('base64');
+      expect(encodeCertStringToBase64(cert)).to.equal(expectedBase64);
+    });
+
+    it('should return the original string if it does not start with "-----BEGIN CERTIFICATE-----"', () => {
+      const nonCertString = 'This is not a certificate';
+      expect(encodeCertStringToBase64(nonCertString)).to.equal(nonCertString);
+    });
+
+    it('should return the original string if it is null or undefined', () => {
+      expect(encodeCertStringToBase64(null)).to.equal(null);
+      expect(encodeCertStringToBase64(undefined)).to.equal(undefined);
     });
   });
 });

@@ -259,3 +259,16 @@ export const findKeyPathWithValue = (obj: any, findKey: string, parentPath: stri
 
   return results;
 };
+
+/**
+ * Encodes a certificate string to Base64 format if it starts with '-----BEGIN CERTIFICATE-----'.
+ *
+ * @param cert - The certificate string to be encoded.
+ * @returns The Base64 encoded certificate string if the input starts with '-----BEGIN CERTIFICATE-----', otherwise returns the original string.
+ */
+export const encodeCertStringToBase64 = (cert: string) => {
+  if (cert?.startsWith('-----BEGIN CERTIFICATE-----')) {
+    return Buffer.from(cert).toString('base64');
+  }
+  return cert;
+};
