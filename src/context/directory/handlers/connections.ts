@@ -12,6 +12,7 @@ import {
   sanitize,
   ensureProp,
   mapClientID2NameSorted,
+  encodeCertStringToBase64,
 } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
@@ -86,6 +87,18 @@ async function dump(context: DirectoryContext): Promise<void> {
       fs.writeFileSync(emailConnectionHtml, html);
 
       dumpedConnection.options.email.body = `./${connectionName}.html`;
+    }
+
+    if (dumpedConnection.strategy === 'samlp' && dumpedConnection.options) {
+      if ('cert' in dumpedConnection.options) {
+        dumpedConnection.options.cert = encodeCertStringToBase64(dumpedConnection.options.cert);
+      }
+
+      if ('signingCert' in dumpedConnection.options) {
+        dumpedConnection.options.signingCert = encodeCertStringToBase64(
+          dumpedConnection.options.signingCert
+        );
+      }
     }
 
     const connectionFile = path.join(connectionsFolder, `${connectionName}.json`);
