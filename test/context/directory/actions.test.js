@@ -200,7 +200,7 @@ describe('#directory context actions', () => {
 
     expect(loadJSON(path.join(actionsFolder, 'action-one.json'))).to.deep.equal({
       name: actionName,
-      code: path.join(context.filePath, '/actions/action-one/code.js'),
+      code: './actions/action-one/code.js',
       runtime: 'node12',
       dependencies: [
         {
