@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.4.2] - 2025-01-08
+
+### Fixed
+
+- Fix Twilio SMS factor provider update for `guardianFactorProviders` [#1007]
+- Fix exporting SAML `connections` certificate [#1008]
+- Fix `action` code paths for directory format exports [#1009]
+- Fix import operation emailProvider and custom email provider action dependencies [#1005]
+- Fix dependency update proxy agent [#1010]
+
 ## [8.4.1] - 2024-12-16
 
 ### Fixed
@@ -1157,7 +1167,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#998]: https://github.com/auth0/auth0-deploy-cli/issues/998
 [#1001]: https://github.com/auth0/auth0-deploy-cli/issues/1001
 [#1002]: https://github.com/auth0/auth0-deploy-cli/issues/1002
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.1...HEAD
+[#1005]: https://github.com/auth0/auth0-deploy-cli/issues/1005
+[#1007]: https://github.com/auth0/auth0-deploy-cli/issues/1007
+[#1008]: https://github.com/auth0/auth0-deploy-cli/issues/1008
+[#1009]: https://github.com/auth0/auth0-deploy-cli/issues/1009
+[#1010]: https://github.com/auth0/auth0-deploy-cli/issues/1010
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.2...HEAD
+[8.4.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.1...v8.4.2
 [8.4.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.0...v8.4.1
 [8.4.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.3.0...v8.4.0
 [8.3.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.2.0...v8.3.0
