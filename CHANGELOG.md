@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix Twilio SMS factor provider update for `guardianFactorProviders` [#1007]
+- Fix exporting SAML `connections` certificate [#1008]
+- Fix `action` code paths for directory format exports [#1009]
+- Fix import operation emailProvider and custom email provider action dependencie [#1005]
+- Fix dependency update proxy agent [#1010]
+
 ## [8.4.1] - 2024-12-16
 
 ### Fixed
