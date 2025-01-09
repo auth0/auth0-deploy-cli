@@ -148,9 +148,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       include_totals: true,
     });
 
-    // Filter out database connections
-    this.existing = connections.filter((c) => c.strategy !== 'auth0');
-    if (this.existing === null) return [];
+    this.existing = connections;
 
     // Apply `scim_configuration` to all the relevant `SCIM` connections. This method mutates `this.existing`.
     await this.scimHandler.applyScimConfiguration(this.existing);

@@ -122,7 +122,7 @@ describe('#connections handler', () => {
           getAll: (params) =>
             mockPagedData(params, 'connections', [
               { strategy: 'github', name: 'github', enabled_clients: [clientId] },
-              { strategy: 'auth0', name: 'db-should-be-ignored', enabled_clients: [] },
+              { strategy: 'auth0', name: 'db-connection', enabled_clients: [] },
             ]),
           _getRestClient: () => ({}),
         },
@@ -137,6 +137,7 @@ describe('#connections handler', () => {
       const data = await handler.getType();
       expect(data).to.deep.equal([
         { strategy: 'github', name: 'github', enabled_clients: [clientId] },
+        { strategy: 'auth0', name: 'db-connection', enabled_clients: [] },
       ]);
     });
 
