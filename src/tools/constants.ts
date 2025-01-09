@@ -12,6 +12,7 @@ const EMAIL_VERIFY = 'verify_email';
 const EMAIL_VERIFY_BY_CODE = 'verify_email_by_code';
 const EMAIL_RESET = 'reset_email';
 const EMAIL_WELCOME = 'welcome_email';
+const EMAIL_RESET_BY_CODE = 'reset_email_by_code';
 const EMAIL_BLOCKED = 'blocked_account';
 const EMAIL_STOLEN_CREDENTIALS = 'stolen_credentials';
 const EMAIL_ENROLLMENT = 'enrollment_email';
@@ -155,6 +156,8 @@ const constants = {
     `${EMAIL_VERIFY_BY_CODE}.html`,
     `${EMAIL_RESET}.json`,
     `${EMAIL_RESET}.html`,
+    `${EMAIL_RESET_BY_CODE}.json`,
+    `${EMAIL_RESET_BY_CODE}.html`,
     `${EMAIL_WELCOME}.json`,
     `${EMAIL_WELCOME}.html`,
     `${EMAIL_BLOCKED}.json`,
