@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/prefer-default-export
 export function emailProviderDefaults(emailProvider) {
   // eslint-disable-line
   const updated = { ...emailProvider };
@@ -29,6 +30,22 @@ export function emailProviderDefaults(emailProvider) {
       accessKeyId: '##SES_ACCESS_KEY_ID##',
       secretAccessKey: '##SES_ACCESS_SECRET_KEY##',
       region: '##SES_AWS_REGION##',
+      ...(updated.credentials || {}),
+    };
+  }
+
+  if (name === 'azure_cs') {
+    updated.credentials = {
+      connectionString: '##AZURE_CS_CONNECTION_KEY##',
+      ...(updated.credentials || {}),
+    };
+  }
+
+  if (name === 'ms365') {
+    updated.credentials = {
+      tenantId: '##MS365_TENANT_ID##',
+      clientId: '##MS365_CLIENT_ID##',
+      clientSecret: '##MS365_CLIENT_SECRET##',
       ...(updated.credentials || {}),
     };
   }
