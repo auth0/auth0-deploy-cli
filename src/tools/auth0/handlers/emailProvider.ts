@@ -53,8 +53,6 @@ export default class EmailProviderHandler extends DefaultHandler {
         const updated = await this.client.emails.update(existing);
         this.updated += 1;
         this.didUpdate(updated);
-
-        log.info(`Email provider has been disabled [${this.type}]: ${this.objString(existing)}`);
       }
       return;
     }
