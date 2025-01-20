@@ -2,6 +2,7 @@ import { EmailProviderCreate } from 'auth0';
 import { isEmpty } from 'lodash';
 import DefaultHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
+import log from '../../../logger';
 
 export const schema = { type: 'object' };
 
@@ -41,10 +42,10 @@ export default class EmailProviderHandler extends DefaultHandler {
 
     const existing = await this.getType();
 
-    // HTTP DELETE on emails/provider is not public, so not part of our vNext SDK.
+    // HTTP DELETE on emails/provider is not supported, as this is not part of our vNext SDK.
     if (Object.keys(emailProvider).length === 0) {
       if (this.config('AUTH0_ALLOW_DELETE') === true) {
-        // await this.client.emails.delete();
+        // await this.client.emails.delete(); is not supported
         existing.enabled = false;
         if (isEmpty(existing.credentials)) {
           delete existing.credentials;
@@ -59,7 +60,7 @@ export default class EmailProviderHandler extends DefaultHandler {
     if (existing.name) {
       if (existing.name !== emailProvider.name) {
         // Delete the current provider as it's different
-        // await this.client.emailProvider.delete();
+        // await this.client.emailProvider.delete(); is not supported
         existing.enabled = false;
       }
     }
