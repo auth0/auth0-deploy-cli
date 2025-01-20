@@ -33,7 +33,7 @@
   "homepage": "https://github.com/auth0/auth0-deploy-cli#readme",
   "dependencies": {
     "ajv": "^6.12.6",
-    "auth0": "^4.15.0",
+    "auth0": "^4.16.0",
     "dot-prop": "^5.2.0",
     "fs-extra": "^10.1.0",
     "global-agent": "^3.0.0",
