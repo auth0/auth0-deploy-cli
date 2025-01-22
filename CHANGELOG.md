@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.4.4] - 2025-01-20
+
+### Fixed
+
+- Fix `emailProvider` support for Azure and MS365 [#1016]
+- Fix npmignore to exclude additional files and directories [#1017]
+
 ## [8.4.3] - 2025-01-08
 
 ### Fixed
@@ -1178,7 +1185,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1008]: https://github.com/auth0/auth0-deploy-cli/issues/1008
 [#1009]: https://github.com/auth0/auth0-deploy-cli/issues/1009
 [#1010]: https://github.com/auth0/auth0-deploy-cli/issues/1010
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.3...HEAD
+[#1016]: https://github.com/auth0/auth0-deploy-cli/issues/1016
+[#1017]: https://github.com/auth0/auth0-deploy-cli/issues/1017
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.4...HEAD
+[8.4.4]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.3...v8.4.4
 [8.4.3]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.2...v8.4.3
 [8.4.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.1...v8.4.2
 [8.4.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.0...v8.4.1
