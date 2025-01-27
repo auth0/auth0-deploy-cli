@@ -1,5 +1,5 @@
 {
-  "template": "reset_email",
+  "template": "reset_email_by_code",
   "from": "",
   "subject": "",
   "resultUrl": "",
