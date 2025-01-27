@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { bootstrap } from 'global-agent';
+import { ProxyAgent, setGlobalDispatcher } from 'undici';
 
 import { getParams, CliParams } from './args';
 import log from './logger';
@@ -19,12 +19,16 @@ async function run(params: CliParams): Promise<void> {
     const MAJOR_NODEJS_VERSION = parseInt(process.version.slice(1).split('.')[0], 10);
 
     if (MAJOR_NODEJS_VERSION < 10) {
-      // `global-agent` works with Node.js v10 and above.
       throw new Error('The --proxy_url option is only supported on Node >= 10');
     }
 
-    process.env.GLOBAL_AGENT_HTTP_PROXY = proxy;
-    bootstrap();
+    process.env.HTTP_PROXY = proxy;
+
+    log.debug(`Setting proxy to ${proxy}`);
+
+    setGlobalDispatcher(
+      new ProxyAgent(process.env.HTTP_PROXY)
+    );
   }
 
   log.debug(`Start command ${command}`);
