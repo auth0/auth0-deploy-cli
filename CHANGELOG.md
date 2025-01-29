@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.5.0] - 2025-01-29
+
+### Added
+
+- Add support for reset_email_by_code template for `emailTemplates` [#1014]
+
+### Fixed
+
+- Fix proxy support [#1022]
+- Fix schema for phone,email,username as flexible identifiers for `databases` [#1023]
+- Fix docs for support of `selfServiceProfiles` [#1021]
+
 ## [8.4.4] - 2025-01-20
 
 ### Fixed
@@ -1185,9 +1197,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1008]: https://github.com/auth0/auth0-deploy-cli/issues/1008
 [#1009]: https://github.com/auth0/auth0-deploy-cli/issues/1009
 [#1010]: https://github.com/auth0/auth0-deploy-cli/issues/1010
+[#1014]: https://github.com/auth0/auth0-deploy-cli/issues/1014
 [#1016]: https://github.com/auth0/auth0-deploy-cli/issues/1016
 [#1017]: https://github.com/auth0/auth0-deploy-cli/issues/1017
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.4...HEAD
+[#1021]: https://github.com/auth0/auth0-deploy-cli/issues/1021
+[#1022]: https://github.com/auth0/auth0-deploy-cli/issues/1022
+[#1023]: https://github.com/auth0/auth0-deploy-cli/issues/1023
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.5.0...HEAD
+[8.5.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.4...v8.5.0
 [8.4.4]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.3...v8.4.4
 [8.4.3]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.2...v8.4.3
 [8.4.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.1...v8.4.2
