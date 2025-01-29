@@ -234,6 +234,7 @@ describe('#YAML context validation', () => {
         { body: './emailTemplates/mfa_oob_code.html', enabled: true, template: 'mfa_oob_code' },
         { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' },
         { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
+        { body: './emailTemplates/reset_email_by_code.html',enabled: true,template: 'reset_email_by_code' },
         {
           body: './emailTemplates/stolen_credentials.html',
           enabled: true,
@@ -351,6 +352,7 @@ describe('#YAML context validation', () => {
         { body: './emailTemplates/mfa_oob_code.html', enabled: true, template: 'mfa_oob_code' },
         { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' },
         { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
+        { body: './emailTemplates/reset_email_by_code.html',enabled: true,template: 'reset_email_by_code' },
         {
           body: './emailTemplates/stolen_credentials.html',
           enabled: true,
@@ -469,6 +471,7 @@ describe('#YAML context validation', () => {
         { body: './emailTemplates/mfa_oob_code.html', enabled: true, template: 'mfa_oob_code' },
         { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' },
         { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
+        { body: './emailTemplates/reset_email_by_code.html',enabled: true,template: 'reset_email_by_code' },
         {
           body: './emailTemplates/stolen_credentials.html',
           enabled: true,

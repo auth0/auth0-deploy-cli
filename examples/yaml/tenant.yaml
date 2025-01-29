@@ -100,6 +100,13 @@ emailTemplates:
     subject: "something"
     body: "emails/change_email.html"
 
+  - template: "reset_email_by_code"
+    enabled: true
+    syntax: "liquid"
+    from: "test@email.com"
+    subject: "something"
+    body: "emails/change_email.html"
+
 
 clientGrants:
   - client_id: "My M2M"

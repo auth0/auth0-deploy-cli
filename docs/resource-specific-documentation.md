@@ -116,8 +116,6 @@ Contents of `promptName_screenName.json`
 }
 ```
 
-
-
 ## Databases
 
 When managing database connections, the values of `options.customScripts` point to specific javascript files relative to
@@ -280,5 +278,99 @@ Contents of `password_reset.json`
   "enabled": true,
   "html": "./password_reset.html",
   "name": "password_reset"
+}
+```
+
+
+## emailTemplates
+
+When managing email templates, the values of `options.body` and `options.body` point to specific HTML files relative to the path of the output folder. Otherwise, the payload closely matches that of the [Management API](https://auth0.com/docs/api/management/v2#!/Email_Templates/post_email_templates).
+
+**YAML Example**
+
+```
+Folder structure when in YAML mode.
+
+./emailTemplates/
+    ./verify_email.html
+    ./welcome_email.html
+    ./password_reset.html
+    ./reset_email.html
+    ./reset_email_by_code.html
+./tenant.yaml
+```
+
+```yaml
+# Contents of ./tenant.yaml
+emailTemplates:
+  - template: "verify_email"
+    enabled: true
+    syntax: "liquid"
+    from: "test@email.com"
+    subject: "something"
+    body: "emailTemplates/change_email.html"
+
+  - template: "welcome_email"
+    enabled: true
+    syntax: "liquid"
+    from: "test@email.com"
+    subject: "something"
+    body: "emailTemplates/change_email.html"
+
+  - template: "password_reset"
+    enabled: true
+    syntax: "liquid"
+    from: "test@email.com"
+    subject: "something"
+    body: "emailTemplates/change_email.html"
+
+  - template: "reset_email_by_code"
+    enabled: true
+    syntax: "liquid"
+    from: "test@email.com"
+    subject: "something"
+    body: "emailTemplates/change_email.html"
+```
+
+**Directory Example**
+
+```
+Folder structure when in directory mode.
+./emailTemplates/
+    ./welcome_email.html
+    ./welcome_email.json
+    ./reset_email.html
+    ./reset_email.json
+    ./reset_email_by_code.html
+    ./reset_email_by_code.json
+```
+
+Contents of `welcome_email.json`
+
+```json
+{
+  "name": "welcome_email",
+  "enabled": true,
+  "html": "./welcome_email.html"
+}
+```
+
+Contents of `reset_email.json`
+
+```json
+{
+  "name": "reset_email",
+  "enabled": true,
+  "html": "./reset_email.html"
+}
+```
+
+Contents of `reset_email_by_code.json`
+
+```json
+{
+  "name": "reset_email_by_code",
+  "enabled": true,
+  "html": "./reset_email_by_code.html"
 }
 ```
