@@ -148,7 +148,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       include_totals: true,
     });
 
-    // Filter out database connections
+    // Filter out database connections as we have separate handler for it
     this.existing = connections.filter((c) => c.strategy !== 'auth0');
     if (this.existing === null) return [];
 

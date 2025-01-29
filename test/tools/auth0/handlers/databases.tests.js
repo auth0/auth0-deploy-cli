@@ -451,6 +451,7 @@ describe('#databases handler', () => {
 
       await stageFn.apply(handler, [assets]);
     });
+
     it('should update database when attributes are passed', async () => {
       const auth0 = {
         connections: {
@@ -482,6 +483,7 @@ describe('#databases handler', () => {
                     active: true,
                   },
                   profile_required: true,
+                  verification_method: 'otp',
                 },
                 username: {
                   signup: {
@@ -534,6 +536,7 @@ describe('#databases handler', () => {
                 active: true,
               },
               profile_required: true,
+              verification_method: 'otp',
             },
             username: {
               signup: {
@@ -558,6 +561,7 @@ describe('#databases handler', () => {
 
       await stageFn.apply(handler, [{ databases: data }]);
     });
+
     it('should update database when require username and validation are passed', async () => {
       const auth0 = {
         connections: {
@@ -861,6 +865,7 @@ describe('#databases handler', () => {
                   active: true,
                 },
                 profile_required: true,
+                verification_method:'link'
               },
               username: {
                 signup: {
@@ -1061,6 +1066,7 @@ describe('#databases handler', () => {
       // eslint-disable-next-line no-unused-expressions
       expect(updateArgs.options.requires_username).to.exist;
     });
+
     it('should update database when attributes are passed', async () => {
       const auth0 = {
         connections: {
@@ -1092,6 +1098,7 @@ describe('#databases handler', () => {
                     active: true,
                   },
                   profile_required: true,
+                  verification_method:'otp',
                 },
                 username: {
                   signup: {
@@ -1144,6 +1151,7 @@ describe('#databases handler', () => {
                 active: true,
               },
               profile_required: true,
+              verification_method: 'otp',
             },
             username: {
               signup: {
@@ -1168,6 +1176,7 @@ describe('#databases handler', () => {
 
       await stageFn.apply(handler, [{ databases: data }]);
     });
+
     it('should update database when require username and validation are passed', async () => {
       const auth0 = {
         connections: {
@@ -1316,6 +1325,7 @@ describe('#databases handler', () => {
                 identifier: {
                   active: true,
                 },
+                verification_method: 'link',
                 profile_required: true,
               },
               username: {
@@ -1471,6 +1481,7 @@ describe('#databases handler', () => {
                   active: true,
                 },
                 profile_required: true,
+                verification_method:'link',
               },
               username: {
                 signup: {
