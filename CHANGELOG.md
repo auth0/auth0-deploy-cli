@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for reset_email_by_code template for `emailTemplates` [#1014]
+
+### Fixed
+
+- Fix proxy support [#1022]
+- Fix schema for phone,email,username as flexible identifiers for `databases` [#1023]
+- Fix docs for support of `selfServiceProfiles` [#1021]
+
 ## [8.4.4] - 2025-01-20
 
 ### Fixed
