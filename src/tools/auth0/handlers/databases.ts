@@ -25,6 +25,78 @@ export const schema = {
               ),
             },
           },
+          attributes: {
+            type: 'object',
+            properties: {
+              email: {
+                type: 'object',
+                properties: {
+                  identifier: {
+                    type: 'object',
+                    properties: {
+                      active: { type: 'boolean' },
+                    },
+                  },
+                  profile_required: { type: 'boolean' },
+                  verification_method: { type: 'string', enum: ['otp', 'link'] },
+                  signup: {
+                    type: 'object',
+                    properties: {
+                      status: { type: 'string', enum: ['required', 'optional', 'inactive'] },
+                      verification: {
+                        type: 'object',
+                        properties: {
+                          active: { type: 'boolean' },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              phone_number: {
+                type: 'object',
+                properties: {
+                  identifier: {
+                    type: 'object',
+                    properties: {
+                      active: { type: 'boolean' },
+                    },
+                  },
+                  profile_required: { type: 'boolean' },
+                  signup: {
+                    type: 'object',
+                    properties: {
+                      status: { type: 'string', enum: ['required', 'optional', 'inactive'] },
+                      verification: {
+                        type: 'object',
+                        properties: {
+                          active: { type: 'boolean' },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              username: {
+                type: 'object',
+                properties: {
+                  identifier: {
+                    type: 'object',
+                    properties: {
+                      active: { type: 'boolean' },
+                    },
+                  },
+                  profile_required: { type: 'boolean' },
+                  signup: {
+                    type: 'object',
+                    properties: {
+                      status: { type: 'string', enum: ['required', 'optional', 'inactive'] },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     },
