@@ -1,0 +1,33 @@
+{
+  "name": "self-service profile 1",
+  "description": "self-Service  profile 1",
+  "user_attributes": [
+    {
+      "name": "email",
+      "description": "Email of the User",
+      "is_optional": false
+    },
+    {
+      "name": "name",
+      "description": "Name of the User",
+      "is_optional": true
+    }
+  ],
+  "allowed_strategies": [
+    "google-apps",
+    "keycloak-samlp",
+    "okta"
+  ],
+  "branding": {
+    "colors": {
+      "primary": "#19aecc"
+    }
+  },
+  "customText": {
+    "en": {
+      "get-started": {
+        "introduction": "Welcome! With <p>only a few steps</p> you'll be able to setup."
+      }
+    }
+  }
+}
