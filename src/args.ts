@@ -9,6 +9,7 @@ type SharedParams = {
   secret?: string;
   base_path?: string; // Necessary when package imported as Node module
   config?: Partial<Config>;
+  experimental_ea?: boolean;
 };
 
 type ImportSpecificParams = {
@@ -42,6 +43,12 @@ function getParams(): CliParams {
       alias: 'p',
       describe: 'A url for proxying requests, only set this if you are behind a proxy.',
       type: 'string',
+    })
+    .option('experimental_ea', {
+      alias: 'ea',
+      describe: 'This will enable supoort experimental early access of features/resource types.',
+      type: 'boolean',
+      default: false,
     })
     .command(['import', 'deploy'], 'Deploy Configuration', {
       input_file: {

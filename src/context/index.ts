@@ -26,6 +26,8 @@ const nonPrimitiveProps: (keyof Config)[] = [
   'INCLUDED_PROPS',
 ];
 
+const EA_FEATURES = ['ACUL', 'wewewe'];
+
 export const setupContext = async (
   config: Config,
   command: 'import' | 'export'
@@ -128,6 +130,19 @@ export const setupContext = async (
         `Usage of the ${usedDeprecatedParams.join(', ')} exclusion ${
           usedDeprecatedParams.length > 1 ? 'params are' : 'param is'
         } deprecated and may be removed from future major versions. See: https://github.com/auth0/auth0-deploy-cli/issues/451#user-content-deprecated-exclusion-props for details.`
+      );
+    }
+  })(config);
+
+  ((config: Config) => {
+    // Check if experimental early access features are enabled
+    if (config.AUTH0_EXPERIMENTAL_EA) {
+      log.warn(
+        `Experimental early access ${
+          EA_FEATURES.length === 1
+            ? 'feature [' + EA_FEATURES.join('') + '] is'
+            : 'features [' + EA_FEATURES.join(',') + '] are'
+        } enabled. These are in a pre-release state and may change in future release.`
       );
     }
   })(config);

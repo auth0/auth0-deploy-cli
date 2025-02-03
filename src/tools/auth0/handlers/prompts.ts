@@ -347,11 +347,15 @@ export default class PromptsHandler extends DefaultHandler {
       partials,
     };
 
-    try {
-      const screenRenderers = await this.getPromptScreenSettings();
-      prompts.screenRenderers = screenRenderers;
-    } catch (error) {
-      log.warn(`Unable to fetch screen renderers: ${error}`);
+    const includeExperimentalEA = this.config('AUTH0_EXPERIMENTAL_EA') || false;
+
+    if (includeExperimentalEA) {
+      try {
+        const screenRenderers = await this.getPromptScreenSettings();
+        prompts.screenRenderers = screenRenderers;
+      } catch (error) {
+        log.warn(`Unable to fetch screen renderers: ${error}`);
+      }
     }
 
     return prompts;
@@ -608,7 +612,7 @@ export default class PromptsHandler extends DefaultHandler {
     } else {
       updatePayload = {
         ...updatePrams,
-        rendering_mode
+        rendering_mode,
       };
     }
 
