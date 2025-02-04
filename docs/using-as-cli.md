@@ -34,7 +34,7 @@ Boolean. Enables more verbose error logging; useful during troubleshooting. Defa
 
 A url for proxying requests. Only set this if you are behind a proxy.
 
-### `--experimental-ea`, `--ea`
+### `--experimental_ea`, `--ea`
 
 Boolean. Enables early access Auth0 resources support and experimental features.
 
@@ -75,7 +75,7 @@ A url for proxying requests. Only set this if you are behind a proxy.
 
 Boolean. Enables more verbose error logging; useful during troubleshooting. Default: `false`.
 
-### `--experimental-ea`, `--ea`
+### `--experimental_ea`, `--ea`
 
 Boolean. Enables early access Auth0 resources support and experimental features.
 
