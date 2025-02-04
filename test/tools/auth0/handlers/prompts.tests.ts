@@ -13,6 +13,14 @@ const mockPromptsSettings = {
 };
 
 describe('#prompts handler', () => {
+  const config = function (key) {
+    return config.data && config.data[key];
+  };
+
+  config.data = {
+    AUTH0_EXPERIMENTAL_EA: true,
+  };
+
   describe('#prompts process', () => {
     it('should get prompts settings, custom texts, template partials and screen renderer', async () => {
       const supportedLanguages: Language[] = ['es', 'fr', 'en'];
@@ -120,6 +128,7 @@ describe('#prompts handler', () => {
 
       const handler = new promptsHandler({
         client: auth0,
+        config: config,
       });
 
       const getCustomPartial = sinon.stub(handler, 'getCustomPartial');
@@ -187,6 +196,7 @@ describe('#prompts handler', () => {
 
       const handler = new promptsHandler({
         client: auth0,
+        config: config,
       });
       sinon.stub(handler, 'updateCustomPartials').callsFake(() => {
         didCallUpdatePartials = true;
@@ -296,6 +306,7 @@ describe('#prompts handler', () => {
 
       const handler = new promptsHandler({
         client: auth0,
+        config: config,
       });
 
       sinon.stub(handler, 'updateCustomPartials').callsFake(() => {
@@ -349,7 +360,7 @@ describe('#prompts handler', () => {
         }),
       };
 
-      const handler = new promptsHandler({ client: auth0 });
+      const handler = new promptsHandler({ client: auth0, config: config });
       const getCustomPartial = sinon.stub(handler, 'getCustomPartial');
       getCustomPartial.withArgs({ prompt: 'login' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'login-id' }).resolves({});

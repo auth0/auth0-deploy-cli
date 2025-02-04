@@ -234,7 +234,11 @@ describe('#YAML context validation', () => {
         { body: './emailTemplates/mfa_oob_code.html', enabled: true, template: 'mfa_oob_code' },
         { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' },
         { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
-        { body: './emailTemplates/reset_email_by_code.html',enabled: true,template: 'reset_email_by_code' },
+        {
+          body: './emailTemplates/reset_email_by_code.html',
+          enabled: true,
+          template: 'reset_email_by_code',
+        },
         {
           body: './emailTemplates/stolen_credentials.html',
           enabled: true,
@@ -293,7 +297,6 @@ describe('#YAML context validation', () => {
       prompts: {
         customText: {},
         partials: {},
-        screenRenderers: [],
       },
       customDomains: [],
       themes: [],
@@ -310,6 +313,7 @@ describe('#YAML context validation', () => {
     const tenantFile = path.join(dir, 'tenant.yml');
     const config = {
       AUTH0_INPUT_FILE: tenantFile,
+      AUTH0_EXPERIMENTAL_EA: true,
       AUTH0_EXCLUDED_DEFAULTS: ['emailProvider'],
     };
     const context = new Context(config, mockMgmtClient());
@@ -352,7 +356,11 @@ describe('#YAML context validation', () => {
         { body: './emailTemplates/mfa_oob_code.html', enabled: true, template: 'mfa_oob_code' },
         { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' },
         { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
-        { body: './emailTemplates/reset_email_by_code.html',enabled: true,template: 'reset_email_by_code' },
+        {
+          body: './emailTemplates/reset_email_by_code.html',
+          enabled: true,
+          template: 'reset_email_by_code',
+        },
         {
           body: './emailTemplates/stolen_credentials.html',
           enabled: true,
@@ -471,7 +479,11 @@ describe('#YAML context validation', () => {
         { body: './emailTemplates/mfa_oob_code.html', enabled: true, template: 'mfa_oob_code' },
         { body: './emailTemplates/password_reset.html', enabled: true, template: 'password_reset' },
         { body: './emailTemplates/reset_email.html', enabled: true, template: 'reset_email' },
-        { body: './emailTemplates/reset_email_by_code.html',enabled: true,template: 'reset_email_by_code' },
+        {
+          body: './emailTemplates/reset_email_by_code.html',
+          enabled: true,
+          template: 'reset_email_by_code',
+        },
         {
           body: './emailTemplates/stolen_credentials.html',
           enabled: true,
@@ -529,7 +541,6 @@ describe('#YAML context validation', () => {
       prompts: {
         customText: {},
         partials: {},
-        screenRenderers: [],
       },
       logStreams: [],
       customDomains: [],
