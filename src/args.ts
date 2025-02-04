@@ -45,7 +45,6 @@ function getParams(): CliParams {
       type: 'string',
     })
     .option('experimental_ea', {
-      alias: 'ea',
       describe: 'This will enable supoort experimental early access of features/resource types.',
       type: 'boolean',
       default: false,
