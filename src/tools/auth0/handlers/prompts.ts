@@ -533,6 +533,7 @@ export default class PromptsHandler extends DefaultHandler {
 
     const includeExperimentalEA = this.config('AUTH0_EXPERIMENTAL_EA') || false;
 
+    console.log('CLOG: includeExperimentalEA', includeExperimentalEA);
     if (includeExperimentalEA) {
       // Update screen renderers
       await this.updateScreenRenderers(screenRenderers);
