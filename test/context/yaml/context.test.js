@@ -313,7 +313,6 @@ describe('#YAML context validation', () => {
     const tenantFile = path.join(dir, 'tenant.yml');
     const config = {
       AUTH0_INPUT_FILE: tenantFile,
-      AUTH0_EXPERIMENTAL_EA: true,
       AUTH0_EXCLUDED_DEFAULTS: ['emailProvider'],
     };
     const context = new Context(config, mockMgmtClient());
@@ -419,7 +418,6 @@ describe('#YAML context validation', () => {
       prompts: {
         customText: {},
         partials: {},
-        screenRenderers: [],
       },
       customDomains: [],
       themes: [],
