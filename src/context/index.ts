@@ -144,6 +144,10 @@ export const setupContext = async (
             : 'features [' + EA_FEATURES.join(',') + '] are'
         } enabled. These are in a pre-release state and may change in future release.`
       );
+    } else {
+      log.info(
+        'To enable experimental early access features use --experimental_ea flag or set AUTH0_EXPERIMENTAL_EA=true in configuration JSON.'
+      );
     }
   })(config);
 
