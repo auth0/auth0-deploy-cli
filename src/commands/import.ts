@@ -13,6 +13,7 @@ export default async function importCMD(params: ImportParams) {
     config: configObj,
     env: shouldInheritEnv = false,
     secret: clientSecret,
+    experimental_ea: experimentalEA,
   } = params;
 
   if (shouldInheritEnv) {
@@ -37,6 +38,14 @@ export default async function importCMD(params: ImportParams) {
   // Allow passed in secret to override the configured one
   if (clientSecret) {
     overrides.AUTH0_CLIENT_SECRET = clientSecret;
+  }
+
+  // Overrides AUTH0_INCLUDE_EXPERIMENTAL_EA is experimental_ea passed in command line
+  if (experimentalEA) {
+    overrides.AUTH0_EXPERIMENTAL_EA = experimentalEA;
+
+    // nconf.overrides() sometimes doesn't work, so we need to set it manually to ensure it's set
+    nconf.set('AUTH0_EXPERIMENTAL_EA', experimentalEA);
   }
 
   nconf.overrides(overrides);

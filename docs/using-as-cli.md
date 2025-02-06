@@ -34,6 +34,10 @@ Boolean. Enables more verbose error logging; useful during troubleshooting. Defa
 
 A url for proxying requests. Only set this if you are behind a proxy.
 
+### `--experimental_ea`
+
+Boolean. When enabled, gain early access Auth0 resources support and experimental features. Default: `false`.
+
 ### Examples
 
 ```shell
@@ -70,6 +74,10 @@ A url for proxying requests. Only set this if you are behind a proxy.
 ### `--debug`
 
 Boolean. Enables more verbose error logging; useful during troubleshooting. Default: `false`.
+
+### `--experimental_ea`
+
+Boolean. When enabled, gain early access Auth0 resources support and experimental features. Default: `false`.
 
 ### Examples
 

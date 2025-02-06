@@ -13,6 +13,14 @@ const mockPromptsSettings = {
 };
 
 describe('#prompts handler', () => {
+  const config = function (key) {
+    return config.data && config.data[key];
+  };
+
+  config.data = {
+    AUTH0_EXPERIMENTAL_EA: true,
+  };
+
   describe('#prompts process', () => {
     it('should get prompts settings, custom texts, template partials and screen renderer', async () => {
       const supportedLanguages: Language[] = ['es', 'fr', 'en'];
@@ -120,6 +128,7 @@ describe('#prompts handler', () => {
 
       const handler = new promptsHandler({
         client: auth0,
+        config: config,
       });
 
       const getCustomPartial = sinon.stub(handler, 'getCustomPartial');
@@ -187,6 +196,7 @@ describe('#prompts handler', () => {
 
       const handler = new promptsHandler({
         client: auth0,
+        config: config,
       });
       sinon.stub(handler, 'updateCustomPartials').callsFake(() => {
         didCallUpdatePartials = true;
@@ -296,6 +306,7 @@ describe('#prompts handler', () => {
 
       const handler = new promptsHandler({
         client: auth0,
+        config: config,
       });
 
       sinon.stub(handler, 'updateCustomPartials').callsFake(() => {
@@ -320,6 +331,111 @@ describe('#prompts handler', () => {
       expect(didCallUpdateCustomText).to.equal(true);
       expect(didCallUpdatePartials).to.equal(true);
       expect(didCallUpdateScreenRenderer).to.equal(true);
+      expect(numberOfUpdateCustomTextCalls).to.equal(3);
+      expect(numberOfUpdatePartialsCalls).to.equal(3);
+    });
+
+    it('should update prompts settings and custom text/partials, not screen renderer settings when AUTH0_EXPERIMENTAL_EA=false', async () => {
+      let didCallUpdatePromptsSettings = false;
+      let didCallUpdateCustomText = false;
+      let didCallUpdatePartials = false;
+      let numberOfUpdateCustomTextCalls = 0;
+      let numberOfUpdatePartialsCalls = 0;
+      let didCallUpdateScreenRenderer = false;
+
+      const customTextToSet = {
+        en: {
+          login: {
+            buttonText: 'button text2',
+            description: 'description text',
+            title: 'title text',
+          },
+          'mfa-webauthn': {},
+        },
+        fr: {
+          login: {
+            buttonText: 'french button text',
+            description: 'french description text',
+            title: 'french title text',
+          },
+        },
+      };
+
+      const partialsToSet: Prompts['partials'] = {
+        login: {
+          login: {
+            'form-content-start': '<div>TEST</div>',
+          },
+        },
+        'signup-id': {
+          'signup-id': {
+            'form-content-start': '<div>TEST</div>',
+          },
+        },
+        'signup-password': {
+          'signup-password': {
+            'form-content-start': '<div>TEST</div>',
+          },
+        },
+      };
+      const screenRenderersToSet: Prompts['screenRenderers'] = [];
+
+      const auth0 = {
+        prompts: {
+          updateCustomTextByLanguage: () => {
+            didCallUpdateCustomText = true;
+            numberOfUpdateCustomTextCalls++;
+            return Promise.resolve({ data: {} });
+          },
+          update: (data) => {
+            didCallUpdatePromptsSettings = true;
+            expect(data).to.deep.equal(mockPromptsSettings);
+            return Promise.resolve({ data });
+          },
+          updateRendering: () => {
+            didCallUpdateScreenRenderer = true;
+            return Promise.resolve({ data: {} });
+          },
+          _getRestClient: (endpoint) => ({
+            get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+          }),
+        },
+        pool: new PromisePoolExecutor({
+          concurrencyLimit: 3,
+          frequencyLimit: 1000,
+          frequencyWindow: 1000, // 1 sec
+        }),
+      };
+
+      config.data.AUTH0_EXPERIMENTAL_EA = false;
+
+      const handler = new promptsHandler({
+        client: auth0,
+        config: config,
+      });
+
+      sinon.stub(handler, 'updateCustomPartials').callsFake(() => {
+        didCallUpdatePartials = true;
+        numberOfUpdatePartialsCalls++;
+        return Promise.resolve({});
+      });
+
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          prompts: {
+            ...mockPromptsSettings,
+            customText: customTextToSet,
+            partials: partialsToSet,
+            screenRenderers: screenRenderersToSet,
+          },
+        },
+      ]);
+      expect(didCallUpdatePromptsSettings).to.equal(true);
+      expect(didCallUpdateCustomText).to.equal(true);
+      expect(didCallUpdatePartials).to.equal(true);
+      expect(didCallUpdateScreenRenderer).to.equal(false);
       expect(numberOfUpdateCustomTextCalls).to.equal(3);
       expect(numberOfUpdatePartialsCalls).to.equal(3);
     });
@@ -349,7 +465,9 @@ describe('#prompts handler', () => {
         }),
       };
 
-      const handler = new promptsHandler({ client: auth0 });
+      config.data.AUTH0_EXPERIMENTAL_EA = true;
+
+      const handler = new promptsHandler({ client: auth0, config: config });
       const getCustomPartial = sinon.stub(handler, 'getCustomPartial');
       getCustomPartial.withArgs({ prompt: 'login' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'login-id' }).resolves({});

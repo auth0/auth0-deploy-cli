@@ -865,7 +865,7 @@ describe('#databases handler', () => {
                   active: true,
                 },
                 profile_required: true,
-                verification_method:'link'
+                verification_method: 'link',
               },
               username: {
                 signup: {
@@ -1098,7 +1098,7 @@ describe('#databases handler', () => {
                     active: true,
                   },
                   profile_required: true,
-                  verification_method:'otp',
+                  verification_method: 'otp',
                 },
                 username: {
                   signup: {
@@ -1481,7 +1481,7 @@ describe('#databases handler', () => {
                   active: true,
                 },
                 profile_required: true,
-                verification_method:'link',
+                verification_method: 'link',
               },
               username: {
                 signup: {

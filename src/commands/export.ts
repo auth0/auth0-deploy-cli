@@ -17,6 +17,7 @@ export default async function exportCMD(params: ExportParams) {
     export_ids: exportIds,
     secret: clientSecret,
     env: shouldInheritEnv = false,
+    experimental_ea: experimentalEA,
   } = params;
 
   if (shouldInheritEnv) {
@@ -42,6 +43,14 @@ export default async function exportCMD(params: ExportParams) {
   // Allow passed in export_ids to override the configured one
   if (exportIds) {
     overrides.AUTH0_EXPORT_IDENTIFIERS = exportIds;
+  }
+
+  // Overrides AUTH0_INCLUDE_EXPERIMENTAL_EA is experimental_ea passed in command line
+  if (experimentalEA) {
+    overrides.AUTH0_EXPERIMENTAL_EA = experimentalEA;
+
+    // nconf.overrides() sometimes doesn't work, so we need to set it manually to ensure it's set
+    nconf.set('AUTH0_EXPERIMENTAL_EA', experimentalEA);
   }
 
   // Check output folder
