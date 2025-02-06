@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support new screens for rendering `prompt` screen's settings [#1028]
+- Add support for new `--experimental_ea` command flag [#1027]
+
+### Fixed
+
+- Fix keyword for the repository [#1026]
+
 ## [8.5.0] - 2025-01-29
 
 ### Added
