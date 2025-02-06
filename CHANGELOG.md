@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.6.0] - 2025-02-06
+
+### Added
+
+- Add support new screens for rendering `prompt` screen's settings [#1028]
+- Add support for new `--experimental_ea` command flag [#1027]
+
+### Fixed
+
+- Fix keyword for the repository [#1026]
+
 ## [8.5.0] - 2025-01-29
 
 ### Added
@@ -1203,7 +1214,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1021]: https://github.com/auth0/auth0-deploy-cli/issues/1021
 [#1022]: https://github.com/auth0/auth0-deploy-cli/issues/1022
 [#1023]: https://github.com/auth0/auth0-deploy-cli/issues/1023
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.5.0...HEAD
+[#1026]: https://github.com/auth0/auth0-deploy-cli/issues/1026
+[#1027]: https://github.com/auth0/auth0-deploy-cli/issues/1027
+[#1028]: https://github.com/auth0/auth0-deploy-cli/issues/1028
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.6.0...HEAD
+[8.6.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.5.0...v8.6.0
 [8.5.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.4...v8.5.0
 [8.4.4]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.3...v8.4.4
 [8.4.3]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.2...v8.4.3
