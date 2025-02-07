@@ -4,7 +4,13 @@
   "AUTH0_CLIENT_SECRET": "<client_secret>",
   "AUTH0_KEYWORD_REPLACE_MAPPINGS": {
     "AUTH0_TENANT_NAME": "<NAME>",
-    "ENV": "DEV"
+    "ENV": "DEV",
+    "SETUP_CONFIG": {
+      "client_id": "<add M2M client id>",
+      "client_secret": "<add M2M client_secret>",
+      "domain": "<add M2M domain>",
+      "type": "OAUTH_APP"
+    }
   },
   "AUTH0_ALLOW_DELETE": false,
   "INCLUDED_PROPS": {

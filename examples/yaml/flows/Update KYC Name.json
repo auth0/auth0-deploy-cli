@@ -1,0 +1,21 @@
+{
+  "name": "Update KYC Name",
+  "actions": [
+    {
+      "id": "update_user_metadata",
+      "type": "AUTH0",
+      "action": "UPDATE_USER",
+      "allow_failure": false,
+      "mask_output": false,
+      "params": {
+        "connection_id": "New Auth0 M2M Con",
+        "user_id": "{{context.user.user_id}}",
+        "changes": {
+          "user_metadata": {
+            "full_name": "{{fields.full_name}}"
+          }
+        }
+      }
+    }
+  ]
+}
