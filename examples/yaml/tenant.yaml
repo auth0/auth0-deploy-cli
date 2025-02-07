@@ -217,6 +217,17 @@ prompts:
         login-passwordless-email-code: ./prompts/screenRenderSettings/login-passwordless_login-passwordless-email-code.json
         login-passwordless-sms-otp: ./prompts/screenRenderSettings/login-passwordless_login-passwordless-sms-otp.json
 
+forms:
+  - name: New Kyc form
+    body: ./forms/New Kyc form.json
+flows:
+  - name: Update KYC Name
+    body: ./flows/Update KYC Name.json
+flowVaultConnections:
+  - name: 'New Auth0 M2M Con'
+    app_id: AUTH0
+    setup: @@SETUP_CONFIG@@
+
 selfServiceProfiles:
   - name: self-service profile 1
     allowed_strategies:
