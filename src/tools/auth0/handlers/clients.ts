@@ -8,6 +8,51 @@ export const schema = {
     type: 'object',
     properties: {
       name: { type: 'string', minLength: 1, pattern: '[^<>]+' },
+      mobile: {
+        type: 'object',
+        properties: {
+          android: {
+            type: 'object',
+            properties: {
+              app_package_name: { type: 'string' },
+              sha256_cert_fingerprints: {
+                type: 'array',
+                items: { type: 'string' },
+              },
+            },
+          },
+          ios: {
+            type: 'object',
+            properties: {
+              team_id: { type: 'string' },
+              app_bundle_identifier: { type: 'string' },
+            },
+          },
+        },
+      },
+      native_social_login: {
+        type: 'object',
+        properties: {
+          apple: {
+            type: 'object',
+            properties: {
+              enabled: { type: 'boolean' },
+            },
+          },
+          facebook: {
+            type: 'object',
+            properties: {
+              enabled: { type: 'boolean' },
+            },
+          },
+          google: {
+            type: 'object',
+            properties: {
+              enabled: { type: 'boolean' },
+            },
+          },
+        },
+      },
     },
     required: ['name'],
   },
