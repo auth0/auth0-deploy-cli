@@ -1,0 +1,13 @@
+{
+  "name": "My Natve app",
+  "mobile": {
+    "android": {
+      "app_package_name": "com.my.android.id"
+    }
+  },
+  "native_social_login": {
+    "google": {
+      "enabled": true
+    }
+  }
+}
