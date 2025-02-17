@@ -1,5 +1,5 @@
 {
-  "name": "My Natve app",
+  "name": "My Native app",
   "app_type": "native",
   "grant_types": [
     "authorization_code",
