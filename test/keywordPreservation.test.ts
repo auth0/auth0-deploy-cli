@@ -9,6 +9,7 @@ import {
   preserveKeywords,
 } from '../src/keywordPreservation';
 import { cloneDeep } from 'lodash';
+import log from '../src/logger';
 
 describe('#Keyword Preservation', () => {
   describe('doesHaveKeywordMarker', () => {
@@ -963,5 +964,115 @@ describe('preserveKeywords', () => {
         },
       ],
     });
+  });
+
+  it('should handle clientGrants with client_id converted to client name', () => {
+    const mockLocalAssets = {
+      clientGrants: [
+        {
+          client_id: 'API Explorer Application',
+          audience: 'https://##ENV##.travel0.com/api/v1',
+          scope: ['update:account'],
+          name: 'API Explorer Application',
+        },
+      ],
+      clients: [
+        {
+          client_id: 'API Explorer Application',
+          name: 'API Explorer Application',
+        },
+      ],
+    };
+
+    const mockRemoteAssets = {
+      clientGrants: [
+        {
+          client_id: 'API Explorer Application',
+          audience: 'https://dev.travel0.com/api/v1',
+          scope: ['update:account'],
+          name: 'API Explorer Application',
+        },
+      ],
+      clients: [
+        {
+          client_id: 'API Explorer Application',
+          name: 'API Explorer Application',
+        },
+      ],
+    };
+
+    const preservedAssets = preserveKeywords({
+      localAssets: mockLocalAssets,
+      remoteAssets: mockRemoteAssets,
+      keywordMappings: {
+        ENV: 'dev',
+      },
+      auth0Handlers: [
+        {
+          id: 'id',
+          identifiers: ['id', 'name'],
+          type: 'clientGrants',
+        },
+        {
+          id: 'id',
+          identifiers: ['id', 'name'],
+          type: 'clients',
+        },
+      ],
+    });
+
+    expect(preservedAssets).to.deep.equal(mockLocalAssets);
+  });
+
+  it('should log a debug message if clients are not included for clientGrants keyword preservation', () => {
+    const mockLocalAssets = {
+      clientGrants: [
+        {
+          client_id: 'API Explorer Application',
+          audience: 'https://##ENV##.travel0.com/api/v1',
+          scope: ['update:account'],
+          name: 'API Explorer Application',
+        },
+      ],
+    };
+
+    const mockRemoteAssets = {
+      clientGrants: [
+        {
+          client_id: 'API Explorer Application',
+          audience: 'https://dev.travel0.com/api/v1',
+          scope: ['update:account'],
+          name: 'API Explorer Application',
+        },
+      ],
+    };
+
+    const originalLogDebug = log.debug;
+    let logMessage = '';
+
+    log.debug = (message) => {
+      logMessage = message;
+    };
+
+    preserveKeywords({
+      localAssets: mockLocalAssets,
+      remoteAssets: mockRemoteAssets,
+      keywordMappings: {
+        ENV: 'dev',
+      },
+      auth0Handlers: [
+        {
+          id: 'id',
+          identifiers: ['id', 'name'],
+          type: 'clientGrants',
+        },
+      ],
+    });
+
+    expect(logMessage).to.equal(
+      "Keyword preservation for 'clientGrants' has dependency on the 'clients' resource, make sure to include both in the export."
+    );
+
+    log.debug = originalLogDebug;
   });
 });
