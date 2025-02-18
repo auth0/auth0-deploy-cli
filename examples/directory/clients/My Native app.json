@@ -1,0 +1,53 @@
+{
+  "name": "My Native app",
+  "app_type": "native",
+  "grant_types": [
+    "authorization_code",
+    "implicit",
+    "refresh_token"
+  ],
+  "mobile": {
+    "android": {
+      "app_package_name": "com.my.android.id"
+    }
+  },
+  "native_social_login": {
+    "google": {
+      "enabled": true
+    },
+    "facebook": {
+      "enabled": false
+    },
+    "apple": {
+      "enabled": false
+    }
+  },
+  "is_first_party": true,
+  "sso_disabled": false,
+  "cross_origin_auth": false,
+  "oidc_conformant": false,
+  "oidc_backchannel_logout": {
+    "backchannel_logout_initiators": {
+      "mode": "custom",
+      "selected_initiators": [
+        "rp-logout",
+        "idp-logout"
+      ]
+    }
+  },
+  "jwt_configuration": {
+    "lifetime_in_seconds": 36000,
+    "secret_encoded": false
+  },
+  "token_endpoint_auth_method": "none",
+  "custom_login_page_on": true,
+  "oidc_logout": {
+    "backchannel_logout_initiators": {
+      "mode": "custom",
+      "selected_initiators": [
+        "rp-logout",
+        "idp-logout"
+      ]
+    }
+  }
+}

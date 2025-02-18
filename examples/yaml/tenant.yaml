@@ -28,7 +28,16 @@ clients:
     name: "My M2M"
     app_type: "non_interactive"
     # Add other client settings https://auth0.com/docs/api/management/v2#!/Clients/post_clients
-
+  -
+    name: "My Native app"
+    app_type: native
+    mobile:
+      android:
+        app_package_name: com.my.android.id
+    native_social_login:
+      google:
+        enabled: true
+    # Add other client settings https://auth0.com/docs/api/management/v2#!/Clients/post_clients
 
 databases:
   - name: "users"

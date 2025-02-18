@@ -13,6 +13,22 @@ const pool = {
   },
 };
 
+const someNativeClient = {
+  name: 'someNativeClient',
+  app_type: 'native',
+  grant_types: ['authorization_code', 'implicit', 'refresh_token'],
+  mobile: {
+    android: {
+      app_package_name: 'com.my.android.id',
+    },
+  },
+  native_social_login: {
+    google: {
+      enabled: true,
+    },
+  },
+};
+
 describe('#clients handler', () => {
   const config = function (key) {
     return config.data && config.data[key];
@@ -78,6 +94,44 @@ describe('#clients handler', () => {
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ clients: [{ name: 'someClient' }] }]);
+    });
+
+    it('should create native client', async () => {
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('someNativeClient');
+            expect(data.app_type).to.equal('native');
+            expect(data.grant_types).to.deep.equal([
+              'authorization_code',
+              'implicit',
+              'refresh_token',
+            ]);
+            expect(data.mobile).to.deep.equal({
+              android: {
+                app_package_name: 'com.my.android.id',
+              },
+            });
+            expect(data.native_social_login).to.deep.equal({
+              google: {
+                enabled: true,
+              },
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ clients: [someNativeClient] }]);
     });
 
     it('should get clients', async () => {
