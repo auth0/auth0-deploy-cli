@@ -1,26 +1,27 @@
 import { get as getByDotNotation, set as setByDotNotation } from 'dot-prop';
-import { keywordReplace } from './tools/utils';
+import { cloneDeep, isArray } from 'lodash';
 import { AssetTypes, KeywordMappings } from './types';
-import { keywordReplaceArrayRegExp, keywordReplaceStringRegExp } from './tools/utils';
-import { cloneDeep, forEach, isArray } from 'lodash';
+import {
+  keywordReplace,
+  keywordReplaceArrayRegExp,
+  keywordReplaceStringRegExp,
+} from './tools/utils';
 import APIHandler from './tools/auth0/handlers/default';
+import { convertClientIdToName } from './utils';
+import log from './logger';
 
 /*
   RFC for Keyword Preservation: https://github.com/auth0/auth0-deploy-cli/issues/688
   Original Github Issue: https://github.com/auth0/auth0-deploy-cli/issues/328
 */
 
-export const doesHaveKeywordMarker = (
-  string: string,
-  keywordMappings: KeywordMappings
-): boolean => {
-  return !Object.keys(keywordMappings).every((keyword) => {
+export const doesHaveKeywordMarker = (string: string, keywordMappings: KeywordMappings): boolean =>
+  !Object.keys(keywordMappings).every((keyword) => {
     const hasArrayMarker = keywordReplaceArrayRegExp(keyword).test(string);
     const hasStringMarker = keywordReplaceStringRegExp(keyword).test(string);
 
     return !hasArrayMarker && !hasStringMarker;
   });
-};
 
 export const getPreservableFieldsFromAssets = (
   asset: object,
@@ -110,8 +111,8 @@ export const getPreservableFieldsFromAssets = (
 // Object: `{ actions: [ { name: "action-1", code: "..."}] }`
 // Address: `.actions[name=action-1].code`
 export const getAssetsValueByAddress = (address: string, assets: any): any => {
-  //Look ahead and see if the address path only contains dots (ex: `tenant.friendly_name`)
-  //if so the address is trivial and can use the dot-prop package to return the value
+  // Look ahead and see if the address path only contains dots (ex: `tenant.friendly_name`)
+  // if so the address is trivial and can use the dot-prop package to return the value
 
   const isTrivialAddress = address.indexOf('[') === -1;
   if (isTrivialAddress) {
@@ -156,7 +157,7 @@ export const convertAddressToDotNotation = (
   address: string,
   finalAddressTrail = ''
 ): string | null => {
-  if (assets === null) return null; //Asset does not exist on remote
+  if (assets === null) return null; // Asset does not exist on remote
 
   const directions = address.split(/\.(?![^\[]*\])/g);
 
@@ -248,6 +249,24 @@ export const preserveKeywords = ({
     ''
   );
 
+  // Convert client_id to client name in clientGrants if clients are available for keyword preservation in clientGrants
+  if (remoteAssets && (remoteAssets as any).clientGrants) {
+    if ((remoteAssets as any).clients) {
+      for (let i = 0; i < (remoteAssets as any).clientGrants.length; i++) {
+        const clientGrant = (remoteAssets as any).clientGrants[i];
+        clientGrant.client_id = convertClientIdToName(
+          clientGrant.client_id,
+          (remoteAssets as any).clients
+        );
+        (remoteAssets as any).clientGrants[i] = clientGrant;
+      }
+    } else {
+      log.debug(
+        "Keyword preservation for 'clientGrants' has dependency on the 'clients' resource, make sure to include both in the export."
+      );
+    }
+  }
+
   let updatedRemoteAssets = cloneDeep(remoteAssets);
 
   addresses.forEach((address) => {
@@ -268,7 +287,8 @@ export const preserveKeywords = ({
       if (typeof remoteValue === 'string') {
         return localValueWithReplacement === remoteValue;
       }
-      //TODO: Account for non-string replacements via @@ syntax
+      // TODO:  Account for non-string replacements via @@ syntax
+      return false; // Default to false
     })();
 
     if (!localAndRemoteValuesAreEqual) {
@@ -285,12 +305,12 @@ export const preserveKeywords = ({
     // Example: `customDomains.[domain=##DOMAIN].domain` and `customDomains.[domain=travel0.com].domain`
     updatedRemoteAssets = updateAssetsByAddress(
       updatedRemoteAssets,
-      address, //Two possible addresses need to be passed, one with identifier field keyword replaced and one where it is not replaced. Ex: `customDomains.[domain=##DOMAIN].domain` and `customDomains.[domain=travel0.com].domain`
+      address, // Two possible addresses need to be passed, one with identifier field keyword replaced and one where it is not replaced. Ex: `customDomains.[domain=##DOMAIN].domain` and `customDomains.[domain=travel0.com].domain`
       localValue
     );
     updatedRemoteAssets = updateAssetsByAddress(
       updatedRemoteAssets,
-      remoteAssetsAddress, //Two possible addresses need to be passed, one with identifier field keyword replaced and one where it is not replaced. Ex: `customDomains.[domain=##DOMAIN].domain` and `customDomains.[domain=travel0.com].domain`
+      remoteAssetsAddress, // Two possible addresses need to be passed, one with identifier field keyword replaced and one where it is not replaced. Ex: `customDomains.[domain=##DOMAIN].domain` and `customDomains.[domain=travel0.com].domain`
       localValue
     );
   });
