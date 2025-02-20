@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix docs for support of `forms`,`flows`,`flowVaultConnections` [#1030]
+- Fix keyword preservation for `clientGrants` [#1032]
+- Fix google credential support for `clients` [#1031]
+
 ## [8.6.0] - 2025-02-06
 
 ### Added
