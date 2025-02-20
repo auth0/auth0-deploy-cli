@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.6.1] - 2025-02-20
+
+### Fixed
+
+- Fix docs for support of `forms`,`flows`,`flowVaultConnections` [#1030]
+- Fix keyword preservation for `clientGrants` [#1032]
+- Fix google credential support for `clients` [#1031]
+
 ## [8.6.0] - 2025-02-06
 
 ### Added
@@ -1217,7 +1225,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1026]: https://github.com/auth0/auth0-deploy-cli/issues/1026
 [#1027]: https://github.com/auth0/auth0-deploy-cli/issues/1027
 [#1028]: https://github.com/auth0/auth0-deploy-cli/issues/1028
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.6.0...HEAD
+[#1030]: https://github.com/auth0/auth0-deploy-cli/issues/1030
+[#1031]: https://github.com/auth0/auth0-deploy-cli/issues/1031
+[#1032]: https://github.com/auth0/auth0-deploy-cli/issues/1032
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.6.1...HEAD
+[8.6.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.6.0...v8.6.1
 [8.6.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.5.0...v8.6.0
 [8.5.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.4...v8.5.0
 [8.4.4]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.3...v8.4.4
