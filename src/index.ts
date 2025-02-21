@@ -29,9 +29,7 @@ async function run(params: CliParams): Promise<void> {
     log.debug(`Setting proxy to ${proxy}`);
 
     // moving from `global-agent` to undici due to update on SDK 4.x.x
-    setGlobalDispatcher(
-      new ProxyAgent(process.env.HTTP_PROXY)
-    );
+    setGlobalDispatcher(new ProxyAgent(process.env.HTTP_PROXY));
   }
 
   log.debug(`Start command ${command}`);
