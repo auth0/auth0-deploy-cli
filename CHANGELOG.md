@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.6.2] - 2025-02-21
+
+### Added
+
+- Add support new screens for rendering `prompt` screen's settings [#1035]
+
 ## [8.6.1] - 2025-02-20
 
 ### Fixed
@@ -1228,7 +1234,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1030]: https://github.com/auth0/auth0-deploy-cli/issues/1030
 [#1031]: https://github.com/auth0/auth0-deploy-cli/issues/1031
 [#1032]: https://github.com/auth0/auth0-deploy-cli/issues/1032
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.6.1...HEAD
+[#1035]: https://github.com/auth0/auth0-deploy-cli/issues/1035
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.6.2...HEAD
+[8.6.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.6.0...v8.6.2
 [8.6.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.6.0...v8.6.1
 [8.6.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.5.0...v8.6.0
 [8.5.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.4.4...v8.5.0
