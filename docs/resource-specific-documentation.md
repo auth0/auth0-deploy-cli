@@ -95,10 +95,7 @@ Contents of `promptName_screenName.json`
   "prompt": "signup-id",
   "screen": "signup-id",
   "rendering_mode": "advanced",
-  "context_configuration": [
-    "branding.settings",
-    "branding.themes.default"
-  ],
+  "context_configuration": ["branding.settings", "branding.themes.default"],
   "default_head_tags_disabled": false,
   "head_tags": [
     {
@@ -107,9 +104,7 @@ Contents of `promptName_screenName.json`
         "src": "URL_TO_YOUR_ASSET",
         "async": true,
         "defer": true,
-        "integrity": [
-          "ASSET_SHA"
-        ]
+        "integrity": ["ASSET_SHA"]
       }
     }
   ]
@@ -281,7 +276,6 @@ Contents of `password_reset.json`
 }
 ```
 
-
 ## emailTemplates
 
 When managing email templates, the values of `options.body` and `options.body` point to specific HTML files relative to the path of the output folder. Otherwise, the payload closely matches that of the [Management API](https://auth0.com/docs/api/management/v2#!/Email_Templates/post_email_templates).
@@ -303,33 +297,33 @@ Folder structure when in YAML mode.
 ```yaml
 # Contents of ./tenant.yaml
 emailTemplates:
-  - template: "verify_email"
+  - template: 'verify_email'
     enabled: true
-    syntax: "liquid"
-    from: "test@email.com"
-    subject: "something"
-    body: "emailTemplates/change_email.html"
+    syntax: 'liquid'
+    from: 'test@email.com'
+    subject: 'something'
+    body: 'emailTemplates/change_email.html'
 
-  - template: "welcome_email"
+  - template: 'welcome_email'
     enabled: true
-    syntax: "liquid"
-    from: "test@email.com"
-    subject: "something"
-    body: "emailTemplates/change_email.html"
+    syntax: 'liquid'
+    from: 'test@email.com'
+    subject: 'something'
+    body: 'emailTemplates/change_email.html'
 
-  - template: "password_reset"
+  - template: 'password_reset'
     enabled: true
-    syntax: "liquid"
-    from: "test@email.com"
-    subject: "something"
-    body: "emailTemplates/change_email.html"
+    syntax: 'liquid'
+    from: 'test@email.com'
+    subject: 'something'
+    body: 'emailTemplates/change_email.html'
 
-  - template: "reset_email_by_code"
+  - template: 'reset_email_by_code'
     enabled: true
-    syntax: "liquid"
-    from: "test@email.com"
-    subject: "something"
-    body: "emailTemplates/change_email.html"
+    syntax: 'liquid'
+    from: 'test@email.com'
+    subject: 'something'
+    body: 'emailTemplates/change_email.html'
 ```
 
 **Directory Example**

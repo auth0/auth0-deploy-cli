@@ -224,8 +224,27 @@ const constants = {
     captcha: ['interstitial-captcha'],
     login: ['login'],
     signup: ['signup'],
-    'reset-password': ['reset-password-request', 'reset-password-email', 'reset-password', 'reset-password-success', 'reset-password-error'],
-
+    'reset-password': [
+      'reset-password-request',
+      'reset-password-email',
+      'reset-password',
+      'reset-password-success',
+      'reset-password-error',
+    ],
+    mfa: [
+      'mfa-detect-browser-capabilities',
+      'mfa-enroll-result',
+      'mfa-begin-enroll-options',
+      'mfa-login-options',
+    ],
+    'mfa-email': ['mfa-email-challenge', 'mfa-email-list'],
+    'mfa-sms': ['mfa-country-codes', 'mfa-sms-challenge', 'mfa-sms-enrollment', 'mfa-sms-list'],
+    'mfa-push': [
+      'mfa-push-challenge-push',
+      'mfa-push-enrollment-qr',
+      'mfa-push-list',
+      'mfa-push-welcome',
+    ],
   } as PromptScreenMapping,
 };
 
