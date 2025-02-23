@@ -52,3 +52,21 @@ export function emailProviderDefaults(emailProvider) {
 
   return updated;
 }
+
+export function phoneProviderDefaults(phoneProvider) {
+  // eslint-disable-line
+  const updated = { ...phoneProvider };
+
+  const apiKeyProviders = ['twilio'];
+
+  // Add placeholder for credentials as they cannot be exported
+  const { name } = updated;
+
+  if (apiKeyProviders.includes(name)) {
+    updated.credentials = {
+      auth_token: `##${name.toUpperCase()}_AUTH_TOKEN##`,
+      ...(updated.credentials || {}),
+    };
+  }
+  return updated;
+}
