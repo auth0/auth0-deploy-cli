@@ -89,11 +89,12 @@ export default class PhoneProviderHandler extends DefaultHandler {
 
     if (currentProviders === null || currentProviders.length === 0) {
       // if provider does not exist, create it
+      this.created += 1;
       await this.client.branding.configurePhoneProvider(providerReqPayload as CreatePhoneProviderRequest);
     } else {
       const currentProvider = currentProviders[0];
       // if provider exists, overwrite it
-      this.created += 1;
+      this.updated += 1;
       await this.client.branding.updatePhoneProvider({ id: currentProvider.id } as UpdatePhoneProviderOperationRequest, providerReqPayload);
     }
 

@@ -22,9 +22,17 @@ async function dump(context: YAMLContext): Promise<ParsedPhoneProviders> {
 
   const { phoneProviders } = context.assets;
 
+  const removeKeysFromOutput = ['id', 'created_at', 'updated_at', 'channel', 'tenant', 'credentials'];
+  phoneProviders.forEach((provider) => {
+    removeKeysFromOutput.forEach((key) => {
+      if (key in provider) {
+        delete provider[key];
+      }
+    });
+  });
+
   return {
-    // @ts-ignore
-    phoneProviders: phoneProviders.map(({ created_at, updated_at, tenant, channel, credentials, ...rest }) => rest)
+    phoneProviders
   };
 }
 

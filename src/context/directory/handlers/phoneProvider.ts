@@ -38,8 +38,17 @@ async function dump(context: DirectoryContext): Promise<void> {
   fs.ensureDirSync(phoneProvidersFolder);
 
   const phoneProviderFile = path.join(phoneProvidersFolder, 'provider.json');
-  // @ts-ignore
-  dumpJSON(phoneProviderFile,  phoneProviders.map(({ created_at, updated_at, tenant, channel, credentials, ...rest }) => rest));
+
+  const removeKeysFromOutput = ['id', 'created_at', 'updated_at', 'channel', 'tenant', 'credentials'];
+  phoneProviders.forEach((provider) => {
+    removeKeysFromOutput.forEach((key) => {
+      if (key in provider) {
+        delete provider[key];
+      }
+    });
+  });
+
+  dumpJSON(phoneProviderFile, phoneProviders);
 }
 
 const phoneProvidersHandler: DirectoryHandler<ParsedPhoneProvider> = {
