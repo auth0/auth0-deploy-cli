@@ -3,12 +3,12 @@ import fs from 'fs-extra';
 import { constants } from '../../../tools';
 
 import { existsMustBeDir, isFile, dumpJSON, loadJSON } from '../../../utils';
-import { phoneProviderDefaults } from '../../defaults';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset, ParsedAsset } from '../../../types';
+import { ParsedAsset } from '../../../types';
+import { PhoneProvider } from '../../../tools/auth0/handlers/phoneProvider';
 
-type ParsedPhoneProvider = ParsedAsset<'phoneProviders', Asset>;
+type ParsedPhoneProvider = ParsedAsset<'phoneProviders', PhoneProvider[]>;
 
 function parse(context: DirectoryContext): ParsedPhoneProvider {
   const phoneProvidersFolder = path.join(context.filePath, constants.PHONE_PROVIDER_DIRECTORY);
@@ -29,22 +29,17 @@ function parse(context: DirectoryContext): ParsedPhoneProvider {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  if (!context.assets.phoneProviders) return; // Skip, nothing to dump
-
-  const phoneProviders: typeof context.assets.phoneProviders = (() => {
-    const excludedDefaults = context.assets.exclude?.defaults || [];
-    if (!excludedDefaults.includes('phoneProviders')) {
-      // Add placeholder for credentials as they cannot be exported
-      return phoneProviderDefaults(context.assets.phoneProviders);
-    }
-    return context.assets.phoneProviders;
-  })();
+  const { phoneProviders } = context.assets;
+  if (!phoneProviders) {
+    return;
+  }// Skip, nothing to dump
 
   const phoneProvidersFolder = path.join(context.filePath, constants.PHONE_PROVIDER_DIRECTORY);
   fs.ensureDirSync(phoneProvidersFolder);
 
   const phoneProviderFile = path.join(phoneProvidersFolder, 'provider.json');
-  dumpJSON(phoneProviderFile, phoneProviders);
+  // @ts-ignore
+  dumpJSON(phoneProviderFile,  phoneProviders.map(({ created_at, updated_at, tenant, channel, credentials, ...rest }) => rest));
 }
 
 const phoneProvidersHandler: DirectoryHandler<ParsedPhoneProvider> = {

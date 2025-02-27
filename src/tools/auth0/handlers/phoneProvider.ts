@@ -8,8 +8,6 @@ import DefaultHandler, { order } from './default';
 import { Assets } from '../../../types';
 import log from '../../../logger';
 
-export const schema = { type: 'object' };
-
 export type PhoneProvider = GetBrandingPhoneProviders200ResponseProvidersInner;
 export default class PhoneProviderHandler extends DefaultHandler {
   existing: PhoneProvider[] | null;
@@ -17,7 +15,7 @@ export default class PhoneProviderHandler extends DefaultHandler {
   constructor(options: DefaultHandler) {
     super({
       ...options,
-      type: 'phoneProvider',
+      type: 'phoneProviders',
       id: 'id',
     });
   }
@@ -103,3 +101,101 @@ export default class PhoneProviderHandler extends DefaultHandler {
     this.didUpdate(phoneProviders[0]);
   }
 }
+
+const TwilioCredentialsSchema = {
+  type: 'object',
+  required: ['auth_token'],
+  properties: {
+    auth_token: {
+      type: 'string',
+      minLength: 1,
+      maxLength: 255,
+    },
+  },
+  additionalProperties: false,
+};
+
+const TwilioConfigurationSchema = {
+  type: 'object',
+  required: ['sid', 'delivery_methods'],
+  additionalProperties: false,
+  properties: {
+    default_from: {
+      type: 'string',
+    },
+    mssid: {
+      type: 'string',
+    },
+    sid: {
+      type: 'string',
+    },
+    delivery_methods: {
+      type: 'array',
+      items: {
+        type: 'string',
+        enum: ['text', 'voice'],
+      },
+      minItems: 1,
+      uniqueItems: true,
+    },
+  },
+};
+
+const CustomCredentialsSchema = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {},
+};
+
+const CustomConfigurationSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['delivery_methods'],
+  properties: {
+    delivery_methods: {
+      type: 'array',
+      items: {
+        type: 'string',
+        enum: ['text', 'voice'],
+      },
+      minItems: 1,
+      uniqueItems: true,
+    },
+  },
+};
+
+export const schema = {
+  type: 'array',
+  description: 'List of phone provider configurations',
+  items: {
+    type: 'object',
+    properties: {
+      id: {
+        type: 'string',
+        minLength: 1,
+        maxLength: 255,
+      },
+      name: {
+        type: 'string',
+        description: 'Name of the phone notification provider',
+        enum: ['twilio', 'custom'],
+        minLength: 1,
+        maxLength: 100,
+      },
+      disabled: {
+        type: 'boolean',
+        description: 'Whether the provider is enabled (false) or disabled (true).',
+        defaultValue: false,
+      },
+      configuration: {
+        type: 'object',
+        anyOf: [TwilioConfigurationSchema, CustomConfigurationSchema],
+      },
+      credentials: {
+        description: 'Provider credentials required to authenticate to the provider.',
+        anyOf: [TwilioCredentialsSchema, CustomCredentialsSchema],
+      },
+    },
+    additionalProperties: false,
+  },
+};

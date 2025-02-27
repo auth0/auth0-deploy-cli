@@ -1,14 +1,16 @@
-import { phoneProviderDefaults } from '../../defaults';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset, ParsedAsset } from '../../../types';
+import { PhoneProvider } from '../../../tools/auth0/handlers/phoneProvider';
+import { ParsedAsset } from '../../../types';
 
-type ParsedPhoneProviders = ParsedAsset<'phoneProviders', Asset>;
+type ParsedPhoneProviders = ParsedAsset<'phoneProviders', PhoneProvider[] >;
 
 async function parse(context: YAMLContext): Promise<ParsedPhoneProviders> {
   const { phoneProviders } = context.assets;
 
   if (!phoneProviders) return { phoneProviders: null };
+
+  console.log(phoneProviders);
 
   return {
     phoneProviders,
@@ -18,18 +20,11 @@ async function parse(context: YAMLContext): Promise<ParsedPhoneProviders> {
 async function dump(context: YAMLContext): Promise<ParsedPhoneProviders> {
   if (!context.assets.phoneProviders) return { phoneProviders: null };
 
-  const phoneProviders = (() => {
-    const { phoneProviders } = context.assets;
-    const excludedDefaults = context.assets.exclude?.defaults || [];
-    if (phoneProviders && !excludedDefaults.includes('phoneProviders')) {
-      // Add placeholder for credentials as they cannot be exported
-      return phoneProviderDefaults(phoneProviders);
-    }
-    return phoneProviders;
-  })();
+  const { phoneProviders } = context.assets;
 
   return {
-    phoneProviders,
+    // @ts-ignore
+    phoneProviders: phoneProviders.map(({ created_at, updated_at, tenant, channel, credentials, ...rest }) => rest)
   };
 }
 
