@@ -2,7 +2,6 @@ import { EmailProviderCreate } from 'auth0';
 import { isEmpty } from 'lodash';
 import DefaultHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
-import log from '../../../logger';
 
 export const schema = { type: 'object' };
 
@@ -46,7 +45,6 @@ export default class EmailProviderHandler extends DefaultHandler {
     if (Object.keys(emailProvider).length === 0) {
       if (this.config('AUTH0_ALLOW_DELETE') === true) {
         // await this.client.emails.delete(); is not supported
-        existing.enabled = false;
         if (isEmpty(existing.credentials)) {
           delete existing.credentials;
         }
@@ -55,14 +53,6 @@ export default class EmailProviderHandler extends DefaultHandler {
         this.didUpdate(updated);
       }
       return;
-    }
-
-    if (existing.name) {
-      if (existing.name !== emailProvider.name) {
-        // Delete the current provider as it's different
-        // await this.client.emailProvider.delete(); is not supported
-        existing.enabled = false;
-      }
     }
 
     if (existing.name) {

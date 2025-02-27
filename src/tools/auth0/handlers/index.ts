@@ -18,6 +18,7 @@ import * as guardianPhoneFactorSelectedProvider from './guardianPhoneFactorSelec
 import * as guardianPhoneFactorMessageTypes from './guardianPhoneFactorMessageTypes';
 import * as roles from './roles';
 import * as branding from './branding';
+import * as phoneProviders from './phoneProvider';
 import * as prompts from './prompts';
 import * as actions from './actions';
 import * as triggers from './triggers';
@@ -55,6 +56,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   guardianPhoneFactorMessageTypes,
   roles,
   branding,
+  phoneProviders,
   //@ts-ignore because prompts have not been universally implemented yet
   prompts,
   actions,

@@ -19,6 +19,7 @@ import organizations from './organizations';
 import triggers from './triggers';
 import attackProtection from './attackProtection';
 import branding from './branding';
+import phoneProviders from './phoneProvider';
 import logStreams from './logStreams';
 import prompts from './prompts';
 import customDomains from './customDomains';
@@ -66,6 +67,7 @@ const directoryHandlers: {
   triggers,
   attackProtection,
   branding,
+  phoneProviders,
   logStreams,
   prompts,
   customDomains,

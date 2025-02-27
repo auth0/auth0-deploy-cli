@@ -12,6 +12,7 @@ import { Form } from './tools/auth0/handlers/forms';
 import { Flow } from './tools/auth0/handlers/flows';
 import { FlowVaultConnection } from './tools/auth0/handlers/flowVaultConnections';
 import { SsProfileWithCustomText } from './tools/auth0/handlers/selfServiceProfiles';
+import { PhoneProvider } from './tools/auth0/handlers/phoneProvider';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -91,6 +92,7 @@ export type Assets = Partial<{
         templates?: { template: string; body: string }[] | null;
       })
     | null;
+  phoneProviders : PhoneProvider[] | null;
   clients: Client[] | null;
   clientGrants: ClientGrant[] | null;
   connections: Asset[] | null;
@@ -163,6 +165,7 @@ export type AssetTypes =
   | 'triggers'
   | 'attackProtection'
   | 'branding'
+  | 'phoneProviders'
   | 'logStreams'
   | 'prompts'
   | 'customDomains'
