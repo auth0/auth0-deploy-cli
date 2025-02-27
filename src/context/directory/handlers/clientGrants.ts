@@ -16,6 +16,7 @@ import DirectoryContext from '..';
 import { ParsedAsset } from '../../../types';
 import { ClientGrant } from '../../../tools/auth0/handlers/clientGrants';
 import { paginate } from '../../../tools/auth0/client';
+import { doesHaveKeywordMarker } from '../../../keywordPreservation';
 
 type ParsedClientGrants = ParsedAsset<'clientGrants', ClientGrant[]>;
 
@@ -71,9 +72,7 @@ async function dump(context: DirectoryContext): Promise<void> {
     }
 
     const clientName = (() => {
-      const associatedClient = allClients.find((client) => {
-        return client.client_id === grant.client_id;
-      });
+      const associatedClient = allClients.find((client) => client.client_id === grant.client_id);
 
       if (associatedClient === undefined) return grant.client_id;
 
@@ -81,9 +80,9 @@ async function dump(context: DirectoryContext): Promise<void> {
     })();
 
     const apiName = (() => {
-      const associatedAPI = allResourceServers.find((resourceServer) => {
-        return resourceServer.identifier === grant.audience;
-      });
+      const associatedAPI = allResourceServers.find(
+        (resourceServer) => resourceServer.identifier === grant.audience
+      );
 
       if (associatedAPI === undefined) return grant.audience;
 
@@ -91,9 +90,12 @@ async function dump(context: DirectoryContext): Promise<void> {
     })();
 
     const name = sanitize(`${clientName}-${apiName}`);
-    const grantFile = path.join(grantsFolder, `${name}.json`);
 
-    dumpJSON(grantFile, dumpGrant);
+    // If the file name has a keyword preserve marker, we don't want to dump it. only dump if it doesn't have a keyword preserve marker.
+    if (!doesHaveKeywordMarker(name, context.mappings)) {
+      const grantFile = path.join(grantsFolder, `${name}.json`);
+      dumpJSON(grantFile, dumpGrant);
+    }
   });
 }
 
