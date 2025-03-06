@@ -10,8 +10,6 @@ async function parse(context: YAMLContext): Promise<ParsedPhoneProviders> {
 
   if (!phoneProviders) return { phoneProviders: null };
 
-  console.log(phoneProviders);
-
   return {
     phoneProviders,
   };

@@ -1,0 +1,16 @@
+[
+  {
+    "name": "twilio",
+    "disabled": true,
+    "configuration": {
+      "sid": "twilio_sid",
+      "default_from": "+1234567890",
+      "delivery_methods": [
+        "text", "voice"
+      ]
+    },
+    "credentials": {
+      "auth_token": "some_auth_token"
+    }
+  }
+]

@@ -118,6 +118,17 @@ export function mockMgmtClient() {
         err.statusCode = 404;
         return Promise.reject(err);
       },
+      getAllPhoneProviders: () => ({
+        data: [{
+          disabled: false,
+          name: 'twilio',
+          configuration:{
+            sid: 'ACc95b2e7e2426f6c6d795680e98c55ab7',
+            default_from: '++15673812247',
+            delivery_methods: ['text', 'voice']
+          }
+        }],
+      }),
     },
     logStreams: { getAll: (params) => mockPagedData(params, 'log_streams', []) },
     prompts: {
