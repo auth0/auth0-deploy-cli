@@ -15,7 +15,7 @@ describe('#directory context phone provider', () => {
           "name": "twilio",
           "disabled": false,
           "configuration": {
-            "sid": "some_sid",
+            "sid": "twilio_sid",
             "default_from": "++15673812247",
             "delivery_methods": [
               "text", "voice"
@@ -35,7 +35,7 @@ describe('#directory context phone provider', () => {
       disabled: false,
       name: 'twilio',
       configuration:{
-        sid: 'some_sid',
+        sid: 'twilio_sid',
         default_from: '++15673812247',
         delivery_methods: ['text', 'voice']
       }
@@ -51,7 +51,7 @@ describe('#directory context phone provider', () => {
       disabled: false,
       name: 'twilio',
       configuration:{
-        sid: 'some_sid',
+        sid: 'twilio_sid',
         default_from: '++15673812247',
         delivery_methods: ['text', 'voice']
       }
@@ -63,7 +63,7 @@ describe('#directory context phone provider', () => {
       disabled: false,
       name: 'twilio',
       configuration:{
-        sid: 'some_sid',
+        sid: 'twilio_sid',
         default_from: '++15673812247',
         delivery_methods: ['text', 'voice']
       }

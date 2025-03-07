@@ -15,7 +15,7 @@ describe('#YAML context phone providers', () => {
 phoneProviders:
   - name: twilio
     configuration:
-      sid: some_sid
+      sid: twilio_sid
       default_from: ++15673812247
       delivery_methods:
         - text
@@ -34,7 +34,7 @@ phoneProviders:
       disabled: false,
       name: 'twilio',
       configuration:{
-        sid: 'some_sid',
+        sid: 'twilio_sid',
         default_from: '++15673812247',
         delivery_methods: ['text', 'voice']
       }
@@ -52,7 +52,7 @@ phoneProviders:
       disabled: false,
       name: 'twilio',
       configuration:{
-        sid: 'some_sid',
+        sid: 'twilio_sid',
         default_from: '++15673812247',
         delivery_methods: ['text', 'voice']
       }
@@ -64,7 +64,7 @@ phoneProviders:
         disabled: false,
         name: 'twilio',
         configuration:{
-          sid: 'some_sid',
+          sid: 'twilio_sid',
           default_from: '++15673812247',
           delivery_methods: ['text', 'voice']
         }
