@@ -365,7 +365,7 @@ export default class OrganizationsHandler extends DefaultHandler {
     const existing = await this.getType();
 
     const existingConnections = await paginate<Connection>(this.client.connections.getAll, {
-      paginate: true,
+      checkpoint: true,
       include_totals: true,
     });
 
