@@ -90,35 +90,21 @@ async function dump(context: DirectoryContext): Promise<void> {
       return associatedAPI.name; // Use the name of the API
     };
 
-    // Generate the initial name using client name and API name
-    let name = `${clientName}-${apiName(grant.audience)}`;
+    // Replace keyword markers if necessary
+    const clientNameNonMarker = doesHaveKeywordMarker(clientName, context.mappings)
+      ? keywordReplace(clientName, context.mappings)
+      : clientName;
+    const apiAudienceNonMarker = doesHaveKeywordMarker(grant.audience, context.mappings)
+      ? keywordReplace(grant.audience, context.mappings)
+      : grant.audience;
 
-    let clientNameNonMarker: string | undefined;
-    let apiNameNonMarker: string | undefined;
+    // Construct the name using non-marker names
+    const name = sanitize(`${clientNameNonMarker}-${apiName(apiAudienceNonMarker)}`);
 
-    // Check if the client name has a keyword marker and replace it if necessary
-    if (doesHaveKeywordMarker(clientName, context.mappings)) {
-      clientNameNonMarker = keywordReplace(clientName, context.mappings);
+    // Ensure the name is not empty or invalid
+    if (!name || name.trim().length === 0) {
+      throw new Error(`Invalid name generated for client grant: ${JSON.stringify(grant)}`);
     }
-
-    // Check if the API name has a keyword marker and replace it if necessary
-    if (doesHaveKeywordMarker(grant.audience, context.mappings)) {
-      apiNameNonMarker = keywordReplace(grant.audience, context.mappings);
-    }
-
-    // Construct the name based on the presence of non-marker names
-    if (clientNameNonMarker && apiNameNonMarker) {
-      name = `${clientNameNonMarker}-${apiName(apiNameNonMarker)}`;
-    } else if (clientNameNonMarker && !apiNameNonMarker) {
-      name = `${clientNameNonMarker}-${apiName(grant.audience)}`;
-    } else if (apiNameNonMarker && !clientNameNonMarker) {
-      name = `${clientName}-${apiName(apiNameNonMarker)}`;
-    } else {
-      name = `${clientName}-${apiName(grant.audience)}`;
-    }
-
-    // Sanitize the final name
-    name = sanitize(name);
 
     const grantFile = path.join(grantsFolder, `${name}.json`);
     dumpJSON(grantFile, dumpGrant);
