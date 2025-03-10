@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { Client, ResourceServer } from 'auth0';
-import { constants } from '../../../tools';
+import { constants, keywordReplace } from '../../../tools';
 
 import {
   getFiles,
@@ -79,23 +79,49 @@ async function dump(context: DirectoryContext): Promise<void> {
       return associatedClient.name;
     })();
 
-    const apiName = (() => {
+    // Convert audience to the API name for readability
+    const apiName = (grantAudience: string) => {
       const associatedAPI = allResourceServers.find(
-        (resourceServer) => resourceServer.identifier === grant.audience
+        (resourceServer) => resourceServer.identifier === grantAudience
       );
 
-      if (associatedAPI === undefined) return grant.audience;
+      if (associatedAPI === undefined) return grantAudience; // Use the audience if the API is not found
 
-      return associatedAPI.name;
-    })();
+      return associatedAPI.name; // Use the name of the API
+    };
 
-    const name = sanitize(`${clientName}-${apiName}`);
+    // Generate the initial name using client name and API name
+    let name = `${clientName}-${apiName(grant.audience)}`;
 
-    // If the file name has a keyword preserve marker, we don't want to dump it. only dump if it doesn't have a keyword preserve marker.
-    if (!doesHaveKeywordMarker(name, context.mappings)) {
-      const grantFile = path.join(grantsFolder, `${name}.json`);
-      dumpJSON(grantFile, dumpGrant);
+    let clientNameNonMarker: string | undefined;
+    let apiNameNonMarker: string | undefined;
+
+    // Check if the client name has a keyword marker and replace it if necessary
+    if (doesHaveKeywordMarker(clientName, context.mappings)) {
+      clientNameNonMarker = keywordReplace(clientName, context.mappings);
     }
+
+    // Check if the API name has a keyword marker and replace it if necessary
+    if (doesHaveKeywordMarker(grant.audience, context.mappings)) {
+      apiNameNonMarker = keywordReplace(grant.audience, context.mappings);
+    }
+
+    // Construct the name based on the presence of non-marker names
+    if (clientNameNonMarker && apiNameNonMarker) {
+      name = `${clientNameNonMarker}-${apiName(apiNameNonMarker)}`;
+    } else if (clientNameNonMarker && !apiNameNonMarker) {
+      name = `${clientNameNonMarker}-${apiName(grant.audience)}`;
+    } else if (apiNameNonMarker && !clientNameNonMarker) {
+      name = `${clientName}-${apiName(apiNameNonMarker)}`;
+    } else {
+      name = `${clientName}-${apiName(grant.audience)}`;
+    }
+
+    // Sanitize the final name
+    name = sanitize(name);
+
+    const grantFile = path.join(grantsFolder, `${name}.json`);
+    dumpJSON(grantFile, dumpGrant);
   });
 }
 
