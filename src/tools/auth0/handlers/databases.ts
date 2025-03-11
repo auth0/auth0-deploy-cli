@@ -152,7 +152,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
 
     const connections = await paginate<Connection>(this.client.connections.getAll, {
       strategy: [GetConnectionsStrategyEnum.auth0],
-      paginate: true,
+      checkpoint: true,
       include_totals: true,
     });
     this.existing = connections;
@@ -183,7 +183,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
       this.client.connections.getAll,
       {
         strategy: [GetConnectionsStrategyEnum.auth0],
-        paginate: true,
+        checkpoint: true,
         include_totals: true,
       }
     );

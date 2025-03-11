@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { Client, ResourceServer } from 'auth0';
-import { constants } from '../../../tools';
+import { constants, keywordReplace } from '../../../tools';
 
 import {
   getFiles,
@@ -16,6 +16,7 @@ import DirectoryContext from '..';
 import { ParsedAsset } from '../../../types';
 import { ClientGrant } from '../../../tools/auth0/handlers/clientGrants';
 import { paginate } from '../../../tools/auth0/client';
+import { doesHaveKeywordMarker } from '../../../keywordPreservation';
 
 type ParsedClientGrants = ParsedAsset<'clientGrants', ClientGrant[]>;
 
@@ -71,28 +72,41 @@ async function dump(context: DirectoryContext): Promise<void> {
     }
 
     const clientName = (() => {
-      const associatedClient = allClients.find((client) => {
-        return client.client_id === grant.client_id;
-      });
+      const associatedClient = allClients.find((client) => client.client_id === grant.client_id);
 
       if (associatedClient === undefined) return grant.client_id;
 
       return associatedClient.name;
     })();
 
-    const apiName = (() => {
-      const associatedAPI = allResourceServers.find((resourceServer) => {
-        return resourceServer.identifier === grant.audience;
-      });
+    // Convert audience to the API name for readability
+    const apiName = (grantAudience: string) => {
+      const associatedAPI = allResourceServers.find(
+        (resourceServer) => resourceServer.identifier === grantAudience
+      );
 
-      if (associatedAPI === undefined) return grant.audience;
+      if (associatedAPI === undefined) return grantAudience; // Use the audience if the API is not found
 
-      return associatedAPI.name;
-    })();
+      return associatedAPI.name; // Use the name of the API
+    };
 
-    const name = sanitize(`${clientName}-${apiName}`);
+    // Replace keyword markers if necessary
+    const clientNameNonMarker = doesHaveKeywordMarker(clientName, context.mappings)
+      ? keywordReplace(clientName, context.mappings)
+      : clientName;
+    const apiAudienceNonMarker = doesHaveKeywordMarker(grant.audience, context.mappings)
+      ? keywordReplace(grant.audience, context.mappings)
+      : grant.audience;
+
+    // Construct the name using non-marker names
+    const name = sanitize(`${clientNameNonMarker}-${apiName(apiAudienceNonMarker)}`);
+
+    // Ensure the name is not empty or invalid
+    if (!name || name.trim().length === 0) {
+      throw new Error(`Invalid name generated for client grant: ${JSON.stringify(grant)}`);
+    }
+
     const grantFile = path.join(grantsFolder, `${name}.json`);
-
     dumpJSON(grantFile, dumpGrant);
   });
 }
