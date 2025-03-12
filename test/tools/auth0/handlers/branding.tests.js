@@ -93,6 +93,34 @@ describe('#branding handler', () => {
       });
     });
 
+    it('should handle insufficient scope error and not export branding templates', async () => {
+      const auth0 = {
+        branding: {
+          getSettings: () => ({
+            data: {
+              logo_url: 'https://example.com/logo.png',
+            },
+          }),
+          getUniversalLoginTemplate: () => ({
+            body: html,
+          }),
+        },
+        customDomains: {
+          getAll: () => {
+            const err = new Error('Insufficient scope');
+            err.statusCode = 403;
+            return Promise.reject(err);
+          },
+        },
+      };
+
+      const handler = new branding.default({ client: auth0 });
+      const data = await handler.getType();
+      expect(data).to.deep.equal({
+        logo_url: 'https://example.com/logo.png',
+      });
+    });
+
     it('should update branding settings without templates if no templates set', (done) => {
       const auth0 = {
         branding: {
