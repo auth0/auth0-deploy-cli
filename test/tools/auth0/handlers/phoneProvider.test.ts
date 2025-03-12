@@ -116,7 +116,6 @@ describe('#phoneProviders handler', () => {
         branding: {
           getAllPhoneProviders: () => Promise.resolve({ data: mockProviders }),
           deletePhoneProvider: () => Promise.resolve({ data: null }),
-
         },
       };
 
