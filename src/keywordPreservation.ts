@@ -297,6 +297,17 @@ export const preserveKeywords = ({
       );
     }
 
+    // Update the clientGrants audience field if it exists
+    if (updatedRemoteAssets && (updatedRemoteAssets as any).clientGrants) {
+      for (let i = 0; i < (updatedRemoteAssets as any).clientGrants.length; i++) {
+        const clientGrant = (updatedRemoteAssets as any).clientGrants[i];
+        if (clientGrant.audience === remoteValue) {
+          clientGrant.audience = localValue;
+        }
+        (updatedRemoteAssets as any).clientGrants[i] = clientGrant;
+      }
+    }
+
     // Two address possibilities are provided to account for cases when there is a keyword
     // in the resources's identifier field. When the resource identifier's field is preserved
     // on the remote assets tree, it loses its identify, so we'll need to try two addresses:

@@ -42,7 +42,7 @@
     "nconf": "^0.12.1",
     "promise-pool-executor": "^1.1.1",
     "sanitize-filename": "^1.6.3",
-    "undici": "^7.3.0",
+    "undici": "^7.4.0",
     "winston": "^3.17.0",
     "yargs": "^15.3.1"
   },
@@ -70,12 +70,12 @@
     "rmdir-sync": "^1.0.1",
     "sinon": "^13.0.2",
     "sinon-chai": "^3.7.0",
-    "ts-mocha": "^10.0.0",
-    "typescript": "^5.7.2",
+    "ts-mocha": "^10.1.0",
+    "typescript": "^5.8.2",
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": ">= 18"
+    "node": ">= 20.18.3"
   },
   "keywords": [
     "auth0",

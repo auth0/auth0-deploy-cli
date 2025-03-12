@@ -144,7 +144,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     if (this.existing) return this.existing;
 
     const connections = await paginate<Connection>(this.client.connections.getAll, {
-      paginate: true,
+      checkpoint: true,
       include_totals: true,
     });
 
@@ -177,7 +177,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     });
 
     const existingConnections = await paginate<Connection>(this.client.connections.getAll, {
-      paginate: true,
+      checkpoint: true,
       include_totals: true,
     });
 
