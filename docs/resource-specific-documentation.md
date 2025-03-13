@@ -368,3 +368,69 @@ Contents of `reset_email_by_code.json`
   "html": "./reset_email_by_code.html"
 }
 ```
+
+## Branding
+
+This resource allows to manage branding within your Auth0 tenant. Auth0 can be customized with a look and feel that aligns with your organization's brand requirements and user expectations. `universal_login` template can be customized (make sure add `read:custom_domains` scope to export templates).
+
+**YAML Example**
+
+Folder structure when in YAML mode.
+
+```yaml
+branding:
+  colors:
+    page_background: '#FF4F40'
+    primary: '#2A2E35'
+  favicon_url: https://example.com/favicon.png
+  font:
+    url: https://example.com/font.woff
+  logo_url: https://example.com/logo.png
+  templates:
+    - template: universal_login
+      body: ./branding_templates/universal_login.html
+```
+
+**Directory Example**
+
+Folder structure when in directory mode.
+
+```json
+{
+  "colors": {
+    "page_background": "#FF4F40",
+    "primary": "#2A2E35"
+  },
+  "favicon_url": "https://example.com/favicon.png",
+  "font": {
+    "url": "https://example.com/font.woff"
+  },
+  "logo_url": "https://example.com/logo.png"
+}
+```
+
+For `universal_login` template `templates/` will be created.
+
+- `templates/universal_login.html`
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    {%- auth0:head -%}
+  </head>
+  <body>
+    {%- auth0:widget -%}
+    <div>page teamplate</div>
+  </body>
+</html>
+```
+
+- `templates/universal_login.json`
+
+```json
+{
+  "template": "universal_login",
+  "body": "./universal_login.html"
+}
+```
