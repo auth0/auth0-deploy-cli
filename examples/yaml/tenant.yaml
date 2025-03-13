@@ -83,6 +83,17 @@ resourceServers:
         description: "read account"
     # Add other resource server settings (https://auth0.com/docs/api/management/v2#!/Resource_Servers/post_resource_servers)
 
+phoneProviders:
+  - name: twilio
+    configuration:
+      sid: "twilio_sid"
+      default_from: "+1234567890"
+      delivery_methods:
+        - text
+        - voice
+    disabled: false
+    credentials:
+      auth_token: "some_auth_token"
 
 emailProvider:
   name: "smtp"
