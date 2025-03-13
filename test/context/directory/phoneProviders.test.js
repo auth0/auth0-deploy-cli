@@ -38,6 +38,9 @@ describe('#directory context phone provider', () => {
         sid: 'twilio_sid',
         default_from: '++15673812247',
         delivery_methods: ['text', 'voice']
+      },
+      credentials: {
+        auth_token: '##TWILIO_AUTH_TOKEN##'
       }
     }]);
   });

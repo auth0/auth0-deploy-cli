@@ -7,6 +7,7 @@ import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { ParsedAsset } from '../../../types';
 import { PhoneProvider } from '../../../tools/auth0/handlers/phoneProvider';
+import { phoneProviderDefaults } from '../../defaults';
 
 type ParsedPhoneProvider = ParsedAsset<'phoneProviders', PhoneProvider[]>;
 
@@ -29,7 +30,8 @@ function parse(context: DirectoryContext): ParsedPhoneProvider {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const { phoneProviders } = context.assets;
+  let { phoneProviders } = context.assets;
+
   if (!phoneProviders) {
     return;
   }// Skip, nothing to dump
@@ -39,13 +41,9 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   const phoneProviderFile = path.join(phoneProvidersFolder, 'provider.json');
 
-  const removeKeysFromOutput = ['id', 'created_at', 'updated_at', 'channel', 'tenant', 'credentials'];
-  phoneProviders.forEach((provider) => {
-    removeKeysFromOutput.forEach((key) => {
-      if (key in provider) {
-        delete provider[key];
-      }
-    });
+  phoneProviders = phoneProviders.map((provider) => {
+    provider = phoneProviderDefaults(provider);
+    return provider;
   });
 
   dumpJSON(phoneProviderFile, phoneProviders);

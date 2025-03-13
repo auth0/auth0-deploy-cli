@@ -128,5 +128,26 @@ describe('#phoneProviders handler', () => {
 
       await stageFn.apply(handler, [{ phoneProviders: [] }]);
     });
+
+    it('shouldnot delete the phone provider when provider exists and AUTH0_ALLOW_DELETE is false', async () => {
+      const AUTH0_ALLOW_DELETE = false;
+
+      const auth0 = {
+        branding: {
+          getAllPhoneProviders: () => Promise.resolve({ data: mockProviders }),
+          deletePhoneProvider: () => {
+            throw new Error('was not expecting delete to be called');
+          },
+        },
+      };
+
+      const handler = new phoneProviderHandler({
+        client: auth0,
+        config: () => AUTH0_ALLOW_DELETE,
+      });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ phoneProviders: [] }]);
+    });
   });
 });
