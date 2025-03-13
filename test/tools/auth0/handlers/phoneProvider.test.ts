@@ -77,36 +77,38 @@ describe('#phoneProviders handler', () => {
       await stageFn.apply(handler, [{ phoneProviders: mockProviders.providers }]);
     });
 
-    // it('should update phone provider', async () => {
-    //   const auth0 = {
-    //     branding: {
-    //       getAllPhoneProviders: () =>
-    //         Promise.resolve({
-    //           data: { providers: [{ id: 'pro_5nbdb4pWifFdA1rV6pW6BE' }] },
-    //         }),
-    //       updatePhoneProvider: (data) => {
-    //         expect(data).to.be.an('object');
-    //         expect(data.name).to.equal('custom');
-    //         expect(data.configuration.delivery_methods).to.equal(['text']);
-    //         return Promise.resolve({ data });
-    //       },
-    //     },
-    //   };
+    it('should update phone provider', async () => {
+      const auth0 = {
+        branding: {
+          getAllPhoneProviders: () =>
+            Promise.resolve({
+              data: { providers: [{ id: 'pro_5nbdb4pWifFdA1rV6pW6BE' }] },
+            }),
+          updatePhoneProvider: (data, updatePayload) => {
+            expect(data).to.be.an('object');
+            expect(data.id).to.equal('pro_5nbdb4pWifFdA1rV6pW6BE');
+            expect(updatePayload).to.be.an('object');
+            expect(updatePayload.name).to.equal('custom');
+            expect(updatePayload.configuration.delivery_methods[0]).to.equal('text');
+            return Promise.resolve({ data: { ...updatePayload, ...data } });
+          },
+        },
+      };
 
-    //   const handler = new phoneProviderHandler({ client: auth0 });
-    //   const stageFn = Object.getPrototypeOf(handler).processChanges;
-    //   const data = [
-    //     {
-    //       name: 'custom',
-    //       disabled: false,
-    //       configuration: {
-    //         delivery_methods: ['text'],
-    //       },
-    //     },
-    //   ];
+      const handler = new phoneProviderHandler({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          name: 'custom',
+          disabled: false,
+          configuration: {
+            delivery_methods: ['text'],
+          },
+        },
+      ];
 
-    //   await stageFn.apply(handler, [{ phoneProviders: data }]);
-    // });
+      await stageFn.apply(handler, [{ phoneProviders: data }]);
+    });
 
     it('should delete the phone provider when provider exists and AUTH0_ALLOW_DELETE is true', async () => {
       const AUTH0_ALLOW_DELETE = true;

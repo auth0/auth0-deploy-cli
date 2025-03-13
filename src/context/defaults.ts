@@ -54,7 +54,6 @@ export function emailProviderDefaults(emailProvider) {
 }
 
 export function phoneProviderDefaults(phoneProvider) {
-  // eslint-disable-line
   const updated = { ...phoneProvider };
 
   const apiKeyProviders = ['twilio'];
