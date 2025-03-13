@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for extensibility as custom phone provider `phoneProviders` [#1038]
+- Add support for checkpoint pagination for GET `connections` [#1041]
+
+### Fixed
+
+- Removed survey link from import/export command [#1039]
+- Fix dumping JSON files with keyword preserve markers in client grants [#1040]
+- Fix warn log insufficient scope for branding templates export [#1047]
+
+### Security
+
+- Security fixes from dependencies [#1046]
+- Node 20(v20.18.3) LTS and newer LTS releases are supported [#1046]
+
 ## [8.6.2] - 2025-02-21
 
 ### Added
