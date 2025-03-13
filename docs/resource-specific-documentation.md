@@ -371,7 +371,7 @@ Contents of `reset_email_by_code.json`
 
 ## Branding
 
-This resource allows to manage branding within your Auth0 tenant. Auth0 can be customized with a look and feel that aligns with your organization's brand requirements and user expectations. `universal_login` template can be customized (make sure add `read:custom_domains` scope to export templates).
+This resource allows to manage branding within your Auth0 tenant. Auth0 can be customized with a look and feel that aligns with your organization's brand requirements and user expectations. `universal_login` template can be customized (make sure to add `read:custom_domains` scope to export templates).
 
 **YAML Example**
 
