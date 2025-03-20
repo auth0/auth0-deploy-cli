@@ -13,6 +13,7 @@ import { Flow } from './tools/auth0/handlers/flows';
 import { FlowVaultConnection } from './tools/auth0/handlers/flowVaultConnections';
 import { SsProfileWithCustomText } from './tools/auth0/handlers/selfServiceProfiles';
 import { PhoneProvider } from './tools/auth0/handlers/phoneProvider';
+import { NetworkACL } from './tools/auth0/handlers/networkACLs';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -131,6 +132,7 @@ export type Assets = Partial<{
   flows: Flow[] | null;
   flowVaultConnections: FlowVaultConnection[] | null;
   selfServiceProfiles: SsProfileWithCustomText[] | null;
+  networkACLs: NetworkACL[]  | null;
 }>;
 
 export type CalculatedChanges = {
@@ -173,7 +175,8 @@ export type AssetTypes =
   | 'forms'
   | 'flows'
   | 'flowVaultConnections'
-  | 'selfServiceProfiles';
+  | 'selfServiceProfiles'
+  | 'networkACLs';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 
