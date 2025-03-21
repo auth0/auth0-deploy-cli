@@ -1,4 +1,4 @@
-import { GetBranding200Response, GetUniversalLogin200ResponseOneOf } from 'auth0';
+import { CustomDomain, GetBranding200Response, GetUniversalLogin200ResponseOneOf } from 'auth0';
 import DefaultHandler, { order } from './default';
 import constants from '../../constants';
 import log from '../../../logger';
@@ -42,7 +42,10 @@ export default class BrandingHandler extends DefaultHandler {
 
       // in case client version does not custom domains
       if (this.client.customDomains && typeof this.client.customDomains.getAll === 'function') {
-        const { data: customDomains } = await this.client.customDomains.getAll();
+        let { data: customDomains } = await this.client.customDomains.getAll();
+
+        customDomains = customDomains as CustomDomain[];
+
         // templates are only supported if there's custom domains.
         if (customDomains && customDomains.length) {
           const { data: payload } = await this.client.branding.getUniversalLoginTemplate();
