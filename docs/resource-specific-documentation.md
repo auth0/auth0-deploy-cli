@@ -434,3 +434,50 @@ For `universal_login` template `templates/` will be created.
   "body": "./universal_login.html"
 }
 ```
+
+## PhoneProviders
+
+When managing phone providers, credentials are never exported.
+
+For the Twilio `phoneProvider`, we add the placeholder `##TWILIO_AUTH_TOKEN##` for the credential's `auth_token`, which can be used with keyword replacement.
+
+Refer to [keyword-replacement.md](keyword-replacement.md), [multi-environment-workflow.md](multi-environment-workflow.md), and the [Management API](https://auth0.com/docs/api/management/v2/branding/create-phone-provider) for more details.
+
+
+**YAML Example**
+
+```yaml
+# Contents of ./tenant.yaml
+phoneProviders:
+  - name: twilio
+    configuration:
+      sid: "twilio_sid"
+      default_from: "+1234567890"
+      delivery_methods:
+        - text
+        - voice
+    disabled: false
+    credentials:
+      auth_token: '##TWILIO_AUTH_TOKEN##'
+```
+
+**Directory Example**
+
+```json
+[
+  {
+    "name": "twilio",
+    "disabled": true,
+    "configuration": {
+      "sid": "twilio_sid",
+      "default_from": "+1234567890",
+      "delivery_methods": [
+        "text", "voice"
+      ]
+    },
+    "credentials": {
+      "auth_token": "##TWILIO_AUTH_TOKEN##"
+    }
+  }
+]
+```

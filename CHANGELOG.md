@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.7.0] - 2025-03-13
+
+### Added
+
+- Add support for extensibility as custom phone provider `phoneProviders` [#1038]
+- Add support for checkpoint pagination for GET `connections` [#1041]
+
+### Fixed
+
+- Removed survey link from import/export command [#1039]
+- Fix dumping JSON files with keyword preserve markers in client grants [#1040]
+- Fix warn log insufficient scope for branding templates export [#1047]
+
+### Security
+
+- Security fixes from dependencies [#1046]
+- Node 20(v20.18.3) LTS and newer LTS releases are supported [#1046]
+
 ## [8.6.2] - 2025-02-21
 
 ### Added
@@ -1235,7 +1253,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1031]: https://github.com/auth0/auth0-deploy-cli/issues/1031
 [#1032]: https://github.com/auth0/auth0-deploy-cli/issues/1032
 [#1035]: https://github.com/auth0/auth0-deploy-cli/issues/1035
-[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.6.2...HEAD
+[#1038]: https://github.com/auth0/auth0-deploy-cli/issues/1038
+[#1039]: https://github.com/auth0/auth0-deploy-cli/issues/1039
+[#1040]: https://github.com/auth0/auth0-deploy-cli/issues/1040
+[#1041]: https://github.com/auth0/auth0-deploy-cli/issues/1041
+[#1046]: https://github.com/auth0/auth0-deploy-cli/issues/1046
+[#1047]: https://github.com/auth0/auth0-deploy-cli/issues/1047
+[unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.7.0...HEAD
+[8.7.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.6.2...v8.7.0
 [8.6.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.6.1...v8.6.2
 [8.6.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.6.0...v8.6.1
 [8.6.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.5.0...v8.6.0

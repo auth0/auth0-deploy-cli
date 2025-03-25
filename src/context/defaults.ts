@@ -52,3 +52,26 @@ export function emailProviderDefaults(emailProvider) {
 
   return updated;
 }
+
+export function phoneProviderDefaults(phoneProvider) {
+  const updated = { ...phoneProvider };
+
+  const removeKeysFromOutput = ['id', 'created_at', 'updated_at', 'channel', 'tenant', 'credentials'];
+  removeKeysFromOutput.forEach((key) => {
+    if (key in updated) {
+      delete updated[key];
+    }
+  });
+
+  const apiKeyProviders = ['twilio'];
+
+  // Add placeholder for credentials as they cannot be exported
+  const { name } = updated;
+
+  if (apiKeyProviders.includes(name)) {
+    updated.credentials = {
+      auth_token: `##${name.toUpperCase()}_AUTH_TOKEN##`,
+    };
+  }
+  return updated;
+}
