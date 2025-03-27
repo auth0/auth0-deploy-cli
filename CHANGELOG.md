@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support new screens for rendering `prompt` screen's settings [#1053]
+
+### Fixed
+
+- Fix get all `customDomains` types [#1054]
+
+### Security
+
+- Security fixes from dependencies [#1054]
+
 ## [8.7.0] - 2025-03-13
 
 ### Added
