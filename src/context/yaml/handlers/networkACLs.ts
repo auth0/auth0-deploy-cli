@@ -16,9 +16,21 @@ async function parse(context: YAMLContext): Promise<ParsedNetworkACLs> {
 }
 
 async function dump(context: YAMLContext): Promise<ParsedNetworkACLs> {
-  const { networkACLs } = context.assets;
+  let { networkACLs } = context.assets;
 
   if (!networkACLs) return { networkACLs: null };
+
+  const removeKeysFromOutput = ['created_at', 'updated_at'];
+
+  networkACLs = networkACLs.map((networkACL) => {
+    removeKeysFromOutput.forEach((key) => {
+      if (key in networkACL) {
+        delete networkACL[key];
+      }
+    });
+
+    return networkACL;
+  });
 
   return {
     networkACLs,

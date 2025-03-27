@@ -38,10 +38,17 @@ async function dump(context: DirectoryContext): Promise<void> {
   const networkACLsDirectory = path.join(context.filePath, constants.NETWORK_ACLS_DIRECTORY);
   fs.ensureDirSync(networkACLsDirectory);
 
+  const removeKeysFromOutput = ['created_at', 'updated_at'];
+
   networkACLs.forEach((networkACL) => {
-    const fileName = networkACL.description ?
-      sanitize(networkACL.description) :
-      `network-acl-${networkACL.id || Date.now()}`;
+    removeKeysFromOutput.forEach((key) => {
+      if (key in networkACL) {
+        delete networkACL[key];
+      }
+    });
+    const fileName = networkACL.description
+      ? sanitize(networkACL.description)
+      : `network-acl-${networkACL.id || Date.now()}`;
     const filePath = path.join(networkACLsDirectory, `${fileName}.json`);
     dumpJSON(filePath, networkACL);
   });
