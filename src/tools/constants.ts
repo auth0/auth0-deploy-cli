@@ -231,6 +231,10 @@ const constants = {
       'reset-password',
       'reset-password-success',
       'reset-password-error',
+      'reset-password-mfa-email-challenge',
+      'reset-password-mfa-otp-challenge',
+      'reset-password-mfa-push-challenge-push',
+      'reset-password-mfa-sms-challenge'
     ],
     mfa: [
       'mfa-detect-browser-capabilities',
@@ -246,6 +250,16 @@ const constants = {
       'mfa-push-list',
       'mfa-push-welcome',
     ],
+    'invitation': ['accept-invitation'],
+    'organizations': ['organization-selection', 'organization-picker'],
+    'consent': ['consent'],
+    'customized-consent': ['customized-consent'],
+    'mfa-otp': [
+      'mfa-otp-challenge',
+      'mfa-otp-enrollment-code',
+      'mfa-otp-enrollment-qr'
+    ],
+
   } as PromptScreenMapping,
 };
 
