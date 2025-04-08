@@ -1,4 +1,4 @@
-import { GetConnectionsStrategyEnum, ManagementClient, ResourceServer, SsProfile } from 'auth0';
+import { CustomDomain, GetConnectionsStrategyEnum, ManagementClient, ResourceServer } from 'auth0';
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { Action } from './tools/auth0/handlers/actions';
 import { Prompts } from './tools/auth0/handlers/prompts';
@@ -93,11 +93,11 @@ export type Assets = Partial<{
         templates?: { template: string; body: string }[] | null;
       })
     | null;
-  phoneProviders : PhoneProvider[] | null;
+  phoneProviders: PhoneProvider[] | null;
   clients: Client[] | null;
   clientGrants: ClientGrant[] | null;
   connections: Asset[] | null;
-  customDomains: Asset[] | null;
+  customDomains: CustomDomain[] | null;
   databases: Asset[] | null;
   emailProvider: Asset | null;
   emailTemplates: Asset[] | null;

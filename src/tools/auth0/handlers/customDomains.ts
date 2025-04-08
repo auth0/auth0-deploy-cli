@@ -1,3 +1,4 @@
+import { CustomDomain } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
 
@@ -50,7 +51,7 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
 
       const { data: customDomains } = await this.client.customDomains.getAll();
 
-      this.existing = customDomains;
+      this.existing = customDomains as CustomDomain[];
 
       return customDomains;
     } catch (err) {
