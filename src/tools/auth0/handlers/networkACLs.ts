@@ -1,8 +1,7 @@
 import { GetNetworkAclsById200Response } from 'auth0';
 import DefaultAPIHandler from './default';
-import { Asset, Assets, CalculatedChanges } from '../../../types';
+import { Asset, Assets } from '../../../types';
 import { paginate } from '../client';
-import log from '../../../logger';
 
 // Define NetworkACL type
 export type NetworkACL = GetNetworkAclsById200Response;
