@@ -253,8 +253,6 @@ const constants = {
     ],
     'invitation': ['accept-invitation'],
     'organizations': ['organization-selection', 'organization-picker'],
-    'consent': ['consent'],
-    'customized-consent': ['customized-consent'],
     'mfa-otp': [
       'mfa-otp-challenge',
       'mfa-otp-enrollment-code',
