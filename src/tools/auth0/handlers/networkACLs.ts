@@ -99,7 +99,6 @@ const MatchSchema = {
       type: 'array',
       items: {
         type: 'string',
-        oneOf: [{ format: 'ipv4' }, { format: 'cidr' }],
       },
       uniqueItems: true,
       minItems: 1,
@@ -109,7 +108,6 @@ const MatchSchema = {
       type: 'array',
       items: {
         type: 'string',
-        oneOf: [{ format: 'ipv6' }, { format: 'ipv6_cidr' }],
       },
       uniqueItems: true,
       minItems: 1,
@@ -208,13 +206,14 @@ export const schema = {
 };
 
 export default class NetworkACLsHandler extends DefaultAPIHandler {
-  existing: Asset | null;
+  existing: NetworkACL[] | null;
 
   constructor(config: DefaultAPIHandler) {
     super({
       ...config,
       type: 'networkACLs',
       id: 'id',
+      identifiers: ['id', 'priority'],
       stripCreateFields: ['created_at', 'updated_at'],
       stripUpdateFields: ['created_at', 'updated_at'],
     });
@@ -226,13 +225,10 @@ export default class NetworkACLsHandler extends DefaultAPIHandler {
     }
 
     try {
-      const networkACLs = await paginate<GetNetworkAclsById200Response>(
-        this.client.networkAcls.getAll,
-        {
-          paginate: true,
-          include_totals: true,
-        }
-      );
+      const networkACLs = await paginate<NetworkACL>(this.client.networkAcls.getAll, {
+        paginate: true,
+        include_totals: true,
+      });
 
       this.existing = networkACLs;
       return this.existing;
