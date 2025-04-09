@@ -26,7 +26,7 @@ describe('#directory context networkACLs', () => {
         },
         scope: 'tenant',
         match: {
-          anonymous_proxy: true,
+          asns: [12345],
         },
       },
     };
@@ -110,7 +110,7 @@ describe('#directory context networkACLs', () => {
           },
           scope: 'tenant',
           match: {
-            anonymous_proxy: true,
+            asns: [12345],
           },
         },
         created_at: '2023-01-01T00:00:00.000Z',
@@ -168,7 +168,7 @@ describe('#directory context networkACLs', () => {
     expect(blockAnonContent.priority).to.equal(1);
     expect(blockAnonContent.rule.action.block).to.equal(true);
     expect(blockAnonContent.rule.scope).to.equal('tenant');
-    expect(blockAnonContent.rule.match.anonymous_proxy).to.equal(true);
+    expect(blockAnonContent.rule.match.asns).to.deep.equal([12345]);
 
     expect(redirectUserAgentsContent.description).to.equal('Redirect Specific User Agents');
     expect(redirectUserAgentsContent.active).to.equal(true);

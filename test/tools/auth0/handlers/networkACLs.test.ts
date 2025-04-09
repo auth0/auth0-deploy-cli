@@ -22,7 +22,7 @@ const sampleNetworkACL = {
     },
     scope: 'tenant',
     match: {
-      anonymous_proxy: true,
+      asns: [12345],
     },
   },
 };
@@ -51,7 +51,7 @@ describe('#networkACLs handler', () => {
             },
             scope: 'tenant',
             match: {
-              anonymous_proxy: true,
+              asns: [12345],
             },
           },
         },

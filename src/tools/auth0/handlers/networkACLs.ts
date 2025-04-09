@@ -65,10 +65,6 @@ const RedirectAction = {
 const MatchSchema = {
   type: 'object',
   properties: {
-    anonymous_proxy: {
-      type: 'boolean',
-      description: 'Anonymous Proxy as reported by GeoIP',
-    },
     asns: {
       type: 'array',
       items: {

@@ -261,3 +261,14 @@ selfServiceProfiles:
       - name: name
         description: Name of the User
         is_optional: true
+
+networkACLs:
+  - description: 'Allow Specific Countries'
+    active: true
+    priority: 2
+    rule:
+      action:
+        allow: true
+      scope: 'authentication'
+      match:
+        geo_country_codes: ['US', 'CA']

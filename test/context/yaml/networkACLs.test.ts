@@ -25,7 +25,7 @@ describe('#YAML context networkACLs', () => {
             block: true
           scope: 'tenant'
           match:
-            anonymous_proxy: true
+            asns: [12345]
       -
         description: 'Allow Specific Countries'
         active: true
@@ -62,7 +62,7 @@ describe('#YAML context networkACLs', () => {
           },
           scope: 'tenant',
           match: {
-            anonymous_proxy: true,
+            asns: [12345],
           },
         },
       },
@@ -126,7 +126,7 @@ describe('#YAML context networkACLs', () => {
           },
           scope: 'tenant',
           match: {
-            anonymous_proxy: true,
+            asns: [12345],
           },
         },
         created_at: '2023-01-01T00:00:00.000Z',
