@@ -1,7 +1,8 @@
 import { GetNetworkAclsById200Response } from 'auth0';
 import DefaultAPIHandler from './default';
-import { Asset, Assets } from '../../../types';
+import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
+import log from '../../../logger';
 
 // Define NetworkACL type
 export type NetworkACL = GetNetworkAclsById200Response;
@@ -149,6 +150,7 @@ export const schema = {
   description: 'List of network ACL configurations',
   items: {
     type: 'object',
+    required: ['description', 'active', 'priority', 'rule'],
     properties: {
       description: {
         type: 'string',
@@ -213,7 +215,7 @@ export default class NetworkACLsHandler extends DefaultAPIHandler {
       ...config,
       type: 'networkACLs',
       id: 'id',
-      identifiers: ['id', 'priority'],
+      identifiers: ['id', 'priority', 'active', 'rule'],
       stripCreateFields: ['created_at', 'updated_at'],
       stripUpdateFields: ['created_at', 'updated_at'],
     });
@@ -246,10 +248,106 @@ export default class NetworkACLsHandler extends DefaultAPIHandler {
     // Do nothing if not set
     if (!networkACLs) return;
 
-    const changes = await this.calcChanges(assets);
+    const { del, update, create } = await this.calcChanges(assets);
 
-    await super.processChanges(assets, {
-      ...changes,
-    });
+    log.debug(
+      `Start processChanges for network ACLs [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
+    );
+
+    const changes = [{ del: del }, { create: create }, { update: update }];
+
+    await Promise.all(
+      changes.map(async (change) => {
+        switch (true) {
+          case change.del && change.del.length > 0:
+            await this.deleteNetworkACLs(change.del || []);
+            break;
+          case change.create && change.create.length > 0:
+            await this.createNetworkACLs(change.create);
+            break;
+          case change.update && change.update.length > 0:
+            if (change.update) await this.updateNetworkACLs(change.update);
+            break;
+          default:
+            break;
+        }
+      })
+    );
+  }
+
+  async createNetworkACL(acl: NetworkACL): Promise<Asset> {
+    const { data: created } = await this.client.networkAcls.create(acl);
+    return created;
+  }
+
+  async createNetworkACLs(creates: CalculatedChanges['create']) {
+    await this.client.pool
+      .addEachTask({
+        data: creates || [],
+        generator: (item: NetworkACL) =>
+          this.createNetworkACL(item)
+            .then((data) => {
+              this.didCreate(data);
+              this.created += 1;
+            })
+            .catch((err) => {
+              throw new Error(`Problem creating ${this.type} ${this.objString(item)}\n${err}`);
+            }),
+      })
+      .promise();
+  }
+
+  async updateNetworkACL(acl: NetworkACL) {
+    const { id, ...updateParams } = acl;
+    const updated = await this.client.networkAcls.update({ id }, updateParams);
+    return updated;
+  }
+
+  async updateNetworkACLs(updates: CalculatedChanges['update']): Promise<void> {
+    await this.client.pool
+      .addEachTask({
+        data: updates || [],
+        generator: (item: NetworkACL) =>
+          this.updateNetworkACL(item)
+            .then((data) => {
+              this.didUpdate(data);
+              this.updated += 1;
+            })
+            .catch((err) => {
+              throw new Error(`Problem updating ${this.type} ${this.objString(item)}\n${err}`);
+            }),
+      })
+      .promise();
+  }
+
+  async deleteNetworkACL(acl: NetworkACL): Promise<void> {
+    await this.client.networkAcls.delete({ id: acl.id });
+  }
+
+  async deleteNetworkACLs(data: Asset[]): Promise<void> {
+    if (
+      this.config('AUTH0_ALLOW_DELETE') === 'true' ||
+      this.config('AUTH0_ALLOW_DELETE') === true
+    ) {
+      await this.client.pool
+        .addEachTask({
+          data: data || [],
+          generator: (item: NetworkACL) =>
+            this.deleteNetworkACL(item)
+              .then(() => {
+                this.didDelete(item);
+                this.deleted += 1;
+              })
+              .catch((err) => {
+                throw new Error(`Problem deleting ${this.type} ${this.objString(item)}\n${err}`);
+              }),
+        })
+        .promise();
+    } else {
+      log.warn(`Detected the following ${
+        this.type
+      } should be deleted. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config
+      \n${data.map((i) => this.objString(i)).join('\n')}`);
+    }
   }
 }

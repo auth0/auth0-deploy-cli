@@ -132,7 +132,7 @@ export type Assets = Partial<{
   flows: Flow[] | null;
   flowVaultConnections: FlowVaultConnection[] | null;
   selfServiceProfiles: SsProfileWithCustomText[] | null;
-  networkACLs: NetworkACL[]  | null;
+  networkACLs: NetworkACL[] | null;
 }>;
 
 export type CalculatedChanges = {
@@ -236,4 +236,4 @@ export const languages = [
   'zh-TW',
 ] as const;
 
-export type Language = typeof languages[number];
+export type Language = (typeof languages)[number];

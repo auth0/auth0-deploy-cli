@@ -6,6 +6,7 @@ import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { ParsedAsset } from '../../../types';
 import { NetworkACL } from '../../../tools/auth0/handlers/networkACLs';
+import log from '../../../logger';
 
 type ParsedNetworkACLs = ParsedAsset<'networkACLs', NetworkACL[]>;
 
@@ -34,6 +35,11 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   if (!networkACLs) return; // Skip, nothing to dump
 
+  if (Array.isArray(networkACLs) && networkACLs.length === 0) {
+    log.info('No network ACLs available, skipping dump');
+    return;
+  }
+
   // Create Network ACLs folder
   const networkACLsDirectory = path.join(context.filePath, constants.NETWORK_ACLS_DIRECTORY);
   fs.ensureDirSync(networkACLsDirectory);
@@ -48,7 +54,7 @@ async function dump(context: DirectoryContext): Promise<void> {
     });
     const fileName = networkACL.description
       ? sanitize(networkACL.description)
-      : `network-acl-${networkACL.id || Date.now()}`;
+      : `network-acl-p-${networkACL.priority}`;
     const filePath = path.join(networkACLsDirectory, `${fileName}.json`);
     dumpJSON(filePath, networkACL);
   });
