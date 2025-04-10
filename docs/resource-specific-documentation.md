@@ -437,7 +437,7 @@ For `universal_login` template `templates/` will be created.
 
 ## NetworkACL
 
-Tenant Network Access Control Lists (NetworkACLs) allow you to configure rules that control access to your Auth0 tenant based on IP addresses, geographical locations, and other network criteria. The Deploy CLI supports managing NetworkACLs in both directory and YAML modes.
+Tenant Network Access Control Lists (NetworkACLs) allow you to configure rules that control access to your Auth0 tenant based on IP addresses, geographical locations, and other network criteria. The Deploy CLI supports managing NetworkACLs in both directory and YAML modes.Refer [more](https://auth0.com/docs/secure/tenant-access-control-list/configure-rules) on this.
 
 NetworkACLs have the following key properties:
 
@@ -463,6 +463,15 @@ networkACLs:
       scope: 'authentication'
       match:
         geo_country_codes: ['US', 'CA']
+  - description: 'Redirect Specific User Agents'
+    active: true
+    priority: 3
+    rule:
+      action:
+        block: true
+      scope: 'management'
+      not_match:
+        user_agents: ['BadBot/1.0']
 ```
 
 **Directory Example**
@@ -471,10 +480,11 @@ networkACLs:
 Folder structure when in directory mode.
 
 ./networkACLs/
-    ./Allow Specific Countries.json
+    ./Allow Specific Countries-p-2.json
+    ./Redirect Specific User Agents-p-3.json
 ```
 
-Contents of `Allow Specific Countries.json`:
+Contents of `Allow Specific Countries-p-2.json`:
 
 ```json
 {
@@ -488,6 +498,25 @@ Contents of `Allow Specific Countries.json`:
     "scope": "authentication",
     "match": {
       "geo_country_codes": ["US", "CA"]
+    }
+  }
+}
+```
+
+Contents of `Redirect Specific User Agents-p-3.json`:
+
+```json
+{
+  "description": "Redirect Specific User Agents",
+  "active": true,
+  "priority": 3,
+  "rule": {
+    "action": {
+      "block": true
+    },
+    "scope": "management",
+    "match": {
+      "user_agents": ["BadBot/1.0"]
     }
   }
 }
