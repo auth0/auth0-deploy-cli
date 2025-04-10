@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.8.0] - 2025-04-10
+
+### Added
+
+- Add support for tenant ACL EA support [#1063]
+- Add support for new prompts in custom-text [#1064]
+
+### Fixed
+
+- Fix: Remove unsupported ACUL screens for rendering `prompt` screen's settings [#1061]
+- Fix: Update node version requirement to 20(v20.18.1) [#1062]
+
 ## [8.7.1] - 2025-03-27
 
 ### Added
@@ -1275,7 +1287,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1047]: https://github.com/auth0/auth0-deploy-cli/issues/1047
 [#1053]: https://github.com/auth0/auth0-deploy-cli/issues/1053
 [#1054]: https://github.com/auth0/auth0-deploy-cli/issues/1054
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.7.1...HEAD
+[#1061]: https://github.com/auth0/auth0-deploy-cli/issues/1061
+[#1062]: https://github.com/auth0/auth0-deploy-cli/issues/1062
+[#1063]: https://github.com/auth0/auth0-deploy-cli/issues/1063
+[#1064]: https://github.com/auth0/auth0-deploy-cli/issues/1064
+
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.8.0...HEAD
+[8.8.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.7.1...v8.8.0
 [8.7.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.7.0...v8.7.1
 [8.7.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.6.2...v8.7.0
 [8.6.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.6.1...v8.6.2
