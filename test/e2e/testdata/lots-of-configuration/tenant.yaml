@@ -757,4 +757,13 @@ selfServiceProfiles:
       - name: name
         description: Name of the User
         is_optional: true
-
+networkACLs:
+      - description: 'Allow Specific Countries'
+        active: false
+        priority: 1
+        rule:
+          action:
+            allow: true
+          scope: 'authentication'
+          match:
+             geo_country_codes: ['US']
