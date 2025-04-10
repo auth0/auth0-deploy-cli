@@ -16,13 +16,19 @@ const promptTypes = [
   'login',
   'login-id',
   'login-password',
+  'login-passwordless',
   'login-email-verification',
   'signup',
   'signup-id',
   'signup-password',
+  'phone-identifier-enrollment',
+  'phone-identifier-challenge',
+  'email-identifier-challenge',
   'reset-password',
   'custom-form',
   'consent',
+  'customized-consent',
+  'logout',
   'mfa-push',
   'mfa-otp',
   'mfa-voice',
@@ -39,6 +45,7 @@ const promptTypes = [
   'organizations',
   'invitation',
   'common',
+  'captcha',
 ] as const;
 
 export type PromptTypes = (typeof promptTypes)[number];
