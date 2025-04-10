@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+
+- Add support for tenant ACL EA support [#1063]
+- Add support for new prompts in custom-text [#1064]
+
+### Fixed
+
+- Fix: Remove unsupported ACUL screens for rendering `prompt` screen's settings [#1061]
+- Fix: Update node version requirement to 20(v20.18.1) [#1062]
 
 ## [8.7.1] - 2025-03-27
 
