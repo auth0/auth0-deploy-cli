@@ -3,7 +3,7 @@
 Guide to migrating from `7.x` to `8.x`
 
 - [General](#general)
-  - [Node 20(v20.18.3) or newer is required](#node-20(v20.18.3)-or-newer-is-required)
+  - [Node 20(v20.18.1) or newer is required](<#node-20(v20.18.1)-or-newer-is-required>)
   - [Auth0 V4 Migration Guide](https://github.com/auth0/node-auth0/blob/master/v4_MIGRATION_GUIDE.md)
 - [Management Resources](#management-resources)
   - [EmailProvider](#emailProvider)
@@ -11,9 +11,9 @@ Guide to migrating from `7.x` to `8.x`
 
 ## General
 
-### Node 20(v20.18.3) or newer is required
+### Node 20(v20.18.1) or newer is required
 
-Node 20(v20.18.3) LTS and newer LTS releases are supported.
+Node 20(v20.18.1) LTS and newer LTS releases are supported.
 
 ## Management Resources
 
