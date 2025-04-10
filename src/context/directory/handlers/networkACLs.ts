@@ -53,7 +53,7 @@ async function dump(context: DirectoryContext): Promise<void> {
       }
     });
     const fileName = networkACL.description
-      ? sanitize(networkACL.description)
+      ? `${sanitize(networkACL.description)}-p-${networkACL.priority}`
       : `network-acl-p-${networkACL.priority}`;
     const filePath = path.join(networkACLsDirectory, `${fileName}.json`);
     dumpJSON(filePath, networkACL);
