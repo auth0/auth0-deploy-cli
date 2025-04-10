@@ -119,15 +119,17 @@ export function mockMgmtClient() {
         return Promise.reject(err);
       },
       getAllPhoneProviders: () => ({
-        data: [{
-          disabled: false,
-          name: 'twilio',
-          configuration:{
-            sid: 'twilio_sid',
-            default_from: '++15673812247',
-            delivery_methods: ['text', 'voice']
-          }
-        }],
+        data: [
+          {
+            disabled: false,
+            name: 'twilio',
+            configuration: {
+              sid: 'twilio_sid',
+              default_from: '++15673812247',
+              delivery_methods: ['text', 'voice'],
+            },
+          },
+        ],
       }),
     },
     logStreams: { getAll: (params) => mockPagedData(params, 'log_streams', []) },
@@ -150,6 +152,9 @@ export function mockMgmtClient() {
     },
     selfServiceProfiles: {
       getAll: (params) => mockPagedData(params, 'selfServiceProfiles', []),
+    },
+    networkAcls: {
+      getAll: (params) => mockPagedData(params, 'network_acls', []),
     },
   };
 }

@@ -435,6 +435,93 @@ For `universal_login` template `templates/` will be created.
 }
 ```
 
+## NetworkACL
+
+Tenant Network Access Control Lists (NetworkACLs) allow you to configure rules that control access to your Auth0 tenant based on IP addresses, geographical locations, and other network criteria. The Deploy CLI supports managing NetworkACLs in both directory and YAML modes.Refer [more](https://auth0.com/docs/secure/tenant-access-control-list/configure-rules) on this.
+
+NetworkACLs have the following key properties:
+
+- `description`: A descriptive name for the rule
+- `active`: Boolean indicating if the rule is active
+- `priority`: Number between 1-10 determining the order of rule evaluation (lower numbers have higher priority)
+- `rule`: The rule configuration containing:
+  - `action`: The action to take (block, allow, log, or redirect)
+  - `scope`: The scope of the rule ('management', 'authentication', or 'tenant')
+  - `match` or `not_match`: Criteria for matching requests
+
+**YAML Example**
+
+```yaml
+# Contents of ./tenant.yaml
+networkACLs:
+  - description: 'Allow Specific Countries'
+    active: true
+    priority: 2
+    rule:
+      action:
+        allow: true
+      scope: 'authentication'
+      match:
+        geo_country_codes: ['US', 'CA']
+  - description: 'Redirect Specific User Agents'
+    active: true
+    priority: 3
+    rule:
+      action:
+        block: true
+      scope: 'management'
+      not_match:
+        user_agents: ['BadBot/1.0']
+```
+
+**Directory Example**
+
+```
+Folder structure when in directory mode.
+
+./networkACLs/
+    ./Allow Specific Countries-p-2.json
+    ./Redirect Specific User Agents-p-3.json
+```
+
+Contents of `Allow Specific Countries-p-2.json`:
+
+```json
+{
+  "description": "Allow Specific Countries",
+  "active": true,
+  "priority": 2,
+  "rule": {
+    "action": {
+      "allow": true
+    },
+    "scope": "authentication",
+    "match": {
+      "geo_country_codes": ["US", "CA"]
+    }
+  }
+}
+```
+
+Contents of `Redirect Specific User Agents-p-3.json`:
+
+```json
+{
+  "description": "Redirect Specific User Agents",
+  "active": true,
+  "priority": 3,
+  "rule": {
+    "action": {
+      "block": true
+    },
+    "scope": "management",
+    "match": {
+      "user_agents": ["BadBot/1.0"]
+    }
+  }
+}
+```
+
 ## PhoneProviders
 
 When managing phone providers, credentials are never exported.
@@ -443,7 +530,6 @@ For the Twilio `phoneProvider`, we add the placeholder `##TWILIO_AUTH_TOKEN##` f
 
 Refer to [keyword-replacement.md](keyword-replacement.md), [multi-environment-workflow.md](multi-environment-workflow.md), and the [Management API](https://auth0.com/docs/api/management/v2/branding/create-phone-provider) for more details.
 
-
 **YAML Example**
 
 ```yaml
@@ -451,8 +537,8 @@ Refer to [keyword-replacement.md](keyword-replacement.md), [multi-environment-wo
 phoneProviders:
   - name: twilio
     configuration:
-      sid: "twilio_sid"
-      default_from: "+1234567890"
+      sid: 'twilio_sid'
+      default_from: '+1234567890'
       delivery_methods:
         - text
         - voice
@@ -471,9 +557,7 @@ phoneProviders:
     "configuration": {
       "sid": "twilio_sid",
       "default_from": "+1234567890",
-      "delivery_methods": [
-        "text", "voice"
-      ]
+      "delivery_methods": ["text", "voice"]
     },
     "credentials": {
       "auth_token": "##TWILIO_AUTH_TOKEN##"
