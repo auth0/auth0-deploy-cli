@@ -127,7 +127,7 @@ describe('#directory context networkACLs', () => {
             redirect_uri: 'https://example.com/blocked',
           },
           scope: 'authentication',
-          match: {
+          not_match: {
             user_agents: ['BadBot/1.0'],
           },
         },
@@ -143,8 +143,11 @@ describe('#directory context networkACLs', () => {
     const networkACLsDir = path.join(repoDir, constants.NETWORK_ACLS_DIRECTORY);
 
     // Check that the files were created with sanitized names
-    const blockAnonFile = path.join(networkACLsDir, 'Block Anonymous Proxies.json');
-    const redirectUserAgentsFile = path.join(networkACLsDir, 'Redirect Specific User Agents.json');
+    const blockAnonFile = path.join(networkACLsDir, 'Block Anonymous Proxies-p-1.json');
+    const redirectUserAgentsFile = path.join(
+      networkACLsDir,
+      'Redirect Specific User Agents-p-4.json'
+    );
 
     // Ensure the directory exists before checking files
     expect(fs.existsSync(networkACLsDir)).to.equal(true);
@@ -178,6 +181,6 @@ describe('#directory context networkACLs', () => {
       'https://example.com/blocked'
     );
     expect(redirectUserAgentsContent.rule.scope).to.equal('authentication');
-    expect(redirectUserAgentsContent.rule.match.user_agents).to.deep.equal(['BadBot/1.0']);
+    expect(redirectUserAgentsContent.rule.not_match.user_agents).to.deep.equal(['BadBot/1.0']);
   });
 });

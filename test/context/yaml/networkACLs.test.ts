@@ -143,7 +143,7 @@ describe('#YAML context networkACLs', () => {
             redirect_uri: 'https://example.com/blocked',
           },
           scope: 'authentication',
-          match: {
+          not_match: {
             user_agents: ['BadBot/1.0'],
           },
         },

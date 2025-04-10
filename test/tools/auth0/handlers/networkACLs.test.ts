@@ -187,7 +187,30 @@ describe('#networkACLs handler', () => {
       await stageFn.apply(handler, [{ networkACLs: [newNetworkACL] }]);
     });
 
+    it('should not remove networkACLs if it is not allowed by config', async () => {
+      config.data.AUTH0_ALLOW_DELETE = false;
+      let idDeleteCalled = false;
+      const auth0 = {
+        networkAcls: {
+          delete: (params) => {
+            idDeleteCalled = true;
+            expect(params).to.be.an('undefined');
+            return Promise.resolve({ data: [] });
+          },
+          getAll: (params) => mockPagedData(params, 'network_acls', [sampleNetworkACL]),
+        },
+        pool,
+      };
+
+      const handler = new NetworkACLsHandler({ client: pageClient(auth0 as any), config } as any);
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ networkACLs: [] }]);
+      expect(idDeleteCalled).to.equal(false);
+    });
+
     it('should delete all networkACLs', async () => {
+      config.data.AUTH0_ALLOW_DELETE = true;
       let removed = false;
       const auth0 = {
         networkAcls: {
@@ -208,25 +231,6 @@ describe('#networkACLs handler', () => {
 
       await stageFn.apply(handler, [{ networkACLs: [] }]);
       expect(removed).to.equal(true);
-    });
-
-    it('should not remove networkACLs if it is not allowed by config', async () => {
-      config.data.AUTH0_ALLOW_DELETE = false;
-      const auth0 = {
-        networkAcls: {
-          delete: (params) => {
-            expect(params).to.be.an('undefined');
-            return Promise.resolve({ data: [] });
-          },
-          getAll: (params) => mockPagedData(params, 'network_acls', [sampleNetworkACL]),
-        },
-        pool,
-      };
-
-      const handler = new NetworkACLsHandler({ client: pageClient(auth0 as any), config } as any);
-      const stageFn = Object.getPrototypeOf(handler).processChanges;
-
-      await stageFn.apply(handler, [{ networkACLs: [] }]);
     });
   });
 });
