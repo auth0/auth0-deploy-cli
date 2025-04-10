@@ -16,12 +16,19 @@ const promptTypes = [
   'login',
   'login-id',
   'login-password',
+  'login-passwordless',
   'login-email-verification',
   'signup',
   'signup-id',
   'signup-password',
+  'phone-identifier-enrollment',
+  'phone-identifier-challenge',
+  'email-identifier-challenge',
   'reset-password',
+  'custom-form',
   'consent',
+  'customized-consent',
+  'logout',
   'mfa-push',
   'mfa-otp',
   'mfa-voice',
@@ -38,9 +45,10 @@ const promptTypes = [
   'organizations',
   'invitation',
   'common',
+  'captcha',
 ] as const;
 
-export type PromptTypes = typeof promptTypes[number];
+export type PromptTypes = (typeof promptTypes)[number];
 
 const screenTypes = [
   'login',
@@ -104,7 +112,7 @@ const screenTypes = [
   'login-passwordless-sms-otp',
 ] as const;
 
-export type ScreenTypes = typeof screenTypes[number];
+export type ScreenTypes = (typeof screenTypes)[number];
 
 const customPartialsPromptTypes = [
   'login',
@@ -116,7 +124,7 @@ const customPartialsPromptTypes = [
   'signup-password',
 ];
 
-export type CustomPartialsPromptTypes = typeof customPartialsPromptTypes[number];
+export type CustomPartialsPromptTypes = (typeof customPartialsPromptTypes)[number];
 
 const customPartialsScreenTypes = [
   'login',
@@ -129,7 +137,7 @@ const customPartialsScreenTypes = [
   'login-passwordless-email-code',
 ] as const;
 
-export type CustomPartialsScreenTypes = typeof customPartialsPromptTypes[number];
+export type CustomPartialsScreenTypes = (typeof customPartialsPromptTypes)[number];
 
 const customPartialsInsertionPoints = [
   'form-content-start',
@@ -140,7 +148,7 @@ const customPartialsInsertionPoints = [
   'secondary-actions-end',
 ] as const;
 
-export type CustomPartialsInsertionPoints = typeof customPartialsInsertionPoints[number];
+export type CustomPartialsInsertionPoints = (typeof customPartialsInsertionPoints)[number];
 
 export type CustomPromptPartialsScreens = Partial<{
   [screen in CustomPartialsScreenTypes]: Partial<{

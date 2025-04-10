@@ -1015,7 +1015,7 @@
         "body": "",
         "status": 200,
         "response": {
-            "total": 8,
+            "total": 9,
             "start": 0,
             "limit": 100,
             "clients": [
@@ -1078,6 +1078,49 @@
                     "tenant": "auth0-deploy-cli-e2e",
                     "global": false,
                     "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Default App",
+                    "callbacks": [],
+                    "cross_origin_auth": false,
+                    "is_first_party": true,
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
                     "name": "API Explorer Application",
                     "allowed_clients": [],
                     "callbacks": [],
@@ -1111,7 +1154,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "L6X9qwV1FzB97KwmL0CPqlu23NfCbg6g",
+                    "client_id": "Jxv2FgWcn68QuDUzXgdll9Xgo2nlEBDm",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1120,6 +1163,50 @@
                         "secret_encoded": false
                     },
                     "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Quickstarts API (Test Application)",
+                    "client_metadata": {
+                        "foo": "bar"
+                    },
+                    "cross_origin_auth": false,
+                    "is_first_party": true,
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "QKsnAEeydL8Fjuxw7jfCzcrVyCgOOypX",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
                     "token_endpoint_auth_method": "client_secret_post",
                     "app_type": "non_interactive",
                     "grant_types": [
@@ -1166,7 +1253,7 @@
                         }
                     ],
                     "allowed_origins": [],
-                    "client_id": "ts2vZULbfHNcdD8QQ86OBQKfVWWJ6hiB",
+                    "client_id": "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1184,50 +1271,6 @@
                         "client_credentials"
                     ],
                     "web_origins": [],
-                    "custom_login_page_on": true
-                },
-                {
-                    "tenant": "auth0-deploy-cli-e2e",
-                    "global": false,
-                    "is_token_endpoint_ip_header_trusted": false,
-                    "name": "Quickstarts API (Test Application)",
-                    "client_metadata": {
-                        "foo": "bar"
-                    },
-                    "cross_origin_auth": false,
-                    "is_first_party": true,
-                    "oidc_conformant": true,
-                    "refresh_token": {
-                        "expiration_type": "non-expiring",
-                        "leeway": 0,
-                        "infinite_token_lifetime": true,
-                        "infinite_idle_token_lifetime": true,
-                        "token_lifetime": 31557600,
-                        "idle_token_lifetime": 2592000,
-                        "rotation_type": "non-rotating"
-                    },
-                    "sso_disabled": false,
-                    "cross_origin_authentication": false,
-                    "signing_keys": [
-                        {
-                            "cert": "[REDACTED]",
-                            "pkcs7": "[REDACTED]",
-                            "subject": "deprecated"
-                        }
-                    ],
-                    "client_id": "GAZCoyw7yeXsQRrLN88FjRPmUCBP8yvo",
-                    "callback_url_template": false,
-                    "client_secret": "[REDACTED]",
-                    "jwt_configuration": {
-                        "alg": "RS256",
-                        "lifetime_in_seconds": 36000,
-                        "secret_encoded": false
-                    },
-                    "token_endpoint_auth_method": "client_secret_post",
-                    "app_type": "non_interactive",
-                    "grant_types": [
-                        "client_credentials"
-                    ],
                     "custom_login_page_on": true
                 },
                 {
@@ -1256,7 +1299,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "tUn1XtT3z7eTSUXxzRdLPAXZWcTUWcyo",
+                    "client_id": "d5YSIoDhbsIhjv9FN1LkpU30DzP8LzJs",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1309,7 +1352,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "C464wymPZGOxmKBz9kuvw4zFNXCPE7Z5",
+                    "client_id": "SlnBYESSQE83e042qhjctEizntTWGboW",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1369,7 +1412,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "q7E9yAT0qwZIU0JBaNUPWIifDPU6Ek1G",
+                    "client_id": "RF60ZkCQzronG0gnoL85Qu0NdQIBGmim",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1427,7 +1470,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "CUZY1ZEbelHn2rc8Ql34QuTNYS6kkRuY",
+                    "client_id": "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1455,12 +1498,73 @@
         "body": "",
         "status": 200,
         "response": {
-            "total": 1,
+            "total": 2,
             "start": 0,
             "limit": 50,
             "connections": [
                 {
-                    "id": "con_MsOPM0dcMNpvwuhs",
+                    "id": "con_cPbeLX3uoH77QRZz",
+                    "options": {
+                        "mfa": {
+                            "active": true,
+                            "return_enroll_settings": true
+                        },
+                        "import_mode": false,
+                        "customScripts": {
+                            "login": "function login(email, password, callback) {\n  // This script should authenticate a user against the credentials stored in\n  // your database.\n  // It is executed when a user attempts to log in or immediately after signing\n  // up (as a verification that the user was successfully signed up).\n  //\n  // Everything returned by this script will be set as part of the user profile\n  // and will be visible by any of the tenant admins. Avoid adding attributes\n  // with values such as passwords, keys, secrets, etc.\n  //\n  // The `password` parameter of this function is in plain text. It must be\n  // hashed/salted to match whatever is stored in your database. For example:\n  //\n  //     var bcrypt = require('bcrypt@0.8.5');\n  //     bcrypt.compare(password, dbPasswordHash, function(err, res)) { ... }\n  //\n  // There are three ways this script can finish:\n  // 1. The user's credentials are valid. The returned user profile should be in\n  // the following format: https://auth0.com/docs/users/normalized/auth0/normalized-user-profile-schema\n  //     var profile = {\n  //       user_id: ..., // user_id is mandatory\n  //       email: ...,\n  //       [...]\n  //     };\n  //     callback(null, profile);\n  // 2. The user's credentials are invalid\n  //     callback(new WrongUsernameOrPasswordError(email, \"my error message\"));\n  // 3. Something went wrong while trying to reach your database\n  //     callback(new Error(\"my error message\"));\n  //\n  // A list of Node.js modules which can be referenced is available here:\n  //\n  //    https://tehsis.github.io/webtaskio-canirequire/\n  console.log('AYYYYYE');\n\n  const msg =\n    'Please implement the Login script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "create": "function create(user, callback) {\n  // This script should create a user entry in your existing database. It will\n  // be executed when a user attempts to sign up, or when a user is created\n  // through the Auth0 dashboard or API.\n  // When this script has finished executing, the Login script will be\n  // executed immediately afterwards, to verify that the user was created\n  // successfully.\n  //\n  // The user object will always contain the following properties:\n  // * email: the user's email\n  // * password: the password entered by the user, in plain text\n  // * tenant: the name of this Auth0 account\n  // * client_id: the client ID of the application where the user signed up, or\n  //              API key if created through the API or Auth0 dashboard\n  // * connection: the name of this database connection\n  //\n  // There are three ways this script can finish:\n  // 1. A user was successfully created\n  //     callback(null);\n  // 2. This user already exists in your database\n  //     callback(new ValidationError(\"user_exists\", \"my error message\"));\n  // 3. Something went wrong while trying to reach your database\n  //     callback(new Error(\"my error message\"));\n\n  const msg =\n    'Please implement the Create script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "delete": "function remove(id, callback) {\n  // This script remove a user from your existing database.\n  // It is executed whenever a user is deleted from the API or Auth0 dashboard.\n  //\n  // There are two ways that this script can finish:\n  // 1. The user was removed successfully:\n  //     callback(null);\n  // 2. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n\n  const msg =\n    'Please implement the Delete script for this database ' +\n    'connection at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "verify": "function verify(email, callback) {\n  // This script should mark the current user's email address as verified in\n  // your database.\n  // It is executed whenever a user clicks the verification link sent by email.\n  // These emails can be customized at https://manage.auth0.com/#/emails.\n  // It is safe to assume that the user's email already exists in your database,\n  // because verification emails, if enabled, are sent immediately after a\n  // successful signup.\n  //\n  // There are two ways that this script can finish:\n  // 1. The user's email was verified successfully\n  //     callback(null, true);\n  // 2. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n  //\n  // If an error is returned, it will be passed to the query string of the page\n  // where the user is being redirected to after clicking the verification link.\n  // For example, returning `callback(new Error(\"error\"))` and redirecting to\n  // https://example.com would redirect to the following URL:\n  //     https://example.com?email=alice%40example.com&message=error&success=false\n\n  const msg =\n    'Please implement the Verify script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "get_user": "function getByEmail(email, callback) {\n  // This script should retrieve a user profile from your existing database,\n  // without authenticating the user.\n  // It is used to check if a user exists before executing flows that do not\n  // require authentication (signup and password reset).\n  //\n  // There are three ways this script can finish:\n  // 1. A user was successfully found. The profile should be in the following\n  // format: https://auth0.com/docs/users/normalized/auth0/normalized-user-profile-schema.\n  //     callback(null, profile);\n  // 2. A user was not found\n  //     callback(null);\n  // 3. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n\n  const msg =\n    'Please implement the Get User script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "change_password": "function changePassword(email, newPassword, callback) {\n  // This script should change the password stored for the current user in your\n  // database. It is executed when the user clicks on the confirmation link\n  // after a reset password request.\n  // The content and behavior of password confirmation emails can be customized\n  // here: https://manage.auth0.com/#/emails\n  // The `newPassword` parameter of this function is in plain text. It must be\n  // hashed/salted to match whatever is stored in your database.\n  //\n  // There are three ways that this script can finish:\n  // 1. The user's password was updated successfully:\n  //     callback(null, true);\n  // 2. The user's password was not updated:\n  //     callback(null, false);\n  // 3. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n  //\n  // If an error is returned, it will be passed to the query string of the page\n  // where the user is being redirected to after clicking the confirmation link.\n  // For example, returning `callback(new Error(\"error\"))` and redirecting to\n  // https://example.com would redirect to the following URL:\n  //     https://example.com?email=alice%40example.com&message=error&success=false\n\n  const msg =\n    'Please implement the Change Password script for this database ' +\n    'connection at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n"
+                        },
+                        "disable_signup": false,
+                        "passwordPolicy": "low",
+                        "passkey_options": {
+                            "challenge_ui": "both",
+                            "local_enrollment_enabled": true,
+                            "progressive_enrollment_enabled": true
+                        },
+                        "password_history": {
+                            "size": 5,
+                            "enable": false
+                        },
+                        "strategy_version": 2,
+                        "requires_username": true,
+                        "password_dictionary": {
+                            "enable": true,
+                            "dictionary": []
+                        },
+                        "authentication_methods": {
+                            "passkey": {
+                                "enabled": false
+                            },
+                            "password": {
+                                "enabled": true
+                            }
+                        },
+                        "brute_force_protection": true,
+                        "password_no_personal_info": {
+                            "enable": true
+                        },
+                        "password_complexity_options": {
+                            "min_length": 8
+                        },
+                        "enabledDatabaseCustomization": true
+                    },
+                    "strategy": "auth0",
+                    "name": "boo-baz-db-connection-test",
+                    "is_domain_connection": false,
+                    "realms": [
+                        "boo-baz-db-connection-test"
+                    ],
+                    "enabled_clients": [
+                        "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
+                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                    ]
+                },
+                {
+                    "id": "con_uAzBCmGhcwxWM9kJ",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -1490,7 +1594,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
                     ]
                 }
             ]
@@ -1507,7 +1612,68 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_MsOPM0dcMNpvwuhs",
+                    "id": "con_cPbeLX3uoH77QRZz",
+                    "options": {
+                        "mfa": {
+                            "active": true,
+                            "return_enroll_settings": true
+                        },
+                        "import_mode": false,
+                        "customScripts": {
+                            "login": "function login(email, password, callback) {\n  // This script should authenticate a user against the credentials stored in\n  // your database.\n  // It is executed when a user attempts to log in or immediately after signing\n  // up (as a verification that the user was successfully signed up).\n  //\n  // Everything returned by this script will be set as part of the user profile\n  // and will be visible by any of the tenant admins. Avoid adding attributes\n  // with values such as passwords, keys, secrets, etc.\n  //\n  // The `password` parameter of this function is in plain text. It must be\n  // hashed/salted to match whatever is stored in your database. For example:\n  //\n  //     var bcrypt = require('bcrypt@0.8.5');\n  //     bcrypt.compare(password, dbPasswordHash, function(err, res)) { ... }\n  //\n  // There are three ways this script can finish:\n  // 1. The user's credentials are valid. The returned user profile should be in\n  // the following format: https://auth0.com/docs/users/normalized/auth0/normalized-user-profile-schema\n  //     var profile = {\n  //       user_id: ..., // user_id is mandatory\n  //       email: ...,\n  //       [...]\n  //     };\n  //     callback(null, profile);\n  // 2. The user's credentials are invalid\n  //     callback(new WrongUsernameOrPasswordError(email, \"my error message\"));\n  // 3. Something went wrong while trying to reach your database\n  //     callback(new Error(\"my error message\"));\n  //\n  // A list of Node.js modules which can be referenced is available here:\n  //\n  //    https://tehsis.github.io/webtaskio-canirequire/\n  console.log('AYYYYYE');\n\n  const msg =\n    'Please implement the Login script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "create": "function create(user, callback) {\n  // This script should create a user entry in your existing database. It will\n  // be executed when a user attempts to sign up, or when a user is created\n  // through the Auth0 dashboard or API.\n  // When this script has finished executing, the Login script will be\n  // executed immediately afterwards, to verify that the user was created\n  // successfully.\n  //\n  // The user object will always contain the following properties:\n  // * email: the user's email\n  // * password: the password entered by the user, in plain text\n  // * tenant: the name of this Auth0 account\n  // * client_id: the client ID of the application where the user signed up, or\n  //              API key if created through the API or Auth0 dashboard\n  // * connection: the name of this database connection\n  //\n  // There are three ways this script can finish:\n  // 1. A user was successfully created\n  //     callback(null);\n  // 2. This user already exists in your database\n  //     callback(new ValidationError(\"user_exists\", \"my error message\"));\n  // 3. Something went wrong while trying to reach your database\n  //     callback(new Error(\"my error message\"));\n\n  const msg =\n    'Please implement the Create script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "delete": "function remove(id, callback) {\n  // This script remove a user from your existing database.\n  // It is executed whenever a user is deleted from the API or Auth0 dashboard.\n  //\n  // There are two ways that this script can finish:\n  // 1. The user was removed successfully:\n  //     callback(null);\n  // 2. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n\n  const msg =\n    'Please implement the Delete script for this database ' +\n    'connection at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "verify": "function verify(email, callback) {\n  // This script should mark the current user's email address as verified in\n  // your database.\n  // It is executed whenever a user clicks the verification link sent by email.\n  // These emails can be customized at https://manage.auth0.com/#/emails.\n  // It is safe to assume that the user's email already exists in your database,\n  // because verification emails, if enabled, are sent immediately after a\n  // successful signup.\n  //\n  // There are two ways that this script can finish:\n  // 1. The user's email was verified successfully\n  //     callback(null, true);\n  // 2. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n  //\n  // If an error is returned, it will be passed to the query string of the page\n  // where the user is being redirected to after clicking the verification link.\n  // For example, returning `callback(new Error(\"error\"))` and redirecting to\n  // https://example.com would redirect to the following URL:\n  //     https://example.com?email=alice%40example.com&message=error&success=false\n\n  const msg =\n    'Please implement the Verify script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "get_user": "function getByEmail(email, callback) {\n  // This script should retrieve a user profile from your existing database,\n  // without authenticating the user.\n  // It is used to check if a user exists before executing flows that do not\n  // require authentication (signup and password reset).\n  //\n  // There are three ways this script can finish:\n  // 1. A user was successfully found. The profile should be in the following\n  // format: https://auth0.com/docs/users/normalized/auth0/normalized-user-profile-schema.\n  //     callback(null, profile);\n  // 2. A user was not found\n  //     callback(null);\n  // 3. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n\n  const msg =\n    'Please implement the Get User script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "change_password": "function changePassword(email, newPassword, callback) {\n  // This script should change the password stored for the current user in your\n  // database. It is executed when the user clicks on the confirmation link\n  // after a reset password request.\n  // The content and behavior of password confirmation emails can be customized\n  // here: https://manage.auth0.com/#/emails\n  // The `newPassword` parameter of this function is in plain text. It must be\n  // hashed/salted to match whatever is stored in your database.\n  //\n  // There are three ways that this script can finish:\n  // 1. The user's password was updated successfully:\n  //     callback(null, true);\n  // 2. The user's password was not updated:\n  //     callback(null, false);\n  // 3. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n  //\n  // If an error is returned, it will be passed to the query string of the page\n  // where the user is being redirected to after clicking the confirmation link.\n  // For example, returning `callback(new Error(\"error\"))` and redirecting to\n  // https://example.com would redirect to the following URL:\n  //     https://example.com?email=alice%40example.com&message=error&success=false\n\n  const msg =\n    'Please implement the Change Password script for this database ' +\n    'connection at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n"
+                        },
+                        "disable_signup": false,
+                        "passwordPolicy": "low",
+                        "passkey_options": {
+                            "challenge_ui": "both",
+                            "local_enrollment_enabled": true,
+                            "progressive_enrollment_enabled": true
+                        },
+                        "password_history": {
+                            "size": 5,
+                            "enable": false
+                        },
+                        "strategy_version": 2,
+                        "requires_username": true,
+                        "password_dictionary": {
+                            "enable": true,
+                            "dictionary": []
+                        },
+                        "authentication_methods": {
+                            "passkey": {
+                                "enabled": false
+                            },
+                            "password": {
+                                "enabled": true
+                            }
+                        },
+                        "brute_force_protection": true,
+                        "password_no_personal_info": {
+                            "enable": true
+                        },
+                        "password_complexity_options": {
+                            "min_length": 8
+                        },
+                        "enabledDatabaseCustomization": true
+                    },
+                    "strategy": "auth0",
+                    "name": "boo-baz-db-connection-test",
+                    "is_domain_connection": false,
+                    "realms": [
+                        "boo-baz-db-connection-test"
+                    ],
+                    "enabled_clients": [
+                        "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
+                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                    ]
+                },
+                {
+                    "id": "con_uAzBCmGhcwxWM9kJ",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -1537,7 +1703,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
                     ]
                 }
             ]
@@ -1552,12 +1719,94 @@
         "body": "",
         "status": 200,
         "response": {
-            "total": 1,
+            "total": 3,
             "start": 0,
             "limit": 50,
             "connections": [
                 {
-                    "id": "con_MsOPM0dcMNpvwuhs",
+                    "id": "con_cPbeLX3uoH77QRZz",
+                    "options": {
+                        "mfa": {
+                            "active": true,
+                            "return_enroll_settings": true
+                        },
+                        "import_mode": false,
+                        "customScripts": {
+                            "login": "function login(email, password, callback) {\n  // This script should authenticate a user against the credentials stored in\n  // your database.\n  // It is executed when a user attempts to log in or immediately after signing\n  // up (as a verification that the user was successfully signed up).\n  //\n  // Everything returned by this script will be set as part of the user profile\n  // and will be visible by any of the tenant admins. Avoid adding attributes\n  // with values such as passwords, keys, secrets, etc.\n  //\n  // The `password` parameter of this function is in plain text. It must be\n  // hashed/salted to match whatever is stored in your database. For example:\n  //\n  //     var bcrypt = require('bcrypt@0.8.5');\n  //     bcrypt.compare(password, dbPasswordHash, function(err, res)) { ... }\n  //\n  // There are three ways this script can finish:\n  // 1. The user's credentials are valid. The returned user profile should be in\n  // the following format: https://auth0.com/docs/users/normalized/auth0/normalized-user-profile-schema\n  //     var profile = {\n  //       user_id: ..., // user_id is mandatory\n  //       email: ...,\n  //       [...]\n  //     };\n  //     callback(null, profile);\n  // 2. The user's credentials are invalid\n  //     callback(new WrongUsernameOrPasswordError(email, \"my error message\"));\n  // 3. Something went wrong while trying to reach your database\n  //     callback(new Error(\"my error message\"));\n  //\n  // A list of Node.js modules which can be referenced is available here:\n  //\n  //    https://tehsis.github.io/webtaskio-canirequire/\n  console.log('AYYYYYE');\n\n  const msg =\n    'Please implement the Login script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "create": "function create(user, callback) {\n  // This script should create a user entry in your existing database. It will\n  // be executed when a user attempts to sign up, or when a user is created\n  // through the Auth0 dashboard or API.\n  // When this script has finished executing, the Login script will be\n  // executed immediately afterwards, to verify that the user was created\n  // successfully.\n  //\n  // The user object will always contain the following properties:\n  // * email: the user's email\n  // * password: the password entered by the user, in plain text\n  // * tenant: the name of this Auth0 account\n  // * client_id: the client ID of the application where the user signed up, or\n  //              API key if created through the API or Auth0 dashboard\n  // * connection: the name of this database connection\n  //\n  // There are three ways this script can finish:\n  // 1. A user was successfully created\n  //     callback(null);\n  // 2. This user already exists in your database\n  //     callback(new ValidationError(\"user_exists\", \"my error message\"));\n  // 3. Something went wrong while trying to reach your database\n  //     callback(new Error(\"my error message\"));\n\n  const msg =\n    'Please implement the Create script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "delete": "function remove(id, callback) {\n  // This script remove a user from your existing database.\n  // It is executed whenever a user is deleted from the API or Auth0 dashboard.\n  //\n  // There are two ways that this script can finish:\n  // 1. The user was removed successfully:\n  //     callback(null);\n  // 2. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n\n  const msg =\n    'Please implement the Delete script for this database ' +\n    'connection at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "verify": "function verify(email, callback) {\n  // This script should mark the current user's email address as verified in\n  // your database.\n  // It is executed whenever a user clicks the verification link sent by email.\n  // These emails can be customized at https://manage.auth0.com/#/emails.\n  // It is safe to assume that the user's email already exists in your database,\n  // because verification emails, if enabled, are sent immediately after a\n  // successful signup.\n  //\n  // There are two ways that this script can finish:\n  // 1. The user's email was verified successfully\n  //     callback(null, true);\n  // 2. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n  //\n  // If an error is returned, it will be passed to the query string of the page\n  // where the user is being redirected to after clicking the verification link.\n  // For example, returning `callback(new Error(\"error\"))` and redirecting to\n  // https://example.com would redirect to the following URL:\n  //     https://example.com?email=alice%40example.com&message=error&success=false\n\n  const msg =\n    'Please implement the Verify script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "get_user": "function getByEmail(email, callback) {\n  // This script should retrieve a user profile from your existing database,\n  // without authenticating the user.\n  // It is used to check if a user exists before executing flows that do not\n  // require authentication (signup and password reset).\n  //\n  // There are three ways this script can finish:\n  // 1. A user was successfully found. The profile should be in the following\n  // format: https://auth0.com/docs/users/normalized/auth0/normalized-user-profile-schema.\n  //     callback(null, profile);\n  // 2. A user was not found\n  //     callback(null);\n  // 3. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n\n  const msg =\n    'Please implement the Get User script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "change_password": "function changePassword(email, newPassword, callback) {\n  // This script should change the password stored for the current user in your\n  // database. It is executed when the user clicks on the confirmation link\n  // after a reset password request.\n  // The content and behavior of password confirmation emails can be customized\n  // here: https://manage.auth0.com/#/emails\n  // The `newPassword` parameter of this function is in plain text. It must be\n  // hashed/salted to match whatever is stored in your database.\n  //\n  // There are three ways that this script can finish:\n  // 1. The user's password was updated successfully:\n  //     callback(null, true);\n  // 2. The user's password was not updated:\n  //     callback(null, false);\n  // 3. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n  //\n  // If an error is returned, it will be passed to the query string of the page\n  // where the user is being redirected to after clicking the confirmation link.\n  // For example, returning `callback(new Error(\"error\"))` and redirecting to\n  // https://example.com would redirect to the following URL:\n  //     https://example.com?email=alice%40example.com&message=error&success=false\n\n  const msg =\n    'Please implement the Change Password script for this database ' +\n    'connection at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n"
+                        },
+                        "disable_signup": false,
+                        "passwordPolicy": "low",
+                        "passkey_options": {
+                            "challenge_ui": "both",
+                            "local_enrollment_enabled": true,
+                            "progressive_enrollment_enabled": true
+                        },
+                        "password_history": {
+                            "size": 5,
+                            "enable": false
+                        },
+                        "strategy_version": 2,
+                        "requires_username": true,
+                        "password_dictionary": {
+                            "enable": true,
+                            "dictionary": []
+                        },
+                        "authentication_methods": {
+                            "passkey": {
+                                "enabled": false
+                            },
+                            "password": {
+                                "enabled": true
+                            }
+                        },
+                        "brute_force_protection": true,
+                        "password_no_personal_info": {
+                            "enable": true
+                        },
+                        "password_complexity_options": {
+                            "min_length": 8
+                        },
+                        "enabledDatabaseCustomization": true
+                    },
+                    "strategy": "auth0",
+                    "name": "boo-baz-db-connection-test",
+                    "is_domain_connection": false,
+                    "realms": [
+                        "boo-baz-db-connection-test"
+                    ],
+                    "enabled_clients": [
+                        "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
+                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                    ]
+                },
+                {
+                    "id": "con_ypEso8gFN9jFQ4Bx",
+                    "options": {
+                        "email": true,
+                        "scope": [
+                            "email",
+                            "profile"
+                        ],
+                        "profile": true
+                    },
+                    "strategy": "google-oauth2",
+                    "name": "google-oauth2",
+                    "is_domain_connection": false,
+                    "realms": [
+                        "google-oauth2"
+                    ],
+                    "enabled_clients": [
+                        "SlnBYESSQE83e042qhjctEizntTWGboW",
+                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                    ]
+                },
+                {
+                    "id": "con_uAzBCmGhcwxWM9kJ",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -1587,7 +1836,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
                     ]
                 }
             ]
@@ -1604,7 +1854,89 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_MsOPM0dcMNpvwuhs",
+                    "id": "con_cPbeLX3uoH77QRZz",
+                    "options": {
+                        "mfa": {
+                            "active": true,
+                            "return_enroll_settings": true
+                        },
+                        "import_mode": false,
+                        "customScripts": {
+                            "login": "function login(email, password, callback) {\n  // This script should authenticate a user against the credentials stored in\n  // your database.\n  // It is executed when a user attempts to log in or immediately after signing\n  // up (as a verification that the user was successfully signed up).\n  //\n  // Everything returned by this script will be set as part of the user profile\n  // and will be visible by any of the tenant admins. Avoid adding attributes\n  // with values such as passwords, keys, secrets, etc.\n  //\n  // The `password` parameter of this function is in plain text. It must be\n  // hashed/salted to match whatever is stored in your database. For example:\n  //\n  //     var bcrypt = require('bcrypt@0.8.5');\n  //     bcrypt.compare(password, dbPasswordHash, function(err, res)) { ... }\n  //\n  // There are three ways this script can finish:\n  // 1. The user's credentials are valid. The returned user profile should be in\n  // the following format: https://auth0.com/docs/users/normalized/auth0/normalized-user-profile-schema\n  //     var profile = {\n  //       user_id: ..., // user_id is mandatory\n  //       email: ...,\n  //       [...]\n  //     };\n  //     callback(null, profile);\n  // 2. The user's credentials are invalid\n  //     callback(new WrongUsernameOrPasswordError(email, \"my error message\"));\n  // 3. Something went wrong while trying to reach your database\n  //     callback(new Error(\"my error message\"));\n  //\n  // A list of Node.js modules which can be referenced is available here:\n  //\n  //    https://tehsis.github.io/webtaskio-canirequire/\n  console.log('AYYYYYE');\n\n  const msg =\n    'Please implement the Login script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "create": "function create(user, callback) {\n  // This script should create a user entry in your existing database. It will\n  // be executed when a user attempts to sign up, or when a user is created\n  // through the Auth0 dashboard or API.\n  // When this script has finished executing, the Login script will be\n  // executed immediately afterwards, to verify that the user was created\n  // successfully.\n  //\n  // The user object will always contain the following properties:\n  // * email: the user's email\n  // * password: the password entered by the user, in plain text\n  // * tenant: the name of this Auth0 account\n  // * client_id: the client ID of the application where the user signed up, or\n  //              API key if created through the API or Auth0 dashboard\n  // * connection: the name of this database connection\n  //\n  // There are three ways this script can finish:\n  // 1. A user was successfully created\n  //     callback(null);\n  // 2. This user already exists in your database\n  //     callback(new ValidationError(\"user_exists\", \"my error message\"));\n  // 3. Something went wrong while trying to reach your database\n  //     callback(new Error(\"my error message\"));\n\n  const msg =\n    'Please implement the Create script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "delete": "function remove(id, callback) {\n  // This script remove a user from your existing database.\n  // It is executed whenever a user is deleted from the API or Auth0 dashboard.\n  //\n  // There are two ways that this script can finish:\n  // 1. The user was removed successfully:\n  //     callback(null);\n  // 2. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n\n  const msg =\n    'Please implement the Delete script for this database ' +\n    'connection at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "verify": "function verify(email, callback) {\n  // This script should mark the current user's email address as verified in\n  // your database.\n  // It is executed whenever a user clicks the verification link sent by email.\n  // These emails can be customized at https://manage.auth0.com/#/emails.\n  // It is safe to assume that the user's email already exists in your database,\n  // because verification emails, if enabled, are sent immediately after a\n  // successful signup.\n  //\n  // There are two ways that this script can finish:\n  // 1. The user's email was verified successfully\n  //     callback(null, true);\n  // 2. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n  //\n  // If an error is returned, it will be passed to the query string of the page\n  // where the user is being redirected to after clicking the verification link.\n  // For example, returning `callback(new Error(\"error\"))` and redirecting to\n  // https://example.com would redirect to the following URL:\n  //     https://example.com?email=alice%40example.com&message=error&success=false\n\n  const msg =\n    'Please implement the Verify script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "get_user": "function getByEmail(email, callback) {\n  // This script should retrieve a user profile from your existing database,\n  // without authenticating the user.\n  // It is used to check if a user exists before executing flows that do not\n  // require authentication (signup and password reset).\n  //\n  // There are three ways this script can finish:\n  // 1. A user was successfully found. The profile should be in the following\n  // format: https://auth0.com/docs/users/normalized/auth0/normalized-user-profile-schema.\n  //     callback(null, profile);\n  // 2. A user was not found\n  //     callback(null);\n  // 3. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n\n  const msg =\n    'Please implement the Get User script for this database connection ' +\n    'at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n",
+                            "change_password": "function changePassword(email, newPassword, callback) {\n  // This script should change the password stored for the current user in your\n  // database. It is executed when the user clicks on the confirmation link\n  // after a reset password request.\n  // The content and behavior of password confirmation emails can be customized\n  // here: https://manage.auth0.com/#/emails\n  // The `newPassword` parameter of this function is in plain text. It must be\n  // hashed/salted to match whatever is stored in your database.\n  //\n  // There are three ways that this script can finish:\n  // 1. The user's password was updated successfully:\n  //     callback(null, true);\n  // 2. The user's password was not updated:\n  //     callback(null, false);\n  // 3. Something went wrong while trying to reach your database:\n  //     callback(new Error(\"my error message\"));\n  //\n  // If an error is returned, it will be passed to the query string of the page\n  // where the user is being redirected to after clicking the confirmation link.\n  // For example, returning `callback(new Error(\"error\"))` and redirecting to\n  // https://example.com would redirect to the following URL:\n  //     https://example.com?email=alice%40example.com&message=error&success=false\n\n  const msg =\n    'Please implement the Change Password script for this database ' +\n    'connection at https://manage.auth0.com/#/connections/database';\n  return callback(new Error(msg));\n}\n"
+                        },
+                        "disable_signup": false,
+                        "passwordPolicy": "low",
+                        "passkey_options": {
+                            "challenge_ui": "both",
+                            "local_enrollment_enabled": true,
+                            "progressive_enrollment_enabled": true
+                        },
+                        "password_history": {
+                            "size": 5,
+                            "enable": false
+                        },
+                        "strategy_version": 2,
+                        "requires_username": true,
+                        "password_dictionary": {
+                            "enable": true,
+                            "dictionary": []
+                        },
+                        "authentication_methods": {
+                            "passkey": {
+                                "enabled": false
+                            },
+                            "password": {
+                                "enabled": true
+                            }
+                        },
+                        "brute_force_protection": true,
+                        "password_no_personal_info": {
+                            "enable": true
+                        },
+                        "password_complexity_options": {
+                            "min_length": 8
+                        },
+                        "enabledDatabaseCustomization": true
+                    },
+                    "strategy": "auth0",
+                    "name": "boo-baz-db-connection-test",
+                    "is_domain_connection": false,
+                    "realms": [
+                        "boo-baz-db-connection-test"
+                    ],
+                    "enabled_clients": [
+                        "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
+                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                    ]
+                },
+                {
+                    "id": "con_ypEso8gFN9jFQ4Bx",
+                    "options": {
+                        "email": true,
+                        "scope": [
+                            "email",
+                            "profile"
+                        ],
+                        "profile": true
+                    },
+                    "strategy": "google-oauth2",
+                    "name": "google-oauth2",
+                    "is_domain_connection": false,
+                    "realms": [
+                        "google-oauth2"
+                    ],
+                    "enabled_clients": [
+                        "SlnBYESSQE83e042qhjctEizntTWGboW",
+                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                    ]
+                },
+                {
+                    "id": "con_uAzBCmGhcwxWM9kJ",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -1634,7 +1966,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
                     ]
                 }
             ]
@@ -1750,14 +2083,18 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/user_invitation",
+        "path": "/api/v2/email-templates/welcome_email",
         "body": "",
-        "status": 404,
+        "status": 200,
         "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
+            "template": "welcome_email",
+            "body": "<html>\n  <body>\n    <h1>Welcome!</h1>\n  </body>\n</html>\n",
+            "from": "",
+            "resultUrl": "https://example.com/welcome",
+            "subject": "Welcome",
+            "syntax": "liquid",
+            "urlLifetimeInSeconds": 3600,
+            "enabled": false
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -1765,37 +2102,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/reset_email_by_code",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/password_reset",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/change_password",
+        "path": "/api/v2/email-templates/blocked_account",
         "body": "",
         "status": 404,
         "response": {
@@ -1825,55 +2132,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/verify_email_by_code",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/blocked_account",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/welcome_email",
-        "body": "",
-        "status": 200,
-        "response": {
-            "template": "welcome_email",
-            "body": "<html>\n  <body>\n    <h1>Welcome!</h1>\n  </body>\n</html>\n",
-            "from": "",
-            "resultUrl": "https://example.com/welcome",
-            "subject": "Welcome",
-            "syntax": "liquid",
-            "urlLifetimeInSeconds": 3600,
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/email-templates/mfa_oob_code",
         "body": "",
         "status": 404,
@@ -1889,7 +2147,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/stolen_credentials",
+        "path": "/api/v2/email-templates/verify_email_by_code",
         "body": "",
         "status": 404,
         "response": {
@@ -1919,11 +2177,86 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/email-templates/user_invitation",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/password_reset",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/stolen_credentials",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/reset_email_by_code",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/change_password",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/client-grants?per_page=100&page=0&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
-            "total": 1,
+            "total": 3,
             "start": 0,
             "limit": 100,
             "client_grants": [
@@ -2135,6 +2468,280 @@
                         "create:organization_client_grants",
                         "delete:organization_client_grants"
                     ]
+                },
+                {
+                    "id": "cgr_ssWlvSQvTDiad8pg",
+                    "client_id": "Jxv2FgWcn68QuDUzXgdll9Xgo2nlEBDm",
+                    "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
+                    "scope": [
+                        "read:client_grants",
+                        "create:client_grants",
+                        "delete:client_grants",
+                        "update:client_grants",
+                        "read:users",
+                        "update:users",
+                        "delete:users",
+                        "create:users",
+                        "read:users_app_metadata",
+                        "update:users_app_metadata",
+                        "delete:users_app_metadata",
+                        "create:users_app_metadata",
+                        "read:user_custom_blocks",
+                        "create:user_custom_blocks",
+                        "delete:user_custom_blocks",
+                        "create:user_tickets",
+                        "read:clients",
+                        "update:clients",
+                        "delete:clients",
+                        "create:clients",
+                        "read:client_keys",
+                        "update:client_keys",
+                        "delete:client_keys",
+                        "create:client_keys",
+                        "read:connections",
+                        "update:connections",
+                        "delete:connections",
+                        "create:connections",
+                        "read:resource_servers",
+                        "update:resource_servers",
+                        "delete:resource_servers",
+                        "create:resource_servers",
+                        "read:device_credentials",
+                        "update:device_credentials",
+                        "delete:device_credentials",
+                        "create:device_credentials",
+                        "read:rules",
+                        "update:rules",
+                        "delete:rules",
+                        "create:rules",
+                        "read:rules_configs",
+                        "update:rules_configs",
+                        "delete:rules_configs",
+                        "read:hooks",
+                        "update:hooks",
+                        "delete:hooks",
+                        "create:hooks",
+                        "read:actions",
+                        "update:actions",
+                        "delete:actions",
+                        "create:actions",
+                        "read:email_provider",
+                        "update:email_provider",
+                        "delete:email_provider",
+                        "create:email_provider",
+                        "blacklist:tokens",
+                        "read:stats",
+                        "read:insights",
+                        "read:tenant_settings",
+                        "update:tenant_settings",
+                        "read:logs",
+                        "read:logs_users",
+                        "read:shields",
+                        "create:shields",
+                        "update:shields",
+                        "delete:shields",
+                        "read:anomaly_blocks",
+                        "delete:anomaly_blocks",
+                        "update:triggers",
+                        "read:triggers",
+                        "read:grants",
+                        "delete:grants",
+                        "read:guardian_factors",
+                        "update:guardian_factors",
+                        "read:guardian_enrollments",
+                        "delete:guardian_enrollments",
+                        "create:guardian_enrollment_tickets",
+                        "read:user_idp_tokens",
+                        "create:passwords_checking_job",
+                        "delete:passwords_checking_job",
+                        "read:custom_domains",
+                        "delete:custom_domains",
+                        "create:custom_domains",
+                        "update:custom_domains",
+                        "read:email_templates",
+                        "create:email_templates",
+                        "update:email_templates",
+                        "read:mfa_policies",
+                        "update:mfa_policies",
+                        "read:roles",
+                        "create:roles",
+                        "delete:roles",
+                        "update:roles",
+                        "read:prompts",
+                        "update:prompts",
+                        "read:branding",
+                        "update:branding",
+                        "delete:branding",
+                        "read:log_streams",
+                        "create:log_streams",
+                        "delete:log_streams",
+                        "update:log_streams",
+                        "create:signing_keys",
+                        "read:signing_keys",
+                        "update:signing_keys",
+                        "read:limits",
+                        "update:limits",
+                        "create:role_members",
+                        "read:role_members",
+                        "delete:role_members",
+                        "read:entitlements",
+                        "read:attack_protection",
+                        "update:attack_protection",
+                        "read:organizations",
+                        "update:organizations",
+                        "create:organizations",
+                        "delete:organizations",
+                        "create:organization_members",
+                        "read:organization_members",
+                        "delete:organization_members",
+                        "create:organization_connections",
+                        "read:organization_connections",
+                        "update:organization_connections",
+                        "delete:organization_connections",
+                        "create:organization_member_roles",
+                        "read:organization_member_roles",
+                        "delete:organization_member_roles",
+                        "create:organization_invitations",
+                        "read:organization_invitations",
+                        "delete:organization_invitations"
+                    ]
+                },
+                {
+                    "id": "cgr_w6RVvDFeHOpwM1Zq",
+                    "client_id": "d5YSIoDhbsIhjv9FN1LkpU30DzP8LzJs",
+                    "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
+                    "scope": [
+                        "read:client_grants",
+                        "create:client_grants",
+                        "delete:client_grants",
+                        "update:client_grants",
+                        "read:users",
+                        "update:users",
+                        "delete:users",
+                        "create:users",
+                        "read:users_app_metadata",
+                        "update:users_app_metadata",
+                        "delete:users_app_metadata",
+                        "create:users_app_metadata",
+                        "read:user_custom_blocks",
+                        "create:user_custom_blocks",
+                        "delete:user_custom_blocks",
+                        "create:user_tickets",
+                        "read:clients",
+                        "update:clients",
+                        "delete:clients",
+                        "create:clients",
+                        "read:client_keys",
+                        "update:client_keys",
+                        "delete:client_keys",
+                        "create:client_keys",
+                        "read:connections",
+                        "update:connections",
+                        "delete:connections",
+                        "create:connections",
+                        "read:resource_servers",
+                        "update:resource_servers",
+                        "delete:resource_servers",
+                        "create:resource_servers",
+                        "read:device_credentials",
+                        "update:device_credentials",
+                        "delete:device_credentials",
+                        "create:device_credentials",
+                        "read:rules",
+                        "update:rules",
+                        "delete:rules",
+                        "create:rules",
+                        "read:rules_configs",
+                        "update:rules_configs",
+                        "delete:rules_configs",
+                        "read:hooks",
+                        "update:hooks",
+                        "delete:hooks",
+                        "create:hooks",
+                        "read:actions",
+                        "update:actions",
+                        "delete:actions",
+                        "create:actions",
+                        "read:email_provider",
+                        "update:email_provider",
+                        "delete:email_provider",
+                        "create:email_provider",
+                        "blacklist:tokens",
+                        "read:stats",
+                        "read:insights",
+                        "read:tenant_settings",
+                        "update:tenant_settings",
+                        "read:logs",
+                        "read:logs_users",
+                        "read:shields",
+                        "create:shields",
+                        "update:shields",
+                        "delete:shields",
+                        "read:anomaly_blocks",
+                        "delete:anomaly_blocks",
+                        "update:triggers",
+                        "read:triggers",
+                        "read:grants",
+                        "delete:grants",
+                        "read:guardian_factors",
+                        "update:guardian_factors",
+                        "read:guardian_enrollments",
+                        "delete:guardian_enrollments",
+                        "create:guardian_enrollment_tickets",
+                        "read:user_idp_tokens",
+                        "create:passwords_checking_job",
+                        "delete:passwords_checking_job",
+                        "read:custom_domains",
+                        "delete:custom_domains",
+                        "create:custom_domains",
+                        "update:custom_domains",
+                        "read:email_templates",
+                        "create:email_templates",
+                        "update:email_templates",
+                        "read:mfa_policies",
+                        "update:mfa_policies",
+                        "read:roles",
+                        "create:roles",
+                        "delete:roles",
+                        "update:roles",
+                        "read:prompts",
+                        "update:prompts",
+                        "read:branding",
+                        "update:branding",
+                        "delete:branding",
+                        "read:log_streams",
+                        "create:log_streams",
+                        "delete:log_streams",
+                        "update:log_streams",
+                        "create:signing_keys",
+                        "read:signing_keys",
+                        "update:signing_keys",
+                        "read:limits",
+                        "update:limits",
+                        "create:role_members",
+                        "read:role_members",
+                        "delete:role_members",
+                        "read:entitlements",
+                        "read:attack_protection",
+                        "update:attack_protection",
+                        "read:organizations",
+                        "update:organizations",
+                        "create:organizations",
+                        "delete:organizations",
+                        "create:organization_members",
+                        "read:organization_members",
+                        "delete:organization_members",
+                        "create:organization_connections",
+                        "read:organization_connections",
+                        "update:organization_connections",
+                        "delete:organization_connections",
+                        "create:organization_member_roles",
+                        "read:organization_member_roles",
+                        "delete:organization_member_roles",
+                        "create:organization_invitations",
+                        "read:organization_invitations",
+                        "delete:organization_invitations"
+                    ]
                 }
             ]
         },
@@ -2155,7 +2762,7 @@
             },
             {
                 "name": "push-notification",
-                "enabled": true,
+                "enabled": false,
                 "trial_expired": false
             },
             {
@@ -2195,7 +2802,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/guardian/factors/sms/providers/twilio",
+        "path": "/api/v2/guardian/factors/push-notification/providers/sns",
         "body": "",
         "status": 200,
         "response": {},
@@ -2205,7 +2812,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/guardian/factors/push-notification/providers/sns",
+        "path": "/api/v2/guardian/factors/sms/providers/twilio",
         "body": "",
         "status": 200,
         "response": {},
@@ -2231,9 +2838,7 @@
         "path": "/api/v2/guardian/policies",
         "body": "",
         "status": 200,
-        "response": [
-            "all-applications"
-        ],
+        "response": [],
         "rawHeaders": [],
         "responseIsBinary": false
     },
@@ -2268,7 +2873,88 @@
         "body": "",
         "status": 200,
         "response": {
-            "roles": [],
+            "roles": [
+                {
+                    "id": "rol_bXMM8Nd7SWResint",
+                    "name": "Admin",
+                    "description": "Can read and write things"
+                },
+                {
+                    "id": "rol_XtB5wmmSUafX2bYA",
+                    "name": "Reader",
+                    "description": "Can only read things"
+                },
+                {
+                    "id": "rol_wj907kUhQgHQ5fSr",
+                    "name": "read_only",
+                    "description": "Read Only"
+                },
+                {
+                    "id": "rol_YEYsNopCYaHPhjMY",
+                    "name": "read_osnly",
+                    "description": "Readz Only"
+                }
+            ],
+            "start": 0,
+            "limit": 100,
+            "total": 4
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/roles/rol_bXMM8Nd7SWResint/permissions?per_page=100&page=0&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "permissions": [],
+            "start": 0,
+            "limit": 100,
+            "total": 0
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/roles/rol_XtB5wmmSUafX2bYA/permissions?per_page=100&page=0&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "permissions": [],
+            "start": 0,
+            "limit": 100,
+            "total": 0
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/roles/rol_wj907kUhQgHQ5fSr/permissions?per_page=100&page=0&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "permissions": [],
+            "start": 0,
+            "limit": 100,
+            "total": 0
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/roles/rol_YEYsNopCYaHPhjMY/permissions?per_page=100&page=0&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "permissions": [],
             "start": 0,
             "limit": 100,
             "total": 0
@@ -2402,7 +3088,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login-password/custom-text/en",
+        "path": "/api/v2/prompts/login/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2422,7 +3108,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login/custom-text/en",
+        "path": "/api/v2/prompts/login-password/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2432,7 +3118,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login-email-verification/custom-text/en",
+        "path": "/api/v2/prompts/login-passwordless/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2443,6 +3129,16 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/prompts/signup/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/login-email-verification/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2472,6 +3168,36 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/prompts/phone-identifier-enrollment/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/phone-identifier-challenge/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/email-identifier-challenge/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/prompts/reset-password/custom-text/en",
         "body": "",
         "status": 200,
@@ -2482,7 +3208,37 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/prompts/custom-form/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/prompts/consent/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/customized-consent/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/logout/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2522,7 +3278,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa-webauthn/custom-text/en",
+        "path": "/api/v2/prompts/mfa-phone/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2542,7 +3298,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa-email/custom-text/en",
+        "path": "/api/v2/prompts/mfa-webauthn/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2552,7 +3308,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa-phone/custom-text/en",
+        "path": "/api/v2/prompts/mfa-email/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2572,7 +3328,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa/custom-text/en",
+        "path": "/api/v2/prompts/status/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2582,7 +3338,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/status/custom-text/en",
+        "path": "/api/v2/prompts/mfa/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2652,6 +3408,26 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/prompts/captcha/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/login/partials",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/prompts/login-id/partials",
         "body": "",
         "status": 200,
@@ -2672,7 +3448,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login/partials",
+        "path": "/api/v2/prompts/signup/partials",
         "body": "",
         "status": 200,
         "response": {},
@@ -2692,7 +3468,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/signup/partials",
+        "path": "/api/v2/prompts/signup-password/partials",
         "body": "",
         "status": 200,
         "response": {},
@@ -2712,23 +3488,13 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/signup-password/partials",
-        "body": "",
-        "status": 200,
-        "response": {},
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/actions/actions?page=0&per_page=100",
         "body": "",
         "status": 200,
         "response": {
             "actions": [
                 {
-                    "id": "012203e1-2e91-47cf-8160-b8ee306d04d9",
+                    "id": "b350f5ab-4a15-475b-9fc9-6ccc76594903",
                     "name": "My Custom Action",
                     "supported_triggers": [
                         {
@@ -2736,34 +3502,34 @@
                             "version": "v2"
                         }
                     ],
-                    "created_at": "2025-04-09T10:25:17.289077295Z",
-                    "updated_at": "2025-04-09T10:25:17.299956037Z",
+                    "created_at": "2025-04-09T16:59:45.514229856Z",
+                    "updated_at": "2025-04-09T16:59:45.531596981Z",
                     "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
                     "dependencies": [],
                     "runtime": "node16",
                     "status": "built",
                     "secrets": [],
                     "current_version": {
-                        "id": "43a84aff-e35e-4374-a703-862a6a2ffdbf",
+                        "id": "51226e3f-8810-49c2-9f7f-d666c4aa04ae",
                         "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
                         "runtime": "node16",
                         "status": "BUILT",
                         "number": 1,
-                        "build_time": "2025-04-09T10:25:18.133079354Z",
-                        "created_at": "2025-04-09T10:25:18.049466683Z",
-                        "updated_at": "2025-04-09T10:25:18.134515467Z"
+                        "build_time": "2025-04-09T16:59:46.398241328Z",
+                        "created_at": "2025-04-09T16:59:46.307869375Z",
+                        "updated_at": "2025-04-09T16:59:46.399941007Z"
                     },
                     "deployed_version": {
                         "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
                         "dependencies": [],
-                        "id": "43a84aff-e35e-4374-a703-862a6a2ffdbf",
+                        "id": "51226e3f-8810-49c2-9f7f-d666c4aa04ae",
                         "deployed": true,
                         "number": 1,
-                        "built_at": "2025-04-09T10:25:18.133079354Z",
+                        "built_at": "2025-04-09T16:59:46.398241328Z",
                         "secrets": [],
                         "status": "built",
-                        "created_at": "2025-04-09T10:25:18.049466683Z",
-                        "updated_at": "2025-04-09T10:25:18.134515467Z",
+                        "created_at": "2025-04-09T16:59:46.307869375Z",
+                        "updated_at": "2025-04-09T16:59:46.399941007Z",
                         "runtime": "node16",
                         "supported_triggers": [
                             {
@@ -2909,17 +3675,6 @@
                 },
                 {
                     "id": "post-change-password",
-                    "version": "v1",
-                    "status": "DEPRECATED",
-                    "runtimes": [
-                        "node12"
-                    ],
-                    "default_runtime": "node12",
-                    "binding_policy": "trigger-bound",
-                    "compatible_triggers": []
-                },
-                {
-                    "id": "post-change-password",
                     "version": "v2",
                     "status": "CURRENT",
                     "runtimes": [
@@ -2929,6 +3684,17 @@
                         "node22"
                     ],
                     "default_runtime": "node22",
+                    "binding_policy": "trigger-bound",
+                    "compatible_triggers": []
+                },
+                {
+                    "id": "post-change-password",
+                    "version": "v1",
+                    "status": "DEPRECATED",
+                    "runtimes": [
+                        "node12"
+                    ],
+                    "default_runtime": "node12",
                     "binding_policy": "trigger-bound",
                     "compatible_triggers": []
                 },
@@ -3173,10 +3939,27 @@
         "body": "",
         "status": 200,
         "response": {
-            "organizations": [],
+            "organizations": [
+                {
+                    "id": "org_dTYabGkEQHnW3Dje",
+                    "name": "org1",
+                    "display_name": "Organization",
+                    "branding": {
+                        "colors": {
+                            "page_background": "#fff5f5",
+                            "primary": "#57ddff"
+                        }
+                    }
+                },
+                {
+                    "id": "org_3smVMi50Xs4ZWDfN",
+                    "name": "org2",
+                    "display_name": "Organization2"
+                }
+            ],
             "start": 0,
             "limit": 50,
-            "total": 0
+            "total": 2
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3188,7 +3971,7 @@
         "body": "",
         "status": 200,
         "response": {
-            "total": 9,
+            "total": 10,
             "start": 0,
             "limit": 100,
             "clients": [
@@ -3251,6 +4034,49 @@
                     "tenant": "auth0-deploy-cli-e2e",
                     "global": false,
                     "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Default App",
+                    "callbacks": [],
+                    "cross_origin_auth": false,
+                    "is_first_party": true,
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
                     "name": "API Explorer Application",
                     "allowed_clients": [],
                     "callbacks": [],
@@ -3284,7 +4110,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "L6X9qwV1FzB97KwmL0CPqlu23NfCbg6g",
+                    "client_id": "Jxv2FgWcn68QuDUzXgdll9Xgo2nlEBDm",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3293,6 +4119,50 @@
                         "secret_encoded": false
                     },
                     "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Quickstarts API (Test Application)",
+                    "client_metadata": {
+                        "foo": "bar"
+                    },
+                    "cross_origin_auth": false,
+                    "is_first_party": true,
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "QKsnAEeydL8Fjuxw7jfCzcrVyCgOOypX",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
                     "token_endpoint_auth_method": "client_secret_post",
                     "app_type": "non_interactive",
                     "grant_types": [
@@ -3339,7 +4209,7 @@
                         }
                     ],
                     "allowed_origins": [],
-                    "client_id": "ts2vZULbfHNcdD8QQ86OBQKfVWWJ6hiB",
+                    "client_id": "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3357,50 +4227,6 @@
                         "client_credentials"
                     ],
                     "web_origins": [],
-                    "custom_login_page_on": true
-                },
-                {
-                    "tenant": "auth0-deploy-cli-e2e",
-                    "global": false,
-                    "is_token_endpoint_ip_header_trusted": false,
-                    "name": "Quickstarts API (Test Application)",
-                    "client_metadata": {
-                        "foo": "bar"
-                    },
-                    "cross_origin_auth": false,
-                    "is_first_party": true,
-                    "oidc_conformant": true,
-                    "refresh_token": {
-                        "expiration_type": "non-expiring",
-                        "leeway": 0,
-                        "infinite_token_lifetime": true,
-                        "infinite_idle_token_lifetime": true,
-                        "token_lifetime": 31557600,
-                        "idle_token_lifetime": 2592000,
-                        "rotation_type": "non-rotating"
-                    },
-                    "sso_disabled": false,
-                    "cross_origin_authentication": false,
-                    "signing_keys": [
-                        {
-                            "cert": "[REDACTED]",
-                            "pkcs7": "[REDACTED]",
-                            "subject": "deprecated"
-                        }
-                    ],
-                    "client_id": "GAZCoyw7yeXsQRrLN88FjRPmUCBP8yvo",
-                    "callback_url_template": false,
-                    "client_secret": "[REDACTED]",
-                    "jwt_configuration": {
-                        "alg": "RS256",
-                        "lifetime_in_seconds": 36000,
-                        "secret_encoded": false
-                    },
-                    "token_endpoint_auth_method": "client_secret_post",
-                    "app_type": "non_interactive",
-                    "grant_types": [
-                        "client_credentials"
-                    ],
                     "custom_login_page_on": true
                 },
                 {
@@ -3429,7 +4255,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "tUn1XtT3z7eTSUXxzRdLPAXZWcTUWcyo",
+                    "client_id": "d5YSIoDhbsIhjv9FN1LkpU30DzP8LzJs",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3482,7 +4308,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "C464wymPZGOxmKBz9kuvw4zFNXCPE7Z5",
+                    "client_id": "SlnBYESSQE83e042qhjctEizntTWGboW",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3542,7 +4368,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "q7E9yAT0qwZIU0JBaNUPWIifDPU6Ek1G",
+                    "client_id": "RF60ZkCQzronG0gnoL85Qu0NdQIBGmim",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3600,7 +4426,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "CUZY1ZEbelHn2rc8Ql34QuTNYS6kkRuY",
+                    "client_id": "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3664,7 +4490,74 @@
         "body": "",
         "status": 200,
         "response": {
-            "organizations": []
+            "organizations": [
+                {
+                    "id": "org_dTYabGkEQHnW3Dje",
+                    "name": "org1",
+                    "display_name": "Organization",
+                    "branding": {
+                        "colors": {
+                            "page_background": "#fff5f5",
+                            "primary": "#57ddff"
+                        }
+                    }
+                },
+                {
+                    "id": "org_3smVMi50Xs4ZWDfN",
+                    "name": "org2",
+                    "display_name": "Organization2"
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/organizations/org_dTYabGkEQHnW3Dje/enabled_connections",
+        "body": "",
+        "status": 200,
+        "response": [],
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/organizations/org_dTYabGkEQHnW3Dje/client-grants?page=0&per_page=100&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "client_grants": [],
+            "start": 0,
+            "limit": 100,
+            "total": 0
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/organizations/org_3smVMi50Xs4ZWDfN/enabled_connections",
+        "body": "",
+        "status": 200,
+        "response": [],
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/organizations/org_3smVMi50Xs4ZWDfN/client-grants?page=0&per_page=100&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "client_grants": [],
+            "start": 0,
+            "limit": 100,
+            "total": 0
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3683,7 +4576,7 @@
             ],
             "mode": "count_per_identifier_and_ip",
             "allowlist": [],
-            "max_attempts": 66
+            "max_attempts": 10
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3720,18 +4613,17 @@
         "response": {
             "enabled": true,
             "shields": [
-                "admin_notification"
+                "admin_notification",
+                "block"
             ],
-            "allowlist": [
-                "127.0.0.1"
-            ],
+            "allowlist": [],
             "stage": {
                 "pre-login": {
-                    "max_attempts": 66,
+                    "max_attempts": 100,
                     "rate": 864000
                 },
                 "pre-user-registration": {
-                    "max_attempts": 66,
+                    "max_attempts": 50,
                     "rate": 1200
                 }
             }
@@ -3747,7 +4639,7 @@
         "status": 200,
         "response": [
             {
-                "id": "lst_0000000000021063",
+                "id": "lst_0000000000021073",
                 "name": "Suspended DD Log Stream",
                 "type": "datadog",
                 "status": "active",
@@ -3758,14 +4650,14 @@
                 "isPriority": false
             },
             {
-                "id": "lst_0000000000021064",
+                "id": "lst_0000000000021074",
                 "name": "Amazon EventBridge",
                 "type": "eventbridge",
                 "status": "active",
                 "sink": {
                     "awsAccountId": "123456789012",
                     "awsRegion": "us-east-2",
-                    "awsPartnerEventSource": "aws.partner/auth0.com/auth0-deploy-cli-e2e-36e23e87-4eeb-49b8-bfb4-287be0ed3ebf/auth0.logs"
+                    "awsPartnerEventSource": "aws.partner/auth0.com/auth0-deploy-cli-e2e-5b66e29c-4c5a-496f-86ab-6dacebd9382d/auth0.logs"
                 },
                 "filters": [
                     {
@@ -3867,7 +4759,7 @@
                     "name": "Blank-form",
                     "flow_count": 0,
                     "created_at": "2024-11-26T11:58:18.187Z",
-                    "updated_at": "2025-04-09T10:24:58.068Z"
+                    "updated_at": "2025-04-10T08:27:06.876Z"
                 }
             ]
         },
@@ -3938,22 +4830,7 @@
                 }
             },
             "created_at": "2024-11-26T11:58:18.187Z",
-            "updated_at": "2025-04-09T10:24:58.068Z"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/flows/vault/connections?page=0&per_page=100&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "limit": 100,
-            "start": 0,
-            "total": 0,
-            "connections": []
+            "updated_at": "2025-04-10T08:27:06.876Z"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3969,6 +4846,21 @@
             "start": 0,
             "total": 0,
             "flows": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/flows/vault/connections?page=0&per_page=100&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 100,
+            "start": 0,
+            "total": 0,
+            "connections": []
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -4017,7 +4909,7 @@
                         "okta"
                     ],
                     "created_at": "2024-11-26T11:58:18.962Z",
-                    "updated_at": "2025-04-09T10:25:20.478Z",
+                    "updated_at": "2025-04-09T16:59:48.642Z",
                     "branding": {
                         "colors": {
                             "primary": "#19aecc"
@@ -4049,10 +4941,30 @@
         "body": "",
         "status": 200,
         "response": {
-            "total": 0,
+            "total": 1,
             "start": 0,
             "limit": 100,
-            "network_acls": []
+            "network_acls": [
+                {
+                    "description": "Allow Specific Countries",
+                    "active": false,
+                    "priority": 1,
+                    "rule": {
+                        "match": {
+                            "geo_country_codes": [
+                                "US"
+                            ]
+                        },
+                        "scope": "authentication",
+                        "action": {
+                            "allow": true
+                        }
+                    },
+                    "created_at": "2025-04-09T10:50:23.683Z",
+                    "updated_at": "2025-04-09T10:51:54.571Z",
+                    "id": "acl_5TpkFaNH63Mfc5EsaADFHg"
+                }
+            ]
         },
         "rawHeaders": [],
         "responseIsBinary": false
