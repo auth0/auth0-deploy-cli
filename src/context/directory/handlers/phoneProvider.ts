@@ -34,7 +34,7 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   if (!phoneProviders) {
     return;
-  }// Skip, nothing to dump
+  } // Skip, nothing to dump
 
   const phoneProvidersFolder = path.join(context.filePath, constants.PHONE_PROVIDER_DIRECTORY);
   fs.ensureDirSync(phoneProvidersFolder);

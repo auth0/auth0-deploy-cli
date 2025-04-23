@@ -235,7 +235,7 @@ const constants = {
       'reset-password-mfa-email-challenge',
       'reset-password-mfa-otp-challenge',
       'reset-password-mfa-push-challenge-push',
-      'reset-password-mfa-sms-challenge'
+      'reset-password-mfa-sms-challenge',
     ],
     mfa: [
       'mfa-detect-browser-capabilities',
@@ -251,14 +251,9 @@ const constants = {
       'mfa-push-list',
       'mfa-push-welcome',
     ],
-    'invitation': ['accept-invitation'],
-    'organizations': ['organization-selection', 'organization-picker'],
-    'mfa-otp': [
-      'mfa-otp-challenge',
-      'mfa-otp-enrollment-code',
-      'mfa-otp-enrollment-qr'
-    ],
-
+    invitation: ['accept-invitation'],
+    organizations: ['organization-selection', 'organization-picker'],
+    'mfa-otp': ['mfa-otp-challenge', 'mfa-otp-enrollment-code', 'mfa-otp-enrollment-qr'],
   } as PromptScreenMapping,
 };
 

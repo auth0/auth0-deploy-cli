@@ -4,7 +4,7 @@ import { PhoneProvider } from '../../../tools/auth0/handlers/phoneProvider';
 import { ParsedAsset } from '../../../types';
 import { phoneProviderDefaults } from '../../defaults';
 
-type ParsedPhoneProviders = ParsedAsset<'phoneProviders', PhoneProvider[] >;
+type ParsedPhoneProviders = ParsedAsset<'phoneProviders', PhoneProvider[]>;
 
 async function parse(context: YAMLContext): Promise<ParsedPhoneProviders> {
   const { phoneProviders } = context.assets;
@@ -27,7 +27,7 @@ async function dump(context: YAMLContext): Promise<ParsedPhoneProviders> {
   });
 
   return {
-    phoneProviders
+    phoneProviders,
   };
 }
 

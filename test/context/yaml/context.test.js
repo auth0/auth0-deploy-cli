@@ -205,7 +205,7 @@ describe('#YAML context validation', () => {
       ],
       connections: [],
       databases: [],
-      phoneProviders : [],
+      phoneProviders: [],
       emailProvider: {
         enabled: true,
         name: 'smtp',
@@ -333,7 +333,7 @@ describe('#YAML context validation', () => {
       ],
       connections: [],
       databases: [],
-      phoneProviders : [],
+      phoneProviders: [],
       emailProvider: {
         enabled: true,
         name: 'smtp',
@@ -460,7 +460,7 @@ describe('#YAML context validation', () => {
         enabled: true,
         name: 'smtp',
       },
-      phoneProviders:[],
+      phoneProviders: [],
       emailTemplates: [
         {
           body: './emailTemplates/blocked_account.html',
