@@ -58,7 +58,7 @@
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-config-prettier": "^8.10.0",
     "eslint-plugin-import": "^2.31.0",
-    "husky": "^7.0.4",
+    "husky": "^9.1.7",
     "kacl": "^1.1.1",
     "mocha": "^10.8.2",
     "nock": "^13.5.6",
