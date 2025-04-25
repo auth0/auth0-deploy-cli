@@ -98,20 +98,29 @@ export default class YAMLContext {
       };
     }, {});
 
+    const initialAssets: Assets = {
+      exclude: this.assets.exclude, // Keep the exclude rules in result assets
+    };
     this.assets = Object.keys(this.assets).reduce((acc: Assets, key: AssetTypes) => {
+      // Get the list of asset types to include
       const includedAssetTypes = this.config.AUTH0_INCLUDED_ONLY;
 
+      // If includedAssetTypes is defined and this asset type (key) is not in the list, exclude it
       if (includedAssetTypes !== undefined && !includedAssetTypes.includes(key)) return acc;
 
+      // Otherwise, include the asset type in the result
       return {
         ...acc,
         [key]: this.assets[key],
       };
-    }, {});
+    }, initialAssets);
 
     // Run initial schema check to ensure valid YAML
     const auth0 = new Auth0(this.mgmtClient, this.assets, toConfigFn(this.config));
-    if (!opts.disableKeywordReplacement) await auth0.validate(); //The schema validation needs to be disabled during keyword-preserved export because a field may be enforced as an array but will be expressed with an array replace marker (string).
+    if (!opts.disableKeywordReplacement) {
+      // The schema validation needs to be disabled during keyword-preserved export because a field may be enforced as an array but will be expressed with an array replace marker (string).
+      await auth0.validate();
+    }
 
     // Allow handlers to process the assets such as loading files etc
     await Promise.all(
