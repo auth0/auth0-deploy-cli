@@ -27,18 +27,20 @@ phoneProviders:
     const yamlFile = path.join(dir, 'config.yaml');
     fs.writeFileSync(yamlFile, yaml);
 
-    const target = [{
-      credentials: {
-        auth_token : 'some_auth_token',
+    const target = [
+      {
+        credentials: {
+          auth_token: 'some_auth_token',
+        },
+        disabled: false,
+        name: 'twilio',
+        configuration: {
+          sid: 'twilio_sid',
+          default_from: '++15673812247',
+          delivery_methods: ['text', 'voice'],
+        },
       },
-      disabled: false,
-      name: 'twilio',
-      configuration:{
-        sid: 'twilio_sid',
-        default_from: '++15673812247',
-        delivery_methods: ['text', 'voice']
-      }
-    }];
+    ];
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { ENV: 'test' } };
     const context = new Context(config, mockMgmtClient());
@@ -48,30 +50,34 @@ phoneProviders:
 
   it('should dump phone providers', async () => {
     const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
-    context.assets.phoneProviders = [{
-      disabled: false,
-      name: 'twilio',
-      configuration:{
-        sid: 'twilio_sid',
-        default_from: '++15673812247',
-        delivery_methods: ['text', 'voice']
-      }
-    }];
+    context.assets.phoneProviders = [
+      {
+        disabled: false,
+        name: 'twilio',
+        configuration: {
+          sid: 'twilio_sid',
+          default_from: '++15673812247',
+          delivery_methods: ['text', 'voice'],
+        },
+      },
+    ];
 
     const dumped = await handler.dump(context);
     expect(dumped).to.deep.equal({
-      phoneProviders: [{
-        disabled: false,
-        name: 'twilio',
-        configuration:{
-          sid: 'twilio_sid',
-          default_from: '++15673812247',
-          delivery_methods: ['text', 'voice']
+      phoneProviders: [
+        {
+          disabled: false,
+          name: 'twilio',
+          configuration: {
+            sid: 'twilio_sid',
+            default_from: '++15673812247',
+            delivery_methods: ['text', 'voice'],
+          },
+          credentials: {
+            auth_token: '##TWILIO_AUTH_TOKEN##',
+          },
         },
-        credentials: {
-          auth_token: '##TWILIO_AUTH_TOKEN##'
-        }
-      }],
+      ],
     });
   });
 });

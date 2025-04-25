@@ -31,15 +31,17 @@ describe('#directory context phone provider', () => {
     const context = new Context(config, mockMgmtClient());
     await context.loadAssetsFromLocal();
 
-    expect(context.assets.phoneProviders).to.deep.equal([{
-      disabled: false,
-      name: 'twilio',
-      configuration:{
-        sid: 'twilio_sid',
-        default_from: '++15673812247',
-        delivery_methods: ['text', 'voice']
-      }
-    }]);
+    expect(context.assets.phoneProviders).to.deep.equal([
+      {
+        disabled: false,
+        name: 'twilio',
+        configuration: {
+          sid: 'twilio_sid',
+          default_from: '++15673812247',
+          delivery_methods: ['text', 'voice'],
+        },
+      },
+    ]);
   });
 
   it('should dump phone providers', async () => {
@@ -47,29 +49,33 @@ describe('#directory context phone provider', () => {
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
-    context.assets.phoneProviders = [{
-      disabled: false,
-      name: 'twilio',
-      configuration:{
-        sid: 'twilio_sid',
-        default_from: '++15673812247',
-        delivery_methods: ['text', 'voice']
-      }
-    }];
+    context.assets.phoneProviders = [
+      {
+        disabled: false,
+        name: 'twilio',
+        configuration: {
+          sid: 'twilio_sid',
+          default_from: '++15673812247',
+          delivery_methods: ['text', 'voice'],
+        },
+      },
+    ];
 
     await handler.dump(context);
     const phoneTemplateFolder = path.join(dir, constants.PHONE_PROVIDER_DIRECTORY);
-    expect(loadJSON(path.join(phoneTemplateFolder, 'provider.json'))).to.deep.equal([{
-      disabled: false,
-      name: 'twilio',
-      configuration:{
-        sid: 'twilio_sid',
-        default_from: '++15673812247',
-        delivery_methods: ['text', 'voice']
+    expect(loadJSON(path.join(phoneTemplateFolder, 'provider.json'))).to.deep.equal([
+      {
+        disabled: false,
+        name: 'twilio',
+        configuration: {
+          sid: 'twilio_sid',
+          default_from: '++15673812247',
+          delivery_methods: ['text', 'voice'],
+        },
+        credentials: {
+          auth_token: '##TWILIO_AUTH_TOKEN##',
+        },
       },
-      credentials: {
-        auth_token: '##TWILIO_AUTH_TOKEN##'
-      },
-    }]);
+    ]);
   });
 });

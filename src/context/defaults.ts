@@ -56,7 +56,14 @@ export function emailProviderDefaults(emailProvider) {
 export function phoneProviderDefaults(phoneProvider) {
   const updated = { ...phoneProvider };
 
-  const removeKeysFromOutput = ['id', 'created_at', 'updated_at', 'channel', 'tenant', 'credentials'];
+  const removeKeysFromOutput = [
+    'id',
+    'created_at',
+    'updated_at',
+    'channel',
+    'tenant',
+    'credentials',
+  ];
   removeKeysFromOutput.forEach((key) => {
     if (key in updated) {
       delete updated[key];
