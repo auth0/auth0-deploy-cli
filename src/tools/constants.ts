@@ -238,13 +238,13 @@ const constants = {
       'reset-password-mfa-sms-challenge',
       'reset-password-mfa-phone-challenge',
       'reset-password-mfa-voice-challenge',
-      'reset-password-mfa-recovery-code-challenge'
+      'reset-password-mfa-recovery-code-challenge',
     ],
     'device-flow': [
       'device-code-activation',
       'device-code-activation-allowed',
       'device-code-activation-denied',
-      'device-code-confirmation'
+      'device-code-confirmation',
     ],
     mfa: [
       'mfa-detect-browser-capabilities',
@@ -260,18 +260,13 @@ const constants = {
       'mfa-push-list',
       'mfa-push-welcome',
     ],
-    'mfa-phone':['mfa-phone-challenge', 'mfa-phone-enrollment'],
+    'mfa-phone': ['mfa-phone-challenge', 'mfa-phone-enrollment'],
     'mfa-voice': ['mfa-voice-challenge', 'mfa-voice-enrollment'],
-    'invitation': ['accept-invitation'],
-    'organizations': ['organization-selection', 'organization-picker'],
-    'mfa-otp': [
-      'mfa-otp-challenge',
-      'mfa-otp-enrollment-code',
-      'mfa-otp-enrollment-qr'
-    ],
+    invitation: ['accept-invitation'],
+    organizations: ['organization-selection', 'organization-picker'],
+    'mfa-otp': ['mfa-otp-challenge', 'mfa-otp-enrollment-code', 'mfa-otp-enrollment-qr'],
     'mfa-recovery-code': ['mfa-recovery-code-challenge', 'mfa-recovery-code-enrollment'],
-    'common': ['redeem-ticket'],
-
+    common: ['redeem-ticket'],
   } as PromptScreenMapping,
 };
 
