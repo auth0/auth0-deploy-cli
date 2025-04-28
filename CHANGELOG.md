@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support new screens for rendering `prompt` screen's settings [#1071]
+
+### Fixed
+
+- Fix AUTH0_EXCLUDED_CLIENTS support for `clients` YAML format [#1072]
+
 ## [8.8.0] - 2025-04-10
 
 ### Added
@@ -16,8 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fix: Remove unsupported ACUL screens for rendering `prompt` screen's settings [#1061]
-- Fix: Update node version requirement to 20(v20.18.1) [#1062]
+- Fix remove unsupported ACUL screens for rendering `prompt` screen's settings [#1061]
+- Fix update node version requirement to 20(v20.18.1) [#1062]
 
 ## [8.7.1] - 2025-03-27
 
