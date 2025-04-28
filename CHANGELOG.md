@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.8.1] - 2025-04-28
+
+### Added
+
+- Add support new screens for rendering `prompt` screen's settings [#1071]
+
+### Fixed
+
+- Fix AUTH0_EXCLUDED_CLIENTS support for `clients` YAML format [#1072]
+
 ## [8.8.0] - 2025-04-10
 
 ### Added
@@ -16,8 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fix: Remove unsupported ACUL screens for rendering `prompt` screen's settings [#1061]
-- Fix: Update node version requirement to 20(v20.18.1) [#1062]
+- Fix remove unsupported ACUL screens for rendering `prompt` screen's settings [#1061]
+- Fix update node version requirement to 20(v20.18.1) [#1062]
 
 ## [8.7.1] - 2025-03-27
 
@@ -1291,7 +1301,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1062]: https://github.com/auth0/auth0-deploy-cli/issues/1062
 [#1063]: https://github.com/auth0/auth0-deploy-cli/issues/1063
 [#1064]: https://github.com/auth0/auth0-deploy-cli/issues/1064
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.8.0...HEAD
+[#1071]: https://github.com/auth0/auth0-deploy-cli/issues/1071
+[#1072]: https://github.com/auth0/auth0-deploy-cli/issues/1072
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.8.1...HEAD
+[8.8.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.8.0...v8.8.1
 [8.8.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.7.1...v8.8.0
 [8.7.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.7.0...v8.7.1
 [8.7.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.6.2...v8.7.0
