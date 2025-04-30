@@ -14,6 +14,11 @@ import { calculateChanges } from '../../calculateChanges';
 import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
 
+/**
+ * Decorator to set the order of a method.
+ * Lower numbers are executed first.
+ * @param value The order value.
+ */
 export function order(value) {
   return function decorator(t, n, descriptor) {
     descriptor.value.order = value; // eslint-disable-line

@@ -128,7 +128,7 @@ export default class FormsHandler extends DefaultHandler {
     return forms;
   }
 
-  @order('70')
+  @order('60')
   async processChanges(assets: Assets): Promise<void> {
     const { forms } = assets;
 

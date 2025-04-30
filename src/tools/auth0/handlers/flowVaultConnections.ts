@@ -57,7 +57,7 @@ export default class FlowVaultHandler extends DefaultHandler {
     return this.existing;
   }
 
-  @order('50')
+  @order('80')
   async processChanges(assets: Assets): Promise<void> {
     const { flowVaultConnections } = assets;
 
