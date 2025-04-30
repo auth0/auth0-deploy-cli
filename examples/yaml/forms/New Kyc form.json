@@ -36,6 +36,19 @@
             }
           }
         ],
+        "next_node": "flow_nyxC"
+      }
+    },
+    {
+      "id": "flow_nyxC",
+      "type": "FLOW",
+      "coordinates": {
+        "x": 1000,
+        "y": 0
+      },
+      "alias": "update kyc name",
+      "config": {
+        "flow_id": "Update KYC Name",
         "next_node": "$ending"
       }
     }
