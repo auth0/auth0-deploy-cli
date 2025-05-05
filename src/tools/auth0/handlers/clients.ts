@@ -54,7 +54,7 @@ export const schema = {
         },
       },
       token_quota: {
-        type: 'object',
+        type: ['object', 'null'],
         properties: {
           client_credentials: {
             type: 'object',
