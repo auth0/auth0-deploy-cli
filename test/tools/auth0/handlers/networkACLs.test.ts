@@ -111,6 +111,18 @@ describe('#networkACLs handler', () => {
       expect(data).to.deep.equal([sampleNetworkACL]);
     });
 
+    it('should handle 403 error when tenant ACL Management is not enabled', async () => {
+      const auth0 = {
+        networkAcls: {
+          getAll: () => Promise.reject(Object.assign(new Error('Forbidden'), { statusCode: 403 })),
+        },
+      };
+
+      const handler = new NetworkACLsHandler({ client: pageClient(auth0 as any), config } as any);
+      const data = await handler.getType();
+      expect(data).to.equal(null);
+    });
+
     it('should update networkACLs', async () => {
       const auth0 = {
         networkAcls: {
