@@ -5,32 +5,9 @@
 [![codecov](https://codecov.io/gh/auth0/auth0-deploy-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/auth0/auth0-deploy-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
----
-
-## Help Us Improve Auth0 Deploy CLI – Take Our Survey!
-
-👋 Hello developers! We're on a mission to make Auth0 Deploy CLI the best it can be, and we need YOUR help. We've put together a brief survey to understand how you use Deploy CLI, what you love about it, and where you think we can do better.
-
-### Why Should You Take the Survey?
-
-- **Direct Impact:** Your feedback will directly influence the future of Deploy CLI. Ever wished for a feature or fix? Here's your chance to let us know.
-- **It's Quick:** The survey takes less than 10 minutes to complete.
-
-### Privacy
-
-We care about your privacy. All data collected is anonymous and will only be used for improving Auth0 Deploy CLI.
-
-### Ready to Make a Difference?
-
-[Click here to take the survey](https://www.surveymonkey.com/r/LZKMPFN)
-
-Thank you for helping us make Auth0 Deploy CLI better for everyone!
-
----
-
 The Auth0 Deploy CLI is a tool that helps you manage your Auth0 tenant configuration. It integrates into your development workflows as a standalone CLI or as a node module.
 
-**Supported resource types:** actions, branding, client grants, clients (applications), connections, custom domains, email templates, emails, grants, guardian, hook secrets, log streams, migrations, organizations, pages, prompts, resource servers (APIs), roles, tenant settings, themes.
+**Supported resource types:** actions, branding, client grants, clients (applications), connections, custom domains, email templates, emails, grants, guardian, hook secrets, log streams, migrations, organizations, pages, prompts, resource servers (APIs), roles, tenant settings, themes, forms, flows, self-service profiles, network ACLs.
 
 🎢 [Highlights](#highlights) • 📚 [Documentation](#documentation) • 🚀 [Getting Started](#getting-started) • 💬 [Feedback](#feedback)
 
