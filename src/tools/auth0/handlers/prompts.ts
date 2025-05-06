@@ -539,12 +539,8 @@ export default class PromptsHandler extends DefaultHandler {
     await this.updateCustomTextSettings(customText);
     await this.updateCustomPromptsPartials(partials);
 
-    const includeExperimentalEA = this.config('AUTH0_EXPERIMENTAL_EA') || false;
-
-    if (includeExperimentalEA) {
-      // Update screen renderers
-      await this.updateScreenRenderers(screenRenderers);
-    }
+    // Update screen renderers
+    await this.updateScreenRenderers(screenRenderers);
 
     this.updated += 1;
     this.didUpdate(prompts);
