@@ -134,6 +134,56 @@ describe('#clients handler', () => {
       await stageFn.apply(handler, [{ clients: [someNativeClient] }]);
     });
 
+    it('should create client with refresh token policies', async () => {
+      const clientWithRefreshTokenPolicies = {
+        name: 'clientWithRefreshTokenPolicies',
+        refresh_token: {
+          policies: [
+            {
+              audience: 'https://api.example.com',
+              scope: ['read:users', 'write:users'],
+            },
+            {
+              audience: 'https://other-api.example.com',
+              scope: ['read:data'],
+            },
+          ],
+        },
+      };
+
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('clientWithRefreshTokenPolicies');
+            expect(data.refresh_token).to.be.an('object');
+            expect(data.refresh_token.policies).to.be.an('array');
+            expect(data.refresh_token.policies).to.deep.equal([
+              {
+                audience: 'https://api.example.com',
+                scope: ['read:users', 'write:users'],
+              },
+              {
+                audience: 'https://other-api.example.com',
+                scope: ['read:data'],
+              },
+            ]);
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ clients: [clientWithRefreshTokenPolicies] }]);
+    });
+
     it('should get clients', async () => {
       const auth0 = {
         clients: {
