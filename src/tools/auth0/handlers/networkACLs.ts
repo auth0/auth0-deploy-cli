@@ -234,6 +234,12 @@ export default class NetworkACLsHandler extends DefaultAPIHandler {
       if (err.statusCode === 404 || err.statusCode === 501) {
         return null;
       }
+      if (err.statusCode === 403) {
+        log.debug(
+          'Tenant ACL Management is not enabled for this tenant. Please verify `scope` or contact Auth0 support to enable this feature.'
+        );
+        return null;
+      }
       throw err;
     }
   }
