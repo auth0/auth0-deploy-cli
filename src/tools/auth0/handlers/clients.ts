@@ -4,7 +4,8 @@ import DefaultAPIHandler from './default';
 
 const multiResourceRefreshTokenPolicies = {
   type: ['array', 'null'],
-  minItems: 1,
+  description:
+    'A collection of policies governing multi-resource refresh token exchange (MRRT), defining how refresh tokens can be used across different resource servers',
   items: {
     type: 'object',
     properties: {
