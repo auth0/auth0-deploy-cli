@@ -71,7 +71,7 @@ describe('#guardianFactorProviders handler', () => {
           getPhoneFactorProviderTwilio: throwForbidden,
           getSmsFactorProviderTwilio: throwForbidden,
           getPushNotificationProviderAPNS: throwForbidden,
-          getPushNotificationProviderSNS: throwForbidden
+          getPushNotificationProviderSNS: throwForbidden,
         },
         pool,
       };
