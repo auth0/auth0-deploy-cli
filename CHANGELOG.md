@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for refresh token policies configuration for `clients` - EA [#1085]
+
+### Fixed
+
+- Fix tenant network ACL management not enabled [#1079]
+- Fix error handling `guardianFactorProviders`, `guardianFactorTemplates`, `guardianFactors`, `guardianPhoneFactorMessageTypes`, `guardianPhoneFactorSelectedProvider` for forbidden depreated feature [#1086]
+
+### Changed
+
+- Remove `AUTH0_EXPERIMENTAL_EA` flag check for screens rendering `prompt` screen's settings `import` command [#1084]
+
 ## [8.8.1] - 2025-04-28
 
 ### Added
