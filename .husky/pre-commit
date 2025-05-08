@@ -1,10 +1,11 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-
 npm run format
 npm run lint:fix
-
 npx pretty-quick --staged
+
+# Add back modified files to staging
+git add -u
 
 npx tsc --noEmit # Ensure that code compiles
