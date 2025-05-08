@@ -1,6 +1,28 @@
-import { ApiResponse, Assets, PagePaginationParams } from '../../../types';
+import { Assets } from '../../../types';
 import { paginate } from '../client';
 import DefaultAPIHandler from './default';
+
+const multiResourceRefreshTokenPolicies = {
+  type: ['array', 'null'],
+  description:
+    'A collection of policies governing multi-resource refresh token exchange (MRRT), defining how refresh tokens can be used across different resource servers',
+  items: {
+    type: 'object',
+    properties: {
+      audience: {
+        type: 'string',
+      },
+      scope: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
+        uniqueItems: true,
+      },
+    },
+    required: ['audience', 'scope'],
+  },
+};
 
 export const schema = {
   type: 'array',
@@ -51,6 +73,13 @@ export const schema = {
               enabled: { type: 'boolean' },
             },
           },
+        },
+      },
+      refresh_token: {
+        type: ['object', 'null'],
+        description: 'Refresh token configuration',
+        properties: {
+          policies: multiResourceRefreshTokenPolicies,
         },
       },
     },
