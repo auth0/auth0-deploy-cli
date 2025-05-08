@@ -275,3 +275,11 @@ export const isDeprecatedError = (err: { message: string; statusCode: number }):
   if (!err) return false;
   return !!(err.statusCode === 403 || err.message?.includes('deprecated feature'));
 };
+
+export const isForbiddenFeatureError = (err, type): boolean => {
+  if (err.statusCode === 403) {
+    log.warn(`${err.message};${err.errorCode ?? ''} - Skipping ${type}`);
+    return true;
+  }
+  return false;
+};

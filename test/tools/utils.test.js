@@ -4,6 +4,7 @@ import { expect } from 'chai';
 import jsYaml from 'js-yaml';
 import * as utils from '../../src/tools/utils';
 import constants from '../../src/tools/constants';
+import log from '../../src/logger';
 
 const mappings = {
   string: 'some string',
@@ -246,10 +247,10 @@ describe('#keywordReplacement', () => {
       STRING_REPLACEMENT: 'string-replace-value',
       ARRAY_REPLACEMENT: ['##STRING_REPLACEMENT##', 'other-array-replace-value'],
     };
-    const inputJSON = `{ 
-        "arrayReplace": "@@ARRAY_REPLACEMENT@@", 
-        "stringReplace": "##STRING_REPLACEMENT##", 
-        "noReplace": "NO_REPLACEMENT" 
+    const inputJSON = `{
+        "arrayReplace": "@@ARRAY_REPLACEMENT@@",
+        "stringReplace": "##STRING_REPLACEMENT##",
+        "noReplace": "NO_REPLACEMENT"
       }`;
     const output = utils.keywordReplace(inputJSON, mapping);
 
@@ -274,8 +275,8 @@ describe('#keywordReplacement', () => {
         propertyShouldNotStringReplace: 'this should not be replaced',
       },
     };
-    const inputJSON = `{ 
-      "stringReplace": "##STRING_REPLACEMENT##", 
+    const inputJSON = `{
+      "stringReplace": "##STRING_REPLACEMENT##",
       "noReplace": "NO_REPLACEMENT",
       "objectReplace": "@@OBJECT_REPLACEMENT@@"
       }`;
@@ -303,7 +304,7 @@ describe('#keywordReplacement', () => {
         GLOBAL_WEB_ORIGINS: "\"http://local.me:8080\", \"http://localhost\", \"http://localhost:3000\"", // eslint-disable-line
       };
 
-      const inputJSON = `{ 
+      const inputJSON = `{
       "web_origins": [
         ##GLOBAL_WEB_ORIGINS##,
         "http://production-app.com",
@@ -648,5 +649,65 @@ describe('#isDeprecatedError', () => {
     expect(utils.isDeprecatedError(undefined)).to.be.false;
     // eslint-disable-next-line no-unused-expressions
     expect(utils.isDeprecatedError({})).to.be.false;
+  });
+});
+
+describe('#isForbiddenFeatureError', () => {
+  it('should return true and log warning for 403 status code', () => {
+    let warnMessage;
+    const originalWarn = log.warn;
+    // Mock the log.warn function
+    log.warn = (msg) => {
+      warnMessage = msg;
+    };
+
+    const error = {
+      message: 'Forbidden resource access',
+      statusCode: 403,
+    };
+    const resourceType = 'connections';
+
+    // eslint-disable-next-line no-unused-expressions
+    expect(utils.isForbiddenFeatureError(error, resourceType)).to.be.true;
+    expect(warnMessage).to.equal('Forbidden resource access; - Skipping connections');
+
+    // Restore original warn function
+    log.warn = originalWarn;
+  });
+
+  it('should include errorCode in log message when available', () => {
+    let warnMessage;
+    const originalWarn = log.warn;
+    // Mock the log.warn function
+    log.warn = (msg) => {
+      warnMessage = msg;
+    };
+
+    const error = {
+      message: 'Forbidden resource access',
+      statusCode: 403,
+      errorCode: 'forbidden_resource_error',
+    };
+    const resourceType = 'actions';
+
+    // eslint-disable-next-line no-unused-expressions
+    expect(utils.isForbiddenFeatureError(error, resourceType)).to.be.true;
+    expect(warnMessage).to.equal(
+      'Forbidden resource access;forbidden_resource_error - Skipping actions'
+    );
+
+    // Restore original warn function
+    log.warn = originalWarn;
+  });
+
+  it('should return false for non-403 status code', () => {
+    const error = {
+      message: 'Not found',
+      statusCode: 404,
+    };
+    const resourceType = 'rules';
+
+    // eslint-disable-next-line no-unused-expressions
+    expect(utils.isForbiddenFeatureError(error, resourceType)).to.be.false;
   });
 });

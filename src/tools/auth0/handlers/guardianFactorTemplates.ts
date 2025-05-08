@@ -1,7 +1,8 @@
+import { TemplateMessages } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Assets, Asset } from '../../../types';
-import { TemplateMessages } from 'auth0';
+import { isForbiddenFeatureError } from '../../utils';
 
 export const schema = {
   type: 'array',
@@ -25,25 +26,33 @@ export default class GuardianFactorTemplatesHandler extends DefaultHandler {
     });
   }
 
-  async getType(): Promise<Asset[]> {
+  async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
+    try {
+      const data = await Promise.all(
+        constants.GUARDIAN_FACTOR_TEMPLATES.map(async (name) => {
+          if (name === 'sms') {
+            const { data: templates } = await this.client.guardian.getSmsFactorTemplates();
+            return { name, ...templates };
+          }
 
-    const data = await Promise.all(
-      constants.GUARDIAN_FACTOR_TEMPLATES.map(async (name) => {
-        // TODO: This is quite a change, needs to be validated for sure.
-        if (name === 'sms') {
-          const { data: templates } = await this.client.guardian.getSmsFactorTemplates();
-          return { name, ...templates };
-          // TODO: GUARDIAN_FACTOR_TEMPLATES only contains 'sms'. Is that expected? We also have 'phone'.
-        } else {
           const { data: templates } = await this.client.guardian.getPhoneFactorTemplates();
           return { name, ...templates };
-        }
-      })
-    );
+        })
+      );
 
-    // Filter out empty, should have more then 1 keys (name)
-    return data.filter((d) => Object.keys(d).length > 1);
+      // Filter out empty, should have more then 1 keys (name)
+      return data.filter((d) => Object.keys(d).length > 1);
+    } catch (err) {
+      if (err.statusCode === 404 || err.statusCode === 501) {
+        return null;
+      }
+      if (isForbiddenFeatureError(err, this.type)) {
+        return null;
+      }
+
+      throw err;
+    }
   }
 
   async processChanges(assets: Assets): Promise<void> {

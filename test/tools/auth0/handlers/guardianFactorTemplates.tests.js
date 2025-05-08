@@ -56,6 +56,23 @@ describe('#guardianFactorTemplates handler', () => {
   });
 
   describe('#guardianFactorTemplates process', () => {
+    it('should handle forbidden error', async () => {
+      const auth0 = {
+        guardian: {
+          getSmsFactorTemplates: () => {
+            const error = new Error('Forbidden resource access');
+            error.statusCode = 403;
+            throw error;
+          },
+        },
+        pool,
+      };
+
+      const handler = new guardianFactorTemplatesTests.default({ client: auth0, config });
+      const data = await handler.getType();
+      expect(data).to.equal(null);
+    });
+
     it('should get guardianFactorTemplates', async () => {
       const auth0 = {
         guardian: {

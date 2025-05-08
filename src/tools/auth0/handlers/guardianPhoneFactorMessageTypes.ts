@@ -1,7 +1,8 @@
+import { GetMessageTypes200Response } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
-import { GetMessageTypes200Response } from 'auth0';
+import { isForbiddenFeatureError } from '../../utils';
 
 export const schema = {
   type: 'object',
@@ -45,13 +46,13 @@ export default class GuardianPhoneMessageTypesHandler extends DefaultHandler {
     });
   }
 
-  async getType(): Promise<Asset[] | {}> {
+  async getType(): Promise<Asset | null> {
     // in case client version does not support the operation
     if (
       !this.client.guardian ||
       typeof this.client.guardian.getPhoneFactorMessageTypes !== 'function'
     ) {
-      return {};
+      return null;
     }
 
     if (this.existing) return this.existing;
@@ -59,12 +60,15 @@ export default class GuardianPhoneMessageTypesHandler extends DefaultHandler {
     try {
       const { data } = await this.client.guardian.getPhoneFactorMessageTypes();
       this.existing = data;
-    } catch (e) {
-      if (isFeatureUnavailableError(e)) {
+    } catch (err) {
+      if (isFeatureUnavailableError(err)) {
         // Gracefully skip processing this configuration value.
-        return {};
+        return null;
       }
-      throw e;
+      if (isForbiddenFeatureError(err, this.type)) {
+        return null;
+      }
+      throw err;
     }
 
     return this.existing;

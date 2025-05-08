@@ -55,6 +55,23 @@ describe('#guardianFactors handler', () => {
   });
 
   describe('#guardianFactors process', () => {
+    it('should handle forbidden error', async () => {
+      const auth0 = {
+        guardian: {
+          getFactors: () => {
+            const error = new Error('Forbidden resource access');
+            error.statusCode = 403;
+            throw error;
+          },
+        },
+        pool,
+      };
+
+      const handler = new guardianFactorsTests.default({ client: auth0, config });
+      const data = await handler.getType();
+      expect(data).to.equal(null);
+    });
+
     it('should get guardianFactors', async () => {
       const factors = [
         { name: 'sms', enabled: true },
