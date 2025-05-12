@@ -1,7 +1,8 @@
+import { Factor, FactorNameEnum } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
-import { Factor, FactorNameEnum } from 'auth0';
+import { isForbiddenFeatureError } from '../../utils';
 
 export const schema = {
   type: 'array',
@@ -25,11 +26,22 @@ export default class GuardianFactorsHandler extends DefaultHandler {
     });
   }
 
-  async getType(): Promise<Asset[]> {
+  async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
-    const { data } = await this.client.guardian.getFactors();
-    this.existing = data;
-    return this.existing;
+    try {
+      const { data } = await this.client.guardian.getFactors();
+      this.existing = data;
+      return this.existing;
+    } catch (err) {
+      if (err.statusCode === 404 || err.statusCode === 501) {
+        return null;
+      }
+      if (isForbiddenFeatureError(err, this.type)) {
+        return null;
+      }
+
+      throw err;
+    }
   }
 
   async processChanges(assets: Assets): Promise<void> {

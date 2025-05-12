@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.8.2] - 2025-05-08
+
+### Added
+
+- Add support for refresh token policies configuration for `clients` - EA [#1085]
+
+### Changed
+
+- Remove `AUTH0_EXPERIMENTAL_EA` flag check for screens rendering `prompt` screen's settings `import` command [#1084]
+
+### Fixed
+
+- Fix tenant network ACL management not enabled [#1079]
+- Fix error handling `guardianFactorProviders`, `guardianFactorTemplates`, `guardianFactors`, `guardianPhoneFactorMessageTypes`, `guardianPhoneFactorSelectedProvider` for forbidden depreated feature [#1086]
+
 ## [8.8.1] - 2025-04-28
 
 ### Added
@@ -1303,7 +1318,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1064]: https://github.com/auth0/auth0-deploy-cli/issues/1064
 [#1071]: https://github.com/auth0/auth0-deploy-cli/issues/1071
 [#1072]: https://github.com/auth0/auth0-deploy-cli/issues/1072
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.8.1...HEAD
+[#1079]: https://github.com/auth0/auth0-deploy-cli/issues/1079
+[#1084]: https://github.com/auth0/auth0-deploy-cli/issues/1084
+[#1085]: https://github.com/auth0/auth0-deploy-cli/issues/1085
+[#1086]: https://github.com/auth0/auth0-deploy-cli/issues/1086
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.8.2...HEAD
+[8.8.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.8.1...v8.8.2
 [8.8.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.8.0...v8.8.1
 [8.8.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.7.1...v8.8.0
 [8.7.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.7.0...v8.7.1

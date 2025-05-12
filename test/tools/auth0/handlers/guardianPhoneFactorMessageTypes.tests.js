@@ -12,7 +12,7 @@ describe('#guardianPhoneFactorMessageTypes handler', () => {
 
       const handler = new guardianPhoneFactorMessageTypes.default({ client: auth0 });
       const data = await handler.getType();
-      expect(data).to.deep.equal({});
+      expect(data).to.deep.equal(null);
     });
 
     it('should support when endpoint does not exist (older installations)', async () => {
@@ -42,7 +42,7 @@ describe('#guardianPhoneFactorMessageTypes handler', () => {
 
       const handler = new guardianPhoneFactorMessageTypes.default({ client: auth0 });
       const data = await handler.getType();
-      expect(data).to.deep.equal({});
+      expect(data).to.deep.equal(null);
     });
 
     it('should support when endpoint is disabled for tenant', async () => {
@@ -73,7 +73,7 @@ describe('#guardianPhoneFactorMessageTypes handler', () => {
 
       const handler = new guardianPhoneFactorMessageTypes.default({ client: auth0 });
       const data = await handler.getType();
-      expect(data).to.deep.equal({});
+      expect(data).to.deep.equal(null);
     });
 
     it('should get guardian phone factor message types', async () => {
@@ -140,7 +140,7 @@ describe('#guardianPhoneFactorMessageTypes handler', () => {
       const handler = new guardianPhoneFactorMessageTypes.default({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [{ guardianPhoneFactorMessageTypes: {} }]);
+      await stageFn.apply(handler, [{ guardianPhoneFactorMessageTypes: null }]);
     });
   });
 });

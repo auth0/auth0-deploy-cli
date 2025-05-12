@@ -59,6 +59,28 @@ describe('#guardianFactorProviders handler', () => {
   });
 
   describe('#guardianFactorProviders process', () => {
+    it('should handle forbidden error', async () => {
+      const throwForbidden = () => {
+        const error = new Error('Forbidden resource access');
+        error.statusCode = 403;
+        throw error;
+      };
+
+      const auth0 = {
+        guardian: {
+          getPhoneFactorProviderTwilio: throwForbidden,
+          getSmsFactorProviderTwilio: throwForbidden,
+          getPushNotificationProviderAPNS: throwForbidden,
+          getPushNotificationProviderSNS: throwForbidden,
+        },
+        pool,
+      };
+
+      const handler = new guardianFactorProvidersTests.default({ client: auth0, config });
+      const data = await handler.getType();
+      expect(data).to.equal(null);
+    });
+
     it('should get guardianFactorProviders', async () => {
       const auth0 = {
         guardian: {

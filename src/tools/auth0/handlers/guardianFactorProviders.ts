@@ -1,6 +1,7 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
+import { isForbiddenFeatureError } from '../../utils';
 
 const mappings = Object.entries(constants.GUARDIAN_FACTOR_PROVIDERS).reduce(
   (accum: { name: string; provider: string }[], [name, providers]) => {
@@ -35,29 +36,40 @@ export default class GuardianFactorProvidersHandler extends DefaultHandler {
     });
   }
 
-  async getType(): Promise<Asset[]> {
+  async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
 
-    const data = await Promise.all(
-      mappings.map(async (m) => {
-        let provider;
-        // TODO: This is quite a change, needs to be validated for sure.
-        if (m.name === 'phone' && m.provider === 'twilio') {
-          provider = await this.client.guardian.getPhoneFactorProviderTwilio();
-        } else if (m.name === 'sms' && m.provider === 'twilio') {
-          provider = await this.client.guardian.getSmsFactorProviderTwilio();
-        } else if (m.name === 'push-notification' && m.provider === 'apns') {
-          provider = await this.client.guardian.getPushNotificationProviderAPNS();
-        } else if (m.name === 'push-notification' && m.provider === 'sns') {
-          provider = await this.client.guardian.getPushNotificationProviderSNS();
-        }
+    try {
+      const data = await Promise.all(
+        mappings.map(async (m) => {
+          let provider;
+          // TODO: This is quite a change, needs to be validated for sure.
+          if (m.name === 'phone' && m.provider === 'twilio') {
+            provider = await this.client.guardian.getPhoneFactorProviderTwilio();
+          } else if (m.name === 'sms' && m.provider === 'twilio') {
+            provider = await this.client.guardian.getSmsFactorProviderTwilio();
+          } else if (m.name === 'push-notification' && m.provider === 'apns') {
+            provider = await this.client.guardian.getPushNotificationProviderAPNS();
+          } else if (m.name === 'push-notification' && m.provider === 'sns') {
+            provider = await this.client.guardian.getPushNotificationProviderSNS();
+          }
 
-        return { ...m, ...provider.data };
-      })
-    );
+          return { ...m, ...provider.data };
+        })
+      );
 
-    // Filter out empty, should have more then 2 keys (name, provider)
-    return data.filter((d) => Object.keys(d).length > 2);
+      // Filter out empty, should have more then 2 keys (name, provider)
+      return data.filter((d) => Object.keys(d).length > 2);
+    } catch (err) {
+      if (err.statusCode === 404 || err.statusCode === 501) {
+        return null;
+      }
+      if (isForbiddenFeatureError(err, this.type)) {
+        return null;
+      }
+
+      throw err;
+    }
   }
 
   async processChanges(assets: Assets): Promise<void> {
