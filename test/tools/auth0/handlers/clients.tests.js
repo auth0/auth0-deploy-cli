@@ -184,6 +184,46 @@ describe('#clients handler', () => {
       await stageFn.apply(handler, [{ clients: [clientWithRefreshTokenPolicies] }]);
     });
 
+    it('should allow valid token_quota property in client', async () => {
+      const clientWithTokenQuota = {
+        name: 'clientWithTokenQuota',
+        token_quota: {
+          client_credentials: {
+            enforce: true,
+            per_day: 1000,
+            per_hour: 100,
+          },
+        },
+      };
+      let wasCreateCalled = false;
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            wasCreateCalled = true;
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('clientWithTokenQuota');
+            expect(data.token_quota).to.deep.equal({
+              client_credentials: {
+                enforce: true,
+                per_day: 1000,
+                per_hour: 100,
+              },
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ clients: [clientWithTokenQuota] }]);
+      // eslint-disable-next-line no-unused-expressions
+      expect(wasCreateCalled).to.be.true;
+    });
+
     it('should get clients', async () => {
       const auth0 = {
         clients: {
