@@ -218,6 +218,58 @@ describe('#organizations handler', () => {
       ]);
     });
 
+    it('should allow valid token_quota property in organization', async () => {
+      const orgWithTokenQuota = {
+        name: 'orgWithTokenQuota',
+        token_quota: {
+          client_credentials: {
+            enforce: false,
+            per_day: 500,
+            per_hour: 50,
+          },
+        },
+      };
+      let wasCreateCalled = false;
+      const auth0 = {
+        organizations: {
+          create: function (data) {
+            wasCreateCalled = true;
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('orgWithTokenQuota');
+            expect(data.token_quota).to.deep.equal({
+              client_credentials: {
+                enforce: false,
+                per_day: 500,
+                per_hour: 50,
+              },
+            });
+            data.id = 'fake';
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          getEnabledConnections: () => Promise.resolve({ data: [] }),
+          getOrganizationClientGrants: () => ({ data: [] }),
+        },
+        connections: {
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+        },
+        pool,
+      };
+      const handler = new organizations.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ organizations: [orgWithTokenQuota] }]);
+      // eslint-disable-next-line no-unused-expressions
+      expect(wasCreateCalled).to.be.true;
+    });
+
     it('should get organizations', async () => {
       const auth0 = {
         organizations: {
