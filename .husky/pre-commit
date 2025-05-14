@@ -1,6 +1,3 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
 npm run format
 npm run lint:fix
 npx pretty-quick --staged
