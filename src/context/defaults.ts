@@ -16,6 +16,10 @@ export function emailProviderDefaults(emailProvider) {
   }
 
   if (name === 'smtp') {
+    // This is to mask smtp_user to '##SMTP_USER##'
+    if (updated.credentials && 'smtp_user' in updated.credentials) {
+      delete updated.credentials.smtp_user;
+    }
     updated.credentials = {
       smtp_host: '##SMTP_HOSTNAME##',
       smtp_port: '##SMTP_PORT##',

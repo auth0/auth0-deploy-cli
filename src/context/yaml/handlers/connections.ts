@@ -14,6 +14,7 @@ import {
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
+import { maskSecretAtPath } from '../../../tools/utils';
 
 type ParsedConnections = ParsedAsset<'connections', Asset[]>;
 
@@ -77,6 +78,11 @@ async function dump(context: YAMLContext): Promise<ParsedConnections> {
         }),
       };
 
+      if (connection.options) {
+        // Mask secret for key: connection.options.client_secret
+        maskSecretAtPath(connection.options, 'client_secret', 'connections', connection.strategy);
+      }
+
       if (dumpedConnection.strategy === 'email') {
         ensureProp(connection, 'options.email.body');
         const connectionsFolder = path.join(context.basePath, constants.CONNECTIONS_DIRECTORY);
@@ -102,6 +108,7 @@ async function dump(context: YAMLContext): Promise<ParsedConnections> {
           );
         }
       }
+
       return dumpedConnection;
     }),
   };

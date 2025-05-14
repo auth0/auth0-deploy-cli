@@ -17,6 +17,7 @@ import {
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
+import { maskSecretAtPath } from '../../../tools/utils';
 
 type ParsedConnections = ParsedAsset<'connections', Asset[]>;
 
@@ -77,6 +78,11 @@ async function dump(context: DirectoryContext): Promise<void> {
     };
 
     const connectionName = sanitize(dumpedConnection.name);
+
+    if (connection.options) {
+      // Mask secret for key: connection.options.client_secret
+      maskSecretAtPath(connection.options, 'client_secret', 'connections', connection.strategy);
+    }
 
     if (dumpedConnection.strategy === 'email') {
       ensureProp(dumpedConnection, 'options.email.body');

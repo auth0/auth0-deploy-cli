@@ -5,6 +5,7 @@ import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../.
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
+import { maskSecretAtPath } from '../../../tools/utils';
 
 type ParsedLogStreams = ParsedAsset<'logStreams', Asset[]>;
 
@@ -29,15 +30,34 @@ function parse(context: DirectoryContext): ParsedLogStreams {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const logStreams = context.assets.logStreams;
+  const { logStreams } = context.assets;
 
   if (!logStreams) return; // Skip, nothing to dump
 
   // Create Rules folder
   const logStreamsDirectory = path.join(context.filePath, constants.LOG_STREAMS_DIRECTORY);
+
+  // masked sensitive fields
+  const sensitiveKeys = [
+    'httpAuthorization',
+    'splunkToken',
+    'datadogApiKey',
+    'mixpanelServiceAccountPassword',
+    'segmentWriteKey',
+  ];
+
   fs.ensureDirSync(logStreamsDirectory);
   logStreams.forEach((logStream) => {
     const ruleFile = path.join(logStreamsDirectory, `${sanitize(logStream.name)}.json`);
+
+    if (logStream.sink) {
+      sensitiveKeys.forEach((key) => {
+        if (logStream.sink && logStream.sink[key]) {
+          maskSecretAtPath(logStream.sink as object, key, 'logStreams', logStream.type);
+        }
+      });
+    }
+
     dumpJSON(ruleFile, logStream);
   });
 }
