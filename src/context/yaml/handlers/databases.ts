@@ -19,9 +19,9 @@ async function parse(context: YAMLContext): Promise<ParsedDatabases> {
       ...databases.map((database) => ({
         ...database,
         options: {
-          ...database.options,
+          ...(database.options || {}),
           // customScripts option only written if there are scripts
-          ...(database.options.customScripts && {
+          ...(database.options?.customScripts && {
             customScripts: Object.entries(database.options.customScripts).reduce(
               (scripts, [name, script]) => ({
                 ...scripts,
