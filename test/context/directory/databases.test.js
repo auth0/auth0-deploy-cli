@@ -342,7 +342,11 @@ describe('#directory context databases', () => {
     ];
 
     await handler.dump(context);
-    const scriptsFolder = path.join(dbDumpDir, constants.DATABASE_CONNECTIONS_DIRECTORY, 'users-no-options');
+    const scriptsFolder = path.join(
+      dbDumpDir,
+      constants.DATABASE_CONNECTIONS_DIRECTORY,
+      'users-no-options'
+    );
     expect(loadJSON(path.join(scriptsFolder, 'database.json'))).to.deep.equal({
       name: 'users-no-options',
       enabled_clients: [],
