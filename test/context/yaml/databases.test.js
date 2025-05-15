@@ -260,7 +260,7 @@ describe('#YAML context databases', () => {
   it('should dump database with undefined options', async () => {
     cleanThenMkdir(dbDumpDir);
     const context = new Context(
-      { AUTH0_INPUT_FILE: path.join(dbDumpDir, 'tennat.yaml') },
+      { AUTH0_INPUT_FILE: path.join(dbDumpDir, 'tenant.yaml') },
       mockMgmtClient()
     );
 
