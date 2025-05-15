@@ -54,15 +54,15 @@ function getDatabase(
   const database = {
     ...metaData,
     options: {
-      //@ts-ignore because this code exists currently, but still needs to be understood if it is correct or not
-      ...metaData.options,
-      //@ts-ignore because this code exists currently, but still needs to be understood if it is correct or not
-      ...(metaData.customScripts && { customScripts: metaData.customScripts }),
+      // @ts-ignore because this code exists currently, but still needs to be understood if it is correct or not
+      ...(metaData.options || {}),
+      // @ts-ignore because this code exists currently, but still needs to be understood if it is correct or not
+      ...(metaData?.customScripts && { customScripts: metaData?.customScripts }),
     },
   };
 
   // If any customScripts configured then load content of files
-  if (database.options.customScripts) {
+  if (database.options?.customScripts) {
     Object.entries(database.options.customScripts).forEach(([name, script]: [string, string]) => {
       if (!constants.DATABASE_SCRIPTS.includes(name)) {
         // skip invalid keys in customScripts object

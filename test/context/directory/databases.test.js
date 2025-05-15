@@ -327,4 +327,27 @@ describe('#directory context databases', () => {
       scriptValidate
     );
   });
+
+  it('should dump database with undefined options', async () => {
+    cleanThenMkdir(dbDumpDir);
+    const context = new Context({ AUTH0_INPUT_FILE: dbDumpDir }, mockMgmtClient());
+
+    context.assets.databases = [
+      {
+        name: 'users-no-options',
+        enabled_clients: [],
+        // options field intentionally missing
+        strategy: 'auth0',
+      },
+    ];
+
+    await handler.dump(context);
+    const scriptsFolder = path.join(dbDumpDir, constants.DATABASE_CONNECTIONS_DIRECTORY, 'users-no-options');
+    expect(loadJSON(path.join(scriptsFolder, 'database.json'))).to.deep.equal({
+      name: 'users-no-options',
+      enabled_clients: [],
+      options: {}, // should be empty object when options is undefined
+      strategy: 'auth0',
+    });
+  });
 });

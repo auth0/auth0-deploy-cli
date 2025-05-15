@@ -54,9 +54,9 @@ async function dump(context: YAMLContext): Promise<ParsedDatabases> {
           enabled_clients: mapClientID2NameSorted(database.enabled_clients, clients || []),
         }),
         options: {
-          ...database.options,
+          ...(database.options || {}),
           // customScripts option only written if there are scripts
-          ...(database.options.customScripts && {
+          ...(database.options?.customScripts && {
             customScripts: Object.entries(database.options.customScripts)
               //@ts-ignore because we'll fix this in subsequent PR
               .sort(sortCustomScripts)
