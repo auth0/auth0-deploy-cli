@@ -11,8 +11,45 @@ import { convertJsonToString } from '../../utils';
 import { Asset, Assets } from '../../../types';
 import log from '../../../logger';
 
+const tokenQuotaConfigurationSchema = {
+  type: 'object',
+  properties: {
+    client_credentials: {
+      type: 'object',
+      properties: {
+        enforce: {
+          type: 'boolean',
+          default: true,
+        },
+        per_day: {
+          type: 'integer',
+          minimum: 1,
+        },
+        per_hour: {
+          type: 'integer',
+          minimum: 1,
+        },
+      },
+      additionalProperties: false,
+      minProperties: 1,
+    },
+  },
+  required: ['client_credentials'],
+};
+
 export const schema = {
   type: 'object',
+  properties: {
+    default_token_quota: {
+      type: 'object',
+      properties: {
+        clients: tokenQuotaConfigurationSchema,
+        organizations: tokenQuotaConfigurationSchema,
+      },
+      additionalProperties: false,
+      minProperties: 1,
+    },
+  },
 };
 
 export type Tenant = TenantSettings;
