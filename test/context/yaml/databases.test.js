@@ -256,4 +256,33 @@ describe('#YAML context databases', () => {
       scriptValidate
     );
   });
+
+  it('should dump database with undefined options', async () => {
+    cleanThenMkdir(dbDumpDir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dbDumpDir, 'tenant.yaml') },
+      mockMgmtClient()
+    );
+
+    context.assets.databases = [
+      {
+        name: 'users-no-options',
+        enabled_clients: [],
+        // options field intentionally missing
+        strategy: 'auth0',
+      },
+    ];
+
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({
+      databases: [
+        {
+          name: 'users-no-options',
+          enabled_clients: [],
+          options: {}, // should be empty object when options is undefined
+          strategy: 'auth0',
+        },
+      ],
+    });
+  });
 });
