@@ -18,8 +18,7 @@
     "dev": "npx tsc --watch",
     "prepublishOnly": "npm run build",
     "preversion": "kacl prerelease",
-    "version": "kacl release && git add CHANGELOG.md",
-    "prepare": "husky || true"
+    "version": "kacl release && git add CHANGELOG.md"
   },
   "repository": {
     "type": "git",
