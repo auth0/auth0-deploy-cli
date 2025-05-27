@@ -19,7 +19,7 @@
     "prepublishOnly": "npm run build",
     "preversion": "kacl prerelease",
     "version": "kacl release && git add CHANGELOG.md",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "repository": {
     "type": "git",
