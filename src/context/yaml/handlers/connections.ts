@@ -14,7 +14,7 @@ import {
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
-import { maskSecretAtPath } from '../../../tools/utils';
+import { connectionDefaults } from '../../defaults';
 
 type ParsedConnections = ParsedAsset<'connections', Asset[]>;
 
@@ -70,7 +70,7 @@ async function dump(context: YAMLContext): Promise<ParsedConnections> {
 
   return {
     connections: connections.map((connection) => {
-      const dumpedConnection = {
+      let dumpedConnection = {
         ...connection,
         ...getFormattedOptions(connection, clients),
         ...(connection.enabled_clients && {
@@ -78,10 +78,8 @@ async function dump(context: YAMLContext): Promise<ParsedConnections> {
         }),
       };
 
-      if (connection.options) {
-        // Mask secret for key: connection.options.client_secret
-        maskSecretAtPath(connection.options, 'client_secret', 'connections', connection.strategy);
-      }
+      // Mask secrets
+      dumpedConnection = connectionDefaults(dumpedConnection);
 
       if (dumpedConnection.strategy === 'email') {
         ensureProp(connection, 'options.email.body');

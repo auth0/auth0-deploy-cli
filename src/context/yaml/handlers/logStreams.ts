@@ -1,7 +1,7 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { maskSecretAtPath } from '../../../tools/utils';
 import { Asset, ParsedAsset } from '../../../types';
+import { logStreamDefaults } from '../../defaults';
 
 type ParsedLogStreams = ParsedAsset<'logStreams', Asset[]>;
 
@@ -21,24 +21,7 @@ async function dump(context: YAMLContext): Promise<ParsedLogStreams> {
   if (!logStreams) return { logStreams: null };
 
   // masked sensitive fields
-  const sensitiveKeys = [
-    'httpAuthorization',
-    'splunkToken',
-    'datadogApiKey',
-    'mixpanelServiceAccountPassword',
-    'segmentWriteKey',
-  ];
-
-  const maskedLogStreams = logStreams.map((logStream) => {
-    if (logStream.sink) {
-      sensitiveKeys.forEach((key) => {
-        if (logStream.sink && logStream.sink[key]) {
-          maskSecretAtPath(logStream.sink as object, key, 'logStreams', logStream.type);
-        }
-      });
-    }
-    return logStream;
-  });
+  const maskedLogStreams = logStreamDefaults(logStreams);
 
   return {
     logStreams: maskedLogStreams,

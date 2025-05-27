@@ -1,3 +1,5 @@
+import { maskSecretAtPath } from '../tools/utils';
+
 // eslint-disable-next-line import/prefer-default-export
 export function emailProviderDefaults(emailProvider) {
   // eslint-disable-line
@@ -85,4 +87,45 @@ export function phoneProviderDefaults(phoneProvider) {
     };
   }
   return updated;
+}
+
+export function connectionDefaults(connection) {
+  if (connection.options) {
+    // Mask secret for key: connection.options.client_secret
+    maskSecretAtPath({
+      resourceTypeName: 'connections',
+      maskedKeyName: connection.strategy,
+      maskOnObj: connection.options,
+      keyJsonPath: 'client_secret',
+    });
+  }
+  return connection;
+}
+
+export function logStreamDefaults(logStreams) {
+  // masked sensitive fields
+  const sensitiveKeys = [
+    'httpAuthorization',
+    'splunkToken',
+    'datadogApiKey',
+    'mixpanelServiceAccountPassword',
+    'segmentWriteKey',
+  ];
+  const maskedLogStreams = logStreams.map((logStream) => {
+    if (logStream.sink) {
+      sensitiveKeys.forEach((key) => {
+        if (logStream.sink && logStream.sink[key]) {
+          maskSecretAtPath({
+            resourceTypeName: 'logStreams',
+            maskedKeyName: logStream.type,
+            maskOnObj: logStream.sink,
+            keyJsonPath: key,
+          });
+        }
+      });
+    }
+    return logStream;
+  });
+
+  return maskedLogStreams;
 }
