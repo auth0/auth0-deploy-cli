@@ -6,9 +6,7 @@ CONFIG_FILE="./config-cli-e2e.json"
 
 npm ci #Install all dependencies to allow for building
 npm run build
-
-# Skip removing dev dependencies - husky prepare script needs them
-# npm ci --omit=dev  #Remove dev dependencies
+npm ci --omit=dev  #Remove dev dependencies
 
 TARBALL_PATH=$(npm pack)
 sudo npm install -g $TARBALL_PATH
