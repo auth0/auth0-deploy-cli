@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support new screens for rendering `prompt` screen's settings [#1096]
+
+### Fixed
+
+- Fix export `databases` options and customScripts [#1095]
+
 ## [8.8.2] - 2025-05-08
 
 ### Added
