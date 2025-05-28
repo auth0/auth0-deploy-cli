@@ -573,7 +573,8 @@ export default class PromptsHandler extends DefaultHandler {
   }
 
   async updateScreenRenderer(screenRenderer: ScreenRenderer): Promise<void> {
-    const { prompt, screen, rendering_mode, tenant, default_head_tags_disabled, ...updatePrams } = screenRenderer;
+    const { prompt, screen, rendering_mode, tenant, default_head_tags_disabled, ...updatePrams } =
+      screenRenderer;
     if (!prompt || !screen) return;
 
     let updatePayload: PatchRenderingRequest = {};
@@ -586,7 +587,7 @@ export default class PromptsHandler extends DefaultHandler {
       updatePayload = {
         ...updatePrams,
         rendering_mode,
-        default_head_tags_disabled: default_head_tags_disabled || undefined
+        default_head_tags_disabled: default_head_tags_disabled || undefined,
       };
     }
 

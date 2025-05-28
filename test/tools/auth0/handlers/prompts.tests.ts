@@ -118,7 +118,7 @@ describe('#prompts handler', () => {
 
             return Promise.resolve({ data: customTextValue });
           },
-          getAllRenderingSettings : () =>
+          getAllRenderingSettings: () =>
             Promise.resolve({ data: [sampleScreenRenderLogin, sampleScreenRenderSignUp] }),
         },
         pool: new PromisePoolExecutor({
