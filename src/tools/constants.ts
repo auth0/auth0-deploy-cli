@@ -239,6 +239,8 @@ const constants = {
       'reset-password-mfa-phone-challenge',
       'reset-password-mfa-voice-challenge',
       'reset-password-mfa-recovery-code-challenge',
+      'reset-password-mfa-webauthn-platform-challenge',
+      'reset-password-mfa-webauthn-roaming-challenge',
     ],
     'device-flow': [
       'device-code-activation',
@@ -265,8 +267,24 @@ const constants = {
     invitation: ['accept-invitation'],
     organizations: ['organization-selection', 'organization-picker'],
     'mfa-otp': ['mfa-otp-challenge', 'mfa-otp-enrollment-code', 'mfa-otp-enrollment-qr'],
-    'mfa-recovery-code': ['mfa-recovery-code-challenge', 'mfa-recovery-code-enrollment'],
+    'mfa-recovery-code': [
+      'mfa-recovery-code-challenge',
+      'mfa-recovery-code-enrollment',
+      'mfa-recovery-code-challenge-new-code',
+    ],
     common: ['redeem-ticket'],
+    'email-verification': ['email-verification-result'],
+    'login-email-verification': ['login-email-verification'],
+    logout: ['logout', 'logout-aborted', 'logout-complete'],
+    'mfa-webauthn': [
+      'mfa-webauthn-change-key-nickname',
+      'mfa-webauthn-enrollment-success',
+      'mfa-webauthn-error',
+      'mfa-webauthn-platform-challenge',
+      'mfa-webauthn-platform-enrollment',
+      'mfa-webauthn-roaming-challenge',
+      'mfa-webauthn-roaming-enrollment',
+    ],
   } as PromptScreenMapping,
 };
 
