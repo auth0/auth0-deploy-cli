@@ -1,14 +1,13 @@
 import { isEmpty } from 'lodash';
 import {
   GetPartialsPromptEnum,
-  GetRendering200Response,
+  GetAllRendering200ResponseOneOfInner,
   GetRenderingScreenEnum,
   PatchRenderingRequest,
   PatchRenderingRequestRenderingModeEnum,
   PutPartialsRequest,
 } from 'auth0';
 import DefaultHandler from './default';
-import constants from '../../constants';
 import { Assets, Language, languages } from '../../../types';
 import log from '../../../logger';
 
@@ -309,7 +308,7 @@ export type AllPromptsByLanguage = Partial<{
   [key in Language]: Partial<PromptsCustomText>;
 }>;
 
-export type ScreenRenderer = Partial<GetRendering200Response>;
+export type ScreenRenderer = Partial<GetAllRendering200ResponseOneOfInner>;
 
 export type Prompts = Partial<
   PromptSettings & {
@@ -359,8 +358,7 @@ export default class PromptsHandler extends DefaultHandler {
 
     if (includeExperimentalEA) {
       try {
-        const screenRenderers = await this.getPromptScreenSettings();
-        prompts.screenRenderers = screenRenderers;
+        prompts.screenRenderers = (await this.client.prompts.getAllRenderingSettings()).data;
       } catch (error) {
         log.warn(`Unable to fetch screen renderers: ${error}`);
       }
@@ -493,38 +491,6 @@ export default class PromptsHandler extends DefaultHandler {
     );
   }
 
-  async getPromptScreenSettings(): Promise<ScreenRenderer[]> {
-    log.info('Loading Prompt Screen Renderers. This may take a while...');
-
-    // Create combinations of prompt and screens
-    const promptScreenCombinations = Object.entries(constants.PROMPT_SCREEN_MAPPINGS).flatMap(
-      ([promptType, screens]) =>
-        screens.map((screen) => ({
-          promptName: promptType,
-          screenName: screen,
-        }))
-    );
-
-    const renderSettings = await this.client.pool
-      .addEachTask({
-        data: promptScreenCombinations,
-        generator: ({ promptName, screenName }) =>
-          this.client.prompts
-            .getRendering({
-              prompt: promptName as GetPartialsPromptEnum,
-              screen: screenName as GetRenderingScreenEnum,
-            })
-            .then(({ data: renderingSettings }) => {
-              if (isEmpty(renderingSettings)) return null;
-              return renderingSettings;
-            }),
-      })
-      .promise();
-
-    const customRenderingRes = renderSettings.filter((item) => item !== null);
-    return customRenderingRes;
-  }
-
   async processChanges(assets: Assets): Promise<void> {
     const { prompts } = assets;
 
@@ -607,8 +573,7 @@ export default class PromptsHandler extends DefaultHandler {
   }
 
   async updateScreenRenderer(screenRenderer: ScreenRenderer): Promise<void> {
-    const { prompt, screen, rendering_mode, tenant, ...updatePrams } = screenRenderer;
-
+    const { prompt, screen, rendering_mode, tenant, default_head_tags_disabled, ...updatePrams } = screenRenderer;
     if (!prompt || !screen) return;
 
     let updatePayload: PatchRenderingRequest = {};
@@ -621,6 +586,7 @@ export default class PromptsHandler extends DefaultHandler {
       updatePayload = {
         ...updatePrams,
         rendering_mode,
+        default_head_tags_disabled: default_head_tags_disabled || undefined
       };
     }
 
