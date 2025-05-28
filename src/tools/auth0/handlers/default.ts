@@ -118,6 +118,40 @@ export default class APIHandler {
     return convertJsonToString(item);
   }
 
+  getResourceName(item: Asset): string {
+    // Get a human-readable identifier for the resource
+    if (item.name) return item.name;
+    if (item.display_name) return item.display_name;
+    if (item.identifier) return item.identifier;
+    if (item.template) return item.template;
+    if (item.audience) return item.audience;
+    if (item.email) return item.email;
+    if (item[this.id]) return item[this.id];
+
+    // For some resources, create a descriptive name
+    if (this.type === 'clientGrants') {
+      return `${item.client_id} -> ${item.audience}`;
+    }
+    if (this.type === 'guardianFactors') {
+      return item.name || item.type || 'unknown factor';
+    }
+    if (this.type === 'emailTemplates') {
+      return item.template || 'unknown template';
+    }
+    if (
+      this.type === 'tenant' ||
+      this.type === 'attackProtection' ||
+      this.type === 'branding' ||
+      this.type === 'emailProvider' ||
+      this.type === 'guardianPhoneFactorSelectedProvider' ||
+      this.type === 'guardianPolicies'
+    ) {
+      return 'settings';
+    }
+
+    return 'unnamed resource';
+  }
+
   async getType(): Promise<Asset | Asset[] | null> {
     // Each type to impl how to get the existing as its not consistent across the mgnt api.
     throw new Error(`Must implement getType for type ${this.type}`);

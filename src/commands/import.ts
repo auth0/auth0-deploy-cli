@@ -14,6 +14,7 @@ export default async function importCMD(params: ImportParams) {
     env: shouldInheritEnv = false,
     secret: clientSecret,
     experimental_ea: experimentalEA,
+    dry_run: dryRun = false,
   } = params;
 
   if (shouldInheritEnv) {
@@ -46,6 +47,12 @@ export default async function importCMD(params: ImportParams) {
 
     // nconf.overrides() sometimes doesn't work, so we need to set it manually to ensure it's set
     nconf.set('AUTH0_EXPERIMENTAL_EA', experimentalEA);
+  }
+
+  // Override AUTH0_DRY_RUN if dry_run passed in command line
+  if (dryRun) {
+    overrides.AUTH0_DRY_RUN = dryRun;
+    nconf.set('AUTH0_DRY_RUN', dryRun);
   }
 
   nconf.overrides(overrides);
