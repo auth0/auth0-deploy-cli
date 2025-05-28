@@ -142,9 +142,6 @@ describe('#prompts handler', () => {
       getCustomPartial.withArgs({ prompt: 'signup-id' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup' }).resolves({ data: signupPartial });
 
-      // const getPromptScreenSettings = sinon.stub(handler, 'getAllRenderingSettings');
-      // getPromptScreenSettings.resolves([sampleScreenRenderLogin, sampleScreenRenderSignUp]);
-
       const data = await handler.getType();
       expect(data).to.deep.equal({
         ...mockPromptsSettings,
