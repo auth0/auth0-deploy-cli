@@ -64,8 +64,10 @@ export default async function importCMD(params: ImportParams) {
   const config = configFactory();
   config.setProvider((key) => nconf.get(key));
 
-  //@ts-ignore because context and assets still need to be typed TODO: type assets and type context
+  // @ts-ignore because context and assets still need to be typed TODO: type assets and type context
   await toolsDeploy(context.assets, context.mgmtClient, config);
 
-  log.info('Import Successful');
+  if (!dryRun) {
+    log.info('Import Successful');
+  }
 }

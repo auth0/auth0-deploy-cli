@@ -15,10 +15,6 @@ export default async function deploy(
 
   const isDryRun = config('AUTH0_DRY_RUN') === true || config('AUTH0_DRY_RUN') === 'true';
 
-  if (isDryRun) {
-    // Don't log here, we'll include it in the formatted output
-  }
-
   log.info(
     `Getting access token for ${
       config('AUTH0_CLIENT_ID') !== undefined ? `${config('AUTH0_CLIENT_ID')}/` : ''
