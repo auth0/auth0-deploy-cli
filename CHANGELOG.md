@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.8.3] - 2025-05-27
+
+### Added
+
+- Add support new screens for rendering `prompt` screen's settings [#1096]
+
+### Fixed
+
+- Fix export `databases` options and customScripts [#1095]
+
 ## [8.8.2] - 2025-05-08
 
 ### Added
@@ -1322,7 +1332,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1084]: https://github.com/auth0/auth0-deploy-cli/issues/1084
 [#1085]: https://github.com/auth0/auth0-deploy-cli/issues/1085
 [#1086]: https://github.com/auth0/auth0-deploy-cli/issues/1086
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.8.2...HEAD
+[#1095]: https://github.com/auth0/auth0-deploy-cli/issues/1095
+[#1096]: https://github.com/auth0/auth0-deploy-cli/issues/1096
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.8.3...HEAD
+[8.8.3]: https://github.com/auth0/auth0-deploy-cli/compare/v8.8.2...v8.8.3
 [8.8.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.8.1...v8.8.2
 [8.8.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.8.0...v8.8.1
 [8.8.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.7.1...v8.8.0
