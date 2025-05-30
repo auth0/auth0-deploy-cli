@@ -17,6 +17,7 @@ import {
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
+import { connectionDefaults } from '../../defaults';
 
 type ParsedConnections = ParsedAsset<'connections', Asset[]>;
 
@@ -69,7 +70,7 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   // Convert enabled_clients from id to name
   connections.forEach((connection) => {
-    const dumpedConnection = {
+    let dumpedConnection = {
       ...connection,
       ...(connection.enabled_clients && {
         enabled_clients: mapClientID2NameSorted(connection.enabled_clients, clientsOrig || []),
@@ -77,6 +78,9 @@ async function dump(context: DirectoryContext): Promise<void> {
     };
 
     const connectionName = sanitize(dumpedConnection.name);
+
+    // Mask secrets
+    dumpedConnection = connectionDefaults(dumpedConnection);
 
     if (dumpedConnection.strategy === 'email') {
       ensureProp(dumpedConnection, 'options.email.body');
