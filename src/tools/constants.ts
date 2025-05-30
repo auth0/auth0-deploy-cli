@@ -25,10 +25,6 @@ const UNIVERSAL_LOGIN_TEMPLATE = 'universal_login';
 
 const OBFUSCATED_SECRET_VALUE = '_VALUE_NOT_SHOWN_';
 
-type PromptScreenMapping = {
-  [prompt: string]: string[]; // Array of screens for each prompt
-};
-
 const constants = {
   CONCURRENT_CALLS: 5,
   RULES_DIRECTORY: 'rules',
@@ -213,79 +209,6 @@ const constants = {
   FLOWS_VAULT_DIRECTORY: 'flow-vault-connections',
   SELF_SERVICE_PROFILE_DIRECTORY: 'self-service-profiles',
   NETWORK_ACLS_DIRECTORY: 'network-acls',
-  PROMPT_SCREEN_MAPPINGS: {
-    'signup-id': ['signup-id'],
-    'signup-password': ['signup-password'],
-    'login-id': ['login-id'],
-    'login-password': ['login-password'],
-    'login-passwordless': ['login-passwordless-email-code', 'login-passwordless-sms-otp'],
-    'phone-identifier-enrollment': ['phone-identifier-enrollment'],
-    'phone-identifier-challenge': ['phone-identifier-challenge'],
-    'email-identifier-challenge': ['email-identifier-challenge'],
-    passkeys: ['passkey-enrollment', 'passkey-enrollment-local'],
-    captcha: ['interstitial-captcha'],
-    login: ['login'],
-    signup: ['signup'],
-    'reset-password': [
-      'reset-password-request',
-      'reset-password-email',
-      'reset-password',
-      'reset-password-success',
-      'reset-password-error',
-      'reset-password-mfa-email-challenge',
-      'reset-password-mfa-otp-challenge',
-      'reset-password-mfa-push-challenge-push',
-      'reset-password-mfa-sms-challenge',
-      'reset-password-mfa-phone-challenge',
-      'reset-password-mfa-voice-challenge',
-      'reset-password-mfa-recovery-code-challenge',
-      'reset-password-mfa-webauthn-platform-challenge',
-      'reset-password-mfa-webauthn-roaming-challenge',
-    ],
-    'device-flow': [
-      'device-code-activation',
-      'device-code-activation-allowed',
-      'device-code-activation-denied',
-      'device-code-confirmation',
-    ],
-    mfa: [
-      'mfa-detect-browser-capabilities',
-      'mfa-enroll-result',
-      'mfa-begin-enroll-options',
-      'mfa-login-options',
-    ],
-    'mfa-email': ['mfa-email-challenge', 'mfa-email-list'],
-    'mfa-sms': ['mfa-country-codes', 'mfa-sms-challenge', 'mfa-sms-enrollment', 'mfa-sms-list'],
-    'mfa-push': [
-      'mfa-push-challenge-push',
-      'mfa-push-enrollment-qr',
-      'mfa-push-list',
-      'mfa-push-welcome',
-    ],
-    'mfa-phone': ['mfa-phone-challenge', 'mfa-phone-enrollment'],
-    'mfa-voice': ['mfa-voice-challenge', 'mfa-voice-enrollment'],
-    invitation: ['accept-invitation'],
-    organizations: ['organization-selection', 'organization-picker'],
-    'mfa-otp': ['mfa-otp-challenge', 'mfa-otp-enrollment-code', 'mfa-otp-enrollment-qr'],
-    'mfa-recovery-code': [
-      'mfa-recovery-code-challenge',
-      'mfa-recovery-code-enrollment',
-      'mfa-recovery-code-challenge-new-code',
-    ],
-    common: ['redeem-ticket'],
-    'email-verification': ['email-verification-result'],
-    'login-email-verification': ['login-email-verification'],
-    logout: ['logout', 'logout-aborted', 'logout-complete'],
-    'mfa-webauthn': [
-      'mfa-webauthn-change-key-nickname',
-      'mfa-webauthn-enrollment-success',
-      'mfa-webauthn-error',
-      'mfa-webauthn-platform-challenge',
-      'mfa-webauthn-platform-enrollment',
-      'mfa-webauthn-roaming-challenge',
-      'mfa-webauthn-roaming-enrollment',
-    ],
-  } as PromptScreenMapping,
 };
 
 export default constants;
