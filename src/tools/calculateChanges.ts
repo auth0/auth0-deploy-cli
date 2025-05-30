@@ -163,10 +163,9 @@ export function calculateChanges({
   // Loop through identifiers (in order) to try match assets to existing
   // If existing then update if not create
   // The remainder will be deleted
-  for (const id of identifiers) {
-    // eslint-disable-line
+  identifiers.forEach((id) => {
     processAssets(id, [...create]);
-  }
+  });
 
   // Check if there are assets with names that will conflict with existing names during the update process
   // This will rename those assets to a temp random name first
