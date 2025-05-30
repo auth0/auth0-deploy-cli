@@ -118,6 +118,8 @@ describe('#prompts handler', () => {
 
             return Promise.resolve({ data: customTextValue });
           },
+          getAllRenderingSettings: () =>
+            Promise.resolve({ data: [sampleScreenRenderLogin, sampleScreenRenderSignUp] }),
         },
         pool: new PromisePoolExecutor({
           concurrencyLimit: 3,
@@ -139,9 +141,6 @@ describe('#prompts handler', () => {
       getCustomPartial.withArgs({ prompt: 'signup-password' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup-id' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup' }).resolves({ data: signupPartial });
-
-      const getPromptScreenSettings = sinon.stub(handler, 'getPromptScreenSettings');
-      getPromptScreenSettings.resolves([sampleScreenRenderLogin, sampleScreenRenderSignUp]);
 
       const data = await handler.getType();
       expect(data).to.deep.equal({
@@ -456,7 +455,7 @@ describe('#prompts handler', () => {
           _getRestClient: (endpoint) => ({
             get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
           }),
-          getRendering: () => Promise.resolve({ data: {} }),
+          getAllRenderingSettings: () => Promise.resolve({ data: [] }),
         },
         pool: new PromisePoolExecutor({
           concurrencyLimit: 3,

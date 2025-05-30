@@ -136,7 +136,7 @@ export function mockMgmtClient() {
           res({ data: {} });
         }),
       get: () => ({ data: {} }),
-      getRendering: () => Promise.resolve({ data: {} }),
+      getAllRenderingSettings: () => Promise.resolve({ data: [] }),
     },
     customDomains: { getAll: (params) => mockPagedData(params, 'custom_domains', []) },
     forms: { getAll: (params) => mockPagedData(params, 'forms', []) },
