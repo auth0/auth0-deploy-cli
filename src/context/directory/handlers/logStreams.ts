@@ -5,6 +5,7 @@ import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../.
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
+import { logStreamDefaults } from '../../defaults';
 
 type ParsedLogStreams = ParsedAsset<'logStreams', Asset[]>;
 
@@ -29,15 +30,21 @@ function parse(context: DirectoryContext): ParsedLogStreams {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const logStreams = context.assets.logStreams;
+  const { logStreams } = context.assets;
 
   if (!logStreams) return; // Skip, nothing to dump
 
   // Create Rules folder
   const logStreamsDirectory = path.join(context.filePath, constants.LOG_STREAMS_DIRECTORY);
+
   fs.ensureDirSync(logStreamsDirectory);
-  logStreams.forEach((logStream) => {
+
+  // masked sensitive fields
+  const maskedLogStreams = logStreamDefaults(logStreams);
+
+  maskedLogStreams.forEach((logStream) => {
     const ruleFile = path.join(logStreamsDirectory, `${sanitize(logStream.name)}.json`);
+
     dumpJSON(ruleFile, logStream);
   });
 }
