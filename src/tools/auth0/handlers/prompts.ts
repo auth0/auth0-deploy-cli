@@ -358,7 +358,8 @@ export default class PromptsHandler extends DefaultHandler {
 
     if (includeExperimentalEA) {
       try {
-        prompts.screenRenderers = (await this.client.prompts.getAllRenderingSettings()).data;
+        const { data } = await this.client.prompts.getAllRenderingSettings();
+        prompts.screenRenderers = data;
       } catch (error) {
         log.warn(`Unable to fetch screen renderers: ${error}`);
       }
