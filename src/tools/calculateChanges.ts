@@ -199,6 +199,49 @@ export function calculateChanges({
   };
 }
 
+/**
+ * Compares two objects and returns true if there are differences.
+ * Gives preference to the first object's values when determining differences.
+ * Only considers keys that exist in obj1 - extra keys in obj2 are ignored.
+ * @param obj1 - The first object (preferred values)
+ * @param obj2 - The second object to compare against
+ * @returns true if objects differ, false if they are the same
+ */
+export function hasObjectDifferences(
+  obj1: Record<string, any>,
+  obj2: Record<string, any>
+): boolean {
+  // Only check keys that exist in obj1 (giving preference to obj1)
+  const obj1Keys = Object.keys(obj1);
+
+  return obj1Keys.some((key) => {
+    const value1 = obj1[key];
+    const value2 = obj2[key];
+
+    // If key doesn't exist in obj2, there's a difference
+    if (!(key in obj2)) {
+      return true;
+    }
+
+    // If both values are objects, recursively compare
+    if (
+      typeof value1 === 'object' &&
+      value1 !== null &&
+      typeof value2 === 'object' &&
+      value2 !== null
+    ) {
+      return hasObjectDifferences(value1, value2);
+    }
+
+    // If values are different
+    if (value1 !== value2) {
+      return true;
+    }
+
+    return false;
+  });
+}
+
 export function calculateDiffChanges({
   type,
   assets,
@@ -219,13 +262,78 @@ export function calculateDiffChanges({
   const localAssets: Asset[] = [...(assets || [])]; // Local assets (what we have locally)
   const remoteAssets: Asset[] = [...(existing || [])]; // Remote assets (what exists remotely)
 
-  // Identify assets that need to be created (exist locally but not remotely)
+  // console.log(
+  //   '[CLOG] localAssets:',
+  //   localAssets.filter((c) => c.name === 'API Explorer Application')
+  // );
 
-  // Identify assets that need to be deleted (exist remotely but not locally)
+  // console.log(
+  //   '[CLOG] remoteAssets:',
+  //   remoteAssets.filter((c) => c.name === 'API Explorer Application')
+  // );
 
-  // Identify assets that need to be updated (exist in both local and remote but are different)
+  // identify created
+  const createdAssets = localAssets.filter(
+    (localAsset) =>
+      !remoteAssets.some((remoteAsset) =>
+        identifiers.some((id) => {
+          if (Array.isArray(id)) {
+            const localValues = id.map((i) => localAsset[i]);
+            const remoteValues = id.map((i) => remoteAsset[i]);
+            return (
+              localValues.every((v) => v) &&
+              remoteValues.every((v) => v) &&
+              localValues.join('-') === remoteValues.join('-')
+            );
+          }
+          return localAsset[id] === remoteAsset[id];
+        })
+      )
+  );
+  create.push(...createdAssets);
 
-  log.info(`Calculated changes for [${type}]:`, {
+  // identify updated
+  const updatedAssets = localAssets.filter((localAsset) => {
+    const matchingRemoteAsset = remoteAssets.find((remoteAsset) =>
+      identifiers.some((id) => {
+        if (Array.isArray(id)) {
+          const localValues = id.map((i) => localAsset[i]);
+          const remoteValues = id.map((i) => remoteAsset[i]);
+          return (
+            localValues.every((v) => v) &&
+            remoteValues.every((v) => v) &&
+            localValues.join('-') === remoteValues.join('-')
+          );
+        }
+        return localAsset[id] === remoteAsset[id];
+      })
+    );
+
+    return matchingRemoteAsset && hasObjectDifferences(localAsset, matchingRemoteAsset);
+  });
+  update.push(...updatedAssets);
+
+  // identify deleted
+  const deletedAssets = remoteAssets.filter(
+    (remoteAsset) =>
+      !localAssets.some((localAsset) =>
+        identifiers.some((id) => {
+          if (Array.isArray(id)) {
+            const localValues = id.map((i) => localAsset[i]);
+            const remoteValues = id.map((i) => remoteAsset[i]);
+            return (
+              localValues.every((v) => v) &&
+              remoteValues.every((v) => v) &&
+              localValues.join('-') === remoteValues.join('-')
+            );
+          }
+          return localAsset[id] === remoteAsset[id];
+        })
+      )
+  );
+  del.push(...deletedAssets);
+
+  console.log(`Calculated changes for [${type}]:`, {
     del: del.length,
     create: create.length,
     conflicts: conflicts.length,

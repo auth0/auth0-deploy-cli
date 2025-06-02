@@ -148,6 +148,7 @@ export default async function deploy(
       await auth0.processChanges();
     } else {
       console.log('\n' + chalk.yellow('Deployment cancelled. No changes were made.') + '\n');
+      process.exit(1);
     }
   } else {
     // Process changes normally
