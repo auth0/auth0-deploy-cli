@@ -10,7 +10,7 @@ import {
   detectInsufficientScopeError,
 } from '../../utils';
 import log from '../../../logger';
-import { calculateChanges } from '../../calculateChanges';
+import { calculateChanges, calculateDiffChanges } from '../../calculateChanges';
 import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
 
@@ -122,9 +122,9 @@ export default class APIHandler {
     // Get a human-readable identifier for the resource
     if (item.name) return item.name;
     if (item.display_name) return item.display_name;
-    if (item.identifier) return item.identifier;
+    //if (item.identifier) return item.identifier;
     if (item.template) return item.template;
-    if (item.audience) return item.audience;
+    //if (item.audience) return item.audience;
     if (item.email) return item.email;
     if (item[this.id]) return item[this.id];
 
@@ -197,6 +197,31 @@ export default class APIHandler {
       assets: typeAssets,
       allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
       //@ts-ignore TODO: investigate what happens when `existing` is null
+      existing,
+      identifiers: this.identifiers,
+    });
+  }
+
+  async diffChanges(assets: Assets): Promise<CalculatedChanges> {
+    const typeAssets = assets[this.type];
+
+    // Do nothing if not set
+    if (!typeAssets) {
+      return {
+        del: [],
+        create: [],
+        conflicts: [],
+        update: [],
+      };
+    }
+
+    const existing = await this.getType();
+
+    // Figure out what needs to be updated vs created
+    return calculateDiffChanges({
+      type: this.type,
+      assets: typeAssets,
+      // @ts-ignore TODO: investigate what happens when `existing` is null
       existing,
       identifiers: this.identifiers,
     });

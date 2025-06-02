@@ -198,3 +198,44 @@ export function calculateChanges({
     create,
   };
 }
+
+export function calculateDiffChanges({
+  type,
+  assets,
+  existing,
+  identifiers = ['id', 'name'],
+}: {
+  type: string;
+  assets: Asset[];
+  existing: Asset[] | null;
+  identifiers: (string | string[])[];
+}): CalculatedChanges {
+  // Calculate the changes required between two sets of assets.
+  const update: Asset[] = [];
+  const del: Asset[] = [];
+  const create: Asset[] = [];
+  const conflicts: Asset[] = [];
+
+  const localAssets: Asset[] = [...(assets || [])]; // Local assets (what we have locally)
+  const remoteAssets: Asset[] = [...(existing || [])]; // Remote assets (what exists remotely)
+
+  // Identify assets that need to be created (exist locally but not remotely)
+
+  // Identify assets that need to be deleted (exist remotely but not locally)
+
+  // Identify assets that need to be updated (exist in both local and remote but are different)
+
+  log.info(`Calculated changes for [${type}]:`, {
+    del: del.length,
+    create: create.length,
+    conflicts: conflicts.length,
+    update: update.length,
+  });
+
+  return {
+    del,
+    create,
+    conflicts,
+    update,
+  };
+}
