@@ -85,7 +85,7 @@ export default async function deploy(
 
       output += `| ${chalk.bold('Resource'.padEnd(resourceWidth))} | ${chalk.bold(
         'Status'.padEnd(statusWidth)
-      )} | ${chalk.bold('Name / ID'.padEnd(nameWidth))} |\n`;
+      )} | ${chalk.bold('Name / Identifier'.padEnd(nameWidth))} |\n`;
       output += `${separator}\n`;
 
       // Table rows

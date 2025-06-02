@@ -126,7 +126,7 @@ export default class APIHandler {
     if (item.template) return item.template;
     //if (item.audience) return item.audience;
     if (item.email) return item.email;
-    if (item[this.id]) return item[this.id];
+    // if (item[this.id]) return item[this.id];
 
     // For some resources, create a descriptive name
     if (this.type === 'clientGrants') {
@@ -137,6 +137,9 @@ export default class APIHandler {
     }
     if (this.type === 'emailTemplates') {
       return item.template || 'unknown template';
+    }
+    if (this.type === 'networkACLs') {
+      return item.description || `priority:${item.priority}`;
     }
     if (
       this.type === 'tenant' ||

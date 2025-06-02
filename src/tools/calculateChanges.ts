@@ -1,5 +1,5 @@
 import log from '../logger';
-import APIHandler from '../tools/auth0/handlers/default';
+import APIHandler from './auth0/handlers/default';
 import { Asset, CalculatedChanges } from '../types';
 
 /**
