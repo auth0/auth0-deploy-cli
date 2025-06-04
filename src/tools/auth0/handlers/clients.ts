@@ -82,6 +82,31 @@ export const schema = {
           policies: multiResourceRefreshTokenPolicies,
         },
       },
+      token_quota: {
+        type: ['object', 'null'],
+        properties: {
+          client_credentials: {
+            type: 'object',
+            properties: {
+              enforce: {
+                type: 'boolean',
+                default: true,
+              },
+              per_day: {
+                type: 'integer',
+                minimum: 1,
+              },
+              per_hour: {
+                type: 'integer',
+                minimum: 1,
+              },
+            },
+            additionalProperties: false,
+            minProperties: 1,
+          },
+        },
+        required: ['client_credentials'],
+      },
     },
     required: ['name'],
   },
