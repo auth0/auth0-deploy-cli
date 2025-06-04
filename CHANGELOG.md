@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support support limit M2M usage - EA [#1093]
+- Add support to fetch list `prompt` screen's settings [#1104]
+
+### Fixed
+
+- Fix secret masking for `connections`, `emailProvider` and `logStreams` [#1103]
+- Fix supported resource types in READMEs. [#1109]
+
 ## [8.8.3] - 2025-05-27
 
 ### Added
