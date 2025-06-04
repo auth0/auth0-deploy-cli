@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.9.0] - 2025-06-04
+
 ### Added
 
 - Add support support limit M2M usage - EA [#1093]
@@ -1342,9 +1344,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1084]: https://github.com/auth0/auth0-deploy-cli/issues/1084
 [#1085]: https://github.com/auth0/auth0-deploy-cli/issues/1085
 [#1086]: https://github.com/auth0/auth0-deploy-cli/issues/1086
+[#1093]: https://github.com/auth0/auth0-deploy-cli/issues/1093
 [#1095]: https://github.com/auth0/auth0-deploy-cli/issues/1095
 [#1096]: https://github.com/auth0/auth0-deploy-cli/issues/1096
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.8.3...HEAD
+[#1103]: https://github.com/auth0/auth0-deploy-cli/issues/1103
+[#1104]: https://github.com/auth0/auth0-deploy-cli/issues/1104
+[#1109]: https://github.com/auth0/auth0-deploy-cli/issues/1109
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.9.0...HEAD
+[8.9.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.8.3...v8.9.0
 [8.8.3]: https://github.com/auth0/auth0-deploy-cli/compare/v8.8.2...v8.8.3
 [8.8.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.8.1...v8.8.2
 [8.8.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.8.0...v8.8.1
