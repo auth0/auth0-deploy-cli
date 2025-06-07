@@ -201,40 +201,78 @@ export function calculateChanges({
 
 /**
  * Compares two objects and returns true if there are differences.
- * Gives preference to the first object's values when determining differences.
  * Only considers keys that exist in obj1 - extra keys in obj2 are ignored.
  * @param obj1 - The first object (preferred values)
  * @param obj2 - The second object to compare against
+ * @param keyObjPath - The current JSON path for nested object tracking
  * @returns true if objects differ, false if they are the same
  */
 export function hasObjectDifferences(
   obj1: Record<string, any>,
-  obj2: Record<string, any>
+  obj2: Record<string, any>,
+  keyObjPath: string = ''
 ): boolean {
-  // Only check keys that exist in obj1 (giving preference to obj1)
-  const obj1Keys = Object.keys(obj1);
-
-  return obj1Keys.some((key) => {
+  return Object.keys(obj1).some((key) => {
     const value1 = obj1[key];
     const value2 = obj2[key];
+    const currentPath = keyObjPath ? `${keyObjPath}.${key}` : key;
 
     // If key doesn't exist in obj2, there's a difference
     if (!(key in obj2)) {
+      console.log(`Key "${currentPath}" found in obj1 but not in obj2.`);
       return true;
     }
 
-    // If both values are objects, recursively compare
+    // Handle arrays
+    if (Array.isArray(value1) && Array.isArray(value2)) {
+      if (value1.length !== value2.length) {
+        console.log(
+          `Array length difference for "${currentPath}": ${value1.length} vs ${value2.length}`
+        );
+        return true;
+      }
+
+      // For arrays with objects, compare in order; for primitive arrays, ignore order
+      const hasObjects = value1.some((item) => typeof item === 'object' && item !== null);
+
+      if (hasObjects) {
+        return value1.some((item, index) => {
+          if (
+            typeof item === 'object' &&
+            item !== null &&
+            typeof value2[index] === 'object' &&
+            value2[index] !== null
+          ) {
+            return hasObjectDifferences(item, value2[index], `${currentPath}[${index}]`);
+          }
+          return item !== value2[index];
+        });
+      }
+
+      // Compare primitive arrays ignoring order
+      const sorted1 = [...value1].sort();
+      const sorted2 = [...value2].sort();
+      const isDifferent = sorted1.some((item, index) => item !== sorted2[index]);
+
+      if (isDifferent) {
+        console.log(`Array content difference found for key "${currentPath}"`);
+      }
+      return isDifferent;
+    }
+
+    // Handle nested objects
     if (
       typeof value1 === 'object' &&
       value1 !== null &&
       typeof value2 === 'object' &&
       value2 !== null
     ) {
-      return hasObjectDifferences(value1, value2);
+      return hasObjectDifferences(value1, value2, currentPath);
     }
 
-    // If values are different
+    // Compare primitive values
     if (value1 !== value2) {
+      console.log(`Value difference for "${currentPath}"`, { value1, value2 });
       return true;
     }
 
@@ -242,7 +280,21 @@ export function hasObjectDifferences(
   });
 }
 
-export function calculateDiffChanges({
+/**
+ * Calculates the changes required between local and remote asset sets for dry run operations.
+ *
+ * This function compares local assets with existing remote assets to determine what operations
+ * need to be performed: create new assets, update existing ones, or delete removed assets.
+ * Assets are matched using configurable identifier fields.
+ *
+ * @param params - The configuration object for calculating changes
+ * @param params.type - The type of assets being compared (used for logging)
+ * @param params.assets - Array of local assets to be deployed
+ * @param params.existing - Array of existing remote assets, or null if none exist
+ * @param params.identifiers - Array of field names or field name arrays used to match assets between local and remote sets. Default is ['id', 'name']
+ *
+ */
+export function calculateDryRunChanges({
   type,
   assets,
   existing,
@@ -251,7 +303,7 @@ export function calculateDiffChanges({
   type: string;
   assets: Asset[];
   existing: Asset[] | null;
-  identifiers: (string | string[])[];
+  identifiers: string[];
 }): CalculatedChanges {
   // Calculate the changes required between two sets of assets.
   const update: Asset[] = [];
@@ -309,7 +361,10 @@ export function calculateDiffChanges({
       })
     );
 
-    return matchingRemoteAsset && hasObjectDifferences(localAsset, matchingRemoteAsset);
+    return (
+      matchingRemoteAsset &&
+      hasObjectDifferences(localAsset, matchingRemoteAsset, matchingRemoteAsset.name ?? '')
+    );
   });
   update.push(...updatedAssets);
 

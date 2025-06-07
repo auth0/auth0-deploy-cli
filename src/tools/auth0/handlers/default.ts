@@ -10,7 +10,7 @@ import {
   detectInsufficientScopeError,
 } from '../../utils';
 import log from '../../../logger';
-import { calculateChanges, calculateDiffChanges } from '../../calculateChanges';
+import { calculateChanges, calculateDryRunChanges } from '../../calculateChanges';
 import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
 
@@ -205,7 +205,7 @@ export default class APIHandler {
     });
   }
 
-  async diffChanges(assets: Assets): Promise<CalculatedChanges> {
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
     const typeAssets = assets[this.type];
 
     // Do nothing if not set
@@ -220,8 +220,8 @@ export default class APIHandler {
 
     const existing = await this.getType();
 
-    // Figure out what needs to be updated vs created
-    return calculateDiffChanges({
+    // Figure out what needs to be created, updated or deleted
+    return calculateDryRunChanges({
       type: this.type,
       assets: typeAssets,
       // @ts-ignore TODO: investigate what happens when `existing` is null

@@ -126,7 +126,7 @@ export default class Auth0 {
           if (isCollection && typeof handler.calcChanges === 'function') {
             // Calculate changes for collection handlers
             //const changes: CalculatedChanges = await handler.calcChanges(this.assets);
-            const changes: CalculatedChanges = await handler.diffChanges(this.assets);
+            const changes: CalculatedChanges = await handler.dryRunChanges(this.assets);
 
             // Add detailed information for each change
             if (changes.create) {
