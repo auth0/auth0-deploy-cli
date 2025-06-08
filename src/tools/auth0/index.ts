@@ -1,4 +1,5 @@
 import Ajv from 'ajv/lib/ajv';
+import { cloneDeep } from 'lodash';
 
 import pagedClient from './client';
 import schema from './schema';
@@ -14,6 +15,7 @@ import {
 } from '../../types';
 import APIHandler from './handlers/default';
 import { ConfigFunction } from '../../configFactory';
+import { dryRunFormatAssets } from '../calculateChanges';
 
 export type Stage = 'load' | 'validate' | 'processChanges';
 
@@ -108,6 +110,8 @@ export default class Auth0 {
   async dryRun(): Promise<DetailedDryRunChanges> {
     // In dry run mode, perform a dry run instead of processing changes
     const allChanges: DetailedDryRunChanges = {};
+
+    this.assets = await dryRunFormatAssets(cloneDeep(this.assets), this.client);
 
     // Process each handler to collect changes
     await Promise.all(

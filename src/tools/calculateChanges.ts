@@ -1,6 +1,9 @@
+import { Client } from 'auth0';
 import log from '../logger';
 import APIHandler from './auth0/handlers/default';
-import { Asset, CalculatedChanges } from '../types';
+import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../types';
+import { convertClientNameToId } from './utils';
+import { paginate } from './auth0/client';
 
 /**
  * @template T
@@ -401,4 +404,40 @@ export function calculateDryRunChanges({
     conflicts,
     update,
   };
+}
+
+/**
+ * Performs a dry run formatting of assets for dry run compare.
+ * - converting client names to client IDs or vice versa
+ *
+ * @param assets - The assets object containing databases and clients configurations
+ * @param authAPIclient - The Auth0 API client instance used to fetch remote client data
+ * @returns A Promise that resolves to the formatted assets object with client names converted to IDs
+ */
+export async function dryRunFormatAssets(
+  localAssets: Assets,
+  authAPIclient: Auth0APIClient
+): Promise<Assets> {
+  // get client remote data
+  const clientsRemoteData = await paginate<Client>(authAPIclient.clients.getAll, {
+    paginate: true,
+    include_totals: true,
+  });
+
+  // console.log(clientsRemoteData);
+
+  // check assets conations databases and clients together and have values
+  if (localAssets.databases && localAssets.clients) {
+    const { databases } = localAssets;
+    localAssets.databases = databases.map((db) => {
+      if (db.enabled_clients && db.enabled_clients.length > 0) {
+        db.enabled_clients = db.enabled_clients.map((enabledClientName) =>
+          convertClientNameToId(enabledClientName, clientsRemoteData)
+        );
+      }
+      return db;
+    });
+  }
+
+  return localAssets;
 }
