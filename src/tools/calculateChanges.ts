@@ -317,16 +317,6 @@ export function calculateDryRunChanges({
   const localAssets: Asset[] = [...(assets || [])]; // Local assets (what we have locally)
   const remoteAssets: Asset[] = [...(existing || [])]; // Remote assets (what exists remotely)
 
-  // console.log(
-  //   '[CLOG] localAssets:',
-  //   localAssets.filter((c) => c.name === 'API Explorer Application')
-  // );
-
-  // console.log(
-  //   '[CLOG] remoteAssets:',
-  //   remoteAssets.filter((c) => c.name === 'API Explorer Application')
-  // );
-
   // identify created
   const createdAssets = localAssets.filter(
     (localAsset) =>
@@ -364,31 +354,66 @@ export function calculateDryRunChanges({
       })
     );
 
-    return (
-      matchingRemoteAsset &&
-      hasObjectDifferences(localAsset, matchingRemoteAsset, matchingRemoteAsset.name ?? '')
-    );
+    if (matchingRemoteAsset) {
+      // Add missing identifiers from remote asset to local asset
+      identifiers.forEach((id) => {
+        if (Array.isArray(id)) {
+          // Handle array identifiers - ensure all parts exist
+          id.forEach((idPart) => {
+            if (!localAsset[idPart] && matchingRemoteAsset[idPart]) {
+              localAsset[idPart] = matchingRemoteAsset[idPart];
+            }
+          });
+        } else if (!localAsset[id] && matchingRemoteAsset[id]) {
+          // Handle single identifier
+          localAsset[id] = matchingRemoteAsset[id];
+        }
+      });
+
+      return hasObjectDifferences(localAsset, matchingRemoteAsset, matchingRemoteAsset.name ?? '');
+    }
+
+    return false;
   });
   update.push(...updatedAssets);
 
   // identify deleted
-  const deletedAssets = remoteAssets.filter(
-    (remoteAsset) =>
-      !localAssets.some((localAsset) =>
-        identifiers.some((id) => {
-          if (Array.isArray(id)) {
-            const localValues = id.map((i) => localAsset[i]);
-            const remoteValues = id.map((i) => remoteAsset[i]);
-            return (
-              localValues.every((v) => v) &&
-              remoteValues.every((v) => v) &&
-              localValues.join('-') === remoteValues.join('-')
-            );
-          }
-          return localAsset[id] === remoteAsset[id];
-        })
-      )
-  );
+  const deletedAssets = remoteAssets
+    .filter(
+      (remoteAsset) =>
+        !localAssets.some((localAsset) =>
+          identifiers.some((id) => {
+            if (Array.isArray(id)) {
+              const localValues = id.map((i) => localAsset[i]);
+              const remoteValues = id.map((i) => remoteAsset[i]);
+              return (
+                localValues.every((v) => v) &&
+                remoteValues.every((v) => v) &&
+                localValues.join('-') === remoteValues.join('-')
+              );
+            }
+            return localAsset[id] === remoteAsset[id];
+          })
+        )
+    )
+    .map((remoteAsset) => {
+      // Add missing identifiers from remote asset for proper tracking
+      const assetWithIdentifiers = { ...remoteAsset };
+      identifiers.forEach((id) => {
+        if (Array.isArray(id)) {
+          // Handle array identifiers - ensure all parts exist
+          id.forEach((idPart) => {
+            if (remoteAsset[idPart]) {
+              assetWithIdentifiers[idPart] = remoteAsset[idPart];
+            }
+          });
+        } else if (remoteAsset[id]) {
+          // Handle single identifier
+          assetWithIdentifiers[id] = remoteAsset[id];
+        }
+      });
+      return assetWithIdentifiers;
+    });
   del.push(...deletedAssets);
 
   console.log(`Calculated changes for [${type}]:`, {
