@@ -426,7 +426,18 @@ export async function dryRunFormatAssets(
 
   // console.log(clientsRemoteData);
 
-  // check assets conations databases and clients together and have values
+  // check assets clientGrants and clients together and have values
+  if (localAssets.clientGrants && localAssets.clients) {
+    const { clientGrants } = localAssets;
+    localAssets.clientGrants = clientGrants.map((clientGrant) => {
+      if (clientGrant.client_id) {
+        clientGrant.client_id = convertClientNameToId(clientGrant.client_id, clientsRemoteData);
+      }
+      return clientGrant;
+    });
+  }
+
+  // check assets databases and clients together and have values
   if (localAssets.databases && localAssets.clients) {
     const { databases } = localAssets;
     localAssets.databases = databases.map((db) => {
