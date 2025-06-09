@@ -222,14 +222,14 @@ export function hasObjectDifferences(
 
     // If key doesn't exist in obj2, there's a difference
     if (!(key in obj2)) {
-      console.log(`Key "${currentPath}" found in obj1 but not in obj2.`);
+      log.debug(`Key "${currentPath}" found in obj1 but not in obj2.`);
       return true;
     }
 
     // Handle arrays
     if (Array.isArray(value1) && Array.isArray(value2)) {
       if (value1.length !== value2.length) {
-        console.log(
+        log.debug(
           `Array length difference for "${currentPath}": ${value1.length} vs ${value2.length}`
         );
         return true;
@@ -258,7 +258,7 @@ export function hasObjectDifferences(
       const isDifferent = sorted1.some((item, index) => item !== sorted2[index]);
 
       if (isDifferent) {
-        console.log(`Array content difference found for key "${currentPath}"`);
+        log.debug(`Array content difference found for key "${currentPath}"`);
       }
       return isDifferent;
     }
@@ -275,7 +275,7 @@ export function hasObjectDifferences(
 
     // Compare primitive values
     if (value1 !== value2) {
-      console.log(`Value difference for "${currentPath}"`, { value1, value2 });
+      log.debug(`Value difference for "${currentPath}"`, { value1, value2 });
       return true;
     }
 
