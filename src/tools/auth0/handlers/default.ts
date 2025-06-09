@@ -194,12 +194,25 @@ export default class APIHandler {
 
     const existing = await this.getType();
 
+    // if we are in dry run mode, calculate the changes
+    // Figure out what needs to be updated vs created
+    if (this.config('AUTH0_DRY_RUN') === true || this.config('AUTH0_DRY_RUN') === 'true') {
+      return calculateDryRunChanges({
+        type: this.type,
+        assets: typeAssets,
+        // @ts-ignore TODO: investigate what happens when `existing` is null
+        existing,
+        identifiers: this.identifiers,
+      });
+    }
+
+    // if we are not in dry run mode, calculate the changes
     // Figure out what needs to be updated vs created
     return calculateChanges({
       handler: this,
       assets: typeAssets,
       allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
-      //@ts-ignore TODO: investigate what happens when `existing` is null
+      // @ts-ignore TODO: investigate what happens when `existing` is null
       existing,
       identifiers: this.identifiers,
     });

@@ -165,6 +165,10 @@ export default class Auth0 {
               });
               deleted = changes.del.length;
             }
+
+            // merge changes and update the current assets with only the changed items
+            // const changedAssets = [...changes.create, ...changes.update, ...changes.del];
+            // this.assets[handler.type] = changedAssets.length > 0 ? changedAssets : null;
           } else if (typeAssets && !isCollection) {
             // Handle singleton handlers (tenant, branding, etc.)
             // For singleton handlers, if asset exists it would be an update

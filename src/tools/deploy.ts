@@ -145,7 +145,7 @@ export default async function deploy(
 
     if (answer === 'y' || answer === 'yes') {
       console.log('\n' + chalk.green('Applying changes...') + '\n');
-      // await auth0.processChanges();
+      await auth0.processChanges();
     } else {
       console.log('\n' + chalk.yellow('Deployment cancelled. No changes were made.') + '\n');
       process.exit(1);
