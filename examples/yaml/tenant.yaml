@@ -272,3 +272,10 @@ networkACLs:
       scope: 'authentication'
       match:
         geo_country_codes: ['US', 'CA']
+
+customDomains:
+  - domain: my_domain.com
+    type: auth0_managed_certs
+    domain_metadata:
+      myKey: value
+

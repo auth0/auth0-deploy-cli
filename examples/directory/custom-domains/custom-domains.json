@@ -1,0 +1,9 @@
+[
+  {
+    "domain": "my_domain.com",
+    "type": "auth0_managed_certs",
+    "domain_metadata": {
+      "myKey": "value"
+    }
+  }
+]
