@@ -101,6 +101,12 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
       );
     }
 
+    if (customDomains.some((customDomain) => 'verification_method' in customDomain)) {
+      log.warn(
+        'The "verification_method" field is deprecated and may be removed in future versions for "customDomains"'
+      );
+    }
+
     const changes = await this.calcChanges(assets);
 
     await super.processChanges(assets, changes);
