@@ -45,7 +45,14 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
       id: 'custom_domain_id',
       identifiers: ['custom_domain_id', 'domain'],
       stripCreateFields: ['status', 'primary', 'verification'],
-      stripUpdateFields: ['status', 'primary', 'verification', 'type', 'domain'],
+      stripUpdateFields: [
+        'status',
+        'primary',
+        'verification',
+        'type',
+        'domain',
+        'verification_method',
+      ],
       functions: {
         delete: (args) => this.client.customDomains.delete({ id: args.custom_domain_id }),
         update: (args, data) =>
@@ -91,12 +98,6 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
     if (customDomains.some((customDomain) => customDomain.primary != null)) {
       log.warn(
         'The "primary" field is deprecated and may be removed in future versions for "customDomains"'
-      );
-    }
-
-    if (customDomains.some((customDomain) => 'verification_method' in customDomain)) {
-      log.warn(
-        'The "verification_method" field is deprecated and may be removed in future versions for "customDomains"'
       );
     }
 
