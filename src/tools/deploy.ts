@@ -63,7 +63,7 @@ export default async function deploy(
         typeChanges.changes.forEach((change, index) => {
           const deleteNote = change.action === 'DELETE' && !allowDelete ? ' *' : '';
           tableData.push({
-            resource: index === 0 ? typeName.slice(0, -1) : '', // Only show resource name for first item in group
+            resource: index === 0 ? typeName : '', // Only show resource name for first item in group
             status: change.action + deleteNote,
             name: change.identifier,
           });

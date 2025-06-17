@@ -475,5 +475,17 @@ export async function dryRunFormatAssets(
     });
   }
 
+  // format assets actions
+  if (localAssets.actions) {
+    const { actions } = localAssets;
+    localAssets.actions = actions.map((action) => {
+      if ('deployed' in action) {
+        action.all_changes_deployed = action.deployed;
+        delete action.deployed;
+      }
+      return action;
+    });
+  }
+
   return localAssets;
 }
