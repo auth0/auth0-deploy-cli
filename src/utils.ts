@@ -272,3 +272,12 @@ export const encodeCertStringToBase64 = (cert: string) => {
   }
   return cert;
 };
+
+// Decode a Base64 encoded certificate string back to its original format.
+export const decodeBase64ToCertString = (base64Cert: string) => {
+  try {
+    return Buffer.from(base64Cert, 'base64').toString('utf-8');
+  } catch (e) {
+    return base64Cert;
+  }
+};

@@ -4,6 +4,7 @@ import APIHandler from './auth0/handlers/default';
 import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../types';
 import { convertClientNameToId } from './utils';
 import { paginate } from './auth0/client';
+import { decodeBase64ToCertString } from '../utils';
 
 /**
  * @template T
@@ -304,8 +305,8 @@ export function calculateDryRunChanges({
   identifiers = ['id', 'name'],
 }: {
   type: string;
-  assets: Asset[];
-  existing: Asset[] | null;
+  assets: Asset[] | Asset;
+  existing: Asset[] | Asset | null;
   identifiers: string[];
 }): CalculatedChanges {
   // Calculate the changes required between two sets of assets.
@@ -314,8 +315,8 @@ export function calculateDryRunChanges({
   const create: Asset[] = [];
   const conflicts: Asset[] = [];
 
-  const localAssets: Asset[] = [...(assets || [])]; // Local assets (what we have locally)
-  const remoteAssets: Asset[] = [...(existing || [])]; // Remote assets (what exists remotely)
+  const localAssets: Asset[] = Array.isArray(assets) ? [...assets] : [assets]; // Local assets (what we have locally)
+  const remoteAssets: Asset[] = Array.isArray(existing) ? [...existing] : [existing]; // Remote assets (what exists remotely)
 
   // identify created
   const createdAssets = localAssets.filter(
@@ -449,8 +450,6 @@ export async function dryRunFormatAssets(
     include_totals: true,
   });
 
-  // console.log(clientsRemoteData);
-
   // check assets clientGrants and clients together and have values
   if (localAssets.clientGrants) {
     const { clientGrants } = localAssets;
@@ -485,6 +484,37 @@ export async function dryRunFormatAssets(
       }
       return action;
     });
+  }
+
+  // format assets connections
+  if (localAssets.connections) {
+    const { connections } = localAssets;
+    localAssets.connections = connections.map((connection) => {
+      if (connection.strategy === 'samlp' && connection.options) {
+        if ('cert' in connection.options) {
+          connection.options.cert = decodeBase64ToCertString(connection.options.cert);
+        }
+      }
+      if (localAssets.clients && connection.enabled_clients) {
+        connection.enabled_clients = connection.enabled_clients.map((clientName) =>
+          convertClientNameToId(clientName, clientsRemoteData)
+        );
+      }
+      return connection;
+    });
+  }
+
+  // format assets emailProvider
+  if (localAssets.emailProvider) {
+    const { emailProvider } = localAssets;
+
+    if (emailProvider.name === 'smtp') {
+      if (emailProvider.credentials && emailProvider.credentials.smtp_pass) {
+        delete emailProvider.credentials.smtp_pass;
+      }
+    }
+
+    localAssets.emailProvider = emailProvider;
   }
 
   return localAssets;

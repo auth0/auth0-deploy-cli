@@ -149,7 +149,7 @@ export default class APIHandler {
       this.type === 'guardianPhoneFactorSelectedProvider' ||
       this.type === 'guardianPolicies'
     ) {
-      return 'settings';
+      return `${this.type} settings`;
     }
 
     return 'unnamed resource';

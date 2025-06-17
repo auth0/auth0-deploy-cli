@@ -122,63 +122,64 @@ export default class Auth0 {
           let updated = 0;
           let deleted = 0;
 
-          const typeAssets = this.assets[handler.type];
+          // const typeAssets = this.assets[handler.type];
 
           // Check if this is a collection (array) or singleton handler
-          const isCollection = Array.isArray(typeAssets);
+          // const isCollection = Array.isArray(typeAssets);
 
-          if (isCollection && typeof handler.calcChanges === 'function') {
-            // Calculate changes for collection handlers
-            // const changes: CalculatedChanges = await handler.calcChanges(this.assets);
-            const changes: CalculatedChanges = await handler.dryRunChanges(this.assets);
+          // if (isCollection && typeof handler.calcChanges === 'function') {
+          // Calculate changes for collection handlers
+          // const changes: CalculatedChanges = await handler.calcChanges(this.assets);
+          const changes: CalculatedChanges = await handler.dryRunChanges(this.assets);
 
-            // Add detailed information for each change
-            if (changes.create) {
-              changes.create.forEach((item) => {
-                detailedChanges.push({
-                  action: 'CREATE' as const,
-                  identifier: handler.getResourceName(item),
-                  details: item,
-                });
+          // Add detailed information for each change
+          if (changes.create) {
+            changes.create.forEach((item) => {
+              detailedChanges.push({
+                action: 'CREATE' as const,
+                identifier: handler.getResourceName(item),
+                details: item,
               });
-              created = changes.create.length;
-            }
-
-            if (changes.update) {
-              changes.update.forEach((item) => {
-                detailedChanges.push({
-                  action: 'UPDATE' as const,
-                  identifier: handler.getResourceName(item),
-                  details: item,
-                });
-              });
-              updated = changes.update.length;
-            }
-
-            if (changes.del) {
-              changes.del.forEach((item) => {
-                detailedChanges.push({
-                  action: 'DELETE' as const,
-                  identifier: handler.getResourceName(item),
-                  details: item,
-                });
-              });
-              deleted = changes.del.length;
-            }
-
-            // merge changes and update the current assets with only the changed items
-            // const changedAssets = [...changes.create, ...changes.update, ...changes.del];
-            // this.assets[handler.type] = changedAssets.length > 0 ? changedAssets : null;
-          } else if (typeAssets && !isCollection) {
-            // Handle singleton handlers (tenant, branding, etc.)
-            // For singleton handlers, if asset exists it would be an update
-            detailedChanges.push({
-              action: 'UPDATE' as const,
-              identifier: handler.getResourceName(typeAssets),
-              details: typeAssets,
             });
-            updated = 1;
+            created = changes.create.length;
           }
+
+          if (changes.update) {
+            changes.update.forEach((item) => {
+              detailedChanges.push({
+                action: 'UPDATE' as const,
+                identifier: handler.getResourceName(item),
+                details: item,
+              });
+            });
+            updated = changes.update.length;
+          }
+
+          if (changes.del) {
+            changes.del.forEach((item) => {
+              detailedChanges.push({
+                action: 'DELETE' as const,
+                identifier: handler.getResourceName(item),
+                details: item,
+              });
+            });
+            deleted = changes.del.length;
+          }
+
+          // merge changes and update the current assets with only the changed items
+          // const changedAssets = [...changes.create, ...changes.update, ...changes.del];
+          // this.assets[handler.type] = changedAssets.length > 0 ? changedAssets : null;
+          // } else if (typeAssets && !isCollection) {
+          //   // Handle singleton handlers (tenant, branding, etc.)
+          //   // For singleton handlers, if asset exists it would be an update
+
+          //   detailedChanges.push({
+          //     action: 'UPDATE' as const,
+          //     identifier: handler.getResourceName(typeAssets),
+          //     details: typeAssets,
+          //   });
+          //   updated = 1;
+          // }
 
           allChanges[handler.type] = {
             created,
