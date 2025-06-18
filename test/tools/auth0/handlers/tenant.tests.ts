@@ -83,6 +83,60 @@ describe('#tenant handler', () => {
       await stageFn.apply(handler, [{ tenant: { sandbox_version: '4' } }]);
     });
 
+    it('should allow valid default_token_quota property in tenant', async () => {
+      const tenantWithDefaultTokenQuota = {
+        default_token_quota: {
+          clients: {
+            client_credentials: {
+              enforce: true,
+              per_day: 2000,
+              per_hour: 200,
+            },
+          },
+          organizations: {
+            client_credentials: {
+              enforce: false,
+              per_day: 1000,
+              per_hour: 100,
+            },
+          },
+        },
+      };
+      let wasUpdateCalled = false;
+      const auth0 = {
+        tenants: {
+          getSettings: () => ({ data: {} }),
+          updateSettings: function (data) {
+            wasUpdateCalled = true;
+            expect(data).to.be.an('object');
+            expect(data.default_token_quota).to.deep.equal({
+              clients: {
+                client_credentials: {
+                  enforce: true,
+                  per_day: 2000,
+                  per_hour: 200,
+                },
+              },
+              organizations: {
+                client_credentials: {
+                  enforce: false,
+                  per_day: 1000,
+                  per_hour: 100,
+                },
+              },
+            });
+            return Promise.resolve(data);
+          },
+        },
+      };
+      // @ts-ignore
+      const handler = new tenantHandler({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ tenant: tenantWithDefaultTokenQuota }]);
+      // eslint-disable-next-line no-unused-expressions
+      expect(wasUpdateCalled).to.be.true;
+    });
+
     describe('filtering-out unallowed tenant flags', async () => {
       it('should filter-out unallowed tenant flags', async () => {
         const proposedFlags = {

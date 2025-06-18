@@ -711,3 +711,160 @@ describe('#isForbiddenFeatureError', () => {
     expect(utils.isForbiddenFeatureError(error, resourceType)).to.be.false;
   });
 });
+
+describe('#maskSecretAtPath', () => {
+  it('should mask a secret at a simple path', () => {
+    const obj = { secret: 'sensitive_value' };
+
+    utils.maskSecretAtPath({
+      resourceTypeName: 'connections',
+      maskedKeyName: 'oauth2',
+      maskOnObj: obj,
+      keyJsonPath: 'secret',
+    });
+
+    expect(obj.secret).to.equal('##CONNECTIONS_OAUTH2_SECRET##');
+  });
+
+  it('should mask a secret at a nested path', () => {
+    const obj = {
+      config: {
+        credentials: {
+          client_secret: 'sensitive_secret',
+        },
+      },
+    };
+
+    utils.maskSecretAtPath({
+      resourceTypeName: 'connections',
+      maskedKeyName: 'samlp',
+      maskOnObj: obj,
+      keyJsonPath: 'config.credentials.client_secret',
+    });
+
+    expect(obj.config.credentials.client_secret).to.equal('##CONNECTIONS_SAMLP_SECRET##');
+  });
+
+  it('should not modify object if path does not exist', () => {
+    const obj = { other_field: 'value' };
+    const originalObj = { ...obj };
+
+    utils.maskSecretAtPath({
+      resourceTypeName: 'connections',
+      maskedKeyName: 'oauth2',
+      maskOnObj: obj,
+      keyJsonPath: 'non_existent_path',
+    });
+
+    expect(obj).to.deep.equal(originalObj);
+  });
+
+  it('should sanitize resource type name with special characters', () => {
+    const obj = { token: 'secret_token' };
+
+    utils.maskSecretAtPath({
+      resourceTypeName: 'log-streams',
+      maskedKeyName: 'http',
+      maskOnObj: obj,
+      keyJsonPath: 'token',
+    });
+
+    expect(obj.token).to.equal('##LOG_STREAMS_HTTP_SECRET##');
+  });
+
+  it('should sanitize masked key name with special characters', () => {
+    const obj = { apiKey: 'secret_key' };
+
+    utils.maskSecretAtPath({
+      resourceTypeName: 'logStreams',
+      maskedKeyName: 'custom-http-2.0',
+      maskOnObj: obj,
+      keyJsonPath: 'apiKey',
+    });
+
+    expect(obj.apiKey).to.equal('##LOGSTREAMS_CUSTOM_HTTP_2_0_SECRET##');
+  });
+
+  it('should handle numeric values in path', () => {
+    const obj = {
+      items: [{ secret: 'first_secret' }, { secret: 'second_secret' }],
+    };
+
+    utils.maskSecretAtPath({
+      resourceTypeName: 'rules',
+      maskedKeyName: 'webhook',
+      maskOnObj: obj,
+      keyJsonPath: 'items.0.secret',
+    });
+
+    expect(obj.items[0].secret).to.equal('##RULES_WEBHOOK_SECRET##');
+    expect(obj.items[1].secret).to.equal('second_secret'); // Should remain unchanged
+  });
+
+  it('should handle deeply nested paths', () => {
+    const obj = {
+      level1: {
+        level2: {
+          level3: {
+            level4: {
+              secret_value: 'deeply_nested_secret',
+            },
+          },
+        },
+      },
+    };
+
+    utils.maskSecretAtPath({
+      resourceTypeName: 'actions',
+      maskedKeyName: 'login',
+      maskOnObj: obj,
+      keyJsonPath: 'level1.level2.level3.level4.secret_value',
+    });
+
+    expect(obj.level1.level2.level3.level4.secret_value).to.equal('##ACTIONS_LOGIN_SECRET##');
+  });
+
+  it('should return the modified object', () => {
+    const obj = { token: 'secret_token' };
+
+    const result = utils.maskSecretAtPath({
+      resourceTypeName: 'hooks',
+      maskedKeyName: 'post_login',
+      maskOnObj: obj,
+      keyJsonPath: 'token',
+    });
+
+    expect(result).to.equal(obj);
+    expect(result.token).to.equal('##HOOKS_POST_LOGIN_SECRET##');
+  });
+
+  it('should handle empty strings in resource and key names', () => {
+    const obj = { secret: 'value' };
+
+    utils.maskSecretAtPath({
+      resourceTypeName: '',
+      maskedKeyName: '',
+      maskOnObj: obj,
+      keyJsonPath: 'secret',
+    });
+
+    expect(obj.secret).to.equal('##__SECRET##');
+  });
+
+  it('should handle array objects', () => {
+    const obj = {
+      configs: [{ auth_token: 'token1' }, { auth_token: 'token2' }, { auth_token: 'token3' }],
+    };
+
+    utils.maskSecretAtPath({
+      resourceTypeName: 'phoneProviders',
+      maskedKeyName: 'twilio',
+      maskOnObj: obj,
+      keyJsonPath: 'configs.1.auth_token',
+    });
+
+    expect(obj.configs[0].auth_token).to.equal('token1');
+    expect(obj.configs[1].auth_token).to.equal('##PHONEPROVIDERS_TWILIO_SECRET##');
+    expect(obj.configs[2].auth_token).to.equal('token3');
+  });
+});

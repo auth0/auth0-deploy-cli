@@ -973,6 +973,22 @@
                             "value": "delete:federated_connections_tokens"
                         },
                         {
+                            "description": "Create User Attribute Profiles",
+                            "value": "create:user_attribute_profiles"
+                        },
+                        {
+                            "description": "Read User Attribute Profiles",
+                            "value": "read:user_attribute_profiles"
+                        },
+                        {
+                            "description": "Update User Attribute Profiles",
+                            "value": "update:user_attribute_profiles"
+                        },
+                        {
+                            "description": "Delete User Attribute Profiles",
+                            "value": "delete:user_attribute_profiles"
+                        },
+                        {
                             "value": "read:client_credentials",
                             "description": "Read Client Credentials"
                         },
@@ -999,6 +1015,30 @@
                         {
                             "value": "delete:organization_client_grants",
                             "description": "Delete Organization Client Grants"
+                        },
+                        {
+                            "value": "read:event_streams",
+                            "description": "Read Event Streams"
+                        },
+                        {
+                            "value": "create:event_streams",
+                            "description": "Create Event Streams"
+                        },
+                        {
+                            "value": "update:event_streams",
+                            "description": "Update Event Streams"
+                        },
+                        {
+                            "value": "delete:event_streams",
+                            "description": "Delete Event Streams"
+                        },
+                        {
+                            "value": "read:event_deliveries",
+                            "description": "Read event deliveries on an event stream"
+                        },
+                        {
+                            "value": "update:event_deliveries",
+                            "description": "Redeliver event(s) on an event stream"
                         }
                     ],
                     "is_system": true
@@ -2083,82 +2123,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/user_invitation",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/stolen_credentials",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/enrollment_email",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/change_password",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/reset_email",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/blocked_account",
+        "path": "/api/v2/email-templates/mfa_oob_code",
         "body": "",
         "status": 404,
         "response": {
@@ -2192,7 +2157,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/verify_email_by_code",
+        "path": "/api/v2/email-templates/stolen_credentials",
         "body": "",
         "status": 404,
         "response": {
@@ -2222,7 +2187,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/reset_email_by_code",
+        "path": "/api/v2/email-templates/user_invitation",
         "body": "",
         "status": 404,
         "response": {
@@ -2237,7 +2202,82 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/mfa_oob_code",
+        "path": "/api/v2/email-templates/reset_email",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/enrollment_email",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/verify_email_by_code",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/change_password",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/blocked_account",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/reset_email_by_code",
         "body": "",
         "status": 404,
         "response": {
@@ -3098,7 +3138,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login-id/custom-text/en",
+        "path": "/api/v2/prompts/login-password/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -3108,7 +3148,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login-password/custom-text/en",
+        "path": "/api/v2/prompts/login-id/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -3348,6 +3388,16 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/prompts/device-flow/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/prompts/email-verification/custom-text/en",
         "body": "",
         "status": 200,
@@ -3368,27 +3418,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/device-flow/custom-text/en",
-        "body": "",
-        "status": 200,
-        "response": {},
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/prompts/organizations/custom-text/en",
-        "body": "",
-        "status": 200,
-        "response": {},
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/prompts/invitation/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -3408,7 +3438,27 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/prompts/invitation/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/prompts/captcha/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/login-password/partials",
         "body": "",
         "status": 200,
         "response": {},
@@ -3438,7 +3488,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login-password/partials",
+        "path": "/api/v2/prompts/signup/partials",
         "body": "",
         "status": 200,
         "response": {},
@@ -3449,16 +3499,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/prompts/login-passwordless/partials",
-        "body": "",
-        "status": 200,
-        "response": {},
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/prompts/signup/partials",
         "body": "",
         "status": 200,
         "response": {},
@@ -3503,33 +3543,33 @@
                         }
                     ],
                     "created_at": "2025-04-10T08:40:53.519356631Z",
-                    "updated_at": "2025-04-10T08:53:38.511045004Z",
+                    "updated_at": "2025-04-10T09:00:57.353906908Z",
                     "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
                     "dependencies": [],
                     "runtime": "node16",
                     "status": "built",
                     "secrets": [],
                     "current_version": {
-                        "id": "d4dae99b-d922-41bb-8e68-62587cd96be0",
+                        "id": "aff3ee7b-eba9-48f8-8d4a-a80abcf51d62",
                         "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
                         "runtime": "node16",
                         "status": "BUILT",
-                        "number": 2,
-                        "build_time": "2025-04-10T08:53:39.257301430Z",
-                        "created_at": "2025-04-10T08:53:39.170711034Z",
-                        "updated_at": "2025-04-10T08:53:39.258749641Z"
+                        "number": 3,
+                        "build_time": "2025-04-10T09:00:58.103474016Z",
+                        "created_at": "2025-04-10T09:00:58.036697986Z",
+                        "updated_at": "2025-04-10T09:00:58.104420251Z"
                     },
                     "deployed_version": {
                         "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
                         "dependencies": [],
-                        "id": "d4dae99b-d922-41bb-8e68-62587cd96be0",
+                        "id": "aff3ee7b-eba9-48f8-8d4a-a80abcf51d62",
                         "deployed": true,
-                        "number": 2,
-                        "built_at": "2025-04-10T08:53:39.257301430Z",
+                        "number": 3,
+                        "built_at": "2025-04-10T09:00:58.103474016Z",
                         "secrets": [],
                         "status": "built",
-                        "created_at": "2025-04-10T08:53:39.170711034Z",
-                        "updated_at": "2025-04-10T08:53:39.258749641Z",
+                        "created_at": "2025-04-10T09:00:58.036697986Z",
+                        "updated_at": "2025-04-10T09:00:58.104420251Z",
                         "runtime": "node16",
                         "supported_triggers": [
                             {
@@ -3555,6 +3595,17 @@
         "status": 200,
         "response": {
             "triggers": [
+                {
+                    "id": "post-login",
+                    "version": "v1",
+                    "status": "DEPRECATED",
+                    "runtimes": [
+                        "node12"
+                    ],
+                    "default_runtime": "node12",
+                    "binding_policy": "trigger-bound",
+                    "compatible_triggers": []
+                },
                 {
                     "id": "post-login",
                     "version": "v2",
@@ -3588,7 +3639,7 @@
                     ]
                 },
                 {
-                    "id": "post-login",
+                    "id": "credentials-exchange",
                     "version": "v1",
                     "status": "DEPRECATED",
                     "runtimes": [
@@ -3609,17 +3660,6 @@
                         "node22"
                     ],
                     "default_runtime": "node22",
-                    "binding_policy": "trigger-bound",
-                    "compatible_triggers": []
-                },
-                {
-                    "id": "credentials-exchange",
-                    "version": "v1",
-                    "status": "DEPRECATED",
-                    "runtimes": [
-                        "node12"
-                    ],
-                    "default_runtime": "node12",
                     "binding_policy": "trigger-bound",
                     "compatible_triggers": []
                 },
@@ -3650,17 +3690,6 @@
                 },
                 {
                     "id": "post-user-registration",
-                    "version": "v1",
-                    "status": "DEPRECATED",
-                    "runtimes": [
-                        "node12"
-                    ],
-                    "default_runtime": "node12",
-                    "binding_policy": "trigger-bound",
-                    "compatible_triggers": []
-                },
-                {
-                    "id": "post-user-registration",
                     "version": "v2",
                     "status": "CURRENT",
                     "runtimes": [
@@ -3670,6 +3699,17 @@
                         "node22"
                     ],
                     "default_runtime": "node22",
+                    "binding_policy": "trigger-bound",
+                    "compatible_triggers": []
+                },
+                {
+                    "id": "post-user-registration",
+                    "version": "v1",
+                    "status": "DEPRECATED",
+                    "runtimes": [
+                        "node12"
+                    ],
+                    "default_runtime": "node12",
                     "binding_policy": "trigger-bound",
                     "compatible_triggers": []
                 },
@@ -4642,61 +4682,11 @@
                 "id": "lst_0000000000021093",
                 "name": "Suspended DD Log Stream",
                 "type": "datadog",
-                "status": "active",
+                "status": "suspended",
                 "sink": {
                     "datadogApiKey": "some-sensitive-api-key",
                     "datadogRegion": "us"
                 },
-                "isPriority": false
-            },
-            {
-                "id": "lst_0000000000021094",
-                "name": "Amazon EventBridge",
-                "type": "eventbridge",
-                "status": "active",
-                "sink": {
-                    "awsAccountId": "123456789012",
-                    "awsRegion": "us-east-2",
-                    "awsPartnerEventSource": "aws.partner/auth0.com/auth0-deploy-cli-e2e-bb95db57-c72d-4a97-bdf1-386d9219e13a/auth0.logs"
-                },
-                "filters": [
-                    {
-                        "type": "category",
-                        "name": "auth.login.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.login.notification"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.login.fail"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.signup.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.logout.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.logout.fail"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.silent_auth.fail"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.silent_auth.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.token_exchange.fail"
-                    }
-                ],
                 "isPriority": false
             }
         ],
@@ -4744,7 +4734,7 @@
                     "name": "Blank-form",
                     "flow_count": 0,
                     "created_at": "2024-11-26T11:58:18.187Z",
-                    "updated_at": "2025-04-10T08:53:56.028Z"
+                    "updated_at": "2025-05-27T11:32:08.928Z"
                 }
             ]
         },
@@ -4830,22 +4820,7 @@
                 }
             },
             "created_at": "2024-11-26T11:58:18.187Z",
-            "updated_at": "2025-04-10T08:53:56.028Z"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/flows?page=0&per_page=100&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "limit": 100,
-            "start": 0,
-            "total": 0,
-            "flows": []
+            "updated_at": "2025-05-27T11:32:08.928Z"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -4861,6 +4836,21 @@
             "start": 0,
             "total": 0,
             "connections": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/flows?page=0&per_page=100&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 100,
+            "start": 0,
+            "total": 0,
+            "flows": []
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -4909,7 +4899,7 @@
                         "okta"
                     ],
                     "created_at": "2024-11-26T11:58:18.962Z",
-                    "updated_at": "2025-04-10T08:53:41.258Z",
+                    "updated_at": "2025-04-10T09:01:00.721Z",
                     "branding": {
                         "colors": {
                             "primary": "#19aecc"
@@ -4961,7 +4951,7 @@
                         }
                     },
                     "created_at": "2025-04-09T10:50:23.683Z",
-                    "updated_at": "2025-04-10T08:53:41.961Z",
+                    "updated_at": "2025-04-10T09:01:01.363Z",
                     "id": "acl_5TpkFaNH63Mfc5EsaADFHg"
                 }
             ]
@@ -6022,6 +6012,22 @@
                             "value": "delete:federated_connections_tokens"
                         },
                         {
+                            "description": "Create User Attribute Profiles",
+                            "value": "create:user_attribute_profiles"
+                        },
+                        {
+                            "description": "Read User Attribute Profiles",
+                            "value": "read:user_attribute_profiles"
+                        },
+                        {
+                            "description": "Update User Attribute Profiles",
+                            "value": "update:user_attribute_profiles"
+                        },
+                        {
+                            "description": "Delete User Attribute Profiles",
+                            "value": "delete:user_attribute_profiles"
+                        },
+                        {
                             "value": "read:client_credentials",
                             "description": "Read Client Credentials"
                         },
@@ -6048,6 +6054,30 @@
                         {
                             "value": "delete:organization_client_grants",
                             "description": "Delete Organization Client Grants"
+                        },
+                        {
+                            "value": "read:event_streams",
+                            "description": "Read Event Streams"
+                        },
+                        {
+                            "value": "create:event_streams",
+                            "description": "Create Event Streams"
+                        },
+                        {
+                            "value": "update:event_streams",
+                            "description": "Update Event Streams"
+                        },
+                        {
+                            "value": "delete:event_streams",
+                            "description": "Delete Event Streams"
+                        },
+                        {
+                            "value": "read:event_deliveries",
+                            "description": "Read event deliveries on an event stream"
+                        },
+                        {
+                            "value": "update:event_deliveries",
+                            "description": "Redeliver event(s) on an event stream"
                         }
                     ],
                     "is_system": true
@@ -7327,7 +7357,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/email",
+        "path": "/api/v2/guardian/factors/duo",
         "body": {
             "enabled": false
         },
@@ -7355,49 +7385,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/duo",
-        "body": {
-            "enabled": false
-        },
-        "status": 200,
-        "response": {
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PUT",
-        "path": "/api/v2/guardian/factors/recovery-code",
-        "body": {
-            "enabled": false
-        },
-        "status": 200,
-        "response": {
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PUT",
-        "path": "/api/v2/guardian/factors/push-notification",
-        "body": {
-            "enabled": false
-        },
-        "status": 200,
-        "response": {
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PUT",
-        "path": "/api/v2/guardian/factors/webauthn-roaming",
+        "path": "/api/v2/guardian/factors/email",
         "body": {
             "enabled": false
         },
@@ -7425,7 +7413,49 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
+        "path": "/api/v2/guardian/factors/webauthn-roaming",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
+        "path": "/api/v2/guardian/factors/push-notification",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
         "path": "/api/v2/guardian/factors/webauthn-platform",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
+        "path": "/api/v2/guardian/factors/recovery-code",
         "body": {
             "enabled": false
         },
@@ -7524,33 +7554,33 @@
                         }
                     ],
                     "created_at": "2025-04-10T08:40:53.519356631Z",
-                    "updated_at": "2025-04-10T08:53:38.511045004Z",
+                    "updated_at": "2025-04-10T09:00:57.353906908Z",
                     "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
                     "dependencies": [],
                     "runtime": "node16",
                     "status": "built",
                     "secrets": [],
                     "current_version": {
-                        "id": "d4dae99b-d922-41bb-8e68-62587cd96be0",
+                        "id": "aff3ee7b-eba9-48f8-8d4a-a80abcf51d62",
                         "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
                         "runtime": "node16",
                         "status": "BUILT",
-                        "number": 2,
-                        "build_time": "2025-04-10T08:53:39.257301430Z",
-                        "created_at": "2025-04-10T08:53:39.170711034Z",
-                        "updated_at": "2025-04-10T08:53:39.258749641Z"
+                        "number": 3,
+                        "build_time": "2025-04-10T09:00:58.103474016Z",
+                        "created_at": "2025-04-10T09:00:58.036697986Z",
+                        "updated_at": "2025-04-10T09:00:58.104420251Z"
                     },
                     "deployed_version": {
                         "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
                         "dependencies": [],
-                        "id": "d4dae99b-d922-41bb-8e68-62587cd96be0",
+                        "id": "aff3ee7b-eba9-48f8-8d4a-a80abcf51d62",
                         "deployed": true,
-                        "number": 2,
-                        "built_at": "2025-04-10T08:53:39.257301430Z",
+                        "number": 3,
+                        "built_at": "2025-04-10T09:00:58.103474016Z",
                         "secrets": [],
                         "status": "built",
-                        "created_at": "2025-04-10T08:53:39.170711034Z",
-                        "updated_at": "2025-04-10T08:53:39.258749641Z",
+                        "created_at": "2025-04-10T09:00:58.036697986Z",
+                        "updated_at": "2025-04-10T09:00:58.104420251Z",
                         "runtime": "node16",
                         "supported_triggers": [
                             {
@@ -7596,33 +7626,33 @@
                 }
             ],
             "created_at": "2025-04-10T08:40:53.519356631Z",
-            "updated_at": "2025-04-10T09:00:57.353906908Z",
+            "updated_at": "2025-05-27T13:47:50.553583374Z",
             "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
             "dependencies": [],
             "runtime": "node16",
             "status": "pending",
             "secrets": [],
             "current_version": {
-                "id": "d4dae99b-d922-41bb-8e68-62587cd96be0",
+                "id": "aff3ee7b-eba9-48f8-8d4a-a80abcf51d62",
                 "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
                 "runtime": "node16",
                 "status": "BUILT",
-                "number": 2,
-                "build_time": "2025-04-10T08:53:39.257301430Z",
-                "created_at": "2025-04-10T08:53:39.170711034Z",
-                "updated_at": "2025-04-10T08:53:39.258749641Z"
+                "number": 3,
+                "build_time": "2025-04-10T09:00:58.103474016Z",
+                "created_at": "2025-04-10T09:00:58.036697986Z",
+                "updated_at": "2025-04-10T09:00:58.104420251Z"
             },
             "deployed_version": {
                 "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
                 "dependencies": [],
-                "id": "d4dae99b-d922-41bb-8e68-62587cd96be0",
+                "id": "aff3ee7b-eba9-48f8-8d4a-a80abcf51d62",
                 "deployed": true,
-                "number": 2,
-                "built_at": "2025-04-10T08:53:39.257301430Z",
+                "number": 3,
+                "built_at": "2025-04-10T09:00:58.103474016Z",
                 "secrets": [],
                 "status": "built",
-                "created_at": "2025-04-10T08:53:39.170711034Z",
-                "updated_at": "2025-04-10T08:53:39.258749641Z",
+                "created_at": "2025-04-10T09:00:58.036697986Z",
+                "updated_at": "2025-04-10T09:00:58.104420251Z",
                 "runtime": "node16",
                 "supported_triggers": [
                     {
@@ -7654,33 +7684,33 @@
                         }
                     ],
                     "created_at": "2025-04-10T08:40:53.519356631Z",
-                    "updated_at": "2025-04-10T09:00:57.353906908Z",
+                    "updated_at": "2025-05-27T13:47:50.553583374Z",
                     "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
                     "dependencies": [],
                     "runtime": "node16",
                     "status": "built",
                     "secrets": [],
                     "current_version": {
-                        "id": "d4dae99b-d922-41bb-8e68-62587cd96be0",
+                        "id": "aff3ee7b-eba9-48f8-8d4a-a80abcf51d62",
                         "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
                         "runtime": "node16",
                         "status": "BUILT",
-                        "number": 2,
-                        "build_time": "2025-04-10T08:53:39.257301430Z",
-                        "created_at": "2025-04-10T08:53:39.170711034Z",
-                        "updated_at": "2025-04-10T08:53:39.258749641Z"
+                        "number": 3,
+                        "build_time": "2025-04-10T09:00:58.103474016Z",
+                        "created_at": "2025-04-10T09:00:58.036697986Z",
+                        "updated_at": "2025-04-10T09:00:58.104420251Z"
                     },
                     "deployed_version": {
                         "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
                         "dependencies": [],
-                        "id": "d4dae99b-d922-41bb-8e68-62587cd96be0",
+                        "id": "aff3ee7b-eba9-48f8-8d4a-a80abcf51d62",
                         "deployed": true,
-                        "number": 2,
-                        "built_at": "2025-04-10T08:53:39.257301430Z",
+                        "number": 3,
+                        "built_at": "2025-04-10T09:00:58.103474016Z",
                         "secrets": [],
                         "status": "built",
-                        "created_at": "2025-04-10T08:53:39.170711034Z",
-                        "updated_at": "2025-04-10T08:53:39.258749641Z",
+                        "created_at": "2025-04-10T09:00:58.036697986Z",
+                        "updated_at": "2025-04-10T09:00:58.104420251Z",
                         "runtime": "node16",
                         "supported_triggers": [
                             {
@@ -7707,13 +7737,13 @@
         "response": {
             "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
             "dependencies": [],
-            "id": "aff3ee7b-eba9-48f8-8d4a-a80abcf51d62",
+            "id": "ba15fb92-52c7-44e3-9cfb-6253df220b8c",
             "deployed": false,
-            "number": 3,
+            "number": 4,
             "secrets": [],
             "status": "built",
-            "created_at": "2025-04-10T09:00:58.036697986Z",
-            "updated_at": "2025-04-10T09:00:58.036697986Z",
+            "created_at": "2025-05-27T13:47:51.262547034Z",
+            "updated_at": "2025-05-27T13:47:51.262547034Z",
             "runtime": "node16",
             "supported_triggers": [
                 {
@@ -7731,7 +7761,7 @@
                     }
                 ],
                 "created_at": "2025-04-10T08:40:53.519356631Z",
-                "updated_at": "2025-04-10T09:00:57.348270238Z",
+                "updated_at": "2025-05-27T13:47:50.549325889Z",
                 "all_changes_deployed": false
             }
         },
@@ -7785,34 +7815,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/attack-protection/brute-force-protection",
-        "body": {
-            "enabled": true,
-            "shields": [
-                "block",
-                "user_notification"
-            ],
-            "mode": "count_per_identifier_and_ip",
-            "allowlist": [],
-            "max_attempts": 10
-        },
-        "status": 200,
-        "response": {
-            "enabled": true,
-            "shields": [
-                "block",
-                "user_notification"
-            ],
-            "mode": "count_per_identifier_and_ip",
-            "allowlist": [],
-            "max_attempts": 10
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PATCH",
         "path": "/api/v2/attack-protection/breached-password-detection",
         "body": {
             "enabled": false,
@@ -7848,6 +7850,34 @@
     },
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/attack-protection/brute-force-protection",
+        "body": {
+            "enabled": true,
+            "shields": [
+                "block",
+                "user_notification"
+            ],
+            "mode": "count_per_identifier_and_ip",
+            "allowlist": [],
+            "max_attempts": 10
+        },
+        "status": 200,
+        "response": {
+            "enabled": true,
+            "shields": [
+                "block",
+                "user_notification"
+            ],
+            "mode": "count_per_identifier_and_ip",
+            "allowlist": [],
+            "max_attempts": 10
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/log-streams",
         "body": "",
@@ -7857,165 +7887,14 @@
                 "id": "lst_0000000000021093",
                 "name": "Suspended DD Log Stream",
                 "type": "datadog",
-                "status": "active",
+                "status": "suspended",
                 "sink": {
                     "datadogApiKey": "some-sensitive-api-key",
                     "datadogRegion": "us"
                 },
                 "isPriority": false
-            },
-            {
-                "id": "lst_0000000000021094",
-                "name": "Amazon EventBridge",
-                "type": "eventbridge",
-                "status": "active",
-                "sink": {
-                    "awsAccountId": "123456789012",
-                    "awsRegion": "us-east-2",
-                    "awsPartnerEventSource": "aws.partner/auth0.com/auth0-deploy-cli-e2e-bb95db57-c72d-4a97-bdf1-386d9219e13a/auth0.logs"
-                },
-                "filters": [
-                    {
-                        "type": "category",
-                        "name": "auth.login.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.login.notification"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.login.fail"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.signup.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.logout.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.logout.fail"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.silent_auth.fail"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.silent_auth.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.token_exchange.fail"
-                    }
-                ],
-                "isPriority": false
             }
         ],
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PATCH",
-        "path": "/api/v2/log-streams/lst_0000000000021094",
-        "body": {
-            "name": "Amazon EventBridge",
-            "filters": [
-                {
-                    "type": "category",
-                    "name": "auth.login.success"
-                },
-                {
-                    "type": "category",
-                    "name": "auth.login.notification"
-                },
-                {
-                    "type": "category",
-                    "name": "auth.login.fail"
-                },
-                {
-                    "type": "category",
-                    "name": "auth.signup.success"
-                },
-                {
-                    "type": "category",
-                    "name": "auth.logout.success"
-                },
-                {
-                    "type": "category",
-                    "name": "auth.logout.fail"
-                },
-                {
-                    "type": "category",
-                    "name": "auth.silent_auth.fail"
-                },
-                {
-                    "type": "category",
-                    "name": "auth.silent_auth.success"
-                },
-                {
-                    "type": "category",
-                    "name": "auth.token_exchange.fail"
-                }
-            ],
-            "isPriority": false,
-            "status": "active"
-        },
-        "status": 200,
-        "response": {
-            "id": "lst_0000000000021094",
-            "name": "Amazon EventBridge",
-            "type": "eventbridge",
-            "status": "active",
-            "sink": {
-                "awsAccountId": "123456789012",
-                "awsRegion": "us-east-2",
-                "awsPartnerEventSource": "aws.partner/auth0.com/auth0-deploy-cli-e2e-bb95db57-c72d-4a97-bdf1-386d9219e13a/auth0.logs"
-            },
-            "filters": [
-                {
-                    "type": "category",
-                    "name": "auth.login.success"
-                },
-                {
-                    "type": "category",
-                    "name": "auth.login.notification"
-                },
-                {
-                    "type": "category",
-                    "name": "auth.login.fail"
-                },
-                {
-                    "type": "category",
-                    "name": "auth.signup.success"
-                },
-                {
-                    "type": "category",
-                    "name": "auth.logout.success"
-                },
-                {
-                    "type": "category",
-                    "name": "auth.logout.fail"
-                },
-                {
-                    "type": "category",
-                    "name": "auth.silent_auth.fail"
-                },
-                {
-                    "type": "category",
-                    "name": "auth.silent_auth.success"
-                },
-                {
-                    "type": "category",
-                    "name": "auth.token_exchange.fail"
-                }
-            ],
-            "isPriority": false
-        },
         "rawHeaders": [],
         "responseIsBinary": false
     },
@@ -8027,18 +7906,18 @@
             "name": "Suspended DD Log Stream",
             "isPriority": false,
             "sink": {
+                "datadogApiKey": "##LOGSTREAMS_DATADOG_SECRET##",
                 "datadogRegion": "us"
-            },
-            "status": "active"
+            }
         },
         "status": 200,
         "response": {
             "id": "lst_0000000000021093",
             "name": "Suspended DD Log Stream",
             "type": "datadog",
-            "status": "active",
+            "status": "suspended",
             "sink": {
-                "datadogApiKey": "some-sensitive-api-key",
+                "datadogApiKey": "##LOGSTREAMS_DATADOG_SECRET##",
                 "datadogRegion": "us"
             },
             "isPriority": false
@@ -8100,7 +7979,7 @@
                         "okta"
                     ],
                     "created_at": "2024-11-26T11:58:18.962Z",
-                    "updated_at": "2025-04-10T08:53:41.258Z",
+                    "updated_at": "2025-04-10T09:01:00.721Z",
                     "branding": {
                         "colors": {
                             "primary": "#19aecc"
@@ -8176,7 +8055,7 @@
                 "okta"
             ],
             "created_at": "2024-11-26T11:58:18.962Z",
-            "updated_at": "2025-04-10T09:01:00.721Z",
+            "updated_at": "2025-05-27T13:47:54.076Z",
             "branding": {
                 "colors": {
                     "primary": "#19aecc"
@@ -8213,7 +8092,7 @@
                         }
                     },
                     "created_at": "2025-04-09T10:50:23.683Z",
-                    "updated_at": "2025-04-10T08:53:41.961Z",
+                    "updated_at": "2025-04-10T09:01:01.363Z",
                     "id": "acl_5TpkFaNH63Mfc5EsaADFHg"
                 }
             ]
@@ -8258,7 +8137,7 @@
                 }
             },
             "created_at": "2025-04-09T10:50:23.683Z",
-            "updated_at": "2025-04-10T09:01:01.363Z",
+            "updated_at": "2025-05-27T13:47:54.788Z",
             "id": "acl_5TpkFaNH63Mfc5EsaADFHg"
         },
         "rawHeaders": [],
@@ -11688,7 +11567,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/client-grants/cgr_5vcTfyeHl5H4fAX9",
+        "path": "/api/v2/client-grants/cgr_VOMMRiAXG3bqPOOY",
         "body": {
             "scope": [
                 "read:client_grants",
@@ -11825,8 +11704,8 @@
         },
         "status": 200,
         "response": {
-            "id": "cgr_5vcTfyeHl5H4fAX9",
-            "client_id": "f4eBblJcLD2brx8wnnicXn70F7FN0yzJ",
+            "id": "cgr_VOMMRiAXG3bqPOOY",
+            "client_id": "l7YeaTKUoTupuw44MDo3475XYGglfuGn",
             "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
             "scope": [
                 "read:client_grants",
@@ -11967,7 +11846,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/client-grants/cgr_VOMMRiAXG3bqPOOY",
+        "path": "/api/v2/client-grants/cgr_5vcTfyeHl5H4fAX9",
         "body": {
             "scope": [
                 "read:client_grants",
@@ -12104,8 +11983,8 @@
         },
         "status": 200,
         "response": {
-            "id": "cgr_VOMMRiAXG3bqPOOY",
-            "client_id": "l7YeaTKUoTupuw44MDo3475XYGglfuGn",
+            "id": "cgr_5vcTfyeHl5H4fAX9",
+            "client_id": "f4eBblJcLD2brx8wnnicXn70F7FN0yzJ",
             "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
             "scope": [
                 "read:client_grants",
@@ -13424,505 +13303,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/client-grants?per_page=100&page=0&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "total": 3,
-            "start": 0,
-            "limit": 100,
-            "client_grants": [
-                {
-                    "id": "cgr_5vcTfyeHl5H4fAX9",
-                    "client_id": "f4eBblJcLD2brx8wnnicXn70F7FN0yzJ",
-                    "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
-                    "scope": [
-                        "read:client_grants",
-                        "create:client_grants",
-                        "delete:client_grants",
-                        "update:client_grants",
-                        "read:users",
-                        "update:users",
-                        "delete:users",
-                        "create:users",
-                        "read:users_app_metadata",
-                        "update:users_app_metadata",
-                        "delete:users_app_metadata",
-                        "create:users_app_metadata",
-                        "read:user_custom_blocks",
-                        "create:user_custom_blocks",
-                        "delete:user_custom_blocks",
-                        "create:user_tickets",
-                        "read:clients",
-                        "update:clients",
-                        "delete:clients",
-                        "create:clients",
-                        "read:client_keys",
-                        "update:client_keys",
-                        "delete:client_keys",
-                        "create:client_keys",
-                        "read:connections",
-                        "update:connections",
-                        "delete:connections",
-                        "create:connections",
-                        "read:resource_servers",
-                        "update:resource_servers",
-                        "delete:resource_servers",
-                        "create:resource_servers",
-                        "read:device_credentials",
-                        "update:device_credentials",
-                        "delete:device_credentials",
-                        "create:device_credentials",
-                        "read:rules",
-                        "update:rules",
-                        "delete:rules",
-                        "create:rules",
-                        "read:rules_configs",
-                        "update:rules_configs",
-                        "delete:rules_configs",
-                        "read:hooks",
-                        "update:hooks",
-                        "delete:hooks",
-                        "create:hooks",
-                        "read:actions",
-                        "update:actions",
-                        "delete:actions",
-                        "create:actions",
-                        "read:email_provider",
-                        "update:email_provider",
-                        "delete:email_provider",
-                        "create:email_provider",
-                        "blacklist:tokens",
-                        "read:stats",
-                        "read:insights",
-                        "read:tenant_settings",
-                        "update:tenant_settings",
-                        "read:logs",
-                        "read:logs_users",
-                        "read:shields",
-                        "create:shields",
-                        "update:shields",
-                        "delete:shields",
-                        "read:anomaly_blocks",
-                        "delete:anomaly_blocks",
-                        "update:triggers",
-                        "read:triggers",
-                        "read:grants",
-                        "delete:grants",
-                        "read:guardian_factors",
-                        "update:guardian_factors",
-                        "read:guardian_enrollments",
-                        "delete:guardian_enrollments",
-                        "create:guardian_enrollment_tickets",
-                        "read:user_idp_tokens",
-                        "create:passwords_checking_job",
-                        "delete:passwords_checking_job",
-                        "read:custom_domains",
-                        "delete:custom_domains",
-                        "create:custom_domains",
-                        "update:custom_domains",
-                        "read:email_templates",
-                        "create:email_templates",
-                        "update:email_templates",
-                        "read:mfa_policies",
-                        "update:mfa_policies",
-                        "read:roles",
-                        "create:roles",
-                        "delete:roles",
-                        "update:roles",
-                        "read:prompts",
-                        "update:prompts",
-                        "read:branding",
-                        "update:branding",
-                        "delete:branding",
-                        "read:log_streams",
-                        "create:log_streams",
-                        "delete:log_streams",
-                        "update:log_streams",
-                        "create:signing_keys",
-                        "read:signing_keys",
-                        "update:signing_keys",
-                        "read:limits",
-                        "update:limits",
-                        "create:role_members",
-                        "read:role_members",
-                        "delete:role_members",
-                        "read:entitlements",
-                        "read:attack_protection",
-                        "update:attack_protection",
-                        "read:organizations",
-                        "update:organizations",
-                        "create:organizations",
-                        "delete:organizations",
-                        "create:organization_members",
-                        "read:organization_members",
-                        "delete:organization_members",
-                        "create:organization_connections",
-                        "read:organization_connections",
-                        "update:organization_connections",
-                        "delete:organization_connections",
-                        "create:organization_member_roles",
-                        "read:organization_member_roles",
-                        "delete:organization_member_roles",
-                        "create:organization_invitations",
-                        "read:organization_invitations",
-                        "delete:organization_invitations"
-                    ]
-                },
-                {
-                    "id": "cgr_VOMMRiAXG3bqPOOY",
-                    "client_id": "l7YeaTKUoTupuw44MDo3475XYGglfuGn",
-                    "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
-                    "scope": [
-                        "read:client_grants",
-                        "create:client_grants",
-                        "delete:client_grants",
-                        "update:client_grants",
-                        "read:users",
-                        "update:users",
-                        "delete:users",
-                        "create:users",
-                        "read:users_app_metadata",
-                        "update:users_app_metadata",
-                        "delete:users_app_metadata",
-                        "create:users_app_metadata",
-                        "read:user_custom_blocks",
-                        "create:user_custom_blocks",
-                        "delete:user_custom_blocks",
-                        "create:user_tickets",
-                        "read:clients",
-                        "update:clients",
-                        "delete:clients",
-                        "create:clients",
-                        "read:client_keys",
-                        "update:client_keys",
-                        "delete:client_keys",
-                        "create:client_keys",
-                        "read:connections",
-                        "update:connections",
-                        "delete:connections",
-                        "create:connections",
-                        "read:resource_servers",
-                        "update:resource_servers",
-                        "delete:resource_servers",
-                        "create:resource_servers",
-                        "read:device_credentials",
-                        "update:device_credentials",
-                        "delete:device_credentials",
-                        "create:device_credentials",
-                        "read:rules",
-                        "update:rules",
-                        "delete:rules",
-                        "create:rules",
-                        "read:rules_configs",
-                        "update:rules_configs",
-                        "delete:rules_configs",
-                        "read:hooks",
-                        "update:hooks",
-                        "delete:hooks",
-                        "create:hooks",
-                        "read:actions",
-                        "update:actions",
-                        "delete:actions",
-                        "create:actions",
-                        "read:email_provider",
-                        "update:email_provider",
-                        "delete:email_provider",
-                        "create:email_provider",
-                        "blacklist:tokens",
-                        "read:stats",
-                        "read:insights",
-                        "read:tenant_settings",
-                        "update:tenant_settings",
-                        "read:logs",
-                        "read:logs_users",
-                        "read:shields",
-                        "create:shields",
-                        "update:shields",
-                        "delete:shields",
-                        "read:anomaly_blocks",
-                        "delete:anomaly_blocks",
-                        "update:triggers",
-                        "read:triggers",
-                        "read:grants",
-                        "delete:grants",
-                        "read:guardian_factors",
-                        "update:guardian_factors",
-                        "read:guardian_enrollments",
-                        "delete:guardian_enrollments",
-                        "create:guardian_enrollment_tickets",
-                        "read:user_idp_tokens",
-                        "create:passwords_checking_job",
-                        "delete:passwords_checking_job",
-                        "read:custom_domains",
-                        "delete:custom_domains",
-                        "create:custom_domains",
-                        "update:custom_domains",
-                        "read:email_templates",
-                        "create:email_templates",
-                        "update:email_templates",
-                        "read:mfa_policies",
-                        "update:mfa_policies",
-                        "read:roles",
-                        "create:roles",
-                        "delete:roles",
-                        "update:roles",
-                        "read:prompts",
-                        "update:prompts",
-                        "read:branding",
-                        "update:branding",
-                        "delete:branding",
-                        "read:log_streams",
-                        "create:log_streams",
-                        "delete:log_streams",
-                        "update:log_streams",
-                        "create:signing_keys",
-                        "read:signing_keys",
-                        "update:signing_keys",
-                        "read:limits",
-                        "update:limits",
-                        "create:role_members",
-                        "read:role_members",
-                        "delete:role_members",
-                        "read:entitlements",
-                        "read:attack_protection",
-                        "update:attack_protection",
-                        "read:organizations",
-                        "update:organizations",
-                        "create:organizations",
-                        "delete:organizations",
-                        "create:organization_members",
-                        "read:organization_members",
-                        "delete:organization_members",
-                        "create:organization_connections",
-                        "read:organization_connections",
-                        "update:organization_connections",
-                        "delete:organization_connections",
-                        "create:organization_member_roles",
-                        "read:organization_member_roles",
-                        "delete:organization_member_roles",
-                        "create:organization_invitations",
-                        "read:organization_invitations",
-                        "delete:organization_invitations"
-                    ]
-                },
-                {
-                    "id": "cgr_a5G2CpWYpgxCM4Xw",
-                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                    "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
-                    "scope": [
-                        "read:client_grants",
-                        "create:client_grants",
-                        "delete:client_grants",
-                        "update:client_grants",
-                        "read:users",
-                        "update:users",
-                        "delete:users",
-                        "create:users",
-                        "read:users_app_metadata",
-                        "update:users_app_metadata",
-                        "delete:users_app_metadata",
-                        "create:users_app_metadata",
-                        "read:user_custom_blocks",
-                        "create:user_custom_blocks",
-                        "delete:user_custom_blocks",
-                        "create:user_tickets",
-                        "read:clients",
-                        "update:clients",
-                        "delete:clients",
-                        "create:clients",
-                        "read:client_keys",
-                        "update:client_keys",
-                        "delete:client_keys",
-                        "create:client_keys",
-                        "read:connections",
-                        "update:connections",
-                        "delete:connections",
-                        "create:connections",
-                        "read:resource_servers",
-                        "update:resource_servers",
-                        "delete:resource_servers",
-                        "create:resource_servers",
-                        "read:device_credentials",
-                        "update:device_credentials",
-                        "delete:device_credentials",
-                        "create:device_credentials",
-                        "read:rules",
-                        "update:rules",
-                        "delete:rules",
-                        "create:rules",
-                        "read:rules_configs",
-                        "update:rules_configs",
-                        "delete:rules_configs",
-                        "read:hooks",
-                        "update:hooks",
-                        "delete:hooks",
-                        "create:hooks",
-                        "read:actions",
-                        "update:actions",
-                        "delete:actions",
-                        "create:actions",
-                        "read:email_provider",
-                        "update:email_provider",
-                        "delete:email_provider",
-                        "create:email_provider",
-                        "blacklist:tokens",
-                        "read:stats",
-                        "read:insights",
-                        "read:tenant_settings",
-                        "update:tenant_settings",
-                        "read:logs",
-                        "read:logs_users",
-                        "read:shields",
-                        "create:shields",
-                        "update:shields",
-                        "delete:shields",
-                        "read:anomaly_blocks",
-                        "delete:anomaly_blocks",
-                        "update:triggers",
-                        "read:triggers",
-                        "read:grants",
-                        "delete:grants",
-                        "read:guardian_factors",
-                        "update:guardian_factors",
-                        "read:guardian_enrollments",
-                        "delete:guardian_enrollments",
-                        "create:guardian_enrollment_tickets",
-                        "read:user_idp_tokens",
-                        "create:passwords_checking_job",
-                        "delete:passwords_checking_job",
-                        "read:custom_domains",
-                        "delete:custom_domains",
-                        "create:custom_domains",
-                        "update:custom_domains",
-                        "read:email_templates",
-                        "create:email_templates",
-                        "update:email_templates",
-                        "read:mfa_policies",
-                        "update:mfa_policies",
-                        "read:roles",
-                        "create:roles",
-                        "delete:roles",
-                        "update:roles",
-                        "read:prompts",
-                        "update:prompts",
-                        "read:branding",
-                        "update:branding",
-                        "delete:branding",
-                        "read:log_streams",
-                        "create:log_streams",
-                        "delete:log_streams",
-                        "update:log_streams",
-                        "create:signing_keys",
-                        "read:signing_keys",
-                        "update:signing_keys",
-                        "read:limits",
-                        "update:limits",
-                        "create:role_members",
-                        "read:role_members",
-                        "delete:role_members",
-                        "read:entitlements",
-                        "read:attack_protection",
-                        "update:attack_protection",
-                        "read:organizations_summary",
-                        "create:authentication_methods",
-                        "read:authentication_methods",
-                        "update:authentication_methods",
-                        "delete:authentication_methods",
-                        "read:organizations",
-                        "update:organizations",
-                        "create:organizations",
-                        "delete:organizations",
-                        "create:organization_members",
-                        "read:organization_members",
-                        "delete:organization_members",
-                        "create:organization_connections",
-                        "read:organization_connections",
-                        "update:organization_connections",
-                        "delete:organization_connections",
-                        "create:organization_member_roles",
-                        "read:organization_member_roles",
-                        "delete:organization_member_roles",
-                        "create:organization_invitations",
-                        "read:organization_invitations",
-                        "delete:organization_invitations",
-                        "read:scim_config",
-                        "create:scim_config",
-                        "update:scim_config",
-                        "delete:scim_config",
-                        "create:scim_token",
-                        "read:scim_token",
-                        "delete:scim_token",
-                        "delete:phone_providers",
-                        "create:phone_providers",
-                        "read:phone_providers",
-                        "update:phone_providers",
-                        "delete:phone_templates",
-                        "create:phone_templates",
-                        "read:phone_templates",
-                        "update:phone_templates",
-                        "create:encryption_keys",
-                        "read:encryption_keys",
-                        "update:encryption_keys",
-                        "delete:encryption_keys",
-                        "read:sessions",
-                        "delete:sessions",
-                        "read:refresh_tokens",
-                        "delete:refresh_tokens",
-                        "create:self_service_profiles",
-                        "read:self_service_profiles",
-                        "update:self_service_profiles",
-                        "delete:self_service_profiles",
-                        "create:sso_access_tickets",
-                        "delete:sso_access_tickets",
-                        "read:forms",
-                        "update:forms",
-                        "delete:forms",
-                        "create:forms",
-                        "read:flows",
-                        "update:flows",
-                        "delete:flows",
-                        "create:flows",
-                        "read:flows_vault",
-                        "read:flows_vault_connections",
-                        "update:flows_vault_connections",
-                        "delete:flows_vault_connections",
-                        "create:flows_vault_connections",
-                        "read:flows_executions",
-                        "delete:flows_executions",
-                        "read:connections_options",
-                        "update:connections_options",
-                        "read:self_service_profile_custom_texts",
-                        "update:self_service_profile_custom_texts",
-                        "create:network_acls",
-                        "update:network_acls",
-                        "read:network_acls",
-                        "delete:network_acls",
-                        "delete:vdcs_templates",
-                        "read:vdcs_templates",
-                        "create:vdcs_templates",
-                        "update:vdcs_templates",
-                        "create:custom_signing_keys",
-                        "read:custom_signing_keys",
-                        "update:custom_signing_keys",
-                        "delete:custom_signing_keys",
-                        "read:client_credentials",
-                        "create:client_credentials",
-                        "update:client_credentials",
-                        "delete:client_credentials",
-                        "read:organization_client_grants",
-                        "create:organization_client_grants",
-                        "delete:organization_client_grants"
-                    ]
-                }
-            ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/clients?page=0&per_page=100&include_totals=true",
         "body": "",
         "status": 200,
@@ -14441,16 +13821,499 @@
     },
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PATCH",
-        "path": "/api/v2/organizations/org_i2X0PJjmXkREAiIw",
-        "body": {
-            "display_name": "Organization2"
-        },
+        "method": "GET",
+        "path": "/api/v2/client-grants?per_page=100&page=0&include_totals=true",
+        "body": "",
         "status": 200,
         "response": {
-            "id": "org_i2X0PJjmXkREAiIw",
-            "display_name": "Organization2",
-            "name": "org2"
+            "total": 3,
+            "start": 0,
+            "limit": 100,
+            "client_grants": [
+                {
+                    "id": "cgr_5vcTfyeHl5H4fAX9",
+                    "client_id": "f4eBblJcLD2brx8wnnicXn70F7FN0yzJ",
+                    "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
+                    "scope": [
+                        "read:client_grants",
+                        "create:client_grants",
+                        "delete:client_grants",
+                        "update:client_grants",
+                        "read:users",
+                        "update:users",
+                        "delete:users",
+                        "create:users",
+                        "read:users_app_metadata",
+                        "update:users_app_metadata",
+                        "delete:users_app_metadata",
+                        "create:users_app_metadata",
+                        "read:user_custom_blocks",
+                        "create:user_custom_blocks",
+                        "delete:user_custom_blocks",
+                        "create:user_tickets",
+                        "read:clients",
+                        "update:clients",
+                        "delete:clients",
+                        "create:clients",
+                        "read:client_keys",
+                        "update:client_keys",
+                        "delete:client_keys",
+                        "create:client_keys",
+                        "read:connections",
+                        "update:connections",
+                        "delete:connections",
+                        "create:connections",
+                        "read:resource_servers",
+                        "update:resource_servers",
+                        "delete:resource_servers",
+                        "create:resource_servers",
+                        "read:device_credentials",
+                        "update:device_credentials",
+                        "delete:device_credentials",
+                        "create:device_credentials",
+                        "read:rules",
+                        "update:rules",
+                        "delete:rules",
+                        "create:rules",
+                        "read:rules_configs",
+                        "update:rules_configs",
+                        "delete:rules_configs",
+                        "read:hooks",
+                        "update:hooks",
+                        "delete:hooks",
+                        "create:hooks",
+                        "read:actions",
+                        "update:actions",
+                        "delete:actions",
+                        "create:actions",
+                        "read:email_provider",
+                        "update:email_provider",
+                        "delete:email_provider",
+                        "create:email_provider",
+                        "blacklist:tokens",
+                        "read:stats",
+                        "read:insights",
+                        "read:tenant_settings",
+                        "update:tenant_settings",
+                        "read:logs",
+                        "read:logs_users",
+                        "read:shields",
+                        "create:shields",
+                        "update:shields",
+                        "delete:shields",
+                        "read:anomaly_blocks",
+                        "delete:anomaly_blocks",
+                        "update:triggers",
+                        "read:triggers",
+                        "read:grants",
+                        "delete:grants",
+                        "read:guardian_factors",
+                        "update:guardian_factors",
+                        "read:guardian_enrollments",
+                        "delete:guardian_enrollments",
+                        "create:guardian_enrollment_tickets",
+                        "read:user_idp_tokens",
+                        "create:passwords_checking_job",
+                        "delete:passwords_checking_job",
+                        "read:custom_domains",
+                        "delete:custom_domains",
+                        "create:custom_domains",
+                        "update:custom_domains",
+                        "read:email_templates",
+                        "create:email_templates",
+                        "update:email_templates",
+                        "read:mfa_policies",
+                        "update:mfa_policies",
+                        "read:roles",
+                        "create:roles",
+                        "delete:roles",
+                        "update:roles",
+                        "read:prompts",
+                        "update:prompts",
+                        "read:branding",
+                        "update:branding",
+                        "delete:branding",
+                        "read:log_streams",
+                        "create:log_streams",
+                        "delete:log_streams",
+                        "update:log_streams",
+                        "create:signing_keys",
+                        "read:signing_keys",
+                        "update:signing_keys",
+                        "read:limits",
+                        "update:limits",
+                        "create:role_members",
+                        "read:role_members",
+                        "delete:role_members",
+                        "read:entitlements",
+                        "read:attack_protection",
+                        "update:attack_protection",
+                        "read:organizations",
+                        "update:organizations",
+                        "create:organizations",
+                        "delete:organizations",
+                        "create:organization_members",
+                        "read:organization_members",
+                        "delete:organization_members",
+                        "create:organization_connections",
+                        "read:organization_connections",
+                        "update:organization_connections",
+                        "delete:organization_connections",
+                        "create:organization_member_roles",
+                        "read:organization_member_roles",
+                        "delete:organization_member_roles",
+                        "create:organization_invitations",
+                        "read:organization_invitations",
+                        "delete:organization_invitations"
+                    ]
+                },
+                {
+                    "id": "cgr_VOMMRiAXG3bqPOOY",
+                    "client_id": "l7YeaTKUoTupuw44MDo3475XYGglfuGn",
+                    "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
+                    "scope": [
+                        "read:client_grants",
+                        "create:client_grants",
+                        "delete:client_grants",
+                        "update:client_grants",
+                        "read:users",
+                        "update:users",
+                        "delete:users",
+                        "create:users",
+                        "read:users_app_metadata",
+                        "update:users_app_metadata",
+                        "delete:users_app_metadata",
+                        "create:users_app_metadata",
+                        "read:user_custom_blocks",
+                        "create:user_custom_blocks",
+                        "delete:user_custom_blocks",
+                        "create:user_tickets",
+                        "read:clients",
+                        "update:clients",
+                        "delete:clients",
+                        "create:clients",
+                        "read:client_keys",
+                        "update:client_keys",
+                        "delete:client_keys",
+                        "create:client_keys",
+                        "read:connections",
+                        "update:connections",
+                        "delete:connections",
+                        "create:connections",
+                        "read:resource_servers",
+                        "update:resource_servers",
+                        "delete:resource_servers",
+                        "create:resource_servers",
+                        "read:device_credentials",
+                        "update:device_credentials",
+                        "delete:device_credentials",
+                        "create:device_credentials",
+                        "read:rules",
+                        "update:rules",
+                        "delete:rules",
+                        "create:rules",
+                        "read:rules_configs",
+                        "update:rules_configs",
+                        "delete:rules_configs",
+                        "read:hooks",
+                        "update:hooks",
+                        "delete:hooks",
+                        "create:hooks",
+                        "read:actions",
+                        "update:actions",
+                        "delete:actions",
+                        "create:actions",
+                        "read:email_provider",
+                        "update:email_provider",
+                        "delete:email_provider",
+                        "create:email_provider",
+                        "blacklist:tokens",
+                        "read:stats",
+                        "read:insights",
+                        "read:tenant_settings",
+                        "update:tenant_settings",
+                        "read:logs",
+                        "read:logs_users",
+                        "read:shields",
+                        "create:shields",
+                        "update:shields",
+                        "delete:shields",
+                        "read:anomaly_blocks",
+                        "delete:anomaly_blocks",
+                        "update:triggers",
+                        "read:triggers",
+                        "read:grants",
+                        "delete:grants",
+                        "read:guardian_factors",
+                        "update:guardian_factors",
+                        "read:guardian_enrollments",
+                        "delete:guardian_enrollments",
+                        "create:guardian_enrollment_tickets",
+                        "read:user_idp_tokens",
+                        "create:passwords_checking_job",
+                        "delete:passwords_checking_job",
+                        "read:custom_domains",
+                        "delete:custom_domains",
+                        "create:custom_domains",
+                        "update:custom_domains",
+                        "read:email_templates",
+                        "create:email_templates",
+                        "update:email_templates",
+                        "read:mfa_policies",
+                        "update:mfa_policies",
+                        "read:roles",
+                        "create:roles",
+                        "delete:roles",
+                        "update:roles",
+                        "read:prompts",
+                        "update:prompts",
+                        "read:branding",
+                        "update:branding",
+                        "delete:branding",
+                        "read:log_streams",
+                        "create:log_streams",
+                        "delete:log_streams",
+                        "update:log_streams",
+                        "create:signing_keys",
+                        "read:signing_keys",
+                        "update:signing_keys",
+                        "read:limits",
+                        "update:limits",
+                        "create:role_members",
+                        "read:role_members",
+                        "delete:role_members",
+                        "read:entitlements",
+                        "read:attack_protection",
+                        "update:attack_protection",
+                        "read:organizations",
+                        "update:organizations",
+                        "create:organizations",
+                        "delete:organizations",
+                        "create:organization_members",
+                        "read:organization_members",
+                        "delete:organization_members",
+                        "create:organization_connections",
+                        "read:organization_connections",
+                        "update:organization_connections",
+                        "delete:organization_connections",
+                        "create:organization_member_roles",
+                        "read:organization_member_roles",
+                        "delete:organization_member_roles",
+                        "create:organization_invitations",
+                        "read:organization_invitations",
+                        "delete:organization_invitations"
+                    ]
+                },
+                {
+                    "id": "cgr_a5G2CpWYpgxCM4Xw",
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                    "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
+                    "scope": [
+                        "read:client_grants",
+                        "create:client_grants",
+                        "delete:client_grants",
+                        "update:client_grants",
+                        "read:users",
+                        "update:users",
+                        "delete:users",
+                        "create:users",
+                        "read:users_app_metadata",
+                        "update:users_app_metadata",
+                        "delete:users_app_metadata",
+                        "create:users_app_metadata",
+                        "read:user_custom_blocks",
+                        "create:user_custom_blocks",
+                        "delete:user_custom_blocks",
+                        "create:user_tickets",
+                        "read:clients",
+                        "update:clients",
+                        "delete:clients",
+                        "create:clients",
+                        "read:client_keys",
+                        "update:client_keys",
+                        "delete:client_keys",
+                        "create:client_keys",
+                        "read:connections",
+                        "update:connections",
+                        "delete:connections",
+                        "create:connections",
+                        "read:resource_servers",
+                        "update:resource_servers",
+                        "delete:resource_servers",
+                        "create:resource_servers",
+                        "read:device_credentials",
+                        "update:device_credentials",
+                        "delete:device_credentials",
+                        "create:device_credentials",
+                        "read:rules",
+                        "update:rules",
+                        "delete:rules",
+                        "create:rules",
+                        "read:rules_configs",
+                        "update:rules_configs",
+                        "delete:rules_configs",
+                        "read:hooks",
+                        "update:hooks",
+                        "delete:hooks",
+                        "create:hooks",
+                        "read:actions",
+                        "update:actions",
+                        "delete:actions",
+                        "create:actions",
+                        "read:email_provider",
+                        "update:email_provider",
+                        "delete:email_provider",
+                        "create:email_provider",
+                        "blacklist:tokens",
+                        "read:stats",
+                        "read:insights",
+                        "read:tenant_settings",
+                        "update:tenant_settings",
+                        "read:logs",
+                        "read:logs_users",
+                        "read:shields",
+                        "create:shields",
+                        "update:shields",
+                        "delete:shields",
+                        "read:anomaly_blocks",
+                        "delete:anomaly_blocks",
+                        "update:triggers",
+                        "read:triggers",
+                        "read:grants",
+                        "delete:grants",
+                        "read:guardian_factors",
+                        "update:guardian_factors",
+                        "read:guardian_enrollments",
+                        "delete:guardian_enrollments",
+                        "create:guardian_enrollment_tickets",
+                        "read:user_idp_tokens",
+                        "create:passwords_checking_job",
+                        "delete:passwords_checking_job",
+                        "read:custom_domains",
+                        "delete:custom_domains",
+                        "create:custom_domains",
+                        "update:custom_domains",
+                        "read:email_templates",
+                        "create:email_templates",
+                        "update:email_templates",
+                        "read:mfa_policies",
+                        "update:mfa_policies",
+                        "read:roles",
+                        "create:roles",
+                        "delete:roles",
+                        "update:roles",
+                        "read:prompts",
+                        "update:prompts",
+                        "read:branding",
+                        "update:branding",
+                        "delete:branding",
+                        "read:log_streams",
+                        "create:log_streams",
+                        "delete:log_streams",
+                        "update:log_streams",
+                        "create:signing_keys",
+                        "read:signing_keys",
+                        "update:signing_keys",
+                        "read:limits",
+                        "update:limits",
+                        "create:role_members",
+                        "read:role_members",
+                        "delete:role_members",
+                        "read:entitlements",
+                        "read:attack_protection",
+                        "update:attack_protection",
+                        "read:organizations_summary",
+                        "create:authentication_methods",
+                        "read:authentication_methods",
+                        "update:authentication_methods",
+                        "delete:authentication_methods",
+                        "read:organizations",
+                        "update:organizations",
+                        "create:organizations",
+                        "delete:organizations",
+                        "create:organization_members",
+                        "read:organization_members",
+                        "delete:organization_members",
+                        "create:organization_connections",
+                        "read:organization_connections",
+                        "update:organization_connections",
+                        "delete:organization_connections",
+                        "create:organization_member_roles",
+                        "read:organization_member_roles",
+                        "delete:organization_member_roles",
+                        "create:organization_invitations",
+                        "read:organization_invitations",
+                        "delete:organization_invitations",
+                        "read:scim_config",
+                        "create:scim_config",
+                        "update:scim_config",
+                        "delete:scim_config",
+                        "create:scim_token",
+                        "read:scim_token",
+                        "delete:scim_token",
+                        "delete:phone_providers",
+                        "create:phone_providers",
+                        "read:phone_providers",
+                        "update:phone_providers",
+                        "delete:phone_templates",
+                        "create:phone_templates",
+                        "read:phone_templates",
+                        "update:phone_templates",
+                        "create:encryption_keys",
+                        "read:encryption_keys",
+                        "update:encryption_keys",
+                        "delete:encryption_keys",
+                        "read:sessions",
+                        "delete:sessions",
+                        "read:refresh_tokens",
+                        "delete:refresh_tokens",
+                        "create:self_service_profiles",
+                        "read:self_service_profiles",
+                        "update:self_service_profiles",
+                        "delete:self_service_profiles",
+                        "create:sso_access_tickets",
+                        "delete:sso_access_tickets",
+                        "read:forms",
+                        "update:forms",
+                        "delete:forms",
+                        "create:forms",
+                        "read:flows",
+                        "update:flows",
+                        "delete:flows",
+                        "create:flows",
+                        "read:flows_vault",
+                        "read:flows_vault_connections",
+                        "update:flows_vault_connections",
+                        "delete:flows_vault_connections",
+                        "create:flows_vault_connections",
+                        "read:flows_executions",
+                        "delete:flows_executions",
+                        "read:connections_options",
+                        "update:connections_options",
+                        "read:self_service_profile_custom_texts",
+                        "update:self_service_profile_custom_texts",
+                        "create:network_acls",
+                        "update:network_acls",
+                        "read:network_acls",
+                        "delete:network_acls",
+                        "delete:vdcs_templates",
+                        "read:vdcs_templates",
+                        "create:vdcs_templates",
+                        "update:vdcs_templates",
+                        "create:custom_signing_keys",
+                        "read:custom_signing_keys",
+                        "update:custom_signing_keys",
+                        "delete:custom_signing_keys",
+                        "read:client_credentials",
+                        "create:client_credentials",
+                        "update:client_credentials",
+                        "delete:client_credentials",
+                        "read:organization_client_grants",
+                        "create:organization_client_grants",
+                        "delete:organization_client_grants"
+                    ]
+                }
+            ]
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -14485,15 +14348,16 @@
     },
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/flows?page=0&per_page=100&include_totals=true",
-        "body": "",
+        "method": "PATCH",
+        "path": "/api/v2/organizations/org_i2X0PJjmXkREAiIw",
+        "body": {
+            "display_name": "Organization2"
+        },
         "status": 200,
         "response": {
-            "limit": 100,
-            "start": 0,
-            "total": 0,
-            "flows": []
+            "id": "org_i2X0PJjmXkREAiIw",
+            "display_name": "Organization2",
+            "name": "org2"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -14529,9 +14393,24 @@
                     "name": "Blank-form",
                     "flow_count": 0,
                     "created_at": "2024-11-26T11:58:18.187Z",
-                    "updated_at": "2025-04-10T08:53:56.028Z"
+                    "updated_at": "2025-05-27T11:32:08.928Z"
                 }
             ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/flows?page=0&per_page=100&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 100,
+            "start": 0,
+            "total": 0,
+            "flows": []
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -14600,7 +14479,7 @@
                 }
             },
             "created_at": "2024-11-26T11:58:18.187Z",
-            "updated_at": "2025-04-10T08:53:56.028Z"
+            "updated_at": "2025-05-27T11:32:08.928Z"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -14725,7 +14604,7 @@
                 }
             },
             "created_at": "2024-11-26T11:58:18.187Z",
-            "updated_at": "2025-04-10T09:01:16.032Z"
+            "updated_at": "2025-05-27T13:48:10.419Z"
         },
         "rawHeaders": [],
         "responseIsBinary": false

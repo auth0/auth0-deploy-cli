@@ -283,3 +283,26 @@ export const isForbiddenFeatureError = (err, type): boolean => {
   }
   return false;
 };
+
+// This function masks the secret at the given JSON path in the object with the provided mask value.
+export function maskSecretAtPath({
+  resourceTypeName,
+  maskedKeyName,
+  maskOnObj,
+  keyJsonPath,
+}: {
+  resourceTypeName: string;
+  maskedKeyName: string;
+  maskOnObj: object;
+  keyJsonPath: string;
+}): any {
+  // Replace spaces and special characters with underscores
+  const sanitize = (str: string) => str.replace(/[^a-zA-Z0-9]/g, '_');
+  if (dotProp.has(maskOnObj, keyJsonPath)) {
+    const maskValue = `##${sanitize(resourceTypeName)}_${sanitize(
+      maskedKeyName
+    )}_SECRET##`.toUpperCase();
+    dotProp.set(maskOnObj, keyJsonPath, maskValue);
+  }
+  return maskOnObj;
+}

@@ -1,4 +1,4 @@
-![Deploy CLI Banner](https://user-images.githubusercontent.com/28300158/215845643-0db6c97f-b090-40f7-b0a3-551d6973aeff.png)
+![Deploy CLI Banner](https://cdn.auth0.com/website/sdks/banners/auth0-deploy-cli-banner.png)
 
 [![npm version](https://badge.fury.io/js/auth0-deploy-cli.svg)](https://badge.fury.io/js/auth0-deploy-cli)
 [![CircleCI](https://circleci.com/gh/auth0/auth0-deploy-cli/tree/master.svg?style=svg)](https://circleci.com/gh/auth0/auth0-deploy-cli/tree/master)
@@ -7,7 +7,7 @@
 
 The Auth0 Deploy CLI is a tool that helps you manage your Auth0 tenant configuration. It integrates into your development workflows as a standalone CLI or as a node module.
 
-**Supported resource types:** actions, branding, client grants, clients (applications), connections, custom domains, email templates, emails, grants, guardian, hook secrets, log streams, migrations, organizations, pages, prompts, resource servers (APIs), roles, tenant settings, themes, forms, flows, self-service profiles, network ACLs.
+**Supported resource types:** actions, branding, client grants, clients (applications), connections, custom domains, email templates, emails, grants, guardian, hook secrets, log streams, organizations, pages, prompts, resource servers (APIs), roles, tenant settings, themes, forms, flows, self-service profiles, network ACLs.
 
 🎢 [Highlights](#highlights) • 📚 [Documentation](#documentation) • 🚀 [Getting Started](#getting-started) • 💬 [Feedback](#feedback)
 

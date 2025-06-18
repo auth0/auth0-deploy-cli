@@ -14,6 +14,7 @@ import {
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
+import { connectionDefaults } from '../../defaults';
 
 type ParsedConnections = ParsedAsset<'connections', Asset[]>;
 
@@ -69,13 +70,16 @@ async function dump(context: YAMLContext): Promise<ParsedConnections> {
 
   return {
     connections: connections.map((connection) => {
-      const dumpedConnection = {
+      let dumpedConnection = {
         ...connection,
         ...getFormattedOptions(connection, clients),
         ...(connection.enabled_clients && {
           enabled_clients: mapClientID2NameSorted(connection.enabled_clients, clients || []),
         }),
       };
+
+      // Mask secrets
+      dumpedConnection = connectionDefaults(dumpedConnection);
 
       if (dumpedConnection.strategy === 'email') {
         ensureProp(connection, 'options.email.body');
@@ -102,6 +106,7 @@ async function dump(context: YAMLContext): Promise<ParsedConnections> {
           );
         }
       }
+
       return dumpedConnection;
     }),
   };
