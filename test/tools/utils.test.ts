@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { getEnabledClients } from '../../src/tools/utils';
+import { hasKeywordMarkers, mapClientID2NameSorted } from '../../src/utils';
 
 describe('#getEnabledClients', () => {
   const mockExclusions = {};
@@ -60,5 +61,75 @@ describe('#getEnabledClients', () => {
     );
 
     expect(enabledClients).to.equal(undefined);
+  });
+});
+
+describe('#hasKeywordMarkers', () => {
+  it('should detect array keyword markers', () => {
+    const testString = '@@SOME_KEYWORD@@';
+    const result = hasKeywordMarkers(testString);
+    expect(result).to.be.true;
+  });
+
+  it('should detect string keyword markers', () => {
+    const testString = '##SOME_KEYWORD##';
+    const result = hasKeywordMarkers(testString);
+    expect(result).to.be.true;
+  });
+
+  it('should return false for non-string values', () => {
+    const testArray = ['client1', 'client2'];
+    const result = hasKeywordMarkers(testArray);
+    expect(result).to.be.false;
+  });
+
+  it('should return false for strings without markers', () => {
+    const testString = 'regular string';
+    const result = hasKeywordMarkers(testString);
+    expect(result).to.be.false;
+  });
+
+  it('should return false for empty strings', () => {
+    const testString = '';
+    const result = hasKeywordMarkers(testString);
+    expect(result).to.be.false;
+  });
+});
+
+describe('#mapClientID2NameSorted', () => {
+  const mockClients = [
+    { name: 'Client B', client_id: 'client-b-id' },
+    { name: 'Client A', client_id: 'client-a-id' },
+    { name: 'Client C', client_id: 'client-c-id' },
+  ];
+
+  it('should handle array input normally', () => {
+    const enabledClients = ['client-a-id', 'client-b-id'];
+    const result = mapClientID2NameSorted(enabledClients, mockClients);
+    expect(result).to.deep.equal(['Client A', 'Client B']);
+  });
+
+  it('should return string unchanged when input is a string', () => {
+    const enabledClients = '@@DATABASE_ENABLED_CLIENTS@@';
+    const result = mapClientID2NameSorted(enabledClients, mockClients);
+    expect(result).to.equal('@@DATABASE_ENABLED_CLIENTS@@');
+  });
+
+  it('should handle empty array', () => {
+    const enabledClients = [];
+    const result = mapClientID2NameSorted(enabledClients, mockClients);
+    expect(result).to.deep.equal([]);
+  });
+
+  it('should handle null/undefined enabled clients', () => {
+    const result = mapClientID2NameSorted(null, mockClients);
+    expect(result).to.deep.equal([]);
+  });
+
+  it('should preserve keyword markers in arrays', () => {
+    const enabledClientsWithKeywords = ['@@CLIENT_KEYWORD@@', 'client-a-id'];
+    const result = mapClientID2NameSorted(enabledClientsWithKeywords, mockClients);
+    // When an array contains keyword markers, the entire array should be returned as-is
+    expect(result).to.deep.equal(enabledClientsWithKeywords);
   });
 });
