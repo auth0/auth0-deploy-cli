@@ -44,7 +44,7 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
       type: 'customDomains',
       id: 'custom_domain_id',
       identifiers: ['custom_domain_id', 'domain'],
-      stripCreateFields: ['status', 'primary', 'verification'],
+      stripCreateFields: ['status', 'primary', 'verification', 'certificate'],
       stripUpdateFields: [
         'status',
         'primary',
@@ -52,6 +52,7 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
         'type',
         'domain',
         'verification_method',
+        'certificate',
       ],
       functions: {
         delete: (args) => this.client.customDomains.delete({ id: args.custom_domain_id }),
