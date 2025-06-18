@@ -30,6 +30,11 @@ export const schema = {
         defaultValue: undefined,
         maxProperties: 10,
       },
+      verification_method: {
+        type: 'string',
+        description: 'Custom domain verification method. Must be `txt`.',
+        defaultValue: 'txt',
+      },
     },
     required: ['domain', 'type'],
   },
