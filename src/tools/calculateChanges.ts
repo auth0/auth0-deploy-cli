@@ -1,4 +1,5 @@
 import { Client } from 'auth0';
+import chalk from 'chalk';
 import log from '../logger';
 import APIHandler from './auth0/handlers/default';
 import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../types';
@@ -212,71 +213,91 @@ export function calculateChanges({
  * @returns true if objects differ, false if they are the same
  */
 export function hasObjectDifferences(
-  obj1: Record<string, any>,
-  obj2: Record<string, any>,
-  keyObjPath: string = ''
+  localObj: Record<string, any>,
+  remoteObj: Record<string, any>,
+  keyObjPath: string = '',
+  resourceTypeName: string = ''
 ): boolean {
-  return Object.keys(obj1).some((key) => {
-    const value1 = obj1[key];
-    const value2 = obj2[key];
+  return Object.keys(localObj).some((key) => {
+    const localValue = localObj[key];
+    const remoteValue = remoteObj[key];
     const currentPath = keyObjPath ? `${keyObjPath}.${key}` : key;
 
-    // If key doesn't exist in obj2, there's a difference
-    if (!(key in obj2)) {
-      log.debug(`Key "${currentPath}" found in obj1 but not in obj2.`);
+    // If key doesn't exist in remoteObj, there's a difference
+    if (!(key in remoteObj)) {
+      log.debug(
+        `[${chalk.blue(resourceTypeName)}] Key ${chalk.yellow(
+          `"${currentPath}"`
+        )} found in 'localObj' but not in 'remoteObj'.`
+      );
       return true;
     }
 
     // Handle arrays
-    if (Array.isArray(value1) && Array.isArray(value2)) {
-      if (value1.length !== value2.length) {
+    if (Array.isArray(localValue) && Array.isArray(remoteValue)) {
+      if (localValue.length !== remoteValue.length) {
         log.debug(
-          `Array length difference for "${currentPath}": ${value1.length} vs ${value2.length}`
+          `[${chalk.blue(resourceTypeName)}] Array length difference for ${chalk.yellow(
+            `"${currentPath}"`
+          )}: ${localValue.length} vs ${remoteValue.length}`
         );
         return true;
       }
 
       // For arrays with objects, compare in order; for primitive arrays, ignore order
-      const hasObjects = value1.some((item) => typeof item === 'object' && item !== null);
+      const hasObjects = localValue.some((item) => typeof item === 'object' && item !== null);
 
       if (hasObjects) {
-        return value1.some((item, index) => {
+        return localValue.some((item, index) => {
           if (
             typeof item === 'object' &&
             item !== null &&
-            typeof value2[index] === 'object' &&
-            value2[index] !== null
+            typeof remoteValue[index] === 'object' &&
+            remoteValue[index] !== null
           ) {
-            return hasObjectDifferences(item, value2[index], `${currentPath}[${index}]`);
+            return hasObjectDifferences(
+              item,
+              remoteValue[index],
+              `${currentPath}[${index}]`,
+              resourceTypeName
+            );
           }
-          return item !== value2[index];
+          return item !== remoteValue[index];
         });
       }
 
       // Compare primitive arrays ignoring order
-      const sorted1 = [...value1].sort();
-      const sorted2 = [...value2].sort();
+      const sorted1 = [...localValue].sort();
+      const sorted2 = [...remoteValue].sort();
       const isDifferent = sorted1.some((item, index) => item !== sorted2[index]);
 
       if (isDifferent) {
-        log.debug(`Array content difference found for key "${currentPath}"`);
+        log.debug(
+          `[${chalk.blue(resourceTypeName)}] Array content difference found for key ${chalk.yellow(
+            `"${currentPath}"`
+          )}`
+        );
       }
       return isDifferent;
     }
 
     // Handle nested objects
     if (
-      typeof value1 === 'object' &&
-      value1 !== null &&
-      typeof value2 === 'object' &&
-      value2 !== null
+      typeof localValue === 'object' &&
+      localValue !== null &&
+      typeof remoteValue === 'object' &&
+      remoteValue !== null
     ) {
-      return hasObjectDifferences(value1, value2, currentPath);
+      return hasObjectDifferences(localValue, remoteValue, currentPath, resourceTypeName);
     }
 
     // Compare primitive values
-    if (value1 !== value2) {
-      log.debug(`Value difference for "${currentPath}"`, { value1, value2 });
+    if (localValue !== remoteValue) {
+      log.debug(
+        `[${chalk.blue(resourceTypeName)}] Value difference for ${chalk.yellow(
+          `"${currentPath}"`
+        )}: ${localValue} vs ${remoteValue}`
+      );
       return true;
     }
 
@@ -371,7 +392,12 @@ export function calculateDryRunChanges({
         }
       });
 
-      return hasObjectDifferences(localAsset, matchingRemoteAsset, matchingRemoteAsset.name ?? '');
+      return hasObjectDifferences(
+        localAsset,
+        matchingRemoteAsset,
+        matchingRemoteAsset.name ?? '',
+        type
+      );
     }
 
     return false;
