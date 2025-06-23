@@ -21,15 +21,7 @@ function parse(context: DirectoryContext): ParsedTenant {
     return { tenant: null };
   }
   /* eslint-disable camelcase */
-  const {
-    session_lifetime,
-    idle_session_lifetime,
-    ...tenant
-  }: {
-    session_lifetime?: number;
-    idle_session_lifetime?: number;
-    [key: string]: any;
-  } = loadJSON(tenantFile, {
+  const tenant = loadJSON(tenantFile, {
     mappings: context.mappings,
     disableKeywordReplacement: context.disableKeywordReplacement,
   });

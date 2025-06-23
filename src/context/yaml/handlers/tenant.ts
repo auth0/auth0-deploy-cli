@@ -9,15 +9,7 @@ async function parse(context: YAMLContext): Promise<ParsedTenant> {
   if (!context.assets.tenant) return { tenant: null };
 
   /* eslint-disable camelcase */
-  const {
-    session_lifetime,
-    idle_session_lifetime,
-    ...tenant
-  }: {
-    session_lifetime?: number;
-    idle_session_lifetime?: number;
-    [key: string]: any;
-  } = context.assets.tenant;
+  const { tenant } = context.assets;
 
   clearTenantFlags(tenant);
 
@@ -29,7 +21,7 @@ async function parse(context: YAMLContext): Promise<ParsedTenant> {
 }
 
 async function dump(context: YAMLContext): Promise<ParsedTenant> {
-  const tenant = context.assets.tenant;
+  const { tenant } = context.assets;
 
   if (!tenant) return { tenant: null };
 

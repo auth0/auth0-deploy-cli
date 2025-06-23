@@ -178,8 +178,6 @@ export default class TenantHandler extends DefaultHandler {
   async processChanges(assets: Assets): Promise<void> {
     const { tenant } = assets;
 
-    console.log('[CLOG] data:', tenant);
-
     // Do nothing if not set
     if (!tenant) return;
 
@@ -205,6 +203,10 @@ export default class TenantHandler extends DefaultHandler {
       let updateTenantPayload = updatedTenant;
       if (!isEmpty(sessionDurations)) {
         updateTenantPayload = { ...updateTenantPayload, ...sessionDurations };
+
+        // context: https://github.com/auth0/auth0-deploy-cli/pull/471
+        delete updateTenantPayload.session_lifetime;
+        delete updateTenantPayload.idle_session_lifetime;
       }
 
       await this.client.tenants.updateSettings(updateTenantPayload);
