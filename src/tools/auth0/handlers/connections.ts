@@ -186,7 +186,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
 
     const formatted = connections.map((connection) => ({
       ...connection,
-      ...this.getFormattedOptions(connection, clients),
+      // ...this.getFormattedOptions(connection, clients),
       enabled_clients: getEnabledClients(assets, connection, existingConnections, clients),
     }));
     const proposedChanges = await super.calcChanges({ ...assets, connections: formatted });
