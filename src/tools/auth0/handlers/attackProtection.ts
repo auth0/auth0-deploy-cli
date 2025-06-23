@@ -1,5 +1,6 @@
 import DefaultAPIHandler from './default';
 import { Asset, Assets } from '../../../types';
+import log from '../../../logger';
 
 export const schema = {
   type: 'object',
@@ -80,6 +81,16 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
     const { attackProtection } = assets;
 
     if (!attackProtection || !Object.keys(attackProtection).length) {
+      return;
+    }
+
+    const { del, update, create } = await this.calcChanges(assets);
+
+    log.debug(
+      `Start processChanges for attackProtection [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
+    );
+
+    if (update.length === 0) {
       return;
     }
 

@@ -404,7 +404,10 @@ export function calculateDryRunChanges({
       );
     }
 
-    return false;
+    // If no match found, check with hasObjectDifferences against all remote assets
+    return remoteAssets.some((remoteAsset) =>
+      hasObjectDifferences(localAsset, remoteAsset, remoteAsset.name ?? '', type)
+    );
   });
   update.push(...updatedAssets);
 
