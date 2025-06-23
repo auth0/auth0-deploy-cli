@@ -3,6 +3,7 @@ import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
 import { paginate } from '../client';
+import log from '../../../logger';
 
 export const supportedPages = constants.PAGE_NAMES.filter((p) => p.includes('.json')).map((p) =>
   p.replace('.json', '')
@@ -142,6 +143,16 @@ export default class PagesHandler extends DefaultHandler {
 
     // Do nothing if not set
     if (!pages) return;
+
+    const { del, update, create } = await this.calcChanges(assets);
+
+    log.debug(
+      `Start processChanges for pages [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
+    );
+
+    if (update.length === 0) {
+      return;
+    }
 
     // Login page is handled via the global client
     const loginPage = pages.find((p) => p.name === 'login');
