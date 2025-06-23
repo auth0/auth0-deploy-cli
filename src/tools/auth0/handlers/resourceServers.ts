@@ -64,6 +64,31 @@ export default class ResourceServersHandler extends DefaultHandler {
     );
   }
 
+  async processChanges(assets: Assets): Promise<void> {
+    const { resourceServers } = assets;
+
+    // Do nothing if not set
+    if (!resourceServers) return;
+
+    const excluded = (assets.exclude && assets.exclude.resourceServers) || [];
+
+    const filterResourceServer = (items) => items.filter((r) => !excluded.includes(r.name));
+
+    const { del, update, create, conflicts } = await this.calcChanges(assets);
+
+    const changes = {
+      del: filterResourceServer(del),
+      update: filterResourceServer(update),
+      create: filterResourceServer(create),
+      conflicts: filterResourceServer(conflicts),
+    };
+
+    await super.processChanges(assets, {
+      ...changes,
+    });
+  }
+
+  /*
   async calcChanges(assets: Assets): Promise<CalculatedChanges> {
     let { resourceServers } = assets;
 
@@ -92,6 +117,7 @@ export default class ResourceServersHandler extends DefaultHandler {
       allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
     });
   }
+  */
 
   async validate(assets: Assets): Promise<void> {
     const { resourceServers } = assets;
