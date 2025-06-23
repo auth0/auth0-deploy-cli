@@ -4,12 +4,14 @@ import {
   TenantSettingsUpdate,
   TenantSettingsUpdateFlags,
 } from 'auth0';
+import { isEmpty } from 'lodash';
 import ValidationError from '../../validationError';
 import DefaultHandler, { order } from './default';
 import { supportedPages, pageNameMap } from './pages';
 import { convertJsonToString } from '../../utils';
 import { Asset, Assets } from '../../../types';
 import log from '../../../logger';
+import sessionDurationsToMinutes from '../../../sessionDurationsToMinutes';
 
 const tokenQuotaConfigurationSchema = {
   type: 'object',
@@ -176,6 +178,8 @@ export default class TenantHandler extends DefaultHandler {
   async processChanges(assets: Assets): Promise<void> {
     const { tenant } = assets;
 
+    console.log('[CLOG] data:', tenant);
+
     // Do nothing if not set
     if (!tenant) return;
 
@@ -193,7 +197,17 @@ export default class TenantHandler extends DefaultHandler {
     }
 
     if (updatedTenant && Object.keys(updatedTenant).length > 0) {
-      await this.client.tenants.updateSettings(updatedTenant);
+      const sessionDurations = sessionDurationsToMinutes(
+        updatedTenant?.session_lifetime,
+        updatedTenant?.idle_session_lifetime
+      );
+
+      let updateTenantPayload = updatedTenant;
+      if (!isEmpty(sessionDurations)) {
+        updateTenantPayload = { ...updateTenantPayload, ...sessionDurations };
+      }
+
+      await this.client.tenants.updateSettings(updateTenantPayload);
       this.updated += 1;
       this.didUpdate(updatedTenant);
     }
