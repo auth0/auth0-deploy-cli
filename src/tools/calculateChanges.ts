@@ -367,12 +367,16 @@ export function calculateDryRunChanges({
           const localValues = id.map((i) => localAsset[i]);
           const remoteValues = id.map((i) => remoteAsset[i]);
           return (
-            localValues.every((v) => v) &&
-            remoteValues.every((v) => v) &&
+            localValues.every((v) => v !== undefined && v !== null) &&
+            remoteValues.every((v) => v !== undefined && v !== null) &&
             localValues.join('-') === remoteValues.join('-')
           );
         }
-        return localAsset[id] === remoteAsset[id];
+        return (
+          localAsset[id] !== undefined &&
+          remoteAsset[id] !== undefined &&
+          localAsset[id] === remoteAsset[id]
+        );
       })
     );
 

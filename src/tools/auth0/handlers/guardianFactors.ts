@@ -2,7 +2,7 @@ import { Factor, FactorNameEnum } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
-import { isForbiddenFeatureError } from '../../utils';
+import { isForbiddenFeatureError, sortGuardianFactors } from '../../utils';
 
 export const schema = {
   type: 'array',
@@ -30,7 +30,7 @@ export default class GuardianFactorsHandler extends DefaultHandler {
     if (this.existing) return this.existing;
     try {
       const { data } = await this.client.guardian.getFactors();
-      this.existing = data;
+      this.existing = sortGuardianFactors(data);
       return this.existing;
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 501) {

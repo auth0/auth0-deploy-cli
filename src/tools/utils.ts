@@ -306,3 +306,18 @@ export function maskSecretAtPath({
   }
   return maskOnObj;
 }
+
+// Sort guardian factors by name
+export function sortGuardianFactors(factors: Asset[]): Asset[] {
+  // if no factors, return empty array
+  if (!factors || factors.length === 0) return [];
+
+  return factors.sort((a, b) => {
+    const nameA = a.name || '';
+    const nameB = b.name || '';
+
+    if (nameA < nameB) return -1;
+    if (nameA > nameB) return 1;
+    return 0;
+  });
+}
