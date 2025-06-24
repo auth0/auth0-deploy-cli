@@ -1,6 +1,7 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Assets } from '../../../types';
+import log from '../../../logger';
 
 export const schema = {
   type: 'object',
@@ -28,7 +29,7 @@ export default class GuardianPoliciesHandler extends DefaultHandler {
     });
   }
 
-  //TODO: standardize empty object literal with more intentional empty indicator
+  // TODO: standardize empty object literal with more intentional empty indicator
   async getType(): Promise<GuardianPoliciesHandler['existing'] | {}> {
     // in case client version does not support the operation
     if (!this.client.guardian || typeof this.client.guardian.getPolicies !== 'function') {
@@ -48,6 +49,15 @@ export default class GuardianPoliciesHandler extends DefaultHandler {
     // Do nothing if not set
     if (!guardianPolicies || !guardianPolicies.policies) return;
 
+    const { del, update, create } = await this.calcChanges(assets);
+
+    log.debug(
+      `Start processChanges for guardianPolicies [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
+    );
+
+    if (update.length === 0) {
+      return;
+    }
     const data = guardianPolicies.policies;
     await this.client.guardian.updatePolicies(data);
     this.updated += 1;

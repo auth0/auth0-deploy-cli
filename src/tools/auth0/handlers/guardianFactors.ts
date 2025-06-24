@@ -3,6 +3,7 @@ import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
 import { isForbiddenFeatureError, sortGuardianFactors } from '../../utils';
+import log from '../../../logger';
 
 export const schema = {
   type: 'array',
@@ -50,6 +51,16 @@ export default class GuardianFactorsHandler extends DefaultHandler {
 
     // Do nothing if not set
     if (!guardianFactors || !guardianFactors.length) return;
+
+    const { del, update, create } = await this.calcChanges(assets);
+
+    log.debug(
+      `Start processChanges for guardianFactors [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
+    );
+
+    if (update.length === 0) {
+      return;
+    }
 
     // Process each factor
     await Promise.all(
