@@ -3,6 +3,7 @@ import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
 import { isForbiddenFeatureError } from '../../utils';
+import log from '../../../logger';
 
 export const schema = {
   type: 'object',
@@ -79,7 +80,19 @@ export default class GuardianPhoneMessageTypesHandler extends DefaultHandler {
     const { guardianPhoneFactorMessageTypes } = assets;
 
     // Do nothing if not set
-    if (!guardianPhoneFactorMessageTypes || !guardianPhoneFactorMessageTypes.message_types) return;
+    if (!guardianPhoneFactorMessageTypes || !guardianPhoneFactorMessageTypes.message_types) {
+      return;
+    }
+
+    const { del, update, create } = await this.calcChanges(assets);
+
+    log.debug(
+      `Start processChanges for guardianPhoneFactorMessageTypes [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
+    );
+
+    if (update.length === 0) {
+      return;
+    }
 
     const data = guardianPhoneFactorMessageTypes;
     await this.client.guardian.updatePhoneFactorMessageTypes(

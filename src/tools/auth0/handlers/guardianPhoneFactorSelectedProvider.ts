@@ -3,6 +3,7 @@ import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
 import { isForbiddenFeatureError } from '../../utils';
+import log from '../../../logger';
 
 export const schema = {
   type: 'object',
@@ -76,8 +77,19 @@ export default class GuardianPhoneSelectedProviderHandler extends DefaultHandler
     const { guardianPhoneFactorSelectedProvider } = assets;
 
     // Do nothing if not set
-    if (!guardianPhoneFactorSelectedProvider || !guardianPhoneFactorSelectedProvider.provider)
+    if (!guardianPhoneFactorSelectedProvider || !guardianPhoneFactorSelectedProvider.provider) {
       return;
+    }
+
+    const { del, update, create } = await this.calcChanges(assets);
+
+    log.debug(
+      `Start processChanges for guardianPhoneFactorSelectedProvider [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
+    );
+
+    if (update.length === 0) {
+      return;
+    }
 
     const data = guardianPhoneFactorSelectedProvider;
     await this.client.guardian.updatePhoneFactorSelectedProvider(
