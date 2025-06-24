@@ -374,7 +374,7 @@ describe('#directory context databases', () => {
     await handler.dump(context);
     const scriptsFolder = path.join(dbDumpDir, constants.DATABASE_CONNECTIONS_DIRECTORY, 'users');
     const dumpedDB = loadJSON(path.join(scriptsFolder, 'database.json'));
-    
+
     // The keyword marker should be preserved as-is
     expect(dumpedDB.enabled_clients).to.equal('@@DATABASE_ENABLED_CLIENTS@@');
     expect(dumpedDB.name).to.equal('users');
