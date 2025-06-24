@@ -220,14 +220,15 @@ export function mapClientID2NameSorted(
     return [];
   }
 
-  // If any element in the array contains keyword markers, return the array as-is
-  if (Array.isArray(enabledClients) && enabledClients.some((client) => hasKeywordMarkers(client))) {
-    return enabledClients;
-  }
+  // Process each element: preserve keyword markers, convert client IDs to names
+  const processedClients = enabledClients.map((client) => {
+    if (hasKeywordMarkers(client)) {
+      return client;
+    }
+    return convertClientIdToName(client, knownClients);
+  });
 
-  return [
-    ...(enabledClients || []).map((clientId) => convertClientIdToName(clientId, knownClients)),
-  ].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+  return processedClients.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 }
 
 export function nomalizedYAMLPath(filePath: string): string[] {

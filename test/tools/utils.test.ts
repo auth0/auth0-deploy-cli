@@ -121,15 +121,16 @@ describe('#mapClientID2NameSorted', () => {
     expect(result).to.deep.equal([]);
   });
 
-  it('should handle null/undefined enabled clients', () => {
-    const result = mapClientID2NameSorted(null, mockClients);
-    expect(result).to.deep.equal([]);
+  it('should handle empty string enabled clients', () => {
+    const result = mapClientID2NameSorted('', mockClients);
+    expect(result).to.deep.equal('');
   });
 
   it('should preserve keyword markers in arrays', () => {
-    const enabledClientsWithKeywords = ['@@CLIENT_KEYWORD@@', 'client-a-id'];
+    const enabledClientsWithKeywords = ['##CLIENT_KEYWORD##', 'client-a-id'];
     const result = mapClientID2NameSorted(enabledClientsWithKeywords, mockClients);
-    // When an array contains keyword markers, the entire array should be returned as-is
-    expect(result).to.deep.equal(enabledClientsWithKeywords);
+
+    const expectedClientsWithKeywords = ['##CLIENT_KEYWORD##', 'Client A'];
+    expect(result).to.deep.equal(expectedClientsWithKeywords);
   });
 });
