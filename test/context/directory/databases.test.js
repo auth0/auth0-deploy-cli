@@ -354,4 +354,30 @@ describe('#directory context databases', () => {
       strategy: 'auth0',
     });
   });
+
+  it('should dump databases with keyword replacement in enabled_clients', async () => {
+    cleanThenMkdir(dbDumpDir);
+    const context = new Context({ AUTH0_INPUT_FILE: dbDumpDir }, mockMgmtClient());
+
+    context.assets.databases = [
+      {
+        name: 'users',
+        enabled_clients: '@@DATABASE_ENABLED_CLIENTS@@', // String with keyword marker
+        options: {
+          requires_username: true,
+        },
+        strategy: 'auth0',
+      },
+    ];
+
+    // This should not throw a TypeError anymore
+    await handler.dump(context);
+    const scriptsFolder = path.join(dbDumpDir, constants.DATABASE_CONNECTIONS_DIRECTORY, 'users');
+    const dumpedDB = loadJSON(path.join(scriptsFolder, 'database.json'));
+
+    // The keyword marker should be preserved as-is
+    expect(dumpedDB.enabled_clients).to.equal('@@DATABASE_ENABLED_CLIENTS@@');
+    expect(dumpedDB.name).to.equal('users');
+    expect(dumpedDB.strategy).to.equal('auth0');
+  });
 });
