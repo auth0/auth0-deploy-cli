@@ -1,8 +1,8 @@
 import dotProp from 'dot-prop';
 import _ from 'lodash';
-import { Client, Connection } from 'auth0';
+import { Client, Connection, PatchClientsRequestInner } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
-import { filterExcluded, convertClientNameToId, getEnabledClients } from '../../utils';
+import { filterExcluded, convertClientNameToId, getEnabledClients, sleep } from '../../utils';
 import { CalculatedChanges, Asset, Assets, Auth0APIClient } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
 import { paginate } from '../client';
@@ -140,6 +140,45 @@ export const getConnectionEnabledClients = async (
   }
 };
 
+/**
+ * Updates the enabled clients for a specific Auth0 connection.
+ *
+ * @param auth0Client - The Auth0 API client instance used to make the connection update request
+ * @param typeName - The type name of the connection (used for error logging purposes)
+ * @param connectionId - The unique identifier of the connection to update
+ * @param enabledClientIds - Array of client IDs that should be enabled for this connection
+ * @returns Promise that resolves to true if the update was successful, false otherwise
+ *
+ */
+export const updateConnectionEnabledClients = async (
+  auth0Client: Auth0APIClient,
+  typeName: string,
+  connectionId: string,
+  enabledClientIds: string[]
+): Promise<boolean> => {
+  if (!connectionId || !Array.isArray(enabledClientIds) || !enabledClientIds.length) return false;
+
+  const enabledClientUpdatePayload: Array<PatchClientsRequestInner> = enabledClientIds.map(
+    (clientId) => ({
+      client_id: clientId,
+      status: true,
+    })
+  );
+  try {
+    await auth0Client.connections.updateEnabledClients(
+      {
+        id: connectionId,
+      },
+      enabledClientUpdatePayload
+    );
+    log.debug(`Updated enabled clients for ${typeName}: ${connectionId}`);
+    return true;
+  } catch (error) {
+    log.error(`Unable to update enabled clients for ${typeName}: ${connectionId}:`, error);
+    return false;
+  }
+};
+
 export default class ConnectionsHandler extends DefaultAPIHandler {
   existing: Asset[] | null;
   scimHandler: ScimHandler;
@@ -272,5 +311,51 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     const changes = await this.calcChanges(assets);
 
     await super.processChanges(assets, filterExcluded(changes, excludedConnections));
+
+    // process enabled clients
+    await this.processConnectionEnabledClients(filterExcluded(changes, excludedConnections));
+  }
+
+  async processConnectionEnabledClients(changes: CalculatedChanges) {
+    const { create, update, conflicts } = changes;
+
+    let createWithId: Asset[] = [];
+    if (create.length) {
+      await sleep(2500); // Wait for 2.5 seconds before fetching new connections
+
+      createWithId = await Promise.all(
+        create.map(async (conn) => {
+          const {
+            data: { connections: newConnections },
+          } = await this.client.connections.getAll({
+            name: conn.name,
+            take: 1,
+            include_totals: true,
+          });
+          if (newConnections && newConnections.length) {
+            conn.id = newConnections[0]?.id;
+          } else {
+            log.warn(
+              `Unable to find ID for newly created connection '${conn.name}' when updating enabled clients`
+            );
+          }
+          return conn;
+        })
+      );
+    }
+
+    // Process enabled clients for each change type
+    // Delete is handled by the `processChanges` method, removed connection completely
+    await Promise.all([
+      ...createWithId.map((conn) =>
+        updateConnectionEnabledClients(this.client, this.type, conn.id, conn.enabled_clients)
+      ),
+      ...update.map((conn) =>
+        updateConnectionEnabledClients(this.client, this.type, conn.id, conn.enabled_clients)
+      ),
+      ...conflicts.map((conn) =>
+        updateConnectionEnabledClients(this.client, this.type, conn.id, conn.enabled_clients)
+      ),
+    ]);
   }
 }
