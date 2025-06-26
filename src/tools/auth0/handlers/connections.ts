@@ -3,10 +3,11 @@ import _ from 'lodash';
 import { Client, Connection } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import { filterExcluded, convertClientNameToId, getEnabledClients } from '../../utils';
-import { CalculatedChanges, Asset, Assets } from '../../../types';
+import { CalculatedChanges, Asset, Assets, Auth0APIClient } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
 import { paginate } from '../client';
 import ScimHandler from './scimHandler';
+import log from '../../../logger';
 
 export const schema = {
   type: 'array',
@@ -95,6 +96,51 @@ export const addExcludedConnectionPropertiesToChanges = ({
   };
 };
 
+/**
+ * Retrieves all enabled client IDs for a specific Auth0 connection.
+ * @param auth0Client - The Auth0 API client instance used to make requests
+ * @param connectionId - The unique identifier of the connection to fetch enabled clients for
+ * @returns A promise that resolves to an array of client IDs, or null if connectionId is empty or an error occurs
+ */
+export const getConnectionEnableClients = async (
+  auth0Client: Auth0APIClient,
+  connectionId: string
+): Promise<string[] | null> => {
+  if (!connectionId) return null;
+
+  try {
+    const enableClientsFormated: string[] = [];
+    let from: string | undefined;
+    let hasMore = true;
+
+    while (hasMore) {
+      const response = await auth0Client.connections.getEnabledClients({
+        id: connectionId,
+        take: 50,
+        ...(from && { from }),
+      });
+
+      const { clients: enableClients, next } = response?.data || {};
+
+      if (enableClients?.length) {
+        enableClients.forEach((client) => {
+          if (client?.client_id) {
+            enableClientsFormated.push(client.client_id);
+          }
+        });
+      }
+
+      hasMore = !!next;
+      from = next;
+    }
+
+    return enableClientsFormated;
+  } catch (error) {
+    log.error(`Error fetching enabled clients for connection ${connectionId}:`, error);
+    return null;
+  }
+};
+
 export default class ConnectionsHandler extends DefaultAPIHandler {
   existing: Asset[] | null;
   scimHandler: ScimHandler;
@@ -149,8 +195,22 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     });
 
     // Filter out database connections as we have separate handler for it
-    this.existing = connections.filter((c) => c.strategy !== 'auth0');
+    const filteredConnections = connections.filter((c) => c.strategy !== 'auth0');
+    this.existing = filteredConnections;
     if (this.existing === null) return [];
+
+    const updatedConnections = await Promise.all(
+      filteredConnections.map(async (con) => {
+        const enabledClients = await getConnectionEnableClients(this.client, con.id);
+        if (enabledClients && enabledClients?.length) {
+          // Return a new object with enabled_clients updated
+          return { ...con, enabled_clients: enabledClients };
+        }
+        return con;
+      })
+    );
+
+    this.existing = updatedConnections;
 
     // Apply `scim_configuration` to all the relevant `SCIM` connections. This method mutates `this.existing`.
     await this.scimHandler.applyScimConfiguration(this.existing);
