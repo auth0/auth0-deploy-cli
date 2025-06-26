@@ -102,14 +102,14 @@ export const addExcludedConnectionPropertiesToChanges = ({
  * @param connectionId - The unique identifier of the connection to fetch enabled clients for
  * @returns A promise that resolves to an array of client IDs, or null if connectionId is empty or an error occurs
  */
-export const getConnectionEnableClients = async (
+export const getConnectionEnabledClients = async (
   auth0Client: Auth0APIClient,
   connectionId: string
 ): Promise<string[] | null> => {
   if (!connectionId) return null;
 
   try {
-    const enableClientsFormated: string[] = [];
+    const enabledClientsFormatted: string[] = [];
     let from: string | undefined;
     let hasMore = true;
 
@@ -120,12 +120,12 @@ export const getConnectionEnableClients = async (
         ...(from && { from }),
       });
 
-      const { clients: enableClients, next } = response?.data || {};
+      const { clients: enabledClients, next } = response?.data || {};
 
-      if (enableClients?.length) {
-        enableClients.forEach((client) => {
+      if (enabledClients?.length) {
+        enabledClients.forEach((client) => {
           if (client?.client_id) {
-            enableClientsFormated.push(client.client_id);
+            enabledClientsFormatted.push(client.client_id);
           }
         });
       }
@@ -134,9 +134,8 @@ export const getConnectionEnableClients = async (
       from = next;
     }
 
-    return enableClientsFormated;
+    return enabledClientsFormatted;
   } catch (error) {
-    log.error(`Error fetching enabled clients for connection ${connectionId}:`, error);
     return null;
   }
 };
@@ -201,7 +200,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
 
     const updatedConnections = await Promise.all(
       filteredConnections.map(async (con) => {
-        const enabledClients = await getConnectionEnableClients(this.client, con.id);
+        const enabledClients = await getConnectionEnabledClients(this.client, con.id);
         if (enabledClients && enabledClients?.length) {
           // Return a new object with enabled_clients updated
           return { ...con, enabled_clients: enabledClients };
