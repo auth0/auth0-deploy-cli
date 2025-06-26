@@ -1,6 +1,6 @@
 import dotProp from 'dot-prop';
 import _ from 'lodash';
-import { Client, Connection, PatchClientsRequestInner } from 'auth0';
+import { Client, Connection, GetConnectionsStrategyEnum, PatchClientsRequestInner } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import { filterExcluded, convertClientNameToId, getEnabledClients, sleep } from '../../utils';
 import { CalculatedChanges, Asset, Assets, Auth0APIClient } from '../../../types';
@@ -179,6 +179,81 @@ export const updateConnectionEnabledClients = async (
   }
 };
 
+/**
+ * This function processes enabled clients for create, update, and conflict operations.
+ * Note: This function mutates the `create` array by adding IDs to the connection objects after creation.
+ *
+ * @param auth0Client - The Auth0 API client instance used to make API calls
+ * @param typeName - The type of connection being processed (e.g., 'database', 'connection')
+ * @param changes - Object containing arrays of connections to create, update, and resolve conflicts for
+ * @param delayMs - Optional delay in milliseconds before fetching new connections (default: 2500ms)
+ *
+ * @returns A Promise that resolves when all enabled client updates are complete
+ */
+export const processConnectionEnabledClients = async (
+  auth0Client: Auth0APIClient,
+  typeName: string,
+  changes: CalculatedChanges,
+  delayMs: number = 2500 // Default delay is 2.5 seconds
+) => {
+  const { create, update, conflicts } = changes;
+
+  let createWithId: Asset[] = [];
+  if (create.length) {
+    await sleep(delayMs); // Wait for the configured duration before fetching new connections
+
+    createWithId = await Promise.all(
+      create.map(async (conn) => {
+        let newConnections;
+
+        if (typeName === 'database') {
+          const {
+            data: { connections },
+          } = await auth0Client.connections.getAll({
+            name: conn.name,
+            take: 1,
+            strategy: [GetConnectionsStrategyEnum.auth0],
+            include_totals: true,
+          });
+          newConnections = connections;
+        } else {
+          const {
+            data: { connections },
+          } = await auth0Client.connections.getAll({
+            name: conn.name,
+            take: 1,
+            include_totals: true,
+          });
+          newConnections = connections;
+        }
+
+        if (newConnections && newConnections.length) {
+          conn.id = newConnections[0]?.id;
+        } else {
+          log.warn(
+            `Unable to find ID for newly created ${typeName} '${conn.name}' when updating enabled clients`
+          );
+        }
+        return conn;
+      })
+    );
+  }
+
+  // Process enabled clients for each change type
+  // Delete is handled by the `processChanges` method, removed connection completely
+  await Promise.all([
+    ...createWithId.map((conn) =>
+      updateConnectionEnabledClients(auth0Client, typeName, conn.id, conn.enabled_clients)
+    ),
+    ...update.map((conn) =>
+      updateConnectionEnabledClients(auth0Client, typeName, conn.id, conn.enabled_clients)
+    ),
+    ...conflicts.map((conn) =>
+      updateConnectionEnabledClients(auth0Client, typeName, conn.id, conn.enabled_clients)
+    ),
+  ]);
+};
+
 export default class ConnectionsHandler extends DefaultAPIHandler {
   existing: Asset[] | null;
   scimHandler: ScimHandler;
@@ -237,18 +312,17 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     this.existing = filteredConnections;
     if (this.existing === null) return [];
 
-    const updatedConnections = await Promise.all(
+    const connectionsWithEnabledClients = await Promise.all(
       filteredConnections.map(async (con) => {
         const enabledClients = await getConnectionEnabledClients(this.client, con.id);
         if (enabledClients && enabledClients?.length) {
-          // Return a new object with enabled_clients updated
           return { ...con, enabled_clients: enabledClients };
         }
         return con;
       })
     );
 
-    this.existing = updatedConnections;
+    this.existing = connectionsWithEnabledClients;
 
     // Apply `scim_configuration` to all the relevant `SCIM` connections. This method mutates `this.existing`.
     await this.scimHandler.applyScimConfiguration(this.existing);
@@ -313,49 +387,10 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     await super.processChanges(assets, filterExcluded(changes, excludedConnections));
 
     // process enabled clients
-    await this.processConnectionEnabledClients(filterExcluded(changes, excludedConnections));
-  }
-
-  async processConnectionEnabledClients(changes: CalculatedChanges) {
-    const { create, update, conflicts } = changes;
-
-    let createWithId: Asset[] = [];
-    if (create.length) {
-      await sleep(2500); // Wait for 2.5 seconds before fetching new connections
-
-      createWithId = await Promise.all(
-        create.map(async (conn) => {
-          const {
-            data: { connections: newConnections },
-          } = await this.client.connections.getAll({
-            name: conn.name,
-            take: 1,
-            include_totals: true,
-          });
-          if (newConnections && newConnections.length) {
-            conn.id = newConnections[0]?.id;
-          } else {
-            log.warn(
-              `Unable to find ID for newly created connection '${conn.name}' when updating enabled clients`
-            );
-          }
-          return conn;
-        })
-      );
-    }
-
-    // Process enabled clients for each change type
-    // Delete is handled by the `processChanges` method, removed connection completely
-    await Promise.all([
-      ...createWithId.map((conn) =>
-        updateConnectionEnabledClients(this.client, this.type, conn.id, conn.enabled_clients)
-      ),
-      ...update.map((conn) =>
-        updateConnectionEnabledClients(this.client, this.type, conn.id, conn.enabled_clients)
-      ),
-      ...conflicts.map((conn) =>
-        updateConnectionEnabledClients(this.client, this.type, conn.id, conn.enabled_clients)
-      ),
-    ]);
+    await processConnectionEnabledClients(
+      this.client,
+      this.type,
+      filterExcluded(changes, excludedConnections)
+    );
   }
 }
