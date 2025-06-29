@@ -4,6 +4,7 @@ import Auth0 from './auth0';
 import log from '../logger';
 import { ConfigFunction } from '../configFactory';
 import { Assets, Auth0APIClient } from '../types';
+import { exportDiffLog } from './calculateChanges';
 
 export default async function deploy(
   assets: Assets,
@@ -130,10 +131,10 @@ export default async function deploy(
     // Print the complete formatted output
     console.log(output);
 
-    if (tableData.length === 0) {
-      console.log(chalk.dim('No changes to apply.'));
-      return;
-    }
+    // if (tableData.length === 0) {
+    //   console.log(chalk.dim('No changes to apply.'));
+    //   return;
+    // }
 
     intro(chalk.inverse(' dry-run '));
     const selectedType = await select({
@@ -155,10 +156,12 @@ export default async function deploy(
         console.log('\n' + chalk.green('Applying changes...') + '\n');
         await auth0.processChanges();
         break;
-      case 'dry-run-export':
-        console.log('\n' + chalk.cyan('Exporting changes...') + '\n');
-        // TODO: Implement export functionality
+      case 'dry-run-export': {
+        const fileName = 'dry-run-diff-log.json';
+        await exportDiffLog(fileName);
+        console.log('\n' + chalk.cyan(`Exported on ./${fileName}`) + '\n');
         break;
+      }
       case 'dry-run-exit':
         console.log('\n' + chalk.yellow('Deployment cancelled. No changes were made.') + '\n');
         process.exit(0);

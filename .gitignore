@@ -12,3 +12,4 @@ yarn-error.log
 *.pem
 *.pub
 Makefile
+dry-run-diff-log*.json
