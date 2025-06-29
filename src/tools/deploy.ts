@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import * as readline from 'readline';
+import { intro, select } from '@clack/prompts';
 import Auth0 from './auth0';
 import log from '../logger';
 import { ConfigFunction } from '../configFactory';
@@ -130,25 +130,42 @@ export default async function deploy(
     // Print the complete formatted output
     console.log(output);
 
-    // Ask for confirmation
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
+    // if (tableData.length === 0) {
+    //   console.log(chalk.dim('No changes to apply.'));
+    //   return;
+    // }
+
+    intro(chalk.inverse(' dry-run '));
+    const selectedType = await select({
+      message: 'What would you like to do?',
+      options: [
+        { value: 'dry-run-apply', label: 'Apply changes' },
+        {
+          value: 'dry-run-export',
+          label: 'Export changes in a file',
+          hint: 'No Apply',
+        },
+        { value: 'dry-run-exit', label: 'Exit', hint: '' },
+      ],
     });
 
-    const answer = await new Promise<string>((resolve) => {
-      rl.question(chalk.bold('> Would you like to apply these changes? (y/N) '), (response) => {
-        rl.close();
-        resolve(response.trim().toLowerCase());
-      });
-    });
-
-    if (answer === 'y' || answer === 'yes') {
-      console.log('\n' + chalk.green('Applying changes...') + '\n');
-      await auth0.processChanges();
-    } else {
-      console.log('\n' + chalk.yellow('Deployment cancelled. No changes were made.') + '\n');
-      process.exit(1);
+    // Handle selectedType
+    switch (selectedType) {
+      case 'dry-run-apply':
+        console.log('\n' + chalk.green('Applying changes...') + '\n');
+        await auth0.processChanges();
+        break;
+      case 'dry-run-export':
+        console.log('\n' + chalk.cyan('Exporting changes...') + '\n');
+        // TODO: Implement export functionality
+        break;
+      case 'dry-run-exit':
+        console.log('\n' + chalk.yellow('Deployment cancelled. No changes were made.') + '\n');
+        process.exit(0);
+        break;
+      default:
+        console.log(chalk.red('Invalid option selected.'));
+        process.exit(1);
     }
   } else {
     // Process changes normally
