@@ -130,10 +130,10 @@ export default async function deploy(
     // Print the complete formatted output
     console.log(output);
 
-    // if (tableData.length === 0) {
-    //   console.log(chalk.dim('No changes to apply.'));
-    //   return;
-    // }
+    if (tableData.length === 0) {
+      console.log(chalk.dim('No changes to apply.'));
+      return;
+    }
 
     intro(chalk.inverse(' dry-run '));
     const selectedType = await select({
