@@ -26,14 +26,14 @@ To use the keyword replacement, the `AUTH0_KEYWORD_REPLACEMENT_MAPPINGS` configu
 
 ```yaml
 tenant:
-  friendly_name: "##ENVIRONMENT## tenant"
-  allowed_logout_urls: @@ALLOWED_LOGOUT_URLS@@
+  friendly_name: '##ENVIRONMENT## tenant'
+  allowed_logout_urls: '@@ALLOWED_LOGOUT_URLS@@'
   enabled_locales:
     - en
 clients:
   - name: Test App
-    allowed_origins: @@ALLOWED_ORIGINS@@
-    allowed_logout_urls: @@ALLOWED_LOGOUT_URLS@@
+    allowed_origins: '@@ALLOWED_ORIGINS@@'
+    allowed_logout_urls: '@@ALLOWED_LOGOUT_URLS@@'
 ```
 
 ### Example `tenant.json`
