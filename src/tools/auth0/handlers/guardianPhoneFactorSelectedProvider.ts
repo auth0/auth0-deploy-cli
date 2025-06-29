@@ -87,7 +87,7 @@ export default class GuardianPhoneSelectedProviderHandler extends DefaultHandler
       `Start processChanges for guardianPhoneFactorSelectedProvider [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
     );
 
-    if (update.length === 0) {
+    if (create.length === 0 && update.length === 0 && del.length === 0) {
       return;
     }
 

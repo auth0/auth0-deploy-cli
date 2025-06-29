@@ -151,7 +151,7 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
       `Start processChanges for selfServiceProfiles [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
     );
 
-    if (update.length === 0) {
+    if (create.length === 0 && update.length === 0 && del.length === 0) {
       return;
     }
 

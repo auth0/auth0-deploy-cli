@@ -55,9 +55,10 @@ export default class GuardianPoliciesHandler extends DefaultHandler {
       `Start processChanges for guardianPolicies [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
     );
 
-    if (update.length === 0) {
+    if (create.length === 0 && update.length === 0 && del.length === 0) {
       return;
     }
+
     const data = guardianPolicies.policies;
     await this.client.guardian.updatePolicies(data);
     this.updated += 1;

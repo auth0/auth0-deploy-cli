@@ -70,6 +70,10 @@ export default class FlowVaultHandler extends DefaultHandler {
       `Start processChanges for flow vault connections [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
     );
 
+    if (create.length === 0 && update.length === 0 && del.length === 0) {
+      return;
+    }
+
     const changes = [{ del: del }, { create: create }, { update: update }];
 
     await Promise.all(
