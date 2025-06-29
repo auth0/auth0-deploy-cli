@@ -2,7 +2,7 @@ import { GetPhoneProviders200Response } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
-import { isForbiddenFeatureError } from '../../utils';
+import { isDryRun, isForbiddenFeatureError } from '../../utils';
 import log from '../../../logger';
 
 export const schema = {
@@ -87,7 +87,7 @@ export default class GuardianPhoneSelectedProviderHandler extends DefaultHandler
       `Start processChanges for guardianPhoneFactorSelectedProvider [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
     );
 
-    if (create.length === 0 && update.length === 0 && del.length === 0) {
+    if (isDryRun(this.config) && create.length === 0 && update.length === 0 && del.length === 0) {
       return;
     }
 

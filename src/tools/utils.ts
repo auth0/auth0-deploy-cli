@@ -5,6 +5,7 @@ import _ from 'lodash';
 import log from '../logger';
 import { Asset, Assets, CalculatedChanges, KeywordMappings } from '../types';
 import constants from './constants';
+import { ConfigFunction } from '../configFactory';
 
 export const keywordReplaceArrayRegExp = (key) => {
   const pattern = `@@${key}@@`;
@@ -320,4 +321,9 @@ export function sortGuardianFactors(factors: Asset[]): Asset[] {
     if (nameA > nameB) return 1;
     return 0;
   });
+}
+
+// Check if dry-run flag is enbaled
+export function isDryRun(config: ConfigFunction): boolean {
+  return config('AUTH0_DRY_RUN') === true || config('AUTH0_DRY_RUN') === 'true';
 }

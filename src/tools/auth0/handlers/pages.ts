@@ -4,6 +4,7 @@ import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
+import { isDryRun } from '../../utils';
 
 export const supportedPages = constants.PAGE_NAMES.filter((p) => p.includes('.json')).map((p) =>
   p.replace('.json', '')
@@ -150,7 +151,7 @@ export default class PagesHandler extends DefaultHandler {
       `Start processChanges for pages [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
     );
 
-    if (create.length === 0 && update.length === 0 && del.length === 0) {
+    if (isDryRun(this.config) && create.length === 0 && update.length === 0 && del.length === 0) {
       return;
     }
 

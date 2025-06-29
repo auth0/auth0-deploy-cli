@@ -2,7 +2,7 @@ import { Factor, FactorNameEnum } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
-import { isForbiddenFeatureError, sortGuardianFactors } from '../../utils';
+import { isDryRun, isForbiddenFeatureError, sortGuardianFactors } from '../../utils';
 import log from '../../../logger';
 
 export const schema = {
@@ -58,7 +58,7 @@ export default class GuardianFactorsHandler extends DefaultHandler {
       `Start processChanges for guardianFactors [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
     );
 
-    if (create.length === 0 && update.length === 0 && del.length === 0) {
+    if (isDryRun(this.config) && create.length === 0 && update.length === 0 && del.length === 0) {
       return;
     }
 

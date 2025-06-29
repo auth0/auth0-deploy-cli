@@ -9,6 +9,7 @@ import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import { findKeyPathWithValue } from '../../../utils';
+import { isDryRun } from '../../utils';
 
 export type Form = {
   name: string;
@@ -141,7 +142,13 @@ export default class FormsHandler extends DefaultHandler {
       `Start processChanges for forms [delete:${del.length}] [update:${update.length}] [create:${create.length}] [conflicts:${conflicts.length}]`
     );
 
-    if (create.length === 0 && update.length === 0 && del.length === 0 && conflicts.length === 0) {
+    if (
+      isDryRun(this.config) &&
+      create.length === 0 &&
+      update.length === 0 &&
+      del.length === 0 &&
+      conflicts.length === 0
+    ) {
       return;
     }
 

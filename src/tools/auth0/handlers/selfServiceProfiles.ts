@@ -7,8 +7,8 @@ import { isEmpty } from 'lodash';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import log from '../../../logger';
 import DefaultAPIHandler from './default';
-import { calculateChanges } from '../../calculateChanges';
 import { paginate } from '../client';
+import { isDryRun } from '../../utils';
 
 type customTextType = {
   [GetSelfServiceProfileCustomTextLanguageEnum.en]: {
@@ -151,7 +151,7 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
       `Start processChanges for selfServiceProfiles [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
     );
 
-    if (create.length === 0 && update.length === 0 && del.length === 0) {
+    if (isDryRun(this.config) && create.length === 0 && update.length === 0 && del.length === 0) {
       return;
     }
 

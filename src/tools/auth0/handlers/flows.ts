@@ -9,6 +9,7 @@ import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
 import { findKeyPathWithValue } from '../../../utils';
+import { isDryRun } from '../../utils';
 
 export type Flow = {
   name: string;
@@ -84,7 +85,13 @@ export default class FlowHandler extends DefaultHandler {
       `Start processChanges for flows [delete:${del.length}] [update:${update.length}] [create:${create.length}] [conflicts:${conflicts.length}]`
     );
 
-    if (create.length === 0 && update.length === 0 && del.length === 0 && conflicts.length === 0) {
+    if (
+      isDryRun(this.config) &&
+      create.length === 0 &&
+      update.length === 0 &&
+      del.length === 0 &&
+      conflicts.length === 0
+    ) {
       return;
     }
 

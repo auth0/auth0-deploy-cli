@@ -7,6 +7,7 @@ import DefaultHandler, { order } from './default';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import constants from '../../constants';
 import log from '../../../logger';
+import { isDryRun } from '../../utils';
 
 export type FlowVaultConnection = {
   name: string;
@@ -70,7 +71,7 @@ export default class FlowVaultHandler extends DefaultHandler {
       `Start processChanges for flow vault connections [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
     );
 
-    if (create.length === 0 && update.length === 0 && del.length === 0) {
+    if (isDryRun(this.config) && create.length === 0 && update.length === 0 && del.length === 0) {
       return;
     }
 
