@@ -91,6 +91,7 @@ describe('#directory context prompts', () => {
           rendering_mode: 'standard',
           context_configuration: [],
           default_head_tags_disabled: false,
+          use_page_template: true,
           head_tags: [
             {
               tag: 'script',
@@ -107,6 +108,15 @@ describe('#directory context prompts', () => {
           prompt: 'login-id',
           screen: 'login-id',
           rendering_mode: 'advanced',
+          filters: {
+            match_type: 'includes_any',
+            clients: [
+              {
+                id: 'SeunfRe6p8EXxV6I0g9kMYdT1DxpfC38',
+                metadata: { key1: 'value1' },
+              },
+            ],
+          },
           context_configuration: [],
           default_head_tags_disabled: false,
           head_tags: [
@@ -175,11 +185,11 @@ describe('#directory context prompts', () => {
 
     const signupIdSettingsFiles = {
       'signup-id_signup-id.json':
-        '{ "prompt": "signup-id", "screen": "signup-id", "rendering_mode": "advanced","default_head_tags_disabled": false,' +
+        '{ "prompt": "signup-id", "screen": "signup-id", "rendering_mode": "advanced","default_head_tags_disabled": false,"use_page_template": true,' +
         '"context_configuration": [ "branding.settings", "branding.themes.default"],  "head_tags": [{"attributes": {"async": true,  "defer": true , ' +
         '"integrity": ["sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="], "src": "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"}, "tag": "script"}]}',
       'login-id_login-id.json':
-        '{ "prompt": "login-id", "screen": "login-id", "rendering_mode": "standard", "context_configuration": [],"default_head_tags_disabled": false}',
+        '{ "prompt": "login-id", "screen": "login-id", "rendering_mode": "standard", "context_configuration": [],"default_head_tags_disabled": false ,"filters": {"match_type": "includes_any", "clients": [{"id": "SeunfRe6p8EXxV6I0g9kMYdT1DxpfC38", "metadata": {"key1": "value1"}}]}}',
     };
 
     createDir(repoDir, { [screenSettingsDir]: signupIdSettingsFiles });
@@ -239,6 +249,15 @@ describe('#directory context prompts', () => {
           rendering_mode: 'standard',
           context_configuration: [],
           default_head_tags_disabled: false,
+          filters: {
+            match_type: 'includes_any',
+            clients: [
+              {
+                id: 'SeunfRe6p8EXxV6I0g9kMYdT1DxpfC38',
+                metadata: { key1: 'value1' },
+              },
+            ],
+          },
         },
         {
           prompt: 'signup-id',
@@ -246,6 +265,7 @@ describe('#directory context prompts', () => {
           rendering_mode: 'advanced',
           context_configuration: ['branding.settings', 'branding.themes.default'],
           default_head_tags_disabled: false,
+          use_page_template: true,
           head_tags: [
             {
               tag: 'script',
@@ -516,6 +536,15 @@ describe('#directory context prompts', () => {
           rendering_mode: 'standard',
           context_configuration: [],
           default_head_tags_disabled: false,
+          filters: {
+            match_type: 'includes_any',
+            clients: [
+              {
+                id: 'SeunfRe6p8EXxV6I0g9kMYdT1DxpfC38',
+                metadata: { key1: 'value1' },
+              },
+            ],
+          },
         },
         {
           prompt: 'signup-id',
@@ -523,6 +552,7 @@ describe('#directory context prompts', () => {
           rendering_mode: 'advanced',
           context_configuration: ['branding.settings', 'branding.themes.default'],
           default_head_tags_disabled: false,
+          use_page_template: true,
           head_tags: [
             {
               tag: 'script',
@@ -594,6 +624,15 @@ describe('#directory context prompts', () => {
       rendering_mode: 'standard',
       context_configuration: [],
       default_head_tags_disabled: false,
+      filters: {
+        match_type: 'includes_any',
+        clients: [
+          {
+            id: 'SeunfRe6p8EXxV6I0g9kMYdT1DxpfC38',
+            metadata: { key1: 'value1' },
+          },
+        ],
+      },
     });
 
     expect(
@@ -604,6 +643,7 @@ describe('#directory context prompts', () => {
       rendering_mode: 'advanced',
       context_configuration: ['branding.settings', 'branding.themes.default'],
       default_head_tags_disabled: false,
+      use_page_template: true,
       head_tags: [
         {
           tag: 'script',
