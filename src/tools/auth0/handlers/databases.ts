@@ -5,6 +5,11 @@ import { filterExcluded, getEnabledClients } from '../../utils';
 import { CalculatedChanges, Assets } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
+import {
+  getConnectionEnabledClients,
+  processConnectionEnabledClients,
+  updateConnectionEnabledClients,
+} from './connections';
 
 export const schema = {
   type: 'array',
@@ -155,7 +160,18 @@ export default class DatabaseHandler extends DefaultAPIHandler {
       checkpoint: true,
       include_totals: true,
     });
-    this.existing = connections;
+
+    const dbConnectionsWithEnabledClients = await Promise.all(
+      connections.map(async (con) => {
+        const enabledClients = await getConnectionEnabledClients(this.client, con.id);
+        if (enabledClients && enabledClients?.length) {
+          return { ...con, enabled_clients: enabledClients };
+        }
+        return con;
+      })
+    );
+
+    this.existing = dbConnectionsWithEnabledClients;
 
     return this.existing;
   }
@@ -214,5 +230,12 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     const changes = await this.calcChanges(assets);
 
     await super.processChanges(assets, filterExcluded(changes, excludedConnections));
+
+    // process enabled clients
+    await processConnectionEnabledClients(
+      this.client,
+      this.type,
+      filterExcluded(changes, excludedConnections)
+    );
   }
 }

@@ -3,6 +3,7 @@ import pageClient from '../../../../src/tools/auth0/client';
 const { expect } = require('chai');
 const sinon = require('sinon');
 const databases = require('../../../../src/tools/auth0/handlers/databases');
+const connections = require('../../../../src/tools/auth0/handlers/connections');
 const { mockPagedData } = require('../../../utils');
 
 const pool = {
@@ -81,13 +82,23 @@ describe('#databases handler', () => {
 
     it('should get databases', async () => {
       const clientId = 'rFeR6vyzQcDEgSUsASPeF4tXr3xbZhxE';
+      let getEnabledClientsCalledOnce = false;
       const auth0 = {
         connections: {
           getAll: function (params) {
             (() => expect(this).to.not.be.undefined)();
             return mockPagedData(params, 'connections', [
-              { strategy: 'auth0', name: 'db', enabled_clients: [clientId] },
+              { id: 'con1', strategy: 'auth0', name: 'db', enabled_clients: [clientId] },
             ]);
+          },
+          getEnabledClients: () => {
+            getEnabledClientsCalledOnce = true;
+            return Promise.resolve({
+              data: {
+                clients: [{ client_id: clientId }],
+                next: null,
+              },
+            });
           },
         },
         clients: {
@@ -101,7 +112,10 @@ describe('#databases handler', () => {
 
       const handler = new databases.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
-      expect(data).to.deep.equal([{ strategy: 'auth0', name: 'db', enabled_clients: [clientId] }]);
+      expect(data).to.deep.equal([
+        { id: 'con1', strategy: 'auth0', name: 'db', enabled_clients: [clientId] },
+      ]);
+      expect(getEnabledClientsCalledOnce).to.equal(true);
     });
 
     it('should update database', async () => {
@@ -134,6 +148,10 @@ describe('#databases handler', () => {
             mockPagedData(params, 'connections', [
               { name: 'someDatabase', id: 'con1', strategy: 'auth0' },
             ]),
+          updateEnabledClients: (params) => {
+            expect(params.id).to.equal('con1');
+            return Promise.resolve({ data: [] });
+          },
         },
         clients: {
           getAll: (params) =>
@@ -194,6 +212,11 @@ describe('#databases handler', () => {
                 enabled_clients: ['excluded-one-id'],
               },
             ]),
+          getEnabledClients: () => Promise.resolve({ data: [] }),
+          updateEnabledClients: (params) => {
+            expect(params.id).to.equal('con1');
+            return Promise.resolve({ data: [] });
+          },
         },
         clients: {
           getAll: (params) =>
@@ -250,6 +273,10 @@ describe('#databases handler', () => {
             mockPagedData(params, 'connections', [
               { name: 'someDatabase', id: 'con1', strategy: 'auth0' },
             ]),
+          updateEnabledClients: (params) => {
+            expect(params.id).to.be.undefined();
+            return false;
+          },
         },
         clients: {
           getAll: (params) =>
@@ -1681,6 +1708,254 @@ describe('#databases handler', () => {
 
       // eslint-disable-next-line no-unused-expressions
       expect(updateArgs.options.requires_username).to.exist;
+    });
+  });
+});
+
+describe('#databases handler with enabled clients integration', () => {
+  const config = function (key) {
+    return config.data && config.data[key];
+  };
+
+  config.data = {
+    AUTH0_CLIENT_ID: 'client_id',
+    AUTH0_ALLOW_DELETE: true,
+  };
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  describe('#getType with enabled clients', () => {
+    it('should fetch and include enabled clients in database connection data', async () => {
+      const auth0 = {
+        connections: {
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con_1', strategy: 'auth0', name: 'database-connection-1' },
+              { id: 'con_2', strategy: 'auth0', name: 'database-connection-2' },
+            ]),
+          getEnabledClients: sinon.stub(),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      // Mock enabled clients responses
+      auth0.connections.getEnabledClients
+        .withArgs({ id: 'con_1', take: 50 })
+        .resolves({
+          data: {
+            clients: [{ client_id: 'client_1' }, { client_id: 'client_2' }],
+            next: null,
+          },
+        })
+        .withArgs({ id: 'con_2', take: 50 })
+        .resolves({
+          data: {
+            clients: [{ client_id: 'client_3' }],
+            next: null,
+          },
+        });
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+
+      const result = await handler.getType();
+
+      expect(result).to.have.length(2);
+      expect(result[0]).to.include({
+        id: 'con_1',
+        strategy: 'auth0',
+        name: 'database-connection-1',
+      });
+      expect(result[0].enabled_clients).to.deep.equal(['client_1', 'client_2']);
+      expect(result[1]).to.include({
+        id: 'con_2',
+        strategy: 'auth0',
+        name: 'database-connection-2',
+      });
+      expect(result[1].enabled_clients).to.deep.equal(['client_3']);
+    });
+
+    it('should handle database connections without enabled clients', async () => {
+      const auth0 = {
+        connections: {
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con_1', strategy: 'auth0', name: 'database-connection-1' },
+            ]),
+          getEnabledClients: sinon.stub(),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      // Mock empty enabled clients response
+      auth0.connections.getEnabledClients.resolves({
+        data: {
+          clients: [],
+          next: null,
+        },
+      });
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+
+      const result = await handler.getType();
+
+      expect(result).to.have.length(1);
+      expect(result[0]).to.not.have.property('enabled_clients');
+    });
+  });
+
+  describe('#processChanges with enabled clients', () => {
+    it('should call processConnectionEnabledClients after super.processChanges for databases', async () => {
+      const processConnectionEnabledClientsStub = sinon
+        .stub(connections, 'processConnectionEnabledClients')
+        .resolves();
+
+      const auth0 = {
+        connections: {
+          create: sinon.stub().resolves({ data: {} }),
+          update: sinon.stub().resolves({ data: {} }),
+          delete: sinon.stub().resolves({ data: {} }),
+          get: sinon.stub().resolves({ data: { options: {} } }),
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+
+      const assets = {
+        databases: [{ name: 'test-database', strategy: 'auth0', enabled_clients: ['client_1'] }],
+      };
+
+      await handler.processChanges(assets);
+
+      sinon.assert.calledOnce(processConnectionEnabledClientsStub);
+      expect(processConnectionEnabledClientsStub.firstCall.args[0]).to.equal(handler.client);
+      expect(processConnectionEnabledClientsStub.firstCall.args[1]).to.equal(handler.type);
+
+      processConnectionEnabledClientsStub.restore();
+    });
+
+    it('should respect excluded databases in enabled clients processing', async () => {
+      const processConnectionEnabledClientsStub = sinon
+        .stub(connections, 'processConnectionEnabledClients')
+        .resolves();
+
+      const auth0 = {
+        connections: {
+          create: sinon.stub().resolves({ data: {} }),
+          update: sinon.stub().resolves({ data: {} }),
+          delete: sinon.stub().resolves({ data: {} }),
+          get: sinon.stub().resolves({ data: { options: {} } }),
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+
+      const assets = {
+        databases: [
+          { name: 'included-database', strategy: 'auth0', enabled_clients: ['client_1'] },
+          { name: 'excluded-database', strategy: 'auth0', enabled_clients: ['client_2'] },
+        ],
+        exclude: {
+          databases: ['excluded-database'],
+        },
+      };
+
+      await handler.processChanges(assets);
+
+      sinon.assert.calledOnce(processConnectionEnabledClientsStub);
+
+      // Verify that excluded databases are filtered out
+      const passedChanges = processConnectionEnabledClientsStub.firstCall.args[2];
+      expect(passedChanges.create).to.be.an('array');
+      expect(passedChanges.update).to.be.an('array');
+      expect(passedChanges.conflicts).to.be.an('array');
+
+      processConnectionEnabledClientsStub.restore();
+    });
+
+    it('should pass database type to processConnectionEnabledClients', async () => {
+      const processConnectionEnabledClientsStub = sinon
+        .stub(connections, 'processConnectionEnabledClients')
+        .resolves();
+
+      const auth0 = {
+        connections: {
+          create: sinon.stub().resolves({ data: {} }),
+          update: sinon.stub().resolves({ data: {} }),
+          delete: sinon.stub().resolves({ data: {} }),
+          get: sinon.stub().resolves({ data: { options: {} } }),
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+
+      const assets = {
+        databases: [{ name: 'test-database', strategy: 'auth0', enabled_clients: ['client_1'] }],
+      };
+
+      await handler.processChanges(assets);
+
+      sinon.assert.calledOnce(processConnectionEnabledClientsStub);
+      expect(processConnectionEnabledClientsStub.firstCall.args[1]).to.equal('databases');
+
+      processConnectionEnabledClientsStub.restore();
+    });
+
+    it('should handle databases without enabled_clients property', async () => {
+      const processConnectionEnabledClientsStub = sinon
+        .stub(connections, 'processConnectionEnabledClients')
+        .resolves();
+
+      const auth0 = {
+        connections: {
+          create: sinon.stub().resolves({ data: {} }),
+          update: sinon.stub().resolves({ data: {} }),
+          delete: sinon.stub().resolves({ data: {} }),
+          get: sinon.stub().resolves({ data: { options: {} } }),
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+
+      const assets = {
+        databases: [
+          { name: 'database-with-clients', strategy: 'auth0', enabled_clients: ['client_1'] },
+          { name: 'database-without-clients', strategy: 'auth0' }, // No enabled_clients property
+        ],
+      };
+
+      await handler.processChanges(assets);
+
+      sinon.assert.calledOnce(processConnectionEnabledClientsStub);
+
+      processConnectionEnabledClientsStub.restore();
     });
   });
 });
