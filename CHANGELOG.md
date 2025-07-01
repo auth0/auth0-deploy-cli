@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support new schema fields in `prompt` screens for rendering. [#1124]
+
+### Changed
+
+- Update endpoints for enabled_clients in `connections` and `databases`. [#1123]
+- Update CONTRIBUTING.md with detailed setup and workflow instructions. [#1115]
+
+### Fixed
+
+- Fix process execution order for `forms`,`flows`,`flowVaultConnections`. [#1121]
+- Fix keyword replacement markers in `databases` enabled_clients. [#1116]
+
 ## [8.9.0] - 2025-06-04
 
 ### Added
