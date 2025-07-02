@@ -177,12 +177,6 @@ export type PromptScreenRenderSettings = {
   body: string;
 };
 
-export type PromptScreenSettings = {
-  [prompt in PromptTypes]: Partial<{
-    [screen in ScreenTypes]: PromptScreenRenderSettings;
-  }>;
-};
-
 export const schema = {
   type: 'object',
   properties: {

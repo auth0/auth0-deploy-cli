@@ -13,3 +13,4 @@ yarn-error.log
 *.pub
 Makefile
 dry-run-diff-log*.json
+.vscode/*
