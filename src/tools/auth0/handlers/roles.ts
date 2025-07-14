@@ -1,10 +1,11 @@
-import { GetOrganizationMemberRoles200ResponseOneOfInner, Permission, ResourceServer } from 'auth0';
+import { GetOrganizationMemberRoles200ResponseOneOfInner, Permission } from 'auth0';
 import { isArray } from 'lodash';
 import DefaultHandler, { order } from './default';
 import { calculateChanges } from '../../calculateChanges';
 import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
+import { isDryRun } from '../../utils';
 
 export const schema = {
   type: 'array',
@@ -210,6 +211,16 @@ export default class RolesHandler extends DefaultHandler {
     const { roles } = assets;
     // Do nothing if not set
     if (!roles) return;
+
+    const { del, update, create } = await this.calcChanges(assets);
+
+    if (isDryRun(this.config) && create.length === 0 && update.length === 0 && del.length === 0) {
+      log.debug(
+        `Start processChanges for roles [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
+      );
+      return;
+    }
+
     // Gets roles from destination tenant
     const existing = await this.getType();
 

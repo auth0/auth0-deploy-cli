@@ -3,7 +3,7 @@ import DefaultHandler, { order } from './default';
 import constants from '../../constants';
 import log from '../../../logger';
 import { Assets } from '../../../types';
-import { sleep } from '../../utils';
+import { isDryRun, sleep } from '../../utils';
 
 export const schema = {
   type: 'object',
@@ -106,6 +106,13 @@ export default class TriggersHandler extends DefaultHandler {
 
     // Do nothing if not set
     if (!triggers) return;
+
+    const { update } = await this.calcChanges(assets);
+
+    if (isDryRun(this.config) && update.length === 0) {
+      log.debug(`Start processChanges for triggers [update:${update.length}]`);
+      return;
+    }
 
     await sleep(2000); // Delay to allow newly-deployed actions to register in backend
 

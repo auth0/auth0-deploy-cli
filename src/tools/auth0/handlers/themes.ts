@@ -2,6 +2,7 @@ import { PostBrandingTheme200Response } from 'auth0';
 import { Assets } from '../../../types';
 import log from '../../../logger';
 import DefaultHandler, { order } from './default';
+import { isDryRun } from '../../utils';
 
 export type Theme = PostBrandingTheme200Response;
 export default class ThemesHandler extends DefaultHandler {
@@ -33,6 +34,13 @@ export default class ThemesHandler extends DefaultHandler {
 
     // Non existing section means themes doesn't need to be processed
     if (!themes) {
+      return;
+    }
+
+    const { del, update } = await this.calcChanges(assets);
+
+    if (isDryRun(this.config) && update.length === 0 && del.length === 0) {
+      log.debug(`Start processChanges for themes [delete:${del.length}] [update:${update.length}]`);
       return;
     }
 

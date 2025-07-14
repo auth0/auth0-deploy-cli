@@ -3,6 +3,7 @@ import DefaultHandler, { order } from './default';
 import constants from '../../constants';
 import log from '../../../logger';
 import { Asset, Assets } from '../../../types';
+import { isDryRun } from '../../utils';
 
 export const schema = {
   type: 'object',
@@ -93,6 +94,15 @@ export default class BrandingHandler extends DefaultHandler {
   @order('70') // Run after custom domains and themes.
   async processChanges(assets: Assets) {
     if (!assets.branding) return;
+
+    const { del, update, create } = await this.calcChanges(assets);
+
+    if (isDryRun(this.config) && create.length === 0 && update.length === 0 && del.length === 0) {
+      log.debug(
+        `Start processChanges for branding [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
+      );
+      return;
+    }
 
     const { templates, ...brandingSettings } = assets.branding;
 

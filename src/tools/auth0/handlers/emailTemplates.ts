@@ -1,6 +1,8 @@
 import DefaultHandler, { order } from './default';
 import constants from '../../constants';
 import { Assets, Asset } from '../../../types';
+import { isDryRun } from '../../utils';
+import log from '../../../logger';
 
 export const supportedTemplates = constants.EMAIL_TEMPLATES_NAMES.filter((p) =>
   p.includes('.json')
@@ -78,6 +80,15 @@ export default class EmailTemplateHandler extends DefaultHandler {
 
     // Do nothing if not set
     if (!emailTemplates || !emailTemplates.length) return;
+
+    const { update, create } = await this.calcChanges(assets);
+
+    if (isDryRun(this.config) && create.length === 0 && update.length === 0) {
+      log.debug(
+        `Start processChanges for emailTemplates [update:${update.length}], [create:${create.length}]`
+      );
+      return;
+    }
 
     await Promise.all(
       emailTemplates.map(async (emailTemplate) => {

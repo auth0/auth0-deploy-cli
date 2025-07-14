@@ -147,11 +147,10 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
 
     const { del, update, create } = await this.calcChanges(assets);
 
-    log.debug(
-      `Start processChanges for selfServiceProfiles [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
-    );
-
     if (isDryRun(this.config) && create.length === 0 && update.length === 0 && del.length === 0) {
+      log.debug(
+        `Start processChanges for selfServiceProfiles [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
+      );
       return;
     }
 

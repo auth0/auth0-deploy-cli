@@ -13,6 +13,7 @@ import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import { convertClientIdToName } from '../../../utils';
+import { isDryRun } from '../../utils';
 
 export const schema = {
   type: 'array',
@@ -386,6 +387,16 @@ export default class OrganizationsHandler extends DefaultHandler {
     const { organizations } = assets;
     // Do nothing if not set
     if (!organizations) return;
+
+    const { del, update, create } = await this.calcChanges(assets);
+
+    if (isDryRun(this.config) && create.length === 0 && update.length === 0 && del.length === 0) {
+      log.debug(
+        `Start processChanges for organizations [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
+      );
+      return;
+    }
+
     // Gets organizations from destination tenant
     const existing = await this.getType();
 

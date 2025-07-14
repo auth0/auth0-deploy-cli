@@ -8,7 +8,7 @@ import { isEmpty } from 'lodash';
 import ValidationError from '../../validationError';
 import DefaultHandler, { order } from './default';
 import { supportedPages, pageNameMap } from './pages';
-import { convertJsonToString } from '../../utils';
+import { convertJsonToString, isDryRun } from '../../utils';
 import { Asset, Assets } from '../../../types';
 import log from '../../../logger';
 import sessionDurationsToMinutes from '../../../sessionDurationsToMinutes';
@@ -180,6 +180,13 @@ export default class TenantHandler extends DefaultHandler {
 
     // Do nothing if not set
     if (!tenant) return;
+
+    const { update } = await this.calcChanges(assets);
+
+    if (isDryRun(this.config) && update.length === 0) {
+      log.debug(`Start processChanges for tenants [update:${update.length}]`);
+      return;
+    }
 
     const updatedTenant: TenantSettingsUpdate = {
       ...tenant,
