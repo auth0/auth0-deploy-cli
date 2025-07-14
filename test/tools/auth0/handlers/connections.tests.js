@@ -4,6 +4,7 @@ import pageClient from '../../../../src/tools/auth0/client';
 const { expect } = require('chai');
 const sinon = require('sinon');
 const connections = require('../../../../src/tools/auth0/handlers/connections');
+const utils = require('../../../../src/tools/utils');
 const { mockPagedData } = require('../../../utils');
 
 const pool = {
@@ -116,15 +117,23 @@ describe('#connections handler', () => {
 
     it('should get connections', async () => {
       const clientId = 'rFeR6vyzQcDEgSUsASPeF4tXr3xbZhxE';
-
+      let getEnabledClientsCalledOnce = false;
       const auth0 = {
         connections: {
           getAll: (params) =>
             mockPagedData(params, 'connections', [
-              { strategy: 'github', name: 'github', enabled_clients: [clientId] },
-              { strategy: 'auth0', name: 'db-should-be-ignored', enabled_clients: [] },
+              { id: 'con1', strategy: 'github', name: 'github', enabled_clients: [clientId] },
+              { id: 'con2', strategy: 'auth0', name: 'db-should-be-ignored', enabled_clients: [] },
             ]),
-          _getRestClient: () => ({}),
+          getEnabledClients: () => {
+            getEnabledClientsCalledOnce = true;
+            return Promise.resolve({
+              data: {
+                clients: [{ client_id: clientId }],
+                next: null,
+              },
+            });
+          },
         },
         clients: {
           getAll: (params) =>
@@ -136,8 +145,9 @@ describe('#connections handler', () => {
       const handler = new connections.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([
-        { strategy: 'github', name: 'github', enabled_clients: [clientId] },
+        { id: 'con1', strategy: 'github', name: 'github', enabled_clients: [clientId] },
       ]);
+      expect(getEnabledClientsCalledOnce).to.equal(true);
     });
 
     it('should update connection', async () => {
@@ -165,6 +175,10 @@ describe('#connections handler', () => {
               { name: 'someConnection', id: 'con1', strategy: 'custom' },
             ]),
           _getRestClient: () => ({}),
+          updateEnabledClients: (params) => {
+            expect(params.id).to.equal('con1');
+            return Promise.resolve({ data: [] });
+          },
         },
         clients: {
           getAll: (params) =>
@@ -234,6 +248,11 @@ describe('#connections handler', () => {
             mockPagedData(params, 'connections', [
               { name: 'someSamlConnection', id: 'con1', strategy: 'samlp' },
             ]),
+          getEnabledClients: () => Promise.resolve({ data: [] }),
+          updateEnabledClients: (params) => {
+            expect(params.id).to.equal('con1');
+            return Promise.resolve({ data: [] });
+          },
         },
         clients: {
           getAll: (params) =>
@@ -324,6 +343,11 @@ describe('#connections handler', () => {
               { name: 'someSamlConnection', id: 'con1', strategy: 'samlp' },
             ]),
           _getRestClient: () => ({}),
+          getEnabledClients: () => Promise.resolve({ data: [] }),
+          updateEnabledClients: (params) => {
+            expect(params.id).to.equal('con1');
+            return Promise.resolve({ data: [] });
+          },
         },
         clients: {
           getAll: (params) =>
@@ -402,6 +426,11 @@ describe('#connections handler', () => {
               },
             ]),
           _getRestClient: () => ({}),
+          getEnabledClients: () => Promise.resolve({ data: [] }),
+          updateEnabledClients: (params) => {
+            expect(params.id).to.equal('con1');
+            return Promise.resolve({ data: [] });
+          },
         },
         clients: {
           getAll: (params) =>
@@ -617,6 +646,406 @@ describe('#connections handler', () => {
       };
 
       await stageFn.apply(handler, [assets]);
+    });
+  });
+});
+
+describe('#connections enabled clients functionality', () => {
+  const {
+    getConnectionEnabledClients,
+    updateConnectionEnabledClients,
+    processConnectionEnabledClients,
+  } = connections;
+
+  let mockAuth0Client;
+
+  beforeEach(() => {
+    // Mock Auth0 client
+    mockAuth0Client = {
+      connections: {
+        getEnabledClients: sinon.stub(),
+        updateEnabledClients: sinon.stub(),
+        getAll: sinon.stub(),
+      },
+    };
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  describe('#getConnectionEnabledClients', () => {
+    it('should return array of client IDs with single page', async () => {
+      const connectionId = 'con_123';
+      const mockResponse = {
+        data: {
+          clients: [
+            { client_id: 'client_1' },
+            { client_id: 'client_2' },
+            { client_id: 'client_3' },
+          ],
+          next: null,
+        },
+      };
+
+      mockAuth0Client.connections.getEnabledClients.resolves(mockResponse);
+
+      const result = await getConnectionEnabledClients(mockAuth0Client, connectionId);
+
+      expect(result).to.deep.equal(['client_1', 'client_2', 'client_3']);
+      sinon.assert.calledOnceWithExactly(mockAuth0Client.connections.getEnabledClients, {
+        id: connectionId,
+        take: 50,
+      });
+    });
+
+    it('should return empty array when no enabled clients', async () => {
+      const connectionId = 'con_123';
+      const mockResponse = {
+        data: {
+          clients: [],
+          next: null,
+        },
+      };
+
+      mockAuth0Client.connections.getEnabledClients.resolves(mockResponse);
+
+      const result = await getConnectionEnabledClients(mockAuth0Client, connectionId);
+
+      expect(result).to.deep.equal([]);
+    });
+  });
+
+  describe('#updateConnectionEnabledClients', () => {
+    it('should update enabled clients successfully', async () => {
+      const connectionId = 'con_123';
+      const enabledClientIds = ['client_1', 'client_2', 'client_3'];
+      const typeName = 'connection';
+
+      mockAuth0Client.connections.updateEnabledClients.resolves();
+
+      const result = await updateConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        connectionId,
+        enabledClientIds
+      );
+
+      expect(result).to.equal(true);
+      sinon.assert.calledOnceWithExactly(
+        mockAuth0Client.connections.updateEnabledClients,
+        { id: connectionId },
+        [
+          { client_id: 'client_1', status: true },
+          { client_id: 'client_2', status: true },
+          { client_id: 'client_3', status: true },
+        ]
+      );
+    });
+  });
+
+  describe('#processConnectionEnabledClients', () => {
+    let sleepStub;
+
+    beforeEach(() => {
+      // Mock the sleep function
+      sleepStub = sinon.stub(utils, 'sleep').resolves();
+    });
+
+    it('should process create operations with ID lookup', async () => {
+      const typeName = 'connection';
+      const changes = {
+        create: [
+          { name: 'new-connection-1', enabled_clients: ['client_1', 'client_2'] },
+          { name: 'new-connection-2', enabled_clients: ['client_3'] },
+        ],
+        update: [],
+        conflicts: [],
+      };
+
+      // Mock getAll to return newly created connections
+      mockAuth0Client.connections.getAll
+        .onFirstCall()
+        .resolves({
+          data: {
+            connections: [{ id: 'con_new_1', name: 'new-connection-1' }],
+          },
+        })
+        .onSecondCall()
+        .resolves({
+          data: {
+            connections: [{ id: 'con_new_2', name: 'new-connection-2' }],
+          },
+        });
+
+      // Mock updateEnabledClients
+      mockAuth0Client.connections.updateEnabledClients.resolves();
+
+      await processConnectionEnabledClients(mockAuth0Client, typeName, changes);
+
+      sinon.assert.calledOnceWithExactly(sleepStub, 2500);
+      sinon.assert.calledTwice(mockAuth0Client.connections.getAll);
+      sinon.assert.calledTwice(mockAuth0Client.connections.updateEnabledClients);
+    });
+
+    it('should process update operations', async () => {
+      const typeName = 'connection';
+      const changes = {
+        create: [],
+        update: [
+          { id: 'con_1', name: 'existing-connection-1', enabled_clients: ['client_1', 'client_2'] },
+          { id: 'con_2', name: 'existing-connection-2', enabled_clients: ['client_3'] },
+        ],
+        conflicts: [],
+      };
+
+      mockAuth0Client.connections.updateEnabledClients.resolves();
+
+      await processConnectionEnabledClients(mockAuth0Client, typeName, changes);
+
+      sinon.assert.notCalled(sleepStub);
+      sinon.assert.calledTwice(mockAuth0Client.connections.updateEnabledClients);
+    });
+
+    it('should process conflict operations', async () => {
+      const typeName = 'connection';
+      const changes = {
+        create: [],
+        update: [],
+        conflicts: [{ id: 'con_1', name: 'conflict-connection-1', enabled_clients: ['client_1'] }],
+      };
+
+      mockAuth0Client.connections.updateEnabledClients.resolves();
+
+      await processConnectionEnabledClients(mockAuth0Client, typeName, changes);
+
+      sinon.assert.calledOnce(mockAuth0Client.connections.updateEnabledClients);
+    });
+
+    it('should handle database type connections differently', async () => {
+      const typeName = 'database';
+      const changes = {
+        create: [{ name: 'new-db-connection', enabled_clients: ['client_1'] }],
+        update: [],
+        conflicts: [],
+      };
+
+      mockAuth0Client.connections.getAll.resolves({
+        data: {
+          connections: [{ id: 'con_db_1', name: 'new-db-connection' }],
+        },
+      });
+      mockAuth0Client.connections.updateEnabledClients.resolves();
+
+      await processConnectionEnabledClients(mockAuth0Client, typeName, changes);
+
+      sinon.assert.calledWith(mockAuth0Client.connections.getAll, {
+        name: 'new-db-connection',
+        take: 1,
+        strategy: ['auth0'],
+        include_totals: true,
+      });
+    });
+  });
+
+  describe('#connections handler with enabled clients integration', () => {
+    const config = function (key) {
+      return config.data && config.data[key];
+    };
+
+    config.data = {
+      AUTH0_CLIENT_ID: 'client_id',
+      AUTH0_ALLOW_DELETE: true,
+    };
+
+    let scimHandlerMock;
+
+    beforeEach(() => {
+      scimHandlerMock = {
+        createIdMap: sinon.stub().resolves(new Map()),
+        getScimConfiguration: sinon.stub().resolves({}),
+        applyScimConfiguration: sinon.stub().resolves(undefined),
+        createOverride: sinon.stub().resolves(new Map()),
+        updateOverride: sinon.stub().resolves(new Map()),
+      };
+    });
+
+    afterEach(() => {
+      sinon.restore();
+    });
+
+    describe('#getType with enabled clients', () => {
+      it('should fetch and include enabled clients in connection data', async () => {
+        const auth0 = {
+          connections: {
+            getAll: (params) =>
+              mockPagedData(params, 'connections', [
+                { id: 'con_1', strategy: 'github', name: 'github-connection' },
+                { id: 'con_2', strategy: 'google', name: 'google-connection' },
+                { strategy: 'auth0', name: 'db-should-be-ignored' }, // Should be filtered out
+              ]),
+            getEnabledClients: sinon.stub(),
+            _getRestClient: () => ({}),
+          },
+          clients: {
+            getAll: (params) => mockPagedData(params, 'clients', []),
+          },
+          pool,
+        };
+
+        // Mock enabled clients responses
+        auth0.connections.getEnabledClients
+          .withArgs({ id: 'con_1', take: 50 })
+          .resolves({
+            data: {
+              clients: [{ client_id: 'client_1' }, { client_id: 'client_2' }],
+              next: null,
+            },
+          })
+          .withArgs({ id: 'con_2', take: 50 })
+          .resolves({
+            data: {
+              clients: [{ client_id: 'client_3' }],
+              next: null,
+            },
+          });
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        handler.scimHandler = scimHandlerMock;
+
+        const result = await handler.getType();
+
+        expect(result).to.have.length(2);
+        expect(result[0]).to.include({
+          id: 'con_1',
+          strategy: 'github',
+          name: 'github-connection',
+        });
+        expect(result[0].enabled_clients).to.deep.equal(['client_1', 'client_2']);
+        expect(result[1]).to.include({
+          id: 'con_2',
+          strategy: 'google',
+          name: 'google-connection',
+        });
+        expect(result[1].enabled_clients).to.deep.equal(['client_3']);
+      });
+
+      it('should handle connections without enabled clients', async () => {
+        const auth0 = {
+          connections: {
+            getAll: (params) =>
+              mockPagedData(params, 'connections', [
+                { id: 'con_1', strategy: 'github', name: 'github-connection' },
+              ]),
+            getEnabledClients: sinon.stub(),
+            _getRestClient: () => ({}),
+          },
+          clients: {
+            getAll: (params) => mockPagedData(params, 'clients', []),
+          },
+          pool,
+        };
+
+        // Mock empty enabled clients response
+        auth0.connections.getEnabledClients.resolves({
+          data: {
+            clients: [],
+            next: null,
+          },
+        });
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        handler.scimHandler = scimHandlerMock;
+
+        const result = await handler.getType();
+
+        expect(result).to.have.length(1);
+        expect(result[0]).to.not.have.property('enabled_clients');
+      });
+    });
+
+    describe('#processChanges with enabled clients', () => {
+      it('should call processConnectionEnabledClients after super.processChanges', async () => {
+        const processConnectionEnabledClientsStub = sinon
+          .stub(connections, 'processConnectionEnabledClients')
+          .resolves();
+
+        const auth0 = {
+          connections: {
+            create: sinon.stub().resolves({ data: {} }),
+            update: sinon.stub().resolves({ data: {} }),
+            delete: sinon.stub().resolves({ data: {} }),
+            getAll: (params) => mockPagedData(params, 'connections', []),
+            _getRestClient: () => ({}),
+          },
+          clients: {
+            getAll: (params) => mockPagedData(params, 'clients', []),
+          },
+          pool,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        handler.scimHandler = scimHandlerMock;
+
+        const assets = {
+          connections: [
+            { name: 'test-connection', strategy: 'custom', enabled_clients: ['client_1'] },
+          ],
+        };
+
+        await handler.processChanges(assets);
+
+        sinon.assert.calledOnce(processConnectionEnabledClientsStub);
+        expect(processConnectionEnabledClientsStub.firstCall.args[0]).to.equal(handler.client);
+        expect(processConnectionEnabledClientsStub.firstCall.args[1]).to.equal(handler.type);
+
+        processConnectionEnabledClientsStub.restore();
+      });
+
+      it('should respect excluded connections in enabled clients processing', async () => {
+        const processConnectionEnabledClientsStub = sinon
+          .stub(connections, 'processConnectionEnabledClients')
+          .resolves();
+
+        const auth0 = {
+          connections: {
+            create: sinon.stub().resolves({ data: {} }),
+            update: sinon.stub().resolves({ data: {} }),
+            delete: sinon.stub().resolves({ data: {} }),
+            getAll: (params) => mockPagedData(params, 'connections', []),
+            _getRestClient: () => ({}),
+          },
+          clients: {
+            getAll: (params) => mockPagedData(params, 'clients', []),
+          },
+          pool,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        handler.scimHandler = scimHandlerMock;
+
+        const assets = {
+          connections: [
+            { name: 'included-connection', strategy: 'custom', enabled_clients: ['client_1'] },
+            { name: 'excluded-connection', strategy: 'custom', enabled_clients: ['client_2'] },
+          ],
+          exclude: {
+            connections: ['excluded-connection'],
+          },
+        };
+
+        await handler.processChanges(assets);
+
+        sinon.assert.calledOnce(processConnectionEnabledClientsStub);
+
+        // Verify that excluded connections are filtered out
+        const passedChanges = processConnectionEnabledClientsStub.firstCall.args[2];
+        expect(passedChanges.create).to.be.an('array');
+        expect(passedChanges.update).to.be.an('array');
+        expect(passedChanges.conflicts).to.be.an('array');
+
+        processConnectionEnabledClientsStub.restore();
+      });
     });
   });
 });

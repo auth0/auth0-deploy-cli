@@ -107,7 +107,17 @@ Contents of `promptName_screenName.json`
         "integrity": ["ASSET_SHA"]
       }
     }
-  ]
+  ],
+  "filters": {
+    "match_type": "includes_any",
+    "clients": [
+      {
+        "id": "SeunfRe6p8EXxV6I0g9kMYdT1DxpfC38",
+        "metadata": { "key1": "value1" }
+      }
+    ]
+  },
+  "use_page_template": false
 }
 ```
 

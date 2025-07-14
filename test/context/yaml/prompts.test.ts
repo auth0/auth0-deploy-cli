@@ -82,7 +82,7 @@ describe('#YAML context prompts', () => {
     fs.ensureDirSync(screenRendererPath);
     fs.writeFileSync(
       path.join(screenRendererPath, 'signup-id_signup-id.json'),
-      '{"prompt":"signup-id","screen":"signup-id","rendering_mode":"standard","context_configuration":[],"default_head_tags_disabled":false,"head_tags":[{"tag":"script","attributes":{"src":"URL_TO_YOUR_ASSET","async":true,"defer":true,"integrity":["ASSET_SHA"]}}]}'
+      '{"prompt":"signup-id","screen":"signup-id","rendering_mode":"standard","context_configuration":[],"default_head_tags_disabled":false,"filters":{"match_type":"includes_any","clients":[{"id":"SeunfRe6p8EXxV6I0g9kMYdT1DxpfC38","metadata":{"key1":"value1"}}]},"head_tags":[{"tag":"script","attributes":{"src":"URL_TO_YOUR_ASSET","async":true,"defer":true,"integrity":["ASSET_SHA"]}}]}'
     );
 
     const config = { AUTH0_INPUT_FILE: yamlFile };
@@ -179,6 +179,17 @@ describe('#YAML context prompts', () => {
               },
             },
           ],
+          filters: {
+            match_type: 'includes_any',
+            clients: [
+              {
+                id: 'SeunfRe6p8EXxV6I0g9kMYdT1DxpfC38',
+                metadata: {
+                  key1: 'value1',
+                },
+              },
+            ],
+          },
         },
       ],
     });
@@ -325,6 +336,16 @@ describe('#YAML context prompts', () => {
               },
             },
           ],
+          use_page_template: true,
+          filters: {
+            match_type: 'includes_any',
+            clients: [
+              {
+                id: 'SeunfRe6p8EXxV6I0g9kMYdT1DxpfC38',
+                metadata: { key1: 'value1' },
+              },
+            ],
+          },
         },
       ],
     };
@@ -354,6 +375,16 @@ describe('#YAML context prompts', () => {
           },
         },
       ],
+      filters: {
+        match_type: 'includes_any',
+        clients: [
+          {
+            id: 'SeunfRe6p8EXxV6I0g9kMYdT1DxpfC38',
+            metadata: { key1: 'value1' },
+          },
+        ],
+      },
+      use_page_template: true,
     });
   });
 });

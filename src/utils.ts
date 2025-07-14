@@ -201,10 +201,34 @@ export function convertClientIdToName(clientId: string, knownClients: Asset[] = 
   }
 }
 
-export function mapClientID2NameSorted(enabledClients: string[], knownClients: Asset[]): string[] {
-  return [
-    ...(enabledClients || []).map((clientId) => convertClientIdToName(clientId, knownClients)),
-  ].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+export function hasKeywordMarkers(value: any): boolean {
+  if (typeof value !== 'string') return false;
+  return /@@[A-Z_]+@@/.test(value) || /##[A-Z_]+##/.test(value);
+}
+
+export function mapClientID2NameSorted(
+  enabledClients: string[] | string,
+  knownClients: Asset[]
+): string[] | string {
+  // If enabledClients is a string (likely contains keyword markers), return as-is
+  if (typeof enabledClients === 'string') {
+    return enabledClients;
+  }
+
+  // If enabledClients is null or undefined, return empty array
+  if (!enabledClients) {
+    return [];
+  }
+
+  // Process each element: preserve keyword markers, convert client IDs to names
+  const processedClients = enabledClients.map((client) => {
+    if (hasKeywordMarkers(client)) {
+      return client;
+    }
+    return convertClientIdToName(client, knownClients);
+  });
+
+  return processedClients.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 }
 
 export function nomalizedYAMLPath(filePath: string): string[] {
