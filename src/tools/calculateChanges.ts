@@ -511,12 +511,23 @@ export function calculateDryRunChanges({
     });
   del.push(...deletedAssets);
 
+  /*
   console.log(`Calculated changes for [${type}]:`, {
     del: del.length,
     create: create.length,
     conflicts: conflicts.length,
     update: update.length,
   });
+  */
+
+  log.debug(
+    `[DryRun] calculated changes for [${type}]:${JSON.stringify({
+      del: del.length,
+      create: create.length,
+      conflicts: conflicts.length,
+      update: update.length,
+    })}`
+  );
 
   return {
     del,

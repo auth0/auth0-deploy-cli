@@ -1,10 +1,11 @@
 import chalk from 'chalk';
-import { intro, select } from '@clack/prompts';
+import { intro, select, log as promptsLog } from '@clack/prompts';
 import Auth0 from './auth0';
 import log from '../logger';
 import { ConfigFunction } from '../configFactory';
 import { Assets, Auth0APIClient } from '../types';
 import { exportDiffLog } from './calculateChanges';
+import { printCLIMessage } from './utils';
 
 export default async function deploy(
   assets: Assets,
@@ -28,6 +29,7 @@ export default async function deploy(
   await auth0.validate();
 
   if (isDryRun) {
+    promptsLog.info('Preparing dry run preview...\n');
     // In dry run mode, perform a dry run instead of processing changes
     const allChanges = await auth0.dryRun();
 
@@ -129,10 +131,10 @@ export default async function deploy(
       ' No changes have been made to your Auth0 tenant.\n\n';
 
     // Print the complete formatted output
-    console.log(output);
+    printCLIMessage(output);
 
     if (tableData.length === 0) {
-      console.log(chalk.dim('No changes to apply.'));
+      printCLIMessage(chalk.dim('No changes to apply.'));
       return;
     }
 
@@ -153,21 +155,21 @@ export default async function deploy(
     // Handle selectedType
     switch (selectedType) {
       case 'dry-run-apply':
-        console.log('\n' + chalk.green('Applying changes...') + '\n');
+        printCLIMessage('\n' + chalk.green('Applying changes...') + '\n');
         await auth0.processChanges();
         break;
       case 'dry-run-export': {
         const fileName = 'dry-run-diff-log.json';
         await exportDiffLog(fileName);
-        console.log('\n' + chalk.cyan(`Exported on ./${fileName}`) + '\n');
+        printCLIMessage('\n' + chalk.cyan(`Exported on ./${fileName}`) + '\n');
         break;
       }
       case 'dry-run-exit':
-        console.log('\n' + chalk.yellow('Deployment cancelled. No changes were made.') + '\n');
+        printCLIMessage('\n' + chalk.yellow('Deployment cancelled. No changes were made.') + '\n');
         process.exit(0);
         break;
       default:
-        console.log(chalk.red('Invalid option selected.'));
+        printCLIMessage(chalk.red('Invalid option selected.'));
         process.exit(1);
     }
   } else {

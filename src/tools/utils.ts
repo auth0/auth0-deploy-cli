@@ -327,3 +327,8 @@ export function sortGuardianFactors(factors: Asset[]): Asset[] {
 export function isDryRun(config: ConfigFunction): boolean {
   return config('AUTH0_DRY_RUN') === true || config('AUTH0_DRY_RUN') === 'true';
 }
+
+// Print a message to the CLI message console
+export function printCLIMessage(message: string): void {
+  process.stdout.write(message + '\n');
+}
