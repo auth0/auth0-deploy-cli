@@ -1,6 +1,7 @@
 import { CustomDomain } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
+import log from '../../../logger';
 
 export const schema = {
   type: 'array',
@@ -18,6 +19,22 @@ export const schema = {
       status: { type: 'string', enum: ['pending_verification', 'ready', 'disabled', 'pending'] },
       type: { type: 'string', enum: ['auth0_managed_certs', 'self_managed_certs'] },
       verification: { type: 'object' },
+      tls_policy: {
+        type: 'string',
+        description: 'Custom domain TLS policy. Must be `recommended`, includes TLS 1.2.',
+        defaultValue: 'recommended',
+      },
+      domain_metadata: {
+        type: 'object',
+        description: 'Domain metadata associated with the custom domain.',
+        defaultValue: undefined,
+        maxProperties: 10,
+      },
+      verification_method: {
+        type: 'string',
+        description: 'Custom domain verification method. Must be `txt`.',
+        defaultValue: 'txt',
+      },
     },
     required: ['domain', 'type'],
   },
@@ -31,10 +48,21 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
       ...config,
       type: 'customDomains',
       id: 'custom_domain_id',
-      identifiers: ['domain'],
-      stripCreateFields: ['status', 'primary', 'verification'],
+      identifiers: ['custom_domain_id', 'domain'],
+      stripCreateFields: ['status', 'primary', 'verification', 'certificate'],
+      stripUpdateFields: [
+        'status',
+        'primary',
+        'verification',
+        'type',
+        'domain',
+        'verification_method',
+        'certificate',
+      ],
       functions: {
         delete: (args) => this.client.customDomains.delete({ id: args.custom_domain_id }),
+        update: (args, data) =>
+          this.client.customDomains.update({ id: args.custom_domain_id }, data),
       },
     });
   }
@@ -71,29 +99,21 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
     const { customDomains } = assets;
 
     if (!customDomains) return;
-    const changes = await this.calcChanges(assets).then((changes) => {
-      const changesWithoutUpdates = {
-        ...changes,
-        create: changes.create.map((customDomainToCreate) => {
-          const newCustomDomain = { ...customDomainToCreate };
-          if (customDomainToCreate.custom_client_ip_header === null) {
-            delete newCustomDomain.custom_client_ip_header;
-          }
 
-          return newCustomDomain;
-        }),
-        delete: changes.del.map((deleteToMake) => {
-          const deleteWithSDKCompatibleID = {
-            ...deleteToMake,
-            id: deleteToMake.custom_domain_id,
-          };
-          delete deleteWithSDKCompatibleID['custom_domain_id'];
-          return deleteWithSDKCompatibleID;
-        }),
-        update: [], //Do not perform custom domain updates because not supported by SDK
-      };
-      return changesWithoutUpdates;
-    });
+    // Deprecation warnings for custom domains
+    if (customDomains.some((customDomain) => customDomain.primary != null)) {
+      log.warn(
+        'The "primary" field is deprecated and may be removed in future versions for "customDomains"'
+      );
+    }
+
+    if (customDomains.some((customDomain) => 'verification_method' in customDomain)) {
+      log.warn(
+        'The "verification_method" field is deprecated and may be removed in future versions for "customDomains"'
+      );
+    }
+
+    const changes = await this.calcChanges(assets);
 
     await super.processChanges(assets, changes);
   }
