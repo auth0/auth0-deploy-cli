@@ -14,6 +14,11 @@ const mockLogStreams = [
       splunkToken: '7b838bd0-028e-4d78-a82c-3564a2007770',
       splunkSecure: false,
     },
+    pii_config: {
+      log_fields: ['first_name', 'last_name', 'phone'],
+      method: 'mask',
+      algorithm: 'xxhash',
+    },
   },
   {
     id: 'log-stream-2',
@@ -25,6 +30,11 @@ const mockLogStreams = [
       httpContentFormat: 'JSONLINES',
       httpContentType: 'application/json',
       httpEndpoint: 'https://example.com/test',
+    },
+    pii_config: {
+      log_fields: ['username', 'email', 'address'],
+      method: 'hash',
+      algorithm: 'xxhash',
     },
   },
   {
@@ -107,6 +117,11 @@ describe('#logStreams handler', () => {
               splunkToken: '_VALUE_NOT_SHOWN_', // secret obfuscated
               splunkSecure: false,
             },
+            pii_config: {
+              log_fields: ['first_name', 'last_name', 'phone'],
+              method: 'mask',
+              algorithm: 'xxhash',
+            },
           },
           {
             id: 'log-stream-2',
@@ -118,6 +133,11 @@ describe('#logStreams handler', () => {
               httpContentFormat: 'JSONLINES',
               httpContentType: 'application/json',
               httpEndpoint: 'https://example.com/test',
+            },
+            pii_config: {
+              log_fields: ['username', 'email', 'address'],
+              method: 'hash',
+              algorithm: 'xxhash',
             },
           },
           {
