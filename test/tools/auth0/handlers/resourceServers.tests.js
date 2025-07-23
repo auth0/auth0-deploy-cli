@@ -71,6 +71,48 @@ describe('#resourceServers handler', () => {
 
       await stageFn.apply(handler, [{ resourceServers: data }]);
     });
+
+    it('should validate proof_of_possession with valid mechanism and required fields', async () => {
+      const handler = new resourceServers.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        {
+          name: 'someAPI',
+          identifier: 'https://api.example.com',
+          proof_of_possession: {
+            mechanism: 'dpop',
+            required: true,
+          },
+        },
+        {
+          name: 'anotherAPI',
+          identifier: 'https://api2.example.com',
+          proof_of_possession: {
+            mechanism: 'mtls',
+            required: false,
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ resourceServers: data }]);
+    });
+
+    it('should reject missing required field in proof_of_possession', async () => {
+      const handler = new resourceServers.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        {
+          name: 'someAPI',
+          identifier: 'https://api.example.com',
+          proof_of_possession: {
+            mechanism: 'dpop',
+            // missing required field
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ resourceServers: data }]);
+    });
   });
 
   describe('#resourceServers process', () => {
@@ -81,6 +123,7 @@ describe('#resourceServers handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someAPI');
+            expect(data.identifier).to.equal('https://api.example.com');
             return Promise.resolve({ data });
           },
           update: () => Promise.resolve({ data: [] }),
@@ -93,7 +136,87 @@ describe('#resourceServers handler', () => {
       const handler = new resourceServers.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [{ resourceServers: [{ name: 'someAPI' }] }]);
+      await stageFn.apply(handler, [
+        { resourceServers: [{ name: 'someAPI', identifier: 'https://api.example.com' }] },
+      ]);
+    });
+
+    it('should create resource server with proof_of_possession(mtls)', async () => {
+      const auth0 = {
+        resourceServers: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('mtlsAPI');
+            expect(data.proof_of_possession).to.deep.equal({
+              mechanism: 'mtls',
+              required: true,
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'resource_servers', []),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          resourceServers: [
+            {
+              name: 'mtlsAPI',
+              identifier: 'https://mtls-api.example.com',
+              proof_of_possession: {
+                mechanism: 'mtls',
+                required: true,
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should create resource server with proof_of_possession(dpop)', async () => {
+      const auth0 = {
+        resourceServers: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('dpopAPI');
+            expect(data.proof_of_possession).to.deep.equal({
+              mechanism: 'dpop',
+              required: true,
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'resource_servers', []),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          resourceServers: [
+            {
+              name: 'dpopAPI',
+              identifier: 'https://dpop-api.example.com',
+              proof_of_possession: {
+                mechanism: 'dpop',
+                required: true,
+              },
+            },
+          ],
+        },
+      ]);
     });
 
     it('should get resource servers', async () => {
@@ -143,7 +266,91 @@ describe('#resourceServers handler', () => {
       ]);
     });
 
-    it('should create new resource server with same name but different identifier', async () => {
+    it('should update resource server with proof_of_possession(mtls)', async () => {
+      const auth0 = {
+        resourceServers: {
+          create: () => Promise.resolve([]),
+          update: function (params, data) {
+            expect(params).to.be.an('object');
+            expect(data).to.be.an('object');
+            expect(params.id).to.equal('rs1');
+            expect(data.proof_of_possession).to.deep.equal({
+              mechanism: 'mtls',
+              required: true,
+            });
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              { id: 'rs1', identifier: 'some-api', name: 'someAPI' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          resourceServers: [
+            {
+              name: 'someAPI',
+              identifier: 'some-api',
+              proof_of_possession: {
+                mechanism: 'mtls',
+                required: true,
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should update resource server with proof_of_possession(dpop)', async () => {
+      const auth0 = {
+        resourceServers: {
+          create: () => Promise.resolve([]),
+          update: function (params, data) {
+            expect(params).to.be.an('object');
+            expect(data).to.be.an('object');
+            expect(params.id).to.equal('rs1');
+            expect(data.proof_of_possession).to.deep.equal({
+              mechanism: 'dpop',
+              required: false,
+            });
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              { id: 'rs1', identifier: 'some-api', name: 'someAPI' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          resourceServers: [
+            {
+              name: 'someAPI',
+              identifier: 'some-api',
+              proof_of_possession: {
+                mechanism: 'dpop',
+                required: false,
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should update new resource server with same name but different identifier', async () => {
       const auth0 = {
         resourceServers: {
           create: function (data) {
