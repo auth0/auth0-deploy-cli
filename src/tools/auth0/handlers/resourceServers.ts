@@ -36,7 +36,7 @@ export const schema = {
         properties: {
           mechanism: {
             type: 'string',
-            enum: ResourceServerProofOfPossessionMechanismEnum,
+            enum: Object.values(ResourceServerProofOfPossessionMechanismEnum),
           },
           required: { type: 'boolean' },
         },

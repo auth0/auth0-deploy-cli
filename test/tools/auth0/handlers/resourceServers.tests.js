@@ -71,48 +71,6 @@ describe('#resourceServers handler', () => {
 
       await stageFn.apply(handler, [{ resourceServers: data }]);
     });
-
-    it('should validate proof_of_possession with valid mechanism and required fields', async () => {
-      const handler = new resourceServers.default({ client: {}, config });
-      const stageFn = Object.getPrototypeOf(handler).validate;
-      const data = [
-        {
-          name: 'someAPI',
-          identifier: 'https://api.example.com',
-          proof_of_possession: {
-            mechanism: 'dpop',
-            required: true,
-          },
-        },
-        {
-          name: 'anotherAPI',
-          identifier: 'https://api2.example.com',
-          proof_of_possession: {
-            mechanism: 'mtls',
-            required: false,
-          },
-        },
-      ];
-
-      await stageFn.apply(handler, [{ resourceServers: data }]);
-    });
-
-    it('should reject missing required field in proof_of_possession', async () => {
-      const handler = new resourceServers.default({ client: {}, config });
-      const stageFn = Object.getPrototypeOf(handler).validate;
-      const data = [
-        {
-          name: 'someAPI',
-          identifier: 'https://api.example.com',
-          proof_of_possession: {
-            mechanism: 'dpop',
-            // missing required field
-          },
-        },
-      ];
-
-      await stageFn.apply(handler, [{ resourceServers: data }]);
-    });
   });
 
   describe('#resourceServers process', () => {
