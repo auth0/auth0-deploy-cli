@@ -47,6 +47,10 @@ export default class FlowVaultHandler extends DefaultHandler {
     });
   }
 
+  objString(item): string {
+    return super.objString({ id: item.id, name: item.name });
+  }
+
   async getType(): Promise<Asset> {
     if (this.existing) {
       return this.existing;
