@@ -674,6 +674,81 @@ describe('#schema validation tests', () => {
 
       checkPassed({ resourceServers: data }, done);
     });
+
+    it('should pass validation with valid proof_of_possession', (done) => {
+      const data = [
+        {
+          name: 'name',
+          identifier: 'identifier',
+          proof_of_possession: {
+            mechanism: 'dpop',
+            required: true,
+          },
+        },
+      ];
+
+      checkPassed({ resourceServers: data }, done);
+    });
+
+    it('should fail validation if proof_of_possession missing required field', (done) => {
+      const data = [
+        {
+          name: 'name',
+          identifier: 'identifier',
+          proof_of_possession: {
+            mechanism: 'dpop',
+            // missing required field
+          },
+        },
+      ];
+
+      checkRequired('required', { resourceServers: data }, done);
+    });
+
+    it('should fail validation if proof_of_possession missing mechanism field', (done) => {
+      const data = [
+        {
+          name: 'name',
+          identifier: 'identifier',
+          proof_of_possession: {
+            required: true,
+            // missing mechanism field
+          },
+        },
+      ];
+
+      checkRequired('mechanism', { resourceServers: data }, done);
+    });
+
+    it('should fail validation if proof_of_possession has invalid mechanism', (done) => {
+      const data = [
+        {
+          name: 'name',
+          identifier: 'identifier',
+          proof_of_possession: {
+            mechanism: 'invalid',
+            required: true,
+          },
+        },
+      ];
+
+      const auth0 = new Auth0(
+        {
+          ...client,
+          resourceServers: {
+            getAll: async (params) => mockPagedData(params, 'resource_servers', []),
+          },
+        },
+        { resourceServers: data },
+        mockConfigFn
+      );
+
+      auth0.validate().then(failedCb(done), (err) => {
+        expect(err.message).to.contain('enum');
+        expect(err.message).to.contain('mechanism');
+        done();
+      });
+    });
   });
 
   describe('#tenant validate', () => {

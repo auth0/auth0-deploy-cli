@@ -610,14 +610,14 @@ describe('#YAML context validation', () => {
       {
         tenants: {
           getSettings: async () =>
-            new Promise((res) =>
-              res({
+            new Promise((resolve) => {
+              resolve({
                 data: {
                   friendly_name: 'Production Tenant',
                   enabled_locales: ['en', 'es'],
                 },
-              })
-            ),
+              });
+            }),
         },
         connections: {
           getAll: (params) =>

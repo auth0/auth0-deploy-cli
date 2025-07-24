@@ -1,4 +1,4 @@
-import { ResourceServer } from 'auth0';
+import { ResourceServer, ResourceServerProofOfPossessionMechanismEnum } from 'auth0';
 import ValidationError from '../../validationError';
 
 import constants from '../../constants';
@@ -31,6 +31,17 @@ export const schema = {
       },
       enforce_policies: { type: 'boolean' },
       token_dialect: { type: 'string' },
+      proof_of_possession: {
+        type: 'object',
+        properties: {
+          mechanism: {
+            type: 'string',
+            enum: Object.values(ResourceServerProofOfPossessionMechanismEnum),
+          },
+          required: { type: 'boolean' },
+        },
+        required: ['mechanism', 'required'],
+      },
     },
     required: ['name', 'identifier'],
   },

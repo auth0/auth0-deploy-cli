@@ -158,14 +158,14 @@ describe('#directory context validation', () => {
       {
         tenants: {
           getSettings: async () =>
-            new Promise((res) =>
+            new Promise((res) => {
               res({
                 data: {
                   friendly_name: 'Production Tenant',
                   enabled_locales: ['en', 'es'],
                 },
-              })
-            ),
+              });
+            }),
         },
         prompts: {
           _getRestClient: (endpoint) => ({
@@ -173,7 +173,10 @@ describe('#directory context validation', () => {
           }),
         },
         actions: {
-          getSettings: async () => new Promise((res) => res([])),
+          getSettings: async () =>
+            new Promise((res) => {
+              res([]);
+            }),
         },
       }
     );

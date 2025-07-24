@@ -88,16 +88,16 @@ export function mockMgmtClient() {
         ]),
     },
     tenants: {
-      getSettings: async () =>
-        new Promise((res) =>
-          res({
+      getSettings: () =>
+        new Promise((resolve) => {
+          resolve({
             data: {
               friendly_name: 'Test',
               default_directory: 'users',
               enabled_locales: ['en'],
             },
-          })
-        ),
+          });
+        }),
       getCustomTextByLanguage: () => Promise.resolve({ data: {} }),
     },
     attackProtection: {
