@@ -742,6 +742,36 @@ describe('#connections enabled clients functionality', () => {
         ]
       );
     });
+
+    it('should update enabled clients with more than 50 clients', async () => {
+      const connectionId = 'con_123';
+      const enabledClientIds = Array.from({ length: 60 }, (_, i) => `client_${i + 1}`);
+      const typeName = 'connection';
+
+      mockAuth0Client.connections.updateEnabledClients.resolves();
+
+      const result = await updateConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        connectionId,
+        enabledClientIds
+      );
+
+      expect(result).to.equal(true);
+      sinon.assert.calledTwice(mockAuth0Client.connections.updateEnabledClients);
+
+      const firstCall = mockAuth0Client.connections.updateEnabledClients.getCall(0);
+      expect(firstCall.args[0]).to.deep.equal({ id: connectionId });
+      expect(firstCall.args[1]).to.have.length(50);
+      expect(firstCall.args[1][0]).to.deep.equal({ client_id: 'client_1', status: true });
+      expect(firstCall.args[1][49]).to.deep.equal({ client_id: 'client_50', status: true });
+
+      const secondCall = mockAuth0Client.connections.updateEnabledClients.getCall(1);
+      expect(secondCall.args[0]).to.deep.equal({ id: connectionId });
+      expect(secondCall.args[1]).to.have.length(10);
+      expect(secondCall.args[1][0]).to.deep.equal({ client_id: 'client_51', status: true });
+      expect(secondCall.args[1][9]).to.deep.equal({ client_id: 'client_60', status: true });
+    });
   });
 
   describe('#processConnectionEnabledClients', () => {

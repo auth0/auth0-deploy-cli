@@ -158,18 +158,24 @@ export const updateConnectionEnabledClients = async (
 ): Promise<boolean> => {
   if (!connectionId || !Array.isArray(enabledClientIds) || !enabledClientIds.length) return false;
 
-  const enabledClientUpdatePayload: Array<PatchClientsRequestInner> = enabledClientIds.map(
+  const enabledClientUpdatePayloads: Array<PatchClientsRequestInner> = enabledClientIds.map(
     (clientId) => ({
       client_id: clientId,
       status: true,
     })
   );
+  const payloadChunks = _.chunk(enabledClientUpdatePayloads, 50);
+
   try {
-    await auth0Client.connections.updateEnabledClients(
-      {
-        id: connectionId,
-      },
-      enabledClientUpdatePayload
+    await Promise.all(
+      payloadChunks.map((payload) =>
+        auth0Client.connections.updateEnabledClients(
+          {
+            id: connectionId,
+          },
+          payload
+        )
+      )
     );
     log.debug(`Updated enabled clients for ${typeName}: ${connectionId}`);
     return true;
