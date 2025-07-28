@@ -1,7 +1,8 @@
-import _, { isArray } from 'lodash';
+import { isArray, isEmpty } from 'lodash';
 import {
   GetFlows200ResponseOneOfInner,
   GetFlowsVaultConnections200ResponseOneOfInner,
+  PostFlows201Response,
 } from 'auth0';
 import dotProp from 'dot-prop';
 import DefaultHandler, { order } from './default';
@@ -41,6 +42,25 @@ export default class FlowHandler extends DefaultHandler {
     });
   }
 
+  objString(item): string {
+    return super.objString({ id: item.id, name: item.name });
+  }
+
+  async getFlows(flows: Array<GetFlows200ResponseOneOfInner>): Promise<PostFlows201Response[]> {
+    const allFlows = await this.client.pool
+      .addEachTask({
+        data: flows,
+        generator: ({ id }) =>
+          this.client.flows.get({ id: id }).then((response) => {
+            if (isEmpty(response?.data)) return null;
+            return response.data;
+          }),
+      })
+      .promise();
+
+    return allFlows.filter((flow): flow is PostFlows201Response => flow !== null);
+  }
+
   async getType(): Promise<Asset> {
     if (this.existing) {
       return this.existing;
@@ -54,12 +74,8 @@ export default class FlowHandler extends DefaultHandler {
       this.getAllFlowConnections(),
     ]);
 
-    const allFlows = await Promise.all(
-      flows.map(async (f) => {
-        const { data: flow } = await this.client.flows.get({ id: f.id });
-        return flow;
-      })
-    );
+    // get more details for each flows
+    const allFlows: Array<PostFlows201Response> = await this.getFlows(flows);
 
     // create a map for id to name from allFlowConnections
     const connectionIdMap = {};
