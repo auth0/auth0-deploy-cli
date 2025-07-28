@@ -2,6 +2,8 @@ import { EmailProviderCreate } from 'auth0';
 import { isEmpty } from 'lodash';
 import DefaultHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
+import { isDryRun } from '../../utils';
+import log from '../../../logger';
 
 export const schema = { type: 'object' };
 
@@ -38,6 +40,15 @@ export default class EmailProviderHandler extends DefaultHandler {
     const { emailProvider } = assets;
 
     if (!emailProvider) return;
+
+    const { del, update, create } = await this.calcChanges(assets);
+
+    if (isDryRun(this.config) && create.length === 0 && update.length === 0 && del.length === 0) {
+      log.debug(
+        `Start processChanges for emailProvider [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
+      );
+      return;
+    }
 
     const existing = await this.getType();
 
