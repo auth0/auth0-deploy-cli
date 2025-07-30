@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix update enabled clients pagination for `connections` and `databases`. [#1127]
-- Fix flow and forms request throttling for `forms` and `flows`. [#1133]
+- Fix request throttling for `forms` and `flows`. [#1133]
 - Fix logging and scope validation for `connections` and `databases`. [#1134]
 
 ## [8.11.0] - 2025-07-15
