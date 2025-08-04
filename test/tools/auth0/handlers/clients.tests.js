@@ -27,6 +27,11 @@ const someNativeClient = {
       enabled: true,
     },
   },
+  session_transfer: {
+    can_create_session_transfer_token: true,
+    enforce_device_binding: 'ip',
+    allowed_authentication_methods: ['cookie', 'query'],
+  },
 };
 
 describe('#clients handler', () => {
@@ -118,6 +123,11 @@ describe('#clients handler', () => {
               google: {
                 enabled: true,
               },
+            });
+            expect(data.session_transfer).to.deep.equal({
+              can_create_session_transfer_token: true,
+              enforce_device_binding: 'ip',
+              allowed_authentication_methods: ['cookie', 'query'],
             });
             return Promise.resolve({ data });
           },

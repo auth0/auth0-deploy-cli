@@ -16,7 +16,7 @@ describe('#directory context clients', () => {
         'someClient.json': '{ "app_type": @@appType@@, "name": "someClient" }',
         'someClient2.json': '{ "app_type": @@appType@@, "name": "someClient2" }',
         'customLoginClient.json':
-          '{ "app_type": @@appType@@, "name": "customLoginClient", "custom_login_page": "./customLoginClient_custom_login_page.html" }',
+          '{ "app_type": @@appType@@, "name": "customLoginClient", "custom_login_page": "./customLoginClient_custom_login_page.html", "session_transfer": { "can_create_session_transfer_token": true,"enforce_device_binding": "ip", "allowed_authentication_methods" : ["cookie", "query"]} }',
         'customLoginClient_custom_login_page.html': 'html code ##appType## @@appType@@',
       },
     };
@@ -32,7 +32,16 @@ describe('#directory context clients', () => {
     await context.loadAssetsFromLocal();
 
     const target = [
-      { app_type: 'spa', name: 'customLoginClient', custom_login_page: 'html code spa "spa"' },
+      {
+        app_type: 'spa',
+        name: 'customLoginClient',
+        custom_login_page: 'html code spa "spa"',
+        session_transfer: {
+          can_create_session_transfer_token: true,
+          enforce_device_binding: 'ip',
+          allowed_authentication_methods: ['cookie', 'query'],
+        },
+      },
       { app_type: 'spa', name: 'someClient' },
       { app_type: 'spa', name: 'someClient2' },
     ];
@@ -85,13 +94,27 @@ describe('#directory context clients', () => {
     context.assets.clients = [
       { app_type: 'spa', name: 'someClient' },
       { app_type: 'spa', name: 'someClient2' },
-      { app_type: 'spa', name: 'customLoginClient', custom_login_page: 'html code' },
+      {
+        app_type: 'spa',
+        name: 'customLoginClient',
+        custom_login_page: 'html code',
+        session_transfer: {
+          can_create_session_transfer_token: false,
+          enforce_device_binding: 'asn',
+          allowed_authentication_methods: ['cookie'],
+        },
+      },
     ];
 
     const customLoginClientTarget = {
       app_type: 'spa',
       name: 'customLoginClient',
       custom_login_page: './customLoginClient_custom_login_page.html',
+      session_transfer: {
+        can_create_session_transfer_token: false,
+        enforce_device_binding: 'asn',
+        allowed_authentication_methods: ['cookie'],
+      },
     };
 
     await handler.dump(context);
