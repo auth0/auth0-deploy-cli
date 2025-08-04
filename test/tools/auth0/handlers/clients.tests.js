@@ -269,6 +269,11 @@ describe('#clients handler', () => {
             expect(params.client_id).to.equal('client1');
             expect(data).to.be.an('object');
             expect(data.description).to.equal('new description');
+            expect(data.session_transfer).to.deep.equal({
+              can_create_session_transfer_token: false,
+              enforce_device_binding: 'asn',
+              allowed_authentication_methods: ['query'],
+            });
 
             return Promise.resolve({ data });
           },
@@ -293,6 +298,11 @@ describe('#clients handler', () => {
             {
               name: 'someClient',
               description: 'new description',
+              session_transfer: {
+                can_create_session_transfer_token: false,
+                enforce_device_binding: 'asn',
+                allowed_authentication_methods: ['query'],
+              },
             },
           ],
         },

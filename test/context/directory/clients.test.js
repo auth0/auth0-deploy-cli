@@ -16,7 +16,8 @@ describe('#directory context clients', () => {
         'someClient.json': '{ "app_type": @@appType@@, "name": "someClient" }',
         'someClient2.json': '{ "app_type": @@appType@@, "name": "someClient2" }',
         'customLoginClient.json':
-          '{ "app_type": @@appType@@, "name": "customLoginClient", "custom_login_page": "./customLoginClient_custom_login_page.html", "session_transfer": { "can_create_session_transfer_token": true,"enforce_device_binding": "ip", "allowed_authentication_methods" : ["cookie", "query"]} }',
+          '{ "app_type": @@appType@@, "name": "customLoginClient", "custom_login_page": "./customLoginClient_custom_login_page.html", ' +
+          '"session_transfer": { "can_create_session_transfer_token": true,"enforce_device_binding": "ip", "allowed_authentication_methods" : @@allowedMethods@@} }',
         'customLoginClient_custom_login_page.html': 'html code ##appType## @@appType@@',
       },
     };
@@ -26,7 +27,7 @@ describe('#directory context clients', () => {
 
     const config = {
       AUTH0_INPUT_FILE: repoDir,
-      AUTH0_KEYWORD_REPLACE_MAPPINGS: { appType: 'spa' },
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { appType: 'spa', allowedMethods: ['cookie', 'query'] },
     };
     const context = new Context(config, mockMgmtClient());
     await context.loadAssetsFromLocal();
