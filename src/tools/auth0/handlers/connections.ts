@@ -315,6 +315,17 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
 
     // Filter out database connections as we have separate handler for it
     const filteredConnections = connections.filter((c) => c.strategy !== 'auth0');
+
+    // If options option is empty for all connection, log the missing options scope.
+    const isOptionExists = filteredConnections.every(
+      (c) => c.options && Object.keys(c.options).length > 0
+    );
+    if (!isOptionExists) {
+      log.warn(
+        `Insufficient scope the read:connections_options scope is required to get ${this.type} options.`
+      );
+    }
+
     this.existing = filteredConnections;
     if (this.existing === null) return [];
 
@@ -385,6 +396,14 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
 
     // Do nothing if not set
     if (!connections) return;
+
+    // If options option is empty for all connection, log the missing options scope.
+    const isOptionExists = connections.every((c) => c.options && Object.keys(c.options).length > 0);
+    if (!isOptionExists) {
+      log.warn(
+        `Insufficient scope the update:connections_options scope is required to update ${this.type} options.`
+      );
+    }
 
     const excludedConnections = (assets.exclude && assets.exclude.connections) || [];
 

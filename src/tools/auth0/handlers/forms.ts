@@ -4,6 +4,7 @@ import {
   PostForms201Response,
 } from 'auth0';
 import dotProp from 'dot-prop';
+import { isEmpty } from 'lodash';
 import DefaultHandler, { order } from './default';
 import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
@@ -43,6 +44,24 @@ export default class FormsHandler extends DefaultHandler {
     });
   }
 
+  objString(item): string {
+    return super.objString({ id: item.id, name: item.name });
+  }
+
+  async getForms(forms: Array<PostForms201Response>): Promise<PostForms201Response[]> {
+    const allForms = await this.client.pool
+      .addEachTask({
+        data: forms,
+        generator: ({ id }) =>
+          this.client.forms.get({ id: id }).then((response) => {
+            if (isEmpty(response?.data)) return null;
+            return response.data;
+          }),
+      })
+      .promise();
+    return allForms.filter((form): form is PostForms201Response => form !== null);
+  }
+
   async getType(): Promise<Asset> {
     if (this.existing) {
       return this.existing;
@@ -60,12 +79,7 @@ export default class FormsHandler extends DefaultHandler {
     ]);
 
     // get more details for each form
-    const allForms = await Promise.all(
-      forms.map(async (from) => {
-        const { data: form } = await this.client.forms.get({ id: from.id });
-        return form;
-      })
-    );
+    const allForms = await this.getForms(forms);
 
     // create a map for id to name from allFlows
     const flowIdMap = {};
