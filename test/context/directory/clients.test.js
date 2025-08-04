@@ -13,11 +13,11 @@ describe('#directory context clients', () => {
   it('should process clients', async () => {
     const files = {
       [constants.CLIENTS_DIRECTORY]: {
-        'someClient.json': '{ "app_type": @@appType@@, "name": "someClient" }',
-        'someClient2.json': '{ "app_type": @@appType@@, "name": "someClient2" }',
+        'someClient.json': '{ "app_type": "@@appType@@", "name": "someClient" }',
+        'someClient2.json': '{ "app_type": "@@appType@@", "name": "someClient2" }',
         'customLoginClient.json':
-          '{ "app_type": @@appType@@, "name": "customLoginClient", "custom_login_page": "./customLoginClient_custom_login_page.html", ' +
-          '"session_transfer": { "can_create_session_transfer_token": true,"enforce_device_binding": "ip", "allowed_authentication_methods" : @@allowedMethods@@} }',
+          '{ "app_type": "@@appType@@", "name": "customLoginClient", "custom_login_page": "./customLoginClient_custom_login_page.html", ' +
+          '"session_transfer": { "can_create_session_transfer_token": true,"enforce_device_binding": "ip", "allowed_authentication_methods" : "@@allowedMethods@@"} }',
         'customLoginClient_custom_login_page.html': 'html code ##appType## @@appType@@',
       },
     };
