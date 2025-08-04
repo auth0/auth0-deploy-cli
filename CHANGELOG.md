@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.13.0] - 2025-08-04
+
 ### Added
 
 - Add support for native to web SSO in `clients`. [#1139]
@@ -1396,10 +1398,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1123]: https://github.com/auth0/auth0-deploy-cli/issues/1123
 [#1124]: https://github.com/auth0/auth0-deploy-cli/issues/1124
 [#1127]: https://github.com/auth0/auth0-deploy-cli/issues/1127
+[#1130]: https://github.com/auth0/auth0-deploy-cli/issues/1130
 [#1132]: https://github.com/auth0/auth0-deploy-cli/issues/1132
 [#1133]: https://github.com/auth0/auth0-deploy-cli/issues/1133
 [#1134]: https://github.com/auth0/auth0-deploy-cli/issues/1134
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.12.0...HEAD
+[#1139]: https://github.com/auth0/auth0-deploy-cli/issues/1139
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.13.0...HEAD
+[8.13.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.12.0...v8.13.0
 [8.12.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.11.0...v8.12.0
 [8.11.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.10.0...v8.11.0
 [8.10.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.9.0...v8.10.0
