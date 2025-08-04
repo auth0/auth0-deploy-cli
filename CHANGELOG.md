@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.12.0] - 2025-07-30
+
+### Added
+
+- Add DPoP support for proof-of-possession mechanism in `resourceServers` [#1132]
+
+### Fixed
+
+- Fix update enabled clients pagination for `connections` and `databases`. [#1127]
+- Fix request throttling for `forms` and `flows`. [#1133]
+- Fix logging and scope validation for `connections` and `databases`. [#1134]
+
 ## [8.11.0] - 2025-07-15
 
 ### Added
@@ -1378,7 +1390,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1121]: https://github.com/auth0/auth0-deploy-cli/issues/1121
 [#1123]: https://github.com/auth0/auth0-deploy-cli/issues/1123
 [#1124]: https://github.com/auth0/auth0-deploy-cli/issues/1124
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.11.0...HEAD
+[#1127]: https://github.com/auth0/auth0-deploy-cli/issues/1127
+[#1132]: https://github.com/auth0/auth0-deploy-cli/issues/1132
+[#1133]: https://github.com/auth0/auth0-deploy-cli/issues/1133
+[#1134]: https://github.com/auth0/auth0-deploy-cli/issues/1134
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.12.0...HEAD
+[8.12.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.11.0...v8.12.0
 [8.11.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.10.0...v8.11.0
 [8.10.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.9.0...v8.10.0
 [8.9.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.8.3...v8.9.0

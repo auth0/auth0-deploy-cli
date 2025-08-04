@@ -5,11 +5,7 @@ import { filterExcluded, getEnabledClients } from '../../utils';
 import { CalculatedChanges, Assets } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
-import {
-  getConnectionEnabledClients,
-  processConnectionEnabledClients,
-  updateConnectionEnabledClients,
-} from './connections';
+import { getConnectionEnabledClients, processConnectionEnabledClients } from './connections';
 
 export const schema = {
   type: 'array',
@@ -145,6 +141,10 @@ export default class DatabaseHandler extends DefaultAPIHandler {
           }
 
           payload.options = { ...connection.options, ...payload.options };
+
+          if (payload.options && Object.keys(payload.options).length === 0) {
+            delete payload.options;
+          }
           return this.client.connections.update(params, payload);
         });
     }
@@ -170,6 +170,16 @@ export default class DatabaseHandler extends DefaultAPIHandler {
         return con;
       })
     );
+
+    // If options option is empty for all connection, log the missing options scope.
+    const isOptionExists = dbConnectionsWithEnabledClients.every(
+      (c) => c.options && Object.keys(c.options).length > 0
+    );
+    if (!isOptionExists) {
+      log.warn(
+        `Insufficient scope the read:connections_options scope is required to get ${this.type} options.`
+      );
+    }
 
     this.existing = dbConnectionsWithEnabledClients;
 
@@ -224,6 +234,14 @@ export default class DatabaseHandler extends DefaultAPIHandler {
 
     // Do nothing if not set
     if (!databases) return;
+
+    // If options option is empty for all connection, log the missing options scope.
+    const isOptionExists = databases.every((c) => c.options && Object.keys(c.options).length > 0);
+    if (!isOptionExists) {
+      log.warn(
+        `Insufficient scope the update:connections_options scope is required to update ${this.type} options.`
+      );
+    }
 
     const excludedConnections: string[] = (assets.exclude && assets.exclude.databases) || [];
 
