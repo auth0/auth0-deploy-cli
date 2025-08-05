@@ -97,17 +97,18 @@ export default class FlowHandler extends DefaultHandler {
 
     const { del, update, create, conflicts } = await this.calcChanges(assets);
 
-    if (
-      isDryRun(this.config) &&
-      create.length === 0 &&
-      update.length === 0 &&
-      del.length === 0 &&
-      conflicts.length === 0
-    ) {
-      log.debug(
-        `Start processChanges for flows [delete:${del.length}] [update:${update.length}] [create:${create.length}] [conflicts:${conflicts.length}]`
-      );
-      return;
+    if (isDryRun(this.config)) {
+      if (
+        create.length === 0 &&
+        update.length === 0 &&
+        del.length === 0 &&
+        conflicts.length === 0
+      ) {
+        log.debug(
+          `Start processChanges for flows [delete:${del.length}] [update:${update.length}] [create:${create.length}] [conflicts:${conflicts.length}]`
+        );
+        return;
+      }
     }
 
     const allFlowConnections = await this.getAllFlowConnections();

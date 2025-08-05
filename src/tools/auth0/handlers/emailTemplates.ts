@@ -81,13 +81,15 @@ export default class EmailTemplateHandler extends DefaultHandler {
     // Do nothing if not set
     if (!emailTemplates || !emailTemplates.length) return;
 
-    const { update, create } = await this.calcChanges(assets);
+    if (isDryRun(this.config)) {
+      const { update, create } = await this.calcChanges(assets);
 
-    if (isDryRun(this.config) && create.length === 0 && update.length === 0) {
-      log.debug(
-        `Start processChanges for emailTemplates [update:${update.length}], [create:${create.length}]`
-      );
-      return;
+      if (create.length === 0 && update.length === 0) {
+        log.debug(
+          `Start processChanges for emailTemplates [update:${update.length}], [create:${create.length}]`
+        );
+        return;
+      }
     }
 
     await Promise.all(

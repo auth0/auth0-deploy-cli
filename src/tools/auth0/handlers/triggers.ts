@@ -107,11 +107,13 @@ export default class TriggersHandler extends DefaultHandler {
     // Do nothing if not set
     if (!triggers) return;
 
-    const { update } = await this.calcChanges(assets);
+    if (isDryRun(this.config)) {
+      const { update } = await this.calcChanges(assets);
 
-    if (isDryRun(this.config) && update.length === 0) {
-      log.debug(`Start processChanges for triggers [update:${update.length}]`);
-      return;
+      if (update.length === 0) {
+        log.debug(`Start processChanges for triggers [update:${update.length}]`);
+        return;
+      }
     }
 
     await sleep(2000); // Delay to allow newly-deployed actions to register in backend

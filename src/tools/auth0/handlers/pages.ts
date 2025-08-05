@@ -145,13 +145,15 @@ export default class PagesHandler extends DefaultHandler {
     // Do nothing if not set
     if (!pages) return;
 
-    const { del, update, create } = await this.calcChanges(assets);
+    if (isDryRun(this.config)) {
+      const { del, update, create } = await this.calcChanges(assets);
 
-    if (isDryRun(this.config) && create.length === 0 && update.length === 0 && del.length === 0) {
-      log.debug(
-        `Start processChanges for pages [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
-      );
-      return;
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        log.debug(
+          `Start processChanges for pages [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
+        );
+        return;
+      }
     }
 
     // Login page is handled via the global client

@@ -143,13 +143,15 @@ export default class PhoneProviderHandler extends DefaultHandler {
     // Non-existing section means themes doesn't need to be processed
     if (!phoneProviders) return;
 
-    const { del, update, create } = await this.calcChanges(assets);
+    if (isDryRun(this.config)) {
+      const { del, update, create } = await this.calcChanges(assets);
 
-    if (isDryRun(this.config) && create.length === 0 && update.length === 0 && del.length === 0) {
-      log.debug(
-        `Start processChanges for phoneProviders [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
-      );
-      return;
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        log.debug(
+          `Start processChanges for phoneProviders [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
+        );
+        return;
+      }
     }
 
     // Empty array means themes should be deleted

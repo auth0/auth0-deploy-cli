@@ -71,11 +71,13 @@ export default class FlowVaultHandler extends DefaultHandler {
 
     const { del, update, create } = await this.calcChanges(assets);
 
-    if (isDryRun(this.config) && create.length === 0 && update.length === 0 && del.length === 0) {
-      log.debug(
-        `Start processChanges for flow vault connections [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
-      );
-      return;
+    if (isDryRun(this.config)) {
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        log.debug(
+          `Start processChanges for flow vault connections [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
+        );
+        return;
+      }
     }
 
     const changes = [{ del: del }, { create: create }, { update: update }];

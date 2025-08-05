@@ -37,19 +37,23 @@ export default class ThemesHandler extends DefaultHandler {
       return;
     }
 
-    const { del, update } = await this.calcChanges(assets);
+    if (isDryRun(this.config)) {
+      const { del, update } = await this.calcChanges(assets);
 
-    if (isDryRun(this.config) && update.length === 0 && del.length === 0) {
-      log.debug(`Start processChanges for themes [delete:${del.length}] [update:${update.length}]`);
-      return;
+      if (update.length === 0 && del.length === 0) {
+        log.debug(
+          `Start processChanges for themes [delete:${del.length}] [update:${update.length}]`
+        );
+        return;
+      }
     }
 
     // Empty array means themes should be deleted
     if (themes.length === 0) {
-      return this.deleteThemes();
+      await this.deleteThemes();
+    } else {
+      await this.updateThemes(themes);
     }
-
-    return this.updateThemes(themes);
   }
 
   async deleteThemes(): Promise<void> {
@@ -81,7 +85,7 @@ export default class ThemesHandler extends DefaultHandler {
       // Removing themeId from update and create payloads, otherwise API will error
       // Theme ID may be required to handle if `--export_ids=true`
       const payload = themes[0];
-      //@ts-ignore to quell non-optional themeId property, but we know that it's ok to delete
+      // @ts-ignore to quell non-optional themeId property, but we know that it's ok to delete
       delete payload.themeId;
       return payload;
     })();

@@ -181,11 +181,13 @@ export default class TenantHandler extends DefaultHandler {
     // Do nothing if not set
     if (!tenant) return;
 
-    const { update } = await this.calcChanges(assets);
+    if (isDryRun(this.config)) {
+      const { update } = await this.calcChanges(assets);
 
-    if (isDryRun(this.config) && update.length === 0) {
-      log.debug(`Start processChanges for tenants [update:${update.length}]`);
-      return;
+      if (update.length === 0) {
+        log.debug(`Start processChanges for tenants [update:${update.length}]`);
+        return;
+      }
     }
 
     const updatedTenant: TenantSettingsUpdate = {

@@ -41,13 +41,14 @@ export default class EmailProviderHandler extends DefaultHandler {
 
     if (!emailProvider) return;
 
-    const { del, update, create } = await this.calcChanges(assets);
+    if (isDryRun(this.config)) {
+      const { del, update, create } = await this.calcChanges(assets);
 
-    if (isDryRun(this.config) && create.length === 0 && update.length === 0 && del.length === 0) {
-      log.debug(
-        `Start processChanges for emailProvider [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
-      );
-      return;
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        log.debug(
+          `Start processChanges for emailProvider [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
+        );
+      }
     }
 
     const existing = await this.getType();

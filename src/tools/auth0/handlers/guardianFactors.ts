@@ -52,13 +52,15 @@ export default class GuardianFactorsHandler extends DefaultHandler {
     // Do nothing if not set
     if (!guardianFactors || !guardianFactors.length) return;
 
-    const { del, update, create } = await this.calcChanges(assets);
+    if (isDryRun(this.config)) {
+      const { del, update, create } = await this.calcChanges(assets);
 
-    if (isDryRun(this.config) && create.length === 0 && update.length === 0 && del.length === 0) {
-      log.debug(
-        `Start processChanges for guardianFactors [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
-      );
-      return;
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        log.debug(
+          `Start processChanges for guardianFactors [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
+        );
+        return;
+      }
     }
 
     // Process each factor
