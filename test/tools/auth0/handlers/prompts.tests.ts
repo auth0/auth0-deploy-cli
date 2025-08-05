@@ -92,6 +92,18 @@ describe('#prompts handler', () => {
             },
           },
         ],
+        use_page_template: true,
+        filters: {
+          match_type: 'includes_any',
+          clients: [
+            {
+              id: 'SeunfRe6p8EXxV6I0g9kMYdT1DxpfC38',
+              metadata: {
+                key1: 'value1',
+              },
+            },
+          ],
+        },
       };
 
       const auth0 = {

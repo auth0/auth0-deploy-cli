@@ -107,6 +107,35 @@ export const schema = {
         },
         required: ['client_credentials'],
       },
+      session_transfer: {
+        type: 'object',
+        properties: {
+          can_create_session_transfer_token: {
+            type: 'boolean',
+            default: false,
+            description:
+              'Specifies whether the application (Native app) can use the Token Exchange endpoint to create a session_transfer_token.',
+          },
+          allowed_authentication_methods: {
+            type: 'array',
+            items: {
+              type: 'string',
+              enum: ['cookie', 'query'],
+            },
+            default: [],
+            description:
+              'Determines the methods allowed for a web application to create a session using a session_transfer_token.',
+          },
+          enforce_device_binding: {
+            type: 'string',
+            enum: ['none', 'ip', 'asn'],
+            default: 'ip',
+            description:
+              'Configures the level of device binding enforced when a session_transfer_token is consumed.',
+          },
+        },
+        additionalProperties: false,
+      },
     },
     required: ['name'],
   },
