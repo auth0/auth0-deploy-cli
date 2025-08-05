@@ -199,6 +199,10 @@ describe('#themes handler', () => {
     it('should create the theme when default theme does not exist', async () => {
       const theme = mockTheme();
 
+      const config = {
+        AUTH0_DRY_RUN: false,
+      };
+
       const auth0 = {
         branding: {
           getDefaultTheme: stub().returns(Promise.reject(errorWithStatusCode(404))),
@@ -212,7 +216,7 @@ describe('#themes handler', () => {
         },
       };
 
-      const handler = new ThemesHandler({ client: auth0 });
+      const handler = new ThemesHandler({ client: auth0, config: (key) => config[key] });
       const assets = { themes: [theme] };
 
       await handler.processChanges(assets);
@@ -229,6 +233,9 @@ describe('#themes handler', () => {
     it('should create the theme when default exists', async () => {
       const theme = mockTheme({ withThemeId: 'myThemeId' });
 
+      const config = {
+        AUTH0_DRY_RUN: false,
+      };
       const auth0 = {
         branding: {
           getDefaultTheme: stub().returns({ data: theme }),
@@ -242,7 +249,7 @@ describe('#themes handler', () => {
         },
       };
 
-      const handler = new ThemesHandler({ client: auth0 });
+      const handler = new ThemesHandler({ client: auth0, config: (key) => config[key] });
       const assets = { themes: [omit(theme, 'themeId')] };
 
       await handler.processChanges(assets);
