@@ -29,11 +29,11 @@ describe('#YAML context guardian factors provider', () => {
     fs.writeFileSync(yamlFile, yaml);
 
     const target = [
-      { enabled: true, name: 'sms' },
-      { enabled: false, name: 'push-notification' },
-      { enabled: false, name: 'otp' },
-      { enabled: false, name: 'email' },
       { enabled: false, name: 'duo' },
+      { enabled: false, name: 'email' },
+      { enabled: false, name: 'otp' },
+      { enabled: false, name: 'push-notification' },
+      { enabled: true, name: 'sms' },
     ];
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { ENV: 'test' } };
