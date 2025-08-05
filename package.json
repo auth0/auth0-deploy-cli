@@ -42,7 +42,7 @@
     "lodash": "^4.17.21",
     "mkdirp": "^1.0.4",
     "nconf": "^0.13.0",
-    "promise-pool-executor": "^1.1.1",
+    "promise-pool-executor": "^2.0.0",
     "sanitize-filename": "^1.6.3",
     "undici": "^7.13.0",
     "winston": "^3.17.0",
