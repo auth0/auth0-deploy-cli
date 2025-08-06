@@ -6,6 +6,10 @@ describe('#emailTemplates handler', () => {
     return config.data && config.data[key];
   };
 
+  config.data = {
+    AUTH0_DRY_RUN: false,
+  };
+
   describe('#emailTemplates process', () => {
     it('should update email template', async () => {
       const auth0 = {
@@ -26,7 +30,7 @@ describe('#emailTemplates handler', () => {
         },
       };
 
-      const handler = new emailTemplates.default({ client: auth0 });
+      const handler = new emailTemplates.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
@@ -76,7 +80,7 @@ describe('#emailTemplates handler', () => {
         },
       };
 
-      const handler = new emailTemplates.default({ client: auth0 });
+      const handler = new emailTemplates.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [

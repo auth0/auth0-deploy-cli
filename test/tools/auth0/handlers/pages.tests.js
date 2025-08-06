@@ -5,6 +5,14 @@ const pages = require('../../../../src/tools/auth0/handlers/pages');
 const { mockPagedData } = require('../../../utils');
 
 describe('#pages handler', () => {
+  const config = function (key) {
+    return config.data && config.data[key];
+  };
+
+  config.data = {
+    AUTH0_DRY_RUN: false,
+  };
+
   describe('#pages process', () => {
     it('should update login page', async () => {
       const auth0 = {
@@ -22,7 +30,7 @@ describe('#pages handler', () => {
         },
       };
 
-      const handler = new pages.default({ client: pageClient(auth0) });
+      const handler = new pages.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
@@ -85,7 +93,7 @@ describe('#pages handler', () => {
         },
       };
 
-      const handler = new pages.default({ client: pageClient(auth0) });
+      const handler = new pages.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
@@ -109,7 +117,7 @@ describe('#pages handler', () => {
         },
       };
 
-      const handler = new pages.default({ client: pageClient(auth0) });
+      const handler = new pages.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [

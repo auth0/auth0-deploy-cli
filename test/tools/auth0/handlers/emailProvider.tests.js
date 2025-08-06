@@ -2,6 +2,14 @@ const { expect } = require('chai');
 const emailProvider = require('../../../../src/tools/auth0/handlers/emailProvider');
 
 describe('#emailProvider handler', () => {
+  const config = function (key) {
+    return config.data && config.data[key];
+  };
+
+  config.data = {
+    AUTH0_DRY_RUN: false,
+  };
+
   describe('#emailProvider process', () => {
     it('should configure email provider', async () => {
       const auth0 = {
@@ -17,7 +25,7 @@ describe('#emailProvider handler', () => {
         },
       };
 
-      const handler = new emailProvider.default({ client: auth0 });
+      const handler = new emailProvider.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ emailProvider: { name: 'someProvider', enabled: true } }]);
@@ -38,7 +46,7 @@ describe('#emailProvider handler', () => {
         },
       };
 
-      const handler = new emailProvider.default({ client: auth0 });
+      const handler = new emailProvider.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = {
         name: 'someProvider',
@@ -51,7 +59,9 @@ describe('#emailProvider handler', () => {
 
     // THIS IS NO LONGER SUPPORTED
     it('should disable instead of delete email provider if set to empty object and AUTH0_ALLOW_DELETE is true', async () => {
-      const AUTH0_ALLOW_DELETE = true;
+      config.data = {
+        AUTH0_ALLOW_DELETE: true,
+      };
       let wasDeleteCalled = false;
       let wasUpdateCalled = false;
       const auth0 = {
@@ -70,7 +80,7 @@ describe('#emailProvider handler', () => {
 
       const handler = new emailProvider.default({
         client: auth0,
-        config: () => AUTH0_ALLOW_DELETE,
+        config,
       });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
@@ -128,7 +138,7 @@ describe('#emailProvider handler', () => {
         },
       };
 
-      const handler = new emailProvider.default({ client: auth0 });
+      const handler = new emailProvider.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = {
         name: 'someProvider',

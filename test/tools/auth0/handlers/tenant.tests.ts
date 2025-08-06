@@ -15,6 +15,14 @@ const mockAllowedFlags = Object.values(allowedTenantFlags).reduce<Record<string,
 );
 
 describe('#tenant handler', () => {
+  const config = function (key) {
+    return config.data && config.data[key];
+  };
+
+  config.data = {
+    AUTH0_DRY_RUN: false,
+  };
+
   describe('#tenant validate', () => {
     it('should not allow pages in tenant config', async () => {
       //@ts-ignore
@@ -77,7 +85,7 @@ describe('#tenant handler', () => {
       };
 
       //@ts-ignore
-      const handler = new tenantHandler({ client: auth0 });
+      const handler = new tenantHandler({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ tenant: { sandbox_version: '4' } }]);
@@ -130,7 +138,7 @@ describe('#tenant handler', () => {
         },
       };
       // @ts-ignore
-      const handler = new tenantHandler({ client: auth0 });
+      const handler = new tenantHandler({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       await stageFn.apply(handler, [{ tenant: tenantWithDefaultTokenQuota }]);
       // eslint-disable-next-line no-unused-expressions
@@ -159,8 +167,8 @@ describe('#tenant handler', () => {
           },
         };
 
-        //@ts-ignore
-        const handler = new tenantHandler({ client: auth0 });
+        // @ts-ignore
+        const handler = new tenantHandler({ client: auth0, config });
         const { processChanges } = Object.getPrototypeOf(handler);
 
         await processChanges.apply(handler, [{ tenant: { flags: proposedFlags } }]);
@@ -182,7 +190,7 @@ describe('#tenant handler', () => {
         };
 
         //@ts-ignore
-        const handler = new tenantHandler({ client: auth0 });
+        const handler = new tenantHandler({ client: auth0, config });
         const { processChanges } = Object.getPrototypeOf(handler);
 
         await processChanges.apply(handler, [{ tenant: { flags: proposedFlags } }]);

@@ -2,6 +2,14 @@ const { expect } = require('chai');
 const guardianPhoneFactorSelectedProvider = require('../../../../src/tools/auth0/handlers/guardianPhoneFactorSelectedProvider');
 
 describe('#guardianPhoneFactorSelectedProvider handler', () => {
+  const config = function (key) {
+    return config.data && config.data[key];
+  };
+
+  config.data = {
+    AUTH0_DRY_RUN: false,
+  };
+
   describe('#getType', () => {
     it('should support older version of auth0 client', async () => {
       const auth0 = {
@@ -83,7 +91,7 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
         },
       };
 
-      const handler = new guardianPhoneFactorSelectedProvider.default({ client: auth0 });
+      const handler = new guardianPhoneFactorSelectedProvider.default({ client: auth0, config });
       const data = await handler.getType();
       expect(data).to.deep.equal({ provider: 'twilio' });
     });
@@ -119,7 +127,7 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
         },
       };
 
-      const handler = new guardianPhoneFactorSelectedProvider.default({ client: auth0 });
+      const handler = new guardianPhoneFactorSelectedProvider.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [

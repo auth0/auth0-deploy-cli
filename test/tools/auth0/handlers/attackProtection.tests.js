@@ -123,7 +123,7 @@ describe('#attackProtection handler', () => {
         },
       };
 
-      const handler = new attackProtection.default({ client: auth0 });
+      const handler = new attackProtection.default({ client: auth0, config: () => ({}) });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [

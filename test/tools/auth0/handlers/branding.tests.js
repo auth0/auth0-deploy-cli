@@ -4,6 +4,14 @@ const branding = require('../../../../src/tools/auth0/handlers/branding');
 const html = '<html></html>';
 
 describe('#branding handler', () => {
+  const config = function (key) {
+    return config.data && config.data[key];
+  };
+
+  config.data = {
+    AUTH0_DRY_RUN: false,
+  };
+
   describe('#branding process', () => {
     it('should get branding settings if no custom domain configured', async () => {
       const auth0 = {
@@ -22,7 +30,7 @@ describe('#branding handler', () => {
         },
       };
 
-      const handler = new branding.default({ client: auth0 });
+      const handler = new branding.default({ client: auth0, config });
       const data = await handler.getType();
       expect(data).to.deep.equal({
         logo_url: 'https://example.com/logo.png',
@@ -215,7 +223,7 @@ describe('#branding handler', () => {
         },
       };
 
-      const handler = new branding.default({ client: auth0 });
+      const handler = new branding.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
@@ -250,7 +258,7 @@ describe('#branding handler', () => {
         },
       };
 
-      const handler = new branding.default({ client: auth0 });
+      const handler = new branding.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
