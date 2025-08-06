@@ -148,7 +148,7 @@ describe('#branding handler', () => {
         },
       };
 
-      const handler = new branding.default({ client: auth0 });
+      const handler = new branding.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       stageFn.apply(handler, [
@@ -184,7 +184,7 @@ describe('#branding handler', () => {
         },
       };
 
-      const handler = new branding.default({ client: auth0 });
+      const handler = new branding.default({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       stageFn.apply(handler, [

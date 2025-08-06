@@ -1,3 +1,5 @@
+import { sortGuardianFactors } from '../../../../src/tools/utils';
+
 const { expect } = require('chai');
 const guardianFactorsTests = require('../../../../src/tools/auth0/handlers/guardianFactors');
 
@@ -93,7 +95,7 @@ describe('#guardianFactors handler', () => {
 
       const handler = new guardianFactorsTests.default({ client: auth0, config });
       const data = await handler.getType();
-      expect(data).to.deep.equal(factors);
+      expect(data).to.deep.equal(sortGuardianFactors(factors));
     });
 
     it('should update factors', async () => {
