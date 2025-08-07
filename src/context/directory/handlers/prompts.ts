@@ -107,12 +107,23 @@ function parse(context: DirectoryContext): ParsedPrompts {
     return renderSettings as ScreenRenderer[];
   })();
 
+  // if screenRenderers exist, include them in the return object
+  if (screenRenderers && screenRenderers.length > 0) {
+    return {
+      prompts: {
+        ...promptsSettings,
+        customText,
+        partials,
+        screenRenderers,
+      },
+    };
+  }
+
   return {
     prompts: {
       ...promptsSettings,
       customText,
       partials,
-      screenRenderers,
     },
   };
 }
