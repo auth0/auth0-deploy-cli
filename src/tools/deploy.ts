@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { intro, select, log as promptsLog } from '@clack/prompts';
+import { intro, select, spinner, log as promptsLog } from '@clack/prompts';
 import Auth0 from './auth0';
 import log from '../logger';
 import { ConfigFunction } from '../configFactory';
@@ -13,7 +13,9 @@ export default async function deploy(
   config: ConfigFunction
 ) {
   // Setup log level
-  log.level = process.env.AUTH0_DEBUG === 'true' ? 'debug' : 'info';
+
+  const isDebug = process.env.AUTH0_DEBUG === 'true';
+  log.level = isDebug ? 'debug' : 'info';
 
   const isDryRun = config('AUTH0_DRY_RUN') === true || config('AUTH0_DRY_RUN') === 'true';
 
@@ -29,9 +31,20 @@ export default async function deploy(
   await auth0.validate();
 
   if (isDryRun) {
-    promptsLog.info('Preparing dry run preview...\n');
+    const s = spinner();
+
+    if (isDebug) {
+      promptsLog.info('Preparing dry run preview...\n');
+    } else {
+      s.start('Preparing dry run preview...');
+    }
+
     // In dry run mode, perform a dry run instead of processing changes
     const allChanges = await auth0.dryRun();
+
+    if (!isDebug) {
+      s.stop('Done\n');
+    }
 
     // Build formatted output
     const allowDelete =
