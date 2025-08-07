@@ -23,12 +23,26 @@ describe('#YAML context clients', () => {
         name: "customLoginClient"
         app_type: "##appType##"
         custom_login_page: "./customLoginClient_custom_login_page.html"
+        session_transfer: {
+        can_create_session_transfer_token: false,
+        enforce_device_binding: 'none',
+        allowed_authentication_methods: ['query']
+      }
     `;
 
     const target = [
       { app_type: 'spa', name: 'someClient' },
       { app_type: 'spa', name: 'someClient2' },
-      { app_type: 'spa', name: 'customLoginClient', custom_login_page: 'html code spa "spa"' },
+      {
+        app_type: 'spa',
+        name: 'customLoginClient',
+        custom_login_page: 'html code spa "spa"',
+        session_transfer: {
+          can_create_session_transfer_token: false,
+          enforce_device_binding: 'none',
+          allowed_authentication_methods: ['query'],
+        },
+      },
     ];
 
     const yamlFile = path.join(dir, 'clients1.yaml');
@@ -60,7 +74,16 @@ describe('#YAML context clients', () => {
 
     const clients = [
       { name: 'someClient', app_type: 'spa' },
-      { name: 'customLoginClient', app_type: 'spa', custom_login_page: 'html code' },
+      {
+        name: 'customLoginClient',
+        app_type: 'spa',
+        custom_login_page: 'html code',
+        session_transfer: {
+          can_create_session_transfer_token: false,
+          enforce_device_binding: 'none',
+          allowed_authentication_methods: ['cookie', 'query'],
+        },
+      },
     ];
 
     const target = [
@@ -69,6 +92,11 @@ describe('#YAML context clients', () => {
         name: 'customLoginClient',
         app_type: 'spa',
         custom_login_page: './customLoginClient_custom_login_page.html',
+        session_transfer: {
+          can_create_session_transfer_token: false,
+          enforce_device_binding: 'none',
+          allowed_authentication_methods: ['cookie', 'query'],
+        },
       },
     ];
 

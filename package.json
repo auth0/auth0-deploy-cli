@@ -1,6 +1,6 @@
 {
   "name": "auth0-deploy-cli",
-  "version": "8.11.0",
+  "version": "8.13.0",
   "description": "A command line tool for deploying updates to your Auth0 tenant",
   "main": "lib/index.js",
   "bin": {
@@ -33,7 +33,7 @@
   "homepage": "https://github.com/auth0/auth0-deploy-cli#readme",
   "dependencies": {
     "ajv": "^6.12.6",
-    "auth0": "^4.27.0",
+    "auth0": "^4.28.0",
     "dot-prop": "^5.3.0",
     "fs-extra": "^10.1.0",
     "js-yaml": "^4.1.0",
@@ -42,7 +42,7 @@
     "nconf": "^0.13.0",
     "promise-pool-executor": "^1.1.1",
     "sanitize-filename": "^1.6.3",
-    "undici": "^7.11.0",
+    "undici": "^7.12.0",
     "winston": "^3.17.0",
     "yargs": "^15.4.1"
   },
@@ -55,8 +55,8 @@
     "chai": "^4.5.0",
     "chai-as-promised": "^7.1.2",
     "eslint": "^7.32.0",
-    "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-config-prettier": "^8.10.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "husky": "^9.1.7",
     "kacl": "^1.1.1",
