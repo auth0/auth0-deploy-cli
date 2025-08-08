@@ -4,6 +4,7 @@
 [![CircleCI](https://circleci.com/gh/auth0/auth0-deploy-cli/tree/master.svg?style=svg)](https://circleci.com/gh/auth0/auth0-deploy-cli/tree/master)
 [![codecov](https://codecov.io/gh/auth0/auth0-deploy-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/auth0/auth0-deploy-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[<img src="https://devin.ai/assets/deepwiki-badge.png" alt="Ask questions about auth0-deploy-cli on DeepWiki" height="20"/>](https://deepwiki.com/auth0/auth0-deploy-cli)
 
 The Auth0 Deploy CLI is a tool that helps you manage your Auth0 tenant configuration. It integrates into your development workflows as a standalone CLI or as a node module.
 

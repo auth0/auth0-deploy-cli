@@ -13,3 +13,4 @@ yarn-error.log
 *.pub
 Makefile
 .vscode/*
+.github/copilot-instructions.md
