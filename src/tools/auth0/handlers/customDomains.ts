@@ -123,7 +123,6 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
     }
 
     const changes = await this.calcChanges(assets);
-
     await super.processChanges(assets, changes);
   }
 }
