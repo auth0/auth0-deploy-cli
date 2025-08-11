@@ -372,4 +372,277 @@ describe('#flows handler', () => {
       await stageFn.apply(handler, [{ flows: [] }]);
     });
   });
+
+  describe('#flows dryRunChanges', () => {
+    const dryRunConfig = function (key) {
+      return dryRunConfig.data && dryRunConfig.data[key];
+    };
+
+    dryRunConfig.data = {
+      AUTH0_ALLOW_DELETE: true,
+    };
+
+    it('should return create changes for new flows', async () => {
+      const auth0 = {
+        flows: {
+          getAll: (params) => mockPagedData(params, 'flows', []),
+          get: () => Promise.resolve({ data: null }),
+          getAllConnections: (params) => mockPagedData(params, 'connections', []),
+        },
+        pool,
+      };
+
+      const handler = new flows.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        flows: [
+          {
+            name: 'New Flow 1',
+            actions: [
+              {
+                id: 'action_1',
+                type: 'AUTH0',
+                action: 'UPDATE_USER',
+              },
+            ],
+          },
+          {
+            name: 'New Flow 2',
+            actions: [
+              {
+                id: 'action_2',
+                type: 'AUTH0',
+                action: 'CREATE_USER',
+              },
+            ],
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(2);
+      expect(changes.create[0]).to.include({ name: 'New Flow 1' });
+      expect(changes.create[1]).to.include({ name: 'New Flow 2' });
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return update changes for existing flows with differences', async () => {
+      const auth0 = {
+        flows: {
+          getAll: (params) =>
+            mockPagedData(params, 'flows', [
+              {
+                id: 'flow1',
+                name: 'Existing Flow',
+                actions: [
+                  {
+                    id: 'action_old',
+                    type: 'AUTH0',
+                    action: 'UPDATE_USER',
+                  },
+                ],
+              },
+            ]),
+          get: (params) =>
+            Promise.resolve({
+              data: {
+                id: params.id,
+                name: 'Existing Flow',
+                actions: [
+                  {
+                    id: 'action_old',
+                    type: 'AUTH0',
+                    action: 'UPDATE_USER',
+                  },
+                ],
+              },
+            }),
+          getAllConnections: (params) => mockPagedData(params, 'connections', []),
+        },
+        pool,
+      };
+
+      const handler = new flows.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        flows: [
+          {
+            name: 'Existing Flow',
+            actions: [
+              {
+                id: 'action_new',
+                type: 'AUTH0',
+                action: 'CREATE_USER',
+              },
+            ],
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(1);
+      expect(changes.update[0]).to.include({
+        name: 'Existing Flow',
+        id: 'flow1',
+      });
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return delete changes for flows not in assets', async () => {
+      const auth0 = {
+        flows: {
+          getAll: (params) =>
+            mockPagedData(params, 'flows', [{ id: 'flow1', name: 'Flow To Remove', actions: [] }]),
+          get: (params) =>
+            Promise.resolve({
+              data: {
+                id: params.id,
+                name: 'Flow To Remove',
+                actions: [],
+              },
+            }),
+          getAllConnections: (params) => mockPagedData(params, 'connections', []),
+        },
+        pool,
+      };
+
+      const handler = new flows.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = { flows: [] };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(1);
+      expect(changes.del[0]).to.include({ id: 'flow1', name: 'Flow To Remove' });
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return no changes when flows are identical', async () => {
+      const auth0 = {
+        flows: {
+          getAll: (params) =>
+            mockPagedData(params, 'flows', [
+              {
+                id: 'flow1',
+                name: 'Unchanged Flow',
+                actions: [
+                  {
+                    id: 'action_1',
+                    type: 'AUTH0',
+                    action: 'UPDATE_USER',
+                  },
+                ],
+              },
+            ]),
+          get: (params) =>
+            Promise.resolve({
+              data: {
+                id: params.id,
+                name: 'Unchanged Flow',
+                actions: [
+                  {
+                    id: 'action_1',
+                    type: 'AUTH0',
+                    action: 'UPDATE_USER',
+                  },
+                ],
+              },
+            }),
+          getAllConnections: (params) => mockPagedData(params, 'connections', []),
+        },
+        pool,
+      };
+
+      const handler = new flows.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        flows: [
+          {
+            name: 'Unchanged Flow',
+            actions: [
+              {
+                id: 'action_1',
+                type: 'AUTH0',
+                action: 'UPDATE_USER',
+              },
+            ],
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle mixed create, update, and delete operations', async () => {
+      const auth0 = {
+        flows: {
+          getAll: (params) =>
+            mockPagedData(params, 'flows', [
+              { id: 'flow1', name: 'Update Flow', actions: [{ id: 'old_action' }] },
+              { id: 'flow2', name: 'Delete Flow', actions: [] },
+            ]),
+          get: (params) => {
+            if (params.id === 'flow1') {
+              return Promise.resolve({
+                data: { id: 'flow1', name: 'Update Flow', actions: [{ id: 'old_action' }] },
+              });
+            }
+            if (params.id === 'flow2') {
+              return Promise.resolve({
+                data: { id: 'flow2', name: 'Delete Flow', actions: [] },
+              });
+            }
+            return Promise.resolve({ data: null });
+          },
+          getAllConnections: (params) => mockPagedData(params, 'connections', []),
+        },
+        pool,
+      };
+
+      const handler = new flows.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        flows: [
+          { name: 'Update Flow', actions: [{ id: 'new_action' }] },
+          { name: 'Create Flow', actions: [{ id: 'create_action' }] },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create.length).to.be.greaterThan(0);
+      expect(changes.update.length).to.be.greaterThan(0);
+      expect(changes.del.length).to.be.greaterThan(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle empty assets', async () => {
+      const auth0 = {
+        flows: {
+          getAll: (params) => mockPagedData(params, 'flows', []),
+          get: () => Promise.resolve({ data: null }),
+          getAllConnections: (params) => mockPagedData(params, 'connections', []),
+        },
+        pool,
+      };
+
+      const handler = new flows.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {}; // No flows property
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+  });
 });

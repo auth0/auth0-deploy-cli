@@ -466,4 +466,204 @@ describe('#actions handler', () => {
       expect(wasDeleteCalled).to.equal(false);
     });
   });
+
+  describe('#actions dryRunChanges', () => {
+    const dryRunConfig = function (key) {
+      return dryRunConfig.data && dryRunConfig.data[key];
+    };
+
+    dryRunConfig.data = {
+      AUTH0_ALLOW_DELETE: true,
+    };
+
+    it('should return create changes for new actions', async () => {
+      const auth0 = {
+        actions: {
+          getAll: () => mockPagedData({ include_totals: true }, 'actions', []),
+          getVersions: () => Promise.resolve({ data: { versions: [] } }),
+          getTriggersAndBindings: () => Promise.resolve({ data: { triggers: [], bindings: [] } }),
+        },
+        pool,
+      };
+
+      const handler = new actions.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        actions: [
+          {
+            name: 'New Action 1',
+            code: 'console.log("hello");',
+            supported_triggers: [{ id: 'post-login', version: 'v1' }],
+          },
+          {
+            name: 'New Action 2',
+            code: 'console.log("world");',
+            supported_triggers: [{ id: 'pre-user-registration', version: 'v1' }],
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(2);
+      expect(changes.create[0]).to.include({ name: 'New Action 1' });
+      expect(changes.create[1]).to.include({ name: 'New Action 2' });
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return update changes for existing actions with differences', async () => {
+      const auth0 = {
+        actions: {
+          getAll: () =>
+            mockPagedData({ include_totals: true }, 'actions', [
+              {
+                id: 'action1',
+                name: 'Existing Action',
+                code: 'console.log("old");',
+                supported_triggers: [{ id: 'post-login', version: 'v1' }],
+              },
+            ]),
+          getVersions: () => Promise.resolve({ data: { versions: [] } }),
+          getTriggersAndBindings: () => Promise.resolve({ data: { triggers: [], bindings: [] } }),
+        },
+        pool,
+      };
+
+      const handler = new actions.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        actions: [
+          {
+            name: 'Existing Action',
+            code: 'console.log("new");',
+            supported_triggers: [{ id: 'post-login', version: 'v1' }],
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(1);
+      expect(changes.update[0]).to.include({
+        name: 'Existing Action',
+        id: 'action1',
+      });
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return delete changes for actions not in assets', async () => {
+      const auth0 = {
+        actions: {
+          getAll: () =>
+            mockPagedData({ include_totals: true }, 'actions', [
+              { id: 'action1', name: 'Action To Remove', code: 'console.log("remove");' },
+            ]),
+          getVersions: () => Promise.resolve({ data: { versions: [] } }),
+          getTriggersAndBindings: () => Promise.resolve({ data: { triggers: [], bindings: [] } }),
+        },
+        pool,
+      };
+
+      const handler = new actions.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = { actions: [] };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(1);
+      expect(changes.del[0]).to.include({ id: 'action1', name: 'Action To Remove' });
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return no changes when actions are identical', async () => {
+      const auth0 = {
+        actions: {
+          getAll: () =>
+            mockPagedData({ include_totals: true }, 'actions', [
+              {
+                id: 'action1',
+                name: 'Unchanged Action',
+                code: 'console.log("unchanged");',
+                supported_triggers: [{ id: 'post-login', version: 'v1' }],
+              },
+            ]),
+          getVersions: () => Promise.resolve({ data: { versions: [] } }),
+          getTriggersAndBindings: () => Promise.resolve({ data: { triggers: [], bindings: [] } }),
+        },
+        pool,
+      };
+
+      const handler = new actions.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        actions: [
+          {
+            name: 'Unchanged Action',
+            code: 'console.log("unchanged");',
+            supported_triggers: [{ id: 'post-login', version: 'v1' }],
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle mixed create, update, and delete operations', async () => {
+      const auth0 = {
+        actions: {
+          getAll: () =>
+            mockPagedData({ include_totals: true }, 'actions', [
+              { id: 'action1', name: 'Update Action', code: 'console.log("old");' },
+              { id: 'action2', name: 'Delete Action', code: 'console.log("delete");' },
+            ]),
+          getVersions: () => Promise.resolve({ data: { versions: [] } }),
+          getTriggersAndBindings: () => Promise.resolve({ data: { triggers: [], bindings: [] } }),
+        },
+        pool,
+      };
+
+      const handler = new actions.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        actions: [
+          { name: 'Update Action', code: 'console.log("new");' },
+          { name: 'Create Action', code: 'console.log("create");' },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create.length).to.be.greaterThan(0);
+      expect(changes.update.length).to.be.greaterThan(0);
+      expect(changes.del.length).to.be.greaterThan(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle empty assets', async () => {
+      const auth0 = {
+        actions: {
+          getAll: (params) => mockPagedData(params, 'actions', []),
+          getVersions: () => Promise.resolve({ data: { versions: [] } }),
+          getTriggersAndBindings: () => Promise.resolve({ data: { triggers: [], bindings: [] } }),
+        },
+        pool,
+      };
+
+      const handler = new actions.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {}; // No actions property
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+  });
 });

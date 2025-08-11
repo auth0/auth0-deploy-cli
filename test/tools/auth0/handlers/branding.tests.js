@@ -292,4 +292,169 @@ describe('#branding handler', () => {
       ]);
     });
   });
+
+  describe('#branding dryRunChanges', () => {
+    const dryRunConfig = function (key) {
+      return dryRunConfig.data && dryRunConfig.data[key];
+    };
+
+    dryRunConfig.data = {
+      AUTH0_CLIENT_ID: 'client_id',
+      AUTH0_ALLOW_DELETE: true,
+    };
+
+    it('should return update changes for branding with differences', async () => {
+      const existingBranding = {
+        logo_url: 'https://old.example.com/logo.png',
+        colors: {
+          primary: '#000000',
+          page_background: '#ffffff',
+        },
+        templates: [
+          {
+            template: 'universal_login',
+            body: '<html>old template</html>',
+          },
+        ],
+      };
+
+      const auth0 = {
+        branding: {
+          getSettings: () =>
+            Promise.resolve({
+              data: {
+                logo_url: existingBranding.logo_url,
+                colors: existingBranding.colors,
+              },
+            }),
+          getUniversalLoginTemplate: () =>
+            Promise.resolve({
+              data: {
+                body: existingBranding.templates[0].body,
+              },
+            }),
+        },
+        customDomains: {
+          getAll: () => Promise.resolve({ data: [{ domain: 'custom.example.com' }] }),
+        },
+      };
+
+      const handler = new branding.default({ client: auth0, config: dryRunConfig });
+      const assets = {
+        branding: {
+          logo_url: 'https://new.example.com/logo.png',
+          colors: {
+            primary: '#ff0000',
+            page_background: '#ffffff',
+          },
+          templates: [
+            {
+              template: 'universal_login',
+              body: '<html>new template</html>',
+            },
+          ],
+        },
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(1);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return no changes when branding is identical', async () => {
+      const existingBranding = {
+        logo_url: 'https://same.example.com/logo.png',
+        colors: {
+          primary: '#000000',
+          page_background: '#ffffff',
+        },
+        templates: [
+          {
+            template: 'universal_login',
+            body: '<html>same template</html>',
+          },
+        ],
+      };
+
+      const auth0 = {
+        branding: {
+          getSettings: () =>
+            Promise.resolve({
+              data: {
+                logo_url: existingBranding.logo_url,
+                colors: existingBranding.colors,
+              },
+            }),
+          getUniversalLoginTemplate: () =>
+            Promise.resolve({
+              data: {
+                body: existingBranding.templates[0].body,
+              },
+            }),
+        },
+        customDomains: {
+          getAll: () => Promise.resolve({ data: [{ domain: 'custom.example.com' }] }),
+        },
+      };
+
+      const handler = new branding.default({ client: auth0, config: dryRunConfig });
+      const assets = {
+        branding: {
+          logo_url: 'https://same.example.com/logo.png',
+          colors: {
+            primary: '#000000',
+            page_background: '#ffffff',
+          },
+          templates: [
+            {
+              template: 'universal_login',
+              body: '<html>same template</html>',
+            },
+          ],
+        },
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle empty assets', async () => {
+      const auth0 = {
+        branding: {
+          getSettings: () =>
+            Promise.resolve({
+              data: {
+                logo_url: 'https://current.example.com/logo.png',
+              },
+            }),
+          getUniversalLoginTemplate: () =>
+            Promise.resolve({
+              data: {
+                body: '<html>current template</html>',
+              },
+            }),
+        },
+        customDomains: {
+          getAll: () => Promise.resolve({ data: [] }),
+        },
+      };
+
+      const handler = new branding.default({ client: auth0, config: dryRunConfig });
+      const assets = {}; // No branding property
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+  });
 });

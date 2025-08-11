@@ -149,4 +149,98 @@ describe('#emailProvider handler', () => {
       await stageFn.apply(handler, [{ emailProvider: data }]);
     });
   });
+
+  describe('#emailProvider dryRunChanges', () => {
+    const dryRunConfig = function (key) {
+      return dryRunConfig.data && dryRunConfig.data[key];
+    };
+
+    dryRunConfig.data = {
+      AUTH0_CLIENT_ID: 'client_id',
+      AUTH0_ALLOW_DELETE: true,
+    };
+
+    it('should return update changes for emailProvider with differences', async () => {
+      const existingProvider = {
+        name: 'smtp',
+        enabled: false,
+        default_from_address: 'old@example.com',
+      };
+
+      const auth0 = {
+        emails: {
+          get: () => Promise.resolve({ data: existingProvider }),
+        },
+      };
+
+      const handler = new emailProvider.default({ client: auth0, config: dryRunConfig });
+      const assets = {
+        emailProvider: {
+          name: 'smtp',
+          enabled: true,
+          default_from_address: 'new@example.com',
+        },
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(1);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return no changes when emailProvider is identical', async () => {
+      const existingProvider = {
+        name: 'smtp',
+        enabled: true,
+        default_from_address: 'same@example.com',
+      };
+
+      const auth0 = {
+        emails: {
+          get: () => Promise.resolve({ data: existingProvider }),
+        },
+      };
+
+      const handler = new emailProvider.default({ client: auth0, config: dryRunConfig });
+      const assets = {
+        emailProvider: {
+          name: 'smtp',
+          enabled: true,
+          default_from_address: 'same@example.com',
+        },
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle empty assets', async () => {
+      const existingProvider = {
+        name: 'smtp',
+        enabled: true,
+      };
+
+      const auth0 = {
+        emails: {
+          get: () => Promise.resolve({ data: existingProvider }),
+        },
+      };
+
+      const handler = new emailProvider.default({ client: auth0, config: dryRunConfig });
+      const assets = {}; // No emailProvider property
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+  });
 });

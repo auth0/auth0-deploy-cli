@@ -313,4 +313,243 @@ describe('#triggers handler', () => {
       }
     });
   });
+
+  describe('#triggers dryRunChanges', () => {
+    const dryRunConfig = function (key) {
+      return dryRunConfig.data && dryRunConfig.data[key];
+    };
+
+    dryRunConfig.data = {
+      AUTH0_ALLOW_DELETE: true,
+    };
+
+    it('should return create changes for new triggers', async () => {
+      const auth0 = {
+        actions: {
+          getAllTriggers: () => Promise.resolve({ data: { triggers: [] } }),
+          getTriggerBindings: () => Promise.resolve({ data: { bindings: [] } }),
+        },
+        pool,
+      };
+
+      const handler = new triggers.default({ client: auth0, config: dryRunConfig });
+      const assets = {
+        triggers: {
+          'post-login': [
+            { action_name: 'new-action-1', display_name: 'New Action 1' },
+            { action_name: 'new-action-2', display_name: 'New Action 2' },
+          ],
+          'pre-user-registration': [],
+        },
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0); // Triggers are always updates
+      expect(changes.update).to.have.length(1); // Only post-login has bindings
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return update changes for existing triggers with differences', async () => {
+      const auth0 = {
+        actions: {
+          getAllTriggers: () =>
+            Promise.resolve({
+              data: {
+                triggers: [{ id: 'post-login' }],
+              },
+            }),
+          getTriggerBindings: (params) => {
+            if (params.triggerId === 'post-login') {
+              return Promise.resolve({
+                data: {
+                  bindings: [
+                    {
+                      action: { name: 'existing-action' },
+                      display_name: 'Old Display Name',
+                    },
+                  ],
+                },
+              });
+            }
+            return Promise.resolve({ data: { bindings: [] } });
+          },
+        },
+        pool,
+      };
+
+      const handler = new triggers.default({ client: auth0, config: dryRunConfig });
+      const assets = {
+        triggers: {
+          'post-login': [{ action_name: 'existing-action', display_name: 'New Display Name' }],
+        },
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(1);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return delete changes for triggers not in assets', async () => {
+      const auth0 = {
+        actions: {
+          getAllTriggers: () =>
+            Promise.resolve({
+              data: {
+                triggers: [{ id: 'post-login' }],
+              },
+            }),
+          getTriggerBindings: (params) => {
+            if (params.triggerId === 'post-login') {
+              return Promise.resolve({
+                data: {
+                  bindings: [
+                    {
+                      action: { name: 'action-to-remove' },
+                      display_name: 'Action To Remove',
+                    },
+                  ],
+                },
+              });
+            }
+            return Promise.resolve({ data: { bindings: [] } });
+          },
+        },
+        pool,
+      };
+
+      const handler = new triggers.default({ client: auth0, config: dryRunConfig });
+      const assets = { triggers: { 'post-login': [] } };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(1); // Triggers handle as updates
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return no changes when triggers are identical', async () => {
+      const auth0 = {
+        actions: {
+          getAllTriggers: () =>
+            Promise.resolve({
+              data: {
+                triggers: [{ id: 'post-login' }],
+              },
+            }),
+          getTriggerBindings: (params) => {
+            if (params.triggerId === 'post-login') {
+              return Promise.resolve({
+                data: {
+                  bindings: [
+                    {
+                      action: { name: 'unchanged-action' },
+                      display_name: 'Unchanged Action',
+                    },
+                  ],
+                },
+              });
+            }
+            return Promise.resolve({ data: { bindings: [] } });
+          },
+        },
+        pool,
+      };
+
+      const handler = new triggers.default({ client: auth0, config: dryRunConfig });
+      const assets = {
+        triggers: {
+          'post-login': [{ action_name: 'unchanged-action', display_name: 'Unchanged Action' }],
+        },
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle mixed create, update, and delete operations', async () => {
+      const auth0 = {
+        actions: {
+          getAllTriggers: () =>
+            Promise.resolve({
+              data: {
+                triggers: [{ id: 'post-login' }, { id: 'pre-user-registration' }],
+              },
+            }),
+          getTriggerBindings: (params) => {
+            if (params.triggerId === 'post-login') {
+              return Promise.resolve({
+                data: {
+                  bindings: [
+                    {
+                      action: { name: 'existing-action' },
+                      display_name: 'Old Name',
+                    },
+                  ],
+                },
+              });
+            }
+            if (params.triggerId === 'pre-user-registration') {
+              return Promise.resolve({
+                data: {
+                  bindings: [
+                    {
+                      action: { name: 'action-to-remove' },
+                      display_name: 'Remove Me',
+                    },
+                  ],
+                },
+              });
+            }
+            return Promise.resolve({ data: { bindings: [] } });
+          },
+        },
+        pool,
+      };
+
+      const handler = new triggers.default({ client: auth0, config: dryRunConfig });
+      const assets = {
+        triggers: {
+          'post-login': [{ action_name: 'existing-action', display_name: 'New Name' }],
+          'pre-user-registration': [],
+          'post-user-registration': [{ action_name: 'new-action', display_name: 'New Action' }],
+        },
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      // For triggers, most operations result in updates, even "creates"
+      expect(changes.create.length + changes.update.length).to.be.greaterThan(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle empty assets', async () => {
+      const auth0 = {
+        actions: {
+          getAllTriggers: () => Promise.resolve({ data: { triggers: [] } }),
+          getTriggerBindings: () => Promise.resolve({ data: { bindings: [] } }),
+        },
+        pool,
+      };
+
+      const handler = new triggers.default({ client: auth0, config: dryRunConfig });
+      const assets = {}; // No triggers property
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+  });
 });
