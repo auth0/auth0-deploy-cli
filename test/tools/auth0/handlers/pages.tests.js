@@ -320,11 +320,12 @@ describe('#pages handler', () => {
         pages: [{ name: 'login', html: '<html>New Login</html>', enabled: true }],
       };
 
-      await handler.processChanges(assets);
+      // Use dryRunChanges instead of processChanges for dry run testing
+      const changes = await handler.dryRunChanges(assets);
 
-      expect(handler.updated).to.equal(1);
-      expect(handler.created).to.equal(0);
-      expect(handler.deleted).to.equal(0);
+      expect(changes.update).to.have.length(1);
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
       expect(auth0.tenantSettings.update.called).to.equal(false);
       expect(auth0.clients.update.called).to.equal(false);
     });
@@ -361,11 +362,12 @@ describe('#pages handler', () => {
         pages: [{ name: 'login', html: '<html>Same Login</html>', enabled: true }],
       };
 
-      await handler.processChanges(assets);
+      // Use dryRunChanges instead of processChanges for dry run testing
+      const changes = await handler.dryRunChanges(assets);
 
-      expect(handler.updated).to.equal(0);
-      expect(handler.created).to.equal(0);
-      expect(handler.deleted).to.equal(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
       expect(auth0.tenantSettings.update.called).to.equal(false);
       expect(auth0.clients.update.called).to.equal(false);
     });
@@ -408,11 +410,12 @@ describe('#pages handler', () => {
         ],
       };
 
-      await handler.processChanges(assets);
+      // Use dryRunChanges instead of processChanges for dry run testing
+      const changes = await handler.dryRunChanges(assets);
 
-      expect(handler.updated).to.equal(2);
-      expect(handler.created).to.equal(0);
-      expect(handler.deleted).to.equal(0);
+      expect(changes.update).to.have.length(2);
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
       expect(auth0.tenantSettings.update.called).to.equal(false);
       expect(auth0.clients.update.called).to.equal(false);
     });
@@ -447,11 +450,12 @@ describe('#pages handler', () => {
         pages: [{ name: 'login', html: '<html>New Login</html>', enabled: true }],
       };
 
-      await handler.processChanges(assets);
+      // Use dryRunChanges instead of processChanges for dry run testing
+      const changes = await handler.dryRunChanges(assets);
 
-      expect(handler.updated).to.equal(0);
-      expect(handler.created).to.equal(1);
-      expect(handler.deleted).to.equal(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.create).to.have.length(1);
+      expect(changes.del).to.have.length(0);
       expect(auth0.tenantSettings.update.called).to.equal(false);
       expect(auth0.clients.update.called).to.equal(false);
     });
@@ -488,11 +492,12 @@ describe('#pages handler', () => {
         pages: [], // Empty means delete all
       };
 
-      await handler.processChanges(assets);
+      // Use dryRunChanges instead of processChanges for dry run testing
+      const changes = await handler.dryRunChanges(assets);
 
-      expect(handler.updated).to.equal(0);
-      expect(handler.created).to.equal(0);
-      expect(handler.deleted).to.equal(1);
+      expect(changes.update).to.have.length(0);
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(1);
       expect(auth0.tenantSettings.update.called).to.equal(false);
       expect(auth0.clients.update.called).to.equal(false);
     });

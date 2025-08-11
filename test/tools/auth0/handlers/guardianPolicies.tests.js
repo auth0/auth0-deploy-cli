@@ -194,11 +194,12 @@ describe('#guardianPolicies handler', () => {
       });
       const assets = { guardianPolicies: { policies: ['per-application'] } };
 
-      await handler.processChanges(assets);
+      // Use dryRunChanges instead of processChanges for dry run testing
+      const changes = await handler.dryRunChanges(assets);
 
-      expect(handler.updated).to.equal(1);
-      expect(handler.created).to.equal(0);
-      expect(handler.deleted).to.equal(0);
+      expect(changes.update).to.have.length(1);
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
       expect(auth0.guardian.getPolicies.called).to.equal(true);
       expect(auth0.guardian.updatePolicies.called).to.equal(false);
     });

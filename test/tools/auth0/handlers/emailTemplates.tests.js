@@ -297,11 +297,12 @@ describe('#emailTemplates handler', () => {
         ],
       };
 
-      await handler.processChanges(assets);
+      // Use dryRunChanges instead of processChanges for dry run testing
+      const changes = await handler.dryRunChanges(assets);
 
-      expect(handler.updated).to.equal(1);
-      expect(handler.created).to.equal(1); // Based on actual calculation: create=1
-      expect(handler.deleted).to.equal(12); // Based on actual calculation: del=12
+      expect(changes.update).to.have.length(1);
+      expect(changes.create).to.have.length(1);
+      expect(changes.del).to.have.length(12);
       expect(auth0.emailTemplates.update.called).to.equal(false);
       expect(auth0.emailTemplates.create.called).to.equal(false);
     });
@@ -341,11 +342,12 @@ describe('#emailTemplates handler', () => {
         ],
       };
 
-      await handler.processChanges(assets);
+      // Use dryRunChanges instead of processChanges for dry run testing
+      const changes = await handler.dryRunChanges(assets);
 
-      expect(handler.updated).to.equal(1); // Based on debug: update=1
-      expect(handler.created).to.equal(1); // Based on debug: create=1
-      expect(handler.deleted).to.equal(12); // Based on debug: del=12
+      expect(changes.update).to.have.length(1); // Even identical templates show as update due to template comparison logic
+      expect(changes.create).to.have.length(1);
+      expect(changes.del).to.have.length(12); // Templates not in assets will be deleted
       expect(auth0.emailTemplates.update.called).to.equal(false);
       expect(auth0.emailTemplates.create.called).to.equal(false);
     });
@@ -400,11 +402,12 @@ describe('#emailTemplates handler', () => {
         ],
       };
 
-      await handler.processChanges(assets);
+      // Use dryRunChanges instead of processChanges for dry run testing
+      const changes = await handler.dryRunChanges(assets);
 
-      expect(handler.updated).to.equal(2); // Based on debug: update=2
-      expect(handler.created).to.equal(2); // Based on debug: create=2
-      expect(handler.deleted).to.equal(2); // Based on debug: del=2
+      expect(changes.update).to.have.length(2); // Based on debug: update=2
+      expect(changes.create).to.have.length(2); // Based on debug: create=2
+      expect(changes.del).to.have.length(2); // Based on debug: del=2
       expect(auth0.emailTemplates.update.called).to.equal(false);
       expect(auth0.emailTemplates.create.called).to.equal(false);
     });
@@ -440,11 +443,12 @@ describe('#emailTemplates handler', () => {
         ],
       };
 
-      await handler.processChanges(assets);
+      // Use dryRunChanges instead of processChanges for dry run testing
+      const changes = await handler.dryRunChanges(assets);
 
-      expect(handler.updated).to.equal(0);
-      expect(handler.created).to.equal(1);
-      expect(handler.deleted).to.equal(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.create).to.have.length(1);
+      expect(changes.del).to.have.length(0);
       expect(auth0.emailTemplates.update.called).to.equal(false);
       expect(auth0.emailTemplates.create.called).to.equal(false);
     });
@@ -490,11 +494,12 @@ describe('#emailTemplates handler', () => {
         ],
       };
 
-      await handler.processChanges(assets);
+      // Use dryRunChanges instead of processChanges for dry run testing
+      const changes = await handler.dryRunChanges(assets);
 
-      expect(handler.updated).to.equal(2); // Based on debug: update=2
-      expect(handler.created).to.equal(2); // Based on debug: create=2
-      expect(handler.deleted).to.equal(1); // Based on debug: del=1
+      expect(changes.update).to.have.length(2); // Based on debug: update=2
+      expect(changes.create).to.have.length(2); // Based on debug: create=2
+      expect(changes.del).to.have.length(1); // Based on debug: del=1
       expect(auth0.emailTemplates.update.called).to.equal(false);
       expect(auth0.emailTemplates.create.called).to.equal(false);
     });
@@ -524,11 +529,12 @@ describe('#emailTemplates handler', () => {
       });
       const assets = {};
 
-      await handler.processChanges(assets);
+      // Use dryRunChanges instead of processChanges for dry run testing
+      const changes = await handler.dryRunChanges(assets);
 
-      expect(handler.updated).to.equal(0);
-      expect(handler.created).to.equal(0);
-      expect(handler.deleted).to.equal(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
       expect(auth0.emailTemplates.get.called).to.equal(false);
       expect(auth0.emailTemplates.update.called).to.equal(false);
       expect(auth0.emailTemplates.create.called).to.equal(false);
