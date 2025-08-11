@@ -1,29 +1,10 @@
 import pageClient from '../../../../src/tools/auth0/client';
 
 const { expect } = require('chai');
+const sinon = require('sinon');
 const pages = require('../../../../src/tools/auth0/handlers/pages');
 const { default: PagesHandler } = require('../../../../src/tools/auth0/handlers/pages');
 const { mockPagedData } = require('../../../utils');
-
-function stub() {
-  const s = function (...args) {
-    s.callCount += 1;
-    s.calls.push(args);
-    s.called = true;
-    return s.returnValue;
-  };
-
-  s.called = false;
-  s.callCount = 0;
-  s.calls = [];
-  s.returnValue = undefined;
-  s.returns = (r) => {
-    s.returnValue = r;
-    return s;
-  };
-
-  return s;
-}
 
 describe('#pages handler', () => {
   const config = function (key) {
@@ -295,26 +276,30 @@ describe('#pages handler', () => {
 
       const auth0 = {
         tenantSettings: {
-          update: stub().returns(
-            Promise.reject(new Error('tenantSettings.update should not have been called'))
-          ),
+          update: sinon
+            .stub()
+            .returns(
+              Promise.reject(new Error('tenantSettings.update should not have been called'))
+            ),
         },
         clients: {
-          update: stub().returns(
-            Promise.reject(new Error('clients.update should not have been called'))
-          ),
-          getAll: stub().returns(Promise.resolve({ data: [{ client_id: 'global1' }] })),
+          update: sinon
+            .stub()
+            .returns(Promise.reject(new Error('clients.update should not have been called'))),
+          getAll: sinon.stub().returns(Promise.resolve({ data: [{ client_id: 'global1' }] })),
         },
         customDomains: {
-          getAll: stub().returns(Promise.resolve({ data: [] })),
+          getAll: sinon.stub().returns(Promise.resolve({ data: [] })),
         },
       };
 
       const handler = new PagesHandler({ client: auth0, config: (key) => dryRunConfig[key] });
       // Mock getType to return existing pages
-      handler.getType = stub().returns(
-        Promise.resolve([{ name: 'login', html: '<html>Old Login</html>', enabled: false }])
-      );
+      handler.getType = sinon
+        .stub()
+        .returns(
+          Promise.resolve([{ name: 'login', html: '<html>Old Login</html>', enabled: false }])
+        );
 
       const assets = {
         pages: [{ name: 'login', html: '<html>New Login</html>', enabled: true }],
@@ -337,26 +322,30 @@ describe('#pages handler', () => {
 
       const auth0 = {
         tenantSettings: {
-          update: stub().returns(
-            Promise.reject(new Error('tenantSettings.update should not have been called'))
-          ),
+          update: sinon
+            .stub()
+            .returns(
+              Promise.reject(new Error('tenantSettings.update should not have been called'))
+            ),
         },
         clients: {
-          update: stub().returns(
-            Promise.reject(new Error('clients.update should not have been called'))
-          ),
-          getAll: stub().returns(Promise.resolve({ data: [{ client_id: 'global1' }] })),
+          update: sinon
+            .stub()
+            .returns(Promise.reject(new Error('clients.update should not have been called'))),
+          getAll: sinon.stub().returns(Promise.resolve({ data: [{ client_id: 'global1' }] })),
         },
         customDomains: {
-          getAll: stub().returns(Promise.resolve({ data: [] })),
+          getAll: sinon.stub().returns(Promise.resolve({ data: [] })),
         },
       };
 
       const handler = new PagesHandler({ client: auth0, config: (key) => dryRunConfig[key] });
       // Mock getType to return existing pages
-      handler.getType = stub().returns(
-        Promise.resolve([{ name: 'login', html: '<html>Same Login</html>', enabled: true }])
-      );
+      handler.getType = sinon
+        .stub()
+        .returns(
+          Promise.resolve([{ name: 'login', html: '<html>Same Login</html>', enabled: true }])
+        );
 
       const assets = {
         pages: [{ name: 'login', html: '<html>Same Login</html>', enabled: true }],
@@ -379,24 +368,26 @@ describe('#pages handler', () => {
 
       const auth0 = {
         tenantSettings: {
-          update: stub().returns(
-            Promise.reject(new Error('tenantSettings.update should not have been called'))
-          ),
+          update: sinon
+            .stub()
+            .returns(
+              Promise.reject(new Error('tenantSettings.update should not have been called'))
+            ),
         },
         clients: {
-          update: stub().returns(
-            Promise.reject(new Error('clients.update should not have been called'))
-          ),
-          getAll: stub().returns(Promise.resolve({ data: [{ client_id: 'global1' }] })),
+          update: sinon
+            .stub()
+            .returns(Promise.reject(new Error('clients.update should not have been called'))),
+          getAll: sinon.stub().returns(Promise.resolve({ data: [{ client_id: 'global1' }] })),
         },
         customDomains: {
-          getAll: stub().returns(Promise.resolve({ data: [] })),
+          getAll: sinon.stub().returns(Promise.resolve({ data: [] })),
         },
       };
 
       const handler = new PagesHandler({ client: auth0, config: (key) => dryRunConfig[key] });
       // Mock getType to return existing pages
-      handler.getType = stub().returns(
+      handler.getType = sinon.stub().returns(
         Promise.resolve([
           { name: 'login', html: '<html>Old Login</html>', enabled: false },
           { name: 'password_reset', html: '<html>Old Reset</html>', enabled: false },
@@ -427,24 +418,26 @@ describe('#pages handler', () => {
 
       const auth0 = {
         tenantSettings: {
-          update: stub().returns(
-            Promise.reject(new Error('tenantSettings.update should not have been called'))
-          ),
+          update: sinon
+            .stub()
+            .returns(
+              Promise.reject(new Error('tenantSettings.update should not have been called'))
+            ),
         },
         clients: {
-          update: stub().returns(
-            Promise.reject(new Error('clients.update should not have been called'))
-          ),
-          getAll: stub().returns(Promise.resolve({ data: [{ client_id: 'global1' }] })),
+          update: sinon
+            .stub()
+            .returns(Promise.reject(new Error('clients.update should not have been called'))),
+          getAll: sinon.stub().returns(Promise.resolve({ data: [{ client_id: 'global1' }] })),
         },
         customDomains: {
-          getAll: stub().returns(Promise.resolve({ data: [] })),
+          getAll: sinon.stub().returns(Promise.resolve({ data: [] })),
         },
       };
 
       const handler = new PagesHandler({ client: auth0, config: (key) => dryRunConfig[key] });
       // Mock getType to return empty existing pages
-      handler.getType = stub().returns(Promise.resolve([]));
+      handler.getType = sinon.stub().returns(Promise.resolve([]));
 
       const assets = {
         pages: [{ name: 'login', html: '<html>New Login</html>', enabled: true }],
@@ -467,26 +460,30 @@ describe('#pages handler', () => {
 
       const auth0 = {
         tenantSettings: {
-          update: stub().returns(
-            Promise.reject(new Error('tenantSettings.update should not have been called'))
-          ),
+          update: sinon
+            .stub()
+            .returns(
+              Promise.reject(new Error('tenantSettings.update should not have been called'))
+            ),
         },
         clients: {
-          update: stub().returns(
-            Promise.reject(new Error('clients.update should not have been called'))
-          ),
-          getAll: stub().returns(Promise.resolve({ data: [{ client_id: 'global1' }] })),
+          update: sinon
+            .stub()
+            .returns(Promise.reject(new Error('clients.update should not have been called'))),
+          getAll: sinon.stub().returns(Promise.resolve({ data: [{ client_id: 'global1' }] })),
         },
         customDomains: {
-          getAll: stub().returns(Promise.resolve({ data: [] })),
+          getAll: sinon.stub().returns(Promise.resolve({ data: [] })),
         },
       };
 
       const handler = new PagesHandler({ client: auth0, config: (key) => dryRunConfig[key] });
       // Mock getType to return existing pages that will be deleted
-      handler.getType = stub().returns(
-        Promise.resolve([{ name: 'login', html: '<html>Old Login</html>', enabled: false }])
-      );
+      handler.getType = sinon
+        .stub()
+        .returns(
+          Promise.resolve([{ name: 'login', html: '<html>Old Login</html>', enabled: false }])
+        );
 
       const assets = {
         pages: [], // Empty means delete all
@@ -509,18 +506,20 @@ describe('#pages handler', () => {
 
       const auth0 = {
         tenantSettings: {
-          update: stub().returns(
-            Promise.reject(new Error('tenantSettings.update should not have been called'))
-          ),
+          update: sinon
+            .stub()
+            .returns(
+              Promise.reject(new Error('tenantSettings.update should not have been called'))
+            ),
         },
         clients: {
-          update: stub().returns(
-            Promise.reject(new Error('clients.update should not have been called'))
-          ),
-          getAll: stub().returns(Promise.resolve({ data: [{ client_id: 'global1' }] })),
+          update: sinon
+            .stub()
+            .returns(Promise.reject(new Error('clients.update should not have been called'))),
+          getAll: sinon.stub().returns(Promise.resolve({ data: [{ client_id: 'global1' }] })),
         },
         customDomains: {
-          getAll: stub().returns(Promise.resolve({ data: [] })),
+          getAll: sinon.stub().returns(Promise.resolve({ data: [] })),
         },
       };
 

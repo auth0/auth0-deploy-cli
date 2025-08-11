@@ -1,30 +1,11 @@
 import { sortGuardianFactors } from '../../../../src/tools/utils';
 
 const { expect } = require('chai');
+const sinon = require('sinon');
 const guardianFactorsTests = require('../../../../src/tools/auth0/handlers/guardianFactors');
 const {
   default: GuardianFactorsHandler,
 } = require('../../../../src/tools/auth0/handlers/guardianFactors');
-
-function stub() {
-  const s = function (...args) {
-    s.callCount += 1;
-    s.calls.push(args);
-    s.called = true;
-    return s.returnValue;
-  };
-
-  s.called = false;
-  s.callCount = 0;
-  s.calls = [];
-  s.returnValue = undefined;
-  s.returns = (r) => {
-    s.returnValue = r;
-    return s;
-  };
-
-  return s;
-}
 
 function mockFactorSms(overrides = {}) {
   return {
@@ -293,12 +274,12 @@ describe('#guardianFactors handler', () => {
 
       const auth0 = {
         guardian: {
-          getFactors: stub().returns(
-            Promise.resolve({ data: [mockFactorSms({ enabled: false })] })
-          ),
-          updateFactor: stub().returns(
-            Promise.reject(new Error('updateFactor should not have been called'))
-          ),
+          getFactors: sinon
+            .stub()
+            .returns(Promise.resolve({ data: [mockFactorSms({ enabled: false })] })),
+          updateFactor: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateFactor should not have been called'))),
         },
       };
 
@@ -325,10 +306,12 @@ describe('#guardianFactors handler', () => {
 
       const auth0 = {
         guardian: {
-          getFactors: stub().returns(Promise.resolve({ data: [mockFactorSms({ enabled: true })] })),
-          updateFactor: stub().returns(
-            Promise.reject(new Error('updateFactor should not have been called'))
-          ),
+          getFactors: sinon
+            .stub()
+            .returns(Promise.resolve({ data: [mockFactorSms({ enabled: true })] })),
+          updateFactor: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateFactor should not have been called'))),
         },
       };
 
@@ -355,14 +338,14 @@ describe('#guardianFactors handler', () => {
 
       const auth0 = {
         guardian: {
-          getFactors: stub().returns(
+          getFactors: sinon.stub().returns(
             Promise.resolve({
               data: [mockFactorSms({ enabled: false }), mockFactorDuo({ enabled: false })],
             })
           ),
-          updateFactor: stub().returns(
-            Promise.reject(new Error('updateFactor should not have been called'))
-          ),
+          updateFactor: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateFactor should not have been called'))),
         },
       };
 
@@ -391,14 +374,14 @@ describe('#guardianFactors handler', () => {
 
       const auth0 = {
         guardian: {
-          getFactors: stub().returns(
+          getFactors: sinon.stub().returns(
             Promise.resolve({
               data: [mockFactorSms({ enabled: true }), mockFactorDuo({ enabled: false })],
             })
           ),
-          updateFactor: stub().returns(
-            Promise.reject(new Error('updateFactor should not have been called'))
-          ),
+          updateFactor: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateFactor should not have been called'))),
         },
       };
 
@@ -430,10 +413,10 @@ describe('#guardianFactors handler', () => {
 
       const auth0 = {
         guardian: {
-          getFactors: stub().returns(Promise.resolve({ data: [] })),
-          updateFactor: stub().returns(
-            Promise.reject(new Error('updateFactor should not have been called'))
-          ),
+          getFactors: sinon.stub().returns(Promise.resolve({ data: [] })),
+          updateFactor: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateFactor should not have been called'))),
         },
       };
 
@@ -459,12 +442,12 @@ describe('#guardianFactors handler', () => {
 
       const auth0 = {
         guardian: {
-          getFactors: stub().returns(
-            Promise.reject(new Error('getFactors should not have been called'))
-          ),
-          updateFactor: stub().returns(
-            Promise.reject(new Error('updateFactor should not have been called'))
-          ),
+          getFactors: sinon
+            .stub()
+            .returns(Promise.reject(new Error('getFactors should not have been called'))),
+          updateFactor: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateFactor should not have been called'))),
         },
       };
 

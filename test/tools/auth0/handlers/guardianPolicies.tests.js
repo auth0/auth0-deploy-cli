@@ -1,28 +1,9 @@
 const { expect } = require('chai');
+const sinon = require('sinon');
 const guardianPolicies = require('../../../../src/tools/auth0/handlers/guardianPolicies');
 const {
   default: GuardianPoliciesHandler,
 } = require('../../../../src/tools/auth0/handlers/guardianPolicies');
-
-function stub() {
-  const s = function (...args) {
-    s.callCount += 1;
-    s.calls.push(args);
-    s.called = true;
-    return s.returnValue;
-  };
-
-  s.called = false;
-  s.callCount = 0;
-  s.calls = [];
-  s.returnValue = undefined;
-  s.returns = (r) => {
-    s.returnValue = r;
-    return s;
-  };
-
-  return s;
-}
 
 describe('#guardianPolicies handler', () => {
   const config = function (key) {
@@ -181,10 +162,10 @@ describe('#guardianPolicies handler', () => {
 
       const auth0 = {
         guardian: {
-          getPolicies: stub().returns(Promise.resolve({ data: ['all-applications'] })),
-          updatePolicies: stub().returns(
-            Promise.reject(new Error('updatePolicies should not have been called'))
-          ),
+          getPolicies: sinon.stub().returns(Promise.resolve({ data: ['all-applications'] })),
+          updatePolicies: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updatePolicies should not have been called'))),
         },
       };
 
@@ -211,10 +192,10 @@ describe('#guardianPolicies handler', () => {
 
       const auth0 = {
         guardian: {
-          getPolicies: stub().returns(Promise.resolve({ data: ['all-applications'] })),
-          updatePolicies: stub().returns(
-            Promise.reject(new Error('updatePolicies should not have been called'))
-          ),
+          getPolicies: sinon.stub().returns(Promise.resolve({ data: ['all-applications'] })),
+          updatePolicies: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updatePolicies should not have been called'))),
         },
       };
 
@@ -240,12 +221,12 @@ describe('#guardianPolicies handler', () => {
 
       const auth0 = {
         guardian: {
-          getPolicies: stub().returns(
-            Promise.reject(new Error('getPolicies should not have been called'))
-          ),
-          updatePolicies: stub().returns(
-            Promise.reject(new Error('updatePolicies should not have been called'))
-          ),
+          getPolicies: sinon
+            .stub()
+            .returns(Promise.reject(new Error('getPolicies should not have been called'))),
+          updatePolicies: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updatePolicies should not have been called'))),
         },
       };
 

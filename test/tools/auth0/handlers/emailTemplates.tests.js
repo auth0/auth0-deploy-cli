@@ -1,39 +1,9 @@
 const { expect } = require('chai');
+const sinon = require('sinon');
 const emailTemplates = require('../../../../src/tools/auth0/handlers/emailTemplates');
 const {
   default: EmailTemplatesHandler,
 } = require('../../../../src/tools/auth0/handlers/emailTemplates');
-
-function stub() {
-  const s = function (...args) {
-    s.callCount += 1;
-    s.calls.push(args);
-    s.called = true;
-    return s.returnValue;
-  };
-
-  s.called = false;
-  s.callCount = 0;
-  s.calls = [];
-  s.returnValue = undefined;
-  s.returns = (r) => {
-    s.returnValue = r;
-    return s;
-  };
-  s.callsFake = (fn) => {
-    s.fakeFunction = fn;
-    const wrapper = function (...args) {
-      s.callCount += 1;
-      s.calls.push(args);
-      s.called = true;
-      return s.fakeFunction(...args);
-    };
-    Object.assign(wrapper, s);
-    return wrapper;
-  };
-
-  return s;
-}
 
 describe('#emailTemplates handler', () => {
   const config = function (key) {
@@ -269,7 +239,7 @@ describe('#emailTemplates handler', () => {
 
       const auth0 = {
         emailTemplates: {
-          get: stub().returns(
+          get: sinon.stub().returns(
             Promise.resolve({
               data: {
                 templateName: 'verify_email',
@@ -278,12 +248,16 @@ describe('#emailTemplates handler', () => {
               },
             })
           ),
-          update: stub().returns(
-            Promise.reject(new Error('emailTemplates.update should not have been called'))
-          ),
-          create: stub().returns(
-            Promise.reject(new Error('emailTemplates.create should not have been called'))
-          ),
+          update: sinon
+            .stub()
+            .returns(
+              Promise.reject(new Error('emailTemplates.update should not have been called'))
+            ),
+          create: sinon
+            .stub()
+            .returns(
+              Promise.reject(new Error('emailTemplates.create should not have been called'))
+            ),
         },
       };
 
@@ -314,7 +288,7 @@ describe('#emailTemplates handler', () => {
 
       const auth0 = {
         emailTemplates: {
-          get: stub().returns(
+          get: sinon.stub().returns(
             Promise.resolve({
               data: {
                 templateName: 'verify_email',
@@ -323,12 +297,16 @@ describe('#emailTemplates handler', () => {
               },
             })
           ),
-          update: stub().returns(
-            Promise.reject(new Error('emailTemplates.update should not have been called'))
-          ),
-          create: stub().returns(
-            Promise.reject(new Error('emailTemplates.create should not have been called'))
-          ),
+          update: sinon
+            .stub()
+            .returns(
+              Promise.reject(new Error('emailTemplates.update should not have been called'))
+            ),
+          create: sinon
+            .stub()
+            .returns(
+              Promise.reject(new Error('emailTemplates.create should not have been called'))
+            ),
         },
       };
 
@@ -359,7 +337,7 @@ describe('#emailTemplates handler', () => {
 
       const auth0 = {
         emailTemplates: {
-          get: stub().callsFake(({ templateName }) => {
+          get: sinon.stub().callsFake(({ templateName }) => {
             if (templateName === 'verify_email') {
               return Promise.resolve({
                 data: {
@@ -382,12 +360,16 @@ describe('#emailTemplates handler', () => {
             error.statusCode = 404;
             return Promise.reject(error);
           }),
-          update: stub().returns(
-            Promise.reject(new Error('emailTemplates.update should not have been called'))
-          ),
-          create: stub().returns(
-            Promise.reject(new Error('emailTemplates.create should not have been called'))
-          ),
+          update: sinon
+            .stub()
+            .returns(
+              Promise.reject(new Error('emailTemplates.update should not have been called'))
+            ),
+          create: sinon
+            .stub()
+            .returns(
+              Promise.reject(new Error('emailTemplates.create should not have been called'))
+            ),
         },
       };
 
@@ -422,14 +404,18 @@ describe('#emailTemplates handler', () => {
           get: (() => {
             const error = new Error('Not Found');
             error.statusCode = 404;
-            return stub().returns(Promise.reject(error));
+            return sinon.stub().returns(Promise.reject(error));
           })(), // No existing templates
-          update: stub().returns(
-            Promise.reject(new Error('emailTemplates.update should not have been called'))
-          ),
-          create: stub().returns(
-            Promise.reject(new Error('emailTemplates.create should not have been called'))
-          ),
+          update: sinon
+            .stub()
+            .returns(
+              Promise.reject(new Error('emailTemplates.update should not have been called'))
+            ),
+          create: sinon
+            .stub()
+            .returns(
+              Promise.reject(new Error('emailTemplates.create should not have been called'))
+            ),
         },
       };
 
@@ -460,7 +446,7 @@ describe('#emailTemplates handler', () => {
 
       const auth0 = {
         emailTemplates: {
-          get: stub().callsFake(({ templateName }) => {
+          get: sinon.stub().callsFake(({ templateName }) => {
             if (templateName === 'verify_email') {
               return Promise.resolve({
                 data: {
@@ -474,12 +460,16 @@ describe('#emailTemplates handler', () => {
             error.statusCode = 404;
             return Promise.reject(error);
           }),
-          update: stub().returns(
-            Promise.reject(new Error('emailTemplates.update should not have been called'))
-          ),
-          create: stub().returns(
-            Promise.reject(new Error('emailTemplates.create should not have been called'))
-          ),
+          update: sinon
+            .stub()
+            .returns(
+              Promise.reject(new Error('emailTemplates.update should not have been called'))
+            ),
+          create: sinon
+            .stub()
+            .returns(
+              Promise.reject(new Error('emailTemplates.create should not have been called'))
+            ),
         },
       };
 
@@ -511,15 +501,19 @@ describe('#emailTemplates handler', () => {
 
       const auth0 = {
         emailTemplates: {
-          get: stub().returns(
-            Promise.reject(new Error('emailTemplates.get should not have been called'))
-          ),
-          update: stub().returns(
-            Promise.reject(new Error('emailTemplates.update should not have been called'))
-          ),
-          create: stub().returns(
-            Promise.reject(new Error('emailTemplates.create should not have been called'))
-          ),
+          get: sinon
+            .stub()
+            .returns(Promise.reject(new Error('emailTemplates.get should not have been called'))),
+          update: sinon
+            .stub()
+            .returns(
+              Promise.reject(new Error('emailTemplates.update should not have been called'))
+            ),
+          create: sinon
+            .stub()
+            .returns(
+              Promise.reject(new Error('emailTemplates.create should not have been called'))
+            ),
         },
       };
 

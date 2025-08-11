@@ -1,38 +1,10 @@
-const { expect, assert, use } = require('chai');
+const { expect, use } = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const { omit, cloneDeep } = require('lodash');
+const sinon = require('sinon');
 const { default: ThemesHandler } = require('../../../../src/tools/auth0/handlers/themes');
 
 use(chaiAsPromised);
-
-function stub() {
-  const s = function (...args) {
-    s.callCount += 1;
-    s.calls.push(args);
-    s.called = true;
-    return s.returnValue;
-  };
-
-  s.called = false;
-  s.callCount = 0;
-  s.calls = [];
-  s.returnValue = undefined;
-  s.returns = (r) => {
-    s.returnValue = r;
-    return s;
-  };
-  s.calledWith = (...args) =>
-    s.calls.some((p) => {
-      try {
-        assert.deepEqual(p, args);
-        return true;
-      } catch {
-        return false;
-      }
-    });
-
-  return s;
-}
 
 function errorWithStatusCode(statusCode, message) {
   const err = new Error(message || `Error ${statusCode}`);
@@ -130,7 +102,7 @@ describe('#themes handler', () => {
 
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(Promise.resolve({ data: theme })),
+          getDefaultTheme: sinon.stub().returns(Promise.resolve({ data: theme })),
         },
       };
 
@@ -145,7 +117,7 @@ describe('#themes handler', () => {
     it('should return empty array if there is no theme', async () => {
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(Promise.reject(errorWithStatusCode(404))),
+          getDefaultTheme: sinon.stub().returns(Promise.reject(errorWithStatusCode(404))),
         },
       };
 
@@ -160,14 +132,16 @@ describe('#themes handler', () => {
     it('should return empty array when no-code is not enabled for the tenant', async () => {
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(
-            Promise.reject(
-              errorWithStatusCode(
-                400,
-                'Your account does not have universal login customizations enabled'
+          getDefaultTheme: sinon
+            .stub()
+            .returns(
+              Promise.reject(
+                errorWithStatusCode(
+                  400,
+                  'Your account does not have universal login customizations enabled'
+                )
               )
-            )
-          ),
+            ),
         },
       };
 
@@ -182,9 +156,9 @@ describe('#themes handler', () => {
     it('should fail for unexpected api errors', async () => {
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(
-            Promise.reject(errorWithStatusCode(500, 'Unexpected error'))
-          ),
+          getDefaultTheme: sinon
+            .stub()
+            .returns(Promise.reject(errorWithStatusCode(500, 'Unexpected error'))),
         },
       };
 
@@ -205,14 +179,14 @@ describe('#themes handler', () => {
 
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(Promise.reject(errorWithStatusCode(404))),
-          createTheme: stub().returns(Promise.resolve(theme)),
-          updateTheme: stub().returns(
-            Promise.reject(new Error('updateTheme should not have been called'))
-          ),
-          deleteTheme: stub().returns(
-            Promise.reject(new Error('deleteTheme should not have been called'))
-          ),
+          getDefaultTheme: sinon.stub().returns(Promise.reject(errorWithStatusCode(404))),
+          createTheme: sinon.stub().returns(Promise.resolve(theme)),
+          updateTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateTheme should not have been called'))),
+          deleteTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('deleteTheme should not have been called'))),
         },
       };
 
@@ -238,14 +212,14 @@ describe('#themes handler', () => {
       };
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns({ data: theme }),
-          createTheme: stub().returns(
-            Promise.reject(new Error('updateTheme should not have been called'))
-          ),
-          updateTheme: stub().returns(Promise.resolve(theme)),
-          deleteTheme: stub().returns(
-            Promise.reject(new Error('deleteTheme should not have been called'))
-          ),
+          getDefaultTheme: sinon.stub().returns({ data: theme }),
+          createTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateTheme should not have been called'))),
+          updateTheme: sinon.stub().returns(Promise.resolve(theme)),
+          deleteTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('deleteTheme should not have been called'))),
         },
       };
 
@@ -274,14 +248,14 @@ describe('#themes handler', () => {
 
     const auth0 = {
       branding: {
-        getDefaultTheme: stub().returns(Promise.resolve({ data: theme })),
-        createTheme: stub().returns(
-          Promise.reject(new Error('createTheme should not have been called'))
-        ),
-        updateTheme: stub().returns(
-          Promise.reject(new Error('updateTheme should not have been called'))
-        ),
-        deleteTheme: stub().returns(Promise.resolve({ data: undefined })),
+        getDefaultTheme: sinon.stub().returns(Promise.resolve({ data: theme })),
+        createTheme: sinon
+          .stub()
+          .returns(Promise.reject(new Error('createTheme should not have been called'))),
+        updateTheme: sinon
+          .stub()
+          .returns(Promise.reject(new Error('updateTheme should not have been called'))),
+        deleteTheme: sinon.stub().returns(Promise.resolve({ data: undefined })),
       },
     };
 
@@ -305,18 +279,18 @@ describe('#themes handler', () => {
 
     const auth0 = {
       branding: {
-        getDefaultTheme: stub().returns(
-          Promise.reject(new Error('getDefaultTheme should not have been called'))
-        ),
-        createTheme: stub().returns(
-          Promise.reject(new Error('createTheme should not have been called'))
-        ),
-        updateTheme: stub().returns(
-          Promise.reject(new Error('updateTheme should not have been called'))
-        ),
-        deleteTheme: stub().returns(
-          Promise.reject(new Error('deleteTheme should not have been called'))
-        ),
+        getDefaultTheme: sinon
+          .stub()
+          .returns(Promise.reject(new Error('getDefaultTheme should not have been called'))),
+        createTheme: sinon
+          .stub()
+          .returns(Promise.reject(new Error('createTheme should not have been called'))),
+        updateTheme: sinon
+          .stub()
+          .returns(Promise.reject(new Error('updateTheme should not have been called'))),
+        deleteTheme: sinon
+          .stub()
+          .returns(Promise.reject(new Error('deleteTheme should not have been called'))),
       },
     };
 
@@ -340,16 +314,16 @@ describe('#themes handler', () => {
 
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(Promise.reject(errorWithStatusCode(404))),
-          createTheme: stub().returns(
-            Promise.reject(new Error('createTheme should not have been called'))
-          ),
-          updateTheme: stub().returns(
-            Promise.reject(new Error('updateTheme should not have been called'))
-          ),
-          deleteTheme: stub().returns(
-            Promise.reject(new Error('deleteTheme should not have been called'))
-          ),
+          getDefaultTheme: sinon.stub().returns(Promise.reject(errorWithStatusCode(404))),
+          createTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('createTheme should not have been called'))),
+          updateTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateTheme should not have been called'))),
+          deleteTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('deleteTheme should not have been called'))),
         },
       };
 
@@ -378,14 +352,14 @@ describe('#themes handler', () => {
 
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(Promise.resolve({ data: existingTheme })),
-          createTheme: stub().returns(
-            Promise.reject(new Error('createTheme should not have been called'))
-          ),
-          updateTheme: stub().returns(Promise.resolve(newTheme)),
-          deleteTheme: stub().returns(
-            Promise.reject(new Error('deleteTheme should not have been called'))
-          ),
+          getDefaultTheme: sinon.stub().returns(Promise.resolve({ data: existingTheme })),
+          createTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('createTheme should not have been called'))),
+          updateTheme: sinon.stub().returns(Promise.resolve(newTheme)),
+          deleteTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('deleteTheme should not have been called'))),
         },
       };
 
@@ -412,14 +386,14 @@ describe('#themes handler', () => {
 
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(Promise.resolve({ data: existingTheme })),
-          createTheme: stub().returns(
-            Promise.reject(new Error('createTheme should not have been called'))
-          ),
-          updateTheme: stub().returns(
-            Promise.reject(new Error('updateTheme should not have been called'))
-          ),
-          deleteTheme: stub().returns(Promise.resolve({ data: undefined })),
+          getDefaultTheme: sinon.stub().returns(Promise.resolve({ data: existingTheme })),
+          createTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('createTheme should not have been called'))),
+          updateTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateTheme should not have been called'))),
+          deleteTheme: sinon.stub().returns(Promise.resolve({ data: undefined })),
         },
       };
 
@@ -445,16 +419,16 @@ describe('#themes handler', () => {
 
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(Promise.reject(errorWithStatusCode(404))),
-          createTheme: stub().returns(
-            Promise.reject(new Error('createTheme should not have been called'))
-          ),
-          updateTheme: stub().returns(
-            Promise.reject(new Error('updateTheme should not have been called'))
-          ),
-          deleteTheme: stub().returns(
-            Promise.reject(new Error('deleteTheme should not have been called'))
-          ),
+          getDefaultTheme: sinon.stub().returns(Promise.reject(errorWithStatusCode(404))),
+          createTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('createTheme should not have been called'))),
+          updateTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateTheme should not have been called'))),
+          deleteTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('deleteTheme should not have been called'))),
         },
       };
 
@@ -481,16 +455,16 @@ describe('#themes handler', () => {
 
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(Promise.reject(errorWithStatusCode(404))),
-          createTheme: stub().returns(
-            Promise.reject(new Error('createTheme should not have been called'))
-          ),
-          updateTheme: stub().returns(
-            Promise.reject(new Error('updateTheme should not have been called'))
-          ),
-          deleteTheme: stub().returns(
-            Promise.reject(new Error('deleteTheme should not have been called'))
-          ),
+          getDefaultTheme: sinon.stub().returns(Promise.reject(errorWithStatusCode(404))),
+          createTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('createTheme should not have been called'))),
+          updateTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateTheme should not have been called'))),
+          deleteTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('deleteTheme should not have been called'))),
         },
       };
 
@@ -516,23 +490,25 @@ describe('#themes handler', () => {
 
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(
-            Promise.reject(
-              errorWithStatusCode(
-                400,
-                'Your account does not have universal login customizations enabled'
+          getDefaultTheme: sinon
+            .stub()
+            .returns(
+              Promise.reject(
+                errorWithStatusCode(
+                  400,
+                  'Your account does not have universal login customizations enabled'
+                )
               )
-            )
-          ),
-          createTheme: stub().returns(
-            Promise.reject(new Error('createTheme should not have been called'))
-          ),
-          updateTheme: stub().returns(
-            Promise.reject(new Error('updateTheme should not have been called'))
-          ),
-          deleteTheme: stub().returns(
-            Promise.reject(new Error('deleteTheme should not have been called'))
-          ),
+            ),
+          createTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('createTheme should not have been called'))),
+          updateTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateTheme should not have been called'))),
+          deleteTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('deleteTheme should not have been called'))),
         },
       };
 
