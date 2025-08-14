@@ -44,6 +44,7 @@ export default class APIHandler {
     create: ApiMethodOverride;
     delete: ApiMethodOverride;
   };
+  ignoreDryRunFields: string[];
 
   constructor(options: {
     id?: APIHandler['id'];
@@ -61,6 +62,7 @@ export default class APIHandler {
       create?: ApiMethodOverride;
       delete?: ApiMethodOverride;
     };
+    ignoreDryRunFields: APIHandler['ignoreDryRunFields'];
   }) {
     this.config = options.config;
     this.type = options.type;
@@ -72,6 +74,7 @@ export default class APIHandler {
     this.stripUpdateFields = [...(options.stripUpdateFields || []), this.id];
     this.sensitiveFieldsToObfuscate = options.sensitiveFieldsToObfuscate || [];
     this.stripCreateFields = options.stripCreateFields || [];
+    this.ignoreDryRunFields = options.ignoreDryRunFields || [];
 
     this.functions = {
       getAll: 'getAll',
@@ -203,6 +206,7 @@ export default class APIHandler {
         // @ts-ignore TODO: investigate what happens when `existing` is null
         existing,
         identifiers: this.identifiers,
+        ignoreDryRunFields: this.ignoreDryRunFields,
       });
     }
 
@@ -240,6 +244,7 @@ export default class APIHandler {
       // @ts-ignore TODO: investigate what happens when `existing` is null
       existing,
       identifiers: this.identifiers,
+      ignoreDryRunFields: this.ignoreDryRunFields,
     });
   }
 

@@ -253,7 +253,8 @@ export function getObjectDifferences(
   localObj: Record<string, any>,
   remoteObj: Record<string, any>,
   keyObjPath: string = '',
-  resourceTypeName: string = ''
+  resourceTypeName: string = '',
+  ignoreDryRunFields: string[] = []
 ): string[] {
   const differences: string[] = [];
 
@@ -264,7 +265,17 @@ export function getObjectDifferences(
 
     // If key doesn't exist in remoteObj, there's a difference
     if (!(key in remoteObj)) {
+      if (ignoreDryRunFields.includes(currentPath)) {
+        log.debug(
+          `[${chalk.blue(resourceTypeName)}] Ignoring key ${chalk.yellow(
+            `"${currentPath}"`
+          )} due to ignoreDryRunFields configuration.`
+        );
+        return;
+      }
+
       const message = `Key [${currentPath}] found in 'localObj' but not in 'remoteObj'.`;
+
       log.debug(
         `[${chalk.blue(resourceTypeName)}] Key ${chalk.yellow(
           `"${currentPath}"`
@@ -301,7 +312,8 @@ export function getObjectDifferences(
               item,
               remoteValue[index],
               `${currentPath}[${index}]`,
-              resourceTypeName
+              resourceTypeName,
+              ignoreDryRunFields
             );
             differences.push(...nestedDifferences);
           } else if (item !== remoteValue[index]) {
@@ -339,7 +351,8 @@ export function getObjectDifferences(
         localValue,
         remoteValue,
         currentPath,
-        resourceTypeName
+        resourceTypeName,
+        ignoreDryRunFields
       );
       differences.push(...nestedDifferences);
       return;
@@ -373,9 +386,16 @@ export function hasObjectDifferences(
   localObj: Record<string, any>,
   remoteObj: Record<string, any>,
   keyObjPath: string = '',
-  resourceTypeName: string = ''
+  resourceTypeName: string = '',
+  ignoreDryRunFields: string[] = []
 ): boolean {
-  const differences = getObjectDifferences(localObj, remoteObj, keyObjPath, resourceTypeName);
+  const differences = getObjectDifferences(
+    localObj,
+    remoteObj,
+    keyObjPath,
+    resourceTypeName,
+    ignoreDryRunFields
+  );
   diffLog(resourceTypeName, differences);
   return differences.length > 0;
 }
@@ -399,11 +419,13 @@ export function calculateDryRunChanges({
   assets,
   existing,
   identifiers = ['id', 'name'],
+  ignoreDryRunFields = [],
 }: {
   type: string;
   assets: Asset[] | Asset;
   existing: Asset[] | Asset | null;
   identifiers: string[];
+  ignoreDryRunFields: string[];
 }): CalculatedChanges {
   // Calculate the changes required between two sets of assets.
   const update: Asset[] = [];
@@ -475,13 +497,20 @@ export function calculateDryRunChanges({
         localAsset,
         matchingRemoteAsset,
         matchingRemoteAsset.name ?? '',
-        type
+        type,
+        ignoreDryRunFields
       );
     }
 
     // If no match found, check with hasObjectDifferences against all remote assets
     return remoteAssets.some((remoteAsset) =>
-      hasObjectDifferences(localAsset, remoteAsset, remoteAsset.name ?? '', type)
+      hasObjectDifferences(
+        localAsset,
+        remoteAsset,
+        remoteAsset.name ?? '',
+        type,
+        ignoreDryRunFields
+      )
     );
   });
   update.push(...updatedAssets);
@@ -623,17 +652,16 @@ export async function dryRunFormatAssets(
     });
   }
 
-  // format assets emailProvider
-  if (localAssets.emailProvider) {
-    const { emailProvider } = localAssets;
+  // format assets branding
+  if (localAssets.branding) {
+    const { branding } = localAssets;
 
-    if (emailProvider.name === 'smtp') {
-      if (emailProvider.credentials && emailProvider.credentials.smtp_pass) {
-        delete emailProvider.credentials.smtp_pass;
-      }
+    // if empty templates do not compare with remote
+    if (branding.templates && branding.templates.length === 0) {
+      delete branding.templates;
     }
 
-    localAssets.emailProvider = emailProvider;
+    localAssets.branding = branding;
   }
 
   return localAssets;

@@ -15,6 +15,7 @@ export default class EmailProviderHandler extends DefaultHandler {
     super({
       ...options,
       type: 'emailProvider',
+      ignoreDryRunFields: ['smtp.credentials.smtp_pass', 'mandrill.credentials.api_key'],
     });
   }
 
