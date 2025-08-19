@@ -1,4 +1,9 @@
-import { ResourceServer, ResourceServerProofOfPossessionMechanismEnum } from 'auth0';
+import {
+  ResourceServer,
+  ResourceServerProofOfPossessionMechanismEnum,
+  ResourceServerSubjectTypeAuthorizationClientPolicyEnum,
+  ResourceServerSubjectTypeAuthorizationUserPolicyEnum,
+} from 'auth0';
 import ValidationError from '../../validationError';
 
 import constants from '../../constants';
@@ -10,12 +15,6 @@ import { paginate } from '../client';
 export const excludeSchema = {
   type: 'array',
   items: { type: 'string' },
-};
-
-const SUBJECT_TYPE_AUTHORIZATION_POLICIES = {
-  REQUIRE_CLIENT_GRANT: 'require_client_grant',
-  ALLOW_ALL: 'allow_all',
-  DENY_ALL: 'deny_all',
 };
 
 export const schema = {
@@ -57,11 +56,7 @@ export const schema = {
             properties: {
               policy: {
                 type: 'string',
-                enum: [
-                  SUBJECT_TYPE_AUTHORIZATION_POLICIES.ALLOW_ALL,
-                  SUBJECT_TYPE_AUTHORIZATION_POLICIES.DENY_ALL,
-                  SUBJECT_TYPE_AUTHORIZATION_POLICIES.REQUIRE_CLIENT_GRANT,
-                ],
+                enum: Object.values(ResourceServerSubjectTypeAuthorizationUserPolicyEnum),
               },
             },
           },
@@ -71,10 +66,7 @@ export const schema = {
             properties: {
               policy: {
                 type: 'string',
-                enum: [
-                  SUBJECT_TYPE_AUTHORIZATION_POLICIES.DENY_ALL,
-                  SUBJECT_TYPE_AUTHORIZATION_POLICIES.REQUIRE_CLIENT_GRANT,
-                ],
+                enum: Object.values(ResourceServerSubjectTypeAuthorizationClientPolicyEnum),
               },
             },
           },

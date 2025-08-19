@@ -1,4 +1,4 @@
-import { Client } from 'auth0';
+import { Client, ClientGrantSubjectTypeEnum } from 'auth0';
 import DefaultHandler, { order } from './default';
 import { convertClientNamesToIds } from '../../utils';
 import { Assets, CalculatedChanges } from '../../../types';
@@ -19,7 +19,7 @@ export const schema = {
       },
       subject_type: {
         type: 'string',
-        enum: ['client', 'user'],
+        enum: Object.values(ClientGrantSubjectTypeEnum),
         description: 'The subject type for this grant.',
       },
       authorization_details_types: {
@@ -39,7 +39,7 @@ export type ClientGrant = {
   client_id: string;
   audience: string;
   scope: string[];
-  subject_type: 'client' | 'user';
+  subject_type: ClientGrantSubjectTypeEnum;
   authorization_details_types: string[];
 };
 
@@ -53,7 +53,7 @@ export default class ClientGrantsHandler extends DefaultHandler {
       id: 'id',
       // @ts-ignore because not sure why two-dimensional array passed in
       identifiers: ['id', ['client_id', 'audience']],
-      stripUpdateFields: ['audience', 'client_id'],
+      stripUpdateFields: ['audience', 'client_id', 'subject_type'],
     });
   }
 
