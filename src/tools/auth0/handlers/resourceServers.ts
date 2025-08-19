@@ -12,6 +12,12 @@ export const excludeSchema = {
   items: { type: 'string' },
 };
 
+const SUBJECT_TYPE_AUTHORIZATION_POLICIES = {
+  REQUIRE_CLIENT_GRANT: 'require_client_grant',
+  ALLOW_ALL: 'allow_all',
+  DENY_ALL: 'deny_all',
+};
+
 export const schema = {
   type: 'array',
   items: {
@@ -41,6 +47,39 @@ export const schema = {
           required: { type: 'boolean' },
         },
         required: ['mechanism', 'required'],
+      },
+      subject_type_authorization: {
+        type: 'object',
+        properties: {
+          user: {
+            type: 'object',
+            description: 'Access Permissions for user-initiated flows',
+            properties: {
+              policy: {
+                type: 'string',
+                enum: [
+                  SUBJECT_TYPE_AUTHORIZATION_POLICIES.ALLOW_ALL,
+                  SUBJECT_TYPE_AUTHORIZATION_POLICIES.DENY_ALL,
+                  SUBJECT_TYPE_AUTHORIZATION_POLICIES.REQUIRE_CLIENT_GRANT,
+                ],
+              },
+            },
+          },
+          client: {
+            type: 'object',
+            description: 'Access Permissions for client-initiated flows',
+            properties: {
+              policy: {
+                type: 'string',
+                enum: [
+                  SUBJECT_TYPE_AUTHORIZATION_POLICIES.DENY_ALL,
+                  SUBJECT_TYPE_AUTHORIZATION_POLICIES.REQUIRE_CLIENT_GRANT,
+                ],
+              },
+            },
+          },
+        },
+        additionalProperties: false,
       },
     },
     required: ['name', 'identifier'],
