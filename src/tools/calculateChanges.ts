@@ -554,23 +554,19 @@ export function calculateDryRunChanges({
     });
   del.push(...deletedAssets);
 
-  /*
-  console.log(`Calculated changes for [${type}]:`, {
-    del: del.length,
-    create: create.length,
-    conflicts: conflicts.length,
-    update: update.length,
-  });
-  */
+  const hasChanges =
+    del.length > 0 || create.length > 0 || conflicts.length > 0 || update.length > 0;
 
-  log.debug(
-    `[DryRun] calculated changes for [${type}]:${JSON.stringify({
-      del: del.length,
-      create: create.length,
-      conflicts: conflicts.length,
-      update: update.length,
-    })}`
-  );
+  if (hasChanges) {
+    log.debug(
+      `[DryRun] calculated changes for [${type}]:${JSON.stringify({
+        create: create.length,
+        update: update.length,
+        del: del.length,
+        conflicts: conflicts.length,
+      })}`
+    );
+  }
 
   return {
     del,
