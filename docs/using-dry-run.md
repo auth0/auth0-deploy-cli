@@ -139,8 +139,6 @@ Simulating deployment... The following changes are proposed:
 No changes detected.
 
 Dry Run completed successfully. No changes have been made to your Auth0 tenant.
-
-No changes to apply.
 ```
 
 ## Best Practices

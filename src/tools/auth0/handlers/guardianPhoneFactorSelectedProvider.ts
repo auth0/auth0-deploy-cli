@@ -85,9 +85,6 @@ export default class GuardianPhoneSelectedProviderHandler extends DefaultHandler
       const { del, update, create } = await this.calcChanges(assets);
 
       if (create.length === 0 && update.length === 0 && del.length === 0) {
-        log.debug(
-          `Start processChanges for guardianPhoneFactorSelectedProvider [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
-        );
         return;
       }
     }

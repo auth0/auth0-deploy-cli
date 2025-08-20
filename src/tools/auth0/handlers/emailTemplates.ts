@@ -85,9 +85,6 @@ export default class EmailTemplateHandler extends DefaultHandler {
       const { update, create } = await this.calcChanges(assets);
 
       if (create.length === 0 && update.length === 0) {
-        log.debug(
-          `Start processChanges for emailTemplates [update:${update.length}], [create:${create.length}]`
-        );
         return;
       }
     }

@@ -73,9 +73,6 @@ export default class FlowVaultHandler extends DefaultHandler {
 
     if (isDryRun(this.config)) {
       if (create.length === 0 && update.length === 0 && del.length === 0) {
-        log.debug(
-          `Start processChanges for flow vault connections [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
-        );
         return;
       }
     }

@@ -139,15 +139,12 @@ export default async function deploy(
     }
 
     output += '\n\n';
-    output +=
-      chalk.green('Dry Run completed successfully.') +
-      ' No changes have been made to your Auth0 tenant.\n\n';
+    output += chalk.green('Dry Run completed successfully.') + '\n';
 
     // Print the complete formatted output
     printCLIMessage(output);
 
     if (tableData.length === 0) {
-      printCLIMessage(chalk.dim('No changes to apply.'));
       return;
     }
 

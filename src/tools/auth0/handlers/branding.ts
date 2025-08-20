@@ -99,9 +99,6 @@ export default class BrandingHandler extends DefaultHandler {
       const { del, update, create } = await this.calcChanges(assets);
 
       if (del.length === 0 && update.length === 0 && create.length === 0) {
-        log.debug(
-          `Start processChanges for branding [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
-        );
         return;
       }
     }

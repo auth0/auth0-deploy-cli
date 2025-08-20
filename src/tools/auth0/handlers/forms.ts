@@ -159,9 +159,6 @@ export default class FormsHandler extends DefaultHandler {
         del.length === 0 &&
         conflicts.length === 0
       ) {
-        log.debug(
-          `Start processChanges for forms [delete:${del.length}] [update:${update.length}] [create:${create.length}] [conflicts:${conflicts.length}]`
-        );
         return;
       }
     }

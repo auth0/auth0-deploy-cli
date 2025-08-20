@@ -189,7 +189,6 @@ export default class TenantHandler extends DefaultHandler {
       const { update } = await this.calcChanges(assets);
 
       if (update.length === 0) {
-        log.debug(`Start processChanges for tenants [update:${update.length}]`);
         return;
       }
     }

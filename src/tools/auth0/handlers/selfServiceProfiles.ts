@@ -149,9 +149,6 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
 
     if (isDryRun(this.config)) {
       if (create.length === 0 && update.length === 0 && del.length === 0) {
-        log.debug(
-          `Start processChanges for selfServiceProfiles [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
-        );
         return;
       }
     }

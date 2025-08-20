@@ -41,9 +41,6 @@ export default class ThemesHandler extends DefaultHandler {
       const { del, update } = await this.calcChanges(assets);
 
       if (update.length === 0 && del.length === 0) {
-        log.debug(
-          `Start processChanges for themes [delete:${del.length}] [update:${update.length}]`
-        );
         return;
       }
     }
