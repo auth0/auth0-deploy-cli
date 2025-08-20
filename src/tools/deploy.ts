@@ -43,6 +43,7 @@ export default async function deploy(
     const allChanges = await auth0.dryRun();
 
     if (!isDebug) {
+      printCLIMessage('');
       s.stop('Done\n');
     }
 
@@ -145,6 +146,7 @@ export default async function deploy(
     printCLIMessage(output);
 
     if (tableData.length === 0) {
+      // Exit early if no changes are detected
       return;
     }
 
