@@ -88,6 +88,43 @@ describe('#clientGrants handler', () => {
       await stageFn.apply(handler, [{ clientGrants: data }]);
     });
 
+    it('should create client grants with subject_type and authorization_details_types', async () => {
+      const auth0 = {
+        clientGrants: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('advancedClientGrant');
+            expect(data.subject_type).to.equal('user');
+            expect(data.authorization_details_types).to.deep.equal([
+              'payment_initiation',
+              'account_information',
+            ]);
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'client_grants', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          name: 'advancedClientGrant',
+          subject_type: 'user',
+          authorization_details_types: ['payment_initiation', 'account_information'],
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+    });
+
     it('should get client grants', async () => {
       const clientId = 'rFeR6vyzQcDEgSUsASPeF4tXr3xbZhxE';
       const clientGrant = {

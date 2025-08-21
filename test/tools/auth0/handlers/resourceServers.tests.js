@@ -177,6 +177,53 @@ describe('#resourceServers handler', () => {
       ]);
     });
 
+    it('should create resource server with subject_type_authorization', async () => {
+      const auth0 = {
+        resourceServers: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('advancedAPI');
+            expect(data.subject_type_authorization).to.deep.equal({
+              user: {
+                policy: 'require_client_grant',
+              },
+              client: {
+                policy: 'deny_all',
+              },
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'resource_servers', []),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          resourceServers: [
+            {
+              name: 'advancedAPI',
+              identifier: 'https://advanced-api.example.com',
+              subject_type_authorization: {
+                user: {
+                  policy: 'require_client_grant',
+                },
+                client: {
+                  policy: 'deny_all',
+                },
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
     it('should get resource servers', async () => {
       const auth0 = {
         resourceServers: {

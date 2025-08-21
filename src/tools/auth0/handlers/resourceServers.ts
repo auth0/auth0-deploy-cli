@@ -1,4 +1,9 @@
-import { ResourceServer, ResourceServerProofOfPossessionMechanismEnum } from 'auth0';
+import {
+  ResourceServer,
+  ResourceServerProofOfPossessionMechanismEnum,
+  ResourceServerSubjectTypeAuthorizationClientPolicyEnum,
+  ResourceServerSubjectTypeAuthorizationUserPolicyEnum,
+} from 'auth0';
 import ValidationError from '../../validationError';
 
 import constants from '../../constants';
@@ -41,6 +46,32 @@ export const schema = {
           required: { type: 'boolean' },
         },
         required: ['mechanism', 'required'],
+      },
+      subject_type_authorization: {
+        type: 'object',
+        properties: {
+          user: {
+            type: 'object',
+            description: 'Access Permissions for user-initiated flows',
+            properties: {
+              policy: {
+                type: 'string',
+                enum: Object.values(ResourceServerSubjectTypeAuthorizationUserPolicyEnum),
+              },
+            },
+          },
+          client: {
+            type: 'object',
+            description: 'Access Permissions for client-initiated flows',
+            properties: {
+              policy: {
+                type: 'string',
+                enum: Object.values(ResourceServerSubjectTypeAuthorizationClientPolicyEnum),
+              },
+            },
+          },
+        },
+        additionalProperties: false,
       },
     },
     required: ['name', 'identifier'],
