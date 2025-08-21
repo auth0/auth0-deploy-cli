@@ -323,7 +323,7 @@ export function sortGuardianFactors(factors: Asset[]): Asset[] {
   });
 }
 
-// Check if dry-run flag is enbaled
+// Check if dry-run flag is enabled
 export function isDryRun(config: ConfigFunction): boolean {
   return config('AUTH0_DRY_RUN') === true || config('AUTH0_DRY_RUN') === 'true';
 }
