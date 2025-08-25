@@ -1,7 +1,6 @@
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Assets } from '../../../types';
-import log from '../../../logger';
 import { isDryRun } from '../../utils';
 
 export const schema = {

@@ -3,7 +3,6 @@ import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
 import { paginate } from '../client';
-import log from '../../../logger';
 import { isDryRun } from '../../utils';
 
 export const supportedPages = constants.PAGE_NAMES.filter((p) => p.includes('.json')).map((p) =>

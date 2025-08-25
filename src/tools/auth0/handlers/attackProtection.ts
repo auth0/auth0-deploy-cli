@@ -1,6 +1,5 @@
 import DefaultAPIHandler from './default';
 import { Asset, Assets } from '../../../types';
-import log from '../../../logger';
 import { isDryRun } from '../../utils';
 
 export const schema = {

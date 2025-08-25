@@ -2,7 +2,6 @@ import DefaultHandler, { order } from './default';
 import constants from '../../constants';
 import { Assets, Asset } from '../../../types';
 import { isDryRun } from '../../utils';
-import log from '../../../logger';
 
 export const supportedTemplates = constants.EMAIL_TEMPLATES_NAMES.filter((p) =>
   p.includes('.json')

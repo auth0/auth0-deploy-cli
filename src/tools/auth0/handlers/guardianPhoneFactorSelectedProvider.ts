@@ -3,7 +3,6 @@ import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
 import { isDryRun, isForbiddenFeatureError } from '../../utils';
-import log from '../../../logger';
 
 export const schema = {
   type: 'object',
