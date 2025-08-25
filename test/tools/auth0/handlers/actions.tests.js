@@ -639,9 +639,9 @@ describe('#actions handler', () => {
 
       const changes = await handler.dryRunChanges(assets);
 
-      expect(changes.create.length).to.be.greaterThan(0);
-      expect(changes.update.length).to.be.greaterThan(0);
-      expect(changes.del.length).to.be.greaterThan(0);
+      expect(changes.create.length).to.be.equal(1);
+      expect(changes.update.length).to.be.equal(2);
+      expect(changes.del.length).to.be.equal(1);
       expect(changes.conflicts).to.have.length(0);
     });
 
