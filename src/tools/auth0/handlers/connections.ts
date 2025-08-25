@@ -289,22 +289,6 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     return super.objString({ name: connection.name, id: connection.id });
   }
 
-  getFormattedOptions(connection, clients) {
-    try {
-      return {
-        options: {
-          ...connection.options,
-          idpinitiated: {
-            ...connection.options.idpinitiated,
-            client_id: convertClientNameToId(connection.options.idpinitiated.client_id, clients),
-          },
-        },
-      };
-    } catch (e) {
-      return {};
-    }
-  }
-
   async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
 
@@ -375,7 +359,6 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
 
     const formatted = connections.map((connection) => ({
       ...connection,
-      // ...this.getFormattedOptions(connection, clients),
       enabled_clients: getEnabledClients(assets, connection, existingConnections, clients),
     }));
     const proposedChanges = await super.calcChanges({ ...assets, connections: formatted });

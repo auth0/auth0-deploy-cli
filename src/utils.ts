@@ -305,3 +305,20 @@ export const decodeBase64ToCertString = (base64Cert: string) => {
     return base64Cert;
   }
 };
+
+// Format connection options by converting client IDs to client names for SAML connections
+export const getFormattedOptions = (connection, clients) => {
+  try {
+    return {
+      options: {
+        ...connection.options,
+        idpinitiated: {
+          ...connection.options.idpinitiated,
+          client_id: convertClientIdToName(connection.options.idpinitiated.client_id, clients),
+        },
+      },
+    };
+  } catch (e) {
+    return {};
+  }
+};
