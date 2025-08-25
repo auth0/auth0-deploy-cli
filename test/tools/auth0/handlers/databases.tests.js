@@ -1958,4 +1958,195 @@ describe('#databases handler with enabled clients integration', () => {
       processConnectionEnabledClientsStub.restore();
     });
   });
+
+  describe('#databases dryRunChanges', () => {
+    const dryRunConfig = function (key) {
+      return dryRunConfig.data && dryRunConfig.data[key];
+    };
+
+    dryRunConfig.data = {
+      AUTH0_CLIENT_ID: 'client_id',
+      AUTH0_ALLOW_DELETE: true,
+    };
+
+    it('should return create changes for new databases', async () => {
+      const auth0 = {
+        connections: {
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        databases: [
+          { name: 'New Database 1', strategy: 'auth0' },
+          { name: 'New Database 2', strategy: 'auth0' },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(2);
+      expect(changes.create[0]).to.include({ name: 'New Database 1', strategy: 'auth0' });
+      expect(changes.create[1]).to.include({ name: 'New Database 2', strategy: 'auth0' });
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return update changes for existing databases with differences', async () => {
+      const auth0 = {
+        connections: {
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              {
+                id: 'db1',
+                name: 'Existing Database',
+                strategy: 'auth0',
+                options: { brute_force_protection: false },
+              },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        databases: [
+          {
+            name: 'Existing Database',
+            strategy: 'auth0',
+            options: { brute_force_protection: true },
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(1);
+      expect(changes.update[0]).to.include({
+        name: 'Existing Database',
+        strategy: 'auth0',
+        id: 'db1',
+      });
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return delete changes for databases not in assets', async () => {
+      const auth0 = {
+        connections: {
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'db1', name: 'Database To Remove', strategy: 'auth0' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = { databases: [] };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(1);
+      expect(changes.del[0]).to.include({
+        id: 'db1',
+        name: 'Database To Remove',
+        strategy: 'auth0',
+      });
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return no changes when databases are identical', async () => {
+      const auth0 = {
+        connections: {
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              {
+                id: 'db1',
+                name: 'Unchanged Database',
+                strategy: 'auth0',
+                options: { brute_force_protection: true },
+              },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        databases: [
+          {
+            name: 'Unchanged Database',
+            strategy: 'auth0',
+            options: { brute_force_protection: true },
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle mixed create, update, and delete operations', async () => {
+      const auth0 = {
+        connections: {
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              {
+                id: 'db1',
+                name: 'Update Database',
+                strategy: 'auth0',
+                options: { brute_force_protection: false },
+              },
+              { id: 'db2', name: 'Delete Database', strategy: 'auth0' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        databases: [
+          { name: 'Update Database', strategy: 'auth0', options: { brute_force_protection: true } },
+          { name: 'Create Database', strategy: 'auth0' },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create.length).to.be.greaterThan(0);
+      expect(changes.update.length).to.be.greaterThan(0);
+      expect(changes.del.length).to.be.greaterThan(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle empty assets', async () => {
+      const auth0 = {
+        connections: {
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {}; // No databases property
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+  });
 });

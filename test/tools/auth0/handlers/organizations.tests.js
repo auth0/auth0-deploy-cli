@@ -752,4 +752,282 @@ describe('#organizations handler', () => {
       await stageFn.apply(handler, [{ organizations: [{}] }]);
     });
   });
+
+  describe('#organizations dryRunChanges', () => {
+    const dryRunConfig = function (key) {
+      return dryRunConfig.data && dryRunConfig.data[key];
+    };
+
+    dryRunConfig.data = {
+      AUTH0_ALLOW_DELETE: true,
+    };
+
+    it('should return create changes for new organizations', async () => {
+      const auth0 = {
+        organizations: {
+          getAll: (params) => mockPagedData(params, 'organizations', []),
+          getEnabledConnections: () => mockPagedData({}, 'enabled_connections', []),
+          getInvitations: () => mockPagedData({}, 'invitations', []),
+          getMembers: () => mockPagedData({}, 'members', []),
+          getClientGrants: () => mockPagedData({}, 'client_grants', []),
+        },
+        connections: {
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', []),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({
+        client: pageClient(auth0),
+        config: dryRunConfig,
+      });
+      const assets = {
+        organizations: [
+          { name: 'New Org 1', display_name: 'New Organization 1' },
+          { name: 'New Org 2', display_name: 'New Organization 2' },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(2);
+      expect(changes.create[0]).to.include({
+        name: 'New Org 1',
+        display_name: 'New Organization 1',
+      });
+      expect(changes.create[1]).to.include({
+        name: 'New Org 2',
+        display_name: 'New Organization 2',
+      });
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return update changes for existing organizations with differences', async () => {
+      const auth0 = {
+        organizations: {
+          getAll: (params) =>
+            mockPagedData(params, 'organizations', [
+              { id: 'org1', name: 'Existing Org', display_name: 'Old Display Name' },
+            ]),
+          getEnabledConnections: () => mockPagedData({}, 'enabled_connections', []),
+          getInvitations: () => mockPagedData({}, 'invitations', []),
+          getMembers: () => mockPagedData({}, 'members', []),
+          getClientGrants: () => mockPagedData({}, 'client_grants', []),
+          getOrganizationClientGrants: () => mockPagedData({}, 'client_grants', []),
+        },
+        connections: {
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', []),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({
+        client: pageClient(auth0),
+        config: dryRunConfig,
+      });
+      const assets = {
+        organizations: [{ name: 'Existing Org', display_name: 'New Display Name' }],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(1);
+      expect(changes.update[0]).to.include({
+        name: 'Existing Org',
+        display_name: 'New Display Name',
+        id: 'org1',
+      });
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return delete changes for organizations not in assets', async () => {
+      const auth0 = {
+        organizations: {
+          getAll: (params) =>
+            mockPagedData(params, 'organizations', [
+              { id: 'org1', name: 'Org To Remove', display_name: 'Remove Me' },
+            ]),
+          getEnabledConnections: () => mockPagedData({}, 'enabled_connections', []),
+          getInvitations: () => mockPagedData({}, 'invitations', []),
+          getMembers: () => mockPagedData({}, 'members', []),
+          getClientGrants: () => mockPagedData({}, 'client_grants', []),
+          getOrganizationClientGrants: () => mockPagedData({}, 'client_grants', []),
+        },
+        connections: {
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', []),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({
+        client: pageClient(auth0),
+        config: dryRunConfig,
+      });
+      const assets = { organizations: [] };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(1);
+      expect(changes.del[0]).to.include({
+        id: 'org1',
+        name: 'Org To Remove',
+        display_name: 'Remove Me',
+      });
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return no changes when organizations are identical', async () => {
+      const auth0 = {
+        organizations: {
+          getAll: (params) =>
+            mockPagedData(params, 'organizations', [
+              {
+                id: 'org1',
+                name: 'Unchanged Org',
+                display_name: 'Unchanged Organization',
+              },
+            ]),
+          getEnabledConnections: () => mockPagedData({}, 'enabled_connections', []),
+          getInvitations: () => mockPagedData({}, 'invitations', []),
+          getMembers: () => mockPagedData({}, 'members', []),
+          getClientGrants: () => mockPagedData({}, 'client_grants', []),
+          getOrganizationClientGrants: () => mockPagedData({}, 'client_grants', []),
+        },
+        connections: {
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', []),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({
+        client: pageClient(auth0),
+        config: dryRunConfig,
+      });
+      const assets = {
+        organizations: [
+          {
+            name: 'Unchanged Org',
+            display_name: 'Unchanged Organization',
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle mixed create, update, and delete operations', async () => {
+      const auth0 = {
+        organizations: {
+          getAll: (params) =>
+            mockPagedData(params, 'organizations', [
+              { id: 'org1', name: 'Update Org', display_name: 'Old Name' },
+              { id: 'org2', name: 'Delete Org', display_name: 'Delete Me' },
+            ]),
+          getEnabledConnections: () => mockPagedData({}, 'enabled_connections', []),
+          getInvitations: () => mockPagedData({}, 'invitations', []),
+          getMembers: () => mockPagedData({}, 'members', []),
+          getClientGrants: () => mockPagedData({}, 'client_grants', []),
+          getOrganizationClientGrants: () => mockPagedData({}, 'client_grants', []),
+        },
+        connections: {
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', []),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({
+        client: pageClient(auth0),
+        config: dryRunConfig,
+      });
+      const assets = {
+        organizations: [
+          { name: 'Update Org', display_name: 'New Name' },
+          { name: 'Create Org', display_name: 'Create Me' },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create.length).to.be.greaterThan(0);
+      expect(changes.update.length).to.be.greaterThan(0);
+      expect(changes.del.length).to.be.greaterThan(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle empty assets', async () => {
+      const auth0 = {
+        organizations: {
+          getAll: (params) => mockPagedData(params, 'organizations', []),
+          getEnabledConnections: () => mockPagedData({}, 'enabled_connections', []),
+          getInvitations: () => mockPagedData({}, 'invitations', []),
+          getMembers: () => mockPagedData({}, 'members', []),
+          getClientGrants: () => mockPagedData({}, 'client_grants', []),
+        },
+        connections: {
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', []),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({
+        client: pageClient(auth0),
+        config: dryRunConfig,
+      });
+      const assets = {}; // No organizations property
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+  });
 });

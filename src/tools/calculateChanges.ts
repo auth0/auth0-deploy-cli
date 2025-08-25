@@ -1,6 +1,12 @@
+import { Client } from 'auth0';
+import chalk from 'chalk';
+import fs from 'node:fs/promises';
 import log from '../logger';
-import APIHandler from '../tools/auth0/handlers/default';
-import { Asset, CalculatedChanges } from '../types';
+import APIHandler from './auth0/handlers/default';
+import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../types';
+import { convertClientNameToId } from './utils';
+import { paginate } from './auth0/client';
+import { decodeBase64ToCertString } from '../utils';
 
 /**
  * @template T
@@ -93,14 +99,20 @@ export function calculateChanges({
 }: {
   handler: APIHandler;
   assets: Asset[];
-  existing: Asset[] | null;
+  existing: Asset[] | Asset | null;
   identifiers: string[];
   allowDelete: boolean;
 }): CalculatedChanges {
   // Calculate the changes required between two sets of assets.
   const update: Asset[] = [];
-  let del: Asset[] = [...(existing || [])];
-  let create: Asset[] = [...assets];
+  let del: Asset[] = [];
+  if (existing) {
+    del = Array.isArray(existing) ? [...existing] : [existing];
+  }
+  let create: Asset[] = [];
+  if (assets) {
+    create = Array.isArray(assets) ? [...assets] : [assets];
+  }
   const conflicts: Asset[] = [];
 
   const findByKeyValue = (key: string, value: string, arr: Asset[]): Asset | undefined =>
@@ -163,10 +175,9 @@ export function calculateChanges({
   // Loop through identifiers (in order) to try match assets to existing
   // If existing then update if not create
   // The remainder will be deleted
-  for (const id of identifiers) {
-    // eslint-disable-line
+  identifiers.forEach((id) => {
     processAssets(id, [...create]);
-  }
+  });
 
   // Check if there are assets with names that will conflict with existing names during the update process
   // This will rename those assets to a temp random name first
@@ -178,7 +189,15 @@ export function calculateChanges({
       // If the conflicting item is going to be deleted then skip
       const inDeleted = del.filter((e) => e.name === a.name && e[uniqueID] !== a[uniqueID])[0];
       if (!inDeleted) {
-        const conflict = (existing || []).filter(
+        let existingArray: Asset[];
+        if (Array.isArray(existing)) {
+          existingArray = existing;
+        } else if (existing) {
+          existingArray = [existing];
+        } else {
+          existingArray = [];
+        }
+        const conflict = existingArray.filter(
           (e) => e.name === a.name && e[uniqueID] !== a[uniqueID]
         )[0];
         if (conflict) {
@@ -198,4 +217,448 @@ export function calculateChanges({
     conflicts,
     create,
   };
+}
+
+const logStore: Record<string, string[]> = {};
+const diffLog = (resourceTypeName: string, message: string[]): void => {
+  if (!logStore[resourceTypeName]) {
+    logStore[resourceTypeName] = [];
+  }
+  logStore[resourceTypeName].push(...message);
+};
+
+const getDiffLog = (resourceTypeName?: string): string[] | { [key: string]: string[] } =>
+  resourceTypeName ? logStore[resourceTypeName] || [] : logStore;
+
+export const exportDiffLog = async (fileName: string, resourceTypeName?: string) => {
+  const diffLogData = getDiffLog(resourceTypeName);
+  try {
+    await fs.writeFile(`./${fileName}`, JSON.stringify(diffLogData, null, 2));
+  } catch (error) {
+    log.error(`Failed to export diff log: ${String(error)}`);
+  }
+};
+
+/**
+ * Compares two objects and returns an array of differences found.
+ * Only considers keys that exist in obj1 - extra keys in obj2 are ignored.
+ * @param localObj - The first object (preferred values)
+ * @param remoteObj - The second object to compare against
+ * @param keyObjPath - The current JSON path for nested object tracking
+ * @param resourceTypeName - The resource type name for logging
+ * @returns Array of difference descriptions, empty array if no differences
+ */
+
+export function getObjectDifferences(
+  localObj: Record<string, any>,
+  remoteObj: Record<string, any>,
+  keyObjPath: string = '',
+  resourceTypeName: string = '',
+  ignoreDryRunFields: string[] = []
+): string[] {
+  const differences: string[] = [];
+
+  Object.keys(localObj).forEach((key) => {
+    const localValue = localObj[key];
+    const remoteValue = remoteObj[key];
+    const currentPath = keyObjPath ? `${keyObjPath}.${key}` : key;
+
+    // If key doesn't exist in remoteObj, there's a difference
+    if (!(key in remoteObj)) {
+      if (ignoreDryRunFields.includes(currentPath)) {
+        log.debug(
+          `[${chalk.blue(resourceTypeName)}] Ignoring key ${chalk.yellow(
+            `"${currentPath}"`
+          )} due to ignoreDryRunFields configuration.`
+        );
+        return;
+      }
+
+      const message = `Key [${currentPath}] found in 'localObj' but not in 'remoteObj'.`;
+
+      log.debug(
+        `[${chalk.blue(resourceTypeName)}] Key ${chalk.yellow(
+          `"${currentPath}"`
+        )} found in 'localObj' but not in 'remoteObj'.`
+      );
+      differences.push(message);
+      return;
+    }
+
+    // Handle arrays
+    if (Array.isArray(localValue) && Array.isArray(remoteValue)) {
+      if (localValue.length !== remoteValue.length) {
+        const message = `Array length difference for [${currentPath}]: local:${localValue.length} vs remote:${remoteValue.length}`;
+        log.debug(
+          `[${chalk.blue(resourceTypeName)}] Array length difference for ${chalk.yellow(
+            `"${currentPath}"`
+          )}: local:${localValue.length} vs remote:${remoteValue.length}`
+        );
+        differences.push(message);
+      }
+
+      // For arrays with objects, compare in order; for primitive arrays, ignore order
+      const hasObjects = localValue.some((item) => typeof item === 'object' && item !== null);
+
+      if (hasObjects) {
+        localValue.forEach((item, index) => {
+          if (
+            typeof item === 'object' &&
+            item !== null &&
+            typeof remoteValue[index] === 'object' &&
+            remoteValue[index] !== null
+          ) {
+            const nestedDifferences = getObjectDifferences(
+              item,
+              remoteValue[index],
+              `${currentPath}[${index}]`,
+              resourceTypeName,
+              ignoreDryRunFields
+            );
+            differences.push(...nestedDifferences);
+          } else if (item !== remoteValue[index]) {
+            const message = `Array item difference at [${currentPath}[${index}]]: local:${item} vs remote:${remoteValue[index]}`;
+            differences.push(message);
+          }
+        });
+      } else {
+        // Compare primitive arrays ignoring order
+        const sorted1 = [...localValue].sort();
+        const sorted2 = [...remoteValue].sort();
+        const isDifferent = sorted1.some((item, index) => item !== sorted2[index]);
+
+        if (isDifferent) {
+          const message = `Array content difference found for key [${currentPath}]`;
+          log.debug(
+            `[${chalk.blue(
+              resourceTypeName
+            )}] Array content difference found for key ${chalk.yellow(`"${currentPath}"`)}`
+          );
+          differences.push(message);
+        }
+      }
+      return;
+    }
+
+    // Handle nested objects
+    if (
+      typeof localValue === 'object' &&
+      localValue !== null &&
+      typeof remoteValue === 'object' &&
+      remoteValue !== null
+    ) {
+      const nestedDifferences = getObjectDifferences(
+        localValue,
+        remoteValue,
+        currentPath,
+        resourceTypeName,
+        ignoreDryRunFields
+      );
+      differences.push(...nestedDifferences);
+      return;
+    }
+
+    // Compare primitive values
+    if (localValue !== remoteValue) {
+      const message = `Value difference for [${currentPath}]: local:${localValue} vs remote:${remoteValue}`;
+      log.debug(
+        `[${chalk.blue(resourceTypeName)}] Value difference for ${chalk.yellow(
+          `"${currentPath}"`
+        )}: local:${localValue} vs remote:${remoteValue}`
+      );
+      differences.push(message);
+    }
+  });
+
+  return differences;
+}
+
+/**
+ * Compares two objects and returns true if there are differences.
+ * Only considers keys that exist in obj1 - extra keys in obj2 are ignored.
+ * @param obj1 - The first object (preferred values)
+ * @param obj2 - The second object to compare against
+ * @param keyObjPath - The current JSON path for nested object tracking
+ * @returns true if objects differ, false if they are the same
+ */
+
+export function hasObjectDifferences(
+  localObj: Record<string, any>,
+  remoteObj: Record<string, any>,
+  keyObjPath: string = '',
+  resourceTypeName: string = '',
+  ignoreDryRunFields: string[] = []
+): boolean {
+  const differences = getObjectDifferences(
+    localObj,
+    remoteObj,
+    keyObjPath,
+    resourceTypeName,
+    ignoreDryRunFields
+  );
+  diffLog(resourceTypeName, differences);
+  return differences.length > 0;
+}
+
+/**
+ * Calculates the changes required between local and remote asset sets for dry run operations.
+ *
+ * This function compares local assets with existing remote assets to determine what operations
+ * need to be performed: create new assets, update existing ones, or delete removed assets.
+ * Assets are matched using configurable identifier fields.
+ *
+ * @param params - The configuration object for calculating changes
+ * @param params.type - The type of assets being compared (used for logging)
+ * @param params.assets - Array of local assets to be deployed
+ * @param params.existing - Array of existing remote assets, or null if none exist
+ * @param params.identifiers - Array of field names or field name arrays used to match assets between local and remote sets. Default is ['id', 'name']
+ *
+ */
+export function calculateDryRunChanges({
+  type,
+  assets,
+  existing,
+  identifiers = ['id', 'name'],
+  ignoreDryRunFields = [],
+}: {
+  type: string;
+  assets: Asset[] | Asset;
+  existing: Asset[] | Asset | null;
+  identifiers: string[];
+  ignoreDryRunFields: string[];
+}): CalculatedChanges {
+  // Calculate the changes required between two sets of assets.
+  const update: Asset[] = [];
+  const del: Asset[] = [];
+  const create: Asset[] = [];
+  const conflicts: Asset[] = [];
+
+  const localAssets: Asset[] = Array.isArray(assets) ? [...assets] : [assets]; // Local assets (what we have locally)
+  const remoteAssets: Asset[] = Array.isArray(existing) ? [...existing] : [existing]; // Remote assets (what exists remotely)
+
+  // identify created
+  const createdAssets = localAssets.filter(
+    (localAsset) =>
+      !remoteAssets.some((remoteAsset) =>
+        identifiers.some((id) => {
+          if (Array.isArray(id)) {
+            const localValues = id.map((i) => localAsset[i]);
+            const remoteValues = id.map((i) => remoteAsset[i]);
+            return (
+              localValues.every((v) => v) &&
+              remoteValues.every((v) => v) &&
+              localValues.join('-') === remoteValues.join('-')
+            );
+          }
+          return localAsset[id] === remoteAsset[id];
+        })
+      )
+  );
+  create.push(...createdAssets);
+
+  // identify updated
+  const updatedAssets = localAssets.filter((localAsset) => {
+    const matchingRemoteAsset = remoteAssets.find((remoteAsset) =>
+      identifiers.some((id) => {
+        if (Array.isArray(id)) {
+          const localValues = id.map((i) => localAsset[i]);
+          const remoteValues = id.map((i) => remoteAsset[i]);
+          return (
+            localValues.every((v) => v !== undefined && v !== null) &&
+            remoteValues.every((v) => v !== undefined && v !== null) &&
+            localValues.join('-') === remoteValues.join('-')
+          );
+        }
+        return (
+          localAsset[id] !== undefined &&
+          remoteAsset[id] !== undefined &&
+          localAsset[id] === remoteAsset[id]
+        );
+      })
+    );
+
+    if (matchingRemoteAsset) {
+      // Add missing identifiers from remote asset to local asset
+      identifiers.forEach((id) => {
+        if (Array.isArray(id)) {
+          // Handle array identifiers - ensure all parts exist
+          id.forEach((idPart) => {
+            if (!localAsset[idPart] && matchingRemoteAsset[idPart]) {
+              localAsset[idPart] = matchingRemoteAsset[idPart];
+            }
+          });
+        } else if (!localAsset[id] && matchingRemoteAsset[id]) {
+          // Handle single identifier
+          localAsset[id] = matchingRemoteAsset[id];
+        }
+      });
+
+      return hasObjectDifferences(
+        localAsset,
+        matchingRemoteAsset,
+        matchingRemoteAsset.name ?? '',
+        type,
+        ignoreDryRunFields
+      );
+    }
+
+    // If no match found, check with hasObjectDifferences against all remote assets
+    return remoteAssets.some((remoteAsset) =>
+      hasObjectDifferences(
+        localAsset,
+        remoteAsset,
+        remoteAsset.name ?? '',
+        type,
+        ignoreDryRunFields
+      )
+    );
+  });
+  update.push(...updatedAssets);
+
+  // identify deleted
+  const deletedAssets = remoteAssets
+    .filter(
+      (remoteAsset) =>
+        !localAssets.some((localAsset) =>
+          identifiers.some((id) => {
+            if (Array.isArray(id)) {
+              const localValues = id.map((i) => localAsset[i]);
+              const remoteValues = id.map((i) => remoteAsset[i]);
+              return (
+                localValues.every((v) => v) &&
+                remoteValues.every((v) => v) &&
+                localValues.join('-') === remoteValues.join('-')
+              );
+            }
+            return localAsset[id] === remoteAsset[id];
+          })
+        )
+    )
+    .map((remoteAsset) => {
+      // Add missing identifiers from remote asset for proper tracking
+      const assetWithIdentifiers = { ...remoteAsset };
+      identifiers.forEach((id) => {
+        if (Array.isArray(id)) {
+          // Handle array identifiers - ensure all parts exist
+          id.forEach((idPart) => {
+            if (remoteAsset[idPart]) {
+              assetWithIdentifiers[idPart] = remoteAsset[idPart];
+            }
+          });
+        } else if (remoteAsset[id]) {
+          // Handle single identifier
+          assetWithIdentifiers[id] = remoteAsset[id];
+        }
+      });
+      return assetWithIdentifiers;
+    });
+  del.push(...deletedAssets);
+
+  const hasChanges =
+    del.length > 0 || create.length > 0 || conflicts.length > 0 || update.length > 0;
+
+  if (hasChanges) {
+    log.debug(
+      `[DryRun] calculated changes for [${type}]:${JSON.stringify({
+        create: create.length,
+        update: update.length,
+        del: del.length,
+        conflicts: conflicts.length,
+      })}`
+    );
+  }
+
+  return {
+    del,
+    create,
+    conflicts,
+    update,
+  };
+}
+
+/**
+ * Performs a dry run formatting of assets for dry run compare.
+ * - converting client names to client IDs or vice versa
+ *
+ * @param assets - The assets object containing databases and clients configurations
+ * @param authAPIclient - The Auth0 API client instance used to fetch remote client data
+ * @returns A Promise that resolves to the formatted assets object with client names converted to IDs
+ */
+export async function dryRunFormatAssets(
+  localAssets: Assets,
+  authAPIclient: Auth0APIClient
+): Promise<Assets> {
+  // get client remote data
+  const clientsRemoteData = await paginate<Client>(authAPIclient.clients.getAll, {
+    paginate: true,
+    include_totals: true,
+  });
+
+  // check assets clientGrants and clients together and have values
+  if (localAssets.clientGrants) {
+    const { clientGrants } = localAssets;
+    localAssets.clientGrants = clientGrants.map((clientGrant) => {
+      if (clientGrant.client_id) {
+        clientGrant.client_id = convertClientNameToId(clientGrant.client_id, clientsRemoteData);
+      }
+      return clientGrant;
+    });
+  }
+
+  // check assets databases and clients together and have values
+  if (localAssets.databases && localAssets.clients) {
+    const { databases } = localAssets;
+    localAssets.databases = databases.map((db) => {
+      if (db.enabled_clients && db.enabled_clients.length > 0) {
+        db.enabled_clients = db.enabled_clients.map((enabledClientName) =>
+          convertClientNameToId(enabledClientName, clientsRemoteData)
+        );
+      }
+      return db;
+    });
+  }
+
+  // format assets actions
+  if (localAssets.actions) {
+    const { actions } = localAssets;
+    localAssets.actions = actions.map((action) => {
+      if ('deployed' in action) {
+        action.all_changes_deployed = action.deployed;
+        delete action.deployed;
+      }
+      return action;
+    });
+  }
+
+  // format assets connections
+  if (localAssets.connections) {
+    const { connections } = localAssets;
+    localAssets.connections = connections.map((connection) => {
+      if (connection.strategy === 'samlp' && connection.options) {
+        if ('cert' in connection.options) {
+          connection.options.cert = decodeBase64ToCertString(connection.options.cert);
+        }
+      }
+      if (localAssets.clients && connection.enabled_clients) {
+        connection.enabled_clients = connection.enabled_clients.map((clientName) =>
+          convertClientNameToId(clientName, clientsRemoteData)
+        );
+      }
+      return connection;
+    });
+  }
+
+  // format assets branding
+  if (localAssets.branding) {
+    const { branding } = localAssets;
+
+    // if empty templates do not compare with remote
+    if (branding.templates && branding.templates.length === 0) {
+      delete branding.templates;
+    }
+
+    localAssets.branding = branding;
+  }
+
+  return localAssets;
 }

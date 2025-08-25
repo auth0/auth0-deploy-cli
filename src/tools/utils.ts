@@ -5,6 +5,7 @@ import _ from 'lodash';
 import log from '../logger';
 import { Asset, Assets, CalculatedChanges, KeywordMappings } from '../types';
 import constants from './constants';
+import { ConfigFunction } from '../configFactory';
 
 export const keywordReplaceArrayRegExp = (key) => {
   const pattern = `@@${key}@@`;
@@ -305,4 +306,29 @@ export function maskSecretAtPath({
     dotProp.set(maskOnObj, keyJsonPath, maskValue);
   }
   return maskOnObj;
+}
+
+// Sort guardian factors by name
+export function sortGuardianFactors(factors: Asset[]): Asset[] {
+  // if no factors, return empty array
+  if (!factors || factors.length === 0) return [];
+
+  return factors.sort((a, b) => {
+    const nameA = a.name || '';
+    const nameB = b.name || '';
+
+    if (nameA < nameB) return -1;
+    if (nameA > nameB) return 1;
+    return 0;
+  });
+}
+
+// Check if dry-run flag is enabled
+export function isDryRun(config: ConfigFunction): boolean {
+  return config('AUTH0_DRY_RUN') === true || config('AUTH0_DRY_RUN') === 'true';
+}
+
+// Print a message to the CLI message console
+export function printCLIMessage(message: string): void {
+  process.stdout.write(message + '\n');
 }

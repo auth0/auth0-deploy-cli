@@ -66,6 +66,7 @@ export type Config = {
   AUTH0_KEYWORD_REPLACE_MAPPINGS?: KeywordMappings;
   AUTH0_EXPORT_IDENTIFIERS?: boolean;
   AUTH0_CONNECTIONS_DIRECTORY?: string;
+  AUTH0_DRY_RUN?: boolean;
   EXCLUDED_PROPS?: {
     [key: string]: string[];
   };
@@ -140,6 +141,21 @@ export type CalculatedChanges = {
   update: Asset[];
   conflicts: Asset[];
   create: Asset[];
+};
+
+export type DetailedDryRunChange = {
+  action: 'CREATE' | 'UPDATE' | 'DELETE';
+  identifier: string;
+  details?: any;
+};
+
+export type DetailedDryRunChanges = {
+  [key: string]: {
+    created: number;
+    updated: number;
+    deleted: number;
+    changes: DetailedDryRunChange[];
+  };
 };
 
 export type AssetTypes =

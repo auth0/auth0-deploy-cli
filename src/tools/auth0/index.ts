@@ -1,12 +1,21 @@
 import Ajv from 'ajv/lib/ajv';
+import { cloneDeep } from 'lodash';
 
 import pagedClient from './client';
 import schema from './schema';
 import handlers from './handlers';
 
-import { Assets, AssetTypes, Auth0APIClient } from '../../types';
+import {
+  Assets,
+  AssetTypes,
+  Auth0APIClient,
+  CalculatedChanges,
+  DetailedDryRunChanges,
+  DetailedDryRunChange,
+} from '../../types';
 import APIHandler from './handlers/default';
 import { ConfigFunction } from '../../configFactory';
+import { dryRunFormatAssets } from '../calculateChanges';
 
 export type Stage = 'load' | 'validate' | 'processChanges';
 
@@ -96,5 +105,73 @@ export default class Auth0 {
 
   async processChanges(): Promise<void> {
     await this.runStage('processChanges');
+  }
+
+  async dryRun(): Promise<DetailedDryRunChanges> {
+    // In dry run mode, perform a dry run instead of processing changes
+    const allChanges: DetailedDryRunChanges = {};
+
+    this.assets = await dryRunFormatAssets(cloneDeep(this.assets), this.client);
+
+    // Process each handler to collect changes
+    await Promise.all(
+      this.handlers.map(async (handler) => {
+        try {
+          const detailedChanges: DetailedDryRunChange[] = [];
+          let created = 0;
+          let updated = 0;
+          let deleted = 0;
+
+          const changes: CalculatedChanges = await handler.dryRunChanges(this.assets);
+
+          // Add detailed information for each change
+          if (changes.create) {
+            changes.create.forEach((item) => {
+              detailedChanges.push({
+                action: 'CREATE' as const,
+                identifier: handler.getResourceName(item),
+                details: item,
+              });
+            });
+            created = changes.create.length;
+          }
+
+          if (changes.update) {
+            changes.update.forEach((item) => {
+              detailedChanges.push({
+                action: 'UPDATE' as const,
+                identifier: handler.getResourceName(item),
+                details: item,
+              });
+            });
+            updated = changes.update.length;
+          }
+
+          if (changes.del) {
+            changes.del.forEach((item) => {
+              detailedChanges.push({
+                action: 'DELETE' as const,
+                identifier: handler.getResourceName(item),
+                details: item,
+              });
+            });
+            deleted = changes.del.length;
+          }
+
+          allChanges[handler.type] = {
+            created,
+            updated,
+            deleted,
+            changes: detailedChanges,
+          };
+        } catch (err) {
+          err.type = handler.type;
+          err.stage = 'dryRun';
+          throw err;
+        }
+      })
+    );
+
+    return allChanges;
   }
 }

@@ -591,3 +591,55 @@ describe('keyword preservation', () => {
     throw new Error("The above should've thrown an exception");
   });
 });
+
+describe('#end-to-end dry run', function () {
+  it('should perform dry run without making changes', async function () {
+    const { recordingDone } = await setupRecording(this.test?.title);
+
+    const baseConfig = {
+      AUTH0_DOMAIN,
+      AUTH0_CLIENT_ID,
+      AUTH0_CLIENT_SECRET,
+      AUTH0_ACCESS_TOKEN,
+    };
+
+    // Capture initial state
+    const workDirectory = testNameToWorkingDirectory(`${this.test?.title}-initial-state`);
+    await dump({
+      output_folder: workDirectory,
+      format: 'yaml',
+      config: baseConfig,
+    });
+
+    const tenantFile = path.join(workDirectory, 'tenant.yaml');
+    const initialState = yamlLoad(fs.readFileSync(tenantFile, 'utf8'));
+
+    // Perform dry run deploy
+    const dryRunResult = await deploy({
+      input_file: `${workDirectory}/tenant.yaml`,
+      config: {
+        ...baseConfig,
+        AUTH0_DRY_RUN: true,
+      },
+    });
+
+    // Validate dry run results as not change made
+    expect(dryRunResult).to.equal(undefined);
+
+    // Verify no actual changes were made by comparing tenant state
+    const workDirectory2 = testNameToWorkingDirectory(`${this.test?.title}-after-dry-run`);
+    await dump({
+      output_folder: workDirectory2,
+      format: 'yaml',
+      config: baseConfig,
+    });
+
+    const tenantFile2 = path.join(workDirectory2, 'tenant.yaml');
+    const finalState = yamlLoad(fs.readFileSync(tenantFile2, 'utf8'));
+
+    // State should be unchanged after dry run
+    expect(finalState).to.deep.equal(initialState);
+
+    recordingDone();
+  });
+});

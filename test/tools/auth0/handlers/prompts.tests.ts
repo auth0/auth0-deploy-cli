@@ -601,4 +601,252 @@ describe('#prompts handler', () => {
       expect(result).to.deep.equal({});
     });
   });
+
+  describe('#prompts dryRunChanges', () => {
+    let handler;
+    let stageFn;
+    let contextDataMock;
+    let dryRunConfig;
+
+    beforeEach(() => {
+      dryRunConfig = function (key) {
+        return key === 'AUTH0_DRY_RUN' || key === 'DRY_RUN';
+      };
+
+      contextDataMock = {
+        prompts: {
+          universal_login_experience: 'new',
+          identifier_first: false,
+          customText: {
+            en: {
+              login: {
+                login: {
+                  buttonText: 'Updated Login',
+                  description: 'Updated login description',
+                },
+              },
+            },
+          },
+          partials: {
+            login: {
+              login: {
+                'form-content-start': '<div>Updated partial</div>',
+              },
+            },
+          },
+        },
+      };
+
+      stageFn = (params) => {
+        const { repository, mappings } = params;
+        if (repository && mappings) {
+          return contextDataMock;
+        }
+        return {};
+      };
+    });
+
+    it('should return update changes for prompts with differences', async () => {
+      const auth0 = {
+        prompts: {
+          get: () => ({
+            data: {
+              universal_login_experience: 'classic',
+              identifier_first: true,
+            },
+          }),
+          getCustomTextByLanguage: () =>
+            Promise.resolve({
+              data: {
+                login: {
+                  buttonText: 'Original Login',
+                  description: 'Original login description',
+                },
+              },
+            }),
+          getPartialsPrompt: () => ({
+            data: {
+              login: {
+                'form-content-start': '<div>Original partial</div>',
+              },
+            },
+          }),
+          getAllRenderingSettings: () => ({
+            data: [],
+          }),
+        },
+        tenants: {
+          getSettings: () =>
+            Promise.resolve({
+              data: {
+                enabled_locales: ['en'],
+              },
+            }),
+        },
+        pool: {
+          addEachTask: ({ data, generator }) => ({
+            promise: () => Promise.resolve(data.map(generator).filter((x) => x !== null)),
+          }),
+        },
+      };
+
+      handler = new promptsHandler({
+        client: auth0,
+        config: dryRunConfig,
+        stageFn,
+      });
+
+      const changes = await handler.dryRunChanges(contextDataMock);
+
+      expect(changes.del).to.have.length(0);
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(1);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return no changes when prompts is identical', async () => {
+      const auth0 = {
+        prompts: {
+          get: () => ({
+            data: {
+              universal_login_experience: 'new',
+              identifier_first: false,
+            },
+          }),
+          getCustomTextByLanguage: ({ language, prompt }) => {
+            if (language === 'en' && prompt === 'login') {
+              return Promise.resolve({
+                data: {
+                  login: {
+                    buttonText: 'Updated Login',
+                    description: 'Updated login description',
+                  },
+                },
+              });
+            }
+            return Promise.resolve({ data: {} });
+          },
+          getPartials: ({ prompt }) => {
+            if (prompt === 'login') {
+              return Promise.resolve({
+                data: {
+                  login: {
+                    'form-content-start': '<div>Updated partial</div>',
+                  },
+                },
+              });
+            }
+            return Promise.resolve({ data: {} });
+          },
+          getAllRenderingSettings: () => ({
+            data: [],
+          }),
+        },
+        tenants: {
+          getSettings: () =>
+            Promise.resolve({
+              data: {
+                enabled_locales: ['en'],
+              },
+            }),
+        },
+        pool: {
+          addEachTask: ({ data, generator }) => ({
+            promise: () => {
+              // Simulate the custom text fetching
+              if (data[0] && data[0].language === 'en' && data[0].promptType === 'login') {
+                return Promise.resolve([
+                  {
+                    language: 'en',
+                    login: {
+                      login: {
+                        buttonText: 'Updated Login',
+                        description: 'Updated login description',
+                      },
+                    },
+                  },
+                ]);
+              }
+              // Simulate the partials fetching
+              if (data[0] === 'login') {
+                return Promise.resolve([
+                  {
+                    promptType: 'login',
+                    partialsData: {
+                      login: {
+                        'form-content-start': '<div>Updated partial</div>',
+                      },
+                    },
+                  },
+                ]);
+              }
+              return Promise.resolve([]);
+            },
+          }),
+        },
+      };
+
+      handler = new promptsHandler({
+        client: auth0,
+        config: dryRunConfig,
+        stageFn,
+      });
+
+      const changes = await handler.dryRunChanges(contextDataMock);
+
+      expect(changes.del).to.have.length(0);
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle empty assets', async () => {
+      const auth0 = {
+        prompts: {
+          get: () => ({
+            data: {
+              universal_login_experience: 'classic',
+              identifier_first: true,
+            },
+          }),
+          getCustomTextByLanguage: () =>
+            Promise.resolve({
+              data: {},
+            }),
+          getPartialsPrompt: () => ({
+            data: {},
+          }),
+          getAllRenderingSettings: () => ({
+            data: [],
+          }),
+        },
+        tenants: {
+          getSettings: () =>
+            Promise.resolve({
+              data: {
+                enabled_locales: ['en'],
+              },
+            }),
+        },
+        pool: {
+          addEachTask: ({ data, generator }) => ({
+            promise: () => Promise.resolve([]),
+          }),
+        },
+      };
+
+      handler = new promptsHandler({
+        client: auth0,
+        config: dryRunConfig,
+        stageFn,
+      });
+
+      const changes = await handler.dryRunChanges({});
+
+      expect(changes.del).to.have.length(0);
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+  });
 });

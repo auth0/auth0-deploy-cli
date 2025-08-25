@@ -384,7 +384,6 @@ describe('#directory context prompts', () => {
           },
         },
       },
-      screenRenderers: [],
     });
   });
 
@@ -413,7 +412,6 @@ describe('#directory context prompts', () => {
         ...mockPromptsSettings,
         customText: {},
         partials: {},
-        screenRenderers: [],
       });
     });
 
@@ -442,7 +440,6 @@ describe('#directory context prompts', () => {
         ...mockPromptsSettings,
         customText: {},
         partials: {},
-        screenRenderers: [],
       });
     });
 
@@ -463,7 +460,6 @@ describe('#directory context prompts', () => {
       expect(context.assets.prompts).to.deep.equal({
         customText: {},
         partials: {},
-        screenRenderers: [],
       });
     });
   });

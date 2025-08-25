@@ -7,6 +7,7 @@ import {
 import DefaultHandler, { order } from './default';
 import { Assets } from '../../../types';
 import log from '../../../logger';
+import { isDryRun } from '../../utils';
 
 const TwilioConfigurationSchema = {
   type: 'object',
@@ -141,6 +142,14 @@ export default class PhoneProviderHandler extends DefaultHandler {
 
     // Non-existing section means themes doesn't need to be processed
     if (!phoneProviders) return;
+
+    if (isDryRun(this.config)) {
+      const { del, update, create } = await this.calcChanges(assets);
+
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        return;
+      }
+    }
 
     // Empty array means themes should be deleted
     if (phoneProviders.length === 0) {

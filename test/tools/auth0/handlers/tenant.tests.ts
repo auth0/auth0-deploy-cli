@@ -1,10 +1,9 @@
-const { expect } = require('chai');
-
-import TenantHandler from '../../../../src/tools/auth0/handlers/tenant';
 import tenantHandler, {
   allowedTenantFlags,
   removeUnallowedTenantFlags,
 } from '../../../../src/tools/auth0/handlers/tenant';
+
+const { expect } = require('chai');
 
 const mockAllowedFlags = Object.values(allowedTenantFlags).reduce<Record<string, boolean>>(
   (acc, cur) => {
@@ -15,6 +14,14 @@ const mockAllowedFlags = Object.values(allowedTenantFlags).reduce<Record<string,
 );
 
 describe('#tenant handler', () => {
+  const config = function (key) {
+    return config.data && config.data[key];
+  };
+
+  config.data = {
+    AUTH0_DRY_RUN: false,
+  };
+
   describe('#tenant validate', () => {
     it('should not allow pages in tenant config', async () => {
       //@ts-ignore
@@ -77,7 +84,7 @@ describe('#tenant handler', () => {
       };
 
       //@ts-ignore
-      const handler = new tenantHandler({ client: auth0 });
+      const handler = new tenantHandler({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ tenant: { sandbox_version: '4' } }]);
@@ -130,7 +137,7 @@ describe('#tenant handler', () => {
         },
       };
       // @ts-ignore
-      const handler = new tenantHandler({ client: auth0 });
+      const handler = new tenantHandler({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       await stageFn.apply(handler, [{ tenant: tenantWithDefaultTokenQuota }]);
       // eslint-disable-next-line no-unused-expressions
@@ -159,8 +166,8 @@ describe('#tenant handler', () => {
           },
         };
 
-        //@ts-ignore
-        const handler = new tenantHandler({ client: auth0 });
+        // @ts-ignore
+        const handler = new tenantHandler({ client: auth0, config });
         const { processChanges } = Object.getPrototypeOf(handler);
 
         await processChanges.apply(handler, [{ tenant: { flags: proposedFlags } }]);
@@ -182,7 +189,7 @@ describe('#tenant handler', () => {
         };
 
         //@ts-ignore
-        const handler = new tenantHandler({ client: auth0 });
+        const handler = new tenantHandler({ client: auth0, config });
         const { processChanges } = Object.getPrototypeOf(handler);
 
         await processChanges.apply(handler, [{ tenant: { flags: proposedFlags } }]);
@@ -211,6 +218,117 @@ describe('#tenant handler', () => {
 
     it('should not throw if allow empty flag objects passed', () => {
       expect(() => removeUnallowedTenantFlags({})).to.not.throw();
+    });
+  });
+
+  describe('#tenant dryRunChanges', () => {
+    const dryRunConfig = function (key) {
+      return dryRunConfig.data && dryRunConfig.data[key];
+    };
+
+    dryRunConfig.data = {
+      AUTH0_CLIENT_ID: 'client_id',
+      AUTH0_ALLOW_DELETE: true,
+    };
+
+    it('should return update changes for tenant with differences', async () => {
+      const existingTenant = {
+        friendly_name: 'Old Name',
+        default_directory: 'users',
+        flags: {
+          change_pwd_flow_v1: false,
+          enable_client_connections: true,
+        },
+      };
+
+      const auth0 = {
+        tenants: {
+          getSettings: () => Promise.resolve({ data: existingTenant }),
+        },
+      };
+
+      // @ts-ignore
+      const handler = new tenantHandler({ client: auth0, config: dryRunConfig });
+      const assets = {
+        tenant: {
+          friendly_name: 'New Name',
+          default_directory: 'users',
+          flags: {
+            change_pwd_flow_v1: true,
+            enable_client_connections: true,
+          },
+        },
+      };
+
+      // @ts-ignore
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(1);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return no changes when tenant is identical', async () => {
+      const existingTenant = {
+        friendly_name: 'Same Name',
+        default_directory: 'users',
+        flags: {
+          change_pwd_flow_v1: false,
+          enable_client_connections: true,
+        },
+      };
+
+      const auth0 = {
+        tenants: {
+          getSettings: () => Promise.resolve({ data: existingTenant }),
+        },
+      };
+
+      // @ts-ignore
+      const handler = new tenantHandler({ client: auth0, config: dryRunConfig });
+      const assets = {
+        tenant: {
+          friendly_name: 'Same Name',
+          default_directory: 'users',
+          flags: {
+            change_pwd_flow_v1: false,
+            enable_client_connections: true,
+          },
+        },
+      };
+
+      // @ts-ignore
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle empty assets', async () => {
+      const existingTenant = {
+        friendly_name: 'Current Name',
+        default_directory: 'users',
+      };
+
+      const auth0 = {
+        tenants: {
+          getSettings: () => Promise.resolve({ data: existingTenant }),
+        },
+      };
+
+      // @ts-ignore
+      const handler = new tenantHandler({ client: auth0, config: dryRunConfig });
+      const assets = {}; // No tenant property
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
     });
   });
 });

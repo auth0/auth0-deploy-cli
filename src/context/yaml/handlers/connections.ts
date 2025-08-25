@@ -7,9 +7,9 @@ import {
   isFile,
   sanitize,
   ensureProp,
-  convertClientIdToName,
   mapClientID2NameSorted,
   encodeCertStringToBase64,
+  getFormattedOptions,
 } from '../../../utils';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
@@ -46,22 +46,6 @@ async function parse(context: YAMLContext): Promise<ParsedConnections> {
     ],
   };
 }
-
-const getFormattedOptions = (connection, clients) => {
-  try {
-    return {
-      options: {
-        ...connection.options,
-        idpinitiated: {
-          ...connection.options.idpinitiated,
-          client_id: convertClientIdToName(connection.options.idpinitiated.client_id, clients),
-        },
-      },
-    };
-  } catch (e) {
-    return {};
-  }
-};
 
 async function dump(context: YAMLContext): Promise<ParsedConnections> {
   const { connections, clients } = context.assets;

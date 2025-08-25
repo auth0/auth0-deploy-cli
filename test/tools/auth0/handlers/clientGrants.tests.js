@@ -506,4 +506,295 @@ describe('#clientGrants handler', () => {
 
     await stageFn.apply(handler, [assets]);
   });
+
+  describe('#clientGrants dryRunChanges', () => {
+    const dryRunConfig = function (key) {
+      return dryRunConfig.data && dryRunConfig.data[key];
+    };
+
+    dryRunConfig.data = {
+      AUTH0_CLIENT_ID: 'client_id',
+      AUTH0_ALLOW_DELETE: true,
+    };
+
+    it('should return create changes for new clientGrants', async () => {
+      const auth0 = {
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        clientGrants: [
+          {
+            name: 'Client Grant 1',
+            client_id: 'client1',
+            audience: 'https://api1.example.com',
+            scope: ['read:data'],
+          },
+          {
+            name: 'Client Grant 2',
+            client_id: 'client2',
+            audience: 'https://api2.example.com',
+            scope: ['write:data'],
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(2);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return update changes for existing clientGrants with differences', async () => {
+      const existingGrants = [
+        {
+          id: 'cg1',
+          name: 'Client Grant 1',
+          client_id: 'client1',
+          audience: 'https://api1.example.com',
+          scope: ['read:data'],
+        },
+        {
+          id: 'cg2',
+          name: 'Client Grant 2',
+          client_id: 'client2',
+          audience: 'https://api2.example.com',
+          scope: ['read:data'],
+        },
+      ];
+
+      const auth0 = {
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', existingGrants),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        clientGrants: [
+          {
+            name: 'Client Grant 1',
+            client_id: 'client1',
+            audience: 'https://api1.example.com',
+            scope: ['read:data', 'write:data'],
+          },
+          {
+            name: 'Client Grant 2',
+            client_id: 'client2',
+            audience: 'https://api2.example.com',
+            scope: ['write:data'],
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(2);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return delete changes for clientGrants not in assets', async () => {
+      const existingGrants = [
+        {
+          id: 'cg1',
+          name: 'Client Grant 1',
+          client_id: 'client1',
+          audience: 'https://api1.example.com',
+          scope: ['read:data'],
+        },
+        {
+          id: 'cg2',
+          name: 'Client Grant 2',
+          client_id: 'client2',
+          audience: 'https://api2.example.com',
+          scope: ['read:data'],
+        },
+        {
+          id: 'cg3',
+          name: 'Client Grant 3',
+          client_id: 'client3',
+          audience: 'https://api3.example.com',
+          scope: ['read:data'],
+        },
+      ];
+
+      const auth0 = {
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', existingGrants),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        clientGrants: [
+          {
+            name: 'Client Grant 1',
+            client_id: 'client1',
+            audience: 'https://api1.example.com',
+            scope: ['read:data'],
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(2);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return no changes when clientGrants are identical', async () => {
+      const existingGrants = [
+        {
+          id: 'cg1',
+          name: 'Client Grant 1',
+          client_id: 'client1',
+          audience: 'https://api1.example.com',
+          scope: ['read:data'],
+        },
+        {
+          id: 'cg2',
+          name: 'Client Grant 2',
+          client_id: 'client2',
+          audience: 'https://api2.example.com',
+          scope: ['write:data'],
+        },
+      ];
+
+      const auth0 = {
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', existingGrants),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        clientGrants: [
+          {
+            name: 'Client Grant 1',
+            client_id: 'client1',
+            audience: 'https://api1.example.com',
+            scope: ['read:data'],
+          },
+          {
+            name: 'Client Grant 2',
+            client_id: 'client2',
+            audience: 'https://api2.example.com',
+            scope: ['write:data'],
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle mixed create, update, and delete operations', async () => {
+      const existingGrants = [
+        {
+          id: 'cg1',
+          name: 'Client Grant 1',
+          client_id: 'client1',
+          audience: 'https://api1.example.com',
+          scope: ['read:data'],
+        },
+        {
+          id: 'cg2',
+          name: 'Client Grant 2',
+          client_id: 'client2',
+          audience: 'https://api2.example.com',
+          scope: ['read:data'],
+        },
+      ];
+
+      const auth0 = {
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', existingGrants),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        clientGrants: [
+          // Update: same client_id + audience, different scope
+          {
+            name: 'Client Grant 1',
+            client_id: 'client1',
+            audience: 'https://api1.example.com',
+            scope: ['read:data', 'write:data'],
+          },
+          // Create: new client_id + audience combination
+          {
+            name: 'Client Grant 3',
+            client_id: 'client3',
+            audience: 'https://api3.example.com',
+            scope: ['admin:all'],
+          },
+          // client2 + api2 will be deleted (not in assets)
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      // For mixed operations, just verify we get some changes of each type
+      expect(changes.create.length).to.be.greaterThan(0);
+      expect(changes.update.length).to.be.greaterThan(0);
+      expect(changes.del.length).to.be.greaterThan(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle empty assets', async () => {
+      const auth0 = {
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {}; // No clientGrants property
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+  });
 });

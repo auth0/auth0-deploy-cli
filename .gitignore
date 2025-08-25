@@ -12,5 +12,7 @@ yarn-error.log
 *.pem
 *.pub
 Makefile
+dry-run-diff-log*.json
 .vscode/*
 .github/copilot-instructions.md
+.github/chatmodes/

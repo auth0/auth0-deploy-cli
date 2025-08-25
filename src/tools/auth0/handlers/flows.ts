@@ -10,6 +10,7 @@ import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
 import { findKeyPathWithValue } from '../../../utils';
+import { isDryRun } from '../../utils';
 
 export type Flow = {
   name: string;
@@ -94,6 +95,19 @@ export default class FlowHandler extends DefaultHandler {
     // Do nothing if not set
     if (!flows) return;
 
+    const { del, update, create, conflicts } = await this.calcChanges(assets);
+
+    if (isDryRun(this.config)) {
+      if (
+        create.length === 0 &&
+        update.length === 0 &&
+        del.length === 0 &&
+        conflicts.length === 0
+      ) {
+        return;
+      }
+    }
+
     const allFlowConnections = await this.getAllFlowConnections();
 
     // create a map for name to id from allFlowConnections
@@ -102,15 +116,11 @@ export default class FlowHandler extends DefaultHandler {
       connectionNameMap[c.name] = c.id;
     });
 
-    assets.flows = await this.pargeFlowConnectionName(flows, connectionNameMap);
-
-    const { del, update, create, conflicts } = await this.calcChanges(assets);
-
     const changes: CalculatedChanges = {
-      del: del,
-      update: update,
-      create: create,
-      conflicts: conflicts,
+      del: await this.pargeFlowConnectionName(del, connectionNameMap),
+      update: await this.pargeFlowConnectionName(update, connectionNameMap),
+      create: await this.pargeFlowConnectionName(create, connectionNameMap),
+      conflicts: await this.pargeFlowConnectionName(conflicts, connectionNameMap),
     };
 
     await super.processChanges(assets, {

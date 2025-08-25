@@ -1215,4 +1215,199 @@ describe('#addExcludedConnectionPropertiesToChanges', () => {
       update: [],
     }); // Expect no change
   });
+
+  describe('#connections dryRunChanges', () => {
+    const dryRunConfig = function (key) {
+      return dryRunConfig.data && dryRunConfig.data[key];
+    };
+
+    dryRunConfig.data = {
+      AUTH0_CLIENT_ID: 'client_id',
+      AUTH0_ALLOW_DELETE: true,
+    };
+
+    it('should return create changes for new connections', async () => {
+      const auth0 = {
+        connections: {
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        connections: [
+          { name: 'New Connection 1', strategy: 'auth0' },
+          { name: 'New Connection 2', strategy: 'google-oauth2' },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(2);
+      expect(changes.create[0]).to.include({ name: 'New Connection 1', strategy: 'auth0' });
+      expect(changes.create[1]).to.include({ name: 'New Connection 2', strategy: 'google-oauth2' });
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return update changes for existing connections with differences', async () => {
+      const auth0 = {
+        connections: {
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              {
+                id: 'conn1',
+                name: 'Existing Connection',
+                strategy: 'google-oauth2',
+                enabled_clients: ['client1'],
+              },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        connections: [
+          {
+            name: 'Existing Connection',
+            strategy: 'google-oauth2',
+            enabled_clients: ['client1', 'client2'],
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(1);
+      expect(changes.update[0]).to.include({
+        name: 'Existing Connection',
+        strategy: 'google-oauth2',
+        id: 'conn1',
+      });
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return delete changes for connections not in assets', async () => {
+      const auth0 = {
+        connections: {
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'conn1', name: 'Connection To Remove', strategy: 'google-oauth2' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = { connections: [] };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(1);
+      expect(changes.del[0]).to.include({
+        id: 'conn1',
+        name: 'Connection To Remove',
+        strategy: 'google-oauth2',
+      });
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return no changes when connections are identical', async () => {
+      const auth0 = {
+        connections: {
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              {
+                id: 'conn1',
+                name: 'Unchanged Connection',
+                strategy: 'google-oauth2',
+                enabled_clients: ['client1'],
+              },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        connections: [
+          {
+            name: 'Unchanged Connection',
+            strategy: 'google-oauth2',
+            enabled_clients: ['client1'],
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle mixed create, update, and delete operations', async () => {
+      const auth0 = {
+        connections: {
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              {
+                id: 'conn1',
+                name: 'Update Connection',
+                strategy: 'google-oauth2',
+                enabled_clients: ['client1'],
+              },
+              { id: 'conn2', name: 'Delete Connection', strategy: 'google-oauth2' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        connections: [
+          {
+            name: 'Update Connection',
+            strategy: 'google-oauth2',
+            enabled_clients: ['client1', 'client2'],
+          },
+          { name: 'Create Connection', strategy: 'facebook' },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create.length).to.be.greaterThan(0);
+      expect(changes.update.length).to.be.greaterThan(0);
+      expect(changes.del.length).to.be.greaterThan(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle empty assets', async () => {
+      const auth0 = {
+        connections: {
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {}; // No connections property
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+  });
 });

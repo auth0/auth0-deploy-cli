@@ -1,5 +1,6 @@
 import DefaultAPIHandler from './default';
 import { Asset, Assets } from '../../../types';
+import { isDryRun } from '../../utils';
 
 export const schema = {
   type: 'object',
@@ -81,6 +82,14 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
 
     if (!attackProtection || !Object.keys(attackProtection).length) {
       return;
+    }
+
+    if (isDryRun(this.config)) {
+      const { del, update, create } = await this.calcChanges(assets);
+
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        return;
+      }
     }
 
     await Promise.all([

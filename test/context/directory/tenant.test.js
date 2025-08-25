@@ -21,8 +21,8 @@ describe('#directory context tenant', () => {
     const tenantTarget = {
       friendly_name: 'Auth0 test',
       default_directory: 'users',
-      session_lifetime_in_minutes: 89,
-      idle_session_lifetime_in_minutes: 7404,
+      session_lifetime: 1.48394893,
+      idle_session_lifetime: 123.4,
     };
 
     createDir(path.join(testDataDir, 'directory'), { tenant1: tenantTest });

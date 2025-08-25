@@ -7,8 +7,8 @@ import { isEmpty } from 'lodash';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import log from '../../../logger';
 import DefaultAPIHandler from './default';
-import { calculateChanges } from '../../calculateChanges';
 import { paginate } from '../client';
+import { isDryRun } from '../../utils';
 
 type customTextType = {
   [GetSelfServiceProfileCustomTextLanguageEnum.en]: {
@@ -145,26 +145,15 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
     // Do nothing if not set
     if (!selfServiceProfiles) return;
 
-    // Gets SsProfileWithCustomText from destination tenant
-    const existing = await this.getType();
+    const { del, update, create } = await this.calcChanges(assets);
 
-    const changes = calculateChanges({
-      handler: this,
-      assets: selfServiceProfiles,
-      existing,
-      identifiers: this.identifiers,
-      allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
-    });
+    if (isDryRun(this.config)) {
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        return;
+      }
+    }
 
-    log.debug(
-      `Start processChanges for selfServiceProfiles [delete:${changes.del.length}] [update:${changes.update.length}], [create:${changes.create.length}]`
-    );
-
-    const myChanges = [
-      { del: changes.del },
-      { create: changes.create },
-      { update: changes.update },
-    ];
+    const myChanges = [{ del: del }, { create: create }, { update: update }];
 
     await Promise.all(
       myChanges.map(async (change) => {
@@ -173,7 +162,7 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
             await this.deleteSelfServiceProfiles(change.del || []);
             break;
           case change.create && change.create.length > 0:
-            await this.createSelfServiceProfiles(changes.create);
+            await this.createSelfServiceProfiles(change.create);
             break;
           case change.update && change.update.length > 0:
             if (change.update) await this.updateSelfServiceProfiles(change.update);

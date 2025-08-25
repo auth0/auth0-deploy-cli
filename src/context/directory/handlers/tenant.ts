@@ -1,6 +1,5 @@
 import path from 'path';
 import { existsMustBeDir, isFile, dumpJSON, loadJSON, clearTenantFlags } from '../../../utils';
-import { sessionDurationsToMinutes } from '../../../sessionDurationsToMinutes';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
@@ -8,9 +7,6 @@ import { Asset, ParsedAsset } from '../../../types';
 type ParsedTenant = ParsedAsset<
   'tenant',
   {
-    session_lifetime: number;
-    idle_session_lifetime: number;
-  } & {
     [key: string]: Asset;
   }
 >;
@@ -25,28 +21,17 @@ function parse(context: DirectoryContext): ParsedTenant {
     return { tenant: null };
   }
   /* eslint-disable camelcase */
-  const {
-    session_lifetime,
-    idle_session_lifetime,
-    ...tenant
-  }: {
-    session_lifetime?: number;
-    idle_session_lifetime?: number;
-    [key: string]: any;
-  } = loadJSON(tenantFile, {
+  const tenant = loadJSON(tenantFile, {
     mappings: context.mappings,
     disableKeywordReplacement: context.disableKeywordReplacement,
   });
 
   clearTenantFlags(tenant);
 
-  const sessionDurations = sessionDurationsToMinutes({ session_lifetime, idle_session_lifetime });
-
   return {
-    //@ts-ignore
+    // @ts-ignore
     tenant: {
       ...tenant,
-      ...sessionDurations,
     },
   };
 }
@@ -60,7 +45,6 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   const tenantFile = path.join(context.filePath, 'tenant.json');
   dumpJSON(tenantFile, tenant);
-  return;
 }
 
 const tenantHandler: DirectoryHandler<ParsedTenant> = {

@@ -10,6 +10,7 @@ import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import { findKeyPathWithValue } from '../../../utils';
+import { isDryRun } from '../../utils';
 
 export type Form = {
   name: string;
@@ -149,6 +150,19 @@ export default class FormsHandler extends DefaultHandler {
     // Do nothing if not set
     if (!forms) return;
 
+    const { del, update, create, conflicts } = await this.calcChanges(assets);
+
+    if (isDryRun(this.config)) {
+      if (
+        create.length === 0 &&
+        update.length === 0 &&
+        del.length === 0 &&
+        conflicts.length === 0
+      ) {
+        return;
+      }
+    }
+
     const flows = await paginate<GetFlows200ResponseOneOfInner>(this.client.flows.getAll, {
       paginate: true,
       include_totals: true,
@@ -160,15 +174,11 @@ export default class FormsHandler extends DefaultHandler {
       flowNamMap[f.name] = f.id;
     });
 
-    assets.forms = await this.pargeFormFlowName(forms, flowNamMap);
-
-    const { del, update, create, conflicts } = await this.calcChanges(assets);
-
     const changes: CalculatedChanges = {
-      del: del,
-      update: update,
-      create: create,
-      conflicts: conflicts,
+      del: await this.pargeFormFlowName(del, flowNamMap),
+      update: await this.pargeFormFlowName(update, flowNamMap),
+      create: await this.pargeFormFlowName(create, flowNamMap),
+      conflicts: await this.pargeFormFlowName(conflicts, flowNamMap),
     };
 
     await super.processChanges(assets, {
