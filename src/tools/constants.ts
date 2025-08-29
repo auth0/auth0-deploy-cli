@@ -58,6 +58,7 @@ const constants = {
     'change_password',
     'password_reset',
     'user_invitation',
+    'async_approval',
   ] as GetEmailTemplatesByTemplateNameTemplateNameEnum[],
   ACTIONS_TRIGGERS: [
     'post-login',
