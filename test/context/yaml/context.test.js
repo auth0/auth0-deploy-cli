@@ -218,6 +218,11 @@ describe('#YAML context validation', () => {
       },
       emailTemplates: [
         {
+          body: './emailTemplates/async_approval.html',
+          enabled: true,
+          template: 'async_approval',
+        },
+        {
           body: './emailTemplates/blocked_account.html',
           enabled: true,
           template: 'blocked_account',
@@ -339,6 +344,11 @@ describe('#YAML context validation', () => {
         name: 'smtp',
       },
       emailTemplates: [
+        {
+          body: './emailTemplates/async_approval.html',
+          enabled: true,
+          template: 'async_approval',
+        },
         {
           body: './emailTemplates/blocked_account.html',
           enabled: true,
@@ -462,6 +472,11 @@ describe('#YAML context validation', () => {
       },
       phoneProviders: [],
       emailTemplates: [
+        {
+          body: './emailTemplates/async_approval.html',
+          enabled: true,
+          template: 'async_approval',
+        },
         {
           body: './emailTemplates/blocked_account.html',
           enabled: true,

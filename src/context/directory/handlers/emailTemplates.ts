@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
+import { existsSync } from 'fs';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
 import log from '../../../logger';
@@ -7,7 +8,6 @@ import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
-import { existsSync } from 'fs';
 
 type ParsedEmailTemplates = ParsedAsset<'emailTemplates', Asset[]>;
 
@@ -59,7 +59,7 @@ function parse(context: DirectoryContext): ParsedEmailTemplates {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const emailTemplates = context.assets.emailTemplates;
+  const { emailTemplates } = context.assets;
 
   if (!emailTemplates) return; // Skip, nothing to dump
 

@@ -16,9 +16,19 @@ const emailTemplates = {
   'welcome_email.json':
     '{ "template": "welcome_email", "enabled": true, "from": "test@##env##.com" }',
   'welcome_email.html': '<html>some ##env## email</html>',
+  'async_approval.json':
+    '{ "template": "async_approval", "enabled": true, "from": "test@##env##.com", "subject": "Async Approval ##env##" }',
+  'async_approval.html': '<html>async approval ##env## email</html>',
 };
 
 const emailTemplatesTarget = [
+  {
+    body: '<html>async approval test email</html>',
+    enabled: true,
+    from: 'test@test.com',
+    subject: 'Async Approval test',
+    template: 'async_approval',
+  },
   {
     body: '<html>some test email</html>',
     enabled: true,
@@ -99,6 +109,14 @@ describe('#directory context email templates', () => {
         syntax: 'liquid',
         template: 'welcome_email',
       },
+      {
+        body: '<html>async approval test</html>',
+        enabled: true,
+        from: 'async@email.com',
+        subject: 'Async Approval Required',
+        syntax: 'liquid',
+        template: 'async_approval',
+      },
     ];
 
     await handler.dump(context);
@@ -128,5 +146,17 @@ describe('#directory context email templates', () => {
     expect(
       fs.readFileSync(path.join(emailTemplateFolder, 'welcome_email.html'), 'utf8')
     ).to.deep.equal('<html>test</html>');
+
+    expect(loadJSON(path.join(emailTemplateFolder, 'async_approval.json'))).to.deep.equal({
+      body: './async_approval.html',
+      enabled: true,
+      from: 'async@email.com',
+      subject: 'Async Approval Required',
+      syntax: 'liquid',
+      template: 'async_approval',
+    });
+    expect(
+      fs.readFileSync(path.join(emailTemplateFolder, 'async_approval.html'), 'utf8')
+    ).to.deep.equal('<html>async approval test</html>');
   });
 });
