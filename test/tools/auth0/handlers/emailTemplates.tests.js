@@ -83,5 +83,74 @@ describe('#emailTemplates handler', () => {
         { emailTemplates: [{ template: 'verify_email', body: 'body' }] },
       ]);
     });
+
+    it('should handle async_approval template operations', async () => {
+      const auth0 = {
+        emailTemplates: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.template).to.equal('async_approval');
+            expect(data.body).to.equal('<html>async approval</html>');
+            expect(data.subject).to.equal('Async Approval Required');
+            return Promise.resolve({ data });
+          },
+          update: function (params, data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(params).to.be.an('object');
+            expect(data).to.be.an('object');
+            expect(params.templateName).to.equal('async_approval');
+            expect(data.template).to.equal('async_approval');
+            expect(data.body).to.equal('<html>async approval</html>');
+            return Promise.resolve({ data: { params, data } });
+          },
+        },
+      };
+
+      const handler = new emailTemplates.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          emailTemplates: [
+            {
+              template: 'async_approval',
+              body: '<html>async approval</html>',
+              subject: 'Async Approval Required',
+              enabled: true,
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should include async_approval in getType response', async () => {
+      const auth0 = {
+        emailTemplates: {
+          get: (template) => ({
+            data: {
+              template: template.templateName,
+              enabled: true,
+              body: '<html>some email</html>',
+              subject:
+                template.templateName === 'async_approval'
+                  ? 'Async Approval Required'
+                  : 'Test Subject',
+            },
+          }),
+        },
+      };
+
+      const handler = new emailTemplates.default({ client: auth0, config });
+      const data = await handler.getType();
+      expect(data.length).to.be.above(1);
+      const asyncApproval = data.find((t) => t.template === 'async_approval');
+      expect(asyncApproval).to.deep.equal({
+        template: 'async_approval',
+        enabled: true,
+        body: '<html>some email</html>',
+        subject: 'Async Approval Required',
+      });
+    });
   });
 });
