@@ -84,7 +84,7 @@ describe('#emailTemplates handler', () => {
       ]);
     });
 
-    it('should handle async_approval template operations', async () => {
+    it('should update async_approval template operations', async () => {
       const auth0 = {
         emailTemplates: {
           create: function (data) {
@@ -124,7 +124,7 @@ describe('#emailTemplates handler', () => {
       ]);
     });
 
-    it('should include async_approval in getType response', async () => {
+    it('should get async_approval in response', async () => {
       const auth0 = {
         emailTemplates: {
           get: (template) => ({
