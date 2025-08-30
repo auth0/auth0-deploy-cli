@@ -226,6 +226,48 @@ describe('#clientGrants handler', () => {
       await stageFn.apply(handler, [{ clientGrants: data }]);
     });
 
+    it('should update client grants with authorization_details_types', async () => {
+      const auth0 = {
+        clientGrants: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data).to.equal({});
+            return Promise.resolve({ data });
+          },
+          update: function (params, data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(params).to.be.an('object');
+            expect(params.id).to.equal('cg1');
+            expect(data).to.be.an('object');
+            expect(data.authorization_details_types).to.be.an('array');
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) =>
+            mockPagedData(params, 'client_grants', [
+              { id: 'cg1', client_id: 'client1', audience: 'audience' },
+            ]),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          client_id: 'client1',
+          audience: 'audience',
+          authorization_details_types: ['payment_initiation'],
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+    });
+
     it('should delete client grant and create another one instead', async () => {
       const auth0 = {
         clientGrants: {
