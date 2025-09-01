@@ -395,4 +395,252 @@ describe('#forms handler', () => {
       await stageFn.apply(handler, [{ forms: [] }]);
     });
   });
+
+  describe('#forms dryRunChanges', () => {
+    const dryRunConfig = function (key) {
+      return dryRunConfig.data && dryRunConfig.data[key];
+    };
+
+    dryRunConfig.data = {
+      AUTH0_ALLOW_DELETE: true,
+    };
+
+    it('should return create changes for new forms', async () => {
+      const auth0 = {
+        forms: {
+          getAll: (params) => mockPagedData(params, 'forms', []),
+          get: () => Promise.resolve({ data: null }),
+        },
+        flows: {
+          getAll: (params) => mockPagedData(params, 'flows', []),
+        },
+        pool,
+      };
+
+      const handler = new forms.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        forms: [
+          {
+            name: 'New Form 1',
+            languages: { primary: 'en' },
+            nodes: [],
+          },
+          {
+            name: 'New Form 2',
+            languages: { primary: 'es' },
+            nodes: [],
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(2);
+      expect(changes.create[0]).to.include({ name: 'New Form 1' });
+      expect(changes.create[1]).to.include({ name: 'New Form 2' });
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return update changes for existing forms with differences', async () => {
+      const auth0 = {
+        forms: {
+          getAll: (params) =>
+            mockPagedData(params, 'forms', [
+              {
+                id: 'form1',
+                name: 'Existing Form',
+                languages: { primary: 'en' },
+                nodes: [],
+              },
+            ]),
+          get: (params) =>
+            Promise.resolve({
+              data: {
+                id: params.id,
+                name: 'Existing Form',
+                languages: { primary: 'en' },
+                nodes: [],
+              },
+            }),
+        },
+        flows: {
+          getAll: (params) => mockPagedData(params, 'flows', []),
+        },
+        pool,
+      };
+
+      const handler = new forms.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        forms: [
+          {
+            name: 'Existing Form',
+            languages: { primary: 'es' },
+            nodes: [],
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(1);
+      expect(changes.update[0]).to.include({
+        name: 'Existing Form',
+        id: 'form1',
+      });
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return delete changes for forms not in assets', async () => {
+      const auth0 = {
+        forms: {
+          getAll: (params) =>
+            mockPagedData(params, 'forms', [
+              { id: 'form1', name: 'Form To Remove', languages: { primary: 'en' } },
+            ]),
+          get: (params) =>
+            Promise.resolve({
+              data: {
+                id: params.id,
+                name: 'Form To Remove',
+                languages: { primary: 'en' },
+                nodes: [],
+              },
+            }),
+        },
+        flows: {
+          getAll: (params) => mockPagedData(params, 'flows', []),
+        },
+        pool,
+      };
+
+      const handler = new forms.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = { forms: [] };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(1);
+      expect(changes.del[0]).to.include({ id: 'form1', name: 'Form To Remove' });
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return no changes when forms are identical', async () => {
+      const auth0 = {
+        forms: {
+          getAll: (params) =>
+            mockPagedData(params, 'forms', [
+              {
+                id: 'form1',
+                name: 'Unchanged Form',
+                languages: { primary: 'en' },
+                nodes: [],
+              },
+            ]),
+          get: (params) =>
+            Promise.resolve({
+              data: {
+                id: params.id,
+                name: 'Unchanged Form',
+                languages: { primary: 'en' },
+                nodes: [],
+              },
+            }),
+        },
+        flows: {
+          getAll: (params) => mockPagedData(params, 'flows', []),
+        },
+        pool,
+      };
+
+      const handler = new forms.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        forms: [
+          {
+            name: 'Unchanged Form',
+            languages: { primary: 'en' },
+            nodes: [],
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle mixed create, update, and delete operations', async () => {
+      const auth0 = {
+        forms: {
+          getAll: (params) =>
+            mockPagedData(params, 'forms', [
+              { id: 'form1', name: 'Update Form', languages: { primary: 'en' } },
+              { id: 'form2', name: 'Delete Form', languages: { primary: 'fr' } },
+            ]),
+          get: (params) => {
+            if (params.id === 'form1') {
+              return Promise.resolve({
+                data: { id: 'form1', name: 'Update Form', languages: { primary: 'en' }, nodes: [] },
+              });
+            }
+            if (params.id === 'form2') {
+              return Promise.resolve({
+                data: { id: 'form2', name: 'Delete Form', languages: { primary: 'fr' }, nodes: [] },
+              });
+            }
+            return Promise.resolve({ data: null });
+          },
+        },
+        flows: {
+          getAll: (params) => mockPagedData(params, 'flows', []),
+        },
+        pool,
+      };
+
+      const handler = new forms.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        forms: [
+          { name: 'Update Form', languages: { primary: 'es' } },
+          { name: 'Create Form', languages: { primary: 'de' } },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create.length).to.be.greaterThan(0);
+      expect(changes.update.length).to.be.greaterThan(0);
+      expect(changes.del.length).to.be.greaterThan(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle empty assets', async () => {
+      const auth0 = {
+        forms: {
+          getAll: (params) => mockPagedData(params, 'forms', []),
+          get: () => Promise.resolve({ data: null }),
+        },
+        flows: {
+          getAll: (params) => mockPagedData(params, 'flows', []),
+        },
+        pool,
+      };
+
+      const handler = new forms.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {}; // No forms property
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+  });
 });

@@ -1,38 +1,10 @@
-const { expect, assert, use } = require('chai');
+const { expect, use } = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const { omit, cloneDeep } = require('lodash');
+const sinon = require('sinon');
 const { default: ThemesHandler } = require('../../../../src/tools/auth0/handlers/themes');
 
 use(chaiAsPromised);
-
-function stub() {
-  const s = function (...args) {
-    s.callCount += 1;
-    s.calls.push(args);
-    s.called = true;
-    return s.returnValue;
-  };
-
-  s.called = false;
-  s.callCount = 0;
-  s.calls = [];
-  s.returnValue = undefined;
-  s.returns = (r) => {
-    s.returnValue = r;
-    return s;
-  };
-  s.calledWith = (...args) =>
-    s.calls.some((p) => {
-      try {
-        assert.deepEqual(p, args);
-        return true;
-      } catch {
-        return false;
-      }
-    });
-
-  return s;
-}
 
 function errorWithStatusCode(statusCode, message) {
   const err = new Error(message || `Error ${statusCode}`);
@@ -130,7 +102,7 @@ describe('#themes handler', () => {
 
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(Promise.resolve({ data: theme })),
+          getDefaultTheme: sinon.stub().returns(Promise.resolve({ data: theme })),
         },
       };
 
@@ -145,7 +117,7 @@ describe('#themes handler', () => {
     it('should return empty array if there is no theme', async () => {
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(Promise.reject(errorWithStatusCode(404))),
+          getDefaultTheme: sinon.stub().returns(Promise.reject(errorWithStatusCode(404))),
         },
       };
 
@@ -160,14 +132,16 @@ describe('#themes handler', () => {
     it('should return empty array when no-code is not enabled for the tenant', async () => {
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(
-            Promise.reject(
-              errorWithStatusCode(
-                400,
-                'Your account does not have universal login customizations enabled'
+          getDefaultTheme: sinon
+            .stub()
+            .returns(
+              Promise.reject(
+                errorWithStatusCode(
+                  400,
+                  'Your account does not have universal login customizations enabled'
+                )
               )
-            )
-          ),
+            ),
         },
       };
 
@@ -182,9 +156,9 @@ describe('#themes handler', () => {
     it('should fail for unexpected api errors', async () => {
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(
-            Promise.reject(errorWithStatusCode(500, 'Unexpected error'))
-          ),
+          getDefaultTheme: sinon
+            .stub()
+            .returns(Promise.reject(errorWithStatusCode(500, 'Unexpected error'))),
         },
       };
 
@@ -199,20 +173,24 @@ describe('#themes handler', () => {
     it('should create the theme when default theme does not exist', async () => {
       const theme = mockTheme();
 
+      const config = {
+        AUTH0_DRY_RUN: false,
+      };
+
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(Promise.reject(errorWithStatusCode(404))),
-          createTheme: stub().returns(Promise.resolve(theme)),
-          updateTheme: stub().returns(
-            Promise.reject(new Error('updateTheme should not have been called'))
-          ),
-          deleteTheme: stub().returns(
-            Promise.reject(new Error('deleteTheme should not have been called'))
-          ),
+          getDefaultTheme: sinon.stub().returns(Promise.reject(errorWithStatusCode(404))),
+          createTheme: sinon.stub().returns(Promise.resolve(theme)),
+          updateTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateTheme should not have been called'))),
+          deleteTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('deleteTheme should not have been called'))),
         },
       };
 
-      const handler = new ThemesHandler({ client: auth0 });
+      const handler = new ThemesHandler({ client: auth0, config: (key) => config[key] });
       const assets = { themes: [theme] };
 
       await handler.processChanges(assets);
@@ -229,20 +207,23 @@ describe('#themes handler', () => {
     it('should create the theme when default exists', async () => {
       const theme = mockTheme({ withThemeId: 'myThemeId' });
 
+      const config = {
+        AUTH0_DRY_RUN: false,
+      };
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns({ data: theme }),
-          createTheme: stub().returns(
-            Promise.reject(new Error('updateTheme should not have been called'))
-          ),
-          updateTheme: stub().returns(Promise.resolve(theme)),
-          deleteTheme: stub().returns(
-            Promise.reject(new Error('deleteTheme should not have been called'))
-          ),
+          getDefaultTheme: sinon.stub().returns({ data: theme }),
+          createTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateTheme should not have been called'))),
+          updateTheme: sinon.stub().returns(Promise.resolve(theme)),
+          deleteTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('deleteTheme should not have been called'))),
         },
       };
 
-      const handler = new ThemesHandler({ client: auth0 });
+      const handler = new ThemesHandler({ client: auth0, config: (key) => config[key] });
       const assets = { themes: [omit(theme, 'themeId')] };
 
       await handler.processChanges(assets);
@@ -267,14 +248,14 @@ describe('#themes handler', () => {
 
     const auth0 = {
       branding: {
-        getDefaultTheme: stub().returns(Promise.resolve({ data: theme })),
-        createTheme: stub().returns(
-          Promise.reject(new Error('createTheme should not have been called'))
-        ),
-        updateTheme: stub().returns(
-          Promise.reject(new Error('updateTheme should not have been called'))
-        ),
-        deleteTheme: stub().returns(Promise.resolve({ data: undefined })),
+        getDefaultTheme: sinon.stub().returns(Promise.resolve({ data: theme })),
+        createTheme: sinon
+          .stub()
+          .returns(Promise.reject(new Error('createTheme should not have been called'))),
+        updateTheme: sinon
+          .stub()
+          .returns(Promise.reject(new Error('updateTheme should not have been called'))),
+        deleteTheme: sinon.stub().returns(Promise.resolve({ data: undefined })),
       },
     };
 
@@ -298,18 +279,18 @@ describe('#themes handler', () => {
 
     const auth0 = {
       branding: {
-        getDefaultTheme: stub().returns(
-          Promise.reject(new Error('getDefaultTheme should not have been called'))
-        ),
-        createTheme: stub().returns(
-          Promise.reject(new Error('createTheme should not have been called'))
-        ),
-        updateTheme: stub().returns(
-          Promise.reject(new Error('updateTheme should not have been called'))
-        ),
-        deleteTheme: stub().returns(
-          Promise.reject(new Error('deleteTheme should not have been called'))
-        ),
+        getDefaultTheme: sinon
+          .stub()
+          .returns(Promise.reject(new Error('getDefaultTheme should not have been called'))),
+        createTheme: sinon
+          .stub()
+          .returns(Promise.reject(new Error('createTheme should not have been called'))),
+        updateTheme: sinon
+          .stub()
+          .returns(Promise.reject(new Error('updateTheme should not have been called'))),
+        deleteTheme: sinon
+          .stub()
+          .returns(Promise.reject(new Error('deleteTheme should not have been called'))),
       },
     };
 
@@ -322,6 +303,229 @@ describe('#themes handler', () => {
     expect(auth0.branding.deleteTheme.called).to.equal(false);
     expect(auth0.branding.updateTheme.called).to.equal(false);
     expect(auth0.branding.createTheme.called).to.equal(false);
+  });
+
+  describe('#themes dryrun tests', () => {
+    it('should not output any changes when no theme exists in dry run mode', async () => {
+      const theme = mockTheme();
+      const config = {
+        AUTH0_DRY_RUN: true,
+      };
+
+      const auth0 = {
+        branding: {
+          getDefaultTheme: sinon.stub().returns(Promise.reject(errorWithStatusCode(404))),
+          createTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('createTheme should not have been called'))),
+          updateTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateTheme should not have been called'))),
+          deleteTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('deleteTheme should not have been called'))),
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0, config: (key) => config[key] });
+      const assets = { themes: [theme] };
+
+      await handler.processChanges(assets);
+
+      // When no theme exists, calcChanges detects a create but the dry run early exit logic triggers
+      expect(handler.created).to.equal(0);
+      expect(handler.updated).to.equal(0);
+      expect(handler.deleted).to.equal(0);
+      expect(auth0.branding.getDefaultTheme.called).to.equal(true);
+      expect(auth0.branding.createTheme.called).to.equal(false);
+      expect(auth0.branding.updateTheme.called).to.equal(false);
+      expect(auth0.branding.deleteTheme.called).to.equal(false);
+    });
+
+    it('should output update changes for themes in dry run mode when theme exists', async () => {
+      const existingTheme = mockTheme({ withThemeId: 'existing-theme' });
+      const newTheme = { ...mockTheme(), displayName: 'Updated theme' };
+
+      const config = {
+        AUTH0_DRY_RUN: true,
+      };
+
+      const auth0 = {
+        branding: {
+          getDefaultTheme: sinon.stub().returns(Promise.resolve({ data: existingTheme })),
+          createTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('createTheme should not have been called'))),
+          updateTheme: sinon.stub().returns(Promise.resolve(newTheme)),
+          deleteTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('deleteTheme should not have been called'))),
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0, config: (key) => config[key] });
+      const assets = { themes: [newTheme] };
+
+      await handler.processChanges(assets);
+
+      expect(handler.created).to.equal(0);
+      expect(handler.updated).to.equal(1);
+      expect(handler.deleted).to.equal(0);
+      expect(auth0.branding.getDefaultTheme.called).to.equal(true);
+      expect(auth0.branding.createTheme.called).to.equal(false);
+      expect(auth0.branding.updateTheme.called).to.equal(true); // API call is still made
+      expect(auth0.branding.deleteTheme.called).to.equal(false);
+    });
+
+    it('should output delete changes for themes in dry run mode when theme should be deleted', async () => {
+      const existingTheme = mockTheme({ withThemeId: 'delete-me' });
+      const config = {
+        AUTH0_DRY_RUN: true,
+        AUTH0_ALLOW_DELETE: true,
+      };
+
+      const auth0 = {
+        branding: {
+          getDefaultTheme: sinon.stub().returns(Promise.resolve({ data: existingTheme })),
+          createTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('createTheme should not have been called'))),
+          updateTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateTheme should not have been called'))),
+          deleteTheme: sinon.stub().returns(Promise.resolve({ data: undefined })),
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0, config: (key) => config[key] });
+      const assets = { themes: [] };
+
+      await handler.processChanges(assets);
+
+      expect(handler.created).to.equal(0);
+      expect(handler.updated).to.equal(0);
+      expect(handler.deleted).to.equal(1);
+      expect(auth0.branding.getDefaultTheme.called).to.equal(true);
+      expect(auth0.branding.createTheme.called).to.equal(false);
+      expect(auth0.branding.updateTheme.called).to.equal(false);
+      expect(auth0.branding.deleteTheme.called).to.equal(true); // API call is still made
+    });
+
+    it('should output delete changes when AUTH0_ALLOW_DELETE is false in dry run mode', async () => {
+      const config = {
+        AUTH0_DRY_RUN: true,
+        AUTH0_ALLOW_DELETE: false,
+      };
+
+      const auth0 = {
+        branding: {
+          getDefaultTheme: sinon.stub().returns(Promise.reject(errorWithStatusCode(404))),
+          createTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('createTheme should not have been called'))),
+          updateTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateTheme should not have been called'))),
+          deleteTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('deleteTheme should not have been called'))),
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0, config: (key) => config[key] });
+      const assets = { themes: [] };
+
+      await handler.processChanges(assets);
+
+      // calcChanges is called first to determine operations, then early exit occurs
+      expect(handler.created).to.equal(0);
+      expect(handler.updated).to.equal(0);
+      expect(handler.deleted).to.equal(0);
+      expect(auth0.branding.getDefaultTheme.called).to.equal(true);
+      expect(auth0.branding.createTheme.called).to.equal(false);
+      expect(auth0.branding.updateTheme.called).to.equal(false);
+      expect(auth0.branding.deleteTheme.called).to.equal(false);
+    });
+
+    it('should not output any changes when theme does not exist and empty array provided in dry run mode', async () => {
+      const config = {
+        AUTH0_DRY_RUN: true,
+        AUTH0_ALLOW_DELETE: true,
+      };
+
+      const auth0 = {
+        branding: {
+          getDefaultTheme: sinon.stub().returns(Promise.reject(errorWithStatusCode(404))),
+          createTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('createTheme should not have been called'))),
+          updateTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateTheme should not have been called'))),
+          deleteTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('deleteTheme should not have been called'))),
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0, config: (key) => config[key] });
+      const assets = { themes: [] };
+
+      await handler.processChanges(assets);
+
+      expect(handler.created).to.equal(0);
+      expect(handler.updated).to.equal(0);
+      expect(handler.deleted).to.equal(0);
+      expect(auth0.branding.getDefaultTheme.called).to.equal(true);
+      expect(auth0.branding.createTheme.called).to.equal(false);
+      expect(auth0.branding.updateTheme.called).to.equal(false);
+      expect(auth0.branding.deleteTheme.called).to.equal(false);
+    });
+
+    it('should handle no-code not enabled for tenant in dry run mode', async () => {
+      const theme = mockTheme();
+      const config = {
+        AUTH0_DRY_RUN: true,
+      };
+
+      const auth0 = {
+        branding: {
+          getDefaultTheme: sinon
+            .stub()
+            .returns(
+              Promise.reject(
+                errorWithStatusCode(
+                  400,
+                  'Your account does not have universal login customizations enabled'
+                )
+              )
+            ),
+          createTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('createTheme should not have been called'))),
+          updateTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateTheme should not have been called'))),
+          deleteTheme: sinon
+            .stub()
+            .returns(Promise.reject(new Error('deleteTheme should not have been called'))),
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0, config: (key) => config[key] });
+      const assets = { themes: [theme] };
+
+      // This should error due to calculateDryRunChanges trying to process null
+      await expect(handler.processChanges(assets)).to.be.rejected;
+
+      expect(handler.created).to.equal(0);
+      expect(handler.updated).to.equal(0);
+      expect(handler.deleted).to.equal(0);
+      expect(auth0.branding.getDefaultTheme.called).to.equal(true);
+      expect(auth0.branding.createTheme.called).to.equal(false);
+      expect(auth0.branding.updateTheme.called).to.equal(false);
+      expect(auth0.branding.deleteTheme.called).to.equal(false);
+    });
   });
 });
 

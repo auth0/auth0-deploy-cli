@@ -1,5 +1,6 @@
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { ConnectionCreate } from 'auth0';
+import nconf from 'nconf';
 import { Asset, Auth0APIClient } from '../../../types';
 import log from '../../../logger';
 import { ConfigFunction } from '../../../configFactory';
@@ -82,7 +83,13 @@ export default class ScimHandler {
    */
   async createIdMap(connections: Asset[]) {
     this.idMap.clear();
-    log.info('Reviewing connections for SCIM support. This may take a while...');
+
+    const logMsg = 'Reviewing connections for SCIM support. This may take a while...';
+    if (nconf.get('AUTH0_DRY_RUN')) {
+      log.debug(logMsg);
+    } else {
+      log.info(logMsg);
+    }
 
     await this.poolClient
       .addEachTask({

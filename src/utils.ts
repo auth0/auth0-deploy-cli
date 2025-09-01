@@ -296,3 +296,29 @@ export const encodeCertStringToBase64 = (cert: string) => {
   }
   return cert;
 };
+
+// Decode a Base64 encoded certificate string back to its original format.
+export const decodeBase64ToCertString = (base64Cert: string) => {
+  try {
+    return Buffer.from(base64Cert, 'base64').toString('utf-8');
+  } catch (e) {
+    return base64Cert;
+  }
+};
+
+// Format connection options by converting client IDs to client names for SAML connections
+export const getFormattedOptions = (connection, clients) => {
+  try {
+    return {
+      options: {
+        ...connection.options,
+        idpinitiated: {
+          ...connection.options.idpinitiated,
+          client_id: convertClientIdToName(connection.options.idpinitiated.client_id, clients),
+        },
+      },
+    };
+  } catch (e) {
+    return {};
+  }
+};

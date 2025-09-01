@@ -2,6 +2,7 @@ import { PostBrandingTheme200Response } from 'auth0';
 import { Assets } from '../../../types';
 import log from '../../../logger';
 import DefaultHandler, { order } from './default';
+import { isDryRun } from '../../utils';
 
 export type Theme = PostBrandingTheme200Response;
 export default class ThemesHandler extends DefaultHandler {
@@ -36,12 +37,20 @@ export default class ThemesHandler extends DefaultHandler {
       return;
     }
 
-    // Empty array means themes should be deleted
-    if (themes.length === 0) {
-      return this.deleteThemes();
+    if (isDryRun(this.config)) {
+      const { del, update } = await this.calcChanges(assets);
+
+      if (update.length === 0 && del.length === 0) {
+        return;
+      }
     }
 
-    return this.updateThemes(themes);
+    // Empty array means themes should be deleted
+    if (themes.length === 0) {
+      await this.deleteThemes();
+    } else {
+      await this.updateThemes(themes);
+    }
   }
 
   async deleteThemes(): Promise<void> {
@@ -73,7 +82,7 @@ export default class ThemesHandler extends DefaultHandler {
       // Removing themeId from update and create payloads, otherwise API will error
       // Theme ID may be required to handle if `--export_ids=true`
       const payload = themes[0];
-      //@ts-ignore to quell non-optional themeId property, but we know that it's ok to delete
+      // @ts-ignore to quell non-optional themeId property, but we know that it's ok to delete
       delete payload.themeId;
       return payload;
     })();

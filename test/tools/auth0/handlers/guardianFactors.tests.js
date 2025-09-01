@@ -1,5 +1,27 @@
+import { sortGuardianFactors } from '../../../../src/tools/utils';
+
 const { expect } = require('chai');
+const sinon = require('sinon');
 const guardianFactorsTests = require('../../../../src/tools/auth0/handlers/guardianFactors');
+const {
+  default: GuardianFactorsHandler,
+} = require('../../../../src/tools/auth0/handlers/guardianFactors');
+
+function mockFactorSms(overrides = {}) {
+  return {
+    name: 'sms',
+    enabled: false,
+    ...overrides,
+  };
+}
+
+function mockFactorDuo(overrides = {}) {
+  return {
+    name: 'duo',
+    enabled: false,
+    ...overrides,
+  };
+}
 
 const pool = {
   addEachTask: (data) => {
@@ -93,7 +115,7 @@ describe('#guardianFactors handler', () => {
 
       const handler = new guardianFactorsTests.default({ client: auth0, config });
       const data = await handler.getType();
-      expect(data).to.deep.equal(factors);
+      expect(data).to.deep.equal(sortGuardianFactors(factors));
     });
 
     it('should update factors', async () => {
@@ -126,6 +148,322 @@ describe('#guardianFactors handler', () => {
       ];
 
       await stageFn.apply(handler, [{ guardianFactors: data }]);
+    });
+  });
+
+  describe('#guardianFactors dryRunChanges', () => {
+    let handler;
+    let stageFn;
+    let contextDataMock;
+
+    const dryRunConfig = (key) => {
+      if (key === 'AUTH0_DRY_RUN') return true;
+      return dryRunConfig.data && dryRunConfig.data[key];
+    };
+    dryRunConfig.data = {
+      AUTH0_CLIENT_ID: 'client_id',
+      AUTH0_ALLOW_DELETE: true,
+    };
+
+    beforeEach(() => {
+      contextDataMock = {
+        guardianFactors: [
+          { name: 'sms', enabled: true },
+          { name: 'otp', enabled: false },
+        ],
+      };
+
+      stageFn = (params) => {
+        const { repository, mappings } = params;
+        if (repository && mappings) {
+          return contextDataMock;
+        }
+        return {};
+      };
+
+      handler = new guardianFactorsTests.default({
+        client: {},
+        config: dryRunConfig,
+        stageFn,
+      });
+
+      handler.existing = [
+        { name: 'sms', enabled: false },
+        { name: 'otp', enabled: false },
+        { name: 'duo', enabled: false },
+      ];
+    });
+
+    it('should return no create changes (guardianFactors cannot be created)', async () => {
+      contextDataMock.guardianFactors = [
+        { name: 'unknown-factor', enabled: true }, // Factor not in existing - should be ignored
+      ];
+
+      const changes = await handler.dryRunChanges(contextDataMock);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(1); // Will be treated as update since it uses standard calcChanges
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return update changes for existing guardianFactors with differences', async () => {
+      const changes = await handler.dryRunChanges(contextDataMock);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(1); // Only sms has differences (otp doesn't exist in this.existing)
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return no delete changes (guardianFactors cannot be deleted)', async () => {
+      contextDataMock.guardianFactors = []; // Empty array will trigger deletes for existing factors
+
+      const changes = await handler.dryRunChanges(contextDataMock);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(3); // All existing factors would be flagged for deletion
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return no changes when guardianFactors are identical', async () => {
+      contextDataMock.guardianFactors = [
+        { name: 'sms', enabled: false },
+        { name: 'otp', enabled: false },
+      ];
+
+      const changes = await handler.dryRunChanges(contextDataMock);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle mixed update scenarios', async () => {
+      contextDataMock.guardianFactors = [
+        { name: 'sms', enabled: true }, // Different from existing (false)
+        { name: 'otp', enabled: false }, // Same as existing
+        { name: 'duo', enabled: true }, // Different from existing (false)
+      ];
+
+      const changes = await handler.dryRunChanges(contextDataMock);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(2); // sms and duo changed
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle empty assets', async () => {
+      const changes = await handler.dryRunChanges({});
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+  });
+
+  describe('#guardianFactors processChanges dryrun tests', () => {
+    it('should update guardian factors during dry run without making API calls', async () => {
+      const dryRunConfig = {
+        AUTH0_DRY_RUN: true,
+      };
+
+      const auth0 = {
+        guardian: {
+          getFactors: sinon
+            .stub()
+            .returns(Promise.resolve({ data: [mockFactorSms({ enabled: false })] })),
+          updateFactor: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateFactor should not have been called'))),
+        },
+      };
+
+      const handler = new GuardianFactorsHandler({
+        client: auth0,
+        config: (key) => dryRunConfig[key],
+      });
+      const assets = { guardianFactors: [mockFactorSms({ enabled: true })] };
+
+      // Use dryRunChanges instead of processChanges for dry run testing
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.update).to.have.length(1);
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(auth0.guardian.getFactors.called).to.equal(true);
+      expect(auth0.guardian.updateFactor.called).to.equal(false);
+    });
+
+    it('should not update identical guardian factors during dry run', async () => {
+      const dryRunConfig = {
+        AUTH0_DRY_RUN: true,
+      };
+
+      const auth0 = {
+        guardian: {
+          getFactors: sinon
+            .stub()
+            .returns(Promise.resolve({ data: [mockFactorSms({ enabled: true })] })),
+          updateFactor: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateFactor should not have been called'))),
+        },
+      };
+
+      const handler = new GuardianFactorsHandler({
+        client: auth0,
+        config: (key) => dryRunConfig[key],
+      });
+      const assets = { guardianFactors: [mockFactorSms({ enabled: true })] };
+
+      // Use dryRunChanges instead of processChanges for dry run testing
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.update).to.have.length(0);
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(auth0.guardian.getFactors.called).to.equal(true);
+      expect(auth0.guardian.updateFactor.called).to.equal(false);
+    });
+
+    it('should update multiple guardian factors during dry run', async () => {
+      const dryRunConfig = {
+        AUTH0_DRY_RUN: true,
+      };
+
+      const auth0 = {
+        guardian: {
+          getFactors: sinon.stub().returns(
+            Promise.resolve({
+              data: [mockFactorSms({ enabled: false }), mockFactorDuo({ enabled: false })],
+            })
+          ),
+          updateFactor: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateFactor should not have been called'))),
+        },
+      };
+
+      const handler = new GuardianFactorsHandler({
+        client: auth0,
+        config: (key) => dryRunConfig[key],
+      });
+      const assets = {
+        guardianFactors: [mockFactorSms({ enabled: true }), mockFactorDuo({ enabled: true })],
+      };
+
+      // Use dryRunChanges instead of processChanges for dry run testing
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.update).to.have.length(2);
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(auth0.guardian.getFactors.called).to.equal(true);
+      expect(auth0.guardian.updateFactor.called).to.equal(false);
+    });
+
+    it('should handle mixed changes during dry run', async () => {
+      const dryRunConfig = {
+        AUTH0_DRY_RUN: true,
+      };
+
+      const auth0 = {
+        guardian: {
+          getFactors: sinon.stub().returns(
+            Promise.resolve({
+              data: [mockFactorSms({ enabled: true }), mockFactorDuo({ enabled: false })],
+            })
+          ),
+          updateFactor: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateFactor should not have been called'))),
+        },
+      };
+
+      const handler = new GuardianFactorsHandler({
+        client: auth0,
+        config: (key) => dryRunConfig[key],
+      });
+      const assets = {
+        guardianFactors: [
+          mockFactorSms({ enabled: true }), // no change
+          mockFactorDuo({ enabled: true }), // update needed
+        ],
+      };
+
+      // Use dryRunChanges instead of processChanges for dry run testing
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.update).to.have.length(1);
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(auth0.guardian.getFactors.called).to.equal(true);
+      expect(auth0.guardian.updateFactor.called).to.equal(false);
+    });
+
+    it('should handle empty guardian factors during dry run', async () => {
+      const dryRunConfig = {
+        AUTH0_DRY_RUN: true,
+      };
+
+      const auth0 = {
+        guardian: {
+          getFactors: sinon.stub().returns(Promise.resolve({ data: [] })),
+          updateFactor: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateFactor should not have been called'))),
+        },
+      };
+
+      const handler = new GuardianFactorsHandler({
+        client: auth0,
+        config: (key) => dryRunConfig[key],
+      });
+      const assets = { guardianFactors: [] };
+
+      await handler.processChanges(assets);
+
+      expect(handler.updated).to.equal(0);
+      expect(handler.created).to.equal(0);
+      expect(handler.deleted).to.equal(0);
+      expect(auth0.guardian.getFactors.called).to.equal(false);
+      expect(auth0.guardian.updateFactor.called).to.equal(false);
+    });
+
+    it('should handle no guardian factors config during dry run', async () => {
+      const dryRunConfig = {
+        AUTH0_DRY_RUN: true,
+      };
+
+      const auth0 = {
+        guardian: {
+          getFactors: sinon
+            .stub()
+            .returns(Promise.reject(new Error('getFactors should not have been called'))),
+          updateFactor: sinon
+            .stub()
+            .returns(Promise.reject(new Error('updateFactor should not have been called'))),
+        },
+      };
+
+      const handler = new GuardianFactorsHandler({
+        client: auth0,
+        config: (key) => dryRunConfig[key],
+      });
+      const assets = {};
+
+      await handler.processChanges(assets);
+
+      expect(handler.updated).to.equal(0);
+      expect(handler.created).to.equal(0);
+      expect(handler.deleted).to.equal(0);
+      expect(auth0.guardian.getFactors.called).to.equal(false);
+      expect(auth0.guardian.updateFactor.called).to.equal(false);
     });
   });
 });

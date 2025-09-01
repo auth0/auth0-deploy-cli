@@ -1,26 +1,55 @@
 import { expect } from 'chai';
-import { calculateChanges, processChangedObjectFields } from '../../src/tools/calculateChanges';
+import { PromisePoolExecutor } from 'promise-pool-executor';
+import {
+  calculateChanges,
+  processChangedObjectFields,
+  calculateDryRunChanges,
+} from '../../src/tools/calculateChanges';
 import DefaultHandler from '../../src/tools/auth0/handlers/default';
 import { configFactory } from '../../src/configFactory';
+import { Auth0APIClient } from '../../src/types';
+
+// Create a mock Auth0 API client
+const mockApiClient: Auth0APIClient = {
+  // @ts-ignore
+  mock: {
+    delete: async (id: string) => ({ id }),
+    create: async (data: any) => ({ ...data, id: 'created-id' }),
+    update: async (id: string, data: any) => ({ ...data, id }),
+    getAll: async () => ({ data: [] }),
+  },
+  pool: new PromisePoolExecutor({
+    concurrencyLimit: 100,
+    frequencyLimit: 3,
+    frequencyWindow: 1000, // 1 sec
+  }),
+};
+
+class MockHandler extends DefaultHandler {
+  constructor(settings = {}) {
+    const config = configFactory();
+    // eslint-disable-next-line no-restricted-syntax
+    for (const key of Object.keys(settings)) {
+      // @ts-ignore
+      config.setValue(key, settings[key]);
+    }
+
+    super({
+      // @ts-ignore
+      config,
+      type: 'mock',
+      client: mockApiClient,
+      functions: {
+        getAll: 'getAll',
+        create: 'create',
+        update: 'update',
+        delete: 'delete',
+      },
+    });
+  }
+}
 
 describe('#utils calcChanges', () => {
-  class MockHandler extends DefaultHandler {
-    constructor(settings = {}) {
-      const config = configFactory();
-      // eslint-disable-next-line no-restricted-syntax
-      for (const key of Object.keys(settings)) {
-        //@ts-ignore
-        config.setValue(key, settings[key]);
-      }
-
-      super({
-        //@ts-ignore
-        config,
-        type: 'mock',
-      });
-    }
-  }
-
   const mockHandler = new MockHandler();
 
   const mockHandlerWithObjectFields = (() => {
@@ -60,7 +89,7 @@ describe('#utils calcChanges', () => {
       assets,
       existing,
       allowDelete: false,
-      //@ts-ignore need to investigate why this "grouping" exists
+      // @ts-ignore need to investigate why this "grouping" exists
       identifiers: ['id', ['client_id', 'audience']],
     });
 
@@ -240,7 +269,7 @@ describe('#utils calcChanges', () => {
       assets,
       existing,
       allowDelete: false,
-      //@ts-ignore need to look into why these "groupings exist"
+      // @ts-ignore need to look into why these "groupings exist"
       identifiers: ['id', ['client_id', 'audience']],
     });
 
@@ -250,13 +279,8 @@ describe('#utils calcChanges', () => {
 });
 
 describe('#utils processChangedObjectFields', () => {
-  const handler = {
-    id: 'test-handler',
-    objectFields: ['client_metadata'],
-    objString: () => {
-      return '';
-    },
-  };
+  const handler = new MockHandler();
+  handler.objectFields = ['client_metadata'];
 
   it('should propose no changes if object field of current and desired states are both empty', () => {
     const desiredObjectFieldState = processChangedObjectFields({
@@ -356,5 +380,154 @@ describe('#utils processChangedObjectFields', () => {
       allowDelete: false,
     });
     expect(desiredObjectFieldState).to.deep.equal(desiredAssetState);
+  });
+});
+
+describe('#calculateDryRunChanges', () => {
+  it('should identify resources to create when no existing resources', () => {
+    const assets = [
+      { id: 'new1', name: 'New Resource 1' },
+      { id: 'new2', name: 'New Resource 2' },
+    ];
+    const existing = [];
+
+    const changes = calculateDryRunChanges({
+      type: 'test',
+      assets,
+      existing,
+      identifiers: ['id', 'name'],
+    });
+
+    expect(changes.create).to.have.length(2);
+    expect(changes.create).to.deep.include({ id: 'new1', name: 'New Resource 1' });
+    expect(changes.create).to.deep.include({ id: 'new2', name: 'New Resource 2' });
+    expect(changes.update).to.have.length(0);
+    expect(changes.del).to.have.length(0);
+    expect(changes.conflicts).to.have.length(0);
+  });
+
+  it('should identify resources to update when existing resources match', () => {
+    const assets = [
+      { id: 'existing1', name: 'Updated Resource 1', description: 'new description' },
+    ];
+    const existing = [
+      { id: 'existing1', name: 'Updated Resource 1', description: 'old description' },
+    ];
+
+    const changes = calculateDryRunChanges({
+      type: 'test',
+      assets,
+      existing,
+      identifiers: ['id', 'name'],
+    });
+
+    expect(changes.create).to.have.length(0);
+    expect(changes.update).to.have.length(1);
+    expect(changes.update[0]).to.deep.include({
+      id: 'existing1',
+      name: 'Updated Resource 1',
+      description: 'new description',
+    });
+    expect(changes.del).to.have.length(0);
+    expect(changes.conflicts).to.have.length(0);
+  });
+
+  it('should identify resources to delete when not in assets', () => {
+    const assets = [];
+    const existing = [
+      { id: 'remove1', name: 'Resource To Remove' },
+      { id: 'remove2', name: 'Another Resource To Remove' },
+    ];
+
+    const changes = calculateDryRunChanges({
+      type: 'test',
+      assets,
+      existing,
+      identifiers: ['id', 'name'],
+    });
+
+    expect(changes.create).to.have.length(0);
+    expect(changes.update).to.have.length(0);
+    expect(changes.del).to.have.length(2);
+    expect(changes.del).to.deep.include({ id: 'remove1', name: 'Resource To Remove' });
+    expect(changes.del).to.deep.include({ id: 'remove2', name: 'Another Resource To Remove' });
+    expect(changes.conflicts).to.have.length(0);
+  });
+
+  it('should handle mixed scenarios with create, update, and delete', () => {
+    const assets = [{ id: 'existing1', name: 'Updated Resource', description: 'updated' }];
+    const existing = [
+      { id: 'existing1', name: 'Updated Resource', description: 'original' },
+      { id: 'remove1', name: 'Resource To Remove' },
+    ];
+
+    const changes = calculateDryRunChanges({
+      type: 'test',
+      assets,
+      existing,
+      identifiers: ['id', 'name'],
+    });
+
+    // Should have at least one update and one delete
+    expect(changes.update.length).to.be.greaterThan(0);
+    expect(changes.del.length).to.be.greaterThan(0);
+    expect(changes.conflicts).to.have.length(0);
+  });
+
+  it('should handle no changes when assets match existing', () => {
+    const assets = [{ id: 'same1', name: 'Unchanged Resource', description: 'same' }];
+    const existing = [{ id: 'same1', name: 'Unchanged Resource', description: 'same' }];
+
+    const changes = calculateDryRunChanges({
+      type: 'test',
+      assets,
+      existing,
+      identifiers: ['id', 'name'],
+    });
+
+    expect(changes.create).to.have.length(0);
+    expect(changes.update).to.have.length(0);
+    expect(changes.del).to.have.length(0);
+    expect(changes.conflicts).to.have.length(0);
+  });
+
+  it('should handle single asset and existing resource', () => {
+    const assets = { id: 'single', name: 'Single Resource', updated: true };
+    const existing = { id: 'single', name: 'Single Resource', updated: false };
+
+    const changes = calculateDryRunChanges({
+      type: 'test',
+      assets,
+      existing,
+      identifiers: ['id', 'name'],
+    });
+
+    expect(changes.create).to.have.length(0);
+    expect(changes.update).to.have.length(1);
+    expect(changes.update[0]).to.deep.include({
+      id: 'single',
+      name: 'Single Resource',
+      updated: true,
+    });
+    expect(changes.del).to.have.length(0);
+    expect(changes.conflicts).to.have.length(0);
+  });
+
+  it('should handle null existing resources', () => {
+    const assets = [{ id: 'new1', name: 'New Resource' }];
+    const existing = [];
+
+    const changes = calculateDryRunChanges({
+      type: 'test',
+      assets,
+      existing,
+      identifiers: ['id', 'name'],
+    });
+
+    expect(changes.create).to.have.length(1);
+    expect(changes.create[0]).to.deep.include({ id: 'new1', name: 'New Resource' });
+    expect(changes.update).to.have.length(0);
+    expect(changes.del).to.have.length(0);
+    expect(changes.conflicts).to.have.length(0);
   });
 });

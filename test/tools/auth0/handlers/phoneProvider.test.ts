@@ -17,6 +17,14 @@ const mockProviders = {
 };
 
 describe('#phoneProviders handler', () => {
+  const config = function (key) {
+    return config.data && config.data[key];
+  };
+
+  config.data = {
+    AUTH0_DRY_RUN: false,
+  };
+
   describe('#phoneProviders getType', () => {
     it('should get phoneProviders', async () => {
       const auth0 = {
@@ -71,7 +79,7 @@ describe('#phoneProviders handler', () => {
         },
       };
 
-      const handler = new phoneProviderHandler({ client: auth0 });
+      const handler = new phoneProviderHandler({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ phoneProviders: mockProviders.providers }]);
@@ -95,7 +103,7 @@ describe('#phoneProviders handler', () => {
         },
       };
 
-      const handler = new phoneProviderHandler({ client: auth0 });
+      const handler = new phoneProviderHandler({ client: auth0, config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       const data = [
         {

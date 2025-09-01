@@ -458,4 +458,204 @@ describe('#resourceServers handler', () => {
       await stageFn.apply(handler, [data]);
     });
   });
+
+  describe('#resourceServers dryRunChanges', () => {
+    const dryRunConfig = function (key) {
+      return dryRunConfig.data && dryRunConfig.data[key];
+    };
+
+    dryRunConfig.data = {
+      AUTH0_ALLOW_DELETE: true,
+    };
+
+    it('should return create changes for new resource servers', async () => {
+      const auth0 = {
+        resourceServers: {
+          getAll: (params) => mockPagedData(params, 'resourceServers', []),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({
+        client: pageClient(auth0),
+        config: dryRunConfig,
+      });
+      const assets = {
+        resourceServers: [
+          { name: 'New API 1', identifier: 'new-api-1' },
+          { name: 'New API 2', identifier: 'new-api-2' },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(2);
+      expect(changes.create[0]).to.include({ name: 'New API 1', identifier: 'new-api-1' });
+      expect(changes.create[1]).to.include({ name: 'New API 2', identifier: 'new-api-2' });
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return update changes for existing resource servers with differences', async () => {
+      const auth0 = {
+        resourceServers: {
+          getAll: (params) =>
+            mockPagedData(params, 'resourceServers', [
+              {
+                id: 'api1',
+                name: 'Existing API',
+                identifier: 'existing-api',
+                token_lifetime: 3600,
+              },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({
+        client: pageClient(auth0),
+        config: dryRunConfig,
+      });
+      const assets = {
+        resourceServers: [
+          { name: 'Existing API', identifier: 'existing-api', token_lifetime: 7200 },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(1);
+      expect(changes.update[0]).to.include({
+        name: 'Existing API',
+        identifier: 'existing-api',
+        token_lifetime: 7200,
+        id: 'api1',
+      });
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return delete changes for resource servers not in assets', async () => {
+      const auth0 = {
+        resourceServers: {
+          getAll: (params) =>
+            mockPagedData(params, 'resourceServers', [
+              { id: 'api1', name: 'API To Remove', identifier: 'api-to-remove' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({
+        client: pageClient(auth0),
+        config: dryRunConfig,
+      });
+      const assets = { resourceServers: [] };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(1);
+      expect(changes.del[0]).to.include({
+        id: 'api1',
+        name: 'API To Remove',
+        identifier: 'api-to-remove',
+      });
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return no changes when resource servers are identical', async () => {
+      const auth0 = {
+        resourceServers: {
+          getAll: (params) =>
+            mockPagedData(params, 'resourceServers', [
+              {
+                id: 'api1',
+                name: 'Unchanged API',
+                identifier: 'unchanged-api',
+                token_lifetime: 3600,
+              },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({
+        client: pageClient(auth0),
+        config: dryRunConfig,
+      });
+      const assets = {
+        resourceServers: [
+          {
+            name: 'Unchanged API',
+            identifier: 'unchanged-api',
+            token_lifetime: 3600,
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle mixed create, update, and delete operations', async () => {
+      const auth0 = {
+        resourceServers: {
+          getAll: (params) =>
+            mockPagedData(params, 'resourceServers', [
+              { id: 'api1', name: 'Update API', identifier: 'update-api', token_lifetime: 3600 },
+              { id: 'api2', name: 'Delete API', identifier: 'delete-api' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({
+        client: pageClient(auth0),
+        config: dryRunConfig,
+      });
+      const assets = {
+        resourceServers: [
+          { name: 'Update API', identifier: 'update-api', token_lifetime: 7200 },
+          { name: 'Create API', identifier: 'create-api' },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create.length).to.be.greaterThan(0);
+      expect(changes.update.length).to.be.greaterThan(0);
+      expect(changes.del.length).to.be.greaterThan(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle empty assets', async () => {
+      const auth0 = {
+        resourceServers: {
+          getAll: (params) => mockPagedData(params, 'resourceServers', []),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({
+        client: pageClient(auth0),
+        config: dryRunConfig,
+      });
+      const assets = {}; // No resourceServers property
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+  });
 });

@@ -25,8 +25,8 @@ describe('#YAML context tenant settings', () => {
     const target = {
       friendly_name: 'Auth0 test',
       default_directory: 'users',
-      session_lifetime_in_minutes: 89,
-      idle_session_lifetime_in_minutes: 7404,
+      session_lifetime: 1.48394893,
+      idle_session_lifetime: 123.4,
     };
 
     const config = { AUTH0_INPUT_FILE: yamlFile, AUTH0_KEYWORD_REPLACE_MAPPINGS: { ENV: 'test' } };

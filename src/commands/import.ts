@@ -14,6 +14,7 @@ export default async function importCMD(params: ImportParams) {
     env: shouldInheritEnv = false,
     secret: clientSecret,
     experimental_ea: experimentalEA,
+    dry_run: dryRun = false,
   } = params;
 
   if (shouldInheritEnv) {
@@ -48,6 +49,12 @@ export default async function importCMD(params: ImportParams) {
     nconf.set('AUTH0_EXPERIMENTAL_EA', experimentalEA);
   }
 
+  // Override AUTH0_DRY_RUN if dry_run passed in command line
+  if (dryRun) {
+    overrides.AUTH0_DRY_RUN = dryRun;
+    nconf.set('AUTH0_DRY_RUN', dryRun);
+  }
+
   nconf.overrides(overrides);
 
   // Setup context and load
@@ -57,8 +64,10 @@ export default async function importCMD(params: ImportParams) {
   const config = configFactory();
   config.setProvider((key) => nconf.get(key));
 
-  //@ts-ignore because context and assets still need to be typed TODO: type assets and type context
+  // @ts-ignore because context and assets still need to be typed TODO: type assets and type context
   await toolsDeploy(context.assets, context.mgmtClient, config);
 
-  log.info('Import Successful');
+  if (!dryRun) {
+    log.info('Import Successful');
+  }
 }

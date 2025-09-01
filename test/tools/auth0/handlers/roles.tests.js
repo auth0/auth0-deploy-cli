@@ -294,4 +294,188 @@ describe('#roles handler', () => {
       await stageFn.apply(handler, [{ roles: [{}] }]);
     });
   });
+
+  describe('#roles dryRunChanges', () => {
+    const dryRunConfig = function (key) {
+      return dryRunConfig.data && dryRunConfig.data[key];
+    };
+
+    dryRunConfig.data = {
+      AUTH0_CLIENT_ID: 'client_id',
+      AUTH0_ALLOW_DELETE: true,
+    };
+
+    it('should return create changes for new roles', async () => {
+      const auth0 = {
+        roles: {
+          getAll: (params) => mockPagedData(params, 'roles', []),
+          getPermissions: () => Promise.resolve({ data: { permissions: [], total: 0 } }),
+        },
+        pool,
+      };
+
+      const handler = new roles.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        roles: [
+          { name: 'Admin Role', description: 'Administrator access' },
+          { name: 'User Role', description: 'Standard user access' },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(2);
+      expect(changes.create[0]).to.include({
+        name: 'Admin Role',
+        description: 'Administrator access',
+      });
+      expect(changes.create[1]).to.include({
+        name: 'User Role',
+        description: 'Standard user access',
+      });
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return update changes for existing roles with differences', async () => {
+      const auth0 = {
+        roles: {
+          getAll: (params) =>
+            mockPagedData(params, 'roles', [
+              { id: 'role1', name: 'Existing Role', description: 'old description' },
+            ]),
+          getPermissions: () => Promise.resolve({ data: { permissions: [], total: 0 } }),
+        },
+        pool,
+      };
+
+      const handler = new roles.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        roles: [{ name: 'Existing Role', description: 'new description' }],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(1);
+      expect(changes.update[0]).to.include({
+        name: 'Existing Role',
+        description: 'new description',
+        id: 'role1',
+      });
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return delete changes for roles not in assets', async () => {
+      const auth0 = {
+        roles: {
+          getAll: (params) =>
+            mockPagedData(params, 'roles', [
+              { id: 'role1', name: 'Role To Remove' },
+              { id: 'role2', name: 'Another Role To Remove' },
+            ]),
+          getPermissions: () => Promise.resolve({ data: { permissions: [], total: 0 } }),
+        },
+        pool,
+      };
+
+      const handler = new roles.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = { roles: [] };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(2);
+      expect(changes.del[0]).to.include({ id: 'role1', name: 'Role To Remove' });
+      expect(changes.del[1]).to.include({ id: 'role2', name: 'Another Role To Remove' });
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return no changes when roles are identical', async () => {
+      const auth0 = {
+        roles: {
+          getAll: (params) =>
+            mockPagedData(params, 'roles', [
+              {
+                id: 'role1',
+                name: 'Unchanged Role',
+                description: 'same description',
+              },
+            ]),
+          getPermissions: () => Promise.resolve({ data: { permissions: [], total: 0 } }),
+        },
+        pool,
+      };
+
+      const handler = new roles.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        roles: [
+          {
+            name: 'Unchanged Role',
+            description: 'same description',
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle mixed create, update, and delete operations', async () => {
+      const auth0 = {
+        roles: {
+          getAll: (params) =>
+            mockPagedData(params, 'roles', [
+              { id: 'role1', name: 'Update Role', description: 'old' },
+              { id: 'role2', name: 'Delete Role' },
+            ]),
+          getPermissions: () => Promise.resolve({ data: { permissions: [], total: 0 } }),
+        },
+        pool,
+      };
+
+      const handler = new roles.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        roles: [
+          { name: 'Update Role', description: 'new' },
+          { name: 'Create Role', description: 'brand new role' },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      // For mixed operations, just verify we get some changes of each type
+      expect(changes.create.length).to.be.greaterThan(0);
+      expect(changes.update.length).to.be.greaterThan(0);
+      expect(changes.del.length).to.be.greaterThan(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle empty assets', async () => {
+      const auth0 = {
+        roles: {
+          getAll: (params) => mockPagedData(params, 'roles', []),
+          getPermissions: () => Promise.resolve({ data: { permissions: [], total: 0 } }),
+        },
+        pool,
+      };
+
+      const handler = new roles.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {}; // No roles property
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+  });
 });

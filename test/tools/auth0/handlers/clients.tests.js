@@ -523,4 +523,177 @@ describe('#clients handler', () => {
       expect(wasDeleteCalled).to.be.true;
     });
   });
+
+  describe('#clients dryRunChanges', () => {
+    const dryRunConfig = function (key) {
+      return dryRunConfig.data && dryRunConfig.data[key];
+    };
+
+    dryRunConfig.data = {
+      AUTH0_CLIENT_ID: 'client_id',
+      AUTH0_ALLOW_DELETE: true,
+    };
+
+    it('should return create changes for new clients', async () => {
+      const auth0 = {
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        clients: [
+          { name: 'New Client 1', app_type: 'spa' },
+          { name: 'New Client 2', app_type: 'regular_web' },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(2);
+      expect(changes.create[0]).to.include({ name: 'New Client 1', app_type: 'spa' });
+      expect(changes.create[1]).to.include({ name: 'New Client 2', app_type: 'regular_web' });
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return update changes for existing clients with differences', async () => {
+      const auth0 = {
+        clients: {
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              { client_id: 'client1', name: 'Existing Client', description: 'old description' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        clients: [{ name: 'Existing Client', description: 'new description' }],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(1);
+      expect(changes.update[0]).to.include({
+        name: 'Existing Client',
+        description: 'new description',
+        client_id: 'client1',
+      });
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return delete changes for clients not in assets', async () => {
+      const auth0 = {
+        clients: {
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              { client_id: 'client1', name: 'Client To Remove' },
+              // Note: Not including deploy client here as it gets filtered out in real scenarios
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = { clients: [] };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(1);
+      expect(changes.del[0]).to.include({ client_id: 'client1', name: 'Client To Remove' });
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return no changes when clients are identical', async () => {
+      const auth0 = {
+        clients: {
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'Unchanged Client',
+                app_type: 'spa',
+                description: 'same description',
+              },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        clients: [
+          {
+            name: 'Unchanged Client',
+            app_type: 'spa',
+            description: 'same description',
+          },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle mixed create, update, and delete operations', async () => {
+      const auth0 = {
+        clients: {
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              { client_id: 'client1', name: 'Update Client', description: 'old' },
+              { client_id: 'client2', name: 'Delete Client' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {
+        clients: [
+          { name: 'Update Client', description: 'new' },
+          { name: 'Create Client', app_type: 'spa' },
+        ],
+      };
+
+      const changes = await handler.dryRunChanges(assets);
+
+      // For mixed operations, just verify we get some changes of each type
+      expect(changes.create.length).to.be.greaterThan(0);
+      expect(changes.update.length).to.be.greaterThan(0);
+      expect(changes.del.length).to.be.greaterThan(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should handle empty assets', async () => {
+      const auth0 = {
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config: dryRunConfig });
+      const assets = {}; // No clients property
+
+      const changes = await handler.dryRunChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+  });
 });
