@@ -79,6 +79,10 @@ Boolean. Enables more verbose error logging; useful during troubleshooting. Defa
 
 Boolean. When enabled, gain early access Auth0 resources support and experimental features. Default: `false`.
 
+### `--dry_run`
+
+Boolean. When enabled, performs a dry run deployment that previews all potential changes without actually applying them to your Auth0 tenant. Default: `false`. See: [Using Dry Run](using-dry-run.md).
+
 ### Examples
 
 ```shell
@@ -90,6 +94,12 @@ a0deploy import -c=config.json --input_file=local
 
 # Deploying configuration with environment variables ignored
 a0deploy import -c=config.json --input_file=local/tenant.yaml --env=false
+
+# Performing a dry run for YAML formats
+a0deploy import -c=config.json --input_file=local/tenant.yaml --dry_run
+
+# Performing a dry run for directory format
+a0deploy import -c=config.json --input_file=local --dry_run
 ```
 
 ---
