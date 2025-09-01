@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.14.0-beta.0] - 2025-09-01
+
+### Added
+
+- Add support for `--dry_run` flag to `import` command. [#1143]
+
 ## [8.13.0] - 2025-08-04
 
 ### Added
@@ -1403,7 +1409,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1133]: https://github.com/auth0/auth0-deploy-cli/issues/1133
 [#1134]: https://github.com/auth0/auth0-deploy-cli/issues/1134
 [#1139]: https://github.com/auth0/auth0-deploy-cli/issues/1139
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.13.0...HEAD
+[#1143]: https://github.com/auth0/auth0-deploy-cli/issues/1143
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.14.0-beta.0...HEAD
+[8.14.0-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.13.0...v8.14.0-beta.0
 [8.13.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.12.0...v8.13.0
 [8.12.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.11.0...v8.12.0
 [8.11.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.10.0...v8.11.0
