@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add application access permissions support in `clientGrants` and `resourceServers`. [#1144]
+
 ## [8.13.0] - 2025-08-04
 
 ### Added
