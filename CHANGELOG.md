@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.15.0] - 2025-09-02
+
 ### Added
 
 - Add application access permissions support in `clientGrants` and `resourceServers`. [#1144]
@@ -1407,7 +1409,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1133]: https://github.com/auth0/auth0-deploy-cli/issues/1133
 [#1134]: https://github.com/auth0/auth0-deploy-cli/issues/1134
 [#1139]: https://github.com/auth0/auth0-deploy-cli/issues/1139
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.13.0...HEAD
+[#1144]: https://github.com/auth0/auth0-deploy-cli/issues/1144
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.15.0...HEAD
+[8.15.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.13.0...v8.15.0
 [8.13.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.12.0...v8.13.0
 [8.12.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.11.0...v8.12.0
 [8.11.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.10.0...v8.11.0
