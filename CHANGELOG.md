@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `subject_type` field to specify the type of subject in `clientGrants`. [#1144]
+- Add `authorization_details_types` field to define allowed authorization detail types in `clientGrants`. [#1144]
+- Add `subject_type_authorization` configuration for fine-grained access control in `resourceServers`. [#1144]
+
 ## [8.13.0] - 2025-08-04
 
 ### Added
