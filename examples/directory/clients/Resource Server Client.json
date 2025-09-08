@@ -1,0 +1,9 @@
+{
+  "name": "My Resource Server Client",
+  "app_type": "resource_server",
+  "resource_server_identifier": "https://##ENV##.myapp.com/api/v1",
+  "description": "A resource server client that can exchange tokens for federated connections",
+  "is_first_party": true,
+  "oidc_conformant": true,
+  "token_endpoint_auth_method": "client_secret_basic"
+}
