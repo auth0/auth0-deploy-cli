@@ -1,4 +1,4 @@
-import { Client } from 'auth0';
+import { Client, ClientGrantSubjectTypeEnum } from 'auth0';
 import DefaultHandler, { order } from './default';
 import { convertClientNamesToIds } from '../../utils';
 import { Assets, CalculatedChanges } from '../../../types';
@@ -17,6 +17,19 @@ export const schema = {
         items: { type: 'string' },
         uniqueItems: true,
       },
+      subject_type: {
+        type: 'string',
+        enum: Object.values(ClientGrantSubjectTypeEnum),
+        description: 'The subject type for this grant.',
+      },
+      authorization_details_types: {
+        type: 'array',
+        description: 'Types of authorization_details allowed for this client grant.',
+        items: {
+          type: 'string',
+        },
+        uniqueItems: true,
+      },
     },
     required: ['client_id', 'scope', 'audience'],
   },
@@ -26,6 +39,8 @@ export type ClientGrant = {
   client_id: string;
   audience: string;
   scope: string[];
+  subject_type: ClientGrantSubjectTypeEnum;
+  authorization_details_types: string[];
 };
 
 export default class ClientGrantsHandler extends DefaultHandler {
@@ -36,9 +51,9 @@ export default class ClientGrantsHandler extends DefaultHandler {
       ...config,
       type: 'clientGrants',
       id: 'id',
-      //@ts-ignore because not sure why two-dimensional array passed in
+      // @ts-ignore because not sure why two-dimensional array passed in
       identifiers: ['id', ['client_id', 'audience']],
-      stripUpdateFields: ['audience', 'client_id'],
+      stripUpdateFields: ['audience', 'client_id', 'subject_type'],
     });
   }
 
@@ -111,13 +126,13 @@ export default class ClientGrantsHandler extends DefaultHandler {
     };
 
     const changes: CalculatedChanges = {
-      //@ts-ignore because this expects `client_id` and that's not yet typed on Asset
+      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
       del: filterGrants(del),
-      //@ts-ignore because this expects `client_id` and that's not yet typed on Asset
+      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
       update: filterGrants(update),
-      //@ts-ignore because this expects `client_id` and that's not yet typed on Asset
+      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
       create: filterGrants(create),
-      //@ts-ignore because this expects `client_id` and that's not yet typed on Asset
+      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
       conflicts: filterGrants(conflicts),
     };
 
