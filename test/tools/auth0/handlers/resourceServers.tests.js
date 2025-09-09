@@ -177,6 +177,53 @@ describe('#resourceServers handler', () => {
       ]);
     });
 
+    it('should create resource server with subject_type_authorization', async () => {
+      const auth0 = {
+        resourceServers: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('advancedAPI');
+            expect(data.subject_type_authorization).to.deep.equal({
+              user: {
+                policy: 'require_client_grant',
+              },
+              client: {
+                policy: 'deny_all',
+              },
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'resource_servers', []),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          resourceServers: [
+            {
+              name: 'advancedAPI',
+              identifier: 'https://advanced-api.example.com',
+              subject_type_authorization: {
+                user: {
+                  policy: 'require_client_grant',
+                },
+                client: {
+                  policy: 'deny_all',
+                },
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
     it('should get resource servers', async () => {
       const auth0 = {
         resourceServers: {
@@ -339,6 +386,57 @@ describe('#resourceServers handler', () => {
 
       await stageFn.apply(handler, [
         { resourceServers: [{ name: 'someAPI', identifier: 'another-api', scope: 'new:scope' }] },
+      ]);
+    });
+
+    it('should update resource server with subject_type_authorization', async () => {
+      const auth0 = {
+        resourceServers: {
+          create: () => Promise.resolve([]),
+          update: function (params, data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(params).to.be.an('object');
+            expect(data).to.be.an('object');
+            expect(params.id).to.equal('rs1');
+            expect(data.subject_type_authorization).to.deep.equal({
+              user: {
+                policy: 'allow_all',
+              },
+              client: {
+                policy: 'require_client_grant',
+              },
+            });
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              { id: 'rs1', identifier: 'some-api', name: 'advancedAPI' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          resourceServers: [
+            {
+              name: 'advancedAPI',
+              identifier: 'some-api',
+              subject_type_authorization: {
+                user: {
+                  policy: 'allow_all',
+                },
+                client: {
+                  policy: 'require_client_grant',
+                },
+              },
+            },
+          ],
+        },
       ]);
     });
 
