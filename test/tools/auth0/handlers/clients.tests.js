@@ -240,9 +240,6 @@ describe('#clients handler', () => {
         name: 'My Resource Server Client',
         app_type: 'resource_server',
         resource_server_identifier: 'https://api.example.com/v1',
-        is_first_party: true,
-        oidc_conformant: true,
-        token_endpoint_auth_method: 'client_secret_basic',
       };
 
       const auth0 = {
@@ -254,9 +251,6 @@ describe('#clients handler', () => {
             expect(data.name).to.equal('My Resource Server Client');
             expect(data.app_type).to.equal('resource_server');
             expect(data.resource_server_identifier).to.equal('https://api.example.com/v1');
-            expect(data.is_first_party).to.equal(true);
-            expect(data.oidc_conformant).to.equal(true);
-            expect(data.token_endpoint_auth_method).to.equal('client_secret_basic');
             return Promise.resolve({ data });
           },
           update: () => Promise.resolve({ data: [] }),
