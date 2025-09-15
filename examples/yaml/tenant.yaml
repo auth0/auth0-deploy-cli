@@ -218,6 +218,20 @@ prompts:
       login-id:
         login-id:
           invalid-email-format: Email is not valid.
+      passkeys:
+        passkey-enrollment:
+          title: Create a passkey for ${clientName}
+          createButtonText: Create a passkey
+          continueButtonText: Continue without passkeys
+          passkeyBenefit1Title: No need to remember a password
+          passkeyBenefit2Title: Works on all of your devices
+          passkeyBenefit3Title: Keep your account safer
+        passkey-enrollment-local:
+          title: Create a passkey for ${clientName} on this device
+          createButtonText: Create a new passkey
+          continueButtonText: Continue without a new passkey
+          passkeyBenefit1Title: Sign in quickly with this device
+          passkeyBenefit2Title: No need to remember a password
   enable_ulp_wcag_compliance: false
   identifier_first: false
   partials: {}
@@ -237,7 +251,7 @@ flows:
 flowVaultConnections:
   - name: 'New Auth0 M2M Con'
     app_id: AUTH0
-    setup: @@SETUP_CONFIG@@
+    setup: "@@SETUP_CONFIG@@"
 
 selfServiceProfiles:
   - name: self-service profile 1
