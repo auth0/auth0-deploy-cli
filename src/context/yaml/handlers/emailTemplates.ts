@@ -24,7 +24,7 @@ async function parse(context: YAMLContext): Promise<ParsedEmailTemplates> {
 }
 
 async function dump(context: YAMLContext): Promise<ParsedEmailTemplates> {
-  let emailTemplates = context.assets.emailTemplates;
+  let { emailTemplates } = context.assets;
 
   if (!emailTemplates) {
     return { emailTemplates: null };
