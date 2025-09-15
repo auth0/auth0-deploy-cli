@@ -20,6 +20,7 @@ const EMAIL_CHANGE_PASSWORD = 'change_password';
 const EMAIL_PASSWORD_RESET = 'password_reset';
 const EMAIL_MFA_OOB_CODE = 'mfa_oob_code';
 const EMAIL_USER_INVITATION = 'user_invitation';
+const EMAIL_ASYNC_APPROVAL = 'async_approval';
 
 const UNIVERSAL_LOGIN_TEMPLATE = 'universal_login';
 
@@ -57,6 +58,7 @@ const constants = {
     'change_password',
     'password_reset',
     'user_invitation',
+    'async_approval',
   ] as GetEmailTemplatesByTemplateNameTemplateNameEnum[],
   ACTIONS_TRIGGERS: [
     'post-login',
@@ -80,6 +82,7 @@ const constants = {
   EMAIL_PASSWORD_RESET,
   EMAIL_MFA_OOB_CODE,
   EMAIL_USER_INVITATION,
+  EMAIL_ASYNC_APPROVAL,
   GUARDIAN_DIRECTORY: 'guardian',
   GUARDIAN_FACTORS_DIRECTORY: 'factors',
   GUARDIAN_PROVIDERS_DIRECTORY: 'providers',
@@ -173,6 +176,8 @@ const constants = {
     `${EMAIL_MFA_OOB_CODE}.html`,
     `${EMAIL_USER_INVITATION}.json`,
     `${EMAIL_USER_INVITATION}.html`,
+    `${EMAIL_ASYNC_APPROVAL}.json`,
+    `${EMAIL_ASYNC_APPROVAL}.html`,
   ],
   SUPPORTED_BRANDING_TEMPLATES: [UNIVERSAL_LOGIN_TEMPLATE],
   LOG_STREAMS_DIRECTORY: 'log-streams',
