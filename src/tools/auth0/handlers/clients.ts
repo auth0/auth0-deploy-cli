@@ -136,6 +136,15 @@ export const schema = {
         },
         additionalProperties: false,
       },
+      app_type: {
+        type: 'string',
+        description: 'The type of application this client represents',
+      },
+      resource_server_identifier: {
+        type: 'string',
+        description:
+          'The identifier of a resource server in your tenant. This property links a client to a resource server indicating that the client IS that resource server. Can only be set when app_type=resource_server.',
+      },
     },
     required: ['name'],
   },
@@ -144,6 +153,8 @@ export const schema = {
 export type Client = {
   client_id: string;
   name: string;
+  app_type?: string;
+  resource_server_identifier?: string;
   custom_login_page?: string;
   custom_login_page_on?: boolean;
 };
@@ -165,6 +176,7 @@ export default class ClientHandler extends DefaultAPIHandler {
         'global',
         'tenant',
         'jwt_configuration.secret_encoded',
+        'resource_server_identifier',
       ],
     });
   }

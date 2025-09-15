@@ -234,6 +234,37 @@ describe('#clients handler', () => {
       expect(wasCreateCalled).to.be.true;
     });
 
+    it('should create resource server client', async () => {
+      let wasCreateCalled = false;
+      const resourceServerClient = {
+        name: 'My Resource Server Client',
+        app_type: 'resource_server',
+        resource_server_identifier: 'https://api.example.com/v1',
+      };
+
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            wasCreateCalled = true;
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('My Resource Server Client');
+            expect(data.app_type).to.equal('resource_server');
+            expect(data.resource_server_identifier).to.equal('https://api.example.com/v1');
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ clients: [resourceServerClient] }]);
+      expect(wasCreateCalled).to.be.equal(true);
+    });
+
     it('should get clients', async () => {
       const auth0 = {
         clients: {

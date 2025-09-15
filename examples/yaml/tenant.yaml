@@ -38,6 +38,10 @@ clients:
       google:
         enabled: true
     # Add other client settings https://auth0.com/docs/api/management/v2#!/Clients/post_clients
+  -
+    name: "My Resource Server Client"
+    app_type: "resource_server"
+    resource_server_identifier: "https://##ENV##.myapp.com/api/v1"
 
 databases:
   - name: "users"
@@ -81,6 +85,7 @@ resourceServers:
         description: "update account"
       - value: "read:account"
         description: "read account"
+    # client_id: "if linked to a resource server client (readonly)"
     # Add other resource server settings (https://auth0.com/docs/api/management/v2#!/Resource_Servers/post_resource_servers)
 
 phoneProviders:
