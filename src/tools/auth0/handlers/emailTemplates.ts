@@ -34,6 +34,11 @@ export default class EmailTemplateHandler extends DefaultHandler {
           const { data: template } = await this.client.emailTemplates.get({ templateName });
           return template;
         } catch (err) {
+          if (err.statusCode === 403 && templateName === constants.EMAIL_ASYNC_APPROVAL) {
+            // Ignore if feature_not_enabled
+            return null;
+          }
+
           // Ignore if not found, else throw error
           if (err.statusCode !== 404) {
             throw err;
