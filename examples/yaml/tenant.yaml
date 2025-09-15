@@ -251,7 +251,7 @@ flows:
 flowVaultConnections:
   - name: 'New Auth0 M2M Con'
     app_id: AUTH0
-    setup: "@@SETUP_CONFIG@@"
+    setup: '@@SETUP_CONFIG@@'
 
 selfServiceProfiles:
   - name: self-service profile 1
