@@ -45,6 +45,7 @@ const promptTypes = [
   'invitation',
   'common',
   'captcha',
+  'passkeys',
 ] as const;
 
 export type PromptTypes = (typeof promptTypes)[number];
@@ -109,6 +110,8 @@ const screenTypes = [
   'login-passwordless-email-code',
   'login-passwordless-email-link',
   'login-passwordless-sms-otp',
+  'passkey-enrollment',
+  'passkey-enrollment-local',
 ] as const;
 
 export type ScreenTypes = (typeof screenTypes)[number];
