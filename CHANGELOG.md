@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for token vault in `clients` and `resourceServers`. [#1158]
+- Add support for `async_approval` template in `emailTemplates`. [#1146]
+- Add support for `passkeys` in `prompts`. [#1161]
+
+### Fixed
+
+- Fix example directory name for `phoneProviders`. [#1155]
+
 ## [8.15.0] - 2025-09-02
 
 ### Added
