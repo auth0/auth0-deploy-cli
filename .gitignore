@@ -14,3 +14,5 @@ yarn-error.log
 Makefile
 .vscode/*
 .github/copilot-instructions.md
+.github/chatmodes/*
+.github/prompts/*
