@@ -1,8 +1,4 @@
-import {
-  GetSelfServiceProfileCustomTextLanguageEnum,
-  GetSelfServiceProfileCustomTextPageEnum,
-  SsProfile,
-} from 'auth0';
+import { Management } from 'auth0';
 import { isEmpty } from 'lodash';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import log from '../../../logger';
@@ -10,11 +6,21 @@ import DefaultAPIHandler from './default';
 import { calculateChanges } from '../../calculateChanges';
 import { paginate } from '../client';
 
+enum SelfServiceProfileCustomTextLanguageEnum {
+  en = 'en',
+}
+
+enum SelfServiceProfileCustomTextPageEnum {
+  getStarted = 'get-started',
+}
+
 type customTextType = {
-  [GetSelfServiceProfileCustomTextLanguageEnum.en]: {
-    [GetSelfServiceProfileCustomTextPageEnum.get_started]: Object;
+  [SelfServiceProfileCustomTextLanguageEnum.en]: {
+    [SelfServiceProfileCustomTextPageEnum.getStarted]: Object;
   };
 };
+
+type SsProfile = Management.SelfServiceProfile;
 
 export type SsProfileWithCustomText = Omit<SsProfile, 'created_at' | 'updated_at'> & {
   customText?: customTextType;
@@ -71,10 +77,10 @@ export const schema = {
       customText: {
         type: 'object',
         properties: {
-          [GetSelfServiceProfileCustomTextLanguageEnum.en]: {
+          [SelfServiceProfileCustomTextLanguageEnum.en]: {
             type: 'object',
             properties: {
-              [GetSelfServiceProfileCustomTextPageEnum.get_started]: {
+              [SelfServiceProfileCustomTextPageEnum.getStarted]: {
                 type: 'object',
               },
             },
@@ -102,10 +108,8 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
   async getType() {
     if (this.existing) return this.existing;
 
-    const selfServiceProfiles = await paginate<SsProfile>(this.client.selfServiceProfiles.getAll, {
+    const selfServiceProfiles = await paginate<SsProfile>(this.client.selfServiceProfiles.list, {
       paginate: true,
-      include_totals: true,
-      is_global: false,
     });
 
     const selfServiceProfileWithCustomText: SsProfileWithCustomText[] = await Promise.all(
@@ -113,16 +117,17 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
         /**
          * Fetches the custom text for the "get_started" in "en" page of a self-service profile.
          */
-        const { data: getStartedText } = await this.client.selfServiceProfiles.getCustomText({
-          id: sp.id,
-          language: GetSelfServiceProfileCustomTextLanguageEnum.en,
-          page: GetSelfServiceProfileCustomTextPageEnum.get_started,
-        });
+
+        const { data: getStartedText } = await this.client.selfServiceProfiles.customText.list(
+          sp.id as string,
+          SelfServiceProfileCustomTextLanguageEnum.en,
+          SelfServiceProfileCustomTextPageEnum.getStarted
+        );
 
         if (!isEmpty(getStartedText)) {
           const customText = {
-            [GetSelfServiceProfileCustomTextLanguageEnum.en]: {
-              [GetSelfServiceProfileCustomTextPageEnum.get_started]: getStartedText,
+            [SelfServiceProfileCustomTextLanguageEnum.en]: {
+              [SelfServiceProfileCustomTextPageEnum.getStarted]: getStartedText,
             },
           };
           return {
@@ -187,16 +192,14 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
 
   async updateCustomText(ssProfileId: string, customText: customTextType): Promise<void> {
     try {
-      await this.client.selfServiceProfiles.updateCustomText(
+      await this.client.selfServiceProfiles.customText.set(
+        ssProfileId,
+        SelfServiceProfileCustomTextLanguageEnum.en,
+        SelfServiceProfileCustomTextPageEnum.getStarted,
         {
-          id: ssProfileId,
-          language: GetSelfServiceProfileCustomTextLanguageEnum.en,
-          page: GetSelfServiceProfileCustomTextPageEnum.get_started,
-        },
-        {
-          ...customText[GetSelfServiceProfileCustomTextLanguageEnum.en][
-            GetSelfServiceProfileCustomTextPageEnum.get_started
-          ],
+          ...customText[SelfServiceProfileCustomTextLanguageEnum.en][
+            SelfServiceProfileCustomTextPageEnum.getStarted
+          ] as Record<string, string>,
         }
       );
       log.debug(`Updated custom text for ${this.type} ${ssProfileId}`);
@@ -225,9 +228,9 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
 
   async createSelfServiceProfile(profile: SsProfileWithCustomText): Promise<Asset> {
     const { customText, ...ssProfile } = profile;
-    const { data: created } = await this.client.selfServiceProfiles.create(ssProfile as SsProfile);
+    const created = await this.client.selfServiceProfiles.create(ssProfile as Management.CreateSelfServiceProfileRequestContent);
 
-    if (!isEmpty(customText)) {
+    if (!isEmpty(customText) && created.id) {
       await this.updateCustomText(created.id, customText);
     }
 
@@ -253,9 +256,9 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
 
   async updateSelfServiceProfile(profile: SsProfileWithCustomText): Promise<Asset> {
     const { customText, id, ...ssProfile } = profile;
-    const { data: updated } = await this.client.selfServiceProfiles.update({ id }, ssProfile);
+    const updated = await this.client.selfServiceProfiles.update(id as string, ssProfile);
 
-    if (!isEmpty(customText)) {
+    if (!isEmpty(customText) && updated.id) {
       await this.updateCustomText(updated.id, customText);
     }
     return updated;
@@ -287,6 +290,6 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
   }
 
   async deleteSelfServiceProfile(profile: SsProfileWithCustomText): Promise<void> {
-    await this.client.selfServiceProfiles.delete({ id: profile.id });
+    await this.client.selfServiceProfiles.delete(profile.id as string);
   }
 }

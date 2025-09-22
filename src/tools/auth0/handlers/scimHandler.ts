@@ -1,5 +1,5 @@
 import { PromisePoolExecutor } from 'promise-pool-executor';
-import { ConnectionCreate } from 'auth0';
+import { Management } from 'auth0';
 import { Asset, Auth0APIClient } from '../../../types';
 import log from '../../../logger';
 import { ConfigFunction } from '../../../configFactory';
@@ -225,7 +225,7 @@ export default class ScimHandler {
 
     return this.withErrorHandling(
       async () =>
-        this.connectionsManager.createScimConfiguration({ id }, { user_id_attribute, mapping }),
+        this.connectionsManager.scimConfiguration.create(id, { user_id_attribute, mapping }),
       'create',
       id
     );
@@ -238,7 +238,7 @@ export default class ScimHandler {
     log.debug(`Getting SCIM configuration from connection ${id}`);
 
     return this.withErrorHandling(
-      async () => this.connectionsManager.getScimConfiguration({ id }),
+      async () => this.connectionsManager.scimConfiguration.get(id),
       'get',
       id
     );
@@ -256,7 +256,7 @@ export default class ScimHandler {
 
     return this.withErrorHandling(
       async () =>
-        this.connectionsManager.updateScimConfiguration({ id }, { user_id_attribute, mapping }),
+        this.connectionsManager.scimConfiguration.update(id, { user_id_attribute, mapping }),
       'patch',
       id
     );
@@ -269,7 +269,7 @@ export default class ScimHandler {
     log.debug(`Deleting SCIM configuration on connection ${id}`);
 
     return this.withErrorHandling(
-      async () => this.connectionsManager.deleteScimConfiguration({ id }),
+      async () => this.connectionsManager.scimConfiguration.delete(id),
       'delete',
       id
     );
@@ -282,7 +282,7 @@ export default class ScimHandler {
     delete bodyParams.scim_configuration;
 
     // First, update `connections`.
-    const updated = await this.connectionsManager.update(requestParams, bodyParams);
+    const updated = await this.connectionsManager.update(requestParams.id, bodyParams);
     const idMapEntry = this.idMap.get(requestParams.id);
 
     // Now, update `scim_configuration` inside the updated connection.
@@ -319,9 +319,11 @@ export default class ScimHandler {
     delete bodyParams.scim_configuration;
 
     // First, create the new `connection`.
-    const { data } = await this.connectionsManager.create(bodyParams as ConnectionCreate);
+    const data = await this.connectionsManager.create(
+      bodyParams as Management.CreateConnectionRequestContent
+    );
 
-    if (scimBodyParams && this.scimScopes.create) {
+    if (data?.id && scimBodyParams && this.scimScopes.create) {
       // Now, create the `scim_configuration` for newly created `connection`.
       await this.createScimConfiguration({ id: data.id }, scimBodyParams);
     }
