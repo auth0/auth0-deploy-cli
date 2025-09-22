@@ -1,6 +1,6 @@
 import dotProp from 'dot-prop';
-import _ from 'lodash';
-import { Client, Connection, GetConnectionsStrategyEnum, PatchClientsRequestInner } from 'auth0';
+import { chunk, keyBy } from 'lodash';
+import { Management } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import { filterExcluded, convertClientNameToId, getEnabledClients, sleep } from '../../utils';
 import { CalculatedChanges, Asset, Assets, Auth0APIClient } from '../../../types';
@@ -8,6 +8,7 @@ import { ConfigFunction } from '../../../configFactory';
 import { paginate } from '../client';
 import ScimHandler from './scimHandler';
 import log from '../../../logger';
+import { Client } from './clients';
 
 export const schema = {
   type: 'array',
@@ -40,6 +41,8 @@ export const schema = {
   },
 };
 
+export type Connection = Management.ConnectionForList;
+
 // addExcludedConnectionPropertiesToChanges superimposes excluded properties on the `options` object. The Auth0 API
 // will overwrite the options property when updating connections, so it is necessary to add excluded properties back in to prevent those excluded properties from being deleted.
 // This use case is common because organizations may not want to expose sensitive connection details, but want to preserve them in the tenant.
@@ -55,11 +58,11 @@ export const addExcludedConnectionPropertiesToChanges = ({
 }) => {
   if (proposedChanges.update.length === 0) return proposedChanges;
 
-  //@ts-ignore because this expects a parameter to be passed
+  // @ts-ignore because this expects a parameter to be passed
   const excludedFields = config()?.EXCLUDED_PROPS?.connections || [];
   if (excludedFields.length === 0) return proposedChanges;
 
-  const existingConnectionsMap = _.keyBy(existingConnections, 'id');
+  const existingConnectionsMap = keyBy(existingConnections, 'id');
   const excludedOptions = excludedFields.filter(
     // Only include fields that pertain to options
     (excludedField) => excludedField.startsWith('options')
@@ -110,29 +113,20 @@ export const getConnectionEnabledClients = async (
 
   try {
     const enabledClientsFormatted: string[] = [];
-    let from: string | undefined;
-    let hasMore = true;
 
-    while (hasMore) {
-      const response = await auth0Client.connections.getEnabledClients({
-        id: connectionId,
-        take: 50,
-        ...(from && { from }),
-      });
+    let enabledClients = await auth0Client.connections.clients.get(connectionId);
 
-      const { clients: enabledClients, next } = response?.data || {};
-
-      if (enabledClients?.length) {
-        enabledClients.forEach((client) => {
+    do {
+      if (enabledClients && enabledClients.data?.length > 0) {
+        enabledClients.data.forEach((client) => {
           if (client?.client_id) {
             enabledClientsFormatted.push(client.client_id);
           }
         });
       }
 
-      hasMore = !!next;
-      from = next;
-    }
+      enabledClients = await enabledClients.getNextPage();
+    } while (enabledClients.hasNextPage());
 
     return enabledClientsFormatted;
   } catch (error) {
@@ -158,24 +152,17 @@ export const updateConnectionEnabledClients = async (
 ): Promise<boolean> => {
   if (!connectionId || !Array.isArray(enabledClientIds) || !enabledClientIds.length) return false;
 
-  const enabledClientUpdatePayloads: Array<PatchClientsRequestInner> = enabledClientIds.map(
-    (clientId) => ({
+  const enabledClientUpdatePayloads: Management.UpdateEnabledClientConnectionsRequestContentItem[] =
+    enabledClientIds.map((clientId) => ({
       client_id: clientId,
       status: true,
-    })
-  );
-  const payloadChunks = _.chunk(enabledClientUpdatePayloads, 50);
+    }));
+
+  const payloadChunks = chunk(enabledClientUpdatePayloads, 50);
 
   try {
     await Promise.all(
-      payloadChunks.map((payload) =>
-        auth0Client.connections.updateEnabledClients(
-          {
-            id: connectionId,
-          },
-          payload
-        )
-      )
+      payloadChunks.map((payload) => auth0Client.connections.clients.update(connectionId, payload))
     );
     log.debug(`Updated enabled clients for ${typeName}: ${connectionId}`);
     return true;
@@ -214,21 +201,21 @@ export const processConnectionEnabledClients = async (
 
         if (typeName === 'database') {
           const {
-            data: { connections },
-          } = await auth0Client.connections.getAll({
+            data: connections,
+          } = await auth0Client.connections.list({
             name: conn.name,
             take: 1,
-            strategy: [GetConnectionsStrategyEnum.auth0],
-            include_totals: true,
+            strategy: [Management.ConnectionStrategyEnum.Auth0],
+            include_fields: true,
           });
           newConnections = connections;
         } else {
           const {
-            data: { connections },
-          } = await auth0Client.connections.getAll({
+            data: connections,
+          } = await auth0Client.connections.list({
             name: conn.name,
             take: 1,
-            include_totals: true,
+            include_fields: true,
           });
           newConnections = connections;
         }
@@ -261,7 +248,8 @@ export const processConnectionEnabledClients = async (
 };
 
 export default class ConnectionsHandler extends DefaultAPIHandler {
-  existing: Asset[] | null;
+  existing: Connection[] | null;
+
   scimHandler: ScimHandler;
 
   constructor(config: DefaultAPIHandler) {
@@ -273,11 +261,11 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
         // When `connections` is updated, it can result in `update`,`create` or `delete` action on SCIM.
         // Because, `scim_configuration` is inside `connections`.
         update: async (requestParams, bodyParams) =>
-          await this.scimHandler.updateOverride(requestParams, bodyParams),
+          this.scimHandler.updateOverride(requestParams, bodyParams),
 
         // When a new `connection` is created. We can perform only `create` option on SCIM.
         // When a connection is `deleted`. `scim_configuration` is also deleted along with it; no action on SCIM is required.
-        create: async (bodyParams) => await this.scimHandler.createOverride(bodyParams),
+        create: async (bodyParams) => this.scimHandler.createOverride(bodyParams),
       },
     });
 
@@ -308,9 +296,8 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
   async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
 
-    const connections = await paginate<Connection>(this.client.connections.getAll, {
+    const connections = await paginate<Connection>(this.client.connections.list, {
       checkpoint: true,
-      include_totals: true,
     });
 
     // Filter out database connections as we have separate handler for it
@@ -331,6 +318,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
 
     const connectionsWithEnabledClients = await Promise.all(
       filteredConnections.map(async (con) => {
+        if (!con?.id) return con;
         const enabledClients = await getConnectionEnabledClients(this.client, con.id);
         if (enabledClients && enabledClients?.length) {
           return { ...con, enabled_clients: enabledClients };
@@ -360,12 +348,12 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       };
 
     // Convert enabled_clients by name to the id
-    const clients = await paginate<Client>(this.client.clients.getAll, {
+    const clients = await paginate<Client>(this.client.clients.list, {
       paginate: true,
       include_totals: true,
     });
 
-    const existingConnections = await paginate<Connection>(this.client.connections.getAll, {
+    const existingConnections = await paginate<Connection>(this.client.connections.list, {
       checkpoint: true,
       include_totals: true,
     });

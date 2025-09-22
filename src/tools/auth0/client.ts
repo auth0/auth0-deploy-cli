@@ -29,7 +29,7 @@ function getEntity(rsp: ApiResponse): Asset[] {
 function checkpointPaginator(
   client: Auth0APIClient,
   target,
-  name: 'getAll'
+  name: 'list'
 ): (arg0: CheckpointPaginationParams) => Promise<Asset[]> {
   return async function (...args: [CheckpointPaginationParams]) {
     const data: Asset[] = [];
@@ -37,16 +37,15 @@ function checkpointPaginator(
     // remove the _checkpoint_ flag
     const { checkpoint, ...newArgs } = _.cloneDeep(args[0]);
 
-    // fetch the total to validate records match
-    const total =
-      (
-        await client.pool
-          .addSingleTask({
-            data: newArgs,
-            generator: (requestArgs) => target[name](requestArgs),
-          })
-          .promise()
-      ).data?.total || 0;
+    // fetch the total to validate records match - v5 returns .data property for paginated responses
+    const totalResponse = await client.pool
+      .addSingleTask({
+        data: newArgs,
+        generator: (requestArgs) => target[name](requestArgs),
+      })
+      .promise();
+
+    const total = totalResponse.data?.total || 0;
 
     let done = false;
     // use checkpoint pagination to allow fetching 1000+ results
@@ -60,11 +59,16 @@ function checkpointPaginator(
         })
         .promise();
 
-      data.push(...getEntity(rsp.data));
-      if (!rsp.data.next) {
+      // v5: paginated responses have .data property containing the array
+      data.push(...(rsp.data || []));
+      
+      // Check if there's a next page using v5 pagination structure
+      if (!rsp.hasNextPage || !rsp.hasNextPage()) {
         done = true;
       } else {
-        newArgs.from = rsp.data.next;
+        // For checkpoint pagination, update the 'from' parameter
+        // This may need adjustment based on the specific endpoint's pagination format
+        newArgs.from = rsp.next || rsp.data.next;
       }
     }
 
@@ -79,7 +83,7 @@ function checkpointPaginator(
 function pagePaginator(
   client: Auth0APIClient,
   target,
-  name: 'getAll'
+  name: 'list'
 ): (arg0: PagePaginationParams) => Promise<Asset[]> {
   return async function (...args: [PagePaginationParams]): Promise<Asset[]> {
     // Where the entity data will be collected
@@ -133,7 +137,7 @@ function pagePaginator(
 function pagedManager(client: Auth0APIClient, manager: Auth0APIClient) {
   return new Proxy<Auth0APIClient>(manager, {
     get: function (target: Auth0APIClient, name: string, receiver: unknown) {
-      if (name === 'getAll') {
+      if (name === 'list') {
         return async function (...args: [CheckpointPaginationParams | PagePaginationParams]) {
           switch (true) {
             case args[0] && typeof args[0] === 'object' && args[0].checkpoint:

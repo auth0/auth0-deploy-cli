@@ -1,4 +1,4 @@
-import { CustomDomain, GetBranding200Response, GetUniversalLogin200ResponseOneOf } from 'auth0';
+import { Management } from 'auth0';
 import DefaultHandler, { order } from './default';
 import constants from '../../constants';
 import log from '../../../logger';
@@ -34,42 +34,34 @@ export default class BrandingHandler extends DefaultHandler {
     let branding = {};
 
     try {
-      // in case client version does not support branding
-      if (this.client.branding && typeof this.client.branding.getSettings === 'function') {
-        const response = await this.client.branding.getSettings();
-        branding = response.data as GetBranding200Response;
-      }
+      branding = await this.client.branding.get();
 
-      // in case client version does not custom domains
-      if (this.client.customDomains && typeof this.client.customDomains.getAll === 'function') {
-        let { data: customDomains } = await this.client.customDomains.getAll();
+      const customDomains = await this.client.customDomains.list();
 
-        customDomains = customDomains as CustomDomain[];
+      // templates are only supported if there's custom domains.
+      if (customDomains && customDomains.length) {
+        let payload = await this.client.branding.templates.getUniversalLogin();
+        payload = payload as Management.GetUniversalLoginTemplate;
 
-        // templates are only supported if there's custom domains.
-        if (customDomains && customDomains.length) {
-          const { data: payload } = await this.client.branding.getUniversalLoginTemplate();
-
-          if (Object.keys(branding).length === 0) {
-            branding = {
-              templates: [
-                {
-                  template: constants.UNIVERSAL_LOGIN_TEMPLATE,
-                  body: (payload as GetUniversalLogin200ResponseOneOf).body,
-                },
-              ],
-            };
-          } else {
-            branding = {
-              ...branding,
-              templates: [
-                {
-                  template: constants.UNIVERSAL_LOGIN_TEMPLATE,
-                  body: (payload as GetUniversalLogin200ResponseOneOf).body,
-                },
-              ],
-            };
-          }
+        if (Object.keys(branding).length === 0) {
+          branding = {
+            templates: [
+              {
+                template: constants.UNIVERSAL_LOGIN_TEMPLATE,
+                body: payload.body,
+              },
+            ],
+          };
+        } else {
+          branding = {
+            ...branding,
+            templates: [
+              {
+                template: constants.UNIVERSAL_LOGIN_TEMPLATE,
+                body: payload.body,
+              },
+            ],
+          };
         }
       }
 
@@ -97,12 +89,12 @@ export default class BrandingHandler extends DefaultHandler {
     const { templates, ...brandingSettings } = assets.branding;
 
     if (brandingSettings.logo_url === '') {
-      //Sometimes blank logo_url returned by API but is invalid on import. See: DXCDT-240
+      // Sometimes blank logo_url returned by API but is invalid on import. See: DXCDT-240
       delete brandingSettings.logo_url;
     }
 
     if (brandingSettings && Object.keys(brandingSettings).length) {
-      await this.client.branding.updateSettings(brandingSettings);
+      await this.client.branding.update(brandingSettings);
       this.updated += 1;
       this.didUpdate(brandingSettings);
     }
@@ -125,7 +117,7 @@ export default class BrandingHandler extends DefaultHandler {
         (t) => t.template === constants.UNIVERSAL_LOGIN_TEMPLATE
       );
       if (templateDefinition && templateDefinition.body) {
-        await this.client.branding.setUniversalLoginTemplate({ template: templateDefinition.body });
+        await this.client.branding.templates.updateUniversalLogin({ template: templateDefinition.body });
         this.updated += 1;
         this.didUpdate(templates);
       }

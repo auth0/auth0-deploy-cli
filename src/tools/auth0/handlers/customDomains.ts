@@ -1,4 +1,4 @@
-import { CustomDomain } from 'auth0';
+import { Management } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
 import log from '../../../logger';
@@ -41,7 +41,7 @@ export const schema = {
 };
 
 export default class CustomDomainsHadnler extends DefaultAPIHandler {
-  existing: Asset[] | null;
+  existing: Management.CustomDomain[] | null;
 
   constructor(config: DefaultAPIHandler) {
     super({
@@ -69,9 +69,9 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
         'updated_at',
       ],
       functions: {
-        delete: (args) => this.client.customDomains.delete({ id: args.custom_domain_id }),
+        delete: (args) => this.client.customDomains.delete(args.custom_domain_id ),
         update: (args, data) =>
-          this.client.customDomains.update({ id: args.custom_domain_id }, data),
+          this.client.customDomains.update(args.custom_domain_id, data),
       },
     });
   }
@@ -86,9 +86,9 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
         return this.existing;
       }
 
-      const { data: customDomains } = await this.client.customDomains.getAll();
+      const customDomains = await this.client.customDomains.list();
 
-      this.existing = customDomains as CustomDomain[];
+      this.existing = customDomains;
 
       return customDomains;
     } catch (err) {

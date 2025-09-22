@@ -1,4 +1,4 @@
-import { TemplateMessages } from 'auth0';
+import { Management } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Assets, Asset } from '../../../types';
@@ -32,11 +32,11 @@ export default class GuardianFactorTemplatesHandler extends DefaultHandler {
       const data = await Promise.all(
         constants.GUARDIAN_FACTOR_TEMPLATES.map(async (name) => {
           if (name === 'sms') {
-            const { data: templates } = await this.client.guardian.getSmsFactorTemplates();
+            const templates = await this.client.guardian.factors.sms.getTemplates();
             return { name, ...templates };
           }
 
-          const { data: templates } = await this.client.guardian.getPhoneFactorTemplates();
+          const templates = await this.client.guardian.factors.phone.getTemplates();
           return { name, ...templates };
         })
       );
@@ -69,9 +69,9 @@ export default class GuardianFactorTemplatesHandler extends DefaultHandler {
         const params = { name: fatorTemplates.name };
         // TODO: This is quite a change, needs to be validated for sure.
         if (name === 'sms') {
-          await this.client.guardian.setSmsFactorTemplates(data as TemplateMessages);
+          await this.client.guardian.factors.sms.setTemplates(data as Management.SetGuardianFactorSmsTemplatesRequestContent);
         } else if (name === 'phone') {
-          await this.client.guardian.setPhoneFactorTemplates(data as TemplateMessages);
+          await this.client.guardian.factors.phone.setTemplates(data as Management.SetGuardianFactorPhoneTemplatesRequestContent);
         }
         this.didUpdate(params);
         this.updated += 1;

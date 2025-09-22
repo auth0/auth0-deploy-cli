@@ -1,5 +1,5 @@
-import { EmailProviderCreate } from 'auth0';
 import { isEmpty } from 'lodash';
+import { Management } from 'auth0';
 import DefaultHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
 
@@ -18,11 +18,11 @@ export default class EmailProviderHandler extends DefaultHandler {
 
   async getType(): Promise<Asset> {
     try {
-      const { data } = await this.client.emails.get({
+      const emailProvider = await this.client.emails.provider.get({
         include_fields: true,
         fields: defaultFields.join(','),
       });
-      return data;
+      return emailProvider;
     } catch (err) {
       if (err.statusCode === 404) return {};
       throw err;
@@ -48,7 +48,7 @@ export default class EmailProviderHandler extends DefaultHandler {
         if (isEmpty(existing.credentials)) {
           delete existing.credentials;
         }
-        const updated = await this.client.emails.update(existing);
+        const updated = await this.client.emails.provider.update(existing);
         this.updated += 1;
         this.didUpdate(updated);
       }
@@ -56,11 +56,11 @@ export default class EmailProviderHandler extends DefaultHandler {
     }
 
     if (existing.name) {
-      const updated = await this.client.emails.update(emailProvider);
+      const updated = await this.client.emails.provider.update(emailProvider);
       this.updated += 1;
       this.didUpdate(updated);
     } else {
-      const created = await this.client.emails.configure(emailProvider as EmailProviderCreate);
+      const created = await this.client.emails.provider.create(emailProvider as Management.CreateEmailProviderRequestContent);
       this.created += 1;
       this.didCreate(created);
     }

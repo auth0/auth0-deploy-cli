@@ -1,11 +1,11 @@
-import { GetNetworkAclsById200Response } from 'auth0';
+import { Management } from 'auth0';
 import DefaultAPIHandler from './default';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
 
 // Define NetworkACL type
-export type NetworkACL = GetNetworkAclsById200Response;
+export type NetworkACL = Management.GetNetworkAclsResponseContent;
 
 // Define action types
 const BlockAction = {
@@ -223,9 +223,8 @@ export default class NetworkACLsHandler extends DefaultAPIHandler {
     }
 
     try {
-      const networkACLs = await paginate<NetworkACL>(this.client.networkAcls.getAll, {
+      const networkACLs = await paginate<NetworkACL>(this.client.networkAcls.list, {
         paginate: true,
-        include_totals: true,
       });
 
       this.existing = networkACLs;
@@ -277,9 +276,9 @@ export default class NetworkACLsHandler extends DefaultAPIHandler {
     );
   }
 
-  async createNetworkACL(acl: NetworkACL): Promise<Asset> {
-    const { data: created } = await this.client.networkAcls.create(acl);
-    return created;
+  async createNetworkACL(acl: NetworkACL): Promise<NetworkACL> {
+    await this.client.networkAcls.create(acl as Management.CreateNetworkAclRequestContent);
+    return acl;
   }
 
   async createNetworkACLs(creates: CalculatedChanges['create']) {
@@ -301,7 +300,12 @@ export default class NetworkACLsHandler extends DefaultAPIHandler {
 
   async updateNetworkACL(acl: NetworkACL) {
     const { id, ...updateParams } = acl;
-    const updated = await this.client.networkAcls.update({ id }, updateParams);
+
+    if (!id) {
+      throw new Error(`Missing id for ${this.type} ${this.objString(acl)}`);
+    }
+
+    const updated = await this.client.networkAcls.update(id, updateParams);
     return updated;
   }
 
@@ -323,7 +327,10 @@ export default class NetworkACLsHandler extends DefaultAPIHandler {
   }
 
   async deleteNetworkACL(acl: NetworkACL): Promise<void> {
-    await this.client.networkAcls.delete({ id: acl.id });
+    if (!acl.id) {
+      throw new Error(`Missing id for ${this.type} ${this.objString(acl)}`);
+    }
+    await this.client.networkAcls.delete(acl.id);
   }
 
   async deleteNetworkACLs(data: Asset[]): Promise<void> {

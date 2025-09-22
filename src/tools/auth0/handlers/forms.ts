@@ -1,22 +1,18 @@
-import {
-  GetFlows200ResponseOneOfInner,
-  GetForms200ResponseOneOfInner,
-  PostForms201Response,
-} from 'auth0';
+import { Management } from 'auth0';
 import dotProp from 'dot-prop';
-import { isEmpty } from 'lodash';
 import DefaultHandler, { order } from './default';
 import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import { findKeyPathWithValue } from '../../../utils';
+import { getFlows } from './flows';
 
 export type Form = {
   name: string;
   body: string;
 };
 
-export type FormResponse = PostForms201Response;
+export type FormResponse = Management.GetFormResponseContent;
 
 export const schema = {
   type: 'array',
@@ -48,38 +44,22 @@ export default class FormsHandler extends DefaultHandler {
     return super.objString({ id: item.id, name: item.name });
   }
 
-  async getForms(forms: Array<PostForms201Response>): Promise<PostForms201Response[]> {
-    const allForms = await this.client.pool
-      .addEachTask({
-        data: forms,
-        generator: ({ id }) =>
-          this.client.forms.get({ id: id }).then((response) => {
-            if (isEmpty(response?.data)) return null;
-            return response.data;
-          }),
-      })
-      .promise();
-    return allForms.filter((form): form is PostForms201Response => form !== null);
-  }
-
   async getType(): Promise<Asset> {
     if (this.existing) {
       return this.existing;
     }
 
     const [forms, flows] = await Promise.all([
-      paginate<GetForms200ResponseOneOfInner>(this.client.forms.getAll, {
+      paginate<Management.FormSummary>(this.client.forms.list, {
         paginate: true,
-        include_totals: true,
       }),
-      paginate<GetFlows200ResponseOneOfInner>(this.client.flows.getAll, {
+      paginate<Management.FlowSummary>(this.client.flows.list, {
         paginate: true,
-        include_totals: true,
       }),
     ]);
 
     // get more details for each form
-    const allForms = await this.getForms(forms);
+    const allForms = await getFlows(this.client, forms);
 
     // create a map for id to name from allFlows
     const flowIdMap = {};
@@ -149,7 +129,7 @@ export default class FormsHandler extends DefaultHandler {
     // Do nothing if not set
     if (!forms) return;
 
-    const flows = await paginate<GetFlows200ResponseOneOfInner>(this.client.flows.getAll, {
+    const flows = await paginate<Management.FlowSummary>(this.client.flows.list, {
       paginate: true,
       include_totals: true,
     });

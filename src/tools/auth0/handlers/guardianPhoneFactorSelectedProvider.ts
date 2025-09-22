@@ -1,4 +1,4 @@
-import { GetPhoneProviders200Response } from 'auth0';
+import { Management } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
@@ -44,18 +44,10 @@ export default class GuardianPhoneSelectedProviderHandler extends DefaultHandler
   }
 
   async getType(): Promise<Asset | null> {
-    // in case client version does not support the operation
-    if (
-      !this.client.guardian ||
-      typeof this.client.guardian.getPhoneFactorSelectedProvider !== 'function'
-    ) {
-      return null;
-    }
-
     if (this.existing) return this.existing;
 
     try {
-      const { data } = await this.client.guardian.getPhoneFactorSelectedProvider();
+      const data  = await this.client.guardian.factors.phone.getSelectedProvider();
       this.existing = data;
     } catch (err) {
       if (isFeatureUnavailableError(err)) {
@@ -80,8 +72,8 @@ export default class GuardianPhoneSelectedProviderHandler extends DefaultHandler
       return;
 
     const data = guardianPhoneFactorSelectedProvider;
-    await this.client.guardian.updatePhoneFactorSelectedProvider(
-      data as GetPhoneProviders200Response
+    await this.client.guardian.factors.phone.setProvider(
+      data as Management.SetGuardianFactorsProviderPhoneRequestContent
     );
     this.updated += 1;
     this.didUpdate(guardianPhoneFactorSelectedProvider);

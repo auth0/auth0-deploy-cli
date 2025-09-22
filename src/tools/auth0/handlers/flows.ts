@@ -1,15 +1,12 @@
-import { isArray, isEmpty } from 'lodash';
-import {
-  GetFlows200ResponseOneOfInner,
-  GetFlowsVaultConnections200ResponseOneOfInner,
-  PostFlows201Response,
-} from 'auth0';
+import { isEmpty } from 'lodash';
+import { Management } from 'auth0';
 import dotProp from 'dot-prop';
 import DefaultHandler, { order } from './default';
-import { Asset, Assets, CalculatedChanges } from '../../../types';
+import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
 import { findKeyPathWithValue } from '../../../utils';
+import { getAllFlowConnections } from './flowVaultConnections';
 
 export type Flow = {
   name: string;
@@ -29,6 +26,24 @@ export const schema = {
   additionalProperties: false,
 };
 
+export const getFlows = async (
+  auth0Client: Auth0APIClient,
+  flows: Array<Management.FlowSummary>
+): Promise<Management.GetFlowResponseContent[]> => {
+  const allFlows = await auth0Client.pool
+    .addEachTask({
+      data: flows,
+      generator: ({ id }) =>
+        auth0Client.flows.get(id).then((response) => {
+          if (isEmpty(response)) return null;
+          return response;
+        }),
+    })
+    .promise();
+
+  return allFlows.filter((flow): flow is Management.GetFlowResponseContent => flow !== null);
+};
+
 export default class FlowHandler extends DefaultHandler {
   existing: Asset;
 
@@ -46,36 +61,20 @@ export default class FlowHandler extends DefaultHandler {
     return super.objString({ id: item.id, name: item.name });
   }
 
-  async getFlows(flows: Array<GetFlows200ResponseOneOfInner>): Promise<PostFlows201Response[]> {
-    const allFlows = await this.client.pool
-      .addEachTask({
-        data: flows,
-        generator: ({ id }) =>
-          this.client.flows.get({ id: id }).then((response) => {
-            if (isEmpty(response?.data)) return null;
-            return response.data;
-          }),
-      })
-      .promise();
-
-    return allFlows.filter((flow): flow is PostFlows201Response => flow !== null);
-  }
-
   async getType(): Promise<Asset> {
     if (this.existing) {
       return this.existing;
     }
 
     const [flows, allFlowConnections] = await Promise.all([
-      paginate<GetFlows200ResponseOneOfInner>(this.client.flows.getAll, {
+      paginate<Management.FlowSummary>(this.client.flows.list, {
         paginate: true,
-        include_totals: true,
       }),
-      this.getAllFlowConnections(),
+      getAllFlowConnections(this.client),
     ]);
 
     // get more details for each flows
-    const allFlows: Array<PostFlows201Response> = await this.getFlows(flows);
+    const allFlows: Array<Management.GetFlowResponseContent> = await getFlows(this.client, flows);
 
     // create a map for id to name from allFlowConnections
     const connectionIdMap = {};
@@ -94,7 +93,7 @@ export default class FlowHandler extends DefaultHandler {
     // Do nothing if not set
     if (!flows) return;
 
-    const allFlowConnections = await this.getAllFlowConnections();
+    const allFlowConnections = await getAllFlowConnections(this.client);
 
     // create a map for name to id from allFlowConnections
     const connectionNameMap = {};
@@ -116,36 +115,6 @@ export default class FlowHandler extends DefaultHandler {
     await super.processChanges(assets, {
       ...changes,
     });
-  }
-
-  async getAllFlowConnections(): Promise<GetFlowsVaultConnections200ResponseOneOfInner[]> {
-    const allFlowConnections: GetFlowsVaultConnections200ResponseOneOfInner[] = [];
-    // paginate without paginate<T> helper as this is not getAll but getAllConnections
-    // paginate through all flow connections
-    let page = 0;
-    while (true) {
-      const {
-        data: { connections, total },
-      } = await this.client.flows.getAllConnections({
-        page: page,
-        per_page: 100,
-        include_totals: true,
-      });
-
-      // if we get an unexpected response, break the loop to avoid infinite loop
-      if (!isArray(allFlowConnections) || typeof total !== 'number') {
-        break;
-      }
-
-      allFlowConnections.push(...connections);
-      page += 1;
-
-      if (allFlowConnections.length === total) {
-        break;
-      }
-    }
-
-    return allFlowConnections;
   }
 
   async formateFlowConnectionId(flows, connectionIdMap): Promise<Asset> {

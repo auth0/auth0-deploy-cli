@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import { GetActions200ResponseActionsInner, PostActionRequest } from 'auth0';
+import { get } from 'lodash';
+import { Management } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import log from '../../../logger';
 import { areArraysEquals, sleep } from '../../utils';
@@ -8,31 +8,10 @@ import { paginate } from '../client';
 
 const MAX_ACTION_DEPLOY_RETRY_ATTEMPTS = 60; // 60 * 2s => 2 min timeout
 
-export type Action = {
-  id: string;
-  name: string;
-  created_at: string;
-  updated_at: string;
-  deployed?: boolean;
-  supported_triggers: {
-    id: string;
-    version: string;
-    status?: string;
-  }[];
-  code?: string;
-  dependencies?: [];
-  runtime?: string;
-  status?: string;
-  secrets?: {
-    name: string;
-    value: string;
-  }[];
-  all_changes_deployed?: boolean;
-  installed_integration_id?: string;
-  integration?: Object;
-};
+export type Action = Management.Action;
+type ActionCreate = Management.CreateActionRequestContent;
 
-type PostActionRequestWithId = PostActionRequest & {
+type CreateActionRequestWithId = ActionCreate & {
   id: string;
 };
 
@@ -88,7 +67,7 @@ export const schema = {
 };
 
 function isActionsDisabled(err) {
-  const errorBody = _.get(err, 'originalError.response.body') || {};
+  const errorBody = get(err, 'originalError.response.body') || {};
 
   return err.statusCode === 403 && errorBody.errorCode === 'feature_not_enabled';
 }
@@ -98,21 +77,21 @@ export function isMarketplaceAction(action: Action): boolean {
 }
 
 export default class ActionHandler extends DefaultAPIHandler {
-  existing: GetActions200ResponseActionsInner[] | null;
+  existing: Action[] | null;
 
   constructor(options: DefaultAPIHandler) {
     super({
       ...options,
       type: 'actions',
       functions: {
-        create: (action: PostActionRequestWithId) => this.createAction(action),
-        delete: (action: Action) => this.deleteAction(action),
+        create: (action: CreateActionRequestWithId) => this.createAction(action),
+        delete: (actionId: string) => this.deleteAction(actionId),
       },
       stripUpdateFields: ['deployed', 'status'],
     });
   }
 
-  async createAction(action: PostActionRequestWithId) {
+  async createAction(action: CreateActionRequestWithId) {
     // Strip the deployed flag
     const addAction = { ...action };
 
@@ -123,19 +102,21 @@ export default class ActionHandler extends DefaultAPIHandler {
       delete addAction.status;
     }
 
-    const { data: createdAction } = await this.client.actions.create(addAction);
+    const createdAction = await this.client.actions.create(addAction);
 
     // Add the action id so we can deploy it later
-    action.id = createdAction.id;
+    if (createdAction?.id) {
+      action.id = createdAction.id;
+    }
 
     return createdAction;
   }
 
-  async deleteAction(action: Action) {
+  async deleteAction(actionId: string) {
     if (!this.client.actions || typeof this.client.actions.delete !== 'function') {
       return [];
     }
-    return this.client.actions.delete({ id: action.id, force: true });
+    return this.client.actions.delete(actionId, { force: true });
   }
 
   objString(action) {
@@ -160,7 +141,7 @@ export default class ActionHandler extends DefaultAPIHandler {
 
   async deployAction(action) {
     try {
-      await this.client.actions.deploy({ id: action.id });
+      await this.client.actions.deploy(action.id);
     } catch (err) {
       // Retry if pending build.
       if (err.message && err.message.includes("must be in the 'built' state")) {
@@ -209,18 +190,15 @@ export default class ActionHandler extends DefaultAPIHandler {
   async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
 
-    if (!this.client.actions || typeof this.client.actions.getAll !== 'function') {
+    if (!this.client.actions || typeof this.client.actions.list !== 'function') {
       return [];
     }
     // Actions API does not support include_totals param like the other paginate API's.
     // So we set it to false otherwise it will fail with "Additional properties not allowed: include_totals"
     try {
-      const actions = await paginate<GetActions200ResponseActionsInner>(
-        this.client.actions.getAll,
-        {
-          paginate: true,
-        }
-      );
+      const actions = await paginate<Action>(this.client.actions.list, {
+        paginate: true,
+      });
 
       this.existing = actions;
       return actions;

@@ -1,9 +1,10 @@
-import { Client, ClientGrantSubjectTypeEnum } from 'auth0';
+import { Management } from 'auth0';
 import DefaultHandler, { order } from './default';
 import { convertClientNamesToIds } from '../../utils';
 import { Assets, CalculatedChanges } from '../../../types';
 import DefaultAPIHandler from './default';
 import { paginate } from '../client';
+import { Client } from './clients';
 
 export const schema = {
   type: 'array',
@@ -19,7 +20,7 @@ export const schema = {
       },
       subject_type: {
         type: 'string',
-        enum: Object.values(ClientGrantSubjectTypeEnum),
+        enum: Object.values(Management.ClientGrantSubjectTypeEnum),
         description: 'The subject type for this grant.',
       },
       authorization_details_types: {
@@ -35,13 +36,7 @@ export const schema = {
   },
 };
 
-export type ClientGrant = {
-  client_id: string;
-  audience: string;
-  scope: string[];
-  subject_type: ClientGrantSubjectTypeEnum;
-  authorization_details_types: string[];
-};
+type ClientGrant = Management.ClientGrantResponseContent;
 
 export default class ClientGrantsHandler extends DefaultHandler {
   existing: ClientGrant[] | null;
@@ -66,9 +61,8 @@ export default class ClientGrantsHandler extends DefaultHandler {
       return this.existing;
     }
 
-    const clientGrants = await paginate<ClientGrant>(this.client.clientGrants.getAll, {
+    const clientGrants = await paginate<ClientGrant>(this.client.clientGrants.list, {
       paginate: true,
-      include_totals: true,
     });
 
     this.existing = clientGrants;
@@ -90,9 +84,8 @@ export default class ClientGrantsHandler extends DefaultHandler {
     // Do nothing if not set
     if (!clientGrants) return;
 
-    const clients = await paginate<Client>(this.client.clients.getAll, {
+    const clients = await paginate<Client>(this.client.clients.list, {
       paginate: true,
-      include_totals: true,
     });
     const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
     const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
@@ -113,6 +106,7 @@ export default class ClientGrantsHandler extends DefaultHandler {
       clientGrants: formatted,
     });
 
+    // eslint-disable-next-line camelcase
     const filterGrants = (list: { client_id: string }[]) => {
       if (excludedClients.length) {
         return list.filter(

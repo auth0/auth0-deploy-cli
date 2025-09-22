@@ -1,3 +1,4 @@
+import { Management } from 'auth0';
 import { Assets } from '../../../types';
 import { paginate } from '../client';
 import DefaultAPIHandler from './default';
@@ -150,14 +151,7 @@ export const schema = {
   },
 };
 
-export type Client = {
-  client_id: string;
-  name: string;
-  app_type?: string;
-  resource_server_identifier?: string;
-  custom_login_page?: string;
-  custom_login_page_on?: boolean;
-};
+export type Client = Management.Client;
 
 export default class ClientHandler extends DefaultAPIHandler {
   existing: Client[];
@@ -242,9 +236,8 @@ export default class ClientHandler extends DefaultAPIHandler {
   async getType() {
     if (this.existing) return this.existing;
 
-    const clients = await paginate<Client>(this.client.clients.getAll, {
+    const clients = await paginate<Client>(this.client.clients.list, {
       paginate: true,
-      include_totals: true,
       is_global: false,
     });
 

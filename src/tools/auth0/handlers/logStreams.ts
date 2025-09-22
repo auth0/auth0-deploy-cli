@@ -81,8 +81,8 @@ export default class LogStreamsHandler extends DefaultAPIHandler {
       return this.existing;
     }
 
-    const logStreams = await this.client.logStreams.getAll().then(({ data: logStreams }) =>
-      logStreams.map((logStream) => {
+    const logStreams = await this.client.logStreams.list().then((logStreamsResponse) =>
+      logStreamsResponse.map((logStream) => {
         if (logStream.status === 'suspended') delete (logStream as any).status;
         return logStream;
       })
@@ -98,9 +98,9 @@ export default class LogStreamsHandler extends DefaultAPIHandler {
 
     if (!logStreams) return;
 
-    const changes = await this.calcChanges(assets).then((changes) => ({
-      ...changes,
-      update: changes.update.map((update: LogStream) => {
+    const changes = await this.calcChanges(assets).then((changesResponse) => ({
+      ...changesResponse,
+      update: changesResponse.update.map((update: LogStream) => {
         if (update.type === 'eventbridge' || update.type === 'eventgrid') {
           delete update.sink;
         }
