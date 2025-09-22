@@ -1,9 +1,4 @@
-import {
-  ResourceServer,
-  ResourceServerProofOfPossessionMechanismEnum,
-  ResourceServerSubjectTypeAuthorizationClientPolicyEnum,
-  ResourceServerSubjectTypeAuthorizationUserPolicyEnum,
-} from 'auth0';
+import { Management } from 'auth0';
 import ValidationError from '../../validationError';
 
 import constants from '../../constants';
@@ -41,7 +36,7 @@ export const schema = {
         properties: {
           mechanism: {
             type: 'string',
-            enum: Object.values(ResourceServerProofOfPossessionMechanismEnum),
+            enum: Object.values(Management.ResourceServerProofOfPossessionMechanismEnum),
           },
           required: { type: 'boolean' },
         },
@@ -56,7 +51,7 @@ export const schema = {
             properties: {
               policy: {
                 type: 'string',
-                enum: Object.values(ResourceServerSubjectTypeAuthorizationUserPolicyEnum),
+                enum: Object.values(Management.ResourceServerSubjectTypeAuthorizationUserPolicyEnum),
               },
             },
           },
@@ -66,7 +61,7 @@ export const schema = {
             properties: {
               policy: {
                 type: 'string',
-                enum: Object.values(ResourceServerSubjectTypeAuthorizationClientPolicyEnum),
+                enum: Object.values(Management.ResourceServerSubjectTypeAuthorizationClientPolicyEnum),
               },
             },
           },
@@ -83,6 +78,8 @@ export const schema = {
     required: ['name', 'identifier'],
   },
 };
+
+type ResourceServer = Management.ResourceServer;
 
 export default class ResourceServersHandler extends DefaultHandler {
   existing: ResourceServer[];
@@ -104,9 +101,8 @@ export default class ResourceServersHandler extends DefaultHandler {
   async getType(): Promise<ResourceServer[]> {
     if (this.existing) return this.existing;
 
-    const resourceServers = await paginate<ResourceServer>(this.client.resourceServers.getAll, {
+    const resourceServers = await paginate<ResourceServer>(this.client.resourceServers.list, {
       paginate: true,
-      include_totals: true,
     });
     return resourceServers.filter(
       (rs) => rs.name !== constants.RESOURCE_SERVERS_MANAGEMENT_API_NAME
@@ -130,8 +126,8 @@ export default class ResourceServersHandler extends DefaultHandler {
     let existing = await this.getType();
 
     // Filter excluded
-    resourceServers = resourceServers.filter((r) => !excluded.includes(r.name));
-    existing = existing.filter((r) => !excluded.includes(r.name));
+    resourceServers = resourceServers.filter((r) => r.name && !excluded.includes(r.name));
+    existing = existing.filter((r) => r.name && !excluded.includes(r.name));
 
     return calculateChanges({
       handler: this,

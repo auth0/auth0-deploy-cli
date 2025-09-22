@@ -1,12 +1,5 @@
 import { isEmpty } from 'lodash';
-import {
-  GetPartialsPromptEnum,
-  GetAllRendering200ResponseOneOfInner,
-  GetRenderingScreenEnum,
-  PatchRenderingRequest,
-  PatchRenderingRequestRenderingModeEnum,
-  PutPartialsRequest,
-} from 'auth0';
+import { Management } from 'auth0';
 import DefaultHandler from './default';
 import { Assets, Language, languages } from '../../../types';
 import log from '../../../logger';
@@ -305,7 +298,7 @@ export type AllPromptsByLanguage = Partial<{
   [key in Language]: Partial<PromptsCustomText>;
 }>;
 
-export type ScreenRenderer = Partial<GetAllRendering200ResponseOneOfInner>;
+export type ScreenRenderer = Management.GetAculResponseContent;
 
 export type Prompts = Partial<
   PromptSettings & {
@@ -339,7 +332,7 @@ export default class PromptsHandler extends DefaultHandler {
   }
 
   async getType(): Promise<Prompts | null> {
-    const { data: promptsSettings } = await this.client.prompts.get();
+    const { data: promptsSettings } = await this.client.prompts.getSettings();
 
     const customText = await this.getCustomTextSettings();
 
@@ -355,7 +348,7 @@ export default class PromptsHandler extends DefaultHandler {
 
     if (includeExperimentalEA) {
       try {
-        const { data } = await this.client.prompts.getAllRenderingSettings();
+        const { data } = await this.client.prompts.rendering.list();
         prompts.screenRenderers = data;
       } catch (error) {
         log.warn(`Unable to fetch screen renderers: ${error}`);
@@ -366,12 +359,10 @@ export default class PromptsHandler extends DefaultHandler {
   }
 
   async getCustomTextSettings(): Promise<AllPromptsByLanguage> {
-    const supportedLanguages = await this.client.tenants
-      .getSettings()
-      .then(({ data: { enabled_locales } }) => {
-        if (enabled_locales === undefined) return []; // In rare cases, private cloud tenants may not have `enabled_locales` defined
-        return enabled_locales;
-      });
+    const supportedLanguages = await this.client.tenants.settings.get().then((res) => {
+      if (res.enabled_locales === undefined) return []; // In rare cases, private cloud tenants may not have `enabled_locales` defined
+      return res.enabled_locales;
+    });
 
     return this.client.pool
       .addEachTask({
@@ -380,24 +371,19 @@ export default class PromptsHandler extends DefaultHandler {
             .map((language) => promptTypes.map((promptType) => ({ promptType, language })))
             .reduce((acc, val) => acc.concat(val), []) || [],
         generator: ({ promptType, language }) =>
-          this.client.prompts
-            .getCustomTextByLanguage({
-              prompt: promptType,
+          this.client.prompts.customText.get(promptType, language).then((customTextData) => {
+            if (isEmpty(customTextData)) return null;
+            return {
               language,
-            })
-            .then(({ data: customTextData }) => {
-              if (isEmpty(customTextData)) return null;
-              return {
-                language,
-                [promptType]: {
-                  ...customTextData,
-                },
-              };
-            }),
+              [promptType]: {
+                ...customTextData,
+              },
+            };
+          }),
       })
       .promise()
-      .then((customTextData) =>
-        customTextData
+      .then((customTextResponse) =>
+        customTextResponse
           .filter((customTextData) => customTextData !== null)
           .reduce((acc: AllPromptsByLanguage, customTextItem) => {
             if (customTextItem?.language === undefined) return acc;
@@ -454,10 +440,10 @@ export default class PromptsHandler extends DefaultHandler {
   async getCustomPartial({
     prompt,
   }: {
-    prompt: GetPartialsPromptEnum;
+    prompt: Management.PartialGroupsEnum;
   }): Promise<CustomPromptPartials> {
     if (!this.IsFeatureSupported) return {};
-    return this.withErrorHandling(async () => this.client.prompts.getPartials({ prompt }));
+    return this.withErrorHandling(async () => this.client.prompts.partials.get(prompt));
   }
 
   async getCustomPromptsPartials(): Promise<CustomPromptPartials> {
@@ -466,7 +452,7 @@ export default class PromptsHandler extends DefaultHandler {
         data: customPartialsPromptTypes,
         generator: (promptType) =>
           this.getCustomPartial({
-            prompt: promptType as GetPartialsPromptEnum,
+            prompt: promptType as Management.PartialGroupsEnum,
           }).then((partialsData: CustomPromptPartials) => {
             if (isEmpty(partialsData?.data)) return null;
             return { promptType, partialsData: partialsData.data };
@@ -497,7 +483,7 @@ export default class PromptsHandler extends DefaultHandler {
     const { partials, customText, screenRenderers, ...promptSettings } = prompts;
 
     if (!isEmpty(promptSettings)) {
-      await this.client.prompts.update(promptSettings);
+      await this.client.prompts.updateSettings(promptSettings);
     }
 
     await this.updateCustomTextSettings(customText);
@@ -533,7 +519,7 @@ export default class PromptsHandler extends DefaultHandler {
           });
         }),
         generator: ({ prompt, language, body }) =>
-          this.client.prompts.updateCustomTextByLanguage({ prompt, language }, body),
+          this.client.prompts.customText.set(prompt, language, body),
       })
       .promise();
   }
@@ -542,13 +528,11 @@ export default class PromptsHandler extends DefaultHandler {
     prompt,
     body,
   }: {
-    prompt: CustomPartialsPromptTypes;
-    body: CustomPromptPartialsScreens;
+    prompt: Management.PartialGroupsEnum;
+    body: Management.SetPartialsRequestContent;
   }): Promise<void> {
     if (!this.IsFeatureSupported) return;
-    await this.withErrorHandling(async () =>
-      this.client.prompts.updatePartials({ prompt } as PutPartialsRequest, body)
-    );
+    await this.withErrorHandling(async () => this.client.prompts.partials.set(prompt, body));
   }
 
   async updateCustomPromptsPartials(partials: Prompts['partials']): Promise<void> {
@@ -558,7 +542,7 @@ export default class PromptsHandler extends DefaultHandler {
     if (!partials) return;
     await this.client.pool
       .addEachTask({
-        data: Object.keys(partials).map((prompt: CustomPartialsPromptTypes) => {
+        data: Object.keys(partials).map((prompt: Management.PartialGroupsEnum) => {
           const body = partials[prompt] || {};
           return {
             body,
@@ -571,30 +555,27 @@ export default class PromptsHandler extends DefaultHandler {
   }
 
   async updateScreenRenderer(screenRenderer: ScreenRenderer): Promise<void> {
-    const { prompt, screen, rendering_mode, tenant, default_head_tags_disabled, ...updatePrams } =
-      screenRenderer;
+    const { prompt, screen, tenant, ...updatePrams } = screenRenderer;
     if (!prompt || !screen) return;
 
-    let updatePayload: PatchRenderingRequest = {};
+    let updatePayload: Management.UpdateAculRequestContent = {};
 
-    if (rendering_mode === PatchRenderingRequestRenderingModeEnum.standard) {
+    if (screenRenderer.rendering_mode === Management.AculRenderingModeEnum.Standard) {
       updatePayload = {
-        rendering_mode,
+        rendering_mode: screenRenderer.rendering_mode,
       };
     } else {
       updatePayload = {
         ...updatePrams,
-        rendering_mode,
-        default_head_tags_disabled: default_head_tags_disabled || undefined,
+        rendering_mode: screenRenderer.rendering_mode,
+        default_head_tags_disabled: screenRenderer.default_head_tags_disabled || undefined,
       };
     }
 
     try {
-      await this.client.prompts.updateRendering(
-        {
-          prompt: prompt as GetPartialsPromptEnum,
-          screen: screen as GetRenderingScreenEnum,
-        },
+      await this.client.prompts.rendering.update(
+        prompt as Management.PromptGroupNameEnum,
+        screen as Management.ScreenGroupNameEnum,
         {
           ...updatePayload,
         }
