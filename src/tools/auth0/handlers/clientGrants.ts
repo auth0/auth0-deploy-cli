@@ -36,7 +36,7 @@ export const schema = {
   },
 };
 
-type ClientGrant = Management.ClientGrantResponseContent;
+export type ClientGrant = Management.ClientGrantResponseContent;
 
 export default class ClientGrantsHandler extends DefaultHandler {
   existing: ClientGrant[] | null;
