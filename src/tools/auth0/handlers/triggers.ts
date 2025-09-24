@@ -49,30 +49,23 @@ export default class TriggersHandler extends DefaultHandler {
       return this.existing;
     }
 
-    // in case client version does not support actions
-    if (!this.client.actions || typeof this.client.actions.getAllTriggers !== 'function') {
-      return [];
-    }
-
     const triggerBindings = {};
 
     try {
-      const res = await this.client.actions.getAllTriggers();
-      const triggers: string[] = _(res.data.triggers).map('id').uniq().value();
+      const res = await this.client.actions.triggers.list();
+      const triggers: string[] = _(res.triggers).map('id').uniq().value();
 
       for (let i = 0; i < triggers.length; i++) {
         const triggerId = triggers[i];
         let bindings;
         try {
-          const { data } = await this.client.actions.getTriggerBindings({
-            triggerId: triggerId,
-          });
+          const { data } = await this.client.actions.triggers.bindings.list(triggerId);
 
-          bindings = data?.bindings;
+          bindings = data;
         } catch (err) {
           log.warn(`${err.message} (trigger: ${triggerId}). Skipping this trigger and continuing.`);
 
-          continue;
+          bindings = null;
         }
 
         if (bindings && bindings.length > 0) {
@@ -119,7 +112,7 @@ export default class TriggersHandler extends DefaultHandler {
           display_name: binding.display_name,
         }));
 
-        await this.client.actions.updateTriggerBindings({ triggerId: name }, { bindings });
+        await this.client.actions.triggers.bindings.updateMany(name, { bindings });
         this.didUpdate({ trigger_id: name });
         this.updated += 1;
       })
