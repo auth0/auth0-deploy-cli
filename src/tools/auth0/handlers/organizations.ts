@@ -202,15 +202,11 @@ export default class OrganizationsHandler extends DefaultHandler {
     await Promise.all(
       connectionsToUpdate.map((conn) =>
         this.client.organizations.enabledConnections
-          .update(
-            params.id,
-            conn.connection_id,
-            {
-              assign_membership_on_login: conn.assign_membership_on_login,
-              show_as_button: conn.show_as_button,
-              is_signup_enabled: conn.is_signup_enabled,
-            }
-          )
+          .update(params.id, conn.connection_id, {
+            assign_membership_on_login: conn.assign_membership_on_login,
+            show_as_button: conn.show_as_button,
+            is_signup_enabled: conn.is_signup_enabled,
+          })
           .catch(() => {
             throw new Error(
               `Problem updating Enabled Connection ${conn.connection_id} for organizations ${params.id}`
@@ -221,10 +217,13 @@ export default class OrganizationsHandler extends DefaultHandler {
 
     await Promise.all(
       connectionsToAdd.map((conn) =>
-        this.client.organizations
-          .enabledConnections.add(
+        this.client.organizations.enabledConnections
+          .add(
             params.id,
-            omit<Management.OrganizationConnection>(conn, 'connection') as Management.AddOrganizationConnectionRequestContent
+            omit<Management.OrganizationConnection>(
+              conn,
+              'connection'
+            ) as Management.AddOrganizationConnectionRequestContent
           )
           .catch(() => {
             throw new Error(
@@ -236,8 +235,8 @@ export default class OrganizationsHandler extends DefaultHandler {
 
     await Promise.all(
       connectionsToRemove.map((conn) =>
-        this.client.organizations
-          .enabledConnections.delete(params.id, conn.connection_id)
+        this.client.organizations.enabledConnections
+          .delete(params.id, conn.connection_id)
           .catch(() => {
             throw new Error(
               `Problem removing Enabled Connection ${conn.connection_id} for organizations ${params.id}`
@@ -350,7 +349,7 @@ export default class OrganizationsHandler extends DefaultHandler {
         }
 
         const connectionId = organizations[index].id as string;
-        const connections = await this.client.organizations.enabledConnections.list(connectionId);
+        const connections = await this.getOrganizationEnabledConnections(connectionId);
 
         organizations[index].connections = connections;
 
@@ -437,6 +436,22 @@ export default class OrganizationsHandler extends DefaultHandler {
         }
       })
     );
+  }
+
+  async getOrganizationEnabledConnections(
+    connectionId: string
+  ): Promise<Management.OrganizationConnection[]> {
+    const allOrganizationConnections: Management.OrganizationConnection[] = [];
+
+    let organizationConnections = await this.client.organizations.enabledConnections.list(
+      connectionId
+    );
+    do {
+      allOrganizationConnections.push(...organizationConnections.data);
+      organizationConnections = await organizationConnections.getNextPage();
+    } while (organizationConnections.hasNextPage());
+
+    return allOrganizationConnections;
   }
 
   async getOrganizationClientGrants(
