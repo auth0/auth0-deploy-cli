@@ -26,24 +26,6 @@ export const schema = {
   additionalProperties: false,
 };
 
-export const getFlows = async (
-  auth0Client: Auth0APIClient,
-  flows: Array<Management.FlowSummary>
-): Promise<Management.GetFlowResponseContent[]> => {
-  const allFlows = await auth0Client.pool
-    .addEachTask({
-      data: flows,
-      generator: ({ id }) =>
-        auth0Client.flows.get(id).then((response) => {
-          if (isEmpty(response)) return null;
-          return response;
-        }),
-    })
-    .promise();
-
-  return allFlows.filter((flow): flow is Management.GetFlowResponseContent => flow !== null);
-};
-
 export default class FlowHandler extends DefaultHandler {
   existing: Asset;
 
@@ -61,6 +43,23 @@ export default class FlowHandler extends DefaultHandler {
     return super.objString({ id: item.id, name: item.name });
   }
 
+  async getFlows(
+    flows: Array<Management.FlowSummary>
+  ): Promise<Management.GetFlowResponseContent[]> {
+    const allFlows = await this.client.pool
+      .addEachTask({
+        data: flows,
+        generator: ({ id }) =>
+          this.client.flows.get(id).then((response) => {
+            if (isEmpty(response)) return null;
+            return response;
+          }),
+      })
+      .promise();
+
+    return allFlows.filter((flow): flow is Management.GetFlowResponseContent => flow !== null);
+  }
+
   async getType(): Promise<Asset> {
     if (this.existing) {
       return this.existing;
@@ -74,7 +73,7 @@ export default class FlowHandler extends DefaultHandler {
     ]);
 
     // get more details for each flows
-    const allFlows: Array<Management.GetFlowResponseContent> = await getFlows(this.client, flows);
+    const allFlows = await this.getFlows(flows);
 
     // create a map for id to name from allFlowConnections
     const connectionIdMap = {};

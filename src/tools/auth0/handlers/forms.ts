@@ -5,7 +5,7 @@ import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import { findKeyPathWithValue } from '../../../utils';
-import { getFlows } from './flows';
+import { isEmpty } from 'lodash';
 
 export type Form = {
   name: string;
@@ -44,6 +44,22 @@ export default class FormsHandler extends DefaultHandler {
     return super.objString({ id: item.id, name: item.name });
   }
 
+  async getForms(
+    forms: Array<Management.FormSummary>
+  ): Promise<Management.GetFormResponseContent[]> {
+    const allForms = await this.client.pool
+      .addEachTask({
+        data: forms,
+        generator: ({ id }) =>
+          this.client.forms.get(id).then((response) => {
+            if (isEmpty(response)) return null;
+            return response;
+          }),
+      })
+      .promise();
+    return allForms.filter((form): form is Management.GetFormResponseContent => form !== null);
+  }
+
   async getType(): Promise<Asset> {
     if (this.existing) {
       return this.existing;
@@ -59,7 +75,7 @@ export default class FormsHandler extends DefaultHandler {
     ]);
 
     // get more details for each form
-    const allForms = await getFlows(this.client, forms);
+    const allForms = await this.getForms(forms);
 
     // create a map for id to name from allFlows
     const flowIdMap = {};
