@@ -39,7 +39,7 @@ export default class APIHandler {
   stripCreateFields: string[]; //Fields to strip from payload when creating
   name?: string; // TODO: understand if any handlers actually leverage `name` property
   functions: {
-    getAll: ApiMethodOverride;
+    list : ApiMethodOverride;
     update: ApiMethodOverride;
     create: ApiMethodOverride;
     delete: ApiMethodOverride;
@@ -56,7 +56,7 @@ export default class APIHandler {
     sensitiveFieldsToObfuscate?: APIHandler['sensitiveFieldsToObfuscate'];
     stripCreateFields?: APIHandler['stripCreateFields'];
     functions: {
-      getAll?: ApiMethodOverride;
+      list?: ApiMethodOverride;
       update?: ApiMethodOverride;
       create?: ApiMethodOverride;
       delete?: ApiMethodOverride;
@@ -74,7 +74,7 @@ export default class APIHandler {
     this.stripCreateFields = options.stripCreateFields || [];
 
     this.functions = {
-      getAll: 'getAll',
+      list: 'list',
       create: 'create',
       delete: 'delete',
       update: 'update',

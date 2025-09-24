@@ -19,10 +19,24 @@ const API_FREQUENCY_PER_SECOND = 8;
 const MAX_PAGE_SIZE = 100;
 
 function getEntity(rsp: ApiResponse): Asset[] {
-  const found = Object.values(rsp).filter((a) => Array.isArray(a));
-  if (Array.isArray(found) && found.length === 1) {
-    return found[0] as Asset[];
+  // If the response is already an array, return it directly (v5 SDK behavior)
+  if (Array.isArray(rsp)) {
+    return rsp as Asset[];
   }
+
+  // If the response is an object, look for array properties (legacy behavior)
+  if (typeof rsp === 'object' && rsp !== null) {
+    const found = Object.values(rsp).filter((a) => Array.isArray(a));
+    if (found.length === 1) {
+      return found[0] as Asset[];
+    }
+    // If we can't find exactly one array, but there's a property that looks like it contains the data
+    // Try some common property names from Auth0 SDK v5
+    if ('data' in rsp && Array.isArray(rsp.data)) {
+      return rsp.data as Asset[];
+    }
+  }
+
   throw new Error('There was an error trying to find the entity within paginate');
 }
 
@@ -47,6 +61,8 @@ function checkpointPaginator(
 
     const total = totalResponse.data?.total || 0;
 
+    // If total is 0, it might mean pagination info isn't available
+    // In checkpoint pagination, we should still try to fetch data and see what we get
     let done = false;
     // use checkpoint pagination to allow fetching 1000+ results
     newArgs.take = 50;
@@ -61,7 +77,7 @@ function checkpointPaginator(
 
       // v5: paginated responses have .data property containing the array
       data.push(...(rsp.data || []));
-      
+
       // Check if there's a next page using v5 pagination structure
       if (!rsp.hasNextPage || !rsp.hasNextPage()) {
         done = true;
@@ -72,7 +88,9 @@ function checkpointPaginator(
       }
     }
 
-    if (data.length !== total) {
+    // Only validate total if it was provided (non-zero) (legacy behavior)
+    // In Auth0 SDK v5, endpoints don't provide total count
+    if (total > 0 && data.length !== total) {
       throw new Error('Fail to load data from tenant');
     }
 
@@ -107,7 +125,16 @@ function pagePaginator(
       .promise();
 
     data.push(...getEntity(rsp.data));
+    // In Auth0 SDK v5, the total is not provided
     const total = rsp.data?.total || 0;
+
+    // If total is 0 but we have data, it likely means the response doesn't include pagination info
+    // In this case, we should assume this is all the data and skip pagination
+    const initialDataLength = getEntity(rsp.data).length;
+    if (total === 0 && initialDataLength > 0) {
+      return data; // Return what we have without pagination
+    }
+
     const pagesLeft = Math.ceil(total / perPage) - 1;
     // Setup pool to get the rest of the pages
     if (pagesLeft > 0) {
@@ -125,7 +152,9 @@ function pagePaginator(
 
       data.push(...flatten(pages));
 
-      if (data.length !== total) {
+      // Only validate total if it was provided (non-zero)
+      // In Auth0 SDK v5,endpoints don't provide total count
+      if (total > 0 && data.length !== total) {
         throw new Error('Fail to load data from tenant');
       }
     }
@@ -167,16 +196,20 @@ function pagedManager(client: Auth0APIClient, manager: Auth0APIClient) {
 
 // Warp around the ManagementClient and detect when requesting specific pages to return all
 export default function pagedClient(client: ManagementClient): Auth0APIClient {
-  const clientWithPooling: Auth0APIClient = {
-    ...client,
-    pool: new PromisePoolExecutor({
-      concurrencyLimit: API_CONCURRENCY,
-      frequencyLimit: API_FREQUENCY_PER_SECOND,
-      frequencyWindow: 1000, // 1 sec
-    }),
-  } as Auth0APIClient;
+  // Create a new object that inherits from the original client
+  const clientWithPooling = Object.create(Object.getPrototypeOf(client));
 
-  return pagedManager(clientWithPooling, clientWithPooling);
+  // Copy all enumerable properties from the original client
+  Object.assign(clientWithPooling, client);
+
+  // Add the pool property
+  clientWithPooling.pool = new PromisePoolExecutor({
+    concurrencyLimit: API_CONCURRENCY,
+    frequencyLimit: API_FREQUENCY_PER_SECOND,
+    frequencyWindow: 1000, // 1 sec
+  });
+
+  return pagedManager(clientWithPooling as Auth0APIClient, clientWithPooling as Auth0APIClient);
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -184,7 +217,7 @@ export async function paginate<T>(
   fetchFunc: (...paginateArgs: any) => any,
   args: PagePaginationParams | CheckpointPaginationParams
 ): Promise<T[]> {
-  // override default <T>.getAll() behaviour using pagedClient
+  // override default <T>.list() behaviour using pagedClient
   const allItems = (await fetchFunc(args)) as unknown as T[];
   return allItems;
 }
