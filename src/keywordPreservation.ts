@@ -15,13 +15,18 @@ import log from './logger';
   Original Github Issue: https://github.com/auth0/auth0-deploy-cli/issues/328
 */
 
-export const doesHaveKeywordMarker = (string: string, keywordMappings: KeywordMappings): boolean =>
-  !Object.keys(keywordMappings).every((keyword) => {
+export const doesHaveKeywordMarker = (string: string | undefined, keywordMappings: KeywordMappings): boolean => {
+  if (string === undefined) {
+    return false;
+  }
+  
+  return !Object.keys(keywordMappings).every((keyword) => {
     const hasArrayMarker = keywordReplaceArrayRegExp(keyword).test(string);
     const hasStringMarker = keywordReplaceStringRegExp(keyword).test(string);
 
     return !hasArrayMarker && !hasStringMarker;
   });
+};
 
 export const getPreservableFieldsFromAssets = (
   asset: object,

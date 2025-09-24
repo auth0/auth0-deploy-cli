@@ -1,4 +1,4 @@
-import { CustomDomain, GetConnectionsStrategyEnum, ManagementClient, ResourceServer } from 'auth0';
+import { Management, ManagementClient } from 'auth0';
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { Action } from './tools/auth0/handlers/actions';
 import { Prompts } from './tools/auth0/handlers/prompts';
@@ -21,7 +21,7 @@ type SharedPaginationParams = {
   is_global?: boolean;
   include_totals?: boolean;
   id?: string;
-  strategy?: GetConnectionsStrategyEnum[];
+  strategy?: Management.ConnectionStrategyEnum[];
 };
 
 export type CheckpointPaginationParams = SharedPaginationParams & {
@@ -97,7 +97,7 @@ export type Assets = Partial<{
   clients: Client[] | null;
   clientGrants: ClientGrant[] | null;
   connections: Asset[] | null;
-  customDomains: CustomDomain[] | null;
+  customDomains: Management.CustomDomain[] | null;
   databases: Asset[] | null;
   emailProvider: Asset | null;
   emailTemplates: Asset[] | null;
@@ -105,24 +105,24 @@ export type Assets = Partial<{
   guardianFactors: Asset[] | null;
   guardianFactorTemplates: Asset[] | null;
   guardianPhoneFactorMessageTypes: {
-    message_types: Asset[]; //TODO: eliminate this intermediate level for consistency
+    message_types: Asset[]; // TODO: eliminate this intermediate level for consistency
   } | null;
   guardianPhoneFactorSelectedProvider: Asset | null;
   guardianPolicies: {
-    policies: string[]; //TODO: eliminate this intermediate level for consistency
+    policies: string[]; // TODO: eliminate this intermediate level for consistency
   } | null;
   hooks: Asset[] | null;
   logStreams: LogStream[] | null;
   organizations: Asset[] | null;
   pages: Page[] | null;
   prompts: Prompts | null;
-  resourceServers: ResourceServer[] | null;
+  resourceServers: Management.ResourceServer[] | null;
   roles: Asset[] | null;
   rules: Asset[] | null;
   rulesConfigs: Asset[] | null;
   tenant: Tenant | null;
   triggers: Asset[] | null;
-  //non-resource types
+  // non-resource types
   exclude?: {
     [key: string]: string[];
   };

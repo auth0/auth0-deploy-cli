@@ -1,10 +1,10 @@
-import { Client } from 'auth0';
 import { convertClientIdToName } from '../../../utils';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { ParsedAsset } from '../../../types';
 import { ClientGrant } from '../../../tools/auth0/handlers/clientGrants';
 import { paginate } from '../../../tools/auth0/client';
+import { Client } from '../../../tools/auth0/handlers/clients';
 
 type ParsedClientGrants = ParsedAsset<'clientGrants', ClientGrant[]>;
 
@@ -25,7 +25,7 @@ async function dump(context: YAMLContext): Promise<ParsedClientGrants> {
   if (!clientGrants) return { clientGrants: null };
 
   if (clients === undefined) {
-    clients = await paginate<Client>(context.mgmtClient.clients.getAll, {
+    clients = await paginate<Client>(context.mgmtClient.clients.list, {
       paginate: true,
       include_totals: true,
     });

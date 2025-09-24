@@ -12,6 +12,8 @@ export const excludeSchema = {
   items: { type: 'string' },
 };
 
+export type ResourceServer = Management.ResourceServer;
+
 export const schema = {
   type: 'array',
   items: {
@@ -78,8 +80,6 @@ export const schema = {
     required: ['name', 'identifier'],
   },
 };
-
-type ResourceServer = Management.ResourceServer;
 
 export default class ResourceServersHandler extends DefaultHandler {
   existing: ResourceServer[];

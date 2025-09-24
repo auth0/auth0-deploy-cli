@@ -8,7 +8,9 @@ import { paginate } from '../client';
 
 const MAX_ACTION_DEPLOY_RETRY_ATTEMPTS = 60; // 60 * 2s => 2 min timeout
 
-export type Action = Management.Action;
+export type Action = Management.Action & {
+  deployed?: boolean;
+};
 type ActionCreate = Management.CreateActionRequestContent;
 
 type CreateActionRequestWithId = ActionCreate & {

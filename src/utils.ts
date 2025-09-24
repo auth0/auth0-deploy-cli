@@ -106,7 +106,8 @@ export function stripIdentifiers(auth0: Auth0, assets: Assets) {
   return updated;
 }
 
-export function sanitize(str: string): string {
+export function sanitize(str: string | undefined): string {
+  if (!str) return 'undefined';
   return sanitizeName(str, { replacement: '-' });
 }
 
@@ -192,7 +193,12 @@ export function clearClientArrays(client: Asset): Asset {
   return client;
 }
 
-export function convertClientIdToName(clientId: string, knownClients: Asset[] = []): string {
+export function convertClientIdToName(
+  clientId: string | undefined,
+  knownClients: Asset[] = []
+): string {
+  if (!clientId) return 'undefined_clientId';
+
   try {
     const found = knownClients.find((c) => c.client_id === clientId);
     return (found && found.name) || clientId;
