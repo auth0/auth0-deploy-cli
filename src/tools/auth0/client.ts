@@ -11,6 +11,14 @@ import {
   PagePaginationParams,
 } from '../../types';
 
+type JSONApiResponseWithPage = JSONApiResponse<ApiResponse> & {
+  response: {
+    start: number;
+    limit: number;
+    total: number;
+  };
+};
+
 const API_CONCURRENCY = 3;
 // To ensure a complete deployment, limit the API requests generated to be 80% of the capacity
 // https://auth0.com/docs/policies/rate-limits#management-api-v2
@@ -51,47 +59,30 @@ function checkpointPaginator(
     // remove the _checkpoint_ flag
     const { checkpoint, ...newArgs } = _.cloneDeep(args[0]);
 
-    // fetch the total to validate records match - v5 returns .data property for paginated responses
-    const totalResponse = await client.pool
+    // Set appropriate page size for checkpoint pagination
+    newArgs.take = newArgs.take || 50; // Default to 50
+
+    let currentPage = await client.pool
       .addSingleTask({
         data: newArgs,
         generator: (requestArgs) => target[name](requestArgs),
       })
       .promise();
 
-    const total = totalResponse.data?.total || 0;
+    // Add first page data
+    data.push(...(currentPage.data || []));
 
-    // If total is 0, it might mean pagination info isn't available
-    // In checkpoint pagination, we should still try to fetch data and see what we get
-    let done = false;
-    // use checkpoint pagination to allow fetching 1000+ results
-    newArgs.take = 50;
-
-    while (!done) {
-      const rsp = await client.pool
+    // Continue fetching while there are more pages
+    while (currentPage.hasNextPage && currentPage.hasNextPage()) {
+      const pageToFetch = currentPage; // Capture the current page reference
+      currentPage = await client.pool
         .addSingleTask({
-          data: newArgs,
-          generator: (requestArgs) => target[name](requestArgs),
+          data: null,
+          generator: () => pageToFetch.getNextPage(),
         })
         .promise();
 
-      // v5: paginated responses have .data property containing the array
-      data.push(...(rsp.data || []));
-
-      // Check if there's a next page using v5 pagination structure
-      if (!rsp.hasNextPage || !rsp.hasNextPage()) {
-        done = true;
-      } else {
-        // For checkpoint pagination, update the 'from' parameter
-        // This may need adjustment based on the specific endpoint's pagination format
-        newArgs.from = rsp.next || rsp.data.next;
-      }
-    }
-
-    // Only validate total if it was provided (non-zero) (legacy behavior)
-    // In Auth0 SDK v5, endpoints don't provide total count
-    if (total > 0 && data.length !== total) {
-      throw new Error('Fail to load data from tenant');
+      data.push(...(currentPage.data || []));
     }
 
     return data;
@@ -117,7 +108,7 @@ function pagePaginator(
     delete newArgs[0].paginate;
 
     // Run the first request to get the total number of entity items
-    const rsp: JSONApiResponse<ApiResponse> = await client.pool
+    const rsp: JSONApiResponseWithPage = await client.pool
       .addSingleTask({
         data: _.cloneDeep(newArgs),
         generator: (pageArgs) => target[name](...pageArgs),
@@ -126,7 +117,7 @@ function pagePaginator(
 
     data.push(...getEntity(rsp.data));
     // In Auth0 SDK v5, the total is not provided
-    const total = rsp.data?.total || 0;
+    const total = rsp.response?.total || 0;
 
     // If total is 0 but we have data, it likely means the response doesn't include pagination info
     // In this case, we should assume this is all the data and skip pagination
