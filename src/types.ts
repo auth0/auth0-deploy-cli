@@ -1,4 +1,4 @@
-import { CustomDomain, GetConnectionsStrategyEnum, ManagementClient, ResourceServer } from 'auth0';
+import { CustomDomain, GetConnectionsStrategyEnum, ManagementClient, ResourceServer, UserAttributeProfile } from 'auth0';
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { Action } from './tools/auth0/handlers/actions';
 import { Prompts } from './tools/auth0/handlers/prompts';
@@ -133,6 +133,7 @@ export type Assets = Partial<{
   flowVaultConnections: FlowVaultConnection[] | null;
   selfServiceProfiles: SsProfileWithCustomText[] | null;
   networkACLs: NetworkACL[] | null;
+  userAttributeProfiles: UserAttributeProfile[] | null;
 }>;
 
 export type CalculatedChanges = {
@@ -176,7 +177,8 @@ export type AssetTypes =
   | 'flows'
   | 'flowVaultConnections'
   | 'selfServiceProfiles'
-  | 'networkACLs';
+  | 'networkACLs'
+  | 'userAttributeProfiles';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 
