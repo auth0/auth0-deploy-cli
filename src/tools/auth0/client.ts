@@ -68,7 +68,8 @@ function checkpointPaginator(
       }
     }
 
-    if (data.length !== total) {
+    // Not all entities return total, so only validate when we have a total
+    if (total > 0 && data.length !== total) {
       throw new Error('Fail to load data from tenant');
     }
 
