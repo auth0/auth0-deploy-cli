@@ -1,10 +1,13 @@
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { cloneDeep } from 'lodash';
+import chai, { expect } from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import pageClient from '../../../../src/tools/auth0/client';
 
-const { expect } = require('chai');
 const selfServiceProfiles = require('../../../../src/tools/auth0/handlers/selfServiceProfiles');
 const { mockPagedData } = require('../../../utils');
+
+chai.use(chaiAsPromised);
 
 const pool = new PromisePoolExecutor({
   concurrencyLimit: 3,
@@ -451,6 +454,25 @@ describe('#selfServiceProfiles handler', () => {
               data: {},
             });
           },
+    it('should throw an error if user_attributes and user_attribute_profile_id are set', async () => {
+      const sspWithBoth = {
+        ...cloneDeep(sampleSsProfileWithId),
+        name: 'self-service-profile-with-uap-name',
+        user_attribute_profile_id: sampleUAP.name,
+      };
+      const auth0 = {
+        selfServiceProfiles: {
+          delete: (params) => {
+            expect(params).to.be.an('undefined');
+            return Promise.resolve({ data: [] });
+          },
+          getAll: (params) => mockPagedData(params, 'selfServiceProfiles', [sspWithBoth]),
+          getCustomText: (params) => {
+            expect(params).to.be.an('object');
+            return Promise.resolve({
+              data: {},
+            });
+          },
         },
         userAttributeProfiles: {
           getAll: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAP]),
@@ -461,7 +483,10 @@ describe('#selfServiceProfiles handler', () => {
       const handler = new selfServiceProfiles.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [{ selfServiceProfiles: [] }]);
+      await expect(stageFn.apply(handler, [{ selfServiceProfiles: [sspWithBoth] }])).to.be.rejectedWith(
+        `Self Service Profile ${sspWithBoth.name} has conflicting properties user_attribute_profile_id and user_attributes. Please remove one.`,
+      );
+
     });
   });
 });

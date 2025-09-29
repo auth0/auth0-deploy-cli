@@ -154,32 +154,31 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
     // Gets SsProfileWithCustomText from destination tenant
     const existing = await this.getType();
 
-    // If any of the selfServiceProfiles have a user_attribute_profile_id, then process to ensure any name usage is converted to ID
-    if (selfServiceProfiles.some(p => p.user_attribute_profile_id && p.user_attribute_profile_id.trim() !== '')) {
-      const userAttributeProfiles = await paginate<UserAttributeProfile>(this.client.userAttributeProfiles.getAll, {
-        checkpoint: true,
-        include_totals: true,
-        is_global: false,
-        take: 10,
-      });
+    const userAttributeProfiles = await this.getUserAttributeProfiles(selfServiceProfiles);
 
-      selfServiceProfiles = selfServiceProfiles.map((ssProfile) => {
-        // don't process if no user_attribute_profile_id
-        if (!ssProfile.user_attribute_profile_id) return ssProfile;
-        const profile = { ...ssProfile };
+    selfServiceProfiles = selfServiceProfiles.map((ssProfile) => {
+      if (this.hasConflictingUserAttribute(ssProfile)) {
+        log.error(
+          `Self Service Profile ${ssProfile.name} has conflicting properties user_attribute_profile_id and user_attributes. Please remove one.`,
+        );
+        throw new Error(`Self Service Profile ${ssProfile.name} has conflicting properties user_attribute_profile_id and user_attributes. Please remove one.`);
+      }
 
-        const found = userAttributeProfiles.find((uap) => uap.name === profile.user_attribute_profile_id);
-        if (found) {
-          profile.user_attribute_profile_id = found.id;
-        } else {
-          log.error(
-            `User Attribute ${profile.user_attribute_profile_id} not found for Self Service Profile ${profile.name}. Please verify the User Attribute Profile Name.`,
-          );
-          throw new Error(`User Attribute ${profile.user_attribute_profile_id} not found for Self Service Profile ${profile.name}. Please verify the User Attribute Profile Name.`);
-        }
-        return profile;
-      });
-    }
+      // don't process if no user_attribute_profile_id
+      if (!ssProfile.user_attribute_profile_id) return ssProfile;
+      const profile = { ...ssProfile };
+
+      const found = userAttributeProfiles.find((uap) => uap.name === profile.user_attribute_profile_id);
+      if (found) {
+        profile.user_attribute_profile_id = found.id;
+      } else {
+        log.error(
+          `User Attribute ${profile.user_attribute_profile_id} not found for Self Service Profile ${profile.name}. Please verify the User Attribute Profile Name.`,
+        );
+        throw new Error(`User Attribute ${profile.user_attribute_profile_id} not found for Self Service Profile ${profile.name}. Please verify the User Attribute Profile Name.`);
+      }
+      return profile;
+    });
 
     const changes = calculateChanges({
       handler: this,
@@ -321,5 +320,31 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
 
   async deleteSelfServiceProfile(profile: SsProfileWithCustomText): Promise<void> {
     await this.client.selfServiceProfiles.delete({ id: profile.id });
+  }
+
+  async getUserAttributeProfiles(selfServiceProfiles: SsProfileWithCustomText[]): Promise<UserAttributeProfile[]> {
+    if (selfServiceProfiles.some(p => p.user_attribute_profile_id && p.user_attribute_profile_id.trim() !== '')) {
+      return paginate<UserAttributeProfile>(this.client.userAttributeProfiles.getAll, {
+        checkpoint: true,
+        include_totals: true,
+        is_global: false,
+        take: 10,
+      });
+    }
+
+    return [];
+  }
+
+  hasConflictingUserAttribute(profile: SsProfileWithCustomText): boolean {
+    // If both user_attribute_profile_id and user_attributes are set and have values then error
+    if (
+      profile.user_attribute_profile_id &&
+      profile.user_attribute_profile_id.trim() !== '' &&
+      profile.user_attributes &&
+      profile.user_attributes.length > 0
+    ) {
+      return true;
+    }
+    return false;
   }
 }
