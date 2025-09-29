@@ -454,6 +454,23 @@ describe('#selfServiceProfiles handler', () => {
               data: {},
             });
           },
+          update: async (params, data) => {
+            expect(data.user_attribute_profile_id).to.equal(sampleUAP.id);
+            return { data };
+          },
+        },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAP]),
+        },
+        pool,
+      };
+
+      const handler = new selfServiceProfiles.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ selfServiceProfiles: [sspWithUserAttributesId] }]);
+    });
+
     it('should throw an error if user_attributes and user_attribute_profile_id are set', async () => {
       const sspWithBoth = {
         ...cloneDeep(sampleSsProfileWithId),
@@ -486,7 +503,40 @@ describe('#selfServiceProfiles handler', () => {
       await expect(stageFn.apply(handler, [{ selfServiceProfiles: [sspWithBoth] }])).to.be.rejectedWith(
         `Self Service Profile ${sspWithBoth.name} has conflicting properties user_attribute_profile_id and user_attributes. Please remove one.`,
       );
+    });
 
+    it('should not call userAttributeProfiles api if user_attribute_profile_id is not a string', async () => {
+      const auth0 = {
+        selfServiceProfiles: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal(sampleSsProfileWithOutId.name);
+            expect(data.user_attributes).to.be.an('array');
+            expect(data.allowed_strategies).to.be.an('array');
+            expect(data.branding).to.be.an('object');
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'selfServiceProfiles', []),
+        },
+        userAttributeProfiles: {
+          getAll: () => {
+            expect.fail('userAttributeProfiles.getAll should not be called');
+          },
+        },
+        pool,
+      };
+
+      const handler = new selfServiceProfiles.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          selfServiceProfiles: [sampleSsProfileWithOutId],
+        },
+      ]);
     });
   });
 });
