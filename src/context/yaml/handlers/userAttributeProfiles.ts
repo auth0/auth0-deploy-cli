@@ -8,18 +8,9 @@ type ParsedUserAttributeProfiles = ParsedAsset<
   Partial<UserAttributeProfile>[]
 >;
 
-async function parse(context: YAMLContext): Promise<ParsedUserAttributeProfiles> {
+async function parseAndDump(context: YAMLContext): Promise<ParsedUserAttributeProfiles> {
   const { userAttributeProfiles } = context.assets;
 
-  if (!userAttributeProfiles) return { userAttributeProfiles: null };
-
-  return {
-    userAttributeProfiles,
-  };
-}
-
-async function dump(context: YAMLContext): Promise<ParsedUserAttributeProfiles> {
-  const { userAttributeProfiles } = context.assets;
   if (!userAttributeProfiles) return { userAttributeProfiles: null };
 
   return {
@@ -28,8 +19,8 @@ async function dump(context: YAMLContext): Promise<ParsedUserAttributeProfiles> 
 }
 
 const selfServiceProfileHandler: YAMLHandler<ParsedUserAttributeProfiles> = {
-  parse,
-  dump,
+  parse: parseAndDump,
+  dump: parseAndDump,
 };
 
 export default selfServiceProfileHandler;

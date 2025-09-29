@@ -2,7 +2,7 @@ import {
   UserAttributeProfile
 } from 'auth0';
 
-import DefaultAPIHandler from './default';
+import DefaultAPIHandler, { order } from './default';
 import { Assets, } from '../../../types';
 import log from '../../../logger';
 import { paginate } from '../client';
@@ -219,6 +219,7 @@ export default class UserAttributeProfilesHandler extends DefaultAPIHandler {
     return this.existing;
   }
 
+  @order('50')
   async processChanges(assets: Assets): Promise<void> {
     const { userAttributeProfiles } = assets;
 
