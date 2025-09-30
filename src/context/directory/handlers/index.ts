@@ -31,6 +31,7 @@ import forms from './forms';
 import flows from './flows';
 import flowVaultConnections from './flowVaultConnections';
 import networkACLs from './networkACLs';
+import userAttributeProfiles from './userAttributeProfiles';
 
 import DirectoryContext from '..';
 import { AssetTypes, Asset } from '../../../types';
@@ -78,6 +79,7 @@ const directoryHandlers: {
   flowVaultConnections,
   selfServiceProfiles,
   networkACLs,
+  userAttributeProfiles,
 };
 
 export default directoryHandlers;

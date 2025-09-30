@@ -31,6 +31,7 @@ import forms from './forms';
 import flows from './flows';
 import flowVaultConnections from './flowVaultConnections';
 import networkACLs from './networkACLs';
+import userAttributeProfiles from './userAttributeProfiles';
 
 import YAMLContext from '..';
 import { AssetTypes } from '../../../types';
@@ -76,6 +77,7 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   flowVaultConnections,
   selfServiceProfiles,
   networkACLs,
+  userAttributeProfiles
 };
 
 export default yamlHandlers;
