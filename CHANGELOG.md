@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for user attribute profiles EA [#1166]
+- Add support for `user_attribute_profile_id` in `selfServiceProfiles` [#1166]
+- Add support for new language codes [#1159]
+
 ## [8.16.0] - 2025-09-16
 
 ### Added
