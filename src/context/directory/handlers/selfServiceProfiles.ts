@@ -39,7 +39,7 @@ function parse(context: DirectoryContext): ParsedSelfServiceProfiles {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const { selfServiceProfiles, userAttributeProfiles } = context.assets;
+  const { selfServiceProfiles, userAttributeProfilesWithId } = context.assets;
   if (!selfServiceProfiles) return;
 
   const selfServiceProfilesFolder = path.join(
@@ -61,7 +61,7 @@ async function dump(context: DirectoryContext): Promise<void> {
     }
 
     if (profile.user_attribute_profile_id) {
-      const p = userAttributeProfiles?.find(uap => uap.id === profile.user_attribute_profile_id);
+      const p = userAttributeProfilesWithId?.find(uap => uap.id === profile.user_attribute_profile_id);
       profile.user_attribute_profile_id = p?.name || profile.user_attribute_profile_id;
 
       if (profile.user_attributes.length === 0) {

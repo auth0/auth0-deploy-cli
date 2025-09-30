@@ -134,6 +134,7 @@ export type Assets = Partial<{
   selfServiceProfiles: SsProfileWithCustomText[] | null;
   networkACLs: NetworkACL[] | null;
   userAttributeProfiles: UserAttributeProfile[] | null;
+  userAttributeProfilesWithId: UserAttributeProfile[] | null;
 }>;
 
 export type CalculatedChanges = {

@@ -64,7 +64,7 @@ describe('#directory context selfServiceProfiles', () => {
       { name: 'test-self-service-profile-2', description: 'test self-Service new profile 2', user_attribute_profile_id: 'uap_12345' },
       { name: 'test-self-service-profile', description: 'test Self-Service Profile', user_attribute_profile_id: 'uap_67890' },
     ];
-    context.assets.userAttributeProfiles = [
+    context.assets.userAttributeProfilesWithId = [
       { id: 'uap_12345', name: 'profile1' },
       { id: 'uap_67890', name: 'profile2' },
     ];
