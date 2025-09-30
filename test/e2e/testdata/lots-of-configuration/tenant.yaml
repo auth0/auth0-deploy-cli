@@ -775,6 +775,8 @@ userAttributeProfiles:
         label: Email
         profile_required: true
         auth0_mapping: email
+    user_id:
+      oidc_mapping: sub
   - name: test-user-attribute-profile-2
     user_attributes:
       email:
