@@ -61,8 +61,16 @@ describe('#directory context selfServiceProfiles', () => {
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
     context.assets.selfServiceProfiles = [
-      { name: 'test-self-service-profile-2', description: 'test self-Service new profile 2', user_attribute_profile_id: 'uap_12345' },
-      { name: 'test-self-service-profile', description: 'test Self-Service Profile', user_attribute_profile_id: 'uap_67890' },
+      {
+        name: 'test-self-service-profile-2',
+        description: 'test self-Service new profile 2',
+        user_attribute_profile_id: 'uap_12345',
+      },
+      {
+        name: 'test-self-service-profile',
+        description: 'test Self-Service Profile',
+        user_attribute_profile_id: 'uap_67890',
+      },
     ];
     context.assets.userAttributeProfilesWithId = [
       { id: 'uap_12345', name: 'profile1' },
@@ -73,8 +81,16 @@ describe('#directory context selfServiceProfiles', () => {
     const selfServiceProfilesFolder = path.join(dir, constants.SELF_SERVICE_PROFILE_DIRECTORY);
 
     const expected = [
-      { name: 'test-self-service-profile-2', description: 'test self-Service new profile 2', user_attribute_profile_id: 'profile1' },
-      { name: 'test-self-service-profile', description: 'test Self-Service Profile', user_attribute_profile_id: 'profile2' },
+      {
+        name: 'test-self-service-profile-2',
+        description: 'test self-Service new profile 2',
+        user_attribute_profile_id: 'profile1',
+      },
+      {
+        name: 'test-self-service-profile',
+        description: 'test Self-Service Profile',
+        user_attribute_profile_id: 'profile2',
+      },
     ];
 
     expect(

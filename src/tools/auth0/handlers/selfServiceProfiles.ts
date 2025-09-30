@@ -159,23 +159,29 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
     selfServiceProfiles = selfServiceProfiles.map((ssProfile) => {
       if (this.hasConflictingUserAttribute(ssProfile)) {
         log.error(
-          `Self Service Profile ${ssProfile.name} has conflicting properties user_attribute_profile_id and user_attributes. Please remove one.`,
+          `Self Service Profile ${ssProfile.name} has conflicting properties user_attribute_profile_id and user_attributes. Please remove one.`
         );
-        throw new Error(`Self Service Profile ${ssProfile.name} has conflicting properties user_attribute_profile_id and user_attributes. Please remove one.`);
+        throw new Error(
+          `Self Service Profile ${ssProfile.name} has conflicting properties user_attribute_profile_id and user_attributes. Please remove one.`
+        );
       }
 
       // don't process if no user_attribute_profile_id
       if (!ssProfile.user_attribute_profile_id) return ssProfile;
       const profile = { ...ssProfile };
 
-      const found = userAttributeProfiles.find((uap) => uap.name === profile.user_attribute_profile_id);
+      const found = userAttributeProfiles.find(
+        (uap) => uap.name === profile.user_attribute_profile_id
+      );
       if (found) {
         profile.user_attribute_profile_id = found.id;
       } else {
         log.error(
-          `User Attribute ${profile.user_attribute_profile_id} not found for Self Service Profile ${profile.name}. Please verify the User Attribute Profile Name.`,
+          `User Attribute ${profile.user_attribute_profile_id} not found for Self Service Profile ${profile.name}. Please verify the User Attribute Profile Name.`
         );
-        throw new Error(`User Attribute ${profile.user_attribute_profile_id} not found for Self Service Profile ${profile.name}. Please verify the User Attribute Profile Name.`);
+        throw new Error(
+          `User Attribute ${profile.user_attribute_profile_id} not found for Self Service Profile ${profile.name}. Please verify the User Attribute Profile Name.`
+        );
       }
       return profile;
     });
@@ -322,8 +328,14 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
     await this.client.selfServiceProfiles.delete({ id: profile.id });
   }
 
-  async getUserAttributeProfiles(selfServiceProfiles: SsProfileWithCustomText[]): Promise<UserAttributeProfile[]> {
-    if (selfServiceProfiles.some(p => p.user_attribute_profile_id && p.user_attribute_profile_id.trim() !== '')) {
+  async getUserAttributeProfiles(
+    selfServiceProfiles: SsProfileWithCustomText[]
+  ): Promise<UserAttributeProfile[]> {
+    if (
+      selfServiceProfiles.some(
+        (p) => p.user_attribute_profile_id && p.user_attribute_profile_id.trim() !== ''
+      )
+    ) {
       return paginate<UserAttributeProfile>(this.client.userAttributeProfiles.getAll, {
         checkpoint: true,
         include_totals: true,

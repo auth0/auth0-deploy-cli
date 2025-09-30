@@ -447,7 +447,8 @@ describe('#selfServiceProfiles handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => mockPagedData(params, 'selfServiceProfiles', [sspWithUserAttributesId]),
+          getAll: (params) =>
+            mockPagedData(params, 'selfServiceProfiles', [sspWithUserAttributesId]),
           getCustomText: (params) => {
             expect(params).to.be.an('object');
             return Promise.resolve({
@@ -500,8 +501,10 @@ describe('#selfServiceProfiles handler', () => {
       const handler = new selfServiceProfiles.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await expect(stageFn.apply(handler, [{ selfServiceProfiles: [sspWithBoth] }])).to.be.rejectedWith(
-        `Self Service Profile ${sspWithBoth.name} has conflicting properties user_attribute_profile_id and user_attributes. Please remove one.`,
+      await expect(
+        stageFn.apply(handler, [{ selfServiceProfiles: [sspWithBoth] }])
+      ).to.be.rejectedWith(
+        `Self Service Profile ${sspWithBoth.name} has conflicting properties user_attribute_profile_id and user_attributes. Please remove one.`
       );
     });
 

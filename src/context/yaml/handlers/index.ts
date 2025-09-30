@@ -77,7 +77,7 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   flowVaultConnections,
   selfServiceProfiles,
   networkACLs,
-  userAttributeProfiles
+  userAttributeProfiles,
 };
 
 export default yamlHandlers;

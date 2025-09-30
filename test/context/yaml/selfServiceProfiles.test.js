@@ -227,7 +227,7 @@ describe('#YAML context selfServiceProfiles', () => {
           },
         },
         user_attribute_profile_id: 'uap_12345',
-      }
+      },
     ];
 
     const target = [
@@ -253,13 +253,11 @@ describe('#YAML context selfServiceProfiles', () => {
           },
         },
         user_attribute_profile_id: 'profile1',
-      }
+      },
     ];
 
     context.assets.selfServiceProfiles = selfServiceProfiles;
-    context.assets.userAttributeProfiles = [
-      { id: 'uap_12345', name: 'profile1' },
-    ];
+    context.assets.userAttributeProfiles = [{ id: 'uap_12345', name: 'profile1' }];
 
     const dumped = await handler.dump(context);
     expect(dumped).to.deep.equal({ selfServiceProfiles: target });

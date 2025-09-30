@@ -1,4 +1,10 @@
-import { CustomDomain, GetConnectionsStrategyEnum, ManagementClient, ResourceServer, UserAttributeProfile } from 'auth0';
+import {
+  CustomDomain,
+  GetConnectionsStrategyEnum,
+  ManagementClient,
+  ResourceServer,
+  UserAttributeProfile,
+} from 'auth0';
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { Action } from './tools/auth0/handlers/actions';
 import { Prompts } from './tools/auth0/handlers/prompts';
