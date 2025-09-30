@@ -63,6 +63,11 @@ async function dump(context: DirectoryContext): Promise<void> {
     if (profile.user_attribute_profile_id) {
       const p = userAttributeProfiles?.find(uap => uap.id === profile.user_attribute_profile_id);
       profile.user_attribute_profile_id = p?.name || profile.user_attribute_profile_id;
+
+      if (profile.user_attributes.length === 0) {
+        // @ts-expect-error - ignore type error here as we know that user_attributes can be removed.
+        delete profile.user_attributes;
+      }
     }
 
     dumpJSON(ssProfileFile, profile);
