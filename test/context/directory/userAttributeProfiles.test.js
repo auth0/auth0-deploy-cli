@@ -55,8 +55,34 @@ describe('#directory context userAttributeProfiles', () => {
     await context.loadAssetsFromLocal();
 
     const target = [
-      { name: 'test-user-attribute-profile-2', user_attributes: { 'email': { auth0_mapping: 'email', description: 'Email of the User', label: 'Email', profile_required: true, saml_mapping: [ 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier', 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn', 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name' ] } }, user_id: { oidc_mapping: 'sub' } } ,
-      { name: 'test-user-attribute-profile', user_attributes: { 'email': { auth0_mapping: 'email', description: 'Email of the User', label: 'Email', profile_required: true } } } ,
+      {
+        name: 'test-user-attribute-profile-2',
+        user_attributes: {
+          email: {
+            auth0_mapping: 'email',
+            description: 'Email of the User',
+            label: 'Email',
+            profile_required: true,
+            saml_mapping: [
+              'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier',
+              'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn',
+              'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name',
+            ],
+          },
+        },
+        user_id: { oidc_mapping: 'sub' },
+      },
+      {
+        name: 'test-user-attribute-profile',
+        user_attributes: {
+          email: {
+            auth0_mapping: 'email',
+            description: 'Email of the User',
+            label: 'Email',
+            profile_required: true,
+          },
+        },
+      },
     ];
     expect(context.assets.userAttributeProfiles).to.deep.equal(target);
   });
@@ -67,7 +93,7 @@ describe('#directory context userAttributeProfiles', () => {
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
     context.assets.userAttributeProfiles = [
-      { name: 'test-user-attribute-profile-2', },
+      { name: 'test-user-attribute-profile-2' },
       { name: 'test-user-attribute-profile', description: 'test User Attribute Profile' },
     ];
 

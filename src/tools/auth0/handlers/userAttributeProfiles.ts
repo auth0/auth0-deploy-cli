@@ -1,9 +1,7 @@
-import {
-  UserAttributeProfile
-} from 'auth0';
+import { UserAttributeProfile } from 'auth0';
 
 import DefaultAPIHandler, { order } from './default';
-import { Assets, } from '../../../types';
+import { Assets } from '../../../types';
 import log from '../../../logger';
 import { paginate } from '../client';
 import { calculateChanges } from '../../calculateChanges';
@@ -25,17 +23,18 @@ const strategyOverrides = {
             required: ['mapping'],
             properties: {
               mapping: {
-                type: 'string'
+                type: 'string',
               },
               display_name: {
                 type: 'string',
                 minLength: 1,
                 maxLength: 50,
               },
-            }, },
+            },
+          },
           saml_mapping: {
             type: 'array',
-            items:  {
+            items: {
               type: 'string',
               minLength: 1,
               maxLength: 128,
@@ -44,7 +43,7 @@ const strategyOverrides = {
             maxItems: 3,
             uniqueItems: true,
           },
-          scim_mapping:  {
+          scim_mapping: {
             type: 'string',
             minLength: 1,
             maxLength: 128,
@@ -96,7 +95,7 @@ export const schema = {
                   type: 'object',
                   additionalProperties: false,
                   properties: {
-                    oidc_mapping:{
+                    oidc_mapping: {
                       type: 'string',
                       enum: ['sub', 'oid', 'email'],
                       minLength: 1,
@@ -117,9 +116,10 @@ export const schema = {
                   },
                 },
               }),
-              {})
-          }
-        }
+              {}
+            ),
+          },
+        },
       },
       user_attributes: {
         type: 'object',
@@ -158,7 +158,7 @@ export const schema = {
               required: ['mapping'],
               properties: {
                 mapping: {
-                  type: 'string'
+                  type: 'string',
                 },
                 display_name: {
                   description: 'Display name for the OIDC mapping',
@@ -166,10 +166,11 @@ export const schema = {
                   minLength: 1,
                   maxLength: 50,
                 },
-              }, },
+              },
+            },
             saml_mapping: {
               type: 'array',
-              items:  {
+              items: {
                 description: 'SAML mapping field',
                 type: 'string',
                 minLength: 1,
@@ -178,9 +179,8 @@ export const schema = {
               minItems: 1,
               maxItems: 3,
               uniqueItems: true,
-
             },
-            scim_mapping:  {
+            scim_mapping: {
               type: 'string',
               minLength: 1,
               maxLength: 128,
@@ -188,9 +188,9 @@ export const schema = {
             strategy_overrides: strategyOverrides,
           },
         },
-      }
+      },
     },
-  }
+  },
 };
 
 export default class UserAttributeProfilesHandler extends DefaultAPIHandler {

@@ -46,8 +46,8 @@ describe('#YAML context userAttributeProfiles', () => {
             description: 'Email of the User',
             label: 'Email',
             profile_required: true,
-            auth0_mapping: 'email'
-          }
+            auth0_mapping: 'email',
+          },
         },
       },
       {
@@ -62,15 +62,15 @@ describe('#YAML context userAttributeProfiles', () => {
             saml_mapping: [
               'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier',
               'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn',
-              'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'
-            ]
-          }
+              'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name',
+            ],
+          },
         },
         user_id: {
           oidc_mapping: 'sub',
-          scim_mapping: 'externalId'
-        }
-      }
+          scim_mapping: 'externalId',
+        },
+      },
     ];
 
     const yamlFile = path.join(dir, 'user-attribute-profiles1.yaml');
@@ -100,8 +100,8 @@ describe('#YAML context userAttributeProfiles', () => {
         name: 'test-user-attribute-profile',
         description: 'test User Attribute Profile',
         user_attributes: [],
-        user_id: {}
-      }
+        user_id: {},
+      },
     ];
 
     const target = [
@@ -109,8 +109,8 @@ describe('#YAML context userAttributeProfiles', () => {
         name: 'test-user-attribute-profile',
         description: 'test User Attribute Profile',
         user_attributes: [],
-        user_id: {}
-      }
+        user_id: {},
+      },
     ];
 
     context.assets.userAttributeProfiles = userAttributeProfiles;
