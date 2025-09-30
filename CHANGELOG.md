@@ -82,7 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add support support limit M2M usage - EA [#1093]
+- Add support for limit M2M usage - EA [#1093]
 - Add support to fetch list `prompt` screen's settings [#1104]
 
 ### Fixed
