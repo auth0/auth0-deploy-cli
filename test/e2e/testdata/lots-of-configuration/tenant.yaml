@@ -660,7 +660,7 @@ actions:
     code: ./actions/My Custom Action/code.js
     dependencies: []
     deployed: true
-    runtime: node16
+    runtime: node18
     secrets: []
     status: built
     supported_triggers:

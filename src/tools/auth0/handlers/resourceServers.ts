@@ -73,6 +73,12 @@ export const schema = {
         },
         additionalProperties: false,
       },
+      client_id: {
+        type: 'string',
+        description:
+          'The client ID of the client that this resource server is linked to (readonly)',
+        readOnly: true,
+      },
     },
     required: ['name', 'identifier'],
   },
@@ -86,7 +92,8 @@ export default class ResourceServersHandler extends DefaultHandler {
       ...options,
       type: 'resourceServers',
       identifiers: ['id', 'identifier'],
-      stripUpdateFields: ['identifier'], // Fields not allowed in updates
+      stripCreateFields: ['client_id'],
+      stripUpdateFields: ['identifier', 'client_id'],
     });
   }
 

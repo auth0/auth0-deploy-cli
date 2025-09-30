@@ -136,6 +136,15 @@ export const schema = {
         },
         additionalProperties: false,
       },
+      app_type: {
+        type: 'string',
+        description: 'The type of application this client represents',
+      },
+      resource_server_identifier: {
+        type: 'string',
+        description:
+          'The identifier of a resource server in your tenant. This property links a client to a resource server indicating that the client IS that resource server. Can only be set when app_type=resource_server.',
+      },
     },
     required: ['name'],
   },
@@ -144,6 +153,8 @@ export const schema = {
 export type Client = {
   client_id: string;
   name: string;
+  app_type?: string;
+  resource_server_identifier?: string;
   custom_login_page?: string;
   custom_login_page_on?: boolean;
 };
@@ -165,6 +176,7 @@ export default class ClientHandler extends DefaultAPIHandler {
         'global',
         'tenant',
         'jwt_configuration.secret_encoded',
+        'resource_server_identifier',
       ],
     });
   }
@@ -197,11 +209,29 @@ export default class ClientHandler extends DefaultAPIHandler {
       return list.filter((item) => item.client_id !== currentClient);
     };
 
+    // Sanitize client fields
+    const sanitizeClientFields = (list) =>
+      list.map((item) => {
+        // For resourceServers app type `resource_server`, don't include `oidc_backchannel_logout`, `oidc_logout`, `refresh_token`
+        if (item.app_type === 'resource_server') {
+          if ('oidc_backchannel_logout' in item) {
+            delete item.oidc_backchannel_logout;
+          }
+          if ('oidc_logout' in item) {
+            delete item.oidc_logout;
+          }
+          if ('refresh_token' in item) {
+            delete item.refresh_token;
+          }
+        }
+        return item;
+      });
+
     const changes = {
-      del: filterClients(del),
-      update: filterClients(update),
-      create: filterClients(create),
-      conflicts: filterClients(conflicts),
+      del: sanitizeClientFields(filterClients(del)),
+      update: sanitizeClientFields(filterClients(update)),
+      create: sanitizeClientFields(filterClients(create)),
+      conflicts: sanitizeClientFields(filterClients(conflicts)),
     };
 
     await super.processChanges(assets, {

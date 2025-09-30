@@ -30,6 +30,13 @@ describe('#YAML context email templates', () => {
         from: "test@email.com"
         subject: "something"
         body: ${htmlFile}
+
+      - template: "async_approval"
+        enabled: true
+        syntax: "liquid"
+        from: "async@email.com"
+        subject: "Async Approval ##ENV##"
+        body: ${htmlFile}
     `;
     const yamlFile = path.join(dir, 'config.yaml');
     fs.writeFileSync(yamlFile, yaml);
@@ -50,6 +57,14 @@ describe('#YAML context email templates', () => {
         subject: 'something',
         syntax: 'liquid',
         template: 'welcome_email',
+      },
+      {
+        body: '<html>test</html>',
+        enabled: true,
+        from: 'async@email.com',
+        subject: 'Async Approval test',
+        syntax: 'liquid',
+        template: 'async_approval',
       },
     ];
 
@@ -84,6 +99,14 @@ describe('#YAML context email templates', () => {
         syntax: 'liquid',
         template: 'welcome_email',
       },
+      {
+        body: '<html>async approval test</html>',
+        enabled: true,
+        from: 'async@email.com',
+        subject: 'Async Approval Required',
+        syntax: 'liquid',
+        template: 'async_approval',
+      },
     ];
 
     const dumped = await handler.dump(context);
@@ -105,6 +128,14 @@ describe('#YAML context email templates', () => {
           syntax: 'liquid',
           template: 'welcome_email',
         },
+        {
+          body: './emailTemplates/async_approval.html',
+          enabled: true,
+          from: 'async@email.com',
+          subject: 'Async Approval Required',
+          syntax: 'liquid',
+          template: 'async_approval',
+        },
       ],
     });
 
@@ -115,5 +146,8 @@ describe('#YAML context email templates', () => {
     expect(fs.readFileSync(path.join(templatesFolder, 'welcome_email.html'), 'utf8')).to.deep.equal(
       '<html>test</html>'
     );
+    expect(
+      fs.readFileSync(path.join(templatesFolder, 'async_approval.html'), 'utf8')
+    ).to.deep.equal('<html>async approval test</html>');
   });
 });
