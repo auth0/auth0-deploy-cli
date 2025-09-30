@@ -150,6 +150,9 @@ export function mockMgmtClient() {
     networkAcls: {
       getAll: (params) => mockPagedData(params, 'network_acls', []),
     },
+    userAttributeProfiles: {
+      getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+    },
   };
 }
 
