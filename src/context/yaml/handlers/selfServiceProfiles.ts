@@ -36,7 +36,7 @@ async function dump(context: YAMLContext): Promise<ParsedSelfServiceProfiles> {
       const p = userAttributeProfiles?.find(uap => uap.id === profile.user_attribute_profile_id);
       profile.user_attribute_profile_id = p?.name || profile.user_attribute_profile_id;
 
-      if (profile.user_attributes.length === 0) {
+      if (profile.user_attributes?.length === 0) {
         // @ts-expect-error - ignore type error here as we know that user_attributes can be removed.
         delete profile.user_attributes;
       }
