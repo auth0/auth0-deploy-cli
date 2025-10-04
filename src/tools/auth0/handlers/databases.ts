@@ -128,7 +128,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     // If we going to update database, we need to get current options first
     if (fn === 'update') {
       return (params, payload) =>
-        this.client.connections.get(params).then((response) => {
+        this.client.connections.get(params?.id).then((response) => {
           const connection = response;
           const attributes = payload?.options?.attributes;
           const requiresUsername = payload?.options?.requires_username;
@@ -150,7 +150,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
           if (payload.options && Object.keys(payload.options).length === 0) {
             delete payload.options;
           }
-          return this.client.connections.update(params, payload);
+          return this.client.connections.update(params.id, payload);
         });
     }
 
