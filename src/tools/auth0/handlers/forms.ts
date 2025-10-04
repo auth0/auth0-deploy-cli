@@ -1,11 +1,11 @@
 import { Management } from 'auth0';
 import dotProp from 'dot-prop';
+import { isEmpty } from 'lodash';
 import DefaultHandler, { order } from './default';
 import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import { findKeyPathWithValue } from '../../../utils';
-import { isEmpty } from 'lodash';
 
 export type Form = {
   name: string;
@@ -37,6 +37,10 @@ export default class FormsHandler extends DefaultHandler {
       id: 'id',
       stripCreateFields: ['created_at', 'updated_at', 'submitted_at', 'embedded_at'],
       stripUpdateFields: ['created_at', 'updated_at', 'submitted_at', 'embedded_at'],
+      functions: {
+        update: async ({ id }: { id: string }, bodyParams: Management.UpdateFormRequestContent) =>
+          this.client.forms.update(id, bodyParams),
+      },
     });
   }
 

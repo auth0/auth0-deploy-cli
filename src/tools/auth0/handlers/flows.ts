@@ -2,7 +2,7 @@ import { isEmpty } from 'lodash';
 import { Management } from 'auth0';
 import dotProp from 'dot-prop';
 import DefaultHandler, { order } from './default';
-import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
+import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
 import { findKeyPathWithValue } from '../../../utils';
@@ -36,6 +36,10 @@ export default class FlowHandler extends DefaultHandler {
       id: 'id',
       stripCreateFields: ['created_at', 'updated_at', 'executed_at'],
       stripUpdateFields: ['created_at', 'updated_at', 'executed_at'],
+      functions: {
+        update: async ({ id }: { id: string }, bodyParams: Management.UpdateFlowRequestContent) =>
+          this.client.flows.update(id, bodyParams),
+      },
     });
   }
 

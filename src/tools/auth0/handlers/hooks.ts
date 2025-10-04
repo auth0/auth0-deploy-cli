@@ -19,7 +19,7 @@ export const excludeSchema = {
   items: { type: 'string' },
 };
 
-type Hook = Management.Hook;;
+type Hook = Management.Hook;
 
 export const schema = {
   type: 'array',
@@ -180,8 +180,8 @@ export default class HooksHandler extends DefaultHandler {
           this.client.hooks
             .get(hook.id)
             .then((hookWithCode) =>
-              this.client.hooks
-                .secrets.get(hook.id)
+              this.client.hooks.secrets
+                .get(hook.id)
                 .then(({ data: secrets }) => ({ ...hookWithCode, secrets }))
             )
         )

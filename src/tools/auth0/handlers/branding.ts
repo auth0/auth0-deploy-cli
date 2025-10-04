@@ -117,7 +117,9 @@ export default class BrandingHandler extends DefaultHandler {
         (t) => t.template === constants.UNIVERSAL_LOGIN_TEMPLATE
       );
       if (templateDefinition && templateDefinition.body) {
-        await this.client.branding.templates.updateUniversalLogin({ template: templateDefinition.body });
+        await this.client.branding.templates.updateUniversalLogin({
+          template: templateDefinition.body,
+        });
         this.updated += 1;
         this.didUpdate(templates);
       }

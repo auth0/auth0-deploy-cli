@@ -62,17 +62,14 @@ export default class PagesHandler extends DefaultHandler {
       throw new Error('Unable to find global client id when trying to update the login page');
     }
 
-    if(!globalClient[0].client_id) {
+    if (!globalClient[0].client_id) {
       throw new Error('Unable to find global client id when trying to update the login page');
     }
 
-    await this.client.clients.update(
-      globalClient[0].client_id,
-      {
-        custom_login_page: page.html,
-        custom_login_page_on: page.enabled,
-      }
-    );
+    await this.client.clients.update(globalClient[0].client_id, {
+      custom_login_page: page.html,
+      custom_login_page_on: page.enabled,
+    });
     this.updated += 1;
     this.didUpdate(page);
   }

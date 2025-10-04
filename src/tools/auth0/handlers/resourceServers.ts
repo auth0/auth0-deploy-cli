@@ -53,7 +53,9 @@ export const schema = {
             properties: {
               policy: {
                 type: 'string',
-                enum: Object.values(Management.ResourceServerSubjectTypeAuthorizationUserPolicyEnum),
+                enum: Object.values(
+                  Management.ResourceServerSubjectTypeAuthorizationUserPolicyEnum
+                ),
               },
             },
           },
@@ -63,7 +65,9 @@ export const schema = {
             properties: {
               policy: {
                 type: 'string',
-                enum: Object.values(Management.ResourceServerSubjectTypeAuthorizationClientPolicyEnum),
+                enum: Object.values(
+                  Management.ResourceServerSubjectTypeAuthorizationClientPolicyEnum
+                ),
               },
             },
           },
@@ -91,6 +95,12 @@ export default class ResourceServersHandler extends DefaultHandler {
       identifiers: ['id', 'identifier'],
       stripCreateFields: ['client_id'],
       stripUpdateFields: ['identifier', 'client_id'],
+      functions: {
+        update: async (
+          { id }: { id: string },
+          bodyParams: Management.UpdateResourceServerRequestContent
+        ) => this.client.resourceServers.update(id, bodyParams),
+      },
     });
   }
 
@@ -154,5 +164,18 @@ export default class ResourceServersHandler extends DefaultHandler {
     }
 
     await super.validate(assets);
+  }
+
+  async processChanges(assets: Assets): Promise<void> {
+    const { resourceServers } = assets;
+
+    // Do nothing if not set
+    if (!resourceServers) return;
+
+    const changes = await this.calcChanges(assets);
+
+    await super.processChanges(assets, {
+      ...changes,
+    });
   }
 }

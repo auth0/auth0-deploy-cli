@@ -47,11 +47,10 @@ export default class GuardianPhoneMessageTypesHandler extends DefaultHandler {
   }
 
   async getType(): Promise<Asset | null> {
-
     if (this.existing) return this.existing;
 
     try {
-      const data  = await this.client.guardian.factors.phone.getMessageTypes();
+      const data = await this.client.guardian.factors.phone.getMessageTypes();
       this.existing = data;
     } catch (err) {
       if (isFeatureUnavailableError(err)) {

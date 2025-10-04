@@ -47,7 +47,7 @@ export default class GuardianPhoneSelectedProviderHandler extends DefaultHandler
     if (this.existing) return this.existing;
 
     try {
-      const data  = await this.client.guardian.factors.phone.getSelectedProvider();
+      const data = await this.client.guardian.factors.phone.getSelectedProvider();
       this.existing = data;
     } catch (err) {
       if (isFeatureUnavailableError(err)) {

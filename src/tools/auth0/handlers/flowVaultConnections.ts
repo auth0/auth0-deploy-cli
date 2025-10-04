@@ -5,7 +5,7 @@ import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types
 import constants from '../../constants';
 import log from '../../../logger';
 
-export type FlowVaultConnection = Management.GetFlowsVaultConnectionResponseContent
+export type FlowVaultConnection = Management.GetFlowsVaultConnectionResponseContent;
 
 export const schema = {
   type: 'array',

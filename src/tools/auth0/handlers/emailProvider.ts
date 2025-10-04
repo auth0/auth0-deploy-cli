@@ -60,7 +60,9 @@ export default class EmailProviderHandler extends DefaultHandler {
       this.updated += 1;
       this.didUpdate(updated);
     } else {
-      const created = await this.client.emails.provider.create(emailProvider as Management.CreateEmailProviderRequestContent);
+      const created = await this.client.emails.provider.create(
+        emailProvider as Management.CreateEmailProviderRequestContent
+      );
       this.created += 1;
       this.didCreate(created);
     }

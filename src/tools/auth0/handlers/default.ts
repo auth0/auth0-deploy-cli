@@ -39,7 +39,7 @@ export default class APIHandler {
   stripCreateFields: string[]; //Fields to strip from payload when creating
   name?: string; // TODO: understand if any handlers actually leverage `name` property
   functions: {
-    list : ApiMethodOverride;
+    list: ApiMethodOverride;
     update: ApiMethodOverride;
     create: ApiMethodOverride;
     delete: ApiMethodOverride;

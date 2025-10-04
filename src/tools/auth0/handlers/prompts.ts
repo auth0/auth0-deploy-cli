@@ -370,15 +370,17 @@ export default class PromptsHandler extends DefaultHandler {
             .map((language) => promptTypes.map((promptType) => ({ promptType, language })))
             .reduce((acc, val) => acc.concat(val), []) || [],
         generator: ({ promptType, language }) =>
-          this.client.prompts.customText.get(promptType, language, { maxRetries: 5 }).then((customTextData) => {
-            if (isEmpty(customTextData)) return null;
-            return {
-              language,
-              [promptType]: {
-                ...customTextData,
-              },
-            };
-          }),
+          this.client.prompts.customText
+            .get(promptType, language, { maxRetries: 5 })
+            .then((customTextData) => {
+              if (isEmpty(customTextData)) return null;
+              return {
+                language,
+                [promptType]: {
+                  ...customTextData,
+                },
+              };
+            }),
       })
       .promise()
       .then((customTextResponse) =>
@@ -442,7 +444,9 @@ export default class PromptsHandler extends DefaultHandler {
     prompt: Management.PartialGroupsEnum;
   }): Promise<CustomPromptPartials> {
     if (!this.IsFeatureSupported) return {};
-    return this.withErrorHandling(async () => this.client.prompts.partials.get(prompt, { maxRetries: 5 }));
+    return this.withErrorHandling(async () =>
+      this.client.prompts.partials.get(prompt, { maxRetries: 5 })
+    );
   }
 
   async getCustomPromptsPartials(): Promise<CustomPromptPartials> {

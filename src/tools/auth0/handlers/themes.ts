@@ -467,7 +467,7 @@ export default class ThemesHandler extends DefaultHandler {
     }
 
     const currentTheme = currentThemes[0];
-    await this.client.branding.themes.delete(currentTheme.themeId );
+    await this.client.branding.themes.delete(currentTheme.themeId);
 
     this.deleted += 1;
     this.didDelete(currentTheme);
@@ -494,7 +494,7 @@ export default class ThemesHandler extends DefaultHandler {
     } else {
       const currentTheme = currentThemes[0];
       // if theme exists, overwrite it otherwise create it
-      await this.client.branding.themes.update(currentTheme.themeId , themeReqPayload);
+      await this.client.branding.themes.update(currentTheme.themeId, themeReqPayload);
     }
 
     this.updated += 1;

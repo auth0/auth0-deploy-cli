@@ -200,9 +200,7 @@ export const processConnectionEnabledClients = async (
         let newConnections;
 
         if (typeName === 'database') {
-          const {
-            data: connections,
-          } = await auth0Client.connections.list({
+          const { data: connections } = await auth0Client.connections.list({
             name: conn.name,
             take: 1,
             strategy: [Management.ConnectionStrategyEnum.Auth0],
@@ -210,9 +208,7 @@ export const processConnectionEnabledClients = async (
           });
           newConnections = connections;
         } else {
-          const {
-            data: connections,
-          } = await auth0Client.connections.list({
+          const { data: connections } = await auth0Client.connections.list({
             name: conn.name,
             take: 1,
             include_fields: true,
