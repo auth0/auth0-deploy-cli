@@ -303,7 +303,7 @@ export default class APIHandler {
           const updateFN = this.getClientFN(this.functions.update);
           const params = { [this.id]: updateItem[this.id] };
           const updatePayload = (() => {
-            let data = stripFields({ ...updateItem }, this.stripUpdateFields);
+            const data = stripFields({ ...updateItem }, this.stripUpdateFields);
             return stripObfuscatedFieldsFromPayload(data, this.sensitiveFieldsToObfuscate);
           })();
           return updateFN(params, updatePayload)

@@ -173,8 +173,8 @@ export default class ClientHandler extends DefaultAPIHandler {
         'resource_server_identifier',
       ],
       functions: {
-        // eslint-disable-next-line camelcase
         update: async (
+          // eslint-disable-next-line camelcase
           { client_id }: { client_id: string },
           bodyParams: Management.UpdateClientRequestContent
         ) => this.client.clients.update(client_id, bodyParams),
