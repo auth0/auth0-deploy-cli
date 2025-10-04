@@ -87,6 +87,8 @@ export default class ActionHandler extends DefaultAPIHandler {
       type: 'actions',
       functions: {
         create: (action: CreateActionRequestWithId) => this.createAction(action),
+        update: (actionId: string, action: Management.UpdateActionRequestContent) =>
+          this.updateAction(actionId, action),
         delete: (actionId: string) => this.deleteAction(actionId),
       },
       stripUpdateFields: ['deployed', 'status'],
@@ -112,6 +114,10 @@ export default class ActionHandler extends DefaultAPIHandler {
     }
 
     return createdAction;
+  }
+
+  async updateAction(actionId: string, action: Management.UpdateActionRequestContent) {
+    return this.client.actions.update(actionId, action);
   }
 
   async deleteAction(actionId: string) {
