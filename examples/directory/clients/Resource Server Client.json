@@ -1,0 +1,5 @@
+{
+  "name": "My Resource Server Client",
+  "app_type": "resource_server",
+  "resource_server_identifier": "https://##ENV##.myapp.com/api/v1"
+}

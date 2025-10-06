@@ -111,6 +111,9 @@ export default class DirectoryContext {
     //@ts-ignore because assets haven't been typed yet TODO: type assets
     this.assets.clientsOrig = [...(this.assets.clients || [])];
 
+    // Copy user attribute profiles with their IDs for use by self-service profiles mapping
+    this.assets.userAttributeProfilesWithId = [...(this.assets.userAttributeProfiles || [])];
+
     // Optionally Strip identifiers
     if (!this.config.AUTH0_EXPORT_IDENTIFIERS) {
       this.assets = stripIdentifiers(auth0, this.assets);

@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.17.0] - 2025-09-30
+
+### Added
+
+- Add support for user attribute profiles EA [#1166]
+- Add support for `user_attribute_profile_id` in `selfServiceProfiles` [#1166]
+- Add support for new language codes [#1159]
+
+## [8.16.0] - 2025-09-16
+
+### Added
+
+- Add support for token vault in `clients` and `resourceServers`. [#1158]
+- Add support for `async_approval` template in `emailTemplates`. [#1146]
+- Add support for `passkeys` in `prompts`. [#1161]
+
+### Fixed
+
+- Fix example directory name for `phoneProviders`. [#1155]
+
 ## [8.15.0] - 2025-09-02
 
 ### Added
@@ -62,7 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add support support limit M2M usage - EA [#1093]
+- Add support for limit M2M usage - EA [#1093]
 - Add support to fetch list `prompt` screen's settings [#1104]
 
 ### Fixed
@@ -1413,8 +1433,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1133]: https://github.com/auth0/auth0-deploy-cli/issues/1133
 [#1134]: https://github.com/auth0/auth0-deploy-cli/issues/1134
 [#1139]: https://github.com/auth0/auth0-deploy-cli/issues/1139
+[#1142]: https://github.com/auth0/auth0-deploy-cli/issues/1142
 [#1144]: https://github.com/auth0/auth0-deploy-cli/issues/1144
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.15.0...HEAD
+[#1146]: https://github.com/auth0/auth0-deploy-cli/issues/1146
+[#1155]: https://github.com/auth0/auth0-deploy-cli/issues/1155
+[#1158]: https://github.com/auth0/auth0-deploy-cli/issues/1158
+[#1159]: https://github.com/auth0/auth0-deploy-cli/issues/1159
+[#1161]: https://github.com/auth0/auth0-deploy-cli/issues/1161
+[#1166]: https://github.com/auth0/auth0-deploy-cli/issues/1166
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.17.0...HEAD
+[8.17.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.16.0...v8.17.0
+[8.16.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.15.0...v8.16.0
 [8.15.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.13.0...v8.15.0
 [8.13.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.12.0...v8.13.0
 [8.12.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.11.0...v8.12.0

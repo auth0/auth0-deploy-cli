@@ -2,11 +2,12 @@ import {
   GetSelfServiceProfileCustomTextLanguageEnum,
   GetSelfServiceProfileCustomTextPageEnum,
   SsProfile,
+  UserAttributeProfile,
 } from 'auth0';
 import { isEmpty } from 'lodash';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import log from '../../../logger';
-import DefaultAPIHandler from './default';
+import DefaultAPIHandler, { order } from './default';
 import { calculateChanges } from '../../calculateChanges';
 import { paginate } from '../client';
 
@@ -81,6 +82,9 @@ export const schema = {
           },
         },
       },
+      user_attribute_profile_id: {
+        type: 'string',
+      },
     },
     required: ['name'],
   },
@@ -139,14 +143,48 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
     return this.existing;
   }
 
+  // Run after UserAttributeProfiles so that we can handle converting any `user_attribute_profile_id` names to IDs
+  @order('60')
   async processChanges(assets: Assets): Promise<void> {
-    const { selfServiceProfiles } = assets;
+    let { selfServiceProfiles } = assets;
 
     // Do nothing if not set
     if (!selfServiceProfiles) return;
 
     // Gets SsProfileWithCustomText from destination tenant
     const existing = await this.getType();
+
+    const userAttributeProfiles = await this.getUserAttributeProfiles(selfServiceProfiles);
+
+    selfServiceProfiles = selfServiceProfiles.map((ssProfile) => {
+      if (this.hasConflictingUserAttribute(ssProfile)) {
+        log.error(
+          `Self Service Profile ${ssProfile.name} has conflicting properties user_attribute_profile_id and user_attributes. Please remove one.`
+        );
+        throw new Error(
+          `Self Service Profile ${ssProfile.name} has conflicting properties user_attribute_profile_id and user_attributes. Please remove one.`
+        );
+      }
+
+      // don't process if no user_attribute_profile_id
+      if (!ssProfile.user_attribute_profile_id) return ssProfile;
+      const profile = { ...ssProfile };
+
+      const found = userAttributeProfiles.find(
+        (uap) => uap.name === profile.user_attribute_profile_id
+      );
+      if (found) {
+        profile.user_attribute_profile_id = found.id;
+      } else {
+        log.error(
+          `User Attribute ${profile.user_attribute_profile_id} not found for Self Service Profile ${profile.name}. Please verify the User Attribute Profile Name.`
+        );
+        throw new Error(
+          `User Attribute ${profile.user_attribute_profile_id} not found for Self Service Profile ${profile.name}. Please verify the User Attribute Profile Name.`
+        );
+      }
+      return profile;
+    });
 
     const changes = calculateChanges({
       handler: this,
@@ -288,5 +326,37 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
 
   async deleteSelfServiceProfile(profile: SsProfileWithCustomText): Promise<void> {
     await this.client.selfServiceProfiles.delete({ id: profile.id });
+  }
+
+  async getUserAttributeProfiles(
+    selfServiceProfiles: SsProfileWithCustomText[]
+  ): Promise<UserAttributeProfile[]> {
+    if (
+      selfServiceProfiles.some(
+        (p) => p.user_attribute_profile_id && p.user_attribute_profile_id.trim() !== ''
+      )
+    ) {
+      return paginate<UserAttributeProfile>(this.client.userAttributeProfiles.getAll, {
+        checkpoint: true,
+        include_totals: true,
+        is_global: false,
+        take: 10,
+      });
+    }
+
+    return [];
+  }
+
+  hasConflictingUserAttribute(profile: SsProfileWithCustomText): boolean {
+    // If both user_attribute_profile_id and user_attributes are set and have values then error
+    if (
+      profile.user_attribute_profile_id &&
+      profile.user_attribute_profile_id.trim() !== '' &&
+      profile.user_attributes &&
+      profile.user_attributes.length > 0
+    ) {
+      return true;
+    }
+    return false;
   }
 }

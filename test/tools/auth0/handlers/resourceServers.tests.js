@@ -555,5 +555,71 @@ describe('#resourceServers handler', () => {
 
       await stageFn.apply(handler, [data]);
     });
+
+    it('should preserve client_id as readonly property during updates', async () => {
+      let updateCalled = false;
+      const existingResourceServer = {
+        id: 'rs1',
+        identifier: 'some-api',
+        name: 'someAPI',
+        client_id: 'linked_client_123', // This should be preserved as readonly
+      };
+
+      const auth0 = {
+        resourceServers: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (params, data) {
+            updateCalled = true;
+            expect(data.client_id).to.be.equals(undefined);
+            expect(data.name).to.equal('someAPI');
+            // identifier is also stripped as it's readonly
+            expect(params.id).to.equal('rs1'); // ID should be in params
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'resourceServers', [existingResourceServer]),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = {
+        resourceServers: [
+          {
+            name: 'someAPI',
+            identifier: 'some-api',
+            client_id: 'different_client_456', // This should be ignored
+          },
+        ],
+      };
+
+      await stageFn.apply(handler, [data]);
+      expect(updateCalled).to.be.equals(true);
+    });
+
+    it('should include client_id in resource server export when present', async () => {
+      const resourceServerWithClient = {
+        id: 'rs1',
+        identifier: 'some-api',
+        name: 'someAPI',
+        client_id: 'linked_client_123',
+      };
+
+      const auth0 = {
+        resourceServers: {
+          getAll: (params) => mockPagedData(params, 'resourceServers', [resourceServerWithClient]),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const result = await handler.getType();
+
+      expect(result).to.be.an('array');
+      expect(result[0]).to.have.property('client_id', 'linked_client_123');
+      expect(result[0]).to.have.property('name', 'someAPI');
+      expect(result[0]).to.have.property('identifier', 'some-api');
+    });
   });
 });

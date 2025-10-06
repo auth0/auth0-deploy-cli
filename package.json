@@ -1,6 +1,6 @@
 {
   "name": "auth0-deploy-cli",
-  "version": "8.15.0",
+  "version": "8.17.0",
   "description": "A command line tool for deploying updates to your Auth0 tenant",
   "main": "lib/index.js",
   "bin": {
@@ -10,7 +10,7 @@
     "lint:fix": "eslint --fix --ignore-path .eslintignore --ignore-pattern webpack . && kacl lint",
     "lint": "eslint --ignore-path .eslintignore --ignore-pattern webpack . && kacl lint",
     "format": "npx prettier --write .",
-    "test": "ts-mocha -p tsconfig.json --recursive 'test/**/*.test*' --exclude 'test/e2e/*' --timeout 15000",
+    "test": "ts-mocha -p tsconfig.json --recursive 'test/**/*.test*' --exclude 'test/e2e/*' --timeout 20000",
     "test:e2e:node-module": "ts-mocha -p tsconfig.json --recursive 'test/e2e/*.test*' --timeout 120000",
     "test:e2e:cli": "sh ./test/e2e/e2e-cli.sh",
     "test:coverage": "nyc npm run test && nyc report --reporter=lcov",
@@ -33,7 +33,7 @@
   "homepage": "https://github.com/auth0/auth0-deploy-cli#readme",
   "dependencies": {
     "ajv": "^6.12.6",
-    "auth0": "^4.29.0",
+    "auth0": "^4.31.0",
     "dot-prop": "^5.3.0",
     "fs-extra": "^10.1.0",
     "js-yaml": "^4.1.0",
@@ -42,7 +42,7 @@
     "nconf": "^0.13.0",
     "promise-pool-executor": "^1.1.1",
     "sanitize-filename": "^1.6.3",
-    "undici": "^7.15.0",
+    "undici": "^7.16.0",
     "winston": "^3.17.0",
     "yargs": "^15.4.1"
   },
