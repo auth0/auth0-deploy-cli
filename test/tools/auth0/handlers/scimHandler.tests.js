@@ -26,10 +26,12 @@ describe('ScimHandler', () => {
       getAll: sinon.stub(),
       update: sinon.stub(),
       create: sinon.stub(),
-      getScimConfiguration: sinon.stub(),
-      createScimConfiguration: sinon.stub(),
-      deleteScimConfiguration: sinon.stub(),
-      updateScimConfiguration: sinon.stub(),
+      scimConfiguration: {
+        get: sinon.stub(),
+        create: sinon.stub(),
+        update: sinon.stub(),
+        delete: sinon.stub(),
+      },
     };
     handler = new ScimHandler(mockConfig, mockConnectionsManager, mockPoolClient);
   });
@@ -133,6 +135,7 @@ describe('ScimHandler', () => {
     it('should not modify connections if idMap is empty', async () => {
       const connections = [{ id: 'con_kzpLY0Afi4I8lvwM', strategy: 'samlp' }];
 
+      mockConnectionsManager.scimConfiguration.get.resolves(null);
       await handler.applyScimConfiguration(connections);
       expect(connections[0]).to.not.have.property('scim_configuration');
     });
@@ -319,7 +322,7 @@ describe('ScimHandler', () => {
     it('should create SCIM configuration when creating connection', async () => {
       const bodyParams = { scim_configuration: { mapping: [], user_id_attribute: 'id' } };
 
-      mockConnectionsManager.create.resolves({ data: { id: 'con_kzpLY0Afi4I8lvwM' } });
+      mockConnectionsManager.create.resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
       handler.createScimConfiguration = sinon.stub().resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
 
       await handler.createOverride(bodyParams);

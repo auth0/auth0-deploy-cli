@@ -14,6 +14,10 @@ const pool = {
     }
     return { promise: () => null };
   },
+  addSingleTask: (task) => {
+    const result = task.generator(task.data);
+    return { promise: () => Promise.resolve(result) };
+  },
 };
 
 describe('#connections handler', () => {
@@ -100,11 +104,15 @@ describe('#connections handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'connections', []),
+          list: (params) => mockPagedData(params, 'connections', []),
           _getRestClient: () => ({}),
+          clients: {
+            get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
+            update: () => Promise.resolve({}),
+          },
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -120,23 +128,20 @@ describe('#connections handler', () => {
       let getEnabledClientsCalledOnce = false;
       const auth0 = {
         connections: {
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'connections', [
               { id: 'con1', strategy: 'github', name: 'github', enabled_clients: [clientId] },
               { id: 'con2', strategy: 'auth0', name: 'db-should-be-ignored', enabled_clients: [] },
             ]),
-          getEnabledClients: () => {
-            getEnabledClientsCalledOnce = true;
-            return Promise.resolve({
-              data: {
-                clients: [{ client_id: clientId }],
-                next: null,
-              },
-            });
+          clients: {
+            get: () => {
+              getEnabledClientsCalledOnce = true;
+              return Promise.resolve(mockPagedData({}, 'clients', [{ client_id: clientId }]));
+            },
           },
         },
         clients: {
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [{ name: 'test client', client_id: clientId }]),
         },
         pool,
@@ -158,30 +163,32 @@ describe('#connections handler', () => {
             expect(data).to.be.an('undefined');
             return Promise.resolve({ data });
           },
-          update: function (params, data) {
+          update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('con1');
+            expect(id).to.be.a('string');
+            expect(id).to.equal('con1');
             expect(data).to.deep.equal({
               enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               options: { passwordPolicy: 'testPolicy' },
             });
 
-            return Promise.resolve({ data: { ...params, ...data } });
+            return Promise.resolve({ ...data, id });
           },
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'connections', [
               { name: 'someConnection', id: 'con1', strategy: 'custom' },
             ]),
           _getRestClient: () => ({}),
-          updateEnabledClients: (params) => {
-            expect(params.id).to.equal('con1');
-            return Promise.resolve({ data: [] });
+          clients: {
+            update: (connectionId) => {
+              expect(connectionId).to.equal('con1');
+              return Promise.resolve({});
+            },
           },
         },
         clients: {
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
             ]),
@@ -244,18 +251,20 @@ describe('#connections handler', () => {
             return Promise.resolve({ data: { ...params, ...data } });
           },
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'connections', [
               { name: 'someSamlConnection', id: 'con1', strategy: 'samlp' },
             ]),
-          getEnabledClients: () => Promise.resolve({ data: [] }),
-          updateEnabledClients: (params) => {
-            expect(params.id).to.equal('con1');
-            return Promise.resolve({ data: [] });
+          clients: {
+            get: () => Promise.resolve({ data: [] }),
+            update: (connectionId, _payload) => {
+              expect(connectionId).to.equal('con1');
+              return Promise.resolve([]);
+            },
           },
         },
         clients: {
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
               { name: 'idp-one', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Teb' },
@@ -338,19 +347,21 @@ describe('#connections handler', () => {
             return Promise.resolve({ data: { ...params, ...data } });
           },
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'connections', [
               { name: 'someSamlConnection', id: 'con1', strategy: 'samlp' },
             ]),
           _getRestClient: () => ({}),
-          getEnabledClients: () => Promise.resolve({ data: [] }),
-          updateEnabledClients: (params) => {
-            expect(params.id).to.equal('con1');
-            return Promise.resolve({ data: [] });
+          clients: {
+            get: () => Promise.resolve({ data: [] }),
+            update: (connectionId) => {
+              expect(connectionId).to.equal('con1');
+              return Promise.resolve([]);
+            },
           },
         },
         clients: {
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
               { name: 'idp-one', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Teb' },
@@ -404,19 +415,19 @@ describe('#connections handler', () => {
             expect(data).to.be.an('undefined');
             return Promise.resolve({ data });
           },
-          update: function (params, data) {
+          update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('con1');
+            expect(id).to.be.a('string');
+            expect(id).to.equal('con1');
             expect(data).to.deep.equal({
               enabled_clients: ['client1-id', 'excluded-one-id'],
               options: { passwordPolicy: 'testPolicy' },
             });
 
-            return Promise.resolve({ data: { ...params, ...data } });
+            return Promise.resolve({ ...data, id });
           },
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'connections', [
               {
                 name: 'someConnection',
@@ -426,14 +437,16 @@ describe('#connections handler', () => {
               },
             ]),
           _getRestClient: () => ({}),
-          getEnabledClients: () => Promise.resolve({ data: [] }),
-          updateEnabledClients: (params) => {
-            expect(params.id).to.equal('con1');
-            return Promise.resolve({ data: [] });
+          clients: {
+            get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
+            update: (connectionId) => {
+              expect(connectionId).to.equal('con1');
+              return Promise.resolve({});
+            },
           },
         },
         clients: {
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               { name: 'client1', client_id: 'client1-id' },
               { name: 'excluded-one', client_id: 'excluded-one-id' },
@@ -478,14 +491,14 @@ describe('#connections handler', () => {
 
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'connections', [
               { id: 'con1', name: 'existingConnection', strategy: 'custom' },
             ]),
           _getRestClient: () => ({}),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -515,14 +528,14 @@ describe('#connections handler', () => {
             removed = true;
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'connections', [
               { id: 'con1', name: 'existingConnection', strategy: 'custom' },
             ]),
           _getRestClient: () => ({}),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -548,14 +561,14 @@ describe('#connections handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'connections', [
               { id: 'con1', name: 'existingConnection', strategy: 'custom' },
             ]),
           _getRestClient: () => ({}),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -585,14 +598,14 @@ describe('#connections handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'connections', [
               { id: 'con1', name: 'existingConnection', strategy: 'custom' },
             ]),
           _getRestClient: () => ({}),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -623,7 +636,7 @@ describe('#connections handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'connections', [
               { id: 'con1', name: 'existing1', strategy: 'custom' },
               { id: 'con2', name: 'existing2', strategy: 'custom' },
@@ -631,7 +644,7 @@ describe('#connections handler', () => {
           _getRestClient: () => ({}),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -663,9 +676,11 @@ describe('#connections enabled clients functionality', () => {
     // Mock Auth0 client
     mockAuth0Client = {
       connections: {
-        getEnabledClients: sinon.stub(),
-        updateEnabledClients: sinon.stub(),
-        getAll: sinon.stub(),
+        clients: {
+          get: sinon.stub(),
+          update: sinon.stub(),
+        },
+        list: sinon.stub(),
       },
     };
   });
@@ -678,37 +693,28 @@ describe('#connections enabled clients functionality', () => {
     it('should return array of client IDs with single page', async () => {
       const connectionId = 'con_123';
       const mockResponse = {
-        data: {
-          clients: [
-            { client_id: 'client_1' },
-            { client_id: 'client_2' },
-            { client_id: 'client_3' },
-          ],
-          next: null,
-        },
+        data: [{ client_id: 'client_1' }, { client_id: 'client_2' }, { client_id: 'client_3' }],
+        hasNextPage: () => false,
+        getNextPage: async () => ({ data: [], hasNextPage: () => false }),
       };
 
-      mockAuth0Client.connections.getEnabledClients.resolves(mockResponse);
+      mockAuth0Client.connections.clients.get.resolves(mockResponse);
 
       const result = await getConnectionEnabledClients(mockAuth0Client, connectionId);
 
       expect(result).to.deep.equal(['client_1', 'client_2', 'client_3']);
-      sinon.assert.calledOnceWithExactly(mockAuth0Client.connections.getEnabledClients, {
-        id: connectionId,
-        take: 50,
-      });
+      sinon.assert.calledOnceWithExactly(mockAuth0Client.connections.clients.get, connectionId);
     });
 
     it('should return empty array when no enabled clients', async () => {
       const connectionId = 'con_123';
       const mockResponse = {
-        data: {
-          clients: [],
-          next: null,
-        },
+        data: [],
+        hasNextPage: () => false,
+        getNextPage: async () => ({ data: [], hasNextPage: () => false }),
       };
 
-      mockAuth0Client.connections.getEnabledClients.resolves(mockResponse);
+      mockAuth0Client.connections.clients.get.resolves(mockResponse);
 
       const result = await getConnectionEnabledClients(mockAuth0Client, connectionId);
 
@@ -722,7 +728,7 @@ describe('#connections enabled clients functionality', () => {
       const enabledClientIds = ['client_1', 'client_2', 'client_3'];
       const typeName = 'connection';
 
-      mockAuth0Client.connections.updateEnabledClients.resolves();
+      mockAuth0Client.connections.clients.update.resolves();
 
       const result = await updateConnectionEnabledClients(
         mockAuth0Client,
@@ -732,15 +738,11 @@ describe('#connections enabled clients functionality', () => {
       );
 
       expect(result).to.equal(true);
-      sinon.assert.calledOnceWithExactly(
-        mockAuth0Client.connections.updateEnabledClients,
-        { id: connectionId },
-        [
-          { client_id: 'client_1', status: true },
-          { client_id: 'client_2', status: true },
-          { client_id: 'client_3', status: true },
-        ]
-      );
+      sinon.assert.calledOnceWithExactly(mockAuth0Client.connections.clients.update, connectionId, [
+        { client_id: 'client_1', status: true },
+        { client_id: 'client_2', status: true },
+        { client_id: 'client_3', status: true },
+      ]);
     });
 
     it('should update enabled clients with more than 50 clients', async () => {
@@ -748,7 +750,7 @@ describe('#connections enabled clients functionality', () => {
       const enabledClientIds = Array.from({ length: 60 }, (_, i) => `client_${i + 1}`);
       const typeName = 'connection';
 
-      mockAuth0Client.connections.updateEnabledClients.resolves();
+      mockAuth0Client.connections.clients.update.resolves();
 
       const result = await updateConnectionEnabledClients(
         mockAuth0Client,
@@ -758,16 +760,16 @@ describe('#connections enabled clients functionality', () => {
       );
 
       expect(result).to.equal(true);
-      sinon.assert.calledTwice(mockAuth0Client.connections.updateEnabledClients);
+      sinon.assert.calledTwice(mockAuth0Client.connections.clients.update);
 
-      const firstCall = mockAuth0Client.connections.updateEnabledClients.getCall(0);
-      expect(firstCall.args[0]).to.deep.equal({ id: connectionId });
+      const firstCall = mockAuth0Client.connections.clients.update.getCall(0);
+      expect(firstCall.args[0]).to.equal(connectionId);
       expect(firstCall.args[1]).to.have.length(50);
       expect(firstCall.args[1][0]).to.deep.equal({ client_id: 'client_1', status: true });
       expect(firstCall.args[1][49]).to.deep.equal({ client_id: 'client_50', status: true });
 
-      const secondCall = mockAuth0Client.connections.updateEnabledClients.getCall(1);
-      expect(secondCall.args[0]).to.deep.equal({ id: connectionId });
+      const secondCall = mockAuth0Client.connections.clients.update.getCall(1);
+      expect(secondCall.args[0]).to.equal(connectionId);
       expect(secondCall.args[1]).to.have.length(10);
       expect(secondCall.args[1][0]).to.deep.equal({ client_id: 'client_51', status: true });
       expect(secondCall.args[1][9]).to.deep.equal({ client_id: 'client_60', status: true });
@@ -793,29 +795,25 @@ describe('#connections enabled clients functionality', () => {
         conflicts: [],
       };
 
-      // Mock getAll to return newly created connections
-      mockAuth0Client.connections.getAll
+      // Mock list to return newly created connections
+      mockAuth0Client.connections.list
         .onFirstCall()
         .resolves({
-          data: {
-            connections: [{ id: 'con_new_1', name: 'new-connection-1' }],
-          },
+          data: [{ id: 'con_new_1', name: 'new-connection-1' }],
         })
         .onSecondCall()
         .resolves({
-          data: {
-            connections: [{ id: 'con_new_2', name: 'new-connection-2' }],
-          },
+          data: [{ id: 'con_new_2', name: 'new-connection-2' }],
         });
 
       // Mock updateEnabledClients
-      mockAuth0Client.connections.updateEnabledClients.resolves();
+      mockAuth0Client.connections.clients.update.resolves();
 
       await processConnectionEnabledClients(mockAuth0Client, typeName, changes);
 
       sinon.assert.calledOnceWithExactly(sleepStub, 2500);
-      sinon.assert.calledTwice(mockAuth0Client.connections.getAll);
-      sinon.assert.calledTwice(mockAuth0Client.connections.updateEnabledClients);
+      sinon.assert.calledTwice(mockAuth0Client.connections.list);
+      sinon.assert.calledTwice(mockAuth0Client.connections.clients.update);
     });
 
     it('should process update operations', async () => {
@@ -829,12 +827,12 @@ describe('#connections enabled clients functionality', () => {
         conflicts: [],
       };
 
-      mockAuth0Client.connections.updateEnabledClients.resolves();
+      mockAuth0Client.connections.clients.update.resolves();
 
       await processConnectionEnabledClients(mockAuth0Client, typeName, changes);
 
       sinon.assert.notCalled(sleepStub);
-      sinon.assert.calledTwice(mockAuth0Client.connections.updateEnabledClients);
+      sinon.assert.calledTwice(mockAuth0Client.connections.clients.update);
     });
 
     it('should process conflict operations', async () => {
@@ -845,11 +843,11 @@ describe('#connections enabled clients functionality', () => {
         conflicts: [{ id: 'con_1', name: 'conflict-connection-1', enabled_clients: ['client_1'] }],
       };
 
-      mockAuth0Client.connections.updateEnabledClients.resolves();
+      mockAuth0Client.connections.clients.update.resolves();
 
       await processConnectionEnabledClients(mockAuth0Client, typeName, changes);
 
-      sinon.assert.calledOnce(mockAuth0Client.connections.updateEnabledClients);
+      sinon.assert.calledOnce(mockAuth0Client.connections.clients.update);
     });
 
     it('should handle database type connections differently', async () => {
@@ -860,20 +858,18 @@ describe('#connections enabled clients functionality', () => {
         conflicts: [],
       };
 
-      mockAuth0Client.connections.getAll.resolves({
-        data: {
-          connections: [{ id: 'con_db_1', name: 'new-db-connection' }],
-        },
+      mockAuth0Client.connections.list.resolves({
+        data: [{ id: 'con_db_1', name: 'new-db-connection' }],
       });
-      mockAuth0Client.connections.updateEnabledClients.resolves();
+      mockAuth0Client.connections.clients.update.resolves();
 
       await processConnectionEnabledClients(mockAuth0Client, typeName, changes);
 
-      sinon.assert.calledWith(mockAuth0Client.connections.getAll, {
+      sinon.assert.calledWith(mockAuth0Client.connections.list, {
         name: 'new-db-connection',
         take: 1,
         strategy: ['auth0'],
-        include_totals: true,
+        include_fields: true,
       });
     });
   });
@@ -906,39 +902,34 @@ describe('#connections enabled clients functionality', () => {
 
     describe('#getType with enabled clients', () => {
       it('should fetch and include enabled clients in connection data', async () => {
+        const getEnabledClientsStub = sinon.stub();
         const auth0 = {
           connections: {
-            getAll: (params) =>
+            list: (params) =>
               mockPagedData(params, 'connections', [
                 { id: 'con_1', strategy: 'github', name: 'github-connection' },
                 { id: 'con_2', strategy: 'google', name: 'google-connection' },
                 { strategy: 'auth0', name: 'db-should-be-ignored' }, // Should be filtered out
               ]),
-            getEnabledClients: sinon.stub(),
+            clients: {
+              get: getEnabledClientsStub,
+            },
             _getRestClient: () => ({}),
           },
           clients: {
-            getAll: (params) => mockPagedData(params, 'clients', []),
+            list: (params) => mockPagedData(params, 'clients', []),
           },
           pool,
         };
 
         // Mock enabled clients responses
-        auth0.connections.getEnabledClients
-          .withArgs({ id: 'con_1', take: 50 })
-          .resolves({
-            data: {
-              clients: [{ client_id: 'client_1' }, { client_id: 'client_2' }],
-              next: null,
-            },
-          })
-          .withArgs({ id: 'con_2', take: 50 })
-          .resolves({
-            data: {
-              clients: [{ client_id: 'client_3' }],
-              next: null,
-            },
-          });
+        getEnabledClientsStub
+          .withArgs('con_1')
+          .resolves(
+            mockPagedData({}, 'clients', [{ client_id: 'client_1' }, { client_id: 'client_2' }])
+          )
+          .withArgs('con_2')
+          .resolves(mockPagedData({}, 'clients', [{ client_id: 'client_3' }]));
 
         const handler = new connections.default({ client: pageClient(auth0), config });
         handler.scimHandler = scimHandlerMock;
@@ -963,7 +954,7 @@ describe('#connections enabled clients functionality', () => {
       it('should handle connections without enabled clients', async () => {
         const auth0 = {
           connections: {
-            getAll: (params) =>
+            list: (params) =>
               mockPagedData(params, 'connections', [
                 { id: 'con_1', strategy: 'github', name: 'github-connection' },
               ]),
@@ -971,7 +962,7 @@ describe('#connections enabled clients functionality', () => {
             _getRestClient: () => ({}),
           },
           clients: {
-            getAll: (params) => mockPagedData(params, 'clients', []),
+            list: (params) => mockPagedData(params, 'clients', []),
           },
           pool,
         };
@@ -1005,11 +996,11 @@ describe('#connections enabled clients functionality', () => {
             create: sinon.stub().resolves({ data: {} }),
             update: sinon.stub().resolves({ data: {} }),
             delete: sinon.stub().resolves({ data: {} }),
-            getAll: (params) => mockPagedData(params, 'connections', []),
+            list: (params) => mockPagedData(params, 'connections', []),
             _getRestClient: () => ({}),
           },
           clients: {
-            getAll: (params) => mockPagedData(params, 'clients', []),
+            list: (params) => mockPagedData(params, 'clients', []),
           },
           pool,
         };
@@ -1042,11 +1033,11 @@ describe('#connections enabled clients functionality', () => {
             create: sinon.stub().resolves({ data: {} }),
             update: sinon.stub().resolves({ data: {} }),
             delete: sinon.stub().resolves({ data: {} }),
-            getAll: (params) => mockPagedData(params, 'connections', []),
+            list: (params) => mockPagedData(params, 'connections', []),
             _getRestClient: () => ({}),
           },
           clients: {
-            getAll: (params) => mockPagedData(params, 'clients', []),
+            list: (params) => mockPagedData(params, 'clients', []),
           },
           pool,
         };

@@ -33,8 +33,8 @@ describe('#tenant handler', () => {
   it('should get tenant', async () => {
     const auth0 = {
       tenants: {
-        getSettings: () => ({
-          data: {
+        settings: {
+          get: () => ({
             friendly_name: 'Test',
             default_directory: 'users',
             flags: {
@@ -42,8 +42,8 @@ describe('#tenant handler', () => {
               'unallowed-flag-1': false,
               'unallowed-flag-2': true,
             },
-          },
-        }),
+          }),
+        },
       },
     };
 
@@ -61,17 +61,17 @@ describe('#tenant handler', () => {
     it('should update tenant settings', async () => {
       const auth0 = {
         tenants: {
-          getSettings: () => ({
-            data: {
+          settings: {
+            get: () => ({
               friendly_name: 'Test',
               default_directory: 'users',
+            }),
+            update: (data) => {
+              expect(data).to.be.an('object');
+              expect(data.sandbox_version).to.equal('4');
+              expect(data.flags).to.equal(undefined);
+              return Promise.resolve(data);
             },
-          }),
-          updateSettings: (data) => {
-            expect(data).to.be.an('object');
-            expect(data.sandbox_version).to.equal('4');
-            expect(data.flags).to.equal(undefined);
-            return Promise.resolve(data);
           },
         },
       };
@@ -105,27 +105,29 @@ describe('#tenant handler', () => {
       let wasUpdateCalled = false;
       const auth0 = {
         tenants: {
-          getSettings: () => ({ data: {} }),
-          updateSettings: function (data) {
-            wasUpdateCalled = true;
-            expect(data).to.be.an('object');
-            expect(data.default_token_quota).to.deep.equal({
-              clients: {
-                client_credentials: {
-                  enforce: true,
-                  per_day: 2000,
-                  per_hour: 200,
+          settings: {
+            get: () => ({}),
+            update: function (data) {
+              wasUpdateCalled = true;
+              expect(data).to.be.an('object');
+              expect(data.default_token_quota).to.deep.equal({
+                clients: {
+                  client_credentials: {
+                    enforce: true,
+                    per_day: 2000,
+                    per_hour: 200,
+                  },
                 },
-              },
-              organizations: {
-                client_credentials: {
-                  enforce: false,
-                  per_day: 1000,
-                  per_hour: 100,
+                organizations: {
+                  client_credentials: {
+                    enforce: false,
+                    per_day: 1000,
+                    per_hour: 100,
+                  },
                 },
-              },
-            });
-            return Promise.resolve(data);
+              });
+              return Promise.resolve(data);
+            },
           },
         },
       };
@@ -148,13 +150,15 @@ describe('#tenant handler', () => {
 
         const auth0 = {
           tenants: {
-            updateSettings: (data) => {
-              expect(data).to.be.an('object');
-              expect(data.flags).to.deep.equal({
-                require_pushed_authorization_requests: true,
-                mfa_show_factor_list_on_enrollment: false,
-              });
-              return Promise.resolve(data);
+            settings: {
+              update: (data) => {
+                expect(data).to.be.an('object');
+                expect(data.flags).to.deep.equal({
+                  require_pushed_authorization_requests: true,
+                  mfa_show_factor_list_on_enrollment: false,
+                });
+                return Promise.resolve(data);
+              },
             },
           },
         };
@@ -173,10 +177,12 @@ describe('#tenant handler', () => {
 
         const auth0 = {
           tenants: {
-            updateSettings: (data) => {
-              expect(data).to.be.an('object');
-              expect(data.flags).to.be.undefined;
-              return Promise.resolve({ data });
+            settings: {
+              update: (data) => {
+                expect(data).to.be.an('object');
+                expect(data.flags).to.be.undefined;
+                return Promise.resolve(data);
+              },
             },
           },
         };

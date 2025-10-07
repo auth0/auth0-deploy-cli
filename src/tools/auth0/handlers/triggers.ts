@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { Management } from 'auth0';
 import DefaultHandler, { order } from './default';
 import constants from '../../constants';
 import log from '../../../logger';
@@ -52,8 +53,9 @@ export default class TriggersHandler extends DefaultHandler {
     const triggerBindings = {};
 
     try {
-      const res = await this.client.actions.triggers.list();
-      const triggers: string[] = _(res.triggers).map('id').uniq().value();
+      const res: Management.ListActionTriggersResponseContent =
+        await this.client.actions.triggers.list();
+      const triggers: string[] = _(res?.triggers).map('id').uniq().value();
 
       for (let i = 0; i < triggers.length; i++) {
         const triggerId = triggers[i];

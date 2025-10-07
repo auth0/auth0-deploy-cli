@@ -29,7 +29,7 @@ describe('#actions handler', () => {
     it('should not allow same names', (done) => {
       const auth0 = {
         actions: {
-          getAll: () => ({ data: [] }),
+          list: () => Promise.resolve({ data: [] }),
         },
       };
 
@@ -69,7 +69,7 @@ describe('#actions handler', () => {
     it('should pass validation', async () => {
       const auth0 = {
         actions: {
-          getAll: () => ({ data: [] }),
+          list: () => Promise.resolve({ data: [] }),
         },
       };
 
@@ -143,27 +143,25 @@ describe('#actions handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: () => {
-            if (!auth0.getAllCalled) {
-              auth0.getAllCalled = true;
+          list: () => {
+            if (!auth0.listCalled) {
+              auth0.listCalled = true;
               return Promise.resolve({ data: [] });
             }
             return Promise.resolve({
-              data: {
-                actions: [
-                  {
-                    name: action.name,
-                    supported_triggers: action.supported_triggers,
-                    id: actionId,
-                  },
-                ],
-              },
+              data: [
+                {
+                  name: action.name,
+                  supported_triggers: action.supported_triggers,
+                  id: actionId,
+                },
+              ],
             });
           },
           createVersion: () => Promise.resolve({ data: version }),
         },
         pool,
-        getAllCalled: true,
+        listCalled: true,
       };
 
       const handler = new actions.default({ client: pageClient(auth0), config });
@@ -204,9 +202,9 @@ describe('#actions handler', () => {
           create: (data) => Promise.resolve({ data: { ...data, id: actionId } }),
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: () => {
-            if (!auth0.getAllCalled) {
-              auth0.getAllCalled = true;
+          list: () => {
+            if (!auth0.listCalled) {
+              auth0.listCalled = true;
               return Promise.resolve(mockPagedData({ include_totals: true }, 'actions', []));
             }
 
@@ -221,13 +219,13 @@ describe('#actions handler', () => {
             );
           },
           createVersion: () => Promise.resolve({ data: version }),
-          deploy: (data) => {
-            expect(data).to.deep.equal({ id: actionId });
+          deploy: (id) => {
+            expect(id).to.equal(actionId);
             didDeployGetCalled = true;
           },
         },
         pool,
-        getAllCalled: false,
+        listCalled: false,
       };
 
       const handler = new actions.default({ client: pageClient(auth0), config });
@@ -261,7 +259,7 @@ describe('#actions handler', () => {
 
       const auth0 = {
         actions: {
-          getAll: () => mockPagedData({ include_totals: true }, 'actions', actionsData),
+          list: () => mockPagedData({ include_totals: true }, 'actions', actionsData),
         },
       };
 
@@ -273,7 +271,7 @@ describe('#actions handler', () => {
     it('should throw informative error when actions service returns "An internal server error occurred" 500 error', async () => {
       const auth0 = {
         actions: {
-          getAll: () => {
+          list: () => {
             const error = new Error();
             error.statusCode = 500;
             error.message = 'An internal server error occurred';
@@ -292,7 +290,7 @@ describe('#actions handler', () => {
     it('should return an empty array for 501 status code', async () => {
       const auth0 = {
         actions: {
-          getAll: () => {
+          list: () => {
             const error = new Error('Feature is not yet implemented');
             error.statusCode = 501;
             throw error;
@@ -309,7 +307,7 @@ describe('#actions handler', () => {
     it('should return an empty array for 404 status code', async () => {
       const auth0 = {
         actions: {
-          getAll: () => {
+          list: () => {
             const error = new Error('Not found');
             error.statusCode = 404;
             throw error;
@@ -326,7 +324,7 @@ describe('#actions handler', () => {
     it('should return an empty array when the feature flag is disabled', async () => {
       const auth0 = {
         actions: {
-          getAll: () => {
+          list: () => {
             const error = new Error('Not enabled');
             error.statusCode = 403;
             error.originalError = {
@@ -350,7 +348,7 @@ describe('#actions handler', () => {
     it('should throw an error for all other failed requests', async () => {
       const auth0 = {
         actions: {
-          getAll: () => {
+          list: () => {
             const error = new Error('Bad request');
             error.statusCode = 500;
             throw error;
@@ -377,7 +375,7 @@ describe('#actions handler', () => {
             expect(data.id).to.equal('action-1');
             return Promise.resolve({ data });
           },
-          getAll: () =>
+          list: () =>
             mockPagedData({ include_totals: true }, 'actions', [
               {
                 id: 'action-1',
@@ -451,7 +449,7 @@ describe('#actions handler', () => {
 
       const auth0 = {
         actions: {
-          getAll: () => Promise.resolve({ data: { actions: [marketplaceAction] } }),
+          list: () => Promise.resolve({ data: [marketplaceAction] }),
           delete: () => {
             wasDeleteCalled = true;
           },

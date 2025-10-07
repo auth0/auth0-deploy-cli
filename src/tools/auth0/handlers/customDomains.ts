@@ -85,7 +85,7 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
         return this.existing;
       }
 
-      const customDomains = await this.client.customDomains.list();
+      const customDomains: Management.CustomDomain[] = await this.client.customDomains.list();
 
       this.existing = customDomains;
 

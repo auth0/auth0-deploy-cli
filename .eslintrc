@@ -50,7 +50,13 @@
         "allowForLoopAfterthoughts": true
       }
     ],
-    "no-unused-vars": 2,
+    "no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
     "no-var": 0,
     "object-curly-spacing": [2, "always"],
     "quotes": [2, "single", "avoid-escape"],

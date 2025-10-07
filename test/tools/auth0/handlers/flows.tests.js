@@ -67,7 +67,13 @@ describe('#flows handler', () => {
   describe('#flows process', () => {
     it('should return empty if no flows asset', async () => {
       const auth0 = {
-        flows: {},
+        flows: {
+          vault: {
+            connections: {
+              list: (params) => mockPagedData(params, 'connections', []),
+            },
+          },
+        },
         pool,
       };
 
@@ -84,12 +90,16 @@ describe('#flows handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal(sampleFlowWthID.name);
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          update: () => Promise.resolve({ data: [] }),
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'flows', []),
-          getAllConnections: (params) => mockPagedData(params, 'connections', []),
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => mockPagedData(params, 'flows', []),
+          vault: {
+            connections: {
+              list: (params) => mockPagedData(params, 'connections', []),
+            },
+          },
         },
         pool,
       };
@@ -133,11 +143,14 @@ describe('#flows handler', () => {
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          getAll: (params) => mockPagedData(params, 'flows', []),
-          getAllConnections: (params) =>
-            mockPagedData(params, 'connections', [sampleConnectionWithID]),
+          list: (params) => mockPagedData(params, 'flows', []),
+          vault: {
+            connections: {
+              list: (params) => mockPagedData(params, 'connections', [sampleConnectionWithID]),
+            },
+          },
         },
         pool,
       };
@@ -155,15 +168,16 @@ describe('#flows handler', () => {
     it('should get flows', async () => {
       const auth0 = {
         flows: {
-          getAll: (params) => mockPagedData(params, 'flows', [sampleFlowWthID]),
-          get: (params) => {
-            expect(params).to.be.an('object');
-            expect(params.id).to.be.a('string');
-            return Promise.resolve({
-              data: sampleFlowWthID,
-            });
+          list: (params) => mockPagedData(params, 'flows', [sampleFlowWthID]),
+          get: (id) => {
+            expect(id).to.be.a('string');
+            return Promise.resolve(sampleFlowWthID);
           },
-          getAllConnections: (params) => mockPagedData(params, 'connections', []),
+          vault: {
+            connections: {
+              list: (params) => mockPagedData(params, 'connections', []),
+            },
+          },
         },
         pool,
       };
@@ -223,16 +237,16 @@ describe('#flows handler', () => {
       };
       const auth0 = {
         flows: {
-          getAll: (params) => mockPagedData(params, 'flows', [sampleFlowWthConnectionWithIdNew]),
-          get: (params) => {
-            expect(params).to.be.an('object');
-            expect(params.id).to.be.a('string');
-            return Promise.resolve({
-              data: sampleFlowWthConnectionWithIdNew,
-            });
+          list: (params) => mockPagedData(params, 'flows', [sampleFlowWthConnectionWithIdNew]),
+          get: (id) => {
+            expect(id).to.be.a('string');
+            return Promise.resolve(sampleFlowWthConnectionWithIdNew);
           },
-          getAllConnections: (params) =>
-            mockPagedData(params, 'connections', [sampleConnectionWithID]),
+          vault: {
+            connections: {
+              list: (params) => mockPagedData(params, 'connections', [sampleConnectionWithID]),
+            },
+          },
         },
         pool,
       };
@@ -246,23 +260,24 @@ describe('#flows handler', () => {
     it('should update flows', async () => {
       const auth0 = {
         flows: {
-          update: function (params, data) {
+          update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal(sampleFlowWthID.id);
+            expect(id).to.be.a('string');
+            expect(id).to.equal(sampleFlowWthID.id);
             expect(data).to.be.an('object');
             expect(data.name).to.equal(sampleFlowWthID.name);
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          getAll: (params) => mockPagedData(params, 'flows', [sampleFlowWthID]),
-          get: (params) => {
-            expect(params).to.be.an('object');
-            expect(params.id).to.be.a('string');
-            return Promise.resolve({
-              data: sampleFlowWthID,
-            });
+          list: (params) => mockPagedData(params, 'flows', [sampleFlowWthID]),
+          get: (id) => {
+            expect(id).to.be.a('string');
+            return Promise.resolve(sampleFlowWthID);
           },
-          getAllConnections: (params) => mockPagedData(params, 'connections', []),
+          vault: {
+            connections: {
+              list: (params) => mockPagedData(params, 'connections', []),
+            },
+          },
         },
         pool,
       };
@@ -289,23 +304,24 @@ describe('#flows handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal(newFlow.name);
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
             expect(params).to.be.an('object');
             expect(params.id).to.equal(sampleFlowWthID.id);
-            return Promise.resolve({ data: [] });
+            return Promise.resolve([]);
           },
-          getAll: (params) => mockPagedData(params, 'flows', [sampleFlowWthID]),
-          get: (params) => {
-            expect(params).to.be.an('object');
-            expect(params.id).to.be.a('string');
-            return Promise.resolve({
-              data: sampleFlowWthID,
-            });
+          list: (params) => mockPagedData(params, 'flows', [sampleFlowWthID]),
+          get: (id) => {
+            expect(id).to.be.a('string');
+            return Promise.resolve(sampleFlowWthID);
           },
-          getAllConnections: (params) => mockPagedData(params, 'connections', []),
+          vault: {
+            connections: {
+              list: (params) => mockPagedData(params, 'connections', []),
+            },
+          },
         },
         pool,
       };
@@ -323,17 +339,18 @@ describe('#flows handler', () => {
           delete: (params) => {
             removed = true;
             expect(params).to.be.an('object');
-            return Promise.resolve({ data: [] });
+            return Promise.resolve([]);
           },
-          getAll: (params) => mockPagedData(params, 'flows', [sampleFlowWthID]),
-          get: (params) => {
-            expect(params).to.be.an('object');
-            expect(params.id).to.be.a('string');
-            return Promise.resolve({
-              data: sampleFlowWthID,
-            });
+          list: (params) => mockPagedData(params, 'flows', [sampleFlowWthID]),
+          get: (id) => {
+            expect(id).to.be.a('string');
+            return Promise.resolve(sampleFlowWthID);
           },
-          getAllConnections: (params) => mockPagedData(params, 'connections', []),
+          vault: {
+            connections: {
+              list: (params) => mockPagedData(params, 'connections', []),
+            },
+          },
         },
         pool,
       };
@@ -351,17 +368,18 @@ describe('#flows handler', () => {
         flows: {
           delete: (params) => {
             expect(params).to.be.an('undefined');
-            return Promise.resolve({ data: [] });
+            return Promise.resolve([]);
           },
-          getAll: (params) => mockPagedData(params, 'flows', [sampleFlowWthID]),
-          get: (params) => {
-            expect(params).to.be.an('object');
-            expect(params.id).to.be.a('string');
-            return Promise.resolve({
-              data: sampleFlowWthID,
-            });
+          list: (params) => mockPagedData(params, 'flows', [sampleFlowWthID]),
+          get: (id) => {
+            expect(id).to.be.a('string');
+            return Promise.resolve(sampleFlowWthID);
           },
-          getAllConnections: (params) => mockPagedData(params, 'connections', []),
+          vault: {
+            connections: {
+              list: (params) => mockPagedData(params, 'connections', []),
+            },
+          },
         },
         pool,
       };

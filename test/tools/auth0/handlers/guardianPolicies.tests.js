@@ -6,19 +6,23 @@ describe('#guardianPolicies handler', () => {
     it('should support older version of auth0 client', async () => {
       const auth0 = {
         guardian: {
-          // omitting getPolicies()
+          policies: {
+            list: () => Promise.resolve([]),
+          },
         },
       };
 
       const handler = new guardianPolicies.default({ client: auth0 });
       const data = await handler.getType();
-      expect(data).to.deep.equal({});
+      expect(data).to.deep.equal({ policies: [] });
     });
 
     it('should get guardian policies', async () => {
       const auth0 = {
         guardian: {
-          getPolicies: () => ({ data: ['all-applications'] }),
+          policies: {
+            list: () => Promise.resolve(['all-applications']),
+          },
         },
       };
 
@@ -34,10 +38,12 @@ describe('#guardianPolicies handler', () => {
     it('should update guardian policies settings', async () => {
       const auth0 = {
         guardian: {
-          updatePolicies: (data) => {
-            expect(data).to.be.an('array');
-            expect(data[0]).to.equal('all-applications');
-            return Promise.resolve({ data });
+          policies: {
+            set: (data) => {
+              expect(data).to.be.an('array');
+              expect(data[0]).to.equal('all-applications');
+              return Promise.resolve(data);
+            },
           },
         },
       };
@@ -57,9 +63,11 @@ describe('#guardianPolicies handler', () => {
     it('should skip processing if assets are empty', async () => {
       const auth0 = {
         guardian: {
-          updatePolicies: () => {
-            const err = new Error('updatePolicies() should not have been called');
-            return Promise.reject(err);
+          policies: {
+            set: () => {
+              const err = new Error('set() should not have been called');
+              return Promise.reject(err);
+            },
           },
         },
       };

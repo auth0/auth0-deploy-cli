@@ -90,7 +90,7 @@ describe('#clients handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -133,7 +133,7 @@ describe('#clients handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -183,7 +183,7 @@ describe('#clients handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -223,7 +223,7 @@ describe('#clients handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -255,7 +255,7 @@ describe('#clients handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -268,7 +268,7 @@ describe('#clients handler', () => {
     it('should get clients', async () => {
       const auth0 = {
         clients: {
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               { name: 'test client', client_id: 'FMfcgxvzLDvPsgpRFKkLVrnKqGgkHhQV' },
               { name: 'deploy client', client_id: 'client_id' },
@@ -294,10 +294,10 @@ describe('#clients handler', () => {
             expect(data.length).to.equal(0);
             return Promise.resolve({ data });
           },
-          update: function (params, data) {
+          update: function (clientId, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.client_id).to.equal('client1');
+            expect(clientId).to.be.a('string');
+            expect(clientId).to.equal('client1');
             expect(data).to.be.an('object');
             expect(data.description).to.equal('new description');
             expect(data.session_transfer).to.deep.equal({
@@ -309,7 +309,7 @@ describe('#clients handler', () => {
             return Promise.resolve({ data });
           },
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               {
                 client_id: 'client1',
@@ -356,7 +356,7 @@ describe('#clients handler', () => {
             expect(params.client_id).to.equal('client1');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               { client_id: 'client1', name: 'existingClient' },
               { client_id: 'client_id', name: 'deploy client' },
@@ -384,7 +384,7 @@ describe('#clients handler', () => {
             removed = true;
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               { client_id: 'client1', name: 'existingClient' },
               { client_id: 'client_id', name: 'deploy client' },
@@ -411,7 +411,7 @@ describe('#clients handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [{ client_id: 'client1', name: 'existingClient' }]),
         },
         pool,
@@ -440,7 +440,7 @@ describe('#clients handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => Promise.resolve(mockPagedData(params, 'clients', [])),
+          list: (params) => Promise.resolve(mockPagedData(params, 'clients', [])),
         },
         pool,
       };
@@ -472,7 +472,7 @@ describe('#clients handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               { client_id: 'client1', name: 'existingClient' },
               { client_id: 'client2', name: 'existingClient2' },
@@ -500,11 +500,12 @@ describe('#clients handler', () => {
             expect(data.name).to.equal('Client 3');
             return Promise.resolve({ data });
           },
-          update: function (data) {
+          update: function (clientId, data) {
             wasUpdateCalled = true;
             (() => expect(this).to.not.be.undefined)();
+            expect(clientId).to.be.a('string');
+            expect(clientId).to.equal('client-1');
             expect(data).to.be.an('object');
-            expect(data.client_id).to.equal('client-1');
             return Promise.resolve({ data });
           },
           delete: function (data) {
@@ -514,7 +515,7 @@ describe('#clients handler', () => {
             expect(data.client_id).to.equal('client-2');
             return Promise.resolve({ data });
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               {
                 client_id: 'client-1',

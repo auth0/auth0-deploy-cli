@@ -124,7 +124,7 @@ export type Assets = Partial<{
   rules: Asset[] | null;
   rulesConfigs: Asset[] | null;
   tenant: Tenant | null;
-  triggers: Asset[] | null;
+  triggers: Asset | null;
   // non-resource types
   exclude?: {
     [key: string]: string[];
