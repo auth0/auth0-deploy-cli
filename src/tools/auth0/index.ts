@@ -32,15 +32,11 @@ function sortByOrder(toSort: APIHandler[], stage: Stage): APIHandler[] {
     // @ts-ignore because stage methods may have order property
     const bOrderRaw = b[stage]?.order;
 
-    // Coerce to numbers, default to 50
-    const aOrder = Number(aOrderRaw) || defaultOrder;
-    const bOrder = Number(bOrderRaw) || defaultOrder;
+    // Coerce to numbers, default to 50 if undefined/null
+    const aOrder = aOrderRaw != null ? Number(aOrderRaw) : defaultOrder;
+    const bOrder = bOrderRaw != null ? Number(bOrderRaw) : defaultOrder;
 
-    // Handle NaN cases (if Number() returns NaN, use default)
-    const aOrderFinal = Number.isNaN(aOrder) ? defaultOrder : aOrder;
-    const bOrderFinal = Number.isNaN(bOrder) ? defaultOrder : bOrder;
-
-    return aOrderFinal - bOrderFinal;
+    return aOrder - bOrder;
   });
   return sorted;
 }
