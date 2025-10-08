@@ -12,16 +12,35 @@ export type Stage = 'load' | 'validate' | 'processChanges';
 
 type StageFunction = APIHandler['load']; // Using `load` method as a template for what type stage functions resemble
 
+/**
+ * Sorts handlers by their @order decorator metadata for a given stage.
+ * Handlers are sorted in ascending order (lower values execute first).
+ * Default order is 50 for handlers without explicit @order metadata.
+ * Uses stable sort: preserves insertion order when order values are equal.
+ *
+ * @param toSort - Array of API handlers to sort
+ * @param stage - The stage name (load, validate, processChanges)
+ * @returns Sorted array of handlers
+ */
 function sortByOrder(toSort: APIHandler[], stage: Stage): APIHandler[] {
   const defaultOrder = 50;
 
   const sorted = [...toSort];
   sorted.sort((a, b) => {
-    //@ts-ignore because this doesn't actually work. TODO: apply stage order
-    const aOrder = a[stage].order || defaultOrder;
-    //@ts-ignore because this doesn't actually work. TODO: apply stage order
-    const bOrder = b[stage].order || defaultOrder;
-    return aOrder - bOrder;
+    // @ts-ignore because stage methods may have order property
+    const aOrderRaw = a[stage]?.order;
+    // @ts-ignore because stage methods may have order property
+    const bOrderRaw = b[stage]?.order;
+
+    // Coerce to numbers, default to 50
+    const aOrder = Number(aOrderRaw) || defaultOrder;
+    const bOrder = Number(bOrderRaw) || defaultOrder;
+
+    // Handle NaN cases (if Number() returns NaN, use default)
+    const aOrderFinal = Number.isNaN(aOrder) ? defaultOrder : aOrder;
+    const bOrderFinal = Number.isNaN(bOrder) ? defaultOrder : bOrder;
+
+    return aOrderFinal - bOrderFinal;
   });
   return sorted;
 }
