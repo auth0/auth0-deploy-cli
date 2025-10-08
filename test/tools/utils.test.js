@@ -383,7 +383,7 @@ describe('#keywordReplacement', () => {
     });
 
     // Issue #1153: Test cases for $ character handling
-    it('should handle dollar-apostrophe in replacement value (issue #1153)', () => {
+    it('should handle dollar-apostrophe in replacement value', () => {
       const input = '{ "secret": "##PASSWORD##" }';
       const passwordMapping = { PASSWORD: "'mySecret$'" };
       const output = utils.keywordStringReplace(input, passwordMapping);
