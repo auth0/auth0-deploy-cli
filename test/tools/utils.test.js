@@ -381,6 +381,15 @@ describe('#keywordReplacement', () => {
         `{ "foo": ${mapping.STRING_REPLACEMENT}, "bar": "OTHER_REPLACEMENT" }`
       );
     });
+
+    // Issue #1153: Test cases for $ character handling
+    it('should handle dollar-apostrophe in replacement value (issue #1153)', () => {
+      const input = '{ "secret": "##PASSWORD##" }';
+      const passwordMapping = { PASSWORD: "'mySecret$'" };
+      const output = utils.keywordStringReplace(input, passwordMapping);
+      expect(output).to.equal('{ "secret": "\'mySecret$\'" }');
+      expect(() => JSON.parse(output)).to.not.throw();
+    });
   });
 
   describe('#keywordArrayReplace', () => {
@@ -428,6 +437,16 @@ describe('#keywordReplacement', () => {
         singleQuotes: mapping.ARRAY_REPLACEMENT,
         doubleQuotes: mapping.ARRAY_REPLACEMENT,
       });
+    });
+
+    // Issue #1153: Test cases for $ character handling in arrays
+    it('should handle dollar-apostrophe in array values', () => {
+      const input = '{ "keys": @@KEYS@@ }';
+      const arrayMapping = { KEYS: ["api-key$'", "secret$'"] };
+      const output = utils.keywordArrayReplace(input, arrayMapping);
+      expect(() => JSON.parse(output)).to.not.throw();
+      const parsed = JSON.parse(output);
+      expect(parsed.keys).to.deep.equal(arrayMapping.KEYS);
     });
   });
 });
