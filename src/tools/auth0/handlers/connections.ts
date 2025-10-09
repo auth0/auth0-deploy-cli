@@ -46,7 +46,7 @@ export const schema = {
       connected_accounts: {
         type: 'object',
         properties: {
-          active: { type:'boolean' },
+          active: { type: 'boolean' },
         },
         required: ['active'],
         additionalProperties: false,
