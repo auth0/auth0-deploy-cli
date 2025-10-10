@@ -1,4 +1,4 @@
-import DefaultAPIHandler from './default';
+import DefaultAPIHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
 
 export const schema = {
@@ -93,6 +93,7 @@ export default class LogStreamsHandler extends DefaultAPIHandler {
     return logStreams;
   }
 
+  @order('70')
   async processChanges(assets: Assets): Promise<void> {
     const { logStreams } = assets;
 
