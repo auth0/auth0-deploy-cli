@@ -28,13 +28,9 @@ function sortByOrder(toSort: APIHandler[], stage: Stage): APIHandler[] {
   const sorted = [...toSort];
   sorted.sort((a, b) => {
     // @ts-ignore because stage methods may have order property
-    const aOrderRaw = a[stage]?.order;
+    const aOrder = a[stage]?.order || defaultOrder;
     // @ts-ignore because stage methods may have order property
-    const bOrderRaw = b[stage]?.order;
-
-    // Coerce to numbers, default to 50 if undefined/null
-    const aOrder = aOrderRaw != null ? Number(aOrderRaw) : defaultOrder;
-    const bOrder = bOrderRaw != null ? Number(bOrderRaw) : defaultOrder;
+    const bOrder = b[stage]?.order || defaultOrder;
 
     return aOrder - bOrder;
   });
