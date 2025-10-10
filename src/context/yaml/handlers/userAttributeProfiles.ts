@@ -1,4 +1,4 @@
-import { UserAttributeProfile } from 'auth0';
+import { UserAttributeProfile } from 'auth0/legacy';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { ParsedAsset } from '../../../types';

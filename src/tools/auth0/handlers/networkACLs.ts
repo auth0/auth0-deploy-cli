@@ -1,4 +1,4 @@
-import { GetNetworkAclsById200Response } from 'auth0';
+import { GetNetworkAclsById200Response } from 'auth0/legacy';
 import DefaultAPIHandler from './default';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
@@ -346,9 +346,8 @@ export default class NetworkACLsHandler extends DefaultAPIHandler {
         })
         .promise();
     } else {
-      log.warn(`Detected the following ${
-        this.type
-      } should be deleted. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config
+      log.warn(`Detected the following ${this.type
+        } should be deleted. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config
       \n${data.map((i) => this.objString(i)).join('\n')}`);
     }
   }

@@ -1,4 +1,4 @@
-import { GetEmailTemplatesByTemplateNameTemplateNameEnum } from 'auth0';
+import { GetEmailTemplatesByTemplateNameTemplateNameEnum } from 'auth0/legacy';
 
 const PAGE_GUARDIAN_MULTIFACTOR = 'guardian_multifactor';
 const PAGE_PASSWORD_RESET = 'password_reset';

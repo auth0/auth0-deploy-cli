@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { UserAttributeProfile } from 'auth0';
+import { UserAttributeProfile } from 'auth0/legacy';
 import { constants } from '../../../tools';
 import DirectoryContext from '..';
 import { dumpJSON, existsMustBeDir, getFiles, loadJSON, sanitize } from '../../../utils';

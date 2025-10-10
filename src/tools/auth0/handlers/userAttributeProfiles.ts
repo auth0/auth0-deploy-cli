@@ -1,4 +1,4 @@
-import { UserAttributeProfile } from 'auth0';
+import { UserAttributeProfile } from 'auth0/legacy';
 
 import DefaultAPIHandler, { order } from './default';
 import { Assets } from '../../../types';

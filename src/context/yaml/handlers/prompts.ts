@@ -1,6 +1,6 @@
 import path from 'path';
 import { ensureDirSync, writeFileSync } from 'fs-extra';
-import { GetRendering200Response } from 'auth0';
+import { GetRendering200Response } from 'auth0/legacy';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { constants } from '../../../tools';

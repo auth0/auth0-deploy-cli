@@ -1,7 +1,7 @@
 import path from 'path';
 import { expect } from 'chai';
 import fs from 'fs-extra';
-import { ManagementClient } from 'auth0';
+import { ManagementClient } from 'auth0/legacy';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/networkACLs';

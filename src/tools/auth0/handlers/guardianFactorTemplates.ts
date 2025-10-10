@@ -1,4 +1,4 @@
-import { TemplateMessages } from 'auth0';
+import { TemplateMessages } from 'auth0/legacy';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Assets, Asset } from '../../../types';

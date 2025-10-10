@@ -1,4 +1,4 @@
-import { CustomDomain } from 'auth0';
+import { CustomDomain } from 'auth0/legacy';
 import DefaultAPIHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
 import log from '../../../logger';
@@ -95,7 +95,7 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
       if (
         err.statusCode === 403 &&
         err.message ===
-          'The account is not allowed to perform this operation, please contact our support team'
+        'The account is not allowed to perform this operation, please contact our support team'
       ) {
         return null;
       }

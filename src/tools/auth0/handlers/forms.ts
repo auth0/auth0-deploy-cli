@@ -2,7 +2,7 @@ import {
   GetFlows200ResponseOneOfInner,
   GetForms200ResponseOneOfInner,
   PostForms201Response,
-} from 'auth0';
+} from 'auth0/legacy';
 import dotProp from 'dot-prop';
 import { isEmpty } from 'lodash';
 import DefaultHandler, { order } from './default';

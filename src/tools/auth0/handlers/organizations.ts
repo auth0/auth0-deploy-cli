@@ -6,7 +6,7 @@ import {
   GetOrganizationClientGrants200ResponseOneOfInner,
   GetOrganizations200ResponseOneOfInner,
   PostEnabledConnectionsRequest,
-} from 'auth0';
+} from 'auth0/legacy';
 import DefaultHandler, { order } from './default';
 import { calculateChanges } from '../../calculateChanges';
 import log from '../../../logger';

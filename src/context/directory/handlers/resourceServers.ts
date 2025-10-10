@@ -1,4 +1,4 @@
-import { Client, ResourceServer } from 'auth0';
+import { Client, ResourceServer } from 'auth0/legacy';
 import path from 'path';
 import fs from 'fs-extra';
 import { constants } from '../../../tools';

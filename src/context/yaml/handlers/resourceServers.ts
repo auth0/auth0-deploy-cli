@@ -1,4 +1,4 @@
-import { Client, ResourceServer } from 'auth0';
+import { Client, ResourceServer } from 'auth0/legacy';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { ParsedAsset } from '../../../types';

@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import { expect } from 'chai';
 import { cloneDeep } from 'lodash';
-import { ManagementClient } from 'auth0';
+import { ManagementClient } from 'auth0/legacy';
 
 import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/networkACLs';

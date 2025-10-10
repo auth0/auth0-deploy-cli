@@ -1,4 +1,4 @@
-import { Client } from 'auth0';
+import { Client } from 'auth0/legacy';
 import { convertClientIdToName } from '../../../utils';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';

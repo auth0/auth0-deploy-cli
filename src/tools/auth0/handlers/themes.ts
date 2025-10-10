@@ -1,4 +1,4 @@
-import { PostBrandingTheme200Response } from 'auth0';
+import { PostBrandingTheme200Response } from 'auth0/legacy';
 import { Assets } from '../../../types';
 import log from '../../../logger';
 import DefaultHandler, { order } from './default';

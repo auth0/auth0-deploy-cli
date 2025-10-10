@@ -1,5 +1,5 @@
 import { PromisePoolExecutor } from 'promise-pool-executor';
-import { ConnectionCreate } from 'auth0';
+import { ConnectionCreate } from 'auth0/legacy';
 import { Asset, Auth0APIClient } from '../../../types';
 import log from '../../../logger';
 import { ConfigFunction } from '../../../configFactory';
@@ -206,8 +206,7 @@ export default class ScimHandler {
     }
 
     log.error(
-      `SCIM request failed with status code ${error.statusCode}. ${
-        error.message || error.toString()
+      `SCIM request failed with status code ${error.statusCode}. ${error.message || error.toString()
       }.`
     );
     throw error;

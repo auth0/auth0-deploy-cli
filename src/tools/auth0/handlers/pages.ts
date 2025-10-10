@@ -1,4 +1,4 @@
-import { Client } from 'auth0';
+import { Client } from 'auth0/legacy';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';

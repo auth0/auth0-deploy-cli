@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { GetActions200ResponseActionsInner, PostActionRequest } from 'auth0';
+import { GetActions200ResponseActionsInner, PostActionRequest } from 'auth0/legacy';
 import DefaultAPIHandler, { order } from './default';
 import log from '../../../logger';
 import { areArraysEquals, sleep } from '../../utils';

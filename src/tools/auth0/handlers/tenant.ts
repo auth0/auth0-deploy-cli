@@ -3,7 +3,7 @@ import {
   TenantSettingsFlags,
   TenantSettingsUpdate,
   TenantSettingsUpdateFlags,
-} from 'auth0';
+} from 'auth0/legacy';
 import ValidationError from '../../validationError';
 import DefaultHandler, { order } from './default';
 import { supportedPages, pageNameMap } from './pages';
@@ -119,11 +119,9 @@ export const removeUnallowedTenantFlags = (
 
   if (removedFlags.length > 0) {
     log.warn(
-      `The following tenant flag${
-        removedFlags.length > 1 ? 's have not been' : ' has not been'
+      `The following tenant flag${removedFlags.length > 1 ? 's have not been' : ' has not been'
       } updated because deemed incompatible with the target tenant: ${removedFlags.join(', ')}
-      ${
-        removedFlags.length > 1 ? 'These flags' : 'This flag'
+      ${removedFlags.length > 1 ? 'These flags' : 'This flag'
       } can likely be removed from the tenant definition file. If you believe this removal is an error, please report via a Github issue.`
     );
   }

@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { ManagementClient } from 'auth0';
+import { ManagementClient } from 'auth0/legacy';
 import { loadFileAndReplaceKeywords, Auth0 } from '../../tools';
 import pagedClient from '../../tools/auth0/client';
 
