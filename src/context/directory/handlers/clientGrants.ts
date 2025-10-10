@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { Client, ResourceServer } from 'auth0';
+import { Client, ResourceServer } from 'auth0/legacy';
 import { constants, keywordReplace } from '../../../tools';
 
 import {

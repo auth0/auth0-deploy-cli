@@ -1,4 +1,4 @@
-import { JSONApiResponse } from 'auth0';
+import { JSONApiResponse } from 'auth0/legacy';
 import ValidationError from '../../validationError';
 
 import {
@@ -195,9 +195,8 @@ export default class APIHandler {
     const duplicateIDs = duplicateItems(typeAssets, this.id);
     if (duplicateIDs.length > 0) {
       const formatted = duplicateIDs.map((dups) => dups.map((d) => `${d[this.id]}`));
-      throw new ValidationError(`There are multiple ${
-        this.type
-      } for the following stage-order combinations
+      throw new ValidationError(`There are multiple ${this.type
+        } for the following stage-order combinations
       ${convertJsonToString(formatted)}.
        Only one rule must be defined for the same order number in a stage.`);
     }
@@ -226,9 +225,8 @@ export default class APIHandler {
         (this.type === 'rules' || this.type === 'resourceServers');
       const shouldDelete = allowDelete || byExtension;
       if (!shouldDelete) {
-        log.warn(`Detected the following ${
-          this.type
-        } should be deleted. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config
+        log.warn(`Detected the following ${this.type
+          } should be deleted. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config
         \n${changes.del.map((i) => this.objString(i)).join('\n')}
          `);
       } else {

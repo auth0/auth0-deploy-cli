@@ -3,7 +3,7 @@ import {
   GetFlows200ResponseOneOfInner,
   GetFlowsVaultConnections200ResponseOneOfInner,
   PostFlows201Response,
-} from 'auth0';
+} from 'auth0/legacy';
 import dotProp from 'dot-prop';
 import DefaultHandler, { order } from './default';
 import { Asset, Assets, CalculatedChanges } from '../../../types';

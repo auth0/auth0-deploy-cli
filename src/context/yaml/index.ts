@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import path from 'path';
-import { ManagementClient } from 'auth0';
+import { ManagementClient } from 'auth0/legacy';
 import {
   loadFileAndReplaceKeywords,
   keywordReplace,

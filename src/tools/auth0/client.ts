@@ -1,7 +1,7 @@
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import _ from 'lodash';
 
-import { JSONApiResponse, ManagementClient } from 'auth0';
+import { JSONApiResponse, ManagementClient } from 'auth0/legacy';
 import { flatten } from '../utils';
 import {
   Asset,

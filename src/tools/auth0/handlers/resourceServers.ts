@@ -3,7 +3,7 @@ import {
   ResourceServerProofOfPossessionMechanismEnum,
   ResourceServerSubjectTypeAuthorizationClientPolicyEnum,
   ResourceServerSubjectTypeAuthorizationUserPolicyEnum,
-} from 'auth0';
+} from 'auth0/legacy';
 import ValidationError from '../../validationError';
 
 import constants from '../../constants';

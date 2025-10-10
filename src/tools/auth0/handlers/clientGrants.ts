@@ -1,4 +1,4 @@
-import { Client, ClientGrantSubjectTypeEnum } from 'auth0';
+import { Client, ClientGrantSubjectTypeEnum } from 'auth0/legacy';
 import DefaultHandler, { order } from './default';
 import { convertClientNamesToIds } from '../../utils';
 import { Assets, CalculatedChanges } from '../../../types';

@@ -6,7 +6,7 @@ import {
   PatchRenderingRequest,
   PatchRenderingRequestRenderingModeEnum,
   PutPartialsRequest,
-} from 'auth0';
+} from 'auth0/legacy';
 import DefaultHandler from './default';
 import { Assets, Language, languages } from '../../../types';
 import log from '../../../logger';

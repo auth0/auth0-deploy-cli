@@ -1,5 +1,5 @@
 import path from 'path';
-import { ResponseError } from 'auth0';
+import { ResponseError } from 'auth0/legacy';
 import fs from 'fs-extra';
 import chai, { expect } from 'chai';
 import sinon from 'sinon';

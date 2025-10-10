@@ -3,7 +3,7 @@ import {
   GetSelfServiceProfileCustomTextPageEnum,
   SsProfile,
   UserAttributeProfile,
-} from 'auth0';
+} from 'auth0/legacy';
 import { isEmpty } from 'lodash';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import log from '../../../logger';
@@ -233,7 +233,7 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
         },
         {
           ...customText[GetSelfServiceProfileCustomTextLanguageEnum.en][
-            GetSelfServiceProfileCustomTextPageEnum.get_started
+          GetSelfServiceProfileCustomTextPageEnum.get_started
           ],
         }
       );

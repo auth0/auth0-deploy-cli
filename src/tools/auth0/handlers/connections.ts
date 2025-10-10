@@ -1,6 +1,6 @@
 import dotProp from 'dot-prop';
 import _ from 'lodash';
-import { Client, Connection, GetConnectionsStrategyEnum, PatchClientsRequestInner } from 'auth0';
+import { Client, Connection, GetConnectionsStrategyEnum, PatchClientsRequestInner } from 'auth0/legacy';
 import DefaultAPIHandler, { order } from './default';
 import { filterExcluded, convertClientNameToId, getEnabledClients, sleep } from '../../utils';
 import { CalculatedChanges, Asset, Assets, Auth0APIClient } from '../../../types';
