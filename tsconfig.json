@@ -2,8 +2,8 @@
   "compilerOptions": {
     "target": "es2016",
     "experimentalDecorators": true,
-    "module": "node16",
-    "moduleResolution": "node16",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "rootDir": "./src",
     "allowJs": true,
     "outDir": "./lib",
