@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for connection purpose configuration options in `connections`. [#1162]
+
+### Fixed
+
+- Fix execution order for `logStreams`. [#1175]
+- Fix keyword replacement handling for special characters. [#1174]
+
 ## [8.17.0] - 2025-09-30
 
 ### Added
