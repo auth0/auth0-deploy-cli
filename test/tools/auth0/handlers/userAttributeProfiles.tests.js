@@ -267,5 +267,18 @@ describe('#userAttributeProfiles handler', () => {
 
       await stageFn.apply(handler, [{ userAttributeProfiles: [] }]);
     });
+
+    it('should handle 403 error when not enabled on tenant', async () => {
+      const auth0 = {
+        userAttributeProfiles: {
+          getAll: () => Promise.reject(Object.assign(new Error('Forbidden'), { statusCode: 403 })),
+        },
+      };
+
+      const handler = new userAttributeProfiles.default({ client: pageClient(auth0), config });
+
+      const data = await handler.getType();
+      expect(data).to.equal(null);
+    });
   });
 });
