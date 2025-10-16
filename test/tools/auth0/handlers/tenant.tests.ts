@@ -142,6 +142,7 @@ describe('#tenant handler', () => {
         const proposedFlags = {
           require_pushed_authorization_requests: true,
           mfa_show_factor_list_on_enrollment: false,
+          skip_non_verifiable_callback_uri_confirmation_prompt: false,
           'unallowed-flag-1': true,
           'unallowed-flag-2': false,
         };
@@ -153,6 +154,7 @@ describe('#tenant handler', () => {
               expect(data.flags).to.deep.equal({
                 require_pushed_authorization_requests: true,
                 mfa_show_factor_list_on_enrollment: false,
+                skip_non_verifiable_callback_uri_confirmation_prompt: false,
               });
               return Promise.resolve(data);
             },
