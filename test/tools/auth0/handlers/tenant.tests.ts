@@ -1,6 +1,4 @@
-const { expect } = require('chai');
-
-import TenantHandler from '../../../../src/tools/auth0/handlers/tenant';
+import { expect } from 'chai';
 import tenantHandler, {
   allowedTenantFlags,
   removeUnallowedTenantFlags,
@@ -65,11 +63,13 @@ describe('#tenant handler', () => {
             data: {
               friendly_name: 'Test',
               default_directory: 'users',
+              skip_non_verifiable_callback_uri_confirmation_prompt: true,
             },
           }),
           updateSettings: (data) => {
             expect(data).to.be.an('object');
             expect(data.sandbox_version).to.equal('4');
+            expect(data.skip_non_verifiable_callback_uri_confirmation_prompt).to.equal(null);
             expect(data.flags).to.equal(undefined);
             return Promise.resolve(data);
           },
@@ -80,7 +80,14 @@ describe('#tenant handler', () => {
       const handler = new tenantHandler({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [{ tenant: { sandbox_version: '4' } }]);
+      await stageFn.apply(handler, [
+        {
+          tenant: {
+            sandbox_version: '4',
+            skip_non_verifiable_callback_uri_confirmation_prompt: null,
+          },
+        },
+      ]);
     });
 
     it('should allow valid default_token_quota property in tenant', async () => {
@@ -142,7 +149,6 @@ describe('#tenant handler', () => {
         const proposedFlags = {
           require_pushed_authorization_requests: true,
           mfa_show_factor_list_on_enrollment: false,
-          skip_non_verifiable_callback_uri_confirmation_prompt: false,
           'unallowed-flag-1': true,
           'unallowed-flag-2': false,
         };
@@ -154,7 +160,6 @@ describe('#tenant handler', () => {
               expect(data.flags).to.deep.equal({
                 require_pushed_authorization_requests: true,
                 mfa_show_factor_list_on_enrollment: false,
-                skip_non_verifiable_callback_uri_confirmation_prompt: false,
               });
               return Promise.resolve(data);
             },
