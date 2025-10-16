@@ -229,6 +229,9 @@ export default class ClientHandler extends DefaultAPIHandler {
             delete item.refresh_token;
           }
         }
+        if (item.skip_non_verifiable_callback_uri_confirmation_prompt === undefined) {
+          item.skip_non_verifiable_callback_uri_confirmation_prompt = null;
+        }
         return item;
       });
 
