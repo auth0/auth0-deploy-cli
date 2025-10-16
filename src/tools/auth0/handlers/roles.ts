@@ -1,4 +1,4 @@
-import { GetOrganizationMemberRoles200ResponseOneOfInner, Permission, ResourceServer } from 'auth0';
+import { GetOrganizationMemberRoles200ResponseOneOfInner, Permission, ResourceServer } from 'auth0/legacy';
 import { isArray } from 'lodash';
 import DefaultHandler, { order } from './default';
 import { calculateChanges } from '../../calculateChanges';

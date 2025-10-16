@@ -1,4 +1,4 @@
-import { EmailProviderCreate } from 'auth0';
+import { EmailProviderCreate } from 'auth0/legacy';
 import { isEmpty } from 'lodash';
 import DefaultHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';

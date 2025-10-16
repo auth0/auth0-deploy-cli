@@ -1,4 +1,4 @@
-import { Rule } from 'auth0';
+import { Rule } from 'auth0/legacy';
 import ValidationError from '../../validationError';
 import { convertJsonToString, stripFields, duplicateItems, isDeprecatedError } from '../../utils';
 import DefaultHandler from './default';

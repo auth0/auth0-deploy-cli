@@ -1,4 +1,4 @@
-import { CustomDomain, GetBranding200Response, GetUniversalLogin200ResponseOneOf } from 'auth0';
+import { CustomDomain, GetBranding200Response, GetUniversalLogin200ResponseOneOf } from 'auth0/legacy';
 import DefaultHandler, { order } from './default';
 import constants from '../../constants';
 import log from '../../../logger';

@@ -14,7 +14,8 @@
       "node": {
         "extensions": [".js", ".ts"]
       }
-    }
+    },
+    "import/core-modules": ["auth0/legacy"]
   },
   "rules": {
     "max-len": 0,
