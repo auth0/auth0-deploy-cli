@@ -553,5 +553,155 @@ describe('#clients handler', () => {
       // eslint-disable-next-line no-unused-expressions
       expect(wasDeleteCalled).to.be.true;
     });
+
+    it('should create client with organization properties', async () => {
+      const clientWithOrganization = {
+        name: 'My Client',
+        oidc_conformant: true,
+        organization_usage: 'require',
+        organization_require_behavior: 'pre_login_prompt',
+        organization_discovery_methods: ['email'],
+      };
+
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('My Client');
+            expect(data.oidc_conformant).to.equal(true);
+            expect(data.organization_usage).to.equal('require');
+            expect(data.organization_require_behavior).to.equal('pre_login_prompt');
+            expect(data.organization_discovery_methods).to.deep.equal(['email']);
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ clients: [clientWithOrganization] }]);
+    });
+
+    it('should handle organization_discovery_methods with multiple values', async () => {
+      const clientWithMultipleMethods = {
+        name: 'My Client',
+        organization_usage: 'require',
+        organization_require_behavior: 'pre_login_prompt',
+        organization_discovery_methods: ['organization_name', 'email'],
+      };
+
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data.organization_discovery_methods).to.deep.equal([
+              'organization_name',
+              'email',
+            ]);
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ clients: [clientWithMultipleMethods] }]);
+    });
+
+    it('should update client organization_usage while preserving organization_require_behavior', async () => {
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (params, data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(params.client_id).to.equal('client1');
+            expect(data.organization_usage).to.equal('allow');
+            // organization_require_behavior should be preserved if not updated
+            expect(data).to.not.have.property('organization_require_behavior');
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'My Client',
+                organization_usage: 'require',
+                organization_require_behavior: 'pre_login_prompt',
+                organization_discovery_methods: ['email'],
+              },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'My Client',
+              organization_usage: 'allow',
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should update client and remove organization_discovery_methods by setting to null', async () => {
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (params, data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(params.client_id).to.equal('client1');
+            expect(data.organization_require_behavior).to.equal('post_login_prompt');
+            // eslint-disable-next-line no-unused-expressions
+            expect(data.organization_discovery_methods).to.be.null;
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'My Client',
+                organization_usage: 'allow',
+                organization_require_behavior: 'pre_login_prompt',
+                organization_discovery_methods: ['email'],
+              },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'My Client',
+              organization_require_behavior: 'post_login_prompt',
+              organization_discovery_methods: null,
+            },
+          ],
+        },
+      ]);
+    });
   });
 });
