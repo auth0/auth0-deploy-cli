@@ -16,6 +16,14 @@
                     "identifier": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
                     "allow_offline_access": false,
                     "skip_consent_for_verifiable_first_party_clients": false,
+                    "subject_type_authorization": {
+                        "client": {
+                            "policy": "require_client_grant"
+                        },
+                        "user": {
+                            "policy": "allow_all"
+                        }
+                    },
                     "token_lifetime": 86400,
                     "token_lifetime_for_web": 7200,
                     "signing_alg": "RS256",
@@ -115,6 +123,22 @@
                         {
                             "description": "Create Client Keys",
                             "value": "create:client_keys"
+                        },
+                        {
+                            "description": "Read Client Credentials",
+                            "value": "read:client_credentials"
+                        },
+                        {
+                            "description": "Update Client Credentials",
+                            "value": "update:client_credentials"
+                        },
+                        {
+                            "description": "Delete Client Credentials",
+                            "value": "delete:client_credentials"
+                        },
+                        {
+                            "description": "Create Client Credentials",
+                            "value": "create:client_credentials"
                         },
                         {
                             "description": "Read Connections",
@@ -509,6 +533,22 @@
                             "value": "delete:organizations"
                         },
                         {
+                            "description": "Read Organization Discovery Domains",
+                            "value": "read:organization_discovery_domains"
+                        },
+                        {
+                            "description": "Update Organization Discovery Domains",
+                            "value": "update:organization_discovery_domains"
+                        },
+                        {
+                            "description": "Create Organization Discovery Domains",
+                            "value": "create:organization_discovery_domains"
+                        },
+                        {
+                            "description": "Delete Organization Discovery Domains",
+                            "value": "delete:organization_discovery_domains"
+                        },
+                        {
                             "description": "Create organization members",
                             "value": "create:organization_members"
                         },
@@ -641,12 +681,20 @@
                             "value": "read:sessions"
                         },
                         {
+                            "description": "Update Sessions",
+                            "value": "update:sessions"
+                        },
+                        {
                             "description": "Delete Sessions",
                             "value": "delete:sessions"
                         },
                         {
                             "description": "Read Refresh Tokens",
                             "value": "read:refresh_tokens"
+                        },
+                        {
+                            "description": "Update Refresh Tokens",
+                            "value": "update:refresh_tokens"
                         },
                         {
                             "description": "Delete Refresh Tokens",
@@ -809,20 +857,60 @@
                             "value": "delete:federated_connections_tokens"
                         },
                         {
-                            "value": "read:client_credentials",
-                            "description": "Read Client Credentials"
+                            "description": "Create User Attribute Profiles",
+                            "value": "create:user_attribute_profiles"
                         },
                         {
-                            "value": "create:client_credentials",
-                            "description": "Create Client Credentials"
+                            "description": "Read User Attribute Profiles",
+                            "value": "read:user_attribute_profiles"
                         },
                         {
-                            "value": "update:client_credentials",
-                            "description": "Update Client Credentials"
+                            "description": "Update User Attribute Profiles",
+                            "value": "update:user_attribute_profiles"
                         },
                         {
-                            "value": "delete:client_credentials",
-                            "description": "delete Client Credentials"
+                            "description": "Delete User Attribute Profiles",
+                            "value": "delete:user_attribute_profiles"
+                        },
+                        {
+                            "description": "Read event streams",
+                            "value": "read:event_streams"
+                        },
+                        {
+                            "description": "Create event streams",
+                            "value": "create:event_streams"
+                        },
+                        {
+                            "description": "Delete event streams",
+                            "value": "delete:event_streams"
+                        },
+                        {
+                            "description": "Update event streams",
+                            "value": "update:event_streams"
+                        },
+                        {
+                            "description": "Read event stream deliveries",
+                            "value": "read:event_deliveries"
+                        },
+                        {
+                            "description": "Redeliver event(s) to an event stream",
+                            "value": "update:event_deliveries"
+                        },
+                        {
+                            "description": "Create Connection Profiles",
+                            "value": "create:connection_profiles"
+                        },
+                        {
+                            "description": "Read Connection Profiles",
+                            "value": "read:connection_profiles"
+                        },
+                        {
+                            "description": "Update Connection Profiles",
+                            "value": "update:connection_profiles"
+                        },
+                        {
+                            "description": "Delete Connection Profiles",
+                            "value": "delete:connection_profiles"
                         },
                         {
                             "value": "read:organization_client_grants",
@@ -835,6 +923,22 @@
                         {
                             "value": "delete:organization_client_grants",
                             "description": "Delete Organization Client Grants"
+                        },
+                        {
+                            "value": "read:security_metrics",
+                            "description": "Read Security Metrics"
+                        },
+                        {
+                            "value": "read:connections_keys",
+                            "description": "Read connection keys"
+                        },
+                        {
+                            "value": "update:connections_keys",
+                            "description": "Update connection keys"
+                        },
+                        {
+                            "value": "create:connections_keys",
+                            "description": "Create connection keys"
                         }
                     ],
                     "is_system": true
@@ -937,7 +1041,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC",
+                    "client_id": "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -990,7 +1094,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "Jxv2FgWcn68QuDUzXgdll9Xgo2nlEBDm",
+                    "client_id": "kvyJLK1YaA90Fn3Xmnk1vOdQHVjiuG5M",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1035,7 +1139,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "QKsnAEeydL8Fjuxw7jfCzcrVyCgOOypX",
+                    "client_id": "vC5XPS3kpE3DjSNFjN8EvmxdEsjXZmXM",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1089,7 +1193,7 @@
                         }
                     ],
                     "allowed_origins": [],
-                    "client_id": "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
+                    "client_id": "mDMSk4t4l81jFOcVEQzUxA8MMPfHyhWy",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1135,7 +1239,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "d5YSIoDhbsIhjv9FN1LkpU30DzP8LzJs",
+                    "client_id": "KUyd85V3ARAVhHlpgFpXu5jn9MLhDnuX",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1188,7 +1292,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "SlnBYESSQE83e042qhjctEizntTWGboW",
+                    "client_id": "XwmnpszVn5cSV0V5JVrHw2kXkrQLPB2F",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1248,7 +1352,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "RF60ZkCQzronG0gnoL85Qu0NdQIBGmim",
+                    "client_id": "hO2Bf4PhXI72DNBgoGyBPsZyig76uJzo",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1306,7 +1410,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK",
+                    "client_id": "o8xIEX6Us6TZ8Jin5tjH1dWjrBPLKllV",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1330,7 +1434,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/clients/r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC",
+        "path": "/api/v2/clients/RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
         "body": {
             "name": "Default App",
             "callbacks": [],
@@ -1358,7 +1462,8 @@
                 "idle_token_lifetime": 1296000,
                 "rotation_type": "non-rotating"
             },
-            "sso_disabled": false
+            "sso_disabled": false,
+            "skip_non_verifiable_callback_uri_confirmation_prompt": null
         },
         "status": 200,
         "response": {
@@ -1388,7 +1493,7 @@
                     "subject": "/CN=auth0-deploy-cli-e2e.us.auth0.com"
                 }
             ],
-            "client_id": "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC",
+            "client_id": "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
             "callback_url_template": false,
             "client_secret": "[REDACTED]",
             "jwt_configuration": {
@@ -1452,21 +1557,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/webauthn-roaming",
-        "body": {
-            "enabled": false
-        },
-        "status": 200,
-        "response": {
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PUT",
-        "path": "/api/v2/guardian/factors/email",
+        "path": "/api/v2/guardian/factors/sms",
         "body": {
             "enabled": false
         },
@@ -1494,7 +1585,21 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/sms",
+        "path": "/api/v2/guardian/factors/webauthn-roaming",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
+        "path": "/api/v2/guardian/factors/email",
         "body": {
             "enabled": false
         },
@@ -1581,7 +1686,7 @@
         "response": {
             "actions": [
                 {
-                    "id": "b350f5ab-4a15-475b-9fc9-6ccc76594903",
+                    "id": "00d4934b-c99d-4da9-bb2e-da5347b483b8",
                     "name": "My Custom Action",
                     "supported_triggers": [
                         {
@@ -1589,35 +1694,35 @@
                             "version": "v2"
                         }
                     ],
-                    "created_at": "2025-04-09T16:59:45.514229856Z",
-                    "updated_at": "2025-04-09T16:59:45.531596981Z",
+                    "created_at": "2025-09-30T09:29:32.014006880Z",
+                    "updated_at": "2025-09-30T09:31:16.988767538Z",
                     "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
                     "dependencies": [],
-                    "runtime": "node16",
+                    "runtime": "node18",
                     "status": "built",
                     "secrets": [],
                     "current_version": {
-                        "id": "51226e3f-8810-49c2-9f7f-d666c4aa04ae",
+                        "id": "e4d42ae6-74f2-4e8a-ac03-fb1cb50810ca",
                         "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
-                        "runtime": "node16",
+                        "runtime": "node18",
                         "status": "BUILT",
-                        "number": 1,
-                        "build_time": "2025-04-09T16:59:46.398241328Z",
-                        "created_at": "2025-04-09T16:59:46.307869375Z",
-                        "updated_at": "2025-04-09T16:59:46.399941007Z"
+                        "number": 2,
+                        "build_time": "2025-09-30T09:31:17.467459427Z",
+                        "created_at": "2025-09-30T09:31:17.371620963Z",
+                        "updated_at": "2025-09-30T09:31:17.469052425Z"
                     },
                     "deployed_version": {
                         "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
                         "dependencies": [],
-                        "id": "51226e3f-8810-49c2-9f7f-d666c4aa04ae",
+                        "id": "e4d42ae6-74f2-4e8a-ac03-fb1cb50810ca",
                         "deployed": true,
-                        "number": 1,
-                        "built_at": "2025-04-09T16:59:46.398241328Z",
+                        "number": 2,
+                        "built_at": "2025-09-30T09:31:17.467459427Z",
                         "secrets": [],
                         "status": "built",
-                        "created_at": "2025-04-09T16:59:46.307869375Z",
-                        "updated_at": "2025-04-09T16:59:46.399941007Z",
-                        "runtime": "node16",
+                        "created_at": "2025-09-30T09:31:17.371620963Z",
+                        "updated_at": "2025-09-30T09:31:17.469052425Z",
+                        "runtime": "node18",
                         "supported_triggers": [
                             {
                                 "id": "post-login",
@@ -1643,7 +1748,7 @@
         "response": {
             "actions": [
                 {
-                    "id": "b350f5ab-4a15-475b-9fc9-6ccc76594903",
+                    "id": "00d4934b-c99d-4da9-bb2e-da5347b483b8",
                     "name": "My Custom Action",
                     "supported_triggers": [
                         {
@@ -1651,35 +1756,35 @@
                             "version": "v2"
                         }
                     ],
-                    "created_at": "2025-04-09T16:59:45.514229856Z",
-                    "updated_at": "2025-04-09T16:59:45.531596981Z",
+                    "created_at": "2025-09-30T09:29:32.014006880Z",
+                    "updated_at": "2025-09-30T09:31:16.988767538Z",
                     "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
                     "dependencies": [],
-                    "runtime": "node16",
+                    "runtime": "node18",
                     "status": "built",
                     "secrets": [],
                     "current_version": {
-                        "id": "51226e3f-8810-49c2-9f7f-d666c4aa04ae",
+                        "id": "e4d42ae6-74f2-4e8a-ac03-fb1cb50810ca",
                         "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
-                        "runtime": "node16",
+                        "runtime": "node18",
                         "status": "BUILT",
-                        "number": 1,
-                        "build_time": "2025-04-09T16:59:46.398241328Z",
-                        "created_at": "2025-04-09T16:59:46.307869375Z",
-                        "updated_at": "2025-04-09T16:59:46.399941007Z"
+                        "number": 2,
+                        "build_time": "2025-09-30T09:31:17.467459427Z",
+                        "created_at": "2025-09-30T09:31:17.371620963Z",
+                        "updated_at": "2025-09-30T09:31:17.469052425Z"
                     },
                     "deployed_version": {
                         "code": "/**\n * Handler that will be called during the execution of a PostLogin flow.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\nexports.onExecutePostLogin = async (event, api) => {\n  console.log('Some custom action!');\n};\n\n/**\n * Handler that will be invoked when this action is resuming after an external redirect. If your\n * onExecutePostLogin function does not perform a redirect, this function can be safely ignored.\n *\n * @param {Event} event - Details about the user and the context in which they are logging in.\n * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.\n */\n// exports.onContinuePostLogin = async (event, api) => {\n// };\n",
                         "dependencies": [],
-                        "id": "51226e3f-8810-49c2-9f7f-d666c4aa04ae",
+                        "id": "e4d42ae6-74f2-4e8a-ac03-fb1cb50810ca",
                         "deployed": true,
-                        "number": 1,
-                        "built_at": "2025-04-09T16:59:46.398241328Z",
+                        "number": 2,
+                        "built_at": "2025-09-30T09:31:17.467459427Z",
                         "secrets": [],
                         "status": "built",
-                        "created_at": "2025-04-09T16:59:46.307869375Z",
-                        "updated_at": "2025-04-09T16:59:46.399941007Z",
-                        "runtime": "node16",
+                        "created_at": "2025-09-30T09:31:17.371620963Z",
+                        "updated_at": "2025-09-30T09:31:17.469052425Z",
+                        "runtime": "node18",
                         "supported_triggers": [
                             {
                                 "id": "post-login",
@@ -1692,34 +1797,6 @@
             ],
             "total": 1,
             "per_page": 100
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PATCH",
-        "path": "/api/v2/attack-protection/brute-force-protection",
-        "body": {
-            "enabled": true,
-            "shields": [
-                "block",
-                "user_notification"
-            ],
-            "mode": "count_per_identifier_and_ip",
-            "allowlist": [],
-            "max_attempts": 10
-        },
-        "status": 200,
-        "response": {
-            "enabled": true,
-            "shields": [
-                "block",
-                "user_notification"
-            ],
-            "mode": "count_per_identifier_and_ip",
-            "allowlist": [],
-            "max_attempts": 10
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -1798,73 +1875,29 @@
     },
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/log-streams",
-        "body": "",
+        "method": "PATCH",
+        "path": "/api/v2/attack-protection/brute-force-protection",
+        "body": {
+            "enabled": true,
+            "shields": [
+                "block",
+                "user_notification"
+            ],
+            "mode": "count_per_identifier_and_ip",
+            "allowlist": [],
+            "max_attempts": 10
+        },
         "status": 200,
-        "response": [
-            {
-                "id": "lst_0000000000021073",
-                "name": "Suspended DD Log Stream",
-                "type": "datadog",
-                "status": "active",
-                "sink": {
-                    "datadogApiKey": "some-sensitive-api-key",
-                    "datadogRegion": "us"
-                },
-                "isPriority": false
-            },
-            {
-                "id": "lst_0000000000021074",
-                "name": "Amazon EventBridge",
-                "type": "eventbridge",
-                "status": "active",
-                "sink": {
-                    "awsAccountId": "123456789012",
-                    "awsRegion": "us-east-2",
-                    "awsPartnerEventSource": "aws.partner/auth0.com/auth0-deploy-cli-e2e-5b66e29c-4c5a-496f-86ab-6dacebd9382d/auth0.logs"
-                },
-                "filters": [
-                    {
-                        "type": "category",
-                        "name": "auth.login.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.login.notification"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.login.fail"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.signup.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.logout.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.logout.fail"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.silent_auth.fail"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.silent_auth.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.token_exchange.fail"
-                    }
-                ],
-                "isPriority": false
-            }
-        ],
+        "response": {
+            "enabled": true,
+            "shields": [
+                "block",
+                "user_notification"
+            ],
+            "mode": "count_per_identifier_and_ip",
+            "allowlist": [],
+            "max_attempts": 10
+        },
         "rawHeaders": [],
         "responseIsBinary": false
     },
@@ -1971,7 +2004,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC",
+                    "client_id": "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -2024,7 +2057,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "Jxv2FgWcn68QuDUzXgdll9Xgo2nlEBDm",
+                    "client_id": "kvyJLK1YaA90Fn3Xmnk1vOdQHVjiuG5M",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -2069,7 +2102,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "QKsnAEeydL8Fjuxw7jfCzcrVyCgOOypX",
+                    "client_id": "vC5XPS3kpE3DjSNFjN8EvmxdEsjXZmXM",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -2123,7 +2156,7 @@
                         }
                     ],
                     "allowed_origins": [],
-                    "client_id": "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
+                    "client_id": "mDMSk4t4l81jFOcVEQzUxA8MMPfHyhWy",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -2169,7 +2202,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "d5YSIoDhbsIhjv9FN1LkpU30DzP8LzJs",
+                    "client_id": "KUyd85V3ARAVhHlpgFpXu5jn9MLhDnuX",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -2222,7 +2255,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "SlnBYESSQE83e042qhjctEizntTWGboW",
+                    "client_id": "XwmnpszVn5cSV0V5JVrHw2kXkrQLPB2F",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -2282,7 +2315,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "RF60ZkCQzronG0gnoL85Qu0NdQIBGmim",
+                    "client_id": "hO2Bf4PhXI72DNBgoGyBPsZyig76uJzo",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -2340,7 +2373,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK",
+                    "client_id": "o8xIEX6Us6TZ8Jin5tjH1dWjrBPLKllV",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -2377,7 +2410,8 @@
                         "mr|samlp|okta|frederik.prijck@auth0.com",
                         "mr|google-oauth2|109614534713742077035",
                         "mr|google-oauth2|116771660953104383819",
-                        "mr|google-oauth2|112839029247827700155"
+                        "mr|google-oauth2|112839029247827700155",
+                        "mr|samlp|okta|ewan.harris@auth0.com"
                     ],
                     "custom_login_page": "<html>TEST123</html>\n",
                     "cross_origin_authentication": true,
@@ -2409,7 +2443,7 @@
             "limit": 50,
             "connections": [
                 {
-                    "id": "con_cPbeLX3uoH77QRZz",
+                    "id": "con_Xji12VfXcjbJkK8L",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -2465,12 +2499,12 @@
                         "boo-baz-db-connection-test"
                     ],
                     "enabled_clients": [
-                        "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
-                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                        "mDMSk4t4l81jFOcVEQzUxA8MMPfHyhWy",
+                        "o8xIEX6Us6TZ8Jin5tjH1dWjrBPLKllV"
                     ]
                 },
                 {
-                    "id": "con_uAzBCmGhcwxWM9kJ",
+                    "id": "con_KY7b5xuw1Bh6S3vy",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -2500,8 +2534,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
+                        "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
             ]
@@ -2518,7 +2552,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_cPbeLX3uoH77QRZz",
+                    "id": "con_Xji12VfXcjbJkK8L",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -2574,12 +2608,12 @@
                         "boo-baz-db-connection-test"
                     ],
                     "enabled_clients": [
-                        "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
-                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                        "mDMSk4t4l81jFOcVEQzUxA8MMPfHyhWy",
+                        "o8xIEX6Us6TZ8Jin5tjH1dWjrBPLKllV"
                     ]
                 },
                 {
-                    "id": "con_uAzBCmGhcwxWM9kJ",
+                    "id": "con_KY7b5xuw1Bh6S3vy",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -2609,8 +2643,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
+                        "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
             ]
@@ -2630,7 +2664,7 @@
             "limit": 50,
             "connections": [
                 {
-                    "id": "con_cPbeLX3uoH77QRZz",
+                    "id": "con_Xji12VfXcjbJkK8L",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -2686,12 +2720,12 @@
                         "boo-baz-db-connection-test"
                     ],
                     "enabled_clients": [
-                        "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
-                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                        "mDMSk4t4l81jFOcVEQzUxA8MMPfHyhWy",
+                        "o8xIEX6Us6TZ8Jin5tjH1dWjrBPLKllV"
                     ]
                 },
                 {
-                    "id": "con_uAzBCmGhcwxWM9kJ",
+                    "id": "con_KY7b5xuw1Bh6S3vy",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -2721,8 +2755,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
+                        "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
             ]
@@ -2739,7 +2773,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_cPbeLX3uoH77QRZz",
+                    "id": "con_Xji12VfXcjbJkK8L",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -2795,12 +2829,12 @@
                         "boo-baz-db-connection-test"
                     ],
                     "enabled_clients": [
-                        "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
-                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                        "mDMSk4t4l81jFOcVEQzUxA8MMPfHyhWy",
+                        "o8xIEX6Us6TZ8Jin5tjH1dWjrBPLKllV"
                     ]
                 },
                 {
-                    "id": "con_uAzBCmGhcwxWM9kJ",
+                    "id": "con_KY7b5xuw1Bh6S3vy",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -2830,8 +2864,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
+                        "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
             ]
@@ -2842,11 +2876,49 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections/con_uAzBCmGhcwxWM9kJ",
+        "path": "/api/v2/connections/con_KY7b5xuw1Bh6S3vy/clients?take=50",
         "body": "",
         "status": 200,
         "response": {
-            "id": "con_uAzBCmGhcwxWM9kJ",
+            "clients": [
+                {
+                    "client_id": "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs"
+                },
+                {
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/connections/con_Xji12VfXcjbJkK8L/clients?take=50",
+        "body": "",
+        "status": 200,
+        "response": {
+            "clients": [
+                {
+                    "client_id": "mDMSk4t4l81jFOcVEQzUxA8MMPfHyhWy"
+                },
+                {
+                    "client_id": "o8xIEX6Us6TZ8Jin5tjH1dWjrBPLKllV"
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/connections/con_KY7b5xuw1Bh6S3vy",
+        "body": "",
+        "status": 200,
+        "response": {
+            "id": "con_KY7b5xuw1Bh6S3vy",
             "options": {
                 "mfa": {
                     "active": true,
@@ -2873,8 +2945,8 @@
             "name": "Username-Password-Authentication",
             "is_domain_connection": false,
             "enabled_clients": [
-                "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
+                "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
+                "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
             ],
             "realms": [
                 "Username-Password-Authentication"
@@ -2886,11 +2958,11 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/connections/con_uAzBCmGhcwxWM9kJ",
+        "path": "/api/v2/connections/con_KY7b5xuw1Bh6S3vy",
         "body": {
             "enabled_clients": [
                 "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
+                "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs"
             ],
             "is_domain_connection": false,
             "options": {
@@ -2921,7 +2993,7 @@
         },
         "status": 200,
         "response": {
-            "id": "con_uAzBCmGhcwxWM9kJ",
+            "id": "con_KY7b5xuw1Bh6S3vy",
             "options": {
                 "mfa": {
                     "active": true,
@@ -2949,12 +3021,31 @@
             "is_domain_connection": false,
             "enabled_clients": [
                 "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
+                "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs"
             ],
             "realms": [
                 "Username-Password-Authentication"
             ]
         },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/connections/con_KY7b5xuw1Bh6S3vy/clients",
+        "body": [
+            {
+                "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                "status": true
+            },
+            {
+                "client_id": "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
+                "status": true
+            }
+        ],
+        "status": 204,
+        "response": "",
         "rawHeaders": [],
         "responseIsBinary": false
     },
@@ -3051,7 +3142,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC",
+                    "client_id": "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3104,7 +3195,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "Jxv2FgWcn68QuDUzXgdll9Xgo2nlEBDm",
+                    "client_id": "kvyJLK1YaA90Fn3Xmnk1vOdQHVjiuG5M",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3149,7 +3240,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "QKsnAEeydL8Fjuxw7jfCzcrVyCgOOypX",
+                    "client_id": "vC5XPS3kpE3DjSNFjN8EvmxdEsjXZmXM",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3203,7 +3294,7 @@
                         }
                     ],
                     "allowed_origins": [],
-                    "client_id": "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
+                    "client_id": "mDMSk4t4l81jFOcVEQzUxA8MMPfHyhWy",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3249,7 +3340,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "d5YSIoDhbsIhjv9FN1LkpU30DzP8LzJs",
+                    "client_id": "KUyd85V3ARAVhHlpgFpXu5jn9MLhDnuX",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3302,7 +3393,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "SlnBYESSQE83e042qhjctEizntTWGboW",
+                    "client_id": "XwmnpszVn5cSV0V5JVrHw2kXkrQLPB2F",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3362,7 +3453,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "RF60ZkCQzronG0gnoL85Qu0NdQIBGmim",
+                    "client_id": "hO2Bf4PhXI72DNBgoGyBPsZyig76uJzo",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3420,7 +3511,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK",
+                    "client_id": "o8xIEX6Us6TZ8Jin5tjH1dWjrBPLKllV",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3457,7 +3548,8 @@
                         "mr|samlp|okta|frederik.prijck@auth0.com",
                         "mr|google-oauth2|109614534713742077035",
                         "mr|google-oauth2|116771660953104383819",
-                        "mr|google-oauth2|112839029247827700155"
+                        "mr|google-oauth2|112839029247827700155",
+                        "mr|samlp|okta|ewan.harris@auth0.com"
                     ],
                     "custom_login_page": "<html>TEST123</html>\n",
                     "cross_origin_authentication": true,
@@ -3489,7 +3581,7 @@
             "limit": 50,
             "connections": [
                 {
-                    "id": "con_cPbeLX3uoH77QRZz",
+                    "id": "con_Xji12VfXcjbJkK8L",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -3545,12 +3637,12 @@
                         "boo-baz-db-connection-test"
                     ],
                     "enabled_clients": [
-                        "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
-                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                        "mDMSk4t4l81jFOcVEQzUxA8MMPfHyhWy",
+                        "o8xIEX6Us6TZ8Jin5tjH1dWjrBPLKllV"
                     ]
                 },
                 {
-                    "id": "con_ypEso8gFN9jFQ4Bx",
+                    "id": "con_hY1sRDc8YCpBu6sZ",
                     "options": {
                         "email": true,
                         "scope": [
@@ -3566,12 +3658,12 @@
                         "google-oauth2"
                     ],
                     "enabled_clients": [
-                        "SlnBYESSQE83e042qhjctEizntTWGboW",
-                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs"
                     ]
                 },
                 {
-                    "id": "con_uAzBCmGhcwxWM9kJ",
+                    "id": "con_KY7b5xuw1Bh6S3vy",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -3601,8 +3693,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
+                        "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
             ]
@@ -3619,7 +3711,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_cPbeLX3uoH77QRZz",
+                    "id": "con_Xji12VfXcjbJkK8L",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -3675,12 +3767,12 @@
                         "boo-baz-db-connection-test"
                     ],
                     "enabled_clients": [
-                        "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
-                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                        "mDMSk4t4l81jFOcVEQzUxA8MMPfHyhWy",
+                        "o8xIEX6Us6TZ8Jin5tjH1dWjrBPLKllV"
                     ]
                 },
                 {
-                    "id": "con_ypEso8gFN9jFQ4Bx",
+                    "id": "con_hY1sRDc8YCpBu6sZ",
                     "options": {
                         "email": true,
                         "scope": [
@@ -3696,12 +3788,12 @@
                         "google-oauth2"
                     ],
                     "enabled_clients": [
-                        "SlnBYESSQE83e042qhjctEizntTWGboW",
-                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs"
                     ]
                 },
                 {
-                    "id": "con_uAzBCmGhcwxWM9kJ",
+                    "id": "con_KY7b5xuw1Bh6S3vy",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -3731,8 +3823,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
+                        "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
             ]
@@ -3752,7 +3844,7 @@
             "limit": 50,
             "connections": [
                 {
-                    "id": "con_cPbeLX3uoH77QRZz",
+                    "id": "con_Xji12VfXcjbJkK8L",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -3808,12 +3900,12 @@
                         "boo-baz-db-connection-test"
                     ],
                     "enabled_clients": [
-                        "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
-                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                        "mDMSk4t4l81jFOcVEQzUxA8MMPfHyhWy",
+                        "o8xIEX6Us6TZ8Jin5tjH1dWjrBPLKllV"
                     ]
                 },
                 {
-                    "id": "con_ypEso8gFN9jFQ4Bx",
+                    "id": "con_hY1sRDc8YCpBu6sZ",
                     "options": {
                         "email": true,
                         "scope": [
@@ -3829,12 +3921,12 @@
                         "google-oauth2"
                     ],
                     "enabled_clients": [
-                        "SlnBYESSQE83e042qhjctEizntTWGboW",
-                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs"
                     ]
                 },
                 {
-                    "id": "con_uAzBCmGhcwxWM9kJ",
+                    "id": "con_KY7b5xuw1Bh6S3vy",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -3864,8 +3956,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
+                        "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
             ]
@@ -3882,7 +3974,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_cPbeLX3uoH77QRZz",
+                    "id": "con_Xji12VfXcjbJkK8L",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -3938,12 +4030,12 @@
                         "boo-baz-db-connection-test"
                     ],
                     "enabled_clients": [
-                        "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
-                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                        "mDMSk4t4l81jFOcVEQzUxA8MMPfHyhWy",
+                        "o8xIEX6Us6TZ8Jin5tjH1dWjrBPLKllV"
                     ]
                 },
                 {
-                    "id": "con_ypEso8gFN9jFQ4Bx",
+                    "id": "con_hY1sRDc8YCpBu6sZ",
                     "options": {
                         "email": true,
                         "scope": [
@@ -3959,12 +4051,12 @@
                         "google-oauth2"
                     ],
                     "enabled_clients": [
-                        "SlnBYESSQE83e042qhjctEizntTWGboW",
-                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs"
                     ]
                 },
                 {
-                    "id": "con_uAzBCmGhcwxWM9kJ",
+                    "id": "con_KY7b5xuw1Bh6S3vy",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -3994,8 +4086,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
+                        "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
             ]
@@ -4005,12 +4097,31 @@
     },
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/connections/con_hY1sRDc8YCpBu6sZ/clients?take=50",
+        "body": "",
+        "status": 200,
+        "response": {
+            "clients": [
+                {
+                    "client_id": "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs"
+                },
+                {
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/connections/con_ypEso8gFN9jFQ4Bx",
+        "path": "/api/v2/connections/con_hY1sRDc8YCpBu6sZ",
         "body": {
             "enabled_clients": [
                 "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
+                "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs"
             ],
             "is_domain_connection": false,
             "options": {
@@ -4024,7 +4135,7 @@
         },
         "status": 200,
         "response": {
-            "id": "con_ypEso8gFN9jFQ4Bx",
+            "id": "con_hY1sRDc8YCpBu6sZ",
             "options": {
                 "email": true,
                 "scope": [
@@ -4038,12 +4149,31 @@
             "is_domain_connection": false,
             "enabled_clients": [
                 "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
+                "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs"
             ],
             "realms": [
                 "google-oauth2"
             ]
         },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/connections/con_hY1sRDc8YCpBu6sZ/clients",
+        "body": [
+            {
+                "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                "status": true
+            },
+            {
+                "client_id": "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
+                "status": true
+            }
+        ],
+        "status": 204,
+        "response": "",
         "rawHeaders": [],
         "responseIsBinary": false
     },
@@ -4155,7 +4285,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC",
+                    "client_id": "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -4208,7 +4338,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "Jxv2FgWcn68QuDUzXgdll9Xgo2nlEBDm",
+                    "client_id": "kvyJLK1YaA90Fn3Xmnk1vOdQHVjiuG5M",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -4253,7 +4383,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "QKsnAEeydL8Fjuxw7jfCzcrVyCgOOypX",
+                    "client_id": "vC5XPS3kpE3DjSNFjN8EvmxdEsjXZmXM",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -4307,7 +4437,7 @@
                         }
                     ],
                     "allowed_origins": [],
-                    "client_id": "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
+                    "client_id": "mDMSk4t4l81jFOcVEQzUxA8MMPfHyhWy",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -4353,7 +4483,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "d5YSIoDhbsIhjv9FN1LkpU30DzP8LzJs",
+                    "client_id": "KUyd85V3ARAVhHlpgFpXu5jn9MLhDnuX",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -4406,7 +4536,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "SlnBYESSQE83e042qhjctEizntTWGboW",
+                    "client_id": "XwmnpszVn5cSV0V5JVrHw2kXkrQLPB2F",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -4466,7 +4596,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "RF60ZkCQzronG0gnoL85Qu0NdQIBGmim",
+                    "client_id": "hO2Bf4PhXI72DNBgoGyBPsZyig76uJzo",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -4524,7 +4654,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK",
+                    "client_id": "o8xIEX6Us6TZ8Jin5tjH1dWjrBPLKllV",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -4561,7 +4691,8 @@
                         "mr|samlp|okta|frederik.prijck@auth0.com",
                         "mr|google-oauth2|109614534713742077035",
                         "mr|google-oauth2|116771660953104383819",
-                        "mr|google-oauth2|112839029247827700155"
+                        "mr|google-oauth2|112839029247827700155",
+                        "mr|samlp|okta|ewan.harris@auth0.com"
                     ],
                     "custom_login_page": "<html>TEST123</html>\n",
                     "cross_origin_authentication": true,
@@ -4593,7 +4724,283 @@
             "limit": 100,
             "client_grants": [
                 {
-                    "id": "cgr_a5G2CpWYpgxCM4Xw",
+                    "id": "cgr_DyH6XoRj6juVcIWE",
+                    "client_id": "KUyd85V3ARAVhHlpgFpXu5jn9MLhDnuX",
+                    "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
+                    "scope": [
+                        "read:client_grants",
+                        "create:client_grants",
+                        "delete:client_grants",
+                        "update:client_grants",
+                        "read:users",
+                        "update:users",
+                        "delete:users",
+                        "create:users",
+                        "read:users_app_metadata",
+                        "update:users_app_metadata",
+                        "delete:users_app_metadata",
+                        "create:users_app_metadata",
+                        "read:user_custom_blocks",
+                        "create:user_custom_blocks",
+                        "delete:user_custom_blocks",
+                        "create:user_tickets",
+                        "read:clients",
+                        "update:clients",
+                        "delete:clients",
+                        "create:clients",
+                        "read:client_keys",
+                        "update:client_keys",
+                        "delete:client_keys",
+                        "create:client_keys",
+                        "read:connections",
+                        "update:connections",
+                        "delete:connections",
+                        "create:connections",
+                        "read:resource_servers",
+                        "update:resource_servers",
+                        "delete:resource_servers",
+                        "create:resource_servers",
+                        "read:device_credentials",
+                        "update:device_credentials",
+                        "delete:device_credentials",
+                        "create:device_credentials",
+                        "read:rules",
+                        "update:rules",
+                        "delete:rules",
+                        "create:rules",
+                        "read:rules_configs",
+                        "update:rules_configs",
+                        "delete:rules_configs",
+                        "read:hooks",
+                        "update:hooks",
+                        "delete:hooks",
+                        "create:hooks",
+                        "read:actions",
+                        "update:actions",
+                        "delete:actions",
+                        "create:actions",
+                        "read:email_provider",
+                        "update:email_provider",
+                        "delete:email_provider",
+                        "create:email_provider",
+                        "blacklist:tokens",
+                        "read:stats",
+                        "read:insights",
+                        "read:tenant_settings",
+                        "update:tenant_settings",
+                        "read:logs",
+                        "read:logs_users",
+                        "read:shields",
+                        "create:shields",
+                        "update:shields",
+                        "delete:shields",
+                        "read:anomaly_blocks",
+                        "delete:anomaly_blocks",
+                        "update:triggers",
+                        "read:triggers",
+                        "read:grants",
+                        "delete:grants",
+                        "read:guardian_factors",
+                        "update:guardian_factors",
+                        "read:guardian_enrollments",
+                        "delete:guardian_enrollments",
+                        "create:guardian_enrollment_tickets",
+                        "read:user_idp_tokens",
+                        "create:passwords_checking_job",
+                        "delete:passwords_checking_job",
+                        "read:custom_domains",
+                        "delete:custom_domains",
+                        "create:custom_domains",
+                        "update:custom_domains",
+                        "read:email_templates",
+                        "create:email_templates",
+                        "update:email_templates",
+                        "read:mfa_policies",
+                        "update:mfa_policies",
+                        "read:roles",
+                        "create:roles",
+                        "delete:roles",
+                        "update:roles",
+                        "read:prompts",
+                        "update:prompts",
+                        "read:branding",
+                        "update:branding",
+                        "delete:branding",
+                        "read:log_streams",
+                        "create:log_streams",
+                        "delete:log_streams",
+                        "update:log_streams",
+                        "create:signing_keys",
+                        "read:signing_keys",
+                        "update:signing_keys",
+                        "read:limits",
+                        "update:limits",
+                        "create:role_members",
+                        "read:role_members",
+                        "delete:role_members",
+                        "read:entitlements",
+                        "read:attack_protection",
+                        "update:attack_protection",
+                        "read:organizations",
+                        "update:organizations",
+                        "create:organizations",
+                        "delete:organizations",
+                        "create:organization_members",
+                        "read:organization_members",
+                        "delete:organization_members",
+                        "create:organization_connections",
+                        "read:organization_connections",
+                        "update:organization_connections",
+                        "delete:organization_connections",
+                        "create:organization_member_roles",
+                        "read:organization_member_roles",
+                        "delete:organization_member_roles",
+                        "create:organization_invitations",
+                        "read:organization_invitations",
+                        "delete:organization_invitations"
+                    ],
+                    "subject_type": "client"
+                },
+                {
+                    "id": "cgr_df97hGA0GWjGdHT4",
+                    "client_id": "kvyJLK1YaA90Fn3Xmnk1vOdQHVjiuG5M",
+                    "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
+                    "scope": [
+                        "read:client_grants",
+                        "create:client_grants",
+                        "delete:client_grants",
+                        "update:client_grants",
+                        "read:users",
+                        "update:users",
+                        "delete:users",
+                        "create:users",
+                        "read:users_app_metadata",
+                        "update:users_app_metadata",
+                        "delete:users_app_metadata",
+                        "create:users_app_metadata",
+                        "read:user_custom_blocks",
+                        "create:user_custom_blocks",
+                        "delete:user_custom_blocks",
+                        "create:user_tickets",
+                        "read:clients",
+                        "update:clients",
+                        "delete:clients",
+                        "create:clients",
+                        "read:client_keys",
+                        "update:client_keys",
+                        "delete:client_keys",
+                        "create:client_keys",
+                        "read:connections",
+                        "update:connections",
+                        "delete:connections",
+                        "create:connections",
+                        "read:resource_servers",
+                        "update:resource_servers",
+                        "delete:resource_servers",
+                        "create:resource_servers",
+                        "read:device_credentials",
+                        "update:device_credentials",
+                        "delete:device_credentials",
+                        "create:device_credentials",
+                        "read:rules",
+                        "update:rules",
+                        "delete:rules",
+                        "create:rules",
+                        "read:rules_configs",
+                        "update:rules_configs",
+                        "delete:rules_configs",
+                        "read:hooks",
+                        "update:hooks",
+                        "delete:hooks",
+                        "create:hooks",
+                        "read:actions",
+                        "update:actions",
+                        "delete:actions",
+                        "create:actions",
+                        "read:email_provider",
+                        "update:email_provider",
+                        "delete:email_provider",
+                        "create:email_provider",
+                        "blacklist:tokens",
+                        "read:stats",
+                        "read:insights",
+                        "read:tenant_settings",
+                        "update:tenant_settings",
+                        "read:logs",
+                        "read:logs_users",
+                        "read:shields",
+                        "create:shields",
+                        "update:shields",
+                        "delete:shields",
+                        "read:anomaly_blocks",
+                        "delete:anomaly_blocks",
+                        "update:triggers",
+                        "read:triggers",
+                        "read:grants",
+                        "delete:grants",
+                        "read:guardian_factors",
+                        "update:guardian_factors",
+                        "read:guardian_enrollments",
+                        "delete:guardian_enrollments",
+                        "create:guardian_enrollment_tickets",
+                        "read:user_idp_tokens",
+                        "create:passwords_checking_job",
+                        "delete:passwords_checking_job",
+                        "read:custom_domains",
+                        "delete:custom_domains",
+                        "create:custom_domains",
+                        "update:custom_domains",
+                        "read:email_templates",
+                        "create:email_templates",
+                        "update:email_templates",
+                        "read:mfa_policies",
+                        "update:mfa_policies",
+                        "read:roles",
+                        "create:roles",
+                        "delete:roles",
+                        "update:roles",
+                        "read:prompts",
+                        "update:prompts",
+                        "read:branding",
+                        "update:branding",
+                        "delete:branding",
+                        "read:log_streams",
+                        "create:log_streams",
+                        "delete:log_streams",
+                        "update:log_streams",
+                        "create:signing_keys",
+                        "read:signing_keys",
+                        "update:signing_keys",
+                        "read:limits",
+                        "update:limits",
+                        "create:role_members",
+                        "read:role_members",
+                        "delete:role_members",
+                        "read:entitlements",
+                        "read:attack_protection",
+                        "update:attack_protection",
+                        "read:organizations",
+                        "update:organizations",
+                        "create:organizations",
+                        "delete:organizations",
+                        "create:organization_members",
+                        "read:organization_members",
+                        "delete:organization_members",
+                        "create:organization_connections",
+                        "read:organization_connections",
+                        "update:organization_connections",
+                        "delete:organization_connections",
+                        "create:organization_member_roles",
+                        "read:organization_member_roles",
+                        "delete:organization_member_roles",
+                        "create:organization_invitations",
+                        "read:organization_invitations",
+                        "delete:organization_invitations"
+                    ],
+                    "subject_type": "client"
+                },
+                {
+                    "id": "cgr_pbwejzhwoujrsNE8",
                     "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
                     "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
                     "scope": [
@@ -4621,6 +5028,10 @@
                         "update:client_keys",
                         "delete:client_keys",
                         "create:client_keys",
+                        "read:client_credentials",
+                        "update:client_credentials",
+                        "delete:client_credentials",
+                        "create:client_credentials",
                         "read:connections",
                         "update:connections",
                         "delete:connections",
@@ -4719,6 +5130,10 @@
                         "update:organizations",
                         "create:organizations",
                         "delete:organizations",
+                        "read:organization_discovery_domains",
+                        "update:organization_discovery_domains",
+                        "create:organization_discovery_domains",
+                        "delete:organization_discovery_domains",
                         "create:organization_members",
                         "read:organization_members",
                         "delete:organization_members",
@@ -4752,6 +5167,7 @@
                         "update:encryption_keys",
                         "delete:encryption_keys",
                         "read:sessions",
+                        "update:sessions",
                         "delete:sessions",
                         "read:refresh_tokens",
                         "delete:refresh_tokens",
@@ -4792,288 +5208,31 @@
                         "read:custom_signing_keys",
                         "update:custom_signing_keys",
                         "delete:custom_signing_keys",
-                        "read:client_credentials",
-                        "create:client_credentials",
-                        "update:client_credentials",
-                        "delete:client_credentials",
+                        "read:federated_connections_tokens",
+                        "delete:federated_connections_tokens",
+                        "create:user_attribute_profiles",
+                        "read:user_attribute_profiles",
+                        "update:user_attribute_profiles",
+                        "delete:user_attribute_profiles",
+                        "read:event_streams",
+                        "create:event_streams",
+                        "delete:event_streams",
+                        "update:event_streams",
+                        "read:event_deliveries",
+                        "update:event_deliveries",
+                        "create:connection_profiles",
+                        "read:connection_profiles",
+                        "update:connection_profiles",
+                        "delete:connection_profiles",
                         "read:organization_client_grants",
                         "create:organization_client_grants",
-                        "delete:organization_client_grants"
-                    ]
-                },
-                {
-                    "id": "cgr_ssWlvSQvTDiad8pg",
-                    "client_id": "Jxv2FgWcn68QuDUzXgdll9Xgo2nlEBDm",
-                    "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
-                    "scope": [
-                        "read:client_grants",
-                        "create:client_grants",
-                        "delete:client_grants",
-                        "update:client_grants",
-                        "read:users",
-                        "update:users",
-                        "delete:users",
-                        "create:users",
-                        "read:users_app_metadata",
-                        "update:users_app_metadata",
-                        "delete:users_app_metadata",
-                        "create:users_app_metadata",
-                        "read:user_custom_blocks",
-                        "create:user_custom_blocks",
-                        "delete:user_custom_blocks",
-                        "create:user_tickets",
-                        "read:clients",
-                        "update:clients",
-                        "delete:clients",
-                        "create:clients",
-                        "read:client_keys",
-                        "update:client_keys",
-                        "delete:client_keys",
-                        "create:client_keys",
-                        "read:connections",
-                        "update:connections",
-                        "delete:connections",
-                        "create:connections",
-                        "read:resource_servers",
-                        "update:resource_servers",
-                        "delete:resource_servers",
-                        "create:resource_servers",
-                        "read:device_credentials",
-                        "update:device_credentials",
-                        "delete:device_credentials",
-                        "create:device_credentials",
-                        "read:rules",
-                        "update:rules",
-                        "delete:rules",
-                        "create:rules",
-                        "read:rules_configs",
-                        "update:rules_configs",
-                        "delete:rules_configs",
-                        "read:hooks",
-                        "update:hooks",
-                        "delete:hooks",
-                        "create:hooks",
-                        "read:actions",
-                        "update:actions",
-                        "delete:actions",
-                        "create:actions",
-                        "read:email_provider",
-                        "update:email_provider",
-                        "delete:email_provider",
-                        "create:email_provider",
-                        "blacklist:tokens",
-                        "read:stats",
-                        "read:insights",
-                        "read:tenant_settings",
-                        "update:tenant_settings",
-                        "read:logs",
-                        "read:logs_users",
-                        "read:shields",
-                        "create:shields",
-                        "update:shields",
-                        "delete:shields",
-                        "read:anomaly_blocks",
-                        "delete:anomaly_blocks",
-                        "update:triggers",
-                        "read:triggers",
-                        "read:grants",
-                        "delete:grants",
-                        "read:guardian_factors",
-                        "update:guardian_factors",
-                        "read:guardian_enrollments",
-                        "delete:guardian_enrollments",
-                        "create:guardian_enrollment_tickets",
-                        "read:user_idp_tokens",
-                        "create:passwords_checking_job",
-                        "delete:passwords_checking_job",
-                        "read:custom_domains",
-                        "delete:custom_domains",
-                        "create:custom_domains",
-                        "update:custom_domains",
-                        "read:email_templates",
-                        "create:email_templates",
-                        "update:email_templates",
-                        "read:mfa_policies",
-                        "update:mfa_policies",
-                        "read:roles",
-                        "create:roles",
-                        "delete:roles",
-                        "update:roles",
-                        "read:prompts",
-                        "update:prompts",
-                        "read:branding",
-                        "update:branding",
-                        "delete:branding",
-                        "read:log_streams",
-                        "create:log_streams",
-                        "delete:log_streams",
-                        "update:log_streams",
-                        "create:signing_keys",
-                        "read:signing_keys",
-                        "update:signing_keys",
-                        "read:limits",
-                        "update:limits",
-                        "create:role_members",
-                        "read:role_members",
-                        "delete:role_members",
-                        "read:entitlements",
-                        "read:attack_protection",
-                        "update:attack_protection",
-                        "read:organizations",
-                        "update:organizations",
-                        "create:organizations",
-                        "delete:organizations",
-                        "create:organization_members",
-                        "read:organization_members",
-                        "delete:organization_members",
-                        "create:organization_connections",
-                        "read:organization_connections",
-                        "update:organization_connections",
-                        "delete:organization_connections",
-                        "create:organization_member_roles",
-                        "read:organization_member_roles",
-                        "delete:organization_member_roles",
-                        "create:organization_invitations",
-                        "read:organization_invitations",
-                        "delete:organization_invitations"
-                    ]
-                },
-                {
-                    "id": "cgr_w6RVvDFeHOpwM1Zq",
-                    "client_id": "d5YSIoDhbsIhjv9FN1LkpU30DzP8LzJs",
-                    "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
-                    "scope": [
-                        "read:client_grants",
-                        "create:client_grants",
-                        "delete:client_grants",
-                        "update:client_grants",
-                        "read:users",
-                        "update:users",
-                        "delete:users",
-                        "create:users",
-                        "read:users_app_metadata",
-                        "update:users_app_metadata",
-                        "delete:users_app_metadata",
-                        "create:users_app_metadata",
-                        "read:user_custom_blocks",
-                        "create:user_custom_blocks",
-                        "delete:user_custom_blocks",
-                        "create:user_tickets",
-                        "read:clients",
-                        "update:clients",
-                        "delete:clients",
-                        "create:clients",
-                        "read:client_keys",
-                        "update:client_keys",
-                        "delete:client_keys",
-                        "create:client_keys",
-                        "read:connections",
-                        "update:connections",
-                        "delete:connections",
-                        "create:connections",
-                        "read:resource_servers",
-                        "update:resource_servers",
-                        "delete:resource_servers",
-                        "create:resource_servers",
-                        "read:device_credentials",
-                        "update:device_credentials",
-                        "delete:device_credentials",
-                        "create:device_credentials",
-                        "read:rules",
-                        "update:rules",
-                        "delete:rules",
-                        "create:rules",
-                        "read:rules_configs",
-                        "update:rules_configs",
-                        "delete:rules_configs",
-                        "read:hooks",
-                        "update:hooks",
-                        "delete:hooks",
-                        "create:hooks",
-                        "read:actions",
-                        "update:actions",
-                        "delete:actions",
-                        "create:actions",
-                        "read:email_provider",
-                        "update:email_provider",
-                        "delete:email_provider",
-                        "create:email_provider",
-                        "blacklist:tokens",
-                        "read:stats",
-                        "read:insights",
-                        "read:tenant_settings",
-                        "update:tenant_settings",
-                        "read:logs",
-                        "read:logs_users",
-                        "read:shields",
-                        "create:shields",
-                        "update:shields",
-                        "delete:shields",
-                        "read:anomaly_blocks",
-                        "delete:anomaly_blocks",
-                        "update:triggers",
-                        "read:triggers",
-                        "read:grants",
-                        "delete:grants",
-                        "read:guardian_factors",
-                        "update:guardian_factors",
-                        "read:guardian_enrollments",
-                        "delete:guardian_enrollments",
-                        "create:guardian_enrollment_tickets",
-                        "read:user_idp_tokens",
-                        "create:passwords_checking_job",
-                        "delete:passwords_checking_job",
-                        "read:custom_domains",
-                        "delete:custom_domains",
-                        "create:custom_domains",
-                        "update:custom_domains",
-                        "read:email_templates",
-                        "create:email_templates",
-                        "update:email_templates",
-                        "read:mfa_policies",
-                        "update:mfa_policies",
-                        "read:roles",
-                        "create:roles",
-                        "delete:roles",
-                        "update:roles",
-                        "read:prompts",
-                        "update:prompts",
-                        "read:branding",
-                        "update:branding",
-                        "delete:branding",
-                        "read:log_streams",
-                        "create:log_streams",
-                        "delete:log_streams",
-                        "update:log_streams",
-                        "create:signing_keys",
-                        "read:signing_keys",
-                        "update:signing_keys",
-                        "read:limits",
-                        "update:limits",
-                        "create:role_members",
-                        "read:role_members",
-                        "delete:role_members",
-                        "read:entitlements",
-                        "read:attack_protection",
-                        "update:attack_protection",
-                        "read:organizations",
-                        "update:organizations",
-                        "create:organizations",
-                        "delete:organizations",
-                        "create:organization_members",
-                        "read:organization_members",
-                        "delete:organization_members",
-                        "create:organization_connections",
-                        "read:organization_connections",
-                        "update:organization_connections",
-                        "delete:organization_connections",
-                        "create:organization_member_roles",
-                        "read:organization_member_roles",
-                        "delete:organization_member_roles",
-                        "create:organization_invitations",
-                        "read:organization_invitations",
-                        "delete:organization_invitations"
-                    ]
+                        "delete:organization_client_grants",
+                        "read:security_metrics",
+                        "read:connections_keys",
+                        "update:connections_keys",
+                        "create:connections_keys"
+                    ],
+                    "subject_type": "client"
                 }
             ]
         },
@@ -5089,22 +5248,22 @@
         "response": {
             "roles": [
                 {
-                    "id": "rol_bXMM8Nd7SWResint",
+                    "id": "rol_7lJdgX8wyBfxNr8I",
                     "name": "Admin",
                     "description": "Can read and write things"
                 },
                 {
-                    "id": "rol_XtB5wmmSUafX2bYA",
+                    "id": "rol_PxKGor3LywqJsP9t",
                     "name": "Reader",
                     "description": "Can only read things"
                 },
                 {
-                    "id": "rol_wj907kUhQgHQ5fSr",
+                    "id": "rol_hpW98Q70uZwkILOm",
                     "name": "read_only",
                     "description": "Read Only"
                 },
                 {
-                    "id": "rol_YEYsNopCYaHPhjMY",
+                    "id": "rol_LWczoJAl15Uy8eIX",
                     "name": "read_osnly",
                     "description": "Readz Only"
                 }
@@ -5119,7 +5278,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles/rol_bXMM8Nd7SWResint/permissions?per_page=100&page=0&include_totals=true",
+        "path": "/api/v2/roles/rol_7lJdgX8wyBfxNr8I/permissions?per_page=100&page=0&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -5134,7 +5293,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles/rol_XtB5wmmSUafX2bYA/permissions?per_page=100&page=0&include_totals=true",
+        "path": "/api/v2/roles/rol_PxKGor3LywqJsP9t/permissions?per_page=100&page=0&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -5149,7 +5308,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles/rol_wj907kUhQgHQ5fSr/permissions?per_page=100&page=0&include_totals=true",
+        "path": "/api/v2/roles/rol_hpW98Q70uZwkILOm/permissions?per_page=100&page=0&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -5164,7 +5323,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles/rol_YEYsNopCYaHPhjMY/permissions?per_page=100&page=0&include_totals=true",
+        "path": "/api/v2/roles/rol_LWczoJAl15Uy8eIX/permissions?per_page=100&page=0&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -5185,7 +5344,7 @@
         "response": {
             "organizations": [
                 {
-                    "id": "org_dTYabGkEQHnW3Dje",
+                    "id": "org_NN4PVFzpDb4i3PLy",
                     "name": "org1",
                     "display_name": "Organization",
                     "branding": {
@@ -5196,7 +5355,7 @@
                     }
                 },
                 {
-                    "id": "org_3smVMi50Xs4ZWDfN",
+                    "id": "org_MjwvHInHSz08xTl9",
                     "name": "org2",
                     "display_name": "Organization2"
                 }
@@ -5301,7 +5460,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC",
+                    "client_id": "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -5354,7 +5513,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "Jxv2FgWcn68QuDUzXgdll9Xgo2nlEBDm",
+                    "client_id": "kvyJLK1YaA90Fn3Xmnk1vOdQHVjiuG5M",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -5399,7 +5558,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "QKsnAEeydL8Fjuxw7jfCzcrVyCgOOypX",
+                    "client_id": "vC5XPS3kpE3DjSNFjN8EvmxdEsjXZmXM",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -5453,7 +5612,7 @@
                         }
                     ],
                     "allowed_origins": [],
-                    "client_id": "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
+                    "client_id": "mDMSk4t4l81jFOcVEQzUxA8MMPfHyhWy",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -5499,7 +5658,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "d5YSIoDhbsIhjv9FN1LkpU30DzP8LzJs",
+                    "client_id": "KUyd85V3ARAVhHlpgFpXu5jn9MLhDnuX",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -5552,7 +5711,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "SlnBYESSQE83e042qhjctEizntTWGboW",
+                    "client_id": "XwmnpszVn5cSV0V5JVrHw2kXkrQLPB2F",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -5612,7 +5771,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "RF60ZkCQzronG0gnoL85Qu0NdQIBGmim",
+                    "client_id": "hO2Bf4PhXI72DNBgoGyBPsZyig76uJzo",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -5670,7 +5829,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK",
+                    "client_id": "o8xIEX6Us6TZ8Jin5tjH1dWjrBPLKllV",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -5707,7 +5866,8 @@
                         "mr|samlp|okta|frederik.prijck@auth0.com",
                         "mr|google-oauth2|109614534713742077035",
                         "mr|google-oauth2|116771660953104383819",
-                        "mr|google-oauth2|112839029247827700155"
+                        "mr|google-oauth2|112839029247827700155",
+                        "mr|samlp|okta|ewan.harris@auth0.com"
                     ],
                     "custom_login_page": "<html>TEST123</html>\n",
                     "cross_origin_authentication": true,
@@ -5736,7 +5896,12 @@
         "response": {
             "organizations": [
                 {
-                    "id": "org_dTYabGkEQHnW3Dje",
+                    "id": "org_MjwvHInHSz08xTl9",
+                    "name": "org2",
+                    "display_name": "Organization2"
+                },
+                {
+                    "id": "org_NN4PVFzpDb4i3PLy",
                     "name": "org1",
                     "display_name": "Organization",
                     "branding": {
@@ -5745,11 +5910,6 @@
                             "primary": "#57ddff"
                         }
                     }
-                },
-                {
-                    "id": "org_3smVMi50Xs4ZWDfN",
-                    "name": "org2",
-                    "display_name": "Organization2"
                 }
             ]
         },
@@ -5759,7 +5919,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/organizations/org_dTYabGkEQHnW3Dje/enabled_connections",
+        "path": "/api/v2/organizations/org_MjwvHInHSz08xTl9/enabled_connections",
         "body": "",
         "status": 200,
         "response": [],
@@ -5769,7 +5929,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/organizations/org_dTYabGkEQHnW3Dje/client-grants?page=0&per_page=100&include_totals=true",
+        "path": "/api/v2/organizations/org_MjwvHInHSz08xTl9/client-grants?page=0&per_page=100&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -5784,7 +5944,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/organizations/org_3smVMi50Xs4ZWDfN/enabled_connections",
+        "path": "/api/v2/organizations/org_NN4PVFzpDb4i3PLy/enabled_connections",
         "body": "",
         "status": 200,
         "response": [],
@@ -5794,7 +5954,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/organizations/org_3smVMi50Xs4ZWDfN/client-grants?page=0&per_page=100&include_totals=true",
+        "path": "/api/v2/organizations/org_NN4PVFzpDb4i3PLy/client-grants?page=0&per_page=100&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -5818,7 +5978,7 @@
             "limit": 50,
             "connections": [
                 {
-                    "id": "con_cPbeLX3uoH77QRZz",
+                    "id": "con_Xji12VfXcjbJkK8L",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -5874,12 +6034,12 @@
                         "boo-baz-db-connection-test"
                     ],
                     "enabled_clients": [
-                        "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
-                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                        "mDMSk4t4l81jFOcVEQzUxA8MMPfHyhWy",
+                        "o8xIEX6Us6TZ8Jin5tjH1dWjrBPLKllV"
                     ]
                 },
                 {
-                    "id": "con_ypEso8gFN9jFQ4Bx",
+                    "id": "con_hY1sRDc8YCpBu6sZ",
                     "options": {
                         "email": true,
                         "scope": [
@@ -5896,11 +6056,11 @@
                     ],
                     "enabled_clients": [
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
+                        "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs"
                     ]
                 },
                 {
-                    "id": "con_uAzBCmGhcwxWM9kJ",
+                    "id": "con_KY7b5xuw1Bh6S3vy",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -5930,8 +6090,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
+                        "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
             ]
@@ -5948,7 +6108,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_cPbeLX3uoH77QRZz",
+                    "id": "con_Xji12VfXcjbJkK8L",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -6004,12 +6164,12 @@
                         "boo-baz-db-connection-test"
                     ],
                     "enabled_clients": [
-                        "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
-                        "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK"
+                        "mDMSk4t4l81jFOcVEQzUxA8MMPfHyhWy",
+                        "o8xIEX6Us6TZ8Jin5tjH1dWjrBPLKllV"
                     ]
                 },
                 {
-                    "id": "con_ypEso8gFN9jFQ4Bx",
+                    "id": "con_hY1sRDc8YCpBu6sZ",
                     "options": {
                         "email": true,
                         "scope": [
@@ -6026,11 +6186,11 @@
                     ],
                     "enabled_clients": [
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
+                        "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs"
                     ]
                 },
                 {
-                    "id": "con_uAzBCmGhcwxWM9kJ",
+                    "id": "con_KY7b5xuw1Bh6S3vy",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -6060,507 +6220,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC"
-                    ]
-                }
-            ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/client-grants?per_page=100&page=0&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "total": 3,
-            "start": 0,
-            "limit": 100,
-            "client_grants": [
-                {
-                    "id": "cgr_a5G2CpWYpgxCM4Xw",
-                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                    "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
-                    "scope": [
-                        "read:client_grants",
-                        "create:client_grants",
-                        "delete:client_grants",
-                        "update:client_grants",
-                        "read:users",
-                        "update:users",
-                        "delete:users",
-                        "create:users",
-                        "read:users_app_metadata",
-                        "update:users_app_metadata",
-                        "delete:users_app_metadata",
-                        "create:users_app_metadata",
-                        "read:user_custom_blocks",
-                        "create:user_custom_blocks",
-                        "delete:user_custom_blocks",
-                        "create:user_tickets",
-                        "read:clients",
-                        "update:clients",
-                        "delete:clients",
-                        "create:clients",
-                        "read:client_keys",
-                        "update:client_keys",
-                        "delete:client_keys",
-                        "create:client_keys",
-                        "read:connections",
-                        "update:connections",
-                        "delete:connections",
-                        "create:connections",
-                        "read:resource_servers",
-                        "update:resource_servers",
-                        "delete:resource_servers",
-                        "create:resource_servers",
-                        "read:device_credentials",
-                        "update:device_credentials",
-                        "delete:device_credentials",
-                        "create:device_credentials",
-                        "read:rules",
-                        "update:rules",
-                        "delete:rules",
-                        "create:rules",
-                        "read:rules_configs",
-                        "update:rules_configs",
-                        "delete:rules_configs",
-                        "read:hooks",
-                        "update:hooks",
-                        "delete:hooks",
-                        "create:hooks",
-                        "read:actions",
-                        "update:actions",
-                        "delete:actions",
-                        "create:actions",
-                        "read:email_provider",
-                        "update:email_provider",
-                        "delete:email_provider",
-                        "create:email_provider",
-                        "blacklist:tokens",
-                        "read:stats",
-                        "read:insights",
-                        "read:tenant_settings",
-                        "update:tenant_settings",
-                        "read:logs",
-                        "read:logs_users",
-                        "read:shields",
-                        "create:shields",
-                        "update:shields",
-                        "delete:shields",
-                        "read:anomaly_blocks",
-                        "delete:anomaly_blocks",
-                        "update:triggers",
-                        "read:triggers",
-                        "read:grants",
-                        "delete:grants",
-                        "read:guardian_factors",
-                        "update:guardian_factors",
-                        "read:guardian_enrollments",
-                        "delete:guardian_enrollments",
-                        "create:guardian_enrollment_tickets",
-                        "read:user_idp_tokens",
-                        "create:passwords_checking_job",
-                        "delete:passwords_checking_job",
-                        "read:custom_domains",
-                        "delete:custom_domains",
-                        "create:custom_domains",
-                        "update:custom_domains",
-                        "read:email_templates",
-                        "create:email_templates",
-                        "update:email_templates",
-                        "read:mfa_policies",
-                        "update:mfa_policies",
-                        "read:roles",
-                        "create:roles",
-                        "delete:roles",
-                        "update:roles",
-                        "read:prompts",
-                        "update:prompts",
-                        "read:branding",
-                        "update:branding",
-                        "delete:branding",
-                        "read:log_streams",
-                        "create:log_streams",
-                        "delete:log_streams",
-                        "update:log_streams",
-                        "create:signing_keys",
-                        "read:signing_keys",
-                        "update:signing_keys",
-                        "read:limits",
-                        "update:limits",
-                        "create:role_members",
-                        "read:role_members",
-                        "delete:role_members",
-                        "read:entitlements",
-                        "read:attack_protection",
-                        "update:attack_protection",
-                        "read:organizations_summary",
-                        "create:authentication_methods",
-                        "read:authentication_methods",
-                        "update:authentication_methods",
-                        "delete:authentication_methods",
-                        "read:organizations",
-                        "update:organizations",
-                        "create:organizations",
-                        "delete:organizations",
-                        "create:organization_members",
-                        "read:organization_members",
-                        "delete:organization_members",
-                        "create:organization_connections",
-                        "read:organization_connections",
-                        "update:organization_connections",
-                        "delete:organization_connections",
-                        "create:organization_member_roles",
-                        "read:organization_member_roles",
-                        "delete:organization_member_roles",
-                        "create:organization_invitations",
-                        "read:organization_invitations",
-                        "delete:organization_invitations",
-                        "read:scim_config",
-                        "create:scim_config",
-                        "update:scim_config",
-                        "delete:scim_config",
-                        "create:scim_token",
-                        "read:scim_token",
-                        "delete:scim_token",
-                        "delete:phone_providers",
-                        "create:phone_providers",
-                        "read:phone_providers",
-                        "update:phone_providers",
-                        "delete:phone_templates",
-                        "create:phone_templates",
-                        "read:phone_templates",
-                        "update:phone_templates",
-                        "create:encryption_keys",
-                        "read:encryption_keys",
-                        "update:encryption_keys",
-                        "delete:encryption_keys",
-                        "read:sessions",
-                        "delete:sessions",
-                        "read:refresh_tokens",
-                        "delete:refresh_tokens",
-                        "create:self_service_profiles",
-                        "read:self_service_profiles",
-                        "update:self_service_profiles",
-                        "delete:self_service_profiles",
-                        "create:sso_access_tickets",
-                        "delete:sso_access_tickets",
-                        "read:forms",
-                        "update:forms",
-                        "delete:forms",
-                        "create:forms",
-                        "read:flows",
-                        "update:flows",
-                        "delete:flows",
-                        "create:flows",
-                        "read:flows_vault",
-                        "read:flows_vault_connections",
-                        "update:flows_vault_connections",
-                        "delete:flows_vault_connections",
-                        "create:flows_vault_connections",
-                        "read:flows_executions",
-                        "delete:flows_executions",
-                        "read:connections_options",
-                        "update:connections_options",
-                        "read:self_service_profile_custom_texts",
-                        "update:self_service_profile_custom_texts",
-                        "create:network_acls",
-                        "update:network_acls",
-                        "read:network_acls",
-                        "delete:network_acls",
-                        "delete:vdcs_templates",
-                        "read:vdcs_templates",
-                        "create:vdcs_templates",
-                        "update:vdcs_templates",
-                        "create:custom_signing_keys",
-                        "read:custom_signing_keys",
-                        "update:custom_signing_keys",
-                        "delete:custom_signing_keys",
-                        "read:client_credentials",
-                        "create:client_credentials",
-                        "update:client_credentials",
-                        "delete:client_credentials",
-                        "read:organization_client_grants",
-                        "create:organization_client_grants",
-                        "delete:organization_client_grants"
-                    ]
-                },
-                {
-                    "id": "cgr_ssWlvSQvTDiad8pg",
-                    "client_id": "Jxv2FgWcn68QuDUzXgdll9Xgo2nlEBDm",
-                    "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
-                    "scope": [
-                        "read:client_grants",
-                        "create:client_grants",
-                        "delete:client_grants",
-                        "update:client_grants",
-                        "read:users",
-                        "update:users",
-                        "delete:users",
-                        "create:users",
-                        "read:users_app_metadata",
-                        "update:users_app_metadata",
-                        "delete:users_app_metadata",
-                        "create:users_app_metadata",
-                        "read:user_custom_blocks",
-                        "create:user_custom_blocks",
-                        "delete:user_custom_blocks",
-                        "create:user_tickets",
-                        "read:clients",
-                        "update:clients",
-                        "delete:clients",
-                        "create:clients",
-                        "read:client_keys",
-                        "update:client_keys",
-                        "delete:client_keys",
-                        "create:client_keys",
-                        "read:connections",
-                        "update:connections",
-                        "delete:connections",
-                        "create:connections",
-                        "read:resource_servers",
-                        "update:resource_servers",
-                        "delete:resource_servers",
-                        "create:resource_servers",
-                        "read:device_credentials",
-                        "update:device_credentials",
-                        "delete:device_credentials",
-                        "create:device_credentials",
-                        "read:rules",
-                        "update:rules",
-                        "delete:rules",
-                        "create:rules",
-                        "read:rules_configs",
-                        "update:rules_configs",
-                        "delete:rules_configs",
-                        "read:hooks",
-                        "update:hooks",
-                        "delete:hooks",
-                        "create:hooks",
-                        "read:actions",
-                        "update:actions",
-                        "delete:actions",
-                        "create:actions",
-                        "read:email_provider",
-                        "update:email_provider",
-                        "delete:email_provider",
-                        "create:email_provider",
-                        "blacklist:tokens",
-                        "read:stats",
-                        "read:insights",
-                        "read:tenant_settings",
-                        "update:tenant_settings",
-                        "read:logs",
-                        "read:logs_users",
-                        "read:shields",
-                        "create:shields",
-                        "update:shields",
-                        "delete:shields",
-                        "read:anomaly_blocks",
-                        "delete:anomaly_blocks",
-                        "update:triggers",
-                        "read:triggers",
-                        "read:grants",
-                        "delete:grants",
-                        "read:guardian_factors",
-                        "update:guardian_factors",
-                        "read:guardian_enrollments",
-                        "delete:guardian_enrollments",
-                        "create:guardian_enrollment_tickets",
-                        "read:user_idp_tokens",
-                        "create:passwords_checking_job",
-                        "delete:passwords_checking_job",
-                        "read:custom_domains",
-                        "delete:custom_domains",
-                        "create:custom_domains",
-                        "update:custom_domains",
-                        "read:email_templates",
-                        "create:email_templates",
-                        "update:email_templates",
-                        "read:mfa_policies",
-                        "update:mfa_policies",
-                        "read:roles",
-                        "create:roles",
-                        "delete:roles",
-                        "update:roles",
-                        "read:prompts",
-                        "update:prompts",
-                        "read:branding",
-                        "update:branding",
-                        "delete:branding",
-                        "read:log_streams",
-                        "create:log_streams",
-                        "delete:log_streams",
-                        "update:log_streams",
-                        "create:signing_keys",
-                        "read:signing_keys",
-                        "update:signing_keys",
-                        "read:limits",
-                        "update:limits",
-                        "create:role_members",
-                        "read:role_members",
-                        "delete:role_members",
-                        "read:entitlements",
-                        "read:attack_protection",
-                        "update:attack_protection",
-                        "read:organizations",
-                        "update:organizations",
-                        "create:organizations",
-                        "delete:organizations",
-                        "create:organization_members",
-                        "read:organization_members",
-                        "delete:organization_members",
-                        "create:organization_connections",
-                        "read:organization_connections",
-                        "update:organization_connections",
-                        "delete:organization_connections",
-                        "create:organization_member_roles",
-                        "read:organization_member_roles",
-                        "delete:organization_member_roles",
-                        "create:organization_invitations",
-                        "read:organization_invitations",
-                        "delete:organization_invitations"
-                    ]
-                },
-                {
-                    "id": "cgr_w6RVvDFeHOpwM1Zq",
-                    "client_id": "d5YSIoDhbsIhjv9FN1LkpU30DzP8LzJs",
-                    "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
-                    "scope": [
-                        "read:client_grants",
-                        "create:client_grants",
-                        "delete:client_grants",
-                        "update:client_grants",
-                        "read:users",
-                        "update:users",
-                        "delete:users",
-                        "create:users",
-                        "read:users_app_metadata",
-                        "update:users_app_metadata",
-                        "delete:users_app_metadata",
-                        "create:users_app_metadata",
-                        "read:user_custom_blocks",
-                        "create:user_custom_blocks",
-                        "delete:user_custom_blocks",
-                        "create:user_tickets",
-                        "read:clients",
-                        "update:clients",
-                        "delete:clients",
-                        "create:clients",
-                        "read:client_keys",
-                        "update:client_keys",
-                        "delete:client_keys",
-                        "create:client_keys",
-                        "read:connections",
-                        "update:connections",
-                        "delete:connections",
-                        "create:connections",
-                        "read:resource_servers",
-                        "update:resource_servers",
-                        "delete:resource_servers",
-                        "create:resource_servers",
-                        "read:device_credentials",
-                        "update:device_credentials",
-                        "delete:device_credentials",
-                        "create:device_credentials",
-                        "read:rules",
-                        "update:rules",
-                        "delete:rules",
-                        "create:rules",
-                        "read:rules_configs",
-                        "update:rules_configs",
-                        "delete:rules_configs",
-                        "read:hooks",
-                        "update:hooks",
-                        "delete:hooks",
-                        "create:hooks",
-                        "read:actions",
-                        "update:actions",
-                        "delete:actions",
-                        "create:actions",
-                        "read:email_provider",
-                        "update:email_provider",
-                        "delete:email_provider",
-                        "create:email_provider",
-                        "blacklist:tokens",
-                        "read:stats",
-                        "read:insights",
-                        "read:tenant_settings",
-                        "update:tenant_settings",
-                        "read:logs",
-                        "read:logs_users",
-                        "read:shields",
-                        "create:shields",
-                        "update:shields",
-                        "delete:shields",
-                        "read:anomaly_blocks",
-                        "delete:anomaly_blocks",
-                        "update:triggers",
-                        "read:triggers",
-                        "read:grants",
-                        "delete:grants",
-                        "read:guardian_factors",
-                        "update:guardian_factors",
-                        "read:guardian_enrollments",
-                        "delete:guardian_enrollments",
-                        "create:guardian_enrollment_tickets",
-                        "read:user_idp_tokens",
-                        "create:passwords_checking_job",
-                        "delete:passwords_checking_job",
-                        "read:custom_domains",
-                        "delete:custom_domains",
-                        "create:custom_domains",
-                        "update:custom_domains",
-                        "read:email_templates",
-                        "create:email_templates",
-                        "update:email_templates",
-                        "read:mfa_policies",
-                        "update:mfa_policies",
-                        "read:roles",
-                        "create:roles",
-                        "delete:roles",
-                        "update:roles",
-                        "read:prompts",
-                        "update:prompts",
-                        "read:branding",
-                        "update:branding",
-                        "delete:branding",
-                        "read:log_streams",
-                        "create:log_streams",
-                        "delete:log_streams",
-                        "update:log_streams",
-                        "create:signing_keys",
-                        "read:signing_keys",
-                        "update:signing_keys",
-                        "read:limits",
-                        "update:limits",
-                        "create:role_members",
-                        "read:role_members",
-                        "delete:role_members",
-                        "read:entitlements",
-                        "read:attack_protection",
-                        "update:attack_protection",
-                        "read:organizations",
-                        "update:organizations",
-                        "create:organizations",
-                        "delete:organizations",
-                        "create:organization_members",
-                        "read:organization_members",
-                        "delete:organization_members",
-                        "create:organization_connections",
-                        "read:organization_connections",
-                        "update:organization_connections",
-                        "delete:organization_connections",
-                        "create:organization_member_roles",
-                        "read:organization_member_roles",
-                        "delete:organization_member_roles",
-                        "create:organization_invitations",
-                        "read:organization_invitations",
-                        "delete:organization_invitations"
+                        "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
             ]
@@ -6661,7 +6322,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "r2Ta0QUA7DLbjXT8fTaXHp3ck2Hk8gtC",
+                    "client_id": "RLlTIxFWlcdNwlqrI9xgHjVDpjvR1mqs",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -6714,7 +6375,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "Jxv2FgWcn68QuDUzXgdll9Xgo2nlEBDm",
+                    "client_id": "kvyJLK1YaA90Fn3Xmnk1vOdQHVjiuG5M",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -6759,7 +6420,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "QKsnAEeydL8Fjuxw7jfCzcrVyCgOOypX",
+                    "client_id": "vC5XPS3kpE3DjSNFjN8EvmxdEsjXZmXM",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -6813,7 +6474,7 @@
                         }
                     ],
                     "allowed_origins": [],
-                    "client_id": "dqf87JvsIowwXVL9BAlojDz3NLO10aO3",
+                    "client_id": "mDMSk4t4l81jFOcVEQzUxA8MMPfHyhWy",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -6859,7 +6520,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "d5YSIoDhbsIhjv9FN1LkpU30DzP8LzJs",
+                    "client_id": "KUyd85V3ARAVhHlpgFpXu5jn9MLhDnuX",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -6912,7 +6573,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "SlnBYESSQE83e042qhjctEizntTWGboW",
+                    "client_id": "XwmnpszVn5cSV0V5JVrHw2kXkrQLPB2F",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -6972,7 +6633,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "RF60ZkCQzronG0gnoL85Qu0NdQIBGmim",
+                    "client_id": "hO2Bf4PhXI72DNBgoGyBPsZyig76uJzo",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -7030,7 +6691,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "rEKLiO9EB6TVZI0mEeypnokYuVpyeaFK",
+                    "client_id": "o8xIEX6Us6TZ8Jin5tjH1dWjrBPLKllV",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -7067,7 +6728,8 @@
                         "mr|samlp|okta|frederik.prijck@auth0.com",
                         "mr|google-oauth2|109614534713742077035",
                         "mr|google-oauth2|116771660953104383819",
-                        "mr|google-oauth2|112839029247827700155"
+                        "mr|google-oauth2|112839029247827700155",
+                        "mr|samlp|okta|ewan.harris@auth0.com"
                     ],
                     "custom_login_page": "<html>TEST123</html>\n",
                     "cross_origin_authentication": true,
@@ -7089,6 +6751,605 @@
     },
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/client-grants?per_page=100&page=0&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "total": 3,
+            "start": 0,
+            "limit": 100,
+            "client_grants": [
+                {
+                    "id": "cgr_DyH6XoRj6juVcIWE",
+                    "client_id": "KUyd85V3ARAVhHlpgFpXu5jn9MLhDnuX",
+                    "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
+                    "scope": [
+                        "read:client_grants",
+                        "create:client_grants",
+                        "delete:client_grants",
+                        "update:client_grants",
+                        "read:users",
+                        "update:users",
+                        "delete:users",
+                        "create:users",
+                        "read:users_app_metadata",
+                        "update:users_app_metadata",
+                        "delete:users_app_metadata",
+                        "create:users_app_metadata",
+                        "read:user_custom_blocks",
+                        "create:user_custom_blocks",
+                        "delete:user_custom_blocks",
+                        "create:user_tickets",
+                        "read:clients",
+                        "update:clients",
+                        "delete:clients",
+                        "create:clients",
+                        "read:client_keys",
+                        "update:client_keys",
+                        "delete:client_keys",
+                        "create:client_keys",
+                        "read:connections",
+                        "update:connections",
+                        "delete:connections",
+                        "create:connections",
+                        "read:resource_servers",
+                        "update:resource_servers",
+                        "delete:resource_servers",
+                        "create:resource_servers",
+                        "read:device_credentials",
+                        "update:device_credentials",
+                        "delete:device_credentials",
+                        "create:device_credentials",
+                        "read:rules",
+                        "update:rules",
+                        "delete:rules",
+                        "create:rules",
+                        "read:rules_configs",
+                        "update:rules_configs",
+                        "delete:rules_configs",
+                        "read:hooks",
+                        "update:hooks",
+                        "delete:hooks",
+                        "create:hooks",
+                        "read:actions",
+                        "update:actions",
+                        "delete:actions",
+                        "create:actions",
+                        "read:email_provider",
+                        "update:email_provider",
+                        "delete:email_provider",
+                        "create:email_provider",
+                        "blacklist:tokens",
+                        "read:stats",
+                        "read:insights",
+                        "read:tenant_settings",
+                        "update:tenant_settings",
+                        "read:logs",
+                        "read:logs_users",
+                        "read:shields",
+                        "create:shields",
+                        "update:shields",
+                        "delete:shields",
+                        "read:anomaly_blocks",
+                        "delete:anomaly_blocks",
+                        "update:triggers",
+                        "read:triggers",
+                        "read:grants",
+                        "delete:grants",
+                        "read:guardian_factors",
+                        "update:guardian_factors",
+                        "read:guardian_enrollments",
+                        "delete:guardian_enrollments",
+                        "create:guardian_enrollment_tickets",
+                        "read:user_idp_tokens",
+                        "create:passwords_checking_job",
+                        "delete:passwords_checking_job",
+                        "read:custom_domains",
+                        "delete:custom_domains",
+                        "create:custom_domains",
+                        "update:custom_domains",
+                        "read:email_templates",
+                        "create:email_templates",
+                        "update:email_templates",
+                        "read:mfa_policies",
+                        "update:mfa_policies",
+                        "read:roles",
+                        "create:roles",
+                        "delete:roles",
+                        "update:roles",
+                        "read:prompts",
+                        "update:prompts",
+                        "read:branding",
+                        "update:branding",
+                        "delete:branding",
+                        "read:log_streams",
+                        "create:log_streams",
+                        "delete:log_streams",
+                        "update:log_streams",
+                        "create:signing_keys",
+                        "read:signing_keys",
+                        "update:signing_keys",
+                        "read:limits",
+                        "update:limits",
+                        "create:role_members",
+                        "read:role_members",
+                        "delete:role_members",
+                        "read:entitlements",
+                        "read:attack_protection",
+                        "update:attack_protection",
+                        "read:organizations",
+                        "update:organizations",
+                        "create:organizations",
+                        "delete:organizations",
+                        "create:organization_members",
+                        "read:organization_members",
+                        "delete:organization_members",
+                        "create:organization_connections",
+                        "read:organization_connections",
+                        "update:organization_connections",
+                        "delete:organization_connections",
+                        "create:organization_member_roles",
+                        "read:organization_member_roles",
+                        "delete:organization_member_roles",
+                        "create:organization_invitations",
+                        "read:organization_invitations",
+                        "delete:organization_invitations"
+                    ],
+                    "subject_type": "client"
+                },
+                {
+                    "id": "cgr_df97hGA0GWjGdHT4",
+                    "client_id": "kvyJLK1YaA90Fn3Xmnk1vOdQHVjiuG5M",
+                    "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
+                    "scope": [
+                        "read:client_grants",
+                        "create:client_grants",
+                        "delete:client_grants",
+                        "update:client_grants",
+                        "read:users",
+                        "update:users",
+                        "delete:users",
+                        "create:users",
+                        "read:users_app_metadata",
+                        "update:users_app_metadata",
+                        "delete:users_app_metadata",
+                        "create:users_app_metadata",
+                        "read:user_custom_blocks",
+                        "create:user_custom_blocks",
+                        "delete:user_custom_blocks",
+                        "create:user_tickets",
+                        "read:clients",
+                        "update:clients",
+                        "delete:clients",
+                        "create:clients",
+                        "read:client_keys",
+                        "update:client_keys",
+                        "delete:client_keys",
+                        "create:client_keys",
+                        "read:connections",
+                        "update:connections",
+                        "delete:connections",
+                        "create:connections",
+                        "read:resource_servers",
+                        "update:resource_servers",
+                        "delete:resource_servers",
+                        "create:resource_servers",
+                        "read:device_credentials",
+                        "update:device_credentials",
+                        "delete:device_credentials",
+                        "create:device_credentials",
+                        "read:rules",
+                        "update:rules",
+                        "delete:rules",
+                        "create:rules",
+                        "read:rules_configs",
+                        "update:rules_configs",
+                        "delete:rules_configs",
+                        "read:hooks",
+                        "update:hooks",
+                        "delete:hooks",
+                        "create:hooks",
+                        "read:actions",
+                        "update:actions",
+                        "delete:actions",
+                        "create:actions",
+                        "read:email_provider",
+                        "update:email_provider",
+                        "delete:email_provider",
+                        "create:email_provider",
+                        "blacklist:tokens",
+                        "read:stats",
+                        "read:insights",
+                        "read:tenant_settings",
+                        "update:tenant_settings",
+                        "read:logs",
+                        "read:logs_users",
+                        "read:shields",
+                        "create:shields",
+                        "update:shields",
+                        "delete:shields",
+                        "read:anomaly_blocks",
+                        "delete:anomaly_blocks",
+                        "update:triggers",
+                        "read:triggers",
+                        "read:grants",
+                        "delete:grants",
+                        "read:guardian_factors",
+                        "update:guardian_factors",
+                        "read:guardian_enrollments",
+                        "delete:guardian_enrollments",
+                        "create:guardian_enrollment_tickets",
+                        "read:user_idp_tokens",
+                        "create:passwords_checking_job",
+                        "delete:passwords_checking_job",
+                        "read:custom_domains",
+                        "delete:custom_domains",
+                        "create:custom_domains",
+                        "update:custom_domains",
+                        "read:email_templates",
+                        "create:email_templates",
+                        "update:email_templates",
+                        "read:mfa_policies",
+                        "update:mfa_policies",
+                        "read:roles",
+                        "create:roles",
+                        "delete:roles",
+                        "update:roles",
+                        "read:prompts",
+                        "update:prompts",
+                        "read:branding",
+                        "update:branding",
+                        "delete:branding",
+                        "read:log_streams",
+                        "create:log_streams",
+                        "delete:log_streams",
+                        "update:log_streams",
+                        "create:signing_keys",
+                        "read:signing_keys",
+                        "update:signing_keys",
+                        "read:limits",
+                        "update:limits",
+                        "create:role_members",
+                        "read:role_members",
+                        "delete:role_members",
+                        "read:entitlements",
+                        "read:attack_protection",
+                        "update:attack_protection",
+                        "read:organizations",
+                        "update:organizations",
+                        "create:organizations",
+                        "delete:organizations",
+                        "create:organization_members",
+                        "read:organization_members",
+                        "delete:organization_members",
+                        "create:organization_connections",
+                        "read:organization_connections",
+                        "update:organization_connections",
+                        "delete:organization_connections",
+                        "create:organization_member_roles",
+                        "read:organization_member_roles",
+                        "delete:organization_member_roles",
+                        "create:organization_invitations",
+                        "read:organization_invitations",
+                        "delete:organization_invitations"
+                    ],
+                    "subject_type": "client"
+                },
+                {
+                    "id": "cgr_pbwejzhwoujrsNE8",
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                    "audience": "https://auth0-deploy-cli-e2e.us.auth0.com/api/v2/",
+                    "scope": [
+                        "read:client_grants",
+                        "create:client_grants",
+                        "delete:client_grants",
+                        "update:client_grants",
+                        "read:users",
+                        "update:users",
+                        "delete:users",
+                        "create:users",
+                        "read:users_app_metadata",
+                        "update:users_app_metadata",
+                        "delete:users_app_metadata",
+                        "create:users_app_metadata",
+                        "read:user_custom_blocks",
+                        "create:user_custom_blocks",
+                        "delete:user_custom_blocks",
+                        "create:user_tickets",
+                        "read:clients",
+                        "update:clients",
+                        "delete:clients",
+                        "create:clients",
+                        "read:client_keys",
+                        "update:client_keys",
+                        "delete:client_keys",
+                        "create:client_keys",
+                        "read:client_credentials",
+                        "update:client_credentials",
+                        "delete:client_credentials",
+                        "create:client_credentials",
+                        "read:connections",
+                        "update:connections",
+                        "delete:connections",
+                        "create:connections",
+                        "read:resource_servers",
+                        "update:resource_servers",
+                        "delete:resource_servers",
+                        "create:resource_servers",
+                        "read:device_credentials",
+                        "update:device_credentials",
+                        "delete:device_credentials",
+                        "create:device_credentials",
+                        "read:rules",
+                        "update:rules",
+                        "delete:rules",
+                        "create:rules",
+                        "read:rules_configs",
+                        "update:rules_configs",
+                        "delete:rules_configs",
+                        "read:hooks",
+                        "update:hooks",
+                        "delete:hooks",
+                        "create:hooks",
+                        "read:actions",
+                        "update:actions",
+                        "delete:actions",
+                        "create:actions",
+                        "read:email_provider",
+                        "update:email_provider",
+                        "delete:email_provider",
+                        "create:email_provider",
+                        "blacklist:tokens",
+                        "read:stats",
+                        "read:insights",
+                        "read:tenant_settings",
+                        "update:tenant_settings",
+                        "read:logs",
+                        "read:logs_users",
+                        "read:shields",
+                        "create:shields",
+                        "update:shields",
+                        "delete:shields",
+                        "read:anomaly_blocks",
+                        "delete:anomaly_blocks",
+                        "update:triggers",
+                        "read:triggers",
+                        "read:grants",
+                        "delete:grants",
+                        "read:guardian_factors",
+                        "update:guardian_factors",
+                        "read:guardian_enrollments",
+                        "delete:guardian_enrollments",
+                        "create:guardian_enrollment_tickets",
+                        "read:user_idp_tokens",
+                        "create:passwords_checking_job",
+                        "delete:passwords_checking_job",
+                        "read:custom_domains",
+                        "delete:custom_domains",
+                        "create:custom_domains",
+                        "update:custom_domains",
+                        "read:email_templates",
+                        "create:email_templates",
+                        "update:email_templates",
+                        "read:mfa_policies",
+                        "update:mfa_policies",
+                        "read:roles",
+                        "create:roles",
+                        "delete:roles",
+                        "update:roles",
+                        "read:prompts",
+                        "update:prompts",
+                        "read:branding",
+                        "update:branding",
+                        "delete:branding",
+                        "read:log_streams",
+                        "create:log_streams",
+                        "delete:log_streams",
+                        "update:log_streams",
+                        "create:signing_keys",
+                        "read:signing_keys",
+                        "update:signing_keys",
+                        "read:limits",
+                        "update:limits",
+                        "create:role_members",
+                        "read:role_members",
+                        "delete:role_members",
+                        "read:entitlements",
+                        "read:attack_protection",
+                        "update:attack_protection",
+                        "read:organizations_summary",
+                        "create:authentication_methods",
+                        "read:authentication_methods",
+                        "update:authentication_methods",
+                        "delete:authentication_methods",
+                        "read:organizations",
+                        "update:organizations",
+                        "create:organizations",
+                        "delete:organizations",
+                        "read:organization_discovery_domains",
+                        "update:organization_discovery_domains",
+                        "create:organization_discovery_domains",
+                        "delete:organization_discovery_domains",
+                        "create:organization_members",
+                        "read:organization_members",
+                        "delete:organization_members",
+                        "create:organization_connections",
+                        "read:organization_connections",
+                        "update:organization_connections",
+                        "delete:organization_connections",
+                        "create:organization_member_roles",
+                        "read:organization_member_roles",
+                        "delete:organization_member_roles",
+                        "create:organization_invitations",
+                        "read:organization_invitations",
+                        "delete:organization_invitations",
+                        "read:scim_config",
+                        "create:scim_config",
+                        "update:scim_config",
+                        "delete:scim_config",
+                        "create:scim_token",
+                        "read:scim_token",
+                        "delete:scim_token",
+                        "delete:phone_providers",
+                        "create:phone_providers",
+                        "read:phone_providers",
+                        "update:phone_providers",
+                        "delete:phone_templates",
+                        "create:phone_templates",
+                        "read:phone_templates",
+                        "update:phone_templates",
+                        "create:encryption_keys",
+                        "read:encryption_keys",
+                        "update:encryption_keys",
+                        "delete:encryption_keys",
+                        "read:sessions",
+                        "update:sessions",
+                        "delete:sessions",
+                        "read:refresh_tokens",
+                        "delete:refresh_tokens",
+                        "create:self_service_profiles",
+                        "read:self_service_profiles",
+                        "update:self_service_profiles",
+                        "delete:self_service_profiles",
+                        "create:sso_access_tickets",
+                        "delete:sso_access_tickets",
+                        "read:forms",
+                        "update:forms",
+                        "delete:forms",
+                        "create:forms",
+                        "read:flows",
+                        "update:flows",
+                        "delete:flows",
+                        "create:flows",
+                        "read:flows_vault",
+                        "read:flows_vault_connections",
+                        "update:flows_vault_connections",
+                        "delete:flows_vault_connections",
+                        "create:flows_vault_connections",
+                        "read:flows_executions",
+                        "delete:flows_executions",
+                        "read:connections_options",
+                        "update:connections_options",
+                        "read:self_service_profile_custom_texts",
+                        "update:self_service_profile_custom_texts",
+                        "create:network_acls",
+                        "update:network_acls",
+                        "read:network_acls",
+                        "delete:network_acls",
+                        "delete:vdcs_templates",
+                        "read:vdcs_templates",
+                        "create:vdcs_templates",
+                        "update:vdcs_templates",
+                        "create:custom_signing_keys",
+                        "read:custom_signing_keys",
+                        "update:custom_signing_keys",
+                        "delete:custom_signing_keys",
+                        "read:federated_connections_tokens",
+                        "delete:federated_connections_tokens",
+                        "create:user_attribute_profiles",
+                        "read:user_attribute_profiles",
+                        "update:user_attribute_profiles",
+                        "delete:user_attribute_profiles",
+                        "read:event_streams",
+                        "create:event_streams",
+                        "delete:event_streams",
+                        "update:event_streams",
+                        "read:event_deliveries",
+                        "update:event_deliveries",
+                        "create:connection_profiles",
+                        "read:connection_profiles",
+                        "update:connection_profiles",
+                        "delete:connection_profiles",
+                        "read:organization_client_grants",
+                        "create:organization_client_grants",
+                        "delete:organization_client_grants",
+                        "read:security_metrics",
+                        "read:connections_keys",
+                        "update:connections_keys",
+                        "create:connections_keys"
+                    ],
+                    "subject_type": "client"
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/log-streams",
+        "body": "",
+        "status": 200,
+        "response": [
+            {
+                "id": "lst_0000000000024267",
+                "name": "Amazon EventBridge",
+                "type": "eventbridge",
+                "status": "active",
+                "sink": {
+                    "awsAccountId": "123456789012",
+                    "awsRegion": "us-east-2",
+                    "awsPartnerEventSource": "aws.partner/auth0.com/auth0-deploy-cli-e2e-4c51ced9-a9e7-4d7e-89d2-b25994424573/auth0.logs"
+                },
+                "filters": [
+                    {
+                        "type": "category",
+                        "name": "auth.login.success"
+                    },
+                    {
+                        "type": "category",
+                        "name": "auth.login.notification"
+                    },
+                    {
+                        "type": "category",
+                        "name": "auth.login.fail"
+                    },
+                    {
+                        "type": "category",
+                        "name": "auth.signup.success"
+                    },
+                    {
+                        "type": "category",
+                        "name": "auth.logout.success"
+                    },
+                    {
+                        "type": "category",
+                        "name": "auth.logout.fail"
+                    },
+                    {
+                        "type": "category",
+                        "name": "auth.silent_auth.fail"
+                    },
+                    {
+                        "type": "category",
+                        "name": "auth.silent_auth.success"
+                    },
+                    {
+                        "type": "category",
+                        "name": "auth.token_exchange.fail"
+                    }
+                ],
+                "isPriority": false
+            },
+            {
+                "id": "lst_0000000000024266",
+                "name": "Suspended DD Log Stream",
+                "type": "datadog",
+                "status": "suspended",
+                "sink": {
+                    "datadogApiKey": "##LOGSTREAMS_DATADOG_SECRET##",
+                    "datadogRegion": "us"
+                },
+                "isPriority": false
+            }
+        ],
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
         "path": "/api/v2/tenants/settings",
         "body": {
@@ -7100,7 +7361,8 @@
                 "allow_legacy_ro_grant_types": true,
                 "revoke_refresh_token_grant": false,
                 "disable_clickjack_protection_headers": false
-            }
+            },
+            "skip_non_verifiable_callback_uri_confirmation_prompt": null
         },
         "status": 200,
         "response": {

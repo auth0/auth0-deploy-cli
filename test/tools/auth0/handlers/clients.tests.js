@@ -265,6 +265,35 @@ describe('#clients handler', () => {
       expect(wasCreateCalled).to.be.equal(true);
     });
 
+    it('should create client with skip_non_verifiable_callback_uri_confirmation_prompt', async () => {
+      let wasCreateCalled = false;
+      const clientWithSkipConfirmation = {
+        name: 'Client With Skip Confirmation',
+        skip_non_verifiable_callback_uri_confirmation_prompt: true,
+      };
+
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            wasCreateCalled = true;
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('Client With Skip Confirmation');
+            expect(data.skip_non_verifiable_callback_uri_confirmation_prompt).to.equal(true);
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ clients: [clientWithSkipConfirmation] }]);
+      expect(wasCreateCalled).to.be.equal(true);
+    });
+
     it('should get clients', async () => {
       const auth0 = {
         clients: {
@@ -334,6 +363,51 @@ describe('#clients handler', () => {
                 enforce_device_binding: 'asn',
                 allowed_authentication_methods: ['query'],
               },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should update client with skip_non_verifiable_callback_uri_confirmation_prompt', async () => {
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('array');
+            expect(data.length).to.equal(0);
+            return Promise.resolve({ data });
+          },
+          update: function (params, data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(params).to.be.an('object');
+            expect(params.client_id).to.equal('client1');
+            expect(data).to.be.an('object');
+            expect(data.skip_non_verifiable_callback_uri_confirmation_prompt).to.equal(false);
+
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'someClient',
+              },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'someClient',
+              skip_non_verifiable_callback_uri_confirmation_prompt: false,
             },
           ],
         },
