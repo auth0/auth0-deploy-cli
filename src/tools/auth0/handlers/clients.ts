@@ -161,7 +161,7 @@ export type Client = {
   resource_server_identifier?: string;
   custom_login_page?: string;
   custom_login_page_on?: boolean;
-  skip_non_verifiable_callback_uri_confirmation_prompt?: boolean;
+  skip_non_verifiable_callback_uri_confirmation_prompt?: boolean | null;
 };
 
 export default class ClientHandler extends DefaultAPIHandler {

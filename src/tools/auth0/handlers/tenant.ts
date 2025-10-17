@@ -192,19 +192,10 @@ export default class TenantHandler extends DefaultHandler {
       }
     }
 
-    console.log(
-      'BEFORE Updating tenant',
-      updatedTenant.skip_non_verifiable_callback_uri_confirmation_prompt
-    );
     // Normalize skip_non_verifiable_callback_uri_confirmation_prompt before processing
     if (updatedTenant.skip_non_verifiable_callback_uri_confirmation_prompt === undefined) {
       updatedTenant.skip_non_verifiable_callback_uri_confirmation_prompt = null;
     }
-
-    console.log(
-      'AFTER Updating tenant',
-      updatedTenant.skip_non_verifiable_callback_uri_confirmation_prompt
-    );
 
     if (updatedTenant && Object.keys(updatedTenant).length > 0) {
       await this.client.tenants.updateSettings(updatedTenant);
