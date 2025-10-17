@@ -209,14 +209,27 @@ export default class UserAttributeProfilesHandler extends DefaultAPIHandler {
   async getType() {
     if (this.existing) return this.existing;
 
-    this.existing = await paginate<UserAttributeProfile>(this.client.userAttributeProfiles.getAll, {
-      checkpoint: true,
-      include_totals: true,
-      is_global: false,
-      take: 10,
-    });
+    try {
+      this.existing = await paginate<UserAttributeProfile>(this.client.userAttributeProfiles.getAll, {
+        checkpoint: true,
+        include_totals: true,
+        is_global: false,
+        take: 10,
+      });
 
-    return this.existing;
+      return this.existing;
+    } catch (err) {
+      if (err.statusCode === 404 || err.statusCode === 501) {
+        return null;
+      }
+      if (err.statusCode === 403) {
+        log.debug(
+          'User Attribute Profile with Self-Service SSO is not enabled for this tenant. Please verify `scope` or contact Auth0 support to enable this feature.'
+        );
+        return null;
+      }
+      throw err;
+    }
   }
 
   @order('50')
