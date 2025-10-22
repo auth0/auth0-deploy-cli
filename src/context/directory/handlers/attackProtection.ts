@@ -5,6 +5,7 @@ import { dumpJSON, existsMustBeDir, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
+import { attackProtectionDefaults } from '../../defaults';
 
 type ParsedAttackProtection = ParsedAsset<
   'attackProtection',
@@ -67,14 +68,16 @@ function parse(context: DirectoryContext): ParsedAttackProtection {
     disableKeywordReplacement: context.disableKeywordReplacement,
   });
 
+  const maskedAttackProtection = attackProtectionDefaults({
+    botDetection,
+    breachedPasswordDetection,
+    bruteForceProtection,
+    captcha,
+    suspiciousIpThrottling,
+  });
+
   return {
-    attackProtection: {
-      botDetection,
-      breachedPasswordDetection,
-      bruteForceProtection,
-      captcha,
-      suspiciousIpThrottling,
-    },
+    attackProtection: maskedAttackProtection,
   };
 }
 

@@ -1,6 +1,7 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
+import { attackProtectionDefaults } from '../../defaults';
 
 type ParsedAttackProtection = ParsedAsset<
   'attackProtection',
@@ -40,8 +41,10 @@ async function parseAndDump(context: YAMLContext): Promise<ParsedAttackProtectio
     attackProtectionConfig.captcha = captcha;
   }
 
+  const maskedAttackProtection = attackProtectionDefaults(attackProtection);
+
   return {
-    attackProtection: attackProtectionConfig,
+    attackProtection: maskedAttackProtection,
   };
 }
 

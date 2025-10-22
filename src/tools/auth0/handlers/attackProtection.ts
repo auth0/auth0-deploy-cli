@@ -1,6 +1,15 @@
 import DefaultAPIHandler from './default';
 import { Asset, Assets } from '../../../types';
 
+export const CAPTCHA_PROVIDERS = [
+  'arkose',
+  'auth_challenge',
+  'friendly_captcha',
+  'hcaptcha',
+  'recaptcha_v2',
+  'recaptcha_enterprise',
+  'simple_captcha',
+];
 export const schema = {
   type: 'object',
   properties: {
@@ -65,15 +74,7 @@ export const schema = {
         active_provider_id: {
           type: 'string',
           description: 'The id of the active provider for the CAPTCHA.',
-          enum: [
-            'arkose',
-            'auth_challenge',
-            'friendly_captcha',
-            'hcaptcha',
-            'recaptcha_v2',
-            'recaptcha_enterprise',
-            'simple_captcha',
-          ],
+          enum: CAPTCHA_PROVIDERS,
         },
         arkose: {
           type: 'object',
@@ -227,7 +228,7 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
       }
       if (item.captcha) {
         obj.captcha = {
-          selected: item.captcha.selected,
+          active_provider_id: item.captcha.active_provider_id,
         };
       }
       if (item.suspiciousIpThrottling?.enabled) {
@@ -313,6 +314,24 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
 
     if (attackProtection.captcha && Object.keys(attackProtection.captcha).length) {
       if (typeof attackProtectionClient.updateCaptchaConfig === 'function') {
+        const { captcha } = attackProtection;
+
+        CAPTCHA_PROVIDERS.forEach((provider) => {
+          if (provider in captcha) {
+            const providerConfig = captcha[provider];
+            const isEmpty =
+              provider === 'auth_challenge' || provider === 'simple_captcha'
+                ? Object.keys(providerConfig).length === 0
+                : providerConfig?.site_key === '';
+
+            if (isEmpty) {
+              delete captcha[provider];
+            }
+          }
+        });
+
+        attackProtection.captcha = captcha;
+
         updates.push(
           attackProtectionClient.updateCaptchaConfig.call(
             attackProtectionClient,
