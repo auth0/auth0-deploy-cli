@@ -146,7 +146,7 @@ export const schema = {
           'The identifier of a resource server in your tenant. This property links a client to a resource server indicating that the client IS that resource server. Can only be set when app_type=resource_server.',
       },
       skip_non_verifiable_callback_uri_confirmation_prompt: {
-        type: 'boolean',
+        type: ['boolean', 'null'],
         description: 'Whether to skip the confirmation prompt for non-verifiable callback URIs',
       },
     },
@@ -161,7 +161,6 @@ export type Client = {
   resource_server_identifier?: string;
   custom_login_page?: string;
   custom_login_page_on?: boolean;
-  skip_non_verifiable_callback_uri_confirmation_prompt?: boolean | null;
 };
 
 export default class ClientHandler extends DefaultAPIHandler {
@@ -228,9 +227,6 @@ export default class ClientHandler extends DefaultAPIHandler {
           if ('refresh_token' in item) {
             delete item.refresh_token;
           }
-        }
-        if (item.skip_non_verifiable_callback_uri_confirmation_prompt === undefined) {
-          item.skip_non_verifiable_callback_uri_confirmation_prompt = null;
         }
         return item;
       });

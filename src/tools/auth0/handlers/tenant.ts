@@ -49,6 +49,10 @@ export const schema = {
       additionalProperties: false,
       minProperties: 1,
     },
+    skip_non_verifiable_callback_uri_confirmation_prompt: {
+      type: ['boolean', 'null'],
+      description: 'Whether to skip the confirmation prompt for non-verifiable callback URIs',
+    },
   },
 };
 
@@ -190,11 +194,6 @@ export default class TenantHandler extends DefaultHandler {
       if (updatedTenant.flags === undefined || Object.keys(updatedTenant.flags).length === 0) {
         delete updatedTenant.flags;
       }
-    }
-
-    // Normalize skip_non_verifiable_callback_uri_confirmation_prompt before processing
-    if (updatedTenant.skip_non_verifiable_callback_uri_confirmation_prompt === undefined) {
-      updatedTenant.skip_non_verifiable_callback_uri_confirmation_prompt = null;
     }
 
     if (updatedTenant && Object.keys(updatedTenant).length > 0) {
