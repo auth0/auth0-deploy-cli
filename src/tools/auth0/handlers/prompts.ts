@@ -376,7 +376,7 @@ export default class PromptsHandler extends DefaultHandler {
             .reduce((acc, val) => acc.concat(val), []) || [],
         generator: ({ promptType, language }) =>
           this.client.prompts.customText
-            .get(promptType, language, { maxRetries: 5 })
+            .get(promptType, language)
             .then((customTextData) => {
               if (isEmpty(customTextData)) return null;
               return {
@@ -450,7 +450,7 @@ export default class PromptsHandler extends DefaultHandler {
   }): Promise<CustomPromptPartials> {
     if (!this.IsFeatureSupported) return {};
     return this.withErrorHandling(async () =>
-      this.client.prompts.partials.get(prompt, { maxRetries: 5 })
+      this.client.prompts.partials.get(prompt)
     );
   }
 

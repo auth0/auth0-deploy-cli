@@ -1,4 +1,4 @@
-import { JSONApiResponse, ManagementError } from 'auth0';
+import { JSONApiResponse } from 'auth0';
 import ValidationError from '../../validationError';
 
 import {

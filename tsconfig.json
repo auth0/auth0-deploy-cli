@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es2016",
+    "target": "es2020",
     "experimentalDecorators": true,
-    "module": "commonjs",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "rootDir": "./src",
     "allowJs": true,
     "outDir": "./lib",
-    "sourceMap": true,
+    "sourceMap": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": false,

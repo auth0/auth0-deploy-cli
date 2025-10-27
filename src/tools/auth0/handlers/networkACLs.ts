@@ -217,6 +217,14 @@ export default class NetworkACLsHandler extends DefaultAPIHandler {
     });
   }
 
+  objString(acl: NetworkACL): string {
+    return super.objString({
+      description: acl.description,
+      active: acl.active,
+      priority: acl.priority,
+    });
+  }
+
   async getType(): Promise<Asset | null> {
     if (this.existing) {
       return this.existing;

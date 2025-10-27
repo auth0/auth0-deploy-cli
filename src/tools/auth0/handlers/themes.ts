@@ -176,6 +176,11 @@ export const schema = {
             pattern: '^#(([0-9a-fA-F]{3}){1,2}|([0-9a-fA-F]{4}){1,2})$',
             type: 'string',
           },
+          read_only_background: {
+            description: 'Read only background',
+            pattern: '^#(([0-9a-fA-F]{3}){1,2}|([0-9a-fA-F]{4}){1,2})$',
+            type: 'string',
+          },
         },
         required: [
           'body_text',

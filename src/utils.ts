@@ -75,7 +75,7 @@ export function toConfigFn(data: Config): (arg0: keyof Config) => any {
   return (key) => data[key];
 }
 
-export function stripIdentifiers(auth0: Auth0, assets: Assets) {
+export function stripIdentifiers(auth0: Auth0, assets: Assets): Assets {
   const updated = { ...assets };
 
   // Some of the object identifiers are required to perform updates.

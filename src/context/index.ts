@@ -206,6 +206,7 @@ export const setupContext = async (
     headers: {
       'User-agent': `deploy-cli/${packageVersion} (node.js/${process.version.replace('v', '')})`,
     },
+    maxRetries: config.AUTH0_API_MAX_RETRIES || 10,
   });
 
   const inputFile = config.AUTH0_INPUT_FILE;
