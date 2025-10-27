@@ -203,7 +203,7 @@ export function mockMgmtClient() {
       },
     },
     userAttributeProfiles: {
-      getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+      list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
     },
   };
 }

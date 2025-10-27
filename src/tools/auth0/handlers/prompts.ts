@@ -351,9 +351,8 @@ export default class PromptsHandler extends DefaultHandler {
         const screenRenderers = await paginate<ScreenRenderer>(this.client.prompts.rendering.list, {
           paginate: true,
         });
-        if (screenRenderers && screenRenderers.length > 0) {
-          prompts.screenRenderers = screenRenderers;
-        }
+
+        prompts.screenRenderers = screenRenderers ?? [];
       } catch (error) {
         log.warn(`Unable to fetch screen renderers: ${error}`);
       }
@@ -375,17 +374,15 @@ export default class PromptsHandler extends DefaultHandler {
             .map((language) => promptTypes.map((promptType) => ({ promptType, language })))
             .reduce((acc, val) => acc.concat(val), []) || [],
         generator: ({ promptType, language }) =>
-          this.client.prompts.customText
-            .get(promptType, language)
-            .then((customTextData) => {
-              if (isEmpty(customTextData)) return null;
-              return {
-                language,
-                [promptType]: {
-                  ...customTextData,
-                },
-              };
-            }),
+          this.client.prompts.customText.get(promptType, language).then((customTextData) => {
+            if (isEmpty(customTextData)) return null;
+            return {
+              language,
+              [promptType]: {
+                ...customTextData,
+              },
+            };
+          }),
       })
       .promise()
       .then((customTextResponse) =>
@@ -449,9 +446,7 @@ export default class PromptsHandler extends DefaultHandler {
     prompt: Management.PartialGroupsEnum;
   }): Promise<CustomPromptPartials> {
     if (!this.IsFeatureSupported) return {};
-    return this.withErrorHandling(async () =>
-      this.client.prompts.partials.get(prompt)
-    );
+    return this.withErrorHandling(async () => this.client.prompts.partials.get(prompt));
   }
 
   async getCustomPromptsPartials(): Promise<CustomPromptPartials> {

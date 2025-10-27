@@ -118,7 +118,7 @@ describe('#userAttributeProfiles handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -136,7 +136,7 @@ describe('#userAttributeProfiles handler', () => {
     it('should get userAttributeProfiles', async () => {
       const auth0 = {
         userAttributeProfiles: {
-          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
         },
         pool,
       };
@@ -149,7 +149,7 @@ describe('#userAttributeProfiles handler', () => {
     it('should get userAttributeProfiles with correct parameters', async () => {
       const auth0 = {
         userAttributeProfiles: {
-          getAll: (params) => {
+          list: (params) => {
             expect(params).to.be.an('object');
             expect(params.include_totals).to.equal(true);
             expect(params.is_global).to.equal(false);
@@ -180,7 +180,7 @@ describe('#userAttributeProfiles handler', () => {
 
             return Promise.resolve({ data });
           },
-          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
         },
         pool,
       };
@@ -217,7 +217,7 @@ describe('#userAttributeProfiles handler', () => {
             expect(params.id).to.equal(sampleUAPWithId.id);
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
         },
         pool,
       };
@@ -237,7 +237,7 @@ describe('#userAttributeProfiles handler', () => {
             expect(params).to.be.an('object');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
         },
         pool,
       };
@@ -257,7 +257,7 @@ describe('#userAttributeProfiles handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
         },
         pool,
       };
@@ -271,7 +271,7 @@ describe('#userAttributeProfiles handler', () => {
     it('should handle 403 error when not enabled on tenant', async () => {
       const auth0 = {
         userAttributeProfiles: {
-          getAll: () => Promise.reject(Object.assign(new Error('Forbidden'), { statusCode: 403 })),
+          list: () => Promise.reject(Object.assign(new Error('Forbidden'), { statusCode: 403 })),
         },
       };
 
