@@ -32,6 +32,7 @@ export const schema = {
               email: {
                 type: 'object',
                 properties: {
+                  unique: { type: 'boolean', default: true },
                   identifier: {
                     type: 'object',
                     properties: {
@@ -120,6 +121,44 @@ export default class DatabaseHandler extends DefaultAPIHandler {
 
   getClientFN(fn: 'create' | 'delete' | 'getAll' | 'update'): Function {
     // Override this as a database is actually a connection but we are treating them as a different object
+
+    // Validation helper function for email.unique constraints
+    const validateEmailUniqueConstraints = (payload, operation) => {
+      const emailAttributes = payload?.options?.attributes?.email;
+      const usernameAttributes = payload?.options?.attributes?.username;
+      const phoneAttributes = payload?.options?.attributes?.phone_number;
+
+      if (emailAttributes?.unique === false) {
+        // For both create and update: When email.unique = false, email.identifier.active cannot be true
+        if (emailAttributes?.identifier?.active === true) {
+          throw new Error(
+            `Database "${payload.name}": Cannot set email.identifier.active to true when email.unique is false. Non-unique emails cannot be used as active identifiers.`
+          );
+        }
+
+        // For create operation: When email is non-unique, username or phone_number identifier must be active
+        if (operation === 'create') {
+          const hasActiveNonEmailIdentifier =
+            usernameAttributes?.identifier?.active === true ||
+            phoneAttributes?.identifier?.active === true;
+
+          if (!hasActiveNonEmailIdentifier) {
+            throw new Error(
+              `Database "${payload.name}": When creating a database with email.unique set to false, either username.identifier.active or phone_number.identifier.active must be set to true. A non-email identifier is required when emails are not unique.`
+            );
+          }
+        }
+      }
+    };
+
+    if (fn === 'create') {
+      return (payload) => {
+        // Validate before creating
+        validateEmailUniqueConstraints(payload, 'create');
+        return this.client.connections.create(payload);
+      };
+    }
+
     // If we going to update database, we need to get current options first
     if (fn === 'update') {
       return (params, payload) =>
@@ -139,6 +178,9 @@ export default class DatabaseHandler extends DefaultAPIHandler {
           } else if (requiresUsername || validation) {
             delete connection.options.attributes;
           }
+
+          // Validate email.unique constraints before making API call
+          validateEmailUniqueConstraints(payload, 'update');
 
           payload.options = { ...connection.options, ...payload.options };
 
