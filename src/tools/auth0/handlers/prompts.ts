@@ -3,6 +3,7 @@ import { Management } from 'auth0';
 import DefaultHandler from './default';
 import { Assets, Language, languages } from '../../../types';
 import log from '../../../logger';
+import { paginate } from '../client';
 
 const promptTypes = [
   'login',
@@ -298,7 +299,7 @@ export type AllPromptsByLanguage = Partial<{
   [key in Language]: Partial<PromptsCustomText>;
 }>;
 
-export type ScreenRenderer = Management.GetAculResponseContent;
+export type ScreenRenderer = Management.AculResponseContent;
 
 export type Prompts = Partial<
   PromptSettings & {
@@ -347,8 +348,12 @@ export default class PromptsHandler extends DefaultHandler {
 
     if (includeExperimentalEA) {
       try {
-        const { data } = await this.client.prompts.rendering.list();
-        prompts.screenRenderers = data;
+        const screenRenderers = await paginate<ScreenRenderer>(this.client.prompts.rendering.list, {
+          paginate: true,
+        });
+        if (screenRenderers && screenRenderers.length > 0) {
+          prompts.screenRenderers = screenRenderers;
+        }
       } catch (error) {
         log.warn(`Unable to fetch screen renderers: ${error}`);
       }

@@ -202,6 +202,9 @@ export function mockMgmtClient() {
         list: (_orgId, params) => mockPagedData(params, 'client_grants', []),
       },
     },
+    userAttributeProfiles: {
+      getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+    },
   };
 }
 

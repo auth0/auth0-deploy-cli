@@ -19,6 +19,7 @@ async function parse(context: YAMLContext): Promise<ParsedSelfServiceProfiles> {
 }
 
 async function dump(context: YAMLContext): Promise<ParsedSelfServiceProfiles> {
+  const { userAttributeProfiles } = context.assets;
   let { selfServiceProfiles } = context.assets;
   if (!selfServiceProfiles) return { selfServiceProfiles: null };
 
@@ -29,6 +30,15 @@ async function dump(context: YAMLContext): Promise<ParsedSelfServiceProfiles> {
 
     if ('updated_at' in profile) {
       delete profile.updated_at;
+    }
+
+    if (profile.user_attribute_profile_id) {
+      const p = userAttributeProfiles?.find((uap) => uap.id === profile.user_attribute_profile_id);
+      profile.user_attribute_profile_id = p?.name || profile.user_attribute_profile_id;
+
+      if (profile.user_attributes?.length === 0) {
+        delete profile.user_attributes;
+      }
     }
 
     return {

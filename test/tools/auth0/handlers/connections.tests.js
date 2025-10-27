@@ -170,6 +170,8 @@ describe('#connections handler', () => {
             expect(data).to.deep.equal({
               enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               options: { passwordPolicy: 'testPolicy' },
+              authentication: { active: false },
+              connected_accounts: { active: false },
             });
 
             return Promise.resolve({ ...data, id });
@@ -205,6 +207,12 @@ describe('#connections handler', () => {
           enabled_clients: ['client1'],
           options: {
             passwordPolicy: 'testPolicy',
+          },
+          authentication: {
+            active: false,
+          },
+          connected_accounts: {
+            active: false,
           },
         },
       ];

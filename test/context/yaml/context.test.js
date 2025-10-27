@@ -310,6 +310,7 @@ describe('#YAML context validation', () => {
       flows: [],
       forms: [],
       selfServiceProfiles: [],
+      userAttributeProfiles: [],
     });
   });
 
@@ -437,6 +438,7 @@ describe('#YAML context validation', () => {
       flows: [],
       forms: [],
       selfServiceProfiles: [],
+      userAttributeProfiles: [],
     });
   });
 
@@ -565,6 +567,7 @@ describe('#YAML context validation', () => {
       flows: [],
       forms: [],
       selfServiceProfiles: [],
+      userAttributeProfiles: [],
     });
   });
 

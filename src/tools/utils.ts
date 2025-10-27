@@ -24,7 +24,8 @@ export function keywordArrayReplace(input: string, mappings: KeywordMappings): s
     // Matching against two sets of patterns because a developer may provide their array replacement keyword with or without wrapping quotes. It is not obvious to the developer which to do depending if they're operating in YAML or JSON.
     const regex = keywordReplaceArrayRegExp(key);
 
-    input = input.replace(regex, JSON.stringify(mappings[key]));
+    // Use function-based replacement to prevent $ sequences (e.g., $', $`, $&) from being interpreted as special replacement patterns to fixes issue #1153.
+    input = input.replace(regex, () => JSON.stringify(mappings[key]));
   });
   return input;
 }
@@ -32,8 +33,9 @@ export function keywordArrayReplace(input: string, mappings: KeywordMappings): s
 export function keywordStringReplace(input: string, mappings: KeywordMappings): string {
   Object.keys(mappings).forEach(function (key) {
     const regex = keywordReplaceStringRegExp(key);
+    // Use function-based replacement to prevent $ sequences (e.g., $', $`, $&) from being interpreted as special replacement patterns to fixes issue #1153.
     // @ts-ignore TODO: come back and distinguish strings vs array replacement.
-    input = input.replace(regex, mappings[key]);
+    input = input.replace(regex, () => mappings[key]);
   });
   return input;
 }

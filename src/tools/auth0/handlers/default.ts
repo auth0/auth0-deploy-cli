@@ -16,7 +16,14 @@ import { ConfigFunction } from '../../../configFactory';
 
 export function order(value) {
   return function decorator(t, n, descriptor) {
-    descriptor.value.order = value; // eslint-disable-line
+    const numericValue = Number(value);
+    if (Number.isNaN(numericValue)) {
+      throw new Error(
+        `Invalid @order value '${value}' for method '${n}'. The @order decorator only accepts numeric values. Received: ${typeof value}`
+      );
+    }
+
+    descriptor.value.order = numericValue;
     return descriptor;
   };
 }

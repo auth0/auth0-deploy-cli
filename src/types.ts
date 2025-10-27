@@ -14,6 +14,7 @@ import { FlowVaultConnection } from './tools/auth0/handlers/flowVaultConnections
 import { SsProfileWithCustomText } from './tools/auth0/handlers/selfServiceProfiles';
 import { PhoneProvider } from './tools/auth0/handlers/phoneProvider';
 import { NetworkACL } from './tools/auth0/handlers/networkACLs';
+import { UserAttributeProfile } from './tools/auth0/handlers/userAttributeProfiles';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -136,6 +137,8 @@ export type Assets = Partial<{
   flowVaultConnections: FlowVaultConnection[] | null;
   selfServiceProfiles: SsProfileWithCustomText[] | null;
   networkACLs: NetworkACL[] | null;
+  userAttributeProfiles: UserAttributeProfile[] | null;
+  userAttributeProfilesWithId: UserAttributeProfile[] | null;
 }>;
 
 export type CalculatedChanges = {
@@ -179,7 +182,8 @@ export type AssetTypes =
   | 'flows'
   | 'flowVaultConnections'
   | 'selfServiceProfiles'
-  | 'networkACLs';
+  | 'networkACLs'
+  | 'userAttributeProfiles';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 
@@ -188,39 +192,62 @@ export type ParsedAsset<Key extends AssetTypes, T> = {
 };
 
 export const languages = [
+  'am',
   'ar',
+  'ar-EG',
+  'ar-SA',
+  'az',
   'bg',
+  'bn',
   'bs',
   'ca-ES',
+  'cnr',
   'cs',
   'cy',
   'da',
   'de',
   'el',
   'en',
+  'en-CA',
   'es',
+  'es-419',
+  'es-AR',
+  'es-MX',
   'et',
   'eu-ES',
+  'fa',
   'fi',
   'fr',
   'fr-CA',
   'fr-FR',
   'gl-ES',
+  'gu',
   'he',
   'hi',
   'hr',
   'hu',
+  'hy',
   'id',
   'is',
   'it',
   'ja',
+  'ka',
+  'kk',
+  'kn',
   'ko',
   'lt',
   'lv',
+  'mk',
+  'ml',
+  'mn',
+  'mr',
+  'ms',
+  'my',
   'nb',
   'nl',
   'nn',
   'no',
+  'pa',
   'pl',
   'pt',
   'pt-BR',
@@ -229,13 +256,22 @@ export const languages = [
   'ru',
   'sk',
   'sl',
+  'so',
+  'sq',
   'sr',
   'sv',
+  'sw',
+  'ta',
+  'te',
   'th',
+  'tl',
   'tr',
   'uk',
+  'ur',
   'vi',
+  'zgh',
   'zh-CN',
+  'zh-HK',
   'zh-TW',
 ] as const;
 

@@ -36,6 +36,22 @@ export const schema = {
         },
         required: ['mapping', 'user_id_attribute'],
       },
+      authentication: {
+        type: 'object',
+        properties: {
+          active: { type: 'boolean' },
+        },
+        required: ['active'],
+        additionalProperties: false,
+      },
+      connected_accounts: {
+        type: 'object',
+        properties: {
+          active: { type: 'boolean' },
+        },
+        required: ['active'],
+        additionalProperties: false,
+      },
     },
     required: ['name', 'strategy'],
   },

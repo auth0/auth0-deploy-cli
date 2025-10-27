@@ -1,10 +1,13 @@
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { cloneDeep } from 'lodash';
+import chai, { expect } from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import pageClient from '../../../../src/tools/auth0/client';
 
-const { expect } = require('chai');
 const selfServiceProfiles = require('../../../../src/tools/auth0/handlers/selfServiceProfiles');
 const { mockPagedData } = require('../../../utils');
+
+chai.use(chaiAsPromised);
 
 const pool = new PromisePoolExecutor({
   concurrencyLimit: 3,
@@ -47,6 +50,39 @@ const sampleSsProfileWithCustomText = {
 const sampleSsProfileWithId = {
   ...cloneDeep(sampleSsProfileWithOutId),
   id: 'ssp_yR1iy6ozRb3XBThacLpA9y',
+};
+
+const sampleUAP = {
+  id: 'uap_yR1iy6ozRb3XBThacLpA9y',
+  name: 'test user attribute profile',
+  user_id: {
+    oidc_mapping: 'sub',
+    saml_mapping: ['urn:oasis:names:tc:SAML:2.0:attrname-format:basic'],
+    scim_mapping: 'externalId',
+  },
+  user_attributes: {
+    email: {
+      description: 'Email of the User',
+      label: 'Email',
+      profile_required: true,
+      auth0_mapping: 'email',
+      oidc_mapping: {
+        mapping: 'email',
+        display_name: 'Email Address',
+      },
+      saml_mapping: ['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'],
+      scim_mapping: 'emails[primary eq true].value',
+    },
+    name: {
+      description: 'Name of the User',
+      label: 'Full Name',
+      profile_required: false,
+      auth0_mapping: 'name',
+      oidc_mapping: {
+        mapping: 'name',
+      },
+    },
+  },
 };
 
 describe('#selfServiceProfiles handler', () => {
@@ -424,6 +460,114 @@ describe('#selfServiceProfiles handler', () => {
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ selfServiceProfiles: [] }]);
+    });
+
+    it('should convert user_attribute_profile name to id', async () => {
+      const sspWithUserAttributesId = {
+        ...cloneDeep(sampleSsProfileWithId),
+        name: 'self-service-profile-with-uap-name',
+        user_attribute_profile_id: sampleUAP.name,
+        user_attributes: undefined,
+      };
+      const auth0 = {
+        selfServiceProfiles: {
+          delete: (params) => {
+            expect(params).to.be.an('undefined');
+            return Promise.resolve({ data: [] });
+          },
+          getAll: (params) =>
+            mockPagedData(params, 'selfServiceProfiles', [sspWithUserAttributesId]),
+          getCustomText: (params) => {
+            expect(params).to.be.an('object');
+            return Promise.resolve({
+              data: {},
+            });
+          },
+          update: async (params, data) => {
+            expect(data.user_attribute_profile_id).to.equal(sampleUAP.id);
+            return { data };
+          },
+        },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAP]),
+        },
+        pool,
+      };
+
+      const handler = new selfServiceProfiles.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ selfServiceProfiles: [sspWithUserAttributesId] }]);
+    });
+
+    it('should throw an error if user_attributes and user_attribute_profile_id are set', async () => {
+      const sspWithBoth = {
+        ...cloneDeep(sampleSsProfileWithId),
+        name: 'self-service-profile-with-uap-name',
+        user_attribute_profile_id: sampleUAP.name,
+      };
+      const auth0 = {
+        selfServiceProfiles: {
+          delete: (params) => {
+            expect(params).to.be.an('undefined');
+            return Promise.resolve({ data: [] });
+          },
+          getAll: (params) => mockPagedData(params, 'selfServiceProfiles', [sspWithBoth]),
+          getCustomText: (params) => {
+            expect(params).to.be.an('object');
+            return Promise.resolve({
+              data: {},
+            });
+          },
+        },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAP]),
+        },
+        pool,
+      };
+
+      const handler = new selfServiceProfiles.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await expect(
+        stageFn.apply(handler, [{ selfServiceProfiles: [sspWithBoth] }])
+      ).to.be.rejectedWith(
+        `Self Service Profile ${sspWithBoth.name} has conflicting properties user_attribute_profile_id and user_attributes. Please remove one.`
+      );
+    });
+
+    it('should not call userAttributeProfiles api if user_attribute_profile_id is not a string', async () => {
+      const auth0 = {
+        selfServiceProfiles: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal(sampleSsProfileWithOutId.name);
+            expect(data.user_attributes).to.be.an('array');
+            expect(data.allowed_strategies).to.be.an('array');
+            expect(data.branding).to.be.an('object');
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'selfServiceProfiles', []),
+        },
+        userAttributeProfiles: {
+          getAll: () => {
+            expect.fail('userAttributeProfiles.getAll should not be called');
+          },
+        },
+        pool,
+      };
+
+      const handler = new selfServiceProfiles.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          selfServiceProfiles: [sampleSsProfileWithOutId],
+        },
+      ]);
     });
   });
 });

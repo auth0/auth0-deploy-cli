@@ -214,6 +214,7 @@ const constants = {
   FLOWS_VAULT_DIRECTORY: 'flow-vault-connections',
   SELF_SERVICE_PROFILE_DIRECTORY: 'self-service-profiles',
   NETWORK_ACLS_DIRECTORY: 'network-acls',
+  USER_ATTRIBUTE_PROFILES_DIRECTORY: 'user-attribute-profiles',
 };
 
 export default constants;
