@@ -215,7 +215,7 @@ describe('#selfServiceProfiles handler', () => {
               expect(sspId).to.be.a('string');
               expect(language).to.equal('en');
               expect(page).to.equal('get-started');
-              return Promise.resolve({ data: [] });
+              return Promise.resolve({});
             },
           },
         },
@@ -244,9 +244,7 @@ describe('#selfServiceProfiles handler', () => {
               expect(sspId).to.be.a('string');
               expect(language).to.equal('en');
               expect(page).to.equal('get-started');
-              return Promise.resolve({
-                data: sampleCustomText,
-              });
+              return Promise.resolve(sampleCustomText);
             },
           },
         },
@@ -469,19 +467,16 @@ describe('#selfServiceProfiles handler', () => {
         user_attribute_profile_id: sampleUAP.name,
         user_attributes: undefined,
       };
+      
       const auth0 = {
         selfServiceProfiles: {
           delete: (params) => {
             expect(params).to.be.an('undefined');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) =>
-            mockPagedData(params, 'selfServiceProfiles', [sspWithUserAttributesId]),
-          getCustomText: (params) => {
-            expect(params).to.be.an('object');
-            return Promise.resolve({
-              data: {},
-            });
+          list: (params) => mockPagedData(params, 'selfServiceProfiles', [sspWithUserAttributesId]),
+          customText: {
+            list: () => Promise.resolve({}),
           },
           update: async (params, data) => {
             expect(data.user_attribute_profile_id).to.equal(sampleUAP.id);
@@ -489,7 +484,7 @@ describe('#selfServiceProfiles handler', () => {
           },
         },
         userAttributeProfiles: {
-          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAP]),
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAP]),
         },
         pool,
       };
@@ -512,16 +507,13 @@ describe('#selfServiceProfiles handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => mockPagedData(params, 'selfServiceProfiles', [sspWithBoth]),
-          getCustomText: (params) => {
-            expect(params).to.be.an('object');
-            return Promise.resolve({
-              data: {},
-            });
+          list: (params) => mockPagedData(params, 'selfServiceProfiles', [sspWithBoth]),
+          customText: {
+            list: () => Promise.resolve({}),
           },
         },
         userAttributeProfiles: {
-          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAP]),
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAP]),
         },
         pool,
       };
@@ -550,10 +542,10 @@ describe('#selfServiceProfiles handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'selfServiceProfiles', []),
+          list: (params) => mockPagedData(params, 'selfServiceProfiles', []),
         },
         userAttributeProfiles: {
-          getAll: () => {
+          list: () => {
             expect.fail('userAttributeProfiles.getAll should not be called');
           },
         },

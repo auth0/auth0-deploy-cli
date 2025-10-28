@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import _ from 'lodash';
 import { PromisePoolExecutor } from 'promise-pool-executor';
-import sinon from 'sinon';
+import * as sinon from 'sinon';
 import promptsHandler, { Prompts } from '../../../../src/tools/auth0/handlers/prompts';
 import { Language } from '../../../../src/types';
 import log from '../../../../src/logger';
@@ -138,8 +138,7 @@ describe('#prompts handler', () => {
             },
           },
           rendering: {
-            list: () =>
-              Promise.resolve({ data: [sampleScreenRenderLogin, sampleScreenRenderSignUp] }),
+            list: () => [sampleScreenRenderLogin, sampleScreenRenderSignUp],
           },
         },
         pool: new PromisePoolExecutor({
@@ -212,9 +211,6 @@ describe('#prompts handler', () => {
             expect(data).to.deep.equal(mockPromptsSettings);
             return Promise.resolve({ data });
           },
-          _getRestClient: (endpoint) => ({
-            get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-          }),
         },
       };
 
@@ -486,11 +482,8 @@ describe('#prompts handler', () => {
         },
         prompts: {
           getSettings: () => Promise.resolve(mockPromptsSettings),
-          _getRestClient: (endpoint) => ({
-            get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-          }),
           rendering: {
-            list: () => Promise.resolve({ data: [] }),
+            list: () => [],
           },
         },
         pool: new PromisePoolExecutor({
