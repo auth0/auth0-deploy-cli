@@ -122,7 +122,7 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
          * Fetches the custom text for the "get_started" in "en" page of a self-service profile.
          */
 
-        const { data: getStartedText } = await this.client.selfServiceProfiles.customText.list(
+        const getStartedText = await this.client.selfServiceProfiles.customText.list(
           sp.id as string,
           SelfServiceProfileCustomTextLanguageEnum.en,
           SelfServiceProfileCustomTextPageEnum.getStarted
@@ -343,9 +343,6 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
     ) {
       return paginate<UserAttributeProfile>(this.client.userAttributeProfiles.list, {
         checkpoint: true,
-        include_totals: true,
-        is_global: false,
-        take: 10,
       });
     }
 
