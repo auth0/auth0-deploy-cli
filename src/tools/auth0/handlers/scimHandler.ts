@@ -94,13 +94,17 @@ export default class ScimHandler {
           this.idMap.set(connection.id, { strategy: connection.strategy });
           return this.getScimConfiguration({ id: connection.id })
             .then((response) => {
-              const scimConfiguration = response?.data;
+              const scimConfiguration = response;
               if (scimConfiguration) {
+                // eslint-disable-next-line camelcase
                 const { mapping, user_id_attribute, connection_id } = scimConfiguration;
-                this.idMap.set(connection_id, {
-                  ...this.idMap.get(connection_id)!,
-                  scimConfiguration: { mapping, user_id_attribute },
-                });
+                // eslint-disable-next-line camelcase
+                if (connection_id) {
+                  this.idMap.set(connection_id, {
+                    ...this.idMap.get(connection_id)!,
+                    scimConfiguration: { mapping, user_id_attribute },
+                  });
+                }
               }
             })
             .catch((error) => {
@@ -234,7 +238,9 @@ export default class ScimHandler {
   /**
    * Retrieves `SCIM` configuration of an enterprise connection.
    */
-  async getScimConfiguration({ id }: ScimRequestParams): Promise<Asset | null> {
+  async getScimConfiguration({
+    id,
+  }: ScimRequestParams): Promise<Management.GetScimConfigurationResponseContent | null> {
     log.debug(`Getting SCIM configuration from connection ${id}`);
 
     return this.withErrorHandling(
