@@ -4,7 +4,7 @@ import {
   ManagementClient,
   ResourceServer,
   UserAttributeProfile,
-} from 'auth0';
+} from 'auth0/legacy';
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { Action } from './tools/auth0/handlers/actions';
 import { Prompts } from './tools/auth0/handlers/prompts';
@@ -95,10 +95,10 @@ export type Assets = Partial<{
   actions: Action[] | null;
   attackProtection: Asset | null;
   branding:
-    | (Asset & {
-        templates?: { template: string; body: string }[] | null;
-      })
-    | null;
+  | (Asset & {
+    templates?: { template: string; body: string }[] | null;
+  })
+  | null;
   phoneProviders: PhoneProvider[] | null;
   clients: Client[] | null;
   clientGrants: ClientGrant[] | null;

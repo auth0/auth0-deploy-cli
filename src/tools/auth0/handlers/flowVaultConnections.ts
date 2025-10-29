@@ -1,7 +1,7 @@
 import {
   GetFlowsVaultConnections200ResponseOneOfInner,
   PatchFlowsVaultConnectionsByIdRequest,
-} from 'auth0';
+} from 'auth0/legacy';
 import { isArray, isEmpty } from 'lodash';
 import DefaultHandler, { order } from './default';
 import { Asset, Assets, CalculatedChanges } from '../../../types';

@@ -3,7 +3,7 @@ import {
   DeletePhoneProviderRequest,
   GetBrandingPhoneProviders200ResponseProvidersInner,
   UpdatePhoneProviderOperationRequest,
-} from 'auth0';
+} from 'auth0/legacy';
 import DefaultHandler, { order } from './default';
 import { Assets } from '../../../types';
 import log from '../../../logger';

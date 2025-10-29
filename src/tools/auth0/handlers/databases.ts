@@ -1,4 +1,4 @@
-import { Client, Connection, GetConnectionsStrategyEnum } from 'auth0';
+import { Client, Connection, GetConnectionsStrategyEnum } from 'auth0/legacy';
 import DefaultAPIHandler, { order } from './default';
 import constants from '../../constants';
 import { filterExcluded, getEnabledClients } from '../../utils';
