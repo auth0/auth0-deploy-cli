@@ -210,12 +210,15 @@ export default class UserAttributeProfilesHandler extends DefaultAPIHandler {
     if (this.existing) return this.existing;
 
     try {
-      this.existing = await paginate<UserAttributeProfile>(this.client.userAttributeProfiles.getAll, {
-        checkpoint: true,
-        include_totals: true,
-        is_global: false,
-        take: 10,
-      });
+      this.existing = await paginate<UserAttributeProfile>(
+        this.client.userAttributeProfiles.getAll,
+        {
+          checkpoint: true,
+          include_totals: true,
+          is_global: false,
+          take: 10,
+        }
+      );
 
       return this.existing;
     } catch (err) {
