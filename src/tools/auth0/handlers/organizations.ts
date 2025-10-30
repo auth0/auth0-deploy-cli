@@ -676,8 +676,8 @@ export default class OrganizationsHandler extends DefaultHandler {
         return null;
       }
       if (err.statusCode === 403) {
-        log.warn(
-          `Error fetching discovery domains for organization ${organizationId}: ${err.message}`
+        log.debug(
+          'Organization Discovery domains are not enabled for this tenant. Please verify `scope` or contact Auth0 support to enable this feature.'
         );
         return null;
       }
