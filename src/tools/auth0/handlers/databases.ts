@@ -2,7 +2,7 @@ import { Client, Connection, GetConnectionsStrategyEnum } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import constants from '../../constants';
 import { filterExcluded, getEnabledClients } from '../../utils';
-import { CalculatedChanges, Assets } from '../../../types';
+import { CalculatedChanges, Assets, Asset } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
 import { getConnectionEnabledClients, processConnectionEnabledClients } from './connections';
@@ -133,7 +133,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     await super.validate(assets);
   }
 
-  private validateEmailUniqueConstraints(payload: any): void {
+  private validateEmailUniqueConstraints(payload: Asset): void {
     const attributes = payload?.options?.attributes;
 
     // Only validate if attributes are present
@@ -180,11 +180,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     // Override this as a database is actually a connection but we are treating them as a different object
 
     if (fn === 'create') {
-      return (payload) => {
-        // Validate as safety net during create
-        this.validateEmailUniqueConstraints(payload);
-        return this.client.connections.create(payload);
-      };
+      return (payload) => this.client.connections.create(payload);
     }
 
     // If we going to update database, we need to get current options first
@@ -206,9 +202,6 @@ export default class DatabaseHandler extends DefaultAPIHandler {
           } else if (requiresUsername || validation) {
             delete connection.options.attributes;
           }
-
-          // Validate as safety net during update
-          this.validateEmailUniqueConstraints(payload);
 
           payload.options = { ...connection.options, ...payload.options };
 
