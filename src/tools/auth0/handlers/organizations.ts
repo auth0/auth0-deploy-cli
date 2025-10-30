@@ -675,7 +675,7 @@ export default class OrganizationsHandler extends DefaultHandler {
       if (err.statusCode === 404 || err.statusCode === 501) {
         return null;
       }
-      if (err.statusCode === 403) {
+      if (err.statusCode === 403 || err.errorCode === 'feature_not_enabled') {
         log.debug(
           'Organization Discovery domains are not enabled for this tenant. Please verify `scope` or contact Auth0 support to enable this feature.'
         );
