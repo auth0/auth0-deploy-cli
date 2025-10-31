@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for organization discovery domains in `organizations`. [#1187]
+- Add support for `email.unique` attribute property in `databases`. [`#1190]
+- Add support for custom-URI-schemes in `clients` and `tenant`. [#1182]
+
+### Fixed
+
+- Fix docs for env vars usage with keyword replacement. [#1188]
+- Fix read_only_background property schema for `themes`. [#1184]
+- Fix `userAttributeProfiles` handle if feature is not enabled. [#1181]
+
 ## [8.18.0] - 2025-10-13
 
 ### Added
