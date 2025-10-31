@@ -160,6 +160,10 @@ export const schema = {
           enum: ['email', 'organization_name'],
         },
       },
+      skip_non_verifiable_callback_uri_confirmation_prompt: {
+        type: ['boolean', 'null'],
+        description: 'Whether to skip the confirmation prompt for non-verifiable callback URIs',
+      },
     },
     required: ['name'],
   },

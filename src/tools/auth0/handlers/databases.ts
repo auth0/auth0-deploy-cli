@@ -2,7 +2,7 @@ import { Client, Connection, GetConnectionsStrategyEnum } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import constants from '../../constants';
 import { filterExcluded, getEnabledClients } from '../../utils';
-import { CalculatedChanges, Assets } from '../../../types';
+import { CalculatedChanges, Assets, Asset } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
 import { getConnectionEnabledClients, processConnectionEnabledClients } from './connections';
@@ -32,6 +32,7 @@ export const schema = {
               email: {
                 type: 'object',
                 properties: {
+                  unique: { type: 'boolean', default: true },
                   identifier: {
                     type: 'object',
                     properties: {
@@ -118,8 +119,59 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     return super.objString({ name: db.name, id: db.id });
   }
 
+  async validate(assets: Assets): Promise<void> {
+    const { databases } = assets;
+
+    // Do nothing if not set
+    if (!databases) return;
+
+    // Validate each database
+    databases.forEach((database) => {
+      this.validateEmailUniqueConstraints(database);
+    });
+
+    await super.validate(assets);
+  }
+
+  private validateEmailUniqueConstraints(payload: Asset): void {
+    const attributes = payload?.options?.attributes;
+
+    // Only validate if attributes are present
+    if (!attributes) return;
+
+    const emailAttributes = attributes.email;
+    const usernameAttributes = attributes.username;
+    const phoneAttributes = attributes.phone_number;
+
+    // At least one identifier must always be active
+    const hasAnyActiveIdentifier =
+      emailAttributes?.identifier?.active === true ||
+      usernameAttributes?.identifier?.active === true ||
+      phoneAttributes?.identifier?.active === true;
+
+    if (!hasAnyActiveIdentifier) {
+      throw new Error(
+        `Database "${payload.name}": At least one identifier must be active. Either email.identifier.active, username.identifier.active, or phone_number.identifier.active must be set to true.`
+      );
+    }
+
+    if (emailAttributes?.unique === false) {
+      // When email.unique = false, email.identifier.active cannot be true
+      if (emailAttributes?.identifier?.active === true) {
+        throw new Error(
+          `Database "${payload.name}": Cannot set email.identifier.active to true when email.unique is false. Non-unique emails cannot be used as active identifiers.`
+        );
+      }
+    }
+  }
+
   getClientFN(fn: 'create' | 'delete' | 'getAll' | 'update'): Function {
     // Override this as a database is actually a connection but we are treating them as a different object
+
+    if (fn === 'create') {
+      return (payload) => this.client.connections.create(payload);
+    }
+
     // If we going to update database, we need to get current options first
     if (fn === 'update') {
       return (params, payload) =>

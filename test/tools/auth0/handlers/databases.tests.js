@@ -52,6 +52,27 @@ describe('#databases handler', () => {
 
       await stageFn.apply(handler, [{ databases: [{ name: 'someDatabase' }] }]);
     });
+
+    it('should validate database with email.unique property', async () => {
+      const handler = new databases.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+
+      const data = [
+        {
+          name: 'testDatabase',
+          options: {
+            attributes: {
+              email: {
+                unique: true,
+                identifier: { active: true },
+              },
+            },
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ databases: data }]);
+    });
   });
 
   describe('#databases process', () => {
@@ -78,6 +99,197 @@ describe('#databases handler', () => {
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ databases: [{ name: 'someDatabase' }] }]);
+    });
+
+    it('should throw error when creating database with email.unique false and email.identifier.active true', async () => {
+      const handler = new databases.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+
+      const data = [
+        {
+          name: 'invalidDatabase',
+          strategy: 'auth0',
+          options: {
+            attributes: {
+              email: {
+                unique: false,
+                identifier: { active: true },
+              },
+            },
+          },
+        },
+      ];
+
+      try {
+        await stageFn.apply(handler, [{ databases: data }]);
+        expect.fail('Expected error was not thrown');
+      } catch (error) {
+        expect(error.message).to.include(
+          'Cannot set email.identifier.active to true when email.unique is false'
+        );
+        expect(error.message).to.include('invalidDatabase');
+      }
+    });
+
+    it('should successfully create database with email.unique false and valid configuration', async () => {
+      const auth0 = {
+        connections: {
+          create: function (data) {
+            expect(data.name).to.equal('validDatabase');
+            expect(data.options.attributes.email.identifier.active).to.equal(false);
+            expect(data.options.attributes.username.identifier.active).to.equal(true);
+            return Promise.resolve({ data });
+          },
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      const data = [
+        {
+          name: 'validDatabase',
+          strategy: 'auth0',
+          options: {
+            attributes: {
+              email: {
+                unique: false,
+                identifier: { active: false },
+              },
+              username: {
+                identifier: { active: true },
+              },
+            },
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ databases: data }]);
+    });
+
+    it('should successfully create database with email.unique false and username.identifier.active true', async () => {
+      const auth0 = {
+        connections: {
+          create: function (data) {
+            expect(data.name).to.equal('testDatabase');
+            expect(data.options.attributes.email.unique).to.equal(false);
+            expect(data.options.attributes.email.identifier.active).to.equal(false);
+            expect(data.options.attributes.username.identifier.active).to.equal(true);
+            return Promise.resolve({ data });
+          },
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      const data = [
+        {
+          name: 'testDatabase',
+          strategy: 'auth0',
+          options: {
+            attributes: {
+              email: {
+                unique: false,
+                identifier: { active: false },
+              },
+              username: {
+                identifier: { active: true },
+              },
+            },
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ databases: data }]);
+    });
+
+    it('should successfully update database when email.unique is not mentioned and email.identifier.active is true', async () => {
+      const auth0 = {
+        connections: {
+          get: function (params) {
+            expect(params.id).to.equal('con1');
+            return Promise.resolve({ data: { options: { someOldOption: true } } });
+          },
+          update: function (params, data) {
+            expect(params.id).to.equal('con1');
+            expect(data.options.attributes.email.identifier.active).to.equal(true);
+            return Promise.resolve({ data: { ...params, ...data } });
+          },
+          getAll: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'testDatabase', id: 'con1', strategy: 'auth0' },
+            ]),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      const data = [
+        {
+          name: 'testDatabase',
+          strategy: 'auth0',
+          options: {
+            attributes: {
+              email: {
+                // unique not mentioned - should default to true
+                identifier: { active: true },
+              },
+            },
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ databases: data }]);
+    });
+
+    it('should throw error when creating database with no active identifiers', async () => {
+      const handler = new databases.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+
+      const data = [
+        {
+          name: 'invalidDatabase',
+          strategy: 'auth0',
+          options: {
+            attributes: {
+              email: {
+                unique: true,
+                identifier: { active: false },
+              },
+              username: {
+                identifier: { active: false },
+              },
+              phone_number: {
+                identifier: { active: false },
+              },
+            },
+          },
+        },
+      ];
+
+      try {
+        await stageFn.apply(handler, [{ databases: data }]);
+        expect.fail('Expected error was not thrown');
+      } catch (error) {
+        expect(error.message).to.include('At least one identifier must be active');
+        expect(error.message).to.include('invalidDatabase');
+      }
     });
 
     it('should get databases', async () => {
