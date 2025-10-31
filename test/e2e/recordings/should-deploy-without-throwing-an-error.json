@@ -1044,7 +1044,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                    "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1068,7 +1068,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/clients/8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+        "path": "/api/v2/clients/IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
         "body": {
             "name": "Default App",
             "callbacks": [],
@@ -1129,7 +1129,7 @@
                     "subject": "/CN=auth0-deploy-cli-e2e.us.auth0.com"
                 }
             ],
-            "client_id": "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+            "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
             "callback_url_template": false,
             "client_secret": "[REDACTED]",
             "jwt_configuration": {
@@ -1165,49 +1165,21 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/recovery-code",
-        "body": {
-            "enabled": false
-        },
-        "status": 200,
-        "response": {
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PUT",
-        "path": "/api/v2/guardian/factors/webauthn-platform",
-        "body": {
-            "enabled": false
-        },
-        "status": 200,
-        "response": {
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PUT",
-        "path": "/api/v2/guardian/factors/sms",
-        "body": {
-            "enabled": false
-        },
-        "status": 200,
-        "response": {
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PUT",
         "path": "/api/v2/guardian/factors/email",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
+        "path": "/api/v2/guardian/factors/otp",
         "body": {
             "enabled": false
         },
@@ -1249,7 +1221,35 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/otp",
+        "path": "/api/v2/guardian/factors/recovery-code",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
+        "path": "/api/v2/guardian/factors/sms",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
+        "path": "/api/v2/guardian/factors/webauthn-platform",
         "body": {
             "enabled": false
         },
@@ -1370,6 +1370,34 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
+        "path": "/api/v2/attack-protection/breached-password-detection",
+        "body": {
+            "enabled": false,
+            "shields": [],
+            "admin_notification_frequency": [],
+            "method": "standard"
+        },
+        "status": 200,
+        "response": {
+            "enabled": false,
+            "shields": [],
+            "admin_notification_frequency": [],
+            "method": "standard",
+            "stage": {
+                "pre-user-registration": {
+                    "shields": []
+                },
+                "pre-change-password": {
+                    "shields": []
+                }
+            }
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
         "path": "/api/v2/attack-protection/suspicious-ip-throttling",
         "body": {
             "enabled": true,
@@ -1405,34 +1433,6 @@
                 "pre-user-registration": {
                     "max_attempts": 50,
                     "rate": 1200
-                }
-            }
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PATCH",
-        "path": "/api/v2/attack-protection/breached-password-detection",
-        "body": {
-            "enabled": false,
-            "shields": [],
-            "admin_notification_frequency": [],
-            "method": "standard"
-        },
-        "status": 200,
-        "response": {
-            "enabled": false,
-            "shields": [],
-            "admin_notification_frequency": [],
-            "method": "standard",
-            "stage": {
-                "pre-user-registration": {
-                    "shields": []
-                },
-                "pre-change-password": {
-                    "shields": []
                 }
             }
         },
@@ -1545,7 +1545,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                    "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1615,7 +1615,7 @@
             "limit": 50,
             "connections": [
                 {
-                    "id": "con_0we3kkVOTK5uFh4v",
+                    "id": "con_T8mVsA0onoFxCML0",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -1645,7 +1645,7 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
@@ -1663,7 +1663,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_0we3kkVOTK5uFh4v",
+                    "id": "con_T8mVsA0onoFxCML0",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -1693,7 +1693,7 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
@@ -1714,7 +1714,7 @@
             "limit": 50,
             "connections": [
                 {
-                    "id": "con_0we3kkVOTK5uFh4v",
+                    "id": "con_T8mVsA0onoFxCML0",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -1744,7 +1744,7 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
@@ -1762,7 +1762,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_0we3kkVOTK5uFh4v",
+                    "id": "con_T8mVsA0onoFxCML0",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -1792,7 +1792,7 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
@@ -1804,13 +1804,13 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections/con_0we3kkVOTK5uFh4v/clients?take=50",
+        "path": "/api/v2/connections/con_T8mVsA0onoFxCML0/clients?take=50",
         "body": "",
         "status": 200,
         "response": {
             "clients": [
                 {
-                    "client_id": "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11"
+                    "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI"
                 },
                 {
                     "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
@@ -1823,11 +1823,11 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections/con_0we3kkVOTK5uFh4v",
+        "path": "/api/v2/connections/con_T8mVsA0onoFxCML0",
         "body": "",
         "status": 200,
         "response": {
-            "id": "con_0we3kkVOTK5uFh4v",
+            "id": "con_T8mVsA0onoFxCML0",
             "options": {
                 "mfa": {
                     "active": true,
@@ -1854,7 +1854,7 @@
             "name": "Username-Password-Authentication",
             "is_domain_connection": false,
             "enabled_clients": [
-                "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                 "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
             ],
             "realms": [
@@ -1867,11 +1867,11 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/connections/con_0we3kkVOTK5uFh4v",
+        "path": "/api/v2/connections/con_T8mVsA0onoFxCML0",
         "body": {
             "enabled_clients": [
                 "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11"
+                "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI"
             ],
             "is_domain_connection": false,
             "options": {
@@ -1902,7 +1902,7 @@
         },
         "status": 200,
         "response": {
-            "id": "con_0we3kkVOTK5uFh4v",
+            "id": "con_T8mVsA0onoFxCML0",
             "options": {
                 "mfa": {
                     "active": true,
@@ -1930,7 +1930,7 @@
             "is_domain_connection": false,
             "enabled_clients": [
                 "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11"
+                "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI"
             ],
             "realms": [
                 "Username-Password-Authentication"
@@ -1942,14 +1942,14 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/connections/con_0we3kkVOTK5uFh4v/clients",
+        "path": "/api/v2/connections/con_T8mVsA0onoFxCML0/clients",
         "body": [
             {
                 "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
                 "status": true
             },
             {
-                "client_id": "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                 "status": true
             }
         ],
@@ -2054,7 +2054,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                    "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -2124,7 +2124,7 @@
             "limit": 50,
             "connections": [
                 {
-                    "id": "con_0we3kkVOTK5uFh4v",
+                    "id": "con_T8mVsA0onoFxCML0",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -2154,7 +2154,7 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
@@ -2172,7 +2172,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_0we3kkVOTK5uFh4v",
+                    "id": "con_T8mVsA0onoFxCML0",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -2202,7 +2202,7 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
@@ -2223,7 +2223,7 @@
             "limit": 50,
             "connections": [
                 {
-                    "id": "con_0we3kkVOTK5uFh4v",
+                    "id": "con_T8mVsA0onoFxCML0",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -2253,7 +2253,7 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
@@ -2271,7 +2271,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_0we3kkVOTK5uFh4v",
+                    "id": "con_T8mVsA0onoFxCML0",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -2301,7 +2301,7 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
@@ -2319,7 +2319,7 @@
             "strategy": "google-oauth2",
             "enabled_clients": [
                 "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11"
+                "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI"
             ],
             "is_domain_connection": false,
             "options": {
@@ -2333,7 +2333,7 @@
         },
         "status": 201,
         "response": {
-            "id": "con_4VKEbNWDQsmYzrFo",
+            "id": "con_PbrTJcCum9aUGXfI",
             "options": {
                 "email": true,
                 "scope": [
@@ -2346,7 +2346,7 @@
             "name": "google-oauth2",
             "is_domain_connection": false,
             "enabled_clients": [
-                "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                 "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
             ],
             "realms": [
@@ -2365,7 +2365,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_4VKEbNWDQsmYzrFo",
+                    "id": "con_PbrTJcCum9aUGXfI",
                     "options": {
                         "email": true,
                         "scope": [
@@ -2381,7 +2381,7 @@
                         "google-oauth2"
                     ],
                     "enabled_clients": [
-                        "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
@@ -2393,14 +2393,14 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/connections/con_4VKEbNWDQsmYzrFo/clients",
+        "path": "/api/v2/connections/con_PbrTJcCum9aUGXfI/clients",
         "body": [
             {
                 "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
                 "status": true
             },
             {
-                "client_id": "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                 "status": true
             }
         ],
@@ -2520,7 +2520,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                    "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -2955,7 +2955,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                    "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3037,7 +3037,7 @@
             "limit": 50,
             "connections": [
                 {
-                    "id": "con_4VKEbNWDQsmYzrFo",
+                    "id": "con_PbrTJcCum9aUGXfI",
                     "options": {
                         "email": true,
                         "scope": [
@@ -3053,12 +3053,12 @@
                         "google-oauth2"
                     ],
                     "enabled_clients": [
-                        "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 },
                 {
-                    "id": "con_0we3kkVOTK5uFh4v",
+                    "id": "con_T8mVsA0onoFxCML0",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -3088,7 +3088,7 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 }
@@ -3106,7 +3106,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_4VKEbNWDQsmYzrFo",
+                    "id": "con_PbrTJcCum9aUGXfI",
                     "options": {
                         "email": true,
                         "scope": [
@@ -3122,12 +3122,12 @@
                         "google-oauth2"
                     ],
                     "enabled_clients": [
-                        "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
                 },
                 {
-                    "id": "con_0we3kkVOTK5uFh4v",
+                    "id": "con_T8mVsA0onoFxCML0",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -3157,163 +3157,9 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
+                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                     ]
-                }
-            ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/clients?page=0&per_page=100&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "total": 3,
-            "start": 0,
-            "limit": 100,
-            "clients": [
-                {
-                    "tenant": "auth0-deploy-cli-e2e",
-                    "global": false,
-                    "is_token_endpoint_ip_header_trusted": false,
-                    "name": "Deploy CLI",
-                    "is_first_party": true,
-                    "oidc_conformant": true,
-                    "sso_disabled": false,
-                    "cross_origin_auth": false,
-                    "refresh_token": {
-                        "expiration_type": "non-expiring",
-                        "leeway": 0,
-                        "infinite_token_lifetime": true,
-                        "infinite_idle_token_lifetime": true,
-                        "token_lifetime": 31557600,
-                        "idle_token_lifetime": 2592000,
-                        "rotation_type": "non-rotating"
-                    },
-                    "cross_origin_authentication": true,
-                    "allowed_clients": [],
-                    "callbacks": [],
-                    "native_social_login": {
-                        "apple": {
-                            "enabled": false
-                        },
-                        "facebook": {
-                            "enabled": false
-                        }
-                    },
-                    "signing_keys": [
-                        {
-                            "cert": "[REDACTED]",
-                            "pkcs7": "[REDACTED]",
-                            "subject": "deprecated"
-                        }
-                    ],
-                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                    "callback_url_template": false,
-                    "client_secret": "[REDACTED]",
-                    "jwt_configuration": {
-                        "alg": "RS256",
-                        "lifetime_in_seconds": 36000,
-                        "secret_encoded": false
-                    },
-                    "client_aliases": [],
-                    "token_endpoint_auth_method": "client_secret_post",
-                    "app_type": "non_interactive",
-                    "grant_types": [
-                        "client_credentials",
-                        "implicit",
-                        "authorization_code",
-                        "refresh_token"
-                    ],
-                    "custom_login_page_on": true
-                },
-                {
-                    "tenant": "auth0-deploy-cli-e2e",
-                    "global": false,
-                    "is_token_endpoint_ip_header_trusted": false,
-                    "async_approval_notification_channels": [
-                        "guardian-push"
-                    ],
-                    "name": "Default App",
-                    "callbacks": [],
-                    "cross_origin_auth": false,
-                    "is_first_party": true,
-                    "oidc_conformant": true,
-                    "refresh_token": {
-                        "expiration_type": "non-expiring",
-                        "leeway": 0,
-                        "infinite_token_lifetime": true,
-                        "infinite_idle_token_lifetime": true,
-                        "token_lifetime": 2592000,
-                        "idle_token_lifetime": 1296000,
-                        "rotation_type": "non-rotating"
-                    },
-                    "sso_disabled": false,
-                    "cross_origin_authentication": false,
-                    "signing_keys": [
-                        {
-                            "cert": "[REDACTED]",
-                            "pkcs7": "[REDACTED]",
-                            "subject": "deprecated"
-                        }
-                    ],
-                    "client_id": "8EUTHA0cDZ6qksiaRG5qZLal8u4X1q11",
-                    "callback_url_template": false,
-                    "client_secret": "[REDACTED]",
-                    "jwt_configuration": {
-                        "alg": "RS256",
-                        "lifetime_in_seconds": 36000,
-                        "secret_encoded": false
-                    },
-                    "grant_types": [
-                        "authorization_code",
-                        "implicit",
-                        "refresh_token",
-                        "client_credentials"
-                    ],
-                    "custom_login_page_on": true
-                },
-                {
-                    "tenant": "auth0-deploy-cli-e2e",
-                    "global": true,
-                    "callbacks": [],
-                    "is_first_party": true,
-                    "name": "All Applications",
-                    "refresh_token": {
-                        "expiration_type": "non-expiring",
-                        "leeway": 0,
-                        "infinite_token_lifetime": true,
-                        "infinite_idle_token_lifetime": true,
-                        "token_lifetime": 2592000,
-                        "idle_token_lifetime": 1296000,
-                        "rotation_type": "non-rotating"
-                    },
-                    "owners": [
-                        "mr|samlp|okta|will.vedder@auth0.com",
-                        "mr|google-oauth2|102002633619863830825",
-                        "mr|samlp|okta|frederik.prijck@auth0.com",
-                        "mr|google-oauth2|109614534713742077035",
-                        "mr|google-oauth2|116771660953104383819",
-                        "mr|google-oauth2|112839029247827700155",
-                        "mr|samlp|okta|ewan.harris@auth0.com"
-                    ],
-                    "custom_login_page": "<html>TEST123</html>\n",
-                    "cross_origin_authentication": true,
-                    "signing_keys": [
-                        {
-                            "cert": "[REDACTED]",
-                            "pkcs7": "[REDACTED]",
-                            "subject": "deprecated"
-                        }
-                    ],
-                    "client_id": "Isi93ibGHIGwmdYjsLwTOn7Gu7nwxU3V",
-                    "client_secret": "[REDACTED]",
-                    "custom_login_page_on": true
                 }
             ]
         },
@@ -3565,6 +3411,160 @@
                         "create:connections_keys"
                     ],
                     "subject_type": "client"
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/clients?page=0&per_page=100&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "total": 3,
+            "start": 0,
+            "limit": 100,
+            "clients": [
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Deploy CLI",
+                    "is_first_party": true,
+                    "oidc_conformant": true,
+                    "sso_disabled": false,
+                    "cross_origin_auth": false,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "cross_origin_authentication": true,
+                    "allowed_clients": [],
+                    "callbacks": [],
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
+                        "client_credentials",
+                        "implicit",
+                        "authorization_code",
+                        "refresh_token"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "async_approval_notification_channels": [
+                        "guardian-push"
+                    ],
+                    "name": "Default App",
+                    "callbacks": [],
+                    "cross_origin_auth": false,
+                    "is_first_party": true,
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": true,
+                    "callbacks": [],
+                    "is_first_party": true,
+                    "name": "All Applications",
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "owners": [
+                        "mr|samlp|okta|will.vedder@auth0.com",
+                        "mr|google-oauth2|102002633619863830825",
+                        "mr|samlp|okta|frederik.prijck@auth0.com",
+                        "mr|google-oauth2|109614534713742077035",
+                        "mr|google-oauth2|116771660953104383819",
+                        "mr|google-oauth2|112839029247827700155",
+                        "mr|samlp|okta|ewan.harris@auth0.com"
+                    ],
+                    "custom_login_page": "<html>TEST123</html>\n",
+                    "cross_origin_authentication": true,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "Isi93ibGHIGwmdYjsLwTOn7Gu7nwxU3V",
+                    "client_secret": "[REDACTED]",
+                    "custom_login_page_on": true
                 }
             ]
         },

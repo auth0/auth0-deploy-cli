@@ -1,6 +1,6 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset, ParsedAsset } from '../../../types';
+import { Asset } from '../../../types';
 
 type ParsedOrganizations = {
   organizations: Asset[] | null;
@@ -33,6 +33,16 @@ async function dump(context: YAMLContext): Promise<ParsedOrganizations> {
           return {
             name,
             ...c,
+          };
+        });
+      }
+      if (org.discovery_domains && org.discovery_domains.length > 0) {
+        org.discovery_domains = org.discovery_domains.map((dd) => {
+          // discovery_domains id is a computed field
+          delete dd.id;
+
+          return {
+            ...dd,
           };
         });
       }

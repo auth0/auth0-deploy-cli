@@ -12,7 +12,7 @@ describe('#directory context organizations', () => {
     const files = {
       organizations: {
         'acme.json':
-          '{ "name": "acme", "display_name": "acme", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "name": "google", "assign_membership_on_login": false, "show_as_button": false }], "client_grants": []}',
+          '{ "name": "acme", "display_name": "acme", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "name": "google", "assign_membership_on_login": false, "show_as_button": false }], "client_grants": [], "discovery_domains": [{ "domain": "login.acme.com", "status": "pending" }]}',
         'contoso.json':
           '{ "name": "contoso", "display_name": "contoso", "branding": { "colors": { "primary": "#3678e2", "page_background": "#9c4949" } }, "connections":[{ "name": "google", "assign_membership_on_login": false, "show_as_button": false }], "client_grants": []}',
         'tast-org.json':
@@ -47,6 +47,12 @@ describe('#directory context organizations', () => {
           },
         ],
         client_grants: [],
+        discovery_domains: [
+          {
+            domain: 'login.acme.com',
+            status: 'pending',
+          },
+        ],
       },
       {
         name: 'contoso',
@@ -164,6 +170,13 @@ describe('#directory context organizations', () => {
             show_as_button: false,
           },
         ],
+        discovery_domains: [
+          {
+            domain: 'login.acme.com',
+            status: 'pending',
+            id: 'dd_123',
+          },
+        ],
       },
       {
         name: 'contoso',
@@ -204,8 +217,14 @@ describe('#directory context organizations', () => {
 
     await handler.dump(context);
     const organizationsFolder = path.join(dir, 'organizations');
-    expect(loadJSON(path.join(organizationsFolder, 'acme.json'))).to.deep.equal(
-      context.assets.organizations[0]
+    const acmeDump = loadJSON(path.join(organizationsFolder, 'acme.json'));
+    const { discovery_domains: dumpedDiscoveryDomains, ...dumpedRest } = acmeDump;
+    const { discovery_domains: originalDiscoveryDomains, ...originalRest } =
+      context.assets.organizations[0];
+
+    expect(dumpedRest).to.deep.equal(originalRest);
+    expect(dumpedDiscoveryDomains).to.deep.equal(
+      originalDiscoveryDomains.map(({ domain, status }) => ({ domain, status }))
     );
     expect(loadJSON(path.join(organizationsFolder, 'contoso.json'))).to.deep.equal(
       context.assets.organizations[1]

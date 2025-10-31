@@ -26,6 +26,9 @@ describe('#YAML context organizations', () => {
             is_signup_enabled: false
         display_name: acme
         client_grants: []
+        discovery_domains:
+          - domain: login.acme.com
+            status: pending
       - name: contoso
         branding:
           colors:
@@ -72,6 +75,12 @@ describe('#YAML context organizations', () => {
           },
         ],
         client_grants: [],
+        discovery_domains: [
+          {
+            domain: 'login.acme.com',
+            status: 'pending',
+          },
+        ],
       },
       {
         name: 'contoso',
@@ -150,6 +159,13 @@ describe('#YAML context organizations', () => {
             },
           },
         ],
+        discovery_domains: [
+          {
+            domain: 'login.acme.com',
+            status: 'verified',
+            id: 'dd_123',
+          },
+        ],
       },
     ];
     context.assets.organizations = cloneDeep(organizations);
@@ -158,6 +174,9 @@ describe('#YAML context organizations', () => {
     organizations[0].connections[0].name = organizations[0].connections[0].connection.name;
     delete organizations[0].connections[0].connection;
     delete organizations[0].connections[0].connection_id;
+    organizations[0].discovery_domains = organizations[0].discovery_domains.map(
+      ({ domain, status }) => ({ domain, status })
+    );
 
     expect(dumped).to.deep.equal({ organizations });
   });
