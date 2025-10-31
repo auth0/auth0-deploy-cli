@@ -1,12 +1,15 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
+import { attackProtectionDefaults } from '../../defaults';
 
 type ParsedAttackProtection = ParsedAsset<
   'attackProtection',
   {
+    botDetection?: Asset | null;
     breachedPasswordDetection: Asset;
     bruteForceProtection: Asset;
+    captcha?: Asset | null;
     suspiciousIpThrottling: Asset;
   }
 >;
@@ -16,15 +19,32 @@ async function parseAndDump(context: YAMLContext): Promise<ParsedAttackProtectio
 
   if (!attackProtection) return { attackProtection: null };
 
-  const { suspiciousIpThrottling, breachedPasswordDetection, bruteForceProtection } =
-    attackProtection;
+  const {
+    botDetection,
+    suspiciousIpThrottling,
+    breachedPasswordDetection,
+    bruteForceProtection,
+    captcha,
+  } = attackProtection;
+
+  const attackProtectionConfig: ParsedAttackProtection['attackProtection'] = {
+    suspiciousIpThrottling,
+    breachedPasswordDetection,
+    bruteForceProtection,
+  };
+
+  if (botDetection) {
+    attackProtectionConfig.botDetection = botDetection;
+  }
+
+  if (captcha) {
+    attackProtectionConfig.captcha = captcha;
+  }
+
+  const maskedAttackProtection = attackProtectionDefaults(attackProtection);
 
   return {
-    attackProtection: {
-      suspiciousIpThrottling,
-      breachedPasswordDetection,
-      bruteForceProtection,
-    },
+    attackProtection: maskedAttackProtection,
   };
 }
 

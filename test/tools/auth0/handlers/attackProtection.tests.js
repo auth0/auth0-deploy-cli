@@ -6,6 +6,13 @@ describe('#attackProtection handler', () => {
     it('should fetch attack protection settings', async () => {
       const auth0 = {
         attackProtection: {
+          getBotDetectionConfig: () => ({
+            data: {
+              bot_detection_level: 'medium',
+              monitoring_mode_enabled: true,
+              allowlist: ['10.0.0.0/24'],
+            },
+          }),
           getBreachedPasswordDetectionConfig: () => ({
             data: {
               admin_notification_frequency: [],
@@ -21,6 +28,12 @@ describe('#attackProtection handler', () => {
               max_attempts: 10,
               mode: 'count_per_identifier_and_ip',
               shields: ['block', 'user_notification'],
+            },
+          }),
+          getCaptchaConfig: () => ({
+            data: {
+              selected: 'friendly_captcha',
+              policy: 'always',
             },
           }),
           getSuspiciousIpThrottlingConfig: () => ({
@@ -46,6 +59,11 @@ describe('#attackProtection handler', () => {
       const handler = new attackProtection.default({ client: auth0 });
       const data = await handler.getType();
       expect(data).to.deep.equal({
+        botDetection: {
+          bot_detection_level: 'medium',
+          monitoring_mode_enabled: true,
+          allowlist: ['10.0.0.0/24'],
+        },
         breachedPasswordDetection: {
           admin_notification_frequency: [],
           enabled: true,
@@ -58,6 +76,10 @@ describe('#attackProtection handler', () => {
           max_attempts: 10,
           mode: 'count_per_identifier_and_ip',
           shields: ['block', 'user_notification'],
+        },
+        captcha: {
+          selected: 'friendly_captcha',
+          policy: 'always',
         },
         suspiciousIpThrottling: {
           allowlist: ['127.0.0.1'],
@@ -80,6 +102,15 @@ describe('#attackProtection handler', () => {
     it('should update attack protection settings', async () => {
       const auth0 = {
         attackProtection: {
+          updateBotDetectionConfig: (data) => {
+            expect(data).to.be.an('object');
+            expect(data).to.deep.equal({
+              bot_detection_level: 'medium',
+              monitoring_mode_enabled: false,
+              allowlist: ['10.0.0.0/24'],
+            });
+            return Promise.resolve(data);
+          },
           updateBreachedPasswordDetectionConfig: (data) => {
             expect(data).to.be.an('object');
             expect(data).to.deep.equal({
@@ -87,6 +118,14 @@ describe('#attackProtection handler', () => {
               enabled: true,
               method: 'standard',
               shields: [],
+            });
+            return Promise.resolve(data);
+          },
+          updateCaptchaConfig: (data) => {
+            expect(data).to.be.an('object');
+            expect(data).to.deep.equal({
+              selected: 'friendly_captcha',
+              policy: 'always',
             });
             return Promise.resolve(data);
           },
@@ -129,6 +168,11 @@ describe('#attackProtection handler', () => {
       await stageFn.apply(handler, [
         {
           attackProtection: {
+            botDetection: {
+              bot_detection_level: 'medium',
+              monitoring_mode_enabled: false,
+              allowlist: ['10.0.0.0/24'],
+            },
             breachedPasswordDetection: {
               admin_notification_frequency: [],
               enabled: true,
@@ -141,6 +185,10 @@ describe('#attackProtection handler', () => {
               max_attempts: 10,
               mode: 'count_per_identifier_and_ip',
               shields: ['block', 'user_notification'],
+            },
+            captcha: {
+              selected: 'friendly_captcha',
+              policy: 'always',
             },
             suspiciousIpThrottling: {
               allowlist: ['127.0.0.1'],

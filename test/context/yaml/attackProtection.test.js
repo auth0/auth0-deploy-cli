@@ -12,6 +12,11 @@ describe('#YAML context attack-protection', () => {
 
     const yaml = `
     attackProtection:
+      botDetection:
+        bot_detection_level: medium
+        monitoring_mode_enabled: true
+        allowlist:
+          - 10.0.0.1
       breachedPasswordDetection:
         enabled: true
         shields: []
@@ -25,6 +30,9 @@ describe('#YAML context attack-protection', () => {
         mode: count_per_identifier_and_ip
         allowlist: []
         max_attempts: 10
+      captcha:
+        selected: friendly_captcha
+        policy: always
       suspiciousIpThrottling:
         enabled: true
         shields:
@@ -42,6 +50,11 @@ describe('#YAML context attack-protection', () => {
     `;
 
     const target = {
+      botDetection: {
+        allowlist: ['10.0.0.1'],
+        bot_detection_level: 'medium',
+        monitoring_mode_enabled: true,
+      },
       breachedPasswordDetection: {
         admin_notification_frequency: [],
         enabled: true,
@@ -54,6 +67,10 @@ describe('#YAML context attack-protection', () => {
         max_attempts: 10,
         mode: 'count_per_identifier_and_ip',
         shields: ['block', 'user_notification'],
+      },
+      captcha: {
+        policy: 'always',
+        selected: 'friendly_captcha',
       },
       suspiciousIpThrottling: {
         allowlist: ['127.0.0.1'],
@@ -84,6 +101,11 @@ describe('#YAML context attack-protection', () => {
   it('should dump attack-protection', async () => {
     const context = new Context({ AUTH0_INPUT_FILE: './attack-protection.yml' }, mockMgmtClient());
     const attackProtection = {
+      botDetection: {
+        allowlist: ['10.0.0.1'],
+        bot_detection_level: 'medium',
+        monitoring_mode_enabled: false,
+      },
       breachedPasswordDetection: {
         admin_notification_frequency: [],
         enabled: true,
@@ -96,6 +118,10 @@ describe('#YAML context attack-protection', () => {
         max_attempts: 10,
         mode: 'count_per_identifier_and_ip',
         shields: ['block', 'user_notification'],
+      },
+      captcha: {
+        policy: 'always',
+        selected: 'friendly_captcha',
       },
       suspiciousIpThrottling: {
         allowlist: ['127.0.0.1'],

@@ -9,10 +9,13 @@ describe('#directory context attack-protection', () => {
   it('should replace keywords', async () => {
     const files = {
       'attack-protection': {
+        'bot-detection.json':
+          '{"bot_detection_level": "@@BOT_DETECTION_LEVEL@@", "monitoring_mode_enabled": @@BOT_MONITORING_MODE@@, "allowlist": ["@@BOT_ALLOWLIST_ENTRY@@"]}',
         'breached-password-detection.json':
           '{"enabled": "@@BREACH_PASSWORD_ENABLED@@", "shields": [], "admin_notification_frequency": [], "method": "##BREACH_PASSWORD_PROT_METHOD##"}',
         'brute-force-protection.json':
           '{"enabled": "@@BRUTE_FORCE_PROT_ENABLED@@", "shields": ["block", "user_notification"], "mode": "count_per_identifier_and_ip", "allowlist": [], "max_attempts": 10}',
+        'captcha.json': '{"selected": "friendly_captcha", "policy": "##CAPTCHA_POLICY##"}',
         'suspicious-ip-throttling.json':
           '{"enabled": true, "shields": ["block", "admin_notification"], "allowlist": ["127.0.0.1"], "stage": {"pre-login": {"max_attempts": 100, "rate": 864000}, "pre-user-registration": {"max_attempts": 50, "rate": 1200}}}',
       },
@@ -27,6 +30,10 @@ describe('#directory context attack-protection', () => {
         BREACH_PASSWORD_ENABLED: true,
         BREACH_PASSWORD_PROT_METHOD: 'standard',
         BRUTE_FORCE_PROT_ENABLED: false,
+        BOT_DETECTION_LEVEL: 'medium',
+        BOT_MONITORING_MODE: true,
+        BOT_ALLOWLIST_ENTRY: '10.0.0.1',
+        CAPTCHA_POLICY: 'always',
       },
     };
 
@@ -34,6 +41,11 @@ describe('#directory context attack-protection', () => {
     await context.loadAssetsFromLocal();
 
     const target = {
+      botDetection: {
+        allowlist: ['10.0.0.1'],
+        bot_detection_level: 'medium',
+        monitoring_mode_enabled: true,
+      },
       breachedPasswordDetection: {
         admin_notification_frequency: [],
         enabled: true,
@@ -46,6 +58,10 @@ describe('#directory context attack-protection', () => {
         max_attempts: 10,
         mode: 'count_per_identifier_and_ip',
         shields: ['block', 'user_notification'],
+      },
+      captcha: {
+        policy: 'always',
+        selected: 'friendly_captcha',
       },
       suspiciousIpThrottling: {
         allowlist: ['127.0.0.1'],
@@ -70,10 +86,13 @@ describe('#directory context attack-protection', () => {
   it('should process attack-protection', async () => {
     const files = {
       'attack-protection': {
+        'bot-detection.json':
+          '{"bot_detection_level": "medium", "monitoring_mode_enabled": true, "allowlist": ["10.0.0.1"]}',
         'breached-password-detection.json':
           '{"enabled": true, "shields": [], "admin_notification_frequency": [], "method": "standard"}',
         'brute-force-protection.json':
           '{"enabled": true, "shields": ["block", "user_notification"], "mode": "count_per_identifier_and_ip", "allowlist": [], "max_attempts": 10}',
+        'captcha.json': '{"selected": "friendly_captcha", "policy": "always"}',
         'suspicious-ip-throttling.json':
           '{"enabled": true, "shields": ["block", "admin_notification"], "allowlist": ["127.0.0.1"], "stage": {"pre-login": {"max_attempts": 100, "rate": 864000}, "pre-user-registration": {"max_attempts": 50, "rate": 1200}}}',
       },
@@ -87,6 +106,11 @@ describe('#directory context attack-protection', () => {
     await context.loadAssetsFromLocal();
 
     const target = {
+      botDetection: {
+        allowlist: ['10.0.0.1'],
+        bot_detection_level: 'medium',
+        monitoring_mode_enabled: true,
+      },
       breachedPasswordDetection: {
         admin_notification_frequency: [],
         enabled: true,
@@ -99,6 +123,10 @@ describe('#directory context attack-protection', () => {
         max_attempts: 10,
         mode: 'count_per_identifier_and_ip',
         shields: ['block', 'user_notification'],
+      },
+      captcha: {
+        policy: 'always',
+        selected: 'friendly_captcha',
       },
       suspiciousIpThrottling: {
         allowlist: ['127.0.0.1'],
@@ -126,6 +154,11 @@ describe('#directory context attack-protection', () => {
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
     context.assets.attackProtection = {
+      botDetection: {
+        allowlist: ['10.0.0.1'],
+        bot_detection_level: 'medium',
+        monitoring_mode_enabled: false,
+      },
       breachedPasswordDetection: {
         admin_notification_frequency: [],
         enabled: true,
@@ -138,6 +171,10 @@ describe('#directory context attack-protection', () => {
         max_attempts: 10,
         mode: 'count_per_identifier_and_ip',
         shields: ['block', 'user_notification'],
+      },
+      captcha: {
+        policy: 'always',
+        selected: 'friendly_captcha',
       },
       suspiciousIpThrottling: {
         allowlist: ['127.0.0.1'],
@@ -159,12 +196,18 @@ describe('#directory context attack-protection', () => {
     await handler.dump(context);
     const attackProtectionFolder = path.join(dir, 'attack-protection');
 
+    expect(loadJSON(path.join(attackProtectionFolder, 'bot-detection.json'))).to.deep.equal(
+      context.assets.attackProtection.botDetection
+    );
     expect(
       loadJSON(path.join(attackProtectionFolder, 'breached-password-detection.json'))
     ).to.deep.equal(context.assets.attackProtection.breachedPasswordDetection);
     expect(
       loadJSON(path.join(attackProtectionFolder, 'brute-force-protection.json'))
     ).to.deep.equal(context.assets.attackProtection.bruteForceProtection);
+    expect(loadJSON(path.join(attackProtectionFolder, 'captcha.json'))).to.deep.equal(
+      context.assets.attackProtection.captcha
+    );
     expect(
       loadJSON(path.join(attackProtectionFolder, 'suspicious-ip-throttling.json'))
     ).to.deep.equal(context.assets.attackProtection.suspiciousIpThrottling);
