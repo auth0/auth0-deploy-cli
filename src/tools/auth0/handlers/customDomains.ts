@@ -2,6 +2,7 @@ import { CustomDomain } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
 import log from '../../../logger';
+import { paginate } from '../client';
 
 export const schema = {
   type: 'array',
@@ -86,9 +87,11 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
         return this.existing;
       }
 
-      const { data: customDomains } = await this.client.customDomains.getAll();
+      const customDomains = await paginate<CustomDomain>(this.client.customDomains.getAll, {
+        checkpoint: true,
+      });
 
-      this.existing = customDomains as CustomDomain[];
+      this.existing = customDomains;
 
       return customDomains;
     } catch (err) {
