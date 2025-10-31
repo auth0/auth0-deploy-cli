@@ -145,6 +145,10 @@ export const schema = {
         description:
           'The identifier of a resource server in your tenant. This property links a client to a resource server indicating that the client IS that resource server. Can only be set when app_type=resource_server.',
       },
+      skip_non_verifiable_callback_uri_confirmation_prompt: {
+        type: ['boolean', 'null'],
+        description: 'Whether to skip the confirmation prompt for non-verifiable callback URIs',
+      },
     },
     required: ['name'],
   },
