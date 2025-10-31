@@ -15,7 +15,7 @@ const mockAllowedFlags = Object.values(allowedTenantFlags).reduce<Record<string,
 describe('#tenant handler', () => {
   describe('#tenant validate', () => {
     it('should not allow pages in tenant config', async () => {
-      //@ts-ignore
+      // @ts-ignore
       const handler = new tenantHandler({ client: {} });
       const stageFn = Object.getPrototypeOf(handler).validate;
 
@@ -45,7 +45,7 @@ describe('#tenant handler', () => {
       },
     };
 
-    //@ts-ignore
+    // @ts-ignore
     const handler = new tenantHandler({ client: auth0 });
     const data = await handler.getType();
     expect(data).to.deep.equal({
@@ -166,7 +166,7 @@ describe('#tenant handler', () => {
           },
         };
 
-        //@ts-ignore
+        // @ts-ignore
         const handler = new tenantHandler({ client: auth0 });
         const { processChanges } = Object.getPrototypeOf(handler);
 
@@ -188,7 +188,7 @@ describe('#tenant handler', () => {
           },
         };
 
-        //@ts-ignore
+        // @ts-ignore
         const handler = new tenantHandler({ client: auth0 });
         const { processChanges } = Object.getPrototypeOf(handler);
 
