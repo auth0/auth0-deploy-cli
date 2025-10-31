@@ -172,14 +172,14 @@ describe('#databases handler', () => {
       await stageFn.apply(handler, [{ databases: data }]);
     });
 
-    it('should successfully create database with email.unique true and email.identifier.active true', async () => {
+    it('should successfully create database with email.unique false and username.identifier.active true', async () => {
       const auth0 = {
         connections: {
           create: function (data) {
             expect(data.name).to.equal('testDatabase');
-            expect(data.options.attributes.email.unique).to.equal(true);
-            expect(data.options.attributes.email.identifier.active).to.equal(true);
-            expect(data.options.attributes.username.identifier.active).to.equal(false);
+            expect(data.options.attributes.email.unique).to.equal(false);
+            expect(data.options.attributes.email.identifier.active).to.equal(false);
+            expect(data.options.attributes.username.identifier.active).to.equal(true);
             return Promise.resolve({ data });
           },
           getAll: (params) => mockPagedData(params, 'connections', []),
@@ -200,11 +200,11 @@ describe('#databases handler', () => {
           options: {
             attributes: {
               email: {
-                unique: true,
-                identifier: { active: true },
+                unique: false,
+                identifier: { active: false },
               },
               username: {
-                identifier: { active: false },
+                identifier: { active: true },
               },
             },
           },

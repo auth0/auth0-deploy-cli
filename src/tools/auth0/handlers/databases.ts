@@ -162,17 +162,6 @@ export default class DatabaseHandler extends DefaultAPIHandler {
           `Database "${payload.name}": Cannot set email.identifier.active to true when email.unique is false. Non-unique emails cannot be used as active identifiers.`
         );
       }
-
-      // When email is non-unique, username or phone_number identifier must be active
-      const hasActiveNonEmailIdentifier =
-        usernameAttributes?.identifier?.active === true ||
-        phoneAttributes?.identifier?.active === true;
-
-      if (!hasActiveNonEmailIdentifier) {
-        throw new Error(
-          `Database "${payload.name}": When email.unique is false, either username.identifier.active or phone_number.identifier.active must be set to true. A non-email identifier is required when emails are not unique.`
-        );
-      }
     }
   }
 
