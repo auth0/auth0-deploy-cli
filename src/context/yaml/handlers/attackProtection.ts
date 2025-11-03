@@ -1,18 +1,10 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset, ParsedAsset } from '../../../types';
+import { AttackProtection } from '../../../tools/auth0/handlers/attackProtection';
+import { ParsedAsset } from '../../../types';
 import { attackProtectionDefaults } from '../../defaults';
 
-type ParsedAttackProtection = ParsedAsset<
-  'attackProtection',
-  {
-    botDetection?: Asset | null;
-    breachedPasswordDetection: Asset;
-    bruteForceProtection: Asset;
-    captcha?: Asset | null;
-    suspiciousIpThrottling: Asset;
-  }
->;
+type ParsedAttackProtection = ParsedAsset<'attackProtection', AttackProtection>;
 
 async function parseAndDump(context: YAMLContext): Promise<ParsedAttackProtection> {
   const { attackProtection } = context.assets;

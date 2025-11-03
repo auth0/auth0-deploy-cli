@@ -1,3 +1,4 @@
+import { AttackProtection } from '../tools/auth0/handlers/attackProtection';
 import { maskSecretAtPath } from '../tools/utils';
 
 // eslint-disable-next-line import/prefer-default-export
@@ -130,7 +131,7 @@ export function logStreamDefaults(logStreams) {
   return maskedLogStreams;
 }
 
-export function attackProtectionDefaults(attackProtection) {
+export function attackProtectionDefaults(attackProtection: AttackProtection) {
   const { captcha } = attackProtection;
 
   if (captcha) {

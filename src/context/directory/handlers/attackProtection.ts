@@ -4,19 +4,11 @@ import { constants } from '../../../tools';
 import { dumpJSON, existsMustBeDir, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset, ParsedAsset } from '../../../types';
+import { ParsedAsset } from '../../../types';
 import { attackProtectionDefaults } from '../../defaults';
+import { AttackProtection } from '../../../tools/auth0/handlers/attackProtection';
 
-type ParsedAttackProtection = ParsedAsset<
-  'attackProtection',
-  {
-    botDetection?: Asset | null;
-    breachedPasswordDetection: Asset;
-    bruteForceProtection: Asset;
-    captcha?: Asset | null;
-    suspiciousIpThrottling: Asset;
-  }
->;
+type ParsedAttackProtection = ParsedAsset<'attackProtection', AttackProtection>;
 
 function attackProtectionFiles(filePath: string): {
   directory: string;
@@ -92,12 +84,18 @@ async function dump(context: DirectoryContext): Promise<void> {
   if (attackProtection.botDetection) {
     dumpJSON(files.botDetection, attackProtection.botDetection);
   }
-  dumpJSON(files.breachedPasswordDetection, attackProtection.breachedPasswordDetection);
-  dumpJSON(files.bruteForceProtection, attackProtection.bruteForceProtection);
+  if (attackProtection.breachedPasswordDetection) {
+    dumpJSON(files.breachedPasswordDetection, attackProtection.breachedPasswordDetection);
+  }
+  if (attackProtection.bruteForceProtection) {
+    dumpJSON(files.bruteForceProtection, attackProtection.bruteForceProtection);
+  }
   if (attackProtection.captcha) {
     dumpJSON(files.captcha, attackProtection.captcha);
   }
-  dumpJSON(files.suspiciousIpThrottling, attackProtection.suspiciousIpThrottling);
+  if (attackProtection.suspiciousIpThrottling) {
+    dumpJSON(files.suspiciousIpThrottling, attackProtection.suspiciousIpThrottling);
+  }
 }
 
 const attackProtectionHandler: DirectoryHandler<ParsedAttackProtection> = {

@@ -1,5 +1,6 @@
 import DefaultAPIHandler from './default';
 import { Asset, Assets } from '../../../types';
+import log from '../../../logger';
 
 export const CAPTCHA_PROVIDERS = [
   'arkose',
@@ -191,14 +192,16 @@ export const schema = {
   additionalProperties: false,
 };
 
+export type AttackProtection = {
+  botDetection?: Asset | null;
+  breachedPasswordDetection: Asset;
+  bruteForceProtection: Asset;
+  captcha?: Asset | null;
+  suspiciousIpThrottling: Asset;
+};
+
 export default class AttackProtectionHandler extends DefaultAPIHandler {
-  existing: {
-    botDetection?: any;
-    breachedPasswordDetection: any;
-    bruteForceProtection: any;
-    captcha?: any;
-    suspiciousIpThrottling: any;
-  } | null;
+  existing: AttackProtection | null;
 
   constructor(config: DefaultAPIHandler) {
     super({
@@ -248,36 +251,45 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
     }
 
     const attackProtectionClient = this.client.attackProtection as Record<string, any>;
-    const botDetectionPromise =
-      typeof attackProtectionClient.getBotDetectionConfig === 'function'
-        ? attackProtectionClient.getBotDetectionConfig()
-        : Promise.resolve({ data: null });
-    const captchaPromise =
-      typeof attackProtectionClient.getCaptchaConfig === 'function'
-        ? attackProtectionClient.getCaptchaConfig()
-        : Promise.resolve({ data: null });
 
-    const [
-      botDetection,
-      captcha,
-      breachedPasswordDetection,
-      bruteForceProtection,
-      suspiciousIpThrottling,
-    ] = await Promise.all([
-      botDetectionPromise,
-      captchaPromise,
-      attackProtectionClient.getBreachedPasswordDetectionConfig(),
-      attackProtectionClient.getBruteForceConfig(),
-      attackProtectionClient.getSuspiciousIpThrottlingConfig(),
-    ]);
+    const [breachedPasswordDetection, bruteForceProtection, suspiciousIpThrottling] =
+      await Promise.all([
+        attackProtectionClient.getBreachedPasswordDetectionConfig(),
+        attackProtectionClient.getBruteForceConfig(),
+        attackProtectionClient.getSuspiciousIpThrottlingConfig(),
+      ]);
 
-    this.existing = {
-      botDetection: botDetection?.data ?? null,
+    let botDetection: Asset | null = null;
+    let captcha: Asset | null = null;
+
+    try {
+      [botDetection, captcha] = await Promise.all([
+        attackProtectionClient.getBotDetectionConfig(),
+        attackProtectionClient.getCaptchaConfig(),
+      ]);
+    } catch (err) {
+      if (err.statusCode === 403) {
+        log.warn(
+          'Bot Detection API are not enabled for this tenant. Please verify `scope` or contact Auth0 support to enable this feature.'
+        );
+      }
+    }
+
+    const attackProtection: AttackProtection = {
       breachedPasswordDetection: breachedPasswordDetection.data,
       bruteForceProtection: bruteForceProtection.data,
-      captcha: captcha?.data ?? null,
       suspiciousIpThrottling: suspiciousIpThrottling.data,
     };
+
+    if (botDetection?.data) {
+      attackProtection.botDetection = botDetection.data;
+    }
+
+    if (captcha?.data) {
+      attackProtection.captcha = captcha.data;
+    }
+
+    this.existing = attackProtection;
 
     return this.existing;
   }
