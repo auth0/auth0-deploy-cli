@@ -2,7 +2,7 @@ import { Assets } from '../../../types';
 import { paginate } from '../client';
 import DefaultAPIHandler from './default';
 
-const multiResourceRefreshTokenPolicies = {
+const multiResourceRefreshTokenPoliciesSchema = {
   type: ['array', 'null'],
   description:
     'A collection of policies governing multi-resource refresh token exchange (MRRT), defining how refresh tokens can be used across different resource servers',
@@ -79,7 +79,7 @@ export const schema = {
         type: ['object', 'null'],
         description: 'Refresh token configuration',
         properties: {
-          policies: multiResourceRefreshTokenPolicies,
+          policies: multiResourceRefreshTokenPoliciesSchema,
         },
       },
       token_quota: {
@@ -144,6 +144,25 @@ export const schema = {
         type: 'string',
         description:
           'The identifier of a resource server in your tenant. This property links a client to a resource server indicating that the client IS that resource server. Can only be set when app_type=resource_server.',
+      },
+      organization_usage: {
+        type: 'string',
+        enum: ['deny', 'allow', 'require'],
+      },
+      organization_require_behavior: {
+        type: 'string',
+        enum: ['no_prompt', 'pre_login_prompt', 'post_login_prompt'],
+      },
+      organization_discovery_methods: {
+        type: ['array', 'null'],
+        items: {
+          type: 'string',
+          enum: ['email', 'organization_name'],
+        },
+      },
+      skip_non_verifiable_callback_uri_confirmation_prompt: {
+        type: ['boolean', 'null'],
+        description: 'Whether to skip the confirmation prompt for non-verifiable callback URIs',
       },
     },
     required: ['name'],

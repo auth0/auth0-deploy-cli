@@ -61,6 +61,17 @@ async function dump(context: DirectoryContext): Promise<void> {
       });
     }
 
+    if (organization.discovery_domains && organization.discovery_domains.length > 0) {
+      organization.discovery_domains = organization.discovery_domains.map((dd) => {
+        // discovery_domains id is a computed field
+        delete dd.id;
+
+        return {
+          ...dd,
+        };
+      });
+    }
+
     dumpJSON(organizationFile, organization);
   });
 }

@@ -57,6 +57,17 @@ databases:
         change_email: "databases/users/change_email.js"
         change_password: "databases/users/change_password.js"
         verify: "databases/users/verify.js"
+      attributes:
+        email:
+          unique: true  # Default: true. Set to false to allow non-unique emails
+          identifier:
+            active: true
+          profile_required: true
+          verification_method: "link"
+        username:
+          identifier:
+            active: false  # Set to true when email.unique is false
+          profile_required: false
 
 connections:
   - name: "myad-waad"
