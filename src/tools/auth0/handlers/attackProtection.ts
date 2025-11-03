@@ -250,13 +250,11 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
       return this.existing;
     }
 
-    const attackProtectionClient = this.client.attackProtection as Record<string, any>;
-
     const [breachedPasswordDetection, bruteForceProtection, suspiciousIpThrottling] =
       await Promise.all([
-        attackProtectionClient.getBreachedPasswordDetectionConfig(),
-        attackProtectionClient.getBruteForceConfig(),
-        attackProtectionClient.getSuspiciousIpThrottlingConfig(),
+        this.client.attackProtection.getBreachedPasswordDetectionConfig(),
+        this.client.attackProtection.getBruteForceConfig(),
+        this.client.attackProtection.getSuspiciousIpThrottlingConfig(),
       ]);
 
     let botDetection: Asset | null = null;
@@ -264,8 +262,8 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
 
     try {
       [botDetection, captcha] = await Promise.all([
-        attackProtectionClient.getBotDetectionConfig(),
-        attackProtectionClient.getCaptchaConfig(),
+        this.client.attackProtection.getBotDetectionConfig(),
+        this.client.attackProtection.getCaptchaConfig(),
       ]);
     } catch (err) {
       if (err.statusCode === 403) {
