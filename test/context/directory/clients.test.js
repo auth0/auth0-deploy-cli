@@ -153,4 +153,72 @@ describe('#directory context clients', () => {
       context.assets.clients[1]
     );
   });
+
+  it('should process clients with async_approval_notification_channels', async () => {
+    const files = {
+      [constants.CLIENTS_DIRECTORY]: {
+        'cibaClient.json':
+          '{ "app_type": "spa", "name": "cibaClient", "async_approval_notification_channels": ["email", "guardian-push"] }',
+        'channelClient.json':
+          '{ "app_type": "native", "name": "channelClient", "async_approval_notification_channels": @@channels@@ }',
+      },
+    };
+
+    const repoDir = path.join(testDataDir, 'directory', 'clientsWithChannels');
+    createDir(repoDir, files);
+
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { channels: ['guardian-push'] },
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    const target = [
+      {
+        app_type: 'native',
+        name: 'channelClient',
+        async_approval_notification_channels: ['guardian-push'],
+      },
+      {
+        app_type: 'spa',
+        name: 'cibaClient',
+        async_approval_notification_channels: ['email', 'guardian-push'],
+      },
+    ];
+
+    expect(context.assets.clients).to.deep.equal(target);
+  });
+
+  it('should dump clients with async_approval_notification_channels', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientsChannelsDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.clients = [
+      {
+        app_type: 'spa',
+        name: 'cibaClient',
+        async_approval_notification_channels: ['guardian-push', 'email'],
+      },
+      {
+        app_type: 'native',
+        name: 'standardClient',
+      },
+    ];
+
+    await handler.dump(context);
+    const clientFolder = path.join(dir, constants.CLIENTS_DIRECTORY);
+
+    expect(loadJSON(path.join(clientFolder, 'cibaClient.json'))).to.deep.equal({
+      app_type: 'spa',
+      name: 'cibaClient',
+      async_approval_notification_channels: ['guardian-push', 'email'],
+    });
+
+    expect(loadJSON(path.join(clientFolder, 'standardClient.json'))).to.deep.equal({
+      app_type: 'native',
+      name: 'standardClient',
+    });
+  });
 });

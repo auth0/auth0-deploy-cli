@@ -635,6 +635,7 @@ describe('#clients handler', () => {
         organization_usage: 'require',
         organization_require_behavior: 'pre_login_prompt',
         organization_discovery_methods: ['email'],
+        async_approval_notification_channels: ['guardian-push'],
       };
 
       const auth0 = {
@@ -647,6 +648,7 @@ describe('#clients handler', () => {
             expect(data.organization_usage).to.equal('require');
             expect(data.organization_require_behavior).to.equal('pre_login_prompt');
             expect(data.organization_discovery_methods).to.deep.equal(['email']);
+            expect(data.async_approval_notification_channels).to.deep.equal(['guardian-push']);
             return Promise.resolve({ data });
           },
           update: () => Promise.resolve({ data: [] }),
@@ -668,6 +670,7 @@ describe('#clients handler', () => {
         organization_usage: 'require',
         organization_require_behavior: 'pre_login_prompt',
         organization_discovery_methods: ['organization_name', 'email'],
+        async_approval_notification_channels: ['email', 'guardian-push'],
       };
 
       const auth0 = {
@@ -677,6 +680,10 @@ describe('#clients handler', () => {
             expect(data.organization_discovery_methods).to.deep.equal([
               'organization_name',
               'email',
+            ]);
+            expect(data.async_approval_notification_channels).to.deep.equal([
+              'email',
+              'guardian-push',
             ]);
             return Promise.resolve({ data });
           },
@@ -745,6 +752,8 @@ describe('#clients handler', () => {
             expect(data.organization_require_behavior).to.equal('post_login_prompt');
             // eslint-disable-next-line no-unused-expressions
             expect(data.organization_discovery_methods).to.be.null;
+            // eslint-disable-next-line no-unused-expressions
+            expect(data.async_approval_notification_channels).to.be.null;
             return Promise.resolve({ data });
           },
           delete: () => Promise.resolve({ data: [] }),
@@ -756,6 +765,7 @@ describe('#clients handler', () => {
                 organization_usage: 'allow',
                 organization_require_behavior: 'pre_login_prompt',
                 organization_discovery_methods: ['email'],
+                async_approval_notification_channels: ['guardian-push', 'email'],
               },
             ]),
         },
@@ -772,6 +782,7 @@ describe('#clients handler', () => {
               name: 'My Client',
               organization_require_behavior: 'post_login_prompt',
               organization_discovery_methods: null,
+              async_approval_notification_channels: null,
             },
           ],
         },
