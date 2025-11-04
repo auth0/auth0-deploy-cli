@@ -73,8 +73,9 @@ function mapActionCode(filePath, action) {
   return `./${constants.ACTIONS_DIRECTORY}/${actionName}/code.js`;
 }
 
-function mapToAction(filePath, action): Partial<Action> {
+function mapToAction(filePath, action, includeIdentifiers: boolean): Partial<Action> {
   return {
+    ...(includeIdentifiers && action.id ? { id: action.id } : {}),
     name: action.name,
     code: mapActionCode(filePath, action),
     runtime: action.runtime,
@@ -105,12 +106,16 @@ async function dump(context: DirectoryContext): Promise<void> {
   // Create Actions folder
   const actionsFolder = path.join(context.filePath, constants.ACTIONS_DIRECTORY);
   fs.ensureDirSync(actionsFolder);
+  const includeIdentifiers = Boolean(context.config.AUTH0_EXPORT_IDENTIFIERS);
   filteredActions.forEach((action) => {
     // Dump template metadata
     const name = sanitize(action.name);
     const actionFile = path.join(actionsFolder, `${name}.json`);
     log.info(`Writing ${actionFile}`);
-    fs.writeFileSync(actionFile, JSON.stringify(mapToAction(context.filePath, action), null, 2));
+    fs.writeFileSync(
+      actionFile,
+      JSON.stringify(mapToAction(context.filePath, action, includeIdentifiers), null, 2)
+    );
   });
 }
 
