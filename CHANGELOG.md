@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for bot-detection and captcha configurations in `attackProtection`. [#1189]
+- Add support for `async_approval_notification_channels` for CIBA on `clients`. [#1194]
+
+### Fixed
+
+- Fix `AUTH0_EXPORT_IDENTIFIERS` configuration to export action IDs in exports. [#1196]
+- Fix `EXCLUDED_PROPS` configuration exporting `emailProvider` in directory format. [#1195]
+
 ## [8.19.0] - 2025-10-31
 
 ### Added
