@@ -4,29 +4,28 @@ import { constants } from '../../../tools';
 import { dumpJSON, existsMustBeDir, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Asset, ParsedAsset } from '../../../types';
+import { ParsedAsset } from '../../../types';
+import { attackProtectionDefaults } from '../../defaults';
+import { AttackProtection } from '../../../tools/auth0/handlers/attackProtection';
 
-type ParsedAttackProtection = ParsedAsset<
-  'attackProtection',
-  {
-    breachedPasswordDetection: Asset;
-    bruteForceProtection: Asset;
-    suspiciousIpThrottling: Asset;
-  }
->;
+type ParsedAttackProtection = ParsedAsset<'attackProtection', AttackProtection>;
 
 function attackProtectionFiles(filePath: string): {
   directory: string;
+  botDetection: string;
   breachedPasswordDetection: string;
   bruteForceProtection: string;
+  captcha: string;
   suspiciousIpThrottling: string;
 } {
   const directory = path.join(filePath, constants.ATTACK_PROTECTION_DIRECTORY);
 
   return {
     directory: directory,
+    botDetection: path.join(directory, 'bot-detection.json'),
     breachedPasswordDetection: path.join(directory, 'breached-password-detection.json'),
     bruteForceProtection: path.join(directory, 'brute-force-protection.json'),
+    captcha: path.join(directory, 'captcha.json'),
     suspiciousIpThrottling: path.join(directory, 'suspicious-ip-throttling.json'),
   };
 }
@@ -40,6 +39,10 @@ function parse(context: DirectoryContext): ParsedAttackProtection {
     };
   }
 
+  const botDetection = loadJSON(files.botDetection, {
+    mappings: context.mappings,
+    disableKeywordReplacement: context.disableKeywordReplacement,
+  });
   const breachedPasswordDetection = loadJSON(files.breachedPasswordDetection, {
     mappings: context.mappings,
     disableKeywordReplacement: context.disableKeywordReplacement,
@@ -48,17 +51,25 @@ function parse(context: DirectoryContext): ParsedAttackProtection {
     mappings: context.mappings,
     disableKeywordReplacement: context.disableKeywordReplacement,
   });
+  const captcha = loadJSON(files.captcha, {
+    mappings: context.mappings,
+    disableKeywordReplacement: context.disableKeywordReplacement,
+  });
   const suspiciousIpThrottling = loadJSON(files.suspiciousIpThrottling, {
     mappings: context.mappings,
     disableKeywordReplacement: context.disableKeywordReplacement,
   });
 
+  const maskedAttackProtection = attackProtectionDefaults({
+    botDetection,
+    breachedPasswordDetection,
+    bruteForceProtection,
+    captcha,
+    suspiciousIpThrottling,
+  });
+
   return {
-    attackProtection: {
-      breachedPasswordDetection,
-      bruteForceProtection,
-      suspiciousIpThrottling,
-    },
+    attackProtection: maskedAttackProtection,
   };
 }
 
@@ -70,9 +81,21 @@ async function dump(context: DirectoryContext): Promise<void> {
   const files = attackProtectionFiles(context.filePath);
   fs.ensureDirSync(files.directory);
 
-  dumpJSON(files.breachedPasswordDetection, attackProtection.breachedPasswordDetection);
-  dumpJSON(files.bruteForceProtection, attackProtection.bruteForceProtection);
-  dumpJSON(files.suspiciousIpThrottling, attackProtection.suspiciousIpThrottling);
+  if (attackProtection.botDetection) {
+    dumpJSON(files.botDetection, attackProtection.botDetection);
+  }
+  if (attackProtection.breachedPasswordDetection) {
+    dumpJSON(files.breachedPasswordDetection, attackProtection.breachedPasswordDetection);
+  }
+  if (attackProtection.bruteForceProtection) {
+    dumpJSON(files.bruteForceProtection, attackProtection.bruteForceProtection);
+  }
+  if (attackProtection.captcha) {
+    dumpJSON(files.captcha, attackProtection.captcha);
+  }
+  if (attackProtection.suspiciousIpThrottling) {
+    dumpJSON(files.suspiciousIpThrottling, attackProtection.suspiciousIpThrottling);
+  }
 }
 
 const attackProtectionHandler: DirectoryHandler<ParsedAttackProtection> = {

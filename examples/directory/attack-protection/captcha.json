@@ -1,0 +1,27 @@
+{
+  "active_provider_id": "friendly_captcha",
+  "friendly_captcha": {
+    "site_key": "##CAPTCHA_FRIENDLY_CAPTCHA_SITE_KEY##",
+    "secret": "##CAPTCHA_FRIENDLY_CAPTCHA_SECRET##"
+  },
+  "recaptcha_v2": {
+    "site_key": "##CAPTCHA_RECAPTCHA_V2_SITE_KEY##",
+    "secret": "##CAPTCHA_RECAPTCHA_V2_SECRET##"
+  },
+  "recaptcha_enterprise": {
+    "site_key": "##CAPTCHA_RECAPTCHA_ENTERPRISE_SITE_KEY##",
+    "api_key": "##CAPTCHA_RECAPTCHA_ENTERPRISE_API_KEY##",
+    "project_id": "##CAPTCHA_RECAPTCHA_ENTERPRISE_PROJECT_ID##"
+  },
+  "hcaptcha": {
+    "site_key": "##CAPTCHA_HCAPTCHA_SITE_KEY##",
+    "secret": "##CAPTCHA_HCAPTCHA_SECRET##"
+  },
+  "arkose": {
+    "site_key": "##CAPTCHA_ARKOSE_SITE_KEY##",
+    "secret": "##CAPTCHA_ARKOSE_SECRET##",
+    "client_subdomain": "my-client-subdomain",
+    "verify_subdomain": "my-verify-subdomain",
+    "fail_open": false
+  }
+}

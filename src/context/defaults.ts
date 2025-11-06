@@ -1,3 +1,4 @@
+import { AttackProtection } from '../tools/auth0/handlers/attackProtection';
 import { maskSecretAtPath } from '../tools/utils';
 
 // eslint-disable-next-line import/prefer-default-export
@@ -128,4 +129,33 @@ export function logStreamDefaults(logStreams) {
   });
 
   return maskedLogStreams;
+}
+
+export function attackProtectionDefaults(attackProtection: AttackProtection) {
+  const { captcha } = attackProtection;
+
+  if (captcha) {
+    const providersWithSecrets = ['arkose', 'hcaptcha', 'friendly_captcha', 'recaptcha_v2'];
+
+    providersWithSecrets.forEach((provider) => {
+      if (captcha[provider]) {
+        captcha[provider] = {
+          ...captcha[provider],
+          secret: `##CAPTCHA_${provider.toUpperCase()}_SECRET##`,
+        };
+      }
+    });
+
+    if ('recaptcha_enterprise' in captcha) {
+      captcha.recaptcha_enterprise = {
+        ...captcha.recaptcha_enterprise,
+        api_key: '##CAPTCHA_RECAPTCHA_ENTERPRISE_API_KEY##',
+        project_id: '##CAPTCHA_RECAPTCHA_ENTERPRISE_PROJECT_ID##',
+      };
+    }
+
+    attackProtection.captcha = captcha;
+  }
+
+  return attackProtection;
 }

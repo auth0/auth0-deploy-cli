@@ -20,6 +20,7 @@ import { FlowVaultConnection } from './tools/auth0/handlers/flowVaultConnections
 import { SsProfileWithCustomText } from './tools/auth0/handlers/selfServiceProfiles';
 import { PhoneProvider } from './tools/auth0/handlers/phoneProvider';
 import { NetworkACL } from './tools/auth0/handlers/networkACLs';
+import { AttackProtection } from './tools/auth0/handlers/attackProtection';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -93,7 +94,7 @@ export type Asset = { [key: string]: any };
 
 export type Assets = Partial<{
   actions: Action[] | null;
-  attackProtection: Asset | null;
+  attackProtection: AttackProtection | null;
   branding:
     | (Asset & {
         templates?: { template: string; body: string }[] | null;
