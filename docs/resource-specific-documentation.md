@@ -575,3 +575,99 @@ phoneProviders:
   }
 ]
 ```
+
+## Connection Profiles
+
+Connection Profiles define reusable SSO configuration templates that can be used with the OIN Express Configuration feature. They allow standardizing connection settings across multiple organizations and connection types.
+
+### Supported Properties
+
+- **name** (required): The name of the connection profile
+- **organization**: Organization-specific settings
+  - **show_as_button**: Controls visibility in login UI (`'none'`, `'optional'`, `'required'`)
+  - **assign_membership_on_login**: Auto-assign users to organization (`'none'`, `'optional'`, `'required'`)
+- **connection_name_prefix_template**: Template for connection naming (supports variables: `{organization_name}`, `{organization_id}`, `{connection_name}`)
+- **enabled_features**: Array of features to enable
+  - `'scim'`: SCIM provisioning support
+  - `'universal_logout'`: Universal logout support
+- **connection_config**: Profile-specific configuration object
+- **strategy_overrides**: Strategy-specific configuration overrides for different connection types
+  - Supported strategies: `pingfederate`, `ad`, `adfs`, `waad`, `google-apps`, `okta`, `oidc`, `samlp`
+  - Each strategy can have:
+    - **enabled_features**: Array of features (same as root level)
+    - **connection_config**: Strategy-specific configuration
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+connectionProfiles:
+  - name: 'Enterprise SSO Profile'
+    organization:
+      show_as_button: 'required'
+      assign_membership_on_login: 'required'
+    connection_name_prefix_template: 'org-{organization_name}'
+    enabled_features:
+      - scim
+      - universal_logout
+    strategy_overrides:
+      samlp:
+        enabled_features:
+          - universal_logout
+      oidc:
+        enabled_features:
+          - scim
+          - universal_logout
+  - name: 'Basic Connection Profile'
+    organization:
+      show_as_button: 'optional'
+      assign_membership_on_login: 'optional'
+    enabled_features:
+      - scim
+```
+
+### Directory Example
+
+File: `./connection-profiles/Enterprise SSO Profile.json`
+
+```json
+{
+  "name": "Enterprise SSO Profile",
+  "organization": {
+    "show_as_button": "required",
+    "assign_membership_on_login": "required"
+  },
+  "connection_name_prefix_template": "org-{organization_name}",
+  "enabled_features": ["scim", "universal_logout"],
+  "strategy_overrides": {
+    "samlp": {
+      "enabled_features": ["universal_logout"]
+    },
+    "oidc": {
+      "enabled_features": ["scim", "universal_logout"]
+    }
+  }
+}
+```
+
+### Express Configuration on Clients
+
+Connection profiles are used in conjunction with the `express_configuration` property on client applications:
+
+```yaml
+clients:
+  - name: 'My Enterprise App'
+    app_type: 'regular_web'
+    express_configuration:
+      initiate_login_uri_template: 'https://myapp.com/sso/start?org={organization_name}&conn={connection_name}'
+      user_attribute_profile_id: 'uap_xxxxxxxxxxxx'
+      connection_profile_id: 'cp_xxxxxxxxxxxx' # Reference to connection profile
+      enable_client: true
+      enable_organization: true
+      okta_oin_client_id: '0oa_xxxxxxxxxxxx'
+      admin_login_domain: 'login.myapp.com'
+      linked_clients:
+        - client_id: 'client_id_of_mobile_app'
+```
+
+For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2).

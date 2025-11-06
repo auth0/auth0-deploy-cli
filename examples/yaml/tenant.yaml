@@ -372,3 +372,27 @@ attackProtection:
         max_attempts: 50
         rate: 1200
 
+connectionProfiles:
+  - name: "Enterprise SSO Profile"
+    organization:
+      show_as_button: "required"
+      assign_membership_on_login: "required"
+    connection_name_prefix_template: "org-{organization_name}"
+    enabled_features:
+      - scim
+      - universal_logout
+    strategy_overrides:
+      samlp:
+        enabled_features:
+          - universal_logout
+      oidc:
+        enabled_features:
+          - scim
+          - universal_logout
+  - name: "Basic Connection Profile"
+    organization:
+      show_as_button: "optional"
+      assign_membership_on_login: "optional"
+    enabled_features:
+      - scim
+

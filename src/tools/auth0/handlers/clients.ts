@@ -173,6 +173,74 @@ export const schema = {
         type: ['boolean', 'null'],
         description: 'Whether to skip the confirmation prompt for non-verifiable callback URIs',
       },
+      express_configuration: {
+        type: ['object', 'null'],
+        description:
+          'Application specific configuration for use with the OIN Express Configuration feature',
+        properties: {
+          initiate_login_uri_template: {
+            type: 'string',
+            description:
+              'The URI users should bookmark to log in to this application. Variable substitution is permitted for the following properties: organization_name, organization_id, and connection_name.',
+          },
+          user_attribute_profile_id: {
+            type: 'string',
+            description: 'The ID of the user attribute profile to use for this application',
+          },
+          connection_profile_id: {
+            type: 'string',
+            description: 'The ID of the connection profile to use for this application',
+          },
+          enable_client: {
+            type: 'boolean',
+            description:
+              'When true, all connections made via express configuration will be enabled for this application',
+          },
+          enable_organization: {
+            type: 'boolean',
+            description:
+              'When true, all connections made via express configuration will have the associated organization enabled',
+          },
+          linked_clients: {
+            type: 'array',
+            description:
+              'List of client IDs that are linked to this express configuration (e.g. web or mobile clients)',
+            items: {
+              type: 'object',
+              properties: {
+                client_id: {
+                  type: 'string',
+                  description: 'The ID of the linked client',
+                },
+              },
+              required: ['client_id'],
+            },
+          },
+          okta_oin_client_id: {
+            type: 'string',
+            description:
+              'This is the unique identifier for the Okta OIN Express Configuration Client, which Okta will use for this application',
+          },
+          admin_login_domain: {
+            type: 'string',
+            description:
+              'This is the domain that admins are expected to log in via for authenticating for express configuration. It can be either the canonical domain or a registered custom domain',
+          },
+          oin_submission_id: {
+            type: 'string',
+            description: 'The identifier of the published application in the OKTA OIN',
+          },
+        },
+        required: [
+          'initiate_login_uri_template',
+          'user_attribute_profile_id',
+          'connection_profile_id',
+          'enable_client',
+          'enable_organization',
+          'okta_oin_client_id',
+          'admin_login_domain',
+        ],
+      },
     },
     required: ['name'],
   },

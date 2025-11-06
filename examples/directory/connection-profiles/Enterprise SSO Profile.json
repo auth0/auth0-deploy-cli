@@ -1,0 +1,27 @@
+{
+  "name": "Enterprise SSO Profile",
+  "organization": {
+    "show_as_button": "required",
+    "assign_membership_on_login": "required"
+  },
+  "connection_name_prefix_template": "org-{organization_name}",
+  "enabled_features": [
+    "scim",
+    "universal_logout"
+  ],
+  "strategy_overrides": {
+    "samlp": {
+      "enabled_features": [
+        "universal_logout"
+      ],
+      "connection_config": {}
+    },
+    "oidc": {
+      "enabled_features": [
+        "scim",
+        "universal_logout"
+      ],
+      "connection_config": {}
+    }
+  }
+}
