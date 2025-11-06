@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.20.0] - 2025-11-06
+
 ### Added
 
 - Add support for bot-detection and captcha configurations in `attackProtection`. [#1189]
@@ -1484,7 +1486,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1184]: https://github.com/auth0/auth0-deploy-cli/issues/1184
 [#1187]: https://github.com/auth0/auth0-deploy-cli/issues/1187
 [#1188]: https://github.com/auth0/auth0-deploy-cli/issues/1188
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.19.0...HEAD
+[#1189]: https://github.com/auth0/auth0-deploy-cli/issues/1189
+[#1194]: https://github.com/auth0/auth0-deploy-cli/issues/1194
+[#1195]: https://github.com/auth0/auth0-deploy-cli/issues/1195
+[#1196]: https://github.com/auth0/auth0-deploy-cli/issues/1196
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.0...HEAD
+[8.20.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.19.0...v8.20.0
 [8.19.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.18.0...v8.19.0
 [8.18.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.17.0...v8.18.0
 [8.17.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.16.0...v8.17.0
