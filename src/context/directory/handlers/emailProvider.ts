@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
+import dotProp from 'dot-prop';
 import { constants } from '../../../tools';
 
 import { existsMustBeDir, isFile, dumpJSON, loadJSON } from '../../../utils';
@@ -31,7 +32,7 @@ function parse(context: DirectoryContext): ParsedEmailProvider {
 async function dump(context: DirectoryContext): Promise<void> {
   if (!context.assets.emailProvider) return; // Skip, nothing to dump
 
-  const emailProvider: typeof context.assets.emailProvider = (() => {
+  let emailProvider: typeof context.assets.emailProvider = (() => {
     const excludedDefaults = context.assets.exclude?.defaults || [];
     if (!excludedDefaults.includes('emailProvider')) {
       // Add placeholder for credentials as they cannot be exported
@@ -39,6 +40,15 @@ async function dump(context: DirectoryContext): Promise<void> {
     }
     return context.assets.emailProvider;
   })();
+
+  // Apply EXCLUDED_PROPS after emailProviderDefaults to remove any re-added fields
+  const excludedFields = context.config.EXCLUDED_PROPS?.emailProvider || [];
+  if (excludedFields.length > 0) {
+    emailProvider = { ...emailProvider };
+    excludedFields.forEach((field) => {
+      dotProp.delete(emailProvider, field);
+    });
+  }
 
   const emailsFolder = path.join(context.filePath, constants.EMAIL_TEMPLATES_DIRECTORY);
   fs.ensureDirSync(emailsFolder);
