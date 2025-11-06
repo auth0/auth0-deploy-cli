@@ -160,6 +160,15 @@ export const schema = {
           enum: ['email', 'organization_name'],
         },
       },
+      async_approval_notification_channels: {
+        type: ['array', 'null'],
+        description:
+          'An ordered array of notification channels enabled for CIBA (Client-Initiated Backchannel Authentication) requests. Channels are evaluated in the order specified.',
+        items: {
+          type: 'string',
+          enum: ['guardian-push', 'email'],
+        },
+      },
       skip_non_verifiable_callback_uri_confirmation_prompt: {
         type: ['boolean', 'null'],
         description: 'Whether to skip the confirmation prompt for non-verifiable callback URIs',
