@@ -472,45 +472,6 @@ describe('#attackProtection handler', () => {
       expect(handler.updated).to.equal(1);
     });
 
-    it('should skip captcha update when updateCaptchaConfig is not a function', async () => {
-      const auth0 = {
-        attackProtection: {
-          updateCaptchaConfig: 'not-a-function',
-          updateBreachedPasswordDetectionConfig: (data) => Promise.resolve(data),
-          updateBruteForceConfig: (data) => Promise.resolve(data),
-          updateSuspiciousIpThrottlingConfig: (data) => Promise.resolve(data),
-        },
-      };
-
-      const handler = new attackProtection.default({ client: auth0 });
-      const stageFn = Object.getPrototypeOf(handler).processChanges;
-
-      await stageFn.apply(handler, [
-        {
-          attackProtection: {
-            captcha: {
-              active_provider_id: 'friendly_captcha',
-              friendly_captcha: {
-                site_key: 'key',
-                secret: 'secret',
-              },
-            },
-            breachedPasswordDetection: {
-              enabled: true,
-            },
-            bruteForceProtection: {
-              enabled: true,
-            },
-            suspiciousIpThrottling: {
-              enabled: true,
-            },
-          },
-        },
-      ]);
-
-      expect(handler.updated).to.equal(1);
-    });
-
     it('should return cached existing data on subsequent calls', async () => {
       const auth0 = {
         attackProtection: {

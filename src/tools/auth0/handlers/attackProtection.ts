@@ -323,6 +323,7 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
     if (attackProtection.captcha && Object.keys(attackProtection.captcha).length) {
       const { captcha } = attackProtection;
 
+      // remove empty CAPTCHA provider configurations before updates to prevent API errors
       CAPTCHA_PROVIDERS.forEach((provider) => {
         if (provider in captcha) {
           const providerConfig = captcha[provider];
