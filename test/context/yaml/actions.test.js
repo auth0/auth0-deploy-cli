@@ -131,6 +131,63 @@ describe('#YAML context actions', () => {
     );
   });
 
+  it('should dump actions with identifiers when AUTH0_EXPORT_IDENTIFIERS is true', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'actionsDumpWithId');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml'), AUTH0_EXPORT_IDENTIFIERS: true },
+      mockMgmtClient()
+    );
+    const codeValidation =
+      '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log("test-action"); return {}; };';
+
+    context.assets.actions = [
+      {
+        id: 'act_123',
+        name: 'action-one',
+        code: codeValidation,
+        runtime: 'node12',
+        status: 'built',
+        dependencies: [],
+        supported_triggers: [
+          {
+            id: 'post-login',
+            version: 'v1',
+          },
+        ],
+        secrets: [],
+        deployed: true,
+      },
+    ];
+
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({
+      actions: [
+        {
+          id: 'act_123',
+          name: 'action-one',
+          code: './actions/action-one/code.js',
+          runtime: 'node12',
+          status: 'built',
+          dependencies: [],
+          supported_triggers: [
+            {
+              id: 'post-login',
+              version: 'v1',
+            },
+          ],
+          secrets: [],
+          deployed: true,
+        },
+      ],
+    });
+
+    const actionsFolder = path.join(dir, 'actions', 'action-one');
+    expect(fs.readFileSync(path.join(actionsFolder, 'code.js'), 'utf8')).to.deep.equal(
+      codeValidation
+    );
+  });
+
   it('should exclude marketplace actions during dump', async () => {
     const dir = path.join(testDataDir, 'yaml', 'actionsDump');
     cleanThenMkdir(dir);
