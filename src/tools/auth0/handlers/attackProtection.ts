@@ -304,14 +304,12 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
     const attackProtectionClient = this.client.attackProtection;
 
     if (attackProtection.botDetection && Object.keys(attackProtection.botDetection).length) {
-      if (typeof attackProtectionClient.updateBotDetectionConfig === 'function') {
-        updates.push(
-          attackProtectionClient.updateBotDetectionConfig.call(
-            attackProtectionClient,
-            attackProtection.botDetection
-          )
-        );
-      }
+      updates.push(
+        attackProtectionClient.updateBotDetectionConfig.call(
+          attackProtectionClient,
+          attackProtection.botDetection
+        )
+      );
     }
 
     if (attackProtection.breachedPasswordDetection) {
@@ -323,32 +321,30 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
     }
 
     if (attackProtection.captcha && Object.keys(attackProtection.captcha).length) {
-      if (typeof attackProtectionClient.updateCaptchaConfig === 'function') {
-        const { captcha } = attackProtection;
+      const { captcha } = attackProtection;
 
-        CAPTCHA_PROVIDERS.forEach((provider) => {
-          if (provider in captcha) {
-            const providerConfig = captcha[provider];
-            const isEmpty =
-              provider === 'auth_challenge' || provider === 'simple_captcha'
-                ? Object.keys(providerConfig).length === 0
-                : !providerConfig?.site_key || providerConfig.site_key === '';
+      CAPTCHA_PROVIDERS.forEach((provider) => {
+        if (provider in captcha) {
+          const providerConfig = captcha[provider];
+          const isEmpty =
+            provider === 'auth_challenge' || provider === 'simple_captcha'
+              ? Object.keys(providerConfig).length === 0
+              : !providerConfig?.site_key || providerConfig.site_key === '';
 
-            if (isEmpty) {
-              delete captcha[provider];
-            }
+          if (isEmpty) {
+            delete captcha[provider];
           }
-        });
+        }
+      });
 
-        attackProtection.captcha = captcha;
+      attackProtection.captcha = captcha;
 
-        updates.push(
-          attackProtectionClient.updateCaptchaConfig.call(
-            attackProtectionClient,
-            attackProtection.captcha
-          )
-        );
-      }
+      updates.push(
+        attackProtectionClient.updateCaptchaConfig.call(
+          attackProtectionClient,
+          attackProtection.captcha
+        )
+      );
     }
 
     if (attackProtection.bruteForceProtection) {
