@@ -301,7 +301,7 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
 
     const updates: Promise<unknown>[] = [];
 
-    const attackProtectionClient = this.client.attackProtection as Record<string, any>;
+    const attackProtectionClient = this.client.attackProtection;
 
     if (attackProtection.botDetection && Object.keys(attackProtection.botDetection).length) {
       if (typeof attackProtectionClient.updateBotDetectionConfig === 'function') {
@@ -332,7 +332,7 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
             const isEmpty =
               provider === 'auth_challenge' || provider === 'simple_captcha'
                 ? Object.keys(providerConfig).length === 0
-                : providerConfig?.site_key === '';
+                : !providerConfig?.site_key || providerConfig.site_key === '';
 
             if (isEmpty) {
               delete captcha[provider];
