@@ -6,7 +6,17 @@ import { attackProtectionDefaults } from '../../defaults';
 
 type ParsedAttackProtection = ParsedAsset<'attackProtection', AttackProtection>;
 
-async function parseAndDump(context: YAMLContext): Promise<ParsedAttackProtection> {
+async function parse(context: YAMLContext): Promise<ParsedAttackProtection> {
+  const { attackProtection } = context.assets;
+
+  if (!attackProtection) return { attackProtection: null };
+
+  return {
+    attackProtection,
+  };
+}
+
+async function dump(context: YAMLContext): Promise<ParsedAttackProtection> {
   const { attackProtection } = context.assets;
 
   if (!attackProtection) return { attackProtection: null };
@@ -41,8 +51,8 @@ async function parseAndDump(context: YAMLContext): Promise<ParsedAttackProtectio
 }
 
 const attackProtectionHandler: YAMLHandler<ParsedAttackProtection> = {
-  parse: parseAndDump,
-  dump: parseAndDump,
+  parse: parse,
+  dump: dump,
 };
 
 export default attackProtectionHandler;
