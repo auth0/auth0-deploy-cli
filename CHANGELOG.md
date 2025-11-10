@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.20.1] - 2025-11-10
+
+### Fixed
+
+- Fix bot detection and captcha files optional loading & CIDR validation for `attackProtection`. [#1200]
+
 ## [8.20.0] - 2025-11-06
 
 ### Added
@@ -1490,7 +1496,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1194]: https://github.com/auth0/auth0-deploy-cli/issues/1194
 [#1195]: https://github.com/auth0/auth0-deploy-cli/issues/1195
 [#1196]: https://github.com/auth0/auth0-deploy-cli/issues/1196
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.0...HEAD
+[#1200]: https://github.com/auth0/auth0-deploy-cli/issues/1200
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.1...HEAD
+[8.20.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.0...v8.20.1
 [8.20.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.19.0...v8.20.0
 [8.19.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.18.0...v8.19.0
 [8.18.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.17.0...v8.18.0
