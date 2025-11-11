@@ -11,11 +11,9 @@ import { Action, isMarketplaceAction } from '../../../tools/auth0/handlers/actio
 
 type ParsedActions = ParsedAsset<'actions', Partial<Action>[]>;
 
-type Secret = { name: string; value: string };
-
 function parseCode(context: YAMLContext, code: string) {
   if (code) {
-    //@ts-ignore TODO: understand why two arguments are passed when context.loadFile only accepts one
+    // @ts-ignore TODO: understand why two arguments are passed when context.loadFile only accepts one
     return context.loadFile(code, constants.ACTIONS_DIRECTORY);
   }
 }
@@ -38,7 +36,7 @@ async function parse(context: YAMLContext): Promise<ParsedActions> {
 
 function mapSecrets(secrets) {
   if (typeof secrets === 'string') {
-    return secrets; //Enables keyword preservation to operate on action secrets
+    return secrets; // Enables keyword preservation to operate on action secrets
   }
   if (secrets && secrets.length > 0) {
     return secrets.map((secret) => ({ name: secret.name, value: secret.value }));
@@ -80,11 +78,14 @@ async function dump(context: YAMLContext): Promise<ParsedActions> {
     return true;
   });
 
+  const includeIdentifiers = Boolean(context.config.AUTH0_EXPORT_IDENTIFIERS);
+
   return {
     actions: filteredActions.map((action) => ({
+      ...(includeIdentifiers && action.id ? { id: action.id } : {}),
       name: action.name,
       deployed: !!action.deployed || !!action.all_changes_deployed,
-      //@ts-ignore because Action resource needs to be typed more accurately
+      // @ts-ignore because Action resource needs to be typed more accurately
       code: mapActionCode(context.basePath, action),
       runtime: action.runtime,
       dependencies: action.dependencies || [],
