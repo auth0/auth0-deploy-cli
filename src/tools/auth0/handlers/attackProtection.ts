@@ -41,18 +41,6 @@ export const schema = {
           type: 'array',
           items: {
             type: 'string',
-            oneOf: [
-              {
-                type: 'string',
-                format: 'ipv4',
-                description: 'IPv4 address or CIDR block',
-              },
-              {
-                type: 'string',
-                format: 'ipv6',
-                description: 'IPv6 address or CIDR block',
-              },
-            ],
             description: 'IP address (IPv4 or IPv6) or CIDR block',
           },
           description: 'List of IP addresses or CIDR blocks to allowlist',
@@ -301,20 +289,15 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
 
     const updates: Promise<unknown>[] = [];
 
-    const attackProtectionClient = this.client.attackProtection;
-
     if (attackProtection.botDetection && Object.keys(attackProtection.botDetection).length) {
       updates.push(
-        attackProtectionClient.updateBotDetectionConfig.call(
-          attackProtectionClient,
-          attackProtection.botDetection
-        )
+        this.client.attackProtection.updateBotDetectionConfig(attackProtection.botDetection)
       );
     }
 
     if (attackProtection.breachedPasswordDetection) {
       updates.push(
-        attackProtectionClient.updateBreachedPasswordDetectionConfig(
+        this.client.attackProtection.updateBreachedPasswordDetectionConfig(
           attackProtection.breachedPasswordDetection
         )
       );
@@ -340,23 +323,18 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
 
       attackProtection.captcha = captcha;
 
-      updates.push(
-        attackProtectionClient.updateCaptchaConfig.call(
-          attackProtectionClient,
-          attackProtection.captcha
-        )
-      );
+      updates.push(this.client.attackProtection.updateCaptchaConfig(attackProtection.captcha));
     }
 
     if (attackProtection.bruteForceProtection) {
       updates.push(
-        attackProtectionClient.updateBruteForceConfig(attackProtection.bruteForceProtection)
+        this.client.attackProtection.updateBruteForceConfig(attackProtection.bruteForceProtection)
       );
     }
 
     if (attackProtection.suspiciousIpThrottling) {
       updates.push(
-        attackProtectionClient.updateSuspiciousIpThrottlingConfig(
+        this.client.attackProtection.updateSuspiciousIpThrottlingConfig(
           attackProtection.suspiciousIpThrottling
         )
       );
