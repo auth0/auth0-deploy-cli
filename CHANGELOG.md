@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.20.2] - 2025-11-13
+
 ### Changed
 
 - Support enhanced custom domains in `customDomains` [#1193]
@@ -1497,11 +1499,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1187]: https://github.com/auth0/auth0-deploy-cli/issues/1187
 [#1188]: https://github.com/auth0/auth0-deploy-cli/issues/1188
 [#1189]: https://github.com/auth0/auth0-deploy-cli/issues/1189
+[#1193]: https://github.com/auth0/auth0-deploy-cli/issues/1193
 [#1194]: https://github.com/auth0/auth0-deploy-cli/issues/1194
 [#1195]: https://github.com/auth0/auth0-deploy-cli/issues/1195
 [#1196]: https://github.com/auth0/auth0-deploy-cli/issues/1196
 [#1200]: https://github.com/auth0/auth0-deploy-cli/issues/1200
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.1...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.2...HEAD
+[8.20.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.1...v8.20.2
 [8.20.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.0...v8.20.1
 [8.20.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.19.0...v8.20.0
 [8.19.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.18.0...v8.19.0
