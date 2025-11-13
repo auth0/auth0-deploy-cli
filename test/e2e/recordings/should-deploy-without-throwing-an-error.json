@@ -1044,7 +1044,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
+                    "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1068,7 +1068,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/clients/IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
+        "path": "/api/v2/clients/p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
         "body": {
             "name": "Default App",
             "callbacks": [],
@@ -1129,7 +1129,7 @@
                     "subject": "/CN=auth0-deploy-cli-e2e.us.auth0.com"
                 }
             ],
-            "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
+            "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
             "callback_url_template": false,
             "client_secret": "[REDACTED]",
             "jwt_configuration": {
@@ -1165,35 +1165,21 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
+        "path": "/api/v2/guardian/factors/sms",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
         "path": "/api/v2/guardian/factors/email",
-        "body": {
-            "enabled": false
-        },
-        "status": 200,
-        "response": {
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PUT",
-        "path": "/api/v2/guardian/factors/otp",
-        "body": {
-            "enabled": false
-        },
-        "status": 200,
-        "response": {
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PUT",
-        "path": "/api/v2/guardian/factors/webauthn-roaming",
         "body": {
             "enabled": false
         },
@@ -1221,6 +1207,20 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
+        "path": "/api/v2/guardian/factors/otp",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
         "path": "/api/v2/guardian/factors/recovery-code",
         "body": {
             "enabled": false
@@ -1235,7 +1235,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/sms",
+        "path": "/api/v2/guardian/factors/webauthn-platform",
         "body": {
             "enabled": false
         },
@@ -1249,7 +1249,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/webauthn-platform",
+        "path": "/api/v2/guardian/factors/webauthn-roaming",
         "body": {
             "enabled": false
         },
@@ -1452,6 +1452,18 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/custom-domains?take=50",
+        "body": "",
+        "status": 200,
+        "response": {
+            "custom_domains": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/clients?page=0&per_page=100&include_totals=true",
         "body": "",
         "status": 200,
@@ -1545,7 +1557,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
+                    "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1615,7 +1627,7 @@
             "limit": 50,
             "connections": [
                 {
-                    "id": "con_T8mVsA0onoFxCML0",
+                    "id": "con_85Lq3efegcuZcVni",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -1645,8 +1657,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
                     ]
                 }
             ]
@@ -1663,7 +1675,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_T8mVsA0onoFxCML0",
+                    "id": "con_85Lq3efegcuZcVni",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -1693,8 +1705,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
                     ]
                 }
             ]
@@ -1714,7 +1726,7 @@
             "limit": 50,
             "connections": [
                 {
-                    "id": "con_T8mVsA0onoFxCML0",
+                    "id": "con_85Lq3efegcuZcVni",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -1744,8 +1756,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
                     ]
                 }
             ]
@@ -1762,7 +1774,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_T8mVsA0onoFxCML0",
+                    "id": "con_85Lq3efegcuZcVni",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -1792,8 +1804,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
                     ]
                 }
             ]
@@ -1804,13 +1816,13 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections/con_T8mVsA0onoFxCML0/clients?take=50",
+        "path": "/api/v2/connections/con_85Lq3efegcuZcVni/clients?take=50",
         "body": "",
         "status": 200,
         "response": {
             "clients": [
                 {
-                    "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI"
+                    "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
                 },
                 {
                     "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
@@ -1823,11 +1835,11 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections/con_T8mVsA0onoFxCML0",
+        "path": "/api/v2/connections/con_85Lq3efegcuZcVni",
         "body": "",
         "status": 200,
         "response": {
-            "id": "con_T8mVsA0onoFxCML0",
+            "id": "con_85Lq3efegcuZcVni",
             "options": {
                 "mfa": {
                     "active": true,
@@ -1854,8 +1866,8 @@
             "name": "Username-Password-Authentication",
             "is_domain_connection": false,
             "enabled_clients": [
-                "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
-                "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
             ],
             "realms": [
                 "Username-Password-Authentication"
@@ -1867,11 +1879,11 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/connections/con_T8mVsA0onoFxCML0",
+        "path": "/api/v2/connections/con_85Lq3efegcuZcVni",
         "body": {
             "enabled_clients": [
                 "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI"
+                "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
             ],
             "is_domain_connection": false,
             "options": {
@@ -1902,7 +1914,7 @@
         },
         "status": 200,
         "response": {
-            "id": "con_T8mVsA0onoFxCML0",
+            "id": "con_85Lq3efegcuZcVni",
             "options": {
                 "mfa": {
                     "active": true,
@@ -1930,7 +1942,7 @@
             "is_domain_connection": false,
             "enabled_clients": [
                 "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI"
+                "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
             ],
             "realms": [
                 "Username-Password-Authentication"
@@ -1942,14 +1954,14 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/connections/con_T8mVsA0onoFxCML0/clients",
+        "path": "/api/v2/connections/con_85Lq3efegcuZcVni/clients",
         "body": [
             {
                 "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
                 "status": true
             },
             {
-                "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
+                "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
                 "status": true
             }
         ],
@@ -2054,7 +2066,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
+                    "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -2124,7 +2136,7 @@
             "limit": 50,
             "connections": [
                 {
-                    "id": "con_T8mVsA0onoFxCML0",
+                    "id": "con_85Lq3efegcuZcVni",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -2154,8 +2166,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
                     ]
                 }
             ]
@@ -2172,7 +2184,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_T8mVsA0onoFxCML0",
+                    "id": "con_85Lq3efegcuZcVni",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -2202,8 +2214,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
                     ]
                 }
             ]
@@ -2223,7 +2235,7 @@
             "limit": 50,
             "connections": [
                 {
-                    "id": "con_T8mVsA0onoFxCML0",
+                    "id": "con_85Lq3efegcuZcVni",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -2253,8 +2265,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
                     ]
                 }
             ]
@@ -2271,7 +2283,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_T8mVsA0onoFxCML0",
+                    "id": "con_85Lq3efegcuZcVni",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -2301,8 +2313,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
                     ]
                 }
             ]
@@ -2319,7 +2331,7 @@
             "strategy": "google-oauth2",
             "enabled_clients": [
                 "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI"
+                "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
             ],
             "is_domain_connection": false,
             "options": {
@@ -2333,7 +2345,7 @@
         },
         "status": 201,
         "response": {
-            "id": "con_PbrTJcCum9aUGXfI",
+            "id": "con_6tyEu2hOP8JuHJku",
             "options": {
                 "email": true,
                 "scope": [
@@ -2346,8 +2358,8 @@
             "name": "google-oauth2",
             "is_domain_connection": false,
             "enabled_clients": [
-                "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
-                "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
             ],
             "realms": [
                 "google-oauth2"
@@ -2365,7 +2377,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_PbrTJcCum9aUGXfI",
+                    "id": "con_6tyEu2hOP8JuHJku",
                     "options": {
                         "email": true,
                         "scope": [
@@ -2381,8 +2393,8 @@
                         "google-oauth2"
                     ],
                     "enabled_clients": [
-                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
                     ]
                 }
             ]
@@ -2393,14 +2405,14 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/connections/con_PbrTJcCum9aUGXfI/clients",
+        "path": "/api/v2/connections/con_6tyEu2hOP8JuHJku/clients",
         "body": [
             {
                 "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
                 "status": true
             },
             {
-                "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
+                "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
                 "status": true
             }
         ],
@@ -2520,7 +2532,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
+                    "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -2955,7 +2967,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
+                    "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3037,7 +3049,7 @@
             "limit": 50,
             "connections": [
                 {
-                    "id": "con_PbrTJcCum9aUGXfI",
+                    "id": "con_6tyEu2hOP8JuHJku",
                     "options": {
                         "email": true,
                         "scope": [
@@ -3053,12 +3065,12 @@
                         "google-oauth2"
                     ],
                     "enabled_clients": [
-                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
                     ]
                 },
                 {
-                    "id": "con_T8mVsA0onoFxCML0",
+                    "id": "con_85Lq3efegcuZcVni",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -3088,8 +3100,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
                     ]
                 }
             ]
@@ -3106,7 +3118,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_PbrTJcCum9aUGXfI",
+                    "id": "con_6tyEu2hOP8JuHJku",
                     "options": {
                         "email": true,
                         "scope": [
@@ -3122,12 +3134,12 @@
                         "google-oauth2"
                     ],
                     "enabled_clients": [
-                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
                     ]
                 },
                 {
-                    "id": "con_T8mVsA0onoFxCML0",
+                    "id": "con_85Lq3efegcuZcVni",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -3157,8 +3169,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
                     ]
                 }
             ]
@@ -3513,7 +3525,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "IPwlWVAj3ZCBcLwKvafeT1dihWqv3izI",
+                    "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {

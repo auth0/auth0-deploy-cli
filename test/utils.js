@@ -17,6 +17,10 @@ export function mockPagedData(params, key, data) {
   if (params && params.include_totals) {
     return { data: { [key]: data, total: data.length || 0 } };
   }
+  // For checkpoint pagination (params.take is set), return data with entity key
+  if (params && params.take) {
+    return { data: { [key]: data, total: data.length || 0 } };
+  }
   return { data };
 }
 
@@ -138,7 +142,10 @@ export function mockMgmtClient() {
       get: () => ({ data: {} }),
       getAllRenderingSettings: () => Promise.resolve({ data: [] }),
     },
-    customDomains: { getAll: (params) => mockPagedData(params, 'custom_domains', []) },
+    customDomains: {
+      getAll: (params) => mockPagedData(params, 'customDomains', []),
+      _getRestClient: () => ({}),
+    },
     forms: { getAll: (params) => mockPagedData(params, 'forms', []) },
     flows: {
       getAll: (params) => mockPagedData(params, 'flows', []),
