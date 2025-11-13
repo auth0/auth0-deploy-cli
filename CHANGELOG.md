@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Support enhanced custom domains in `customDomains` [#1193]
+
 ## [8.20.1] - 2025-11-10
 
 ### Fixed
