@@ -578,24 +578,7 @@ phoneProviders:
 
 ## Connection Profiles
 
-Connection Profiles define reusable SSO configuration templates that can be used with the OIN Express Configuration feature. They allow standardizing connection settings across multiple organizations and connection types.
-
-### Supported Properties
-
-- **name** (required): The name of the connection profile
-- **organization**: Organization-specific settings
-  - **show_as_button**: Controls visibility in login UI (`'none'`, `'optional'`, `'required'`)
-  - **assign_membership_on_login**: Auto-assign users to organization (`'none'`, `'optional'`, `'required'`)
-- **connection_name_prefix_template**: Template for connection naming (supports variables: `{organization_name}`, `{organization_id}`, `{connection_name}`)
-- **enabled_features**: Array of features to enable
-  - `'scim'`: SCIM provisioning support
-  - `'universal_logout'`: Universal logout support
-- **connection_config**: Profile-specific configuration object
-- **strategy_overrides**: Strategy-specific configuration overrides for different connection types
-  - Supported strategies: `pingfederate`, `ad`, `adfs`, `waad`, `google-apps`, `okta`, `oidc`, `samlp`
-  - Each strategy can have:
-    - **enabled_features**: Array of features (same as root level)
-    - **connection_config**: Strategy-specific configuration
+Application specific configuration for use with the OIN Express Configuration feature
 
 ### YAML Example
 
