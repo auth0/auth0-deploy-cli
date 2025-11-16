@@ -144,10 +144,10 @@ describe('#databases handler', () => {
             expect(data.options.attributes.username.identifier.active).to.equal(true);
             return Promise.resolve({ data });
           },
-          getAll: (params) => mockPagedData(params, 'connections', []),
+          list: (params) => mockPagedData(params, 'connections', []),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -186,10 +186,10 @@ describe('#databases handler', () => {
             expect(data.options.attributes.username.identifier.active).to.equal(true);
             return Promise.resolve({ data });
           },
-          getAll: (params) => mockPagedData(params, 'connections', []),
+          list: (params) => mockPagedData(params, 'connections', []),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -221,22 +221,22 @@ describe('#databases handler', () => {
     it('should successfully update database when email.unique is not mentioned and email.identifier.active is true', async () => {
       const auth0 = {
         connections: {
-          get: function (params) {
-            expect(params.id).to.equal('con1');
-            return Promise.resolve({ data: { options: { someOldOption: true } } });
+          get: function (id) {
+            expect(id).to.equal('con1');
+            return Promise.resolve({ options: { someOldOption: true } });
           },
-          update: function (params, data) {
-            expect(params.id).to.equal('con1');
+          update: function (id, data) {
+            expect(id).to.equal('con1');
             expect(data.options.attributes.email.identifier.active).to.equal(true);
-            return Promise.resolve({ data: { ...params, ...data } });
+            return Promise.resolve({ data: { id, ...data } });
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'connections', [
               { name: 'testDatabase', id: 'con1', strategy: 'auth0' },
             ]),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
