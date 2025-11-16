@@ -7,7 +7,23 @@
       "login": "./login.js",
       "get_user": "./get_user.js"
     },
-    "import_mode": true
+    "import_mode": true,
+    "attributes": {
+      "email": {
+        "unique": true,
+        "identifier": {
+          "active": true
+        },
+        "profile_required": true,
+        "verification_method": "link"
+      },
+      "username": {
+        "identifier": {
+          "active": false
+        },
+        "profile_required": false
+      }
+    }
   },
   "strategy": "auth0",
   "name": "users",

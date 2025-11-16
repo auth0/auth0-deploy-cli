@@ -70,4 +70,40 @@ describe('#directory context email provider', () => {
       name: 'smtp',
     });
   });
+
+  it('should dump email provider with EXCLUDED_PROPS applied', async () => {
+    const dir = path.join(testDataDir, 'directory', 'emailProviderExcludedProps');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      {
+        AUTH0_INPUT_FILE: dir,
+        EXCLUDED_PROPS: {
+          emailProvider: ['credentials.accessKeyId', 'credentials.secretAccessKey'],
+        },
+      },
+      mockMgmtClient()
+    );
+
+    context.assets.emailProvider = {
+      name: 'ses',
+      enabled: true,
+      credentials: {
+        accessKeyId: 'TEST_123',
+        secretAccessKey: 'TEST_abc',
+        region: 'test-acb',
+      },
+    };
+
+    await handler.dump(context);
+    const emailTemplateFolder = path.join(dir, constants.EMAIL_TEMPLATES_DIRECTORY);
+    const dumped = loadJSON(path.join(emailTemplateFolder, 'provider.json'));
+
+    // Should not contain excluded fields
+    expect(dumped.credentials).to.not.have.property('accessKeyId');
+    expect(dumped.credentials).to.not.have.property('secretAccessKey');
+    // Should still have region since it's not excluded (placeholder value added by emailProviderDefaults)
+    expect(dumped.credentials).to.have.property('region');
+    expect(dumped).to.have.property('enabled', true);
+    expect(dumped).to.have.property('name', 'ses');
+  });
 });

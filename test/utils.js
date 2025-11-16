@@ -177,7 +177,9 @@ export function mockMgmtClient() {
       getSettings: () => Promise.resolve(Object.create(null)),
       updateSettings: () => Promise.resolve({}),
     },
-    customDomains: { list: () => [] },
+    customDomains: {
+      list: (params) => mockPagedData(params, 'customDomains', []),
+    },
     forms: { list: (params) => mockPagedData(params, 'forms', []) },
     flows: {
       list: (params) => mockPagedData(params, 'flows', []),

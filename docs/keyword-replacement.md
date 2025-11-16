@@ -78,6 +78,11 @@ The keyword preservation functionality will attempt to preserve as many keywords
 
 To learn more about the history and technical challenges of of keyword preservation, refer to [RFC: Keyword Preservation During Export](https://github.com/auth0/auth0-deploy-cli/issues/688).
 
+## Environment Variables
+
+Environment variables are added into the keyword replacement mappings object automatically.
+This means that you can refer to environment variables by name in your config with the same `@@EXAMPLE_KEY@@` or `##EXAMPLE_KEY##` syntax.
+
 ---
 
 [[table of contents]](../README.md#documentation)

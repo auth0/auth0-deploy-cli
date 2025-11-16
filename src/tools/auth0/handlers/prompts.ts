@@ -558,20 +558,22 @@ export default class PromptsHandler extends DefaultHandler {
   }
 
   async updateScreenRenderer(screenRenderer: ScreenRenderer): Promise<void> {
-    const { prompt, screen, tenant, ...updatePrams } = screenRenderer;
+    const { prompt, screen, ...updatePrams } = screenRenderer;
     if (!prompt || !screen) return;
 
-    let updatePayload: Management.UpdateAculRequestContent = {};
+    let updatePayload: Management.UpdateAculRequestContent;
 
     if (screenRenderer.rendering_mode === Management.AculRenderingModeEnum.Standard) {
       updatePayload = {
-        rendering_mode: screenRenderer.rendering_mode,
+        rendering_mode: Management.AculRenderingModeEnum.Standard,
+        head_tags: screenRenderer.head_tags as Management.AculHeadTag[],
       };
     } else {
       updatePayload = {
         ...updatePrams,
-        rendering_mode: screenRenderer.rendering_mode,
+        rendering_mode: Management.AculRenderingModeEnum.Advanced,
         default_head_tags_disabled: screenRenderer.default_head_tags_disabled || undefined,
+        head_tags: screenRenderer.head_tags as Management.AculHeadTag[],
       };
     }
 

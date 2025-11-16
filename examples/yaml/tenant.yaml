@@ -57,6 +57,17 @@ databases:
         change_email: "databases/users/change_email.js"
         change_password: "databases/users/change_password.js"
         verify: "databases/users/verify.js"
+      attributes:
+        email:
+          unique: true  # Default: true. Set to false to allow non-unique emails
+          identifier:
+            active: true
+          profile_required: true
+          verification_method: "link"
+        username:
+          identifier:
+            active: false  # Set to true when email.unique is false
+          profile_required: false
 
 connections:
   - name: "myad-waad"
@@ -298,4 +309,66 @@ customDomains:
     tls_policy: 'recommended'
     domain_metadata:
       myKey: value
+
+attackProtection:
+  botDetection:
+    bot_detection_level: medium
+    challenge_password_policy: when_risky
+    challenge_passwordless_policy: when_risky
+    challenge_password_reset_policy: when_risky
+    allowlist:
+      - 192.168.1.0/24
+      - 10.0.0.1
+    monitoring_mode_enabled: false
+  captcha:
+    active_provider_id: friendly_captcha
+    friendly_captcha:
+      site_key: ##CAPTCHA_FRIENDLY_CAPTCHA_SITE_KEY##
+      secret: ##CAPTCHA_FRIENDLY_CAPTCHA_SECRET##
+    recaptcha_v2:
+      site_key: ##CAPTCHA_RECAPTCHA_V2_SITE_KEY##
+      secret: ##CAPTCHA_RECAPTCHA_V2_SECRET##
+    recaptcha_enterprise:
+      site_key: ##CAPTCHA_RECAPTCHA_ENTERPRISE_SITE_KEY##
+      api_key: ##CAPTCHA_RECAPTCHA_ENTERPRISE_API_KEY##
+      project_id: ##CAPTCHA_RECAPTCHA_ENTERPRISE_PROJECT_ID##
+    hcaptcha:
+      site_key: ##CAPTCHA_HCAPTCHA_SITE_KEY##
+      secret: ##CAPTCHA_HCAPTCHA_SECRET##
+    arkose:
+      site_key: ##CAPTCHA_ARKOSE_SITE_KEY##
+      secret: ##CAPTCHA_ARKOSE_SECRET##
+      client_subdomain: my-client-subdomain
+      verify_subdomain: my-verify-subdomain
+      fail_open: false
+  breachedPasswordDetection:
+    enabled: true
+    shields:
+      - block
+      - admin_notification
+    admin_notification_frequency:
+      - immediately
+    method: standard
+  bruteForceProtection:
+    enabled: true
+    shields:
+      - block
+      - user_notification
+    mode: count_per_identifier_and_ip
+    allowlist: []
+    max_attempts: 10
+  suspiciousIpThrottling:
+    enabled: true
+    shields:
+      - block
+      - admin_notification
+    allowlist:
+      - 127.0.0.1
+    stage:
+      pre-login:
+        max_attempts: 100
+        rate: 864000
+      pre-user-registration:
+        max_attempts: 50
+        rate: 1200
 

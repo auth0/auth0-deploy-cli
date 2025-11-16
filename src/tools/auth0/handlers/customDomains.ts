@@ -2,6 +2,7 @@ import { Management } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
 import log from '../../../logger';
+import { paginate } from '../client';
 
 export const schema = {
   type: 'array',
@@ -40,8 +41,10 @@ export const schema = {
   },
 };
 
+type CustomDomain = Management.CustomDomain;
+
 export default class CustomDomainsHadnler extends DefaultAPIHandler {
-  existing: Management.CustomDomain[] | null;
+  existing: CustomDomain[] | null;
 
   constructor(config: DefaultAPIHandler) {
     super({
@@ -85,7 +88,9 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
         return this.existing;
       }
 
-      const customDomains: Management.CustomDomain[] = await this.client.customDomains.list();
+      const customDomains = await paginate<CustomDomain>(this.client.customDomains.list, {
+        checkpoint: true,
+      });
 
       this.existing = customDomains;
 

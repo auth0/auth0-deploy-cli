@@ -66,6 +66,17 @@ export const schema = {
         },
         required: ['client_credentials'],
       },
+      discovery_domains: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            domain: { type: 'string' },
+            status: { type: 'string', enum: ['pending', 'verified'] },
+          },
+          required: ['domain', 'status'],
+        },
+      },
     },
     required: ['name'],
   },
@@ -127,6 +138,10 @@ export default class OrganizationsHandler extends DefaultHandler {
     delete organization.connections;
     delete organization.client_grants;
 
+    if ('discovery_domains' in organization) {
+      delete organization.discovery_domains;
+    }
+
     const { data: created } = await this.client.organizations.create(organization);
 
     if (typeof org.connections !== 'undefined' && org.connections.length > 0) {
@@ -146,6 +161,23 @@ export default class OrganizationsHandler extends DefaultHandler {
           )
         )
       );
+    }
+
+    if (typeof org.discovery_domains !== 'undefined' && org.discovery_domains.length > 0) {
+      await this.client.pool
+        .addEachTask({
+          data: org.discovery_domains,
+          generator: (discoveryDomain: Management.CreateOrganizationDiscoveryDomainRequestContent) =>
+            this.createOrganizationDiscoveryDomain(created.id, {
+              domain: discoveryDomain?.domain,
+              status: discoveryDomain?.status,
+            }).catch((err) => {
+              throw new Error(
+                `Problem creating discovery domain ${discoveryDomain?.domain} for organization ${created.id}\n${err}`
+              );
+            }),
+        })
+        .promise();
     }
     return created;
   }
@@ -168,16 +200,24 @@ export default class OrganizationsHandler extends DefaultHandler {
   }
 
   async updateOrganization(org, organizations) {
-    const { connections: existingConnections, client_grants: existingClientGrants } =
-      await organizations.find((orgToUpdate) => orgToUpdate.name === org.name);
+    const {
+      connections: existingConnections,
+      client_grants: existingClientGrants,
+      discovery_domains: existingDiscoveryDomains,
+    } = await organizations.find((orgToUpdate) => orgToUpdate.name === org.name);
 
     const params = { id: org.id };
-    const { connections, client_grants: organizationClientGrants } = org;
+    const {
+      connections,
+      client_grants: organizationClientGrants,
+      discovery_domains: organizationDiscoveryDomains,
+    } = org;
 
     delete org.connections;
     delete org.name;
     delete org.id;
     delete org.client_grants;
+    delete org.discovery_domains;
 
     await this.client.organizations.update(params.id, org);
 
@@ -281,6 +321,84 @@ export default class OrganizationsHandler extends DefaultHandler {
       )
     );
 
+    // organization discovery_domains
+    const orgDiscoveryDomainsToRemove =
+      existingDiscoveryDomains?.filter(
+        (existingDomain) =>
+          !organizationDiscoveryDomains?.find((d) => d.domain === existingDomain.domain)
+      ) || [];
+
+    const orgDiscoveryDomainsToAdd =
+      organizationDiscoveryDomains?.filter(
+        (domain) => !existingDiscoveryDomains?.find((d) => d.domain === domain.domain)
+      ) || [];
+
+    const orgDiscoveryDomainsToUpdate =
+      existingDiscoveryDomains
+        ?.filter((existingDomain) => {
+          const updatedDomain = organizationDiscoveryDomains?.find(
+            (d) => d.domain === existingDomain.domain
+          );
+          return updatedDomain && updatedDomain.status !== existingDomain.status;
+        })
+        .map((existingDomain) => ({
+          id: existingDomain.id,
+          domain: existingDomain.domain,
+          status: organizationDiscoveryDomains.find((d) => d.domain === existingDomain.domain)
+            .status,
+        })) || [];
+
+    // Handle updates first
+    await Promise.all(
+      orgDiscoveryDomainsToUpdate.map((domainUpdate) =>
+        this.updateOrganizationDiscoveryDomain(
+          params.id,
+          domainUpdate.id,
+          domainUpdate.domain,
+          domainUpdate.status
+        ).catch((err) => {
+          throw new Error(
+            `Problem updating discovery domain ${domainUpdate.domain} for organization ${params.id}\n${err.message}`
+          );
+        })
+      )
+    );
+
+    await Promise.all(
+      orgDiscoveryDomainsToAdd.map((domain) =>
+        this.createOrganizationDiscoveryDomain(params.id, {
+          domain: domain.domain,
+          status: domain.status,
+        }).catch((err) => {
+          throw new Error(
+            `Problem adding discovery domain ${domain.domain} for organization ${params.id}\n${err.message}`
+          );
+        })
+      )
+    );
+
+    if (orgDiscoveryDomainsToRemove.length > 0) {
+      if (
+        this.config('AUTH0_ALLOW_DELETE') === 'true' ||
+        this.config('AUTH0_ALLOW_DELETE') === true
+      ) {
+        await Promise.all(
+          orgDiscoveryDomainsToRemove.map((domain) =>
+            this.deleteOrganizationDiscoveryDomain(params.id, domain.domain, domain.id).catch(
+              (err) => {
+                throw new Error(
+                  `Problem removing discovery domain ${domain.domain} for organization ${params.id}\n${err.message}`
+                );
+              }
+            )
+          )
+        );
+      } else {
+        log.warn(`Detected the following organization discovery domains should be deleted. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config
+      \n${orgDiscoveryDomainsToRemove.map((i) => this.objString(i)).join('\n')}`);
+      }
+    }
+
     return params;
   }
 
@@ -344,20 +462,26 @@ export default class OrganizationsHandler extends DefaultHandler {
       ]);
 
       for (let index = 0; index < organizations.length; index++) {
-        if (!organizations[index].id) {
+        const org = organizations[index];
+        if (!org?.id) {
           throw new Error(`Organization ${index} is missing an ID`);
         }
 
-        const connectionId = organizations[index].id as string;
-        const connections = await this.getOrganizationEnabledConnections(connectionId);
+        const connections = await this.getOrganizationEnabledConnections(org.id);
 
-        organizations[index].connections = connections;
+        org.connections = connections;
 
-        const organizationClientGrants = await this.getOrganizationClientGrants(connectionId);
+        const organizationClientGrants = await this.getOrganizationClientGrants(org.id);
 
-        organizations[index].client_grants = organizationClientGrants?.map((clientGrant) => ({
+        org.client_grants = organizationClientGrants?.map((clientGrant) => ({
           client_id: convertClientIdToName(clientGrant.client_id as string, clients),
         }));
+
+        // Get discovery domains for each organization
+        const organizationDiscoveryDomains = await this.getAllOrganizationDiscoveryDomains(org.id);
+        if (organizationDiscoveryDomains) {
+          org.discovery_domains = organizationDiscoveryDomains;
+        }
       }
 
       this.existing = organizations;
@@ -439,12 +563,12 @@ export default class OrganizationsHandler extends DefaultHandler {
   }
 
   async getOrganizationEnabledConnections(
-    connectionId: string
+    organizationId: string
   ): Promise<Management.OrganizationConnection[]> {
     const allOrganizationConnections: Management.OrganizationConnection[] = [];
 
     let organizationConnections = await this.client.organizations.enabledConnections.list(
-      connectionId
+      organizationId
     );
     do {
       allOrganizationConnections.push(...organizationConnections.data);
@@ -488,5 +612,114 @@ export default class OrganizationsHandler extends DefaultHandler {
   async deleteOrganizationClientGrants(organizationId: string, grantId: string): Promise<void> {
     log.debug(`Deleting organization client grant ${grantId} for organization ${organizationId}`);
     await this.client.organizations.clientGrants.delete(organizationId, grantId);
+  }
+
+  async getAllOrganizationDiscoveryDomains(
+    organizationId: string
+  ): Promise<Management.OrganizationDiscoveryDomain[] | null> {
+    // paginate using checkpoint pagination for getAllDiscoveryDomains
+    const allDiscoveryDomains: Management.OrganizationDiscoveryDomain[] = [];
+
+    try {
+      let orgDiscoveryDomain = await this.client.organizations.discoveryDomains.list(
+        organizationId
+      );
+      do {
+        allDiscoveryDomains.push(...orgDiscoveryDomain.data);
+        orgDiscoveryDomain = await orgDiscoveryDomain.getNextPage();
+      } while (orgDiscoveryDomain.hasNextPage());
+
+      return allDiscoveryDomains;
+    } catch (err) {
+      if (err.statusCode === 404 || err.statusCode === 501) {
+        return null;
+      }
+      if (err.statusCode === 403 || err.errorCode === 'feature_not_enabled') {
+        log.debug(
+          'Organization Discovery domains are not enabled for this tenant. Please verify `scope` or contact Auth0 support to enable this feature.'
+        );
+        return null;
+      }
+      throw err;
+    }
+  }
+
+  async getOrganizationDiscoveryDomain(
+    organizationId: string,
+    discoveryDomainId: string
+  ): Promise<Management.GetOrganizationDiscoveryDomainResponseContent> {
+    const orgDiscoveryDomain = await this.client.organizations.discoveryDomains.get(
+      organizationId,
+      discoveryDomainId
+    );
+    return orgDiscoveryDomain;
+  }
+
+  async createOrganizationDiscoveryDomain(
+    organizationId: string,
+    discoveryDomain: Management.CreateOrganizationDiscoveryDomainRequestContent
+  ): Promise<Management.CreateOrganizationDiscoveryDomainResponseContent> {
+    log.debug(
+      `Creating discovery domain ${discoveryDomain.domain} for organization ${organizationId}`
+    );
+    const orgDiscoveryDomain = await this.client.pool
+      .addSingleTask({
+        data: {
+          id: organizationId,
+        },
+        generator: (args) =>
+          this.client.organizations.discoveryDomains.create(args.id, discoveryDomain),
+      })
+      .promise();
+    return orgDiscoveryDomain;
+  }
+
+  async updateOrganizationDiscoveryDomain(
+    organizationId: string,
+    discoveryDomainId: string,
+    discoveryDomain: string,
+    status: Management.OrganizationDiscoveryDomainStatus
+  ): Promise<Management.UpdateOrganizationDiscoveryDomainResponseContent> {
+    log.debug(`Updating discovery domain ${discoveryDomain} for organization ${organizationId}`);
+
+    // stripUpdateFields does not support in sub modules
+    const stripUpdateFields = ['verification_host', 'verification_txt'];
+    log.debug(
+      `Stripping ${this.type} discovery domain read-only fields ${JSON.stringify(
+        stripUpdateFields
+      )}`
+    );
+
+    const discoveryDomainUpdated = await this.client.pool
+      .addSingleTask({
+        data: {
+          id: organizationId,
+          discoveryDomainId: discoveryDomainId,
+        },
+        generator: (args) =>
+          this.client.organizations.discoveryDomains.update(args.id, args.discoveryDomainId, {
+            status: status,
+          }),
+      })
+      .promise();
+    return discoveryDomainUpdated;
+  }
+
+  async deleteOrganizationDiscoveryDomain(
+    organizationId: string,
+    discoveryDomain: string,
+    discoveryDomainId: string
+  ): Promise<void> {
+    log.debug(`Deleting discovery domain ${discoveryDomain} for organization ${organizationId}`);
+    await this.client.pool
+      .addSingleTask({
+        data: {
+          id: organizationId,
+          discoveryDomainId: discoveryDomainId,
+        },
+        generator: (args) =>
+          this.client.organizations.discoveryDomains.delete(args.id, args.discoveryDomainId),
+      })
+      .promise();
   }
 }

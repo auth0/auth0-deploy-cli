@@ -57,6 +57,14 @@ const sampleClientGrant = {
   scope: ['read:logs'],
 };
 
+const sampleDiscoveryDomain = {
+  id: 'dd_123',
+  domain: 'login.acme.com',
+  status: 'pending',
+  verification_txt: 'auth0-domain-verification=xyz',
+  verification_host: '_auth0-domain-verification.login.acme.com',
+};
+
 describe('#organizations handler', () => {
   const config = function (key) {
     return config.data && config.data[key];
@@ -268,33 +276,12 @@ describe('#organizations handler', () => {
             data.id = 'fake';
             return Promise.resolve({ data });
           },
-          update: () => Promise.resolve([]),
-          delete: () => Promise.resolve([]),
-          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
-          enabledConnections: {
-            list: () => ({
-              data: [],
-              hasNextPage: () => false,
-              getNextPage: () =>
-                Promise.resolve({
-                  data: [],
-                  hasNextPage: () => false,
-                  getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
-                }),
-            }),
-          },
-          clientGrants: {
-            list: () => ({
-              data: [],
-              hasNextPage: () => false,
-              getNextPage: () =>
-                Promise.resolve({
-                  data: [],
-                  hasNextPage: () => false,
-                  getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
-                }),
-            }),
-          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          getEnabledConnections: () => Promise.resolve({ data: [] }),
+          getOrganizationClientGrants: () => ({ data: [] }),
+          getAllDiscoveryDomains: () => Promise.resolve({ data: [], next: undefined }),
         },
         connections: {
           list: (params) => mockPagedData(params, 'connections', []),
@@ -317,31 +304,11 @@ describe('#organizations handler', () => {
     it('should get organizations', async () => {
       const auth0 = {
         organizations: {
-          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
-          enabledConnections: {
-            list: () => ({
-              data: [sampleEnabledConnection],
-              hasNextPage: () => false,
-              getNextPage: () =>
-                Promise.resolve({
-                  data: [],
-                  hasNextPage: () => false,
-                  getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
-                }),
-            }),
-          },
-          clientGrants: {
-            list: () => ({
-              data: sampleOrgClientGrants,
-              hasNextPage: () => false,
-              getNextPage: () =>
-                Promise.resolve({
-                  data: [],
-                  hasNextPage: () => false,
-                  getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
-                }),
-            }),
-          },
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          getEnabledConnections: () => ({ data: [sampleEnabledConnection] }),
+          getOrganizationClientGrants: () => ({ data: sampleOrgClientGrants }),
+          getAllDiscoveryDomains: () =>
+            Promise.resolve({ data: [sampleDiscoveryDomain], next: undefined }),
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', sampleClients),
@@ -351,19 +318,23 @@ describe('#organizations handler', () => {
 
       const handler = new organizations.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
-      expect(data).to.deep.equal([{ ...sampleOrg, connections: [sampleEnabledConnection] }]);
+      expect(data).to.deep.equal([
+        {
+          ...sampleOrg,
+          connections: [sampleEnabledConnection],
+          discovery_domains: [sampleDiscoveryDomain],
+        },
+      ]);
     });
 
-    it('should get all organizations', async () => {
-      const organizationsPage1 = Array.from({ length: 50 }, (v, i) => ({
-        id: 'org_' + i,
+    it('should get all organizations', async function () {
+      const organizationsPage1 = Array.from({ length: 3 }, (v, i) => ({
         name: 'acme' + i,
         display_name: 'Acme ' + i,
       }));
-      const organizationsPage2 = Array.from({ length: 40 }, (v, i) => ({
-        id: 'org_' + (i + 50),
-        name: 'acme' + (i + 50),
-        display_name: 'Acme ' + (i + 50),
+      const organizationsPage2 = Array.from({ length: 5 }, (v, i) => ({
+        name: 'acme' + (i + 10),
+        display_name: 'Acme ' + (i + 10),
       }));
 
       const auth0 = {
@@ -372,30 +343,10 @@ describe('#organizations handler', () => {
             Promise.resolve(
               mockPagedData(params, 'organizations', [...organizationsPage2, ...organizationsPage1])
             ),
-          enabledConnections: {
-            list: () => ({
-              data: [],
-              hasNextPage: () => false,
-              getNextPage: () =>
-                Promise.resolve({
-                  data: [],
-                  hasNextPage: () => false,
-                  getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
-                }),
-            }),
-          },
-          clientGrants: {
-            list: () => ({
-              data: [],
-              hasNextPage: () => false,
-              getNextPage: () =>
-                Promise.resolve({
-                  data: [],
-                  hasNextPage: () => false,
-                  getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
-                }),
-            }),
-          },
+          getEnabledConnections: () => Promise.resolve({ data: { connections: [] } }),
+          getOrganizationClientGrants: () =>
+            Promise.resolve({ data: { client_grants: [], total: 0 } }),
+          getAllDiscoveryDomains: () => Promise.resolve({ data: [], next: undefined }),
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', sampleClients),
@@ -405,7 +356,7 @@ describe('#organizations handler', () => {
 
       const handler = new organizations.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
-      expect(data).to.have.length(90);
+      expect(data).to.have.length(8);
     });
 
     it('should return an empty array for old versions of the sdk', async () => {
@@ -503,30 +454,9 @@ describe('#organizations handler', () => {
 
             throw new Error('Unexpected');
           },
-          enabledConnections: {
-            list: () => ({
-              data: [],
-              hasNextPage: () => false,
-              getNextPage: () =>
-                Promise.resolve({
-                  data: [],
-                  hasNextPage: () => false,
-                  getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
-                }),
-            }),
-          },
-          clientGrants: {
-            list: () => ({
-              data: [],
-              hasNextPage: () => false,
-              getNextPage: () =>
-                Promise.resolve({
-                  data: [],
-                  hasNextPage: () => false,
-                  getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
-                }),
-            }),
-          },
+          getEnabledConnections: () => Promise.resolve({ data: [] }),
+          getOrganizationClientGrants: () => ({ data: [] }),
+          getAllDiscoveryDomains: () => Promise.resolve({ data: [], next: undefined }),
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', sampleClients),
@@ -611,6 +541,8 @@ describe('#organizations handler', () => {
                 }),
             }),
           },
+          getOrganizationClientGrants: () => ({ data: [] }),
+          getAllDiscoveryDomains: () => Promise.resolve({ data: [], next: undefined }),
         },
         connections: {
           list: (params) =>
@@ -707,6 +639,8 @@ describe('#organizations handler', () => {
                 }),
             }),
           },
+          getOrganizationClientGrants: () => ({ data: [] }),
+          getAllDiscoveryDomains: () => Promise.resolve({ data: [], next: undefined }),
         },
         connections: {
           list: (params) =>
@@ -798,6 +732,8 @@ describe('#organizations handler', () => {
                 }),
             }),
           },
+          getOrganizationClientGrants: () => ({ data: [] }),
+          getAllDiscoveryDomains: () => Promise.resolve({ data: [], next: undefined }),
         },
         connections: {
           list: (params) =>
@@ -876,6 +812,11 @@ describe('#organizations handler', () => {
                 }),
             }),
           },
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          getEnabledConnections: () => ({ data: [] }),
+          getOrganizationClientGrants: () => ({ data: [] }),
+          getAllDiscoveryDomains: () => Promise.resolve({ data: [], next: undefined }),
         },
         connections: {
           list: (params) =>
@@ -953,6 +894,10 @@ describe('#organizations handler', () => {
                 }),
             }),
           },
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          getEnabledConnections: () => [],
+          getOrganizationClientGrants: () => ({ data: [] }),
+          getAllDiscoveryDomains: () => Promise.resolve({ data: [], next: undefined }),
         },
         connections: {
           list: (params) => mockPagedData(params, 'connections', []),
@@ -968,6 +913,271 @@ describe('#organizations handler', () => {
       const handler = new organizations.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       await stageFn.apply(handler, [{ organizations: [{}] }]);
+    });
+
+    it('should create organization with discovery domains', async () => {
+      const auth0 = {
+        organizations: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('acme');
+            expect(data.discovery_domains).to.equal(undefined);
+            data.id = 'fake';
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [])),
+          createDiscoveryDomain: (params, domain) => {
+            expect(params.id).to.equal('fake');
+            expect(domain).to.be.an('object');
+            expect(domain.domain).to.equal('login.acme.com');
+            expect(domain.status).to.equal('pending');
+            return Promise.resolve({ data: { ...domain, id: 'dd_new' } });
+          },
+          getAllDiscoveryDomains: () => Promise.resolve({ data: [], next: undefined }),
+        },
+        connections: {
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [
+        {
+          organizations: [
+            {
+              name: 'acme',
+              display_name: 'Acme',
+              discovery_domains: [{ domain: 'login.acme.com', status: 'pending' }],
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should update organization discovery domains', async () => {
+      const auth0 = {
+        organizations: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (params, data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(params).to.be.an('object');
+            expect(params.id).to.equal('123');
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          getEnabledConnections: () => ({ data: [] }),
+          getOrganizationClientGrants: () => ({ data: [] }),
+          getAllDiscoveryDomains: () =>
+            Promise.resolve({ data: [sampleDiscoveryDomain], next: undefined }),
+          updateDiscoveryDomain: (params, body) => {
+            expect(params.id).to.equal('123');
+            expect(params.discovery_domain_id).to.equal('dd_123');
+            expect(body.status).to.equal('verified');
+            return Promise.resolve({ data: { ...sampleDiscoveryDomain, status: 'verified' } });
+          },
+          createDiscoveryDomain: (params, domain) => {
+            expect(params.id).to.equal('123');
+            expect(domain.domain).to.equal('auth.acme.com');
+            return Promise.resolve({ data: { ...domain, id: 'dd_new' } });
+          },
+          deleteDiscoveryDomain: (params) => {
+            expect(params.id).to.equal('123');
+            expect(params.discovery_domain_id).to.equal('dd_123');
+            return Promise.resolve({ data: {} });
+          },
+        },
+        connections: {
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          organizations: [
+            {
+              id: '123',
+              name: 'acme',
+              display_name: 'Acme Inc',
+              discovery_domains: [
+                { domain: 'login.acme.com', status: 'verified' },
+                { domain: 'auth.acme.com', status: 'pending' },
+              ],
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should delete organization discovery domains', async () => {
+      const auth0 = {
+        organizations: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (params, data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(params).to.be.an('object');
+            expect(params.id).to.equal('123');
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          getEnabledConnections: () => ({ data: [] }),
+          getOrganizationClientGrants: () => ({ data: [] }),
+          getAllDiscoveryDomains: () =>
+            Promise.resolve({
+              data: [
+                sampleDiscoveryDomain,
+                {
+                  id: 'dd_456',
+                  domain: 'auth.acme.com',
+                  status: 'verified',
+                  verification_txt: 'auth0-domain-verification=abc',
+                  verification_host: '_auth0-domain-verification.auth.acme.com',
+                },
+              ],
+              next: undefined,
+            }),
+          updateDiscoveryDomain: (params, body) => {
+            expect(params.id).to.equal('123');
+            expect(params.discovery_domain_id).to.equal('dd_123');
+            return Promise.resolve({ data: { ...sampleDiscoveryDomain, ...body } });
+          },
+          deleteDiscoveryDomain: (params) => {
+            expect(params.id).to.equal('123');
+            expect(params.discovery_domain_id).to.equal('dd_456');
+            return Promise.resolve({ data: {} });
+          },
+        },
+        connections: {
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          organizations: [
+            {
+              id: '123',
+              name: 'acme',
+              display_name: 'Acme Inc',
+              discovery_domains: [
+                // Only keep one domain, delete the other
+                { domain: 'login.acme.com', status: 'verified' },
+              ],
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should handle discovery domain deletion when AUTH0_ALLOW_DELETE is false', async () => {
+      const configNoDelete = function (key) {
+        return configNoDelete.data && configNoDelete.data[key];
+      };
+
+      configNoDelete.data = {
+        AUTH0_ALLOW_DELETE: false,
+      };
+
+      const auth0 = {
+        organizations: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (params, data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(params).to.be.an('object');
+            expect(params.id).to.equal('123');
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          getEnabledConnections: () => ({ data: [] }),
+          getOrganizationClientGrants: () => ({ data: [] }),
+          getAllDiscoveryDomains: () =>
+            Promise.resolve({
+              data: [
+                sampleDiscoveryDomain,
+                {
+                  id: 'dd_456',
+                  domain: 'auth.acme.com',
+                  status: 'verified',
+                  verification_txt: 'auth0-domain-verification=abc',
+                  verification_host: '_auth0-domain-verification.auth.acme.com',
+                },
+              ],
+              next: undefined,
+            }),
+          updateDiscoveryDomain: (params, body) => {
+            expect(params.id).to.equal('123');
+            return Promise.resolve({ data: { ...sampleDiscoveryDomain, ...body } });
+          },
+          deleteDiscoveryDomain: () => {
+            throw new Error('deleteDiscoveryDomain should not be called when delete is disabled');
+          },
+        },
+        connections: {
+          getAll: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        clientGrants: {
+          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({
+        client: pageClient(auth0),
+        config: configNoDelete,
+      });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          organizations: [
+            {
+              id: '123',
+              name: 'acme',
+              display_name: 'Acme Inc',
+              discovery_domains: [
+                // Only keep one domain, other will be deleted but should warn
+                { domain: 'login.acme.com', status: 'verified' },
+              ],
+            },
+          ],
+        },
+      ]);
     });
   });
 });

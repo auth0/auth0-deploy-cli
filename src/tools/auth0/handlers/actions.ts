@@ -23,7 +23,7 @@ export const schema = {
   items: {
     type: 'object',
     required: ['name', 'supported_triggers', 'code'],
-    additionalProperties: false,
+    additionalProperties: true,
     properties: {
       code: { type: 'string', default: '' },
       runtime: { type: 'string' },

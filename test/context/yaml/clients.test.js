@@ -110,4 +110,85 @@ describe('#YAML context clients', () => {
       fs.readFileSync(path.join(clientsFolder, 'customLoginClient_custom_login_page.html'), 'utf8')
     ).to.deep.equal('html code');
   });
+
+  it('should process clients with async_approval_notification_channels', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'clientsWithChannels');
+    cleanThenMkdir(dir);
+
+    const yaml = `
+    clients:
+      -
+        name: "cibaClient"
+        app_type: "spa"
+        async_approval_notification_channels: ['guardian-push', 'email']
+      -
+        name: "emailOnlyClient"
+        app_type: "native"
+        async_approval_notification_channels: @@channels@@
+    `;
+
+    const target = [
+      {
+        name: 'cibaClient',
+        app_type: 'spa',
+        async_approval_notification_channels: ['guardian-push', 'email'],
+      },
+      {
+        name: 'emailOnlyClient',
+        app_type: 'native',
+        async_approval_notification_channels: ['email'],
+      },
+    ];
+
+    const yamlFile = path.join(dir, 'clients.yaml');
+    fs.writeFileSync(yamlFile, yaml);
+
+    const config = {
+      AUTH0_INPUT_FILE: yamlFile,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { channels: ['email'] },
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.clients).to.deep.equal(target);
+  });
+
+  it('should dump clients with async_approval_notification_channels', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'clientsChannelsDump');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, './test.yml') },
+      mockMgmtClient()
+    );
+
+    const clients = [
+      {
+        name: 'cibaClient',
+        app_type: 'spa',
+        async_approval_notification_channels: ['email', 'guardian-push'],
+      },
+      {
+        name: 'standardClient',
+        app_type: 'native',
+      },
+    ];
+
+    const target = [
+      {
+        name: 'cibaClient',
+        app_type: 'spa',
+        async_approval_notification_channels: ['email', 'guardian-push'],
+      },
+      {
+        name: 'standardClient',
+        app_type: 'native',
+      },
+    ];
+
+    context.assets.clients = clients;
+
+    const dumped = await handler.dump(context);
+
+    expect(dumped).to.deep.equal({ clients: target });
+  });
 });

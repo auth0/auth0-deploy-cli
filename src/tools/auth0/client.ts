@@ -43,6 +43,11 @@ function getEntity(rsp: ApiResponse): Asset[] {
     if ('data' in rsp && Array.isArray(rsp.data)) {
       return rsp.data as Asset[];
     }
+
+    // Handle empty response case - return empty array instead of throwing error
+    if (Array.isArray(found) && found.length === 0) {
+      return [];
+    }
   }
 
   throw new Error('There was an error trying to find the entity within paginate');

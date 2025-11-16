@@ -64,7 +64,7 @@ export const sanitizeObject = (
   keysToRedact: string[],
   replaceWith = '[REDACTED]'
 ) => {
-  if (typeof obj === 'string' || obj === undefined) return obj;
+  if (typeof obj === 'string' || obj === undefined || obj === null) return obj;
 
   if (Array.isArray(obj)) {
     return obj.map((item) => sanitizeObject(item, keysToRedact));
