@@ -67,7 +67,6 @@ export default class GuardianFactorTemplatesHandler extends DefaultHandler {
       guardianFactorTemplates.map(async (fatorTemplates) => {
         const { name, ...data } = fatorTemplates;
         const params = { name: fatorTemplates.name };
-        // TODO: This is quite a change, needs to be validated for sure.
         if (name === 'sms') {
           await this.client.guardian.factors.sms.setTemplates(
             data as Management.SetGuardianFactorSmsTemplatesRequestContent

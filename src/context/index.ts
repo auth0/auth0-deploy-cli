@@ -202,7 +202,6 @@ export const setupContext = async (
   const mgmtClient = new ManagementClient({
     domain: config.AUTH0_DOMAIN,
     token: accessToken,
-    // TODO: retry: { maxRetries: config.AUTH0_API_MAX_RETRIES || 10, enabled: true },
     headers: {
       'User-agent': `deploy-cli/${packageVersion} (node.js/${process.version.replace('v', '')})`,
     },

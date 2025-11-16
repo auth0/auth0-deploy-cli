@@ -43,7 +43,6 @@ export default class GuardianFactorProvidersHandler extends DefaultHandler {
       const data = await Promise.all(
         mappings.map(async (m) => {
           let provider;
-          // TODO: This is quite a change, needs to be validated for sure.
           if (m.name === 'phone' && m.provider === 'twilio') {
             provider = await this.client.guardian.factors.phone.getTwilioProvider();
           } else if (m.name === 'sms' && m.provider === 'twilio') {
@@ -84,7 +83,6 @@ export default class GuardianFactorProvidersHandler extends DefaultHandler {
       guardianFactorProviders.map(async (factorProvider) => {
         const { name, provider, ...data } = factorProvider;
         const params = { name: factorProvider.name, provider: factorProvider.provider };
-        // TODO: This is quite a change, needs to be validated for sure.
         if (name === 'phone' && provider === 'twilio') {
           await this.client.guardian.factors.phone.setTwilioProvider(data);
         } else if (name === 'sms' && provider === 'twilio') {
