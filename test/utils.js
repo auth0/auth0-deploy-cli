@@ -30,6 +30,20 @@ export function mockPagedData(params, key, data) {
   };
 }
 
+// Helper function to create SDK v5 pagination response
+export function createPaginatedResponse(data = []) {
+  return {
+    data,
+    hasNextPage: () => false,
+    getNextPage: () =>
+      Promise.resolve({
+        data: [],
+        hasNextPage: () => false,
+        getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+      }),
+  };
+}
+
 export function mockMgmtClient() {
   // Fake Mgmt Client. Bit hacky but good enough for now.
   return {
