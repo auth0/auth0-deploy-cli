@@ -167,7 +167,9 @@ export default class OrganizationsHandler extends DefaultHandler {
       await this.client.pool
         .addEachTask({
           data: org.discovery_domains,
-          generator: (discoveryDomain: Management.CreateOrganizationDiscoveryDomainRequestContent) =>
+          generator: (
+            discoveryDomain: Management.CreateOrganizationDiscoveryDomainRequestContent
+          ) =>
             this.createOrganizationDiscoveryDomain(created.id, {
               domain: discoveryDomain?.domain,
               status: discoveryDomain?.status,

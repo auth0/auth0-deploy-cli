@@ -467,7 +467,7 @@ describe('#selfServiceProfiles handler', () => {
         user_attribute_profile_id: sampleUAP.name,
         user_attributes: undefined,
       };
-      
+
       const auth0 = {
         selfServiceProfiles: {
           delete: (params) => {

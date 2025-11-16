@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import pageClient from '../../../../src/tools/auth0/client';
 
 const { expect } = require('chai');

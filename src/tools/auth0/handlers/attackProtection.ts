@@ -290,9 +290,7 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
     const updates: Promise<unknown>[] = [];
 
     if (attackProtection.botDetection && Object.keys(attackProtection.botDetection).length) {
-      updates.push(
-        this.client.attackProtection.botDetection.update(attackProtection.botDetection)
-      );
+      updates.push(this.client.attackProtection.botDetection.update(attackProtection.botDetection));
     }
 
     if (attackProtection.breachedPasswordDetection) {
@@ -328,7 +326,9 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
 
     if (attackProtection.bruteForceProtection) {
       updates.push(
-        this.client.attackProtection.bruteForceProtection.update(attackProtection.bruteForceProtection)
+        this.client.attackProtection.bruteForceProtection.update(
+          attackProtection.bruteForceProtection
+        )
       );
     }
 
