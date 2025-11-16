@@ -6,15 +6,15 @@ describe('#attackProtection handler', () => {
     it('should fetch attack protection settings', async () => {
       const auth0 = {
         attackProtection: {
-          getBotDetectionConfig: () => ({
-            data: {
+          botDetection: {
+            get: () => ({
               bot_detection_level: 'medium',
               monitoring_mode_enabled: true,
               allowlist: ['10.0.0.0/24'],
-            },
-          }),
-          getBreachedPasswordDetectionConfig: () => ({
-            data: {
+            }),
+          },
+          breachedPasswordDetection: {
+            get: () => ({
               admin_notification_frequency: [],
               enabled: true,
               method: 'standard',
@@ -28,16 +28,16 @@ describe('#attackProtection handler', () => {
               max_attempts: 10,
               mode: 'count_per_identifier_and_ip',
               shields: ['block', 'user_notification'],
-            },
-          }),
-          getCaptchaConfig: () => ({
-            data: {
+            }),
+          },
+          captcha: {
+            get: () => ({
               selected: 'friendly_captcha',
               policy: 'always',
-            },
-          }),
-          getSuspiciousIpThrottlingConfig: () => ({
-            data: {
+            }),
+          },
+          suspiciousIpThrottling: {
+            get: () => ({
               allowlist: ['127.0.0.1'],
               enabled: true,
               shields: ['block', 'admin_notification'],
@@ -102,43 +102,55 @@ describe('#attackProtection handler', () => {
     it('should update attack protection settings', async () => {
       const auth0 = {
         attackProtection: {
-          updateBotDetectionConfig: (data) => {
-            expect(data).to.be.an('object');
-            expect(data).to.deep.equal({
-              bot_detection_level: 'medium',
-              monitoring_mode_enabled: false,
-              allowlist: ['10.0.0.0/24'],
-            });
-            return Promise.resolve(data);
+          botDetection: {
+            update: (data) => {
+              expect(data).to.be.an('object');
+              expect(data).to.deep.equal({
+                bot_detection_level: 'medium',
+                monitoring_mode_enabled: false,
+                allowlist: ['10.0.0.0/24'],
+              });
+              return Promise.resolve(data);
+            },
           },
-          updateBreachedPasswordDetectionConfig: (data) => {
-            expect(data).to.be.an('object');
-            expect(data).to.deep.equal({
-              admin_notification_frequency: [],
-              enabled: true,
-              method: 'standard',
-              shields: [],
-            });
-            return Promise.resolve(data);
+          breachedPasswordDetection: {
+            update: (data) => {
+              expect(data).to.be.an('object');
+              expect(data).to.deep.equal({
+                admin_notification_frequency: [],
+                enabled: true,
+                method: 'standard',
+                shields: [],
+              });
+              return Promise.resolve(data);
+            },
           },
-          updateCaptchaConfig: (data) => {
-            expect(data).to.be.an('object');
-            expect(data).to.deep.equal({
-              selected: 'friendly_captcha',
-              policy: 'always',
-            });
-            return Promise.resolve(data);
+          captcha: {
+            update: (data) => {
+              expect(data).to.be.an('object');
+              expect(data).to.deep.equal({
+                selected: 'friendly_captcha',
+                policy: 'always',
+              });
+              return Promise.resolve(data);
+            },
           },
-          updateSuspiciousIpThrottlingConfig: (data) => {
-            expect(data).to.be.an('object');
-            expect(data).to.deep.equal({
-              allowlist: ['127.0.0.1'],
-              enabled: true,
-              shields: ['block', 'admin_notification'],
-              stage: {
-                'pre-login': {
-                  max_attempts: 100,
-                  rate: 864000,
+          suspiciousIpThrottling: {
+            update: (data) => {
+              expect(data).to.be.an('object');
+              expect(data).to.deep.equal({
+                allowlist: ['127.0.0.1'],
+                enabled: true,
+                shields: ['block', 'admin_notification'],
+                stage: {
+                  'pre-login': {
+                    max_attempts: 100,
+                    rate: 864000,
+                  },
+                  'pre-user-registration': {
+                    max_attempts: 50,
+                    rate: 1200,
+                  },
                 },
               });
               return Promise.resolve(data);
@@ -211,35 +223,39 @@ describe('#attackProtection handler', () => {
     it('should handle 403 error when fetching bot detection and captcha configs', async () => {
       const auth0 = {
         attackProtection: {
-          getBotDetectionConfig: () => {
-            const err = new Error('Forbidden');
-            err.statusCode = 403;
-            throw err;
+          botDetection: {
+            get: () => {
+              const err = new Error('Forbidden');
+              err.statusCode = 403;
+              throw err;
+            },
           },
-          getCaptchaConfig: () => {
-            const err = new Error('Forbidden');
-            err.statusCode = 403;
-            throw err;
+          captcha: {
+            get: () => {
+              const err = new Error('Forbidden');
+              err.statusCode = 403;
+              throw err;
+            },
           },
-          getBreachedPasswordDetectionConfig: () => ({
-            data: {
+          breachedPasswordDetection: {
+            get: () => ({
               admin_notification_frequency: [],
               enabled: true,
               method: 'standard',
               shields: [],
-            },
-          }),
-          getBruteForceConfig: () => ({
-            data: {
+            }),
+          },
+          bruteForceProtection: {
+            get: () => ({
               allowlist: [],
               enabled: true,
               max_attempts: 10,
               mode: 'count_per_identifier_and_ip',
               shields: ['block', 'user_notification'],
-            },
-          }),
-          getSuspiciousIpThrottlingConfig: () => ({
-            data: {
+            }),
+          },
+          suspiciousIpThrottling: {
+            get: () => ({
               allowlist: ['127.0.0.1'],
               enabled: true,
               shields: ['block', 'admin_notification'],
@@ -253,8 +269,8 @@ describe('#attackProtection handler', () => {
                   rate: 1200,
                 },
               },
-            },
-          }),
+            }),
+          },
         },
       };
 
@@ -333,9 +349,15 @@ describe('#attackProtection handler', () => {
     it('should skip botDetection update when empty object', async () => {
       const auth0 = {
         attackProtection: {
-          updateBreachedPasswordDetectionConfig: (data) => Promise.resolve(data),
-          updateBruteForceConfig: (data) => Promise.resolve(data),
-          updateSuspiciousIpThrottlingConfig: (data) => Promise.resolve(data),
+          breachedPasswordDetection: {
+            update: (data) => Promise.resolve(data),
+          },
+          bruteForceProtection: {
+            update: (data) => Promise.resolve(data),
+          },
+          suspiciousIpThrottling: {
+            update: (data) => Promise.resolve(data),
+          },
         },
       };
 
@@ -375,9 +397,15 @@ describe('#attackProtection handler', () => {
     it('should skip captcha update when empty object', async () => {
       const auth0 = {
         attackProtection: {
-          updateBreachedPasswordDetectionConfig: (data) => Promise.resolve(data),
-          updateBruteForceConfig: (data) => Promise.resolve(data),
-          updateSuspiciousIpThrottlingConfig: (data) => Promise.resolve(data),
+          breachedPasswordDetection: {
+            update: (data) => Promise.resolve(data),
+          },
+          bruteForceProtection: {
+            update: (data) => Promise.resolve(data),
+          },
+          suspiciousIpThrottling: {
+            update: (data) => Promise.resolve(data),
+          },
         },
       };
 
@@ -418,13 +446,21 @@ describe('#attackProtection handler', () => {
       let capturedCaptcha;
       const auth0 = {
         attackProtection: {
-          updateCaptchaConfig: (data) => {
-            capturedCaptcha = data;
-            return Promise.resolve(data);
+          captcha: {
+            update: (data) => {
+              capturedCaptcha = data;
+              return Promise.resolve(data);
+            },
           },
-          updateBreachedPasswordDetectionConfig: (data) => Promise.resolve(data),
-          updateBruteForceConfig: (data) => Promise.resolve(data),
-          updateSuspiciousIpThrottlingConfig: (data) => Promise.resolve(data),
+          breachedPasswordDetection: {
+            update: (data) => Promise.resolve(data),
+          },
+          bruteForceProtection: {
+            update: (data) => Promise.resolve(data),
+          },
+          suspiciousIpThrottling: {
+            update: (data) => Promise.resolve(data),
+          },
         },
       };
 
@@ -473,25 +509,25 @@ describe('#attackProtection handler', () => {
     it('should return cached existing data on subsequent calls', async () => {
       const auth0 = {
         attackProtection: {
-          getBotDetectionConfig: () => ({
-            data: {
+          botDetection: {
+            get: () => ({
               bot_detection_level: 'medium',
-            },
-          }),
-          getCaptchaConfig: () => ({
-            data: {
+            }),
+          },
+          captcha: {
+            get: () => ({
               active_provider_id: 'friendly_captcha',
-            },
-          }),
-          getBreachedPasswordDetectionConfig: () => ({
-            data: { enabled: true },
-          }),
-          getBruteForceConfig: () => ({
-            data: { enabled: true },
-          }),
-          getSuspiciousIpThrottlingConfig: () => ({
-            data: { enabled: true },
-          }),
+            }),
+          },
+          breachedPasswordDetection: {
+            get: () => ({ enabled: true }),
+          },
+          bruteForceProtection: {
+            get: () => ({ enabled: true }),
+          },
+          suspiciousIpThrottling: {
+            get: () => ({ enabled: true }),
+          },
         },
       };
 
