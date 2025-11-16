@@ -15,24 +15,7 @@ export const testDataDir = path.resolve(localDir, 'testData');
 
 export function mockPagedData(params, key, data) {
   // SDK v5 Page<T> always returns data as an array, with total as a separate property
-  if (params && params.include_totals) {
-    return {
-      data,
-      total: data.length || 0,
-      hasNextPage: () => false,
-      getNextPage: () => Promise.resolve({ data: [], total: 0, hasNextPage: () => false }),
-    };
-  }
-  return {
-    data,
-    hasNextPage: () => false,
-    getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
-  };
-}
-
-// Helper function to create SDK v5 pagination response
-export function createPaginatedResponse(data = []) {
-  return {
+  const pagedResponse = {
     data,
     hasNextPage: () => false,
     getNextPage: () =>
@@ -42,6 +25,13 @@ export function createPaginatedResponse(data = []) {
         getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
       }),
   };
+
+  if (params && params.include_totals) {
+    pagedResponse.total = data.length || 0;
+    return pagedResponse;
+  }
+
+  return pagedResponse;
 }
 
 export function mockMgmtClient() {
