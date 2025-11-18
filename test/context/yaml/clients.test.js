@@ -25,8 +25,11 @@ describe('#YAML context clients', () => {
         custom_login_page: "./customLoginClient_custom_login_page.html"
         session_transfer: {
         can_create_session_transfer_token: false,
+        enforce_cascade_revocation: false,
         enforce_device_binding: 'none',
-        allowed_authentication_methods: ['query']
+        allowed_authentication_methods: ['query'],
+        allow_refresh_token: false,
+        enforce_online_refresh_tokens: false
       }
     `;
 
@@ -39,8 +42,11 @@ describe('#YAML context clients', () => {
         custom_login_page: 'html code spa "spa"',
         session_transfer: {
           can_create_session_transfer_token: false,
+          enforce_cascade_revocation: false,
           enforce_device_binding: 'none',
           allowed_authentication_methods: ['query'],
+          allow_refresh_token: false,
+          enforce_online_refresh_tokens: false,
         },
       },
     ];
@@ -80,8 +86,11 @@ describe('#YAML context clients', () => {
         custom_login_page: 'html code',
         session_transfer: {
           can_create_session_transfer_token: false,
+          enforce_cascade_revocation: false,
           enforce_device_binding: 'none',
           allowed_authentication_methods: ['cookie', 'query'],
+          allow_refresh_token: false,
+          enforce_online_refresh_tokens: false,
         },
       },
     ];
@@ -94,8 +103,11 @@ describe('#YAML context clients', () => {
         custom_login_page: './customLoginClient_custom_login_page.html',
         session_transfer: {
           can_create_session_transfer_token: false,
+          enforce_cascade_revocation: false,
           enforce_device_binding: 'none',
           allowed_authentication_methods: ['cookie', 'query'],
+          allow_refresh_token: false,
+          enforce_online_refresh_tokens: false,
         },
       },
     ];
