@@ -205,6 +205,10 @@ export default class UserAttributeProfilesHandler extends DefaultAPIHandler {
       id: 'id',
       identifiers: ['id', 'name'],
       stripUpdateFields: ['id'],
+      functions: {
+        update: async (params, payload) =>
+          this.client.userAttributeProfiles.update(params?.id, payload),
+      },
     });
   }
 

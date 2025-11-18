@@ -69,6 +69,9 @@ export default class LogStreamsHandler extends DefaultAPIHandler {
         'sink.splunkToken',
         'sink.datadogApiKey',
       ],
+      functions: {
+        update: async (params, payload) => this.client.logStreams.update(params?.id, payload),
+      },
     });
   }
 

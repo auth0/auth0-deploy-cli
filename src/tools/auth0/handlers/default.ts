@@ -323,7 +323,7 @@ export default class APIHandler {
             generator: (delItem) =>
               retryWithExponentialBackoff(() => {
                 const delFunction = this.getClientFN(this.functions.delete);
-                return delFunction({ [this.id]: delItem[this.id] });
+                return delFunction(delItem[this.id]);
               }, retryConfig)
                 .then(() => {
                   this.didDelete(delItem);

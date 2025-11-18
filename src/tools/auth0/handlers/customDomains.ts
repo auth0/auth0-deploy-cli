@@ -72,7 +72,6 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
         'updated_at',
       ],
       functions: {
-        delete: (args) => this.client.customDomains.delete(args.custom_domain_id),
         update: (args, data) => this.client.customDomains.update(args.custom_domain_id, data),
       },
     });
