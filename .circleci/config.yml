@@ -6,7 +6,7 @@ orbs:
 jobs:
   e2e_test_as_node_module:
     docker:
-      - image: cimg/node:22.4.1
+      - image: cimg/node:22.12.0
     working_directory: ~/repo
     steps:
       - checkout
@@ -15,7 +15,7 @@ jobs:
 
   e2e_test_as_cli:
     docker:
-      - image: cimg/node:22.4.1
+      - image: cimg/node:22.12.0
     working_directory: ~/repo
     steps:
       - checkout
@@ -68,7 +68,7 @@ jobs:
 
   does_typescript_compile:
     docker:
-      - image: cimg/node:22.4.1
+      - image: cimg/node:22.12.0
     working_directory: ~/repo
     steps:
       - checkout
@@ -97,7 +97,7 @@ workflows:
           v: "lts"
       - unit_test:
           name: Unit tests with Node current
-          v: "22.4.1"
+          v: "22.12.0"
 
   test_and_deploy:
     jobs:
