@@ -5,7 +5,6 @@ import * as sinon from 'sinon';
 import promptsHandler, { Prompts } from '../../../../src/tools/auth0/handlers/prompts';
 import { Language } from '../../../../src/types';
 import log from '../../../../src/logger';
-import { CustomPartialsPromptTypes } from '../../../../lib/tools/auth0/handlers/prompts';
 
 const mockPromptsSettings = {
   universal_login_experience: 'classic',
@@ -118,7 +117,7 @@ describe('#prompts handler', () => {
         prompts: {
           getSettings: () => Promise.resolve(mockPromptsSettings),
           customText: {
-            get: (prompt, language, options) => {
+            get: (prompt, language, _options) => {
               const customTextLanguageMap = {
                 en: englishCustomText,
                 es: spanishCustomText,
@@ -613,7 +612,7 @@ describe('#prompts handler', () => {
       handler.IsFeatureSupported = false;
 
       const result = await handler.getCustomPartial({
-        prompt: 'login' as CustomPartialsPromptTypes,
+        prompt: 'login',
       });
       expect(result).to.deep.equal({});
     });

@@ -110,9 +110,9 @@ describe('#customDomains handler', () => {
     const auth0ApiClientMock = {
       customDomains: {
         list: async () => [],
-        create: async (args) => {
+        create: async (_args) => {
           didCreateFunctionGetCalled = true;
-          expect(args).to.deep.equal({
+          expect(_args).to.deep.equal({
             domain: customDomains[0].domain,
             type: customDomains[0].type,
             tls_policy: customDomains[0].tls_policy,
@@ -155,7 +155,7 @@ describe('#customDomains handler', () => {
         list: async () => {
           throw unsupportedTenantError;
         },
-        create: async (args) => {
+        create: async (_args: unknown) => {
           didCreateFunctionGetCalled = true;
           return customDomains[0];
         },
