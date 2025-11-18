@@ -371,8 +371,8 @@ describe('#actions handler', () => {
           create: () => Promise.resolve({ data: [] }),
           update: () => Promise.resolve({ data: [] }),
           delete: (data) => {
-            expect(data).to.be.an('object');
-            expect(data.id).to.equal('action-1');
+            expect(data).to.be.a('string');
+            expect(data).to.equal('action-1');
             return Promise.resolve({ data });
           },
           list: () =>

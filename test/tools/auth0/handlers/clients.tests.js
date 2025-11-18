@@ -427,8 +427,8 @@ describe('#clients handler', () => {
           update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.client_id).to.equal('client1');
+            expect(params).to.be.a('string');
+            expect(params).to.equal('client1');
             return Promise.resolve({ data: [] });
           },
           list: (params) =>
@@ -454,8 +454,8 @@ describe('#clients handler', () => {
           update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.client_id).to.equal('client1');
+            expect(params).to.be.a('string');
+            expect(params).to.equal('client1');
             removed = true;
             return Promise.resolve({ data: [] });
           },
@@ -586,8 +586,8 @@ describe('#clients handler', () => {
           delete: function (data) {
             wasDeleteCalled = true;
             (() => expect(this).to.not.be.undefined)();
-            expect(data).to.be.an('object');
-            expect(data.client_id).to.equal('client-2');
+            expect(data).to.be.a('string');
+            expect(data).to.equal('client-2');
             return Promise.resolve({ data });
           },
           list: (params) =>

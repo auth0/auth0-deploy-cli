@@ -308,8 +308,8 @@ describe('#flows handler', () => {
           },
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal(sampleFlowWthID.id);
+            expect(params).to.be.a('string');
+            expect(params).to.equal(sampleFlowWthID.id);
             return Promise.resolve([]);
           },
           list: (params) => mockPagedData(params, 'flows', [sampleFlowWthID]),
@@ -338,7 +338,7 @@ describe('#flows handler', () => {
         flows: {
           delete: (params) => {
             removed = true;
-            expect(params).to.be.an('object');
+            expect(params).to.be.a('string');
             return Promise.resolve([]);
           },
           list: (params) => mockPagedData(params, 'flows', [sampleFlowWthID]),

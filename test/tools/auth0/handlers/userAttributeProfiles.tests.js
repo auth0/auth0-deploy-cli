@@ -173,8 +173,8 @@ describe('#userAttributeProfiles handler', () => {
         userAttributeProfiles: {
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal(sampleUAPWithId.id);
+            expect(params).to.be.a('string');
+            expect(params).to.equal(sampleUAPWithId.id);
             expect(data).to.be.an('object');
             expect(data.name).to.equal(sampleUAPUpdated.name);
 
@@ -213,8 +213,8 @@ describe('#userAttributeProfiles handler', () => {
           },
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal(sampleUAPWithId.id);
+            expect(params).to.be.a('string');
+            expect(params).to.equal(sampleUAPWithId.id);
             return Promise.resolve({ data: [] });
           },
           list: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
@@ -234,7 +234,7 @@ describe('#userAttributeProfiles handler', () => {
         userAttributeProfiles: {
           delete: (params) => {
             removed = true;
-            expect(params).to.be.an('object');
+            expect(params).to.be.a('string');
             return Promise.resolve({ data: [] });
           },
           list: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),

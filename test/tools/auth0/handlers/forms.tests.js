@@ -301,8 +301,8 @@ describe('#forms handler', () => {
           },
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal(sampleFormWthID.id);
+            expect(params).to.be.a('string');
+            expect(params).to.equal(sampleFormWthID.id);
             return Promise.resolve([]);
           },
           list: (params) => mockPagedData(params, 'forms', [sampleFormWthID]),
@@ -329,7 +329,7 @@ describe('#forms handler', () => {
         forms: {
           delete: (params) => {
             removed = true;
-            expect(params).to.be.an('object');
+            expect(params).to.be.a('string');
             return Promise.resolve([]);
           },
           list: (params) => mockPagedData(params, 'forms', [sampleFormWthID, sampleFormTwoWthID]),

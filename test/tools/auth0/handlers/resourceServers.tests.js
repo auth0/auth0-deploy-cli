@@ -446,8 +446,8 @@ describe('#resourceServers handler', () => {
           create: () => Promise.resolve([]),
           update: () => Promise.resolve([]),
           delete: (data) => {
-            expect(data).to.be.an('object');
-            expect(data.id).to.equal('rs1');
+            expect(data).to.be.a('string');
+            expect(data).to.equal('rs1');
             return Promise.resolve(data);
           },
           list: (params) =>
@@ -471,8 +471,8 @@ describe('#resourceServers handler', () => {
           create: () => Promise.resolve([]),
           update: () => Promise.resolve([]),
           delete: (data) => {
-            expect(data).to.be.an('object');
-            expect(data.id).to.equal('rs1');
+            expect(data).to.be.a('string');
+            expect(data).to.equal('rs1');
             removed = true;
             return Promise.resolve(data);
           },
@@ -502,8 +502,8 @@ describe('#resourceServers handler', () => {
           create: () => Promise.resolve([]),
           update: () => Promise.resolve([]),
           delete: (data) => {
-            expect(data).to.be.an('object');
-            expect(data.id).to.equal('rs1');
+            expect(data).to.be.a('string');
+            expect(data).to.equal('rs1');
             removed = true;
             return Promise.resolve(data);
           },

@@ -533,8 +533,8 @@ describe('#databases handler', () => {
           update: () => Promise.resolve([]),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('con1');
+            expect(params).to.be.a('string');
+            expect(params).to.equal('con1');
 
             return Promise.resolve({ data: [] });
           },
@@ -569,8 +569,8 @@ describe('#databases handler', () => {
           update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('con1');
+            expect(params).to.be.a('string');
+            expect(params).to.equal('con1');
             removed = true;
             return Promise.resolve({ data: [] });
           },
