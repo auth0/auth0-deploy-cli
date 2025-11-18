@@ -6,7 +6,7 @@ orbs:
 jobs:
   e2e_test_as_node_module:
     docker:
-      - image: cimg/node:22.4.1
+      - image: cimg/node:22.12.0
     working_directory: ~/repo
     steps:
       - checkout
@@ -15,7 +15,7 @@ jobs:
 
   e2e_test_as_cli:
     docker:
-      - image: cimg/node:22.4.1
+      - image: cimg/node:22.12.0
     working_directory: ~/repo
     steps:
       - checkout
@@ -66,9 +66,27 @@ jobs:
           name: Publish package
           command: npm publish
 
+  deploy_beta:
+    parameters:
+      v:
+        type: string
+        default: "lts"
+    docker:
+      - image: cimg/node:<< parameters.v >>
+    working_directory: ~/repo
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Authenticate with registry
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
+      - run:
+          name: Publish beta package
+          command: npm publish --tag beta
+
   does_typescript_compile:
     docker:
-      - image: cimg/node:22.4.1
+      - image: cimg/node:22.12.0
     working_directory: ~/repo
     steps:
       - checkout
@@ -97,7 +115,7 @@ workflows:
           v: "lts"
       - unit_test:
           name: Unit tests with Node current
-          v: "22.4.1"
+          v: "22.12.0"
 
   test_and_deploy:
     jobs:
@@ -118,6 +136,29 @@ workflows:
             branches:
               ignore: /.*/
             tags:
-              only: /^v.*/
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+$/
+          context:
+            - publish-npm
+
+  test_and_deploy_beta:
+    jobs:
+      - unit_test:
+          name: Unit tests with Node LTS (Beta)
+          v: "lts"
+          filters:
+            branches:
+              only: beta
+            tags:
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$/
+      - deploy_beta:
+          name: Publish Beta to NPM
+          v: "lts"
+          requires:
+            - Unit tests with Node LTS (Beta)
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$/
           context:
             - publish-npm

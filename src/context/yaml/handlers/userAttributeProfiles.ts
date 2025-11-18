@@ -1,6 +1,6 @@
-import { UserAttributeProfile } from 'auth0';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
+import { UserAttributeProfile } from '../../../tools/auth0/handlers/userAttributeProfiles';
 import { ParsedAsset } from '../../../types';
 
 type ParsedUserAttributeProfiles = ParsedAsset<

@@ -12,16 +12,16 @@ describe('#emailTemplates handler', () => {
         emailTemplates: {
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          update: function (params, data) {
+          update: function (templateName, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
+            expect(templateName).to.be.a('string');
             expect(data).to.be.an('object');
-            expect(params.templateName).to.equal('verify_email');
+            expect(templateName).to.equal('verify_email');
             expect(data.template).to.equal('verify_email');
             expect(data.body).to.equal('body');
-            return Promise.resolve({ data: { params, data } });
+            return Promise.resolve(data);
           },
         },
       };
@@ -37,13 +37,12 @@ describe('#emailTemplates handler', () => {
     it('should get email templates', async () => {
       const auth0 = {
         emailTemplates: {
-          get: (template) => ({
-            data: {
-              template: template.templateName,
+          get: (templateName) =>
+            Promise.resolve({
+              template: templateName,
               enabled: true,
               body: '<html>some email</html>',
-            },
-          }),
+            }),
         },
       };
 
@@ -66,7 +65,7 @@ describe('#emailTemplates handler', () => {
             expect(data).to.be.an('object');
             expect(data.template).to.equal('verify_email');
             expect(data.body).to.equal('body');
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
           update: () => {
             const error = new Error('test');
@@ -93,16 +92,16 @@ describe('#emailTemplates handler', () => {
             expect(data.template).to.equal('async_approval');
             expect(data.body).to.equal('<html>async approval</html>');
             expect(data.subject).to.equal('Async Approval Required');
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          update: function (params, data) {
+          update: function (templateName, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
+            expect(templateName).to.be.a('string');
             expect(data).to.be.an('object');
-            expect(params.templateName).to.equal('async_approval');
+            expect(templateName).to.equal('async_approval');
             expect(data.template).to.equal('async_approval');
             expect(data.body).to.equal('<html>async approval</html>');
-            return Promise.resolve({ data: { params, data } });
+            return Promise.resolve(data);
           },
         },
       };
@@ -127,17 +126,14 @@ describe('#emailTemplates handler', () => {
     it('should get async_approval in response', async () => {
       const auth0 = {
         emailTemplates: {
-          get: (template) => ({
-            data: {
-              template: template.templateName,
+          get: (templateName) =>
+            Promise.resolve({
+              template: templateName,
               enabled: true,
               body: '<html>some email</html>',
               subject:
-                template.templateName === 'async_approval'
-                  ? 'Async Approval Required'
-                  : 'Test Subject',
-            },
-          }),
+                templateName === 'async_approval' ? 'Async Approval Required' : 'Test Subject',
+            }),
         },
       };
 

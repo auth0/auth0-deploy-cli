@@ -19,7 +19,11 @@ describe('#triggers handler', () => {
     it('should pass validation', async () => {
       const auth0 = {
         actions: {
-          getTriggerBindings: () => [],
+          triggers: {
+            bindings: {
+              list: () => Promise.resolve({ data: [] }),
+            },
+          },
         },
       };
 
@@ -53,8 +57,14 @@ describe('#triggers handler', () => {
 
       const auth0 = {
         actions: {
-          getAllTriggers: () => Promise.resolve(triggersBindings),
-          updateTriggerBindings: () => Promise.resolve([]),
+          triggers: {
+            list: () =>
+              Promise.resolve({ triggers: Object.keys(triggersBindings).map((id) => ({ id })) }),
+            bindings: {
+              list: (triggerId) => Promise.resolve({ data: triggersBindings[triggerId] || [] }),
+              updateMany: () => Promise.resolve([]),
+            },
+          },
         },
         pool,
         getAllCalled: false,
@@ -85,21 +95,30 @@ describe('#triggers handler', () => {
 
       const auth0 = {
         actions: {
-          getAllTriggers: () => Promise.resolve(existingTriggerBindings),
-          // eslint-disable-next-line camelcase
-          updateTriggerBindings: ({ triggerId }, { bindings }) => {
-            expect([
-              'post-login',
-              'credentials-exchange',
-              'pre-user-registration',
-              'post-user-registration',
-              'post-change-password',
-              'send-phone-message',
-              'password-reset-post-challenge',
-            ]).to.include(triggerId); // eslint-disable-line camelcase
-            expect(bindings).to.be.an('array').that.is.empty; // eslint-disable-line no-unused-expressions
-            timesUpdateTriggerBindingsCalled += 1;
-            return Promise.resolve([]);
+          triggers: {
+            list: () =>
+              Promise.resolve({
+                triggers: Object.keys(existingTriggerBindings).map((id) => ({ id })),
+              }),
+            bindings: {
+              list: (triggerId) =>
+                Promise.resolve({ data: existingTriggerBindings[triggerId] || [] }),
+              // eslint-disable-next-line camelcase
+              updateMany: (triggerId, { bindings }) => {
+                expect([
+                  'post-login',
+                  'credentials-exchange',
+                  'pre-user-registration',
+                  'post-user-registration',
+                  'post-change-password',
+                  'send-phone-message',
+                  'password-reset-post-challenge',
+                ]).to.include(triggerId); // eslint-disable-line camelcase
+                expect(bindings).to.be.an('array').that.is.empty; // eslint-disable-line no-unused-expressions
+                timesUpdateTriggerBindingsCalled += 1;
+                return Promise.resolve([]);
+              },
+            },
           },
         },
         pool,
@@ -165,13 +184,22 @@ describe('#triggers handler', () => {
 
       const auth0 = {
         actions: {
-          getAllTriggers: () => Promise.resolve(existingTriggerBindings),
-          // eslint-disable-next-line camelcase
-          updateTriggerBindings: ({ triggerId }, { bindings }) => {
-            expect(triggerId).to.equal('post-login');
-            expect(bindings).to.deep.equal(updatePayload);
-            timesUpdateTriggerBindingsCalled += 1;
-            return Promise.resolve(updatePayload);
+          triggers: {
+            list: () =>
+              Promise.resolve({
+                triggers: Object.keys(existingTriggerBindings).map((id) => ({ id })),
+              }),
+            bindings: {
+              list: (triggerId) =>
+                Promise.resolve({ data: existingTriggerBindings[triggerId] || [] }),
+              // eslint-disable-next-line camelcase
+              updateMany: (triggerId, { bindings }) => {
+                expect(triggerId).to.equal('post-login');
+                expect(bindings).to.deep.equal(updatePayload);
+                timesUpdateTriggerBindingsCalled += 1;
+                return Promise.resolve(updatePayload);
+              },
+            },
           },
         },
         pool,
@@ -208,41 +236,45 @@ describe('#triggers handler', () => {
 
       const auth0 = {
         actions: {
-          getTriggerBindings: (params) => {
-            let res = {};
-            switch (params.trigger_id) {
-              case 'post-login':
-                res = {
-                  bindings: [
-                    {
-                      action: { name: 'action-one' },
-                      display_name: 'display-name',
-                    },
-                  ],
-                };
-                break;
-              case 'credentials-exchange':
-                res = { bindings: [] };
-                break;
-              case 'pre-user-registration':
-                res = { bindings: [] };
-                break;
-              case 'post-user-registration':
-                res = { bindings: [] };
-                break;
-              case 'post-change-password':
-                res = { bindings: [] };
-                break;
-              case 'send-phone-message':
-                res = { bindings: [] };
-                break;
-              case 'password-reset-post-challenge':
-                res = { bindings: [] };
-                break;
-              default:
-                break;
-            }
-            return Promise.resolve(res);
+          triggers: {
+            list: () =>
+              Promise.resolve({
+                triggers: [
+                  { id: 'post-login' },
+                  { id: 'credentials-exchange' },
+                  { id: 'pre-user-registration' },
+                  { id: 'post-user-registration' },
+                  { id: 'post-change-password' },
+                  { id: 'send-phone-message' },
+                  { id: 'password-reset-post-challenge' },
+                ],
+              }),
+            bindings: {
+              list: (triggerId) => {
+                let res = [];
+                switch (triggerId) {
+                  case 'post-login':
+                    res = [
+                      {
+                        action: { name: 'action-one' },
+                        display_name: 'display-name',
+                      },
+                    ];
+                    break;
+                  case 'credentials-exchange':
+                  case 'pre-user-registration':
+                  case 'post-user-registration':
+                  case 'post-change-password':
+                  case 'send-phone-message':
+                  case 'password-reset-post-challenge':
+                    res = [];
+                    break;
+                  default:
+                    break;
+                }
+                return Promise.resolve({ data: res });
+              },
+            },
           },
         },
       };
@@ -255,10 +287,12 @@ describe('#triggers handler', () => {
     it('should return an empty array for 404 status code', async () => {
       const auth0 = {
         actions: {
-          getTriggerBindings: () => {
-            const error = new Error('Not found');
-            error.statusCode = 404;
-            throw error;
+          triggers: {
+            list: () => {
+              const error = new Error('Not found');
+              error.statusCode = 404;
+              throw error;
+            },
           },
         },
         pool,
@@ -272,17 +306,19 @@ describe('#triggers handler', () => {
     it('should return an empty array when the feature flag is disabled', async () => {
       const auth0 = {
         actions: {
-          getAllTriggers: () => {
-            const error = new Error('Not enabled');
-            error.statusCode = 403;
-            error.originalError = {
-              response: {
-                body: {
-                  errorCode: 'feature_not_enabled',
+          triggers: {
+            list: () => {
+              const error = new Error('Not enabled');
+              error.statusCode = 403;
+              error.originalError = {
+                response: {
+                  body: {
+                    errorCode: 'feature_not_enabled',
+                  },
                 },
-              },
-            };
-            throw error;
+              };
+              throw error;
+            },
           },
         },
         pool,
@@ -296,10 +332,12 @@ describe('#triggers handler', () => {
     it('should throw an error for all other failed requests', async () => {
       const auth0 = {
         actions: {
-          getTriggerBindings: () => {
-            const error = new Error('Bad request');
-            error.statusCode = 500;
-            throw error;
+          triggers: {
+            list: () => {
+              const error = new Error('Bad request');
+              error.statusCode = 500;
+              throw error;
+            },
           },
         },
         pool,

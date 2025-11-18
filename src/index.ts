@@ -85,13 +85,22 @@ if (require.main === module) {
 }
 
 // Export commands to be used programmatically
-export default {
+// Explicit type to avoid non-portable type inference
+const cliCommands: {
+  deploy: typeof importCMD;
+  dump: typeof exportCMD;
+  import: typeof importCMD;
+  export: typeof exportCMD;
+  tools: typeof tools;
+} = {
   deploy: importCMD,
   dump: exportCMD,
   import: importCMD,
   export: exportCMD,
   tools,
 };
+
+export default cliCommands;
 
 export const dump = exportCMD;
 export const deploy = importCMD;

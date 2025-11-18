@@ -1,5 +1,0 @@
-examples/
-test/e2e/testdata/**/**
-local/
-node_modules/
-lib/

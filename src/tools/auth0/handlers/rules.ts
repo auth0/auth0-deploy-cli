@@ -1,4 +1,4 @@
-import { Rule } from 'auth0';
+import { Management } from 'auth0';
 import ValidationError from '../../validationError';
 import { convertJsonToString, stripFields, duplicateItems, isDeprecatedError } from '../../utils';
 import DefaultHandler from './default';
@@ -51,6 +51,8 @@ export const schema = {
   },
 };
 
+type Rule = Management.Rule;
+
 export default class RulesHandler extends DefaultHandler {
   existing: Asset[];
 
@@ -66,9 +68,8 @@ export default class RulesHandler extends DefaultHandler {
     try {
       if (this.existing) return this.existing;
 
-      const rules = await paginate<Rule>(this.client.rules.getAll, {
+      const rules = await paginate<Rule>(this.client.rules.list, {
         paginate: true,
-        include_totals: true,
       });
       this.existing = rules;
       return this.existing;
@@ -124,7 +125,7 @@ export default class RulesHandler extends DefaultHandler {
     const existingMaxOrder = Math.max(...existing.map((r) => r.order));
     let nextOrderNo = Math.max(futureMaxOrder, existingMaxOrder);
 
-    //@ts-ignore because we know reOrder is Asset[]
+    // @ts-ignore because we know reOrder is Asset[]
     const reOrder: Asset[] = futureRules.reduce((accum: Asset[], r: Asset) => {
       if (existing === null) return accum;
       const conflict = existing.find((f) => r.order === f.order && r.name !== f.name);
@@ -222,7 +223,7 @@ export default class RulesHandler extends DefaultHandler {
           data: changes.reOrder,
           generator: (rule) =>
             this.client.rules
-              .update({ id: rule.id }, stripFields(rule, this.stripUpdateFields))
+              .update(rule.id, stripFields(rule, this.stripUpdateFields))
               .then(() => {
                 const updated = {
                   name: rule.name,

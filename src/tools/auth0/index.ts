@@ -75,6 +75,13 @@ export default class Auth0 {
       // eslint-disable-line
       try {
         const stageFn: StageFunction = Object.getPrototypeOf(handler)[stage];
+        if (typeof stageFn !== 'function') {
+          throw new Error(
+            `Handler ${
+              handler.type
+            } does not have a ${stage} method or it is not a function (got ${typeof stageFn})`
+          );
+        }
         this.assets = {
           ...this.assets,
           ...((await stageFn.apply(handler, [this.assets])) || {}),

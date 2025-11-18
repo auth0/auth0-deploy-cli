@@ -151,11 +151,11 @@ describe('#selfServiceProfiles handler', () => {
             expect(data.user_attributes).to.be.an('array');
             expect(data.allowed_strategies).to.be.an('array');
             expect(data.branding).to.be.an('object');
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          update: () => Promise.resolve({ data: [] }),
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'selfServiceProfiles', []),
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => mockPagedData(params, 'selfServiceProfiles', []),
         },
         pool,
       };
@@ -177,18 +177,20 @@ describe('#selfServiceProfiles handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal(sampleSsProfileWithCustomText.name);
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          update: () => Promise.resolve({ data: [] }),
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'selfServiceProfiles', []),
-          updateCustomText: (params, data) => {
-            expect(params).to.be.an('object');
-            expect(data).to.be.an('object');
-            expect(params.language).to.equal('en');
-            expect(params.page).to.equal('get-started');
-            expect(data).to.deep.equal(sampleCustomText);
-            return Promise.resolve({ data: sampleCustomText });
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => mockPagedData(params, 'selfServiceProfiles', []),
+          customText: {
+            set: (sspId, language, page, data) => {
+              expect(sspId).to.be.a('string');
+              expect(language).to.equal('en');
+              expect(page).to.equal('get-started');
+              expect(data).to.be.an('object');
+              expect(data).to.deep.equal(sampleCustomText);
+              return Promise.resolve(sampleCustomText);
+            },
           },
         },
         pool,
@@ -207,10 +209,14 @@ describe('#selfServiceProfiles handler', () => {
     it('should get selfServiceProfiles', async () => {
       const auth0 = {
         selfServiceProfiles: {
-          getAll: (params) => mockPagedData(params, 'selfServiceProfiles', [sampleSsProfileWithId]),
-          getCustomText: (params) => {
-            expect(params).to.be.an('object');
-            return Promise.resolve({ data: [] });
+          list: (params) => mockPagedData(params, 'selfServiceProfiles', [sampleSsProfileWithId]),
+          customText: {
+            list: (sspId, language, page) => {
+              expect(sspId).to.be.a('string');
+              expect(language).to.equal('en');
+              expect(page).to.equal('get-started');
+              return Promise.resolve({});
+            },
           },
         },
         pool,
@@ -232,12 +238,14 @@ describe('#selfServiceProfiles handler', () => {
       };
       const auth0 = {
         selfServiceProfiles: {
-          getAll: (params) => mockPagedData(params, 'selfServiceProfiles', [sampleSsProfileWithId]),
-          getCustomText: (params) => {
-            expect(params).to.be.an('object');
-            return Promise.resolve({
-              data: sampleCustomText,
-            });
+          list: (params) => mockPagedData(params, 'selfServiceProfiles', [sampleSsProfileWithId]),
+          customText: {
+            list: (sspId, language, page) => {
+              expect(sspId).to.be.a('string');
+              expect(language).to.equal('en');
+              expect(page).to.equal('get-started');
+              return Promise.resolve(sampleCustomText);
+            },
           },
         },
         pool,
@@ -257,21 +265,25 @@ describe('#selfServiceProfiles handler', () => {
 
       const auth0 = {
         selfServiceProfiles: {
-          update: function (params, data) {
+          update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal(sampleSsProfileWithId.id);
+            expect(id).to.be.a('string');
+            expect(id).to.equal(sampleSsProfileWithId.id);
             expect(data).to.be.an('object');
             expect(data.name).to.equal(sampleFormUpdated.name);
 
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          getAll: (params) => mockPagedData(params, 'selfServiceProfiles', [sampleSsProfileWithId]),
-          getCustomText: (params) => {
-            expect(params).to.be.an('object');
-            return Promise.resolve({
-              data: sampleCustomText,
-            });
+          list: (params) => mockPagedData(params, 'selfServiceProfiles', [sampleSsProfileWithId]),
+          customText: {
+            list: (sspId, language, page) => {
+              expect(sspId).to.be.a('string');
+              expect(language).to.equal('en');
+              expect(page).to.equal('get-started');
+              return Promise.resolve({
+                data: sampleCustomText,
+              });
+            },
           },
         },
         pool,
@@ -302,32 +314,34 @@ describe('#selfServiceProfiles handler', () => {
 
       const auth0 = {
         selfServiceProfiles: {
-          update: function (params, data) {
+          update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal(sampleSsProfileWithId.id);
+            expect(id).to.be.a('string');
+            expect(id).to.equal(sampleSsProfileWithId.id);
             expect(data).to.be.an('object');
             expect(data.name).to.equal(sampleFormUpdated.name);
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          getAll: (params) => mockPagedData(params, 'selfServiceProfiles', [sampleSsProfileWithId]),
-          getCustomText: (params) => {
-            expect(params).to.be.an('object');
-            return Promise.resolve({
-              data: {},
-            });
-          },
-          updateCustomText: (params, data) => {
-            expect(params).to.be.an('object');
-            expect(data).to.be.an('object');
-            expect(params.language).to.equal('en');
-            expect(params.page).to.equal('get-started');
-            expect(data).to.deep.equal({
-              introduction: 'Welcome! <p> Updated introduction</p>',
-            });
-            return Promise.resolve({
-              data,
-            });
+          list: (params) => mockPagedData(params, 'selfServiceProfiles', [sampleSsProfileWithId]),
+          customText: {
+            list: (sspId, language, page) => {
+              expect(sspId).to.be.a('string');
+              expect(language).to.equal('en');
+              expect(page).to.equal('get-started');
+              return Promise.resolve({
+                data: {},
+              });
+            },
+            set: (sspId, language, page, data) => {
+              expect(sspId).to.be.a('string');
+              expect(language).to.equal('en');
+              expect(page).to.equal('get-started');
+              expect(data).to.be.an('object');
+              expect(data).to.deep.equal({
+                introduction: 'Welcome! <p> Updated introduction</p>',
+              });
+              return Promise.resolve(data);
+            },
           },
         },
         pool,
@@ -357,20 +371,24 @@ describe('#selfServiceProfiles handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal(sampleFormNew.name);
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          delete: function (params) {
+          delete: function (id) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal(sampleSsProfileWithId.id);
-            return Promise.resolve({ data: [] });
+            expect(id).to.be.a('string');
+            expect(id).to.equal(sampleSsProfileWithId.id);
+            return Promise.resolve([]);
           },
-          getAll: (params) => mockPagedData(params, 'selfServiceProfiles', [sampleSsProfileWithId]),
-          getCustomText: (params) => {
-            expect(params).to.be.an('object');
-            return Promise.resolve({
-              data: {},
-            });
+          list: (params) => mockPagedData(params, 'selfServiceProfiles', [sampleSsProfileWithId]),
+          customText: {
+            list: (sspId, language, page) => {
+              expect(sspId).to.be.a('string');
+              expect(language).to.equal('en');
+              expect(page).to.equal('get-started');
+              return Promise.resolve({
+                data: {},
+              });
+            },
           },
         },
         pool,
@@ -386,17 +404,21 @@ describe('#selfServiceProfiles handler', () => {
       let removed = false;
       const auth0 = {
         selfServiceProfiles: {
-          delete: (params) => {
+          delete: (id) => {
             removed = true;
-            expect(params).to.be.an('object');
-            return Promise.resolve({ data: [] });
+            expect(id).to.be.a('string');
+            return Promise.resolve([]);
           },
-          getAll: (params) => mockPagedData(params, 'selfServiceProfiles', [sampleSsProfileWithId]),
-          getCustomText: (params) => {
-            expect(params).to.be.an('object');
-            return Promise.resolve({
-              data: {},
-            });
+          list: (params) => mockPagedData(params, 'selfServiceProfiles', [sampleSsProfileWithId]),
+          customText: {
+            list: (sspId, language, page) => {
+              expect(sspId).to.be.a('string');
+              expect(language).to.equal('en');
+              expect(page).to.equal('get-started');
+              return Promise.resolve({
+                data: {},
+              });
+            },
           },
         },
         pool,
@@ -413,16 +435,20 @@ describe('#selfServiceProfiles handler', () => {
       config.data.AUTH0_ALLOW_DELETE = false;
       const auth0 = {
         selfServiceProfiles: {
-          delete: (params) => {
-            expect(params).to.be.an('undefined');
-            return Promise.resolve({ data: [] });
+          delete: (id) => {
+            expect(id).to.be.an('undefined');
+            return Promise.resolve([]);
           },
-          getAll: (params) => mockPagedData(params, 'selfServiceProfiles', [sampleSsProfileWithId]),
-          getCustomText: (params) => {
-            expect(params).to.be.an('object');
-            return Promise.resolve({
-              data: {},
-            });
+          list: (params) => mockPagedData(params, 'selfServiceProfiles', [sampleSsProfileWithId]),
+          customText: {
+            list: (sspId, language, page) => {
+              expect(sspId).to.be.a('string');
+              expect(language).to.equal('en');
+              expect(page).to.equal('get-started');
+              return Promise.resolve({
+                data: {},
+              });
+            },
           },
         },
         pool,
@@ -441,19 +467,16 @@ describe('#selfServiceProfiles handler', () => {
         user_attribute_profile_id: sampleUAP.name,
         user_attributes: undefined,
       };
+
       const auth0 = {
         selfServiceProfiles: {
           delete: (params) => {
             expect(params).to.be.an('undefined');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) =>
-            mockPagedData(params, 'selfServiceProfiles', [sspWithUserAttributesId]),
-          getCustomText: (params) => {
-            expect(params).to.be.an('object');
-            return Promise.resolve({
-              data: {},
-            });
+          list: (params) => mockPagedData(params, 'selfServiceProfiles', [sspWithUserAttributesId]),
+          customText: {
+            list: () => Promise.resolve({}),
           },
           update: async (params, data) => {
             expect(data.user_attribute_profile_id).to.equal(sampleUAP.id);
@@ -461,7 +484,7 @@ describe('#selfServiceProfiles handler', () => {
           },
         },
         userAttributeProfiles: {
-          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAP]),
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAP]),
         },
         pool,
       };
@@ -484,16 +507,13 @@ describe('#selfServiceProfiles handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => mockPagedData(params, 'selfServiceProfiles', [sspWithBoth]),
-          getCustomText: (params) => {
-            expect(params).to.be.an('object');
-            return Promise.resolve({
-              data: {},
-            });
+          list: (params) => mockPagedData(params, 'selfServiceProfiles', [sspWithBoth]),
+          customText: {
+            list: () => Promise.resolve({}),
           },
         },
         userAttributeProfiles: {
-          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAP]),
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAP]),
         },
         pool,
       };
@@ -522,10 +542,10 @@ describe('#selfServiceProfiles handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'selfServiceProfiles', []),
+          list: (params) => mockPagedData(params, 'selfServiceProfiles', []),
         },
         userAttributeProfiles: {
-          getAll: () => {
+          list: () => {
             expect.fail('userAttributeProfiles.getAll should not be called');
           },
         },

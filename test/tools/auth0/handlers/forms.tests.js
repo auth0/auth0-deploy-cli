@@ -137,14 +137,14 @@ describe('#forms handler', () => {
             expect(data.name).to.equal(sampleFormWithOutId.name);
             expect(data.languages).to.be.an('object');
             expect(data.languages.primary).to.equal(sampleFormWithOutId.languages.primary);
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          update: () => Promise.resolve({ data: [] }),
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'forms', []),
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => mockPagedData(params, 'forms', []),
         },
         flows: {
-          getAll: (params) => mockPagedData(params, 'flows', []),
+          list: (params) => mockPagedData(params, 'flows', []),
         },
         pool,
       };
@@ -165,12 +165,12 @@ describe('#forms handler', () => {
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          getAll: (params) => mockPagedData(params, 'forms', []),
+          list: (params) => mockPagedData(params, 'forms', []),
         },
         flows: {
-          getAll: (params) => mockPagedData(params, 'flows', [sampleFlowWithID]),
+          list: (params) => mockPagedData(params, 'flows', [sampleFlowWithID]),
         },
         pool,
       };
@@ -188,17 +188,14 @@ describe('#forms handler', () => {
     it('should get forms', async () => {
       const auth0 = {
         forms: {
-          getAll: (params) => mockPagedData(params, 'forms', [sampleFormWthID]),
-          get: (params) => {
-            expect(params).to.be.an('object');
-            expect(params.id).to.be.a('string');
-            return Promise.resolve({
-              data: sampleFormWthID,
-            });
+          list: (params) => mockPagedData(params, 'forms', [sampleFormWthID]),
+          get: (id) => {
+            expect(id).to.be.a('string');
+            return Promise.resolve(sampleFormWthID);
           },
         },
         flows: {
-          getAll: (params) => mockPagedData(params, 'flows', []),
+          list: (params) => mockPagedData(params, 'flows', []),
         },
         pool,
       };
@@ -230,17 +227,14 @@ describe('#forms handler', () => {
       };
       const auth0 = {
         forms: {
-          getAll: (params) => mockPagedData(params, 'forms', [sampleFormWthFlowWithId]),
-          get: (params) => {
-            expect(params).to.be.an('object');
-            expect(params.id).to.be.a('string');
-            return Promise.resolve({
-              data: sampleFormWthFlowWithId,
-            });
+          list: (params) => mockPagedData(params, 'forms', [sampleFormWthFlowWithId]),
+          get: (id) => {
+            expect(id).to.be.a('string');
+            return Promise.resolve(sampleFormWthFlowWithId);
           },
         },
         flows: {
-          getAll: (params) => mockPagedData(params, 'flows', [sampleFlowWithID]),
+          list: (params) => mockPagedData(params, 'flows', [sampleFlowWithID]),
         },
         pool,
       };
@@ -254,27 +248,24 @@ describe('#forms handler', () => {
     it('should update forms', async () => {
       const auth0 = {
         forms: {
-          update: function (params, data) {
+          update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal(sampleFormWthID.id);
+            expect(id).to.be.a('string');
+            expect(id).to.equal(sampleFormWthID.id);
             expect(data).to.be.an('object');
             expect(data.languages).to.be.an('object');
             expect(data.languages.primary).to.equal('en');
 
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          getAll: (params) => mockPagedData(params, 'forms', [sampleFormWthID]),
-          get: (params) => {
-            expect(params).to.be.an('object');
-            expect(params.id).to.be.a('string');
-            return Promise.resolve({
-              data: sampleFormWthID,
-            });
+          list: (params) => mockPagedData(params, 'forms', [sampleFormWthID]),
+          get: (id) => {
+            expect(id).to.be.a('string');
+            return Promise.resolve(sampleFormWthID);
           },
         },
         flows: {
-          getAll: (params) => mockPagedData(params, 'flows', []),
+          list: (params) => mockPagedData(params, 'flows', []),
         },
         pool,
       };
@@ -306,25 +297,22 @@ describe('#forms handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal(sampleFormTwoWthID.name);
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal(sampleFormWthID.id);
-            return Promise.resolve({ data: [] });
+            expect(params).to.be.a('string');
+            expect(params).to.equal(sampleFormWthID.id);
+            return Promise.resolve([]);
           },
-          getAll: (params) => mockPagedData(params, 'forms', [sampleFormWthID]),
-          get: (params) => {
-            expect(params).to.be.an('object');
-            expect(params.id).to.be.a('string');
-            return Promise.resolve({
-              data: sampleFormWthID,
-            });
+          list: (params) => mockPagedData(params, 'forms', [sampleFormWthID]),
+          get: (id) => {
+            expect(id).to.be.a('string');
+            return Promise.resolve(sampleFormWthID);
           },
         },
         flows: {
-          getAll: (params) => mockPagedData(params, 'flows', []),
+          list: (params) => mockPagedData(params, 'flows', []),
         },
         pool,
       };
@@ -341,20 +329,17 @@ describe('#forms handler', () => {
         forms: {
           delete: (params) => {
             removed = true;
-            expect(params).to.be.an('object');
-            return Promise.resolve({ data: [] });
+            expect(params).to.be.a('string');
+            return Promise.resolve([]);
           },
-          getAll: (params) => mockPagedData(params, 'forms', [sampleFormWthID, sampleFormTwoWthID]),
-          get: (params) => {
-            expect(params).to.be.an('object');
-            expect(params.id).to.be.a('string');
-            return Promise.resolve({
-              data: sampleFormWthID,
-            });
+          list: (params) => mockPagedData(params, 'forms', [sampleFormWthID, sampleFormTwoWthID]),
+          get: (id) => {
+            expect(id).to.be.a('string');
+            return Promise.resolve(sampleFormWthID);
           },
         },
         flows: {
-          getAll: (params) => mockPagedData(params, 'flows', []),
+          list: (params) => mockPagedData(params, 'flows', []),
         },
         pool,
       };
@@ -372,19 +357,16 @@ describe('#forms handler', () => {
         forms: {
           delete: (params) => {
             expect(params).to.be.an('undefined');
-            return Promise.resolve({ data: [] });
+            return Promise.resolve([]);
           },
-          getAll: (params) => mockPagedData(params, 'forms', [sampleFormWthID, sampleFormTwoWthID]),
-          get: (params) => {
-            expect(params).to.be.an('object');
-            expect(params.id).to.be.a('string');
-            return Promise.resolve({
-              data: sampleFormWthID,
-            });
+          list: (params) => mockPagedData(params, 'forms', [sampleFormWthID, sampleFormTwoWthID]),
+          get: (id) => {
+            expect(id).to.be.a('string');
+            return Promise.resolve(sampleFormWthID);
           },
         },
         flows: {
-          getAll: (params) => mockPagedData(params, 'flows', []),
+          list: (params) => mockPagedData(params, 'flows', []),
         },
         pool,
       };

@@ -6,7 +6,15 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
     it('should support older version of auth0 client', async () => {
       const auth0 = {
         guardian: {
-          // omitting getPhoneFactorSelectedProvider()
+          factors: {
+            phone: {
+              getSelectedProvider: () => {
+                const err = new Error('Not Found');
+                err.statusCode = 404;
+                return Promise.reject(err);
+              },
+            },
+          },
         },
       };
 
@@ -18,24 +26,28 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
     it('should support when endpoint does not exist (older installations)', async () => {
       const auth0 = {
         guardian: {
-          getPhoneFactorSelectedProvider: () => {
-            const err = new Error('Not Found');
-            err.name = 'Not Found';
-            err.statusCode = 404;
-            err.requestInfo = {
-              method: 'get',
-              url: 'https://example.auth0.com/api/v2/guardian/factors/sms/selected-provider',
-            };
-            err.originalError = new Error('Not Found');
-            err.originalError.status = 404;
-            err.originalError.response = {
-              body: {
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+          factors: {
+            phone: {
+              getSelectedProvider: () => {
+                const err = new Error('Not Found');
+                err.name = 'Not Found';
+                err.statusCode = 404;
+                err.requestInfo = {
+                  method: 'get',
+                  url: 'https://example.auth0.com/api/v2/guardian/factors/sms/selected-provider',
+                };
+                err.originalError = new Error('Not Found');
+                err.originalError.status = 404;
+                err.originalError.response = {
+                  body: {
+                    statusCode: 404,
+                    error: 'Not Found',
+                    message: 'Not Found',
+                  },
+                };
+                return Promise.reject(err);
               },
-            };
-            return Promise.reject(err);
+            },
           },
         },
       };
@@ -48,25 +60,29 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
     it('should support when endpoint is disabled for tenant', async () => {
       const auth0 = {
         guardian: {
-          getPhoneFactorSelectedProvider: () => {
-            const err = new Error('This endpoint is disabled for your tenant.');
-            err.name = 'Forbidden';
-            err.statusCode = 403;
-            err.requestInfo = {
-              method: 'get',
-              url: 'https://example.auth0.com/api/v2/guardian/factors/sms/selected-provider',
-            };
-            err.originalError = new Error('Forbidden');
-            err.originalError.status = 403;
-            err.originalError.response = {
-              body: {
-                statusCode: 403,
-                error: 'Forbidden',
-                message: 'This endpoint is disabled for your tenant.',
-                errorCode: 'hooks_not_allowed',
+          factors: {
+            phone: {
+              getSelectedProvider: () => {
+                const err = new Error('This endpoint is disabled for your tenant.');
+                err.name = 'Forbidden';
+                err.statusCode = 403;
+                err.requestInfo = {
+                  method: 'get',
+                  url: 'https://example.auth0.com/api/v2/guardian/factors/sms/selected-provider',
+                };
+                err.originalError = new Error('Forbidden');
+                err.originalError.status = 403;
+                err.originalError.response = {
+                  body: {
+                    statusCode: 403,
+                    error: 'Forbidden',
+                    message: 'This endpoint is disabled for your tenant.',
+                    errorCode: 'hooks_not_allowed',
+                  },
+                };
+                return Promise.reject(err);
               },
-            };
-            return Promise.reject(err);
+            },
           },
         },
       };
@@ -79,7 +95,11 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
     it('should get guardian phone factor selected provider', async () => {
       const auth0 = {
         guardian: {
-          getPhoneFactorSelectedProvider: () => ({ data: { provider: 'twilio' } }),
+          factors: {
+            phone: {
+              getSelectedProvider: () => Promise.resolve({ provider: 'twilio' }),
+            },
+          },
         },
       };
 
@@ -91,10 +111,14 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
     it('should throw an error for all other failed requests', async () => {
       const auth0 = {
         guardian: {
-          getPhoneFactorSelectedProvider: () => {
-            const error = new Error('Bad request');
-            error.statusCode = 500;
-            throw error;
+          factors: {
+            phone: {
+              getSelectedProvider: () => {
+                const error = new Error('Bad request');
+                error.statusCode = 500;
+                throw error;
+              },
+            },
           },
         },
       };
@@ -112,9 +136,13 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
     it('should update guardian phone factor selected provider', async () => {
       const auth0 = {
         guardian: {
-          updatePhoneFactorSelectedProvider: (data) => {
-            expect(data).to.eql({ provider: 'twilio' });
-            return Promise.resolve({ data });
+          factors: {
+            phone: {
+              setProvider: (data) => {
+                expect(data).to.eql({ provider: 'twilio' });
+                return Promise.resolve(data);
+              },
+            },
           },
         },
       };
@@ -130,11 +158,13 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
     it('should skip processing if assets are empty', async () => {
       const auth0 = {
         guardian: {
-          updatePhoneFactorSelectedProvider: () => {
-            const err = new Error(
-              'updatePhoneFactorSelectedProvider() should not have been called'
-            );
-            return Promise.reject(err);
+          factors: {
+            phone: {
+              setProvider: () => {
+                const err = new Error('setProvider() should not have been called');
+                return Promise.reject(err);
+              },
+            },
           },
         },
       };

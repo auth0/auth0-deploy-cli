@@ -1,3 +1,4 @@
+import { Management } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Assets } from '../../../types';
@@ -28,15 +29,10 @@ export default class GuardianPoliciesHandler extends DefaultHandler {
     });
   }
 
-  //TODO: standardize empty object literal with more intentional empty indicator
+  // TODO: standardize empty object literal with more intentional empty indicator
   async getType(): Promise<GuardianPoliciesHandler['existing'] | {}> {
-    // in case client version does not support the operation
-    if (!this.client.guardian || typeof this.client.guardian.getPolicies !== 'function') {
-      return {};
-    }
-
     if (this.existing) return this.existing;
-    const { data: policies } = await this.client.guardian.getPolicies();
+    const policies = await this.client.guardian.policies.list();
     this.existing = { policies };
     return this.existing;
   }
@@ -48,8 +44,8 @@ export default class GuardianPoliciesHandler extends DefaultHandler {
     // Do nothing if not set
     if (!guardianPolicies || !guardianPolicies.policies) return;
 
-    const data = guardianPolicies.policies;
-    await this.client.guardian.updatePolicies(data);
+    const data = guardianPolicies.policies as Management.SetGuardianPoliciesRequestContent;
+    await this.client.guardian.policies.set(data);
     this.updated += 1;
     this.didUpdate(guardianPolicies);
   }

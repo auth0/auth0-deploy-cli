@@ -81,9 +81,9 @@ describe('#networkACLs handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.description).to.equal(sampleNetworkACL.description);
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          getAll: (params) => mockPagedData(params, 'network_acls', []),
+          list: (params) => mockPagedData(params, 'network_acls', []),
         },
         pool,
       };
@@ -101,7 +101,7 @@ describe('#networkACLs handler', () => {
     it('should get networkACLs', async () => {
       const auth0 = {
         networkAcls: {
-          getAll: (params) => mockPagedData(params, 'network_acls', [sampleNetworkACL]),
+          list: (params) => mockPagedData(params, 'network_acls', [sampleNetworkACL]),
         },
         pool,
       };
@@ -114,7 +114,7 @@ describe('#networkACLs handler', () => {
     it('should handle 403 error when tenant ACL Management is not enabled', async () => {
       const auth0 = {
         networkAcls: {
-          getAll: () => Promise.reject(Object.assign(new Error('Forbidden'), { statusCode: 403 })),
+          list: () => Promise.reject(Object.assign(new Error('Forbidden'), { statusCode: 403 })),
         },
       };
 
@@ -126,15 +126,15 @@ describe('#networkACLs handler', () => {
     it('should update networkACLs', async () => {
       const auth0 = {
         networkAcls: {
-          update: function (params, data) {
+          update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal(sampleNetworkACL.id);
+            expect(id).to.be.a('string');
+            expect(id).to.equal(sampleNetworkACL.id);
             expect(data).to.be.an('object');
             expect(data.description).to.equal(sampleNetworkACL.description);
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          getAll: (params) => mockPagedData(params, 'network_acls', [sampleNetworkACL]),
+          list: (params) => mockPagedData(params, 'network_acls', [sampleNetworkACL]),
         },
         pool,
       };
@@ -173,22 +173,21 @@ describe('#networkACLs handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.description).to.equal(newNetworkACL.description);
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          delete: function (params) {
+          delete: function (id) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal(sampleNetworkACL.id);
-            return Promise.resolve({ data: [] });
+            expect(id).to.be.a('string');
+            expect(id).to.equal(sampleNetworkACL.id);
+            return Promise.resolve([]);
           },
-          update: function (params, data) {
+          update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.be.a('string');
+            expect(id).to.be.a('string');
             expect(data).to.be.an('object');
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          getAll: (params) => mockPagedData(params, 'network_acls', [sampleNetworkACL]),
+          list: (params) => mockPagedData(params, 'network_acls', [sampleNetworkACL]),
         },
         pool,
       };
@@ -204,12 +203,12 @@ describe('#networkACLs handler', () => {
       let idDeleteCalled = false;
       const auth0 = {
         networkAcls: {
-          delete: (params) => {
+          delete: (id) => {
             idDeleteCalled = true;
-            expect(params).to.be.an('undefined');
-            return Promise.resolve({ data: [] });
+            expect(id).to.be.an('undefined');
+            return Promise.resolve([]);
           },
-          getAll: (params) => mockPagedData(params, 'network_acls', [sampleNetworkACL]),
+          list: (params) => mockPagedData(params, 'network_acls', [sampleNetworkACL]),
         },
         pool,
       };
@@ -226,14 +225,14 @@ describe('#networkACLs handler', () => {
       let removed = false;
       const auth0 = {
         networkAcls: {
-          delete: function (params) {
+          delete: function (id) {
             removed = true;
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal(sampleNetworkACL.id);
-            return Promise.resolve({ data: [] });
+            expect(id).to.be.a('string');
+            expect(id).to.equal(sampleNetworkACL.id);
+            return Promise.resolve([]);
           },
-          getAll: (params) => mockPagedData(params, 'network_acls', [sampleNetworkACL]),
+          list: (params) => mockPagedData(params, 'network_acls', [sampleNetworkACL]),
         },
         pool,
       };

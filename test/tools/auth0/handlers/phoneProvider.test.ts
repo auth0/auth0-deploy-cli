@@ -21,7 +21,11 @@ describe('#phoneProviders handler', () => {
     it('should get phoneProviders', async () => {
       const auth0 = {
         branding: {
-          getAllPhoneProviders: () => Promise.resolve({ data: mockProviders }),
+          phone: {
+            providers: {
+              list: () => Promise.resolve(mockProviders),
+            },
+          },
         },
       };
 
@@ -34,7 +38,11 @@ describe('#phoneProviders handler', () => {
     it('should return empty array if there are no phone providers', async () => {
       const auth0 = {
         branding: {
-          getAllPhoneProviders: () => Promise.resolve({ data: { providers: [] } }),
+          phone: {
+            providers: {
+              list: () => Promise.resolve({ providers: [] }),
+            },
+          },
         },
       };
 
@@ -47,7 +55,11 @@ describe('#phoneProviders handler', () => {
     it('should fail for unexpected api errors', async () => {
       const auth0 = {
         branding: {
-          getAllPhoneProviders: () => Promise.reject(new Error('Unexpected API error')),
+          phone: {
+            providers: {
+              list: () => Promise.reject(new Error('Unexpected API error')),
+            },
+          },
         },
       };
 
@@ -66,8 +78,12 @@ describe('#phoneProviders handler', () => {
     it('should configure phone provider', async () => {
       const auth0 = {
         branding: {
-          getAllPhoneProviders: () => Promise.resolve({ data: { providers: [] } }),
-          configurePhoneProvider: (data) => Promise.resolve({ data }),
+          phone: {
+            providers: {
+              list: () => Promise.resolve({ providers: [] }),
+              create: (data) => Promise.resolve(data),
+            },
+          },
         },
       };
 
@@ -80,17 +96,20 @@ describe('#phoneProviders handler', () => {
     it('should update phone provider', async () => {
       const auth0 = {
         branding: {
-          getAllPhoneProviders: () =>
-            Promise.resolve({
-              data: { providers: [{ id: 'pro_5nbdb4pWifFdA1rV6pW6BE' }] },
-            }),
-          updatePhoneProvider: (data, updatePayload) => {
-            expect(data).to.be.an('object');
-            expect(data.id).to.equal('pro_5nbdb4pWifFdA1rV6pW6BE');
-            expect(updatePayload).to.be.an('object');
-            expect(updatePayload.name).to.equal('custom');
-            expect(updatePayload.configuration.delivery_methods[0]).to.equal('text');
-            return Promise.resolve({ data: { ...updatePayload, ...data } });
+          phone: {
+            providers: {
+              list: () =>
+                Promise.resolve({
+                  providers: [{ id: 'pro_5nbdb4pWifFdA1rV6pW6BE' }],
+                }),
+              update: (id, updatePayload) => {
+                expect(id).to.equal('pro_5nbdb4pWifFdA1rV6pW6BE');
+                expect(updatePayload).to.be.an('object');
+                expect(updatePayload.name).to.equal('custom');
+                expect(updatePayload.configuration.delivery_methods[0]).to.equal('text');
+                return Promise.resolve({ ...updatePayload, id });
+              },
+            },
           },
         },
       };
@@ -113,10 +132,29 @@ describe('#phoneProviders handler', () => {
     it('should delete the phone provider when provider exists and AUTH0_ALLOW_DELETE is true', async () => {
       const AUTH0_ALLOW_DELETE = true;
 
+      const mockProvidersWithId = {
+        providers: [
+          {
+            id: 'provider_123',
+            disabled: false,
+            name: 'twilio',
+            configuration: {
+              sid: 'twilio_sid',
+              default_from: '++15673812247',
+              delivery_methods: ['text', 'voice'],
+            },
+          },
+        ],
+      };
+
       const auth0 = {
         branding: {
-          getAllPhoneProviders: () => Promise.resolve({ data: mockProviders }),
-          deletePhoneProvider: () => Promise.resolve({ data: null }),
+          phone: {
+            providers: {
+              list: () => Promise.resolve(mockProvidersWithId),
+              delete: () => Promise.resolve(),
+            },
+          },
         },
       };
 
@@ -132,11 +170,30 @@ describe('#phoneProviders handler', () => {
     it('shouldnot delete the phone provider when provider exists and AUTH0_ALLOW_DELETE is false', async () => {
       const AUTH0_ALLOW_DELETE = false;
 
+      const mockProvidersWithId = {
+        providers: [
+          {
+            id: 'provider_123',
+            disabled: false,
+            name: 'twilio',
+            configuration: {
+              sid: 'twilio_sid',
+              default_from: '++15673812247',
+              delivery_methods: ['text', 'voice'],
+            },
+          },
+        ],
+      };
+
       const auth0 = {
         branding: {
-          getAllPhoneProviders: () => Promise.resolve({ data: mockProviders }),
-          deletePhoneProvider: () => {
-            throw new Error('was not expecting delete to be called');
+          phone: {
+            providers: {
+              list: () => Promise.resolve(mockProvidersWithId),
+              delete: () => {
+                throw new Error('was not expecting delete to be called');
+              },
+            },
           },
         },
       };

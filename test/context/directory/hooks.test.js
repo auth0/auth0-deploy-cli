@@ -68,7 +68,7 @@ describe('#directory context hooks', () => {
     const dir = path.join(repoDir, constants.HOOKS_DIRECTORY);
     fs.writeFileSync(dir, 'junk');
 
-    const context = new Context({ AUTH0_INPUT_FILE: repoDir });
+    const context = new Context({ AUTH0_INPUT_FILE: repoDir }, mockMgmtClient());
     const errorMessage = `Expected ${dir} to be a folder but got a file?`;
     await expect(context.loadAssetsFromLocal())
       .to.be.eventually.rejectedWith(Error)

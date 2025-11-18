@@ -157,29 +157,51 @@ describe('#organizations handler', () => {
             data.id = 'fake';
             return Promise.resolve({ data });
           },
-          update: () => Promise.resolve({ data: [] }),
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [])),
-          addEnabledConnection: (org, connection) => {
-            expect(org.id).to.equal('fake');
-            expect(connection).to.be.an('object');
-            expect(connection.connection_id).to.equal('con_123');
-            expect(connection.assign_membership_on_login).to.equal(true);
-            expect(connection.show_as_button).to.equal(false);
-            expect(connection.is_signup_enabled).to.equal(true);
-            return Promise.resolve({ data: connection });
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [])),
+          enabledConnections: {
+            add: (org, connection) => {
+              expect(org).to.equal('fake');
+              expect(connection).to.be.an('object');
+              expect(connection.connection_id).to.equal('con_123');
+              expect(connection.assign_membership_on_login).to.equal(true);
+              expect(connection.show_as_button).to.equal(false);
+              expect(connection.is_signup_enabled).to.equal(true);
+              return Promise.resolve(connection);
+            },
+            list: () => ({
+              data: [],
+              hasNextPage: () => false,
+              getNextPage: () =>
+                Promise.resolve({
+                  data: [],
+                  hasNextPage: () => false,
+                  getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+                }),
+            }),
           },
-          createOrganizationClientGrants: (orgId, clientGrants) => {
-            expect(orgId).to.equal('fake');
-            expect(clientGrants).to.be.an('array');
-            expect(clientGrants).to.have.length(1);
-            expect(clientGrants[0].client_id).to.equal('abc_123');
-            return Promise.resolve({ data: clientGrants });
+          clientGrants: {
+            create: (orgId, clientGrant) => {
+              expect(orgId).to.equal('fake');
+              expect(clientGrant).to.be.an('object');
+              expect(clientGrant).to.have.property('grant_id');
+              return Promise.resolve({ grant_id: clientGrant.grant_id });
+            },
+            list: () => ({
+              data: [],
+              hasNextPage: () => false,
+              getNextPage: () =>
+                Promise.resolve({
+                  data: [],
+                  hasNextPage: () => false,
+                  getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+                }),
+            }),
           },
-          postOrganizationClientGrants: () => Promise.resolve({ data: sampleClientGrant }),
         },
         connections: {
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'connections', [
               {
                 id: sampleEnabledConnection.connection_id,
@@ -195,10 +217,10 @@ describe('#organizations handler', () => {
             ]),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         clientGrants: {
-          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+          list: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
         },
         pool,
       };
@@ -256,19 +278,25 @@ describe('#organizations handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
-          getEnabledConnections: () => Promise.resolve({ data: [] }),
-          getOrganizationClientGrants: () => ({ data: [] }),
-          getAllDiscoveryDomains: () => Promise.resolve({ data: [], next: undefined }),
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          enabledConnections: {
+            list: () => mockPagedData({}, 'enabled_connections', []),
+          },
+          clientGrants: {
+            list: () => mockPagedData({}, 'client_grants', []),
+          },
+          discoveryDomains: {
+            list: () => mockPagedData({}, 'discovery_domains', []),
+          },
         },
         connections: {
-          getAll: (params) => mockPagedData(params, 'connections', []),
+          list: (params) => mockPagedData(params, 'connections', []),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         clientGrants: {
-          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+          list: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
         },
         pool,
       };
@@ -282,14 +310,19 @@ describe('#organizations handler', () => {
     it('should get organizations', async () => {
       const auth0 = {
         organizations: {
-          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
-          getEnabledConnections: () => ({ data: [sampleEnabledConnection] }),
-          getOrganizationClientGrants: () => ({ data: sampleOrgClientGrants }),
-          getAllDiscoveryDomains: () =>
-            Promise.resolve({ data: [sampleDiscoveryDomain], next: undefined }),
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          enabledConnections: {
+            list: () => mockPagedData({}, 'enabled_connections', [sampleEnabledConnection]),
+          },
+          clientGrants: {
+            list: () => mockPagedData({}, 'client_grants', sampleOrgClientGrants),
+          },
+          discoveryDomains: {
+            list: () => mockPagedData({}, 'discovery_domains', [sampleDiscoveryDomain]),
+          },
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         pool,
       };
@@ -307,27 +340,34 @@ describe('#organizations handler', () => {
 
     it('should get all organizations', async function () {
       const organizationsPage1 = Array.from({ length: 3 }, (v, i) => ({
+        id: 'org_' + i,
         name: 'acme' + i,
         display_name: 'Acme ' + i,
       }));
       const organizationsPage2 = Array.from({ length: 5 }, (v, i) => ({
+        id: 'org_' + (i + 10),
         name: 'acme' + (i + 10),
         display_name: 'Acme ' + (i + 10),
       }));
 
       const auth0 = {
         organizations: {
-          getAll: (params) =>
+          list: (params) =>
             Promise.resolve(
               mockPagedData(params, 'organizations', [...organizationsPage2, ...organizationsPage1])
             ),
-          getEnabledConnections: () => Promise.resolve({ data: { connections: [] } }),
-          getOrganizationClientGrants: () =>
-            Promise.resolve({ data: { client_grants: [], total: 0 } }),
-          getAllDiscoveryDomains: () => Promise.resolve({ data: [], next: undefined }),
+          enabledConnections: {
+            list: () => mockPagedData({}, 'enabled_connections', []),
+          },
+          clientGrants: {
+            list: () => mockPagedData({}, 'client_grants', []),
+          },
+          discoveryDomains: {
+            list: () => mockPagedData({}, 'discovery_domains', []),
+          },
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         pool,
       };
@@ -339,6 +379,20 @@ describe('#organizations handler', () => {
 
     it('should return an empty array for old versions of the sdk', async () => {
       const auth0 = {
+        organizations: {
+          list: () => {
+            const error = new Error('organizations.list is not a function');
+            error.statusCode = 501;
+            throw error;
+          },
+        },
+        clients: {
+          list: () => {
+            const error = new Error('clients.list is not a function');
+            error.statusCode = 501;
+            throw error;
+          },
+        },
         pool,
       };
 
@@ -350,14 +404,14 @@ describe('#organizations handler', () => {
     it('should return an empty array for 501 status code', async () => {
       const auth0 = {
         organizations: {
-          getAll: () => {
+          list: () => {
             const error = new Error('Feature is not yet implemented');
             error.statusCode = 501;
             throw error;
           },
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         pool,
       };
@@ -370,14 +424,14 @@ describe('#organizations handler', () => {
     it('should return an empty array for 404 status code', async () => {
       const auth0 = {
         organizations: {
-          getAll: () => {
+          list: () => {
             const error = new Error('Not found');
             error.statusCode = 404;
             throw error;
           },
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         pool,
       };
@@ -390,7 +444,7 @@ describe('#organizations handler', () => {
     it('should throw an error for all other failed requests', async () => {
       const auth0 = {
         organizations: {
-          getAll: () => {
+          list: () => {
             const error = new Error('Bad request');
             error.statusCode = 500;
             throw error;
@@ -411,19 +465,25 @@ describe('#organizations handler', () => {
       let shouldThrow = false;
       const auth0 = {
         organizations: {
-          getAll: (params) => {
+          list: (params) => {
             if (!shouldThrow) {
               return mockPagedData(params, 'organizations', [sampleOrg]);
             }
 
             throw new Error('Unexpected');
           },
-          getEnabledConnections: () => Promise.resolve({ data: [] }),
-          getOrganizationClientGrants: () => ({ data: [] }),
-          getAllDiscoveryDomains: () => Promise.resolve({ data: [], next: undefined }),
+          enabledConnections: {
+            list: () => mockPagedData({}, 'enabled_connections', []),
+          },
+          clientGrants: {
+            list: () => mockPagedData({}, 'client_grants', []),
+          },
+          discoveryDomains: {
+            list: () => mockPagedData({}, 'discovery_domains', []),
+          },
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         pool,
       };
@@ -441,59 +501,67 @@ describe('#organizations handler', () => {
       const auth0 = {
         organizations: {
           create: () => Promise.resolve({ data: [] }),
-          update: function (params, data) {
+          update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('123');
+            expect(id).to.equal('123');
             expect(data.display_name).to.equal('Acme 2');
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) =>
+          delete: () => Promise.resolve([]),
+          list: (params) =>
             Promise.resolve(
               mockPagedData({ ...params, include_totals: true }, 'organizations', [sampleOrg])
             ),
-          getEnabledConnections: () => ({
-            data: [sampleEnabledConnection, sampleEnabledConnection2],
-          }),
-          addEnabledConnection: (params, data) => {
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('123');
-            expect(data).to.be.an('object');
-            expect(data.connection_id).to.equal('con_789');
-            expect(data.assign_membership_on_login).to.equal(false);
-            return Promise.resolve({ data });
-          },
-          removeEnabledConnection: (params) => {
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('123');
-            expect(params.connection_id).to.equal(sampleEnabledConnection2.connection_id);
-            return Promise.resolve({ data: undefined });
-          },
-          updateEnabledConnection: (params, data) => {
-            if (params.connectionId === sampleEnabledConnection.connection_id) {
-              expect(params).to.be.an('object');
-              expect(params.id).to.equal('123');
-              expect(params.connectionId).to.equal(sampleEnabledConnection.connection_id);
+          enabledConnections: {
+            list: () => ({
+              data: [sampleEnabledConnection, sampleEnabledConnection2],
+              hasNextPage: () => false,
+              getNextPage: () =>
+                Promise.resolve({
+                  data: [],
+                  hasNextPage: () => false,
+                  getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+                }),
+            }),
+            add: (orgId, data) => {
+              expect(orgId).to.equal('123');
               expect(data).to.be.an('object');
+              expect(data.connection_id).to.equal('con_789');
               expect(data.assign_membership_on_login).to.equal(false);
-              expect(data.show_as_button).to.equal(true);
-              expect(data.is_signup_enabled).to.equal(false);
-            } else {
-              expect(params).to.be.an('object');
-              expect(params.id).to.equal('123');
-              expect(params.connectionId).to.equal(sampleEnabledConnection2.connection_id);
-              expect(data).to.be.an('object');
-              expect(data.assign_membership_on_login).to.equal(true);
-              expect(data.show_as_button).to.equal(false);
-            }
-            return Promise.resolve(data);
+              return Promise.resolve(data);
+            },
+            delete: (orgId, connectionId) => {
+              expect(orgId).to.equal('123');
+              expect(connectionId).to.equal(sampleEnabledConnection2.connection_id);
+              return Promise.resolve(undefined);
+            },
+            update: (orgId, connectionId, data) => {
+              if (connectionId === sampleEnabledConnection.connection_id) {
+                expect(orgId).to.equal('123');
+                expect(connectionId).to.equal(sampleEnabledConnection.connection_id);
+                expect(data).to.be.an('object');
+                expect(data.assign_membership_on_login).to.equal(false);
+                expect(data.show_as_button).to.equal(true);
+                expect(data.is_signup_enabled).to.equal(false);
+              } else {
+                expect(orgId).to.equal('123');
+                expect(connectionId).to.equal(sampleEnabledConnection2.connection_id);
+                expect(data).to.be.an('object');
+                expect(data.assign_membership_on_login).to.equal(true);
+                expect(data.show_as_button).to.equal(false);
+              }
+              return Promise.resolve(data);
+            },
           },
-          getOrganizationClientGrants: () => ({ data: [] }),
-          getAllDiscoveryDomains: () => Promise.resolve({ data: [], next: undefined }),
+          clientGrants: {
+            list: () => mockPagedData({}, 'client_grants', []),
+          },
+          discoveryDomains: {
+            list: () => mockPagedData({}, 'discovery_domains', []),
+          },
         },
         connections: {
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData({ ...params, include_totals: true }, 'connections', [
               {
                 id: sampleEnabledConnection.connection_id,
@@ -509,10 +577,10 @@ describe('#organizations handler', () => {
             ]),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         clientGrants: {
-          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+          list: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
         },
         pool,
       };
@@ -545,32 +613,45 @@ describe('#organizations handler', () => {
     it('should add an enabled connection to the organizations', async () => {
       const auth0 = {
         organizations: {
-          create: () => Promise.resolve({ data: [] }),
-          update: function (params, data) {
+          create: () => Promise.resolve([]),
+          update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('123');
+            expect(id).to.equal('123');
             expect(data.display_name).to.equal('Acme 2');
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
-          getEnabledConnections: () => ({ data: [] }),
-          addEnabledConnection: (params, data) => {
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('123');
-            expect(data).to.be.an('object');
-            expect(data.connection_id).to.equal('con_123');
-            expect(data.assign_membership_on_login).to.equal(false);
-            expect(data.show_as_button).to.equal(false);
-            expect(data.is_signup_enabled).to.equal(false);
-            return Promise.resolve({ data });
+          delete: () => Promise.resolve([]),
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          enabledConnections: {
+            list: () => ({
+              data: [],
+              hasNextPage: () => false,
+              getNextPage: () =>
+                Promise.resolve({
+                  data: [],
+                  hasNextPage: () => false,
+                  getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+                }),
+            }),
+            add: (orgId, data) => {
+              expect(orgId).to.equal('123');
+              expect(data).to.be.an('object');
+              expect(data.connection_id).to.equal('con_123');
+              expect(data.assign_membership_on_login).to.equal(false);
+              expect(data.show_as_button).to.equal(false);
+              expect(data.is_signup_enabled).to.equal(false);
+              return Promise.resolve(data);
+            },
           },
-          getOrganizationClientGrants: () => ({ data: [] }),
-          getAllDiscoveryDomains: () => Promise.resolve({ data: [], next: undefined }),
+          clientGrants: {
+            list: () => mockPagedData({}, 'client_grants', []),
+          },
+          discoveryDomains: {
+            list: () => mockPagedData({}, 'discovery_domains', []),
+          },
         },
         connections: {
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'connections', [
               {
                 id: sampleEnabledConnection.connection_id,
@@ -586,10 +667,10 @@ describe('#organizations handler', () => {
             ]),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         clientGrants: {
-          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+          list: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
         },
         pool,
       };
@@ -622,32 +703,40 @@ describe('#organizations handler', () => {
       const auth0 = {
         organizations: {
           create: () => Promise.resolve([]),
-          update: function (params, data) {
+          update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('123');
+            expect(id).to.equal('123');
             expect(data.display_name).to.equal('Acme 2');
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
-          getEnabledConnections: () => ({ data: [sampleEnabledConnection2] }),
-          deleteEnabledConnection: (params) => {
-            expect(params).to.be.an('object');
-            expect(params.connectionId).to.equal(sampleEnabledConnection2.connection_id);
-            return Promise.resolve({ data: [] });
+          delete: () => Promise.resolve([]),
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          enabledConnections: {
+            list: () => ({
+              data: [sampleEnabledConnection2],
+              hasNextPage: () => false,
+              getNextPage: () =>
+                Promise.resolve({
+                  data: [],
+                  hasNextPage: () => false,
+                  getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+                }),
+            }),
+            delete: (orgId, connectionId) => {
+              expect(orgId).to.equal('123');
+              expect(connectionId).to.equal(sampleEnabledConnection2.connection_id);
+              return Promise.resolve(undefined);
+            },
           },
-          removeEnabledConnection: (params) => {
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('123');
-            expect(params.connection_id).to.equal(sampleEnabledConnection2.connection_id);
-            return Promise.resolve({ data: undefined });
+          clientGrants: {
+            list: () => mockPagedData({}, 'client_grants', []),
           },
-          getOrganizationClientGrants: () => ({ data: [] }),
-          getAllDiscoveryDomains: () => Promise.resolve({ data: [], next: undefined }),
+          discoveryDomains: {
+            list: () => mockPagedData({}, 'discovery_domains', []),
+          },
         },
         connections: {
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'connections', [
               {
                 id: sampleEnabledConnection.connection_id,
@@ -663,10 +752,10 @@ describe('#organizations handler', () => {
             ]),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         clientGrants: {
-          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+          list: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
         },
         pool,
       };
@@ -691,21 +780,26 @@ describe('#organizations handler', () => {
       const auth0 = {
         organizations: {
           create: () => Promise.resolve([]),
-          update: function (params, data) {
+          update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('123');
+            expect(id).to.equal('123');
             expect(data.display_name).to.equal('Acme 2');
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
-          getEnabledConnections: () => ({ data: [] }),
-          getOrganizationClientGrants: () => ({ data: [] }),
-          getAllDiscoveryDomains: () => Promise.resolve({ data: [], next: undefined }),
+          delete: () => Promise.resolve([]),
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          enabledConnections: {
+            list: () => mockPagedData({}, 'enabled_connections', []),
+          },
+          clientGrants: {
+            list: () => mockPagedData({}, 'client_grants', []),
+          },
+          discoveryDomains: {
+            list: () => mockPagedData({}, 'discovery_domains', []),
+          },
         },
         connections: {
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'connections', [
               {
                 id: sampleEnabledConnection.connection_id,
@@ -721,10 +815,10 @@ describe('#organizations handler', () => {
             ]),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         clientGrants: {
-          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+          list: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
         },
         pool,
       };
@@ -749,26 +843,31 @@ describe('#organizations handler', () => {
     it('should delete organizations', async () => {
       const auth0 = {
         organizations: {
-          create: () => Promise.resolve({ data: [] }),
-          update: () => Promise.resolve({ data: [] }),
-          delete: (data) => {
-            expect(data).to.be.an('object');
-            expect(data.id).to.equal(sampleOrg.id);
-            return Promise.resolve({ data });
+          create: () => Promise.resolve([]),
+          update: () => Promise.resolve([]),
+          delete: (orgId) => {
+            expect(orgId).to.equal(sampleOrg.id);
+            return Promise.resolve();
           },
-          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
-          getEnabledConnections: () => [],
-          getOrganizationClientGrants: () => ({ data: [] }),
-          getAllDiscoveryDomains: () => Promise.resolve({ data: [], next: undefined }),
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          enabledConnections: {
+            list: () => mockPagedData({}, 'enabled_connections', []),
+          },
+          clientGrants: {
+            list: () => mockPagedData({}, 'client_grants', []),
+          },
+          discoveryDomains: {
+            list: () => mockPagedData({}, 'discovery_domains', []),
+          },
         },
         connections: {
-          getAll: (params) => mockPagedData(params, 'connections', []),
+          list: (params) => mockPagedData(params, 'connections', []),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         clientGrants: {
-          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+          list: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
         },
         pool,
       };
@@ -790,24 +889,26 @@ describe('#organizations handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [])),
-          createDiscoveryDomain: (params, domain) => {
-            expect(params.id).to.equal('fake');
-            expect(domain).to.be.an('object');
-            expect(domain.domain).to.equal('login.acme.com');
-            expect(domain.status).to.equal('pending');
-            return Promise.resolve({ data: { ...domain, id: 'dd_new' } });
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [])),
+          discoveryDomains: {
+            list: () => mockPagedData({}, 'discovery_domains', []),
+            create: (orgId, domain) => {
+              expect(orgId).to.equal('fake');
+              expect(domain).to.be.an('object');
+              expect(domain.domain).to.equal('login.acme.com');
+              expect(domain.status).to.equal('pending');
+              return Promise.resolve({ data: { ...domain, id: 'dd_new' } });
+            },
           },
-          getAllDiscoveryDomains: () => Promise.resolve({ data: [], next: undefined }),
         },
         connections: {
-          getAll: (params) => mockPagedData(params, 'connections', []),
+          list: (params) => mockPagedData(params, 'connections', []),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         clientGrants: {
-          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+          list: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
         },
         pool,
       };
@@ -831,43 +932,48 @@ describe('#organizations handler', () => {
       const auth0 = {
         organizations: {
           create: () => Promise.resolve({ data: [] }),
-          update: function (params, data) {
+          update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('123');
+            expect(id).to.be.a('string');
+            expect(id).to.equal('123');
             return Promise.resolve({ data });
           },
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
-          getEnabledConnections: () => ({ data: [] }),
-          getOrganizationClientGrants: () => ({ data: [] }),
-          getAllDiscoveryDomains: () =>
-            Promise.resolve({ data: [sampleDiscoveryDomain], next: undefined }),
-          updateDiscoveryDomain: (params, body) => {
-            expect(params.id).to.equal('123');
-            expect(params.discovery_domain_id).to.equal('dd_123');
-            expect(body.status).to.equal('verified');
-            return Promise.resolve({ data: { ...sampleDiscoveryDomain, status: 'verified' } });
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          enabledConnections: {
+            list: () => mockPagedData({}, 'enabled_connections', []),
           },
-          createDiscoveryDomain: (params, domain) => {
-            expect(params.id).to.equal('123');
-            expect(domain.domain).to.equal('auth.acme.com');
-            return Promise.resolve({ data: { ...domain, id: 'dd_new' } });
+          clientGrants: {
+            list: () => mockPagedData({}, 'client_grants', []),
           },
-          deleteDiscoveryDomain: (params) => {
-            expect(params.id).to.equal('123');
-            expect(params.discovery_domain_id).to.equal('dd_123');
-            return Promise.resolve({ data: {} });
+          discoveryDomains: {
+            list: () => mockPagedData({}, 'discovery_domains', [sampleDiscoveryDomain]),
+            update: (orgId, discoveryDomainId, body) => {
+              expect(orgId).to.equal('123');
+              expect(discoveryDomainId).to.equal('dd_123');
+              expect(body.status).to.equal('verified');
+              return Promise.resolve({ data: { ...sampleDiscoveryDomain, status: 'verified' } });
+            },
+            create: (orgId, domain) => {
+              expect(orgId).to.equal('123');
+              expect(domain.domain).to.equal('auth.acme.com');
+              return Promise.resolve({ data: { ...domain, id: 'dd_new' } });
+            },
+            delete: (orgId, discoveryDomainId) => {
+              expect(orgId).to.equal('123');
+              expect(discoveryDomainId).to.equal('dd_123');
+              return Promise.resolve({ data: {} });
+            },
           },
         },
         connections: {
-          getAll: (params) => mockPagedData(params, 'connections', []),
+          list: (params) => mockPagedData(params, 'connections', []),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         clientGrants: {
-          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+          list: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
         },
         pool,
       };
@@ -896,19 +1002,23 @@ describe('#organizations handler', () => {
       const auth0 = {
         organizations: {
           create: () => Promise.resolve({ data: [] }),
-          update: function (params, data) {
+          update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('123');
+            expect(id).to.be.a('string');
+            expect(id).to.equal('123');
             return Promise.resolve({ data });
           },
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
-          getEnabledConnections: () => ({ data: [] }),
-          getOrganizationClientGrants: () => ({ data: [] }),
-          getAllDiscoveryDomains: () =>
-            Promise.resolve({
-              data: [
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          enabledConnections: {
+            list: () => mockPagedData({}, 'enabled_connections', []),
+          },
+          clientGrants: {
+            list: () => mockPagedData({}, 'client_grants', []),
+          },
+          discoveryDomains: {
+            list: () =>
+              mockPagedData({}, 'discovery_domains', [
                 sampleDiscoveryDomain,
                 {
                   id: 'dd_456',
@@ -917,28 +1027,27 @@ describe('#organizations handler', () => {
                   verification_txt: 'auth0-domain-verification=abc',
                   verification_host: '_auth0-domain-verification.auth.acme.com',
                 },
-              ],
-              next: undefined,
-            }),
-          updateDiscoveryDomain: (params, body) => {
-            expect(params.id).to.equal('123');
-            expect(params.discovery_domain_id).to.equal('dd_123');
-            return Promise.resolve({ data: { ...sampleDiscoveryDomain, ...body } });
-          },
-          deleteDiscoveryDomain: (params) => {
-            expect(params.id).to.equal('123');
-            expect(params.discovery_domain_id).to.equal('dd_456');
-            return Promise.resolve({ data: {} });
+              ]),
+            update: (orgId, discoveryDomainId, body) => {
+              expect(orgId).to.equal('123');
+              expect(discoveryDomainId).to.equal('dd_123');
+              return Promise.resolve({ data: { ...sampleDiscoveryDomain, ...body } });
+            },
+            delete: (orgId, discoveryDomainId) => {
+              expect(orgId).to.equal('123');
+              expect(discoveryDomainId).to.equal('dd_456');
+              return Promise.resolve({ data: {} });
+            },
           },
         },
         connections: {
-          getAll: (params) => mockPagedData(params, 'connections', []),
+          list: (params) => mockPagedData(params, 'connections', []),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         clientGrants: {
-          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+          list: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
         },
         pool,
       };
@@ -975,19 +1084,23 @@ describe('#organizations handler', () => {
       const auth0 = {
         organizations: {
           create: () => Promise.resolve({ data: [] }),
-          update: function (params, data) {
+          update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('123');
+            expect(id).to.be.a('string');
+            expect(id).to.equal('123');
             return Promise.resolve({ data });
           },
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
-          getEnabledConnections: () => ({ data: [] }),
-          getOrganizationClientGrants: () => ({ data: [] }),
-          getAllDiscoveryDomains: () =>
-            Promise.resolve({
-              data: [
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          enabledConnections: {
+            list: () => mockPagedData({}, 'enabled_connections', []),
+          },
+          clientGrants: {
+            list: () => mockPagedData({}, 'client_grants', []),
+          },
+          discoveryDomains: {
+            list: () =>
+              mockPagedData({}, 'discovery_domains', [
                 sampleDiscoveryDomain,
                 {
                   id: 'dd_456',
@@ -996,25 +1109,24 @@ describe('#organizations handler', () => {
                   verification_txt: 'auth0-domain-verification=abc',
                   verification_host: '_auth0-domain-verification.auth.acme.com',
                 },
-              ],
-              next: undefined,
-            }),
-          updateDiscoveryDomain: (params, body) => {
-            expect(params.id).to.equal('123');
-            return Promise.resolve({ data: { ...sampleDiscoveryDomain, ...body } });
-          },
-          deleteDiscoveryDomain: () => {
-            throw new Error('deleteDiscoveryDomain should not be called when delete is disabled');
+              ]),
+            update: (orgId, discoveryDomainId, body) => {
+              expect(orgId).to.equal('123');
+              return Promise.resolve({ data: { ...sampleDiscoveryDomain, ...body } });
+            },
+            delete: () => {
+              throw new Error('deleteDiscoveryDomain should not be called when delete is disabled');
+            },
           },
         },
         connections: {
-          getAll: (params) => mockPagedData(params, 'connections', []),
+          list: (params) => mockPagedData(params, 'connections', []),
         },
         clients: {
-          getAll: (params) => mockPagedData(params, 'clients', sampleClients),
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
         },
         clientGrants: {
-          getAll: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+          list: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
         },
         pool,
       };

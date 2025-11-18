@@ -124,7 +124,7 @@ describe('#directory context clientGrants', () => {
       {
         ...mockMgmtClient(),
         clients: {
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               {
                 client_id: 'client-id-1',
@@ -137,7 +137,7 @@ describe('#directory context clientGrants', () => {
             ]),
         },
         resourceServers: {
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'resource_servers', [
               {
                 id: 'resource-server-1',
@@ -203,12 +203,12 @@ describe('#directory context clientGrants', () => {
       {
         ...mockMgmtClient(),
         clients: {
-          getAll: () => {
+          list: () => {
             throw new 'This should not be called'();
           },
         },
         resourceServers: {
-          getAll: () => {
+          list: () => {
             throw new 'This should not be called'();
           },
         },

@@ -1,9 +1,10 @@
-import { Client, ResourceServer } from 'auth0';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { ParsedAsset } from '../../../types';
 import { paginate } from '../../../tools/auth0/client';
 import { convertClientIdToName } from '../../../utils';
+import { ResourceServer } from '../../../tools/auth0/handlers/resourceServers';
+import { Client } from '../../../tools/auth0/handlers/clients';
 
 type ParsedResourceServers = ParsedAsset<'resourceServers', ResourceServer[]>;
 
@@ -16,7 +17,7 @@ async function dumpAndParse(context: YAMLContext): Promise<ParsedResourceServers
   }
 
   if (clients === undefined) {
-    clients = await paginate<Client>(context.mgmtClient.clients.getAll, {
+    clients = await paginate<Client>(context.mgmtClient.clients.list, {
       paginate: true,
       include_totals: true,
     });

@@ -58,10 +58,12 @@ describe('#guardianFactors handler', () => {
     it('should handle forbidden error', async () => {
       const auth0 = {
         guardian: {
-          getFactors: () => {
-            const error = new Error('Forbidden resource access');
-            error.statusCode = 403;
-            throw error;
+          factors: {
+            list: () => {
+              const error = new Error('Forbidden resource access');
+              error.statusCode = 403;
+              throw error;
+            },
           },
         },
         pool,
@@ -86,7 +88,9 @@ describe('#guardianFactors handler', () => {
 
       const auth0 = {
         guardian: {
-          getFactors: () => ({ data: [...factors] }),
+          factors: {
+            list: () => Promise.resolve([...factors]),
+          },
         },
         pool,
       };
@@ -110,8 +114,10 @@ describe('#guardianFactors handler', () => {
 
       const auth0 = {
         guardian: {
-          getFactors: () => [...factors],
-          updateFactor: () => ({ enabled: true }),
+          factors: {
+            list: () => Promise.resolve([...factors]),
+            set: () => Promise.resolve({ enabled: true }),
+          },
         },
         pool,
       };

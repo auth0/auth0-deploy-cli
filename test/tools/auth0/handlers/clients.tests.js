@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import pageClient from '../../../../src/tools/auth0/client';
 
 const { expect } = require('chai');
@@ -90,7 +91,7 @@ describe('#clients handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -133,7 +134,7 @@ describe('#clients handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -183,7 +184,7 @@ describe('#clients handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -223,7 +224,7 @@ describe('#clients handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -255,7 +256,7 @@ describe('#clients handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -284,7 +285,7 @@ describe('#clients handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -297,7 +298,7 @@ describe('#clients handler', () => {
     it('should get clients', async () => {
       const auth0 = {
         clients: {
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               { name: 'test client', client_id: 'FMfcgxvzLDvPsgpRFKkLVrnKqGgkHhQV' },
               { name: 'deploy client', client_id: 'client_id' },
@@ -323,10 +324,10 @@ describe('#clients handler', () => {
             expect(data.length).to.equal(0);
             return Promise.resolve({ data });
           },
-          update: function (params, data) {
+          update: function (clientId, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.client_id).to.equal('client1');
+            expect(clientId).to.be.a('string');
+            expect(clientId).to.equal('client1');
             expect(data).to.be.an('object');
             expect(data.description).to.equal('new description');
             expect(data.session_transfer).to.deep.equal({
@@ -338,7 +339,7 @@ describe('#clients handler', () => {
             return Promise.resolve({ data });
           },
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               {
                 client_id: 'client1',
@@ -378,17 +379,17 @@ describe('#clients handler', () => {
             expect(data.length).to.equal(0);
             return Promise.resolve({ data });
           },
-          update: function (params, data) {
+          update: function (client_id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.client_id).to.equal('client1');
+            expect(client_id).to.be.a('string');
+            expect(client_id).to.equal('client1');
             expect(data).to.be.an('object');
             expect(data.skip_non_verifiable_callback_uri_confirmation_prompt).to.equal(false);
 
             return Promise.resolve({ data });
           },
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               {
                 client_id: 'client1',
@@ -426,11 +427,11 @@ describe('#clients handler', () => {
           update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.client_id).to.equal('client1');
+            expect(params).to.be.a('string');
+            expect(params).to.equal('client1');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               { client_id: 'client1', name: 'existingClient' },
               { client_id: 'client_id', name: 'deploy client' },
@@ -453,12 +454,12 @@ describe('#clients handler', () => {
           update: () => Promise.resolve({ data: [] }),
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.client_id).to.equal('client1');
+            expect(params).to.be.a('string');
+            expect(params).to.equal('client1');
             removed = true;
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               { client_id: 'client1', name: 'existingClient' },
               { client_id: 'client_id', name: 'deploy client' },
@@ -485,7 +486,7 @@ describe('#clients handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [{ client_id: 'client1', name: 'existingClient' }]),
         },
         pool,
@@ -514,7 +515,7 @@ describe('#clients handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => Promise.resolve(mockPagedData(params, 'clients', [])),
+          list: (params) => Promise.resolve(mockPagedData(params, 'clients', [])),
         },
         pool,
       };
@@ -546,7 +547,7 @@ describe('#clients handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               { client_id: 'client1', name: 'existingClient' },
               { client_id: 'client2', name: 'existingClient2' },
@@ -574,21 +575,22 @@ describe('#clients handler', () => {
             expect(data.name).to.equal('Client 3');
             return Promise.resolve({ data });
           },
-          update: function (data) {
+          update: function (clientId, data) {
             wasUpdateCalled = true;
             (() => expect(this).to.not.be.undefined)();
+            expect(clientId).to.be.a('string');
+            expect(clientId).to.equal('client-1');
             expect(data).to.be.an('object');
-            expect(data.client_id).to.equal('client-1');
             return Promise.resolve({ data });
           },
           delete: function (data) {
             wasDeleteCalled = true;
             (() => expect(this).to.not.be.undefined)();
-            expect(data).to.be.an('object');
-            expect(data.client_id).to.equal('client-2');
+            expect(data).to.be.a('string');
+            expect(data).to.equal('client-2');
             return Promise.resolve({ data });
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               {
                 client_id: 'client-1',
@@ -653,7 +655,7 @@ describe('#clients handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -689,7 +691,7 @@ describe('#clients handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'clients', []),
+          list: (params) => mockPagedData(params, 'clients', []),
         },
         pool,
       };
@@ -704,16 +706,16 @@ describe('#clients handler', () => {
       const auth0 = {
         clients: {
           create: () => Promise.resolve({ data: [] }),
-          update: function (params, data) {
+          update: function (client_id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params.client_id).to.equal('client1');
+            expect(client_id).to.equal('client1');
             expect(data.organization_usage).to.equal('allow');
             // organization_require_behavior should be preserved if not updated
             expect(data).to.not.have.property('organization_require_behavior');
             return Promise.resolve({ data });
           },
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               {
                 client_id: 'client1',
@@ -746,9 +748,9 @@ describe('#clients handler', () => {
       const auth0 = {
         clients: {
           create: () => Promise.resolve({ data: [] }),
-          update: function (params, data) {
+          update: function (client_id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params.client_id).to.equal('client1');
+            expect(client_id).to.equal('client1');
             expect(data.organization_require_behavior).to.equal('post_login_prompt');
             // eslint-disable-next-line no-unused-expressions
             expect(data.organization_discovery_methods).to.be.null;
@@ -757,7 +759,7 @@ describe('#clients handler', () => {
             return Promise.resolve({ data });
           },
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               {
                 client_id: 'client1',

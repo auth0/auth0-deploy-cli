@@ -7,7 +7,15 @@ import {
   wrapArrayReplaceMarkersInQuotes,
 } from './utils';
 
-export default {
+// Explicit type to avoid non-portable type inference
+const tools: {
+  constants: typeof constants;
+  deploy: typeof deploy;
+  keywordReplace: typeof keywordReplace;
+  loadFileAndReplaceKeywords: typeof loadFileAndReplaceKeywords;
+  wrapArrayReplaceMarkersInQuotes: typeof wrapArrayReplaceMarkersInQuotes;
+  Auth0: typeof Auth0;
+} = {
   constants,
   deploy,
   keywordReplace,
@@ -15,6 +23,8 @@ export default {
   wrapArrayReplaceMarkersInQuotes,
   Auth0,
 };
+
+export default tools;
 
 export {
   constants,

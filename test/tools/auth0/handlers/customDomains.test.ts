@@ -25,7 +25,7 @@ describe('#customDomains handler', () => {
   it('should get custom domains', async () => {
     const auth0ApiClientMock = {
       customDomains: {
-        getAll: async () => customDomains,
+        list: async () => customDomains,
         create: async () => ({ data: customDomains[0] }),
         update: async () => ({ data: {} }),
         delete: async () => ({ data: {} }),
@@ -47,7 +47,7 @@ describe('#customDomains handler', () => {
   it('should return null when retrieving domains on unsupported tenant', async () => {
     const auth0ApiClientMock = {
       customDomains: {
-        getAll: async () => {
+        list: async () => {
           throw {
             statusCode: 403,
             message:
@@ -81,7 +81,7 @@ describe('#customDomains handler', () => {
   it('should handle error gracefully if custom domains not supported by tenant', async () => {
     const auth0ApiClientMock = {
       customDomains: {
-        getAll: async () => {
+        list: async () => {
           throw unsupportedTenantError;
         },
         create: async () => {},
@@ -109,10 +109,10 @@ describe('#customDomains handler', () => {
 
     const auth0ApiClientMock = {
       customDomains: {
-        getAll: async () => [],
-        create: async (args) => {
+        list: async () => [],
+        create: async (_args) => {
           didCreateFunctionGetCalled = true;
-          expect(args).to.deep.equal({
+          expect(_args).to.deep.equal({
             domain: customDomains[0].domain,
             type: customDomains[0].type,
             tls_policy: customDomains[0].tls_policy,
@@ -152,10 +152,10 @@ describe('#customDomains handler', () => {
 
     const auth0ApiClientMock = {
       customDomains: {
-        getAll: async () => {
+        list: async () => {
           throw unsupportedTenantError;
         },
-        create: async (args) => {
+        create: async (_args: unknown) => {
           didCreateFunctionGetCalled = true;
           return customDomains[0];
         },
@@ -192,7 +192,7 @@ describe('#customDomains handler', () => {
 
     const auth0ApiClientMock = {
       customDomains: {
-        getAll: async () => customDomains,
+        list: async () => customDomains,
         create: async () => {
           didCreateFunctionGetCalled = true;
         },
@@ -231,7 +231,7 @@ describe('#customDomains handler', () => {
 
     const auth0ApiClientMock = {
       customDomains: {
-        getAll: async () => customDomains,
+        list: async () => customDomains,
         create: async () => {
           didCreateFunctionGetCalled = true;
         },
@@ -270,7 +270,7 @@ describe('#customDomains handler', () => {
 
     const auth0ApiClientMock = {
       customDomains: {
-        getAll: async () => [],
+        list: async () => [],
         create: async () => {
           didCreateFunctionGetCalled = true;
         },
@@ -322,16 +322,16 @@ describe('#customDomains handler', () => {
 
     const auth0ApiClientMock = {
       customDomains: {
-        getAll: async () => [existingCustomDomain],
+        list: async () => [existingCustomDomain],
         create: async () => {},
         update: async (args, data) => {
           didUpdateFunctionGetCalled = true;
-          expect(args).to.deep.equal({ id: 'cd_123' });
+          expect(args).to.equal('cd_123');
           expect(data).to.deep.equal({
             tls_policy: 'recommended',
             domain_metadata: { environment: 'production' },
           });
-          return { data: updatedCustomDomain };
+          return updatedCustomDomain;
         },
         delete: async () => {},
       },
@@ -375,11 +375,11 @@ describe('#customDomains handler', () => {
 
     const auth0ApiClientMock = {
       customDomains: {
-        getAll: async () => [existingCustomDomain],
+        list: async () => [existingCustomDomain],
         create: async () => {},
         update: async (args, data) => {
           updateCallData = data;
-          return { data: {} };
+          return {};
         },
         delete: async () => {},
       },
@@ -429,11 +429,11 @@ describe('#customDomains handler', () => {
 
     const auth0ApiClientMock = {
       customDomains: {
-        getAll: async () => [],
+        list: async () => [],
         create: async (args) => {
           didCreateFunctionGetCalled = true;
           createCallArgs = args;
-          return { data: customDomainWithMetadata };
+          return customDomainWithMetadata;
         },
         update: async () => {},
         delete: async () => {},
@@ -474,11 +474,11 @@ describe('#customDomains handler', () => {
 
     const auth0ApiClientMock = {
       customDomains: {
-        getAll: async () => [],
+        list: async () => [],
         create: async (args) => {
           didCreateFunctionGetCalled = true;
           createCallArgs = args;
-          return { data: customDomainWithTlsPolicy };
+          return customDomainWithTlsPolicy;
         },
         update: async () => {},
         delete: async () => {},
@@ -518,11 +518,11 @@ describe('#customDomains handler', () => {
 
     const auth0ApiClientMock = {
       customDomains: {
-        getAll: async () => [],
+        list: async () => [],
         create: async (args) => {
           didCreateFunctionGetCalled = true;
           createCallArgs = args;
-          return { data: customDomainWithBothFields };
+          return customDomainWithBothFields;
         },
         update: async () => {},
         delete: async () => {},

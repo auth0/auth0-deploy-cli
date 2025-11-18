@@ -76,7 +76,7 @@ describe('#YAML context client grants', () => {
   it('should dump client grants and replace client ID with client name even if clients not in assets', async () => {
     const mockMgmt = mockMgmtClient();
 
-    mockMgmt.clients.getAll = (params) => {
+    mockMgmt.clients.list = (params) => {
       const client = {
         client_id: 'client-id-1',
         name: 'Client 1',

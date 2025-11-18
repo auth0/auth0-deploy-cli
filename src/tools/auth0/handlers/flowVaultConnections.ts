@@ -1,21 +1,11 @@
-import {
-  GetFlowsVaultConnections200ResponseOneOfInner,
-  PatchFlowsVaultConnectionsByIdRequest,
-} from 'auth0';
-import { isArray, isEmpty } from 'lodash';
+import { Management } from 'auth0';
+import { isEmpty } from 'lodash';
 import DefaultHandler, { order } from './default';
-import { Asset, Assets, CalculatedChanges } from '../../../types';
+import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import constants from '../../constants';
 import log from '../../../logger';
 
-export type FlowVaultConnection = {
-  name: string;
-  app_id: string;
-  environment: string;
-  setup: object;
-  account_name: string;
-  ready: string;
-};
+export type FlowVaultConnection = Management.GetFlowsVaultConnectionResponseContent;
 
 export const schema = {
   type: 'array',
@@ -32,6 +22,20 @@ export const schema = {
     required: ['name', 'app_id'],
   },
   additionalProperties: false,
+};
+
+export const getAllFlowConnections = async (
+  auth0Client: Auth0APIClient
+): Promise<Management.FlowsVaultConnectionSummary[]> => {
+  const allFlowConnections: Management.FlowsVaultConnectionSummary[] = [];
+
+  let vaultConnections = await auth0Client.flows.vault.connections.list();
+  do {
+    allFlowConnections.push(...vaultConnections.data);
+    vaultConnections = await vaultConnections.getNextPage();
+  } while (vaultConnections.hasNextPage());
+
+  return allFlowConnections;
 };
 
 export default class FlowVaultHandler extends DefaultHandler {
@@ -56,7 +60,7 @@ export default class FlowVaultHandler extends DefaultHandler {
       return this.existing;
     }
 
-    this.existing = await this.getAllFlowConnections();
+    this.existing = await getAllFlowConnections(this.client);
 
     return this.existing;
   }
@@ -95,36 +99,6 @@ export default class FlowVaultHandler extends DefaultHandler {
     );
   }
 
-  async getAllFlowConnections(): Promise<GetFlowsVaultConnections200ResponseOneOfInner[]> {
-    const allFlowConnections: GetFlowsVaultConnections200ResponseOneOfInner[] = [];
-    // paginate without paginate<T> helper as this is not getAll but getAllConnections
-    // paginate through all flow connections
-    let page = 0;
-    while (true) {
-      const {
-        data: { connections, total },
-      } = await this.client.flows.getAllConnections({
-        page: page,
-        per_page: 100,
-        include_totals: true,
-      });
-
-      // if we get an unexpected response, break the loop to avoid infinite loop
-      if (!isArray(allFlowConnections) || typeof total !== 'number') {
-        break;
-      }
-
-      allFlowConnections.push(...connections);
-      page += 1;
-
-      if (allFlowConnections.length === total) {
-        break;
-      }
-    }
-
-    return allFlowConnections;
-  }
-
   async createVaultConnection(conn): Promise<Asset> {
     if ('ready' in conn) {
       delete conn.ready;
@@ -132,7 +106,7 @@ export default class FlowVaultHandler extends DefaultHandler {
     if ('account_name' in conn) {
       delete conn.account_name;
     }
-    const { data: created } = await this.client.flows.createConnection(conn);
+    const created = await this.client.flows.vault.connections.create(conn);
     return created;
   }
 
@@ -155,13 +129,13 @@ export default class FlowVaultHandler extends DefaultHandler {
 
   async updateVaultConnection(conn) {
     const { id, name, setup } = conn;
-    const params: PatchFlowsVaultConnectionsByIdRequest = {
+    const params: Management.UpdateFlowsVaultConnectionRequestContent = {
       name,
     };
     if (!isEmpty(setup)) {
       params.setup = setup;
     }
-    const updated = await this.client.flows.updateConnection({ id: id }, params);
+    const updated = await this.client.flows.vault.connections.update(id, params);
     return updated;
   }
 
@@ -183,7 +157,7 @@ export default class FlowVaultHandler extends DefaultHandler {
   }
 
   async deleteVaultConnection(conn): Promise<void> {
-    await this.client.flows.deleteConnection({ id: conn.id });
+    await this.client.flows.vault.connections.delete(conn.id);
   }
 
   async deleteVaultConnections(data: Asset[]): Promise<void> {

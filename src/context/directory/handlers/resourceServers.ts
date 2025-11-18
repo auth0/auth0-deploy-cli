@@ -1,4 +1,3 @@
-import { Client, ResourceServer } from 'auth0';
 import path from 'path';
 import fs from 'fs-extra';
 import { constants } from '../../../tools';
@@ -14,6 +13,8 @@ import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { ParsedAsset } from '../../../types';
 import { paginate } from '../../../tools/auth0/client';
+import { ResourceServer } from '../../../tools/auth0/handlers/resourceServers';
+import { Client } from '../../../tools/auth0/handlers/clients';
 
 type ParsedResourceServers = ParsedAsset<'resourceServers', ResourceServer[]>;
 
@@ -47,7 +48,7 @@ async function dump(context: DirectoryContext): Promise<void> {
   fs.ensureDirSync(resourceServersFolder);
 
   if (clients === undefined) {
-    clients = await paginate<Client>(context.mgmtClient.clients.getAll, {
+    clients = await paginate<Client>(context.mgmtClient.clients.list, {
       paginate: true,
       include_totals: true,
     });

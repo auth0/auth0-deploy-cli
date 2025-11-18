@@ -14,55 +14,86 @@ export const localDir = 'local';
 export const testDataDir = path.resolve(localDir, 'testData');
 
 export function mockPagedData(params, key, data) {
+  // SDK v5 Page<T> always returns data as an array, with total as a separate property
+  const pagedResponse = {
+    data,
+    hasNextPage: () => false,
+    getNextPage: () =>
+      Promise.resolve({
+        data: [],
+        hasNextPage: () => false,
+        getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+      }),
+  };
+
   if (params && params.include_totals) {
-    return { data: { [key]: data, total: data.length || 0 } };
+    pagedResponse.total = data.length || 0;
+    return pagedResponse;
   }
-  // For checkpoint pagination (params.take is set), return data with entity key
-  if (params && params.take) {
-    return { data: { [key]: data, total: data.length || 0 } };
-  }
-  return { data };
+
+  return pagedResponse;
 }
 
 export function mockMgmtClient() {
   // Fake Mgmt Client. Bit hacky but good enough for now.
   return {
-    rules: { getAll: (params) => mockPagedData(params, 'rules', []) },
-    hooks: { getAll: (params) => mockPagedData(params, 'hooks', []) },
-    actions: { getAll: () => mockPagedData({ include_totals: true }, 'actions', []) },
-    databases: { getAll: (params) => mockPagedData(params, 'databases', []) },
-    connections: { getAll: (params) => mockPagedData(params, 'connections', []) },
-    resourceServers: { getAll: (params) => mockPagedData(params, 'resource_servers', []) },
-    rulesConfigs: { getAll: (params) => mockPagedData(params, 'rules_configs', []) },
+    rules: { list: (params) => mockPagedData(params, 'rules', []) },
+    hooks: { list: (params) => mockPagedData(params, 'hooks', []) },
+    actions: {
+      list: () => mockPagedData({ include_totals: true }, 'actions', []),
+      triggers: {
+        list: () => {},
+        bindings: {
+          list: (_triggerId) => Promise.resolve({ data: [] }),
+        },
+      },
+    },
+    databases: { list: (params) => mockPagedData(params, 'databases', []) },
+    connections: { list: (params) => mockPagedData(params, 'connections', []) },
+    resourceServers: { list: (params) => mockPagedData(params, 'resource_servers', []) },
+    rulesConfigs: { list: (params) => mockPagedData(params, 'rules_configs', []) },
     emails: {
-      get: () => ({
-        data: {
+      provider: {
+        get: () => ({
           name: 'smtp',
           enabled: true,
-        },
-      }),
+        }),
+      },
     },
-    clientGrants: { getAll: (params) => mockPagedData(params, 'client_grants', []) },
+    clientGrants: { list: (params) => mockPagedData(params, 'client_grants', []) },
     guardian: {
-      getFactors: () => ({ data: [] }),
-      getSmsFactorProviderTwilio: () => ({ data: [] }),
-      getPushNotificationProviderSNS: () => ({ data: [] }),
-      getSmsFactorTemplates: () => ({ data: [] }),
-      getPhoneFactorMessageTypes: () => ({ data: { message_types: ['sms'] } }),
-      getPhoneFactorSelectedProvider: () => ({ data: { provider: 'twilio' } }),
-      getPolicies: () => ({ data: [] }),
+      factors: {
+        list: () => [],
+        sms: {
+          getTwilioProvider: () => [],
+          getTemplates: () => [],
+          getSelectedProvider: () => ({ provider: 'twilio' }),
+        },
+        phone: {
+          getMessageTypes: () => ({ message_types: ['sms'] }),
+          getSelectedProvider: () => ({ provider: 'twilio' }),
+        },
+        pushNotification: {
+          getSnsProvider: () => [],
+        },
+      },
+      policies: {
+        list: () => [],
+      },
     },
     emailTemplates: {
-      get: (template) => ({
-        data: {
-          template: template.templateName,
+      get: (template) => {
+        const templateName = typeof template === 'string' ? template : template.templateName;
+
+        return {
+          template: templateName,
           enabled: true,
           body: 'fake template',
-        },
-      }),
+        };
+      },
     },
     clients: {
-      getAll: (params) => {
+      list: (params) => {
         const client = {
           name: 'Global Client',
           client_id: 'FMfcgxvzLDvPsgpRFKkLVrnKqGgkHhQV',
@@ -75,7 +106,7 @@ export function mockMgmtClient() {
       },
     },
     roles: {
-      getAll: (params) =>
+      list: (params) =>
         mockPagedData(params, 'roles', [
           {
             name: 'App Admin',
@@ -83,82 +114,102 @@ export function mockMgmtClient() {
             description: 'Admin of app',
           },
         ]),
-      getPermissions: (params) =>
-        mockPagedData(params, 'permissions', [
-          {
-            permission_name: 'create:data',
-            resource_server_identifier: 'urn:ref',
-          },
-        ]),
+      permissions: {
+        list: (params) =>
+          mockPagedData(params, 'permissions', [
+            {
+              permission_name: 'create:data',
+              resource_server_identifier: 'urn:ref',
+            },
+          ]),
+      },
     },
     tenants: {
-      getSettings: () =>
-        new Promise((resolve) => {
-          resolve({
-            data: {
+      settings: {
+        get: () =>
+          new Promise((resolve) => {
+            resolve({
               friendly_name: 'Test',
               default_directory: 'users',
               enabled_locales: ['en'],
-            },
-          });
-        }),
-      getCustomTextByLanguage: () => Promise.resolve({ data: {} }),
+            });
+          }),
+      },
+      getCustomTextByLanguage: () => Promise.resolve({}),
     },
     attackProtection: {
-      getBreachedPasswordDetectionConfig: () => ({ data: {} }),
-      getBruteForceConfig: () => ({ data: {} }),
-      getSuspiciousIpThrottlingConfig: () => ({ data: {} }),
+      breachedPasswordDetection: {
+        get: () => ({}),
+      },
+      bruteForceProtection: {
+        get: () => ({}),
+      },
+      suspiciousIpThrottling: {
+        get: () => ({}),
+      },
     },
     branding: {
-      getSettings: () => ({ data: {} }),
-      getDefaultTheme: () => {
-        const err = new Error('Not found');
-        err.statusCode = 404;
-        return Promise.reject(err);
+      get: () => ({}),
+      themes: {
+        getDefault: () => {
+          const err = new Error('Not found');
+          err.statusCode = 404;
+          return Promise.reject(err);
+        },
       },
-      getAllPhoneProviders: () => ({
-        data: [
-          {
-            disabled: false,
-            name: 'twilio',
-            configuration: {
-              sid: 'twilio_sid',
-              default_from: '++15673812247',
-              delivery_methods: ['text', 'voice'],
-            },
-          },
-        ],
-      }),
+      phone: {
+        providers: {
+          list: () => Promise.resolve({ providers: [] }),
+          get: (_id) => Promise.resolve({}),
+          create: (data) => Promise.resolve(data),
+          update: (_id, data) => Promise.resolve(data),
+          delete: (_id) => Promise.resolve(),
+        },
+      },
     },
-    logStreams: { getAll: (params) => mockPagedData(params, 'log_streams', []) },
+    logStreams: { list: () => Promise.resolve([]) },
     prompts: {
-      _getRestClient: (endpoint) => ({
-        get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-      }),
-      getCustomTextByLanguage: () =>
-        new Promise((res) => {
-          res({ data: {} });
-        }),
-      get: () => ({ data: {} }),
-      getAllRenderingSettings: () => Promise.resolve({ data: [] }),
+      customText: {
+        get: (_promptType, _language, _options) => Promise.resolve({}),
+      },
+      partials: {
+        get: (_prompt, _options) => Promise.resolve({}),
+      },
+      rendering: {
+        list: () => Promise.resolve({ data: [] }),
+      },
+      getSettings: () => Promise.resolve(Object.create(null)),
+      updateSettings: () => Promise.resolve({}),
     },
     customDomains: {
-      getAll: (params) => mockPagedData(params, 'customDomains', []),
-      _getRestClient: () => ({}),
+      list: (params) => mockPagedData(params, 'customDomains', []),
     },
-    forms: { getAll: (params) => mockPagedData(params, 'forms', []) },
+    forms: { list: (params) => mockPagedData(params, 'forms', []) },
     flows: {
-      getAll: (params) => mockPagedData(params, 'flows', []),
-      getAllConnections: (params) => mockPagedData(params, 'connections', []),
+      list: (params) => mockPagedData(params, 'flows', []),
+      vault: {
+        connections: {
+          list: (params) => mockPagedData(params, 'connections', []),
+        },
+      },
     },
     selfServiceProfiles: {
-      getAll: (params) => mockPagedData(params, 'selfServiceProfiles', []),
+      list: (params) => mockPagedData(params, 'selfServiceProfiles', []),
     },
     networkAcls: {
-      getAll: (params) => mockPagedData(params, 'network_acls', []),
+      list: (params) => mockPagedData(params, 'network_acls', []),
+    },
+    organizations: {
+      list: (params) => mockPagedData(params, 'organizations', []),
+      enabledConnections: {
+        list: (_orgId, params) => mockPagedData(params, 'enabled_connections', []),
+      },
+      clientGrants: {
+        list: (_orgId, params) => mockPagedData(params, 'client_grants', []),
+      },
     },
     userAttributeProfiles: {
-      getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+      list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
     },
   };
 }

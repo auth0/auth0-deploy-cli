@@ -1,11 +1,11 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { UserAttributeProfile } from 'auth0';
 import { constants } from '../../../tools';
 import DirectoryContext from '..';
 import { dumpJSON, existsMustBeDir, getFiles, loadJSON, sanitize } from '../../../utils';
 import { DirectoryHandler } from '.';
 import { ParsedAsset } from '../../../types';
+import { UserAttributeProfile } from '../../../tools/auth0/handlers/userAttributeProfiles';
 
 type ParsedUserAttributeProfiles = ParsedAsset<
   'userAttributeProfiles',

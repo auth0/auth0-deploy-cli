@@ -1,4 +1,4 @@
-import { GetMessageTypes200Response } from 'auth0';
+import { Management } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
@@ -47,18 +47,10 @@ export default class GuardianPhoneMessageTypesHandler extends DefaultHandler {
   }
 
   async getType(): Promise<Asset | null> {
-    // in case client version does not support the operation
-    if (
-      !this.client.guardian ||
-      typeof this.client.guardian.getPhoneFactorMessageTypes !== 'function'
-    ) {
-      return null;
-    }
-
     if (this.existing) return this.existing;
 
     try {
-      const { data } = await this.client.guardian.getPhoneFactorMessageTypes();
+      const data = await this.client.guardian.factors.phone.getMessageTypes();
       this.existing = data;
     } catch (err) {
       if (isFeatureUnavailableError(err)) {
@@ -82,8 +74,8 @@ export default class GuardianPhoneMessageTypesHandler extends DefaultHandler {
     if (!guardianPhoneFactorMessageTypes || !guardianPhoneFactorMessageTypes.message_types) return;
 
     const data = guardianPhoneFactorMessageTypes;
-    await this.client.guardian.updatePhoneFactorMessageTypes(
-      data as unknown as GetMessageTypes200Response
+    await this.client.guardian.factors.phone.setMessageTypes(
+      data as unknown as Management.SetGuardianFactorPhoneMessageTypesRequestContent
     );
     this.updated += 1;
     this.didUpdate(guardianPhoneFactorMessageTypes);

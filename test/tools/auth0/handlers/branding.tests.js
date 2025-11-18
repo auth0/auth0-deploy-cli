@@ -8,17 +8,17 @@ describe('#branding handler', () => {
     it('should get branding settings if no custom domain configured', async () => {
       const auth0 = {
         branding: {
-          getSettings: () => ({
-            data: {
-              logo_url: 'https://example.com/logo.png',
-            },
+          get: () => ({
+            logo_url: 'https://example.com/logo.png',
           }),
-          getUniversalLoginTemplate: () => ({
-            body: html,
-          }),
+          templates: {
+            getUniversalLogin: () => ({
+              body: html,
+            }),
+          },
         },
         customDomains: {
-          getAll: () => [], // mock no custom domains
+          list: () => [], // mock no custom domains
         },
       };
 
@@ -32,23 +32,19 @@ describe('#branding handler', () => {
     it('should get branding settings and templates if custom domain configured', async () => {
       const auth0 = {
         branding: {
-          getSettings: () => ({
-            data: {
-              logo_url: 'https://example.com/logo.png',
-            },
+          get: () => ({
+            logo_url: 'https://example.com/logo.png',
           }),
-          getUniversalLoginTemplate: () => ({
-            data: {
+          templates: {
+            getUniversalLogin: () => ({
               body: html,
-            },
-          }),
+            }),
+          },
         },
         customDomains: {
-          getAll: () => ({
-            data: [
-              {}, // mock one custom domain.
-            ],
-          }),
+          list: () => [
+            {}, // mock one custom domain.
+          ],
         },
       };
 
@@ -68,17 +64,17 @@ describe('#branding handler', () => {
     it('should return no templates if HTTP 403 error fetching custom domains', async () => {
       const auth0 = {
         branding: {
-          getSettings: () => ({
-            data: {
-              logo_url: 'https://example.com/logo.png',
-            },
+          get: () => ({
+            logo_url: 'https://example.com/logo.png',
           }),
-          getUniversalLoginTemplate: () => ({
-            body: html,
-          }),
+          templates: {
+            getUniversalLogin: () => ({
+              body: html,
+            }),
+          },
         },
         customDomains: {
-          getAll: () => {
+          list: () => {
             const err = new Error('FakeHttpError');
             err.statusCode = 403;
             return Promise.reject(err);
@@ -96,17 +92,17 @@ describe('#branding handler', () => {
     it('should handle insufficient scope error and not export branding templates', async () => {
       const auth0 = {
         branding: {
-          getSettings: () => ({
-            data: {
-              logo_url: 'https://example.com/logo.png',
-            },
+          get: () => ({
+            logo_url: 'https://example.com/logo.png',
           }),
-          getUniversalLoginTemplate: () => ({
-            body: html,
-          }),
+          templates: {
+            getUniversalLogin: () => ({
+              body: html,
+            }),
+          },
         },
         customDomains: {
-          getAll: () => {
+          list: () => {
             const err = new Error('Insufficient scope');
             err.statusCode = 403;
             return Promise.reject(err);
@@ -124,7 +120,7 @@ describe('#branding handler', () => {
     it('should update branding settings without templates if no templates set', (done) => {
       const auth0 = {
         branding: {
-          updateSettings: (data) => {
+          update: (data) => {
             try {
               expect(data).to.be.an('object');
               expect(data.templates).to.equal(undefined);
@@ -134,8 +130,10 @@ describe('#branding handler', () => {
               done(err);
             }
           },
-          setUniversalLoginTemplate: () => {
-            done(new Error('setUniversalLoginTemplate should not have been called.'));
+          templates: {
+            updateUniversalLogin: () => {
+              done(new Error('updateUniversalLogin should not have been called.'));
+            },
           },
         },
       };
@@ -155,7 +153,7 @@ describe('#branding handler', () => {
     it('should update branding settings and templates if templates set', (done) => {
       const auth0 = {
         branding: {
-          updateSettings: (data) => {
+          update: (data) => {
             try {
               expect(data).to.be.an('object');
               expect(data.templates).to.equal(undefined);
@@ -164,14 +162,16 @@ describe('#branding handler', () => {
               done(err);
             }
           },
-          setUniversalLoginTemplate: (data) => {
-            try {
-              expect(data).to.be.an('object');
-              expect(data.template).to.equal(html);
-              done();
-            } catch (err) {
-              done(err);
-            }
+          templates: {
+            updateUniversalLogin: (data) => {
+              try {
+                expect(data).to.be.an('object');
+                expect(data.template).to.equal(html);
+                done();
+              } catch (err) {
+                done(err);
+              }
+            },
           },
         },
       };
@@ -199,7 +199,7 @@ describe('#branding handler', () => {
 
       const auth0 = {
         branding: {
-          updateSettings: (data) => {
+          update: (data) => {
             expect(data).to.deep.equal({
               colors: {
                 primary: '#F8F8F2',
@@ -241,10 +241,10 @@ describe('#branding handler', () => {
 
       const auth0 = {
         branding: {
-          updateSettings: () => {
+          update: () => {
             wasUpdateCalled = true;
             throw new Error(
-              'updateSettings should not have been called because omitted `logo_url` means that no API request needs to be made.'
+              'update should not have been called because omitted `logo_url` means that no API request needs to be made.'
             );
           },
         },
@@ -265,11 +265,13 @@ describe('#branding handler', () => {
     it('should not throw, and be no-op if branding not set in context', async () => {
       const auth0 = {
         branding: {
-          updateSettings: () => {
-            throw new Error('updateSettings should not have been called.');
+          update: () => {
+            throw new Error('update should not have been called.');
           },
-          setUniversalLoginTemplate: () => {
-            throw new Error('setUniversalLoginTemplate should not have been called.');
+          templates: {
+            updateUniversalLogin: () => {
+              throw new Error('updateUniversalLogin should not have been called.');
+            },
           },
         },
       };

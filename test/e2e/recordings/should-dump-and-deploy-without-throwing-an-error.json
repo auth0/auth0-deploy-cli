@@ -158,7 +158,8 @@
                 "22",
                 "18",
                 "12"
-            ]
+            ],
+            "resource_parameter_profile": "audience"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -1208,7 +1209,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
+                    "client_id": "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1232,16 +1233,13 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&strategy=auth0",
+        "path": "/api/v2/connections?take=50&strategy=auth0",
         "body": "",
         "status": 200,
         "response": {
-            "total": 1,
-            "start": 0,
-            "limit": 50,
             "connections": [
                 {
-                    "id": "con_85Lq3efegcuZcVni",
+                    "id": "con_YQIQ8h72LqqSXD75",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -1272,7 +1270,7 @@
                     ],
                     "enabled_clients": [
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                        "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
                     ]
                 }
             ]
@@ -1283,64 +1281,16 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&take=50&strategy=auth0",
-        "body": "",
-        "status": 200,
-        "response": {
-            "connections": [
-                {
-                    "id": "con_85Lq3efegcuZcVni",
-                    "options": {
-                        "mfa": {
-                            "active": true,
-                            "return_enroll_settings": true
-                        },
-                        "passwordPolicy": "good",
-                        "passkey_options": {
-                            "challenge_ui": "both",
-                            "local_enrollment_enabled": true,
-                            "progressive_enrollment_enabled": true
-                        },
-                        "strategy_version": 2,
-                        "authentication_methods": {
-                            "passkey": {
-                                "enabled": false
-                            },
-                            "password": {
-                                "enabled": true
-                            }
-                        },
-                        "brute_force_protection": true
-                    },
-                    "strategy": "auth0",
-                    "name": "Username-Password-Authentication",
-                    "is_domain_connection": false,
-                    "realms": [
-                        "Username-Password-Authentication"
-                    ],
-                    "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
-                    ]
-                }
-            ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/connections/con_85Lq3efegcuZcVni/clients?take=50",
+        "path": "/api/v2/connections/con_YQIQ8h72LqqSXD75/clients?take=50",
         "body": "",
         "status": 200,
         "response": {
             "clients": [
                 {
-                    "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                 },
                 {
-                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                    "client_id": "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
                 }
             ]
         },
@@ -1350,16 +1300,32 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true",
+        "path": "/api/v2/connections/con_YQIQ8h72LqqSXD75/clients?take=50",
         "body": "",
         "status": 200,
         "response": {
-            "total": 2,
-            "start": 0,
-            "limit": 50,
+            "clients": [
+                {
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                },
+                {
+                    "client_id": "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/connections?take=50",
+        "body": "",
+        "status": 200,
+        "response": {
             "connections": [
                 {
-                    "id": "con_6tyEu2hOP8JuHJku",
+                    "id": "con_TZft9UmXrtdJXHZN",
                     "options": {
                         "email": true,
                         "scope": [
@@ -1376,11 +1342,11 @@
                     ],
                     "enabled_clients": [
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                        "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
                     ]
                 },
                 {
-                    "id": "con_85Lq3efegcuZcVni",
+                    "id": "con_YQIQ8h72LqqSXD75",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -1411,7 +1377,7 @@
                     ],
                     "enabled_clients": [
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                        "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
                     ]
                 }
             ]
@@ -1422,85 +1388,35 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&take=50",
-        "body": "",
-        "status": 200,
-        "response": {
-            "connections": [
-                {
-                    "id": "con_6tyEu2hOP8JuHJku",
-                    "options": {
-                        "email": true,
-                        "scope": [
-                            "email",
-                            "profile"
-                        ],
-                        "profile": true
-                    },
-                    "strategy": "google-oauth2",
-                    "name": "google-oauth2",
-                    "is_domain_connection": false,
-                    "realms": [
-                        "google-oauth2"
-                    ],
-                    "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
-                    ]
-                },
-                {
-                    "id": "con_85Lq3efegcuZcVni",
-                    "options": {
-                        "mfa": {
-                            "active": true,
-                            "return_enroll_settings": true
-                        },
-                        "passwordPolicy": "good",
-                        "passkey_options": {
-                            "challenge_ui": "both",
-                            "local_enrollment_enabled": true,
-                            "progressive_enrollment_enabled": true
-                        },
-                        "strategy_version": 2,
-                        "authentication_methods": {
-                            "passkey": {
-                                "enabled": false
-                            },
-                            "password": {
-                                "enabled": true
-                            }
-                        },
-                        "brute_force_protection": true
-                    },
-                    "strategy": "auth0",
-                    "name": "Username-Password-Authentication",
-                    "is_domain_connection": false,
-                    "realms": [
-                        "Username-Password-Authentication"
-                    ],
-                    "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
-                    ]
-                }
-            ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/connections/con_6tyEu2hOP8JuHJku/clients?take=50",
+        "path": "/api/v2/connections/con_TZft9UmXrtdJXHZN/clients?take=50",
         "body": "",
         "status": 200,
         "response": {
             "clients": [
                 {
-                    "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                 },
                 {
+                    "client_id": "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/connections/con_TZft9UmXrtdJXHZN/clients?take=50",
+        "body": "",
+        "status": 200,
+        "response": {
+            "clients": [
+                {
                     "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                },
+                {
+                    "client_id": "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
                 }
             ]
         },
@@ -1573,7 +1489,8 @@
                 "22",
                 "18",
                 "12"
-            ]
+            ],
+            "resource_parameter_profile": "audience"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -1614,7 +1531,37 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/async_approval",
+        "path": "/api/v2/email-templates/stolen_credentials",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/user_invitation",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/verify_email_by_code",
         "body": "",
         "status": 404,
         "response": {
@@ -1644,7 +1591,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/enrollment_email",
+        "path": "/api/v2/email-templates/blocked_account",
         "body": "",
         "status": 404,
         "response": {
@@ -1659,37 +1606,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/reset_email_by_code",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/change_password",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/password_reset",
+        "path": "/api/v2/email-templates/async_approval",
         "body": "",
         "status": 404,
         "response": {
@@ -1723,6 +1640,21 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/email-templates/password_reset",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/email-templates/reset_email",
         "body": "",
         "status": 404,
@@ -1738,7 +1670,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/user_invitation",
+        "path": "/api/v2/email-templates/reset_email_by_code",
         "body": "",
         "status": 404,
         "response": {
@@ -1753,7 +1685,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/blocked_account",
+        "path": "/api/v2/email-templates/enrollment_email",
         "body": "",
         "status": 404,
         "response": {
@@ -1768,7 +1700,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/verify_email_by_code",
+        "path": "/api/v2/email-templates/change_password",
         "body": "",
         "status": 404,
         "response": {
@@ -1783,28 +1715,10 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/stolen_credentials",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/client-grants?per_page=100&page=0&include_totals=true",
+        "path": "/api/v2/client-grants?take=50",
         "body": "",
         "status": 200,
         "response": {
-            "total": 1,
-            "start": 0,
-            "limit": 100,
             "client_grants": [
                 {
                     "id": "cgr_pbwejzhwoujrsNE8",
@@ -2296,18 +2210,9 @@
                 "22",
                 "18",
                 "12"
-            ]
+            ],
+            "resource_parameter_profile": "audience"
         },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/prompts/login-id/custom-text/en",
-        "body": "",
-        "status": 200,
-        "response": {},
         "rawHeaders": [],
         "responseIsBinary": false
     },
@@ -2324,7 +2229,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login-password/custom-text/en",
+        "path": "/api/v2/prompts/login-id/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2345,6 +2250,16 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/prompts/login-email-verification/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/login-password/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2424,7 +2339,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/consent/custom-text/en",
+        "path": "/api/v2/prompts/custom-form/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2434,7 +2349,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/custom-form/custom-text/en",
+        "path": "/api/v2/prompts/consent/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2766,6 +2681,7 @@
                     "version": "v2",
                     "status": "CURRENT",
                     "runtimes": [
+                        "node12",
                         "node18-actions",
                         "node22"
                     ],
@@ -2791,7 +2707,6 @@
                     "version": "v2",
                     "status": "CURRENT",
                     "runtimes": [
-                        "node12",
                         "node18-actions",
                         "node22"
                     ],
@@ -2914,12 +2829,12 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/triggers/post-login/bindings",
+        "path": "/api/v2/actions/triggers/post-login/bindings?page=0&per_page=50",
         "body": "",
         "status": 200,
         "response": {
             "bindings": [],
-            "per_page": 20
+            "per_page": 50
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -2927,12 +2842,12 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/triggers/credentials-exchange/bindings",
+        "path": "/api/v2/actions/triggers/credentials-exchange/bindings?page=0&per_page=50",
         "body": "",
         "status": 200,
         "response": {
             "bindings": [],
-            "per_page": 20
+            "per_page": 50
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -2940,12 +2855,12 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/triggers/pre-user-registration/bindings",
+        "path": "/api/v2/actions/triggers/pre-user-registration/bindings?page=0&per_page=50",
         "body": "",
         "status": 200,
         "response": {
             "bindings": [],
-            "per_page": 20
+            "per_page": 50
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -2953,12 +2868,12 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/triggers/post-user-registration/bindings",
+        "path": "/api/v2/actions/triggers/post-user-registration/bindings?page=0&per_page=50",
         "body": "",
         "status": 200,
         "response": {
             "bindings": [],
-            "per_page": 20
+            "per_page": 50
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -2966,12 +2881,12 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/triggers/post-change-password/bindings",
+        "path": "/api/v2/actions/triggers/post-change-password/bindings?page=0&per_page=50",
         "body": "",
         "status": 200,
         "response": {
             "bindings": [],
-            "per_page": 20
+            "per_page": 50
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -2979,12 +2894,12 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/triggers/send-phone-message/bindings",
+        "path": "/api/v2/actions/triggers/send-phone-message/bindings?page=0&per_page=50",
         "body": "",
         "status": 200,
         "response": {
             "bindings": [],
-            "per_page": 20
+            "per_page": 50
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -2992,12 +2907,12 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/triggers/password-reset-post-challenge/bindings",
+        "path": "/api/v2/actions/triggers/password-reset-post-challenge/bindings?page=0&per_page=50",
         "body": "",
         "status": 200,
         "response": {
             "bindings": [],
-            "per_page": 20
+            "per_page": 50
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3005,12 +2920,12 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/triggers/login-post-identifier/bindings",
+        "path": "/api/v2/actions/triggers/login-post-identifier/bindings?page=0&per_page=50",
         "body": "",
         "status": 200,
         "response": {
             "bindings": [],
-            "per_page": 20
+            "per_page": 50
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3018,12 +2933,12 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/triggers/custom-phone-provider/bindings",
+        "path": "/api/v2/actions/triggers/custom-phone-provider/bindings?page=0&per_page=50",
         "body": "",
         "status": 200,
         "response": {
             "bindings": [],
-            "per_page": 20
+            "per_page": 50
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3031,12 +2946,12 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/triggers/custom-email-provider/bindings",
+        "path": "/api/v2/actions/triggers/custom-email-provider/bindings?page=0&per_page=50",
         "body": "",
         "status": 200,
         "response": {
             "bindings": [],
-            "per_page": 20
+            "per_page": 50
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3044,12 +2959,12 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/triggers/custom-token-exchange/bindings",
+        "path": "/api/v2/actions/triggers/custom-token-exchange/bindings?page=0&per_page=50",
         "body": "",
         "status": 200,
         "response": {
             "bindings": [],
-            "per_page": 20
+            "per_page": 50
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3057,12 +2972,12 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/actions/triggers/event-stream/bindings",
+        "path": "/api/v2/actions/triggers/event-stream/bindings?page=0&per_page=50",
         "body": "",
         "status": 200,
         "response": {
             "bindings": [],
-            "per_page": 20
+            "per_page": 50
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3070,14 +2985,11 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/organizations?include_totals=true",
+        "path": "/api/v2/organizations?take=50",
         "body": "",
         "status": 200,
         "response": {
-            "organizations": [],
-            "start": 0,
-            "limit": 50,
-            "total": 0
+            "organizations": []
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3178,7 +3090,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
+                    "client_id": "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3239,11 +3151,18 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/organizations?include_totals=true&take=50",
+        "path": "/api/v2/attack-protection/brute-force-protection",
         "body": "",
         "status": 200,
         "response": {
-            "organizations": []
+            "enabled": true,
+            "shields": [
+                "block",
+                "user_notification"
+            ],
+            "mode": "count_per_identifier_and_ip",
+            "allowlist": [],
+            "max_attempts": 10
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3267,25 +3186,6 @@
                     "shields": []
                 }
             }
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/attack-protection/brute-force-protection",
-        "body": "",
-        "status": 200,
-        "response": {
-            "enabled": true,
-            "shields": [
-                "block",
-                "user_notification"
-            ],
-            "mode": "count_per_identifier_and_ip",
-            "allowlist": [],
-            "max_attempts": 10
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3320,6 +3220,58 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/attack-protection/captcha",
+        "body": "",
+        "status": 200,
+        "response": {
+            "active_provider_id": "auth_challenge",
+            "simple_captcha": {},
+            "auth_challenge": {
+                "fail_open": false
+            },
+            "recaptcha_v2": {
+                "site_key": ""
+            },
+            "recaptcha_enterprise": {
+                "site_key": "",
+                "project_id": ""
+            },
+            "hcaptcha": {
+                "site_key": ""
+            },
+            "friendly_captcha": {
+                "site_key": ""
+            },
+            "arkose": {
+                "site_key": "",
+                "client_subdomain": "client-api",
+                "verify_subdomain": "verify-api",
+                "fail_open": false
+            }
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/attack-protection/bot-detection",
+        "body": "",
+        "status": 200,
+        "response": {
+            "challenge_password_policy": "never",
+            "challenge_passwordless_policy": "never",
+            "challenge_password_reset_policy": "never",
+            "allowlist": [],
+            "bot_detection_level": "medium",
+            "monitoring_mode_enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/log-streams",
         "body": "",
         "status": 200,
@@ -3334,18 +3286,6 @@
         "body": "",
         "status": 200,
         "response": [],
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/custom-domains?take=50",
-        "body": "",
-        "status": 200,
-        "response": {
-            "custom_domains": []
-        },
         "rawHeaders": [],
         "responseIsBinary": false
     },
@@ -3367,6 +3307,21 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/flows?page=0&per_page=100&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 100,
+            "start": 0,
+            "total": 0,
+            "flows": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/forms?page=0&per_page=100&include_totals=true",
         "body": "",
         "status": 200,
@@ -3380,24 +3335,9 @@
                     "name": "Blank-form",
                     "flow_count": 0,
                     "created_at": "2024-11-26T11:58:18.187Z",
-                    "updated_at": "2025-10-31T09:34:07.401Z"
+                    "updated_at": "2025-11-14T06:56:46.159Z"
                 }
             ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/flows?page=0&per_page=100&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "limit": 100,
-            "start": 0,
-            "total": 0,
-            "flows": []
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3466,22 +3406,7 @@
                 }
             },
             "created_at": "2024-11-26T11:58:18.187Z",
-            "updated_at": "2025-10-31T09:34:07.401Z"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/flows/vault/connections?page=0&per_page=100&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "limit": 100,
-            "start": 0,
-            "total": 0,
-            "connections": []
+            "updated_at": "2025-11-14T06:56:46.159Z"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3504,11 +3429,56 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/flows/vault/connections?page=0&per_page=100&include_totals=true",
+        "path": "/api/v2/flows/vault/connections?page=0&per_page=50&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
-            "limit": 100,
+            "limit": 50,
+            "start": 0,
+            "total": 0,
+            "connections": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/flows/vault/connections?page=0&per_page=50&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 50,
+            "start": 0,
+            "total": 0,
+            "connections": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/flows/vault/connections?page=0&per_page=50&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 50,
+            "start": 0,
+            "total": 0,
+            "connections": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/flows/vault/connections?page=0&per_page=50&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 50,
             "start": 0,
             "total": 0,
             "connections": []
@@ -3545,7 +3515,7 @@
                         "okta"
                     ],
                     "created_at": "2024-11-26T11:58:18.962Z",
-                    "updated_at": "2025-10-31T06:06:31.353Z",
+                    "updated_at": "2025-10-31T14:59:23.732Z",
                     "branding": {
                         "colors": {
                             "primary": "#19aecc"
@@ -3597,7 +3567,7 @@
                         }
                     },
                     "created_at": "2025-09-09T04:41:43.671Z",
-                    "updated_at": "2025-10-31T06:06:16.461Z",
+                    "updated_at": "2025-11-18T03:34:46.530Z",
                     "id": "acl_wpZ6oScRU5L6QKAxMUMHmx"
                 }
             ]
@@ -3609,61 +3579,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/user-attribute-profiles?take=10",
-        "body": "",
-        "status": 200,
-        "response": {
-            "user_attribute_profiles": [
-                {
-                    "id": "uap_1csDj3szFsgxGS1oTZTdFm",
-                    "name": "test-user-attribute-profile-2",
-                    "user_id": {
-                        "oidc_mapping": "sub",
-                        "saml_mapping": [
-                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
-                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
-                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-                        ],
-                        "scim_mapping": "externalId"
-                    },
-                    "user_attributes": {
-                        "email": {
-                            "label": "Email",
-                            "description": "Email of the User",
-                            "auth0_mapping": "email",
-                            "profile_required": true
-                        }
-                    }
-                },
-                {
-                    "id": "uap_1csDj3sAVu6n5eTzLw6XZg",
-                    "name": "test-user-attribute-profile",
-                    "user_id": {
-                        "oidc_mapping": "sub",
-                        "saml_mapping": [
-                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
-                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
-                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-                        ],
-                        "scim_mapping": "externalId"
-                    },
-                    "user_attributes": {
-                        "email": {
-                            "label": "Email",
-                            "description": "Email of the User",
-                            "auth0_mapping": "email",
-                            "profile_required": true
-                        }
-                    }
-                }
-            ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/user-attribute-profiles?take=50",
         "body": "",
         "status": 200,
         "response": {
@@ -5005,7 +4920,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
+                    "client_id": "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -5029,7 +4944,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/clients/p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
+        "path": "/api/v2/clients/wIkGgCzD5FjG37vxaj11fUPbUw83iTj7",
         "body": {
             "name": "Default App",
             "async_approval_notification_channels": [
@@ -5094,7 +5009,7 @@
                     "subject": "/CN=auth0-deploy-cli-e2e.us.auth0.com"
                 }
             ],
-            "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
+            "client_id": "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7",
             "callback_url_template": false,
             "client_secret": "[REDACTED]",
             "jwt_configuration": {
@@ -5130,7 +5045,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/otp",
+        "path": "/api/v2/guardian/factors/webauthn-platform",
         "body": {
             "enabled": false
         },
@@ -5144,7 +5059,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/push-notification",
+        "path": "/api/v2/guardian/factors/otp",
         "body": {
             "enabled": false
         },
@@ -5172,34 +5087,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/webauthn-roaming",
-        "body": {
-            "enabled": false
-        },
-        "status": 200,
-        "response": {
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PUT",
-        "path": "/api/v2/guardian/factors/webauthn-platform",
-        "body": {
-            "enabled": false
-        },
-        "status": 200,
-        "response": {
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PUT",
         "path": "/api/v2/guardian/factors/recovery-code",
         "body": {
             "enabled": false
@@ -5214,7 +5101,35 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
+        "path": "/api/v2/guardian/factors/webauthn-roaming",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
         "path": "/api/v2/guardian/factors/sms",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
+        "path": "/api/v2/guardian/factors/push-notification",
         "body": {
             "enabled": false
         },
@@ -5324,6 +5239,98 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
+        "path": "/api/v2/attack-protection/bot-detection",
+        "body": {
+            "challenge_password_policy": "never",
+            "challenge_passwordless_policy": "never",
+            "challenge_password_reset_policy": "never",
+            "allowlist": [],
+            "bot_detection_level": "medium",
+            "monitoring_mode_enabled": false
+        },
+        "status": 200,
+        "response": {
+            "challenge_password_policy": "never",
+            "challenge_passwordless_policy": "never",
+            "challenge_password_reset_policy": "never",
+            "allowlist": [],
+            "bot_detection_level": "medium",
+            "monitoring_mode_enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/attack-protection/brute-force-protection",
+        "body": {
+            "enabled": true,
+            "shields": [
+                "block",
+                "user_notification"
+            ],
+            "mode": "count_per_identifier_and_ip",
+            "allowlist": [],
+            "max_attempts": 10
+        },
+        "status": 200,
+        "response": {
+            "enabled": true,
+            "shields": [
+                "block",
+                "user_notification"
+            ],
+            "mode": "count_per_identifier_and_ip",
+            "allowlist": [],
+            "max_attempts": 10
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/attack-protection/captcha",
+        "body": {
+            "active_provider_id": "auth_challenge",
+            "auth_challenge": {
+                "fail_open": false
+            }
+        },
+        "status": 200,
+        "response": {
+            "active_provider_id": "auth_challenge",
+            "simple_captcha": {},
+            "auth_challenge": {
+                "fail_open": false
+            },
+            "recaptcha_v2": {
+                "site_key": ""
+            },
+            "recaptcha_enterprise": {
+                "site_key": "",
+                "project_id": ""
+            },
+            "hcaptcha": {
+                "site_key": ""
+            },
+            "friendly_captcha": {
+                "site_key": ""
+            },
+            "arkose": {
+                "site_key": "",
+                "client_subdomain": "client-api",
+                "verify_subdomain": "verify-api",
+                "fail_open": false
+            }
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
         "path": "/api/v2/attack-protection/suspicious-ip-throttling",
         "body": {
             "enabled": true,
@@ -5361,34 +5368,6 @@
                     "rate": 1200
                 }
             }
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PATCH",
-        "path": "/api/v2/attack-protection/brute-force-protection",
-        "body": {
-            "enabled": true,
-            "shields": [
-                "block",
-                "user_notification"
-            ],
-            "mode": "count_per_identifier_and_ip",
-            "allowlist": [],
-            "max_attempts": 10
-        },
-        "status": 200,
-        "response": {
-            "enabled": true,
-            "shields": [
-                "block",
-                "user_notification"
-            ],
-            "mode": "count_per_identifier_and_ip",
-            "allowlist": [],
-            "max_attempts": 10
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -5442,18 +5421,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/custom-domains?take=50",
-        "body": "",
-        "status": 200,
-        "response": {
-            "custom_domains": []
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/network-acls?page=0&per_page=100&include_totals=true",
         "body": "",
         "status": 200,
@@ -5478,7 +5445,7 @@
                         }
                     },
                     "created_at": "2025-09-09T04:41:43.671Z",
-                    "updated_at": "2025-10-31T06:06:16.461Z",
+                    "updated_at": "2025-11-18T03:34:46.530Z",
                     "id": "acl_wpZ6oScRU5L6QKAxMUMHmx"
                 }
             ]
@@ -5488,7 +5455,7 @@
     },
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PUT",
+        "method": "PATCH",
         "path": "/api/v2/network-acls/acl_wpZ6oScRU5L6QKAxMUMHmx",
         "body": {
             "priority": 1,
@@ -5523,7 +5490,7 @@
                 }
             },
             "created_at": "2025-09-09T04:41:43.671Z",
-            "updated_at": "2025-10-31T14:56:40.821Z",
+            "updated_at": "2025-11-18T04:41:07.750Z",
             "id": "acl_wpZ6oScRU5L6QKAxMUMHmx"
         },
         "rawHeaders": [],
@@ -5586,55 +5553,49 @@
     },
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/user-attribute-profiles?take=50",
-        "body": "",
+        "method": "PATCH",
+        "path": "/api/v2/user-attribute-profiles/uap_1csDj3szFsgxGS1oTZTdFm",
+        "body": {
+            "name": "test-user-attribute-profile-2",
+            "user_attributes": {
+                "email": {
+                    "label": "Email",
+                    "description": "Email of the User",
+                    "auth0_mapping": "email",
+                    "profile_required": true
+                }
+            },
+            "user_id": {
+                "oidc_mapping": "sub",
+                "saml_mapping": [
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+                ],
+                "scim_mapping": "externalId"
+            }
+        },
         "status": 200,
         "response": {
-            "user_attribute_profiles": [
-                {
-                    "id": "uap_1csDj3szFsgxGS1oTZTdFm",
-                    "name": "test-user-attribute-profile-2",
-                    "user_id": {
-                        "oidc_mapping": "sub",
-                        "saml_mapping": [
-                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
-                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
-                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-                        ],
-                        "scim_mapping": "externalId"
-                    },
-                    "user_attributes": {
-                        "email": {
-                            "label": "Email",
-                            "description": "Email of the User",
-                            "auth0_mapping": "email",
-                            "profile_required": true
-                        }
-                    }
-                },
-                {
-                    "id": "uap_1csDj3sAVu6n5eTzLw6XZg",
-                    "name": "test-user-attribute-profile",
-                    "user_id": {
-                        "oidc_mapping": "sub",
-                        "saml_mapping": [
-                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
-                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
-                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-                        ],
-                        "scim_mapping": "externalId"
-                    },
-                    "user_attributes": {
-                        "email": {
-                            "label": "Email",
-                            "description": "Email of the User",
-                            "auth0_mapping": "email",
-                            "profile_required": true
-                        }
-                    }
+            "id": "uap_1csDj3szFsgxGS1oTZTdFm",
+            "name": "test-user-attribute-profile-2",
+            "user_id": {
+                "oidc_mapping": "sub",
+                "saml_mapping": [
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+                ],
+                "scim_mapping": "externalId"
+            },
+            "user_attributes": {
+                "email": {
+                    "label": "Email",
+                    "description": "Email of the User",
+                    "auth0_mapping": "email",
+                    "profile_required": true
                 }
-            ]
+            }
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -5667,55 +5628,6 @@
         "response": {
             "id": "uap_1csDj3sAVu6n5eTzLw6XZg",
             "name": "test-user-attribute-profile",
-            "user_id": {
-                "oidc_mapping": "sub",
-                "saml_mapping": [
-                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
-                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
-                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-                ],
-                "scim_mapping": "externalId"
-            },
-            "user_attributes": {
-                "email": {
-                    "label": "Email",
-                    "description": "Email of the User",
-                    "auth0_mapping": "email",
-                    "profile_required": true
-                }
-            }
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PATCH",
-        "path": "/api/v2/user-attribute-profiles/uap_1csDj3szFsgxGS1oTZTdFm",
-        "body": {
-            "name": "test-user-attribute-profile-2",
-            "user_attributes": {
-                "email": {
-                    "label": "Email",
-                    "description": "Email of the User",
-                    "auth0_mapping": "email",
-                    "profile_required": true
-                }
-            },
-            "user_id": {
-                "oidc_mapping": "sub",
-                "saml_mapping": [
-                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
-                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
-                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-                ],
-                "scim_mapping": "externalId"
-            }
-        },
-        "status": 200,
-        "response": {
-            "id": "uap_1csDj3szFsgxGS1oTZTdFm",
-            "name": "test-user-attribute-profile-2",
             "user_id": {
                 "oidc_mapping": "sub",
                 "saml_mapping": [
@@ -5833,7 +5745,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
+                    "client_id": "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -5894,16 +5806,13 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&strategy=auth0",
+        "path": "/api/v2/connections?take=50&strategy=auth0",
         "body": "",
         "status": 200,
         "response": {
-            "total": 1,
-            "start": 0,
-            "limit": 50,
             "connections": [
                 {
-                    "id": "con_85Lq3efegcuZcVni",
+                    "id": "con_YQIQ8h72LqqSXD75",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -5934,7 +5843,7 @@
                     ],
                     "enabled_clients": [
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                        "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
                     ]
                 }
             ]
@@ -5945,13 +5854,13 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&take=50&strategy=auth0",
+        "path": "/api/v2/connections?take=50&strategy=auth0",
         "body": "",
         "status": 200,
         "response": {
             "connections": [
                 {
-                    "id": "con_85Lq3efegcuZcVni",
+                    "id": "con_YQIQ8h72LqqSXD75",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -5982,7 +5891,7 @@
                     ],
                     "enabled_clients": [
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                        "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
                     ]
                 }
             ]
@@ -5993,115 +5902,16 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&strategy=auth0",
-        "body": "",
-        "status": 200,
-        "response": {
-            "total": 1,
-            "start": 0,
-            "limit": 50,
-            "connections": [
-                {
-                    "id": "con_85Lq3efegcuZcVni",
-                    "options": {
-                        "mfa": {
-                            "active": true,
-                            "return_enroll_settings": true
-                        },
-                        "passwordPolicy": "good",
-                        "passkey_options": {
-                            "challenge_ui": "both",
-                            "local_enrollment_enabled": true,
-                            "progressive_enrollment_enabled": true
-                        },
-                        "strategy_version": 2,
-                        "authentication_methods": {
-                            "passkey": {
-                                "enabled": false
-                            },
-                            "password": {
-                                "enabled": true
-                            }
-                        },
-                        "brute_force_protection": true
-                    },
-                    "strategy": "auth0",
-                    "name": "Username-Password-Authentication",
-                    "is_domain_connection": false,
-                    "realms": [
-                        "Username-Password-Authentication"
-                    ],
-                    "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
-                    ]
-                }
-            ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&take=50&strategy=auth0",
-        "body": "",
-        "status": 200,
-        "response": {
-            "connections": [
-                {
-                    "id": "con_85Lq3efegcuZcVni",
-                    "options": {
-                        "mfa": {
-                            "active": true,
-                            "return_enroll_settings": true
-                        },
-                        "passwordPolicy": "good",
-                        "passkey_options": {
-                            "challenge_ui": "both",
-                            "local_enrollment_enabled": true,
-                            "progressive_enrollment_enabled": true
-                        },
-                        "strategy_version": 2,
-                        "authentication_methods": {
-                            "passkey": {
-                                "enabled": false
-                            },
-                            "password": {
-                                "enabled": true
-                            }
-                        },
-                        "brute_force_protection": true
-                    },
-                    "strategy": "auth0",
-                    "name": "Username-Password-Authentication",
-                    "is_domain_connection": false,
-                    "realms": [
-                        "Username-Password-Authentication"
-                    ],
-                    "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
-                    ]
-                }
-            ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/connections/con_85Lq3efegcuZcVni/clients?take=50",
+        "path": "/api/v2/connections/con_YQIQ8h72LqqSXD75/clients?take=50",
         "body": "",
         "status": 200,
         "response": {
             "clients": [
                 {
-                    "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                 },
                 {
-                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                    "client_id": "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
                 }
             ]
         },
@@ -6111,11 +5921,30 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections/con_85Lq3efegcuZcVni",
+        "path": "/api/v2/connections/con_YQIQ8h72LqqSXD75/clients?take=50",
         "body": "",
         "status": 200,
         "response": {
-            "id": "con_85Lq3efegcuZcVni",
+            "clients": [
+                {
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                },
+                {
+                    "client_id": "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/connections/con_YQIQ8h72LqqSXD75",
+        "body": "",
+        "status": 200,
+        "response": {
+            "id": "con_YQIQ8h72LqqSXD75",
             "options": {
                 "mfa": {
                     "active": true,
@@ -6143,7 +5972,7 @@
             "is_domain_connection": false,
             "enabled_clients": [
                 "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
             ],
             "realms": [
                 "Username-Password-Authentication"
@@ -6155,11 +5984,11 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/connections/con_85Lq3efegcuZcVni",
+        "path": "/api/v2/connections/con_YQIQ8h72LqqSXD75",
         "body": {
             "enabled_clients": [
                 "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
             ],
             "is_domain_connection": false,
             "options": {
@@ -6190,7 +6019,7 @@
         },
         "status": 200,
         "response": {
-            "id": "con_85Lq3efegcuZcVni",
+            "id": "con_YQIQ8h72LqqSXD75",
             "options": {
                 "mfa": {
                     "active": true,
@@ -6218,7 +6047,7 @@
             "is_domain_connection": false,
             "enabled_clients": [
                 "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
             ],
             "realms": [
                 "Username-Password-Authentication"
@@ -6230,14 +6059,14 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/connections/con_85Lq3efegcuZcVni/clients",
+        "path": "/api/v2/connections/con_YQIQ8h72LqqSXD75/clients",
         "body": [
             {
                 "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
                 "status": true
             },
             {
-                "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
+                "client_id": "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7",
                 "status": true
             }
         ],
@@ -6342,7 +6171,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
+                    "client_id": "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -6403,16 +6232,13 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true",
+        "path": "/api/v2/connections?take=50",
         "body": "",
         "status": 200,
         "response": {
-            "total": 2,
-            "start": 0,
-            "limit": 50,
             "connections": [
                 {
-                    "id": "con_6tyEu2hOP8JuHJku",
+                    "id": "con_TZft9UmXrtdJXHZN",
                     "options": {
                         "email": true,
                         "scope": [
@@ -6429,11 +6255,11 @@
                     ],
                     "enabled_clients": [
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                        "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
                     ]
                 },
                 {
-                    "id": "con_85Lq3efegcuZcVni",
+                    "id": "con_YQIQ8h72LqqSXD75",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -6464,7 +6290,7 @@
                     ],
                     "enabled_clients": [
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                        "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
                     ]
                 }
             ]
@@ -6475,13 +6301,13 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&take=50",
+        "path": "/api/v2/connections?take=50",
         "body": "",
         "status": 200,
         "response": {
             "connections": [
                 {
-                    "id": "con_6tyEu2hOP8JuHJku",
+                    "id": "con_TZft9UmXrtdJXHZN",
                     "options": {
                         "email": true,
                         "scope": [
@@ -6498,11 +6324,11 @@
                     ],
                     "enabled_clients": [
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                        "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
                     ]
                 },
                 {
-                    "id": "con_85Lq3efegcuZcVni",
+                    "id": "con_YQIQ8h72LqqSXD75",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -6533,7 +6359,7 @@
                     ],
                     "enabled_clients": [
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                        "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
                     ]
                 }
             ]
@@ -6544,157 +6370,35 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "total": 2,
-            "start": 0,
-            "limit": 50,
-            "connections": [
-                {
-                    "id": "con_6tyEu2hOP8JuHJku",
-                    "options": {
-                        "email": true,
-                        "scope": [
-                            "email",
-                            "profile"
-                        ],
-                        "profile": true
-                    },
-                    "strategy": "google-oauth2",
-                    "name": "google-oauth2",
-                    "is_domain_connection": false,
-                    "realms": [
-                        "google-oauth2"
-                    ],
-                    "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
-                    ]
-                },
-                {
-                    "id": "con_85Lq3efegcuZcVni",
-                    "options": {
-                        "mfa": {
-                            "active": true,
-                            "return_enroll_settings": true
-                        },
-                        "passwordPolicy": "good",
-                        "passkey_options": {
-                            "challenge_ui": "both",
-                            "local_enrollment_enabled": true,
-                            "progressive_enrollment_enabled": true
-                        },
-                        "strategy_version": 2,
-                        "authentication_methods": {
-                            "passkey": {
-                                "enabled": false
-                            },
-                            "password": {
-                                "enabled": true
-                            }
-                        },
-                        "brute_force_protection": true
-                    },
-                    "strategy": "auth0",
-                    "name": "Username-Password-Authentication",
-                    "is_domain_connection": false,
-                    "realms": [
-                        "Username-Password-Authentication"
-                    ],
-                    "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
-                    ]
-                }
-            ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&take=50",
-        "body": "",
-        "status": 200,
-        "response": {
-            "connections": [
-                {
-                    "id": "con_6tyEu2hOP8JuHJku",
-                    "options": {
-                        "email": true,
-                        "scope": [
-                            "email",
-                            "profile"
-                        ],
-                        "profile": true
-                    },
-                    "strategy": "google-oauth2",
-                    "name": "google-oauth2",
-                    "is_domain_connection": false,
-                    "realms": [
-                        "google-oauth2"
-                    ],
-                    "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
-                    ]
-                },
-                {
-                    "id": "con_85Lq3efegcuZcVni",
-                    "options": {
-                        "mfa": {
-                            "active": true,
-                            "return_enroll_settings": true
-                        },
-                        "passwordPolicy": "good",
-                        "passkey_options": {
-                            "challenge_ui": "both",
-                            "local_enrollment_enabled": true,
-                            "progressive_enrollment_enabled": true
-                        },
-                        "strategy_version": 2,
-                        "authentication_methods": {
-                            "passkey": {
-                                "enabled": false
-                            },
-                            "password": {
-                                "enabled": true
-                            }
-                        },
-                        "brute_force_protection": true
-                    },
-                    "strategy": "auth0",
-                    "name": "Username-Password-Authentication",
-                    "is_domain_connection": false,
-                    "realms": [
-                        "Username-Password-Authentication"
-                    ],
-                    "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
-                    ]
-                }
-            ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/connections/con_6tyEu2hOP8JuHJku/clients?take=50",
+        "path": "/api/v2/connections/con_TZft9UmXrtdJXHZN/clients?take=50",
         "body": "",
         "status": 200,
         "response": {
             "clients": [
                 {
-                    "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                 },
                 {
+                    "client_id": "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/connections/con_TZft9UmXrtdJXHZN/clients?take=50",
+        "body": "",
+        "status": 200,
+        "response": {
+            "clients": [
+                {
                     "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                },
+                {
+                    "client_id": "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
                 }
             ]
         },
@@ -6704,11 +6408,11 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/connections/con_6tyEu2hOP8JuHJku",
+        "path": "/api/v2/connections/con_TZft9UmXrtdJXHZN",
         "body": {
             "enabled_clients": [
                 "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
             ],
             "is_domain_connection": false,
             "options": {
@@ -6722,7 +6426,7 @@
         },
         "status": 200,
         "response": {
-            "id": "con_6tyEu2hOP8JuHJku",
+            "id": "con_TZft9UmXrtdJXHZN",
             "options": {
                 "email": true,
                 "scope": [
@@ -6736,7 +6440,7 @@
             "is_domain_connection": false,
             "enabled_clients": [
                 "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
             ],
             "realms": [
                 "google-oauth2"
@@ -6748,14 +6452,14 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/connections/con_6tyEu2hOP8JuHJku/clients",
+        "path": "/api/v2/connections/con_TZft9UmXrtdJXHZN/clients",
         "body": [
             {
                 "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
                 "status": true
             },
             {
-                "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
+                "client_id": "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7",
                 "status": true
             }
         ],
@@ -6897,7 +6601,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
+                    "client_id": "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -6958,13 +6662,10 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/client-grants?per_page=100&page=0&include_totals=true",
+        "path": "/api/v2/client-grants?take=50",
         "body": "",
         "status": 200,
         "response": {
-            "total": 1,
-            "start": 0,
-            "limit": 100,
             "client_grants": [
                 {
                     "id": "cgr_pbwejzhwoujrsNE8",
@@ -7250,7 +6951,7 @@
                         "okta"
                     ],
                     "created_at": "2024-11-26T11:58:18.962Z",
-                    "updated_at": "2025-10-31T06:06:31.353Z",
+                    "updated_at": "2025-10-31T14:59:23.732Z",
                     "branding": {
                         "colors": {
                             "primary": "#19aecc"
@@ -7326,7 +7027,7 @@
                 "okta"
             ],
             "created_at": "2024-11-26T11:58:18.962Z",
-            "updated_at": "2025-10-31T14:56:52.430Z",
+            "updated_at": "2025-11-18T04:41:17.205Z",
             "branding": {
                 "colors": {
                     "primary": "#19aecc"
@@ -7415,14 +7116,11 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/organizations?include_totals=true",
+        "path": "/api/v2/organizations?take=50",
         "body": "",
         "status": 200,
         "response": {
-            "organizations": [],
-            "start": 0,
-            "limit": 50,
-            "total": 0
+            "organizations": []
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -7523,7 +7221,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
+                    "client_id": "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -7584,28 +7282,13 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/organizations?include_totals=true&take=50",
+        "path": "/api/v2/connections?take=50",
         "body": "",
         "status": 200,
         "response": {
-            "organizations": []
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/connections?include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "total": 2,
-            "start": 0,
-            "limit": 50,
             "connections": [
                 {
-                    "id": "con_6tyEu2hOP8JuHJku",
+                    "id": "con_TZft9UmXrtdJXHZN",
                     "options": {
                         "email": true,
                         "scope": [
@@ -7622,11 +7305,11 @@
                     ],
                     "enabled_clients": [
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                        "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
                     ]
                 },
                 {
-                    "id": "con_85Lq3efegcuZcVni",
+                    "id": "con_YQIQ8h72LqqSXD75",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -7657,7 +7340,7 @@
                     ],
                     "enabled_clients": [
                         "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
+                        "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7"
                     ]
                 }
             ]
@@ -7668,82 +7351,164 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections?include_totals=true&take=50",
+        "path": "/api/v2/clients?page=0&per_page=100&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
-            "connections": [
-                {
-                    "id": "con_6tyEu2hOP8JuHJku",
-                    "options": {
-                        "email": true,
-                        "scope": [
-                            "email",
-                            "profile"
-                        ],
-                        "profile": true
-                    },
-                    "strategy": "google-oauth2",
-                    "name": "google-oauth2",
-                    "is_domain_connection": false,
-                    "realms": [
-                        "google-oauth2"
-                    ],
-                    "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
-                    ]
-                },
-                {
-                    "id": "con_85Lq3efegcuZcVni",
-                    "options": {
-                        "mfa": {
-                            "active": true,
-                            "return_enroll_settings": true
-                        },
-                        "passwordPolicy": "good",
-                        "passkey_options": {
-                            "challenge_ui": "both",
-                            "local_enrollment_enabled": true,
-                            "progressive_enrollment_enabled": true
-                        },
-                        "strategy_version": 2,
-                        "authentication_methods": {
-                            "passkey": {
-                                "enabled": false
-                            },
-                            "password": {
-                                "enabled": true
-                            }
-                        },
-                        "brute_force_protection": true
-                    },
-                    "strategy": "auth0",
-                    "name": "Username-Password-Authentication",
-                    "is_domain_connection": false,
-                    "realms": [
-                        "Username-Password-Authentication"
-                    ],
-                    "enabled_clients": [
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                        "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg"
-                    ]
-                }
-            ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/client-grants?per_page=100&page=0&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "total": 1,
+            "total": 3,
             "start": 0,
             "limit": 100,
+            "clients": [
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Deploy CLI",
+                    "is_first_party": true,
+                    "oidc_conformant": true,
+                    "sso_disabled": false,
+                    "cross_origin_auth": false,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "cross_origin_authentication": true,
+                    "allowed_clients": [],
+                    "callbacks": [],
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
+                        "client_credentials",
+                        "implicit",
+                        "authorization_code",
+                        "refresh_token"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "async_approval_notification_channels": [
+                        "guardian-push"
+                    ],
+                    "name": "Default App",
+                    "callbacks": [],
+                    "cross_origin_auth": false,
+                    "is_first_party": true,
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "wIkGgCzD5FjG37vxaj11fUPbUw83iTj7",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": true,
+                    "callbacks": [],
+                    "is_first_party": true,
+                    "name": "All Applications",
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "owners": [
+                        "mr|samlp|okta|will.vedder@auth0.com",
+                        "mr|google-oauth2|102002633619863830825",
+                        "mr|samlp|okta|frederik.prijck@auth0.com",
+                        "mr|google-oauth2|109614534713742077035",
+                        "mr|google-oauth2|116771660953104383819",
+                        "mr|google-oauth2|112839029247827700155",
+                        "mr|samlp|okta|ewan.harris@auth0.com"
+                    ],
+                    "custom_login_page": "<html>TEST123</html>\n",
+                    "cross_origin_authentication": true,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "Isi93ibGHIGwmdYjsLwTOn7Gu7nwxU3V",
+                    "client_secret": "[REDACTED]",
+                    "custom_login_page_on": true
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/client-grants?take=50",
+        "body": "",
+        "status": 200,
+        "response": {
             "client_grants": [
                 {
                     "id": "cgr_pbwejzhwoujrsNE8",
@@ -7988,160 +7753,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?page=0&per_page=100&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "total": 3,
-            "start": 0,
-            "limit": 100,
-            "clients": [
-                {
-                    "tenant": "auth0-deploy-cli-e2e",
-                    "global": false,
-                    "is_token_endpoint_ip_header_trusted": false,
-                    "name": "Deploy CLI",
-                    "is_first_party": true,
-                    "oidc_conformant": true,
-                    "sso_disabled": false,
-                    "cross_origin_auth": false,
-                    "refresh_token": {
-                        "expiration_type": "non-expiring",
-                        "leeway": 0,
-                        "infinite_token_lifetime": true,
-                        "infinite_idle_token_lifetime": true,
-                        "token_lifetime": 31557600,
-                        "idle_token_lifetime": 2592000,
-                        "rotation_type": "non-rotating"
-                    },
-                    "cross_origin_authentication": true,
-                    "allowed_clients": [],
-                    "callbacks": [],
-                    "native_social_login": {
-                        "apple": {
-                            "enabled": false
-                        },
-                        "facebook": {
-                            "enabled": false
-                        }
-                    },
-                    "signing_keys": [
-                        {
-                            "cert": "[REDACTED]",
-                            "pkcs7": "[REDACTED]",
-                            "subject": "deprecated"
-                        }
-                    ],
-                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                    "callback_url_template": false,
-                    "client_secret": "[REDACTED]",
-                    "jwt_configuration": {
-                        "alg": "RS256",
-                        "lifetime_in_seconds": 36000,
-                        "secret_encoded": false
-                    },
-                    "client_aliases": [],
-                    "token_endpoint_auth_method": "client_secret_post",
-                    "app_type": "non_interactive",
-                    "grant_types": [
-                        "client_credentials",
-                        "implicit",
-                        "authorization_code",
-                        "refresh_token"
-                    ],
-                    "custom_login_page_on": true
-                },
-                {
-                    "tenant": "auth0-deploy-cli-e2e",
-                    "global": false,
-                    "is_token_endpoint_ip_header_trusted": false,
-                    "async_approval_notification_channels": [
-                        "guardian-push"
-                    ],
-                    "name": "Default App",
-                    "callbacks": [],
-                    "cross_origin_auth": false,
-                    "is_first_party": true,
-                    "oidc_conformant": true,
-                    "refresh_token": {
-                        "expiration_type": "non-expiring",
-                        "leeway": 0,
-                        "infinite_token_lifetime": true,
-                        "infinite_idle_token_lifetime": true,
-                        "token_lifetime": 2592000,
-                        "idle_token_lifetime": 1296000,
-                        "rotation_type": "non-rotating"
-                    },
-                    "sso_disabled": false,
-                    "cross_origin_authentication": false,
-                    "signing_keys": [
-                        {
-                            "cert": "[REDACTED]",
-                            "pkcs7": "[REDACTED]",
-                            "subject": "deprecated"
-                        }
-                    ],
-                    "client_id": "p6AdI4eB3aIQ90CHsBP4rSo7KS0oeKmg",
-                    "callback_url_template": false,
-                    "client_secret": "[REDACTED]",
-                    "jwt_configuration": {
-                        "alg": "RS256",
-                        "lifetime_in_seconds": 36000,
-                        "secret_encoded": false
-                    },
-                    "grant_types": [
-                        "authorization_code",
-                        "implicit",
-                        "refresh_token",
-                        "client_credentials"
-                    ],
-                    "custom_login_page_on": true
-                },
-                {
-                    "tenant": "auth0-deploy-cli-e2e",
-                    "global": true,
-                    "callbacks": [],
-                    "is_first_party": true,
-                    "name": "All Applications",
-                    "refresh_token": {
-                        "expiration_type": "non-expiring",
-                        "leeway": 0,
-                        "infinite_token_lifetime": true,
-                        "infinite_idle_token_lifetime": true,
-                        "token_lifetime": 2592000,
-                        "idle_token_lifetime": 1296000,
-                        "rotation_type": "non-rotating"
-                    },
-                    "owners": [
-                        "mr|samlp|okta|will.vedder@auth0.com",
-                        "mr|google-oauth2|102002633619863830825",
-                        "mr|samlp|okta|frederik.prijck@auth0.com",
-                        "mr|google-oauth2|109614534713742077035",
-                        "mr|google-oauth2|116771660953104383819",
-                        "mr|google-oauth2|112839029247827700155",
-                        "mr|samlp|okta|ewan.harris@auth0.com"
-                    ],
-                    "custom_login_page": "<html>TEST123</html>\n",
-                    "cross_origin_authentication": true,
-                    "signing_keys": [
-                        {
-                            "cert": "[REDACTED]",
-                            "pkcs7": "[REDACTED]",
-                            "subject": "deprecated"
-                        }
-                    ],
-                    "client_id": "Isi93ibGHIGwmdYjsLwTOn7Gu7nwxU3V",
-                    "client_secret": "[REDACTED]",
-                    "custom_login_page_on": true
-                }
-            ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/log-streams",
         "body": "",
         "status": 200,
@@ -8152,11 +7763,11 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/flows/vault/connections?page=0&per_page=100&include_totals=true",
+        "path": "/api/v2/flows/vault/connections?page=0&per_page=50&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
-            "limit": 100,
+            "limit": 50,
             "start": 0,
             "total": 0,
             "connections": []
@@ -8167,11 +7778,41 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/flows/vault/connections?page=0&per_page=100&include_totals=true",
+        "path": "/api/v2/flows/vault/connections?page=0&per_page=50&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
-            "limit": 100,
+            "limit": 50,
+            "start": 0,
+            "total": 0,
+            "connections": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/flows/vault/connections?page=0&per_page=50&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 50,
+            "start": 0,
+            "total": 0,
+            "connections": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/flows/vault/connections?page=0&per_page=50&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 50,
             "start": 0,
             "total": 0,
             "connections": []
@@ -8197,11 +7838,11 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/flows/vault/connections?page=0&per_page=100&include_totals=true",
+        "path": "/api/v2/flows/vault/connections?page=0&per_page=50&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
-            "limit": 100,
+            "limit": 50,
             "start": 0,
             "total": 0,
             "connections": []
@@ -8212,14 +7853,14 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/flows?page=0&per_page=100&include_totals=true",
+        "path": "/api/v2/flows/vault/connections?page=0&per_page=50&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
-            "limit": 100,
+            "limit": 50,
             "start": 0,
             "total": 0,
-            "flows": []
+            "connections": []
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -8255,9 +7896,24 @@
                     "name": "Blank-form",
                     "flow_count": 0,
                     "created_at": "2024-11-26T11:58:18.187Z",
-                    "updated_at": "2025-10-31T09:34:07.401Z"
+                    "updated_at": "2025-11-14T06:56:46.159Z"
                 }
             ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/flows?page=0&per_page=100&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 100,
+            "start": 0,
+            "total": 0,
+            "flows": []
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -8326,7 +7982,7 @@
                 }
             },
             "created_at": "2024-11-26T11:58:18.187Z",
-            "updated_at": "2025-10-31T09:34:07.401Z"
+            "updated_at": "2025-11-14T06:56:46.159Z"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -8451,7 +8107,7 @@
                 }
             },
             "created_at": "2024-11-26T11:58:18.187Z",
-            "updated_at": "2025-10-31T14:57:00.495Z"
+            "updated_at": "2025-11-18T04:41:25.239Z"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -8482,6 +8138,7 @@
             },
             "friendly_name": "My Test Tenant",
             "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
+            "resource_parameter_profile": "audience",
             "sandbox_version": "12",
             "session_cookie": {
                 "mode": "non-persistent"
@@ -8554,6 +8211,7 @@
                 },
                 "identifier_first": true
             },
+            "resource_parameter_profile": "audience",
             "session_cookie": {
                 "mode": "non-persistent"
             }

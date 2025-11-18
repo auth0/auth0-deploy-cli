@@ -14,18 +14,19 @@ describe('#schema validation tests', async () => {
 
     const mock = {
       clients: {
-        getAll: async (args) =>
+        list: async (args) =>
           new Promise((resolve) => {
             const localArgs = { ...args };
             setTimeout(() => {
               resolve({
-                data: {
-                  start: localArgs.page * localArgs.per_page,
+                data: clients.slice(
+                  localArgs.page * localArgs.per_page,
+                  (localArgs.page + 1) * localArgs.per_page
+                ),
+                response: {
                   total: expectedNbClients,
-                  clients: clients.slice(
-                    localArgs.page * localArgs.per_page,
-                    (localArgs.page + 1) * localArgs.per_page
-                  ),
+                  start: localArgs.page * localArgs.per_page,
+                  limit: localArgs.per_page,
                 },
               });
             }, 10);
@@ -35,7 +36,7 @@ describe('#schema validation tests', async () => {
 
     const pagedManager = client(mock);
 
-    const allClients = await pagedManager.clients.getAll({ paginate: true });
+    const allClients = await pagedManager.clients.list({ paginate: true });
 
     expect(allClients.length).to.eq(expectedNbClients);
   });
@@ -53,15 +54,16 @@ describe('#schema validation tests', async () => {
     const mock = {
       roles: {
         permissions: {
-          getAll: async (localArgs) =>
+          list: async (localArgs) =>
             Promise.resolve({
-              data: {
-                start: localArgs.page * localArgs.per_page,
+              data: permissions.slice(
+                localArgs.page * localArgs.per_page,
+                (localArgs.page + 1) * localArgs.per_page
+              ),
+              response: {
                 total: expectedNbItems,
-                permissions: permissions.slice(
-                  localArgs.page * localArgs.per_page,
-                  (localArgs.page + 1) * localArgs.per_page
-                ),
+                start: localArgs.page * localArgs.per_page,
+                limit: localArgs.per_page,
               },
             }),
         },
@@ -70,7 +72,7 @@ describe('#schema validation tests', async () => {
 
     const pagedManager = client(mock);
 
-    const rolesPermissions = await pagedManager.roles.permissions.getAll({ paginate: true });
+    const rolesPermissions = await pagedManager.roles.permissions.list({ paginate: true });
     expect(rolesPermissions.length).to.eq(expectedNbItems);
   });
 });

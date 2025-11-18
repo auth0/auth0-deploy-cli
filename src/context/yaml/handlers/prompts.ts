@@ -1,6 +1,6 @@
 import path from 'path';
 import { ensureDirSync, writeFileSync } from 'fs-extra';
-import { GetRendering200Response } from 'auth0';
+import { Management } from 'auth0';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { constants } from '../../../tools';
@@ -22,9 +22,9 @@ const getPromptsDirectory = (filePath: string) => path.join(filePath, constants.
 const loadScreenRenderers = (
   context: YAMLContext,
   screenRenderArray: ScreenRenderYAML
-): GetRendering200Response[] => {
+): Management.GetAculResponseContent[] => {
   // Array to store loaded renderers
-  const loadedRenderers: GetRendering200Response[] = [];
+  const loadedRenderers: Management.GetAculResponseContent[] = [];
 
   screenRenderArray.forEach((promptEntry) => {
     // Get the prompt (there will be only one key in each entry)

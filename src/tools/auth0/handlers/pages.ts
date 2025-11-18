@@ -1,8 +1,8 @@
-import { Client } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
 import { paginate } from '../client';
+import { Client } from './clients';
 
 export const supportedPages = constants.PAGE_NAMES.filter((p) => p.includes('.json')).map((p) =>
   p.replace('.json', '')
@@ -15,6 +15,7 @@ export const pageNameMap = {
 };
 
 export type Page = {
+  // eslint-disable-next-line camelcase
   show_log_link?: boolean;
   name: string;
   enabled?: boolean;
@@ -52,9 +53,8 @@ export default class PagesHandler extends DefaultHandler {
   }
 
   async updateLoginPage(page): Promise<void> {
-    const globalClient = await paginate<Client>(this.client.clients.getAll, {
+    const globalClient = await paginate<Client>(this.client.clients.list, {
       paginate: true,
-      include_totals: true,
       is_global: true,
     });
 
@@ -62,13 +62,14 @@ export default class PagesHandler extends DefaultHandler {
       throw new Error('Unable to find global client id when trying to update the login page');
     }
 
-    await this.client.clients.update(
-      { client_id: globalClient[0].client_id },
-      {
-        custom_login_page: page.html,
-        custom_login_page_on: page.enabled,
-      }
-    );
+    if (!globalClient[0].client_id) {
+      throw new Error('Unable to find global client id when trying to update the login page');
+    }
+
+    await this.client.clients.update(globalClient[0].client_id, {
+      custom_login_page: page.html,
+      custom_login_page_on: page.enabled,
+    });
     this.updated += 1;
     this.didUpdate(page);
   }
@@ -88,7 +89,7 @@ export default class PagesHandler extends DefaultHandler {
     }, {});
 
     if (Object.keys(update).length) {
-      await this.client.tenants.updateSettings(update);
+      await this.client.tenants.settings.update(update);
     }
 
     toUpdate.forEach((page) => {
@@ -105,7 +106,7 @@ export default class PagesHandler extends DefaultHandler {
     }[] = [];
 
     // Login page is handled via the global client
-    const globalClient = await paginate<Client>(this.client.clients.getAll, {
+    const globalClient = await paginate<Client>(this.client.clients.list, {
       paginate: true,
       include_totals: true,
       is_global: true,
@@ -122,7 +123,7 @@ export default class PagesHandler extends DefaultHandler {
       });
     }
 
-    const { data: tenantSettings } = await this.client.tenants.getSettings();
+    const tenantSettings = await this.client.tenants.settings.get();
 
     Object.entries(pageNameMap).forEach(([key, name]) => {
       const page = tenantSettings[name];

@@ -1,6 +1,5 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { Client, ResourceServer } from 'auth0';
 import { constants, keywordReplace } from '../../../tools';
 
 import {
@@ -17,6 +16,8 @@ import { ParsedAsset } from '../../../types';
 import { ClientGrant } from '../../../tools/auth0/handlers/clientGrants';
 import { paginate } from '../../../tools/auth0/client';
 import { doesHaveKeywordMarker } from '../../../keywordPreservation';
+import { ResourceServer } from '../../../tools/auth0/handlers/resourceServers';
+import { Client } from '../../../tools/auth0/handlers/clients';
 
 type ParsedClientGrants = ParsedAsset<'clientGrants', ClientGrant[]>;
 
@@ -51,14 +52,14 @@ async function dump(context: DirectoryContext): Promise<void> {
   if (clientGrants.length === 0) return;
 
   const allResourceServers = await paginate<ResourceServer>(
-    context.mgmtClient.resourceServers.getAll,
+    context.mgmtClient.resourceServers.list,
     {
       paginate: true,
       include_totals: true,
     }
   );
 
-  const allClients = await paginate<Client>(context.mgmtClient.clients.getAll, {
+  const allClients = await paginate<Client>(context.mgmtClient.clients.list, {
     paginate: true,
     include_totals: true,
   });
@@ -80,7 +81,9 @@ async function dump(context: DirectoryContext): Promise<void> {
     })();
 
     // Convert audience to the API name for readability
-    const apiName = (grantAudience: string) => {
+    const apiName = (grantAudience: string | undefined) => {
+      if (!grantAudience) return grantAudience;
+
       const associatedAPI = allResourceServers.find(
         (resourceServer) => resourceServer.identifier === grantAudience
       );
