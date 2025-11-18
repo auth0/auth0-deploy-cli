@@ -75,7 +75,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": ">=20.19.0"
+    "node": ">=22.12.0"
   },
   "keywords": [
     "auth0",
