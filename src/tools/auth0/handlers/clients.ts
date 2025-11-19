@@ -112,29 +112,46 @@ export const schema = {
         properties: {
           can_create_session_transfer_token: {
             type: 'boolean',
-            default: false,
             description:
-              'Specifies whether the application (Native app) can use the Token Exchange endpoint to create a session_transfer_token.',
+              "Indicates whether an app can issue a Session Transfer Token through Token Exchange. If set to 'false', the app will not be able to issue a Session Transfer Token. Usually configured in the native application.",
+            default: false,
+          },
+          enforce_cascade_revocation: {
+            type: 'boolean',
+            description:
+              'Indicates whether revoking the parent Refresh Token that initiated a Native to Web flow and was used to issue a Session Transfer Token should trigger a cascade revocation affecting its dependent child entities. Usually configured in the native application.',
+            default: true,
           },
           allowed_authentication_methods: {
-            type: 'array',
+            type: ['array', 'null'],
+            description:
+              'Indicates whether an app can create a session from a Session Transfer Token received via indicated methods. Can include `cookie` and/or `query`. Usually configured in the web application.',
             items: {
               type: 'string',
               enum: ['cookie', 'query'],
             },
-            default: [],
-            description:
-              'Determines the methods allowed for a web application to create a session using a session_transfer_token.',
           },
           enforce_device_binding: {
             type: 'string',
-            enum: ['none', 'ip', 'asn'],
-            default: 'ip',
             description:
-              'Configures the level of device binding enforced when a session_transfer_token is consumed.',
+              "Indicates whether device binding security should be enforced for the app. If set to 'ip', the app will enforce device binding by IP, meaning that consumption of Session Transfer Token must be done from the same IP of the issuer. Likewise, if set to 'asn', device binding is enforced by ASN, meaning consumption of Session Transfer Token must be done from the same ASN as the issuer. If set to 'null', device binding is not enforced. Usually configured in the web application.",
+            enum: ['ip', 'asn', 'none'],
+            default: 'ip',
+          },
+          allow_refresh_token: {
+            type: 'boolean',
+            description:
+              'Indicates whether Refresh Tokens are allowed to be issued when authenticating with a Session Transfer Token. Usually configured in the web application.',
+            default: false,
+          },
+          enforce_online_refresh_tokens: {
+            type: 'boolean',
+            description:
+              "Indicates whether Refresh Tokens created during a native-to-web session are tied to that session's lifetime. This determines if such refresh tokens should be automatically revoked when their corresponding sessions are. Usually configured in the web application.",
+            default: true,
           },
         },
-        additionalProperties: false,
+        additionalProperties: true,
       },
       app_type: {
         type: 'string',
