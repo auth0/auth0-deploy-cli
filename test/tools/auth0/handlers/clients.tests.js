@@ -399,6 +399,40 @@ describe('#clients handler', () => {
       ]);
     });
 
+    it('should get clients with is_first_party when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is enabled', async () => {
+      const getAllParams = [];
+      const auth0 = {
+        clients: {
+          getAll: (params) => {
+            getAllParams.push(params);
+            return mockPagedData(params, 'clients', [
+              { name: 'first party client', client_id: 'first-party-client-id' },
+            ]);
+          },
+        },
+        pool,
+      };
+
+      const testConfig = function (key) {
+        return testConfig.data && testConfig.data[key];
+      };
+      testConfig.data = {
+        AUTH0_CLIENT_ID: 'client_id',
+        AUTH0_ALLOW_DELETE: true,
+        AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS: true,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config: testConfig });
+      await handler.getType();
+
+      expect(getAllParams.length).to.be.greaterThan(0);
+      const firstCallParams = getAllParams[0];
+      expect(firstCallParams).to.be.an('object');
+      expect(firstCallParams.is_first_party).to.equal(true);
+      expect(firstCallParams.include_totals).to.equal(true);
+      expect(firstCallParams.is_global).to.equal(false);
+    });
+
     it('should update client', async () => {
       const auth0 = {
         clients: {
