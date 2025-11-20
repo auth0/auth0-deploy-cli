@@ -377,7 +377,7 @@ connectionProfiles:
     organization:
       show_as_button: "required"
       assign_membership_on_login: "required"
-    connection_name_prefix_template: "org-{organization_name}"
+    connection_name_prefix_template: "org-{org_name}"
     enabled_features:
       - scim
       - universal_logout

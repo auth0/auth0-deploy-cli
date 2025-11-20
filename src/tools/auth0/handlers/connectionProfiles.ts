@@ -2,6 +2,7 @@ import { ConnectionProfile } from 'auth0';
 import { Assets } from '../../../types';
 import DefaultAPIHandler from './default';
 import { paginate } from '../client';
+import log from '../../../logger';
 
 export const schema = {
   type: 'array',
@@ -36,10 +37,10 @@ export const schema = {
         uniqueItems: true,
       },
       connection_config: {
-        type: 'object',
+        type: ['object', 'null'],
       },
       strategy_overrides: {
-        type: 'object',
+        type: ['object', 'null'],
         properties: {
           pingfederate: {
             type: 'object',
@@ -192,15 +193,29 @@ export default class ConnectionProfilesHandler extends DefaultAPIHandler {
   async getType(): Promise<ConnectionProfile[]> {
     if (this.existing) return this.existing;
 
-    const connectionProfiles = await paginate<ConnectionProfile>(
-      this.client.connectionProfiles?.getAll,
-      {
-        checkpoint: true,
-      }
-    );
+    try {
+      const connectionProfiles = await paginate<ConnectionProfile>(
+        this.client.connectionProfiles?.getAll,
+        {
+          checkpoint: true,
+          take: 10,
+        }
+      );
 
-    this.existing = connectionProfiles;
-    return this.existing;
+      this.existing = connectionProfiles;
+      return this.existing;
+    } catch (err) {
+      if (err.statusCode === 404 || err.statusCode === 501) {
+        return [];
+      }
+      if (err.statusCode === 403) {
+        log.debug(
+          'Connections Profile is not enabled for this tenant. Please verify `scope` or contact Auth0 support to enable this feature.'
+        );
+        return [];
+      }
+      throw err;
+    }
   }
 
   async processChanges(assets: Assets): Promise<void> {

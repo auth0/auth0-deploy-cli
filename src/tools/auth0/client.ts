@@ -54,7 +54,7 @@ function checkpointPaginator(
 
     let done = false;
     // use checkpoint pagination to allow fetching 1000+ results
-    newArgs.take = 50;
+    newArgs.take = newArgs.take ?? 50;
 
     while (!done) {
       const rsp = await client.pool
