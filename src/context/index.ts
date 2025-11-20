@@ -26,7 +26,7 @@ const nonPrimitiveProps: (keyof Config)[] = [
   'INCLUDED_PROPS',
 ];
 
-const EA_FEATURES = ['ACUL'];
+const EA_FEATURES = [];
 
 export const setupContext = async (
   config: Config,
