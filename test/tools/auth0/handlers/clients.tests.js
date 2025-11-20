@@ -29,8 +29,11 @@ const someNativeClient = {
   },
   session_transfer: {
     can_create_session_transfer_token: true,
+    enforce_cascade_revocation: true,
     enforce_device_binding: 'ip',
     allowed_authentication_methods: ['cookie', 'query'],
+    allow_refresh_token: true,
+    enforce_online_refresh_tokens: true,
   },
 };
 
@@ -126,8 +129,11 @@ describe('#clients handler', () => {
             });
             expect(data.session_transfer).to.deep.equal({
               can_create_session_transfer_token: true,
+              enforce_cascade_revocation: true,
               enforce_device_binding: 'ip',
               allowed_authentication_methods: ['cookie', 'query'],
+              allow_refresh_token: true,
+              enforce_online_refresh_tokens: true,
             });
             return Promise.resolve({ data });
           },
@@ -331,8 +337,11 @@ describe('#clients handler', () => {
             expect(data.description).to.equal('new description');
             expect(data.session_transfer).to.deep.equal({
               can_create_session_transfer_token: false,
+              enforce_cascade_revocation: false,
               enforce_device_binding: 'asn',
               allowed_authentication_methods: ['query'],
+              allow_refresh_token: false,
+              enforce_online_refresh_tokens: false,
             });
 
             return Promise.resolve({ data });
@@ -360,8 +369,11 @@ describe('#clients handler', () => {
               description: 'new description',
               session_transfer: {
                 can_create_session_transfer_token: false,
+                enforce_cascade_revocation: false,
                 enforce_device_binding: 'asn',
                 allowed_authentication_methods: ['query'],
+                allow_refresh_token: false,
+                enforce_online_refresh_tokens: false,
               },
             },
           ],

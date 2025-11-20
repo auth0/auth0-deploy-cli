@@ -17,7 +17,7 @@ describe('#directory context clients', () => {
         'someClient2.json': '{ "app_type": "@@appType@@", "name": "someClient2" }',
         'customLoginClient.json':
           '{ "app_type": "@@appType@@", "name": "customLoginClient", "custom_login_page": "./customLoginClient_custom_login_page.html", ' +
-          '"session_transfer": { "can_create_session_transfer_token": true,"enforce_device_binding": "ip", "allowed_authentication_methods" : "@@allowedMethods@@"} }',
+          '"session_transfer": { "can_create_session_transfer_token": true, "enforce_cascade_revocation": true, "enforce_device_binding": "ip", "allowed_authentication_methods" : "@@allowedMethods@@", "allow_refresh_token": true, "enforce_online_refresh_tokens": true} }',
         'customLoginClient_custom_login_page.html': 'html code ##appType## @@appType@@',
       },
     };
@@ -39,8 +39,11 @@ describe('#directory context clients', () => {
         custom_login_page: 'html code spa "spa"',
         session_transfer: {
           can_create_session_transfer_token: true,
+          enforce_cascade_revocation: true,
           enforce_device_binding: 'ip',
           allowed_authentication_methods: ['cookie', 'query'],
+          allow_refresh_token: true,
+          enforce_online_refresh_tokens: true,
         },
       },
       { app_type: 'spa', name: 'someClient' },
@@ -101,8 +104,11 @@ describe('#directory context clients', () => {
         custom_login_page: 'html code',
         session_transfer: {
           can_create_session_transfer_token: false,
+          enforce_cascade_revocation: false,
           enforce_device_binding: 'asn',
           allowed_authentication_methods: ['cookie'],
+          allow_refresh_token: false,
+          enforce_online_refresh_tokens: false,
         },
       },
     ];
@@ -113,8 +119,11 @@ describe('#directory context clients', () => {
       custom_login_page: './customLoginClient_custom_login_page.html',
       session_transfer: {
         can_create_session_transfer_token: false,
+        enforce_cascade_revocation: false,
         enforce_device_binding: 'asn',
         allowed_authentication_methods: ['cookie'],
+        allow_refresh_token: false,
+        enforce_online_refresh_tokens: false,
       },
     };
 
