@@ -1,6 +1,13 @@
-import { Assets } from '../../../types';
+import {
+  ClientClientAuthenticationMethods,
+  ClientExpressConfiguration,
+  ClientOrganizationRequireBehaviorEnum,
+} from 'auth0';
+import { Assets, Auth0APIClient } from '../../../types';
 import { paginate } from '../client';
 import DefaultAPIHandler from './default';
+import { getConnectionProfile } from './connectionProfiles';
+import { getUserAttributeProfiles } from './userAttributeProfiles';
 
 const multiResourceRefreshTokenPoliciesSchema = {
   type: ['array', 'null'],
@@ -270,6 +277,9 @@ export type Client = {
   resource_server_identifier?: string;
   custom_login_page?: string;
   custom_login_page_on?: boolean;
+  express_configuration?: ClientExpressConfiguration;
+  client_authentication_methods?: ClientClientAuthenticationMethods | null;
+  organization_require_behavior?: ClientOrganizationRequireBehaviorEnum;
 };
 
 export default class ClientHandler extends DefaultAPIHandler {
@@ -304,6 +314,8 @@ export default class ClientHandler extends DefaultAPIHandler {
     // Do nothing if not set
     if (!clients) return;
 
+    assets.clients = await this.sanitizeMapExpressConfiguration(this.client, clients);
+
     const excludedClients = (assets.exclude && assets.exclude.clients) || [];
 
     const { del, update, create, conflicts } = await this.calcChanges(assets);
@@ -323,7 +335,7 @@ export default class ClientHandler extends DefaultAPIHandler {
     };
 
     // Sanitize client fields
-    const sanitizeClientFields = (list) =>
+    const sanitizeClientFields = (list: Client[]): Client[] =>
       list.map((item) => {
         // For resourceServers app type `resource_server`, don't include `oidc_backchannel_logout`, `oidc_logout`, `refresh_token`
         if (item.app_type === 'resource_server') {
@@ -363,5 +375,48 @@ export default class ClientHandler extends DefaultAPIHandler {
 
     this.existing = clients;
     return this.existing;
+  }
+
+  // convert names back to IDs for express configuration
+  async sanitizeMapExpressConfiguration(
+    auth0Client: Auth0APIClient,
+    clientList: Client[]
+  ): Promise<Client[]> {
+    const clientData = await this.getType();
+    const connectionProfiles = await getConnectionProfile(auth0Client);
+    const userAttributeProfiles = await getUserAttributeProfiles(auth0Client);
+    return clientList.map((client) => {
+      if (!client.express_configuration) return client;
+
+      const userAttributeProfileName = client.express_configuration?.user_attribute_profile_id;
+      if (userAttributeProfileName) {
+        const userAttributeProfile = userAttributeProfiles?.find(
+          (uap) => uap.name === userAttributeProfileName
+        );
+        if (userAttributeProfile?.id) {
+          client.express_configuration.user_attribute_profile_id = userAttributeProfile.id;
+        }
+      }
+
+      const connectionProfileName = client.express_configuration.connection_profile_id;
+      if (connectionProfileName) {
+        const connectionProfile = connectionProfiles?.find(
+          (cp) => cp.name === connectionProfileName
+        );
+        if (connectionProfile?.id) {
+          client.express_configuration.connection_profile_id = connectionProfile.id;
+        }
+      }
+
+      const oktaOinClientName = client.express_configuration.okta_oin_client_id;
+      if (oktaOinClientName) {
+        const oktaOinClient = clientData?.find((c) => c.name === oktaOinClientName);
+        if (oktaOinClient) {
+          client.express_configuration.okta_oin_client_id = oktaOinClient.client_id;
+        }
+      }
+
+      return client;
+    });
   }
 }

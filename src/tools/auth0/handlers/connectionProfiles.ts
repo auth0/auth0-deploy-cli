@@ -1,5 +1,5 @@
 import { ConnectionProfile } from 'auth0';
-import { Assets } from '../../../types';
+import { Assets, Auth0APIClient } from '../../../types';
 import DefaultAPIHandler from './default';
 import { paginate } from '../client';
 import log from '../../../logger';
@@ -177,6 +177,33 @@ export const schema = {
   },
 };
 
+export const getConnectionProfile = async (
+  auth0Client: Auth0APIClient
+): Promise<ConnectionProfile[]> => {
+  try {
+    const connectionProfiles = await paginate<ConnectionProfile>(
+      auth0Client.connectionProfiles?.getAll,
+      {
+        checkpoint: true,
+        take: 10,
+      }
+    );
+
+    return connectionProfiles;
+  } catch (err) {
+    if (err.statusCode === 404 || err.statusCode === 501) {
+      return [];
+    }
+    if (err.statusCode === 403) {
+      log.debug(
+        'Connections Profile is not enabled for this tenant. Please verify `scope` or contact Auth0 support to enable this feature.'
+      );
+      return [];
+    }
+    throw err;
+  }
+};
+
 export default class ConnectionProfilesHandler extends DefaultAPIHandler {
   existing: ConnectionProfile[];
 
@@ -193,29 +220,8 @@ export default class ConnectionProfilesHandler extends DefaultAPIHandler {
   async getType(): Promise<ConnectionProfile[]> {
     if (this.existing) return this.existing;
 
-    try {
-      const connectionProfiles = await paginate<ConnectionProfile>(
-        this.client.connectionProfiles?.getAll,
-        {
-          checkpoint: true,
-          take: 10,
-        }
-      );
-
-      this.existing = connectionProfiles;
-      return this.existing;
-    } catch (err) {
-      if (err.statusCode === 404 || err.statusCode === 501) {
-        return [];
-      }
-      if (err.statusCode === 403) {
-        log.debug(
-          'Connections Profile is not enabled for this tenant. Please verify `scope` or contact Auth0 support to enable this feature.'
-        );
-        return [];
-      }
-      throw err;
-    }
+    this.existing = await getConnectionProfile(this.client);
+    return this.existing;
   }
 
   async processChanges(assets: Assets): Promise<void> {

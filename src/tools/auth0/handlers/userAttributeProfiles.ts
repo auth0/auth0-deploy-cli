@@ -1,7 +1,7 @@
 import { UserAttributeProfile } from 'auth0';
 
 import DefaultAPIHandler, { order } from './default';
-import { Assets } from '../../../types';
+import { Assets, Auth0APIClient } from '../../../types';
 import log from '../../../logger';
 import { paginate } from '../client';
 import { calculateChanges } from '../../calculateChanges';
@@ -193,6 +193,35 @@ export const schema = {
   },
 };
 
+export const getUserAttributeProfiles = async (
+  auth0Client: Auth0APIClient
+): Promise<UserAttributeProfile[]> => {
+  try {
+    const userAttributeProfiles = await paginate<UserAttributeProfile>(
+      auth0Client.userAttributeProfiles.getAll,
+      {
+        checkpoint: true,
+        include_totals: true,
+        is_global: false,
+        take: 10,
+      }
+    );
+
+    return userAttributeProfiles;
+  } catch (err) {
+    if (err.statusCode === 404 || err.statusCode === 501) {
+      return [];
+    }
+    if (err.statusCode === 403) {
+      log.debug(
+        'User Attribute Profile with Self-Service SSO is not enabled for this tenant. Please verify `scope` or contact Auth0 support to enable this feature.'
+      );
+      return [];
+    }
+    throw err;
+  }
+};
+
 export default class UserAttributeProfilesHandler extends DefaultAPIHandler {
   existing: UserAttributeProfile[];
 
@@ -209,30 +238,8 @@ export default class UserAttributeProfilesHandler extends DefaultAPIHandler {
   async getType() {
     if (this.existing) return this.existing;
 
-    try {
-      this.existing = await paginate<UserAttributeProfile>(
-        this.client.userAttributeProfiles.getAll,
-        {
-          checkpoint: true,
-          include_totals: true,
-          is_global: false,
-          take: 10,
-        }
-      );
-
-      return this.existing;
-    } catch (err) {
-      if (err.statusCode === 404 || err.statusCode === 501) {
-        return null;
-      }
-      if (err.statusCode === 403) {
-        log.debug(
-          'User Attribute Profile with Self-Service SSO is not enabled for this tenant. Please verify `scope` or contact Auth0 support to enable this feature.'
-        );
-        return null;
-      }
-      throw err;
-    }
+    this.existing = await getUserAttributeProfiles(this.client);
+    return this.existing;
   }
 
   @order('50')
