@@ -93,7 +93,7 @@ export default class ResourceServersHandler extends DefaultHandler {
       type: 'resourceServers',
       identifiers: ['id', 'identifier'],
       stripCreateFields: ['client_id'],
-      stripUpdateFields: ['identifier', 'client_id'],
+      stripUpdateFields: ['identifier', 'client_id', 'is_system'],
     });
   }
 

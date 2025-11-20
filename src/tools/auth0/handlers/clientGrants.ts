@@ -41,6 +41,7 @@ export type ClientGrant = {
   scope: string[];
   subject_type: ClientGrantSubjectTypeEnum;
   authorization_details_types: string[];
+  is_system?: boolean;
 };
 
 export default class ClientGrantsHandler extends DefaultHandler {
@@ -53,7 +54,7 @@ export default class ClientGrantsHandler extends DefaultHandler {
       id: 'id',
       // @ts-ignore because not sure why two-dimensional array passed in
       identifiers: ['id', ['client_id', 'audience']],
-      stripUpdateFields: ['audience', 'client_id', 'subject_type'],
+      stripUpdateFields: ['audience', 'client_id', 'subject_type', 'is_system'],
     });
   }
 
@@ -113,7 +114,7 @@ export default class ClientGrantsHandler extends DefaultHandler {
       clientGrants: formatted,
     });
 
-    const filterGrants = (list: { client_id: string }[]) => {
+    const filterGrants = (list: ClientGrant[]) => {
       if (excludedClients.length) {
         return list.filter(
           (item) =>
@@ -122,7 +123,9 @@ export default class ClientGrantsHandler extends DefaultHandler {
         );
       }
 
-      return list.filter((item) => item.client_id !== currentClient);
+      return list
+        .filter((item) => item.client_id !== currentClient)
+        .filter((item) => item.is_system !== true);
     };
 
     const changes: CalculatedChanges = {
