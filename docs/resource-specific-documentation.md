@@ -635,7 +635,7 @@ File: `./connection-profiles/Enterprise SSO Profile.json`
 
 ### Express Configuration on Clients
 
-Connection profiles are used in conjunction with the `express_configuration` property on client applications:
+Connection profiles are used in conjunction with the `express_configuration` property on client applications: (In order to use express_configuration app_type should not be 'express_configuration')
 
 ```yaml
 clients:
