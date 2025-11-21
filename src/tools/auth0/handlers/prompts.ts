@@ -351,15 +351,11 @@ export default class PromptsHandler extends DefaultHandler {
       partials,
     };
 
-    const includeExperimentalEA = this.config('AUTH0_EXPERIMENTAL_EA') || false;
-
-    if (includeExperimentalEA) {
-      try {
-        const { data } = await this.client.prompts.getAllRenderingSettings();
-        prompts.screenRenderers = data;
-      } catch (error) {
-        log.warn(`Unable to fetch screen renderers: ${error}`);
-      }
+    try {
+      const { data } = await this.client.prompts.getAllRenderingSettings();
+      prompts.screenRenderers = data;
+    } catch (error) {
+      log.warn(`Unable to fetch screen renderers: ${error}`);
     }
 
     return prompts;
@@ -575,19 +571,11 @@ export default class PromptsHandler extends DefaultHandler {
       screenRenderer;
     if (!prompt || !screen) return;
 
-    let updatePayload: PatchRenderingRequest = {};
-
-    if (rendering_mode === PatchRenderingRequestRenderingModeEnum.standard) {
-      updatePayload = {
-        rendering_mode,
-      };
-    } else {
-      updatePayload = {
-        ...updatePrams,
-        rendering_mode,
-        default_head_tags_disabled: default_head_tags_disabled || undefined,
-      };
-    }
+    const updatePayload = {
+      ...updatePrams,
+      rendering_mode,
+      default_head_tags_disabled: default_head_tags_disabled || undefined,
+    };
 
     try {
       await this.client.prompts.updateRendering(
