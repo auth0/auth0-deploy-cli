@@ -230,4 +230,72 @@ describe('#directory context clients', () => {
       name: 'standardClient',
     });
   });
+
+  it('should dump clients with express_configuration', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientsDumpExpress');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.clients = [
+      {
+        name: 'someClient',
+        app_type: 'regular_web',
+        express_configuration: {
+          user_attribute_profile_id: 'uap_123',
+          connection_profile_id: 'cp_123',
+          okta_oin_client_id: 'client_123',
+        },
+      },
+    ];
+
+    context.assets.userAttributeProfiles = [{ id: 'uap_123', name: 'My User Attribute Profile' }];
+
+    context.assets.connectionProfiles = [{ id: 'cp_123', name: 'My Connection Profile' }];
+
+    // Mock clients for okta_oin_client_id lookup
+    // The dump method looks up in context.assets.clients
+    context.assets.clients.push({
+      client_id: 'client_123',
+      name: 'My OIN Client',
+    });
+
+    await handler.dump(context);
+
+    const dumpedClient = loadJSON(path.join(dir, 'clients', 'someClient.json'));
+    expect(dumpedClient).to.deep.equal({
+      name: 'someClient',
+      app_type: 'regular_web',
+      express_configuration: {
+        user_attribute_profile_id: 'My User Attribute Profile',
+        connection_profile_id: 'My Connection Profile',
+        okta_oin_client_id: 'My OIN Client',
+      },
+    });
+  });
+
+  it('should dump clients with app_type express_configuration and filter fields', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientsDumpExpressAppType');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.clients = [
+      {
+        name: 'someExpressClient',
+        app_type: 'express_configuration',
+        client_authentication_methods: {},
+        organization_require_behavior: 'no_prompt',
+        some_other_field: 'should be removed',
+      },
+    ];
+
+    await handler.dump(context);
+
+    const dumpedClient = loadJSON(path.join(dir, 'clients', 'someExpressClient.json'));
+    expect(dumpedClient).to.deep.equal({
+      name: 'someExpressClient',
+      app_type: 'express_configuration',
+      client_authentication_methods: {},
+      organization_require_behavior: 'no_prompt',
+    });
+  });
 });

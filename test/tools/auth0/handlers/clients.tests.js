@@ -95,6 +95,10 @@ describe('#clients handler', () => {
           delete: () => Promise.resolve({ data: [] }),
           getAll: (params) => mockPagedData(params, 'clients', []),
         },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
 
@@ -140,6 +144,10 @@ describe('#clients handler', () => {
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
           getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -191,6 +199,10 @@ describe('#clients handler', () => {
           delete: () => Promise.resolve({ data: [] }),
           getAll: (params) => mockPagedData(params, 'clients', []),
         },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
 
@@ -231,6 +243,10 @@ describe('#clients handler', () => {
           delete: () => Promise.resolve({ data: [] }),
           getAll: (params) => mockPagedData(params, 'clients', []),
         },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
       const handler = new clients.default({ client: pageClient(auth0), config });
@@ -263,11 +279,66 @@ describe('#clients handler', () => {
           delete: () => Promise.resolve({ data: [] }),
           getAll: (params) => mockPagedData(params, 'clients', []),
         },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
       const handler = new clients.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       await stageFn.apply(handler, [{ clients: [resourceServerClient] }]);
+      expect(wasCreateCalled).to.be.equal(true);
+    });
+
+    it('should create client with express_configuration and map names to IDs', async () => {
+      let wasCreateCalled = false;
+      const clientWithExpressConfig = {
+        name: 'Client With Express Config',
+        app_type: 'regular_web',
+        express_configuration: {
+          user_attribute_profile_id: 'My User Attribute Profile',
+          connection_profile_id: 'My Connection Profile',
+          okta_oin_client_id: 'My OIN Client',
+        },
+      };
+
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            wasCreateCalled = true;
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('Client With Express Config');
+            expect(data.express_configuration).to.deep.equal({
+              user_attribute_profile_id: 'uap_123',
+              connection_profile_id: 'cp_123',
+              okta_oin_client_id: 'client_123',
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [{ client_id: 'client_123', name: 'My OIN Client' }]),
+        },
+        connectionProfiles: {
+          getAll: (params) =>
+            mockPagedData(params, 'connectionProfiles', [
+              { id: 'cp_123', name: 'My Connection Profile' },
+            ]),
+        },
+        userAttributeProfiles: {
+          getAll: (params) =>
+            mockPagedData(params, 'userAttributeProfiles', [
+              { id: 'uap_123', name: 'My User Attribute Profile' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ clients: [clientWithExpressConfig] }]);
       expect(wasCreateCalled).to.be.equal(true);
     });
 
@@ -292,6 +363,10 @@ describe('#clients handler', () => {
           delete: () => Promise.resolve({ data: [] }),
           getAll: (params) => mockPagedData(params, 'clients', []),
         },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
       const handler = new clients.default({ client: pageClient(auth0), config });
@@ -308,6 +383,10 @@ describe('#clients handler', () => {
               { name: 'test client', client_id: 'FMfcgxvzLDvPsgpRFKkLVrnKqGgkHhQV' },
               { name: 'deploy client', client_id: 'client_id' },
             ]),
+        },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -354,6 +433,10 @@ describe('#clients handler', () => {
                 name: 'someClient',
               },
             ]),
+        },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -408,6 +491,10 @@ describe('#clients handler', () => {
               },
             ]),
         },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
 
@@ -448,6 +535,10 @@ describe('#clients handler', () => {
               { client_id: 'client_id', name: 'deploy client' },
             ]),
         },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
 
@@ -476,6 +567,10 @@ describe('#clients handler', () => {
               { client_id: 'client_id', name: 'deploy client' },
             ]),
         },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
 
@@ -499,6 +594,10 @@ describe('#clients handler', () => {
           },
           getAll: (params) =>
             mockPagedData(params, 'clients', [{ client_id: 'client1', name: 'existingClient' }]),
+        },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -527,6 +626,10 @@ describe('#clients handler', () => {
             return Promise.resolve({ data: [] });
           },
           getAll: (params) => Promise.resolve(mockPagedData(params, 'clients', [])),
+        },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -563,6 +666,10 @@ describe('#clients handler', () => {
               { client_id: 'client1', name: 'existingClient' },
               { client_id: 'client2', name: 'existingClient2' },
             ]),
+        },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -611,6 +718,10 @@ describe('#clients handler', () => {
                 name: 'Client 2',
               },
             ]),
+        },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -667,6 +778,10 @@ describe('#clients handler', () => {
           delete: () => Promise.resolve({ data: [] }),
           getAll: (params) => mockPagedData(params, 'clients', []),
         },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
 
@@ -703,6 +818,10 @@ describe('#clients handler', () => {
           delete: () => Promise.resolve({ data: [] }),
           getAll: (params) => mockPagedData(params, 'clients', []),
         },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
 
@@ -735,6 +854,10 @@ describe('#clients handler', () => {
                 organization_discovery_methods: ['email'],
               },
             ]),
+        },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -780,6 +903,10 @@ describe('#clients handler', () => {
                 async_approval_notification_channels: ['guardian-push', 'email'],
               },
             ]),
+        },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
