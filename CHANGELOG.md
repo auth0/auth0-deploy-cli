@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.21.0] - 2025-11-21
+
 ### Added
 
 - Add support for Connection Profiles and Express Configuration on Clients. [#1204]
@@ -1521,7 +1523,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1196]: https://github.com/auth0/auth0-deploy-cli/issues/1196
 [#1200]: https://github.com/auth0/auth0-deploy-cli/issues/1200
 [#1203]: https://github.com/auth0/auth0-deploy-cli/issues/1203
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.3...HEAD
+[#1204]: https://github.com/auth0/auth0-deploy-cli/issues/1204
+[#1209]: https://github.com/auth0/auth0-deploy-cli/issues/1209
+[#1211]: https://github.com/auth0/auth0-deploy-cli/issues/1211
+[#1214]: https://github.com/auth0/auth0-deploy-cli/issues/1214
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.21.0...HEAD
+[8.21.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.3...v8.21.0
 [8.20.3]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.2...v8.20.3
 [8.20.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.1...v8.20.2
 [8.20.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.0...v8.20.1
