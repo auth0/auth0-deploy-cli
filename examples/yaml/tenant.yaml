@@ -42,6 +42,20 @@ clients:
     name: "My Resource Server Client"
     app_type: "resource_server"
     resource_server_identifier: "https://##ENV##.myapp.com/api/v1"
+  -
+    name: "My Okta OIN Client"
+    app_type: "regular_web"
+  -
+    name: "My Express App"
+    app_type: "regular_web"
+    express_configuration:
+      initiate_login_uri_template: "https://myapp.com/sso/start?org={organization_name}&conn={connection_name}"
+      user_attribute_profile_id: "My User Attribute Profile"
+      connection_profile_id: "Enterprise SSO Profile"
+      enable_client: true
+      enable_organization: true
+      okta_oin_client_id: "My Okta OIN Client"
+      admin_login_domain: "login.myapp.com"
 
 databases:
   - name: "users"
@@ -395,4 +409,13 @@ connectionProfiles:
       assign_membership_on_login: "optional"
     enabled_features:
       - scim
+
+userAttributeProfiles:
+  - name: "My User Attribute Profile"
+    description: "My User Attribute Profile Description"
+    user_attributes:
+      - name: "email"
+        description: "Email"
+        type: "email"
+        required: true
 

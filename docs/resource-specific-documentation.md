@@ -643,11 +643,11 @@ clients:
     app_type: 'regular_web'
     express_configuration:
       initiate_login_uri_template: 'https://myapp.com/sso/start?org={organization_name}&conn={connection_name}'
-      user_attribute_profile_id: 'uap_xxxxxxxxxxxx'
-      connection_profile_id: 'cp_xxxxxxxxxxxx' # Reference to connection profile
+      user_attribute_profile_id: 'My User Attribute Profile'
+      connection_profile_id: 'Enterprise SSO Profile' # Reference to connection profile
       enable_client: true
       enable_organization: true
-      okta_oin_client_id: '0oa_xxxxxxxxxxxx'
+      okta_oin_client_id: 'My Okta OIN Client'
       admin_login_domain: 'login.myapp.com'
       linked_clients:
         - client_id: 'client_id_of_mobile_app'

@@ -239,4 +239,27 @@ describe('#YAML context clients', () => {
       },
     });
   });
+
+  it('should dump clients with app_type express_configuration and filter fields', async () => {
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+
+    context.assets.clients = [
+      {
+        name: 'someExpressClient',
+        app_type: 'express_configuration',
+        client_authentication_methods: {},
+        organization_require_behavior: 'no_prompt',
+        some_other_field: 'should be removed',
+      },
+    ];
+
+    const dumped = await handler.dump(context);
+
+    expect(dumped.clients[0]).to.deep.equal({
+      name: 'someExpressClient',
+      app_type: 'express_configuration',
+      client_authentication_methods: {},
+      organization_require_behavior: 'no_prompt',
+    });
+  });
 });
