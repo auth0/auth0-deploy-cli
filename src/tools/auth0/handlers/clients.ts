@@ -382,9 +382,15 @@ export default class ClientHandler extends DefaultAPIHandler {
     auth0Client: Auth0APIClient,
     clientList: Client[]
   ): Promise<Client[]> {
+    // if no clients have express configuration, return early
+    if (!clientList.some((p) => p.express_configuration)) {
+      return clientList;
+    }
+
     const clientData = await this.getType();
     const connectionProfiles = await getConnectionProfile(auth0Client);
     const userAttributeProfiles = await getUserAttributeProfiles(auth0Client);
+
     return clientList.map((client) => {
       if (!client.express_configuration) return client;
 
