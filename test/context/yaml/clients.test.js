@@ -203,4 +203,40 @@ describe('#YAML context clients', () => {
 
     expect(dumped).to.deep.equal({ clients: target });
   });
+
+  it('should dump clients with express_configuration', async () => {
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+
+    context.assets.clients = [
+      {
+        name: 'someClient',
+        app_type: 'regular_web',
+        express_configuration: {
+          user_attribute_profile_id: 'uap_123',
+          connection_profile_id: 'cp_123',
+          okta_oin_client_id: 'client_123',
+        },
+      },
+      {
+        client_id: 'client_123',
+        name: 'My OIN Client',
+      },
+    ];
+
+    context.assets.userAttributeProfiles = [{ id: 'uap_123', name: 'My User Attribute Profile' }];
+
+    context.assets.connectionProfiles = [{ id: 'cp_123', name: 'My Connection Profile' }];
+
+    const dumped = await handler.dump(context);
+
+    expect(dumped.clients[0]).to.deep.equal({
+      name: 'someClient',
+      app_type: 'regular_web',
+      express_configuration: {
+        user_attribute_profile_id: 'My User Attribute Profile',
+        connection_profile_id: 'My Connection Profile',
+        okta_oin_client_id: 'My OIN Client',
+      },
+    });
+  });
 });
