@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for Connection Profiles and Express Configuration on Clients. [#1204]
+- Add support for ACUL GA. [#1209]
+- Add support for `session_transfer` schema in `clients`. [#1211]
+
+### Fixed
+
+- Fix handle responses when paginating custom domains. [#1214]
+
 ## [8.20.3] - 2025-11-14
 
 ### Fixed
