@@ -18,12 +18,21 @@ const API_FREQUENCY_PER_SECOND = 8;
 
 const MAX_PAGE_SIZE = 100;
 
-function getEntity(rsp: ApiResponse): Asset[] {
+function getEntity(rsp: ApiResponse | Asset[]): Asset[] {
+  // Extract all array values from the response object
   const found = Object.values(rsp).filter((a) => Array.isArray(a));
+
+  // If response contains exactly one array property, return it as the entity list
   if (Array.isArray(found) && found.length === 1) {
     return found[0] as Asset[];
   }
-  // Handle empty response case - return empty array instead of throwing error
+
+  // If the response itself is an array, return it directly
+  if (Array.isArray(rsp)) {
+    return rsp as Asset[];
+  }
+
+  // If empty response case - return empty array instead of throwing error
   if (Array.isArray(found) && found.length === 0) {
     return [];
   }
