@@ -128,6 +128,7 @@ export function stripFields(obj: Asset, fields: string[]): Asset {
     const name = ['id', 'client_id', 'template', 'name'].reduce((n, k) => newObj[k] || n, '');
     log.debug(`Stripping "${name}" read-only fields ${JSON.stringify(stripped)}`);
   }
+  log.debug(`non stripped ${newObj}`);
   return newObj;
 }
 
