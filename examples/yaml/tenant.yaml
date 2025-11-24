@@ -419,3 +419,6 @@ userAttributeProfiles:
         type: "email"
         required: true
 
+riskAssessments:
+  enabled: false
+

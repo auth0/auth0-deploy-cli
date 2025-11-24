@@ -576,6 +576,30 @@ phoneProviders:
 ]
 ```
 
+## Risk Assessments
+
+Risk assessments configuration allows you to enable or disable risk assessment features for your tenant.
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+riskAssessments:
+  enabled: true
+```
+
+### Directory Example
+
+File: `./risk-assessments/settings.json`
+
+```json
+{
+  "enabled": true
+}
+```
+
+For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2#!/Risk_Assessments/get_settings).
+
 ## Connection Profiles
 
 Application specific configuration for use with the OIN Express Configuration feature

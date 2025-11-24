@@ -95,6 +95,8 @@ export type Asset = { [key: string]: any };
 export type Assets = Partial<{
   actions: Action[] | null;
   attackProtection: AttackProtection | null;
+  riskAssessments: Asset | null;
+  riskAssessmentsNewDevice: Asset | null;
   branding:
     | (Asset & {
         templates?: { template: string; body: string }[] | null;
@@ -176,6 +178,8 @@ export type AssetTypes =
   | 'organizations'
   | 'triggers'
   | 'attackProtection'
+  | 'riskAssessments'
+  | 'riskAssessmentsNewDevice'
   | 'branding'
   | 'phoneProviders'
   | 'logStreams'
