@@ -367,10 +367,15 @@ export default class ClientHandler extends DefaultAPIHandler {
   async getType() {
     if (this.existing) return this.existing;
 
+    const excludeThirdPartyClients =
+      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === 'true' ||
+      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === true;
+
     const clients = await paginate<Client>(this.client.clients.getAll, {
       paginate: true,
       include_totals: true,
       is_global: false,
+      ...(excludeThirdPartyClients && { is_first_party: true }),
     });
 
     this.existing = clients;
