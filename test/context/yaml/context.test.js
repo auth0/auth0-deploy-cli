@@ -289,6 +289,7 @@ describe('#YAML context validation', () => {
           ],
         },
       ],
+      connectionProfiles: [],
       tenant: {
         default_directory: 'users',
         friendly_name: 'Test',
@@ -303,6 +304,7 @@ describe('#YAML context validation', () => {
       prompts: {
         customText: {},
         partials: {},
+        screenRenderers: [],
       },
       customDomains: [],
       themes: [],
@@ -417,6 +419,7 @@ describe('#YAML context validation', () => {
           ],
         },
       ],
+      connectionProfiles: [],
       tenant: {
         default_directory: 'users',
         friendly_name: 'Test',
@@ -431,6 +434,7 @@ describe('#YAML context validation', () => {
       prompts: {
         customText: {},
         partials: {},
+        screenRenderers: [],
       },
       customDomains: [],
       themes: [],
@@ -546,6 +550,7 @@ describe('#YAML context validation', () => {
           ],
         },
       ],
+      connectionProfiles: [],
       tenant: {
         default_directory: 'users',
         friendly_name: 'Test',
@@ -559,6 +564,7 @@ describe('#YAML context validation', () => {
       prompts: {
         customText: {},
         partials: {},
+        screenRenderers: [],
       },
       logStreams: [],
       customDomains: [],

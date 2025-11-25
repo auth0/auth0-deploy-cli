@@ -160,6 +160,9 @@ export function mockMgmtClient() {
     userAttributeProfiles: {
       getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
     },
+    connectionProfiles: {
+      getAll: (params) => mockPagedData(params, 'connectionProfiles', []),
+    },
   };
 }
 

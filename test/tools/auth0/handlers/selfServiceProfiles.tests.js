@@ -132,6 +132,9 @@ describe('#selfServiceProfiles handler', () => {
     it('should return empty if no selfServiceProfiles asset', async () => {
       const auth0 = {
         selfServiceProfiles: {},
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
 
@@ -156,6 +159,9 @@ describe('#selfServiceProfiles handler', () => {
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
           getAll: (params) => mockPagedData(params, 'selfServiceProfiles', []),
+        },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -191,6 +197,9 @@ describe('#selfServiceProfiles handler', () => {
             return Promise.resolve({ data: sampleCustomText });
           },
         },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
 
@@ -212,6 +221,9 @@ describe('#selfServiceProfiles handler', () => {
             expect(params).to.be.an('object');
             return Promise.resolve({ data: [] });
           },
+        },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -239,6 +251,9 @@ describe('#selfServiceProfiles handler', () => {
               data: sampleCustomText,
             });
           },
+        },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -273,6 +288,9 @@ describe('#selfServiceProfiles handler', () => {
               data: sampleCustomText,
             });
           },
+        },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -330,6 +348,9 @@ describe('#selfServiceProfiles handler', () => {
             });
           },
         },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
 
@@ -373,6 +394,9 @@ describe('#selfServiceProfiles handler', () => {
             });
           },
         },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
 
@@ -399,6 +423,9 @@ describe('#selfServiceProfiles handler', () => {
             });
           },
         },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
 
@@ -424,6 +451,9 @@ describe('#selfServiceProfiles handler', () => {
               data: {},
             });
           },
+        },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };

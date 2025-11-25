@@ -144,6 +144,7 @@ export type Assets = Partial<{
   networkACLs: NetworkACL[] | null;
   userAttributeProfiles: UserAttributeProfile[] | null;
   userAttributeProfilesWithId: UserAttributeProfile[] | null;
+  connectionProfiles: Asset[] | null;
 }>;
 
 export type CalculatedChanges = {
@@ -188,7 +189,8 @@ export type AssetTypes =
   | 'flowVaultConnections'
   | 'selfServiceProfiles'
   | 'networkACLs'
-  | 'userAttributeProfiles';
+  | 'userAttributeProfiles'
+  | 'connectionProfiles';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 

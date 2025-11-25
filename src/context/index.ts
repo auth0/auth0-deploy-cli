@@ -26,7 +26,7 @@ const nonPrimitiveProps: (keyof Config)[] = [
   'INCLUDED_PROPS',
 ];
 
-const EA_FEATURES = ['ACUL'];
+const EA_FEATURES = [];
 
 export const setupContext = async (
   config: Config,
@@ -144,7 +144,7 @@ export const setupContext = async (
             : 'features [' + EA_FEATURES.join(',') + '] are'
         } enabled. These are in a pre-release state and may change in future release.`
       );
-    } else {
+    } else if (EA_FEATURES.length > 0) {
       log.info(
         'To enable experimental early access features use --experimental_ea flag or set AUTH0_EXPERIMENTAL_EA=true in configuration JSON.'
       );

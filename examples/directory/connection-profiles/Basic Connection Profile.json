@@ -1,0 +1,10 @@
+{
+  "name": "Basic Connection Profile",
+  "organization": {
+    "show_as_button": "optional",
+    "assign_membership_on_login": "optional"
+  },
+  "enabled_features": [
+    "scim"
+  ]
+}

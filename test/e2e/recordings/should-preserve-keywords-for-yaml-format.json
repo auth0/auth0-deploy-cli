@@ -92,7 +92,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "Lt6GqstC0ERmNFSyWMCWy6pZYFHUgAdl",
+                    "client_id": "RKfFTGiVl5FTSXkp7hJfJfd16GLBCxgy",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -107,6 +107,131 @@
                         "client_credentials"
                     ],
                     "custom_login_page_on": true
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/connection-profiles?take=10",
+        "body": "",
+        "status": 403,
+        "response": {
+            "statusCode": 403,
+            "error": "Forbidden",
+            "message": "This feature is not enabled for this tenant.",
+            "errorCode": "feature_not_enabled"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/user-attribute-profiles?take=10",
+        "body": "",
+        "status": 200,
+        "response": {
+            "user_attribute_profiles": [
+                {
+                    "id": "uap_1csDj3szFsgxGS1oTZTdFm",
+                    "name": "test-user-attribute-profile-2",
+                    "user_id": {
+                        "oidc_mapping": "sub",
+                        "saml_mapping": [
+                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
+                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
+                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+                        ],
+                        "scim_mapping": "externalId"
+                    },
+                    "user_attributes": {
+                        "email": {
+                            "label": "Email",
+                            "description": "Email of the User",
+                            "auth0_mapping": "email",
+                            "profile_required": true
+                        }
+                    }
+                },
+                {
+                    "id": "uap_1csDj3sAVu6n5eTzLw6XZg",
+                    "name": "test-user-attribute-profile",
+                    "user_id": {
+                        "oidc_mapping": "sub",
+                        "saml_mapping": [
+                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
+                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
+                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+                        ],
+                        "scim_mapping": "externalId"
+                    },
+                    "user_attributes": {
+                        "email": {
+                            "label": "Email",
+                            "description": "Email of the User",
+                            "auth0_mapping": "email",
+                            "profile_required": true
+                        }
+                    }
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/user-attribute-profiles?take=10",
+        "body": "",
+        "status": 200,
+        "response": {
+            "user_attribute_profiles": [
+                {
+                    "id": "uap_1csDj3szFsgxGS1oTZTdFm",
+                    "name": "test-user-attribute-profile-2",
+                    "user_id": {
+                        "oidc_mapping": "sub",
+                        "saml_mapping": [
+                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
+                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
+                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+                        ],
+                        "scim_mapping": "externalId"
+                    },
+                    "user_attributes": {
+                        "email": {
+                            "label": "Email",
+                            "description": "Email of the User",
+                            "auth0_mapping": "email",
+                            "profile_required": true
+                        }
+                    }
+                },
+                {
+                    "id": "uap_1csDj3sAVu6n5eTzLw6XZg",
+                    "name": "test-user-attribute-profile",
+                    "user_id": {
+                        "oidc_mapping": "sub",
+                        "saml_mapping": [
+                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
+                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
+                            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+                        ],
+                        "scim_mapping": "externalId"
+                    },
+                    "user_attributes": {
+                        "email": {
+                            "label": "Email",
+                            "description": "Email of the User",
+                            "auth0_mapping": "email",
+                            "profile_required": true
+                        }
+                    }
                 }
             ]
         },
@@ -196,7 +321,7 @@
                     "subject": "/CN=auth0-deploy-cli-e2e.us.auth0.com"
                 }
             ],
-            "client_id": "y9oVy76WWPiq8gNm9dhZCsv3kSeDgljh",
+            "client_id": "EUzvsYe5x0sxt8bknLZqzcPwHlxgzu8F",
             "callback_url_template": false,
             "client_secret": "[REDACTED]",
             "jwt_configuration": {
@@ -343,6 +468,7 @@
                 },
                 "identifier_first": true
             },
+            "resource_parameter_profile": "audience",
             "session_cookie": {
                 "mode": "non-persistent"
             }
@@ -443,7 +569,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "Lt6GqstC0ERmNFSyWMCWy6pZYFHUgAdl",
+                    "client_id": "RKfFTGiVl5FTSXkp7hJfJfd16GLBCxgy",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -496,7 +622,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "y9oVy76WWPiq8gNm9dhZCsv3kSeDgljh",
+                    "client_id": "EUzvsYe5x0sxt8bknLZqzcPwHlxgzu8F",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -577,6 +703,7 @@
                     "page_background": "#222221"
                 }
             },
+            "resource_parameter_profile": "audience",
             "session_cookie": {
                 "mode": "non-persistent"
             },
@@ -610,86 +737,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/welcome_email",
-        "body": "",
-        "status": 200,
-        "response": {
-            "template": "welcome_email",
-            "body": "<html>\n  <body>\n    <h1>Welcome to This tenant name should be preserved!</h1>\n  </body>\n</html>\n",
-            "from": "",
-            "resultUrl": "https://travel0.com/welcome",
-            "subject": "Welcome",
-            "syntax": "liquid",
-            "urlLifetimeInSeconds": 3600,
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/reset_email",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/reset_email_by_code",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/user_invitation",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/password_reset",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/change_password",
+        "path": "/api/v2/email-templates/verify_email_by_code",
         "body": "",
         "status": 404,
         "response": {
@@ -719,22 +767,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/blocked_account",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/mfa_oob_code",
+        "path": "/api/v2/email-templates/reset_email_by_code",
         "body": "",
         "status": 404,
         "response": {
@@ -764,6 +797,25 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/email-templates/welcome_email",
+        "body": "",
+        "status": 200,
+        "response": {
+            "template": "welcome_email",
+            "body": "<html>\n  <body>\n    <h1>Welcome to This tenant name should be preserved!</h1>\n  </body>\n</html>\n",
+            "from": "",
+            "resultUrl": "https://travel0.com/welcome",
+            "subject": "Welcome",
+            "syntax": "liquid",
+            "urlLifetimeInSeconds": 3600,
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/email-templates/enrollment_email",
         "body": "",
         "status": 404,
@@ -779,7 +831,82 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/verify_email_by_code",
+        "path": "/api/v2/email-templates/change_password",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/reset_email",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/blocked_account",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/password_reset",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/mfa_oob_code",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/user_invitation",
         "body": "",
         "status": 404,
         "response": {
@@ -884,7 +1011,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "Lt6GqstC0ERmNFSyWMCWy6pZYFHUgAdl",
+                    "client_id": "RKfFTGiVl5FTSXkp7hJfJfd16GLBCxgy",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -937,7 +1064,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "y9oVy76WWPiq8gNm9dhZCsv3kSeDgljh",
+                    "client_id": "EUzvsYe5x0sxt8bknLZqzcPwHlxgzu8F",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1018,6 +1145,7 @@
                     "page_background": "#222221"
                 }
             },
+            "resource_parameter_profile": "audience",
             "session_cookie": {
                 "mode": "non-persistent"
             },
@@ -1026,70 +1154,6 @@
                 "18",
                 "12"
             ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/welcome_email",
-        "body": "",
-        "status": 200,
-        "response": {
-            "template": "welcome_email",
-            "body": "<html>\n  <body>\n    <h1>Welcome to This tenant name should be preserved!</h1>\n  </body>\n</html>\n",
-            "from": "",
-            "resultUrl": "https://travel0.com/welcome",
-            "subject": "Welcome",
-            "syntax": "liquid",
-            "urlLifetimeInSeconds": 3600,
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/reset_email",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/mfa_oob_code",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/reset_email_by_code",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -1115,7 +1179,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/change_password",
+        "path": "/api/v2/email-templates/verify_email_by_code",
         "body": "",
         "status": 404,
         "response": {
@@ -1130,7 +1194,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/enrollment_email",
+        "path": "/api/v2/email-templates/reset_email",
         "body": "",
         "status": 404,
         "response": {
@@ -1145,7 +1209,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/stolen_credentials",
+        "path": "/api/v2/email-templates/blocked_account",
         "body": "",
         "status": 404,
         "response": {
@@ -1153,6 +1217,25 @@
             "error": "Not Found",
             "message": "The template does not exist.",
             "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/welcome_email",
+        "body": "",
+        "status": 200,
+        "response": {
+            "template": "welcome_email",
+            "body": "<html>\n  <body>\n    <h1>Welcome to This tenant name should be preserved!</h1>\n  </body>\n</html>\n",
+            "from": "",
+            "resultUrl": "https://travel0.com/welcome",
+            "subject": "Welcome",
+            "syntax": "liquid",
+            "urlLifetimeInSeconds": 3600,
+            "enabled": false
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -1190,21 +1273,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/verify_email_by_code",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/email-templates/user_invitation",
         "body": "",
         "status": 404,
@@ -1220,7 +1288,67 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/blocked_account",
+        "path": "/api/v2/email-templates/enrollment_email",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/reset_email_by_code",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/change_password",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/mfa_oob_code",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/stolen_credentials",
         "body": "",
         "status": 404,
         "response": {
