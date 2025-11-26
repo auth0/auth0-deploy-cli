@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { expect } from 'chai';
+import _ from 'lodash';
 
 import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/clients';
@@ -261,5 +262,23 @@ describe('#YAML context clients', () => {
       client_authentication_methods: {},
       organization_require_behavior: 'no_prompt',
     });
+  });
+
+  it('should remove cross_origin_auth from all clients', () => {
+    const cleaned = {
+      clients: [
+        { name: 'ClientA', cross_origin_auth: true, other: 'foo' },
+        { name: 'ClientB', cross_origin_auth: false, other: 'bar' },
+        { name: 'ClientC', other: 'baz' }
+      ]
+    };
+    cleaned.clients = cleaned.clients?.map(client => _.omit(client, ['cross_origin_auth']));
+
+    cleaned.clients.forEach(client => {
+      expect(client).to.not.have.property('cross_origin_auth');
+    });
+    expect(cleaned.clients[0]).to.have.property('name', 'ClientA');
+    expect(cleaned.clients[1]).to.have.property('name', 'ClientB');
+    expect(cleaned.clients[2]).to.have.property('name', 'ClientC');
   });
 });

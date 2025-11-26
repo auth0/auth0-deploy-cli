@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import path from 'path';
 import { ManagementClient } from 'auth0';
+import _ from 'lodash';
 import {
   loadFileAndReplaceKeywords,
   keywordReplace,
@@ -202,6 +203,7 @@ export default class YAMLContext {
 
     // Delete exclude as it's not part of the auth0 tenant config
     delete cleaned.exclude;
+    cleaned.clients = cleaned.clients?.map(client =>_.omit(client, ['cross_origin_auth']));
 
     // Optionally Strip identifiers
     if (!this.config.AUTH0_EXPORT_IDENTIFIERS) {

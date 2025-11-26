@@ -275,6 +275,7 @@ export type Client = {
   name: string;
   app_type?: string;
   resource_server_identifier?: string;
+  cross_origin_auth?: boolean;
   custom_login_page?: string;
   custom_login_page_on?: boolean;
   express_configuration?: ClientExpressConfiguration;
