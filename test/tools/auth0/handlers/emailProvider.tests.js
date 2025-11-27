@@ -121,17 +121,22 @@ describe('#emailProvider handler', () => {
       expect(data).to.deep.equal({ name: 'smtp', enabled: true });
     });
 
-    it('should delete email provider and create another one instead', async () => {
+    // DELETE on emails/provider is not supported on SDK, so changing provider should call update instead
+    it('should update email provider when changing to a different provider (delete not supported)', async () => {
+      let wasUpdateCalled = false;
       const auth0 = {
         emails: {
           provider: {
-            create: (data) => {
+            create: () => {
+              throw new Error('was not expecting create to be called');
+            },
+            update: (data) => {
               expect(data).to.be.an('object');
               expect(data.name).to.equal('someProvider');
               expect(data.credentials).to.equal('password');
+              wasUpdateCalled = true;
               return Promise.resolve(data);
             },
-            update: (data) => Promise.resolve(data),
             get: () => Promise.resolve({ name: 'oldProvider', enabled: true }),
           },
         },
@@ -146,6 +151,7 @@ describe('#emailProvider handler', () => {
       };
 
       await stageFn.apply(handler, [{ emailProvider: data }]);
+      expect(wasUpdateCalled).to.equal(true);
     });
   });
 });

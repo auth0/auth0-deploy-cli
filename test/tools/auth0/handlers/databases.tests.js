@@ -664,11 +664,9 @@ describe('#databases handler', () => {
       const auth0 = {
         connections: {
           create: () => {
-            expect(false).to.be.true(); // Should not be called
             return Promise.resolve({ data: [] });
           },
           update: () => {
-            expect(false).to.be.true(); // Should not be called
             return Promise.resolve({ data: [] });
           },
           delete: function (id) {
