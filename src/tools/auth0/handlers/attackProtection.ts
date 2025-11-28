@@ -240,9 +240,9 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
 
     const [breachedPasswordDetection, bruteForceProtection, suspiciousIpThrottling] =
       await Promise.all([
-        this.client.attackProtection.getBreachedPasswordDetectionConfig(),
-        this.client.attackProtection.getBruteForceConfig(),
-        this.client.attackProtection.getSuspiciousIpThrottlingConfig(),
+        this.client.attackProtection.breachedPasswordDetection.get(),
+        this.client.attackProtection.bruteForceProtection.get(),
+        this.client.attackProtection.suspiciousIpThrottling.get(),
       ]);
 
     let botDetection: Asset | null = null;
@@ -250,8 +250,8 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
 
     try {
       [botDetection, captcha] = await Promise.all([
-        this.client.attackProtection.getBotDetectionConfig(),
-        this.client.attackProtection.getCaptchaConfig(),
+        this.client.attackProtection.botDetection.get(),
+        this.client.attackProtection.captcha.get(),
       ]);
     } catch (err) {
       if (err.statusCode === 403) {
@@ -262,17 +262,17 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
     }
 
     const attackProtection: AttackProtection = {
-      breachedPasswordDetection: breachedPasswordDetection.data,
-      bruteForceProtection: bruteForceProtection.data,
-      suspiciousIpThrottling: suspiciousIpThrottling.data,
+      breachedPasswordDetection: breachedPasswordDetection,
+      bruteForceProtection: bruteForceProtection,
+      suspiciousIpThrottling: suspiciousIpThrottling,
     };
 
-    if (botDetection?.data) {
-      attackProtection.botDetection = botDetection.data;
+    if (botDetection) {
+      attackProtection.botDetection = botDetection;
     }
 
-    if (captcha?.data) {
-      attackProtection.captcha = captcha.data;
+    if (captcha) {
+      attackProtection.captcha = captcha;
     }
 
     this.existing = attackProtection;
@@ -290,14 +290,12 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
     const updates: Promise<unknown>[] = [];
 
     if (attackProtection.botDetection && Object.keys(attackProtection.botDetection).length) {
-      updates.push(
-        this.client.attackProtection.updateBotDetectionConfig(attackProtection.botDetection)
-      );
+      updates.push(this.client.attackProtection.botDetection.update(attackProtection.botDetection));
     }
 
     if (attackProtection.breachedPasswordDetection) {
       updates.push(
-        this.client.attackProtection.updateBreachedPasswordDetectionConfig(
+        this.client.attackProtection.breachedPasswordDetection.update(
           attackProtection.breachedPasswordDetection
         )
       );
@@ -323,18 +321,20 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
 
       attackProtection.captcha = captcha;
 
-      updates.push(this.client.attackProtection.updateCaptchaConfig(attackProtection.captcha));
+      updates.push(this.client.attackProtection.captcha.update(attackProtection.captcha));
     }
 
     if (attackProtection.bruteForceProtection) {
       updates.push(
-        this.client.attackProtection.updateBruteForceConfig(attackProtection.bruteForceProtection)
+        this.client.attackProtection.bruteForceProtection.update(
+          attackProtection.bruteForceProtection
+        )
       );
     }
 
     if (attackProtection.suspiciousIpThrottling) {
       updates.push(
-        this.client.attackProtection.updateSuspiciousIpThrottlingConfig(
+        this.client.attackProtection.suspiciousIpThrottling.update(
           attackProtection.suspiciousIpThrottling
         )
       );

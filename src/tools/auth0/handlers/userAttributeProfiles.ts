@@ -1,4 +1,4 @@
-import { UserAttributeProfile } from 'auth0';
+import { Management } from 'auth0';
 
 import DefaultAPIHandler, { order } from './default';
 import { Assets } from '../../../types';
@@ -54,6 +54,8 @@ const strategyOverrides = {
     {}
   ),
 };
+
+export type UserAttributeProfile = Management.UserAttributeProfile;
 
 export const schema = {
   type: 'array',
@@ -203,6 +205,10 @@ export default class UserAttributeProfilesHandler extends DefaultAPIHandler {
       id: 'id',
       identifiers: ['id', 'name'],
       stripUpdateFields: ['id'],
+      functions: {
+        update: async (params, payload) =>
+          this.client.userAttributeProfiles.update(params?.id, payload),
+      },
     });
   }
 
@@ -210,15 +216,12 @@ export default class UserAttributeProfilesHandler extends DefaultAPIHandler {
     if (this.existing) return this.existing;
 
     try {
-      this.existing = await paginate<UserAttributeProfile>(
-        this.client.userAttributeProfiles.getAll,
-        {
-          checkpoint: true,
-          include_totals: true,
-          is_global: false,
-          take: 10,
-        }
-      );
+      this.existing = await paginate<UserAttributeProfile>(this.client.userAttributeProfiles.list, {
+        checkpoint: true,
+        include_totals: true,
+        is_global: false,
+        take: 10,
+      });
 
       return this.existing;
     } catch (err) {

@@ -1,4 +1,4 @@
-import { CustomDomain } from 'auth0';
+import { Management } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
 import log from '../../../logger';
@@ -41,8 +41,10 @@ export const schema = {
   },
 };
 
+type CustomDomain = Management.CustomDomain;
+
 export default class CustomDomainsHadnler extends DefaultAPIHandler {
-  existing: Asset[] | null;
+  existing: CustomDomain[] | null;
 
   constructor(config: DefaultAPIHandler) {
     super({
@@ -70,9 +72,7 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
         'updated_at',
       ],
       functions: {
-        delete: (args) => this.client.customDomains.delete({ id: args.custom_domain_id }),
-        update: (args, data) =>
-          this.client.customDomains.update({ id: args.custom_domain_id }, data),
+        update: (args, data) => this.client.customDomains.update(args.custom_domain_id, data),
       },
     });
   }
@@ -87,7 +87,7 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
         return this.existing;
       }
 
-      const customDomains = await paginate<CustomDomain>(this.client.customDomains.getAll, {
+      const customDomains = await paginate<CustomDomain>(this.client.customDomains.list, {
         checkpoint: true,
       });
 

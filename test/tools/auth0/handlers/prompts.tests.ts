@@ -1,11 +1,10 @@
 import { expect } from 'chai';
 import _ from 'lodash';
 import { PromisePoolExecutor } from 'promise-pool-executor';
-import sinon from 'sinon';
+import * as sinon from 'sinon';
 import promptsHandler, { Prompts } from '../../../../src/tools/auth0/handlers/prompts';
 import { Language } from '../../../../src/types';
 import log from '../../../../src/logger';
-import { CustomPartialsPromptTypes } from '../../../../lib/tools/auth0/handlers/prompts';
 
 const mockPromptsSettings = {
   universal_login_experience: 'classic',
@@ -108,30 +107,38 @@ describe('#prompts handler', () => {
 
       const auth0 = {
         tenants: {
-          getSettings: () =>
-            Promise.resolve({
-              data: {
+          settings: {
+            get: () =>
+              Promise.resolve({
                 enabled_locales: supportedLanguages,
-              },
-            }),
+              }),
+          },
         },
         prompts: {
-          get: () => ({ data: mockPromptsSettings }),
-          getCustomTextByLanguage: ({ language, prompt }) => {
-            const customTextLanguageMap = {
-              en: englishCustomText,
-              es: spanishCustomText,
-              fr: frenchCustomText,
-            };
-            const customTextValue = customTextLanguageMap[language][prompt];
+          getSettings: () => Promise.resolve(mockPromptsSettings),
+          customText: {
+            get: (prompt, language, _options) => {
+              const customTextLanguageMap = {
+                en: englishCustomText,
+                es: spanishCustomText,
+                fr: frenchCustomText,
+              };
+              const customTextForLanguage = customTextLanguageMap[language];
+              if (!customTextForLanguage || !customTextForLanguage[prompt]) {
+                return Promise.resolve({});
+              }
 
-            if (customTextValue === undefined || _.isEmpty(customTextValue))
-              return Promise.resolve({ data: {} });
+              const customTextValue = customTextForLanguage[prompt]; // Get the wrapper object with prompt as key
 
-            return Promise.resolve({ data: customTextValue });
+              if (customTextValue === undefined || _.isEmpty(customTextValue))
+                return Promise.resolve({});
+
+              return Promise.resolve(customTextValue);
+            },
           },
-          getAllRenderingSettings: () =>
-            Promise.resolve({ data: [sampleScreenRenderLogin, sampleScreenRenderSignUp] }),
+          rendering: {
+            list: () => [sampleScreenRenderLogin, sampleScreenRenderSignUp],
+          },
         },
         pool: new PromisePoolExecutor({
           concurrencyLimit: 3,
@@ -146,13 +153,13 @@ describe('#prompts handler', () => {
       });
 
       const getCustomPartial = sinon.stub(handler, 'getCustomPartial');
-      getCustomPartial.withArgs({ prompt: 'login' }).resolves({ data: loginPartial });
+      getCustomPartial.withArgs({ prompt: 'login' }).resolves(loginPartial);
       getCustomPartial.withArgs({ prompt: 'login-id' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'login-password' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'login-passwordless' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup-password' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup-id' }).resolves({});
-      getCustomPartial.withArgs({ prompt: 'signup' }).resolves({ data: signupPartial });
+      getCustomPartial.withArgs({ prompt: 'signup' }).resolves(signupPartial);
 
       const data = await handler.getType();
       expect(data).to.deep.equal({
@@ -186,22 +193,23 @@ describe('#prompts handler', () => {
 
       const auth0 = {
         tenants: {
-          getSettings: () => ({
-            enabled_locales: ['en'],
-          }),
+          settings: {
+            get: () => ({
+              enabled_locales: ['en'],
+            }),
+          },
         },
         prompts: {
-          updateCustomTextByLanguage: () => {
-            didCallUpdateCustomText = true;
+          customText: {
+            set: () => {
+              didCallUpdateCustomText = true;
+            },
           },
-          update: (data) => {
+          updateSettings: (data) => {
             didCallUpdatePromptsSettings = true;
             expect(data).to.deep.equal(mockPromptsSettings);
             return Promise.resolve({ data });
           },
-          _getRestClient: (endpoint) => ({
-            get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-          }),
         },
       };
 
@@ -290,19 +298,23 @@ describe('#prompts handler', () => {
 
       const auth0 = {
         prompts: {
-          updateCustomTextByLanguage: () => {
-            didCallUpdateCustomText = true;
-            numberOfUpdateCustomTextCalls++;
-            return Promise.resolve({ data: {} });
+          customText: {
+            set: () => {
+              didCallUpdateCustomText = true;
+              numberOfUpdateCustomTextCalls++;
+              return Promise.resolve({ data: {} });
+            },
           },
-          update: (data) => {
+          updateSettings: (data) => {
             didCallUpdatePromptsSettings = true;
             expect(data).to.deep.equal(mockPromptsSettings);
             return Promise.resolve({ data });
           },
-          updateRendering: () => {
-            didCallUpdateScreenRenderer = true;
-            return Promise.resolve({ data: {} });
+          rendering: {
+            update: () => {
+              didCallUpdateScreenRenderer = true;
+              return Promise.resolve({ data: {} });
+            },
           },
           _getRestClient: (endpoint) => ({
             get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
@@ -393,19 +405,23 @@ describe('#prompts handler', () => {
 
       const auth0 = {
         prompts: {
-          updateCustomTextByLanguage: () => {
-            didCallUpdateCustomText = true;
-            numberOfUpdateCustomTextCalls++;
-            return Promise.resolve({ data: {} });
+          customText: {
+            set: () => {
+              didCallUpdateCustomText = true;
+              numberOfUpdateCustomTextCalls++;
+              return Promise.resolve({ data: {} });
+            },
           },
-          update: (data) => {
+          updateSettings: (data) => {
             didCallUpdatePromptsSettings = true;
             expect(data).to.deep.equal(mockPromptsSettings);
             return Promise.resolve({ data });
           },
-          updateRendering: () => {
-            didCallUpdateScreenRenderer = true;
-            return Promise.resolve({ data: {} });
+          rendering: {
+            update: () => {
+              didCallUpdateScreenRenderer = true;
+              return Promise.resolve({ data: {} });
+            },
           },
           _getRestClient: (endpoint) => ({
             get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
@@ -454,20 +470,20 @@ describe('#prompts handler', () => {
     it('should not fail if tenant languages or partials are undefined', async () => {
       const auth0 = {
         tenants: {
-          getSettings: () =>
-            Promise.resolve({
-              data: {
-                enabled_locales: undefined,
-              },
-            }),
+          settings: {
+            get: () =>
+              Promise.resolve({
+                data: {
+                  enabled_locales: undefined,
+                },
+              }),
+          },
         },
         prompts: {
-          get: () => ({ data: mockPromptsSettings }),
-          getSettings: () => mockPromptsSettings,
-          _getRestClient: (endpoint) => ({
-            get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
-          }),
-          getAllRenderingSettings: () => Promise.resolve({ data: [] }),
+          getSettings: () => Promise.resolve(mockPromptsSettings),
+          rendering: {
+            list: () => [],
+          },
         },
         pool: new PromisePoolExecutor({
           concurrencyLimit: 3,
@@ -596,7 +612,7 @@ describe('#prompts handler', () => {
       handler.IsFeatureSupported = false;
 
       const result = await handler.getCustomPartial({
-        prompt: 'login' as CustomPartialsPromptTypes,
+        prompt: 'login',
       });
       expect(result).to.deep.equal({});
     });

@@ -59,10 +59,14 @@ describe('#guardianFactorTemplates handler', () => {
     it('should handle forbidden error', async () => {
       const auth0 = {
         guardian: {
-          getSmsFactorTemplates: () => {
-            const error = new Error('Forbidden resource access');
-            error.statusCode = 403;
-            throw error;
+          factors: {
+            sms: {
+              getTemplates: () => {
+                const error = new Error('Forbidden resource access');
+                error.statusCode = 403;
+                throw error;
+              },
+            },
           },
         },
         pool,
@@ -76,7 +80,11 @@ describe('#guardianFactorTemplates handler', () => {
     it('should get guardianFactorTemplates', async () => {
       const auth0 = {
         guardian: {
-          getSmsFactorTemplates: (params) => ({ data: { ...params, enrollment_message: 'test' } }),
+          factors: {
+            sms: {
+              getTemplates: () => Promise.resolve({ enrollment_message: 'test' }),
+            },
+          },
         },
         pool,
       };
@@ -94,7 +102,11 @@ describe('#guardianFactorTemplates handler', () => {
     it('should update guardianFactorTemplates', async () => {
       const auth0 = {
         guardian: {
-          setSmsFactorTemplates: (params, data) => ({ data }),
+          factors: {
+            sms: {
+              setTemplates: (data) => Promise.resolve(data),
+            },
+          },
         },
         pool,
       };

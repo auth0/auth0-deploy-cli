@@ -1,108 +1,7 @@
-import { PostBrandingTheme200Response } from 'auth0';
+import { Management } from 'auth0';
 import { Assets } from '../../../types';
 import log from '../../../logger';
 import DefaultHandler, { order } from './default';
-
-export type Theme = PostBrandingTheme200Response;
-export default class ThemesHandler extends DefaultHandler {
-  existing: Theme[] | null;
-
-  constructor(options: DefaultHandler) {
-    super({
-      ...options,
-      type: 'themes',
-      id: 'themeId',
-    });
-  }
-
-  objString(theme: Theme): string {
-    return theme.displayName || JSON.stringify(theme);
-  }
-
-  async getType(): Promise<Theme[] | null> {
-    if (!this.existing) {
-      this.existing = await this.getThemes();
-    }
-
-    return this.existing;
-  }
-
-  @order('60') // Run after custom domains.
-  async processChanges(assets: Assets): Promise<void> {
-    const { themes } = assets;
-
-    // Non existing section means themes doesn't need to be processed
-    if (!themes) {
-      return;
-    }
-
-    // Empty array means themes should be deleted
-    if (themes.length === 0) {
-      return this.deleteThemes();
-    }
-
-    return this.updateThemes(themes);
-  }
-
-  async deleteThemes(): Promise<void> {
-    if (!this.config('AUTH0_ALLOW_DELETE')) {
-      return;
-    }
-
-    // if theme exists we need to delete it
-    const currentThemes = await this.getThemes();
-    if (currentThemes === null || currentThemes.length === 0) {
-      return;
-    }
-
-    const currentTheme = currentThemes[0];
-    await this.client.branding.deleteTheme({ themeId: currentTheme.themeId });
-
-    this.deleted += 1;
-    this.didDelete(currentTheme);
-  }
-
-  async updateThemes(themes: Theme[]): Promise<void> {
-    if (themes.length > 1) {
-      log.warn('Only one theme is supported per tenant');
-    }
-
-    const currentThemes = await this.getThemes();
-
-    const themeReqPayload = ((): Omit<Theme, 'themeId'> => {
-      // Removing themeId from update and create payloads, otherwise API will error
-      // Theme ID may be required to handle if `--export_ids=true`
-      const payload = themes[0];
-      //@ts-ignore to quell non-optional themeId property, but we know that it's ok to delete
-      delete payload.themeId;
-      return payload;
-    })();
-
-    if (currentThemes === null || currentThemes.length === 0) {
-      await this.client.branding.createTheme(themeReqPayload);
-    } else {
-      const currentTheme = currentThemes[0];
-      // if theme exists, overwrite it otherwise create it
-      await this.client.branding.updateTheme({ themeId: currentTheme.themeId }, themeReqPayload);
-    }
-
-    this.updated += 1;
-    this.didUpdate(themes[0]);
-  }
-
-  async getThemes(): Promise<Theme[] | null> {
-    try {
-      const { data: theme } = await this.client.branding.getDefaultTheme();
-      return [theme];
-    } catch (err) {
-      if (err.statusCode === 404) return [];
-      if (err.statusCode === 400) return null;
-
-      // Errors other than 404 (theme doesn't exist) or 400 (no-code not enabled) shouldn't be expected
-      throw err;
-    }
-  }
-}
 
 /**
  * Schema
@@ -519,3 +418,104 @@ export const schema = {
     type: 'object',
   },
 };
+
+export type Theme = Management.GetBrandingThemeResponseContent;
+export default class ThemesHandler extends DefaultHandler {
+  existing: Theme[] | null;
+
+  constructor(options: DefaultHandler) {
+    super({
+      ...options,
+      type: 'themes',
+      id: 'themeId',
+    });
+  }
+
+  objString(theme: Theme): string {
+    return theme.displayName || JSON.stringify(theme);
+  }
+
+  async getType(): Promise<Theme[] | null> {
+    if (!this.existing) {
+      this.existing = await this.getThemes();
+    }
+
+    return this.existing;
+  }
+
+  @order('60') // Run after custom domains.
+  async processChanges(assets: Assets): Promise<void> {
+    const { themes } = assets;
+
+    // Non existing section means themes doesn't need to be processed
+    if (!themes) {
+      return;
+    }
+
+    // Empty array means themes should be deleted
+    if (themes.length === 0) {
+      return this.deleteThemes();
+    }
+
+    return this.updateThemes(themes);
+  }
+
+  async deleteThemes(): Promise<void> {
+    if (!this.config('AUTH0_ALLOW_DELETE')) {
+      return;
+    }
+
+    // if theme exists we need to delete it
+    const currentThemes = await this.getThemes();
+    if (currentThemes === null || currentThemes.length === 0) {
+      return;
+    }
+
+    const currentTheme = currentThemes[0];
+    await this.client.branding.themes.delete(currentTheme.themeId);
+
+    this.deleted += 1;
+    this.didDelete(currentTheme);
+  }
+
+  async updateThemes(themes: Theme[]): Promise<void> {
+    if (themes.length > 1) {
+      log.warn('Only one theme is supported per tenant');
+    }
+
+    const currentThemes = await this.getThemes();
+
+    const themeReqPayload = ((): Omit<Theme, 'themeId'> => {
+      // Removing themeId from update and create payloads, otherwise API will error
+      // Theme ID may be required to handle if `--export_ids=true`
+      const payload = themes[0];
+      // @ts-ignore to quell non-optional themeId property, but we know that it's ok to delete
+      delete payload.themeId;
+      return payload;
+    })();
+
+    if (currentThemes === null || currentThemes.length === 0) {
+      await this.client.branding.themes.create(themeReqPayload);
+    } else {
+      const currentTheme = currentThemes[0];
+      // if theme exists, overwrite it otherwise create it
+      await this.client.branding.themes.update(currentTheme.themeId, themeReqPayload);
+    }
+
+    this.updated += 1;
+    this.didUpdate(themes[0]);
+  }
+
+  async getThemes(): Promise<Theme[] | null> {
+    try {
+      const theme = await this.client.branding.themes.getDefault();
+      return [theme];
+    } catch (err) {
+      if (err.statusCode === 404) return [];
+      if (err.statusCode === 400) return null;
+
+      // Errors other than 404 (theme doesn't exist) or 400 (no-code not enabled) shouldn't be expected
+      throw err;
+    }
+  }
+}

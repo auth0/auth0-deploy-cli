@@ -66,25 +66,24 @@ describe('#roles handler', () => {
             expect(data).to.be.an('object');
             expect(data.name).to.equal('myRole');
             expect(data.description).to.equal('myDescription');
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          update: () => Promise.resolve({ data: [] }),
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'roles', []),
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => mockPagedData(params, 'roles', []),
           permissions: {
-            getAll: () =>
+            list: () =>
               Promise.resolve([
                 { permission_name: 'Create:cal_entry', resource_server_identifier: 'organise' },
               ]),
-            create: (params, data) => {
-              expect(params).to.be.an('object');
-              expect(params.id).to.equal('myRoleId');
+            add: (roleId, data) => {
+              expect(roleId).to.be.a('string');
+              expect(roleId).to.equal('myRoleId');
               expect(data).to.be.an('object');
               expect(data.permissions).to.not.equal(null);
               expect(data.permissions).to.be.an('Array');
-              return Promise.resolve({ data: data.permissions });
+              return Promise.resolve(data.permissions);
             },
-            update: Promise.resolve({ data: [] }),
           },
         },
         pool,
@@ -113,7 +112,7 @@ describe('#roles handler', () => {
 
       const auth0 = {
         roles: {
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData({ ...params, include_totals: true }, 'roles', [
               {
                 name: 'myRole',
@@ -121,8 +120,10 @@ describe('#roles handler', () => {
                 description: 'myDescription',
               },
             ]),
-          getPermissions: (params) =>
-            mockPagedData({ ...params, include_totals: true }, 'permissions', permissions),
+          permissions: {
+            list: (roleId, params) =>
+              mockPagedData({ ...params, include_totals: true }, 'permissions', permissions),
+          },
         },
         pool,
       };
@@ -145,7 +146,7 @@ describe('#roles handler', () => {
     it('should return an empty array for 501 status code', async () => {
       const auth0 = {
         roles: {
-          getAll: () => {
+          list: () => {
             const error = new Error('Feature is not yet implemented');
             error.statusCode = 501;
             throw error;
@@ -162,7 +163,7 @@ describe('#roles handler', () => {
     it('should return an empty array for 404 status code', async () => {
       const auth0 = {
         roles: {
-          getAll: () => {
+          list: () => {
             const error = new Error('Not found');
             error.statusCode = 404;
             throw error;
@@ -179,7 +180,7 @@ describe('#roles handler', () => {
     it('should throw an error for all other failed requests', async () => {
       const auth0 = {
         roles: {
-          getAll: () => {
+          list: () => {
             const error = new Error('Bad request');
             error.statusCode = 500;
             throw error;
@@ -203,20 +204,20 @@ describe('#roles handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.length).to.equal(0);
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          update: function (params, data) {
+          update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('myRoleId');
+            expect(id).to.be.a('string');
+            expect(id).to.equal('myRoleId');
             expect(data).to.be.an('object');
             expect(data.name).to.equal('myRole');
             expect(data.description).to.equal('myDescription');
 
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) =>
+          delete: () => Promise.resolve([]),
+          list: (params) =>
             mockPagedData(params, 'roles', [
               {
                 name: 'myRole',
@@ -224,22 +225,24 @@ describe('#roles handler', () => {
                 description: 'myDescription',
               },
             ]),
-          getPermissions: (params) =>
-            mockPagedData(params, 'permissions', [
-              {
-                permission_name: 'Create:cal_entry',
-                resource_server_identifier: 'organise',
-              },
-            ]),
-          deletePermissions: function (params) {
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('myRoleId');
-            return Promise.resolve({ data: [] });
-          },
-          addPermissions: function (params) {
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('myRoleId');
-            return Promise.resolve({ data: [] });
+          permissions: {
+            list: (roleId, params) =>
+              mockPagedData(params, 'permissions', [
+                {
+                  permission_name: 'Create:cal_entry',
+                  resource_server_identifier: 'organise',
+                },
+              ]),
+            delete: function (roleId, _data) {
+              expect(roleId).to.be.a('string');
+              expect(roleId).to.equal('myRoleId');
+              return Promise.resolve([]);
+            },
+            add: function (roleId, _data) {
+              expect(roleId).to.be.a('string');
+              expect(roleId).to.equal('myRoleId');
+              return Promise.resolve([]);
+            },
           },
         },
         pool,
@@ -270,14 +273,14 @@ describe('#roles handler', () => {
     it('should delete role', async () => {
       const auth0 = {
         roles: {
-          create: () => Promise.resolve({ data: [] }),
-          update: () => Promise.resolve({ data: [] }),
-          delete: (data) => {
-            expect(data).to.be.an('object');
-            expect(data.id).to.equal('myRoleId');
-            return Promise.resolve({ data });
+          create: () => Promise.resolve([]),
+          update: () => Promise.resolve([]),
+          delete: (id) => {
+            expect(id).to.be.a('string');
+            expect(id).to.equal('myRoleId');
+            return Promise.resolve({});
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'roles', [
               {
                 name: 'myRole',
@@ -285,7 +288,9 @@ describe('#roles handler', () => {
                 description: 'myDescription',
               },
             ]),
-          getPermissions: (params) => mockPagedData(params, 'permissions', []),
+          permissions: {
+            list: (roleId, params) => mockPagedData(params, 'permissions', []),
+          },
         },
         pool,
       };

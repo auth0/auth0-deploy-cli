@@ -9,16 +9,16 @@ describe('#pages handler', () => {
     it('should update login page', async () => {
       const auth0 = {
         clients: {
-          update: function (params, data) {
+          update: function (clientId, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
+            expect(clientId).to.be.a('string');
             expect(data).to.be.an('object');
-            expect(params.client_id).to.equal('global1');
+            expect(clientId).to.equal('global1');
             expect(data.custom_login_page).to.equal('login_body');
             expect(data.custom_login_page_on).to.equal(true);
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          getAll: (params) => mockPagedData(params, 'clients', [{ client_id: 'global1' }]),
+          list: (params) => mockPagedData(params, 'clients', [{ client_id: 'global1' }]),
         },
       };
 
@@ -36,7 +36,7 @@ describe('#pages handler', () => {
 
       const auth0 = {
         clients: {
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'clients', [
               {
                 name: 'Global Client',
@@ -47,13 +47,13 @@ describe('#pages handler', () => {
             ]),
         },
         tenants: {
-          getSettings: () => ({
-            data: {
+          settings: {
+            get: () => ({
               guardian_mfa_page: { enabled: true, html: html },
               change_password: { enabled: true, html: html },
               error_page: { show_log_link: true, html: html, url: errorPageUrl },
-            },
-          }),
+            }),
+          },
         },
       };
 
@@ -75,12 +75,14 @@ describe('#pages handler', () => {
     it('should update password_reset page', async () => {
       const auth0 = {
         tenants: {
-          updateSettings: (data) => {
-            expect(data).to.be.an('object');
-            expect(data.change_password).to.be.an('object');
-            expect(data.change_password.html).to.equal('password_reset_body');
-            expect(data.change_password.enabled).to.equal(false);
-            return Promise.resolve({ data });
+          settings: {
+            update: (data) => {
+              expect(data).to.be.an('object');
+              expect(data.change_password).to.be.an('object');
+              expect(data.change_password.html).to.equal('password_reset_body');
+              expect(data.change_password.enabled).to.equal(false);
+              return Promise.resolve(data);
+            },
           },
         },
       };
@@ -98,13 +100,15 @@ describe('#pages handler', () => {
       const errorPageUrl = 'https://mycompany.org/error';
       const auth0 = {
         tenants: {
-          updateSettings: (data) => {
-            expect(data).to.be.an('object');
-            expect(data.error_page).to.be.an('object');
-            expect(data.error_page.html).to.equal(errorPageHtml);
-            expect(data.error_page.url).to.equal(errorPageUrl);
-            expect(data.error_page.show_log_link).to.equal(true);
-            return Promise.resolve({ data });
+          settings: {
+            update: (data) => {
+              expect(data).to.be.an('object');
+              expect(data.error_page).to.be.an('object');
+              expect(data.error_page.html).to.equal(errorPageHtml);
+              expect(data.error_page.url).to.equal(errorPageUrl);
+              expect(data.error_page.show_log_link).to.equal(true);
+              return Promise.resolve(data);
+            },
           },
         },
       };

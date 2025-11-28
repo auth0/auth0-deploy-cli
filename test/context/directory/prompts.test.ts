@@ -12,6 +12,7 @@ import {
   mockMgmtClient,
   createDirWithNestedDir,
 } from '../../utils';
+import { Config } from '../../../src/types';
 
 const dir = path.join(testDataDir, 'directory', 'promptsDump');
 const promptsDirectory = path.join(dir, constants.PROMPTS_DIRECTORY);
@@ -471,7 +472,7 @@ describe('#directory context prompts', () => {
   it('should not dump prompts settings and prompts custom text when prompts object is null', async () => {
     cleanThenMkdir(dir);
 
-    const context = new Context({ AUTH0_INPUT_FILE: dir });
+    const context = new Context({ AUTH0_INPUT_FILE: dir } as Config, mockMgmtClient());
     context.assets.prompts = null;
 
     promptsHandler.dump(context);
@@ -483,7 +484,7 @@ describe('#directory context prompts', () => {
   it('should not dump prompts settings and prompts custom text when prompts object is undefined', async () => {
     cleanThenMkdir(dir);
 
-    const context = new Context({ AUTH0_INPUT_FILE: dir });
+    const context = new Context({ AUTH0_INPUT_FILE: dir } as Config, mockMgmtClient());
 
     promptsHandler.dump(context);
     const dumpedFiles = getFiles(promptsDirectory, ['.json']);
@@ -494,7 +495,7 @@ describe('#directory context prompts', () => {
   it('should dump prompts settings, prompts custom text when API responses are empty and screen renderers', async () => {
     cleanThenMkdir(dir);
 
-    const context = new Context({ AUTH0_INPUT_FILE: dir });
+    const context = new Context({ AUTH0_INPUT_FILE: dir } as Config, mockMgmtClient());
 
     context.assets.prompts = {
       universal_login_experience: 'classic',

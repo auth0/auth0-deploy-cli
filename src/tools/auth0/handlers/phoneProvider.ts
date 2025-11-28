@@ -1,9 +1,4 @@
-import {
-  CreatePhoneProviderRequest,
-  DeletePhoneProviderRequest,
-  GetBrandingPhoneProviders200ResponseProvidersInner,
-  UpdatePhoneProviderOperationRequest,
-} from 'auth0';
+import { Management } from 'auth0';
 import DefaultHandler, { order } from './default';
 import { Assets } from '../../../types';
 import log from '../../../logger';
@@ -106,7 +101,7 @@ export const schema = {
   },
 };
 
-export type PhoneProvider = GetBrandingPhoneProviders200ResponseProvidersInner;
+export type PhoneProvider = Management.GetBrandingPhoneProviderResponseContent;
 export default class PhoneProviderHandler extends DefaultHandler {
   existing: PhoneProvider[] | null;
 
@@ -119,7 +114,7 @@ export default class PhoneProviderHandler extends DefaultHandler {
   }
 
   objString(provider: PhoneProvider): string {
-    return super.objString({ name: provider.name, disabled: provider.disabled }); //Que
+    return super.objString({ name: provider.name, disabled: provider.disabled });
   }
 
   async getType(): Promise<PhoneProvider[] | null> {
@@ -131,7 +126,7 @@ export default class PhoneProviderHandler extends DefaultHandler {
   }
 
   async getPhoneProviders(): Promise<PhoneProvider[] | null> {
-    const { data: response } = await this.client.branding.getAllPhoneProviders();
+    const response = await this.client.branding.phone.providers.list();
     return response.providers ?? [];
   }
 
@@ -162,9 +157,11 @@ export default class PhoneProviderHandler extends DefaultHandler {
     }
 
     const currentProvider = currentProviders[0];
-    await this.client.branding.deletePhoneProvider(<DeletePhoneProviderRequest>{
-      id: currentProvider.id,
-    });
+    if (!currentProvider.id) {
+      throw new Error('Unable to find phone provider id when trying to delete');
+    }
+
+    await this.client.branding.phone.providers.delete(currentProvider.id);
 
     this.deleted += 1;
     this.didDelete(currentProvider);
@@ -192,16 +189,16 @@ export default class PhoneProviderHandler extends DefaultHandler {
     if (currentProviders === null || currentProviders.length === 0) {
       // if provider does not exist, create it
       this.created += 1;
-      await this.client.branding.configurePhoneProvider(
-        providerReqPayload as CreatePhoneProviderRequest
+      await this.client.branding.phone.providers.create(
+        providerReqPayload as Management.CreateBrandingPhoneProviderRequestContent
       );
     } else {
       const currentProvider = currentProviders[0];
+      if (!currentProvider.id) {
+        throw new Error('Unable to find phone provider id when trying to delete');
+      }
       // if provider exists, overwrite it
-      await this.client.branding.updatePhoneProvider(
-        { id: currentProvider.id } as UpdatePhoneProviderOperationRequest,
-        providerReqPayload
-      );
+      await this.client.branding.phone.providers.update(currentProvider.id, providerReqPayload);
 
       this.updated += 1;
       this.didUpdate(phoneProviders[0]);
