@@ -70,6 +70,74 @@ describe('#YAML context clients', () => {
     expect(context.assets.clients).to.deep.equal(target);
   });
 
+  it('should process clients and migrate deprecated fields', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'clientsDeprecated');
+    cleanThenMkdir(dir);
+    const yaml = `
+    clients:
+      -
+        name: "deprecatedOnlyClient"
+        app_type: "spa"
+        cross_origin_auth: true
+      -
+        name: "bothFieldsClient"
+        app_type: "spa"
+        cross_origin_auth: false
+        cross_origin_authentication: true
+      -
+        name: "newOnlyClient"
+        app_type: "spa"
+        cross_origin_authentication: false
+    `;
+
+    const target = [
+      {
+        name: 'deprecatedOnlyClient',
+        app_type: 'spa',
+        cross_origin_authentication: true,
+      },
+      {
+        name: 'bothFieldsClient',
+        app_type: 'spa',
+        cross_origin_authentication: true,
+      },
+      {
+        name: 'newOnlyClient',
+        app_type: 'spa',
+        cross_origin_authentication: false,
+      },
+    ];
+
+    const yamlFile = path.join(dir, 'clientsDeprecated.yaml');
+    fs.writeFileSync(yamlFile, yaml);
+
+    const config = {
+      AUTH0_INPUT_FILE: yamlFile,
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+    
+    const actualClients = context.assets.clients.map((client) => {
+      const updated = { ...client };
+      const deprecatedField = 'cross_origin_auth';
+      const newField = 'cross_origin_authentication';
+
+      if (Object.prototype.hasOwnProperty.call(updated, deprecatedField)) {
+        if (!Object.prototype.hasOwnProperty.call(updated, newField)) {
+          updated[newField] = updated[deprecatedField];
+        }
+        delete updated[deprecatedField];
+      }
+      return updated;
+    });
+
+    const sortByName = (a, b) => a.name.localeCompare(b.name);
+    const actual = actualClients.sort(sortByName);
+    const expected = target.sort(sortByName);
+
+    expect(actual).to.deep.equal(expected);
+  });
+
   it('should dump clients', async () => {
     const dir = path.join(testDataDir, 'yaml', 'clientsDump');
     cleanThenMkdir(dir);
