@@ -3,11 +3,13 @@ import {
   ClientExpressConfiguration,
   ClientOrganizationRequireBehaviorEnum,
 } from 'auth0';
+import _ from 'lodash';
 import { Assets, Auth0APIClient } from '../../../types';
 import { paginate } from '../client';
 import DefaultAPIHandler from './default';
 import { getConnectionProfile } from './connectionProfiles';
 import { getUserAttributeProfiles } from './userAttributeProfiles';
+import log from '../../../logger';
 
 const multiResourceRefreshTokenPoliciesSchema = {
   type: ['array', 'null'],
@@ -316,6 +318,11 @@ export default class ClientHandler extends DefaultAPIHandler {
 
     assets.clients = await this.sanitizeMapExpressConfiguration(this.client, clients);
 
+    assets.clients = this.normalizeClientFields({
+      clients,
+      fields: [{ newField: 'cross_origin_authentication', deprecatedField: 'cross_origin_auth' }],
+    });
+
     const excludedClients = (assets.exclude && assets.exclude.clients) || [];
 
     const { del, update, create, conflicts } = await this.calcChanges(assets);
@@ -373,9 +380,55 @@ export default class ClientHandler extends DefaultAPIHandler {
       is_global: false,
     });
 
-    this.existing = clients;
+    const sanitizedClients = this.normalizeClientFields({
+      clients,
+      fields: [{ newField: 'cross_origin_authentication', deprecatedField: 'cross_origin_auth' }],
+    });
+
+    this.existing = sanitizedClients;
     return this.existing;
   }
+
+  /**
+   * @description Maps deprecated client fields to their new counterparts and removes the deprecated field.
+   * If a deprecated field exists, its value is always used for the new field, ensuring data migration
+   * and preventing loss of configuration data during schema transitions.
+   * @returns Client[]
+   */
+  normalizeClientFields = ({
+    clients,
+    fields,
+  }: {
+    clients: Client[];
+    fields: {
+      newField: string;
+      deprecatedField: string;
+    }[];
+  }): Client[] =>
+    clients.map(
+      (client) =>
+        fields.reduce(
+          (acc, { deprecatedField, newField }) => {
+            const hasDeprecated = _.has(acc, deprecatedField);
+            const hasNew = _.has(acc, newField);
+
+            if (hasDeprecated) {
+              // If deprecated exists and new is missing, log a warning and copy the value
+              if (!hasNew) {
+                log.warn(
+                  `Client '${client.name}': The '${deprecatedField}' field is deprecated. Migrating value to '${newField}'.`
+                );
+                acc[newField] = acc[deprecatedField];
+              }
+              // Remove the deprecated field
+              return _.omit(acc, deprecatedField);
+            }
+
+            return acc;
+          },
+          { ...client } as Record<string, unknown>
+        ) as Client
+    );
 
   // convert names back to IDs for express configuration
   async sanitizeMapExpressConfiguration(
