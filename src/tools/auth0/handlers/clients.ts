@@ -3,11 +3,13 @@ import {
   ClientExpressConfiguration,
   ClientOrganizationRequireBehaviorEnum,
 } from 'auth0';
+import { forEach, has, omit } from 'lodash';
 import { Assets, Auth0APIClient } from '../../../types';
 import { paginate } from '../client';
 import DefaultAPIHandler from './default';
 import { getConnectionProfile } from './connectionProfiles';
 import { getUserAttributeProfiles } from './userAttributeProfiles';
+import log from '../../../logger';
 
 const multiResourceRefreshTokenPoliciesSchema = {
   type: ['array', 'null'],
@@ -335,8 +337,13 @@ export default class ClientHandler extends DefaultAPIHandler {
     };
 
     // Sanitize client fields
-    const sanitizeClientFields = (list: Client[]): Client[] =>
-      list.map((item) => {
+    const sanitizeClientFields = (list: Client[]): Client[] => {
+      const sanitizedList = this.sanitizeDeprecatedClientFields({
+        clients: list,
+        fields: [{ newField: 'cross_origin_authentication', deprecatedField: 'cross_origin_auth' }],
+      });
+
+      return sanitizedList.map((item) => {
         // For resourceServers app type `resource_server`, don't include `oidc_backchannel_logout`, `oidc_logout`, `refresh_token`
         if (item.app_type === 'resource_server') {
           if ('oidc_backchannel_logout' in item) {
@@ -351,6 +358,7 @@ export default class ClientHandler extends DefaultAPIHandler {
         }
         return item;
       });
+    };
 
     const changes = {
       del: sanitizeClientFields(filterClients(del)),
@@ -376,6 +384,41 @@ export default class ClientHandler extends DefaultAPIHandler {
     this.existing = clients;
     return this.existing;
   }
+
+  /**
+   * @description Always prefer `newField` over `deprecatedField`.
+   * If only `deprecatedField` exists, set the value of the new field to the value of the deprecated field.
+   * If both exist, keep `newField`'s value and warn about `deprecatedField`.
+   */
+  private sanitizeDeprecatedClientFields = ({
+    clients,
+    fields,
+  }: {
+    clients: Client[];
+    fields: { deprecatedField: string; newField: string }[];
+  }): Client[] =>
+    clients.map((client) => {
+      let updated = { ...client } as Record<string, unknown>;
+
+      forEach(fields, ({ deprecatedField, newField }) => {
+        // check if the client has the deprecated field and if the new field is not present
+        if (has(updated, deprecatedField)) {
+          log.warn(
+            `Client '${client.name}': '${deprecatedField}' is deprecated and may not be available in the major version`
+          );
+
+          // if the new field is not present, set it to the value of the deprecated field
+          if (!has(updated, newField)) {
+            updated[newField] = updated[deprecatedField];
+          }
+
+          // remove the deprecated field
+          updated = omit(updated, deprecatedField);
+        }
+      });
+
+      return updated as Client;
+    });
 
   // convert names back to IDs for express configuration
   async sanitizeMapExpressConfiguration(
