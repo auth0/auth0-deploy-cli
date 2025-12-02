@@ -3,7 +3,7 @@ import {
   ClientExpressConfiguration,
   ClientOrganizationRequireBehaviorEnum,
 } from 'auth0';
-import { forEach, has, omit } from 'lodash';
+import { has, omit } from 'lodash';
 import { Assets, Auth0APIClient } from '../../../types';
 import { paginate } from '../client';
 import DefaultAPIHandler from './default';
@@ -277,6 +277,8 @@ export type Client = {
   name: string;
   app_type?: string;
   resource_server_identifier?: string;
+  cross_origin_authentication?: boolean;
+  cross_origin_auth?: boolean;
   custom_login_page?: string;
   custom_login_page_on?: boolean;
   express_configuration?: ClientExpressConfiguration;
@@ -337,28 +339,35 @@ export default class ClientHandler extends DefaultAPIHandler {
     };
 
     // Sanitize client fields
-    const sanitizeClientFields = (list: Client[]): Client[] => {
-      const sanitizedClientList = this.sanitizeDeprecatedClientFields({
-        clients: list,
-        fields: [{ newField: 'cross_origin_authentication', deprecatedField: 'cross_origin_auth' }],
-      });
+    const sanitizeClientFields = (list: Client[]): Client[] =>
+      list.map((item: Client) => {
+        let updated = { ...item };
 
-      return sanitizedClientList.map((item) => {
-        // For resourceServers app type `resource_server`, don't include `oidc_backchannel_logout`, `oidc_logout`, `refresh_token`
-        if (item.app_type === 'resource_server') {
-          if ('oidc_backchannel_logout' in item) {
-            delete item.oidc_backchannel_logout;
+        // Sanitize the deprecated field `cross_origin_auth` to `cross_origin_authentication`
+        if (has(updated, 'cross_origin_auth')) {
+          log.warn(
+            `Client '${item.name}': 'cross_origin_auth' is deprecated and may not be available in the future versions.`
+          );
+
+          if (!has(updated, 'cross_origin_authentication')) {
+            updated.cross_origin_authentication = updated.cross_origin_auth;
           }
-          if ('oidc_logout' in item) {
-            delete item.oidc_logout;
+          updated = omit(updated, 'cross_origin_auth');
+        }
+
+        if (updated.app_type === 'resource_server') {
+          if ('oidc_backchannel_logout' in updated) {
+            delete updated.oidc_backchannel_logout;
           }
-          if ('refresh_token' in item) {
-            delete item.refresh_token;
+          if ('oidc_logout' in updated) {
+            delete updated.oidc_logout;
+          }
+          if ('refresh_token' in updated) {
+            delete updated.refresh_token;
           }
         }
-        return item;
+        return updated;
       });
-    };
 
     const changes = {
       del: sanitizeClientFields(filterClients(del)),
@@ -384,41 +393,6 @@ export default class ClientHandler extends DefaultAPIHandler {
     this.existing = clients;
     return this.existing;
   }
-
-  /**
-   * @description Always prefer `newField` over `deprecatedField`.
-   * If only `deprecatedField` exists, set the value of the new field to the value of the deprecated field.
-   * If both exist, keep `newField`'s value and warn about `deprecatedField`.
-   */
-  private sanitizeDeprecatedClientFields = ({
-    clients,
-    fields,
-  }: {
-    clients: Client[];
-    fields: { deprecatedField: string; newField: string }[];
-  }): Client[] =>
-    clients.map((client) => {
-      let updated = { ...client } as Record<string, unknown>;
-
-      forEach(fields, ({ deprecatedField, newField }) => {
-        // check if the client has the deprecated field and if the new field is not present
-        if (has(updated, deprecatedField)) {
-          log.warn(
-            `Client '${client.name}': '${deprecatedField}' is deprecated and may not be available in the major version`
-          );
-
-          // if the new field is not present, set it to the value of the deprecated field
-          if (!has(updated, newField)) {
-            updated[newField] = updated[deprecatedField];
-          }
-
-          // remove the deprecated field
-          updated = omit(updated, deprecatedField);
-        }
-      });
-
-      return updated as Client;
-    });
 
   // convert names back to IDs for express configuration
   async sanitizeMapExpressConfiguration(
