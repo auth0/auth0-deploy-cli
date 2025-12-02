@@ -399,6 +399,57 @@ describe('#clients handler', () => {
       ]);
     });
 
+    it('should migrate deprecated cross_origin_auth to cross_origin_authentication on export', async () => {
+      const auth0 = {
+        clients: {
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'deprecatedOnlyClient',
+                app_type: 'spa',
+                cross_origin_auth: true,
+              },
+              {
+                client_id: 'client2',
+                name: 'bothFieldsClient',
+                app_type: 'spa',
+                cross_origin_auth: false,
+                cross_origin_authentication: true,
+              },
+              {
+                client_id: 'client3',
+                name: 'newOnlyClient',
+                app_type: 'spa',
+                cross_origin_authentication: false,
+              },
+            ]),
+        },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const data = await handler.getType();
+
+      expect(data).to.have.lengthOf(3);
+
+      const deprecatedOnlyClient = data.find((c) => c.name === 'deprecatedOnlyClient');
+      expect(deprecatedOnlyClient).to.not.have.property('cross_origin_auth');
+      expect(deprecatedOnlyClient.cross_origin_authentication).to.equal(true);
+
+      const bothFieldsClient = data.find((c) => c.name === 'bothFieldsClient');
+      expect(bothFieldsClient).to.not.have.property('cross_origin_auth');
+      expect(bothFieldsClient.cross_origin_authentication).to.equal(true);
+
+      const newOnlyClient = data.find((c) => c.name === 'newOnlyClient');
+      expect(newOnlyClient).to.not.have.property('cross_origin_auth');
+      expect(newOnlyClient.cross_origin_authentication).to.equal(false);
+    });
+
     it('should update client', async () => {
       const auth0 = {
         clients: {
