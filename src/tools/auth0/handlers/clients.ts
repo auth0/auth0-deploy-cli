@@ -329,6 +329,12 @@ export default class ClientHandler extends DefaultAPIHandler {
     // As it could cause problems if it gets deleted or updated etc
     const currentClient = this.config('AUTH0_CLIENT_ID') || '';
 
+    /*
+     * Filter out:
+     * - The client used to access Auth0 Management API
+     * - Clients in the exclusion list
+     * - Third-party clients when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is enabled
+     */
     const filterClients = (list: Client[]): Client[] =>
       list.filter(
         (item) =>
