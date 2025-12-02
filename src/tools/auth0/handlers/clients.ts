@@ -343,17 +343,7 @@ export default class ClientHandler extends DefaultAPIHandler {
       list.map((item: Client) => {
         let client: Client = { ...item };
 
-        // Sanitize the deprecated field `cross_origin_auth` to `cross_origin_authentication`
-        if (has(client, 'cross_origin_auth')) {
-          log.warn(
-            `Client '${item.name}': 'cross_origin_auth' is deprecated and may not be available in the future versions.\nSee more on: https://community.auth0.com/t/action-required-update-applications-that-use-cross-origin-authentication/132819`
-          );
-
-          if (!has(client, 'cross_origin_authentication')) {
-            client.cross_origin_authentication = client.cross_origin_auth;
-          }
-          client = omit(client, 'cross_origin_auth');
-        }
+        client = this.sanitizeCrossOriginAuth(client);
 
         if (client.app_type === 'resource_server') {
           if ('oidc_backchannel_logout' in client) {
@@ -381,6 +371,30 @@ export default class ClientHandler extends DefaultAPIHandler {
     });
   }
 
+  /**
+   * @description
+   * Sanitize the deprecated field `cross_origin_auth` to `cross_origin_authentication`
+   *
+   * @param {Client} client - The client object to sanitize.
+   * @returns {Client} The sanitized client object.
+   */
+  private sanitizeCrossOriginAuth(client: Client): Client {
+    let updatedClient: Client = { ...client };
+
+    if (has(updatedClient, 'cross_origin_auth')) {
+      log.warn(
+        `Client '${client.name}': 'cross_origin_auth' is deprecated and may not be available in the future versions.\nSee more on: https://community.auth0.com/t/action-required-update-applications-that-use-cross-origin-authentication/132819`
+      );
+
+      if (!has(updatedClient, 'cross_origin_authentication')) {
+        updatedClient.cross_origin_authentication = updatedClient.cross_origin_auth;
+      }
+      updatedClient = omit(updatedClient, 'cross_origin_auth') as Client;
+    }
+
+    return updatedClient;
+  }
+
   async getType() {
     if (this.existing) return this.existing;
 
@@ -390,22 +404,7 @@ export default class ClientHandler extends DefaultAPIHandler {
       is_global: false,
     });
 
-    this.existing = clients.map((item: Client) => {
-      let client: Client = { ...item };
-
-      if (has(client, 'cross_origin_auth')) {
-        log.warn(
-          `Client '${item.name}': 'cross_origin_auth' is deprecated and may not be available in the future versions.\nSee more on: https://community.auth0.com/t/action-required-update-applications-that-use-cross-origin-authentication/132819`
-        );
-
-        if (!has(client, 'cross_origin_authentication')) {
-          client.cross_origin_authentication = client.cross_origin_auth;
-        }
-        client = omit(client, 'cross_origin_auth');
-      }
-
-      return client;
-    });
+    this.existing = clients.map(this.sanitizeCrossOriginAuth.bind(this));
 
     return this.existing;
   }
