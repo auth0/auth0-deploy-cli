@@ -338,12 +338,12 @@ export default class ClientHandler extends DefaultAPIHandler {
 
     // Sanitize client fields
     const sanitizeClientFields = (list: Client[]): Client[] => {
-      const sanitizedList = this.sanitizeDeprecatedClientFields({
+      const sanitizedClientList = this.sanitizeDeprecatedClientFields({
         clients: list,
         fields: [{ newField: 'cross_origin_authentication', deprecatedField: 'cross_origin_auth' }],
       });
 
-      return sanitizedList.map((item) => {
+      return sanitizedClientList.map((item) => {
         // For resourceServers app type `resource_server`, don't include `oidc_backchannel_logout`, `oidc_logout`, `refresh_token`
         if (item.app_type === 'resource_server') {
           if ('oidc_backchannel_logout' in item) {
