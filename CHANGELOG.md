@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Upgrading node-auth0 from v4 to v5 [beta]. [#1207]
+
 ## [8.20.3] - 2025-11-14
 
 ### Fixed
