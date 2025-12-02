@@ -341,32 +341,32 @@ export default class ClientHandler extends DefaultAPIHandler {
     // Sanitize client fields
     const sanitizeClientFields = (list: Client[]): Client[] =>
       list.map((item: Client) => {
-        let fields: Client = { ...item };
+        let client: Client = { ...item };
 
         // Sanitize the deprecated field `cross_origin_auth` to `cross_origin_authentication`
-        if (has(fields, 'cross_origin_auth')) {
+        if (has(client, 'cross_origin_auth')) {
           log.warn(
             `Client '${item.name}': 'cross_origin_auth' is deprecated and may not be available in the future versions.`
           );
 
-          if (!has(fields, 'cross_origin_authentication')) {
-            fields.cross_origin_authentication = fields.cross_origin_auth;
+          if (!has(client, 'cross_origin_authentication')) {
+            client.cross_origin_authentication = client.cross_origin_auth;
           }
-          fields = omit(fields, 'cross_origin_auth');
+          client = omit(client, 'cross_origin_auth');
         }
 
-        if (fields.app_type === 'resource_server') {
-          if ('oidc_backchannel_logout' in fields) {
-            delete fields.oidc_backchannel_logout;
+        if (client.app_type === 'resource_server') {
+          if ('oidc_backchannel_logout' in client) {
+            delete client.oidc_backchannel_logout;
           }
-          if ('oidc_logout' in fields) {
-            delete fields.oidc_logout;
+          if ('oidc_logout' in client) {
+            delete client.oidc_logout;
           }
-          if ('refresh_token' in fields) {
-            delete fields.refresh_token;
+          if ('refresh_token' in client) {
+            delete client.refresh_token;
           }
         }
-        return fields;
+        return client;
       });
 
     const changes = {
