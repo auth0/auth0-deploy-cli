@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.20.4-beta.0] - 2025-12-02
+
+### Changed
+
+- Upgrading node-auth0 from v4 to v5 [beta]. [#1207]
+
 ## [8.20.3] - 2025-11-14
 
 ### Fixed
@@ -1511,7 +1517,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1196]: https://github.com/auth0/auth0-deploy-cli/issues/1196
 [#1200]: https://github.com/auth0/auth0-deploy-cli/issues/1200
 [#1203]: https://github.com/auth0/auth0-deploy-cli/issues/1203
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.3...HEAD
+[#1207]: https://github.com/auth0/auth0-deploy-cli/issues/1207
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.4-beta.0...HEAD
+[8.20.4-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.3...v8.20.4-beta.0
 [8.20.3]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.2...v8.20.3
 [8.20.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.1...v8.20.2
 [8.20.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.0...v8.20.1
