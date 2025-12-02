@@ -341,7 +341,7 @@ export default class ClientHandler extends DefaultAPIHandler {
     // Sanitize client fields
     const sanitizeClientFields = (list: Client[]): Client[] =>
       list.map((item: Client) => {
-        let fields = { ...item };
+        let fields: Client = { ...item };
 
         // Sanitize the deprecated field `cross_origin_auth` to `cross_origin_authentication`
         if (has(fields, 'cross_origin_auth')) {
