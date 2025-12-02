@@ -111,6 +111,21 @@ phoneProviders:
     credentials:
       auth_token: "some_auth_token"
 
+phoneTemplates:
+  - type: otp_verify
+    disabled: false
+    content:
+      from: "+12341234567"
+      body:
+        text: "Your verification code is {{ code }}"
+        voice: "Your verification code is {{ code }}"
+  - type: otp_enroll
+    disabled: false
+    content:
+      from: "+12341234567"
+      body:
+        text: "Your enrollment code is {{ code }}"
+
 emailProvider:
   name: "smtp"
   enabled: true

@@ -9,7 +9,7 @@ type ParsedPhoneTemplates = ParsedAsset<'phoneTemplates', PhoneTemplate[]>;
 async function parse(context: YAMLContext): Promise<ParsedPhoneTemplates> {
   const { phoneTemplates } = context.assets;
 
-  if (!phoneTemplates) return { phoneTemplates: [] };
+  if (!phoneTemplates) return { phoneTemplates: null };
 
   return {
     phoneTemplates,
@@ -19,7 +19,7 @@ async function parse(context: YAMLContext): Promise<ParsedPhoneTemplates> {
 async function dump(context: YAMLContext): Promise<ParsedPhoneTemplates> {
   const { phoneTemplates } = context.assets;
 
-  if (!phoneTemplates) return { phoneTemplates: [] };
+  if (!phoneTemplates) return { phoneTemplates: null };
 
   const processedTemplates = phoneTemplates.map((template) => phoneTemplatesDefaults(template));
 

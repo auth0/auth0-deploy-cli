@@ -13,7 +13,7 @@ type ParsedPhoneTemplates = ParsedAsset<'phoneTemplates', PhoneTemplate[]>;
 
 function parse(context: DirectoryContext): ParsedPhoneTemplates {
   const phoneTemplatesFolder = path.join(context.filePath, constants.PHONE_TEMPLATES_DIRECTORY);
-  if (!existsMustBeDir(phoneTemplatesFolder)) return { phoneTemplates: [] }; // Skip
+  if (!existsMustBeDir(phoneTemplatesFolder)) return { phoneTemplates: null }; // Skip
 
   const files = getFiles(phoneTemplatesFolder, ['.json']);
 
