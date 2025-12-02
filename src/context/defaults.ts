@@ -90,6 +90,27 @@ export function phoneProviderDefaults(phoneProvider) {
   return updated;
 }
 
+export function phoneTemplatesDefaults(phoneTemplate) {
+  const updated = { ...phoneTemplate };
+
+  // Strip read-only fields that are returned by the API but should not be included in exported config
+  const removeKeysFromOutput = [
+    'id',
+    'channel',
+    'customizable',
+    'tenant',
+    'created_at',
+    'updated_at',
+  ];
+  removeKeysFromOutput.forEach((key) => {
+    if (key in updated) {
+      delete updated[key];
+    }
+  });
+
+  return updated;
+}
+
 export function connectionDefaults(connection) {
   if (connection.options) {
     // Mask secret for key: connection.options.client_secret

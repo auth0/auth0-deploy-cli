@@ -96,6 +96,7 @@ const constants = {
   CLIENTS_GRANTS_DIRECTORY: 'grants',
   BRANDING_DIRECTORY: 'branding',
   PHONE_PROVIDER_DIRECTORY: 'phone-providers',
+  PHONE_TEMPLATES_DIRECTORY: 'phone-templates',
   BRANDING_TEMPLATES_DIRECTORY: 'templates',
   BRANDING_TEMPLATES_YAML_DIRECTORY: 'branding_templates',
   CLIENTS_CLIENT_NAME: 'clients',
