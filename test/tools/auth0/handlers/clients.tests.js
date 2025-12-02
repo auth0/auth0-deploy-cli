@@ -927,5 +927,130 @@ describe('#clients handler', () => {
         },
       ]);
     });
+
+    it('should migrate deprecated cross_origin_auth to cross_origin_authentication on create', async () => {
+      const createdClients = [];
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            createdClients.push(data);
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) => mockPagedData(params, 'clients', []),
+        },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'deprecatedOnlyClient',
+              app_type: 'spa',
+              cross_origin_auth: true,
+            },
+            {
+              name: 'bothFieldsClient',
+              app_type: 'spa',
+              cross_origin_auth: false,
+              cross_origin_authentication: true,
+            },
+            {
+              name: 'newOnlyClient',
+              app_type: 'spa',
+              cross_origin_authentication: false,
+            },
+          ],
+        },
+      ]);
+
+      expect(createdClients).to.have.lengthOf(3);
+
+      const deprecatedOnlyClient = createdClients.find((c) => c.name === 'deprecatedOnlyClient');
+      expect(deprecatedOnlyClient).to.not.have.property('cross_origin_auth');
+      expect(deprecatedOnlyClient.cross_origin_authentication).to.equal(true);
+
+      const bothFieldsClient = createdClients.find((c) => c.name === 'bothFieldsClient');
+      expect(bothFieldsClient).to.not.have.property('cross_origin_auth');
+      expect(bothFieldsClient.cross_origin_authentication).to.equal(true);
+
+      const newOnlyClient = createdClients.find((c) => c.name === 'newOnlyClient');
+      expect(newOnlyClient).to.not.have.property('cross_origin_auth');
+      expect(newOnlyClient.cross_origin_authentication).to.equal(false);
+    });
+
+    it('should migrate deprecated cross_origin_auth to cross_origin_authentication on update', async () => {
+      const updatedClients = [];
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (params, data) {
+            updatedClients.push({ ...data, client_id: params.client_id });
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          getAll: (params) =>
+            mockPagedData(params, 'clients', [
+              { client_id: 'client1', name: 'deprecatedOnlyClient' },
+              { client_id: 'client2', name: 'bothFieldsClient' },
+              { client_id: 'client3', name: 'newOnlyClient' },
+            ]),
+        },
+        connectionProfiles: { getAll: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'deprecatedOnlyClient',
+              app_type: 'spa',
+              cross_origin_auth: true,
+            },
+            {
+              name: 'bothFieldsClient',
+              app_type: 'spa',
+              cross_origin_auth: false,
+              cross_origin_authentication: true,
+            },
+            {
+              name: 'newOnlyClient',
+              app_type: 'spa',
+              cross_origin_authentication: false,
+            },
+          ],
+        },
+      ]);
+
+      expect(updatedClients).to.have.lengthOf(3);
+
+      const deprecatedOnlyClient = updatedClients.find((c) => c.client_id === 'client1');
+      expect(deprecatedOnlyClient).to.not.have.property('cross_origin_auth');
+      expect(deprecatedOnlyClient.cross_origin_authentication).to.equal(true);
+
+      const bothFieldsClient = updatedClients.find((c) => c.client_id === 'client2');
+      expect(bothFieldsClient).to.not.have.property('cross_origin_auth');
+      expect(bothFieldsClient.cross_origin_authentication).to.equal(true);
+
+      const newOnlyClient = updatedClients.find((c) => c.client_id === 'client3');
+      expect(newOnlyClient).to.not.have.property('cross_origin_auth');
+      expect(newOnlyClient.cross_origin_authentication).to.equal(false);
+    });
   });
 });
