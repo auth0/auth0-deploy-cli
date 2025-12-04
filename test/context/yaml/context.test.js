@@ -274,9 +274,9 @@ describe('#YAML context validation', () => {
       resourceServers: [],
       riskAssessments: {
         enabled: false,
-      },
-      riskAssessmentsNewDevice: {
-        remember_for: 30,
+        newDevice: {
+          remember_for: 30,
+        },
       },
       rules: [],
       hooks: [],
@@ -410,9 +410,9 @@ describe('#YAML context validation', () => {
       resourceServers: [],
       riskAssessments: {
         enabled: false,
-      },
-      riskAssessmentsNewDevice: {
-        remember_for: 30,
+        newDevice: {
+          remember_for: 30,
+        },
       },
       rules: [],
       hooks: [],
@@ -547,9 +547,9 @@ describe('#YAML context validation', () => {
       resourceServers: [],
       riskAssessments: {
         enabled: false,
-      },
-      riskAssessmentsNewDevice: {
-        remember_for: 30,
+        newDevice: {
+          remember_for: 30,
+        },
       },
       rules: [],
       hooks: [],

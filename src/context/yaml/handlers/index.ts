@@ -19,7 +19,6 @@ import actions from './actions';
 import triggers from './triggers';
 import attackProtection from './attackProtection';
 import riskAssessments from './riskAssessments';
-import riskAssessmentsNewDevice from './riskAssessmentsNewDevice';
 import branding from './branding';
 import phoneProviders from './phoneProvider';
 import logStreams from './logStreams';
@@ -70,7 +69,6 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   triggers,
   attackProtection,
   riskAssessments,
-  riskAssessmentsNewDevice,
   branding,
   phoneProviders,
   logStreams,

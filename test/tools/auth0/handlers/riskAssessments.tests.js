@@ -6,7 +6,21 @@ describe('#riskAssessments handler', () => {
     it('should get risk assessments settings', async () => {
       const auth0 = {
         riskAssessments: {
-          getSettings: () => ({ data: { enabled: true } }),
+          getSettings: () => Promise.resolve({ data: { enabled: true } }),
+          getNewDeviceSettings: () => Promise.resolve({ data: { remember_for: 30 } }),
+        },
+      };
+
+      const handler = new riskAssessments.default({ client: auth0 });
+      const data = await handler.getType();
+      expect(data).to.deep.equal({ enabled: true, newDevice: { remember_for: 30 } });
+    });
+
+    it('should get risk assessments settings without newDevice when remember_for is 0', async () => {
+      const auth0 = {
+        riskAssessments: {
+          getSettings: () => Promise.resolve({ data: { enabled: true } }),
+          getNewDeviceSettings: () => Promise.resolve({ data: { remember_for: 0 } }),
         },
       };
 
@@ -21,7 +35,12 @@ describe('#riskAssessments handler', () => {
           getSettings: () => {
             const error = new Error('Not found');
             error.statusCode = 404;
-            throw error;
+            return Promise.reject(error);
+          },
+          getNewDeviceSettings: () => {
+            const error = new Error('Not found');
+            error.statusCode = 404;
+            return Promise.reject(error);
           },
         },
       };
@@ -48,6 +67,31 @@ describe('#riskAssessments handler', () => {
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ riskAssessments: { enabled: true } }]);
+      expect(handler.updated).to.equal(1);
+    });
+
+    it('should update risk assessments settings with newDevice', async () => {
+      const auth0 = {
+        riskAssessments: {
+          updateSettings: (data) => {
+            expect(data).to.be.an('object');
+            expect(data.enabled).to.equal(true);
+            return Promise.resolve({ data });
+          },
+          updateNewDeviceSettings: (data) => {
+            expect(data).to.be.an('object');
+            expect(data.remember_for).to.equal(30);
+            return Promise.resolve({ data });
+          },
+        },
+      };
+
+      const handler = new riskAssessments.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        { riskAssessments: { enabled: true, newDevice: { remember_for: 30 } } },
+      ]);
       expect(handler.updated).to.equal(1);
     });
 
