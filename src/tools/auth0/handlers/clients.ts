@@ -274,6 +274,7 @@ export type Client = {
   client_id: string;
   name: string;
   app_type?: string;
+  is_first_party?: boolean;
   resource_server_identifier?: string;
   custom_login_page?: string;
   custom_login_page_on?: boolean;
@@ -318,21 +319,29 @@ export default class ClientHandler extends DefaultAPIHandler {
 
     const excludedClients = (assets.exclude && assets.exclude.clients) || [];
 
+    const excludeThirdPartyClients =
+      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === 'true' ||
+      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === true;
+
     const { del, update, create, conflicts } = await this.calcChanges(assets);
 
     // Always filter out the client we are using to access Auth0 Management API
     // As it could cause problems if it gets deleted or updated etc
     const currentClient = this.config('AUTH0_CLIENT_ID') || '';
 
-    const filterClients = (list) => {
-      if (excludedClients.length) {
-        return list.filter(
-          (item) => item.client_id !== currentClient && !excludedClients.includes(item.name)
-        );
-      }
-
-      return list.filter((item) => item.client_id !== currentClient);
-    };
+    /*
+     * Filter out:
+     * - The client used to access Auth0 Management API
+     * - Clients in the exclusion list
+     * - Third-party clients when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is enabled
+     */
+    const filterClients = (list: Client[]): Client[] =>
+      list.filter(
+        (item) =>
+          item.client_id !== currentClient &&
+          !excludedClients.includes(item.name) &&
+          (!excludeThirdPartyClients || item.is_first_party)
+      );
 
     // Sanitize client fields
     const sanitizeClientFields = (list: Client[]): Client[] =>
@@ -353,10 +362,10 @@ export default class ClientHandler extends DefaultAPIHandler {
       });
 
     const changes = {
-      del: sanitizeClientFields(filterClients(del)),
-      update: sanitizeClientFields(filterClients(update)),
-      create: sanitizeClientFields(filterClients(create)),
-      conflicts: sanitizeClientFields(filterClients(conflicts)),
+      del: sanitizeClientFields(filterClients(del as Client[])),
+      update: sanitizeClientFields(filterClients(update as Client[])),
+      create: sanitizeClientFields(filterClients(create as Client[])),
+      conflicts: sanitizeClientFields(filterClients(conflicts as Client[])),
     };
 
     await super.processChanges(assets, {
@@ -367,10 +376,15 @@ export default class ClientHandler extends DefaultAPIHandler {
   async getType() {
     if (this.existing) return this.existing;
 
+    const excludeThirdPartyClients =
+      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === 'true' ||
+      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === true;
+
     const clients = await paginate<Client>(this.client.clients.getAll, {
       paginate: true,
       include_totals: true,
       is_global: false,
+      ...(excludeThirdPartyClients && { is_first_party: true }),
     });
 
     this.existing = clients;
