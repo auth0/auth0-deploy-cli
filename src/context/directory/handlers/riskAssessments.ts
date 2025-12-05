@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { constants } from '../../../tools';
-import { dumpJSON, existsMustBeDir, loadJSON } from '../../../utils';
+import { dumpJSON, existsMustBeDir, isFile, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { ParsedAsset, Asset } from '../../../types';
@@ -16,6 +16,10 @@ function parse(context: DirectoryContext): ParsedRiskAssessments {
   const riskAssessmentsFile = path.join(riskAssessmentsDirectory, 'settings.json');
 
   if (!existsMustBeDir(riskAssessmentsDirectory)) {
+    return { riskAssessments: null };
+  }
+
+  if (!isFile(riskAssessmentsFile)) {
     return { riskAssessments: null };
   }
 

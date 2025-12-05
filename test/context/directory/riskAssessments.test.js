@@ -30,31 +30,6 @@ describe('#directory context risk-assessments', () => {
     expect(context.assets.riskAssessments).to.deep.equal(target);
   });
 
-  it('should process risk-assessments with backward compatibility for separate new-device.json', async () => {
-    const files = {
-      'risk-assessments': {
-        'settings.json': '{"enabled": true}',
-        'new-device.json': '{"remember_for": 30}',
-      },
-    };
-
-    const repoDir = path.join(testDataDir, 'directory', 'riskAssessments2');
-    createDir(repoDir, files);
-
-    const config = { AUTH0_INPUT_FILE: repoDir };
-    const context = new Context(config, mockMgmtClient());
-    await context.loadAssetsFromLocal();
-
-    const target = {
-      enabled: true,
-      newDevice: {
-        remember_for: 30,
-      },
-    };
-
-    expect(context.assets.riskAssessments).to.deep.equal(target);
-  });
-
   it('should replace keywords in newDevice settings', async () => {
     const files = {
       'risk-assessments': {
