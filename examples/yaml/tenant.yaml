@@ -419,3 +419,8 @@ userAttributeProfiles:
         type: "email"
         required: true
 
+riskAssessments:
+  enabled: false
+  # newDevice:
+  #   remember_for: 30
+
