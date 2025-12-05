@@ -160,6 +160,8 @@ describe('#prompts handler', () => {
       getCustomPartial.withArgs({ prompt: 'signup-password' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup-id' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup' }).resolves(signupPartial);
+      // Stub new prompts to return empty for retrieval test
+      getCustomPartial.withArgs({ prompt: 'brute-force-protection' }).resolves({});
 
       const data = await handler.getType();
       expect(data).to.deep.equal({
@@ -184,6 +186,111 @@ describe('#prompts handler', () => {
         },
         screenRenderers: [sampleScreenRenderLogin, sampleScreenRenderSignUp],
       });
+      sinon.restore();
+    });
+
+    it('should get brute-force-protection custom texts along with others', async () => {
+      const supportedLanguages: Language[] = ['en'];
+
+      const englishCustomText = {
+        login: {
+          login: {
+            description: 'login description in english',
+            title: 'login title in english',
+            buttonText: 'login button text in english',
+          },
+        },
+        'brute-force-protection': {
+          'brute-force-protection-unblock': {
+            pageTitle: 'Unblock My Account here only',
+            description: 'Unblock My Account here only',
+            buttonText: 'Continue here only',
+            logoAltText: 'only',
+          },
+          'brute-force-protection-unblock-success': {
+            pageTitle: 'Account Unblocked Testing',
+            eventTitle: 'Account Unblocked Titnasdasd',
+            description: 'Your account has been unblocked Descriptiasd',
+          },
+          'brute-force-protection-unblock-failure': {
+            pageTitle: 'Authentication Error testing',
+            eventTitle: 'Authentication Error testing',
+            expiredError: 'This link has expired. testing',
+            usedError: 'This link can only be used once. testing.',
+            genericError: 'Something went wrong, please try again later. testing',
+          },
+        },
+      };
+
+      const auth0 = {
+        tenants: {
+          settings: {
+            get: () =>
+              Promise.resolve({
+                enabled_locales: supportedLanguages,
+              }),
+          },
+        },
+        prompts: {
+          getSettings: () => Promise.resolve(mockPromptsSettings),
+          customText: {
+            get: (prompt, language, _options) => {
+              const customTextLanguageMap = {
+                en: {
+                  login: englishCustomText.login,
+                  'brute-force-protection': englishCustomText['brute-force-protection'],
+                },
+              };
+
+              // Simulate fetching custom text for the specific prompt ('login' or 'brute-force-protection')
+              const customTextForLanguage = customTextLanguageMap[language];
+
+              if (!customTextForLanguage || !customTextForLanguage[prompt]) {
+                return Promise.resolve({});
+              }
+
+              const customTextValue = customTextForLanguage[prompt];
+              if (customTextValue === undefined || _.isEmpty(customTextValue))
+                return Promise.resolve({});
+
+              return Promise.resolve(customTextValue);
+            },
+          },
+          rendering: {
+            list: () => [],
+          },
+        },
+        pool: new PromisePoolExecutor({
+          concurrencyLimit: 3,
+          frequencyLimit: 1000,
+          frequencyWindow: 1000, // 1 sec
+        }),
+      };
+
+      const handler = new promptsHandler({
+        client: auth0,
+        config: config,
+      });
+
+      const getCustomPartial = sinon.stub(handler, 'getCustomPartial');
+      // Stub all partials to return empty for simplicity in this test
+      getCustomPartial.resolves({});
+
+      const data = await handler.getType();
+
+      // The expected data should include the brute-force-protection custom texts
+      expect(data).to.deep.equal({
+        ...mockPromptsSettings,
+        customText: {
+          en: {
+            login: englishCustomText.login,
+            'brute-force-protection': englishCustomText['brute-force-protection'],
+          },
+        },
+        partials: {},
+        screenRenderers: [],
+      });
+      sinon.restore();
     });
 
     it('should update prompts settings but not custom text/partials settings if not set', async () => {
@@ -210,6 +317,9 @@ describe('#prompts handler', () => {
             expect(data).to.deep.equal(mockPromptsSettings);
             return Promise.resolve({ data });
           },
+          rendering: {
+            update: () => {}, // Stub update since AUTH0_EXPERIMENTAL_EA is true by default here
+          },
         },
       };
 
@@ -230,9 +340,10 @@ describe('#prompts handler', () => {
       expect(didCallUpdatePromptsSettings).to.equal(true);
       expect(didCallUpdateCustomText).to.equal(false);
       expect(didCallUpdatePartials).to.equal(false);
+      sinon.restore();
     });
 
-    it('should update prompts settings and custom text/partials, screen renderer settings when set', async () => {
+    it('should update prompts settings and custom text/partials, screen renderer settings when set, including brute-force-protection', async () => {
       let didCallUpdatePromptsSettings = false;
       let didCallUpdateCustomText = false;
       let didCallUpdatePartials = false;
@@ -246,6 +357,17 @@ describe('#prompts handler', () => {
             buttonText: 'button text2',
             description: 'description text',
             title: 'title text',
+          },
+          'brute-force-protection': {
+            // Added brute-force-protection custom text
+            'brute-force-protection-unblock': {
+              pageTitle: 'Unblock My Account here only',
+              description: 'Unblock My Account here only',
+              buttonText: 'Continue here only',
+            },
+            'brute-force-protection-unblock-success': {
+              pageTitle: 'Account Unblocked Testing',
+            },
           },
           'mfa-webauthn': {},
         },
@@ -299,9 +421,15 @@ describe('#prompts handler', () => {
       const auth0 = {
         prompts: {
           customText: {
-            set: () => {
+            set: (prompt, language, body) => {
               didCallUpdateCustomText = true;
               numberOfUpdateCustomTextCalls++;
+              if (prompt === 'brute-force-protection') {
+                expect(language).to.equal('en');
+                // Check if the body contains the brute-force-protection screens
+                expect(body).to.have.property('brute-force-protection-unblock');
+                expect(body).to.have.property('brute-force-protection-unblock-success');
+              }
               return Promise.resolve({ data: {} });
             },
           },
@@ -354,8 +482,12 @@ describe('#prompts handler', () => {
       expect(didCallUpdateCustomText).to.equal(true);
       expect(didCallUpdatePartials).to.equal(true);
       expect(didCallUpdateScreenRenderer).to.equal(true);
-      expect(numberOfUpdateCustomTextCalls).to.equal(3);
-      expect(numberOfUpdatePartialsCalls).to.equal(3);
+      // Expected calls: login (en), brute-force-protection (en), mfa-webauthn (en), login (fr)
+      // Note: The total number of calls depends on how many unique prompt/language combinations are in customTextToSet.
+      // In this case: (en/login), (en/brute-force-protection), (en/mfa-webauthn), (fr/login) = 4 calls
+      expect(numberOfUpdateCustomTextCalls).to.equal(4);
+      expect(numberOfUpdatePartialsCalls).to.equal(3); // Based on partialsToSet keys
+      sinon.restore();
     });
 
     it('should update prompts settings and custom text/partials, not screen renderer settings when AUTH0_EXPERIMENTAL_EA=false', async () => {
@@ -463,8 +595,10 @@ describe('#prompts handler', () => {
       expect(didCallUpdateCustomText).to.equal(true);
       expect(didCallUpdatePartials).to.equal(true);
       expect(didCallUpdateScreenRenderer).to.equal(false);
-      expect(numberOfUpdateCustomTextCalls).to.equal(3);
+      expect(numberOfUpdateCustomTextCalls).to.equal(3); // login-en, mfa-webauthn-en, login-fr
       expect(numberOfUpdatePartialsCalls).to.equal(3);
+      config.data.AUTH0_EXPERIMENTAL_EA = true; // Reset config for subsequent tests
+      sinon.restore();
     });
 
     it('should not fail if tenant languages or partials are undefined', async () => {
@@ -503,6 +637,7 @@ describe('#prompts handler', () => {
       getCustomPartial.withArgs({ prompt: 'signup-password' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup-id' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup' }).resolves({});
+      getCustomPartial.withArgs({ prompt: 'brute-force-protection' }).resolves({});
 
       const data = await handler.getType();
       expect(data).to.deep.equal({
@@ -511,6 +646,7 @@ describe('#prompts handler', () => {
         partials: {}, // Partials empty
         screenRenderers: [],
       });
+      sinon.restore();
     });
   });
   describe('withErrorHandling', () => {
