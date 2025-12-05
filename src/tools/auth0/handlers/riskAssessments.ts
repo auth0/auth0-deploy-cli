@@ -48,7 +48,7 @@ export default class RiskAssessmentsHandler extends DefaultAPIHandler {
       const [settings, newDeviceSettings] = await Promise.all([
         this.client.riskAssessments.getSettings(),
         this.client.riskAssessments.getNewDeviceSettings().catch((err) => {
-          if (err.statusCode === 404) return { data: { remember_for: 0 } };
+          if (err?.statusCode === 404) return { data: { remember_for: 0 } };
           throw err;
         }),
       ]);
