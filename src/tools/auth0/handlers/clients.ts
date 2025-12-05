@@ -3,11 +3,13 @@ import {
   ClientExpressConfiguration,
   ClientOrganizationRequireBehaviorEnum,
 } from 'auth0';
+import { has, omit } from 'lodash';
 import { Assets, Auth0APIClient } from '../../../types';
 import { paginate } from '../client';
 import DefaultAPIHandler from './default';
 import { getConnectionProfile } from './connectionProfiles';
 import { getUserAttributeProfiles } from './userAttributeProfiles';
+import log from '../../../logger';
 
 const multiResourceRefreshTokenPoliciesSchema = {
   type: ['array', 'null'],
@@ -276,6 +278,8 @@ export type Client = {
   app_type?: string;
   is_first_party?: boolean;
   resource_server_identifier?: string;
+  cross_origin_authentication?: boolean;
+  cross_origin_auth?: boolean;
   custom_login_page?: string;
   custom_login_page_on?: boolean;
   express_configuration?: ClientExpressConfiguration;
@@ -344,9 +348,10 @@ export default class ClientHandler extends DefaultAPIHandler {
       );
 
     // Sanitize client fields
-    const sanitizeClientFields = (list: Client[]): Client[] =>
-      list.map((item) => {
-        // For resourceServers app type `resource_server`, don't include `oidc_backchannel_logout`, `oidc_logout`, `refresh_token`
+    const sanitizeClientFields = (list: Client[]): Client[] => {
+      const sanitizedClients = this.sanitizeCrossOriginAuth(list);
+
+      return sanitizedClients.map((item: Client) => {
         if (item.app_type === 'resource_server') {
           if ('oidc_backchannel_logout' in item) {
             delete item.oidc_backchannel_logout;
@@ -360,6 +365,7 @@ export default class ClientHandler extends DefaultAPIHandler {
         }
         return item;
       });
+    };
 
     const changes = {
       del: sanitizeClientFields(filterClients(del as Client[])),
@@ -371,6 +377,44 @@ export default class ClientHandler extends DefaultAPIHandler {
     await super.processChanges(assets, {
       ...changes,
     });
+  }
+
+  /**
+   * @description
+   * Sanitize the deprecated field `cross_origin_auth` to `cross_origin_authentication`
+   *
+   * @param {Client[]} clients - The client array to sanitize.
+   * @returns {Client[]} The sanitized array of clients.
+   */
+  private sanitizeCrossOriginAuth(clients: Client[]): Client[] {
+    const deprecatedClients: string[] = [];
+
+    const updatedClients = clients.map((client) => {
+      let updated: Client = { ...client };
+
+      if (has(updated, 'cross_origin_auth')) {
+        deprecatedClients.push(client.name);
+
+        if (!has(updated, 'cross_origin_authentication')) {
+          updated.cross_origin_authentication = updated.cross_origin_auth;
+        }
+
+        updated = omit(updated, 'cross_origin_auth') as Client;
+      }
+
+      return updated;
+    });
+
+    if (deprecatedClients.length > 0) {
+      log.warn(
+        "The 'cross_origin_auth' parameter is deprecated in clients and scheduled for removal in future releases.\n" +
+          `Use 'cross_origin_authentication' going forward. Clients using the deprecated setting: [${deprecatedClients.join(
+            ', '
+          )}]`
+      );
+    }
+
+    return updatedClients;
   }
 
   async getType() {
@@ -387,7 +431,9 @@ export default class ClientHandler extends DefaultAPIHandler {
       ...(excludeThirdPartyClients && { is_first_party: true }),
     });
 
-    this.existing = clients;
+    const sanitizedClients = this.sanitizeCrossOriginAuth(clients);
+
+    this.existing = sanitizedClients;
     return this.existing;
   }
 
