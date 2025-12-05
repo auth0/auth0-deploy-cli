@@ -14,7 +14,6 @@ function parse(context: DirectoryContext): ParsedRiskAssessments {
     constants.RISK_ASSESSMENTS_DIRECTORY
   );
   const riskAssessmentsFile = path.join(riskAssessmentsDirectory, 'settings.json');
-  const newDeviceFile = path.join(riskAssessmentsDirectory, 'new-device.json');
 
   if (!existsMustBeDir(riskAssessmentsDirectory)) {
     return { riskAssessments: null };
@@ -24,19 +23,6 @@ function parse(context: DirectoryContext): ParsedRiskAssessments {
     mappings: context.mappings,
     disableKeywordReplacement: context.disableKeywordReplacement,
   });
-
-  // Load newDevice settings if the file exists (for backward compatibility)
-  if (fs.existsSync(newDeviceFile)) {
-    const newDeviceSettings = loadJSON(newDeviceFile, {
-      mappings: context.mappings,
-      disableKeywordReplacement: context.disableKeywordReplacement,
-    });
-    if (newDeviceSettings && newDeviceSettings.remember_for) {
-      riskAssessments.newDevice = {
-        remember_for: newDeviceSettings.remember_for,
-      };
-    }
-  }
 
   return {
     riskAssessments,
