@@ -76,28 +76,24 @@ export default class RiskAssessmentsHandler extends DefaultAPIHandler {
       return;
     }
 
-    try {
-      const updates: Promise<unknown>[] = [];
+    const updates: Promise<unknown>[] = [];
 
-      // Update main settings (enabled flag)
-      const settings = {
-        enabled: riskAssessments.enabled as boolean,
+    // Update main settings (enabled flag)
+    const settings = {
+      enabled: riskAssessments.enabled as boolean,
+    };
+    updates.push(this.client.riskAssessments.updateSettings(settings));
+
+    // Update new device settings if provided
+    if (riskAssessments.newDevice) {
+      const newDeviceSettings = {
+        remember_for: riskAssessments.newDevice.remember_for as number,
       };
-      updates.push(this.client.riskAssessments.updateSettings(settings));
-
-      // Update new device settings if provided
-      if (riskAssessments.newDevice) {
-        const newDeviceSettings = {
-          remember_for: riskAssessments.newDevice.remember_for as number,
-        };
-        updates.push(this.client.riskAssessments.updateNewDeviceSettings(newDeviceSettings));
-      }
-
-      await Promise.all(updates);
-      this.updated += 1;
-      this.didUpdate(riskAssessments);
-    } catch (err) {
-      throw err;
+      updates.push(this.client.riskAssessments.updateNewDeviceSettings(newDeviceSettings));
     }
+
+    await Promise.all(updates);
+    this.updated += 1;
+    this.didUpdate(riskAssessments);
   }
 }
