@@ -13,6 +13,7 @@ import { Flow } from './tools/auth0/handlers/flows';
 import { FlowVaultConnection } from './tools/auth0/handlers/flowVaultConnections';
 import { SsProfileWithCustomText } from './tools/auth0/handlers/selfServiceProfiles';
 import { PhoneProvider } from './tools/auth0/handlers/phoneProvider';
+import { PhoneTemplate } from './tools/auth0/handlers/phoneTemplates';
 import { NetworkACL } from './tools/auth0/handlers/networkACLs';
 import { UserAttributeProfile } from './tools/auth0/handlers/userAttributeProfiles';
 import { AttackProtection } from './tools/auth0/handlers/attackProtection';
@@ -99,6 +100,7 @@ export type Assets = Partial<{
       })
     | null;
   phoneProviders: PhoneProvider[] | null;
+  phoneTemplates: PhoneTemplate[] | null;
   clients: Client[] | null;
   clientGrants: ClientGrant[] | null;
   connections: Asset[] | null;
@@ -175,6 +177,7 @@ export type AssetTypes =
   | 'attackProtection'
   | 'branding'
   | 'phoneProviders'
+  | 'phoneTemplates'
   | 'logStreams'
   | 'prompts'
   | 'customDomains'

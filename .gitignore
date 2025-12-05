@@ -16,3 +16,4 @@ Makefile
 .github/copilot-instructions.md
 .github/chatmodes/*
 .github/prompts/*
+.github/agents/*

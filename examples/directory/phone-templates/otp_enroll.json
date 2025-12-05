@@ -1,0 +1,12 @@
+{
+  "type": "otp_enroll",
+  "disabled": false,
+  "content": {
+    "syntax": "liquid",
+    "from": "+12341234567",
+    "body": {
+      "text": "Your enrollment code is {{ code }}",
+      "voice": "Your enrollment code is {{ code }}"
+    }
+  }
+}

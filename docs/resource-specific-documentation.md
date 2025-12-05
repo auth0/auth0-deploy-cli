@@ -575,3 +575,56 @@ phoneProviders:
   }
 ]
 ```
+
+## PhoneTemplates
+
+Phone templates allow you to customize the SMS and voice messages sent to users for phone-based authentication.
+Refer to the [Management API](https://auth0.com/docs/api/management/v2/branding/get-phone-templates) for more details.
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+phoneTemplates:
+  - type: otp_verify
+    disabled: false
+    content:
+      from: '+12341234567'
+      body:
+        text: 'Your verification code is {{ code }}'
+        voice: 'Your verification code is {{ code }}'
+  - type: otp_enroll
+    disabled: false
+    content:
+      from: '+12341234567'
+      body:
+        text: 'Your enrollment code is {{ code }}'
+```
+
+### Directory Example
+
+Create individual JSON files for each template in the `phone-templates` directory:
+
+```text
+phone-templates/
+├── otp_verify.json
+├── otp_enroll.json
+├── change_password.json
+└── ...
+```
+
+Example `phone-templates/otp_verify.json`:
+
+```json
+{
+  "type": "otp_verify",
+  "disabled": false,
+  "content": {
+    "from": "+12341234567",
+    "body": {
+      "text": "Your verification code is {{ code }}",
+      "voice": "Your verification code is {{ code }}"
+    }
+  }
+}
+```
