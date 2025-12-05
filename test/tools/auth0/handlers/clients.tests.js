@@ -375,7 +375,7 @@ describe('#clients handler', () => {
       expect(wasCreateCalled).to.be.equal(true);
     });
 
-    it('should ignore third-party clients if AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is true', async () => {
+    it('should ignore third-party clients by default', async () => {
       let wasCreateCalled = false;
       const thirdPartyClient = {
         name: 'Third-Party Client',
@@ -403,25 +403,13 @@ describe('#clients handler', () => {
         pool,
       };
 
-      const testConfig = function (key) {
-        return testConfig.data && testConfig.data[key];
-      };
-      testConfig.data = {
-        AUTH0_CLIENT_ID: 'client_id',
-        AUTH0_ALLOW_DELETE: true,
-        AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS: true,
-      };
-
-      const handler = new clients.default({
-        client: pageClient(auth0),
-        config: testConfig,
-      });
+      const handler = new clients.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       await stageFn.apply(handler, [{ clients: [thirdPartyClient] }]);
       expect(wasCreateCalled).to.be.equal(false);
     });
 
-    it('should include third-party clients if AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is false', async () => {
+    it('should include third-party clients if AUTH0_INCLUDE_THIRD_PARTY_CLIENTS is true', async () => {
       let wasCreateCalled = false;
       const thirdPartyClient = {
         name: 'Third-Party Client',
@@ -448,7 +436,7 @@ describe('#clients handler', () => {
       testConfig.data = {
         AUTH0_CLIENT_ID: 'client_id',
         AUTH0_ALLOW_DELETE: true,
-        AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS: false,
+        AUTH0_INCLUDE_THIRD_PARTY_CLIENTS: true,
       };
 
       const handler = new clients.default({
@@ -460,7 +448,32 @@ describe('#clients handler', () => {
       expect(wasCreateCalled).to.be.equal(true);
     });
 
-    it('should get clients with is_first_party when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is enabled', async () => {
+    it('should get clients with is_first_party by default', async () => {
+      const getAllParams = [];
+      const auth0 = {
+        clients: {
+          getAll: (params) => {
+            getAllParams.push(params);
+            return mockPagedData(params, 'clients', [
+              { name: 'first party client', client_id: 'first-party-client-id' },
+            ]);
+          },
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      await handler.getType();
+
+      expect(getAllParams.length).to.be.greaterThan(0);
+      const firstCallParams = getAllParams[0];
+      expect(firstCallParams).to.be.an('object');
+      expect(firstCallParams.is_first_party).to.equal(true);
+      expect(firstCallParams.include_totals).to.equal(true);
+      expect(firstCallParams.is_global).to.equal(false);
+    });
+
+    it('should omit the is_first_party client parameter if AUTH0_INCLUDE_THIRD_PART_CLIENTS is true', async () => {
       const getAllParams = [];
       const auth0 = {
         clients: {
@@ -480,7 +493,7 @@ describe('#clients handler', () => {
       testConfig.data = {
         AUTH0_CLIENT_ID: 'client_id',
         AUTH0_ALLOW_DELETE: true,
-        AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS: true,
+        AUTH0_INCLUDE_THIRD_PARTY_CLIENTS: true,
       };
 
       const handler = new clients.default({ client: pageClient(auth0), config: testConfig });
@@ -489,7 +502,7 @@ describe('#clients handler', () => {
       expect(getAllParams.length).to.be.greaterThan(0);
       const firstCallParams = getAllParams[0];
       expect(firstCallParams).to.be.an('object');
-      expect(firstCallParams.is_first_party).to.equal(true);
+      expect(firstCallParams.is_first_party).to.equal(undefined);
       expect(firstCallParams.include_totals).to.equal(true);
       expect(firstCallParams.is_global).to.equal(false);
     });

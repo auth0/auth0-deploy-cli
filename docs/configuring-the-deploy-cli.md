@@ -114,6 +114,10 @@ Array of strings. Dictates which resource types to _only_ manage, bi-directional
 
 Cannot be used simultaneously with `AUTH0_EXCLUDED`.
 
+### `AUTH0_INCLUDE_THIRD_PARTY_CLIENTS`
+
+Boolean. Third-party clients are excluded from export and import operations by default. Enable this option to include them. This is useful when you have Dynamic Client Registration (DCR) enabled and need to directly manage third-party clients. Default: `false`.
+
 ### `AUTH0_KEYWORD_REPLACE_MAPPINGS`
 
 Mapping of specific keywords to facilities dynamic replacement. See also: [keyword replacement](keyword-replacement.md).
@@ -154,10 +158,6 @@ Provides ability to exclude any unwanted properties from management.
 ### `AUTH0_AUDIENCE`
 
 String. Separate value from audience value while retrieving an access token for management API. Useful when default Management API endpoints are not publicly exposed.
-
-### `AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS`
-
-Boolean. When enabled, excludes third-party clients from being managed. Only first-party clients will be included in export and import operations. This is useful when you have Dynamic Client Registration (DCR) enabled and you have a lot of third-party clients in your tenant. Default: `false`.
 
 ### `AUTH0_EXCLUDED_RULES`
 
