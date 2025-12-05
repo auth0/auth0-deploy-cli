@@ -55,18 +55,6 @@ Some resource types support exclusions of individual resource by name. This is p
 
 > ⚠️ **NOTE:** Excluding resources by ID is being considered for deprecation in future major versions. See the [resource exclusion proposal](https://github.com/auth0/auth0-deploy-cli/issues/451) for more details.
 
-### Excluding third-party clients
-
-You can also exclude all third-party clients at once using the `AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS` configuration option. When enabled, only first-party clients will be included in export and import operations. This is useful when you have Dynamic Client Registration (DCR) enabled and you have a lot of third-party clients in your tenant.
-
-```json
-{
-  "AUTH0_DOMAIN": "example-site.us.auth0.com",
-  "AUTH0_CLIENT_ID": "<YOUR_AUTH0_CLIENT_ID>",
-  "AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS": true
-}
-```
-
 ## Omitted vs excluded vs empty
 
 The above sections pertain to exclusion which forcefully ignore configurations bi-directionally. It is worth noting similar but very different concepts: “omissions” and “empty” states.
