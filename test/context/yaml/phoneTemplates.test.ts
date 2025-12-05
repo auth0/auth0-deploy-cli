@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
+import jsYaml from 'js-yaml';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/yaml';
@@ -18,14 +19,14 @@ phoneTemplates:
     content:
       from: '+15551234567'
       body:
-        text: 'Your verification code is {{ code }}'
-        voice: 'Your verification code is {{ code }}'
+        text: '##OTP_VERIFICATION_TEXT## {{ code }}'
+        voice: '##OTP_VERIFICATION_TEXT## {{ code }}'
   - type: otp_enroll
     disabled: false
     content:
       from: '+15551234567'
       body:
-        text: 'Your enrollment code is {{ code }}'
+        text: '##OTP_ENROLL_TEXT## {{ code }}'
 `;
     const yamlFile = path.join(dir, 'config.yaml');
     fs.writeFileSync(yamlFile, yaml);
@@ -37,8 +38,8 @@ phoneTemplates:
         content: {
           from: '+15551234567',
           body: {
-            text: 'Your verification code is {{ code }}',
-            voice: 'Your verification code is {{ code }}',
+            text: '##OTP_VERIFICATION_TEXT## {{ code }}',
+            voice: '##OTP_VERIFICATION_TEXT## {{ code }}',
           },
         },
       },
@@ -48,7 +49,7 @@ phoneTemplates:
         content: {
           from: '+15551234567',
           body: {
-            text: 'Your enrollment code is {{ code }}',
+            text: '##OTP_ENROLL_TEXT## {{ code }}',
           },
         },
       },
@@ -74,8 +75,8 @@ phoneTemplates:
           syntax: 'liquid',
           from: '+15551234567',
           body: {
-            text: 'Your verification code is {{ code }}',
-            voice: 'Your verification code is {{ code }}',
+            text: '##OTP_VERIFICATION_TEXT## {{ code }}',
+            voice: '##OTP_VERIFICATION_TEXT## {{ code }}',
           },
         },
       },
@@ -90,7 +91,7 @@ phoneTemplates:
           syntax: 'liquid',
           from: '+15551234567',
           body: {
-            text: 'Your enrollment code is {{ code }}',
+            text: '##OTP_ENROLL_TEXT## {{ code }}',
           },
         },
       },
@@ -108,8 +109,8 @@ phoneTemplates:
             syntax: 'liquid',
             from: '+15551234567',
             body: {
-              text: 'Your verification code is {{ code }}',
-              voice: 'Your verification code is {{ code }}',
+              text: '##OTP_VERIFICATION_TEXT## {{ code }}',
+              voice: '##OTP_VERIFICATION_TEXT## {{ code }}',
             },
           },
         },
@@ -120,7 +121,7 @@ phoneTemplates:
             syntax: 'liquid',
             from: '+15551234567',
             body: {
-              text: 'Your enrollment code is {{ code }}',
+              text: '##OTP_ENROLL_TEXT## {{ code }}',
             },
           },
         },
@@ -158,5 +159,81 @@ clients: []
 
     const dumped = await handler.dump(context);
     expect(dumped).to.deep.equal({ phoneTemplates: null });
+  });
+
+  it('should preserve keyword markers when dumping with AUTH0_PRESERVE_KEYWORDS', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'phoneTemplatesPreserve');
+    cleanThenMkdir(dir);
+
+    const yamlFile = path.join(dir, 'config.yaml');
+    const localYaml = `
+phoneTemplates:
+  - type: otp_verify
+    disabled: false
+    content:
+      from: '##FROM_NUMBER##'
+      body:
+        text: '##OTP_VERIFICATION_TEXT## {{ code }}'
+        voice: '##OTP_VERIFICATION_TEXT## {{ code }}'
+`;
+    fs.writeFileSync(yamlFile, localYaml);
+
+    const remoteTemplates = [
+      {
+        id: 'pntm_otp_verify',
+        type: 'otp_verify',
+        disabled: false,
+        content: {
+          syntax: 'liquid',
+          from: '+15551230000',
+          body: {
+            text: 'Your verification code is {{ code }}',
+            voice: 'Your verification code is {{ code }}',
+          },
+        },
+      },
+    ];
+
+    const context = new Context(
+      {
+        AUTH0_INPUT_FILE: yamlFile,
+        AUTH0_PRESERVE_KEYWORDS: true,
+        AUTH0_INCLUDED_ONLY: ['phoneTemplates'],
+        AUTH0_KEYWORD_REPLACE_MAPPINGS: {
+          FROM_NUMBER: '+15551230000',
+          OTP_VERIFICATION_TEXT: 'Your verification code is',
+        },
+      } as any,
+      {
+        branding: {
+          phone: {
+            templates: {
+              list: () => Promise.resolve({ templates: remoteTemplates }) as any,
+            },
+          },
+        },
+      } as any
+    );
+
+    await context.dump();
+
+    const dumpedYaml = jsYaml.load(fs.readFileSync(yamlFile, 'utf8'));
+
+    expect(dumpedYaml).to.deep.equal({
+      phoneTemplates: [
+        {
+          type: 'otp_verify',
+          disabled: false,
+          content: {
+            syntax: 'liquid',
+            from: '##FROM_NUMBER##',
+            body: {
+              text: '##OTP_VERIFICATION_TEXT## {{ code }}',
+              voice: '##OTP_VERIFICATION_TEXT## {{ code }}',
+            },
+          },
+        },
+      ],
+    });
   });
 });

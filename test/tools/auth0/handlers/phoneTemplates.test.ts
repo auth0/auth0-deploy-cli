@@ -12,8 +12,8 @@ const mockTemplates = {
         syntax: 'liquid',
         from: '+15551234567',
         body: {
-          text: 'Your verification code is {{ code }}',
-          voice: 'Your verification code is {{ code }}',
+          text: 'Your verification code is ##OTP_VERIFICATION_TEXT## {{ code }}',
+          voice: 'Your verification code is ##OTP_VERIFICATION_TEXT## {{ code }}',
         },
       },
     },
@@ -25,8 +25,8 @@ const mockTemplates = {
         syntax: 'liquid',
         from: '+15551234567',
         body: {
-          text: 'Your enrollment code is {{ code }}',
-          voice: 'Your enrollment code is {{ code }}',
+          text: 'Your enrollment code is ##OTP_ENROLL_TEXT## {{ code }}',
+          voice: 'Your enrollment code is ##OTP_ENROLL_TEXT## {{ code }}',
         },
       },
     },
@@ -146,7 +146,7 @@ describe('#phoneTemplates handler', () => {
           syntax: 'liquid',
           from: '+15551234567',
           body: {
-            text: 'Your code is {{ code }}',
+            text: 'Your verification code is ##OTP_VERIFICATION_TEXT## {{ code }}',
           },
         },
       };
@@ -165,7 +165,7 @@ describe('#phoneTemplates handler', () => {
           syntax: 'liquid',
           from: '+15551234567',
           body: {
-            text: 'Old text',
+            text: 'Your verification code is ##OTP_VERIFICATION_TEXT## {{ code }}',
           },
         },
       };
@@ -178,7 +178,9 @@ describe('#phoneTemplates handler', () => {
               update: (id, updatePayload) => {
                 updateCalled = true;
                 expect(id).to.equal('pntm_1234567890');
-                expect(updatePayload.content.body.text).to.equal('New text');
+                expect(updatePayload.content.body.text).to.equal(
+                  'Your verification code is ##OTP_VERIFICATION_TEXT## {{ code }}'
+                );
                 expect(updatePayload.disabled).to.equal(true);
                 return Promise.resolve({ id, ...updatePayload });
               },
@@ -198,7 +200,7 @@ describe('#phoneTemplates handler', () => {
           syntax: 'liquid',
           from: '+15551234567',
           body: {
-            text: 'New text',
+            text: 'Your verification code is ##OTP_VERIFICATION_TEXT## {{ code }}',
           },
         },
       };

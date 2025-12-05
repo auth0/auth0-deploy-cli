@@ -38,7 +38,6 @@ async function dump(context: DirectoryContext): Promise<void> {
   fs.ensureDirSync(phoneTemplatesFolder);
 
   phoneTemplates.forEach((template) => {
-    // Strip read-only fields (id, channel, customizable, tenant) that are returned by the API but should not be included in exported config
     const templateWithDefaults = phoneTemplatesDefaults(template);
     const templateFile = path.join(phoneTemplatesFolder, `${template.type}.json`);
     dumpJSON(templateFile, templateWithDefaults);

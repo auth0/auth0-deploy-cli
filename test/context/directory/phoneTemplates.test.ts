@@ -25,8 +25,8 @@ describe('#directory context phone templates', () => {
         content: {
           from: '+15551234567',
           body: {
-            text: 'Your verification code is {{ code }}',
-            voice: 'Your verification code is {{ code }}',
+            text: '##OTP_VERIFICATION_TEXT## {{ code }}',
+            voice: '##OTP_VERIFICATION_TEXT## {{ code }}',
           },
         },
       })
@@ -40,7 +40,7 @@ describe('#directory context phone templates', () => {
         content: {
           from: '+15551234567',
           body: {
-            text: 'Your enrollment code is {{ code }}',
+            text: '##OTP_ENROLL_TEXT## {{ code }}',
           },
         },
       })
@@ -62,7 +62,7 @@ describe('#directory context phone templates', () => {
         content: {
           from: '+15551234567',
           body: {
-            text: 'Your enrollment code is {{ code }}',
+            text: '##OTP_ENROLL_TEXT## {{ code }}',
           },
         },
       },
@@ -72,8 +72,8 @@ describe('#directory context phone templates', () => {
         content: {
           from: '+15551234567',
           body: {
-            text: 'Your verification code is {{ code }}',
-            voice: 'Your verification code is {{ code }}',
+            text: '##OTP_VERIFICATION_TEXT## {{ code }}',
+            voice: '##OTP_VERIFICATION_TEXT## {{ code }}',
           },
         },
       },
@@ -108,8 +108,8 @@ describe('#directory context phone templates', () => {
           syntax: 'liquid',
           from: '+15551234567',
           body: {
-            text: 'Your verification code is {{ code }}',
-            voice: 'Your verification code is {{ code }}',
+            text: '##OTP_VERIFICATION_TEXT## {{ code }}',
+            voice: '##OTP_VERIFICATION_TEXT## {{ code }}',
           },
         },
       },
@@ -124,7 +124,7 @@ describe('#directory context phone templates', () => {
           syntax: 'liquid',
           from: '+15551234567',
           body: {
-            text: 'Your enrollment code is {{ code }}',
+            text: '##OTP_ENROLL_TEXT## {{ code }}',
           },
         },
       },
@@ -143,8 +143,8 @@ describe('#directory context phone templates', () => {
         syntax: 'liquid',
         from: '+15551234567',
         body: {
-          text: 'Your verification code is {{ code }}',
-          voice: 'Your verification code is {{ code }}',
+          text: '##OTP_VERIFICATION_TEXT## {{ code }}',
+          voice: '##OTP_VERIFICATION_TEXT## {{ code }}',
         },
       },
     });
@@ -162,7 +162,7 @@ describe('#directory context phone templates', () => {
         syntax: 'liquid',
         from: '+15551234567',
         body: {
-          text: 'Your enrollment code is {{ code }}',
+          text: '##OTP_ENROLL_TEXT## {{ code }}',
         },
       },
     });
@@ -179,5 +179,75 @@ describe('#directory context phone templates', () => {
 
     const phoneTemplatesFolder = path.join(dir, constants.PHONE_TEMPLATES_DIRECTORY);
     expect(fs.existsSync(phoneTemplatesFolder)).to.equal(false);
+  });
+
+  it('should preserve keyword markers when dumping with AUTH0_PRESERVE_KEYWORDS', async () => {
+    const dir = path.join(testDataDir, 'directory', 'phoneTemplatesPreserve');
+    const phoneTemplatesDir = path.join(dir, constants.PHONE_TEMPLATES_DIRECTORY);
+    cleanThenMkdir(phoneTemplatesDir);
+
+    const localTemplate = {
+      type: 'otp_verify',
+      disabled: false,
+      content: {
+        syntax: 'liquid',
+        from: '##FROM_NUMBER##',
+        body: {
+          text: '##OTP_VERIFICATION_TEXT## {{ code }}',
+          voice: '##OTP_VERIFICATION_TEXT## {{ code }}',
+        },
+      },
+    };
+
+    fs.writeFileSync(
+      path.join(phoneTemplatesDir, 'otp_verify.json'),
+      JSON.stringify(localTemplate)
+    );
+
+    const remoteTemplates = [
+      {
+        id: 'pntm_otp_verify',
+        type: 'otp_verify',
+        disabled: false,
+        content: {
+          syntax: 'liquid',
+          from: '+15551230000',
+          body: {
+            text: 'Your verification code is {{ code }}',
+            voice: 'Your verification code is {{ code }}',
+          },
+        },
+      },
+    ];
+
+    const mockMgmt = {
+      branding: {
+        phone: {
+          templates: {
+            list: () => Promise.resolve({ templates: remoteTemplates }),
+          },
+        },
+      },
+    } as any;
+
+    const context = new Context(
+      {
+        AUTH0_INPUT_FILE: dir,
+        AUTH0_PRESERVE_KEYWORDS: true,
+        AUTH0_INCLUDED_ONLY: ['phoneTemplates'],
+        AUTH0_KEYWORD_REPLACE_MAPPINGS: {
+          FROM_NUMBER: '+15551230000',
+          OTP_VERIFICATION_TEXT: 'Your verification code is',
+          OTP_ENROLL_TEXT: 'Your enrollment code is',
+        },
+      } as any,
+      mockMgmt
+    );
+
+    await context.dump();
+
+    const dumped = loadJSON(path.join(phoneTemplatesDir, 'otp_verify.json'));
+
+    expect(dumped).to.deep.equal(localTemplate);
   });
 });
