@@ -25,8 +25,8 @@ async function dump(context: YAMLContext): Promise<ParsedRiskAssessments> {
 }
 
 const riskAssessmentsHandler: YAMLHandler<ParsedRiskAssessments> = {
-  parse: parse,
-  dump: dump,
+  parse,
+  dump,
 };
 
 export default riskAssessmentsHandler;
