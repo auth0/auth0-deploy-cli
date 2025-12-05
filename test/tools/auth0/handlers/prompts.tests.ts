@@ -202,22 +202,22 @@ describe('#prompts handler', () => {
         },
         'brute-force-protection': {
           'brute-force-protection-unblock': {
-            pageTitle: 'Unblock My Account here only',
-            description: 'Unblock My Account here only',
-            buttonText: 'Continue here only',
-            logoAltText: 'only',
+            pageTitle: 'Unblock My Account here',
+            description: 'Unblock My Account here',
+            buttonText: 'Continue here',
+            logoAltText: 'comapny_name',
           },
           'brute-force-protection-unblock-success': {
-            pageTitle: 'Account Unblocked Testing',
-            eventTitle: 'Account Unblocked Titnasdasd',
-            description: 'Your account has been unblocked Descriptiasd',
+            pageTitle: 'Account Unblocked',
+            eventTitle: 'Account Unblocked',
+            description: 'Your account has been unblocked Description',
           },
           'brute-force-protection-unblock-failure': {
-            pageTitle: 'Authentication Error testing',
-            eventTitle: 'Authentication Error testing',
-            expiredError: 'This link has expired. testing',
-            usedError: 'This link can only be used once. testing.',
-            genericError: 'Something went wrong, please try again later. testing',
+            pageTitle: 'Authentication Error',
+            eventTitle: 'Authentication Error',
+            expiredError: 'This link has expired.',
+            usedError: 'This link can only be used once.',
+            genericError: 'Something went wrong, please try again later.',
           },
         },
       };
@@ -361,12 +361,12 @@ describe('#prompts handler', () => {
           'brute-force-protection': {
             // Added brute-force-protection custom text
             'brute-force-protection-unblock': {
-              pageTitle: 'Unblock My Account here only',
-              description: 'Unblock My Account here only',
-              buttonText: 'Continue here only',
+              pageTitle: 'Unblock My Account here',
+              description: 'Unblock My Account here',
+              buttonText: 'Continue here',
             },
             'brute-force-protection-unblock-success': {
-              pageTitle: 'Account Unblocked Testing',
+              pageTitle: 'Account Unblocked',
             },
           },
           'mfa-webauthn': {},
