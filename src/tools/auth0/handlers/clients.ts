@@ -398,9 +398,10 @@ export default class ClientHandler extends DefaultAPIHandler {
 
     if (deprecatedClients.length > 0) {
       log.warn(
-        `The 'cross_origin_auth' parameter is deprecated in clients and scheduled for removal in future releases.\n  Use 'cross_origin_authentication' going forward. Clients using the deprecated setting: [${deprecatedClients.join(
-          ', '
-        )}]`
+        "The 'cross_origin_auth' parameter is deprecated in clients and scheduled for removal in future releases.\n" +
+          `Use 'cross_origin_authentication' going forward. Clients using the deprecated setting: [${deprecatedClients.join(
+            ', '
+          )}]`
       );
     }
 
