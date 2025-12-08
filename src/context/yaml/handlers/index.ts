@@ -68,7 +68,7 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   organizations,
   triggers,
   attackProtection,
-  riskAssessments,
+  riskAssessment: riskAssessments,
   branding,
   phoneProviders,
   logStreams,

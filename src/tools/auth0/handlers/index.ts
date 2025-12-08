@@ -67,7 +67,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   triggers,
   organizations,
   attackProtection,
-  riskAssessments,
+  riskAssessment: riskAssessments,
   logStreams,
   customDomains,
   themes,

@@ -584,7 +584,7 @@ Risk assessments configuration allows you to enable or disable risk assessment f
 
 ```yaml
 # Contents of ./tenant.yaml
-riskAssessments:
+riskAssessment:
   enabled: true
 ```
 

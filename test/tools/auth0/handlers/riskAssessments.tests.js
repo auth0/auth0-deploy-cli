@@ -66,7 +66,7 @@ describe('#riskAssessments handler', () => {
       const handler = new riskAssessments.default({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [{ riskAssessments: { enabled: true } }]);
+      await stageFn.apply(handler, [{ riskAssessment: { enabled: true } }]);
       expect(handler.updated).to.equal(1);
     });
 
@@ -90,7 +90,7 @@ describe('#riskAssessments handler', () => {
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
-        { riskAssessments: { enabled: true, newDevice: { remember_for: 30 } } },
+        { riskAssessment: { enabled: true, newDevice: { remember_for: 30 } } },
       ]);
       expect(handler.updated).to.equal(1);
     });
@@ -109,11 +109,11 @@ describe('#riskAssessments handler', () => {
       const handler = new riskAssessments.default({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [{ riskAssessments: { enabled: false } }]);
+      await stageFn.apply(handler, [{ riskAssessment: { enabled: false } }]);
       expect(handler.updated).to.equal(1);
     });
 
-    it('should not process changes if riskAssessments is not provided', async () => {
+    it('should not process changes if riskAssessment is not provided', async () => {
       const auth0 = {
         riskAssessments: {
           updateSettings: () => {
@@ -144,7 +144,7 @@ describe('#riskAssessments handler', () => {
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       try {
-        await stageFn.apply(handler, [{ riskAssessments: { enabled: true } }]);
+        await stageFn.apply(handler, [{ riskAssessment: { enabled: true } }]);
         expect.fail('Should have thrown an error');
       } catch (err) {
         expect(err.message).to.equal('API Error');

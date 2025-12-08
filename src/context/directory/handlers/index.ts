@@ -70,7 +70,7 @@ const directoryHandlers: {
   organizations,
   triggers,
   attackProtection,
-  riskAssessments,
+  riskAssessment: riskAssessments,
   branding,
   phoneProviders,
   logStreams,

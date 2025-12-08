@@ -6,9 +6,9 @@ import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { ParsedAsset, Asset } from '../../../types';
 
-type ParsedRiskAssessments = ParsedAsset<'riskAssessments', Asset>;
+type ParsedRiskAssessment = ParsedAsset<'riskAssessment', Asset>;
 
-function parse(context: DirectoryContext): ParsedRiskAssessments {
+function parse(context: DirectoryContext): ParsedRiskAssessment {
   const riskAssessmentsDirectory = path.join(
     context.filePath,
     constants.RISK_ASSESSMENTS_DIRECTORY
@@ -16,27 +16,27 @@ function parse(context: DirectoryContext): ParsedRiskAssessments {
   const riskAssessmentsFile = path.join(riskAssessmentsDirectory, 'settings.json');
 
   if (!existsMustBeDir(riskAssessmentsDirectory)) {
-    return { riskAssessments: null };
+    return { riskAssessment: null };
   }
 
   if (!isFile(riskAssessmentsFile)) {
-    return { riskAssessments: null };
+    return { riskAssessment: null };
   }
 
-  const riskAssessments = loadJSON(riskAssessmentsFile, {
+  const riskAssessment = loadJSON(riskAssessmentsFile, {
     mappings: context.mappings,
     disableKeywordReplacement: context.disableKeywordReplacement,
   });
 
   return {
-    riskAssessments,
+    riskAssessment,
   };
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const { riskAssessments } = context.assets;
+  const { riskAssessment } = context.assets;
 
-  if (!riskAssessments) return;
+  if (!riskAssessment) return;
 
   const riskAssessmentsDirectory = path.join(
     context.filePath,
@@ -45,10 +45,10 @@ async function dump(context: DirectoryContext): Promise<void> {
   const riskAssessmentsFile = path.join(riskAssessmentsDirectory, 'settings.json');
 
   fs.ensureDirSync(riskAssessmentsDirectory);
-  dumpJSON(riskAssessmentsFile, riskAssessments);
+  dumpJSON(riskAssessmentsFile, riskAssessment);
 }
 
-const riskAssessmentsHandler: DirectoryHandler<ParsedRiskAssessments> = {
+const riskAssessmentsHandler: DirectoryHandler<ParsedRiskAssessment> = {
   parse,
   dump,
 };

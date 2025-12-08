@@ -27,7 +27,7 @@ describe('#directory context risk-assessments', () => {
       },
     };
 
-    expect(context.assets.riskAssessments).to.deep.equal(target);
+    expect(context.assets.riskAssessment).to.deep.equal(target);
   });
 
   it('should replace keywords in newDevice settings', async () => {
@@ -57,7 +57,7 @@ describe('#directory context risk-assessments', () => {
       },
     };
 
-    expect(context.assets.riskAssessments).to.deep.equal(target);
+    expect(context.assets.riskAssessment).to.deep.equal(target);
   });
 
   it('should process risk-assessments without newDevice', async () => {
@@ -78,7 +78,7 @@ describe('#directory context risk-assessments', () => {
       enabled: false,
     };
 
-    expect(context.assets.riskAssessments).to.deep.equal(target);
+    expect(context.assets.riskAssessment).to.deep.equal(target);
   });
 
   it('should dump risk-assessments with newDevice to settings.json', async () => {
@@ -86,7 +86,7 @@ describe('#directory context risk-assessments', () => {
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
-    context.assets.riskAssessments = {
+    context.assets.riskAssessment = {
       enabled: true,
       newDevice: {
         remember_for: 90,
@@ -97,7 +97,7 @@ describe('#directory context risk-assessments', () => {
     const riskAssessmentsFolder = path.join(dir, 'risk-assessments');
 
     expect(loadJSON(path.join(riskAssessmentsFolder, 'settings.json'))).to.deep.equal(
-      context.assets.riskAssessments
+      context.assets.riskAssessment
     );
   });
 
@@ -106,7 +106,7 @@ describe('#directory context risk-assessments', () => {
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
-    context.assets.riskAssessments = {
+    context.assets.riskAssessment = {
       enabled: false,
     };
 
@@ -114,16 +114,16 @@ describe('#directory context risk-assessments', () => {
     const riskAssessmentsFolder = path.join(dir, 'risk-assessments');
 
     expect(loadJSON(path.join(riskAssessmentsFolder, 'settings.json'))).to.deep.equal(
-      context.assets.riskAssessments
+      context.assets.riskAssessment
     );
   });
 
-  it('should not create files if riskAssessments is null', async () => {
+  it('should not create files if riskAssessment is null', async () => {
     const dir = path.join(testDataDir, 'directory', 'riskAssessmentsNull');
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
-    context.assets.riskAssessments = null;
+    context.assets.riskAssessment = null;
 
     await handler.dump(context);
     const riskAssessmentsFolder = path.join(dir, 'risk-assessments');

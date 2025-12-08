@@ -35,7 +35,7 @@ export default class RiskAssessmentsHandler extends DefaultAPIHandler {
   constructor(config: DefaultAPIHandler) {
     super({
       ...config,
-      type: 'riskAssessments',
+      type: 'riskAssessment',
     });
   }
 
@@ -69,10 +69,10 @@ export default class RiskAssessmentsHandler extends DefaultAPIHandler {
   }
 
   async processChanges(assets: Assets): Promise<void> {
-    const { riskAssessments } = assets;
+    const { riskAssessment } = assets;
 
     // Non-existing section means it doesn't need to be processed
-    if (!riskAssessments) {
+    if (!riskAssessment) {
       return;
     }
 
@@ -80,20 +80,20 @@ export default class RiskAssessmentsHandler extends DefaultAPIHandler {
 
     // Update main settings (enabled flag)
     const settings = {
-      enabled: riskAssessments.enabled as boolean,
+      enabled: riskAssessment.enabled as boolean,
     };
     updates.push(this.client.riskAssessments.updateSettings(settings));
 
     // Update new device settings if provided
-    if (riskAssessments.newDevice) {
+    if (riskAssessment.newDevice) {
       const newDeviceSettings = {
-        remember_for: riskAssessments.newDevice.remember_for as number,
+        remember_for: riskAssessment.newDevice.remember_for as number,
       };
       updates.push(this.client.riskAssessments.updateNewDeviceSettings(newDeviceSettings));
     }
 
     await Promise.all(updates);
     this.updated += 1;
-    this.didUpdate(riskAssessments);
+    this.didUpdate(riskAssessment);
   }
 }

@@ -2,29 +2,29 @@ import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedRiskAssessments = ParsedAsset<'riskAssessments', Asset>;
+type ParsedRiskAssessment = ParsedAsset<'riskAssessment', Asset>;
 
-async function parse(context: YAMLContext): Promise<ParsedRiskAssessments> {
-  const { riskAssessments } = context.assets;
+async function parse(context: YAMLContext): Promise<ParsedRiskAssessment> {
+  const { riskAssessment } = context.assets;
 
-  if (!riskAssessments) return { riskAssessments: null };
+  if (!riskAssessment) return { riskAssessment: null };
 
   return {
-    riskAssessments,
+    riskAssessment,
   };
 }
 
-async function dump(context: YAMLContext): Promise<ParsedRiskAssessments> {
-  const { riskAssessments } = context.assets;
+async function dump(context: YAMLContext): Promise<ParsedRiskAssessment> {
+  const { riskAssessment } = context.assets;
 
-  if (!riskAssessments) return { riskAssessments: null };
+  if (!riskAssessment) return { riskAssessment: null };
 
   return {
-    riskAssessments,
+    riskAssessment,
   };
 }
 
-const riskAssessmentsHandler: YAMLHandler<ParsedRiskAssessments> = {
+const riskAssessmentsHandler: YAMLHandler<ParsedRiskAssessment> = {
   parse,
   dump,
 };
