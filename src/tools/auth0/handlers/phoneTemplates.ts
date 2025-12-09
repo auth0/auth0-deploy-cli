@@ -115,9 +115,7 @@ export default class PhoneTemplatesHandler extends DefaultHandler {
   }
 
   async createPhoneTemplate(template): Promise<Asset> {
-    const created = await this.client.branding.phone.templates.create(
-      template
-    );
+    const created = await this.client.branding.phone.templates.create(template);
     return created;
   }
 
@@ -144,7 +142,10 @@ export default class PhoneTemplatesHandler extends DefaultHandler {
     // Find the existing template to get its id
     const existing = this.existing?.find((t) => t.type === type);
     if (!existing?.id) {
-      throw new Error(`Unable to find phone template id for type ${type} when trying to update`);
+      log.warn(
+        `Skipping update for phone template type '${type}' as unable to find existing template ID`
+      );
+      return template;
     }
 
     // stripUpdateFields does not support in sub modules
