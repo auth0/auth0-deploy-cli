@@ -311,6 +311,7 @@ describe('#YAML context validation', () => {
       forms: [],
       selfServiceProfiles: [],
       userAttributeProfiles: [],
+      phoneTemplates: [],
     });
   });
 
@@ -439,6 +440,7 @@ describe('#YAML context validation', () => {
       forms: [],
       selfServiceProfiles: [],
       userAttributeProfiles: [],
+      phoneTemplates: [],
     });
   });
 
@@ -568,6 +570,7 @@ describe('#YAML context validation', () => {
       forms: [],
       selfServiceProfiles: [],
       userAttributeProfiles: [],
+      phoneTemplates: [],
     });
   });
 
