@@ -70,7 +70,7 @@ export default class PhoneTemplatesHandler extends DefaultHandler {
     return super.objString({ type: template.type, disabled: template.disabled });
   }
 
-  async getType(): Promise<Asset> {
+  async getType(): Promise<PhoneTemplate[]> {
     if (this.existing) {
       return this.existing;
     }
