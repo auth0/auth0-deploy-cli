@@ -116,7 +116,7 @@ export default class PhoneTemplatesHandler extends DefaultHandler {
 
   async createPhoneTemplate(template): Promise<Asset> {
     const created = await this.client.branding.phone.templates.create(
-      template as Management.CreatePhoneTemplateRequestContent
+      template
     );
     return created;
   }
