@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS` config property to exclude third-party `clients`. [#1212]
+
+### Fixed
+
+- Fix managing `Auth0 My Account API` in `resourceServers`. [#1229]
+- Fix `cross_origin_auth` is deprecated and migrated to `cross_origin_authentication` in `clients`. [#1223]
+
 ## [8.21.0] - 2025-11-21
 
 ### Added
