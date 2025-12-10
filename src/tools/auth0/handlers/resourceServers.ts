@@ -124,8 +124,6 @@ export default class ResourceServersHandler extends DefaultHandler {
         if (resourceServer.is_system === true) {
           const allowedKeys = [
             'token_lifetime',
-            //  TODO:'token_lifetime_for_web',
-            //  TODO: 'allow_offline_access',
             'proof_of_possession',
             'skip_consent_for_verifiable_first_party_clients',
             'name',
