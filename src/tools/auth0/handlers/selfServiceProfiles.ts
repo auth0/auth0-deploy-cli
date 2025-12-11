@@ -1,11 +1,11 @@
 import { Management } from 'auth0';
 import { isEmpty } from 'lodash';
-import { Asset, Assets, CalculatedChanges } from '../../../types';
+import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import log from '../../../logger';
 import DefaultAPIHandler, { order } from './default';
 import { calculateChanges } from '../../calculateChanges';
 import { paginate } from '../client';
-import { UserAttributeProfile } from './userAttributeProfiles';
+import { getUserAttributeProfiles, UserAttributeProfile } from './userAttributeProfiles';
 
 const SelfServiceProfileCustomTextLanguageEnum = {
   en: 'en',
@@ -159,7 +159,10 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
     // Gets SsProfileWithCustomText from destination tenant
     const existing = await this.getType();
 
-    const userAttributeProfiles = await this.getUserAttributeProfiles(selfServiceProfiles);
+    const userAttributeProfiles = await this.getUserAttributeProfiles(
+      this.client,
+      selfServiceProfiles
+    );
 
     selfServiceProfiles = selfServiceProfiles.map((ssProfile) => {
       if (this.hasConflictingUserAttribute(ssProfile)) {
@@ -334,6 +337,7 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
   }
 
   async getUserAttributeProfiles(
+    auth0Client: Auth0APIClient,
     selfServiceProfiles: SsProfileWithCustomText[]
   ): Promise<UserAttributeProfile[]> {
     if (
@@ -341,9 +345,7 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
         (p) => p.user_attribute_profile_id && p.user_attribute_profile_id.trim() !== ''
       )
     ) {
-      return paginate<UserAttributeProfile>(this.client.userAttributeProfiles.list, {
-        checkpoint: true,
-      });
+      return getUserAttributeProfiles(auth0Client);
     }
 
     return [];

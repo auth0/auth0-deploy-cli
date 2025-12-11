@@ -1266,7 +1266,6 @@
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Default App",
                     "callbacks": [],
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "oidc_conformant": true,
                     "refresh_token": {
@@ -1280,6 +1279,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -1311,7 +1311,6 @@
                     "allowed_clients": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -1333,6 +1332,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -1409,7 +1409,6 @@
                     "allowed_logout_urls": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -1431,6 +1430,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -1464,7 +1464,6 @@
                     "global": false,
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Terraform Provider",
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "oidc_conformant": true,
                     "refresh_token": {
@@ -1478,6 +1477,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -1569,7 +1569,6 @@
                         "http://localhost:3000"
                     ],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -1591,6 +1590,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -1627,7 +1627,6 @@
                     "allowed_clients": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -1649,6 +1648,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -1668,6 +1668,62 @@
                     "token_endpoint_auth_method": "client_secret_post",
                     "app_type": "non_interactive",
                     "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "The Default App",
+                    "allowed_clients": [],
+                    "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": false,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso": false,
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "xYOv2UsoAuKptIEAjkeB62Oaeg1Jn2QX",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
                         "client_credentials"
                     ],
                     "custom_login_page_on": true
@@ -1698,7 +1754,6 @@
             "callbacks": [],
             "client_aliases": [],
             "client_metadata": {},
-            "cross_origin_auth": false,
             "custom_login_page_on": true,
             "grant_types": [
                 "client_credentials"
@@ -1728,7 +1783,8 @@
                 "rotation_type": "non-rotating"
             },
             "sso_disabled": false,
-            "token_endpoint_auth_method": "client_secret_post"
+            "token_endpoint_auth_method": "client_secret_post",
+            "cross_origin_authentication": false
         },
         "status": 200,
         "response": {
@@ -1739,7 +1795,6 @@
             "allowed_clients": [],
             "callbacks": [],
             "client_metadata": {},
-            "cross_origin_auth": false,
             "is_first_party": true,
             "native_social_login": {
                 "apple": {
@@ -1761,6 +1816,7 @@
             },
             "sso_disabled": false,
             "cross_origin_authentication": false,
+            "cross_origin_auth": false,
             "signing_keys": [
                 {
                     "cert": "[REDACTED]",
@@ -1882,7 +1938,6 @@
             "callbacks": [],
             "client_aliases": [],
             "client_metadata": {},
-            "cross_origin_auth": false,
             "custom_login_page_on": true,
             "grant_types": [
                 "authorization_code",
@@ -1916,7 +1971,8 @@
             },
             "sso_disabled": false,
             "token_endpoint_auth_method": "client_secret_post",
-            "web_origins": []
+            "web_origins": [],
+            "cross_origin_authentication": false
         },
         "status": 200,
         "response": {
@@ -1928,7 +1984,6 @@
             "allowed_logout_urls": [],
             "callbacks": [],
             "client_metadata": {},
-            "cross_origin_auth": false,
             "is_first_party": true,
             "native_social_login": {
                 "apple": {
@@ -1950,6 +2005,7 @@
             },
             "sso_disabled": false,
             "cross_origin_authentication": false,
+            "cross_origin_auth": false,
             "signing_keys": [
                 {
                     "cert": "[REDACTED]",
@@ -1988,7 +2044,6 @@
         "body": {
             "name": "Terraform Provider",
             "app_type": "non_interactive",
-            "cross_origin_auth": false,
             "custom_login_page_on": true,
             "grant_types": [
                 "client_credentials"
@@ -2010,7 +2065,8 @@
                 "rotation_type": "non-rotating"
             },
             "sso_disabled": false,
-            "token_endpoint_auth_method": "client_secret_post"
+            "token_endpoint_auth_method": "client_secret_post",
+            "cross_origin_authentication": false
         },
         "status": 200,
         "response": {
@@ -2018,7 +2074,6 @@
             "global": false,
             "is_token_endpoint_ip_header_trusted": false,
             "name": "Terraform Provider",
-            "cross_origin_auth": false,
             "is_first_party": true,
             "oidc_conformant": true,
             "refresh_token": {
@@ -2032,6 +2087,7 @@
             },
             "sso_disabled": false,
             "cross_origin_authentication": false,
+            "cross_origin_auth": false,
             "signing_keys": [
                 {
                     "cert": "[REDACTED]",
@@ -2067,7 +2123,6 @@
             "callbacks": [],
             "client_aliases": [],
             "client_metadata": {},
-            "cross_origin_auth": false,
             "custom_login_page_on": true,
             "grant_types": [
                 "authorization_code",
@@ -2101,7 +2156,8 @@
             },
             "sso": false,
             "sso_disabled": false,
-            "token_endpoint_auth_method": "client_secret_post"
+            "token_endpoint_auth_method": "client_secret_post",
+            "cross_origin_authentication": false
         },
         "status": 200,
         "response": {
@@ -2112,7 +2168,6 @@
             "allowed_clients": [],
             "callbacks": [],
             "client_metadata": {},
-            "cross_origin_auth": false,
             "is_first_party": true,
             "native_social_login": {
                 "apple": {
@@ -2135,6 +2190,7 @@
             "sso": false,
             "sso_disabled": false,
             "cross_origin_authentication": false,
+            "cross_origin_auth": false,
             "signing_keys": [
                 {
                     "cert": "[REDACTED]",
@@ -2279,7 +2335,6 @@
             ],
             "client_aliases": [],
             "client_metadata": {},
-            "cross_origin_auth": false,
             "custom_login_page_on": true,
             "grant_types": [
                 "authorization_code",
@@ -2314,7 +2369,8 @@
             "token_endpoint_auth_method": "none",
             "web_origins": [
                 "http://localhost:3000"
-            ]
+            ],
+            "cross_origin_authentication": false
         },
         "status": 200,
         "response": {
@@ -2330,7 +2386,6 @@
                 "http://localhost:3000"
             ],
             "client_metadata": {},
-            "cross_origin_auth": false,
             "is_first_party": true,
             "native_social_login": {
                 "apple": {
@@ -2352,6 +2407,7 @@
             },
             "sso_disabled": false,
             "cross_origin_authentication": false,
+            "cross_origin_auth": false,
             "signing_keys": [
                 {
                     "cert": "[REDACTED]",
@@ -3239,7 +3295,6 @@
                     "allowed_clients": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -3261,6 +3316,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -3337,7 +3393,6 @@
                     "allowed_logout_urls": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -3359,6 +3414,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -3392,7 +3448,6 @@
                     "global": false,
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Terraform Provider",
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "oidc_conformant": true,
                     "refresh_token": {
@@ -3406,6 +3461,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -3497,7 +3553,6 @@
                         "http://localhost:3000"
                     ],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -3519,6 +3574,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -3555,7 +3611,6 @@
                     "allowed_clients": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -3577,6 +3632,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -3596,6 +3652,62 @@
                     "token_endpoint_auth_method": "client_secret_post",
                     "app_type": "non_interactive",
                     "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "The Default App",
+                    "allowed_clients": [],
+                    "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": false,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso": false,
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "xYOv2UsoAuKptIEAjkeB62Oaeg1Jn2QX",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
                         "client_credentials"
                     ],
                     "custom_login_page_on": true
@@ -4273,7 +4385,6 @@
                     "allowed_clients": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -4295,6 +4406,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -4371,7 +4483,6 @@
                     "allowed_logout_urls": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -4393,6 +4504,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -4426,7 +4538,6 @@
                     "global": false,
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Terraform Provider",
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "oidc_conformant": true,
                     "refresh_token": {
@@ -4440,6 +4551,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -4531,7 +4643,6 @@
                         "http://localhost:3000"
                     ],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -4553,6 +4664,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -4589,7 +4701,6 @@
                     "allowed_clients": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -4611,6 +4722,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -4630,6 +4742,62 @@
                     "token_endpoint_auth_method": "client_secret_post",
                     "app_type": "non_interactive",
                     "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "The Default App",
+                    "allowed_clients": [],
+                    "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": false,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso": false,
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "xYOv2UsoAuKptIEAjkeB62Oaeg1Jn2QX",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
                         "client_credentials"
                     ],
                     "custom_login_page_on": true
@@ -5110,7 +5278,6 @@
                     "allowed_clients": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -5132,6 +5299,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -5208,7 +5376,6 @@
                     "allowed_logout_urls": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -5230,6 +5397,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -5263,7 +5431,6 @@
                     "global": false,
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Terraform Provider",
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "oidc_conformant": true,
                     "refresh_token": {
@@ -5277,6 +5444,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -5368,7 +5536,6 @@
                         "http://localhost:3000"
                     ],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -5390,6 +5557,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -5426,7 +5594,6 @@
                     "allowed_clients": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -5448,6 +5615,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -5467,6 +5635,62 @@
                     "token_endpoint_auth_method": "client_secret_post",
                     "app_type": "non_interactive",
                     "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "The Default App",
+                    "allowed_clients": [],
+                    "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": false,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso": false,
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "xYOv2UsoAuKptIEAjkeB62Oaeg1Jn2QX",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
                         "client_credentials"
                     ],
                     "custom_login_page_on": true
@@ -7093,7 +7317,6 @@
                     "allowed_clients": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -7115,6 +7338,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -7191,7 +7415,6 @@
                     "allowed_logout_urls": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -7213,6 +7436,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -7246,7 +7470,6 @@
                     "global": false,
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Terraform Provider",
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "oidc_conformant": true,
                     "refresh_token": {
@@ -7260,6 +7483,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -7351,7 +7575,6 @@
                         "http://localhost:3000"
                     ],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -7373,6 +7596,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -7409,7 +7633,6 @@
                     "allowed_clients": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -7431,6 +7654,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -7450,6 +7674,62 @@
                     "token_endpoint_auth_method": "client_secret_post",
                     "app_type": "non_interactive",
                     "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "The Default App",
+                    "allowed_clients": [],
+                    "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": false,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso": false,
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "xYOv2UsoAuKptIEAjkeB62Oaeg1Jn2QX",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
                         "client_credentials"
                     ],
                     "custom_login_page_on": true
@@ -8370,7 +8650,6 @@
                     "allowed_clients": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -8392,6 +8671,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -8468,7 +8748,6 @@
                     "allowed_logout_urls": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -8490,6 +8769,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -8523,7 +8803,6 @@
                     "global": false,
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Terraform Provider",
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "oidc_conformant": true,
                     "refresh_token": {
@@ -8537,6 +8816,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -8628,7 +8908,6 @@
                         "http://localhost:3000"
                     ],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -8650,6 +8929,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -8686,7 +8966,6 @@
                     "allowed_clients": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -8708,6 +8987,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -8727,6 +9007,62 @@
                     "token_endpoint_auth_method": "client_secret_post",
                     "app_type": "non_interactive",
                     "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "The Default App",
+                    "allowed_clients": [],
+                    "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": false,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso": false,
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "xYOv2UsoAuKptIEAjkeB62Oaeg1Jn2QX",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
                         "client_credentials"
                     ],
                     "custom_login_page_on": true
@@ -10448,7 +10784,6 @@
                     "allowed_clients": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -10470,6 +10805,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -10546,7 +10882,6 @@
                     "allowed_logout_urls": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -10568,6 +10903,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -10601,7 +10937,6 @@
                     "global": false,
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Terraform Provider",
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "oidc_conformant": true,
                     "refresh_token": {
@@ -10615,6 +10950,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -10706,7 +11042,6 @@
                         "http://localhost:3000"
                     ],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -10728,6 +11063,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -10764,7 +11100,6 @@
                     "allowed_clients": [],
                     "callbacks": [],
                     "client_metadata": {},
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "native_social_login": {
                         "apple": {
@@ -10786,6 +11121,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -10805,6 +11141,62 @@
                     "token_endpoint_auth_method": "client_secret_post",
                     "app_type": "non_interactive",
                     "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "The Default App",
+                    "allowed_clients": [],
+                    "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": false,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso": false,
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "xYOv2UsoAuKptIEAjkeB62Oaeg1Jn2QX",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
                         "client_credentials"
                     ],
                     "custom_login_page_on": true
@@ -10891,7 +11283,6 @@
         "body": {
             "name": "Default App",
             "callbacks": [],
-            "cross_origin_auth": false,
             "custom_login_page_on": true,
             "grant_types": [
                 "authorization_code",
@@ -10916,7 +11307,8 @@
                 "idle_token_lifetime": 1296000,
                 "rotation_type": "non-rotating"
             },
-            "sso_disabled": false
+            "sso_disabled": false,
+            "cross_origin_authentication": false
         },
         "status": 201,
         "response": {
@@ -10925,7 +11317,6 @@
             "is_token_endpoint_ip_header_trusted": false,
             "name": "Default App",
             "callbacks": [],
-            "cross_origin_auth": false,
             "is_first_party": true,
             "oidc_conformant": true,
             "refresh_token": {
@@ -10939,6 +11330,7 @@
             },
             "sso_disabled": false,
             "cross_origin_authentication": false,
+            "cross_origin_auth": false,
             "encrypted": true,
             "signing_keys": [
                 {
@@ -10998,7 +11390,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/otp",
+        "path": "/api/v2/guardian/factors/recovery-code",
         "body": {
             "enabled": false
         },
@@ -11013,6 +11405,20 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
         "path": "/api/v2/guardian/factors/recovery-code",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
+        "path": "/api/v2/guardian/factors/duo",
         "body": {
             "enabled": false
         },
@@ -11389,7 +11795,6 @@
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Default App",
                     "callbacks": [],
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "oidc_conformant": true,
                     "refresh_token": {
@@ -11403,6 +11808,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -11877,7 +12283,6 @@
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Default App",
                     "callbacks": [],
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "oidc_conformant": true,
                     "refresh_token": {
@@ -11891,6 +12296,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -12256,7 +12662,6 @@
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Default App",
                     "callbacks": [],
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "oidc_conformant": true,
                     "refresh_token": {
@@ -12270,6 +12675,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -12880,7 +13286,6 @@
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Default App",
                     "callbacks": [],
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "oidc_conformant": true,
                     "refresh_token": {
@@ -12894,6 +13299,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -14957,7 +15363,6 @@
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Default App",
                     "callbacks": [],
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "oidc_conformant": true,
                     "refresh_token": {
@@ -14971,6 +15376,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -15257,12 +15663,16 @@
         "method": "GET",
         "path": "/api/v2/email-templates/password_reset",
         "body": "",
-        "status": 404,
+        "status": 200,
         "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
+            "template": "welcome_email",
+            "body": "<html>\n  <body>\n    <h1>Welcome!</h1>\n  </body>\n</html>\n",
+            "from": "",
+            "resultUrl": "https://example.com/welcome",
+            "subject": "Welcome",
+            "syntax": "liquid",
+            "urlLifetimeInSeconds": 3600,
+            "enabled": false
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -15270,7 +15680,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/reset_email",
+        "path": "/api/v2/email-templates/enrollment_email",
         "body": "",
         "status": 404,
         "response": {
@@ -16157,7 +16567,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/custom-form/custom-text/en",
+        "path": "/api/v2/prompts/reset-password/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -16247,7 +16657,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa-sms/custom-text/en",
+        "path": "/api/v2/prompts/mfa-email/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -16257,7 +16667,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa-email/custom-text/en",
+        "path": "/api/v2/prompts/mfa-sms/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -16337,7 +16747,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/invitation/custom-text/en",
+        "path": "/api/v2/prompts/common/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -16347,7 +16757,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/common/custom-text/en",
+        "path": "/api/v2/prompts/email-otp-challenge/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -16387,7 +16797,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login-password/partials",
+        "path": "/api/v2/prompts/login/partials",
         "body": "",
         "status": 200,
         "response": {},
@@ -16437,6 +16847,16 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/prompts/login-passwordless/partials",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/prompts/signup-id/partials",
         "body": "",
         "status": 200,
@@ -16477,21 +16897,10 @@
             "triggers": [
                 {
                     "id": "post-login",
-                    "version": "v2",
-                    "status": "DEPRECATED",
-                    "runtimes": [
-                        "node12",
-                        "node18"
-                    ],
-                    "default_runtime": "node16",
-                    "binding_policy": "trigger-bound",
-                    "compatible_triggers": []
-                },
-                {
-                    "id": "post-login",
                     "version": "v3",
                     "status": "CURRENT",
                     "runtimes": [
+                        "node12",
                         "node18-actions",
                         "node22"
                     ],
@@ -16503,6 +16912,17 @@
                             "version": "v2"
                         }
                     ]
+                },
+                {
+                    "id": "post-login",
+                    "version": "v2",
+                    "status": "DEPRECATED",
+                    "runtimes": [
+                        "node18"
+                    ],
+                    "default_runtime": "node16",
+                    "binding_policy": "trigger-bound",
+                    "compatible_triggers": []
                 },
                 {
                     "id": "credentials-exchange",
@@ -16518,10 +16938,20 @@
                 },
                 {
                     "id": "pre-user-registration",
+                    "version": "v1",
+                    "status": "DEPRECATED",
+                    "runtimes": [
+                        "node12"
+                    ],
+                    "default_runtime": "node12",
+                    "binding_policy": "trigger-bound",
+                    "compatible_triggers": []
+                },
+                {
+                    "id": "pre-user-registration",
                     "version": "v2",
                     "status": "CURRENT",
                     "runtimes": [
-                        "node12",
                         "node18-actions",
                         "node22"
                     ],
@@ -16894,7 +17324,6 @@
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Default App",
                     "callbacks": [],
-                    "cross_origin_auth": false,
                     "is_first_party": true,
                     "oidc_conformant": true,
                     "refresh_token": {
@@ -16908,6 +17337,7 @@
                     },
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -16969,6 +17399,25 @@
                     "custom_login_page_on": true
                 }
             ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/attack-protection/brute-force-protection",
+        "body": "",
+        "status": 200,
+        "response": {
+            "enabled": true,
+            "shields": [
+                "block",
+                "user_notification"
+            ],
+            "mode": "count_per_identifier_and_ip",
+            "allowlist": [],
+            "max_attempts": 10
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -17304,6 +17753,21 @@
         "status": 200,
         "response": {
             "limit": 50,
+            "start": 0,
+            "total": 0,
+            "connections": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/flows/vault/connections?page=0&per_page=100&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 100,
             "start": 0,
             "total": 0,
             "connections": []

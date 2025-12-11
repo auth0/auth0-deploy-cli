@@ -1185,9 +1185,173 @@
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Default App",
                     "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
                     "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "vVbUuOLzLQ9k7iwdZoLRtQuhG8XHUkSY",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Quickstarts API (Test Application)",
+                    "client_metadata": {
+                        "foo": "bar"
+                    },
                     "is_first_party": true,
                     "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "O0AMH5MORoUOkQ8g31aPVmBZ11jyApI5",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Node App",
+                    "allowed_clients": [],
+                    "allowed_logout_urls": [],
+                    "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "allowed_origins": [],
+                    "client_id": "88gPebiknBTdBHOAYrSdF2WWRyuroAax",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "regular_web",
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
+                        "client_credentials"
+                    ],
+                    "web_origins": [],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "The Default App",
+                    "allowed_clients": [],
+                    "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": false,
                     "refresh_token": {
                         "expiration_type": "non-expiring",
                         "leeway": 0,
@@ -1197,8 +1361,10 @@
                         "idle_token_lifetime": 1296000,
                         "rotation_type": "non-rotating"
                     },
+                    "sso": false,
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -1214,6 +1380,8 @@
                         "lifetime_in_seconds": 36000,
                         "secret_encoded": false
                     },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
                     "grant_types": [
                         "authorization_code",
                         "implicit",
@@ -2121,7 +2289,67 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/change_password",
+        "path": "/api/v2/email-templates/reset_email",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/blocked_account",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/stolen_credentials",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/mfa_oob_code",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/async_approval",
         "body": "",
         "status": 404,
         "response": {
@@ -2810,7 +3038,7 @@
             },
             {
                 "name": "push-notification",
-                "enabled": false,
+                "enabled": true,
                 "trial_expired": false
             },
             {
@@ -2886,7 +3114,9 @@
         "path": "/api/v2/guardian/policies",
         "body": "",
         "status": 200,
-        "response": [],
+        "response": [
+            "all-applications"
+        ],
         "rawHeaders": [],
         "responseIsBinary": false
     },
@@ -3330,16 +3560,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login-email-verification/custom-text/en",
-        "body": "",
-        "status": 200,
-        "response": {},
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/prompts/signup/custom-text/en",
         "body": "",
         "status": 200,
@@ -3380,7 +3600,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/phone-identifier-challenge/custom-text/en",
+        "path": "/api/v2/prompts/signup-id/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -3391,6 +3611,16 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/prompts/email-identifier-challenge/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/phone-identifier-challenge/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -3460,16 +3690,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa-otp/custom-text/en",
-        "body": "",
-        "status": 200,
-        "response": {},
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/prompts/mfa-voice/custom-text/en",
         "body": "",
         "status": 200,
@@ -3481,6 +3701,16 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/prompts/mfa-phone/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/mfa-otp/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -3650,7 +3880,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login-id/partials",
+        "path": "/api/v2/prompts/login/partials",
         "body": "",
         "status": 200,
         "response": {},
@@ -3670,7 +3900,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login-passwordless/partials",
+        "path": "/api/v2/prompts/signup-id/partials",
         "body": "",
         "status": 200,
         "response": {},
@@ -3690,7 +3920,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/signup-id/partials",
+        "path": "/api/v2/prompts/login-passwordless/partials",
         "body": "",
         "status": 200,
         "response": {},
@@ -3704,6 +3934,16 @@
         "body": "",
         "status": 200,
         "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/rendering",
+        "body": "",
+        "status": 200,
+        "response": [],
         "rawHeaders": [],
         "responseIsBinary": false
     },
@@ -3858,6 +4098,7 @@
                     "version": "v2",
                     "status": "CURRENT",
                     "runtimes": [
+                        "node12",
                         "node18-actions",
                         "node22"
                     ],
@@ -3867,10 +4108,20 @@
                 },
                 {
                     "id": "pre-user-registration",
+                    "version": "v1",
+                    "status": "DEPRECATED",
+                    "runtimes": [
+                        "node12"
+                    ],
+                    "default_runtime": "node12",
+                    "binding_policy": "trigger-bound",
+                    "compatible_triggers": []
+                },
+                {
+                    "id": "pre-user-registration",
                     "version": "v2",
                     "status": "CURRENT",
                     "runtimes": [
-                        "node12",
                         "node18-actions",
                         "node22"
                     ],
@@ -3906,6 +4157,7 @@
                     "version": "v2",
                     "status": "CURRENT",
                     "runtimes": [
+                        "node12",
                         "node18-actions",
                         "node22"
                     ],
@@ -4320,9 +4572,173 @@
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Default App",
                     "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
                     "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "vVbUuOLzLQ9k7iwdZoLRtQuhG8XHUkSY",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Quickstarts API (Test Application)",
+                    "client_metadata": {
+                        "foo": "bar"
+                    },
                     "is_first_party": true,
                     "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "O0AMH5MORoUOkQ8g31aPVmBZ11jyApI5",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Node App",
+                    "allowed_clients": [],
+                    "allowed_logout_urls": [],
+                    "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "allowed_origins": [],
+                    "client_id": "88gPebiknBTdBHOAYrSdF2WWRyuroAax",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "regular_web",
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
+                        "client_credentials"
+                    ],
+                    "web_origins": [],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "The Default App",
+                    "allowed_clients": [],
+                    "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": false,
                     "refresh_token": {
                         "expiration_type": "non-expiring",
                         "leeway": 0,
@@ -4332,8 +4748,10 @@
                         "idle_token_lifetime": 1296000,
                         "rotation_type": "non-rotating"
                     },
+                    "sso": false,
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -4349,6 +4767,8 @@
                         "lifetime_in_seconds": 36000,
                         "secret_encoded": false
                     },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
                     "grant_types": [
                         "authorization_code",
                         "implicit",
@@ -4962,6 +5382,34 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/attack-protection/suspicious-ip-throttling",
+        "body": "",
+        "status": 200,
+        "response": {
+            "enabled": true,
+            "shields": [
+                "admin_notification"
+            ],
+            "allowlist": [
+                "127.0.0.1"
+            ],
+            "stage": {
+                "pre-login": {
+                    "max_attempts": 66,
+                    "rate": 864000
+                },
+                "pre-user-registration": {
+                    "max_attempts": 66,
+                    "rate": 1200
+                }
+            }
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/attack-protection/brute-force-protection",
         "body": "",
         "status": 200,
@@ -4973,7 +5421,7 @@
             ],
             "mode": "count_per_identifier_and_ip",
             "allowlist": [],
-            "max_attempts": 10
+            "max_attempts": 66
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -4981,25 +5429,33 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/attack-protection/suspicious-ip-throttling",
+        "path": "/api/v2/attack-protection/captcha",
         "body": "",
         "status": 200,
         "response": {
-            "enabled": true,
-            "shields": [
-                "admin_notification",
-                "block"
-            ],
-            "allowlist": [],
-            "stage": {
-                "pre-login": {
-                    "max_attempts": 100,
-                    "rate": 864000
-                },
-                "pre-user-registration": {
-                    "max_attempts": 50,
-                    "rate": 1200
-                }
+            "active_provider_id": "auth_challenge",
+            "simple_captcha": {},
+            "auth_challenge": {
+                "fail_open": false
+            },
+            "recaptcha_v2": {
+                "site_key": ""
+            },
+            "recaptcha_enterprise": {
+                "site_key": "",
+                "project_id": ""
+            },
+            "hcaptcha": {
+                "site_key": ""
+            },
+            "friendly_captcha": {
+                "site_key": ""
+            },
+            "arkose": {
+                "site_key": "",
+                "client_subdomain": "client-api",
+                "verify_subdomain": "verify-api",
+                "fail_open": false
             }
         },
         "rawHeaders": [],
@@ -5157,6 +5613,21 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/flows?page=0&per_page=100&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 100,
+            "start": 0,
+            "total": 0,
+            "flows": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/forms?page=0&per_page=100&include_totals=true",
         "body": "",
         "status": 200,
@@ -5173,21 +5644,6 @@
                     "updated_at": "2025-12-05T14:24:57.289Z"
                 }
             ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/flows?page=0&per_page=100&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "limit": 100,
-            "start": 0,
-            "total": 0,
-            "flows": []
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -6747,9 +7203,173 @@
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Default App",
                     "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
                     "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "vVbUuOLzLQ9k7iwdZoLRtQuhG8XHUkSY",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Quickstarts API (Test Application)",
+                    "client_metadata": {
+                        "foo": "bar"
+                    },
                     "is_first_party": true,
                     "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "O0AMH5MORoUOkQ8g31aPVmBZ11jyApI5",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Node App",
+                    "allowed_clients": [],
+                    "allowed_logout_urls": [],
+                    "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "allowed_origins": [],
+                    "client_id": "88gPebiknBTdBHOAYrSdF2WWRyuroAax",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "regular_web",
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
+                        "client_credentials"
+                    ],
+                    "web_origins": [],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "The Default App",
+                    "allowed_clients": [],
+                    "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": false,
                     "refresh_token": {
                         "expiration_type": "non-expiring",
                         "leeway": 0,
@@ -6759,8 +7379,10 @@
                         "idle_token_lifetime": 1296000,
                         "rotation_type": "non-rotating"
                     },
+                    "sso": false,
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -6776,6 +7398,8 @@
                         "lifetime_in_seconds": 36000,
                         "secret_encoded": false
                     },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
                     "grant_types": [
                         "authorization_code",
                         "implicit",
@@ -7266,13 +7890,110 @@
         "body": {
             "name": "Default App",
             "callbacks": [],
-            "cross_origin_auth": false,
+            "client_aliases": [],
+            "client_metadata": {},
             "cross_origin_authentication": false,
             "custom_login_page_on": true,
             "grant_types": [
-                "authorization_code",
-                "implicit",
-                "refresh_token",
+                "client_credentials"
+            ],
+            "is_first_party": true,
+            "is_token_endpoint_ip_header_trusted": false,
+            "jwt_configuration": {
+                "alg": "RS256",
+                "lifetime_in_seconds": 36000
+            },
+            "native_social_login": {
+                "apple": {
+                    "enabled": false
+                },
+                "facebook": {
+                    "enabled": false
+                }
+            },
+            "oidc_conformant": true,
+            "refresh_token": {
+                "expiration_type": "non-expiring",
+                "leeway": 0,
+                "infinite_token_lifetime": true,
+                "infinite_idle_token_lifetime": true,
+                "token_lifetime": 31557600,
+                "idle_token_lifetime": 2592000,
+                "rotation_type": "non-rotating"
+            },
+            "sso_disabled": false,
+            "token_endpoint_auth_method": "client_secret_post"
+        },
+        "status": 200,
+        "response": {
+            "tenant": "auth0-deploy-cli-e2e",
+            "global": false,
+            "is_token_endpoint_ip_header_trusted": false,
+            "name": "API Explorer Application",
+            "allowed_clients": [],
+            "callbacks": [],
+            "client_metadata": {},
+            "is_first_party": true,
+            "native_social_login": {
+                "apple": {
+                    "enabled": false
+                },
+                "facebook": {
+                    "enabled": false
+                }
+            },
+            "oidc_conformant": true,
+            "refresh_token": {
+                "expiration_type": "non-expiring",
+                "leeway": 0,
+                "infinite_token_lifetime": true,
+                "infinite_idle_token_lifetime": true,
+                "token_lifetime": 31557600,
+                "idle_token_lifetime": 2592000,
+                "rotation_type": "non-rotating"
+            },
+            "sso_disabled": false,
+            "cross_origin_authentication": false,
+            "cross_origin_auth": false,
+            "signing_keys": [
+                {
+                    "cert": "[REDACTED]",
+                    "pkcs7": "[REDACTED]",
+                    "subject": "/CN=auth0-deploy-cli-e2e.us.auth0.com"
+                }
+            ],
+            "client_id": "vVbUuOLzLQ9k7iwdZoLRtQuhG8XHUkSY",
+            "callback_url_template": false,
+            "client_secret": "[REDACTED]",
+            "jwt_configuration": {
+                "alg": "RS256",
+                "lifetime_in_seconds": 36000,
+                "secret_encoded": false
+            },
+            "client_aliases": [],
+            "token_endpoint_auth_method": "client_secret_post",
+            "app_type": "non_interactive",
+            "grant_types": [
+                "client_credentials"
+            ],
+            "custom_login_page_on": true
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/clients/O0AMH5MORoUOkQ8g31aPVmBZ11jyApI5",
+        "body": {
+            "name": "Quickstarts API (Test Application)",
+            "app_type": "non_interactive",
+            "client_metadata": {
+                "foo": "bar"
+            },
+            "cross_origin_authentication": false,
+            "custom_login_page_on": true,
+            "grant_types": [
                 "client_credentials"
             ],
             "is_first_party": true,
@@ -7287,11 +8008,12 @@
                 "leeway": 0,
                 "infinite_token_lifetime": true,
                 "infinite_idle_token_lifetime": true,
-                "token_lifetime": 2592000,
-                "idle_token_lifetime": 1296000,
+                "token_lifetime": 31557600,
+                "idle_token_lifetime": 2592000,
                 "rotation_type": "non-rotating"
             },
-            "sso_disabled": false
+            "sso_disabled": false,
+            "token_endpoint_auth_method": "client_secret_post"
         },
         "status": 200,
         "response": {
@@ -7308,12 +8030,348 @@
                 "leeway": 0,
                 "infinite_token_lifetime": true,
                 "infinite_idle_token_lifetime": true,
-                "token_lifetime": 2592000,
-                "idle_token_lifetime": 1296000,
+                "token_lifetime": 31557600,
+                "idle_token_lifetime": 2592000,
                 "rotation_type": "non-rotating"
             },
             "sso_disabled": false,
             "cross_origin_authentication": false,
+            "cross_origin_auth": false,
+            "signing_keys": [
+                {
+                    "cert": "[REDACTED]",
+                    "pkcs7": "[REDACTED]",
+                    "subject": "/CN=auth0-deploy-cli-e2e.us.auth0.com"
+                }
+            ],
+            "client_id": "O0AMH5MORoUOkQ8g31aPVmBZ11jyApI5",
+            "callback_url_template": false,
+            "client_secret": "[REDACTED]",
+            "jwt_configuration": {
+                "alg": "RS256",
+                "lifetime_in_seconds": 36000,
+                "secret_encoded": false
+            },
+            "token_endpoint_auth_method": "client_secret_post",
+            "app_type": "non_interactive",
+            "grant_types": [
+                "client_credentials"
+            ],
+            "custom_login_page_on": true
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/clients/88gPebiknBTdBHOAYrSdF2WWRyuroAax",
+        "body": {
+            "name": "Node App",
+            "allowed_clients": [],
+            "allowed_logout_urls": [],
+            "allowed_origins": [],
+            "app_type": "regular_web",
+            "callbacks": [],
+            "client_aliases": [],
+            "client_metadata": {},
+            "cross_origin_authentication": false,
+            "custom_login_page_on": true,
+            "grant_types": [
+                "authorization_code",
+                "implicit",
+                "refresh_token",
+                "client_credentials"
+            ],
+            "is_first_party": true,
+            "is_token_endpoint_ip_header_trusted": false,
+            "jwt_configuration": {
+                "alg": "RS256",
+                "lifetime_in_seconds": 36000
+            },
+            "native_social_login": {
+                "apple": {
+                    "enabled": false
+                },
+                "facebook": {
+                    "enabled": false
+                }
+            },
+            "oidc_conformant": true,
+            "refresh_token": {
+                "expiration_type": "non-expiring",
+                "leeway": 0,
+                "infinite_token_lifetime": true,
+                "infinite_idle_token_lifetime": true,
+                "token_lifetime": 31557600,
+                "idle_token_lifetime": 2592000,
+                "rotation_type": "non-rotating"
+            },
+            "sso_disabled": false,
+            "token_endpoint_auth_method": "client_secret_post",
+            "web_origins": []
+        },
+        "status": 200,
+        "response": {
+            "tenant": "auth0-deploy-cli-e2e",
+            "global": false,
+            "is_token_endpoint_ip_header_trusted": false,
+            "name": "Node App",
+            "allowed_clients": [],
+            "allowed_logout_urls": [],
+            "callbacks": [],
+            "client_metadata": {},
+            "is_first_party": true,
+            "native_social_login": {
+                "apple": {
+                    "enabled": false
+                },
+                "facebook": {
+                    "enabled": false
+                }
+            },
+            "oidc_conformant": true,
+            "refresh_token": {
+                "expiration_type": "non-expiring",
+                "leeway": 0,
+                "infinite_token_lifetime": true,
+                "infinite_idle_token_lifetime": true,
+                "token_lifetime": 31557600,
+                "idle_token_lifetime": 2592000,
+                "rotation_type": "non-rotating"
+            },
+            "sso_disabled": false,
+            "cross_origin_authentication": false,
+            "cross_origin_auth": false,
+            "signing_keys": [
+                {
+                    "cert": "[REDACTED]",
+                    "pkcs7": "[REDACTED]",
+                    "subject": "/CN=auth0-deploy-cli-e2e.us.auth0.com"
+                }
+            ],
+            "allowed_origins": [],
+            "client_id": "88gPebiknBTdBHOAYrSdF2WWRyuroAax",
+            "callback_url_template": false,
+            "client_secret": "[REDACTED]",
+            "jwt_configuration": {
+                "alg": "RS256",
+                "lifetime_in_seconds": 36000,
+                "secret_encoded": false
+            },
+            "client_aliases": [],
+            "token_endpoint_auth_method": "client_secret_post",
+            "app_type": "regular_web",
+            "grant_types": [
+                "authorization_code",
+                "implicit",
+                "refresh_token",
+                "client_credentials"
+            ],
+            "web_origins": [],
+            "custom_login_page_on": true
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/clients/9ztJ1ZaM0iTa9eR2Ga08KOrwBNqNuRmr",
+        "body": {
+            "name": "Test SPA",
+            "allowed_clients": [],
+            "allowed_logout_urls": [
+                "http://localhost:3000"
+            ],
+            "app_type": "spa",
+            "callbacks": [
+                "http://localhost:3000"
+            ],
+            "client_aliases": [],
+            "client_metadata": {},
+            "cross_origin_authentication": false,
+            "custom_login_page_on": true,
+            "grant_types": [
+                "authorization_code",
+                "implicit",
+                "refresh_token"
+            ],
+            "is_first_party": true,
+            "is_token_endpoint_ip_header_trusted": false,
+            "jwt_configuration": {
+                "alg": "RS256",
+                "lifetime_in_seconds": 36000
+            },
+            "native_social_login": {
+                "apple": {
+                    "enabled": false
+                },
+                "facebook": {
+                    "enabled": false
+                }
+            },
+            "oidc_conformant": true,
+            "refresh_token": {
+                "expiration_type": "expiring",
+                "leeway": 0,
+                "token_lifetime": 2592000,
+                "idle_token_lifetime": 1296000,
+                "infinite_token_lifetime": false,
+                "infinite_idle_token_lifetime": false,
+                "rotation_type": "rotating"
+            },
+            "sso_disabled": false,
+            "token_endpoint_auth_method": "none",
+            "web_origins": [
+                "http://localhost:3000"
+            ]
+        },
+        "status": 200,
+        "response": {
+            "tenant": "auth0-deploy-cli-e2e",
+            "global": false,
+            "is_token_endpoint_ip_header_trusted": false,
+            "name": "Test SPA",
+            "allowed_clients": [],
+            "allowed_logout_urls": [
+                "http://localhost:3000"
+            ],
+            "callbacks": [
+                "http://localhost:3000"
+            ],
+            "client_metadata": {},
+            "is_first_party": true,
+            "native_social_login": {
+                "apple": {
+                    "enabled": false
+                },
+                "facebook": {
+                    "enabled": false
+                }
+            },
+            "oidc_conformant": true,
+            "refresh_token": {
+                "expiration_type": "expiring",
+                "leeway": 0,
+                "token_lifetime": 2592000,
+                "idle_token_lifetime": 1296000,
+                "infinite_token_lifetime": false,
+                "infinite_idle_token_lifetime": false,
+                "rotation_type": "rotating"
+            },
+            "sso_disabled": false,
+            "cross_origin_authentication": false,
+            "cross_origin_auth": false,
+            "signing_keys": [
+                {
+                    "cert": "[REDACTED]",
+                    "pkcs7": "[REDACTED]",
+                    "subject": "/CN=auth0-deploy-cli-e2e.us.auth0.com"
+                }
+            ],
+            "client_id": "9ztJ1ZaM0iTa9eR2Ga08KOrwBNqNuRmr",
+            "callback_url_template": false,
+            "client_secret": "[REDACTED]",
+            "jwt_configuration": {
+                "alg": "RS256",
+                "lifetime_in_seconds": 36000,
+                "secret_encoded": false
+            },
+            "client_aliases": [],
+            "token_endpoint_auth_method": "none",
+            "app_type": "spa",
+            "grant_types": [
+                "authorization_code",
+                "implicit",
+                "refresh_token"
+            ],
+            "web_origins": [
+                "http://localhost:3000"
+            ],
+            "custom_login_page_on": true
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/clients/7vlUKQihTlaGoILrgQ51JW4xMbU1XhI0",
+        "body": {
+            "name": "The Default App",
+            "allowed_clients": [],
+            "callbacks": [],
+            "client_aliases": [],
+            "client_metadata": {},
+            "cross_origin_authentication": false,
+            "custom_login_page_on": true,
+            "grant_types": [
+                "authorization_code",
+                "implicit",
+                "refresh_token",
+                "client_credentials"
+            ],
+            "is_first_party": true,
+            "is_token_endpoint_ip_header_trusted": false,
+            "jwt_configuration": {
+                "alg": "RS256",
+                "lifetime_in_seconds": 36000
+            },
+            "native_social_login": {
+                "apple": {
+                    "enabled": false
+                },
+                "facebook": {
+                    "enabled": false
+                }
+            },
+            "oidc_conformant": false,
+            "refresh_token": {
+                "expiration_type": "non-expiring",
+                "leeway": 0,
+                "infinite_token_lifetime": true,
+                "infinite_idle_token_lifetime": true,
+                "token_lifetime": 2592000,
+                "idle_token_lifetime": 1296000,
+                "rotation_type": "non-rotating"
+            },
+            "sso": false,
+            "sso_disabled": false,
+            "token_endpoint_auth_method": "client_secret_post"
+        },
+        "status": 200,
+        "response": {
+            "tenant": "auth0-deploy-cli-e2e",
+            "global": false,
+            "is_token_endpoint_ip_header_trusted": false,
+            "name": "The Default App",
+            "allowed_clients": [],
+            "callbacks": [],
+            "client_metadata": {},
+            "is_first_party": true,
+            "native_social_login": {
+                "apple": {
+                    "enabled": false
+                },
+                "facebook": {
+                    "enabled": false
+                }
+            },
+            "oidc_conformant": false,
+            "refresh_token": {
+                "expiration_type": "non-expiring",
+                "leeway": 0,
+                "infinite_token_lifetime": true,
+                "infinite_idle_token_lifetime": true,
+                "token_lifetime": 2592000,
+                "idle_token_lifetime": 1296000,
+                "rotation_type": "non-rotating"
+            },
+            "sso": false,
+            "sso_disabled": false,
+            "cross_origin_authentication": false,
+            "cross_origin_auth": false,
             "signing_keys": [
                 {
                     "cert": "[REDACTED]",
@@ -7329,6 +8387,8 @@
                 "lifetime_in_seconds": 36000,
                 "secret_encoded": false
             },
+            "client_aliases": [],
+            "token_endpoint_auth_method": "client_secret_post",
             "grant_types": [
                 "authorization_code",
                 "implicit",
@@ -8074,9 +9134,13 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
         "path": "/api/v2/guardian/policies",
-        "body": [],
+        "body": [
+            "all-applications"
+        ],
         "status": 200,
-        "response": [],
+        "response": [
+            "all-applications"
+        ],
         "rawHeaders": [],
         "responseIsBinary": false
     },
@@ -8706,26 +9770,44 @@
                     "max_attempts": 50,
                     "rate": 1200
                 }
+            ],
+            "action": {
+                "id": "bae9165a-5430-464c-b900-7de6abc92c29",
+                "name": "My Custom Action",
+                "supported_triggers": [
+                    {
+                        "id": "post-login",
+                        "version": "v2"
+                    }
+                ],
+                "created_at": "2025-12-04T10:16:43.559450240Z",
+                "updated_at": "2025-12-04T10:20:27.874490222Z",
+                "all_changes_deployed": false
             }
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/attack-protection/bot-detection",
+        "body": {
+            "challenge_password_policy": "never",
+            "challenge_passwordless_policy": "never",
+            "challenge_password_reset_policy": "never",
+            "allowlist": [],
+            "bot_detection_level": "medium",
+            "monitoring_mode_enabled": false
         },
         "status": 200,
         "response": {
-            "enabled": true,
-            "shields": [
-                "admin_notification",
-                "block"
-            ],
+            "challenge_password_policy": "never",
+            "challenge_passwordless_policy": "never",
+            "challenge_password_reset_policy": "never",
             "allowlist": [],
-            "stage": {
-                "pre-login": {
-                    "max_attempts": 100,
-                    "rate": 864000
-                },
-                "pre-user-registration": {
-                    "max_attempts": 50,
-                    "rate": 1200
-                }
-            }
+            "bot_detection_level": "medium",
+            "monitoring_mode_enabled": false
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -8869,55 +9951,6 @@
                     }
                 }
             ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PATCH",
-        "path": "/api/v2/user-attribute-profiles/uap_1csDj3sAVu6n5eTzLw6XZg",
-        "body": {
-            "name": "test-user-attribute-profile",
-            "user_attributes": {
-                "email": {
-                    "label": "Email",
-                    "description": "Email of the User",
-                    "auth0_mapping": "email",
-                    "profile_required": true
-                }
-            },
-            "user_id": {
-                "oidc_mapping": "sub",
-                "saml_mapping": [
-                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
-                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
-                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-                ],
-                "scim_mapping": "externalId"
-            }
-        },
-        "status": 200,
-        "response": {
-            "id": "uap_1csDj3sAVu6n5eTzLw6XZg",
-            "name": "test-user-attribute-profile",
-            "user_id": {
-                "oidc_mapping": "sub",
-                "saml_mapping": [
-                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
-                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
-                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-                ],
-                "scim_mapping": "externalId"
-            },
-            "user_attributes": {
-                "email": {
-                    "label": "Email",
-                    "description": "Email of the User",
-                    "auth0_mapping": "email",
-                    "profile_required": true
-                }
-            }
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -10203,9 +11236,53 @@
                 "client_id": "BKAbUN8rqBV7Wb1If7QC2sVfJixwCkbX",
                 "status": true
             }
-        ],
-        "status": 204,
-        "response": "",
+        },
+        "status": 200,
+        "response": {
+            "id": "uap_1csDj3sAVu6n5eTzLw6XZg",
+            "name": "test-user-attribute-profile",
+            "user_id": {
+                "oidc_mapping": "sub",
+                "saml_mapping": [
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+                ],
+                "scim_mapping": "externalId"
+            },
+            "user_attributes": {
+                "email": {
+                    "label": "Email",
+                    "description": "Email of the User",
+                    "auth0_mapping": "email",
+                    "profile_required": true
+                }
+            }
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/connection-profiles?take=10",
+        "body": "",
+        "status": 200,
+        "response": {
+            "connection_profiles": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/connection-profiles?take=10",
+        "body": "",
+        "status": 200,
+        "response": {
+            "connection_profiles": []
+        },
         "rawHeaders": [],
         "responseIsBinary": false
     },
@@ -10281,9 +11358,173 @@
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Default App",
                     "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
                     "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "vVbUuOLzLQ9k7iwdZoLRtQuhG8XHUkSY",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Quickstarts API (Test Application)",
+                    "client_metadata": {
+                        "foo": "bar"
+                    },
                     "is_first_party": true,
                     "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "O0AMH5MORoUOkQ8g31aPVmBZ11jyApI5",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Node App",
+                    "allowed_clients": [],
+                    "allowed_logout_urls": [],
+                    "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "allowed_origins": [],
+                    "client_id": "88gPebiknBTdBHOAYrSdF2WWRyuroAax",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "regular_web",
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
+                        "client_credentials"
+                    ],
+                    "web_origins": [],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "The Default App",
+                    "allowed_clients": [],
+                    "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": false,
                     "refresh_token": {
                         "expiration_type": "non-expiring",
                         "leeway": 0,
@@ -10293,8 +11534,10 @@
                         "idle_token_lifetime": 1296000,
                         "rotation_type": "non-rotating"
                     },
+                    "sso": false,
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -10310,6 +11553,8 @@
                         "lifetime_in_seconds": 36000,
                         "secret_encoded": false
                     },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
                     "grant_types": [
                         "authorization_code",
                         "implicit",
@@ -11251,9 +12496,173 @@
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Default App",
                     "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
                     "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "vVbUuOLzLQ9k7iwdZoLRtQuhG8XHUkSY",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Quickstarts API (Test Application)",
+                    "client_metadata": {
+                        "foo": "bar"
+                    },
                     "is_first_party": true,
                     "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "O0AMH5MORoUOkQ8g31aPVmBZ11jyApI5",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Node App",
+                    "allowed_clients": [],
+                    "allowed_logout_urls": [],
+                    "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "allowed_origins": [],
+                    "client_id": "88gPebiknBTdBHOAYrSdF2WWRyuroAax",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "regular_web",
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
+                        "client_credentials"
+                    ],
+                    "web_origins": [],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "The Default App",
+                    "allowed_clients": [],
+                    "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": false,
                     "refresh_token": {
                         "expiration_type": "non-expiring",
                         "leeway": 0,
@@ -11263,8 +12672,10 @@
                         "idle_token_lifetime": 1296000,
                         "rotation_type": "non-rotating"
                     },
+                    "sso": false,
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -11280,6 +12691,8 @@
                         "lifetime_in_seconds": 36000,
                         "secret_encoded": false
                     },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
                     "grant_types": [
                         "authorization_code",
                         "implicit",
@@ -13570,9 +14983,173 @@
                     "is_token_endpoint_ip_header_trusted": false,
                     "name": "Default App",
                     "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
                     "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "vVbUuOLzLQ9k7iwdZoLRtQuhG8XHUkSY",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Quickstarts API (Test Application)",
+                    "client_metadata": {
+                        "foo": "bar"
+                    },
                     "is_first_party": true,
                     "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "O0AMH5MORoUOkQ8g31aPVmBZ11jyApI5",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Node App",
+                    "allowed_clients": [],
+                    "allowed_logout_urls": [],
+                    "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "allowed_origins": [],
+                    "client_id": "88gPebiknBTdBHOAYrSdF2WWRyuroAax",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "regular_web",
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
+                        "client_credentials"
+                    ],
+                    "web_origins": [],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "The Default App",
+                    "allowed_clients": [],
+                    "callbacks": [],
+                    "client_metadata": {},
+                    "is_first_party": true,
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "oidc_conformant": false,
                     "refresh_token": {
                         "expiration_type": "non-expiring",
                         "leeway": 0,
@@ -13582,8 +15159,10 @@
                         "idle_token_lifetime": 1296000,
                         "rotation_type": "non-rotating"
                     },
+                    "sso": false,
                     "sso_disabled": false,
                     "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
                     "signing_keys": [
                         {
                             "cert": "[REDACTED]",
@@ -13599,6 +15178,8 @@
                         "lifetime_in_seconds": 36000,
                         "secret_encoded": false
                     },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
                     "grant_types": [
                         "authorization_code",
                         "implicit",
@@ -15418,6 +16999,50 @@
                 }
             },
             "id": "org_fIRF1it8cTOyf2yS",
+            "display_name": "Organization",
+            "name": "org1"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/organizations/org_dg75TodzDZQ3yqAV",
+        "body": {
+            "display_name": "Organization2"
+        },
+        "status": 200,
+        "response": {
+            "id": "org_dg75TodzDZQ3yqAV",
+            "display_name": "Organization2",
+            "name": "org2"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/organizations/org_GDDGaXDUPC3vLmot",
+        "body": {
+            "branding": {
+                "colors": {
+                    "page_background": "#fff5f5",
+                    "primary": "#57ddff"
+                }
+            },
+            "display_name": "Organization"
+        },
+        "status": 200,
+        "response": {
+            "branding": {
+                "colors": {
+                    "page_background": "#fff5f5",
+                    "primary": "#57ddff"
+                }
+            },
+            "id": "org_GDDGaXDUPC3vLmot",
             "display_name": "Organization",
             "name": "org1"
         },

@@ -93,13 +93,10 @@ export default class ResourceServersHandler extends DefaultHandler {
       ...options,
       type: 'resourceServers',
       identifiers: ['id', 'identifier'],
-      stripCreateFields: ['client_id'],
-      stripUpdateFields: ['identifier', 'client_id'],
+      stripCreateFields: ['client_id', 'is_system'],
+      stripUpdateFields: ['identifier', 'client_id', 'is_system'],
       functions: {
-        update: async (
-          { id }: { id: string },
-          bodyParams: Management.UpdateResourceServerRequestContent
-        ) => this.client.resourceServers.update(id, bodyParams),
+        update: (args, data) => this.updateResourceServer(args, data),
       },
     });
   }
@@ -111,12 +108,43 @@ export default class ResourceServersHandler extends DefaultHandler {
   async getType(): Promise<ResourceServer[]> {
     if (this.existing) return this.existing;
 
-    const resourceServers = await paginate<ResourceServer>(this.client.resourceServers.list, {
+    let resourceServers = await paginate<ResourceServer>(this.client.resourceServers.list, {
       paginate: true,
     });
-    return resourceServers.filter(
+
+    resourceServers = resourceServers.filter(
       (rs) => rs.name !== constants.RESOURCE_SERVERS_MANAGEMENT_API_NAME
     );
+
+    // Sanitize resource servers fields
+    const sanitizeResourceServersFields = (rs: ResourceServer[]): ResourceServer[] =>
+      rs.map((resourceServer: ResourceServer) => {
+        // For system resource servers like Auth0 My Account API, only allow certain fields to be updated
+        if (resourceServer.is_system === true) {
+          const allowedKeys = [
+            'token_lifetime',
+            'proof_of_possession',
+            'skip_consent_for_verifiable_first_party_clients',
+            'name',
+            'identifier',
+            'id',
+            'is_system',
+          ];
+          const sanitized: any = {};
+          allowedKeys.forEach((key) => {
+            if (key in resourceServer) {
+              sanitized[key] = resourceServer[key];
+            }
+          });
+          return sanitized;
+        }
+
+        return resourceServer;
+      });
+
+    this.existing = sanitizeResourceServersFields(resourceServers);
+
+    return this.existing;
   }
 
   async calcChanges(assets: Assets): Promise<CalculatedChanges> {
@@ -177,5 +205,18 @@ export default class ResourceServersHandler extends DefaultHandler {
     await super.processChanges(assets, {
       ...changes,
     });
+  }
+
+  async updateResourceServer(
+    args,
+    update: ResourceServer
+  ): Promise<Management.UpdateResourceServerResponseContent> {
+    // Exclude name from update as it cannot be modified for system resource servers like Auth0 My Account API
+    if (update.is_system === true || update.name === 'Auth0 My Account API') {
+      const { name, is_system: _isSystem, ...updateFields } = update;
+      return this.client.resourceServers.update(args, updateFields);
+    }
+
+    return this.client.resourceServers.update(args, update);
   }
 }
