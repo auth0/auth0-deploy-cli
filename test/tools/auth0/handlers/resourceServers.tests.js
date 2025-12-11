@@ -247,10 +247,10 @@ describe('#resourceServers handler', () => {
       const auth0 = {
         resourceServers: {
           create: () => Promise.resolve([]),
-          update: function (id, data) {
-            expect(id).to.be.a('string');
+          update: function (params, data) {
+            expect(params).to.be.an('object');
             expect(data).to.be.an('object');
-            expect(id).to.equal('rs1');
+            expect(params.id).to.equal('rs1');
             expect(data.scope).to.equal('new:scope');
             return Promise.resolve(data);
           },
@@ -275,10 +275,10 @@ describe('#resourceServers handler', () => {
       const auth0 = {
         resourceServers: {
           create: () => Promise.resolve([]),
-          update: function (id, data) {
-            expect(id).to.be.a('string');
+          update: function (params, data) {
+            expect(params).to.be.an('object');
             expect(data).to.be.an('object');
-            expect(id).to.equal('rs1');
+            expect(params.id).to.equal('rs1');
             expect(data.proof_of_possession).to.deep.equal({
               mechanism: 'mtls',
               required: true,
@@ -317,10 +317,10 @@ describe('#resourceServers handler', () => {
       const auth0 = {
         resourceServers: {
           create: () => Promise.resolve([]),
-          update: function (id, data) {
-            expect(id).to.be.a('string');
+          update: function (params, data) {
+            expect(params).to.be.an('object');
             expect(data).to.be.an('object');
-            expect(id).to.equal('rs1');
+            expect(params.id).to.equal('rs1');
             expect(data.proof_of_possession).to.deep.equal({
               mechanism: 'dpop',
               required: false,
@@ -393,11 +393,11 @@ describe('#resourceServers handler', () => {
       const auth0 = {
         resourceServers: {
           create: () => Promise.resolve([]),
-          update: function (id, data) {
+          update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(id).to.be.a('string');
+            expect(params).to.be.an('object');
             expect(data).to.be.an('object');
-            expect(id).to.equal('rs1');
+            expect(params.id).to.equal('rs1');
             expect(data.subject_type_authorization).to.deep.equal({
               user: {
                 policy: 'allow_all',
@@ -568,12 +568,12 @@ describe('#resourceServers handler', () => {
       const auth0 = {
         resourceServers: {
           create: () => Promise.resolve([]),
-          update: function (id, data) {
+          update: function (params, data) {
             updateCalled = true;
             expect(data.client_id).to.be.equals(undefined);
             expect(data.name).to.equal('someAPI');
             // identifier is also stripped as it's readonly
-            expect(id).to.equal('rs1'); // ID should be in params
+            expect(params.id).to.equal('rs1'); // ID should be in params
             return Promise.resolve(data);
           },
           delete: () => Promise.resolve([]),
@@ -639,7 +639,7 @@ describe('#resourceServers handler', () => {
 
       const auth0 = {
         resourceServers: {
-          getAll: (params) => mockPagedData(params, 'resourceServers', [systemResourceServer]),
+          list: (params) => mockPagedData(params, 'resource_servers', [systemResourceServer]),
         },
         pool,
       };
@@ -679,7 +679,7 @@ describe('#resourceServers handler', () => {
             return Promise.resolve({ data });
           },
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'resourceServers', [existingResourceServer]),
+          list: (params) => mockPagedData(params, 'resource_servers', [existingResourceServer]),
         },
         pool,
       };
