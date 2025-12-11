@@ -211,6 +211,9 @@ export function mockMgmtClient() {
     userAttributeProfiles: {
       list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
     },
+    tokenExchangeProfiles: {
+      list: (params) => mockPagedData(params, 'tokenExchangeProfiles', []),
+    },
   };
 }
 

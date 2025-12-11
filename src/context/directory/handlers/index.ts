@@ -32,6 +32,7 @@ import flows from './flows';
 import flowVaultConnections from './flowVaultConnections';
 import networkACLs from './networkACLs';
 import userAttributeProfiles from './userAttributeProfiles';
+import tokenExchangeProfiles from './tokenExchangeProfiles';
 
 import DirectoryContext from '..';
 import { AssetTypes, Asset } from '../../../types';
@@ -80,6 +81,7 @@ const directoryHandlers: {
   selfServiceProfiles,
   networkACLs,
   userAttributeProfiles,
+  tokenExchangeProfiles,
 };
 
 export default directoryHandlers;

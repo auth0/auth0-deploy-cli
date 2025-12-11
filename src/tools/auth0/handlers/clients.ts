@@ -174,6 +174,20 @@ export const schema = {
         type: ['boolean', 'null'],
         description: 'Whether to skip the confirmation prompt for non-verifiable callback URIs',
       },
+      token_exchange: {
+        type: ['object', 'null'],
+        description: 'Token exchange configuration for the client',
+        properties: {
+          allow_any_profile_of_type: {
+            type: 'array',
+            description: 'List of enabled token exchange profile types for this client',
+            items: {
+              type: 'string',
+              enum: ['custom_authentication'],
+            },
+          },
+        },
+      },
     },
     required: ['name'],
   },
