@@ -323,9 +323,9 @@ export default class ClientHandler extends DefaultAPIHandler {
 
     const excludedClients = (assets.exclude && assets.exclude.clients) || [];
 
-    const excludeThirdPartyClients =
-      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === 'true' ||
-      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === true;
+    const includeThirdPartyClients =
+      this.config('AUTH0_INCLUDE_THIRD_PARTY_CLIENTS') === 'true' ||
+      this.config('AUTH0_INCLUDE_THIRD_PARTY_CLIENTS') === true;
 
     const { del, update, create, conflicts } = await this.calcChanges(assets);
 
@@ -337,14 +337,14 @@ export default class ClientHandler extends DefaultAPIHandler {
      * Filter out:
      * - The client used to access Auth0 Management API
      * - Clients in the exclusion list
-     * - Third-party clients when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is enabled
+     * - Third-party clients when AUTH0_INCLUDE_THIRD_PARTY_CLIENTS is not enabled
      */
     const filterClients = (list: Client[]): Client[] =>
       list.filter(
         (item) =>
           item.client_id !== currentClient &&
           !excludedClients.includes(item.name) &&
-          (!excludeThirdPartyClients || item.is_first_party)
+          (includeThirdPartyClients || item.is_first_party || item.is_first_party == null)
       );
 
     // Sanitize client fields
@@ -420,15 +420,15 @@ export default class ClientHandler extends DefaultAPIHandler {
   async getType() {
     if (this.existing) return this.existing;
 
-    const excludeThirdPartyClients =
-      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === 'true' ||
-      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === true;
+    const includeThirdPartyClients =
+      this.config('AUTH0_INCLUDE_THIRD_PARTY_CLIENTS') === 'true' ||
+      this.config('AUTH0_INCLUDE_THIRD_PARTY_CLIENTS') === true;
 
     const clients = await paginate<Client>(this.client.clients.getAll, {
       paginate: true,
       include_totals: true,
       is_global: false,
-      ...(excludeThirdPartyClients && { is_first_party: true }),
+      ...(!includeThirdPartyClients && { is_first_party: true }),
     });
 
     const sanitizedClients = this.sanitizeCrossOriginAuth(clients);
