@@ -42,6 +42,17 @@ clients:
     name: "My Resource Server Client"
     app_type: "resource_server"
     resource_server_identifier: "https://##ENV##.myapp.com/api/v1"
+  -
+    name: "My Token Exchange App"
+    app_type: "regular_web"
+    grant_types:
+      - "authorization_code"
+      - "refresh_token"
+      - "client_credentials"
+      - "urn:auth0:params:oauth:grant-type:token-exchange:federated-connection-access-token"
+    token_exchange:
+      allow_any_profile_of_type:
+        - "custom_authentication"
 
 databases:
   - name: "users"
@@ -98,6 +109,12 @@ resourceServers:
         description: "read account"
     # client_id: "if linked to a resource server client (readonly)"
     # Add other resource server settings (https://auth0.com/docs/api/management/v2#!/Resource_Servers/post_resource_servers)
+
+tokenExchangeProfiles:
+  - name: "Custom Authentication Profile"
+    type: "custom_authentication"
+    subject_token_type: "urn:ietf:params:oauth:token-type:custom"
+    action: "custom-token-exchange-action"
 
 phoneProviders:
   - name: twilio
