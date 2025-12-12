@@ -590,7 +590,7 @@ riskAssessment:
 
 ### Directory Example
 
-File: `./risk-assessments/settings.json`
+File: `./risk-assessment/settings.json`
 
 ```json
 {
