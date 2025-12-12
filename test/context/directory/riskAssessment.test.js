@@ -2,7 +2,7 @@ import path from 'path';
 import { expect } from 'chai';
 import Context from '../../../src/context/directory';
 import { cleanThenMkdir, createDir, mockMgmtClient, testDataDir } from '../../utils';
-import handler from '../../../src/context/directory/handlers/riskAssessments';
+import handler from '../../../src/context/directory/handlers/riskAssessment';
 import { loadJSON } from '../../../src/utils';
 
 describe('#directory context risk-assessments', () => {
@@ -13,7 +13,7 @@ describe('#directory context risk-assessments', () => {
       },
     };
 
-    const repoDir = path.join(testDataDir, 'directory', 'riskAssessments1');
+    const repoDir = path.join(testDataDir, 'directory', 'riskAssessment1');
     createDir(repoDir, files);
 
     const config = { AUTH0_INPUT_FILE: repoDir };
@@ -37,7 +37,7 @@ describe('#directory context risk-assessments', () => {
       },
     };
 
-    const repoDir = path.join(testDataDir, 'directory', 'riskAssessments3');
+    const repoDir = path.join(testDataDir, 'directory', 'riskAssessment3');
     createDir(repoDir, files);
 
     const config = {
@@ -67,7 +67,7 @@ describe('#directory context risk-assessments', () => {
       },
     };
 
-    const repoDir = path.join(testDataDir, 'directory', 'riskAssessments4');
+    const repoDir = path.join(testDataDir, 'directory', 'riskAssessment4');
     createDir(repoDir, files);
 
     const config = { AUTH0_INPUT_FILE: repoDir };
@@ -82,7 +82,7 @@ describe('#directory context risk-assessments', () => {
   });
 
   it('should dump risk-assessments with newDevice to settings.json', async () => {
-    const dir = path.join(testDataDir, 'directory', 'riskAssessmentsDump');
+    const dir = path.join(testDataDir, 'directory', 'riskAssessmentDump');
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
@@ -94,15 +94,15 @@ describe('#directory context risk-assessments', () => {
     };
 
     await handler.dump(context);
-    const riskAssessmentsFolder = path.join(dir, 'risk-assessments');
+    const riskAssessmentFolder = path.join(dir, 'risk-assessment');
 
-    expect(loadJSON(path.join(riskAssessmentsFolder, 'settings.json'))).to.deep.equal(
+    expect(loadJSON(path.join(riskAssessmentFolder, 'settings.json'))).to.deep.equal(
       context.assets.riskAssessment
     );
   });
 
   it('should dump risk-assessments without newDevice', async () => {
-    const dir = path.join(testDataDir, 'directory', 'riskAssessmentsDump2');
+    const dir = path.join(testDataDir, 'directory', 'riskAssessmentDump2');
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
@@ -111,23 +111,23 @@ describe('#directory context risk-assessments', () => {
     };
 
     await handler.dump(context);
-    const riskAssessmentsFolder = path.join(dir, 'risk-assessments');
+    const riskAssessmentFolder = path.join(dir, 'risk-assessment');
 
-    expect(loadJSON(path.join(riskAssessmentsFolder, 'settings.json'))).to.deep.equal(
+    expect(loadJSON(path.join(riskAssessmentFolder, 'settings.json'))).to.deep.equal(
       context.assets.riskAssessment
     );
   });
 
   it('should not create files if riskAssessment is null', async () => {
-    const dir = path.join(testDataDir, 'directory', 'riskAssessmentsNull');
+    const dir = path.join(testDataDir, 'directory', 'riskAssessmentNull');
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
     context.assets.riskAssessment = null;
 
     await handler.dump(context);
-    const riskAssessmentsFolder = path.join(dir, 'risk-assessments');
+    const riskAssessmentFolder = path.join(dir, 'risk-assessment');
 
-    expect(() => loadJSON(path.join(riskAssessmentsFolder, 'settings.json'))).to.throw();
+    expect(() => loadJSON(path.join(riskAssessmentFolder, 'settings.json'))).to.throw();
   });
 });

@@ -1,8 +1,8 @@
 const { expect } = require('chai');
-const riskAssessments = require('../../../../src/tools/auth0/handlers/riskAssessments');
+const riskAssessment = require('../../../../src/tools/auth0/handlers/riskAssessment');
 
-describe('#riskAssessments handler', () => {
-  describe('#riskAssessments getType', () => {
+describe('#riskAssessment handler', () => {
+  describe('#riskAssessment getType', () => {
     it('should get risk assessments settings', async () => {
       const auth0 = {
         riskAssessments: {
@@ -11,7 +11,7 @@ describe('#riskAssessments handler', () => {
         },
       };
 
-      const handler = new riskAssessments.default({ client: auth0 });
+      const handler = new riskAssessment.default({ client: auth0 });
       const data = await handler.getType();
       expect(data).to.deep.equal({ enabled: true, newDevice: { remember_for: 30 } });
     });
@@ -24,7 +24,7 @@ describe('#riskAssessments handler', () => {
         },
       };
 
-      const handler = new riskAssessments.default({ client: auth0 });
+      const handler = new riskAssessment.default({ client: auth0 });
       const data = await handler.getType();
       expect(data).to.deep.equal({ enabled: true });
     });
@@ -45,13 +45,13 @@ describe('#riskAssessments handler', () => {
         },
       };
 
-      const handler = new riskAssessments.default({ client: auth0 });
+      const handler = new riskAssessment.default({ client: auth0 });
       const data = await handler.getType();
       expect(data).to.deep.equal({ enabled: false });
     });
   });
 
-  describe('#riskAssessments processChanges', () => {
+  describe('#riskAssessment processChanges', () => {
     it('should update risk assessments settings to enabled', async () => {
       const auth0 = {
         riskAssessments: {
@@ -63,7 +63,7 @@ describe('#riskAssessments handler', () => {
         },
       };
 
-      const handler = new riskAssessments.default({ client: auth0 });
+      const handler = new riskAssessment.default({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ riskAssessment: { enabled: true } }]);
@@ -86,7 +86,7 @@ describe('#riskAssessments handler', () => {
         },
       };
 
-      const handler = new riskAssessments.default({ client: auth0 });
+      const handler = new riskAssessment.default({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
@@ -106,7 +106,7 @@ describe('#riskAssessments handler', () => {
         },
       };
 
-      const handler = new riskAssessments.default({ client: auth0 });
+      const handler = new riskAssessment.default({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ riskAssessment: { enabled: false } }]);
@@ -122,7 +122,7 @@ describe('#riskAssessments handler', () => {
         },
       };
 
-      const handler = new riskAssessments.default({ client: auth0 });
+      const handler = new riskAssessment.default({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{}]);
@@ -140,7 +140,7 @@ describe('#riskAssessments handler', () => {
         },
       };
 
-      const handler = new riskAssessments.default({ client: auth0 });
+      const handler = new riskAssessment.default({ client: auth0 });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       try {

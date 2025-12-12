@@ -9,21 +9,21 @@ import { ParsedAsset, Asset } from '../../../types';
 type ParsedRiskAssessment = ParsedAsset<'riskAssessment', Asset>;
 
 function parse(context: DirectoryContext): ParsedRiskAssessment {
-  const riskAssessmentsDirectory = path.join(
+  const riskAssessmentDirectory = path.join(
     context.filePath,
-    constants.RISK_ASSESSMENTS_DIRECTORY
+    constants.RISK_ASSESSMENT_DIRECTORY
   );
-  const riskAssessmentsFile = path.join(riskAssessmentsDirectory, 'settings.json');
+  const riskAssessmentFile = path.join(riskAssessmentDirectory, 'settings.json');
 
-  if (!existsMustBeDir(riskAssessmentsDirectory)) {
+  if (!existsMustBeDir(riskAssessmentDirectory)) {
     return { riskAssessment: null };
   }
 
-  if (!isFile(riskAssessmentsFile)) {
+  if (!isFile(riskAssessmentFile)) {
     return { riskAssessment: null };
   }
 
-  const riskAssessment = loadJSON(riskAssessmentsFile, {
+  const riskAssessment = loadJSON(riskAssessmentFile, {
     mappings: context.mappings,
     disableKeywordReplacement: context.disableKeywordReplacement,
   });
@@ -38,19 +38,19 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   if (!riskAssessment) return;
 
-  const riskAssessmentsDirectory = path.join(
+  const riskAssessmentDirectory = path.join(
     context.filePath,
-    constants.RISK_ASSESSMENTS_DIRECTORY
+    constants.RISK_ASSESSMENT_DIRECTORY
   );
-  const riskAssessmentsFile = path.join(riskAssessmentsDirectory, 'settings.json');
+  const riskAssessmentFile = path.join(riskAssessmentDirectory, 'settings.json');
 
-  fs.ensureDirSync(riskAssessmentsDirectory);
-  dumpJSON(riskAssessmentsFile, riskAssessment);
+  fs.ensureDirSync(riskAssessmentDirectory);
+  dumpJSON(riskAssessmentFile, riskAssessment);
 }
 
-const riskAssessmentsHandler: DirectoryHandler<ParsedRiskAssessment> = {
+const riskAssessmentHandler: DirectoryHandler<ParsedRiskAssessment> = {
   parse,
   dump,
 };
 
-export default riskAssessmentsHandler;
+export default riskAssessmentHandler;

@@ -24,7 +24,7 @@ import * as actions from './actions';
 import * as triggers from './triggers';
 import * as organizations from './organizations';
 import * as attackProtection from './attackProtection';
-import * as riskAssessments from './riskAssessments';
+import * as riskAssessment from './riskAssessment';
 import * as logStreams from './logStreams';
 import * as customDomains from './customDomains';
 import * as themes from './themes';
@@ -67,7 +67,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   triggers,
   organizations,
   attackProtection,
-  riskAssessment: riskAssessments,
+  riskAssessment,
   logStreams,
   customDomains,
   themes,
