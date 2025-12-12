@@ -18,6 +18,7 @@ import actions from './actions';
 import organizations from './organizations';
 import triggers from './triggers';
 import attackProtection from './attackProtection';
+import riskAssessment from './riskAssessment';
 import branding from './branding';
 import phoneProviders from './phoneProvider';
 import logStreams from './logStreams';
@@ -69,6 +70,7 @@ const directoryHandlers: {
   organizations,
   triggers,
   attackProtection,
+  riskAssessment,
   branding,
   phoneProviders,
   logStreams,
