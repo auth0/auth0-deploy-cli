@@ -8,7 +8,7 @@ import { loadJSON } from '../../../src/utils';
 describe('#directory context risk-assessments', () => {
   it('should process risk-assessments with newDevice from settings.json', async () => {
     const files = {
-      'risk-assessments': {
+      'risk-assessment': {
         'settings.json': '{"enabled": true, "newDevice": {"remember_for": 30}}',
       },
     };
@@ -32,7 +32,7 @@ describe('#directory context risk-assessments', () => {
 
   it('should replace keywords in newDevice settings', async () => {
     const files = {
-      'risk-assessments': {
+      'risk-assessment': {
         'settings.json': '{"enabled": true, "newDevice": {"remember_for": @@REMEMBER_FOR_DAYS@@}}',
       },
     };
@@ -62,7 +62,7 @@ describe('#directory context risk-assessments', () => {
 
   it('should process risk-assessments without newDevice', async () => {
     const files = {
-      'risk-assessments': {
+      'risk-assessment': {
         'settings.json': '{"enabled": false}',
       },
     };
