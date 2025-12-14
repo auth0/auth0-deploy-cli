@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.22.0] - 2025-12-10
+
+### Added
+
+- Add `AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS` config property to exclude third-party `clients`. [#1212]
+
+### Fixed
+
+- Fix managing `Auth0 My Account API` in `resourceServers`. [#1229]
+- Fix `cross_origin_auth` is deprecated and migrated to `cross_origin_authentication` in `clients`. [#1223]
+
 ## [8.21.0] - 2025-11-21
 
 ### Added
@@ -1526,8 +1537,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1204]: https://github.com/auth0/auth0-deploy-cli/issues/1204
 [#1209]: https://github.com/auth0/auth0-deploy-cli/issues/1209
 [#1211]: https://github.com/auth0/auth0-deploy-cli/issues/1211
+[#1212]: https://github.com/auth0/auth0-deploy-cli/issues/1212
 [#1214]: https://github.com/auth0/auth0-deploy-cli/issues/1214
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.21.0...HEAD
+[#1223]: https://github.com/auth0/auth0-deploy-cli/issues/1223
+[#1229]: https://github.com/auth0/auth0-deploy-cli/issues/1229
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.22.0...HEAD
+[8.22.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.21.0...v8.22.0
 [8.21.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.3...v8.21.0
 [8.20.3]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.2...v8.20.3
 [8.20.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.1...v8.20.2
