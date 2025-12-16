@@ -64,8 +64,8 @@ export type Config = {
   AUTH0_INPUT_FILE: string;
   AUTH0_ALLOW_DELETE: boolean;
   AUTH0_EXCLUDED?: AssetTypes[];
-  AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS?: boolean;
   AUTH0_INCLUDED_ONLY?: AssetTypes[];
+  AUTH0_INCLUDE_THIRD_PARTY_CLIENTS?: boolean;
   AUTH0_PRESERVE_KEYWORDS: boolean;
   EXTENSION_SECRET: string;
   AUTH0_ACCESS_TOKEN?: string;
