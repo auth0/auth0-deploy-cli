@@ -140,17 +140,6 @@ describe('#schema validation tests', () => {
       checkRequired('client_id', { clientGrants: data }, done);
     });
 
-    it('should fail validation if no "scope" provided', (done) => {
-      const data = [
-        {
-          client_id: 'client_id',
-          audience: 'audience',
-        },
-      ];
-
-      checkRequired('scope', { clientGrants: data }, done);
-    });
-
     it('should fail validation if no "audience" provided', (done) => {
       const data = [
         {

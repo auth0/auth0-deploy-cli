@@ -68,10 +68,18 @@ describe('#guardianFactorProviders handler', () => {
 
       const auth0 = {
         guardian: {
-          getPhoneFactorProviderTwilio: throwForbidden,
-          getSmsFactorProviderTwilio: throwForbidden,
-          getPushNotificationProviderAPNS: throwForbidden,
-          getPushNotificationProviderSNS: throwForbidden,
+          factors: {
+            phone: {
+              getTwilioProvider: throwForbidden,
+            },
+            sms: {
+              getTwilioProvider: throwForbidden,
+            },
+            pushNotification: {
+              getApnsProvider: throwForbidden,
+              getSnsProvider: throwForbidden,
+            },
+          },
         },
         pool,
       };
@@ -84,10 +92,18 @@ describe('#guardianFactorProviders handler', () => {
     it('should get guardianFactorProviders', async () => {
       const auth0 = {
         guardian: {
-          getPhoneFactorProviderTwilio: (params) => ({ data: { ...params, test: 'data' } }),
-          getPushNotificationProviderAPNS: (params) => ({ data: { ...params, test: 'data' } }),
-          getPushNotificationProviderSNS: (params) => ({ data: { ...params, test: 'data' } }),
-          getSmsFactorProviderTwilio: (params) => ({ data: { ...params, test: 'data' } }),
+          factors: {
+            phone: {
+              getTwilioProvider: (params) => ({ data: { ...params, test: 'data' } }),
+            },
+            sms: {
+              getTwilioProvider: (params) => ({ data: { ...params, test: 'data' } }),
+            },
+            pushNotification: {
+              getApnsProvider: (params) => ({ data: { ...params, test: 'data' } }),
+              getSnsProvider: (params) => ({ data: { ...params, test: 'data' } }),
+            },
+          },
         },
         pool,
       };
@@ -112,7 +128,19 @@ describe('#guardianFactorProviders handler', () => {
 
       const auth0 = {
         guardian: {
-          updateFactorProvider: () => ({ ...provider }),
+          factors: {
+            phone: {
+              setTwilioProvider: () => ({ ...provider }),
+            },
+            sms: {
+              setTwilioProvider: () => ({ ...provider }),
+            },
+            pushNotification: {
+              setApnsProvider: () => ({ ...provider }),
+              setFcmProvider: () => ({ ...provider }),
+              setSnsProvider: () => ({ ...provider }),
+            },
+          },
         },
         pool,
       };

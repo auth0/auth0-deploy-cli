@@ -65,7 +65,13 @@ describe('#flowVaultConnections handler', () => {
   describe('#flowVaultConnections process', () => {
     it('should return empty if no flowVaultConnections asset', async () => {
       const auth0 = {
-        flowVaultConnections: {},
+        flows: {
+          vault: {
+            connections: {
+              list: (params) => mockPagedData(params, 'connections', []),
+            },
+          },
+        },
         pool,
       };
 
@@ -78,13 +84,17 @@ describe('#flowVaultConnections handler', () => {
     it('should create flowVaultConnections', async () => {
       const auth0 = {
         flows: {
-          createConnection: function (data) {
-            (() => expect(this).to.not.be.undefined)();
-            expect(data).to.be.an('object');
-            expect(data.name).to.equal(sampleFlowVaultConnections.name);
-            return Promise.resolve({ data });
+          vault: {
+            connections: {
+              create: function (data) {
+                (() => expect(this).to.not.be.undefined)();
+                expect(data).to.be.an('object');
+                expect(data.name).to.equal(sampleFlowVaultConnections.name);
+                return Promise.resolve(data);
+              },
+              list: (params) => mockPagedData(params, 'connections', []),
+            },
           },
-          getAllConnections: (params) => mockPagedData(params, 'connections', []),
         },
         pool,
       };
@@ -102,8 +112,11 @@ describe('#flowVaultConnections handler', () => {
     it('should get flowVaultConnections', async () => {
       const auth0 = {
         flows: {
-          getAllConnections: (params) =>
-            mockPagedData(params, 'connections', [sampleFlowVaultConnections]),
+          vault: {
+            connections: {
+              list: (params) => mockPagedData(params, 'connections', [sampleFlowVaultConnections]),
+            },
+          },
         },
         pool,
       };
@@ -116,16 +129,19 @@ describe('#flowVaultConnections handler', () => {
     it('should update flowVaultConnections', async () => {
       const auth0 = {
         flows: {
-          updateConnection: function (params, data) {
-            (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal(sampleFlowVaultConnections.id);
-            expect(data).to.be.an('object');
-            expect(data.name).to.equal(sampleFlowVaultConnections.name);
-            return Promise.resolve({ data });
+          vault: {
+            connections: {
+              update: function (id, data) {
+                (() => expect(this).to.not.be.undefined)();
+                expect(id).to.be.a('string');
+                expect(id).to.equal(sampleFlowVaultConnections.id);
+                expect(data).to.be.an('object');
+                expect(data.name).to.equal(sampleFlowVaultConnections.name);
+                return Promise.resolve(data);
+              },
+              list: (params) => mockPagedData(params, 'connections', [sampleFlowVaultConnections]),
+            },
           },
-          getAllConnections: (params) =>
-            mockPagedData(params, 'connections', [sampleFlowVaultConnections]),
         },
         pool,
       };
@@ -148,20 +164,23 @@ describe('#flowVaultConnections handler', () => {
       };
       const auth0 = {
         flows: {
-          createConnection: function (data) {
-            (() => expect(this).to.not.be.undefined)();
-            expect(data).to.be.an('object');
-            expect(data.name).to.equal(newFlowConnection.name);
-            return Promise.resolve({ data });
+          vault: {
+            connections: {
+              create: function (data) {
+                (() => expect(this).to.not.be.undefined)();
+                expect(data).to.be.an('object');
+                expect(data.name).to.equal(newFlowConnection.name);
+                return Promise.resolve(data);
+              },
+              delete: function (id) {
+                (() => expect(this).to.not.be.undefined)();
+                expect(id).to.be.a('string');
+                expect(id).to.equal(sampleFlowVaultConnections.id);
+                return Promise.resolve([]);
+              },
+              list: (params) => mockPagedData(params, 'connections', [sampleFlowVaultConnections]),
+            },
           },
-          deleteConnection: function (params) {
-            (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal(sampleFlowVaultConnections.id);
-            return Promise.resolve({ data: [] });
-          },
-          getAllConnections: (params) =>
-            mockPagedData(params, 'connections', [sampleFlowVaultConnections]),
         },
         pool,
       };
@@ -176,15 +195,18 @@ describe('#flowVaultConnections handler', () => {
       let removed = false;
       const auth0 = {
         flows: {
-          deleteConnection: function (params) {
-            removed = true;
-            (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal(sampleFlowVaultConnections.id);
-            return Promise.resolve({ data: [] });
+          vault: {
+            connections: {
+              delete: function (id) {
+                removed = true;
+                (() => expect(this).to.not.be.undefined)();
+                expect(id).to.be.a('string');
+                expect(id).to.equal(sampleFlowVaultConnections.id);
+                return Promise.resolve([]);
+              },
+              list: (params) => mockPagedData(params, 'connections', [sampleFlowVaultConnections]),
+            },
           },
-          getAllConnections: (params) =>
-            mockPagedData(params, 'connections', [sampleFlowVaultConnections]),
         },
         pool,
       };
@@ -200,12 +222,15 @@ describe('#flowVaultConnections handler', () => {
       config.data.AUTH0_ALLOW_DELETE = false;
       const auth0 = {
         flows: {
-          deleteConnection: (params) => {
-            expect(params).to.be.an('undefined');
-            return Promise.resolve({ data: [] });
+          vault: {
+            connections: {
+              delete: (id) => {
+                expect(id).to.be.an('undefined');
+                return Promise.resolve([]);
+              },
+              list: (params) => mockPagedData(params, 'connections', [sampleFlowVaultConnections]),
+            },
           },
-          getAllConnections: (params) =>
-            mockPagedData(params, 'connections', [sampleFlowVaultConnections]),
         },
         pool,
       };

@@ -1,12 +1,12 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { ConnectionProfile } from 'auth0';
 import { constants } from '../../../tools';
 import log from '../../../logger';
 
 import { dumpJSON, existsMustBeDir, getFiles, loadJSON, sanitize } from '../../../utils';
 import DirectoryContext from '..';
 import { ParsedAsset } from '../../../types';
+import { ConnectionProfile } from '../../../tools/auth0/handlers/connectionProfiles';
 
 type ParsedConnectionProfiles = ParsedAsset<'connectionProfiles', Partial<ConnectionProfile>[]>;
 

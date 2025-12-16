@@ -130,7 +130,9 @@ describe('#themes handler', () => {
 
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(Promise.resolve({ data: theme })),
+          themes: {
+            getDefault: stub().returns(Promise.resolve(theme)),
+          },
         },
       };
 
@@ -138,14 +140,16 @@ describe('#themes handler', () => {
       const data = await handler.getType();
 
       expect(data).to.deep.equal([theme]);
-      expect(auth0.branding.getDefaultTheme.called).to.equal(true);
-      expect(auth0.branding.getDefaultTheme.callCount).to.equal(1);
+      expect(auth0.branding.themes.getDefault.called).to.equal(true);
+      expect(auth0.branding.themes.getDefault.callCount).to.equal(1);
     });
 
     it('should return empty array if there is no theme', async () => {
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(Promise.reject(errorWithStatusCode(404))),
+          themes: {
+            getDefault: stub().returns(Promise.reject(errorWithStatusCode(404))),
+          },
         },
       };
 
@@ -153,21 +157,23 @@ describe('#themes handler', () => {
       const data = await handler.getType();
 
       expect(data).to.deep.equal([]);
-      expect(auth0.branding.getDefaultTheme.called).to.equal(true);
-      expect(auth0.branding.getDefaultTheme.callCount).to.equal(1);
+      expect(auth0.branding.themes.getDefault.called).to.equal(true);
+      expect(auth0.branding.themes.getDefault.callCount).to.equal(1);
     });
 
     it('should return empty array when no-code is not enabled for the tenant', async () => {
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(
-            Promise.reject(
-              errorWithStatusCode(
-                400,
-                'Your account does not have universal login customizations enabled'
+          themes: {
+            getDefault: stub().returns(
+              Promise.reject(
+                errorWithStatusCode(
+                  400,
+                  'Your account does not have universal login customizations enabled'
+                )
               )
-            )
-          ),
+            ),
+          },
         },
       };
 
@@ -175,23 +181,25 @@ describe('#themes handler', () => {
       const data = await handler.getType();
 
       expect(data).to.deep.equal(null);
-      expect(auth0.branding.getDefaultTheme.called).to.equal(true);
-      expect(auth0.branding.getDefaultTheme.callCount).to.equal(1);
+      expect(auth0.branding.themes.getDefault.called).to.equal(true);
+      expect(auth0.branding.themes.getDefault.callCount).to.equal(1);
     });
 
     it('should fail for unexpected api errors', async () => {
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(
-            Promise.reject(errorWithStatusCode(500, 'Unexpected error'))
-          ),
+          themes: {
+            getDefault: stub().returns(
+              Promise.reject(errorWithStatusCode(500, 'Unexpected error'))
+            ),
+          },
         },
       };
 
       const handler = new ThemesHandler({ client: auth0 });
       await expect(handler.getType()).to.be.rejectedWith('Unexpected error');
-      expect(auth0.branding.getDefaultTheme.called).to.equal(true);
-      expect(auth0.branding.getDefaultTheme.callCount).to.equal(1);
+      expect(auth0.branding.themes.getDefault.called).to.equal(true);
+      expect(auth0.branding.themes.getDefault.callCount).to.equal(1);
     });
   });
 
@@ -201,14 +209,12 @@ describe('#themes handler', () => {
 
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns(Promise.reject(errorWithStatusCode(404))),
-          createTheme: stub().returns(Promise.resolve(theme)),
-          updateTheme: stub().returns(
-            Promise.reject(new Error('updateTheme should not have been called'))
-          ),
-          deleteTheme: stub().returns(
-            Promise.reject(new Error('deleteTheme should not have been called'))
-          ),
+          themes: {
+            getDefault: stub().returns(Promise.reject(errorWithStatusCode(404))),
+            create: stub().returns(Promise.resolve(theme)),
+            update: stub().returns(Promise.reject(new Error('update should not have been called'))),
+            delete: stub().returns(Promise.reject(new Error('delete should not have been called'))),
+          },
         },
       };
 
@@ -217,13 +223,13 @@ describe('#themes handler', () => {
 
       await handler.processChanges(assets);
 
-      expect(auth0.branding.getDefaultTheme.called).to.equal(true);
-      expect(auth0.branding.getDefaultTheme.callCount).to.equal(1);
-      expect(auth0.branding.createTheme.called).to.equal(true);
-      expect(auth0.branding.createTheme.callCount).to.equal(1);
-      expect(auth0.branding.createTheme.calledWith(theme)).to.equal(true);
-      expect(auth0.branding.updateTheme.called).to.equal(false);
-      expect(auth0.branding.deleteTheme.called).to.equal(false);
+      expect(auth0.branding.themes.getDefault.called).to.equal(true);
+      expect(auth0.branding.themes.getDefault.callCount).to.equal(1);
+      expect(auth0.branding.themes.create.called).to.equal(true);
+      expect(auth0.branding.themes.create.callCount).to.equal(1);
+      expect(auth0.branding.themes.create.calledWith(theme)).to.equal(true);
+      expect(auth0.branding.themes.update.called).to.equal(false);
+      expect(auth0.branding.themes.delete.called).to.equal(false);
     });
 
     it('should create the theme when default exists', async () => {
@@ -231,14 +237,12 @@ describe('#themes handler', () => {
 
       const auth0 = {
         branding: {
-          getDefaultTheme: stub().returns({ data: theme }),
-          createTheme: stub().returns(
-            Promise.reject(new Error('updateTheme should not have been called'))
-          ),
-          updateTheme: stub().returns(Promise.resolve(theme)),
-          deleteTheme: stub().returns(
-            Promise.reject(new Error('deleteTheme should not have been called'))
-          ),
+          themes: {
+            getDefault: stub().returns(theme),
+            create: stub().returns(Promise.reject(new Error('create should not have been called'))),
+            update: stub().returns(Promise.resolve(theme)),
+            delete: stub().returns(Promise.reject(new Error('delete should not have been called'))),
+          },
         },
       };
 
@@ -247,15 +251,15 @@ describe('#themes handler', () => {
 
       await handler.processChanges(assets);
 
-      expect(auth0.branding.getDefaultTheme.called).to.equal(true);
-      expect(auth0.branding.getDefaultTheme.callCount).to.equal(1);
-      expect(auth0.branding.updateTheme.called).to.equal(true);
-      expect(auth0.branding.updateTheme.callCount).to.equal(1);
+      expect(auth0.branding.themes.getDefault.called).to.equal(true);
+      expect(auth0.branding.themes.getDefault.callCount).to.equal(1);
+      expect(auth0.branding.themes.update.called).to.equal(true);
+      expect(auth0.branding.themes.update.callCount).to.equal(1);
       expect(
-        auth0.branding.updateTheme.calledWith({ themeId: 'myThemeId' }, omit(theme, 'themeId'))
+        auth0.branding.themes.update.calledWith('myThemeId', omit(theme, 'themeId'))
       ).to.deep.equal(true);
-      expect(auth0.branding.createTheme.called).to.equal(false);
-      expect(auth0.branding.deleteTheme.called).to.equal(false);
+      expect(auth0.branding.themes.create.called).to.equal(false);
+      expect(auth0.branding.themes.delete.called).to.equal(false);
     });
   });
 
@@ -267,14 +271,12 @@ describe('#themes handler', () => {
 
     const auth0 = {
       branding: {
-        getDefaultTheme: stub().returns(Promise.resolve({ data: theme })),
-        createTheme: stub().returns(
-          Promise.reject(new Error('createTheme should not have been called'))
-        ),
-        updateTheme: stub().returns(
-          Promise.reject(new Error('updateTheme should not have been called'))
-        ),
-        deleteTheme: stub().returns(Promise.resolve({ data: undefined })),
+        themes: {
+          getDefault: stub().returns(Promise.resolve(theme)),
+          create: stub().returns(Promise.reject(new Error('create should not have been called'))),
+          update: stub().returns(Promise.reject(new Error('update should not have been called'))),
+          delete: stub().returns(Promise.resolve(undefined)),
+        },
       },
     };
 
@@ -283,12 +285,12 @@ describe('#themes handler', () => {
 
     await handler.processChanges(assets);
 
-    expect(auth0.branding.getDefaultTheme.called).to.equal(true);
-    expect(auth0.branding.getDefaultTheme.callCount).to.equal(1);
-    expect(auth0.branding.deleteTheme.callCount).to.equal(1);
-    expect(auth0.branding.deleteTheme.calledWith({ themeId: 'delete-me' })).to.equal(true);
-    expect(auth0.branding.updateTheme.called).to.equal(false);
-    expect(auth0.branding.createTheme.called).to.equal(false);
+    expect(auth0.branding.themes.getDefault.called).to.equal(true);
+    expect(auth0.branding.themes.getDefault.callCount).to.equal(1);
+    expect(auth0.branding.themes.delete.callCount).to.equal(1);
+    expect(auth0.branding.themes.delete.calledWith('delete-me')).to.equal(true);
+    expect(auth0.branding.themes.update.called).to.equal(false);
+    expect(auth0.branding.themes.create.called).to.equal(false);
   });
 
   it('should not delete the theme when AUTH0_ALLOW_DELETE: false', async () => {
@@ -298,18 +300,14 @@ describe('#themes handler', () => {
 
     const auth0 = {
       branding: {
-        getDefaultTheme: stub().returns(
-          Promise.reject(new Error('getDefaultTheme should not have been called'))
-        ),
-        createTheme: stub().returns(
-          Promise.reject(new Error('createTheme should not have been called'))
-        ),
-        updateTheme: stub().returns(
-          Promise.reject(new Error('updateTheme should not have been called'))
-        ),
-        deleteTheme: stub().returns(
-          Promise.reject(new Error('deleteTheme should not have been called'))
-        ),
+        themes: {
+          getDefault: stub().returns(
+            Promise.reject(new Error('getDefault should not have been called'))
+          ),
+          create: stub().returns(Promise.reject(new Error('create should not have been called'))),
+          update: stub().returns(Promise.reject(new Error('update should not have been called'))),
+          delete: stub().returns(Promise.reject(new Error('delete should not have been called'))),
+        },
       },
     };
 
@@ -318,10 +316,10 @@ describe('#themes handler', () => {
 
     await handler.processChanges(assets);
 
-    expect(auth0.branding.getDefaultTheme.called).to.equal(false);
-    expect(auth0.branding.deleteTheme.called).to.equal(false);
-    expect(auth0.branding.updateTheme.called).to.equal(false);
-    expect(auth0.branding.createTheme.called).to.equal(false);
+    expect(auth0.branding.themes.getDefault.called).to.equal(false);
+    expect(auth0.branding.themes.delete.called).to.equal(false);
+    expect(auth0.branding.themes.update.called).to.equal(false);
+    expect(auth0.branding.themes.create.called).to.equal(false);
   });
 });
 

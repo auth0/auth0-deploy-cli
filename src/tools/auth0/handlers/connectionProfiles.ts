@@ -1,4 +1,4 @@
-import { ConnectionProfile } from 'auth0';
+import { Management } from 'auth0';
 import { Assets, Auth0APIClient } from '../../../types';
 import DefaultAPIHandler from './default';
 import { paginate } from '../client';
@@ -177,12 +177,14 @@ export const schema = {
   },
 };
 
+export type ConnectionProfile = Management.ConnectionProfile;
+
 export const getConnectionProfile = async (
   auth0Client: Auth0APIClient
 ): Promise<ConnectionProfile[]> => {
   try {
     const connectionProfiles = await paginate<ConnectionProfile>(
-      auth0Client.connectionProfiles?.getAll,
+      auth0Client.connectionProfiles?.list,
       {
         checkpoint: true,
         take: 10,
@@ -213,7 +215,15 @@ export default class ConnectionProfilesHandler extends DefaultAPIHandler {
       type: 'connectionProfiles',
       id: 'id',
       identifiers: ['id', 'name'],
-      stripUpdateFields: ['id'],
+      functions: {
+        update: (args, data) => this.client.connectionProfiles.update(args?.id, data),
+      },
+    });
+  }
+
+  objString(item): string {
+    return super.objString({
+      name: item.name,
     });
   }
 
@@ -230,7 +240,18 @@ export default class ConnectionProfilesHandler extends DefaultAPIHandler {
     // Do nothing if not set
     if (!connectionProfiles) return;
 
+    const { del, update, create, conflicts } = await this.calcChanges(assets);
+
+    const changes = {
+      del: del,
+      update: update,
+      create: create,
+      conflicts: conflicts,
+    };
+
     // Process using the default implementation
-    await super.processChanges(assets, await this.calcChanges(assets));
+    await super.processChanges(assets, {
+      ...changes,
+    });
   }
 }

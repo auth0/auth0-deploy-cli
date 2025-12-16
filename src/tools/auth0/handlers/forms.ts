@@ -1,8 +1,4 @@
-import {
-  GetFlows200ResponseOneOfInner,
-  GetForms200ResponseOneOfInner,
-  PostForms201Response,
-} from 'auth0';
+import { Management } from 'auth0';
 import dotProp from 'dot-prop';
 import { isEmpty } from 'lodash';
 import DefaultHandler, { order } from './default';
@@ -16,7 +12,7 @@ export type Form = {
   body: string;
 };
 
-export type FormResponse = PostForms201Response;
+export type FormResponse = Management.GetFormResponseContent;
 
 export const schema = {
   type: 'array',
@@ -41,6 +37,10 @@ export default class FormsHandler extends DefaultHandler {
       id: 'id',
       stripCreateFields: ['created_at', 'updated_at', 'submitted_at', 'embedded_at'],
       stripUpdateFields: ['created_at', 'updated_at', 'submitted_at', 'embedded_at'],
+      functions: {
+        update: async ({ id }: { id: string }, bodyParams: Management.UpdateFormRequestContent) =>
+          this.client.forms.update(id, bodyParams),
+      },
     });
   }
 
@@ -48,18 +48,20 @@ export default class FormsHandler extends DefaultHandler {
     return super.objString({ id: item.id, name: item.name });
   }
 
-  async getForms(forms: Array<PostForms201Response>): Promise<PostForms201Response[]> {
+  async getForms(
+    forms: Array<Management.FormSummary>
+  ): Promise<Management.GetFormResponseContent[]> {
     const allForms = await this.client.pool
       .addEachTask({
         data: forms,
         generator: ({ id }) =>
-          this.client.forms.get({ id: id }).then((response) => {
-            if (isEmpty(response?.data)) return null;
-            return response.data;
+          this.client.forms.get(id).then((response) => {
+            if (isEmpty(response)) return null;
+            return response;
           }),
       })
       .promise();
-    return allForms.filter((form): form is PostForms201Response => form !== null);
+    return allForms.filter((form): form is Management.GetFormResponseContent => form !== null);
   }
 
   async getType(): Promise<Asset> {
@@ -68,13 +70,11 @@ export default class FormsHandler extends DefaultHandler {
     }
 
     const [forms, flows] = await Promise.all([
-      paginate<GetForms200ResponseOneOfInner>(this.client.forms.getAll, {
+      paginate<Management.FormSummary>(this.client.forms.list, {
         paginate: true,
-        include_totals: true,
       }),
-      paginate<GetFlows200ResponseOneOfInner>(this.client.flows.getAll, {
+      paginate<Management.FlowSummary>(this.client.flows.list, {
         paginate: true,
-        include_totals: true,
       }),
     ]);
 
@@ -149,7 +149,7 @@ export default class FormsHandler extends DefaultHandler {
     // Do nothing if not set
     if (!forms) return;
 
-    const flows = await paginate<GetFlows200ResponseOneOfInner>(this.client.flows.getAll, {
+    const flows = await paginate<Management.FlowSummary>(this.client.flows.list, {
       paginate: true,
       include_totals: true,
     });

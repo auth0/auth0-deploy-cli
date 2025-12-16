@@ -27,11 +27,18 @@ export default class EmailTemplateHandler extends DefaultHandler {
     });
   }
 
+  objString(item): string {
+    return super.objString({
+      template: item.template,
+      enabled: item.enabled,
+    });
+  }
+
   async getType(): Promise<Asset> {
     const emailTemplates = await Promise.all(
       constants.EMAIL_TEMPLATES_TYPES.map(async (templateName) => {
         try {
-          const { data: template } = await this.client.emailTemplates.get({ templateName });
+          const template = await this.client.emailTemplates.get(templateName);
           return template;
         } catch (err) {
           if (err.statusCode === 403 && templateName === constants.EMAIL_ASYNC_APPROVAL) {
@@ -44,6 +51,7 @@ export default class EmailTemplateHandler extends DefaultHandler {
             throw err;
           }
         }
+        return null;
       })
     );
 
@@ -57,7 +65,7 @@ export default class EmailTemplateHandler extends DefaultHandler {
       const identifierField = this.identifiers[0];
 
       const params = { templateName: emailTemplate[identifierField] };
-      const { data: updated } = await this.client.emailTemplates.update(params, emailTemplate);
+      const updated = await this.client.emailTemplates.update(params.templateName, emailTemplate);
       // Remove body from the response
       const { body, ...excludedBody } = updated;
       this.didUpdate(excludedBody);
@@ -65,7 +73,7 @@ export default class EmailTemplateHandler extends DefaultHandler {
     } catch (err) {
       if (err.statusCode === 404) {
         // Create if it does not exist
-        const { data: created } = await this.client.emailTemplates.create(emailTemplate);
+        const created = await this.client.emailTemplates.create(emailTemplate);
         // Remove body from the response
         const { body, ...excludedBody } = created;
         this.didCreate(excludedBody);

@@ -262,4 +262,46 @@ describe('#YAML context clients', () => {
       organization_require_behavior: 'no_prompt',
     });
   });
+
+  it('should process clients with token_exchange', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'clientsWithTokenExchange');
+    cleanThenMkdir(dir);
+
+    const yaml = `
+    clients:
+      -
+        name: "tokenExchangeClient"
+        app_type: "spa"
+        token_exchange:
+          allow_any_profile_of_type: ['custom_authentication']
+      -
+        name: "regularClient"
+        app_type: "native"
+    `;
+
+    const target = [
+      {
+        name: 'tokenExchangeClient',
+        app_type: 'spa',
+        token_exchange: {
+          allow_any_profile_of_type: ['custom_authentication'],
+        },
+      },
+      {
+        name: 'regularClient',
+        app_type: 'native',
+      },
+    ];
+
+    const yamlFile = path.join(dir, 'clients.yaml');
+    fs.writeFileSync(yamlFile, yaml);
+
+    const config = {
+      AUTH0_INPUT_FILE: yamlFile,
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.clients).to.deep.equal(target);
+  });
 });

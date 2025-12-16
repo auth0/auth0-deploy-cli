@@ -1,10 +1,4 @@
-import {
-  ApiResponse,
-  ResourceServer,
-  ResourceServerProofOfPossessionMechanismEnum,
-  ResourceServerSubjectTypeAuthorizationClientPolicyEnum,
-  ResourceServerSubjectTypeAuthorizationUserPolicyEnum,
-} from 'auth0';
+import { Management } from 'auth0';
 import ValidationError from '../../validationError';
 
 import constants from '../../constants';
@@ -17,6 +11,8 @@ export const excludeSchema = {
   type: 'array',
   items: { type: 'string' },
 };
+
+export type ResourceServer = Management.ResourceServer;
 
 export const schema = {
   type: 'array',
@@ -42,7 +38,7 @@ export const schema = {
         properties: {
           mechanism: {
             type: 'string',
-            enum: Object.values(ResourceServerProofOfPossessionMechanismEnum),
+            enum: Object.values(Management.ResourceServerProofOfPossessionMechanismEnum),
           },
           required: { type: 'boolean' },
         },
@@ -57,7 +53,9 @@ export const schema = {
             properties: {
               policy: {
                 type: 'string',
-                enum: Object.values(ResourceServerSubjectTypeAuthorizationUserPolicyEnum),
+                enum: Object.values(
+                  Management.ResourceServerSubjectTypeAuthorizationUserPolicyEnum
+                ),
               },
             },
           },
@@ -67,7 +65,9 @@ export const schema = {
             properties: {
               policy: {
                 type: 'string',
-                enum: Object.values(ResourceServerSubjectTypeAuthorizationClientPolicyEnum),
+                enum: Object.values(
+                  Management.ResourceServerSubjectTypeAuthorizationClientPolicyEnum
+                ),
               },
             },
           },
@@ -108,9 +108,8 @@ export default class ResourceServersHandler extends DefaultHandler {
   async getType(): Promise<ResourceServer[]> {
     if (this.existing) return this.existing;
 
-    let resourceServers = await paginate<ResourceServer>(this.client.resourceServers.getAll, {
+    let resourceServers = await paginate<ResourceServer>(this.client.resourceServers.list, {
       paginate: true,
-      include_totals: true,
     });
 
     resourceServers = resourceServers.filter(
@@ -165,8 +164,8 @@ export default class ResourceServersHandler extends DefaultHandler {
     let existing = await this.getType();
 
     // Filter excluded
-    resourceServers = resourceServers.filter((r) => !excluded.includes(r.name));
-    existing = existing.filter((r) => !excluded.includes(r.name));
+    resourceServers = resourceServers.filter((r) => r.name && !excluded.includes(r.name));
+    existing = existing.filter((r) => r.name && !excluded.includes(r.name));
 
     return calculateChanges({
       handler: this,
@@ -195,13 +194,36 @@ export default class ResourceServersHandler extends DefaultHandler {
     await super.validate(assets);
   }
 
-  async updateResourceServer(args, update: ResourceServer): Promise<ApiResponse<ResourceServer>> {
+  async processChanges(assets: Assets): Promise<void> {
+    const { resourceServers } = assets;
+
+    // Do nothing if not set
+    if (!resourceServers) return;
+
+    const changes = await this.calcChanges(assets);
+
+    await super.processChanges(assets, {
+      ...changes,
+    });
+  }
+
+  async updateResourceServer(
+    args: { id: string },
+    update: ResourceServer
+  ): Promise<Management.UpdateResourceServerResponseContent> {
     // Exclude name from update as it cannot be modified for system resource servers like Auth0 My Account API
     if (update.is_system === true || update.name === 'Auth0 My Account API') {
-      const { name, is_system: _isSystem, ...updateFields } = update;
-      return this.client.resourceServers.update(args, updateFields);
+      const updateFields: Management.UpdateResourceServerRequestContent = {
+        token_lifetime: update.token_lifetime,
+        proof_of_possession: update.proof_of_possession,
+        skip_consent_for_verifiable_first_party_clients:
+          update.skip_consent_for_verifiable_first_party_clients,
+        subject_type_authorization: update.subject_type_authorization,
+      };
+
+      return this.client.resourceServers.update(args?.id, updateFields);
     }
 
-    return this.client.resourceServers.update(args, update);
+    return this.client.resourceServers.update(args?.id, update);
   }
 }

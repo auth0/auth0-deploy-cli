@@ -2,7 +2,7 @@ import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedTriggers = ParsedAsset<'triggers', Asset[]>;
+type ParsedTriggers = ParsedAsset<'triggers', Asset>;
 
 async function parse(context: YAMLContext): Promise<ParsedTriggers> {
   // Load the script file for each action

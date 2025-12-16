@@ -275,7 +275,7 @@ describe('#YAML context validation', () => {
       rules: [],
       hooks: [],
       actions: [],
-      triggers: [],
+      triggers: {},
       rulesConfigs: [],
       roles: [
         {
@@ -312,7 +312,9 @@ describe('#YAML context validation', () => {
       flows: [],
       forms: [],
       selfServiceProfiles: [],
+      tokenExchangeProfiles: [],
       userAttributeProfiles: [],
+      phoneTemplates: [],
     });
   });
 
@@ -405,7 +407,7 @@ describe('#YAML context validation', () => {
       rules: [],
       hooks: [],
       actions: [],
-      triggers: [],
+      triggers: {},
       rulesConfigs: [],
       roles: [
         {
@@ -442,7 +444,9 @@ describe('#YAML context validation', () => {
       flows: [],
       forms: [],
       selfServiceProfiles: [],
+      tokenExchangeProfiles: [],
       userAttributeProfiles: [],
+      phoneTemplates: [],
     });
   });
 
@@ -536,7 +540,7 @@ describe('#YAML context validation', () => {
       rules: [],
       hooks: [],
       actions: [],
-      triggers: [],
+      triggers: {},
       rulesConfigs: [],
       roles: [
         {
@@ -573,7 +577,9 @@ describe('#YAML context validation', () => {
       flows: [],
       forms: [],
       selfServiceProfiles: [],
+      tokenExchangeProfiles: [],
       userAttributeProfiles: [],
+      phoneTemplates: [],
     });
   });
 
@@ -633,18 +639,18 @@ describe('#YAML context validation', () => {
       },
       {
         tenants: {
-          getSettings: async () =>
-            new Promise((resolve) => {
-              resolve({
-                data: {
+          settings: {
+            get: async () =>
+              new Promise((resolve) => {
+                resolve({
                   friendly_name: 'Production Tenant',
                   enabled_locales: ['en', 'es'],
-                },
-              });
-            }),
+                });
+              }),
+          },
         },
         connections: {
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'connections', [
               {
                 name: 'connection-1',

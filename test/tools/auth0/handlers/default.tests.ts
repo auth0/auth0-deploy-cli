@@ -30,11 +30,14 @@ const mockApiClient = {
 } as Auth0APIClient;
 
 describe('#default handler', () => {
+  const config = () => undefined;
+
   it('should strip designated fields from payload when creating', async () => {
     let didCreateFunctionGetCalled = false;
 
     const handler = new mockHandler({
       client: mockApiClient,
+      config,
       stripCreateFields: ['stripThisFromCreate', 'stripObjectFromCreate.nestedProperty'],
       type: mockAssetType,
       functions: {
@@ -98,6 +101,7 @@ describe('#default handler', () => {
 
     const handler = new mockHandler({
       client: mockApiClient,
+      config,
       sensitiveFieldsToObfuscate: ['secret', 'auth_key'],
       type: mockAssetType,
       functions: {
@@ -136,6 +140,7 @@ describe('#default handler', () => {
 
     const handler = new mockHandler({
       client: mockApiClient,
+      config,
       sensitiveFieldsToObfuscate: ['secret', 'auth_key'],
       type: mockAssetType,
       functions: {

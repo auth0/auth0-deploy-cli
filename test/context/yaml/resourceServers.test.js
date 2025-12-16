@@ -72,15 +72,15 @@ describe('#YAML context resource servers', () => {
   it('should dump resource servers with client_id conversion', async () => {
     const mockClient = mockMgmtClient();
     mockClient.clients = {
-      getAll: (params) => {
+      list: (params) => {
         const clients = [
           { client_id: 'client_123', name: 'Test Client' },
           { client_id: 'client_456', name: 'Another Client' },
         ];
         if (params && params.include_totals) {
-          return { data: { clients, total: clients.length } };
+          return { data: clients, response: { total: clients.length } };
         }
-        return { data: clients };
+        return clients;
       },
     };
 

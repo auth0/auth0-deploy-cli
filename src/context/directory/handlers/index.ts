@@ -20,6 +20,7 @@ import triggers from './triggers';
 import attackProtection from './attackProtection';
 import branding from './branding';
 import phoneProviders from './phoneProvider';
+import phoneTemplates from './phoneTemplates';
 import logStreams from './logStreams';
 import prompts from './prompts';
 import customDomains from './customDomains';
@@ -33,6 +34,7 @@ import flowVaultConnections from './flowVaultConnections';
 import networkACLs from './networkACLs';
 import userAttributeProfiles from './userAttributeProfiles';
 import connectionProfiles from './connectionProfiles';
+import tokenExchangeProfiles from './tokenExchangeProfiles';
 
 import DirectoryContext from '..';
 import { AssetTypes, Asset } from '../../../types';
@@ -71,6 +73,7 @@ const directoryHandlers: {
   attackProtection,
   branding,
   phoneProviders,
+  phoneTemplates,
   logStreams,
   prompts,
   customDomains,
@@ -82,6 +85,7 @@ const directoryHandlers: {
   networkACLs,
   userAttributeProfiles,
   connectionProfiles,
+  tokenExchangeProfiles,
 };
 
 export default directoryHandlers;

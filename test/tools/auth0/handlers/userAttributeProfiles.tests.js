@@ -118,7 +118,7 @@ describe('#userAttributeProfiles handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -136,7 +136,7 @@ describe('#userAttributeProfiles handler', () => {
     it('should get userAttributeProfiles', async () => {
       const auth0 = {
         userAttributeProfiles: {
-          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
         },
         pool,
       };
@@ -149,7 +149,7 @@ describe('#userAttributeProfiles handler', () => {
     it('should get userAttributeProfiles with correct parameters', async () => {
       const auth0 = {
         userAttributeProfiles: {
-          getAll: (params) => {
+          list: (params) => {
             expect(params).to.be.an('object');
             expect(params.include_totals).to.equal(true);
             expect(params.is_global).to.equal(false);
@@ -173,14 +173,14 @@ describe('#userAttributeProfiles handler', () => {
         userAttributeProfiles: {
           update: function (params, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal(sampleUAPWithId.id);
+            expect(params).to.be.a('string');
+            expect(params).to.equal(sampleUAPWithId.id);
             expect(data).to.be.an('object');
             expect(data.name).to.equal(sampleUAPUpdated.name);
 
             return Promise.resolve({ data });
           },
-          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
         },
         pool,
       };
@@ -213,11 +213,11 @@ describe('#userAttributeProfiles handler', () => {
           },
           delete: function (params) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal(sampleUAPWithId.id);
+            expect(params).to.be.a('string');
+            expect(params).to.equal(sampleUAPWithId.id);
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
         },
         pool,
       };
@@ -234,10 +234,10 @@ describe('#userAttributeProfiles handler', () => {
         userAttributeProfiles: {
           delete: (params) => {
             removed = true;
-            expect(params).to.be.an('object');
+            expect(params).to.be.a('string');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
         },
         pool,
       };
@@ -257,7 +257,7 @@ describe('#userAttributeProfiles handler', () => {
             expect(params).to.be.an('undefined');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
         },
         pool,
       };
@@ -271,7 +271,7 @@ describe('#userAttributeProfiles handler', () => {
     it('should handle 403 error when not enabled on tenant', async () => {
       const auth0 = {
         userAttributeProfiles: {
-          getAll: () => Promise.reject(Object.assign(new Error('Forbidden'), { statusCode: 403 })),
+          list: () => Promise.reject(Object.assign(new Error('Forbidden'), { statusCode: 403 })),
         },
       };
 

@@ -1,4 +1,4 @@
-import { Hook } from 'auth0';
+import { Management } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
@@ -18,6 +18,8 @@ export const excludeSchema = {
   type: 'array',
   items: { type: 'string' },
 };
+
+type Hook = Management.Hook;
 
 export const schema = {
   type: 'array',
@@ -144,48 +146,42 @@ export default class HooksHandler extends DefaultHandler {
 
     await Promise.all(
       changes.del.map(async (data) => {
-        await this.client.hooks.deleteSecrets({ id: data.hookId }, data.secrets);
+        await this.client.hooks.secrets.delete(data.hookId, data.secrets);
       })
     );
 
     await Promise.all(
       changes.update.map(async (data) => {
-        await this.client.hooks.updateSecrets({ id: data.hookId }, data.secrets);
+        await this.client.hooks.secrets.update(data.hookId, data.secrets);
       })
     );
 
     await Promise.all(
       changes.create.map(async (data) => {
-        await this.client.hooks.addSecrets({ id: data.hookId }, data.secrets);
+        await this.client.hooks.secrets.create(data.hookId, data.secrets);
       })
     );
   }
 
-  //@ts-ignore because hooks use a special reload argument
+  // @ts-ignore because hooks use a special reload argument
   async getType(reload: boolean): Promise<Asset[] | null> {
     if (this.existing && !reload) {
       return this.existing;
     }
 
-    // in case client version does not support hooks
-    if (!this.client.hooks || typeof this.client.hooks.getAll !== 'function') {
-      return [];
-    }
-
     try {
-      const hooks = await paginate<Hook>(this.client.hooks.getAll, {
+      const hooks = await paginate<Hook>(this.client.hooks.list, {
         paginate: true,
-        include_totals: true,
       });
 
       // hooks.getAll does not return code and secrets, we have to fetch hooks one-by-one
       this.existing = await Promise.all(
         hooks.map((hook: { id: string }) =>
           this.client.hooks
-            .get({ id: hook.id })
-            .then(({ data: hookWithCode }) =>
-              this.client.hooks
-                .getSecrets({ id: hook.id })
+            .get(hook.id)
+            .then((hookWithCode) =>
+              this.client.hooks.secrets
+                .get(hook.id)
                 .then(({ data: secrets }) => ({ ...hookWithCode, secrets }))
             )
         )
@@ -232,7 +228,7 @@ export default class HooksHandler extends DefaultHandler {
         const err = new Error(
           `Only one active hook allowed for "${type}" extensibility point. Conflicting hooks: ${conflict}`
         );
-        //@ts-ignore need to investigate if appending status actually works here
+        // @ts-ignore need to investigate if appending status actually works here
         err.status = 409;
         throw err;
       }

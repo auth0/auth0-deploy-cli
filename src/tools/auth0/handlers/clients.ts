@@ -1,8 +1,4 @@
-import {
-  ClientClientAuthenticationMethods,
-  ClientExpressConfiguration,
-  ClientOrganizationRequireBehaviorEnum,
-} from 'auth0';
+import { Management } from 'auth0';
 import { has, omit } from 'lodash';
 import { Assets, Auth0APIClient } from '../../../types';
 import { paginate } from '../client';
@@ -267,25 +263,26 @@ export const schema = {
           'admin_login_domain',
         ],
       },
+      token_exchange: {
+        type: ['object', 'null'],
+        description: 'Token exchange configuration for the client',
+        properties: {
+          allow_any_profile_of_type: {
+            type: 'array',
+            description: 'List of enabled token exchange profile types for this client',
+            items: {
+              type: 'string',
+              enum: ['custom_authentication'],
+            },
+          },
+        },
+      },
     },
     required: ['name'],
   },
 };
 
-export type Client = {
-  client_id: string;
-  name: string;
-  app_type?: string;
-  is_first_party?: boolean;
-  resource_server_identifier?: string;
-  cross_origin_authentication?: boolean;
-  cross_origin_auth?: boolean;
-  custom_login_page?: string;
-  custom_login_page_on?: boolean;
-  express_configuration?: ClientExpressConfiguration;
-  client_authentication_methods?: ClientClientAuthenticationMethods | null;
-  organization_require_behavior?: ClientOrganizationRequireBehaviorEnum;
-};
+export type Client = Management.Client;
 
 export default class ClientHandler extends DefaultAPIHandler {
   existing: Client[];
@@ -306,6 +303,13 @@ export default class ClientHandler extends DefaultAPIHandler {
         'jwt_configuration.secret_encoded',
         'resource_server_identifier',
       ],
+      functions: {
+        update: async (
+          // eslint-disable-next-line camelcase
+          { client_id }: { client_id: string },
+          bodyParams: Management.UpdateClientRequestContent
+        ) => this.client.clients.update(client_id, bodyParams),
+      },
     });
   }
 
@@ -343,6 +347,7 @@ export default class ClientHandler extends DefaultAPIHandler {
       list.filter(
         (item) =>
           item.client_id !== currentClient &&
+          item.name &&
           !excludedClients.includes(item.name) &&
           (!excludeThirdPartyClients || item.is_first_party)
       );
@@ -393,7 +398,8 @@ export default class ClientHandler extends DefaultAPIHandler {
       let updated: Client = { ...client };
 
       if (has(updated, 'cross_origin_auth')) {
-        deprecatedClients.push(client.name);
+        const clientName = client.name || client.client_id || 'unknown client';
+        deprecatedClients.push(clientName);
 
         if (!has(updated, 'cross_origin_authentication')) {
           updated.cross_origin_authentication = updated.cross_origin_auth;
@@ -424,9 +430,8 @@ export default class ClientHandler extends DefaultAPIHandler {
       this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === 'true' ||
       this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === true;
 
-    const clients = await paginate<Client>(this.client.clients.getAll, {
+    const clients = await paginate<Client>(this.client.clients.list, {
       paginate: true,
-      include_totals: true,
       is_global: false,
       ...(excludeThirdPartyClients && { is_first_party: true }),
     });
@@ -477,7 +482,7 @@ export default class ClientHandler extends DefaultAPIHandler {
       const oktaOinClientName = client.express_configuration.okta_oin_client_id;
       if (oktaOinClientName) {
         const oktaOinClient = clientData?.find((c) => c.name === oktaOinClientName);
-        if (oktaOinClient) {
+        if (oktaOinClient?.client_id) {
           client.express_configuration.okta_oin_client_id = oktaOinClient.client_id;
         }
       }

@@ -1,0 +1,6 @@
+{
+  "name": "Custom Authentication Profile",
+  "type": "custom_authentication",
+  "subject_token_type": "urn:ietf:params:oauth:token-type:custom",
+  "action": "custom-token-exchange-action"
+}
