@@ -17,6 +17,7 @@ import { PhoneTemplate } from './tools/auth0/handlers/phoneTemplates';
 import { NetworkACL } from './tools/auth0/handlers/networkACLs';
 import { UserAttributeProfile } from './tools/auth0/handlers/userAttributeProfiles';
 import { AttackProtection } from './tools/auth0/handlers/attackProtection';
+import { TokenExchangeProfile } from './tools/auth0/handlers/tokenExchangeProfiles';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -145,6 +146,7 @@ export type Assets = Partial<{
   userAttributeProfiles: UserAttributeProfile[] | null;
   userAttributeProfilesWithId: UserAttributeProfile[] | null;
   connectionProfiles: Asset[] | null;
+  tokenExchangeProfiles: TokenExchangeProfile[] | null;
 }>;
 
 export type CalculatedChanges = {
@@ -191,7 +193,8 @@ export type AssetTypes =
   | 'selfServiceProfiles'
   | 'networkACLs'
   | 'userAttributeProfiles'
-  | 'connectionProfiles';
+  | 'connectionProfiles'
+  | 'tokenExchangeProfiles';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 

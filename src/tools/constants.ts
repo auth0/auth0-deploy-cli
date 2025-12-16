@@ -68,6 +68,7 @@ const constants = {
     'post-change-password',
     'send-phone-message',
     'password-reset-post-challenge',
+    'custom-token-exchange',
   ],
   EMAIL_TEMPLATES_DIRECTORY: 'emails',
   EMAIL_VERIFY,
@@ -217,6 +218,7 @@ const constants = {
   NETWORK_ACLS_DIRECTORY: 'network-acls',
   USER_ATTRIBUTE_PROFILES_DIRECTORY: 'user-attribute-profiles',
   CONNECTION_PROFILES_DIRECTORY: 'connection-profiles',
+  TOKEN_EXCHANGE_PROFILES_DIRECTORY: 'token-exchange-profiles',
 };
 
 export default constants;
