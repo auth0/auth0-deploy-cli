@@ -40,6 +40,9 @@ repository =>
   resource-servers
     resource_server1.json
     resource_server2.json
+  token-exchange-profiles
+    profile1.json
+    profile2.json
   guardian
     factors
       sms.json

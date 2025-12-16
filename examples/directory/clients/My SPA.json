@@ -36,5 +36,10 @@
 	"token_endpoint_auth_method": "none",
 	"web_origins": [
 		"https://##ENV##.myapp.com"
-	]
+	],
+	 "token_exchange": {
+		"allow_any_profile_of_type": [
+			"custom_authentication"
+		]
+  	}
 }
