@@ -27,6 +27,13 @@ export default class EmailTemplateHandler extends DefaultHandler {
     });
   }
 
+  objString(item): string {
+    return super.objString({
+      template: item.template,
+      enabled: item.enabled,
+    });
+  }
+
   async getType(): Promise<Asset> {
     const emailTemplates = await Promise.all(
       constants.EMAIL_TEMPLATES_TYPES.map(async (templateName) => {

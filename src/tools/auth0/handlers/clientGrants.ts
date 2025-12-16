@@ -32,7 +32,7 @@ export const schema = {
         uniqueItems: true,
       },
     },
-    required: ['client_id', 'scope', 'audience'],
+    required: ['client_id', 'audience'],
   },
 };
 

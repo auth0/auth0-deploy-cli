@@ -208,15 +208,22 @@ export default class ResourceServersHandler extends DefaultHandler {
   }
 
   async updateResourceServer(
-    args,
+    args: { id: string },
     update: ResourceServer
   ): Promise<Management.UpdateResourceServerResponseContent> {
     // Exclude name from update as it cannot be modified for system resource servers like Auth0 My Account API
     if (update.is_system === true || update.name === 'Auth0 My Account API') {
-      const { name, is_system: _isSystem, ...updateFields } = update;
-      return this.client.resourceServers.update(args, updateFields);
+      const updateFields: Management.UpdateResourceServerRequestContent = {
+        token_lifetime: update.token_lifetime,
+        proof_of_possession: update.proof_of_possession,
+        skip_consent_for_verifiable_first_party_clients:
+          update.skip_consent_for_verifiable_first_party_clients,
+        subject_type_authorization: update.subject_type_authorization,
+      };
+
+      return this.client.resourceServers.update(args?.id, updateFields);
     }
 
-    return this.client.resourceServers.update(args, update);
+    return this.client.resourceServers.update(args?.id, update);
   }
 }

@@ -215,7 +215,15 @@ export default class ConnectionProfilesHandler extends DefaultAPIHandler {
       type: 'connectionProfiles',
       id: 'id',
       identifiers: ['id', 'name'],
-      stripUpdateFields: ['id'],
+      functions: {
+        update: (args, data) => this.client.connectionProfiles.update(args?.id, data),
+      },
+    });
+  }
+
+  objString(item): string {
+    return super.objString({
+      name: item.name,
     });
   }
 
@@ -232,7 +240,18 @@ export default class ConnectionProfilesHandler extends DefaultAPIHandler {
     // Do nothing if not set
     if (!connectionProfiles) return;
 
+    const { del, update, create, conflicts } = await this.calcChanges(assets);
+
+    const changes = {
+      del: del,
+      update: update,
+      create: create,
+      conflicts: conflicts,
+    };
+
     // Process using the default implementation
-    await super.processChanges(assets, await this.calcChanges(assets));
+    await super.processChanges(assets, {
+      ...changes,
+    });
   }
 }

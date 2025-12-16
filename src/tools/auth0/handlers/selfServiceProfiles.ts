@@ -109,6 +109,12 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
     });
   }
 
+  objString(item): string {
+    return super.objString({
+      name: item.name,
+    });
+  }
+
   async getType() {
     if (this.existing) return this.existing;
 
