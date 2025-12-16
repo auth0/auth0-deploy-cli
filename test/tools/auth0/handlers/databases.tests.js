@@ -873,7 +873,6 @@ describe('#databases handler', () => {
       const updateStub = sinon.stub().resolves({
         id: 'con1',
       });
-      const logWarnSpy = sinon.spy(console, 'warn');
       const deleteStub = sinon.stub().resolves([]);
       const getAllStub = sinon.stub().resolves([
         {
@@ -914,9 +913,6 @@ describe('#databases handler', () => {
               const validation = payload?.options?.validation;
 
               if (attributes && (requiresUsername || validation)) {
-                console.warn(
-                  'Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.'
-                );
                 throw new Error('Cannot set both attributes and requires_username or validation');
               }
 
@@ -996,19 +992,8 @@ describe('#databases handler', () => {
         );
       }
 
-      // eslint-disable-next-line no-unused-expressions
-      expect(logWarnSpy.calledOnce).to.be.true;
-      // eslint-disable-next-line no-unused-expressions
-      expect(
-        logWarnSpy.calledWith(
-          'Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.'
-        )
-      ).to.be.true;
-
       sinon.assert.calledOnce(getStub);
       sinon.assert.notCalled(updateStub);
-
-      logWarnSpy.restore();
     });
 
     it('should update database with attributes and remove validation from the update request if validation is in the get response but attributes are in the update request', async () => {
@@ -1066,20 +1051,15 @@ describe('#databases handler', () => {
               const requiresUsername = payload?.options?.requires_username;
               const validation = payload?.options?.validation;
               if (attributes && (requiresUsername || validation)) {
-                console.warn(
-                  'Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.'
-                );
                 throw new Error('Cannot set both attributes and requires_username or validation');
               }
 
               if (attributes) {
-                console.info('Info: "Removed Validation from Connection Payload"');
                 delete connection.options.validation;
                 delete connection.options.requires_username;
               }
 
               if (requiresUsername || validation) {
-                console.info('Info: "Removed Attributes from Connection Payload"');
                 delete connection.options.attributes;
               }
 
@@ -1253,20 +1233,15 @@ describe('#databases handler', () => {
               const validation = payload?.options?.validation;
 
               if (attributes && (requiresUsername || validation)) {
-                console.warn(
-                  'Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.'
-                );
                 throw new Error('Cannot set both attributes and requires_username or validation');
               }
 
               if (attributes) {
-                console.info('Info: "Removed Validation from Connection Payload"');
                 delete connection.options.validation;
                 delete connection.options.requires_username;
               }
 
               if (requiresUsername || validation) {
-                console.info('Info: "Removed Attributes from Connection Payload"');
                 delete connection.options.attributes;
               }
 
@@ -1488,7 +1463,6 @@ describe('#databases handler', () => {
       const updateStub = sinon.stub().resolves({
         id: 'con1',
       });
-      const logWarnSpy = sinon.spy(console, 'warn');
       const deleteStub = sinon.stub().resolves([]);
       const getAllStub = sinon.stub().resolves([
         {
@@ -1529,9 +1503,6 @@ describe('#databases handler', () => {
               const validation = payload?.options?.validation;
 
               if (attributes && (requiresUsername || validation)) {
-                console.warn(
-                  'Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.'
-                );
                 throw new Error('Cannot set both attributes and requires_username or validation');
               }
 
@@ -1612,19 +1583,8 @@ describe('#databases handler', () => {
         );
       }
 
-      // eslint-disable-next-line no-unused-expressions
-      expect(logWarnSpy.calledOnce).to.be.true;
-      // eslint-disable-next-line no-unused-expressions
-      expect(
-        logWarnSpy.calledWith(
-          'Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.'
-        )
-      ).to.be.true;
-
       sinon.assert.calledOnce(getStub);
       sinon.assert.notCalled(updateStub);
-
-      logWarnSpy.restore();
     });
 
     it('should update database with attributes and remove validation from the update request if validation is in the get response but attributes are in the update request', async () => {
@@ -1682,20 +1642,15 @@ describe('#databases handler', () => {
               const requiresUsername = payload?.options?.requires_username;
               const validation = payload?.options?.validation;
               if (attributes && (requiresUsername || validation)) {
-                console.warn(
-                  'Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.'
-                );
                 throw new Error('Cannot set both attributes and requires_username or validation');
               }
 
               if (attributes) {
-                console.info('Info: "Removed Validation from Connection Payload"');
                 delete connection.options.validation;
                 delete connection.options.requires_username;
               }
 
               if (requiresUsername || validation) {
-                console.info('Info: "Removed Attributes from Connection Payload"');
                 delete connection.options.attributes;
               }
 
@@ -1869,20 +1824,15 @@ describe('#databases handler', () => {
               const validation = payload?.options?.validation;
 
               if (attributes && (requiresUsername || validation)) {
-                console.warn(
-                  'Warning: "attributes" cannot be used with "requires_username" or "validation". Please remove one of the conflicting options.'
-                );
                 throw new Error('Cannot set both attributes and requires_username or validation');
               }
 
               if (attributes) {
-                console.info('Info: "Removed Validation from Connection Payload"');
                 delete connection.options.validation;
                 delete connection.options.requires_username;
               }
 
               if (requiresUsername || validation) {
-                console.info('Info: "Removed Attributes from Connection Payload"');
                 delete connection.options.attributes;
               }
 

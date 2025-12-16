@@ -348,18 +348,14 @@ export default class PromptsHandler extends DefaultHandler {
       partials,
     };
 
-    const includeExperimentalEA = this.config('AUTH0_EXPERIMENTAL_EA') || false;
+    try {
+      const screenRenderers = await paginate<ScreenRenderer>(this.client.prompts.rendering.list, {
+        paginate: true,
+      });
 
-    if (includeExperimentalEA) {
-      try {
-        const screenRenderers = await paginate<ScreenRenderer>(this.client.prompts.rendering.list, {
-          paginate: true,
-        });
-
-        prompts.screenRenderers = screenRenderers ?? [];
-      } catch (error) {
-        log.warn(`Unable to fetch screen renderers: ${error}`);
-      }
+      prompts.screenRenderers = screenRenderers ?? [];
+    } catch (error) {
+      log.warn(`Unable to fetch screen renderers: ${error}`);
     }
 
     return prompts;

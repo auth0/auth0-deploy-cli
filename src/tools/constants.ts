@@ -217,6 +217,7 @@ const constants = {
   SELF_SERVICE_PROFILE_DIRECTORY: 'self-service-profiles',
   NETWORK_ACLS_DIRECTORY: 'network-acls',
   USER_ATTRIBUTE_PROFILES_DIRECTORY: 'user-attribute-profiles',
+  CONNECTION_PROFILES_DIRECTORY: 'connection-profiles',
   TOKEN_EXCHANGE_PROFILES_DIRECTORY: 'token-exchange-profiles',
 };
 

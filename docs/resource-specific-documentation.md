@@ -628,3 +628,82 @@ Example `phone-templates/otp_verify.json`:
   }
 }
 ```
+
+## Connection Profiles
+
+Application specific configuration for use with the OIN Express Configuration feature
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+connectionProfiles:
+  - name: 'Enterprise SSO Profile'
+    organization:
+      show_as_button: 'required'
+      assign_membership_on_login: 'required'
+    connection_name_prefix_template: 'org-{organization_name}'
+    enabled_features:
+      - scim
+      - universal_logout
+    strategy_overrides:
+      samlp:
+        enabled_features:
+          - universal_logout
+      oidc:
+        enabled_features:
+          - scim
+          - universal_logout
+  - name: 'Basic Connection Profile'
+    organization:
+      show_as_button: 'optional'
+      assign_membership_on_login: 'optional'
+    enabled_features:
+      - scim
+```
+
+### Directory Example
+
+File: `./connection-profiles/Enterprise SSO Profile.json`
+
+```json
+{
+  "name": "Enterprise SSO Profile",
+  "organization": {
+    "show_as_button": "required",
+    "assign_membership_on_login": "required"
+  },
+  "connection_name_prefix_template": "org-{organization_name}",
+  "enabled_features": ["scim", "universal_logout"],
+  "strategy_overrides": {
+    "samlp": {
+      "enabled_features": ["universal_logout"]
+    },
+    "oidc": {
+      "enabled_features": ["scim", "universal_logout"]
+    }
+  }
+}
+```
+
+### Express Configuration on Clients
+
+Connection profiles are used in conjunction with the `express_configuration` property on client applications: (In order to use express_configuration app_type should not be 'express_configuration')
+
+```yaml
+clients:
+  - name: 'My Enterprise App'
+    app_type: 'regular_web'
+    express_configuration:
+      initiate_login_uri_template: 'https://myapp.com/sso/start?org={organization_name}&conn={connection_name}'
+      user_attribute_profile_id: 'My User Attribute Profile'
+      connection_profile_id: 'Enterprise SSO Profile' # Reference to connection profile
+      enable_client: true
+      enable_organization: true
+      okta_oin_client_id: 'My Okta OIN Client'
+      admin_login_domain: 'login.myapp.com'
+      linked_clients:
+        - client_id: 'client_id_of_mobile_app'
+```
+
+For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2).

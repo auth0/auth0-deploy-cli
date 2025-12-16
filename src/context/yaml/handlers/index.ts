@@ -33,6 +33,7 @@ import flows from './flows';
 import flowVaultConnections from './flowVaultConnections';
 import networkACLs from './networkACLs';
 import userAttributeProfiles from './userAttributeProfiles';
+import connectionProfiles from './connectionProfiles';
 import tokenExchangeProfiles from './tokenExchangeProfiles';
 
 import YAMLContext from '..';
@@ -81,6 +82,7 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   selfServiceProfiles,
   networkACLs,
   userAttributeProfiles,
+  connectionProfiles,
   tokenExchangeProfiles,
 };
 

@@ -17,7 +17,7 @@ describe('#directory context clients', () => {
         'someClient2.json': '{ "app_type": "@@appType@@", "name": "someClient2" }',
         'customLoginClient.json':
           '{ "app_type": "@@appType@@", "name": "customLoginClient", "custom_login_page": "./customLoginClient_custom_login_page.html", ' +
-          '"session_transfer": { "can_create_session_transfer_token": true,"enforce_device_binding": "ip", "allowed_authentication_methods" : "@@allowedMethods@@"} }',
+          '"session_transfer": { "can_create_session_transfer_token": true, "enforce_cascade_revocation": true, "enforce_device_binding": "ip", "allowed_authentication_methods" : "@@allowedMethods@@", "allow_refresh_token": true, "enforce_online_refresh_tokens": true} }',
         'customLoginClient_custom_login_page.html': 'html code ##appType## @@appType@@',
       },
     };
@@ -39,8 +39,11 @@ describe('#directory context clients', () => {
         custom_login_page: 'html code spa "spa"',
         session_transfer: {
           can_create_session_transfer_token: true,
+          enforce_cascade_revocation: true,
           enforce_device_binding: 'ip',
           allowed_authentication_methods: ['cookie', 'query'],
+          allow_refresh_token: true,
+          enforce_online_refresh_tokens: true,
         },
       },
       { app_type: 'spa', name: 'someClient' },
@@ -101,8 +104,11 @@ describe('#directory context clients', () => {
         custom_login_page: 'html code',
         session_transfer: {
           can_create_session_transfer_token: false,
+          enforce_cascade_revocation: false,
           enforce_device_binding: 'asn',
           allowed_authentication_methods: ['cookie'],
+          allow_refresh_token: false,
+          enforce_online_refresh_tokens: false,
         },
       },
     ];
@@ -113,8 +119,11 @@ describe('#directory context clients', () => {
       custom_login_page: './customLoginClient_custom_login_page.html',
       session_transfer: {
         can_create_session_transfer_token: false,
+        enforce_cascade_revocation: false,
         enforce_device_binding: 'asn',
         allowed_authentication_methods: ['cookie'],
+        allow_refresh_token: false,
+        enforce_online_refresh_tokens: false,
       },
     };
 
@@ -219,6 +228,74 @@ describe('#directory context clients', () => {
     expect(loadJSON(path.join(clientFolder, 'standardClient.json'))).to.deep.equal({
       app_type: 'native',
       name: 'standardClient',
+    });
+  });
+
+  it('should dump clients with express_configuration', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientsDumpExpress');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.clients = [
+      {
+        name: 'someClient',
+        app_type: 'regular_web',
+        express_configuration: {
+          user_attribute_profile_id: 'uap_123',
+          connection_profile_id: 'cp_123',
+          okta_oin_client_id: 'client_123',
+        },
+      },
+    ];
+
+    context.assets.userAttributeProfiles = [{ id: 'uap_123', name: 'My User Attribute Profile' }];
+
+    context.assets.connectionProfiles = [{ id: 'cp_123', name: 'My Connection Profile' }];
+
+    // Mock clients for okta_oin_client_id lookup
+    // The dump method looks up in context.assets.clients
+    context.assets.clients.push({
+      client_id: 'client_123',
+      name: 'My OIN Client',
+    });
+
+    await handler.dump(context);
+
+    const dumpedClient = loadJSON(path.join(dir, 'clients', 'someClient.json'));
+    expect(dumpedClient).to.deep.equal({
+      name: 'someClient',
+      app_type: 'regular_web',
+      express_configuration: {
+        user_attribute_profile_id: 'My User Attribute Profile',
+        connection_profile_id: 'My Connection Profile',
+        okta_oin_client_id: 'My OIN Client',
+      },
+    });
+  });
+
+  it('should dump clients with app_type express_configuration and filter fields', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientsDumpExpressAppType');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.clients = [
+      {
+        name: 'someExpressClient',
+        app_type: 'express_configuration',
+        client_authentication_methods: {},
+        organization_require_behavior: 'no_prompt',
+        some_other_field: 'should be removed',
+      },
+    ];
+
+    await handler.dump(context);
+
+    const dumpedClient = loadJSON(path.join(dir, 'clients', 'someExpressClient.json'));
+    expect(dumpedClient).to.deep.equal({
+      name: 'someExpressClient',
+      app_type: 'express_configuration',
+      client_authentication_methods: {},
+      organization_require_behavior: 'no_prompt',
     });
   });
 });

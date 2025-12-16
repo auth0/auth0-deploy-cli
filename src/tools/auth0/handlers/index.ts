@@ -34,6 +34,7 @@ import * as flowVaultConnections from './flowVaultConnections';
 import * as selfServiceProfiles from './selfServiceProfiles';
 import * as networkACLs from './networkACLs';
 import * as userAttributeProfiles from './userAttributeProfiles';
+import * as connectionProfiles from './connectionProfiles';
 import * as tokenExchangeProfiles from './tokenExchangeProfiles';
 
 import { AssetTypes } from '../../../types';
@@ -77,6 +78,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   selfServiceProfiles,
   networkACLs,
   userAttributeProfiles,
+  connectionProfiles,
   tokenExchangeProfiles,
 };
 

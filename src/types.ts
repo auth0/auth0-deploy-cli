@@ -23,6 +23,7 @@ type SharedPaginationParams = {
   checkpoint?: boolean;
   paginate?: boolean;
   is_global?: boolean;
+  is_first_party?: boolean;
   include_totals?: boolean;
   id?: string;
   strategy?: Management.ConnectionStrategyEnum[];
@@ -60,6 +61,7 @@ export type Config = {
   AUTH0_INPUT_FILE: string;
   AUTH0_ALLOW_DELETE: boolean;
   AUTH0_EXCLUDED?: AssetTypes[];
+  AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS?: boolean;
   AUTH0_INCLUDED_ONLY?: AssetTypes[];
   AUTH0_PRESERVE_KEYWORDS: boolean;
   EXTENSION_SECRET: string;
@@ -143,6 +145,7 @@ export type Assets = Partial<{
   networkACLs: NetworkACL[] | null;
   userAttributeProfiles: UserAttributeProfile[] | null;
   userAttributeProfilesWithId: UserAttributeProfile[] | null;
+  connectionProfiles: Asset[] | null;
   tokenExchangeProfiles: TokenExchangeProfile[] | null;
 }>;
 
@@ -190,6 +193,7 @@ export type AssetTypes =
   | 'selfServiceProfiles'
   | 'networkACLs'
   | 'userAttributeProfiles'
+  | 'connectionProfiles'
   | 'tokenExchangeProfiles';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };

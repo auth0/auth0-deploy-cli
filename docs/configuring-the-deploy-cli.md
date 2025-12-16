@@ -155,6 +155,10 @@ Provides ability to exclude any unwanted properties from management.
 
 String. Separate value from audience value while retrieving an access token for management API. Useful when default Management API endpoints are not publicly exposed.
 
+### `AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS`
+
+Boolean. When enabled, excludes third-party clients from being managed. Only first-party clients will be included in export and import operations. This is useful when you have Dynamic Client Registration (DCR) enabled and you have a lot of third-party clients in your tenant. Default: `false`.
+
 ### `AUTH0_EXCLUDED_RULES`
 
 Array of strings. Excludes the management of specific rules by ID. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).

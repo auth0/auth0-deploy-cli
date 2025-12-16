@@ -33,6 +33,7 @@ import flows from './flows';
 import flowVaultConnections from './flowVaultConnections';
 import networkACLs from './networkACLs';
 import userAttributeProfiles from './userAttributeProfiles';
+import connectionProfiles from './connectionProfiles';
 import tokenExchangeProfiles from './tokenExchangeProfiles';
 
 import DirectoryContext from '..';
@@ -83,6 +84,7 @@ const directoryHandlers: {
   selfServiceProfiles,
   networkACLs,
   userAttributeProfiles,
+  connectionProfiles,
   tokenExchangeProfiles,
 };
 

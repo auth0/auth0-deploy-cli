@@ -1,7 +1,11 @@
 import { Management } from 'auth0';
-import { Assets } from '../../../types';
+import { has, omit } from 'lodash';
+import { Assets, Auth0APIClient } from '../../../types';
 import { paginate } from '../client';
 import DefaultAPIHandler from './default';
+import { getConnectionProfile } from './connectionProfiles';
+import { getUserAttributeProfiles } from './userAttributeProfiles';
+import log from '../../../logger';
 
 const multiResourceRefreshTokenPoliciesSchema = {
   type: ['array', 'null'],
@@ -113,29 +117,46 @@ export const schema = {
         properties: {
           can_create_session_transfer_token: {
             type: 'boolean',
-            default: false,
             description:
-              'Specifies whether the application (Native app) can use the Token Exchange endpoint to create a session_transfer_token.',
+              "Indicates whether an app can issue a Session Transfer Token through Token Exchange. If set to 'false', the app will not be able to issue a Session Transfer Token. Usually configured in the native application.",
+            default: false,
+          },
+          enforce_cascade_revocation: {
+            type: 'boolean',
+            description:
+              'Indicates whether revoking the parent Refresh Token that initiated a Native to Web flow and was used to issue a Session Transfer Token should trigger a cascade revocation affecting its dependent child entities. Usually configured in the native application.',
+            default: true,
           },
           allowed_authentication_methods: {
-            type: 'array',
+            type: ['array', 'null'],
+            description:
+              'Indicates whether an app can create a session from a Session Transfer Token received via indicated methods. Can include `cookie` and/or `query`. Usually configured in the web application.',
             items: {
               type: 'string',
               enum: ['cookie', 'query'],
             },
-            default: [],
-            description:
-              'Determines the methods allowed for a web application to create a session using a session_transfer_token.',
           },
           enforce_device_binding: {
             type: 'string',
-            enum: ['none', 'ip', 'asn'],
-            default: 'ip',
             description:
-              'Configures the level of device binding enforced when a session_transfer_token is consumed.',
+              "Indicates whether device binding security should be enforced for the app. If set to 'ip', the app will enforce device binding by IP, meaning that consumption of Session Transfer Token must be done from the same IP of the issuer. Likewise, if set to 'asn', device binding is enforced by ASN, meaning consumption of Session Transfer Token must be done from the same ASN as the issuer. If set to 'null', device binding is not enforced. Usually configured in the web application.",
+            enum: ['ip', 'asn', 'none'],
+            default: 'ip',
+          },
+          allow_refresh_token: {
+            type: 'boolean',
+            description:
+              'Indicates whether Refresh Tokens are allowed to be issued when authenticating with a Session Transfer Token. Usually configured in the web application.',
+            default: false,
+          },
+          enforce_online_refresh_tokens: {
+            type: 'boolean',
+            description:
+              "Indicates whether Refresh Tokens created during a native-to-web session are tied to that session's lifetime. This determines if such refresh tokens should be automatically revoked when their corresponding sessions are. Usually configured in the web application.",
+            default: true,
           },
         },
-        additionalProperties: false,
+        additionalProperties: true,
       },
       app_type: {
         type: 'string',
@@ -173,6 +194,74 @@ export const schema = {
       skip_non_verifiable_callback_uri_confirmation_prompt: {
         type: ['boolean', 'null'],
         description: 'Whether to skip the confirmation prompt for non-verifiable callback URIs',
+      },
+      express_configuration: {
+        type: ['object', 'null'],
+        description:
+          'Application specific configuration for use with the OIN Express Configuration feature',
+        properties: {
+          initiate_login_uri_template: {
+            type: 'string',
+            description:
+              'The URI users should bookmark to log in to this application. Variable substitution is permitted for the following properties: organization_name, organization_id, and connection_name.',
+          },
+          user_attribute_profile_id: {
+            type: 'string',
+            description: 'The ID of the user attribute profile to use for this application',
+          },
+          connection_profile_id: {
+            type: 'string',
+            description: 'The ID of the connection profile to use for this application',
+          },
+          enable_client: {
+            type: 'boolean',
+            description:
+              'When true, all connections made via express configuration will be enabled for this application',
+          },
+          enable_organization: {
+            type: 'boolean',
+            description:
+              'When true, all connections made via express configuration will have the associated organization enabled',
+          },
+          linked_clients: {
+            type: 'array',
+            description:
+              'List of client IDs that are linked to this express configuration (e.g. web or mobile clients)',
+            items: {
+              type: 'object',
+              properties: {
+                client_id: {
+                  type: 'string',
+                  description: 'The ID of the linked client',
+                },
+              },
+              required: ['client_id'],
+            },
+          },
+          okta_oin_client_id: {
+            type: 'string',
+            description:
+              'This is the unique identifier for the Okta OIN Express Configuration Client, which Okta will use for this application',
+          },
+          admin_login_domain: {
+            type: 'string',
+            description:
+              'This is the domain that admins are expected to log in via for authenticating for express configuration. It can be either the canonical domain or a registered custom domain',
+          },
+          oin_submission_id: {
+            type: 'string',
+            description: 'The identifier of the published application in the OKTA OIN',
+          },
+        },
+        required: [
+          'initiate_login_uri_template',
+          'user_attribute_profile_id',
+          'connection_profile_id',
+          'enable_client',
+          'enable_organization',
+          'okta_oin_client_id',
+          'admin_login_domain',
+        ],
       },
       token_exchange: {
         type: ['object', 'null'],
@@ -234,7 +323,13 @@ export default class ClientHandler extends DefaultAPIHandler {
     // Do nothing if not set
     if (!clients) return;
 
+    assets.clients = await this.sanitizeMapExpressConfiguration(this.client, clients);
+
     const excludedClients = (assets.exclude && assets.exclude.clients) || [];
+
+    const excludeThirdPartyClients =
+      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === 'true' ||
+      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === true;
 
     const { del, update, create, conflicts } = await this.calcChanges(assets);
 
@@ -242,20 +337,26 @@ export default class ClientHandler extends DefaultAPIHandler {
     // As it could cause problems if it gets deleted or updated etc
     const currentClient = this.config('AUTH0_CLIENT_ID') || '';
 
-    const filterClients = (list) => {
-      if (excludedClients.length) {
-        return list.filter(
-          (item) => item.client_id !== currentClient && !excludedClients.includes(item.name)
-        );
-      }
-
-      return list.filter((item) => item.client_id !== currentClient);
-    };
+    /*
+     * Filter out:
+     * - The client used to access Auth0 Management API
+     * - Clients in the exclusion list
+     * - Third-party clients when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is enabled
+     */
+    const filterClients = (list: Client[]): Client[] =>
+      list.filter(
+        (item) =>
+          item.client_id !== currentClient &&
+          item.name &&
+          !excludedClients.includes(item.name) &&
+          (!excludeThirdPartyClients || item.is_first_party)
+      );
 
     // Sanitize client fields
-    const sanitizeClientFields = (list) =>
-      list.map((item) => {
-        // For resourceServers app type `resource_server`, don't include `oidc_backchannel_logout`, `oidc_logout`, `refresh_token`
+    const sanitizeClientFields = (list: Client[]): Client[] => {
+      const sanitizedClients = this.sanitizeCrossOriginAuth(list);
+
+      return sanitizedClients.map((item: Client) => {
         if (item.app_type === 'resource_server') {
           if ('oidc_backchannel_logout' in item) {
             delete item.oidc_backchannel_logout;
@@ -269,12 +370,13 @@ export default class ClientHandler extends DefaultAPIHandler {
         }
         return item;
       });
+    };
 
     const changes = {
-      del: sanitizeClientFields(filterClients(del)),
-      update: sanitizeClientFields(filterClients(update)),
-      create: sanitizeClientFields(filterClients(create)),
-      conflicts: sanitizeClientFields(filterClients(conflicts)),
+      del: sanitizeClientFields(filterClients(del as Client[])),
+      update: sanitizeClientFields(filterClients(update as Client[])),
+      create: sanitizeClientFields(filterClients(create as Client[])),
+      conflicts: sanitizeClientFields(filterClients(conflicts as Client[])),
     };
 
     await super.processChanges(assets, {
@@ -282,15 +384,110 @@ export default class ClientHandler extends DefaultAPIHandler {
     });
   }
 
+  /**
+   * @description
+   * Sanitize the deprecated field `cross_origin_auth` to `cross_origin_authentication`
+   *
+   * @param {Client[]} clients - The client array to sanitize.
+   * @returns {Client[]} The sanitized array of clients.
+   */
+  private sanitizeCrossOriginAuth(clients: Client[]): Client[] {
+    const deprecatedClients: string[] = [];
+
+    const updatedClients = clients.map((client) => {
+      let updated: Client = { ...client };
+
+      if (has(updated, 'cross_origin_auth')) {
+        const clientName = client.name || client.client_id || 'unknown client';
+        deprecatedClients.push(clientName);
+
+        if (!has(updated, 'cross_origin_authentication')) {
+          updated.cross_origin_authentication = updated.cross_origin_auth;
+        }
+
+        updated = omit(updated, 'cross_origin_auth') as Client;
+      }
+
+      return updated;
+    });
+
+    if (deprecatedClients.length > 0) {
+      log.warn(
+        "The 'cross_origin_auth' parameter is deprecated in clients and scheduled for removal in future releases.\n" +
+          `Use 'cross_origin_authentication' going forward. Clients using the deprecated setting: [${deprecatedClients.join(
+            ', '
+          )}]`
+      );
+    }
+
+    return updatedClients;
+  }
+
   async getType() {
     if (this.existing) return this.existing;
+
+    const excludeThirdPartyClients =
+      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === 'true' ||
+      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === true;
 
     const clients = await paginate<Client>(this.client.clients.list, {
       paginate: true,
       is_global: false,
+      ...(excludeThirdPartyClients && { is_first_party: true }),
     });
 
-    this.existing = clients;
+    const sanitizedClients = this.sanitizeCrossOriginAuth(clients);
+
+    this.existing = sanitizedClients;
     return this.existing;
+  }
+
+  // convert names back to IDs for express configuration
+  async sanitizeMapExpressConfiguration(
+    auth0Client: Auth0APIClient,
+    clientList: Client[]
+  ): Promise<Client[]> {
+    // if no clients have express configuration, return early
+    if (!clientList.some((p) => p.express_configuration)) {
+      return clientList;
+    }
+
+    const clientData = await this.getType();
+    const connectionProfiles = await getConnectionProfile(auth0Client);
+    const userAttributeProfiles = await getUserAttributeProfiles(auth0Client);
+
+    return clientList.map((client) => {
+      if (!client.express_configuration) return client;
+
+      const userAttributeProfileName = client.express_configuration?.user_attribute_profile_id;
+      if (userAttributeProfileName) {
+        const userAttributeProfile = userAttributeProfiles?.find(
+          (uap) => uap.name === userAttributeProfileName
+        );
+        if (userAttributeProfile?.id) {
+          client.express_configuration.user_attribute_profile_id = userAttributeProfile.id;
+        }
+      }
+
+      const connectionProfileName = client.express_configuration.connection_profile_id;
+      if (connectionProfileName) {
+        const connectionProfile = connectionProfiles?.find(
+          (cp) => cp.name === connectionProfileName
+        );
+        if (connectionProfile?.id) {
+          client.express_configuration.connection_profile_id = connectionProfile.id;
+        }
+      }
+
+      const oktaOinClientName = client.express_configuration.okta_oin_client_id;
+      if (oktaOinClientName) {
+        const oktaOinClient = clientData?.find((c) => c.name === oktaOinClientName);
+        if (oktaOinClient?.client_id) {
+          client.express_configuration.okta_oin_client_id = oktaOinClient.client_id;
+        }
+      }
+
+      return client;
+    });
   }
 }

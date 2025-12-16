@@ -96,6 +96,7 @@ export const allowedTenantFlags = [
   'disable_fields_map_fix',
   'require_pushed_authorization_requests',
   'mfa_show_factor_list_on_enrollment',
+  'improved_signup_bot_detection_in_classic',
 ];
 
 export const removeUnallowedTenantFlags = (

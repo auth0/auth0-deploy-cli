@@ -32,7 +32,7 @@ export const schema = {
         uniqueItems: true,
       },
     },
-    required: ['client_id', 'scope', 'audience'],
+    required: ['client_id', 'audience'],
   },
 };
 
@@ -48,13 +48,13 @@ export default class ClientGrantsHandler extends DefaultHandler {
       id: 'id',
       // @ts-ignore because not sure why two-dimensional array passed in
       identifiers: ['id', ['client_id', 'audience']],
-      stripUpdateFields: ['audience', 'client_id', 'subject_type'],
       functions: {
         update: async (
           { id }: { id: string },
           bodyParams: Management.UpdateClientGrantRequestContent
         ) => this.client.clientGrants.update(id, bodyParams),
       },
+      stripUpdateFields: ['audience', 'client_id', 'subject_type', 'is_system'],
     });
   }
 
@@ -112,17 +112,19 @@ export default class ClientGrantsHandler extends DefaultHandler {
       clientGrants: formatted,
     });
 
-    // eslint-disable-next-line camelcase
-    const filterGrants = (list: { client_id: string }[]) => {
+    const filterGrants = (list: ClientGrant[]) => {
       if (excludedClients.length) {
         return list.filter(
           (item) =>
             item.client_id !== currentClient &&
+            item.client_id &&
             ![...excludedClientsByNames, ...excludedClients].includes(item.client_id)
         );
       }
 
-      return list.filter((item) => item.client_id !== currentClient);
+      return list
+        .filter((item) => item.client_id !== currentClient)
+        .filter((item) => item.is_system !== true);
     };
 
     const changes: CalculatedChanges = {

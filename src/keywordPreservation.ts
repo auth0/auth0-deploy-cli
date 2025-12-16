@@ -300,6 +300,7 @@ export const preserveKeywords = ({
     })();
 
     if (!localAndRemoteValuesAreEqual) {
+      // eslint-disable-next-line no-console
       console.warn(
         `WARNING! The remote value with address of ${address} has value of "${remoteValue}" but will be preserved with "${localValueWithReplacement}" due to keyword preservation.`
       );

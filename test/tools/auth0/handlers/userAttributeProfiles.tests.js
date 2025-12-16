@@ -278,7 +278,7 @@ describe('#userAttributeProfiles handler', () => {
       const handler = new userAttributeProfiles.default({ client: pageClient(auth0), config });
 
       const data = await handler.getType();
-      expect(data).to.equal(null);
+      expect(data).to.deep.equal([]);
     });
   });
 });

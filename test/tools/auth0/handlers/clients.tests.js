@@ -30,8 +30,11 @@ const someNativeClient = {
   },
   session_transfer: {
     can_create_session_transfer_token: true,
+    enforce_cascade_revocation: true,
     enforce_device_binding: 'ip',
     allowed_authentication_methods: ['cookie', 'query'],
+    allow_refresh_token: true,
+    enforce_online_refresh_tokens: true,
   },
 };
 
@@ -93,6 +96,10 @@ describe('#clients handler', () => {
           delete: () => Promise.resolve({ data: [] }),
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
 
@@ -127,14 +134,21 @@ describe('#clients handler', () => {
             });
             expect(data.session_transfer).to.deep.equal({
               can_create_session_transfer_token: true,
+              enforce_cascade_revocation: true,
               enforce_device_binding: 'ip',
               allowed_authentication_methods: ['cookie', 'query'],
+              allow_refresh_token: true,
+              enforce_online_refresh_tokens: true,
             });
             return Promise.resolve({ data });
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -186,6 +200,10 @@ describe('#clients handler', () => {
           delete: () => Promise.resolve({ data: [] }),
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
 
@@ -226,6 +244,10 @@ describe('#clients handler', () => {
           delete: () => Promise.resolve({ data: [] }),
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
       const handler = new clients.default({ client: pageClient(auth0), config });
@@ -258,11 +280,66 @@ describe('#clients handler', () => {
           delete: () => Promise.resolve({ data: [] }),
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
       const handler = new clients.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       await stageFn.apply(handler, [{ clients: [resourceServerClient] }]);
+      expect(wasCreateCalled).to.be.equal(true);
+    });
+
+    it('should create client with express_configuration and map names to IDs', async () => {
+      let wasCreateCalled = false;
+      const clientWithExpressConfig = {
+        name: 'Client With Express Config',
+        app_type: 'regular_web',
+        express_configuration: {
+          user_attribute_profile_id: 'My User Attribute Profile',
+          connection_profile_id: 'My Connection Profile',
+          okta_oin_client_id: 'My OIN Client',
+        },
+      };
+
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            wasCreateCalled = true;
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('Client With Express Config');
+            expect(data.express_configuration).to.deep.equal({
+              user_attribute_profile_id: 'uap_123',
+              connection_profile_id: 'cp_123',
+              okta_oin_client_id: 'client_123',
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ client_id: 'client_123', name: 'My OIN Client' }]),
+        },
+        connectionProfiles: {
+          list: (params) =>
+            mockPagedData(params, 'connectionProfiles', [
+              { id: 'cp_123', name: 'My Connection Profile' },
+            ]),
+        },
+        userAttributeProfiles: {
+          list: (params) =>
+            mockPagedData(params, 'userAttributeProfiles', [
+              { id: 'uap_123', name: 'My User Attribute Profile' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ clients: [clientWithExpressConfig] }]);
       expect(wasCreateCalled).to.be.equal(true);
     });
 
@@ -287,6 +364,10 @@ describe('#clients handler', () => {
           delete: () => Promise.resolve({ data: [] }),
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
       const handler = new clients.default({ client: pageClient(auth0), config });
@@ -295,24 +376,173 @@ describe('#clients handler', () => {
       expect(wasCreateCalled).to.be.equal(true);
     });
 
-    it('should get clients', async () => {
+    it('should ignore third-party clients if AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is true', async () => {
+      let wasCreateCalled = false;
+      const thirdPartyClient = {
+        name: 'Third-Party Client',
+        is_first_party: false,
+      };
+
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            wasCreateCalled = true;
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('Third-Party Client');
+            expect(data.is_first_party).to.equal(false);
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const testConfig = function (key) {
+        return testConfig.data && testConfig.data[key];
+      };
+      testConfig.data = {
+        AUTH0_CLIENT_ID: 'client_id',
+        AUTH0_ALLOW_DELETE: true,
+        AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS: true,
+      };
+
+      const handler = new clients.default({
+        client: pageClient(auth0),
+        config: testConfig,
+      });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ clients: [thirdPartyClient] }]);
+      expect(wasCreateCalled).to.be.equal(false);
+    });
+
+    it('should include third-party clients if AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is false', async () => {
+      let wasCreateCalled = false;
+      const thirdPartyClient = {
+        name: 'Third-Party Client',
+        is_first_party: false,
+      };
+
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            wasCreateCalled = true;
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const testConfig = function (key) {
+        return testConfig.data && testConfig.data[key];
+      };
+      testConfig.data = {
+        AUTH0_CLIENT_ID: 'client_id',
+        AUTH0_ALLOW_DELETE: true,
+        AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS: false,
+      };
+
+      const handler = new clients.default({
+        client: pageClient(auth0),
+        config: testConfig,
+      });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ clients: [thirdPartyClient] }]);
+      expect(wasCreateCalled).to.be.equal(true);
+    });
+
+    it('should get clients with is_first_party when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is enabled', async () => {
+      const listParams = [];
+      const auth0 = {
+        clients: {
+          list: (params) => {
+            listParams.push(params);
+            return mockPagedData(params, 'clients', [
+              { name: 'first party client', client_id: 'first-party-client-id' },
+            ]);
+          },
+        },
+        pool,
+      };
+
+      const testConfig = function (key) {
+        return testConfig.data && testConfig.data[key];
+      };
+      testConfig.data = {
+        AUTH0_CLIENT_ID: 'client_id',
+        AUTH0_ALLOW_DELETE: true,
+        AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS: true,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config: testConfig });
+      await handler.getType();
+
+      expect(listParams.length).to.be.greaterThan(0);
+      const firstCallParams = listParams[0];
+      expect(firstCallParams).to.be.an('object');
+      expect(firstCallParams.is_first_party).to.equal(true);
+      expect(firstCallParams.is_global).to.equal(false);
+    });
+
+    it('should migrate deprecated cross_origin_auth to cross_origin_authentication on export', async () => {
       const auth0 = {
         clients: {
           list: (params) =>
             mockPagedData(params, 'clients', [
-              { name: 'test client', client_id: 'FMfcgxvzLDvPsgpRFKkLVrnKqGgkHhQV' },
-              { name: 'deploy client', client_id: 'client_id' },
+              {
+                client_id: 'client1',
+                name: 'deprecatedOnlyClient',
+                app_type: 'spa',
+                cross_origin_auth: true,
+              },
+              {
+                client_id: 'client2',
+                name: 'bothFieldsClient',
+                app_type: 'spa',
+                cross_origin_auth: false,
+                cross_origin_authentication: true,
+              },
+              {
+                client_id: 'client3',
+                name: 'newOnlyClient',
+                app_type: 'spa',
+                cross_origin_authentication: false,
+              },
             ]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
 
       const handler = new clients.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
-      expect(data).to.deep.equal([
-        { client_id: 'FMfcgxvzLDvPsgpRFKkLVrnKqGgkHhQV', name: 'test client' },
-        { client_id: 'client_id', name: 'deploy client' },
-      ]);
+
+      expect(data).to.have.lengthOf(3);
+
+      const deprecatedOnlyClient = data.find((c) => c.name === 'deprecatedOnlyClient');
+      expect(deprecatedOnlyClient).to.not.have.property('cross_origin_auth');
+      expect(deprecatedOnlyClient.cross_origin_authentication).to.equal(true);
+
+      const bothFieldsClient = data.find((c) => c.name === 'bothFieldsClient');
+      expect(bothFieldsClient).to.not.have.property('cross_origin_auth');
+      expect(bothFieldsClient.cross_origin_authentication).to.equal(true);
+
+      const newOnlyClient = data.find((c) => c.name === 'newOnlyClient');
+      expect(newOnlyClient).to.not.have.property('cross_origin_auth');
+      expect(newOnlyClient.cross_origin_authentication).to.equal(false);
     });
 
     it('should update client', async () => {
@@ -332,8 +562,11 @@ describe('#clients handler', () => {
             expect(data.description).to.equal('new description');
             expect(data.session_transfer).to.deep.equal({
               can_create_session_transfer_token: false,
+              enforce_cascade_revocation: false,
               enforce_device_binding: 'asn',
               allowed_authentication_methods: ['query'],
+              allow_refresh_token: false,
+              enforce_online_refresh_tokens: false,
             });
 
             return Promise.resolve({ data });
@@ -346,6 +579,10 @@ describe('#clients handler', () => {
                 name: 'someClient',
               },
             ]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -361,8 +598,11 @@ describe('#clients handler', () => {
               description: 'new description',
               session_transfer: {
                 can_create_session_transfer_token: false,
+                enforce_cascade_revocation: false,
                 enforce_device_binding: 'asn',
                 allowed_authentication_methods: ['query'],
+                allow_refresh_token: false,
+                enforce_online_refresh_tokens: false,
               },
             },
           ],
@@ -396,6 +636,10 @@ describe('#clients handler', () => {
                 name: 'someClient',
               },
             ]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -437,6 +681,10 @@ describe('#clients handler', () => {
               { client_id: 'client_id', name: 'deploy client' },
             ]),
         },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
 
@@ -465,6 +713,10 @@ describe('#clients handler', () => {
               { client_id: 'client_id', name: 'deploy client' },
             ]),
         },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
 
@@ -488,6 +740,10 @@ describe('#clients handler', () => {
           },
           list: (params) =>
             mockPagedData(params, 'clients', [{ client_id: 'client1', name: 'existingClient' }]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -516,6 +772,10 @@ describe('#clients handler', () => {
             return Promise.resolve({ data: [] });
           },
           list: (params) => Promise.resolve(mockPagedData(params, 'clients', [])),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -552,6 +812,10 @@ describe('#clients handler', () => {
               { client_id: 'client1', name: 'existingClient' },
               { client_id: 'client2', name: 'existingClient2' },
             ]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -601,6 +865,10 @@ describe('#clients handler', () => {
                 name: 'Client 2',
               },
             ]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -657,6 +925,10 @@ describe('#clients handler', () => {
           delete: () => Promise.resolve({ data: [] }),
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
 
@@ -693,6 +965,10 @@ describe('#clients handler', () => {
           delete: () => Promise.resolve({ data: [] }),
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
 
@@ -725,6 +1001,10 @@ describe('#clients handler', () => {
                 organization_discovery_methods: ['email'],
               },
             ]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
@@ -771,6 +1051,10 @@ describe('#clients handler', () => {
               },
             ]),
         },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
         pool,
       };
 
@@ -789,6 +1073,131 @@ describe('#clients handler', () => {
           ],
         },
       ]);
+    });
+
+    it('should migrate deprecated cross_origin_auth to cross_origin_authentication on create', async () => {
+      const createdClients = [];
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            createdClients.push(data);
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'deprecatedOnlyClient',
+              app_type: 'spa',
+              cross_origin_auth: true,
+            },
+            {
+              name: 'bothFieldsClient',
+              app_type: 'spa',
+              cross_origin_auth: false,
+              cross_origin_authentication: true,
+            },
+            {
+              name: 'newOnlyClient',
+              app_type: 'spa',
+              cross_origin_authentication: false,
+            },
+          ],
+        },
+      ]);
+
+      expect(createdClients).to.have.lengthOf(3);
+
+      const deprecatedOnlyClient = createdClients.find((c) => c.name === 'deprecatedOnlyClient');
+      expect(deprecatedOnlyClient).to.not.have.property('cross_origin_auth');
+      expect(deprecatedOnlyClient.cross_origin_authentication).to.equal(true);
+
+      const bothFieldsClient = createdClients.find((c) => c.name === 'bothFieldsClient');
+      expect(bothFieldsClient).to.not.have.property('cross_origin_auth');
+      expect(bothFieldsClient.cross_origin_authentication).to.equal(true);
+
+      const newOnlyClient = createdClients.find((c) => c.name === 'newOnlyClient');
+      expect(newOnlyClient).to.not.have.property('cross_origin_auth');
+      expect(newOnlyClient.cross_origin_authentication).to.equal(false);
+    });
+
+    it('should migrate deprecated cross_origin_auth to cross_origin_authentication on update', async () => {
+      const updatedClients = [];
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (clientId, data) {
+            updatedClients.push({ ...data, client_id: clientId });
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              { client_id: 'client1', name: 'deprecatedOnlyClient' },
+              { client_id: 'client2', name: 'bothFieldsClient' },
+              { client_id: 'client3', name: 'newOnlyClient' },
+            ]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'deprecatedOnlyClient',
+              app_type: 'spa',
+              cross_origin_auth: true,
+            },
+            {
+              name: 'bothFieldsClient',
+              app_type: 'spa',
+              cross_origin_auth: false,
+              cross_origin_authentication: true,
+            },
+            {
+              name: 'newOnlyClient',
+              app_type: 'spa',
+              cross_origin_authentication: false,
+            },
+          ],
+        },
+      ]);
+
+      expect(updatedClients).to.have.lengthOf(3);
+
+      const deprecatedOnlyClient = updatedClients.find((c) => c.client_id === 'client1');
+      expect(deprecatedOnlyClient).to.not.have.property('cross_origin_auth');
+      expect(deprecatedOnlyClient.cross_origin_authentication).to.equal(true);
+
+      const bothFieldsClient = updatedClients.find((c) => c.client_id === 'client2');
+      expect(bothFieldsClient).to.not.have.property('cross_origin_auth');
+      expect(bothFieldsClient.cross_origin_authentication).to.equal(true);
+
+      const newOnlyClient = updatedClients.find((c) => c.client_id === 'client3');
+      expect(newOnlyClient).to.not.have.property('cross_origin_auth');
+      expect(newOnlyClient.cross_origin_authentication).to.equal(false);
     });
   });
 });

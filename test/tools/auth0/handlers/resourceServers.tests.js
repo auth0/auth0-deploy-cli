@@ -573,7 +573,7 @@ describe('#resourceServers handler', () => {
             expect(data.client_id).to.be.equals(undefined);
             expect(data.name).to.equal('someAPI');
             // identifier is also stripped as it's readonly
-            expect(id).to.equal('rs1'); // ID should be in params
+            expect(id).to.equal('rs1');
             return Promise.resolve(data);
           },
           delete: () => Promise.resolve([]),
@@ -620,6 +620,84 @@ describe('#resourceServers handler', () => {
       expect(result[0]).to.have.property('client_id', 'linked_client_123');
       expect(result[0]).to.have.property('name', 'someAPI');
       expect(result[0]).to.have.property('identifier', 'some-api');
+    });
+
+    it('should sanitize system resource servers in getType for Auth0 My Account API', async () => {
+      const systemResourceServer = {
+        id: 'rs_system',
+        identifier: 'https://api.system.com/me/',
+        name: 'Auth0 My Account API',
+        is_system: true,
+        token_lifetime: 86400,
+        scopes: [{ value: 'read:users' }], // Should be removed
+        signing_alg: 'RS256', // Should be removed
+        allow_offline_access: true, // Should be removed
+        skip_consent_for_verifiable_first_party_clients: true,
+        enforce_policies: true, // Should be removed
+        token_dialect: 'access_token', // Should be removed
+      };
+
+      const auth0 = {
+        resourceServers: {
+          list: (params) => mockPagedData(params, 'resource_servers', [systemResourceServer]),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const result = await handler.getType();
+
+      expect(result).to.be.an('array');
+      expect(result[0]).to.deep.equal({
+        id: 'rs_system',
+        identifier: 'https://api.system.com/me/',
+        name: 'Auth0 My Account API',
+        is_system: true,
+        token_lifetime: 86400,
+        skip_consent_for_verifiable_first_party_clients: true,
+      });
+    });
+
+    it('should update "Auth0 My Account API" without name and is_system', async () => {
+      let updateCalled = false;
+      const existingResourceServer = {
+        id: 'rs_my_account',
+        identifier: 'https://auth0.com/my-account/me/',
+        name: 'Auth0 My Account API',
+        is_system: true,
+      };
+
+      const auth0 = {
+        resourceServers: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (id, data) {
+            updateCalled = true;
+            expect(id).to.equal('rs_my_account');
+            expect(data.name).to.equal(undefined);
+            expect(data.is_system).to.equal(undefined);
+            expect(data.token_lifetime).to.equal(54321);
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'resource_servers', [existingResourceServer]),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = {
+        resourceServers: [
+          {
+            name: 'Auth0 My Account API',
+            identifier: 'https://auth0.com/my-account/me/',
+            token_lifetime: 54321,
+          },
+        ],
+      };
+
+      await stageFn.apply(handler, [data]);
+      expect(updateCalled).to.equal(true);
     });
   });
 });

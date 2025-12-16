@@ -25,8 +25,11 @@ describe('#YAML context clients', () => {
         custom_login_page: "./customLoginClient_custom_login_page.html"
         session_transfer: {
         can_create_session_transfer_token: false,
+        enforce_cascade_revocation: false,
         enforce_device_binding: 'none',
-        allowed_authentication_methods: ['query']
+        allowed_authentication_methods: ['query'],
+        allow_refresh_token: false,
+        enforce_online_refresh_tokens: false
       }
     `;
 
@@ -39,8 +42,11 @@ describe('#YAML context clients', () => {
         custom_login_page: 'html code spa "spa"',
         session_transfer: {
           can_create_session_transfer_token: false,
+          enforce_cascade_revocation: false,
           enforce_device_binding: 'none',
           allowed_authentication_methods: ['query'],
+          allow_refresh_token: false,
+          enforce_online_refresh_tokens: false,
         },
       },
     ];
@@ -80,8 +86,11 @@ describe('#YAML context clients', () => {
         custom_login_page: 'html code',
         session_transfer: {
           can_create_session_transfer_token: false,
+          enforce_cascade_revocation: false,
           enforce_device_binding: 'none',
           allowed_authentication_methods: ['cookie', 'query'],
+          allow_refresh_token: false,
+          enforce_online_refresh_tokens: false,
         },
       },
     ];
@@ -94,8 +103,11 @@ describe('#YAML context clients', () => {
         custom_login_page: './customLoginClient_custom_login_page.html',
         session_transfer: {
           can_create_session_transfer_token: false,
+          enforce_cascade_revocation: false,
           enforce_device_binding: 'none',
           allowed_authentication_methods: ['cookie', 'query'],
+          allow_refresh_token: false,
+          enforce_online_refresh_tokens: false,
         },
       },
     ];
@@ -190,6 +202,65 @@ describe('#YAML context clients', () => {
     const dumped = await handler.dump(context);
 
     expect(dumped).to.deep.equal({ clients: target });
+  });
+
+  it('should dump clients with express_configuration', async () => {
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+
+    context.assets.clients = [
+      {
+        name: 'someClient',
+        app_type: 'regular_web',
+        express_configuration: {
+          user_attribute_profile_id: 'uap_123',
+          connection_profile_id: 'cp_123',
+          okta_oin_client_id: 'client_123',
+        },
+      },
+      {
+        client_id: 'client_123',
+        name: 'My OIN Client',
+      },
+    ];
+
+    context.assets.userAttributeProfiles = [{ id: 'uap_123', name: 'My User Attribute Profile' }];
+
+    context.assets.connectionProfiles = [{ id: 'cp_123', name: 'My Connection Profile' }];
+
+    const dumped = await handler.dump(context);
+
+    expect(dumped.clients[0]).to.deep.equal({
+      name: 'someClient',
+      app_type: 'regular_web',
+      express_configuration: {
+        user_attribute_profile_id: 'My User Attribute Profile',
+        connection_profile_id: 'My Connection Profile',
+        okta_oin_client_id: 'My OIN Client',
+      },
+    });
+  });
+
+  it('should dump clients with app_type express_configuration and filter fields', async () => {
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+
+    context.assets.clients = [
+      {
+        name: 'someExpressClient',
+        app_type: 'express_configuration',
+        client_authentication_methods: {},
+        organization_require_behavior: 'no_prompt',
+        some_other_field: 'should be removed',
+      },
+    ];
+
+    const dumped = await handler.dump(context);
+
+    expect(dumped.clients[0]).to.deep.equal({
+      name: 'someExpressClient',
+      app_type: 'express_configuration',
+      client_authentication_methods: {},
+      organization_require_behavior: 'no_prompt',
+    });
   });
 
   it('should process clients with token_exchange', async () => {
