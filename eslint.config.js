@@ -91,6 +91,7 @@ module.exports = [
       'no-useless-escape': 'off',
       'no-redeclare': 'off',
       'no-unused-vars': 'off',
+      'no-console': 'warn',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {

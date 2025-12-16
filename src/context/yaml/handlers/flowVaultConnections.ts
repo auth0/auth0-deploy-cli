@@ -40,6 +40,7 @@ async function dump(context: YAMLContext): Promise<ParsedParsedFlowVaults> {
     });
   });
 
+  // eslint-disable-next-line no-console
   console.warn(
     'WARNING! Flow vault connections `setup` key does not support keyword preservation, `export` or `dump` commmand will not preserve `setup` key in local configuration file.'
   );
