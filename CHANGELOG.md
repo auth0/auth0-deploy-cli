@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.23.0] - 2025-12-16
+
+### Added
+
+- Add support for `brute-force-protection` in prompts custom-text. [#1221]
+- Add support for `phoneTemplates`. [#1224]
+- Add support for `tokenExchangeProfiles`. [#1232]
+
+### Changed
+
+- Upgrading `node-auth0` from v4 to v5. [#1207]
+
+### Fixed
+
+- Fix `improved_signup_bot_detection_in_classic` is added in allowed `tenant` flags. [#1231]
+
+## [8.22.0] - 2025-12-10
+
+### Added
+
+- Add `AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS` config property to exclude third-party `clients`. [#1212]
+
+### Fixed
+
+- Fix managing `Auth0 My Account API` in `resourceServers`. [#1229]
+- Fix `cross_origin_auth` is deprecated and migrated to `cross_origin_authentication` in `clients`. [#1223]
+
+## [8.21.0] - 2025-11-21
+
+### Added
+
+- Add support for Connection Profiles and Express Configuration on Clients. [#1204]
+- Add support for ACUL GA. [#1209]
+- Add support for `session_transfer` schema in `clients`. [#1211]
+
+### Fixed
+
+- Fix handle responses when paginating custom domains. [#1214]
+
 ## [8.20.4-beta.0] - 2025-12-02
 
 ### Changed
@@ -1517,8 +1556,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1196]: https://github.com/auth0/auth0-deploy-cli/issues/1196
 [#1200]: https://github.com/auth0/auth0-deploy-cli/issues/1200
 [#1203]: https://github.com/auth0/auth0-deploy-cli/issues/1203
+[#1204]: https://github.com/auth0/auth0-deploy-cli/issues/1204
 [#1207]: https://github.com/auth0/auth0-deploy-cli/issues/1207
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.4-beta.0...HEAD
+[#1209]: https://github.com/auth0/auth0-deploy-cli/issues/1209
+[#1211]: https://github.com/auth0/auth0-deploy-cli/issues/1211
+[#1212]: https://github.com/auth0/auth0-deploy-cli/issues/1212
+[#1214]: https://github.com/auth0/auth0-deploy-cli/issues/1214
+[#1221]: https://github.com/auth0/auth0-deploy-cli/issues/1221
+[#1223]: https://github.com/auth0/auth0-deploy-cli/issues/1223
+[#1224]: https://github.com/auth0/auth0-deploy-cli/issues/1224
+[#1229]: https://github.com/auth0/auth0-deploy-cli/issues/1229
+[#1231]: https://github.com/auth0/auth0-deploy-cli/issues/1231
+[#1232]: https://github.com/auth0/auth0-deploy-cli/issues/1232
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.0...HEAD
+[8.23.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.22.0...v8.23.0
+[8.22.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.21.0...v8.22.0
+[8.21.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.4-beta.0...v8.21.0
 [8.20.4-beta.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.3...v8.20.4-beta.0
 [8.20.3]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.2...v8.20.3
 [8.20.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.1...v8.20.2
