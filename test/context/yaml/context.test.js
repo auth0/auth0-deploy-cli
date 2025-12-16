@@ -312,6 +312,7 @@ describe('#YAML context validation', () => {
       selfServiceProfiles: [],
       tokenExchangeProfiles: [],
       userAttributeProfiles: [],
+      phoneTemplates: [],
     });
   });
 
@@ -441,6 +442,7 @@ describe('#YAML context validation', () => {
       selfServiceProfiles: [],
       tokenExchangeProfiles: [],
       userAttributeProfiles: [],
+      phoneTemplates: [],
     });
   });
 
@@ -571,6 +573,7 @@ describe('#YAML context validation', () => {
       selfServiceProfiles: [],
       tokenExchangeProfiles: [],
       userAttributeProfiles: [],
+      phoneTemplates: [],
     });
   });
 

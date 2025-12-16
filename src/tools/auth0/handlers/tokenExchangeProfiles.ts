@@ -51,7 +51,7 @@ export const schema = {
 export default class TokenExchangeProfilesHandler extends DefaultHandler {
   existing: TokenExchangeProfile[];
 
-  actions: Asset[] | null;
+  private actions: Asset[] | null;
 
   constructor(config: DefaultHandler) {
     super({
@@ -63,7 +63,6 @@ export default class TokenExchangeProfilesHandler extends DefaultHandler {
       stripUpdateFields: ['id', 'created_at', 'updated_at', 'action_id', 'type'],
       stripCreateFields: ['id', 'created_at', 'updated_at'],
     });
-    this.actions = null;
   }
 
   private sanitizeForExport(profile: TokenExchangeProfile, actions: Asset[]): TokenExchangeProfile {
@@ -93,6 +92,14 @@ export default class TokenExchangeProfilesHandler extends DefaultHandler {
         );
       }
     }
+
+    if (!profile.action_id) {
+      throw new Error(
+        `Token exchange profile "${profile.name}" is missing action reference. ` +
+          `Expected "action" (name) or "action_id" (ID) field.`
+      );
+    }
+
     return profile;
   }
 
@@ -213,7 +220,12 @@ export default class TokenExchangeProfilesHandler extends DefaultHandler {
 
   async updateTokenExchangeProfile(profile: TokenExchangeProfile): Promise<void> {
     const { id, created_at, updated_at, action_id, type, ...updateParams } = profile;
-    await this.client.tokenExchangeProfiles.update(id as string, updateParams);
+
+    if (!id) {
+      throw new Error(`Cannot update token exchange profile "${profile.name}" - missing id`);
+    }
+
+    await this.client.tokenExchangeProfiles.update(id, updateParams);
   }
 
   async updateTokenExchangeProfiles(updates: TokenExchangeProfile[]): Promise<void> {
@@ -234,7 +246,11 @@ export default class TokenExchangeProfilesHandler extends DefaultHandler {
   }
 
   async deleteTokenExchangeProfile(profile: TokenExchangeProfile): Promise<void> {
-    await this.client.tokenExchangeProfiles.delete(profile.id as string);
+    if (!profile.id) {
+      throw new Error(`Cannot delete token exchange profile "${profile.name}" - missing id`);
+    }
+
+    await this.client.tokenExchangeProfiles.delete(profile.id);
   }
 
   async deleteTokenExchangeProfiles(data: TokenExchangeProfile[]): Promise<void> {
@@ -257,7 +273,7 @@ export default class TokenExchangeProfilesHandler extends DefaultHandler {
         })
         .promise();
     } else {
-      log.warn(`Detected the following tokenExhangeProfile should be deleted. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config
+      log.warn(`Detected the following tokenExchangeProfile should be deleted. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config
       \n${data.map((i) => this.objString(i)).join('\n')}`);
     }
   }

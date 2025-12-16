@@ -40,6 +40,7 @@ const promptTypes = [
   'common',
   'captcha',
   'passkeys',
+  'brute-force-protection',
 ] as const;
 
 export type PromptTypes = (typeof promptTypes)[number];
@@ -106,6 +107,9 @@ const screenTypes = [
   'login-passwordless-sms-otp',
   'passkey-enrollment',
   'passkey-enrollment-local',
+  'brute-force-protection-unblock',
+  'brute-force-protection-unblock-success',
+  'brute-force-protection-unblock-failure',
 ] as const;
 
 export type ScreenTypes = (typeof screenTypes)[number];

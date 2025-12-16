@@ -30,7 +30,7 @@ function parse(context: DirectoryContext): ParsedTokenExchangeProfiles {
 async function dump(context: DirectoryContext) {
   const { tokenExchangeProfiles } = context.assets;
 
-  if (!tokenExchangeProfiles || tokenExchangeProfiles.constructor === Object) return; // Skip
+  if (!tokenExchangeProfiles || !Array.isArray(tokenExchangeProfiles)) return; // Skip
 
   const folder = path.join(context.filePath, constants.TOKEN_EXCHANGE_PROFILES_DIRECTORY);
   fs.ensureDirSync(folder);

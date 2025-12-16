@@ -1499,7 +1499,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/change_password",
+        "path": "/api/v2/email-templates/verify_email_by_code",
         "body": "",
         "status": 404,
         "response": {
@@ -1507,6 +1507,40 @@
             "error": "Not Found",
             "message": "The template does not exist.",
             "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/reset_email",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/welcome_email",
+        "body": "",
+        "status": 200,
+        "response": {
+            "template": "welcome_email",
+            "body": "<html>\n  <body>\n    <h1>Welcome!</h1>\n  </body>\n</html>\n",
+            "from": "",
+            "resultUrl": "https://example.com/welcome",
+            "subject": "Welcome",
+            "syntax": "liquid",
+            "urlLifetimeInSeconds": 3600,
+            "enabled": false
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -1544,86 +1578,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/welcome_email",
-        "body": "",
-        "status": 200,
-        "response": {
-            "template": "welcome_email",
-            "body": "<html>\n  <body>\n    <h1>Welcome!</h1>\n  </body>\n</html>\n",
-            "from": "",
-            "resultUrl": "https://example.com/welcome",
-            "subject": "Welcome",
-            "syntax": "liquid",
-            "urlLifetimeInSeconds": 3600,
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/email-templates/stolen_credentials",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/verify_email_by_code",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/async_approval",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/reset_email",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/mfa_oob_code",
         "body": "",
         "status": 404,
         "response": {
@@ -1653,7 +1608,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/user_invitation",
+        "path": "/api/v2/email-templates/mfa_oob_code",
         "body": "",
         "status": 404,
         "response": {
@@ -1669,6 +1624,51 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/email-templates/password_reset",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/change_password",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/async_approval",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/user_invitation",
         "body": "",
         "status": 404,
         "response": {
@@ -2108,7 +2108,85 @@
                     },
                     "credentials": null,
                     "created_at": "2025-12-09T12:24:00.604Z",
-                    "updated_at": "2025-12-11T12:24:00.120Z"
+                    "updated_at": "2025-12-11T19:04:05.770Z"
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/branding/phone/templates",
+        "body": "",
+        "status": 200,
+        "response": {
+            "templates": [
+                {
+                    "id": "tem_dL83uTmWn8moGzm8UgAk4Q",
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "channel": "phone",
+                    "type": "blocked_account",
+                    "disabled": false,
+                    "created_at": "2025-12-09T12:22:47.683Z",
+                    "updated_at": "2025-12-09T12:30:30.019Z",
+                    "content": {
+                        "syntax": "liquid",
+                        "body": {
+                            "text": "We detected suspicious activity on your account from the ip {{user.source_ip}}{% if user.city %} from {{user.city}}, {{user.country}}{% elsif user.country %} from {{user.country}}{% endif %}. Logins from this IP have been blocked on your account. If this is your IP, please reset your password to unblock your account. Otherwise, disregard this message.",
+                            "voice": "We detected suspicious activity on your account from the ip {{user.source_ip}}{% if user.city %} from {{user.city}}, {{user.country}}{% elsif user.country %} from {{user.country}}{% endif %}. Logins from this IP have been blocked on your account. If this is your IP, please reset your password to unblock your account. Otherwise, disregard this message."
+                        },
+                        "from": "0032232323"
+                    }
+                },
+                {
+                    "id": "tem_xqbUSF83fpnRv8r8rqXFDZ",
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "channel": "phone",
+                    "type": "change_password",
+                    "disabled": false,
+                    "created_at": "2025-12-09T12:26:20.243Z",
+                    "updated_at": "2025-12-09T12:30:30.034Z",
+                    "content": {
+                        "syntax": "liquid",
+                        "body": {
+                            "text": "{{ code | escape }} is your password change code for {{ friendly_name | escape }}",
+                            "voice": "Hello. Your password change code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your password change code is {{ pause }} {{ code | escape }}"
+                        }
+                    }
+                },
+                {
+                    "id": "tem_qarYST5TTE5pbMNB5NHZAj",
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "channel": "phone",
+                    "type": "otp_enroll",
+                    "disabled": false,
+                    "created_at": "2025-12-09T12:26:25.327Z",
+                    "updated_at": "2025-12-09T12:30:30.174Z",
+                    "content": {
+                        "syntax": "liquid",
+                        "body": {
+                            "text": "{{ code | escape }} is your verification code for {{ friendly_name | escape }}. Please enter this code to verify your enrollment.",
+                            "voice": "Hello. Your verification code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your verification code is {{ pause }} {{ code | escape }}"
+                        }
+                    }
+                },
+                {
+                    "id": "tem_o4LBTt4NQyX8K4vC9dPafR",
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "channel": "phone",
+                    "type": "otp_verify",
+                    "disabled": false,
+                    "created_at": "2025-12-09T12:26:30.547Z",
+                    "updated_at": "2025-12-09T12:30:30.365Z",
+                    "content": {
+                        "syntax": "liquid",
+                        "body": {
+                            "text": "{{ code | escape }} is your verification code for {{ friendly_name | escape }}",
+                            "voice": "Hello. Your verification code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your verification code is {{ pause }} {{ code | escape }}"
+                        }
+                    }
                 }
             ]
         },
@@ -2203,7 +2281,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login-id/custom-text/en",
+        "path": "/api/v2/prompts/login/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2213,7 +2291,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login/custom-text/en",
+        "path": "/api/v2/prompts/login-id/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2293,7 +2371,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/email-identifier-challenge/custom-text/en",
+        "path": "/api/v2/prompts/phone-identifier-challenge/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2303,7 +2381,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/phone-identifier-challenge/custom-text/en",
+        "path": "/api/v2/prompts/email-identifier-challenge/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2363,6 +2441,16 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/prompts/mfa-push/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/prompts/mfa-otp/custom-text/en",
         "body": "",
         "status": 200,
@@ -2383,17 +2471,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa-push/custom-text/en",
-        "body": "",
-        "status": 200,
-        "response": {},
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/prompts/mfa-sms/custom-text/en",
+        "path": "/api/v2/prompts/mfa-phone/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2413,7 +2491,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa-phone/custom-text/en",
+        "path": "/api/v2/prompts/mfa-sms/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2443,7 +2521,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/status/custom-text/en",
+        "path": "/api/v2/prompts/mfa/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2453,7 +2531,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/mfa/custom-text/en",
+        "path": "/api/v2/prompts/status/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2473,7 +2551,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/organizations/custom-text/en",
+        "path": "/api/v2/prompts/email-verification/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2493,17 +2571,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/email-verification/custom-text/en",
-        "body": "",
-        "status": 200,
-        "response": {},
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/prompts/common/custom-text/en",
+        "path": "/api/v2/prompts/organizations/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2523,7 +2591,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/passkeys/custom-text/en",
+        "path": "/api/v2/prompts/common/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2534,6 +2602,26 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/prompts/captcha/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/passkeys/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/prompts/brute-force-protection/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2583,7 +2671,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login-passwordless/partials",
+        "path": "/api/v2/prompts/signup-id/partials",
         "body": "",
         "status": 200,
         "response": {},
@@ -2593,7 +2681,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/signup-id/partials",
+        "path": "/api/v2/prompts/login-passwordless/partials",
         "body": "",
         "status": 200,
         "response": {},
@@ -2628,33 +2716,33 @@
                         }
                     ],
                     "created_at": "2025-12-11T11:30:13.629492200Z",
-                    "updated_at": "2025-12-11T12:23:50.126254323Z",
+                    "updated_at": "2025-12-11T19:03:56.861288470Z",
                     "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                     "dependencies": [],
                     "runtime": "node22",
                     "status": "built",
                     "secrets": [],
                     "current_version": {
-                        "id": "f43d7d42-41ee-4f23-8e8b-3bc3ee750f3c",
+                        "id": "7c1d4428-7721-40b7-91b0-c17278614787",
                         "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                         "runtime": "node22",
                         "status": "BUILT",
-                        "number": 3,
-                        "build_time": "2025-12-11T12:23:50.914593858Z",
-                        "created_at": "2025-12-11T12:23:50.836357193Z",
-                        "updated_at": "2025-12-11T12:23:50.915971520Z"
+                        "number": 4,
+                        "build_time": "2025-12-11T19:03:57.560767224Z",
+                        "created_at": "2025-12-11T19:03:57.472143Z",
+                        "updated_at": "2025-12-11T19:03:57.562385412Z"
                     },
                     "deployed_version": {
                         "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                         "dependencies": [],
-                        "id": "f43d7d42-41ee-4f23-8e8b-3bc3ee750f3c",
+                        "id": "7c1d4428-7721-40b7-91b0-c17278614787",
                         "deployed": true,
-                        "number": 3,
-                        "built_at": "2025-12-11T12:23:50.914593858Z",
+                        "number": 4,
+                        "built_at": "2025-12-11T19:03:57.560767224Z",
                         "secrets": [],
                         "status": "built",
-                        "created_at": "2025-12-11T12:23:50.836357193Z",
-                        "updated_at": "2025-12-11T12:23:50.915971520Z",
+                        "created_at": "2025-12-11T19:03:57.472143Z",
+                        "updated_at": "2025-12-11T19:03:57.562385412Z",
                         "runtime": "node22",
                         "supported_triggers": [
                             {
@@ -2682,17 +2770,6 @@
             "triggers": [
                 {
                     "id": "post-login",
-                    "version": "v2",
-                    "status": "DEPRECATED",
-                    "runtimes": [
-                        "node18"
-                    ],
-                    "default_runtime": "node16",
-                    "binding_policy": "trigger-bound",
-                    "compatible_triggers": []
-                },
-                {
-                    "id": "post-login",
                     "version": "v3",
                     "status": "CURRENT",
                     "runtimes": [
@@ -2709,11 +2786,32 @@
                     ]
                 },
                 {
+                    "id": "post-login",
+                    "version": "v2",
+                    "status": "DEPRECATED",
+                    "runtimes": [
+                        "node18"
+                    ],
+                    "default_runtime": "node16",
+                    "binding_policy": "trigger-bound",
+                    "compatible_triggers": []
+                },
+                {
+                    "id": "credentials-exchange",
+                    "version": "v1",
+                    "status": "DEPRECATED",
+                    "runtimes": [
+                        "node12"
+                    ],
+                    "default_runtime": "node12",
+                    "binding_policy": "trigger-bound",
+                    "compatible_triggers": []
+                },
+                {
                     "id": "credentials-exchange",
                     "version": "v2",
                     "status": "CURRENT",
                     "runtimes": [
-                        "node12",
                         "node18-actions",
                         "node22"
                     ],
@@ -2752,7 +2850,6 @@
                     "version": "v2",
                     "status": "CURRENT",
                     "runtimes": [
-                        "node12",
                         "node18-actions",
                         "node22"
                     ],
@@ -2762,10 +2859,20 @@
                 },
                 {
                     "id": "send-phone-message",
+                    "version": "v1",
+                    "status": "DEPRECATED",
+                    "runtimes": [
+                        "node12"
+                    ],
+                    "default_runtime": "node12",
+                    "binding_policy": "trigger-bound",
+                    "compatible_triggers": []
+                },
+                {
+                    "id": "send-phone-message",
                     "version": "v2",
                     "status": "CURRENT",
                     "runtimes": [
-                        "node12",
                         "node18-actions",
                         "node22"
                     ],
@@ -2973,7 +3080,7 @@
         "response": {
             "bindings": [
                 {
-                    "id": "dc93358f-3e6b-4465-b724-49bd9fd3f50b",
+                    "id": "6b2e7f91-0bc4-428d-8ed0-590d245b03eb",
                     "trigger_id": "custom-phone-provider",
                     "action": {
                         "id": "40d899f3-a209-42a2-a3ed-39e764dcbc33",
@@ -2985,28 +3092,28 @@
                             }
                         ],
                         "created_at": "2025-12-11T11:30:13.629492200Z",
-                        "updated_at": "2025-12-11T12:23:50.112997376Z",
+                        "updated_at": "2025-12-11T19:03:56.854977710Z",
                         "current_version": {
-                            "id": "f43d7d42-41ee-4f23-8e8b-3bc3ee750f3c",
+                            "id": "7c1d4428-7721-40b7-91b0-c17278614787",
                             "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                             "runtime": "node22",
                             "status": "BUILT",
-                            "number": 3,
-                            "build_time": "2025-12-11T12:23:50.914593858Z",
-                            "created_at": "2025-12-11T12:23:50.836357193Z",
-                            "updated_at": "2025-12-11T12:23:50.915971520Z"
+                            "number": 4,
+                            "build_time": "2025-12-11T19:03:57.560767224Z",
+                            "created_at": "2025-12-11T19:03:57.472143Z",
+                            "updated_at": "2025-12-11T19:03:57.562385412Z"
                         },
                         "deployed_version": {
                             "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                             "dependencies": [],
-                            "id": "f43d7d42-41ee-4f23-8e8b-3bc3ee750f3c",
+                            "id": "7c1d4428-7721-40b7-91b0-c17278614787",
                             "deployed": true,
-                            "number": 3,
-                            "built_at": "2025-12-11T12:23:50.914593858Z",
+                            "number": 4,
+                            "built_at": "2025-12-11T19:03:57.560767224Z",
                             "secrets": [],
                             "status": "built",
-                            "created_at": "2025-12-11T12:23:50.836357193Z",
-                            "updated_at": "2025-12-11T12:23:50.915971520Z",
+                            "created_at": "2025-12-11T19:03:57.472143Z",
+                            "updated_at": "2025-12-11T19:03:57.562385412Z",
                             "runtime": "node22",
                             "supported_triggers": [
                                 {
@@ -3017,8 +3124,8 @@
                         },
                         "all_changes_deployed": false
                     },
-                    "created_at": "2025-12-11T12:24:07.516447326Z",
-                    "updated_at": "2025-12-11T12:24:07.516447326Z",
+                    "created_at": "2025-12-11T19:04:12.425709969Z",
+                    "updated_at": "2025-12-11T19:04:12.425709969Z",
                     "display_name": "Custom Phone Provider"
                 }
             ],
@@ -3319,6 +3426,23 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/attack-protection/bot-detection",
+        "body": "",
+        "status": 200,
+        "response": {
+            "challenge_password_policy": "never",
+            "challenge_passwordless_policy": "never",
+            "challenge_password_reset_policy": "never",
+            "allowlist": [],
+            "bot_detection_level": "medium",
+            "monitoring_mode_enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/attack-protection/captcha",
         "body": "",
         "status": 200,
@@ -3347,23 +3471,6 @@
                 "verify_subdomain": "verify-api",
                 "fail_open": false
             }
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/attack-protection/bot-detection",
-        "body": "",
-        "status": 200,
-        "response": {
-            "challenge_password_policy": "never",
-            "challenge_passwordless_policy": "never",
-            "challenge_password_reset_policy": "never",
-            "allowlist": [],
-            "bot_detection_level": "medium",
-            "monitoring_mode_enabled": false
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3419,7 +3526,7 @@
                     "name": "Blank-form",
                     "flow_count": 0,
                     "created_at": "2024-11-26T11:58:18.187Z",
-                    "updated_at": "2025-12-11T12:24:10.654Z"
+                    "updated_at": "2025-12-11T19:04:15.095Z"
                 }
             ]
         },
@@ -3505,7 +3612,7 @@
                 }
             },
             "created_at": "2024-11-26T11:58:18.187Z",
-            "updated_at": "2025-12-11T12:24:10.654Z"
+            "updated_at": "2025-12-11T19:04:15.095Z"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3614,7 +3721,7 @@
                         "okta"
                     ],
                     "created_at": "2024-11-26T11:58:18.962Z",
-                    "updated_at": "2025-12-11T12:24:01.242Z",
+                    "updated_at": "2025-12-11T19:04:06.915Z",
                     "branding": {
                         "colors": {
                             "primary": "#19aecc"
@@ -3666,7 +3773,7 @@
                         }
                     },
                     "created_at": "2025-09-09T04:41:43.671Z",
-                    "updated_at": "2025-12-11T12:23:52.339Z",
+                    "updated_at": "2025-12-11T19:03:58.933Z",
                     "id": "acl_wpZ6oScRU5L6QKAxMUMHmx"
                 }
             ]
@@ -5167,48 +5274,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/webauthn-roaming",
-        "body": {
-            "enabled": false
-        },
-        "status": 200,
-        "response": {
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PUT",
-        "path": "/api/v2/guardian/factors/push-notification",
-        "body": {
-            "enabled": false
-        },
-        "status": 200,
-        "response": {
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PUT",
-        "path": "/api/v2/guardian/factors/webauthn-platform",
-        "body": {
-            "enabled": false
-        },
-        "status": 200,
-        "response": {
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PUT",
         "path": "/api/v2/guardian/factors/email",
         "body": {
             "enabled": false
@@ -5237,7 +5302,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/sms",
+        "path": "/api/v2/guardian/factors/push-notification",
         "body": {
             "enabled": false
         },
@@ -5252,6 +5317,48 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
         "path": "/api/v2/guardian/factors/recovery-code",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
+        "path": "/api/v2/guardian/factors/webauthn-platform",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
+        "path": "/api/v2/guardian/factors/sms",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
+        "path": "/api/v2/guardian/factors/webauthn-roaming",
         "body": {
             "enabled": false
         },
@@ -5350,33 +5457,33 @@
                         }
                     ],
                     "created_at": "2025-12-11T11:30:13.629492200Z",
-                    "updated_at": "2025-12-11T12:23:50.126254323Z",
+                    "updated_at": "2025-12-11T19:03:56.861288470Z",
                     "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                     "dependencies": [],
                     "runtime": "node22",
                     "status": "built",
                     "secrets": [],
                     "current_version": {
-                        "id": "f43d7d42-41ee-4f23-8e8b-3bc3ee750f3c",
+                        "id": "7c1d4428-7721-40b7-91b0-c17278614787",
                         "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                         "runtime": "node22",
                         "status": "BUILT",
-                        "number": 3,
-                        "build_time": "2025-12-11T12:23:50.914593858Z",
-                        "created_at": "2025-12-11T12:23:50.836357193Z",
-                        "updated_at": "2025-12-11T12:23:50.915971520Z"
+                        "number": 4,
+                        "build_time": "2025-12-11T19:03:57.560767224Z",
+                        "created_at": "2025-12-11T19:03:57.472143Z",
+                        "updated_at": "2025-12-11T19:03:57.562385412Z"
                     },
                     "deployed_version": {
                         "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                         "dependencies": [],
-                        "id": "f43d7d42-41ee-4f23-8e8b-3bc3ee750f3c",
+                        "id": "7c1d4428-7721-40b7-91b0-c17278614787",
                         "deployed": true,
-                        "number": 3,
-                        "built_at": "2025-12-11T12:23:50.914593858Z",
+                        "number": 4,
+                        "built_at": "2025-12-11T19:03:57.560767224Z",
                         "secrets": [],
                         "status": "built",
-                        "created_at": "2025-12-11T12:23:50.836357193Z",
-                        "updated_at": "2025-12-11T12:23:50.915971520Z",
+                        "created_at": "2025-12-11T19:03:57.472143Z",
+                        "updated_at": "2025-12-11T19:03:57.562385412Z",
                         "runtime": "node22",
                         "supported_triggers": [
                             {
@@ -5422,33 +5529,33 @@
                 }
             ],
             "created_at": "2025-12-11T11:30:13.629492200Z",
-            "updated_at": "2025-12-11T19:03:56.861288470Z",
+            "updated_at": "2025-12-16T05:15:01.577210494Z",
             "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
             "dependencies": [],
             "runtime": "node22",
             "status": "pending",
             "secrets": [],
             "current_version": {
-                "id": "f43d7d42-41ee-4f23-8e8b-3bc3ee750f3c",
+                "id": "7c1d4428-7721-40b7-91b0-c17278614787",
                 "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                 "runtime": "node22",
                 "status": "BUILT",
-                "number": 3,
-                "build_time": "2025-12-11T12:23:50.914593858Z",
-                "created_at": "2025-12-11T12:23:50.836357193Z",
-                "updated_at": "2025-12-11T12:23:50.915971520Z"
+                "number": 4,
+                "build_time": "2025-12-11T19:03:57.560767224Z",
+                "created_at": "2025-12-11T19:03:57.472143Z",
+                "updated_at": "2025-12-11T19:03:57.562385412Z"
             },
             "deployed_version": {
                 "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                 "dependencies": [],
-                "id": "f43d7d42-41ee-4f23-8e8b-3bc3ee750f3c",
+                "id": "7c1d4428-7721-40b7-91b0-c17278614787",
                 "deployed": true,
-                "number": 3,
-                "built_at": "2025-12-11T12:23:50.914593858Z",
+                "number": 4,
+                "built_at": "2025-12-11T19:03:57.560767224Z",
                 "secrets": [],
                 "status": "built",
-                "created_at": "2025-12-11T12:23:50.836357193Z",
-                "updated_at": "2025-12-11T12:23:50.915971520Z",
+                "created_at": "2025-12-11T19:03:57.472143Z",
+                "updated_at": "2025-12-11T19:03:57.562385412Z",
                 "runtime": "node22",
                 "supported_triggers": [
                     {
@@ -5480,33 +5587,33 @@
                         }
                     ],
                     "created_at": "2025-12-11T11:30:13.629492200Z",
-                    "updated_at": "2025-12-11T19:03:56.861288470Z",
+                    "updated_at": "2025-12-16T05:15:01.577210494Z",
                     "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                     "dependencies": [],
                     "runtime": "node22",
                     "status": "built",
                     "secrets": [],
                     "current_version": {
-                        "id": "f43d7d42-41ee-4f23-8e8b-3bc3ee750f3c",
+                        "id": "7c1d4428-7721-40b7-91b0-c17278614787",
                         "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                         "runtime": "node22",
                         "status": "BUILT",
-                        "number": 3,
-                        "build_time": "2025-12-11T12:23:50.914593858Z",
-                        "created_at": "2025-12-11T12:23:50.836357193Z",
-                        "updated_at": "2025-12-11T12:23:50.915971520Z"
+                        "number": 4,
+                        "build_time": "2025-12-11T19:03:57.560767224Z",
+                        "created_at": "2025-12-11T19:03:57.472143Z",
+                        "updated_at": "2025-12-11T19:03:57.562385412Z"
                     },
                     "deployed_version": {
                         "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                         "dependencies": [],
-                        "id": "f43d7d42-41ee-4f23-8e8b-3bc3ee750f3c",
+                        "id": "7c1d4428-7721-40b7-91b0-c17278614787",
                         "deployed": true,
-                        "number": 3,
-                        "built_at": "2025-12-11T12:23:50.914593858Z",
+                        "number": 4,
+                        "built_at": "2025-12-11T19:03:57.560767224Z",
                         "secrets": [],
                         "status": "built",
-                        "created_at": "2025-12-11T12:23:50.836357193Z",
-                        "updated_at": "2025-12-11T12:23:50.915971520Z",
+                        "created_at": "2025-12-11T19:03:57.472143Z",
+                        "updated_at": "2025-12-11T19:03:57.562385412Z",
                         "runtime": "node22",
                         "supported_triggers": [
                             {
@@ -5533,13 +5640,13 @@
         "response": {
             "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
             "dependencies": [],
-            "id": "7c1d4428-7721-40b7-91b0-c17278614787",
+            "id": "9b05dee7-c8c0-4f0d-9e0e-14531369af8b",
             "deployed": false,
-            "number": 4,
+            "number": 5,
             "secrets": [],
             "status": "built",
-            "created_at": "2025-12-11T19:03:57.472143Z",
-            "updated_at": "2025-12-11T19:03:57.472143Z",
+            "created_at": "2025-12-16T05:15:03.656132145Z",
+            "updated_at": "2025-12-16T05:15:03.656132145Z",
             "runtime": "node22",
             "supported_triggers": [
                 {
@@ -5557,8 +5664,72 @@
                     }
                 ],
                 "created_at": "2025-12-11T11:30:13.629492200Z",
-                "updated_at": "2025-12-11T19:03:56.854977710Z",
+                "updated_at": "2025-12-16T05:15:01.571703559Z",
                 "all_changes_deployed": false
+            }
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/attack-protection/bot-detection",
+        "body": {
+            "challenge_password_policy": "never",
+            "challenge_passwordless_policy": "never",
+            "challenge_password_reset_policy": "never",
+            "allowlist": [],
+            "bot_detection_level": "medium",
+            "monitoring_mode_enabled": false
+        },
+        "status": 200,
+        "response": {
+            "challenge_password_policy": "never",
+            "challenge_passwordless_policy": "never",
+            "challenge_password_reset_policy": "never",
+            "allowlist": [],
+            "bot_detection_level": "medium",
+            "monitoring_mode_enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/attack-protection/captcha",
+        "body": {
+            "active_provider_id": "auth_challenge",
+            "auth_challenge": {
+                "fail_open": false
+            }
+        },
+        "status": 200,
+        "response": {
+            "active_provider_id": "auth_challenge",
+            "simple_captcha": {},
+            "auth_challenge": {
+                "fail_open": false
+            },
+            "recaptcha_v2": {
+                "site_key": ""
+            },
+            "recaptcha_enterprise": {
+                "site_key": "",
+                "project_id": ""
+            },
+            "hcaptcha": {
+                "site_key": ""
+            },
+            "friendly_captcha": {
+                "site_key": ""
+            },
+            "arkose": {
+                "site_key": "",
+                "client_subdomain": "client-api",
+                "verify_subdomain": "verify-api",
+                "fail_open": false
             }
         },
         "rawHeaders": [],
@@ -5647,70 +5818,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/attack-protection/captcha",
-        "body": {
-            "active_provider_id": "auth_challenge",
-            "auth_challenge": {
-                "fail_open": false
-            }
-        },
-        "status": 200,
-        "response": {
-            "active_provider_id": "auth_challenge",
-            "simple_captcha": {},
-            "auth_challenge": {
-                "fail_open": false
-            },
-            "recaptcha_v2": {
-                "site_key": ""
-            },
-            "recaptcha_enterprise": {
-                "site_key": "",
-                "project_id": ""
-            },
-            "hcaptcha": {
-                "site_key": ""
-            },
-            "friendly_captcha": {
-                "site_key": ""
-            },
-            "arkose": {
-                "site_key": "",
-                "client_subdomain": "client-api",
-                "verify_subdomain": "verify-api",
-                "fail_open": false
-            }
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PATCH",
-        "path": "/api/v2/attack-protection/bot-detection",
-        "body": {
-            "challenge_password_policy": "never",
-            "challenge_passwordless_policy": "never",
-            "challenge_password_reset_policy": "never",
-            "allowlist": [],
-            "bot_detection_level": "medium",
-            "monitoring_mode_enabled": false
-        },
-        "status": 200,
-        "response": {
-            "challenge_password_policy": "never",
-            "challenge_passwordless_policy": "never",
-            "challenge_password_reset_policy": "never",
-            "allowlist": [],
-            "bot_detection_level": "medium",
-            "monitoring_mode_enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PATCH",
         "path": "/api/v2/attack-protection/breached-password-detection",
         "body": {
             "enabled": false,
@@ -5781,7 +5888,7 @@
                         }
                     },
                     "created_at": "2025-09-09T04:41:43.671Z",
-                    "updated_at": "2025-12-11T12:23:52.339Z",
+                    "updated_at": "2025-12-11T19:03:58.933Z",
                     "id": "acl_wpZ6oScRU5L6QKAxMUMHmx"
                 }
             ]
@@ -5826,7 +5933,7 @@
                 }
             },
             "created_at": "2025-09-09T04:41:43.671Z",
-            "updated_at": "2025-12-11T19:03:58.933Z",
+            "updated_at": "2025-12-16T05:15:07.563Z",
             "id": "acl_wpZ6oScRU5L6QKAxMUMHmx"
         },
         "rawHeaders": [],
@@ -7176,7 +7283,7 @@
                     },
                     "credentials": null,
                     "created_at": "2025-12-09T12:24:00.604Z",
-                    "updated_at": "2025-12-11T12:24:00.120Z"
+                    "updated_at": "2025-12-11T19:04:05.770Z"
                 }
             ]
         },
@@ -7209,7 +7316,7 @@
                 ]
             },
             "created_at": "2025-12-09T12:24:00.604Z",
-            "updated_at": "2025-12-11T19:04:05.770Z"
+            "updated_at": "2025-12-16T05:15:18.469Z"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -7243,7 +7350,7 @@
                         "okta"
                     ],
                     "created_at": "2024-11-26T11:58:18.962Z",
-                    "updated_at": "2025-12-11T12:24:01.242Z",
+                    "updated_at": "2025-12-11T19:04:06.915Z",
                     "branding": {
                         "colors": {
                             "primary": "#19aecc"
@@ -7319,10 +7426,222 @@
                 "okta"
             ],
             "created_at": "2024-11-26T11:58:18.962Z",
-            "updated_at": "2025-12-11T19:04:06.915Z",
+            "updated_at": "2025-12-16T05:15:20.151Z",
             "branding": {
                 "colors": {
                     "primary": "#19aecc"
+                }
+            }
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/branding/phone/templates",
+        "body": "",
+        "status": 200,
+        "response": {
+            "templates": [
+                {
+                    "id": "tem_dL83uTmWn8moGzm8UgAk4Q",
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "channel": "phone",
+                    "type": "blocked_account",
+                    "disabled": false,
+                    "created_at": "2025-12-09T12:22:47.683Z",
+                    "updated_at": "2025-12-09T12:30:30.019Z",
+                    "content": {
+                        "syntax": "liquid",
+                        "body": {
+                            "text": "We detected suspicious activity on your account from the ip {{user.source_ip}}{% if user.city %} from {{user.city}}, {{user.country}}{% elsif user.country %} from {{user.country}}{% endif %}. Logins from this IP have been blocked on your account. If this is your IP, please reset your password to unblock your account. Otherwise, disregard this message.",
+                            "voice": "We detected suspicious activity on your account from the ip {{user.source_ip}}{% if user.city %} from {{user.city}}, {{user.country}}{% elsif user.country %} from {{user.country}}{% endif %}. Logins from this IP have been blocked on your account. If this is your IP, please reset your password to unblock your account. Otherwise, disregard this message."
+                        },
+                        "from": "0032232323"
+                    }
+                },
+                {
+                    "id": "tem_xqbUSF83fpnRv8r8rqXFDZ",
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "channel": "phone",
+                    "type": "change_password",
+                    "disabled": false,
+                    "created_at": "2025-12-09T12:26:20.243Z",
+                    "updated_at": "2025-12-09T12:30:30.034Z",
+                    "content": {
+                        "syntax": "liquid",
+                        "body": {
+                            "text": "{{ code | escape }} is your password change code for {{ friendly_name | escape }}",
+                            "voice": "Hello. Your password change code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your password change code is {{ pause }} {{ code | escape }}"
+                        }
+                    }
+                },
+                {
+                    "id": "tem_qarYST5TTE5pbMNB5NHZAj",
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "channel": "phone",
+                    "type": "otp_enroll",
+                    "disabled": false,
+                    "created_at": "2025-12-09T12:26:25.327Z",
+                    "updated_at": "2025-12-09T12:30:30.174Z",
+                    "content": {
+                        "syntax": "liquid",
+                        "body": {
+                            "text": "{{ code | escape }} is your verification code for {{ friendly_name | escape }}. Please enter this code to verify your enrollment.",
+                            "voice": "Hello. Your verification code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your verification code is {{ pause }} {{ code | escape }}"
+                        }
+                    }
+                },
+                {
+                    "id": "tem_o4LBTt4NQyX8K4vC9dPafR",
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "channel": "phone",
+                    "type": "otp_verify",
+                    "disabled": false,
+                    "created_at": "2025-12-09T12:26:30.547Z",
+                    "updated_at": "2025-12-09T12:30:30.365Z",
+                    "content": {
+                        "syntax": "liquid",
+                        "body": {
+                            "text": "{{ code | escape }} is your verification code for {{ friendly_name | escape }}",
+                            "voice": "Hello. Your verification code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your verification code is {{ pause }} {{ code | escape }}"
+                        }
+                    }
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/branding/phone/templates/tem_dL83uTmWn8moGzm8UgAk4Q",
+        "body": {
+            "content": {
+                "from": "0032232323",
+                "body": {
+                    "text": "We detected suspicious activity on your account from the ip {{user.source_ip}}{% if user.city %} from {{user.city}}, {{user.country}}{% elsif user.country %} from {{user.country}}{% endif %}. Logins from this IP have been blocked on your account. If this is your IP, please reset your password to unblock your account. Otherwise, disregard this message.",
+                    "voice": "We detected suspicious activity on your account from the ip {{user.source_ip}}{% if user.city %} from {{user.city}}, {{user.country}}{% elsif user.country %} from {{user.country}}{% endif %}. Logins from this IP have been blocked on your account. If this is your IP, please reset your password to unblock your account. Otherwise, disregard this message."
+                }
+            },
+            "disabled": false
+        },
+        "status": 200,
+        "response": {
+            "id": "tem_dL83uTmWn8moGzm8UgAk4Q",
+            "tenant": "auth0-deploy-cli-e2e",
+            "channel": "phone",
+            "type": "blocked_account",
+            "disabled": false,
+            "created_at": "2025-12-09T12:22:47.683Z",
+            "updated_at": "2025-12-16T05:15:21.194Z",
+            "content": {
+                "syntax": "liquid",
+                "body": {
+                    "text": "We detected suspicious activity on your account from the ip {{user.source_ip}}{% if user.city %} from {{user.city}}, {{user.country}}{% elsif user.country %} from {{user.country}}{% endif %}. Logins from this IP have been blocked on your account. If this is your IP, please reset your password to unblock your account. Otherwise, disregard this message.",
+                    "voice": "We detected suspicious activity on your account from the ip {{user.source_ip}}{% if user.city %} from {{user.city}}, {{user.country}}{% elsif user.country %} from {{user.country}}{% endif %}. Logins from this IP have been blocked on your account. If this is your IP, please reset your password to unblock your account. Otherwise, disregard this message."
+                },
+                "from": "0032232323"
+            }
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/branding/phone/templates/tem_xqbUSF83fpnRv8r8rqXFDZ",
+        "body": {
+            "content": {
+                "body": {
+                    "text": "{{ code | escape }} is your password change code for {{ friendly_name | escape }}",
+                    "voice": "Hello. Your password change code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your password change code is {{ pause }} {{ code | escape }}"
+                }
+            },
+            "disabled": false
+        },
+        "status": 200,
+        "response": {
+            "id": "tem_xqbUSF83fpnRv8r8rqXFDZ",
+            "tenant": "auth0-deploy-cli-e2e",
+            "channel": "phone",
+            "type": "change_password",
+            "disabled": false,
+            "created_at": "2025-12-09T12:26:20.243Z",
+            "updated_at": "2025-12-16T05:15:21.476Z",
+            "content": {
+                "syntax": "liquid",
+                "body": {
+                    "text": "{{ code | escape }} is your password change code for {{ friendly_name | escape }}",
+                    "voice": "Hello. Your password change code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your password change code is {{ pause }} {{ code | escape }}"
+                }
+            }
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/branding/phone/templates/tem_qarYST5TTE5pbMNB5NHZAj",
+        "body": {
+            "content": {
+                "body": {
+                    "text": "{{ code | escape }} is your verification code for {{ friendly_name | escape }}. Please enter this code to verify your enrollment.",
+                    "voice": "Hello. Your verification code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your verification code is {{ pause }} {{ code | escape }}"
+                }
+            },
+            "disabled": false
+        },
+        "status": 200,
+        "response": {
+            "id": "tem_qarYST5TTE5pbMNB5NHZAj",
+            "tenant": "auth0-deploy-cli-e2e",
+            "channel": "phone",
+            "type": "otp_enroll",
+            "disabled": false,
+            "created_at": "2025-12-09T12:26:25.327Z",
+            "updated_at": "2025-12-16T05:15:21.567Z",
+            "content": {
+                "syntax": "liquid",
+                "body": {
+                    "text": "{{ code | escape }} is your verification code for {{ friendly_name | escape }}. Please enter this code to verify your enrollment.",
+                    "voice": "Hello. Your verification code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your verification code is {{ pause }} {{ code | escape }}"
+                }
+            }
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/branding/phone/templates/tem_o4LBTt4NQyX8K4vC9dPafR",
+        "body": {
+            "content": {
+                "body": {
+                    "text": "{{ code | escape }} is your verification code for {{ friendly_name | escape }}",
+                    "voice": "Hello. Your verification code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your verification code is {{ pause }} {{ code | escape }}"
+                }
+            },
+            "disabled": false
+        },
+        "status": 200,
+        "response": {
+            "id": "tem_o4LBTt4NQyX8K4vC9dPafR",
+            "tenant": "auth0-deploy-cli-e2e",
+            "channel": "phone",
+            "type": "otp_verify",
+            "disabled": false,
+            "created_at": "2025-12-09T12:26:30.547Z",
+            "updated_at": "2025-12-16T05:15:21.814Z",
+            "content": {
+                "syntax": "liquid",
+                "body": {
+                    "text": "{{ code | escape }} is your verification code for {{ friendly_name | escape }}",
+                    "voice": "Hello. Your verification code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your verification code is {{ pause }} {{ code | escape }}"
                 }
             }
         },
@@ -7347,33 +7666,33 @@
                         }
                     ],
                     "created_at": "2025-12-11T11:30:13.629492200Z",
-                    "updated_at": "2025-12-11T19:03:56.861288470Z",
+                    "updated_at": "2025-12-16T05:15:01.577210494Z",
                     "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                     "dependencies": [],
                     "runtime": "node22",
                     "status": "built",
                     "secrets": [],
                     "current_version": {
-                        "id": "7c1d4428-7721-40b7-91b0-c17278614787",
+                        "id": "9b05dee7-c8c0-4f0d-9e0e-14531369af8b",
                         "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                         "runtime": "node22",
                         "status": "BUILT",
-                        "number": 4,
-                        "build_time": "2025-12-11T19:03:57.560767224Z",
-                        "created_at": "2025-12-11T19:03:57.472143Z",
-                        "updated_at": "2025-12-11T19:03:57.562385412Z"
+                        "number": 5,
+                        "build_time": "2025-12-16T05:15:03.730905338Z",
+                        "created_at": "2025-12-16T05:15:03.656132145Z",
+                        "updated_at": "2025-12-16T05:15:03.732003986Z"
                     },
                     "deployed_version": {
                         "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                         "dependencies": [],
-                        "id": "7c1d4428-7721-40b7-91b0-c17278614787",
+                        "id": "9b05dee7-c8c0-4f0d-9e0e-14531369af8b",
                         "deployed": true,
-                        "number": 4,
-                        "built_at": "2025-12-11T19:03:57.560767224Z",
+                        "number": 5,
+                        "built_at": "2025-12-16T05:15:03.730905338Z",
                         "secrets": [],
                         "status": "built",
-                        "created_at": "2025-12-11T19:03:57.472143Z",
-                        "updated_at": "2025-12-11T19:03:57.562385412Z",
+                        "created_at": "2025-12-16T05:15:03.656132145Z",
+                        "updated_at": "2025-12-16T05:15:03.732003986Z",
                         "runtime": "node22",
                         "supported_triggers": [
                             {
@@ -7409,32 +7728,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/email-templates/verify_email",
-        "body": {
-            "template": "verify_email",
-            "body": "<html>\n  <head>\n    <style type=\"text/css\">\n      .ExternalClass,\n      .ExternalClass div,\n      .ExternalClass font,\n      .ExternalClass p,\n      .ExternalClass span,\n      .ExternalClass td,\n      img {\n        line-height: 100%;\n      }\n      #outlook a {\n        padding: 0;\n      }\n      .ExternalClass,\n      .ReadMsgBody {\n        width: 100%;\n      }\n      a,\n      blockquote,\n      body,\n      li,\n      p,\n      table,\n      td {\n        -webkit-text-size-adjust: 100%;\n        -ms-text-size-adjust: 100%;\n      }\n      table,\n      td {\n        mso-table-lspace: 0;\n        mso-table-rspace: 0;\n      }\n      img {\n        -ms-interpolation-mode: bicubic;\n        border: 0;\n        height: auto;\n        outline: 0;\n        text-decoration: none;\n      }\n      table {\n        border-collapse: collapse !important;\n      }\n      #bodyCell,\n      #bodyTable,\n      body {\n        height: 100% !important;\n        margin: 0;\n        padding: 0;\n        font-family: ProximaNova, sans-serif;\n      }\n      #bodyCell {\n        padding: 20px;\n      }\n      #bodyTable {\n        width: 600px;\n      }\n      @font-face {\n        font-family: ProximaNova;\n        src: url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-regular-webfont-webfont.eot);\n        src: url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-regular-webfont-webfont.eot?#iefix)\n            format('embedded-opentype'),\n          url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-regular-webfont-webfont.woff)\n            format('woff');\n        font-weight: 400;\n        font-style: normal;\n      }\n      @font-face {\n        font-family: ProximaNova;\n        src: url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-semibold-webfont-webfont.eot);\n        src: url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-semibold-webfont-webfont.eot?#iefix)\n            format('embedded-opentype'),\n          url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-semibold-webfont-webfont.woff)\n            format('woff');\n        font-weight: 600;\n        font-style: normal;\n      }\n      @media only screen and (max-width: 480px) {\n        #bodyTable,\n        body {\n          width: 100% !important;\n        }\n        a,\n        blockquote,\n        body,\n        li,\n        p,\n        table,\n        td {\n          -webkit-text-size-adjust: none !important;\n        }\n        body {\n          min-width: 100% !important;\n        }\n        #bodyTable {\n          max-width: 600px !important;\n        }\n        #signIn {\n          max-width: 280px !important;\n        }\n      }\n    </style>\n  </head>\n  <body>\n    <center>\n      <table\n        style=\"\n          width: 600px;\n          -webkit-text-size-adjust: 100%;\n          -ms-text-size-adjust: 100%;\n          mso-table-lspace: 0pt;\n          mso-table-rspace: 0pt;\n          margin: 0;\n          padding: 0;\n          font-family: 'ProximaNova', sans-serif;\n          border-collapse: collapse !important;\n          height: 100% !important;\n        \"\n        align=\"center\"\n        border=\"0\"\n        cellpadding=\"0\"\n        cellspacing=\"0\"\n        height=\"100%\"\n        width=\"100%\"\n        id=\"bodyTable\"\n      >\n        <tr>\n          <td\n            align=\"center\"\n            valign=\"top\"\n            id=\"bodyCell\"\n            style=\"\n              -webkit-text-size-adjust: 100%;\n              -ms-text-size-adjust: 100%;\n              mso-table-lspace: 0pt;\n              mso-table-rspace: 0pt;\n              margin: 0;\n              padding: 20px;\n              font-family: 'ProximaNova', sans-serif;\n              height: 100% !important;\n            \"\n          >\n            <div class=\"main\">\n              <p\n                style=\"\n                  text-align: center;\n                  -webkit-text-size-adjust: 100%;\n                  -ms-text-size-adjust: 100%;\n                  margin-bottom: 30px;\n                \"\n              >\n                <img\n                  src=\"https://cdn.auth0.com/styleguide/2.0.9/lib/logos/img/badge.png\"\n                  width=\"50\"\n                  alt=\"Your logo goes here\"\n                  style=\"\n                    -ms-interpolation-mode: bicubic;\n                    border: 0;\n                    height: auto;\n                    line-height: 100%;\n                    outline: none;\n                    text-decoration: none;\n                  \"\n                />\n              </p>\n\n              <h1>Welcome to {{ application.name}}!</h1>\n\n              <p>\n                Thank you for signing up. Please verify your email address by clicking the following\n                link:\n              </p>\n\n              <p><a href=\"{{ url }}\">Confirm my account</a></p>\n\n              <p>\n                If you are having any issues with your account, please don’t hesitate to contact us\n                by replying to this mail.\n              </p>\n\n              <br />\n              Haha!!!\n              <br />\n\n              <strong>{{ application.name }}</strong>\n\n              <br /><br />\n              <hr style=\"border: 2px solid #eaeef3; border-bottom: 0; margin: 20px 0\" />\n              <p\n                style=\"\n                  text-align: center;\n                  color: #a9b3bc;\n                  -webkit-text-size-adjust: 100%;\n                  -ms-text-size-adjust: 100%;\n                \"\n              >\n                If you did not make this request, please contact us by replying to this mail.\n              </p>\n            </div>\n          </td>\n        </tr>\n      </table>\n    </center>\n  </body>\n</html>\n",
-            "enabled": true,
-            "from": "",
-            "subject": "",
-            "syntax": "liquid",
-            "urlLifetimeInSeconds": 432000
-        },
-        "status": 200,
-        "response": {
-            "template": "verify_email",
-            "body": "<html>\n  <head>\n    <style type=\"text/css\">\n      .ExternalClass,\n      .ExternalClass div,\n      .ExternalClass font,\n      .ExternalClass p,\n      .ExternalClass span,\n      .ExternalClass td,\n      img {\n        line-height: 100%;\n      }\n      #outlook a {\n        padding: 0;\n      }\n      .ExternalClass,\n      .ReadMsgBody {\n        width: 100%;\n      }\n      a,\n      blockquote,\n      body,\n      li,\n      p,\n      table,\n      td {\n        -webkit-text-size-adjust: 100%;\n        -ms-text-size-adjust: 100%;\n      }\n      table,\n      td {\n        mso-table-lspace: 0;\n        mso-table-rspace: 0;\n      }\n      img {\n        -ms-interpolation-mode: bicubic;\n        border: 0;\n        height: auto;\n        outline: 0;\n        text-decoration: none;\n      }\n      table {\n        border-collapse: collapse !important;\n      }\n      #bodyCell,\n      #bodyTable,\n      body {\n        height: 100% !important;\n        margin: 0;\n        padding: 0;\n        font-family: ProximaNova, sans-serif;\n      }\n      #bodyCell {\n        padding: 20px;\n      }\n      #bodyTable {\n        width: 600px;\n      }\n      @font-face {\n        font-family: ProximaNova;\n        src: url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-regular-webfont-webfont.eot);\n        src: url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-regular-webfont-webfont.eot?#iefix)\n            format('embedded-opentype'),\n          url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-regular-webfont-webfont.woff)\n            format('woff');\n        font-weight: 400;\n        font-style: normal;\n      }\n      @font-face {\n        font-family: ProximaNova;\n        src: url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-semibold-webfont-webfont.eot);\n        src: url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-semibold-webfont-webfont.eot?#iefix)\n            format('embedded-opentype'),\n          url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-semibold-webfont-webfont.woff)\n            format('woff');\n        font-weight: 600;\n        font-style: normal;\n      }\n      @media only screen and (max-width: 480px) {\n        #bodyTable,\n        body {\n          width: 100% !important;\n        }\n        a,\n        blockquote,\n        body,\n        li,\n        p,\n        table,\n        td {\n          -webkit-text-size-adjust: none !important;\n        }\n        body {\n          min-width: 100% !important;\n        }\n        #bodyTable {\n          max-width: 600px !important;\n        }\n        #signIn {\n          max-width: 280px !important;\n        }\n      }\n    </style>\n  </head>\n  <body>\n    <center>\n      <table\n        style=\"\n          width: 600px;\n          -webkit-text-size-adjust: 100%;\n          -ms-text-size-adjust: 100%;\n          mso-table-lspace: 0pt;\n          mso-table-rspace: 0pt;\n          margin: 0;\n          padding: 0;\n          font-family: 'ProximaNova', sans-serif;\n          border-collapse: collapse !important;\n          height: 100% !important;\n        \"\n        align=\"center\"\n        border=\"0\"\n        cellpadding=\"0\"\n        cellspacing=\"0\"\n        height=\"100%\"\n        width=\"100%\"\n        id=\"bodyTable\"\n      >\n        <tr>\n          <td\n            align=\"center\"\n            valign=\"top\"\n            id=\"bodyCell\"\n            style=\"\n              -webkit-text-size-adjust: 100%;\n              -ms-text-size-adjust: 100%;\n              mso-table-lspace: 0pt;\n              mso-table-rspace: 0pt;\n              margin: 0;\n              padding: 20px;\n              font-family: 'ProximaNova', sans-serif;\n              height: 100% !important;\n            \"\n          >\n            <div class=\"main\">\n              <p\n                style=\"\n                  text-align: center;\n                  -webkit-text-size-adjust: 100%;\n                  -ms-text-size-adjust: 100%;\n                  margin-bottom: 30px;\n                \"\n              >\n                <img\n                  src=\"https://cdn.auth0.com/styleguide/2.0.9/lib/logos/img/badge.png\"\n                  width=\"50\"\n                  alt=\"Your logo goes here\"\n                  style=\"\n                    -ms-interpolation-mode: bicubic;\n                    border: 0;\n                    height: auto;\n                    line-height: 100%;\n                    outline: none;\n                    text-decoration: none;\n                  \"\n                />\n              </p>\n\n              <h1>Welcome to {{ application.name}}!</h1>\n\n              <p>\n                Thank you for signing up. Please verify your email address by clicking the following\n                link:\n              </p>\n\n              <p><a href=\"{{ url }}\">Confirm my account</a></p>\n\n              <p>\n                If you are having any issues with your account, please don’t hesitate to contact us\n                by replying to this mail.\n              </p>\n\n              <br />\n              Haha!!!\n              <br />\n\n              <strong>{{ application.name }}</strong>\n\n              <br /><br />\n              <hr style=\"border: 2px solid #eaeef3; border-bottom: 0; margin: 20px 0\" />\n              <p\n                style=\"\n                  text-align: center;\n                  color: #a9b3bc;\n                  -webkit-text-size-adjust: 100%;\n                  -ms-text-size-adjust: 100%;\n                \"\n              >\n                If you did not make this request, please contact us by replying to this mail.\n              </p>\n            </div>\n          </td>\n        </tr>\n      </table>\n    </center>\n  </body>\n</html>\n",
-            "from": "",
-            "subject": "",
-            "syntax": "liquid",
-            "urlLifetimeInSeconds": 432000,
-            "enabled": true
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PATCH",
         "path": "/api/v2/email-templates/welcome_email",
         "body": {
             "template": "welcome_email",
@@ -7463,6 +7756,32 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
+        "path": "/api/v2/email-templates/verify_email",
+        "body": {
+            "template": "verify_email",
+            "body": "<html>\n  <head>\n    <style type=\"text/css\">\n      .ExternalClass,\n      .ExternalClass div,\n      .ExternalClass font,\n      .ExternalClass p,\n      .ExternalClass span,\n      .ExternalClass td,\n      img {\n        line-height: 100%;\n      }\n      #outlook a {\n        padding: 0;\n      }\n      .ExternalClass,\n      .ReadMsgBody {\n        width: 100%;\n      }\n      a,\n      blockquote,\n      body,\n      li,\n      p,\n      table,\n      td {\n        -webkit-text-size-adjust: 100%;\n        -ms-text-size-adjust: 100%;\n      }\n      table,\n      td {\n        mso-table-lspace: 0;\n        mso-table-rspace: 0;\n      }\n      img {\n        -ms-interpolation-mode: bicubic;\n        border: 0;\n        height: auto;\n        outline: 0;\n        text-decoration: none;\n      }\n      table {\n        border-collapse: collapse !important;\n      }\n      #bodyCell,\n      #bodyTable,\n      body {\n        height: 100% !important;\n        margin: 0;\n        padding: 0;\n        font-family: ProximaNova, sans-serif;\n      }\n      #bodyCell {\n        padding: 20px;\n      }\n      #bodyTable {\n        width: 600px;\n      }\n      @font-face {\n        font-family: ProximaNova;\n        src: url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-regular-webfont-webfont.eot);\n        src: url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-regular-webfont-webfont.eot?#iefix)\n            format('embedded-opentype'),\n          url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-regular-webfont-webfont.woff)\n            format('woff');\n        font-weight: 400;\n        font-style: normal;\n      }\n      @font-face {\n        font-family: ProximaNova;\n        src: url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-semibold-webfont-webfont.eot);\n        src: url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-semibold-webfont-webfont.eot?#iefix)\n            format('embedded-opentype'),\n          url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-semibold-webfont-webfont.woff)\n            format('woff');\n        font-weight: 600;\n        font-style: normal;\n      }\n      @media only screen and (max-width: 480px) {\n        #bodyTable,\n        body {\n          width: 100% !important;\n        }\n        a,\n        blockquote,\n        body,\n        li,\n        p,\n        table,\n        td {\n          -webkit-text-size-adjust: none !important;\n        }\n        body {\n          min-width: 100% !important;\n        }\n        #bodyTable {\n          max-width: 600px !important;\n        }\n        #signIn {\n          max-width: 280px !important;\n        }\n      }\n    </style>\n  </head>\n  <body>\n    <center>\n      <table\n        style=\"\n          width: 600px;\n          -webkit-text-size-adjust: 100%;\n          -ms-text-size-adjust: 100%;\n          mso-table-lspace: 0pt;\n          mso-table-rspace: 0pt;\n          margin: 0;\n          padding: 0;\n          font-family: 'ProximaNova', sans-serif;\n          border-collapse: collapse !important;\n          height: 100% !important;\n        \"\n        align=\"center\"\n        border=\"0\"\n        cellpadding=\"0\"\n        cellspacing=\"0\"\n        height=\"100%\"\n        width=\"100%\"\n        id=\"bodyTable\"\n      >\n        <tr>\n          <td\n            align=\"center\"\n            valign=\"top\"\n            id=\"bodyCell\"\n            style=\"\n              -webkit-text-size-adjust: 100%;\n              -ms-text-size-adjust: 100%;\n              mso-table-lspace: 0pt;\n              mso-table-rspace: 0pt;\n              margin: 0;\n              padding: 20px;\n              font-family: 'ProximaNova', sans-serif;\n              height: 100% !important;\n            \"\n          >\n            <div class=\"main\">\n              <p\n                style=\"\n                  text-align: center;\n                  -webkit-text-size-adjust: 100%;\n                  -ms-text-size-adjust: 100%;\n                  margin-bottom: 30px;\n                \"\n              >\n                <img\n                  src=\"https://cdn.auth0.com/styleguide/2.0.9/lib/logos/img/badge.png\"\n                  width=\"50\"\n                  alt=\"Your logo goes here\"\n                  style=\"\n                    -ms-interpolation-mode: bicubic;\n                    border: 0;\n                    height: auto;\n                    line-height: 100%;\n                    outline: none;\n                    text-decoration: none;\n                  \"\n                />\n              </p>\n\n              <h1>Welcome to {{ application.name}}!</h1>\n\n              <p>\n                Thank you for signing up. Please verify your email address by clicking the following\n                link:\n              </p>\n\n              <p><a href=\"{{ url }}\">Confirm my account</a></p>\n\n              <p>\n                If you are having any issues with your account, please don’t hesitate to contact us\n                by replying to this mail.\n              </p>\n\n              <br />\n              Haha!!!\n              <br />\n\n              <strong>{{ application.name }}</strong>\n\n              <br /><br />\n              <hr style=\"border: 2px solid #eaeef3; border-bottom: 0; margin: 20px 0\" />\n              <p\n                style=\"\n                  text-align: center;\n                  color: #a9b3bc;\n                  -webkit-text-size-adjust: 100%;\n                  -ms-text-size-adjust: 100%;\n                \"\n              >\n                If you did not make this request, please contact us by replying to this mail.\n              </p>\n            </div>\n          </td>\n        </tr>\n      </table>\n    </center>\n  </body>\n</html>\n",
+            "enabled": true,
+            "from": "",
+            "subject": "",
+            "syntax": "liquid",
+            "urlLifetimeInSeconds": 432000
+        },
+        "status": 200,
+        "response": {
+            "template": "verify_email",
+            "body": "<html>\n  <head>\n    <style type=\"text/css\">\n      .ExternalClass,\n      .ExternalClass div,\n      .ExternalClass font,\n      .ExternalClass p,\n      .ExternalClass span,\n      .ExternalClass td,\n      img {\n        line-height: 100%;\n      }\n      #outlook a {\n        padding: 0;\n      }\n      .ExternalClass,\n      .ReadMsgBody {\n        width: 100%;\n      }\n      a,\n      blockquote,\n      body,\n      li,\n      p,\n      table,\n      td {\n        -webkit-text-size-adjust: 100%;\n        -ms-text-size-adjust: 100%;\n      }\n      table,\n      td {\n        mso-table-lspace: 0;\n        mso-table-rspace: 0;\n      }\n      img {\n        -ms-interpolation-mode: bicubic;\n        border: 0;\n        height: auto;\n        outline: 0;\n        text-decoration: none;\n      }\n      table {\n        border-collapse: collapse !important;\n      }\n      #bodyCell,\n      #bodyTable,\n      body {\n        height: 100% !important;\n        margin: 0;\n        padding: 0;\n        font-family: ProximaNova, sans-serif;\n      }\n      #bodyCell {\n        padding: 20px;\n      }\n      #bodyTable {\n        width: 600px;\n      }\n      @font-face {\n        font-family: ProximaNova;\n        src: url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-regular-webfont-webfont.eot);\n        src: url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-regular-webfont-webfont.eot?#iefix)\n            format('embedded-opentype'),\n          url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-regular-webfont-webfont.woff)\n            format('woff');\n        font-weight: 400;\n        font-style: normal;\n      }\n      @font-face {\n        font-family: ProximaNova;\n        src: url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-semibold-webfont-webfont.eot);\n        src: url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-semibold-webfont-webfont.eot?#iefix)\n            format('embedded-opentype'),\n          url(https://cdn.auth0.com/fonts/proxima-nova/proximanova-semibold-webfont-webfont.woff)\n            format('woff');\n        font-weight: 600;\n        font-style: normal;\n      }\n      @media only screen and (max-width: 480px) {\n        #bodyTable,\n        body {\n          width: 100% !important;\n        }\n        a,\n        blockquote,\n        body,\n        li,\n        p,\n        table,\n        td {\n          -webkit-text-size-adjust: none !important;\n        }\n        body {\n          min-width: 100% !important;\n        }\n        #bodyTable {\n          max-width: 600px !important;\n        }\n        #signIn {\n          max-width: 280px !important;\n        }\n      }\n    </style>\n  </head>\n  <body>\n    <center>\n      <table\n        style=\"\n          width: 600px;\n          -webkit-text-size-adjust: 100%;\n          -ms-text-size-adjust: 100%;\n          mso-table-lspace: 0pt;\n          mso-table-rspace: 0pt;\n          margin: 0;\n          padding: 0;\n          font-family: 'ProximaNova', sans-serif;\n          border-collapse: collapse !important;\n          height: 100% !important;\n        \"\n        align=\"center\"\n        border=\"0\"\n        cellpadding=\"0\"\n        cellspacing=\"0\"\n        height=\"100%\"\n        width=\"100%\"\n        id=\"bodyTable\"\n      >\n        <tr>\n          <td\n            align=\"center\"\n            valign=\"top\"\n            id=\"bodyCell\"\n            style=\"\n              -webkit-text-size-adjust: 100%;\n              -ms-text-size-adjust: 100%;\n              mso-table-lspace: 0pt;\n              mso-table-rspace: 0pt;\n              margin: 0;\n              padding: 20px;\n              font-family: 'ProximaNova', sans-serif;\n              height: 100% !important;\n            \"\n          >\n            <div class=\"main\">\n              <p\n                style=\"\n                  text-align: center;\n                  -webkit-text-size-adjust: 100%;\n                  -ms-text-size-adjust: 100%;\n                  margin-bottom: 30px;\n                \"\n              >\n                <img\n                  src=\"https://cdn.auth0.com/styleguide/2.0.9/lib/logos/img/badge.png\"\n                  width=\"50\"\n                  alt=\"Your logo goes here\"\n                  style=\"\n                    -ms-interpolation-mode: bicubic;\n                    border: 0;\n                    height: auto;\n                    line-height: 100%;\n                    outline: none;\n                    text-decoration: none;\n                  \"\n                />\n              </p>\n\n              <h1>Welcome to {{ application.name}}!</h1>\n\n              <p>\n                Thank you for signing up. Please verify your email address by clicking the following\n                link:\n              </p>\n\n              <p><a href=\"{{ url }}\">Confirm my account</a></p>\n\n              <p>\n                If you are having any issues with your account, please don’t hesitate to contact us\n                by replying to this mail.\n              </p>\n\n              <br />\n              Haha!!!\n              <br />\n\n              <strong>{{ application.name }}</strong>\n\n              <br /><br />\n              <hr style=\"border: 2px solid #eaeef3; border-bottom: 0; margin: 20px 0\" />\n              <p\n                style=\"\n                  text-align: center;\n                  color: #a9b3bc;\n                  -webkit-text-size-adjust: 100%;\n                  -ms-text-size-adjust: 100%;\n                \"\n              >\n                If you did not make this request, please contact us by replying to this mail.\n              </p>\n            </div>\n          </td>\n        </tr>\n      </table>\n    </center>\n  </body>\n</html>\n",
+            "from": "",
+            "subject": "",
+            "syntax": "liquid",
+            "urlLifetimeInSeconds": 432000,
+            "enabled": true
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
         "path": "/api/v2/branding",
         "body": {
             "colors": {
@@ -7478,6 +7797,18 @@
                 "page_background": "#222221"
             },
             "logo_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/organizations?take=50",
+        "body": "",
+        "status": 200,
+        "response": {
+            "organizations": []
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -7629,18 +7960,6 @@
                     "custom_login_page_on": true
                 }
             ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/organizations?take=50",
-        "body": "",
-        "status": 200,
-        "response": {
-            "organizations": []
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -8158,7 +8477,7 @@
         "response": {
             "bindings": [
                 {
-                    "id": "6b2e7f91-0bc4-428d-8ed0-590d245b03eb",
+                    "id": "d885dc2e-8002-4692-ba48-e70d9325fe78",
                     "trigger_id": "custom-phone-provider",
                     "action": {
                         "id": "40d899f3-a209-42a2-a3ed-39e764dcbc33",
@@ -8170,28 +8489,28 @@
                             }
                         ],
                         "created_at": "2025-12-11T11:30:13.629492200Z",
-                        "updated_at": "2025-12-11T19:03:56.854977710Z",
+                        "updated_at": "2025-12-16T05:15:01.571703559Z",
                         "current_version": {
-                            "id": "7c1d4428-7721-40b7-91b0-c17278614787",
+                            "id": "9b05dee7-c8c0-4f0d-9e0e-14531369af8b",
                             "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                             "runtime": "node22",
                             "status": "BUILT",
-                            "number": 4,
-                            "build_time": "2025-12-11T19:03:57.560767224Z",
-                            "created_at": "2025-12-11T19:03:57.472143Z",
-                            "updated_at": "2025-12-11T19:03:57.562385412Z"
+                            "number": 5,
+                            "build_time": "2025-12-16T05:15:03.730905338Z",
+                            "created_at": "2025-12-16T05:15:03.656132145Z",
+                            "updated_at": "2025-12-16T05:15:03.732003986Z"
                         },
                         "deployed_version": {
                             "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                             "dependencies": [],
-                            "id": "7c1d4428-7721-40b7-91b0-c17278614787",
+                            "id": "9b05dee7-c8c0-4f0d-9e0e-14531369af8b",
                             "deployed": true,
-                            "number": 4,
-                            "built_at": "2025-12-11T19:03:57.560767224Z",
+                            "number": 5,
+                            "built_at": "2025-12-16T05:15:03.730905338Z",
                             "secrets": [],
                             "status": "built",
-                            "created_at": "2025-12-11T19:03:57.472143Z",
-                            "updated_at": "2025-12-11T19:03:57.562385412Z",
+                            "created_at": "2025-12-16T05:15:03.656132145Z",
+                            "updated_at": "2025-12-16T05:15:03.732003986Z",
                             "runtime": "node22",
                             "supported_triggers": [
                                 {
@@ -8202,8 +8521,8 @@
                         },
                         "all_changes_deployed": false
                     },
-                    "created_at": "2025-12-11T19:04:12.425709969Z",
-                    "updated_at": "2025-12-11T19:04:12.425709969Z",
+                    "created_at": "2025-12-16T05:15:29.671498879Z",
+                    "updated_at": "2025-12-16T05:15:29.671498879Z",
                     "display_name": "Custom Phone Provider"
                 }
             ]
@@ -8244,21 +8563,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/flows/vault/connections?page=0&per_page=50&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "limit": 50,
-            "start": 0,
-            "total": 0,
-            "connections": []
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/flows?page=0&per_page=100&include_totals=true",
         "body": "",
         "status": 200,
@@ -8267,6 +8571,21 @@
             "start": 0,
             "total": 0,
             "flows": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/flows/vault/connections?page=0&per_page=50&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 50,
+            "start": 0,
+            "total": 0,
+            "connections": []
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -8304,21 +8623,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/flows?page=0&per_page=100&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "limit": 100,
-            "start": 0,
-            "total": 0,
-            "flows": []
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/forms?page=0&per_page=100&include_totals=true",
         "body": "",
         "status": 200,
@@ -8332,9 +8636,24 @@
                     "name": "Blank-form",
                     "flow_count": 0,
                     "created_at": "2024-11-26T11:58:18.187Z",
-                    "updated_at": "2025-12-11T12:24:10.654Z"
+                    "updated_at": "2025-12-11T19:04:15.095Z"
                 }
             ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/flows?page=0&per_page=100&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 100,
+            "start": 0,
+            "total": 0,
+            "flows": []
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -8403,7 +8722,7 @@
                 }
             },
             "created_at": "2024-11-26T11:58:18.187Z",
-            "updated_at": "2025-12-11T12:24:10.654Z"
+            "updated_at": "2025-12-11T19:04:15.095Z"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -8528,7 +8847,7 @@
                 }
             },
             "created_at": "2024-11-26T11:58:18.187Z",
-            "updated_at": "2025-12-11T19:04:15.095Z"
+            "updated_at": "2025-12-16T05:15:34.906Z"
         },
         "rawHeaders": [],
         "responseIsBinary": false

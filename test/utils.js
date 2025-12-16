@@ -165,6 +165,12 @@ export function mockMgmtClient() {
           update: (_id, data) => Promise.resolve(data),
           delete: (_id) => Promise.resolve(),
         },
+        templates: {
+          list: () => Promise.resolve({ templates: [] }),
+          create: (data) => Promise.resolve(data),
+          update: (_id, data) => Promise.resolve(data),
+          delete: (_id) => Promise.resolve(),
+        },
       },
     },
     logStreams: { list: () => Promise.resolve([]) },
