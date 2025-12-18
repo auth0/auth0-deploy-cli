@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix `customDomains` handler 409 for listing domains. [#1244]
+
 ## [8.23.1] - 2025-12-18
 
 ### Fixed
