@@ -13,17 +13,25 @@ chai.use(chaiAsPromised);
 export const localDir = 'local';
 export const testDataDir = path.resolve(localDir, 'testData');
 
-export function mockPagedData(params, key, data) {
+export function mockPagedData(params, key, data, pages = []) {
   // SDK v5 Page<T> always returns data as an array, with total as a separate property
+  const remainingPages = Array.isArray(pages) ? [...pages] : [];
+
   const pagedResponse = {
     data,
-    hasNextPage: () => false,
-    getNextPage: () =>
-      Promise.resolve({
-        data: [],
-        hasNextPage: () => false,
-        getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
-      }),
+    hasNextPage: () => remainingPages.length > 0,
+    getNextPage: () => {
+      if (!remainingPages.length) {
+        return Promise.resolve({
+          data: [],
+          hasNextPage: () => false,
+          getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+        });
+      }
+
+      const next = remainingPages.shift();
+      return Promise.resolve(mockPagedData(params, key, next, remainingPages));
+    },
   };
 
   if (params && params.include_totals) {
