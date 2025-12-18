@@ -467,7 +467,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
             conn.directory_provisioning_configuration!
           ).catch((err) => {
             throw new Error(
-              `Failed to update directory provisioning for connection '${conn.name}':\n${err}`
+              `Failed to update directory provisioning for connection '${conn.id}':\n${err}`
             );
           }),
       })
@@ -483,7 +483,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
             conn.directory_provisioning_configuration!
           ).catch((err) => {
             throw new Error(
-              `Failed to create directory provisioning for connection '${conn.name}':\n${err}`
+              `Failed to create directory provisioning for connection '${conn.id}':\n${err}`
             );
           }),
       })
@@ -500,7 +500,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
           generator: (conn) =>
             this.deleteConnectionDirectoryProvisioning(conn.id!).catch((err) => {
               throw new Error(
-                `Failed to delete directory provisioning for connection '${conn.name}':\n${err}`
+                `Failed to delete directory provisioning for connection '${conn.id}':\n${err}`
               );
             }),
         })

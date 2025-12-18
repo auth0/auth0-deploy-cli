@@ -286,6 +286,7 @@ export default class ScimHandler {
     // Remove `scim_configuration` from `bodyParams`, because `connections.update` doesn't accept it.
     const { scim_configuration: scimBodyParams } = bodyParams;
     delete bodyParams.scim_configuration;
+    delete bodyParams.directory_provisioning_configuration;
 
     // First, update `connections`.
     const updated = await this.connectionsManager.update(requestParams.id, bodyParams);
