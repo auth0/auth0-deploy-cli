@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix resolve race conditions in processChanges for handlers. [#1240]
+- Fix client grants pagination to use checkpoint. [#1239]
+
 ## [8.23.0] - 2025-12-16
 
 ### Added
