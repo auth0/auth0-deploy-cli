@@ -137,6 +137,9 @@ export type Assets = Partial<{
   exclude?: {
     [key: string]: string[];
   };
+  include?: {
+    [key: string]: string[];
+  };
   clientsOrig: Asset[] | null;
   themes: Theme[] | null;
   forms: Form[] | null;

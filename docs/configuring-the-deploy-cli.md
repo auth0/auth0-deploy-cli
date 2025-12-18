@@ -88,14 +88,14 @@ Boolean. When enabled, will allow the tool to delete resources. Default: `false`
 
 ### `AUTH0_INCLUDED_CONNECTIONS`
 
-Array of strings. Specifies which connections should be managed by the Deploy CLI. When configured, only the connections listed by name will be included in export, import, update, and delete operations. All other connections in the tenant will be completely ignored.
+Array of strings. Specifies which connections should be managed by the Deploy CLI. When configured, only the connections listed by name will be included in export and import operations. All other connections in the tenant will be completely ignored.
 
 This is particularly useful for:
 - Managing only specific connections while preserving others (e.g., self-service SSO connections, third-party integrations)
 - Preventing accidental modifications to connections managed by other systems
 - Isolating connection management to specific subsets of your tenant
 
-**Important:** This setting affects all operations (export, import, update, and delete). Connections not in this list will not appear in exports and will not be modified during imports.
+**Important:** This setting affects all operations (export and import). Connections not in this list will not appear in exports and will not be modified during imports.
 
 #### Example
 
@@ -117,26 +117,6 @@ export AUTH0_INCLUDED_CONNECTIONS='["github","google-oauth2","Username-Password-
 
 # Or as a single-line array
 export AUTH0_INCLUDED_CONNECTIONS='["github"]'
-```
-
-#### Use Cases
-
-**Scenario 1: Self-Service SSO**
-If your organization allows users to create their own SAML or OIDC connections through a self-service portal, you can exclude those connections from Deploy CLI management:
-
-```json
-{
-  "AUTH0_INCLUDED_CONNECTIONS": ["github", "google-oauth2"]
-}
-```
-
-**Scenario 2: Environment-Specific Connections**
-Manage only connections relevant to a specific environment:
-
-```json
-{
-  "AUTH0_INCLUDED_CONNECTIONS": ["dev-database", "dev-google-oauth2"]
-}
 ```
 
 ### `AUTH0_EXCLUDED`

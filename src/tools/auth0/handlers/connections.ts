@@ -313,17 +313,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     });
 
     // Filter out database connections as we have separate handler for it
-    let filteredConnections = connections.filter((c) => c.strategy !== 'auth0');
-
-    const managedConnectionNames = this.config('AUTH0_INCLUDED_CONNECTIONS');
-    if (managedConnectionNames) {
-      filteredConnections = filteredConnections.filter((conn) =>
-        managedConnectionNames.includes(conn.name ?? '')
-      );
-      log.info(
-        `AUTH0_INCLUDED_CONNECTIONS is configured. Retrieved ${filteredConnections.length} managed connection(s) from tenant.`
-      );
-    }
+    const filteredConnections = connections.filter((c) => c.strategy !== 'auth0');
 
     // If options option is empty for all connection, log the missing options scope.
     const isOptionExists = filteredConnections.every(
@@ -369,12 +359,13 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
         conflicts: [],
       };
 
-    const managedConnectionNames = this.config('AUTH0_INCLUDED_CONNECTIONS');
-    const filteredConnections = managedConnectionNames
-      ? connections.filter((conn) => managedConnectionNames.includes(conn.name))
-      : connections;
+    const includedConnections = (assets.include && assets.include.connections) || [];
+    const filteredConnections =
+      includedConnections.length > 0
+        ? connections.filter((conn) => includedConnections.includes(conn.name))
+        : connections;
 
-    if (managedConnectionNames && filteredConnections.length !== connections.length) {
+    if (includedConnections.length > 0 && filteredConnections.length !== connections.length) {
       const excludedCount = connections.length - filteredConnections.length;
       log.info(
         `AUTH0_INCLUDED_CONNECTIONS is configured. Managing ${filteredConnections.length} connection(s), ignoring ${excludedCount} connection(s) not in the managed list.`
