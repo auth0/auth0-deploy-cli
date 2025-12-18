@@ -78,25 +78,17 @@ export default class FlowVaultHandler extends DefaultHandler {
       `Start processChanges for flow vault connections [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
     );
 
-    const changes = [{ del: del }, { create: create }, { update: update }];
+    if (del.length > 0) {
+      await this.deleteVaultConnections(del);
+    }
 
-    await Promise.all(
-      changes.map(async (change) => {
-        switch (true) {
-          case change.del && change.del.length > 0:
-            await this.deleteVaultConnections(change.del || []);
-            break;
-          case change.create && change.create.length > 0:
-            await this.createVaultConnections(change.create);
-            break;
-          case change.update && change.update.length > 0:
-            if (change.update) await this.updateVaultConnections(change.update);
-            break;
-          default:
-            break;
-        }
-      })
-    );
+    if (create.length > 0) {
+      await this.createVaultConnections(create);
+    }
+
+    if (update.length > 0) {
+      await this.updateVaultConnections(update);
+    }
   }
 
   async createVaultConnection(conn): Promise<Asset> {

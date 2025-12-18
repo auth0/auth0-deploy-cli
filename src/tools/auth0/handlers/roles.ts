@@ -224,27 +224,16 @@ export default class RolesHandler extends DefaultHandler {
     log.debug(
       `Start processChanges for roles [delete:${changes.del.length}] [update:${changes.update.length}], [create:${changes.create.length}]`
     );
-    const myChanges = [
-      { del: changes.del },
-      { create: changes.create },
-      { update: changes.update },
-    ];
-    await Promise.all(
-      myChanges.map(async (change) => {
-        switch (true) {
-          case change.del && change.del.length > 0:
-            if (change.del) await this.deleteRoles(change.del);
-            break;
-          case change.create && change.create.length > 0:
-            await this.createRoles(changes.create);
-            break;
-          case change.update && change.update.length > 0:
-            if (change.update) await this.updateRoles(change.update, existing);
-            break;
-          default:
-            break;
-        }
-      })
-    );
+    if (changes.del.length > 0) {
+      await this.deleteRoles(changes.del);
+    }
+
+    if (changes.create.length > 0) {
+      await this.createRoles(changes.create);
+    }
+
+    if (changes.update.length > 0) {
+      await this.updateRoles(changes.update, existing);
+    }
   }
 }
