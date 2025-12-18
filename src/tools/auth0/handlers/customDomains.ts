@@ -2,7 +2,6 @@ import { Management } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
 import log from '../../../logger';
-import { paginate } from '../client';
 
 export const schema = {
   type: 'array',
@@ -17,7 +16,7 @@ export const schema = {
       },
       domain: { type: 'string' },
       primary: { type: 'boolean' },
-      status: { type: 'string', enum: ['pending_verification', 'ready', 'disabled', 'pending'] },
+      status: { type: 'string' },
       type: { type: 'string', enum: ['auth0_managed_certs', 'self_managed_certs'] },
       verification: { type: 'object' },
       tls_policy: {
@@ -87,9 +86,7 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
         return this.existing;
       }
 
-      const customDomains = await paginate<CustomDomain>(this.client.customDomains.list, {
-        checkpoint: true,
-      });
+      const customDomains = await this.client.customDomains.list();
 
       this.existing = customDomains;
 
