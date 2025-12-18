@@ -101,11 +101,11 @@ This is particularly useful for:
 
 ```json
 {
-  "AUTH0_INCLUDED_CONNECTIONS": ["github", "google-oauth2", "Username-Password-Authentication"]
+  "AUTH0_INCLUDED_CONNECTIONS": ["github", "google-oauth2"]
 }
 ```
 
-In the example above, only the `github`, `google-oauth2`, and `Username-Password-Authentication` connections will be managed. All other connections in the tenant will be ignored.
+In the example above, only the `github` and `google-oauth2` connections will be managed. All other connections in the tenant will be ignored.
 
 #### Environment Variable Format
 
