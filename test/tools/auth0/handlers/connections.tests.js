@@ -1079,6 +1079,495 @@ describe('#connections enabled clients functionality', () => {
   });
 });
 
+describe('#AUTH0_INCLUDED_CONNECTIONS functionality', () => {
+  const config = function (key) {
+    return config.data && config.data[key];
+  };
+
+  config.data = {
+    AUTH0_CLIENT_ID: 'client_id',
+    AUTH0_ALLOW_DELETE: true,
+  };
+
+  let scimHandlerMock;
+
+  beforeEach(() => {
+    scimHandlerMock = {
+      createIdMap: sinon.stub().resolves(new Map()),
+      getScimConfiguration: sinon.stub().resolves({}),
+      applyScimConfiguration: sinon.stub().resolves(undefined),
+      createOverride: sinon.stub().resolves(new Map()),
+      updateOverride: sinon.stub().resolves(new Map()),
+    };
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  describe('#getType with AUTH0_INCLUDED_CONNECTIONS', () => {
+    it('should return only managed connections when AUTH0_INCLUDED_CONNECTIONS is configured', async () => {
+      config.data.AUTH0_INCLUDED_CONNECTIONS = ['github', 'google-oauth2'];
+
+      const auth0 = {
+        connections: {
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con_1', strategy: 'github', name: 'github', options: {} },
+              { id: 'con_2', strategy: 'google-oauth2', name: 'google-oauth2', options: {} },
+              { id: 'con_3', strategy: 'samlp', name: 'enterprise-saml', options: {} },
+              {
+                id: 'con_4',
+                strategy: 'auth0',
+                name: 'Username-Password-Authentication',
+                options: {},
+              },
+            ]),
+          clients: {
+            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
+
+      const result = await handler.getType();
+
+      expect(result).to.have.length(2);
+      expect(result[0]).to.include({ name: 'github' });
+      expect(result[1]).to.include({ name: 'google-oauth2' });
+    });
+
+    it('should return all non-auth0 connections when AUTH0_INCLUDED_CONNECTIONS is not configured', async () => {
+      delete config.data.AUTH0_INCLUDED_CONNECTIONS;
+
+      const auth0 = {
+        connections: {
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con_1', strategy: 'github', name: 'github', options: {} },
+              { id: 'con_2', strategy: 'google-oauth2', name: 'google-oauth2', options: {} },
+              { id: 'con_3', strategy: 'samlp', name: 'enterprise-saml', options: {} },
+              {
+                id: 'con_4',
+                strategy: 'auth0',
+                name: 'Username-Password-Authentication',
+                options: {},
+              },
+            ]),
+          clients: {
+            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
+
+      const result = await handler.getType();
+
+      expect(result).to.have.length(3);
+      expect(result.find((c) => c.name === 'github')).to.exist;
+      expect(result.find((c) => c.name === 'google-oauth2')).to.exist;
+      expect(result.find((c) => c.name === 'enterprise-saml')).to.exist;
+      expect(result.find((c) => c.name === 'Username-Password-Authentication')).to.not.exist;
+    });
+
+    it('should return empty array when no connections match AUTH0_INCLUDED_CONNECTIONS', async () => {
+      config.data.AUTH0_INCLUDED_CONNECTIONS = ['non-existent-connection'];
+
+      const auth0 = {
+        connections: {
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con_1', strategy: 'github', name: 'github', options: {} },
+              { id: 'con_2', strategy: 'google-oauth2', name: 'google-oauth2', options: {} },
+            ]),
+          clients: {
+            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
+
+      const result = await handler.getType();
+
+      expect(result).to.have.length(0);
+    });
+
+    it('should handle empty AUTH0_INCLUDED_CONNECTIONS array', async () => {
+      config.data.AUTH0_INCLUDED_CONNECTIONS = [];
+
+      const auth0 = {
+        connections: {
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con_1', strategy: 'github', name: 'github', options: {} },
+              { id: 'con_2', strategy: 'google-oauth2', name: 'google-oauth2', options: {} },
+            ]),
+          clients: {
+            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
+
+      const result = await handler.getType();
+
+      expect(result).to.have.length(0);
+    });
+
+    it('should include enabled_clients for managed connections only', async () => {
+      config.data.AUTH0_INCLUDED_CONNECTIONS = ['github'];
+
+      const auth0 = {
+        connections: {
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con_1', strategy: 'github', name: 'github', options: {} },
+              { id: 'con_2', strategy: 'google-oauth2', name: 'google-oauth2', options: {} },
+            ]),
+          clients: {
+            get: sinon.stub().callsFake((connectionId) => {
+              if (connectionId === 'con_1') {
+                return Promise.resolve(
+                  mockPagedData({}, 'clients', [
+                    { client_id: 'client_1' },
+                    { client_id: 'client_2' },
+                  ])
+                );
+              }
+              return Promise.resolve(mockPagedData({}, 'clients', []));
+            }),
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
+
+      const result = await handler.getType();
+
+      expect(result).to.have.length(1);
+      expect(result[0].name).to.equal('github');
+      expect(result[0].enabled_clients).to.deep.equal(['client_1', 'client_2']);
+    });
+  });
+
+  describe('#calcChanges with AUTH0_INCLUDED_CONNECTIONS', () => {
+    it('should only calculate changes for managed connections', async () => {
+      config.data.AUTH0_INCLUDED_CONNECTIONS = ['github', 'google-oauth2'];
+
+      const auth0 = {
+        connections: {
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con_1', strategy: 'github', name: 'github', options: {} },
+              { id: 'con_2', strategy: 'google-oauth2', name: 'google-oauth2', options: {} },
+              { id: 'con_3', strategy: 'samlp', name: 'enterprise-saml', options: {} },
+            ]),
+          clients: {
+            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
+
+      const assets = {
+        connections: [
+          { name: 'github', strategy: 'github', options: { foo: 'bar' } },
+          { name: 'google-oauth2', strategy: 'google-oauth2', options: {} },
+          { name: 'enterprise-saml', strategy: 'samlp', options: {} }, // This should be ignored
+        ],
+      };
+
+      const changes = await handler.calcChanges(assets);
+
+      // Should only process github and google-oauth2
+      const allChanges = [...changes.create, ...changes.update, ...changes.del];
+      expect(allChanges.every((c) => ['github', 'google-oauth2'].includes(c.name))).to.be.true;
+      expect(allChanges.find((c) => c.name === 'enterprise-saml')).to.be.undefined;
+    });
+
+    it('should process all connections when AUTH0_INCLUDED_CONNECTIONS is not configured', async () => {
+      delete config.data.AUTH0_INCLUDED_CONNECTIONS;
+
+      const auth0 = {
+        connections: {
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con_1', strategy: 'github', name: 'github', options: {} },
+            ]),
+          clients: {
+            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
+
+      const assets = {
+        connections: [
+          { name: 'github', strategy: 'github', options: { foo: 'bar' } },
+          { name: 'google-oauth2', strategy: 'google-oauth2', options: {} },
+          { name: 'enterprise-saml', strategy: 'samlp', options: {} },
+        ],
+      };
+
+      const changes = await handler.calcChanges(assets);
+
+      // Should process all connections
+      const allChanges = [...changes.create, ...changes.update, ...changes.del];
+      expect(allChanges.length).to.be.at.least(2); // At least the new ones (google-oauth2 and enterprise-saml)
+    });
+
+    it('should log correct counts when some connections are ignored', async () => {
+      config.data.AUTH0_INCLUDED_CONNECTIONS = ['github'];
+
+      const auth0 = {
+        connections: {
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con_1', strategy: 'github', name: 'github', options: {} },
+            ]),
+          clients: {
+            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
+
+      const assets = {
+        connections: [
+          { name: 'github', strategy: 'github', options: {} },
+          { name: 'google-oauth2', strategy: 'google-oauth2', options: {} },
+          { name: 'enterprise-saml', strategy: 'samlp', options: {} },
+        ],
+      };
+
+      const changes = await handler.calcChanges(assets);
+
+      // The function should have logged that it's managing 1 connection and ignoring 2
+      // We can't directly test log output in this test, but we can verify the filtering worked
+      const allChanges = [...changes.create, ...changes.update, ...changes.del];
+      expect(allChanges.every((c) => c.name === 'github' || !c.name)).to.be.true;
+    });
+
+    it('should handle empty connections array with AUTH0_INCLUDED_CONNECTIONS', async () => {
+      config.data.AUTH0_INCLUDED_CONNECTIONS = ['github'];
+
+      const auth0 = {
+        connections: {
+          list: (params) => mockPagedData(params, 'connections', []),
+          clients: {
+            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
+
+      const assets = {
+        connections: [],
+      };
+
+      const changes = await handler.calcChanges(assets);
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+    });
+  });
+
+  describe('#processChanges with AUTH0_INCLUDED_CONNECTIONS', () => {
+    it('should only process managed connections during import', async () => {
+      config.data.AUTH0_INCLUDED_CONNECTIONS = ['github'];
+
+      const createStub = sinon.stub().resolves({ data: {} });
+      const updateStub = sinon.stub().callsFake((params, data) => {
+        return Promise.resolve({ data: { ...params, ...data } });
+      });
+      const deleteStub = sinon.stub().resolves({ data: {} });
+
+      const auth0 = {
+        connections: {
+          create: createStub,
+          update: updateStub,
+          delete: deleteStub,
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con_1', strategy: 'github', name: 'github', options: {} },
+              { id: 'con_2', strategy: 'google-oauth2', name: 'google-oauth2', options: {} },
+            ]),
+          clients: {
+            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
+            update: sinon.stub().resolves({}),
+          },
+          _getRestClient: () => ({}),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
+
+      const assets = {
+        connections: [
+          { name: 'github', strategy: 'github', options: { updated: true } },
+          { name: 'google-oauth2', strategy: 'google-oauth2', options: { updated: true } },
+        ],
+      };
+
+      await handler.processChanges(assets);
+
+      // Only github should be updated (via scimHandler.updateOverride), google-oauth2 should be ignored
+      expect(scimHandlerMock.updateOverride.calledOnce).to.be.true;
+      const updateCall = scimHandlerMock.updateOverride.firstCall;
+      expect(updateCall.args[0]).to.deep.include({ id: 'con_1' });
+      expect(updateCall.args[1]).to.deep.include({ options: { updated: true } });
+    });
+
+    it('should only delete managed connections with AUTH0_ALLOW_DELETE', async () => {
+      config.data.AUTH0_INCLUDED_CONNECTIONS = ['github'];
+      config.data.AUTH0_ALLOW_DELETE = true;
+
+      const deleteStub = sinon.stub().resolves({ data: {} });
+
+      const auth0 = {
+        connections: {
+          create: sinon.stub().resolves({ data: {} }),
+          update: sinon.stub().resolves({ data: {} }),
+          delete: deleteStub,
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con_1', strategy: 'github', name: 'github', options: {} },
+              { id: 'con_2', strategy: 'google-oauth2', name: 'google-oauth2', options: {} },
+            ]),
+          clients: {
+            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
+            update: sinon.stub().resolves({}),
+          },
+          _getRestClient: () => ({}),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
+
+      const assets = {
+        connections: [], // Empty means delete all managed connections
+      };
+
+      await handler.processChanges(assets);
+
+      // Should delete github because it's managed, but google-oauth2 is never considered
+      // because it's not in AUTH0_INCLUDED_CONNECTIONS
+      expect(deleteStub.calledOnce).to.be.true;
+      expect(deleteStub.firstCall.args[0]).to.equal('con_1');
+    });
+
+    it('should preserve managed connections when they are in the assets', async () => {
+      config.data.AUTH0_INCLUDED_CONNECTIONS = ['github'];
+      config.data.AUTH0_ALLOW_DELETE = true;
+
+      const deleteStub = sinon.stub().resolves({ data: {} });
+      const updateStub = sinon.stub().callsFake((params, data) => {
+        return Promise.resolve({ data: { ...params, ...data } });
+      });
+
+      const auth0 = {
+        connections: {
+          create: sinon.stub().resolves({ data: {} }),
+          update: updateStub,
+          delete: deleteStub,
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con_1', strategy: 'github', name: 'github', options: {} },
+              { id: 'con_2', strategy: 'google-oauth2', name: 'google-oauth2', options: {} },
+            ]),
+          clients: {
+            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
+            update: sinon.stub().resolves({}),
+          },
+          _getRestClient: () => ({}),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
+
+      const assets = {
+        connections: [{ name: 'github', strategy: 'github', options: {} }],
+      };
+
+      await handler.processChanges(assets);
+
+      // Should not delete anything
+      expect(deleteStub.called).to.be.false;
+      // Should update github if there are changes, or not call update if same
+      // (actual behavior depends on change detection)
+    });
+  });
+});
+
 describe('#addExcludedConnectionPropertiesToChanges', () => {
   const { addExcludedConnectionPropertiesToChanges } = connections;
 

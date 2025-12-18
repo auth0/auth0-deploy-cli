@@ -86,6 +86,59 @@ String. Specifies the JWT signing algorithms used by the client when facilitatin
 
 Boolean. When enabled, will allow the tool to delete resources. Default: `false`.
 
+### `AUTH0_INCLUDED_CONNECTIONS`
+
+Array of strings. Specifies which connections should be managed by the Deploy CLI. When configured, only the connections listed by name will be included in export, import, update, and delete operations. All other connections in the tenant will be completely ignored.
+
+This is particularly useful for:
+- Managing only specific connections while preserving others (e.g., self-service SSO connections, third-party integrations)
+- Preventing accidental modifications to connections managed by other systems
+- Isolating connection management to specific subsets of your tenant
+
+**Important:** This setting affects all operations (export, import, update, and delete). Connections not in this list will not appear in exports and will not be modified during imports.
+
+#### Example
+
+```json
+{
+  "AUTH0_INCLUDED_CONNECTIONS": ["github", "google-oauth2", "Username-Password-Authentication"]
+}
+```
+
+In the example above, only the `github`, `google-oauth2`, and `Username-Password-Authentication` connections will be managed. All other connections in the tenant will be ignored.
+
+#### Environment Variable Format
+
+When passing as an environment variable, use JSON array format:
+
+```shell
+# JSON array format
+export AUTH0_INCLUDED_CONNECTIONS='["github","google-oauth2","Username-Password-Authentication"]'
+
+# Or as a single-line array
+export AUTH0_INCLUDED_CONNECTIONS='["github"]'
+```
+
+#### Use Cases
+
+**Scenario 1: Self-Service SSO**
+If your organization allows users to create their own SAML or OIDC connections through a self-service portal, you can exclude those connections from Deploy CLI management:
+
+```json
+{
+  "AUTH0_INCLUDED_CONNECTIONS": ["github", "google-oauth2"]
+}
+```
+
+**Scenario 2: Environment-Specific Connections**
+Manage only connections relevant to a specific environment:
+
+```json
+{
+  "AUTH0_INCLUDED_CONNECTIONS": ["dev-database", "dev-google-oauth2"]
+}
+```
+
 ### `AUTH0_EXCLUDED`
 
 Array of strings. Excludes entire resource types from being managed, bi-directionally. See also: [excluding resources from management](excluding-from-management.md). Possible values: `actions`, `attackProtection`, `branding`, `clientGrants`, `clients`, `connections`, `customDomains`, `databases`, `emailProvider`, `phoneProviders`, `emailTemplates`, `guardianFactorProviders`, `guardianFactorTemplates`, `guardianFactors`, `guardianPhoneFactorMessageTypes`, `guardianPhoneFactorSelectedProvider`, `guardianPolicies`, `logStreams`, `migrations`, `organizations`, `pages`, `prompts`, `resourceServers`, `roles`, `tenant`, `triggers`, `selfServiceProfiles`.

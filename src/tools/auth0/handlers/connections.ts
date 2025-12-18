@@ -313,7 +313,17 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     });
 
     // Filter out database connections as we have separate handler for it
-    const filteredConnections = connections.filter((c) => c.strategy !== 'auth0');
+    let filteredConnections = connections.filter((c) => c.strategy !== 'auth0');
+
+    const managedConnectionNames = this.config('AUTH0_INCLUDED_CONNECTIONS');
+    if (managedConnectionNames) {
+      filteredConnections = filteredConnections.filter((conn) =>
+        managedConnectionNames.includes(conn.name ?? '')
+      );
+      log.info(
+        `AUTH0_INCLUDED_CONNECTIONS is configured. Retrieved ${filteredConnections.length} managed connection(s) from tenant.`
+      );
+    }
 
     // If options option is empty for all connection, log the missing options scope.
     const isOptionExists = filteredConnections.every(
@@ -359,6 +369,18 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
         conflicts: [],
       };
 
+    const managedConnectionNames = this.config('AUTH0_INCLUDED_CONNECTIONS');
+    const filteredConnections = managedConnectionNames
+      ? connections.filter((conn) => managedConnectionNames.includes(conn.name))
+      : connections;
+
+    if (managedConnectionNames && filteredConnections.length !== connections.length) {
+      const excludedCount = connections.length - filteredConnections.length;
+      log.info(
+        `AUTH0_INCLUDED_CONNECTIONS is configured. Managing ${filteredConnections.length} connection(s), ignoring ${excludedCount} connection(s) not in the managed list.`
+      );
+    }
+
     // Convert enabled_clients by name to the id
     const clients = await paginate<Client>(this.client.clients.list, {
       paginate: true,
@@ -373,7 +395,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     // Prepare an id map. We'll use this map later to get the `strategy` and SCIM enable status of the connections.
     await this.scimHandler.createIdMap(existingConnections);
 
-    const formatted = connections.map((connection) => ({
+    const formatted = filteredConnections.map((connection) => ({
       ...connection,
       ...this.getFormattedOptions(connection, clients),
       enabled_clients: getEnabledClients(assets, connection, existingConnections, clients),
