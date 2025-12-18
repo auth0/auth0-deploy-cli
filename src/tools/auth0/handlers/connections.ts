@@ -1,6 +1,6 @@
 import dotProp from 'dot-prop';
 import { chunk, keyBy } from 'lodash';
-import { Management } from 'auth0';
+import { Management, ManagementError } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import { filterExcluded, convertClientNameToId, getEnabledClients, sleep } from '../../utils';
 import { CalculatedChanges, Asset, Assets, Auth0APIClient } from '../../../types';
@@ -353,22 +353,19 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
                 config = resp;
               })
               .catch((err) => {
-                throw new Error(err);
+                throw new ManagementError(err);
               }),
         })
         .promise();
 
       return config;
     } catch (error) {
-      if (error.statusCode === 403) {
-        log.warn(
-          'Directory Provisioning feature is not available on this tenant. Please contact Auth0 support to enable this feature.'
-        );
+      const errLog = `Unable to fetch directory provisioning for connection '${connectionId}'. `;
+      if (error instanceof ManagementError && error.statusCode === 403) {
+        const bodyMessage = (error.body as any)?.message;
+        log.warn(errLog + bodyMessage);
       } else {
-        log.error(
-          `Unable to fetch directory provisioning for connection '${connectionId}':`,
-          error
-        );
+        log.error(errLog, error?.message);
       }
       return null;
     }
