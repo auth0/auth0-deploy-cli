@@ -358,6 +358,68 @@ describe('#tokenExchangeProfiles handler', () => {
       await stageFn.apply(handler, [{ tokenExchangeProfiles: [] }]);
     });
 
+    it('should process deletes before creates to avoid race conditions', async () => {
+      const executionOrder = [];
+      const auth0 = {
+        tokenExchangeProfiles: {
+          create: function (data) {
+            executionOrder.push('create');
+            return Promise.resolve({ data: { ...data, id: 'tep_new' } });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: function (id) {
+            executionOrder.push('delete');
+            return new Promise((resolve) => setTimeout(() => resolve({ id }), 10));
+          },
+          list: (params) =>
+            mockPagedData({ ...params, include_totals: true }, 'tokenExchangeProfiles', [
+              {
+                id: 'tep_123',
+                name: 'Existing token exchange',
+                subject_token_type: 'https://acme.com/cis-token',
+                action_id: 'action_123',
+                type: 'custom_authentication',
+              },
+            ]),
+        },
+        actions: {
+          list: () =>
+            Promise.resolve({
+              data: [
+                {
+                  id: 'action_123',
+                  name: 'my-action',
+                  supported_triggers: [{ id: 'custom-token-exchange', version: 'v1' }],
+                },
+              ],
+            }),
+        },
+        pool: {
+          addEachTask: ({ data, generator }) => ({
+            promise: () => Promise.all((data || []).map((item) => generator(item))),
+          }),
+        },
+      };
+
+      const handler = new tokenExchangeProfiles.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          tokenExchangeProfiles: [
+            {
+              name: 'New token exchange',
+              subject_token_type: 'https://acme.com/cis-token',
+              action: 'my-action',
+              type: 'custom_authentication',
+            },
+          ],
+        },
+      ]);
+
+      expect(executionOrder).to.deep.equal(['delete', 'create']);
+    });
+
     it('should throw error when action is not found during create', async () => {
       const auth0 = {
         tokenExchangeProfiles: {
