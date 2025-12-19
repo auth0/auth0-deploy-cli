@@ -250,6 +250,31 @@ describe('ScimHandler', () => {
       expect(handler.updateScimConfiguration.calledOnce).to.be.true;
     });
 
+    it('should remove directory provisioning configuration before updating connection', async () => {
+      const requestParams = { id: 'con_dirprov' };
+      const bodyParams = {
+        name: 'google-apps-connection',
+        scim_configuration: { mapping: [], user_id_attribute: 'id' },
+        directory_provisioning_configuration: { mapping: [{ auth0: 'email', idp: 'mail' }] },
+      };
+
+      handler.idMap.set('con_dirprov', {
+        strategy: 'samlp',
+        scimConfiguration: bodyParams.scim_configuration,
+      });
+
+      mockConnectionsManager.update.resolves({ id: 'con_dirprov' });
+      handler.updateScimConfiguration = sinon.stub().resolves({ connection_id: 'con_dirprov' });
+
+      await handler.updateOverride(requestParams, { ...bodyParams });
+
+      const [, updateBody] = mockConnectionsManager.update.firstCall.args;
+      expect(updateBody).to.not.have.property('directory_provisioning_configuration');
+      expect(updateBody).to.not.have.property('scim_configuration');
+      expect(updateBody).to.have.property('name', 'google-apps-connection');
+      expect(handler.updateScimConfiguration.calledOnce).to.be.true;
+    });
+
     it('should create SCIM configuration when updating connection during updateOverride', async () => {
       const requestParams = { id: 'con_kzpLY0Afi4I8lvwM' };
       const bodyParams = { scim_configuration: { mapping: [], user_id_attribute: 'id' } };

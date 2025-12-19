@@ -358,6 +358,20 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
         })
         .promise();
 
+      const stripKeysFromOutput = [
+        'connection_id',
+        'connection_name',
+        'strategy',
+        'created_at',
+        'updated_at',
+      ];
+
+      stripKeysFromOutput.forEach((key) => {
+        if (config && key in config) {
+          delete (config as Partial<DirectoryProvisioningConfig>)[key];
+        }
+      });
+
       return config;
     } catch (error) {
       const errLog = `Unable to fetch directory provisioning for connection '${connectionId}'. `;
@@ -381,8 +395,11 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     if (!connectionId) {
       throw new Error('Connection ID is required to create directory provisioning configuration.');
     }
-    await this.client.connections.directoryProvisioning.create(connectionId, payload);
-    log.debug(`Created directory provisioning for ${this.type}: ${connectionId}`);
+    const createPayload: Management.CreateDirectoryProvisioningRequestContent = {
+      mapping: payload.mapping,
+      synchronize_automatically: payload.synchronize_automatically,
+    };
+    await this.client.connections.directoryProvisioning.create(connectionId, createPayload);
   }
 
   /**
@@ -395,8 +412,13 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     if (!connectionId) {
       throw new Error('Connection ID is required to update directory provisioning configuration.');
     }
-    await this.client.connections.directoryProvisioning.update(connectionId, payload);
-    log.debug(`Updated directory provisioning for ${this.type}: ${connectionId}`);
+
+    const updatePayload: Management.UpdateDirectoryProvisioningRequestContent = {
+      mapping: payload.mapping,
+      synchronize_automatically: payload.synchronize_automatically,
+    };
+
+    await this.client.connections.directoryProvisioning.update(connectionId, updatePayload);
   }
 
   /**
@@ -407,7 +429,6 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       throw new Error('Connection ID is required to delete directory provisioning configuration.');
     }
     await this.client.connections.directoryProvisioning.delete(connectionId);
-    log.debug(`Deleted directory provisioning for ${this.type}: ${connectionId}`);
   }
 
   /**
@@ -454,7 +475,6 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       } else if (existingConfig && !proposedConfig) {
         directoryConnectionsToDelete.push(conn);
       }
-      // If neither exists, do nothing
     }
 
     // Process updates first

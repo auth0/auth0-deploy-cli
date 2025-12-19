@@ -121,6 +121,59 @@ Contents of `promptName_screenName.json`
 }
 ```
 
+## Connections (Google Workspace directory provisioning)
+
+The Deploy CLI supports managing the `directory_provisioning_configuration` for Google Workspace (`google-apps`) connections. Only `google-apps` connections are processed for directory provisioning; other strategies will ignore this block. Deleting directory provisioning requires `AUTH0_ALLOW_DELETE=true`.
+
+The `mapping` array pairs Auth0 user fields with IdP fields, and `synchronize_automatically` controls whether Auth0 runs scheduled sync jobs for the connection.
+
+**YAML Example**
+
+```yaml
+connections:
+  - name: google-workspace
+    strategy: google-apps
+    options:
+      domain: example.com
+      tenant_domain: example.com
+      client_id: 'some_client_id'
+      client_secret: 'some_client_secret'
+    directory_provisioning_configuration:
+      mapping:
+        - auth0: email
+          idp: mail
+        - auth0: name
+          idp: displayName
+      synchronize_automatically: true
+```
+
+**Directory Example**
+
+```
+./connections/google-apps-directory-provisioning.json
+```
+
+```json
+{
+  "name": "google-apps-directory-provisioning",
+  "strategy": "google-apps",
+  "enabled_clients": ["My SPA"],
+  "options": {
+    "domain": "example.com",
+    "tenant_domain": "example.com",
+    "client_id": "some_client_id",
+    "client_secret": "some_client_secret"
+  },
+  "directory_provisioning_configuration": {
+    "mapping": [
+      { "auth0": "email", "idp": "mail" },
+      { "auth0": "name", "idp": "displayName" }
+    ],
+    "synchronize_automatically": true
+  }
+}
+```
+
 ## Databases
 
 When managing database connections, the values of `options.customScripts` point to specific javascript files relative to

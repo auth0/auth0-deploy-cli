@@ -111,6 +111,23 @@ connections:
       ext_groups: true
     # Add other connection settings (https://auth0.com/docs/api/management/v2#!/Connections/post_connections)
 
+  - name: "google-workspace"
+    strategy: "google-apps"
+    enabled_clients:
+      - "My SPA"
+    options:
+      domain: "example.com"
+      tenant_domain: "example.com"
+      client_id: 'some_client_id'
+      client_secret: 'some_client_secret'
+    directory_provisioning_configuration:
+      mapping:
+        - auth0: "email"
+          idp: "mail"
+        - auth0: "name"
+          idp: "displayName"
+      synchronize_automatically: true
+
 
 resourceServers:
   -
