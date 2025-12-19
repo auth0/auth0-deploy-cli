@@ -97,6 +97,8 @@ This is particularly useful for:
 
 **Important:** This setting affects all operations (export and import). Connections not in this list will not appear in exports and will not be modified during imports.
 
+Cannot be used simultaneously with `AUTH0_EXCLUDED_CONNECTIONS`.
+
 #### Example
 
 ```json
@@ -207,6 +209,8 @@ Array of strings. Excludes the management of specific databases by name. **Note:
 ### `AUTH0_EXCLUDED_CONNECTIONS`
 
 Array of strings. Excludes the management of specific connections by name. **Note:** This configuration may be subject to deprecation in the future. See: [excluding resources from management](excluding-from-management.md).
+
+Cannot be used simultaneously with `AUTH0_INCLUDED_CONNECTIONS`.
 
 ### `AUTH0_EXCLUDED_RESOURCE_SERVERS`
 

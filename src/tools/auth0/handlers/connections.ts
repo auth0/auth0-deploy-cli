@@ -365,13 +365,6 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
         ? connections.filter((conn) => includedConnections.includes(conn.name))
         : connections;
 
-    if (includedConnections.length > 0 && filteredConnections.length !== connections.length) {
-      const excludedCount = connections.length - filteredConnections.length;
-      log.info(
-        `AUTH0_INCLUDED_CONNECTIONS is configured. Managing ${filteredConnections.length} connection(s), ignoring ${excludedCount} connection(s) not in the managed list.`
-      );
-    }
-
     // Convert enabled_clients by name to the id
     const clients = await paginate<Client>(this.client.clients.list, {
       paginate: true,
