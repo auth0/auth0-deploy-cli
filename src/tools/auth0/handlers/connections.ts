@@ -375,7 +375,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       return config;
     } catch (error) {
       const errLog = `Unable to fetch directory provisioning for connection '${connectionId}'. `;
-      if (error instanceof ManagementError && error.statusCode === 403) {
+      if (error instanceof ManagementError) {
         const bodyMessage = (error.body as any)?.message;
         log.warn(errLog + bodyMessage);
       } else {
@@ -400,6 +400,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       synchronize_automatically: payload.synchronize_automatically,
     };
     await this.client.connections.directoryProvisioning.create(connectionId, createPayload);
+    log.debug(`Created directory provisioning for connection '${connectionId}'`);
   }
 
   /**
@@ -419,6 +420,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     };
 
     await this.client.connections.directoryProvisioning.update(connectionId, updatePayload);
+    log.debug(`Updated directory provisioning for connection '${connectionId}'`);
   }
 
   /**
@@ -429,6 +431,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       throw new Error('Connection ID is required to delete directory provisioning configuration.');
     }
     await this.client.connections.directoryProvisioning.delete(connectionId);
+    log.debug(`Deleted directory provisioning for connection '${connectionId}'`);
   }
 
   /**
@@ -443,9 +446,8 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     // Build a map of existing connections by ID for quick lookup
     const existingConnectionsMap = keyBy(this.existing || [], 'id');
 
-    // Filter to only google-apps connections that have directory_provisioning_configuration
-    const googleAppsWithDirProvFilter = (conn: Asset) =>
-      conn.strategy === 'google-apps' && conn.directory_provisioning_configuration;
+    // Filter to only google-apps connections
+    const googleAppsWithDirProvFilter = (conn: Asset) => conn.strategy === 'google-apps';
 
     const connectionsToProcess = [
       ...update.filter(googleAppsWithDirProvFilter),

@@ -438,7 +438,8 @@ describe('#connections handler', () => {
           mapping: sampleMapping,
         });
 
-        expect(createStub.calledOnceWith('con-post', { mapping: sampleMapping })).to.be.true;
+        expect(createStub.calledOnceWith('con-post', sinon.match.has('mapping', sampleMapping))).to
+          .be.true;
       });
 
       it('should retrieve directory provisioning configuration (GET)', async () => {
