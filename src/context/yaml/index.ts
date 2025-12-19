@@ -206,6 +206,7 @@ export default class YAMLContext {
 
     // Delete exclude as it's not part of the auth0 tenant config
     delete cleaned.exclude;
+    delete cleaned.include;
 
     // Optionally Strip identifiers
     if (!this.config.AUTH0_EXPORT_IDENTIFIERS) {
