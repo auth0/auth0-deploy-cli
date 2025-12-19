@@ -172,25 +172,17 @@ export default class TokenExchangeProfilesHandler extends DefaultHandler {
     );
 
     // Process changes in order: delete, create, update
-    const changes = [{ del }, { create }, { update }];
+    if (del.length > 0) {
+      await this.deleteTokenExchangeProfiles(del);
+    }
 
-    await Promise.all(
-      changes.map(async (change) => {
-        switch (true) {
-          case change.del && change.del.length > 0:
-            await this.deleteTokenExchangeProfiles(change.del || []);
-            break;
-          case change.create && change.create.length > 0:
-            await this.createTokenExchangeProfiles(change.create);
-            break;
-          case change.update && change.update.length > 0:
-            if (change.update) await this.updateTokenExchangeProfiles(change.update);
-            break;
-          default:
-            break;
-        }
-      })
-    );
+    if (create.length > 0) {
+      await this.createTokenExchangeProfiles(create);
+    }
+
+    if (update.length > 0) {
+      await this.updateTokenExchangeProfiles(update);
+    }
   }
 
   async createTokenExchangeProfile(profile: TokenExchangeProfile): Promise<TokenExchangeProfile> {

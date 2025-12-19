@@ -93,25 +93,17 @@ export default class PhoneTemplatesHandler extends DefaultHandler {
       `Start processChanges for phone templates [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
     );
 
-    const changes = [{ del: del }, { create: create }, { update: update }];
+    if (del.length > 0) {
+      await this.deletePhoneTemplates(del);
+    }
 
-    await Promise.all(
-      changes.map(async (change) => {
-        switch (true) {
-          case change.del && change.del.length > 0:
-            await this.deletePhoneTemplates(change.del || []);
-            break;
-          case change.create && change.create.length > 0:
-            await this.createPhoneTemplates(change.create);
-            break;
-          case change.update && change.update.length > 0:
-            if (change.update) await this.updatePhoneTemplates(change.update);
-            break;
-          default:
-            break;
-        }
-      })
-    );
+    if (create.length > 0) {
+      await this.createPhoneTemplates(create);
+    }
+
+    if (update.length > 0) {
+      await this.updatePhoneTemplates(update);
+    }
   }
 
   async createPhoneTemplate(template): Promise<Asset> {

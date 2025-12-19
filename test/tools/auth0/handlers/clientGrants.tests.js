@@ -11,6 +11,7 @@ const pool = {
     }
     return { promise: () => null };
   },
+  addSingleTask: ({ data, generator }) => ({ promise: () => Promise.resolve(generator(data)) }),
 };
 
 describe('#clientGrants handler', () => {
@@ -147,6 +148,42 @@ describe('#clientGrants handler', () => {
       const handler = new clientGrants.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([clientGrant]);
+    });
+
+    it('should fetch all client grants across multiple checkpoint pages', async () => {
+      const page1 = Array.from({ length: 2 }, (_, i) => ({
+        id: `cg${i}`,
+        client_id: `client${i}`,
+        audience: `audience${i}`,
+      }));
+      const page2 = Array.from({ length: 2 }, (_, i) => ({
+        id: `cg${i + 2}`,
+        client_id: `client${i + 2}`,
+        audience: `audience${i + 2}`,
+      }));
+      const page3 = [
+        {
+          id: 'cg4',
+          client_id: 'client4',
+          audience: 'audience4',
+        },
+      ];
+
+      const auth0 = {
+        clientGrants: {
+          list: (params) => mockPagedData(params, 'client_grants', page1, [page2, page3]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const data = await handler.getType();
+
+      expect(data).to.have.lengthOf(5);
+      expect(data.map((g) => g.id)).to.deep.equal(['cg0', 'cg1', 'cg2', 'cg3', 'cg4']);
     });
 
     it('should convert client_name to client_id', async () => {

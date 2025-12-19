@@ -68,7 +68,7 @@ export default class ClientGrantsHandler extends DefaultHandler {
     }
 
     const clientGrants = await paginate<ClientGrant>(this.client.clientGrants.list, {
-      paginate: true,
+      checkpoint: true,
     });
 
     this.existing = clientGrants;

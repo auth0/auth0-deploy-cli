@@ -539,29 +539,17 @@ export default class OrganizationsHandler extends DefaultHandler {
       `Start processChanges for organizations [delete:${changes.del.length}] [update:${changes.update.length}], [create:${changes.create.length}]`
     );
 
-    const myChanges = [
-      { del: changes.del },
-      { create: changes.create },
-      { update: changes.update },
-    ];
+    if (changes.del.length > 0) {
+      await this.deleteOrganizations(changes.del);
+    }
 
-    await Promise.all(
-      myChanges.map(async (change) => {
-        switch (true) {
-          case change.del && change.del.length > 0:
-            await this.deleteOrganizations(change.del || []);
-            break;
-          case change.create && change.create.length > 0:
-            await this.createOrganizations(changes.create);
-            break;
-          case change.update && change.update.length > 0:
-            if (change.update) await this.updateOrganizations(change.update, existing);
-            break;
-          default:
-            break;
-        }
-      })
-    );
+    if (changes.create.length > 0) {
+      await this.createOrganizations(changes.create);
+    }
+
+    if (changes.update.length > 0) {
+      await this.updateOrganizations(changes.update, existing);
+    }
   }
 
   async getOrganizationEnabledConnections(
