@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.23.2] - 2025-12-18
+
+### Fixed
+
+- Fix `customDomains` handler 409 for listing domains. [#1244]
+
+## [8.23.1] - 2025-12-18
+
+### Fixed
+
+- Fix resolve race conditions in processChanges for handlers. [#1240]
+- Fix client grants pagination to use checkpoint. [#1239]
+
 ## [8.23.0] - 2025-12-16
 
 ### Added
@@ -1568,7 +1581,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1229]: https://github.com/auth0/auth0-deploy-cli/issues/1229
 [#1231]: https://github.com/auth0/auth0-deploy-cli/issues/1231
 [#1232]: https://github.com/auth0/auth0-deploy-cli/issues/1232
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.0...HEAD
+[#1239]: https://github.com/auth0/auth0-deploy-cli/issues/1239
+[#1240]: https://github.com/auth0/auth0-deploy-cli/issues/1240
+[#1244]: https://github.com/auth0/auth0-deploy-cli/issues/1244
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.2...HEAD
+[8.23.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.1...v8.23.2
+[8.23.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.0...v8.23.1
 [8.23.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.22.0...v8.23.0
 [8.22.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.21.0...v8.22.0
 [8.21.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.20.4-beta.0...v8.21.0

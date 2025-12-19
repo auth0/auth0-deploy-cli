@@ -196,7 +196,8 @@ export function mockMgmtClient() {
       updateSettings: () => Promise.resolve({}),
     },
     customDomains: {
-      list: (params) => mockPagedData(params, 'customDomains', []),
+      // Auth0 SDK v5 returns an array (not Page<T>) for custom domains
+      list: () => [],
     },
     forms: { list: (params) => mockPagedData(params, 'forms', []) },
     flows: {
