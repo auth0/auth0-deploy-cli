@@ -452,7 +452,8 @@ userAttributeProfiles:
         required: true
 
 riskAssessment:
-  enabled: false
-  # newDevice:
+  settings:
+    enabled: false
+  # new_device:
   #   remember_for: 30
 
