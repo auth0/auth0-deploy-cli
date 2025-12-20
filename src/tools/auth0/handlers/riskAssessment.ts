@@ -5,11 +5,17 @@ import { Management, ManagementError } from 'auth0';
 export const schema = {
   type: 'object',
   properties: {
-    enabled: {
-      type: 'boolean',
-      description: 'Whether or not risk assessment is enabled.',
+    settings: {
+      type: 'object',
+      properties: {
+        enabled: {
+          type: 'boolean',
+          description: 'Whether or not risk assessment is enabled.',
+        },
+      },
+      required: ['enabled'],
     },
-    newDevice: {
+    new_device: {
       type: 'object',
       properties: {
         remember_for: {
@@ -20,7 +26,7 @@ export const schema = {
       required: ['remember_for'],
     },
   },
-  required: ['enabled'],
+  required: ['settings'],
 };
 
 export type RiskAssessmentSettings = {
