@@ -273,8 +273,10 @@ describe('#YAML context validation', () => {
       guardianPolicies: { policies: [] },
       resourceServers: [],
       riskAssessment: {
-        enabled: false,
-        newDevice: {
+        settings: {
+          enabled: false,
+        },
+        new_device: {
           remember_for: 30,
         },
       },
@@ -411,8 +413,10 @@ describe('#YAML context validation', () => {
       guardianPolicies: { policies: [] },
       resourceServers: [],
       riskAssessment: {
-        enabled: false,
-        newDevice: {
+        settings: {
+          enabled: false,
+        },
+        new_device: {
           remember_for: 30,
         },
       },
@@ -550,8 +554,10 @@ describe('#YAML context validation', () => {
       guardianPolicies: { policies: [] },
       resourceServers: [],
       riskAssessment: {
-        enabled: false,
-        newDevice: {
+        settings: {
+          enabled: false,
+        },
+        new_device: {
           remember_for: 30,
         },
       },

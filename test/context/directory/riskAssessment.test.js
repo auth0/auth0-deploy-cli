@@ -9,7 +9,7 @@ describe('#directory context risk-assessments', () => {
   it('should process risk-assessments with newDevice from settings.json', async () => {
     const files = {
       'risk-assessment': {
-        'settings.json': '{"enabled": true, "newDevice": {"remember_for": 30}}',
+        'settings.json': '{"settings": {"enabled": true}, "new_device": {"remember_for": 30}}',
       },
     };
 
@@ -21,8 +21,10 @@ describe('#directory context risk-assessments', () => {
     await context.loadAssetsFromLocal();
 
     const target = {
-      enabled: true,
-      newDevice: {
+      settings: {
+        enabled: true,
+      },
+      new_device: {
         remember_for: 30,
       },
     };
@@ -33,7 +35,8 @@ describe('#directory context risk-assessments', () => {
   it('should replace keywords in newDevice settings', async () => {
     const files = {
       'risk-assessment': {
-        'settings.json': '{"enabled": true, "newDevice": {"remember_for": @@REMEMBER_FOR_DAYS@@}}',
+        'settings.json':
+          '{"settings": {"enabled": true}, "new_device": {"remember_for": @@REMEMBER_FOR_DAYS@@}}',
       },
     };
 
@@ -51,8 +54,10 @@ describe('#directory context risk-assessments', () => {
     await context.loadAssetsFromLocal();
 
     const target = {
-      enabled: true,
-      newDevice: {
+      settings: {
+        enabled: true,
+      },
+      new_device: {
         remember_for: 60,
       },
     };
@@ -63,7 +68,7 @@ describe('#directory context risk-assessments', () => {
   it('should process risk-assessments without newDevice', async () => {
     const files = {
       'risk-assessment': {
-        'settings.json': '{"enabled": false}',
+        'settings.json': '{"settings": {"enabled": false}}',
       },
     };
 
@@ -75,7 +80,9 @@ describe('#directory context risk-assessments', () => {
     await context.loadAssetsFromLocal();
 
     const target = {
-      enabled: false,
+      settings: {
+        enabled: false,
+      },
     };
 
     expect(context.assets.riskAssessment).to.deep.equal(target);
@@ -87,8 +94,10 @@ describe('#directory context risk-assessments', () => {
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
     context.assets.riskAssessment = {
-      enabled: true,
-      newDevice: {
+      settings: {
+        enabled: true,
+      },
+      new_device: {
         remember_for: 90,
       },
     };
@@ -107,7 +116,9 @@ describe('#directory context risk-assessments', () => {
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
     context.assets.riskAssessment = {
-      enabled: false,
+      settings: {
+        enabled: false,
+      },
     };
 
     await handler.dump(context);

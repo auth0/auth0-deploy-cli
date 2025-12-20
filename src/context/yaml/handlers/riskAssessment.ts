@@ -1,8 +1,9 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
-import { Asset, ParsedAsset } from '../../../types';
+import { RiskAssessmentSettings } from '../../../tools/auth0/handlers/riskAssessment';
+import { ParsedAsset } from '../../../types';
 
-type ParsedRiskAssessment = ParsedAsset<'riskAssessment', Asset>;
+type ParsedRiskAssessment = ParsedAsset<'riskAssessment', RiskAssessmentSettings>;
 
 async function parse(context: YAMLContext): Promise<ParsedRiskAssessment> {
   const { riskAssessment } = context.assets;

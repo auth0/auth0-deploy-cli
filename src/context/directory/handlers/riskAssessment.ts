@@ -4,9 +4,10 @@ import { constants } from '../../../tools';
 import { dumpJSON, existsMustBeDir, isFile, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { ParsedAsset, Asset } from '../../../types';
+import { ParsedAsset } from '../../../types';
+import { RiskAssessmentSettings } from '../../../tools/auth0/handlers/riskAssessment';
 
-type ParsedRiskAssessment = ParsedAsset<'riskAssessment', Asset>;
+type ParsedRiskAssessment = ParsedAsset<'riskAssessment', RiskAssessmentSettings>;
 
 function parse(context: DirectoryContext): ParsedRiskAssessment {
   const riskAssessmentDirectory = path.join(context.filePath, constants.RISK_ASSESSMENT_DIRECTORY);
