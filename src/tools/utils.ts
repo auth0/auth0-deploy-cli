@@ -40,8 +40,12 @@ export function keywordStringReplace(input: string, mappings: KeywordMappings): 
   return input;
 }
 
-export function keywordReplace(input: string, mappings: KeywordMappings): string {
+export function keywordReplace(input: string | undefined, mappings: KeywordMappings): string {
   // Replace keywords with mappings within input.
+  if (input === undefined) {
+    return 'undefined';
+  }
+
   if (mappings && Object.keys(mappings).length > 0) {
     input = keywordArrayReplace(input, mappings);
     input = keywordStringReplace(input, mappings);

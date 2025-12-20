@@ -1,8 +1,7 @@
-import { CustomDomain } from 'auth0';
+import { Management } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
 import log from '../../../logger';
-import { paginate } from '../client';
 
 export const schema = {
   type: 'array',
@@ -17,7 +16,7 @@ export const schema = {
       },
       domain: { type: 'string' },
       primary: { type: 'boolean' },
-      status: { type: 'string', enum: ['pending_verification', 'ready', 'disabled', 'pending'] },
+      status: { type: 'string' },
       type: { type: 'string', enum: ['auth0_managed_certs', 'self_managed_certs'] },
       verification: { type: 'object' },
       tls_policy: {
@@ -41,8 +40,10 @@ export const schema = {
   },
 };
 
+type CustomDomain = Management.CustomDomain;
+
 export default class CustomDomainsHadnler extends DefaultAPIHandler {
-  existing: Asset[] | null;
+  existing: CustomDomain[] | null;
 
   constructor(config: DefaultAPIHandler) {
     super({
@@ -70,9 +71,7 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
         'updated_at',
       ],
       functions: {
-        delete: (args) => this.client.customDomains.delete({ id: args.custom_domain_id }),
-        update: (args, data) =>
-          this.client.customDomains.update({ id: args.custom_domain_id }, data),
+        update: (args, data) => this.client.customDomains.update(args.custom_domain_id, data),
       },
     });
   }
@@ -87,9 +86,7 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
         return this.existing;
       }
 
-      const customDomains = await paginate<CustomDomain>(this.client.customDomains.getAll, {
-        checkpoint: true,
-      });
+      const customDomains = await this.client.customDomains.list();
 
       this.existing = customDomains;
 

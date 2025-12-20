@@ -67,7 +67,7 @@ describe('#connectionProfiles handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'connectionProfiles', []),
+          list: (params) => mockPagedData(params, 'connectionProfiles', []),
         },
         pool,
       };
@@ -82,16 +82,16 @@ describe('#connectionProfiles handler', () => {
       const auth0 = {
         connectionProfiles: {
           create: () => Promise.resolve({ data: [] }),
-          update: function (params, data) {
+          update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('cp_123');
+            expect(id).to.be.a('string');
+            expect(id).to.equal('cp_123');
             expect(data).to.be.an('object');
             expect(data.enabled_features).to.deep.equal(['scim']);
             return Promise.resolve({ data });
           },
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'connectionProfiles', [
               { id: 'cp_123', name: 'someProfile', enabled_features: [] },
             ]),
@@ -112,13 +112,13 @@ describe('#connectionProfiles handler', () => {
         connectionProfiles: {
           create: () => Promise.resolve({ data: [] }),
           update: () => Promise.resolve({ data: [] }),
-          delete: function (params) {
+          delete: function (id) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
-            expect(params.id).to.equal('cp_123');
+            expect(id).to.be.a('string');
+            expect(id).to.equal('cp_123');
             return Promise.resolve({ data: [] });
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'connectionProfiles', [{ id: 'cp_123', name: 'someProfile' }]),
         },
         pool,

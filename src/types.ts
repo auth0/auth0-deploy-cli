@@ -1,10 +1,4 @@
-import {
-  CustomDomain,
-  GetConnectionsStrategyEnum,
-  ManagementClient,
-  ResourceServer,
-  UserAttributeProfile,
-} from 'auth0';
+import { Management, ManagementClient } from 'auth0';
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { Action } from './tools/auth0/handlers/actions';
 import { Prompts } from './tools/auth0/handlers/prompts';
@@ -19,8 +13,12 @@ import { Flow } from './tools/auth0/handlers/flows';
 import { FlowVaultConnection } from './tools/auth0/handlers/flowVaultConnections';
 import { SsProfileWithCustomText } from './tools/auth0/handlers/selfServiceProfiles';
 import { PhoneProvider } from './tools/auth0/handlers/phoneProvider';
+import { PhoneTemplate } from './tools/auth0/handlers/phoneTemplates';
 import { NetworkACL } from './tools/auth0/handlers/networkACLs';
+import { UserAttributeProfile } from './tools/auth0/handlers/userAttributeProfiles';
 import { AttackProtection } from './tools/auth0/handlers/attackProtection';
+import { TokenExchangeProfile } from './tools/auth0/handlers/tokenExchangeProfiles';
+import { RiskAssessmentSettings } from './tools/auth0/handlers/riskAssessment';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -29,7 +27,7 @@ type SharedPaginationParams = {
   is_first_party?: boolean;
   include_totals?: boolean;
   id?: string;
-  strategy?: GetConnectionsStrategyEnum[];
+  strategy?: Management.ConnectionStrategyEnum[];
 };
 
 export type CheckpointPaginationParams = SharedPaginationParams & {
@@ -72,6 +70,9 @@ export type Config = {
   AUTH0_BASE_PATH?: string;
   AUTH0_AUDIENCE?: string;
   AUTH0_API_MAX_RETRIES?: number;
+  AUTH0_MAX_RETRIES?: number;
+  AUTH0_RETRY_INITIAL_DELAY_MS?: number;
+  AUTH0_RETRY_MAX_DELAY_MS?: number;
   AUTH0_KEYWORD_REPLACE_MAPPINGS?: KeywordMappings;
   AUTH0_EXPORT_IDENTIFIERS?: boolean;
   AUTH0_CONNECTIONS_DIRECTORY?: string;
@@ -97,17 +98,18 @@ export type Asset = { [key: string]: any };
 export type Assets = Partial<{
   actions: Action[] | null;
   attackProtection: AttackProtection | null;
-  riskAssessment: Asset | null;
+  riskAssessment: RiskAssessmentSettings | null;
   branding:
     | (Asset & {
         templates?: { template: string; body: string }[] | null;
       })
     | null;
   phoneProviders: PhoneProvider[] | null;
+  phoneTemplates: PhoneTemplate[] | null;
   clients: Client[] | null;
   clientGrants: ClientGrant[] | null;
   connections: Asset[] | null;
-  customDomains: CustomDomain[] | null;
+  customDomains: Management.CustomDomain[] | null;
   databases: Asset[] | null;
   emailProvider: Asset | null;
   emailTemplates: Asset[] | null;
@@ -115,24 +117,24 @@ export type Assets = Partial<{
   guardianFactors: Asset[] | null;
   guardianFactorTemplates: Asset[] | null;
   guardianPhoneFactorMessageTypes: {
-    message_types: Asset[]; //TODO: eliminate this intermediate level for consistency
+    message_types: Asset[]; // TODO: eliminate this intermediate level for consistency
   } | null;
   guardianPhoneFactorSelectedProvider: Asset | null;
   guardianPolicies: {
-    policies: string[]; //TODO: eliminate this intermediate level for consistency
+    policies: string[]; // TODO: eliminate this intermediate level for consistency
   } | null;
   hooks: Asset[] | null;
   logStreams: LogStream[] | null;
   organizations: Asset[] | null;
   pages: Page[] | null;
   prompts: Prompts | null;
-  resourceServers: ResourceServer[] | null;
+  resourceServers: Management.ResourceServer[] | null;
   roles: Asset[] | null;
   rules: Asset[] | null;
   rulesConfigs: Asset[] | null;
   tenant: Tenant | null;
   triggers: Asset[] | null;
-  //non-resource types
+  // non-resource types
   exclude?: {
     [key: string]: string[];
   };
@@ -146,6 +148,7 @@ export type Assets = Partial<{
   userAttributeProfiles: UserAttributeProfile[] | null;
   userAttributeProfilesWithId: UserAttributeProfile[] | null;
   connectionProfiles: Asset[] | null;
+  tokenExchangeProfiles: TokenExchangeProfile[] | null;
 }>;
 
 export type CalculatedChanges = {
@@ -182,6 +185,7 @@ export type AssetTypes =
   | 'riskAssessment'
   | 'branding'
   | 'phoneProviders'
+  | 'phoneTemplates'
   | 'logStreams'
   | 'prompts'
   | 'customDomains'
@@ -192,7 +196,8 @@ export type AssetTypes =
   | 'selfServiceProfiles'
   | 'networkACLs'
   | 'userAttributeProfiles'
-  | 'connectionProfiles';
+  | 'connectionProfiles'
+  | 'tokenExchangeProfiles';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 

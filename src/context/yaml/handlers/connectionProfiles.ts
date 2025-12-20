@@ -1,5 +1,5 @@
-import { ConnectionProfile } from 'auth0';
 import YAMLContext from '..';
+import { ConnectionProfile } from '../../../tools/auth0/handlers/connectionProfiles';
 import { ParsedAsset } from '../../../types';
 
 type ParsedConnectionProfiles = ParsedAsset<'connectionProfiles', Partial<ConnectionProfile>[]>;

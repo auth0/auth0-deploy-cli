@@ -1,9 +1,10 @@
-import { Client, ClientGrantSubjectTypeEnum } from 'auth0';
+import { Management } from 'auth0';
 import DefaultHandler, { order } from './default';
 import { convertClientNamesToIds } from '../../utils';
 import { Assets, CalculatedChanges } from '../../../types';
 import DefaultAPIHandler from './default';
 import { paginate } from '../client';
+import { Client } from './clients';
 
 export const schema = {
   type: 'array',
@@ -19,7 +20,7 @@ export const schema = {
       },
       subject_type: {
         type: 'string',
-        enum: Object.values(ClientGrantSubjectTypeEnum),
+        enum: Object.values(Management.ClientGrantSubjectTypeEnum),
         description: 'The subject type for this grant.',
       },
       authorization_details_types: {
@@ -31,18 +32,11 @@ export const schema = {
         uniqueItems: true,
       },
     },
-    required: ['client_id', 'scope', 'audience'],
+    required: ['client_id', 'audience'],
   },
 };
 
-export type ClientGrant = {
-  client_id: string;
-  audience: string;
-  scope: string[];
-  subject_type: ClientGrantSubjectTypeEnum;
-  authorization_details_types: string[];
-  is_system?: boolean;
-};
+export type ClientGrant = Management.ClientGrantResponseContent;
 
 export default class ClientGrantsHandler extends DefaultHandler {
   existing: ClientGrant[] | null;
@@ -54,6 +48,12 @@ export default class ClientGrantsHandler extends DefaultHandler {
       id: 'id',
       // @ts-ignore because not sure why two-dimensional array passed in
       identifiers: ['id', ['client_id', 'audience']],
+      functions: {
+        update: async (
+          { id }: { id: string },
+          bodyParams: Management.UpdateClientGrantRequestContent
+        ) => this.client.clientGrants.update(id, bodyParams),
+      },
       stripUpdateFields: ['audience', 'client_id', 'subject_type', 'is_system'],
     });
   }
@@ -67,9 +67,8 @@ export default class ClientGrantsHandler extends DefaultHandler {
       return this.existing;
     }
 
-    const clientGrants = await paginate<ClientGrant>(this.client.clientGrants.getAll, {
-      paginate: true,
-      include_totals: true,
+    const clientGrants = await paginate<ClientGrant>(this.client.clientGrants.list, {
+      checkpoint: true,
     });
 
     this.existing = clientGrants;
@@ -91,9 +90,8 @@ export default class ClientGrantsHandler extends DefaultHandler {
     // Do nothing if not set
     if (!clientGrants) return;
 
-    const clients = await paginate<Client>(this.client.clients.getAll, {
+    const clients = await paginate<Client>(this.client.clients.list, {
       paginate: true,
-      include_totals: true,
     });
     const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
     const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
@@ -119,6 +117,7 @@ export default class ClientGrantsHandler extends DefaultHandler {
         return list.filter(
           (item) =>
             item.client_id !== currentClient &&
+            item.client_id &&
             ![...excludedClientsByNames, ...excludedClients].includes(item.client_id)
         );
       }

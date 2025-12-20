@@ -56,6 +56,17 @@ clients:
       enable_organization: true
       okta_oin_client_id: "My Okta OIN Client"
       admin_login_domain: "login.myapp.com"
+  -
+    name: "My Token Exchange App"
+    app_type: "regular_web"
+    grant_types:
+      - "authorization_code"
+      - "refresh_token"
+      - "client_credentials"
+      - "urn:auth0:params:oauth:grant-type:token-exchange:federated-connection-access-token"
+    token_exchange:
+      allow_any_profile_of_type:
+        - "custom_authentication"
 
 databases:
   - name: "users"
@@ -113,6 +124,12 @@ resourceServers:
     # client_id: "if linked to a resource server client (readonly)"
     # Add other resource server settings (https://auth0.com/docs/api/management/v2#!/Resource_Servers/post_resource_servers)
 
+tokenExchangeProfiles:
+  - name: "Custom Authentication Profile"
+    type: "custom_authentication"
+    subject_token_type: "urn:ietf:params:oauth:token-type:custom"
+    action: "custom-token-exchange-action"
+
 phoneProviders:
   - name: twilio
     configuration:
@@ -124,6 +141,21 @@ phoneProviders:
     disabled: false
     credentials:
       auth_token: "some_auth_token"
+
+phoneTemplates:
+  - type: otp_verify
+    disabled: false
+    content:
+      from: "+12341234567"
+      body:
+        text: "Your verification code is {{ code }}"
+        voice: "Your verification code is {{ code }}"
+  - type: otp_enroll
+    disabled: false
+    content:
+      from: "+12341234567"
+      body:
+        text: "Your enrollment code is {{ code }}"
 
 emailProvider:
   name: "smtp"

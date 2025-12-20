@@ -1,4 +1,4 @@
-import { GetEmailTemplatesByTemplateNameTemplateNameEnum } from 'auth0';
+import { Management } from 'auth0';
 
 const PAGE_GUARDIAN_MULTIFACTOR = 'guardian_multifactor';
 const PAGE_PASSWORD_RESET = 'password_reset';
@@ -59,7 +59,7 @@ const constants = {
     'password_reset',
     'user_invitation',
     'async_approval',
-  ] as GetEmailTemplatesByTemplateNameTemplateNameEnum[],
+  ] as Management.EmailTemplateNameEnum[],
   ACTIONS_TRIGGERS: [
     'post-login',
     'credentials-exchange',
@@ -68,6 +68,7 @@ const constants = {
     'post-change-password',
     'send-phone-message',
     'password-reset-post-challenge',
+    'custom-token-exchange',
   ],
   EMAIL_TEMPLATES_DIRECTORY: 'emails',
   EMAIL_VERIFY,
@@ -96,6 +97,7 @@ const constants = {
   CLIENTS_GRANTS_DIRECTORY: 'grants',
   BRANDING_DIRECTORY: 'branding',
   PHONE_PROVIDER_DIRECTORY: 'phone-providers',
+  PHONE_TEMPLATES_DIRECTORY: 'phone-templates',
   BRANDING_TEMPLATES_DIRECTORY: 'templates',
   BRANDING_TEMPLATES_YAML_DIRECTORY: 'branding_templates',
   CLIENTS_CLIENT_NAME: 'clients',
@@ -217,6 +219,7 @@ const constants = {
   NETWORK_ACLS_DIRECTORY: 'network-acls',
   USER_ATTRIBUTE_PROFILES_DIRECTORY: 'user-attribute-profiles',
   CONNECTION_PROFILES_DIRECTORY: 'connection-profiles',
+  TOKEN_EXCHANGE_PROFILES_DIRECTORY: 'token-exchange-profiles',
 };
 
 export default constants;

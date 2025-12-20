@@ -82,11 +82,11 @@ describe('#resourceServers handler', () => {
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someAPI');
             expect(data.identifier).to.equal('https://api.example.com');
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          update: () => Promise.resolve({ data: [] }),
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'resource_servers', []),
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => mockPagedData(params, 'resource_servers', []),
         },
         pool,
       };
@@ -110,11 +110,11 @@ describe('#resourceServers handler', () => {
               mechanism: 'mtls',
               required: true,
             });
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          update: () => Promise.resolve({ data: [] }),
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'resource_servers', []),
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => mockPagedData(params, 'resource_servers', []),
         },
         pool,
       };
@@ -149,11 +149,11 @@ describe('#resourceServers handler', () => {
               mechanism: 'dpop',
               required: true,
             });
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          update: () => Promise.resolve({ data: [] }),
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'resource_servers', []),
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => mockPagedData(params, 'resource_servers', []),
         },
         pool,
       };
@@ -192,11 +192,11 @@ describe('#resourceServers handler', () => {
                 policy: 'deny_all',
               },
             });
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          update: () => Promise.resolve({ data: [] }),
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'resource_servers', []),
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => mockPagedData(params, 'resource_servers', []),
         },
         pool,
       };
@@ -227,7 +227,7 @@ describe('#resourceServers handler', () => {
     it('should get resource servers', async () => {
       const auth0 = {
         resourceServers: {
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'resource_servers', [
               {
                 name: 'Auth0 Management API',
@@ -247,15 +247,15 @@ describe('#resourceServers handler', () => {
       const auth0 = {
         resourceServers: {
           create: () => Promise.resolve([]),
-          update: function (params, data) {
-            expect(params).to.be.an('object');
+          update: function (id, data) {
+            expect(id).to.be.a('string');
             expect(data).to.be.an('object');
-            expect(params.id).to.equal('rs1');
+            expect(id).to.equal('rs1');
             expect(data.scope).to.equal('new:scope');
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) =>
+          delete: () => Promise.resolve([]),
+          list: (params) =>
             mockPagedData(params, 'resource_servers', [
               { id: 'rs1', identifier: 'some-api', name: 'someAPI' },
             ]),
@@ -275,18 +275,18 @@ describe('#resourceServers handler', () => {
       const auth0 = {
         resourceServers: {
           create: () => Promise.resolve([]),
-          update: function (params, data) {
-            expect(params).to.be.an('object');
+          update: function (id, data) {
+            expect(id).to.be.a('string');
             expect(data).to.be.an('object');
-            expect(params.id).to.equal('rs1');
+            expect(id).to.equal('rs1');
             expect(data.proof_of_possession).to.deep.equal({
               mechanism: 'mtls',
               required: true,
             });
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) =>
+          delete: () => Promise.resolve([]),
+          list: (params) =>
             mockPagedData(params, 'resource_servers', [
               { id: 'rs1', identifier: 'some-api', name: 'someAPI' },
             ]),
@@ -317,18 +317,18 @@ describe('#resourceServers handler', () => {
       const auth0 = {
         resourceServers: {
           create: () => Promise.resolve([]),
-          update: function (params, data) {
-            expect(params).to.be.an('object');
+          update: function (id, data) {
+            expect(id).to.be.a('string');
             expect(data).to.be.an('object');
-            expect(params.id).to.equal('rs1');
+            expect(id).to.equal('rs1');
             expect(data.proof_of_possession).to.deep.equal({
               mechanism: 'dpop',
               required: false,
             });
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) =>
+          delete: () => Promise.resolve([]),
+          list: (params) =>
             mockPagedData(params, 'resource_servers', [
               { id: 'rs1', identifier: 'some-api', name: 'someAPI' },
             ]),
@@ -364,16 +364,16 @@ describe('#resourceServers handler', () => {
             expect(data.name).to.equal('someAPI');
             expect(data.scope).to.equal('new:scope');
             expect(data.identifier).to.equal('another-api');
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          update: function (params, data) {
+          update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be('undefined');
+            expect(id).to.be('undefined');
             expect(data).to.be('undefined');
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
           delete: () => Promise.resolve([]),
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'resource_servers', [
               { id: 'rs1', identifier: 'some-api', name: 'someAPI' },
             ]),
@@ -393,11 +393,11 @@ describe('#resourceServers handler', () => {
       const auth0 = {
         resourceServers: {
           create: () => Promise.resolve([]),
-          update: function (params, data) {
+          update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
-            expect(params).to.be.an('object');
+            expect(id).to.be.a('string');
             expect(data).to.be.an('object');
-            expect(params.id).to.equal('rs1');
+            expect(id).to.equal('rs1');
             expect(data.subject_type_authorization).to.deep.equal({
               user: {
                 policy: 'allow_all',
@@ -406,10 +406,10 @@ describe('#resourceServers handler', () => {
                 policy: 'require_client_grant',
               },
             });
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) =>
+          delete: () => Promise.resolve([]),
+          list: (params) =>
             mockPagedData(params, 'resource_servers', [
               { id: 'rs1', identifier: 'some-api', name: 'advancedAPI' },
             ]),
@@ -446,11 +446,11 @@ describe('#resourceServers handler', () => {
           create: () => Promise.resolve([]),
           update: () => Promise.resolve([]),
           delete: (data) => {
-            expect(data).to.be.an('object');
-            expect(data.id).to.equal('rs1');
-            return Promise.resolve({ data });
+            expect(data).to.be.a('string');
+            expect(data).to.equal('rs1');
+            return Promise.resolve(data);
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'resource_servers', [
               { id: 'rs1', identifier: 'some-api', name: 'someAPI' },
             ]),
@@ -468,15 +468,15 @@ describe('#resourceServers handler', () => {
       let removed = false;
       const auth0 = {
         resourceServers: {
-          create: () => Promise.resolve({ data: [] }),
-          update: () => Promise.resolve({ data: [] }),
+          create: () => Promise.resolve([]),
+          update: () => Promise.resolve([]),
           delete: (data) => {
-            expect(data).to.be.an('object');
-            expect(data.id).to.equal('rs1');
+            expect(data).to.be.a('string');
+            expect(data).to.equal('rs1');
             removed = true;
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'resource_servers', [
               { id: 'rs1', identifier: 'some-api', name: 'someAPI' },
             ]),
@@ -499,15 +499,15 @@ describe('#resourceServers handler', () => {
       let removed = false;
       const auth0 = {
         resourceServers: {
-          create: () => Promise.resolve({ data: [] }),
-          update: () => Promise.resolve({ data: [] }),
+          create: () => Promise.resolve([]),
+          update: () => Promise.resolve([]),
           delete: (data) => {
-            expect(data).to.be.an('object');
-            expect(data.id).to.equal('rs1');
+            expect(data).to.be.a('string');
+            expect(data).to.equal('rs1');
             removed = true;
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'resource_servers', [
               { id: 'rs1', identifier: 'some-api', name: 'someAPI' },
             ]),
@@ -529,13 +529,13 @@ describe('#resourceServers handler', () => {
           update: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('undefined');
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
           delete: (data) => {
             expect(data).to.be.an('undefined');
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
-          getAll: (params) =>
+          list: (params) =>
             mockPagedData(params, 'resource_servers', [
               { id: 'rs1', identifier: 'some-api', name: 'someAPI' },
               { id: 'rs2', identifier: 'some-other-api', name: 'someOtherAPI' },
@@ -567,17 +567,17 @@ describe('#resourceServers handler', () => {
 
       const auth0 = {
         resourceServers: {
-          create: () => Promise.resolve({ data: [] }),
-          update: function (params, data) {
+          create: () => Promise.resolve([]),
+          update: function (id, data) {
             updateCalled = true;
             expect(data.client_id).to.be.equals(undefined);
             expect(data.name).to.equal('someAPI');
             // identifier is also stripped as it's readonly
-            expect(params.id).to.equal('rs1'); // ID should be in params
-            return Promise.resolve({ data });
+            expect(id).to.equal('rs1');
+            return Promise.resolve(data);
           },
-          delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'resourceServers', [existingResourceServer]),
+          delete: () => Promise.resolve([]),
+          list: (params) => mockPagedData(params, 'resourceServers', [existingResourceServer]),
         },
         pool,
       };
@@ -608,7 +608,7 @@ describe('#resourceServers handler', () => {
 
       const auth0 = {
         resourceServers: {
-          getAll: (params) => mockPagedData(params, 'resourceServers', [resourceServerWithClient]),
+          list: (params) => mockPagedData(params, 'resourceServers', [resourceServerWithClient]),
         },
         pool,
       };
@@ -639,7 +639,7 @@ describe('#resourceServers handler', () => {
 
       const auth0 = {
         resourceServers: {
-          getAll: (params) => mockPagedData(params, 'resourceServers', [systemResourceServer]),
+          list: (params) => mockPagedData(params, 'resource_servers', [systemResourceServer]),
         },
         pool,
       };
@@ -670,16 +670,16 @@ describe('#resourceServers handler', () => {
       const auth0 = {
         resourceServers: {
           create: () => Promise.resolve({ data: [] }),
-          update: function (params, data) {
+          update: function (id, data) {
             updateCalled = true;
-            expect(params.id).to.equal('rs_my_account');
+            expect(id).to.equal('rs_my_account');
             expect(data.name).to.equal(undefined);
             expect(data.is_system).to.equal(undefined);
             expect(data.token_lifetime).to.equal(54321);
             return Promise.resolve({ data });
           },
           delete: () => Promise.resolve({ data: [] }),
-          getAll: (params) => mockPagedData(params, 'resourceServers', [existingResourceServer]),
+          list: (params) => mockPagedData(params, 'resource_servers', [existingResourceServer]),
         },
         pool,
       };

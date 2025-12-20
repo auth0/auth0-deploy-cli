@@ -5,7 +5,7 @@ describe('#riskAssessment handler', () => {
   describe('#riskAssessment getType', () => {
     it('should get risk assessments settings', async () => {
       const auth0 = {
-        riskAssessments: {
+        RiskAssessment: {
           getSettings: () => Promise.resolve({ data: { enabled: true } }),
           getNewDeviceSettings: () => Promise.resolve({ data: { remember_for: 30 } }),
         },
@@ -18,7 +18,7 @@ describe('#riskAssessment handler', () => {
 
     it('should get risk assessments settings without newDevice when remember_for is 0', async () => {
       const auth0 = {
-        riskAssessments: {
+        RiskAssessment: {
           getSettings: () => Promise.resolve({ data: { enabled: true } }),
           getNewDeviceSettings: () => Promise.resolve({ data: { remember_for: 0 } }),
         },
@@ -31,7 +31,7 @@ describe('#riskAssessment handler', () => {
 
     it('should return default settings when not found', async () => {
       const auth0 = {
-        riskAssessments: {
+        RiskAssessment: {
           getSettings: () => {
             const error = new Error('Not found');
             error.statusCode = 404;
@@ -54,7 +54,7 @@ describe('#riskAssessment handler', () => {
   describe('#riskAssessment processChanges', () => {
     it('should update risk assessments settings to enabled', async () => {
       const auth0 = {
-        riskAssessments: {
+        RiskAssessment: {
           updateSettings: (data) => {
             expect(data).to.be.an('object');
             expect(data.enabled).to.equal(true);
@@ -72,7 +72,7 @@ describe('#riskAssessment handler', () => {
 
     it('should update risk assessments settings with newDevice', async () => {
       const auth0 = {
-        riskAssessments: {
+        RiskAssessment: {
           updateSettings: (data) => {
             expect(data).to.be.an('object');
             expect(data.enabled).to.equal(true);
@@ -97,7 +97,7 @@ describe('#riskAssessment handler', () => {
 
     it('should update risk assessments settings to disabled', async () => {
       const auth0 = {
-        riskAssessments: {
+        RiskAssessment: {
           updateSettings: (data) => {
             expect(data).to.be.an('object');
             expect(data.enabled).to.equal(false);
@@ -115,7 +115,7 @@ describe('#riskAssessment handler', () => {
 
     it('should not process changes if riskAssessment is not provided', async () => {
       const auth0 = {
-        riskAssessments: {
+        RiskAssessment: {
           updateSettings: () => {
             throw new Error('updateSettings should not be called');
           },
@@ -131,7 +131,7 @@ describe('#riskAssessment handler', () => {
 
     it('should handle API errors properly', async () => {
       const auth0 = {
-        riskAssessments: {
+        RiskAssessment: {
           updateSettings: () => {
             const error = new Error('API Error');
             error.statusCode = 500;

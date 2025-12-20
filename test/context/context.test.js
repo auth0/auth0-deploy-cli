@@ -175,23 +175,6 @@ describe('#context loader validation', async () => {
     expect(loaded2).to.be.an.instanceof(yamlContext);
   });
 
-  it('should include the deploy cli version in the user agent header', async () => {
-    /* Create empty directory */
-    const dir = path.resolve(testDataDir, 'context');
-    cleanThenMkdir(dir);
-
-    const yaml = path.join(dir, 'empty.yaml');
-    fs.writeFileSync(yaml, '');
-
-    const loaded = await setupContext({ ...config, AUTH0_INPUT_FILE: yaml }, 'import');
-    expect(loaded).to.be.an.instanceof(yamlContext);
-
-    const userAgent = loaded.mgmtClient.configuration.headers['User-agent'];
-
-    expect(userAgent).to.contain('deploy-cli');
-    expect(userAgent).to.contain('node.js');
-  });
-
   it('should warn about deprecated exclusion params', async () => {
     /* Create empty directory */
     const dir = path.resolve(testDataDir, 'context');

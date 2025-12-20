@@ -576,29 +576,58 @@ phoneProviders:
 ]
 ```
 
-## Risk Assessments
+## PhoneTemplates
 
-Risk assessments configuration allows you to enable or disable risk assessment features for your tenant.
+Phone templates allow you to customize the SMS and voice messages sent to users for phone-based authentication.
+Refer to the [Management API](https://auth0.com/docs/api/management/v2/branding/get-phone-templates) for more details.
 
 ### YAML Example
 
 ```yaml
 # Contents of ./tenant.yaml
-riskAssessment:
-  enabled: true
+phoneTemplates:
+  - type: otp_verify
+    disabled: false
+    content:
+      from: '+12341234567'
+      body:
+        text: 'Your verification code is {{ code }}'
+        voice: 'Your verification code is {{ code }}'
+  - type: otp_enroll
+    disabled: false
+    content:
+      from: '+12341234567'
+      body:
+        text: 'Your enrollment code is {{ code }}'
 ```
 
 ### Directory Example
 
-File: `./risk-assessment/settings.json`
+Create individual JSON files for each template in the `phone-templates` directory:
+
+```text
+phone-templates/
+├── otp_verify.json
+├── otp_enroll.json
+├── change_password.json
+└── ...
+```
+
+Example `phone-templates/otp_verify.json`:
 
 ```json
 {
-  "enabled": true
+  "type": "otp_verify",
+  "disabled": false,
+  "content": {
+    "from": "+12341234567",
+    "body": {
+      "text": "Your verification code is {{ code }}",
+      "voice": "Your verification code is {{ code }}"
+    }
+  }
 }
 ```
-
-For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2#!/Risk_Assessments/get_settings).
 
 ## Connection Profiles
 
@@ -678,3 +707,27 @@ clients:
 ```
 
 For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2).
+
+## Risk Assessments
+
+Risk assessments configuration allows you to enable or disable risk assessment features for your tenant.
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+riskAssessment:
+  enabled: true
+```
+
+### Directory Example
+
+File: `./risk-assessment/settings.json`
+
+```json
+{
+  "enabled": true
+}
+```
+
+For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2#!/Risk_Assessments/get_settings).

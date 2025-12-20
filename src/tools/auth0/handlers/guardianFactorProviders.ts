@@ -43,15 +43,14 @@ export default class GuardianFactorProvidersHandler extends DefaultHandler {
       const data = await Promise.all(
         mappings.map(async (m) => {
           let provider;
-          // TODO: This is quite a change, needs to be validated for sure.
           if (m.name === 'phone' && m.provider === 'twilio') {
-            provider = await this.client.guardian.getPhoneFactorProviderTwilio();
+            provider = await this.client.guardian.factors.phone.getTwilioProvider();
           } else if (m.name === 'sms' && m.provider === 'twilio') {
-            provider = await this.client.guardian.getSmsFactorProviderTwilio();
+            provider = await this.client.guardian.factors.sms.getTwilioProvider();
           } else if (m.name === 'push-notification' && m.provider === 'apns') {
-            provider = await this.client.guardian.getPushNotificationProviderAPNS();
+            provider = await this.client.guardian.factors.pushNotification.getApnsProvider();
           } else if (m.name === 'push-notification' && m.provider === 'sns') {
-            provider = await this.client.guardian.getPushNotificationProviderSNS();
+            provider = await this.client.guardian.factors.pushNotification.getSnsProvider();
           }
 
           return { ...m, ...provider.data };
@@ -84,17 +83,16 @@ export default class GuardianFactorProvidersHandler extends DefaultHandler {
       guardianFactorProviders.map(async (factorProvider) => {
         const { name, provider, ...data } = factorProvider;
         const params = { name: factorProvider.name, provider: factorProvider.provider };
-        // TODO: This is quite a change, needs to be validated for sure.
         if (name === 'phone' && provider === 'twilio') {
-          await this.client.guardian.updatePhoneFactorProviderTwilio(data);
+          await this.client.guardian.factors.phone.setTwilioProvider(data);
         } else if (name === 'sms' && provider === 'twilio') {
-          await this.client.guardian.setSmsFactorProviderTwilio(data);
+          await this.client.guardian.factors.sms.setTwilioProvider(data);
         } else if (name === 'push-notification' && provider === 'apns') {
-          await this.client.guardian.updatePushNotificationProviderAPNS(data);
+          await this.client.guardian.factors.pushNotification.setApnsProvider(data);
         } else if (name === 'push-notification' && provider === 'fcm') {
-          await this.client.guardian.updatePushNotificationProviderFCM(data);
+          await this.client.guardian.factors.pushNotification.setFcmProvider(data);
         } else if (name === 'push-notification' && provider === 'sns') {
-          await this.client.guardian.updatePushNotificationProviderSNS(data);
+          await this.client.guardian.factors.pushNotification.setSnsProvider(data);
         }
         this.didUpdate(params);
         this.updated += 1;

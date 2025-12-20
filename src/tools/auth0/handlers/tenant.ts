@@ -1,9 +1,4 @@
-import {
-  TenantSettings,
-  TenantSettingsFlags,
-  TenantSettingsUpdate,
-  TenantSettingsUpdateFlags,
-} from 'auth0';
+import { Management } from 'auth0';
 import ValidationError from '../../validationError';
 import DefaultHandler, { order } from './default';
 import { supportedPages, pageNameMap } from './pages';
@@ -56,7 +51,10 @@ export const schema = {
   },
 };
 
-export type Tenant = TenantSettings;
+// export type Tenant = TenantSettings;
+
+export type Tenant = Management.GetTenantSettingsResponseContent;
+type TenantSettingsFlags = Management.TenantSettingsFlags;
 
 const blockPageKeys = [
   ...Object.keys(pageNameMap),
@@ -102,7 +100,7 @@ export const allowedTenantFlags = [
 ];
 
 export const removeUnallowedTenantFlags = (
-  proposedFlags: TenantSettingsFlags
+  proposedFlags: TenantSettingsFlags | undefined
 ): TenantSettingsFlags => {
   if (proposedFlags === undefined) return {} as unknown as TenantSettingsFlags;
 
@@ -147,7 +145,7 @@ export default class TenantHandler extends DefaultHandler {
   }
 
   async getType(): Promise<Asset> {
-    const { data: tenant } = await this.client.tenants.getSettings();
+    const tenant = await this.client.tenants.settings.get();
 
     tenant.flags = removeUnallowedTenantFlags(tenant.flags);
 
@@ -184,10 +182,10 @@ export default class TenantHandler extends DefaultHandler {
     // Do nothing if not set
     if (!tenant) return;
 
-    const updatedTenant: TenantSettingsUpdate = {
+    const updatedTenant: Management.UpdateTenantSettingsRequestContent = {
       ...tenant,
       flags: tenant.flags
-        ? (removeUnallowedTenantFlags(tenant.flags) as TenantSettingsUpdateFlags)
+        ? (removeUnallowedTenantFlags(tenant.flags) as TenantSettingsFlags)
         : undefined,
     };
 
@@ -198,7 +196,7 @@ export default class TenantHandler extends DefaultHandler {
     }
 
     if (updatedTenant && Object.keys(updatedTenant).length > 0) {
-      await this.client.tenants.updateSettings(updatedTenant);
+      await this.client.tenants.settings.update(updatedTenant);
       this.updated += 1;
       this.didUpdate(updatedTenant);
     }

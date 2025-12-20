@@ -1,5 +1,6 @@
 import DefaultAPIHandler from './default';
 import { Assets } from '../../../types';
+import { Management, ManagementError } from 'auth0';
 
 export const schema = {
   type: 'object',
@@ -22,15 +23,13 @@ export const schema = {
   required: ['enabled'],
 };
 
-export type RiskAssessmentsSettings = {
-  enabled: boolean;
-  newDevice?: {
-    remember_for: number;
-  };
+export type RiskAssessmentSettings = {
+  settings: Management.GetRiskAssessmentsSettingsResponseContent;
+  new_device?: Management.GetRiskAssessmentsSettingsNewDeviceResponseContent;
 };
 
-export default class RiskAssessmentsHandler extends DefaultAPIHandler {
-  existing: RiskAssessmentsSettings | null;
+export default class RiskAssessmentHandler extends DefaultAPIHandler {
+  existing: RiskAssessmentSettings;
 
   constructor(config: DefaultAPIHandler) {
     super({
@@ -39,31 +38,40 @@ export default class RiskAssessmentsHandler extends DefaultAPIHandler {
     });
   }
 
-  async getType(): Promise<RiskAssessmentsSettings> {
+  async getType(): Promise<RiskAssessmentSettings> {
     if (this.existing) {
       return this.existing;
     }
 
     try {
       const [settings, newDeviceSettings] = await Promise.all([
-        this.client.riskAssessments.getSettings(),
-        this.client.riskAssessments.getNewDeviceSettings().catch((err) => {
-          if (err?.statusCode === 404) return { data: { remember_for: 0 } };
+        this.client.riskAssessments.settings.get(),
+        this.client.riskAssessments.settings.newDevice.get().catch((err) => {
+          if (err instanceof ManagementError && err?.statusCode === 404) {
+            return { remember_for: 0 };
+          }
           throw err;
         }),
       ]);
 
-      this.existing = {
-        enabled: settings.data.enabled,
-        ...(newDeviceSettings.data.remember_for > 0 && {
-          newDevice: {
-            remember_for: newDeviceSettings.data.remember_for,
-          },
+      const riskAssessmentSettings: RiskAssessmentSettings = {
+        settings: settings,
+        new_device: newDeviceSettings,
+        ...(newDeviceSettings.remember_for > 0 && {
+          new_device: newDeviceSettings,
         }),
       };
+
+      this.existing = riskAssessmentSettings;
       return this.existing;
     } catch (err) {
-      if (err.statusCode === 404) return { enabled: false };
+      if (err instanceof ManagementError && err.statusCode === 404) {
+        const riskAssessmentSettings: RiskAssessmentSettings = {
+          settings: { enabled: false },
+        };
+        this.existing = riskAssessmentSettings;
+        return this.existing;
+      }
       throw err;
     }
   }
@@ -79,17 +87,13 @@ export default class RiskAssessmentsHandler extends DefaultAPIHandler {
     const updates: Promise<unknown>[] = [];
 
     // Update main settings (enabled flag)
-    const settings = {
-      enabled: riskAssessment.enabled as boolean,
-    };
-    updates.push(this.client.riskAssessments.updateSettings(settings));
+    updates.push(this.client.riskAssessments.settings.update(riskAssessment?.settings));
 
     // Update new device settings if provided
-    if (riskAssessment.newDevice) {
-      const newDeviceSettings = {
-        remember_for: riskAssessment.newDevice.remember_for as number,
-      };
-      updates.push(this.client.riskAssessments.updateNewDeviceSettings(newDeviceSettings));
+    if (riskAssessment.new_device) {
+      updates.push(
+        this.client.riskAssessments.settings.newDevice.update(riskAssessment.new_device)
+      );
     }
 
     await Promise.all(updates);

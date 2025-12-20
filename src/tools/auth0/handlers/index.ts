@@ -19,6 +19,7 @@ import * as guardianPhoneFactorMessageTypes from './guardianPhoneFactorMessageTy
 import * as roles from './roles';
 import * as branding from './branding';
 import * as phoneProviders from './phoneProvider';
+import * as phoneTemplates from './phoneTemplates';
 import * as prompts from './prompts';
 import * as actions from './actions';
 import * as triggers from './triggers';
@@ -35,6 +36,7 @@ import * as selfServiceProfiles from './selfServiceProfiles';
 import * as networkACLs from './networkACLs';
 import * as userAttributeProfiles from './userAttributeProfiles';
 import * as connectionProfiles from './connectionProfiles';
+import * as tokenExchangeProfiles from './tokenExchangeProfiles';
 
 import { AssetTypes } from '../../../types';
 import APIHandler from './default';
@@ -61,6 +63,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   roles,
   branding,
   phoneProviders,
+  phoneTemplates,
   //@ts-ignore because prompts have not been universally implemented yet
   prompts,
   actions,
@@ -78,6 +81,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   networkACLs,
   userAttributeProfiles,
   connectionProfiles,
+  tokenExchangeProfiles,
 };
 
 export default auth0ApiHandlers as {

@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/directory';
-import { cleanThenMkdir, testDataDir } from '../../utils';
+import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 import handlers from '../../../src/context/directory/handlers';
 
 describe('#directory context validation', () => {
@@ -12,7 +12,7 @@ describe('#directory context validation', () => {
     const dir = path.resolve(testDataDir, 'directory', 'empty');
     cleanThenMkdir(dir);
 
-    const context = new Context({ AUTH0_INPUT_FILE: dir });
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
     await context.loadAssetsFromLocal();
 
     expect(Object.keys(context.assets).length).to.equal(Object.keys(handlers).length + 1);
@@ -46,7 +46,7 @@ describe('#directory context validation', () => {
       AUTH0_EXCLUDED_RESOURCE_SERVERS: ['api'],
       AUTH0_EXCLUDED_DEFAULTS: ['emailProvider'],
     };
-    const context = new Context(config);
+    const context = new Context(config, mockMgmtClient());
     await context.loadAssetsFromLocal();
 
     expect(context.assets.exclude.rules).to.deep.equal(['rule']);
@@ -68,17 +68,23 @@ describe('#directory context validation', () => {
     cleanThenMkdir(dir);
     fs.writeFileSync(path.join(dir, 'tenant.json'), JSON.stringify(tenantConfig));
 
-    const contextWithExclusion = new Context({
-      AUTH0_INPUT_FILE: dir,
-      AUTH0_EXCLUDED: ['tenant'],
-    });
+    const contextWithExclusion = new Context(
+      {
+        AUTH0_INPUT_FILE: dir,
+        AUTH0_EXCLUDED: ['tenant'],
+      },
+      mockMgmtClient()
+    );
     await contextWithExclusion.loadAssetsFromLocal();
     expect(contextWithExclusion.assets.tenant).to.equal(undefined);
 
-    const contextWithoutExclusion = new Context({
-      AUTH0_INPUT_FILE: dir,
-      AUTH0_EXCLUDED: [], // Not excluding tenant resource
-    });
+    const contextWithoutExclusion = new Context(
+      {
+        AUTH0_INPUT_FILE: dir,
+        AUTH0_EXCLUDED: [], // Not excluding tenant resource
+      },
+      mockMgmtClient()
+    );
     await contextWithoutExclusion.loadAssetsFromLocal();
     expect(contextWithoutExclusion.assets.tenant).to.deep.equal(tenantConfig);
   });
@@ -94,10 +100,13 @@ describe('#directory context validation', () => {
     cleanThenMkdir(dir);
     fs.writeFileSync(path.join(dir, 'tenant.json'), JSON.stringify(tenantConfig));
 
-    const contextWithInclusion = new Context({
-      AUTH0_INPUT_FILE: dir,
-      AUTH0_INCLUDED_ONLY: ['tenant'],
-    });
+    const contextWithInclusion = new Context(
+      {
+        AUTH0_INPUT_FILE: dir,
+        AUTH0_INCLUDED_ONLY: ['tenant'],
+      },
+      mockMgmtClient()
+    );
     await contextWithInclusion.loadAssetsFromLocal();
     expect(contextWithInclusion.assets.tenant).to.deep.equal(tenantConfig);
     expect(contextWithInclusion.assets.actions).to.equal(undefined); // Arbitrary sample resources
@@ -106,7 +115,7 @@ describe('#directory context validation', () => {
 
   it('should error on bad directory', async () => {
     const dir = path.resolve(testDataDir, 'directory', 'doesNotExist');
-    const context = new Context({ AUTH0_INPUT_FILE: dir });
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
     const errorMessage = `Not sure what to do with, ${dir} as it is not a directory...`;
     await expect(context.loadAssetsFromLocal())
       .to.be.eventually.rejectedWith(Error)
@@ -126,7 +135,7 @@ describe('#directory context validation', () => {
     cleanThenMkdir(dir);
     fs.symlinkSync(file, link);
 
-    const context = new Context({ AUTH0_INPUT_FILE: link });
+    const context = new Context({ AUTH0_INPUT_FILE: link }, mockMgmtClient());
     const errorMessage = `Not sure what to do with, ${link} as it is not a directory...`;
     await expect(context.loadAssetsFromLocal())
       .to.be.eventually.rejectedWith(Error)
@@ -157,26 +166,20 @@ describe('#directory context validation', () => {
       },
       {
         tenants: {
-          getSettings: async () =>
-            new Promise((res) => {
-              res({
-                data: {
+          settings: {
+            get: async () =>
+              new Promise((res) => {
+                res({
                   friendly_name: 'Production Tenant',
                   enabled_locales: ['en', 'es'],
-                },
-              });
-            }),
+                });
+              }),
+          },
         },
         prompts: {
           _getRestClient: (endpoint) => ({
             get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
           }),
-        },
-        actions: {
-          getSettings: async () =>
-            new Promise((res) => {
-              res([]);
-            }),
         },
       }
     );

@@ -28,6 +28,77 @@ export function order(value) {
   };
 }
 
+// Retry configuration constants
+const DEFAULT_MAX_RETRIES = 3;
+const DEFAULT_INITIAL_DELAY_MS = 1000; // 1 second
+const DEFAULT_MAX_DELAY_MS = 30000; // 30 seconds
+
+interface RetryOptions {
+  maxRetries?: number;
+  initialDelay?: number;
+  maxDelay?: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onRetry?: (error: any, attempt: number, delay: number) => void;
+}
+
+/**
+ * Executes a function with exponential backoff retry logic for rate limit errors (429).
+ *
+ * @param fn - The function to execute with retry logic
+ * @param options - Configuration options for retry behavior
+ * @returns Promise that resolves with the function result or rejects after max retries
+ */
+async function retryWithExponentialBackoff<T>(
+  fn: () => Promise<T>,
+  options: RetryOptions = {}
+): Promise<T> {
+  const {
+    maxRetries = DEFAULT_MAX_RETRIES,
+    initialDelay = DEFAULT_INITIAL_DELAY_MS,
+    maxDelay = DEFAULT_MAX_DELAY_MS,
+    onRetry = () => {},
+  } = options;
+
+  let lastError: any;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+
+      // Only retry on rate limit errors (429)
+      const isRateLimitError =
+        error?.statusCode === 429 ||
+        error?.message?.includes('429') ||
+        error?.message?.includes('Too Many Requests') ||
+        error?.message?.includes('TooManyRequestsError') ||
+        error?.message?.includes('Global limit has been reached');
+
+      if (!isRateLimitError || attempt === maxRetries) {
+        throw error;
+      }
+
+      // Calculate delay with exponential backoff and jitter
+      const exponentialDelay = initialDelay * 2 ** attempt;
+      const jitter = Math.random() * 1000; // 0-1s randomization to prevent thundering herd
+      const delay = Math.min(exponentialDelay + jitter, maxDelay);
+
+      // Check for Retry-After header (if available in error response)
+      const retryAfter = error?.rawResponse?.headers?.get('retry-after');
+      const finalDelay = retryAfter ? parseInt(retryAfter, 10) * 1000 : delay;
+
+      onRetry(error, attempt + 1, finalDelay);
+
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, finalDelay);
+      });
+    }
+  }
+
+  throw lastError;
+}
+
 type ApiMethodOverride = string | Function;
 
 export default class APIHandler {
@@ -46,7 +117,7 @@ export default class APIHandler {
   stripCreateFields: string[]; //Fields to strip from payload when creating
   name?: string; // TODO: understand if any handlers actually leverage `name` property
   functions: {
-    getAll: ApiMethodOverride;
+    list: ApiMethodOverride;
     update: ApiMethodOverride;
     create: ApiMethodOverride;
     delete: ApiMethodOverride;
@@ -63,7 +134,7 @@ export default class APIHandler {
     sensitiveFieldsToObfuscate?: APIHandler['sensitiveFieldsToObfuscate'];
     stripCreateFields?: APIHandler['stripCreateFields'];
     functions: {
-      getAll?: ApiMethodOverride;
+      list?: ApiMethodOverride;
       update?: ApiMethodOverride;
       create?: ApiMethodOverride;
       delete?: ApiMethodOverride;
@@ -81,7 +152,7 @@ export default class APIHandler {
     this.stripCreateFields = options.stripCreateFields || [];
 
     this.functions = {
-      getAll: 'getAll',
+      list: 'list',
       create: 'create',
       delete: 'delete',
       update: 'update',
@@ -217,6 +288,20 @@ export default class APIHandler {
       `Start processChanges for ${this.type} [delete:${del.length}] [update:${update.length}], [create:${create.length}], [conflicts:${conflicts.length}]`
     );
 
+    // Set retry configuration from config
+    const retryConfig: RetryOptions = {
+      maxRetries: this.config('AUTH0_MAX_RETRIES') || DEFAULT_MAX_RETRIES,
+      initialDelay: this.config('AUTH0_RETRY_INITIAL_DELAY_MS') || DEFAULT_INITIAL_DELAY_MS,
+      maxDelay: this.config('AUTH0_RETRY_MAX_DELAY_MS') || DEFAULT_MAX_DELAY_MS,
+      onRetry: (error: any, attempt: number, delay: number) => {
+        log.warn(
+          `Rate limit hit for [${this.type}]. Retrying attempt ${attempt}/${
+            retryConfig.maxRetries
+          } after ${Math.round(delay / 1000)}s...`
+        );
+      },
+    };
+
     // Process Deleted
     if (del.length > 0) {
       const allowDelete =
@@ -235,9 +320,11 @@ export default class APIHandler {
         await this.client.pool
           .addEachTask({
             data: del || [],
-            generator: (delItem) => {
-              const delFunction = this.getClientFN(this.functions.delete);
-              return delFunction({ [this.id]: delItem[this.id] })
+            generator: (delItem) =>
+              retryWithExponentialBackoff(() => {
+                const delFunction = this.getClientFN(this.functions.delete);
+                return delFunction(delItem[this.id]);
+              }, retryConfig)
                 .then(() => {
                   this.didDelete(delItem);
                   this.deleted += 1;
@@ -246,8 +333,7 @@ export default class APIHandler {
                   throw new Error(
                     `Problem deleting ${this.type} ${this.objString(delItem)}\n${err}`
                   );
-                });
-            },
+                }),
           })
           .promise();
       }
@@ -257,21 +343,22 @@ export default class APIHandler {
     await this.client.pool
       .addEachTask({
         data: conflicts || [],
-        generator: (updateItem) => {
-          const updateFN = this.getClientFN(this.functions.update);
-          const params = { [this.id]: updateItem[this.id] };
-          const updatePayload = (() => {
-            let data = stripFields({ ...updateItem }, this.stripUpdateFields);
-            return stripObfuscatedFieldsFromPayload(data, this.sensitiveFieldsToObfuscate);
-          })();
-          return updateFN(params, updatePayload)
-            .then((data) => this.didUpdate(data))
+        generator: (updateItem) =>
+          retryWithExponentialBackoff(() => {
+            const updateFN = this.getClientFN(this.functions.update);
+            const params = { [this.id]: updateItem[this.id] };
+            const updatePayload = (() => {
+              const data = stripFields({ ...updateItem }, this.stripUpdateFields);
+              return stripObfuscatedFieldsFromPayload(data, this.sensitiveFieldsToObfuscate);
+            })();
+            return updateFN(params, updatePayload);
+          }, retryConfig)
+            .then((data) => this.didUpdate(data as Asset))
             .catch((err) => {
               throw new Error(
                 `Problem updating ${this.type} ${this.objString(updateItem)}\n${err}`
               );
-            });
-        },
+            }),
       })
       .promise();
 
@@ -279,26 +366,27 @@ export default class APIHandler {
     await this.client.pool
       .addEachTask({
         data: create || [],
-        generator: (createItem) => {
-          const createFunction = this.getClientFN(this.functions.create);
-          const createPayload = (() => {
-            const strippedPayload = stripFields(createItem, this.stripCreateFields);
-            return stripObfuscatedFieldsFromPayload(
-              strippedPayload,
-              this.sensitiveFieldsToObfuscate
-            );
-          })();
-          return createFunction(createPayload)
+        generator: (createItem) =>
+          retryWithExponentialBackoff(() => {
+            const createFunction = this.getClientFN(this.functions.create);
+            const createPayload = (() => {
+              const strippedPayload = stripFields(createItem, this.stripCreateFields);
+              return stripObfuscatedFieldsFromPayload(
+                strippedPayload,
+                this.sensitiveFieldsToObfuscate
+              );
+            })();
+            return createFunction(createPayload);
+          }, retryConfig)
             .then((data) => {
-              this.didCreate(data);
+              this.didCreate(data as Asset);
               this.created += 1;
             })
             .catch((err) => {
               throw new Error(
                 `Problem creating ${this.type} ${this.objString(createItem)}\n${err}`
               );
-            });
-        },
+            }),
       })
       .promise();
 
@@ -306,24 +394,25 @@ export default class APIHandler {
     await this.client.pool
       .addEachTask({
         data: update || [],
-        generator: (updateItem) => {
-          const updateFN = this.getClientFN(this.functions.update);
-          const params = { [this.id]: updateItem[this.id] };
-          const updatePayload = (() => {
-            let data = stripFields({ ...updateItem }, this.stripUpdateFields);
-            return stripObfuscatedFieldsFromPayload(data, this.sensitiveFieldsToObfuscate);
-          })();
-          return updateFN(params, updatePayload)
+        generator: (updateItem) =>
+          retryWithExponentialBackoff(() => {
+            const updateFN = this.getClientFN(this.functions.update);
+            const params = { [this.id]: updateItem[this.id] };
+            const updatePayload = (() => {
+              const data = stripFields({ ...updateItem }, this.stripUpdateFields);
+              return stripObfuscatedFieldsFromPayload(data, this.sensitiveFieldsToObfuscate);
+            })();
+            return updateFN(params, updatePayload);
+          }, retryConfig)
             .then((data) => {
-              this.didUpdate(data);
+              this.didUpdate(data as Asset);
               this.updated += 1;
             })
             .catch((err) => {
               throw new Error(
                 `Problem updating ${this.type} ${this.objString(updateItem)}\n${err}`
               );
-            });
-        },
+            }),
       })
       .promise();
   }

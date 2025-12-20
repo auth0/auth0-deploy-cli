@@ -1,5 +1,4 @@
-import { GetOrganizationMemberRoles200ResponseOneOfInner, Permission, ResourceServer } from 'auth0';
-import { isArray } from 'lodash';
+import { Management } from 'auth0';
 import DefaultHandler, { order } from './default';
 import { calculateChanges } from '../../calculateChanges';
 import log from '../../../logger';
@@ -29,6 +28,7 @@ export const schema = {
   },
 };
 
+type Role = Management.GetRoleResponseContent;
 export default class RolesHandler extends DefaultHandler {
   existing: Asset[];
 
@@ -44,10 +44,10 @@ export default class RolesHandler extends DefaultHandler {
     const role = { ...data };
     delete role.permissions;
 
-    const { data: created } = await this.client.roles.create(role);
+    const created = await this.client.roles.create(role);
 
-    if (typeof data.permissions !== 'undefined' && data.permissions.length > 0) {
-      await this.client.roles.addPermissions({ id: created.id }, { permissions: data.permissions });
+    if (created.id && typeof data.permissions !== 'undefined' && data.permissions.length > 0) {
+      await this.client.roles.permissions.add(created.id, { permissions: data.permissions });
     }
 
     return created;
@@ -71,7 +71,7 @@ export default class RolesHandler extends DefaultHandler {
   }
 
   async deleteRole(data) {
-    await this.client.roles.delete({ id: data.id });
+    await this.client.roles.delete(data.id);
   }
 
   async deleteRoles(dels: CalculatedChanges['del']): Promise<void> {
@@ -110,14 +110,16 @@ export default class RolesHandler extends DefaultHandler {
     delete data.permissions;
     delete data.id;
 
-    await this.client.roles.update(params, data);
+    await this.client.roles.update(params.id, data);
 
     if (typeof existingRole.permissions !== 'undefined' && existingRole.permissions.length > 0) {
-      await this.client.roles.deletePermissions(params, { permissions: existingRole.permissions });
+      await this.client.roles.permissions.delete(params.id, {
+        permissions: existingRole.permissions,
+      });
     }
 
     if (typeof newPermissions !== 'undefined' && newPermissions.length > 0) {
-      await this.client.roles.addPermissions(params, { permissions: newPermissions });
+      await this.client.roles.permissions.add(params.id, { permissions: newPermissions });
     }
 
     return params;
@@ -145,29 +147,20 @@ export default class RolesHandler extends DefaultHandler {
       return this.existing;
     }
 
-    // in case client version does not support roles
-    if (!this.client.roles || typeof this.client.roles.getAll !== 'function') {
-      return [];
-    }
-
     try {
-      const roles = await paginate<GetOrganizationMemberRoles200ResponseOneOfInner>(
-        this.client.roles.getAll,
-        {
-          paginate: true,
-          include_totals: true,
-        }
-      );
+      const roles = await paginate<Role>(this.client.roles.list, {
+        paginate: true,
+        include_totals: true,
+      });
 
       for (let index = 0; index < roles.length; index++) {
-        // paginate without paginate<T> helper as this is not getAll but getPermissions
-        // paginate through all permissions for each role
-        const allPermission: Permission[] = [];
+        const allPermission: Management.PermissionsResponsePayload[] = [];
+        /*
         let page = 0;
         while (true) {
           const {
             data: { permissions, total },
-          } = await this.client.roles.getPermissions({
+          } = await this.client.roles.permissions.list({
             include_totals: true,
             id: roles[index].id,
             page: page,
@@ -184,6 +177,14 @@ export default class RolesHandler extends DefaultHandler {
             break;
           }
         }
+        */
+
+        const rolesId = roles[index].id as string;
+        let permissions = await this.client.roles.permissions.list(rolesId, { per_page: 100 });
+        do {
+          allPermission.push(...permissions.data);
+          permissions = await permissions.getNextPage();
+        } while (permissions.hasNextPage());
 
         const strippedPerms = await Promise.all(
           allPermission.map(async (permission) => {
@@ -223,27 +224,16 @@ export default class RolesHandler extends DefaultHandler {
     log.debug(
       `Start processChanges for roles [delete:${changes.del.length}] [update:${changes.update.length}], [create:${changes.create.length}]`
     );
-    const myChanges = [
-      { del: changes.del },
-      { create: changes.create },
-      { update: changes.update },
-    ];
-    await Promise.all(
-      myChanges.map(async (change) => {
-        switch (true) {
-          case change.del && change.del.length > 0:
-            if (change.del) await this.deleteRoles(change.del);
-            break;
-          case change.create && change.create.length > 0:
-            await this.createRoles(changes.create); //TODO: fix this tho change.create
-            break;
-          case change.update && change.update.length > 0:
-            if (change.update) await this.updateRoles(change.update, existing);
-            break;
-          default:
-            break;
-        }
-      })
-    );
+    if (changes.del.length > 0) {
+      await this.deleteRoles(changes.del);
+    }
+
+    if (changes.create.length > 0) {
+      await this.createRoles(changes.create);
+    }
+
+    if (changes.update.length > 0) {
+      await this.updateRoles(changes.update, existing);
+    }
   }
 }

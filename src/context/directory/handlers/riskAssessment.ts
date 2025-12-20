@@ -9,10 +9,7 @@ import { ParsedAsset, Asset } from '../../../types';
 type ParsedRiskAssessment = ParsedAsset<'riskAssessment', Asset>;
 
 function parse(context: DirectoryContext): ParsedRiskAssessment {
-  const riskAssessmentDirectory = path.join(
-    context.filePath,
-    constants.RISK_ASSESSMENT_DIRECTORY
-  );
+  const riskAssessmentDirectory = path.join(context.filePath, constants.RISK_ASSESSMENT_DIRECTORY);
   const riskAssessmentFile = path.join(riskAssessmentDirectory, 'settings.json');
 
   if (!existsMustBeDir(riskAssessmentDirectory)) {
@@ -38,10 +35,7 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   if (!riskAssessment) return;
 
-  const riskAssessmentDirectory = path.join(
-    context.filePath,
-    constants.RISK_ASSESSMENT_DIRECTORY
-  );
+  const riskAssessmentDirectory = path.join(context.filePath, constants.RISK_ASSESSMENT_DIRECTORY);
   const riskAssessmentFile = path.join(riskAssessmentDirectory, 'settings.json');
 
   fs.ensureDirSync(riskAssessmentDirectory);
