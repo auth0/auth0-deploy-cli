@@ -32,8 +32,7 @@ clients:
     sso_disabled: false
   - name: Deploy CLI
     app_type: non_interactive
-    cross_origin_auth: false
-    cross_origin_authentication: false
+    cross_origin_authentication: true
     custom_login_page_on: true
     grant_types:
       - client_credentials
