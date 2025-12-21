@@ -1222,7 +1222,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0",
+                    "client_id": "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -1252,7 +1252,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_zrS71fW5lRxGdmRA",
+                    "id": "con_kUOiqiXvPh6Lp7sd",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -1289,8 +1289,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
                     ]
                 }
             ]
@@ -1301,13 +1301,13 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections/con_zrS71fW5lRxGdmRA/clients?take=50",
+        "path": "/api/v2/connections/con_kUOiqiXvPh6Lp7sd/clients?take=50",
         "body": "",
         "status": 200,
         "response": {
             "clients": [
                 {
-                    "client_id": "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0"
+                    "client_id": "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
                 },
                 {
                     "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
@@ -1320,13 +1320,13 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections/con_zrS71fW5lRxGdmRA/clients?take=50",
+        "path": "/api/v2/connections/con_kUOiqiXvPh6Lp7sd/clients?take=50",
         "body": "",
         "status": 200,
         "response": {
             "clients": [
                 {
-                    "client_id": "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0"
+                    "client_id": "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
                 },
                 {
                     "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
@@ -1345,7 +1345,34 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_zrS71fW5lRxGdmRA",
+                    "id": "con_5LSfDxdBnayBrcNp",
+                    "options": {
+                        "email": true,
+                        "scope": [
+                            "email",
+                            "profile"
+                        ],
+                        "profile": true
+                    },
+                    "strategy": "google-oauth2",
+                    "name": "google-oauth2",
+                    "is_domain_connection": false,
+                    "authentication": {
+                        "active": true
+                    },
+                    "connected_accounts": {
+                        "active": false
+                    },
+                    "realms": [
+                        "google-oauth2"
+                    ],
+                    "enabled_clients": [
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
+                    ]
+                },
+                {
+                    "id": "con_kUOiqiXvPh6Lp7sd",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -1382,9 +1409,47 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
                     ]
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/connections/con_5LSfDxdBnayBrcNp/clients?take=50",
+        "body": "",
+        "status": 200,
+        "response": {
+            "clients": [
+                {
+                    "client_id": "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
+                },
+                {
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/connections/con_5LSfDxdBnayBrcNp/clients?take=50",
+        "body": "",
+        "status": 200,
+        "response": {
+            "clients": [
+                {
+                    "client_id": "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
+                },
+                {
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                 }
             ]
         },
@@ -1499,37 +1564,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/stolen_credentials",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/async_approval",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/blocked_account",
+        "path": "/api/v2/email-templates/reset_email_by_code",
         "body": "",
         "status": 404,
         "response": {
@@ -1563,7 +1598,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/reset_email",
+        "path": "/api/v2/email-templates/user_invitation",
         "body": "",
         "status": 404,
         "response": {
@@ -1593,6 +1628,21 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/email-templates/stolen_credentials",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/email-templates/change_password",
         "body": "",
         "status": 404,
@@ -1608,22 +1658,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/user_invitation",
-        "body": "",
-        "status": 404,
-        "response": {
-            "statusCode": 404,
-            "error": "Not Found",
-            "message": "The template does not exist.",
-            "errorCode": "inexistent_email_template"
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/email-templates/reset_email_by_code",
+        "path": "/api/v2/email-templates/password_reset",
         "body": "",
         "status": 404,
         "response": {
@@ -1653,6 +1688,36 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/email-templates/blocked_account",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/email-templates/reset_email",
+        "body": "",
+        "status": 404,
+        "response": {
+            "statusCode": 404,
+            "error": "Not Found",
+            "message": "The template does not exist.",
+            "errorCode": "inexistent_email_template"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/email-templates/mfa_oob_code",
         "body": "",
         "status": 404,
@@ -1668,7 +1733,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/email-templates/password_reset",
+        "path": "/api/v2/email-templates/async_approval",
         "body": "",
         "status": 404,
         "response": {
@@ -1982,7 +2047,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/guardian/factors/sms/providers/twilio",
+        "path": "/api/v2/guardian/factors/push-notification/providers/sns",
         "body": "",
         "status": 200,
         "response": {},
@@ -1992,7 +2057,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/guardian/factors/push-notification/providers/sns",
+        "path": "/api/v2/guardian/factors/sms/providers/twilio",
         "body": "",
         "status": 200,
         "response": {},
@@ -2102,15 +2167,15 @@
                     "channel": "phone",
                     "disabled": false,
                     "configuration": {
-                        "sid": "twilio_sid",
-                        "default_from": "0000001",
+                        "sid": "28y8y32232",
+                        "default_from": "+1234567890",
                         "delivery_methods": [
                             "text"
                         ]
                     },
                     "credentials": null,
                     "created_at": "2025-12-09T12:24:00.604Z",
-                    "updated_at": "2025-12-21T14:27:14.438Z"
+                    "updated_at": "2025-12-21T15:55:30.156Z"
                 }
             ]
         },
@@ -2126,13 +2191,29 @@
         "response": {
             "templates": [
                 {
+                    "id": "tem_qarYST5TTE5pbMNB5NHZAj",
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "channel": "phone",
+                    "type": "otp_enroll",
+                    "disabled": false,
+                    "created_at": "2025-12-09T12:26:25.327Z",
+                    "updated_at": "2025-12-21T14:28:18.246Z",
+                    "content": {
+                        "syntax": "liquid",
+                        "body": {
+                            "text": "{{ code | escape }} is your verification code for {{ friendly_name | escape }}. Please enter this code to verify your enrollment.",
+                            "voice": "Hello. Your verification code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your verification code is {{ pause }} {{ code | escape }}"
+                        }
+                    }
+                },
+                {
                     "id": "tem_o4LBTt4NQyX8K4vC9dPafR",
                     "tenant": "auth0-deploy-cli-e2e",
                     "channel": "phone",
                     "type": "otp_verify",
                     "disabled": false,
                     "created_at": "2025-12-09T12:26:30.547Z",
-                    "updated_at": "2025-12-16T10:11:50.208Z",
+                    "updated_at": "2025-12-21T14:28:17.913Z",
                     "content": {
                         "syntax": "liquid",
                         "body": {
@@ -2148,7 +2229,7 @@
                     "type": "change_password",
                     "disabled": false,
                     "created_at": "2025-12-09T12:26:20.243Z",
-                    "updated_at": "2025-12-16T10:11:50.047Z",
+                    "updated_at": "2025-12-21T14:28:18.033Z",
                     "content": {
                         "syntax": "liquid",
                         "body": {
@@ -2164,7 +2245,7 @@
                     "type": "blocked_account",
                     "disabled": false,
                     "created_at": "2025-12-09T12:22:47.683Z",
-                    "updated_at": "2025-12-16T10:11:50.118Z",
+                    "updated_at": "2025-12-21T14:28:18.038Z",
                     "content": {
                         "syntax": "liquid",
                         "body": {
@@ -2172,22 +2253,6 @@
                             "voice": "We detected suspicious activity on your account from the ip {{user.source_ip}}{% if user.city %} from {{user.city}}, {{user.country}}{% elsif user.country %} from {{user.country}}{% endif %}. Logins from this IP have been blocked on your account. If this is your IP, please reset your password to unblock your account. Otherwise, disregard this message."
                         },
                         "from": "0032232323"
-                    }
-                },
-                {
-                    "id": "tem_qarYST5TTE5pbMNB5NHZAj",
-                    "tenant": "auth0-deploy-cli-e2e",
-                    "channel": "phone",
-                    "type": "otp_enroll",
-                    "disabled": false,
-                    "created_at": "2025-12-09T12:26:25.327Z",
-                    "updated_at": "2025-12-16T10:11:50.397Z",
-                    "content": {
-                        "syntax": "liquid",
-                        "body": {
-                            "text": "{{ code | escape }} is your verification code for {{ friendly_name | escape }}. Please enter this code to verify your enrollment.",
-                            "voice": "Hello. Your verification code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your verification code is {{ pause }} {{ code | escape }}"
-                        }
                     }
                 }
             ]
@@ -2283,6 +2348,16 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/prompts/login/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/prompts/login-id/custom-text/en",
         "body": "",
         "status": 200,
@@ -2303,7 +2378,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login/custom-text/en",
+        "path": "/api/v2/prompts/login-email-verification/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2333,7 +2408,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/login-email-verification/custom-text/en",
+        "path": "/api/v2/prompts/signup-password/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2353,7 +2428,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/signup-password/custom-text/en",
+        "path": "/api/v2/prompts/phone-identifier-challenge/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2373,17 +2448,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/phone-identifier-challenge/custom-text/en",
-        "body": "",
-        "status": 200,
-        "response": {},
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/prompts/email-identifier-challenge/custom-text/en",
+        "path": "/api/v2/prompts/reset-password/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2403,7 +2468,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/reset-password/custom-text/en",
+        "path": "/api/v2/prompts/email-identifier-challenge/custom-text/en",
         "body": "",
         "status": 200,
         "response": {},
@@ -2613,6 +2678,16 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/prompts/passkeys/custom-text/en",
+        "body": "",
+        "status": 200,
+        "response": {},
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/prompts/brute-force-protection/custom-text/en",
         "body": "",
         "status": 200,
@@ -2623,7 +2698,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/prompts/passkeys/custom-text/en",
+        "path": "/api/v2/prompts/login/partials",
         "body": "",
         "status": 200,
         "response": {},
@@ -2644,16 +2719,6 @@
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/prompts/login-password/partials",
-        "body": "",
-        "status": 200,
-        "response": {},
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/prompts/login/partials",
         "body": "",
         "status": 200,
         "response": {},
@@ -2724,7 +2789,7 @@
         "response": {
             "actions": [
                 {
-                    "id": "ba7feb04-85e7-4311-8c29-c3e1c6c1f624",
+                    "id": "36d94765-973b-4644-8141-98b83c38e7e5",
                     "name": "Custom Phone Provider",
                     "supported_triggers": [
                         {
@@ -2732,14 +2797,43 @@
                             "version": "v1"
                         }
                     ],
-                    "created_at": "2025-12-21T14:26:44.739470959Z",
-                    "updated_at": "2025-12-21T14:26:44.750164716Z",
+                    "created_at": "2025-12-21T15:45:46.276106345Z",
+                    "updated_at": "2025-12-21T15:49:01.044672751Z",
                     "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                     "dependencies": [],
                     "runtime": "node22",
                     "status": "built",
                     "secrets": [],
-                    "all_changes_deployed": false
+                    "current_version": {
+                        "id": "a29aeed6-834c-4146-af10-a1e6c22964c4",
+                        "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
+                        "runtime": "node22",
+                        "status": "BUILT",
+                        "number": 2,
+                        "build_time": "2025-12-21T15:49:02.041623864Z",
+                        "created_at": "2025-12-21T15:49:01.964956939Z",
+                        "updated_at": "2025-12-21T15:49:02.042769826Z"
+                    },
+                    "deployed_version": {
+                        "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
+                        "dependencies": [],
+                        "id": "a29aeed6-834c-4146-af10-a1e6c22964c4",
+                        "deployed": true,
+                        "number": 2,
+                        "built_at": "2025-12-21T15:49:02.041623864Z",
+                        "secrets": [],
+                        "status": "built",
+                        "created_at": "2025-12-21T15:49:01.964956939Z",
+                        "updated_at": "2025-12-21T15:49:02.042769826Z",
+                        "runtime": "node22",
+                        "supported_triggers": [
+                            {
+                                "id": "custom-phone-provider",
+                                "version": "v1"
+                            }
+                        ]
+                    },
+                    "all_changes_deployed": true
                 }
             ],
             "total": 1,
@@ -2758,21 +2852,10 @@
             "triggers": [
                 {
                     "id": "post-login",
-                    "version": "v2",
-                    "status": "DEPRECATED",
-                    "runtimes": [
-                        "node12",
-                        "node18"
-                    ],
-                    "default_runtime": "node16",
-                    "binding_policy": "trigger-bound",
-                    "compatible_triggers": []
-                },
-                {
-                    "id": "post-login",
                     "version": "v3",
                     "status": "CURRENT",
                     "runtimes": [
+                        "node12",
                         "node18-actions",
                         "node22"
                     ],
@@ -2786,11 +2869,21 @@
                     ]
                 },
                 {
+                    "id": "post-login",
+                    "version": "v2",
+                    "status": "DEPRECATED",
+                    "runtimes": [
+                        "node18"
+                    ],
+                    "default_runtime": "node16",
+                    "binding_policy": "trigger-bound",
+                    "compatible_triggers": []
+                },
+                {
                     "id": "credentials-exchange",
                     "version": "v2",
                     "status": "CURRENT",
                     "runtimes": [
-                        "node12",
                         "node18-actions",
                         "node22"
                     ],
@@ -2816,6 +2909,7 @@
                     "version": "v2",
                     "status": "CURRENT",
                     "runtimes": [
+                        "node12",
                         "node18-actions",
                         "node22"
                     ],
@@ -3056,7 +3150,58 @@
         "body": "",
         "status": 200,
         "response": {
-            "bindings": [],
+            "bindings": [
+                {
+                    "id": "d682832f-3ee0-45dc-a7ce-2041e5d7b31c",
+                    "trigger_id": "custom-phone-provider",
+                    "action": {
+                        "id": "36d94765-973b-4644-8141-98b83c38e7e5",
+                        "name": "Custom Phone Provider",
+                        "supported_triggers": [
+                            {
+                                "id": "custom-phone-provider",
+                                "version": "v1"
+                            }
+                        ],
+                        "created_at": "2025-12-21T15:45:46.276106345Z",
+                        "updated_at": "2025-12-21T15:49:01.038201448Z",
+                        "current_version": {
+                            "id": "a29aeed6-834c-4146-af10-a1e6c22964c4",
+                            "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
+                            "runtime": "node22",
+                            "status": "BUILT",
+                            "number": 2,
+                            "build_time": "2025-12-21T15:49:02.041623864Z",
+                            "created_at": "2025-12-21T15:49:01.964956939Z",
+                            "updated_at": "2025-12-21T15:49:02.042769826Z"
+                        },
+                        "deployed_version": {
+                            "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
+                            "dependencies": [],
+                            "id": "a29aeed6-834c-4146-af10-a1e6c22964c4",
+                            "deployed": true,
+                            "number": 2,
+                            "built_at": "2025-12-21T15:49:02.041623864Z",
+                            "secrets": [],
+                            "status": "built",
+                            "created_at": "2025-12-21T15:49:01.964956939Z",
+                            "updated_at": "2025-12-21T15:49:02.042769826Z",
+                            "runtime": "node22",
+                            "supported_triggers": [
+                                {
+                                    "id": "custom-phone-provider",
+                                    "version": "v1"
+                                }
+                            ]
+                        },
+                        "all_changes_deployed": false
+                    },
+                    "created_at": "2025-12-21T15:49:03.129601550Z",
+                    "updated_at": "2025-12-21T15:49:03.129601550Z",
+                    "display_name": "Custom Phone Provider"
+                }
+            ],
+            "total": 1,
             "per_page": 50
         },
         "rawHeaders": [],
@@ -3219,7 +3364,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0",
+                    "client_id": "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -3353,23 +3498,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/attack-protection/bot-detection",
-        "body": "",
-        "status": 200,
-        "response": {
-            "challenge_password_policy": "never",
-            "challenge_passwordless_policy": "never",
-            "challenge_password_reset_policy": "never",
-            "allowlist": [],
-            "bot_detection_level": "medium",
-            "monitoring_mode_enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/attack-protection/captcha",
         "body": "",
         "status": 200,
@@ -3405,11 +3533,16 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/risk-assessments/settings",
+        "path": "/api/v2/attack-protection/bot-detection",
         "body": "",
         "status": 200,
         "response": {
-            "enabled": false
+            "challenge_password_policy": "never",
+            "challenge_passwordless_policy": "never",
+            "challenge_password_reset_policy": "never",
+            "allowlist": [],
+            "bot_detection_level": "medium",
+            "monitoring_mode_enabled": false
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3422,6 +3555,18 @@
         "status": 200,
         "response": {
             "remember_for": 30
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/risk-assessments/settings",
+        "body": "",
+        "status": 200,
+        "response": {
+            "enabled": false
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3464,6 +3609,21 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/flows?page=0&per_page=100&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "limit": 100,
+            "start": 0,
+            "total": 0,
+            "flows": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/forms?page=0&per_page=100&include_totals=true",
         "body": "",
         "status": 200,
@@ -3477,24 +3637,9 @@
                     "name": "Blank-form",
                     "flow_count": 0,
                     "created_at": "2024-11-26T11:58:18.187Z",
-                    "updated_at": "2025-12-19T11:46:13.054Z"
+                    "updated_at": "2025-12-21T14:52:11.304Z"
                 }
             ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/flows?page=0&per_page=100&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "limit": 100,
-            "start": 0,
-            "total": 0,
-            "flows": []
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3563,7 +3708,7 @@
                 }
             },
             "created_at": "2024-11-26T11:58:18.187Z",
-            "updated_at": "2025-12-19T11:46:13.054Z"
+            "updated_at": "2025-12-21T14:52:11.304Z"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -3672,7 +3817,7 @@
                         "okta"
                     ],
                     "created_at": "2024-11-26T11:58:18.962Z",
-                    "updated_at": "2025-12-19T11:46:02.065Z",
+                    "updated_at": "2025-12-21T14:52:04.961Z",
                     "branding": {
                         "colors": {
                             "primary": "#19aecc"
@@ -3724,7 +3869,7 @@
                         }
                     },
                     "created_at": "2025-09-09T04:41:43.671Z",
-                    "updated_at": "2025-12-21T14:25:29.583Z",
+                    "updated_at": "2025-12-21T14:51:49.130Z",
                     "id": "acl_wpZ6oScRU5L6QKAxMUMHmx"
                 }
             ]
@@ -5118,7 +5263,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0",
+                    "client_id": "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -5142,7 +5287,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/clients/Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0",
+        "path": "/api/v2/clients/aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z",
         "body": {
             "name": "Default App",
             "callbacks": [],
@@ -5200,7 +5345,7 @@
                     "subject": "/CN=auth0-deploy-cli-e2e.us.auth0.com"
                 }
             ],
-            "client_id": "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0",
+            "client_id": "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z",
             "callback_url_template": false,
             "client_secret": "[REDACTED]",
             "jwt_configuration": {
@@ -5236,7 +5381,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/webauthn-roaming",
+        "path": "/api/v2/guardian/factors/push-notification",
         "body": {
             "enabled": false
         },
@@ -5264,7 +5409,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/webauthn-platform",
+        "path": "/api/v2/guardian/factors/webauthn-roaming",
         "body": {
             "enabled": false
         },
@@ -5292,7 +5437,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/otp",
+        "path": "/api/v2/guardian/factors/webauthn-platform",
         "body": {
             "enabled": false
         },
@@ -5306,7 +5451,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/push-notification",
+        "path": "/api/v2/guardian/factors/otp",
         "body": {
             "enabled": false
         },
@@ -5410,7 +5555,7 @@
         "response": {
             "actions": [
                 {
-                    "id": "ba7feb04-85e7-4311-8c29-c3e1c6c1f624",
+                    "id": "36d94765-973b-4644-8141-98b83c38e7e5",
                     "name": "Custom Phone Provider",
                     "supported_triggers": [
                         {
@@ -5418,14 +5563,43 @@
                             "version": "v1"
                         }
                     ],
-                    "created_at": "2025-12-21T14:26:44.739470959Z",
-                    "updated_at": "2025-12-21T14:26:44.750164716Z",
+                    "created_at": "2025-12-21T15:45:46.276106345Z",
+                    "updated_at": "2025-12-21T15:49:01.044672751Z",
                     "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                     "dependencies": [],
                     "runtime": "node22",
                     "status": "built",
                     "secrets": [],
-                    "all_changes_deployed": false
+                    "current_version": {
+                        "id": "a29aeed6-834c-4146-af10-a1e6c22964c4",
+                        "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
+                        "runtime": "node22",
+                        "status": "BUILT",
+                        "number": 2,
+                        "build_time": "2025-12-21T15:49:02.041623864Z",
+                        "created_at": "2025-12-21T15:49:01.964956939Z",
+                        "updated_at": "2025-12-21T15:49:02.042769826Z"
+                    },
+                    "deployed_version": {
+                        "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
+                        "dependencies": [],
+                        "id": "a29aeed6-834c-4146-af10-a1e6c22964c4",
+                        "deployed": true,
+                        "number": 2,
+                        "built_at": "2025-12-21T15:49:02.041623864Z",
+                        "secrets": [],
+                        "status": "built",
+                        "created_at": "2025-12-21T15:49:01.964956939Z",
+                        "updated_at": "2025-12-21T15:49:02.042769826Z",
+                        "runtime": "node22",
+                        "supported_triggers": [
+                            {
+                                "id": "custom-phone-provider",
+                                "version": "v1"
+                            }
+                        ]
+                    },
+                    "all_changes_deployed": true
                 }
             ],
             "total": 1,
@@ -5437,7 +5611,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/actions/actions/ba7feb04-85e7-4311-8c29-c3e1c6c1f624",
+        "path": "/api/v2/actions/actions/36d94765-973b-4644-8141-98b83c38e7e5",
         "body": {
             "name": "Custom Phone Provider",
             "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
@@ -5453,7 +5627,7 @@
         },
         "status": 200,
         "response": {
-            "id": "ba7feb04-85e7-4311-8c29-c3e1c6c1f624",
+            "id": "36d94765-973b-4644-8141-98b83c38e7e5",
             "name": "Custom Phone Provider",
             "supported_triggers": [
                 {
@@ -5461,14 +5635,43 @@
                     "version": "v1"
                 }
             ],
-            "created_at": "2025-12-21T14:26:44.739470959Z",
-            "updated_at": "2025-12-21T14:28:05.747805984Z",
+            "created_at": "2025-12-21T15:45:46.276106345Z",
+            "updated_at": "2025-12-21T15:57:35.988323694Z",
             "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
             "dependencies": [],
             "runtime": "node22",
             "status": "pending",
             "secrets": [],
-            "all_changes_deployed": false
+            "current_version": {
+                "id": "a29aeed6-834c-4146-af10-a1e6c22964c4",
+                "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
+                "runtime": "node22",
+                "status": "BUILT",
+                "number": 2,
+                "build_time": "2025-12-21T15:49:02.041623864Z",
+                "created_at": "2025-12-21T15:49:01.964956939Z",
+                "updated_at": "2025-12-21T15:49:02.042769826Z"
+            },
+            "deployed_version": {
+                "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
+                "dependencies": [],
+                "id": "a29aeed6-834c-4146-af10-a1e6c22964c4",
+                "deployed": true,
+                "number": 2,
+                "built_at": "2025-12-21T15:49:02.041623864Z",
+                "secrets": [],
+                "status": "built",
+                "created_at": "2025-12-21T15:49:01.964956939Z",
+                "updated_at": "2025-12-21T15:49:02.042769826Z",
+                "runtime": "node22",
+                "supported_triggers": [
+                    {
+                        "id": "custom-phone-provider",
+                        "version": "v1"
+                    }
+                ]
+            },
+            "all_changes_deployed": true
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -5482,7 +5685,7 @@
         "response": {
             "actions": [
                 {
-                    "id": "ba7feb04-85e7-4311-8c29-c3e1c6c1f624",
+                    "id": "36d94765-973b-4644-8141-98b83c38e7e5",
                     "name": "Custom Phone Provider",
                     "supported_triggers": [
                         {
@@ -5490,18 +5693,87 @@
                             "version": "v1"
                         }
                     ],
-                    "created_at": "2025-12-21T14:26:44.739470959Z",
-                    "updated_at": "2025-12-21T14:28:05.747805984Z",
+                    "created_at": "2025-12-21T15:45:46.276106345Z",
+                    "updated_at": "2025-12-21T15:57:35.988323694Z",
                     "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                     "dependencies": [],
                     "runtime": "node22",
                     "status": "built",
                     "secrets": [],
-                    "all_changes_deployed": false
+                    "current_version": {
+                        "id": "a29aeed6-834c-4146-af10-a1e6c22964c4",
+                        "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
+                        "runtime": "node22",
+                        "status": "BUILT",
+                        "number": 2,
+                        "build_time": "2025-12-21T15:49:02.041623864Z",
+                        "created_at": "2025-12-21T15:49:01.964956939Z",
+                        "updated_at": "2025-12-21T15:49:02.042769826Z"
+                    },
+                    "deployed_version": {
+                        "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
+                        "dependencies": [],
+                        "id": "a29aeed6-834c-4146-af10-a1e6c22964c4",
+                        "deployed": true,
+                        "number": 2,
+                        "built_at": "2025-12-21T15:49:02.041623864Z",
+                        "secrets": [],
+                        "status": "built",
+                        "created_at": "2025-12-21T15:49:01.964956939Z",
+                        "updated_at": "2025-12-21T15:49:02.042769826Z",
+                        "runtime": "node22",
+                        "supported_triggers": [
+                            {
+                                "id": "custom-phone-provider",
+                                "version": "v1"
+                            }
+                        ]
+                    },
+                    "all_changes_deployed": true
                 }
             ],
             "total": 1,
             "per_page": 100
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "POST",
+        "path": "/api/v2/actions/actions/36d94765-973b-4644-8141-98b83c38e7e5/deploy",
+        "body": "",
+        "status": 200,
+        "response": {
+            "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
+            "dependencies": [],
+            "id": "199e883f-ecd7-463d-a957-26a17d4933fe",
+            "deployed": false,
+            "number": 3,
+            "secrets": [],
+            "status": "built",
+            "created_at": "2025-12-21T15:57:36.674288537Z",
+            "updated_at": "2025-12-21T15:57:36.674288537Z",
+            "runtime": "node22",
+            "supported_triggers": [
+                {
+                    "id": "custom-phone-provider",
+                    "version": "v1"
+                }
+            ],
+            "action": {
+                "id": "36d94765-973b-4644-8141-98b83c38e7e5",
+                "name": "Custom Phone Provider",
+                "supported_triggers": [
+                    {
+                        "id": "custom-phone-provider",
+                        "version": "v1"
+                    }
+                ],
+                "created_at": "2025-12-21T15:45:46.276106345Z",
+                "updated_at": "2025-12-21T15:57:35.979984352Z",
+                "all_changes_deployed": false
+            }
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -5585,46 +5857,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/attack-protection/captcha",
-        "body": {
-            "active_provider_id": "auth_challenge",
-            "auth_challenge": {
-                "fail_open": false
-            }
-        },
-        "status": 200,
-        "response": {
-            "active_provider_id": "auth_challenge",
-            "simple_captcha": {},
-            "auth_challenge": {
-                "fail_open": false
-            },
-            "recaptcha_v2": {
-                "site_key": ""
-            },
-            "recaptcha_enterprise": {
-                "site_key": "",
-                "project_id": ""
-            },
-            "hcaptcha": {
-                "site_key": ""
-            },
-            "friendly_captcha": {
-                "site_key": ""
-            },
-            "arkose": {
-                "site_key": "",
-                "client_subdomain": "client-api",
-                "verify_subdomain": "verify-api",
-                "fail_open": false
-            }
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PATCH",
         "path": "/api/v2/attack-protection/breached-password-detection",
         "body": {
             "enabled": false,
@@ -5682,6 +5914,46 @@
             "mode": "count_per_identifier_and_ip",
             "allowlist": [],
             "max_attempts": 10
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/attack-protection/captcha",
+        "body": {
+            "active_provider_id": "auth_challenge",
+            "auth_challenge": {
+                "fail_open": false
+            }
+        },
+        "status": 200,
+        "response": {
+            "active_provider_id": "auth_challenge",
+            "simple_captcha": {},
+            "auth_challenge": {
+                "fail_open": false
+            },
+            "recaptcha_v2": {
+                "site_key": ""
+            },
+            "recaptcha_enterprise": {
+                "site_key": "",
+                "project_id": ""
+            },
+            "hcaptcha": {
+                "site_key": ""
+            },
+            "friendly_captcha": {
+                "site_key": ""
+            },
+            "arkose": {
+                "site_key": "",
+                "client_subdomain": "client-api",
+                "verify_subdomain": "verify-api",
+                "fail_open": false
+            }
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -5751,7 +6023,7 @@
                         }
                     },
                     "created_at": "2025-09-09T04:41:43.671Z",
-                    "updated_at": "2025-12-21T14:25:29.583Z",
+                    "updated_at": "2025-12-21T14:51:49.130Z",
                     "id": "acl_wpZ6oScRU5L6QKAxMUMHmx"
                 }
             ]
@@ -5796,7 +6068,7 @@
                 }
             },
             "created_at": "2025-09-09T04:41:43.671Z",
-            "updated_at": "2025-12-21T14:28:08.273Z",
+            "updated_at": "2025-12-21T15:57:38.847Z",
             "id": "acl_wpZ6oScRU5L6QKAxMUMHmx"
         },
         "rawHeaders": [],
@@ -5860,55 +6132,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/user-attribute-profiles/uap_1csDj3szFsgxGS1oTZTdFm",
-        "body": {
-            "name": "test-user-attribute-profile-2",
-            "user_attributes": {
-                "email": {
-                    "label": "Email",
-                    "description": "Email of the User",
-                    "auth0_mapping": "email",
-                    "profile_required": true
-                }
-            },
-            "user_id": {
-                "oidc_mapping": "sub",
-                "saml_mapping": [
-                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
-                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
-                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-                ],
-                "scim_mapping": "externalId"
-            }
-        },
-        "status": 200,
-        "response": {
-            "id": "uap_1csDj3szFsgxGS1oTZTdFm",
-            "name": "test-user-attribute-profile-2",
-            "user_id": {
-                "oidc_mapping": "sub",
-                "saml_mapping": [
-                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
-                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
-                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-                ],
-                "scim_mapping": "externalId"
-            },
-            "user_attributes": {
-                "email": {
-                    "label": "Email",
-                    "description": "Email of the User",
-                    "auth0_mapping": "email",
-                    "profile_required": true
-                }
-            }
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PATCH",
         "path": "/api/v2/user-attribute-profiles/uap_1csDj3sAVu6n5eTzLw6XZg",
         "body": {
             "name": "test-user-attribute-profile",
@@ -5934,6 +6157,55 @@
         "response": {
             "id": "uap_1csDj3sAVu6n5eTzLw6XZg",
             "name": "test-user-attribute-profile",
+            "user_id": {
+                "oidc_mapping": "sub",
+                "saml_mapping": [
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+                ],
+                "scim_mapping": "externalId"
+            },
+            "user_attributes": {
+                "email": {
+                    "label": "Email",
+                    "description": "Email of the User",
+                    "auth0_mapping": "email",
+                    "profile_required": true
+                }
+            }
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/user-attribute-profiles/uap_1csDj3szFsgxGS1oTZTdFm",
+        "body": {
+            "name": "test-user-attribute-profile-2",
+            "user_attributes": {
+                "email": {
+                    "label": "Email",
+                    "description": "Email of the User",
+                    "auth0_mapping": "email",
+                    "profile_required": true
+                }
+            },
+            "user_id": {
+                "oidc_mapping": "sub",
+                "saml_mapping": [
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+                ],
+                "scim_mapping": "externalId"
+            }
+        },
+        "status": 200,
+        "response": {
+            "id": "uap_1csDj3szFsgxGS1oTZTdFm",
+            "name": "test-user-attribute-profile-2",
             "user_id": {
                 "oidc_mapping": "sub",
                 "saml_mapping": [
@@ -6060,7 +6332,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0",
+                    "client_id": "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -6127,7 +6399,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_zrS71fW5lRxGdmRA",
+                    "id": "con_kUOiqiXvPh6Lp7sd",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -6164,8 +6436,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
                     ]
                 }
             ]
@@ -6182,7 +6454,7 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_zrS71fW5lRxGdmRA",
+                    "id": "con_kUOiqiXvPh6Lp7sd",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -6219,8 +6491,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
                     ]
                 }
             ]
@@ -6231,13 +6503,13 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections/con_zrS71fW5lRxGdmRA/clients?take=50",
+        "path": "/api/v2/connections/con_kUOiqiXvPh6Lp7sd/clients?take=50",
         "body": "",
         "status": 200,
         "response": {
             "clients": [
                 {
-                    "client_id": "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0"
+                    "client_id": "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
                 },
                 {
                     "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
@@ -6250,13 +6522,13 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections/con_zrS71fW5lRxGdmRA/clients?take=50",
+        "path": "/api/v2/connections/con_kUOiqiXvPh6Lp7sd/clients?take=50",
         "body": "",
         "status": 200,
         "response": {
             "clients": [
                 {
-                    "client_id": "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0"
+                    "client_id": "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
                 },
                 {
                     "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
@@ -6269,11 +6541,11 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections/con_zrS71fW5lRxGdmRA",
+        "path": "/api/v2/connections/con_kUOiqiXvPh6Lp7sd",
         "body": "",
         "status": 200,
         "response": {
-            "id": "con_zrS71fW5lRxGdmRA",
+            "id": "con_kUOiqiXvPh6Lp7sd",
             "options": {
                 "mfa": {
                     "active": true,
@@ -6307,8 +6579,8 @@
                 "active": false
             },
             "enabled_clients": [
-                "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0",
-                "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
             ],
             "realms": [
                 "Username-Password-Authentication"
@@ -6320,7 +6592,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/connections/con_zrS71fW5lRxGdmRA",
+        "path": "/api/v2/connections/con_kUOiqiXvPh6Lp7sd",
         "body": {
             "authentication": {
                 "active": true
@@ -6330,7 +6602,7 @@
             },
             "enabled_clients": [
                 "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0"
+                "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
             ],
             "is_domain_connection": false,
             "options": {
@@ -6362,7 +6634,7 @@
         },
         "status": 200,
         "response": {
-            "id": "con_zrS71fW5lRxGdmRA",
+            "id": "con_kUOiqiXvPh6Lp7sd",
             "options": {
                 "mfa": {
                     "active": true,
@@ -6397,7 +6669,7 @@
             },
             "enabled_clients": [
                 "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0"
+                "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
             ],
             "realms": [
                 "Username-Password-Authentication"
@@ -6409,14 +6681,14 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/connections/con_zrS71fW5lRxGdmRA/clients",
+        "path": "/api/v2/connections/con_kUOiqiXvPh6Lp7sd/clients",
         "body": [
             {
                 "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
                 "status": true
             },
             {
-                "client_id": "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0",
+                "client_id": "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z",
                 "status": true
             }
         ],
@@ -6518,7 +6790,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0",
+                    "client_id": "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -6585,7 +6857,34 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_zrS71fW5lRxGdmRA",
+                    "id": "con_5LSfDxdBnayBrcNp",
+                    "options": {
+                        "email": true,
+                        "scope": [
+                            "email",
+                            "profile"
+                        ],
+                        "profile": true
+                    },
+                    "strategy": "google-oauth2",
+                    "name": "google-oauth2",
+                    "is_domain_connection": false,
+                    "authentication": {
+                        "active": true
+                    },
+                    "connected_accounts": {
+                        "active": false
+                    },
+                    "realms": [
+                        "google-oauth2"
+                    ],
+                    "enabled_clients": [
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
+                    ]
+                },
+                {
+                    "id": "con_kUOiqiXvPh6Lp7sd",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -6622,8 +6921,8 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
                     ]
                 }
             ]
@@ -6640,7 +6939,34 @@
         "response": {
             "connections": [
                 {
-                    "id": "con_zrS71fW5lRxGdmRA",
+                    "id": "con_5LSfDxdBnayBrcNp",
+                    "options": {
+                        "email": true,
+                        "scope": [
+                            "email",
+                            "profile"
+                        ],
+                        "profile": true
+                    },
+                    "strategy": "google-oauth2",
+                    "name": "google-oauth2",
+                    "is_domain_connection": false,
+                    "authentication": {
+                        "active": true
+                    },
+                    "connected_accounts": {
+                        "active": false
+                    },
+                    "realms": [
+                        "google-oauth2"
+                    ],
+                    "enabled_clients": [
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
+                    ]
+                },
+                {
+                    "id": "con_kUOiqiXvPh6Lp7sd",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -6677,12 +7003,125 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
                     ]
                 }
             ]
         },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/connections/con_5LSfDxdBnayBrcNp/clients?take=50",
+        "body": "",
+        "status": 200,
+        "response": {
+            "clients": [
+                {
+                    "client_id": "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
+                },
+                {
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/connections/con_5LSfDxdBnayBrcNp/clients?take=50",
+        "body": "",
+        "status": 200,
+        "response": {
+            "clients": [
+                {
+                    "client_id": "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
+                },
+                {
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/connections/con_5LSfDxdBnayBrcNp",
+        "body": {
+            "authentication": {
+                "active": true
+            },
+            "connected_accounts": {
+                "active": false
+            },
+            "enabled_clients": [
+                "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
+            ],
+            "is_domain_connection": false,
+            "options": {
+                "email": true,
+                "scope": [
+                    "email",
+                    "profile"
+                ],
+                "profile": true
+            }
+        },
+        "status": 200,
+        "response": {
+            "id": "con_5LSfDxdBnayBrcNp",
+            "options": {
+                "email": true,
+                "scope": [
+                    "email",
+                    "profile"
+                ],
+                "profile": true
+            },
+            "strategy": "google-oauth2",
+            "name": "google-oauth2",
+            "is_domain_connection": false,
+            "authentication": {
+                "active": true
+            },
+            "connected_accounts": {
+                "active": false
+            },
+            "enabled_clients": [
+                "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
+            ],
+            "realms": [
+                "google-oauth2"
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/connections/con_5LSfDxdBnayBrcNp/clients",
+        "body": [
+            {
+                "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                "status": true
+            },
+            {
+                "client_id": "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z",
+                "status": true
+            }
+        ],
+        "status": 204,
+        "response": "",
         "rawHeaders": [],
         "responseIsBinary": false
     },
@@ -6816,7 +7255,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0",
+                    "client_id": "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -7152,15 +7591,15 @@
                     "channel": "phone",
                     "disabled": false,
                     "configuration": {
-                        "sid": "twilio_sid",
-                        "default_from": "0000001",
+                        "sid": "28y8y32232",
+                        "default_from": "+1234567890",
                         "delivery_methods": [
                             "text"
                         ]
                     },
                     "credentials": null,
                     "created_at": "2025-12-09T12:24:00.604Z",
-                    "updated_at": "2025-12-21T14:27:14.438Z"
+                    "updated_at": "2025-12-21T15:55:30.156Z"
                 }
             ]
         },
@@ -7174,8 +7613,8 @@
         "body": {
             "name": "twilio",
             "configuration": {
-                "sid": "twilio_sid",
-                "default_from": "0000001",
+                "sid": "28y8y32232",
+                "default_from": "+1234567890",
                 "delivery_methods": [
                     "text"
                 ]
@@ -7193,14 +7632,14 @@
             "channel": "phone",
             "disabled": false,
             "configuration": {
-                "sid": "twilio_sid",
-                "default_from": "0000001",
+                "sid": "28y8y32232",
+                "default_from": "+1234567890",
                 "delivery_methods": [
                     "text"
                 ]
             },
             "created_at": "2025-12-09T12:24:00.604Z",
-            "updated_at": "2025-12-21T14:28:16.175Z"
+            "updated_at": "2025-12-21T15:57:47.991Z"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -7234,7 +7673,7 @@
                         "okta"
                     ],
                     "created_at": "2024-11-26T11:58:18.962Z",
-                    "updated_at": "2025-12-19T11:46:02.065Z",
+                    "updated_at": "2025-12-21T14:52:04.961Z",
                     "branding": {
                         "colors": {
                             "primary": "#19aecc"
@@ -7310,7 +7749,7 @@
                 "okta"
             ],
             "created_at": "2024-11-26T11:58:18.962Z",
-            "updated_at": "2025-12-21T14:28:17.247Z",
+            "updated_at": "2025-12-21T15:57:49.220Z",
             "branding": {
                 "colors": {
                     "primary": "#19aecc"
@@ -7329,13 +7768,29 @@
         "response": {
             "templates": [
                 {
+                    "id": "tem_qarYST5TTE5pbMNB5NHZAj",
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "channel": "phone",
+                    "type": "otp_enroll",
+                    "disabled": false,
+                    "created_at": "2025-12-09T12:26:25.327Z",
+                    "updated_at": "2025-12-21T14:28:18.246Z",
+                    "content": {
+                        "syntax": "liquid",
+                        "body": {
+                            "text": "{{ code | escape }} is your verification code for {{ friendly_name | escape }}. Please enter this code to verify your enrollment.",
+                            "voice": "Hello. Your verification code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your verification code is {{ pause }} {{ code | escape }}"
+                        }
+                    }
+                },
+                {
                     "id": "tem_o4LBTt4NQyX8K4vC9dPafR",
                     "tenant": "auth0-deploy-cli-e2e",
                     "channel": "phone",
                     "type": "otp_verify",
                     "disabled": false,
                     "created_at": "2025-12-09T12:26:30.547Z",
-                    "updated_at": "2025-12-16T10:11:50.208Z",
+                    "updated_at": "2025-12-21T14:28:17.913Z",
                     "content": {
                         "syntax": "liquid",
                         "body": {
@@ -7351,7 +7806,7 @@
                     "type": "change_password",
                     "disabled": false,
                     "created_at": "2025-12-09T12:26:20.243Z",
-                    "updated_at": "2025-12-16T10:11:50.047Z",
+                    "updated_at": "2025-12-21T14:28:18.033Z",
                     "content": {
                         "syntax": "liquid",
                         "body": {
@@ -7367,7 +7822,7 @@
                     "type": "blocked_account",
                     "disabled": false,
                     "created_at": "2025-12-09T12:22:47.683Z",
-                    "updated_at": "2025-12-16T10:11:50.118Z",
+                    "updated_at": "2025-12-21T14:28:18.038Z",
                     "content": {
                         "syntax": "liquid",
                         "body": {
@@ -7376,24 +7831,41 @@
                         },
                         "from": "0032232323"
                     }
-                },
-                {
-                    "id": "tem_qarYST5TTE5pbMNB5NHZAj",
-                    "tenant": "auth0-deploy-cli-e2e",
-                    "channel": "phone",
-                    "type": "otp_enroll",
-                    "disabled": false,
-                    "created_at": "2025-12-09T12:26:25.327Z",
-                    "updated_at": "2025-12-16T10:11:50.397Z",
-                    "content": {
-                        "syntax": "liquid",
-                        "body": {
-                            "text": "{{ code | escape }} is your verification code for {{ friendly_name | escape }}. Please enter this code to verify your enrollment.",
-                            "voice": "Hello. Your verification code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your verification code is {{ pause }} {{ code | escape }}"
-                        }
-                    }
                 }
             ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/branding/phone/templates/tem_qarYST5TTE5pbMNB5NHZAj",
+        "body": {
+            "content": {
+                "body": {
+                    "text": "{{ code | escape }} is your verification code for {{ friendly_name | escape }}. Please enter this code to verify your enrollment.",
+                    "voice": "Hello. Your verification code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your verification code is {{ pause }} {{ code | escape }}"
+                }
+            },
+            "disabled": false
+        },
+        "status": 200,
+        "response": {
+            "id": "tem_qarYST5TTE5pbMNB5NHZAj",
+            "tenant": "auth0-deploy-cli-e2e",
+            "channel": "phone",
+            "type": "otp_enroll",
+            "disabled": false,
+            "created_at": "2025-12-09T12:26:25.327Z",
+            "updated_at": "2025-12-21T15:57:49.912Z",
+            "content": {
+                "syntax": "liquid",
+                "body": {
+                    "text": "{{ code | escape }} is your verification code for {{ friendly_name | escape }}. Please enter this code to verify your enrollment.",
+                    "voice": "Hello. Your verification code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your verification code is {{ pause }} {{ code | escape }}"
+                }
+            }
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -7419,12 +7891,45 @@
             "type": "otp_verify",
             "disabled": false,
             "created_at": "2025-12-09T12:26:30.547Z",
-            "updated_at": "2025-12-21T14:28:17.913Z",
+            "updated_at": "2025-12-21T15:57:50.003Z",
             "content": {
                 "syntax": "liquid",
                 "body": {
                     "text": "{{ code | escape }} is your verification code for {{ friendly_name | escape }}",
                     "voice": "Hello. Your verification code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your verification code is {{ pause }} {{ code | escape }}"
+                }
+            }
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/branding/phone/templates/tem_xqbUSF83fpnRv8r8rqXFDZ",
+        "body": {
+            "content": {
+                "body": {
+                    "text": "{{ code | escape }} is your password change code for {{ friendly_name | escape }}",
+                    "voice": "Hello. Your password change code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your password change code is {{ pause }} {{ code | escape }}"
+                }
+            },
+            "disabled": false
+        },
+        "status": 200,
+        "response": {
+            "id": "tem_xqbUSF83fpnRv8r8rqXFDZ",
+            "tenant": "auth0-deploy-cli-e2e",
+            "channel": "phone",
+            "type": "change_password",
+            "disabled": false,
+            "created_at": "2025-12-09T12:26:20.243Z",
+            "updated_at": "2025-12-21T15:57:50.000Z",
+            "content": {
+                "syntax": "liquid",
+                "body": {
+                    "text": "{{ code | escape }} is your password change code for {{ friendly_name | escape }}",
+                    "voice": "Hello. Your password change code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your password change code is {{ pause }} {{ code | escape }}"
                 }
             }
         },
@@ -7453,7 +7958,7 @@
             "type": "blocked_account",
             "disabled": false,
             "created_at": "2025-12-09T12:22:47.683Z",
-            "updated_at": "2025-12-21T14:28:18.038Z",
+            "updated_at": "2025-12-21T15:57:50.222Z",
             "content": {
                 "syntax": "liquid",
                 "body": {
@@ -7468,72 +7973,6 @@
     },
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PATCH",
-        "path": "/api/v2/branding/phone/templates/tem_xqbUSF83fpnRv8r8rqXFDZ",
-        "body": {
-            "content": {
-                "body": {
-                    "text": "{{ code | escape }} is your password change code for {{ friendly_name | escape }}",
-                    "voice": "Hello. Your password change code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your password change code is {{ pause }} {{ code | escape }}"
-                }
-            },
-            "disabled": false
-        },
-        "status": 200,
-        "response": {
-            "id": "tem_xqbUSF83fpnRv8r8rqXFDZ",
-            "tenant": "auth0-deploy-cli-e2e",
-            "channel": "phone",
-            "type": "change_password",
-            "disabled": false,
-            "created_at": "2025-12-09T12:26:20.243Z",
-            "updated_at": "2025-12-21T14:28:18.033Z",
-            "content": {
-                "syntax": "liquid",
-                "body": {
-                    "text": "{{ code | escape }} is your password change code for {{ friendly_name | escape }}",
-                    "voice": "Hello. Your password change code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your password change code is {{ pause }} {{ code | escape }}"
-                }
-            }
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PATCH",
-        "path": "/api/v2/branding/phone/templates/tem_qarYST5TTE5pbMNB5NHZAj",
-        "body": {
-            "content": {
-                "body": {
-                    "text": "{{ code | escape }} is your verification code for {{ friendly_name | escape }}. Please enter this code to verify your enrollment.",
-                    "voice": "Hello. Your verification code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your verification code is {{ pause }} {{ code | escape }}"
-                }
-            },
-            "disabled": false
-        },
-        "status": 200,
-        "response": {
-            "id": "tem_qarYST5TTE5pbMNB5NHZAj",
-            "tenant": "auth0-deploy-cli-e2e",
-            "channel": "phone",
-            "type": "otp_enroll",
-            "disabled": false,
-            "created_at": "2025-12-09T12:26:25.327Z",
-            "updated_at": "2025-12-21T14:28:18.246Z",
-            "content": {
-                "syntax": "liquid",
-                "body": {
-                    "text": "{{ code | escape }} is your verification code for {{ friendly_name | escape }}. Please enter this code to verify your enrollment.",
-                    "voice": "Hello. Your verification code for {{ friendly_name | escape }} is {{ pause }} {{ code | escape }}. I repeat, your verification code is {{ pause }} {{ code | escape }}"
-                }
-            }
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
         "path": "/api/v2/actions/actions?page=0&per_page=100",
         "body": "",
@@ -7541,7 +7980,7 @@
         "response": {
             "actions": [
                 {
-                    "id": "ba7feb04-85e7-4311-8c29-c3e1c6c1f624",
+                    "id": "36d94765-973b-4644-8141-98b83c38e7e5",
                     "name": "Custom Phone Provider",
                     "supported_triggers": [
                         {
@@ -7549,14 +7988,43 @@
                             "version": "v1"
                         }
                     ],
-                    "created_at": "2025-12-21T14:26:44.739470959Z",
-                    "updated_at": "2025-12-21T14:28:05.747805984Z",
+                    "created_at": "2025-12-21T15:45:46.276106345Z",
+                    "updated_at": "2025-12-21T15:57:35.988323694Z",
                     "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
                     "dependencies": [],
                     "runtime": "node22",
                     "status": "built",
                     "secrets": [],
-                    "all_changes_deployed": false
+                    "current_version": {
+                        "id": "199e883f-ecd7-463d-a957-26a17d4933fe",
+                        "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
+                        "runtime": "node22",
+                        "status": "BUILT",
+                        "number": 3,
+                        "build_time": "2025-12-21T15:57:36.745134991Z",
+                        "created_at": "2025-12-21T15:57:36.674288537Z",
+                        "updated_at": "2025-12-21T15:57:36.746281622Z"
+                    },
+                    "deployed_version": {
+                        "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
+                        "dependencies": [],
+                        "id": "199e883f-ecd7-463d-a957-26a17d4933fe",
+                        "deployed": true,
+                        "number": 3,
+                        "built_at": "2025-12-21T15:57:36.745134991Z",
+                        "secrets": [],
+                        "status": "built",
+                        "created_at": "2025-12-21T15:57:36.674288537Z",
+                        "updated_at": "2025-12-21T15:57:36.746281622Z",
+                        "runtime": "node22",
+                        "supported_triggers": [
+                            {
+                                "id": "custom-phone-provider",
+                                "version": "v1"
+                            }
+                        ]
+                    },
+                    "all_changes_deployed": true
                 }
             ],
             "total": 1,
@@ -7659,6 +8127,18 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/organizations?take=50",
+        "body": "",
+        "status": 200,
+        "response": {
+            "organizations": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/clients?page=0&per_page=100&include_totals=true",
         "body": "",
         "status": 200,
@@ -7749,7 +8229,7 @@
                             "subject": "deprecated"
                         }
                     ],
-                    "client_id": "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0",
+                    "client_id": "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z",
                     "callback_url_template": false,
                     "client_secret": "[REDACTED]",
                     "jwt_configuration": {
@@ -7810,25 +8290,40 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/organizations?take=50",
-        "body": "",
-        "status": 200,
-        "response": {
-            "organizations": []
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/connections?take=50",
         "body": "",
         "status": 200,
         "response": {
             "connections": [
                 {
-                    "id": "con_zrS71fW5lRxGdmRA",
+                    "id": "con_5LSfDxdBnayBrcNp",
+                    "options": {
+                        "email": true,
+                        "scope": [
+                            "email",
+                            "profile"
+                        ],
+                        "profile": true
+                    },
+                    "strategy": "google-oauth2",
+                    "name": "google-oauth2",
+                    "is_domain_connection": false,
+                    "authentication": {
+                        "active": true
+                    },
+                    "connected_accounts": {
+                        "active": false
+                    },
+                    "realms": [
+                        "google-oauth2"
+                    ],
+                    "enabled_clients": [
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
+                    ]
+                },
+                {
+                    "id": "con_kUOiqiXvPh6Lp7sd",
                     "options": {
                         "mfa": {
                             "active": true,
@@ -7865,9 +8360,160 @@
                         "Username-Password-Authentication"
                     ],
                     "enabled_clients": [
-                        "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0",
-                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z"
                     ]
+                }
+            ]
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/clients?page=0&per_page=100&include_totals=true",
+        "body": "",
+        "status": 200,
+        "response": {
+            "total": 3,
+            "start": 0,
+            "limit": 100,
+            "clients": [
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Deploy CLI",
+                    "is_first_party": true,
+                    "oidc_conformant": true,
+                    "sso_disabled": false,
+                    "cross_origin_auth": false,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 31557600,
+                        "idle_token_lifetime": 2592000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "cross_origin_authentication": true,
+                    "allowed_clients": [],
+                    "callbacks": [],
+                    "native_social_login": {
+                        "apple": {
+                            "enabled": false
+                        },
+                        "facebook": {
+                            "enabled": false
+                        }
+                    },
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "client_aliases": [],
+                    "token_endpoint_auth_method": "client_secret_post",
+                    "app_type": "non_interactive",
+                    "grant_types": [
+                        "client_credentials",
+                        "implicit",
+                        "authorization_code",
+                        "refresh_token"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": false,
+                    "is_token_endpoint_ip_header_trusted": false,
+                    "name": "Default App",
+                    "callbacks": [],
+                    "is_first_party": true,
+                    "oidc_conformant": true,
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "sso_disabled": false,
+                    "cross_origin_authentication": false,
+                    "cross_origin_auth": false,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "aYNo1pAMNcLd5rm5c3I5W0IME6vmIh2Z",
+                    "callback_url_template": false,
+                    "client_secret": "[REDACTED]",
+                    "jwt_configuration": {
+                        "alg": "RS256",
+                        "lifetime_in_seconds": 36000,
+                        "secret_encoded": false
+                    },
+                    "grant_types": [
+                        "authorization_code",
+                        "implicit",
+                        "refresh_token",
+                        "client_credentials"
+                    ],
+                    "custom_login_page_on": true
+                },
+                {
+                    "tenant": "auth0-deploy-cli-e2e",
+                    "global": true,
+                    "callbacks": [],
+                    "is_first_party": true,
+                    "name": "All Applications",
+                    "refresh_token": {
+                        "expiration_type": "non-expiring",
+                        "leeway": 0,
+                        "infinite_token_lifetime": true,
+                        "infinite_idle_token_lifetime": true,
+                        "token_lifetime": 2592000,
+                        "idle_token_lifetime": 1296000,
+                        "rotation_type": "non-rotating"
+                    },
+                    "owners": [
+                        "mr|samlp|okta|will.vedder@auth0.com",
+                        "mr|google-oauth2|102002633619863830825",
+                        "mr|samlp|okta|frederik.prijck@auth0.com",
+                        "mr|google-oauth2|109614534713742077035",
+                        "mr|google-oauth2|116771660953104383819",
+                        "mr|google-oauth2|112839029247827700155",
+                        "mr|samlp|okta|ewan.harris@auth0.com"
+                    ],
+                    "custom_login_page": "<html>TEST123</html>\n",
+                    "cross_origin_authentication": true,
+                    "signing_keys": [
+                        {
+                            "cert": "[REDACTED]",
+                            "pkcs7": "[REDACTED]",
+                            "subject": "deprecated"
+                        }
+                    ],
+                    "client_id": "Isi93ibGHIGwmdYjsLwTOn7Gu7nwxU3V",
+                    "client_secret": "[REDACTED]",
+                    "custom_login_page_on": true
                 }
             ]
         },
@@ -8125,157 +8771,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/clients?page=0&per_page=100&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "total": 3,
-            "start": 0,
-            "limit": 100,
-            "clients": [
-                {
-                    "tenant": "auth0-deploy-cli-e2e",
-                    "global": false,
-                    "is_token_endpoint_ip_header_trusted": false,
-                    "name": "Deploy CLI",
-                    "is_first_party": true,
-                    "oidc_conformant": true,
-                    "sso_disabled": false,
-                    "cross_origin_auth": false,
-                    "refresh_token": {
-                        "expiration_type": "non-expiring",
-                        "leeway": 0,
-                        "infinite_token_lifetime": true,
-                        "infinite_idle_token_lifetime": true,
-                        "token_lifetime": 31557600,
-                        "idle_token_lifetime": 2592000,
-                        "rotation_type": "non-rotating"
-                    },
-                    "cross_origin_authentication": true,
-                    "allowed_clients": [],
-                    "callbacks": [],
-                    "native_social_login": {
-                        "apple": {
-                            "enabled": false
-                        },
-                        "facebook": {
-                            "enabled": false
-                        }
-                    },
-                    "signing_keys": [
-                        {
-                            "cert": "[REDACTED]",
-                            "pkcs7": "[REDACTED]",
-                            "subject": "deprecated"
-                        }
-                    ],
-                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
-                    "callback_url_template": false,
-                    "client_secret": "[REDACTED]",
-                    "jwt_configuration": {
-                        "alg": "RS256",
-                        "lifetime_in_seconds": 36000,
-                        "secret_encoded": false
-                    },
-                    "client_aliases": [],
-                    "token_endpoint_auth_method": "client_secret_post",
-                    "app_type": "non_interactive",
-                    "grant_types": [
-                        "client_credentials",
-                        "implicit",
-                        "authorization_code",
-                        "refresh_token"
-                    ],
-                    "custom_login_page_on": true
-                },
-                {
-                    "tenant": "auth0-deploy-cli-e2e",
-                    "global": false,
-                    "is_token_endpoint_ip_header_trusted": false,
-                    "name": "Default App",
-                    "callbacks": [],
-                    "is_first_party": true,
-                    "oidc_conformant": true,
-                    "refresh_token": {
-                        "expiration_type": "non-expiring",
-                        "leeway": 0,
-                        "infinite_token_lifetime": true,
-                        "infinite_idle_token_lifetime": true,
-                        "token_lifetime": 2592000,
-                        "idle_token_lifetime": 1296000,
-                        "rotation_type": "non-rotating"
-                    },
-                    "sso_disabled": false,
-                    "cross_origin_authentication": false,
-                    "cross_origin_auth": false,
-                    "signing_keys": [
-                        {
-                            "cert": "[REDACTED]",
-                            "pkcs7": "[REDACTED]",
-                            "subject": "deprecated"
-                        }
-                    ],
-                    "client_id": "Bb2FBm2ummYljt0MnMTAEDaiEJqmpDj0",
-                    "callback_url_template": false,
-                    "client_secret": "[REDACTED]",
-                    "jwt_configuration": {
-                        "alg": "RS256",
-                        "lifetime_in_seconds": 36000,
-                        "secret_encoded": false
-                    },
-                    "grant_types": [
-                        "authorization_code",
-                        "implicit",
-                        "refresh_token",
-                        "client_credentials"
-                    ],
-                    "custom_login_page_on": true
-                },
-                {
-                    "tenant": "auth0-deploy-cli-e2e",
-                    "global": true,
-                    "callbacks": [],
-                    "is_first_party": true,
-                    "name": "All Applications",
-                    "refresh_token": {
-                        "expiration_type": "non-expiring",
-                        "leeway": 0,
-                        "infinite_token_lifetime": true,
-                        "infinite_idle_token_lifetime": true,
-                        "token_lifetime": 2592000,
-                        "idle_token_lifetime": 1296000,
-                        "rotation_type": "non-rotating"
-                    },
-                    "owners": [
-                        "mr|samlp|okta|will.vedder@auth0.com",
-                        "mr|google-oauth2|102002633619863830825",
-                        "mr|samlp|okta|frederik.prijck@auth0.com",
-                        "mr|google-oauth2|109614534713742077035",
-                        "mr|google-oauth2|116771660953104383819",
-                        "mr|google-oauth2|112839029247827700155",
-                        "mr|samlp|okta|ewan.harris@auth0.com"
-                    ],
-                    "custom_login_page": "<html>TEST123</html>\n",
-                    "cross_origin_authentication": true,
-                    "signing_keys": [
-                        {
-                            "cert": "[REDACTED]",
-                            "pkcs7": "[REDACTED]",
-                            "subject": "deprecated"
-                        }
-                    ],
-                    "client_id": "Isi93ibGHIGwmdYjsLwTOn7Gu7nwxU3V",
-                    "client_secret": "[REDACTED]",
-                    "custom_login_page_on": true
-                }
-            ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/log-streams",
         "body": "",
         "status": 200,
@@ -8309,6 +8804,78 @@
             "start": 50,
             "total": 0,
             "connections": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/actions/triggers/custom-phone-provider/bindings",
+        "body": {
+            "bindings": [
+                {
+                    "ref": {
+                        "type": "action_name",
+                        "value": "Custom Phone Provider"
+                    },
+                    "display_name": "Custom Phone Provider"
+                }
+            ]
+        },
+        "status": 200,
+        "response": {
+            "bindings": [
+                {
+                    "id": "d544a75e-66b6-485a-ae75-13baddd4a66d",
+                    "trigger_id": "custom-phone-provider",
+                    "action": {
+                        "id": "36d94765-973b-4644-8141-98b83c38e7e5",
+                        "name": "Custom Phone Provider",
+                        "supported_triggers": [
+                            {
+                                "id": "custom-phone-provider",
+                                "version": "v1"
+                            }
+                        ],
+                        "created_at": "2025-12-21T15:45:46.276106345Z",
+                        "updated_at": "2025-12-21T15:57:35.979984352Z",
+                        "current_version": {
+                            "id": "199e883f-ecd7-463d-a957-26a17d4933fe",
+                            "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
+                            "runtime": "node22",
+                            "status": "BUILT",
+                            "number": 3,
+                            "build_time": "2025-12-21T15:57:36.745134991Z",
+                            "created_at": "2025-12-21T15:57:36.674288537Z",
+                            "updated_at": "2025-12-21T15:57:36.746281622Z"
+                        },
+                        "deployed_version": {
+                            "code": "/**\n* Handler to be executed while sending a phone notification\n* @param {Event} event - Details about the user and the context in which they are logging in.\n* @param {CustomPhoneProviderAPI} api - Methods and utilities to help change the behavior of sending a phone notification.\n*/\nexports.onExecuteCustomPhoneProvider = async (event, api) => {\n  // Code goes here\n  return;\n};",
+                            "dependencies": [],
+                            "id": "199e883f-ecd7-463d-a957-26a17d4933fe",
+                            "deployed": true,
+                            "number": 3,
+                            "built_at": "2025-12-21T15:57:36.745134991Z",
+                            "secrets": [],
+                            "status": "built",
+                            "created_at": "2025-12-21T15:57:36.674288537Z",
+                            "updated_at": "2025-12-21T15:57:36.746281622Z",
+                            "runtime": "node22",
+                            "supported_triggers": [
+                                {
+                                    "id": "custom-phone-provider",
+                                    "version": "v1"
+                                }
+                            ]
+                        },
+                        "all_changes_deployed": false
+                    },
+                    "created_at": "2025-12-21T15:57:56.139823279Z",
+                    "updated_at": "2025-12-21T15:57:56.139823279Z",
+                    "display_name": "Custom Phone Provider"
+                }
+            ]
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -8419,7 +8986,7 @@
                     "name": "Blank-form",
                     "flow_count": 0,
                     "created_at": "2024-11-26T11:58:18.187Z",
-                    "updated_at": "2025-12-19T11:46:13.054Z"
+                    "updated_at": "2025-12-21T14:52:11.304Z"
                 }
             ]
         },
@@ -8505,7 +9072,7 @@
                 }
             },
             "created_at": "2024-11-26T11:58:18.187Z",
-            "updated_at": "2025-12-19T11:46:13.054Z"
+            "updated_at": "2025-12-21T14:52:11.304Z"
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -8630,7 +9197,7 @@
                 }
             },
             "created_at": "2024-11-26T11:58:18.187Z",
-            "updated_at": "2025-12-21T14:28:27.049Z"
+            "updated_at": "2025-12-21T15:57:58.996Z"
         },
         "rawHeaders": [],
         "responseIsBinary": false

@@ -710,9 +710,9 @@ For more details, see the [Management API documentation](https://auth0.com/docs/
 
 ## Risk Assessments
 
-Risk assessments configuration allows you to enable or disable risk assessment features for your tenant. The configuration mirrors the Management API shape:
+Risk assessments configuration allows you to enable or disable risk assessment features for your tenant.
 
-- `settings.enabled`: toggles the feature on/off (required)
+- `settings.enabled`: toggles the feature true/flase (required)
 - `new_device.remember_for` (optional): days to remember devices
 
 ### YAML Example
