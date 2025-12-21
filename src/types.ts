@@ -18,7 +18,7 @@ import { NetworkACL } from './tools/auth0/handlers/networkACLs';
 import { UserAttributeProfile } from './tools/auth0/handlers/userAttributeProfiles';
 import { AttackProtection } from './tools/auth0/handlers/attackProtection';
 import { TokenExchangeProfile } from './tools/auth0/handlers/tokenExchangeProfiles';
-import { RiskAssessmentSettings } from './tools/auth0/handlers/riskAssessment';
+import { RiskAssessment } from './tools/auth0/handlers/riskAssessment';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -98,7 +98,7 @@ export type Asset = { [key: string]: any };
 export type Assets = Partial<{
   actions: Action[] | null;
   attackProtection: AttackProtection | null;
-  riskAssessment: RiskAssessmentSettings | null;
+  riskAssessment: RiskAssessment | null;
   branding:
     | (Asset & {
         templates?: { template: string; body: string }[] | null;

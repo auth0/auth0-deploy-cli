@@ -29,13 +29,13 @@ export const schema = {
   required: ['settings'],
 };
 
-export type RiskAssessmentSettings = {
+export type RiskAssessment = {
   settings: Management.GetRiskAssessmentsSettingsResponseContent;
   new_device?: Management.GetRiskAssessmentsSettingsNewDeviceResponseContent;
 };
 
 export default class RiskAssessmentHandler extends DefaultAPIHandler {
-  existing: RiskAssessmentSettings;
+  existing: RiskAssessment;
 
   constructor(config: DefaultAPIHandler) {
     super({
@@ -44,7 +44,7 @@ export default class RiskAssessmentHandler extends DefaultAPIHandler {
     });
   }
 
-  async getType(): Promise<RiskAssessmentSettings> {
+  async getType(): Promise<RiskAssessment> {
     if (this.existing) {
       return this.existing;
     }
@@ -60,7 +60,7 @@ export default class RiskAssessmentHandler extends DefaultAPIHandler {
         }),
       ]);
 
-      const riskAssessmentSettings: RiskAssessmentSettings = {
+      const riskAssessment: RiskAssessment = {
         settings: settings,
         new_device: newDeviceSettings,
         ...(newDeviceSettings.remember_for > 0 && {
@@ -68,14 +68,14 @@ export default class RiskAssessmentHandler extends DefaultAPIHandler {
         }),
       };
 
-      this.existing = riskAssessmentSettings;
+      this.existing = riskAssessment;
       return this.existing;
     } catch (err) {
       if (err instanceof ManagementError && err.statusCode === 404) {
-        const riskAssessmentSettings: RiskAssessmentSettings = {
+        const riskAssessment: RiskAssessment = {
           settings: { enabled: false },
         };
-        this.existing = riskAssessmentSettings;
+        this.existing = riskAssessment;
         return this.existing;
       }
       throw err;

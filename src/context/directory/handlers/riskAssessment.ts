@@ -5,9 +5,9 @@ import { dumpJSON, existsMustBeDir, isFile, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { ParsedAsset } from '../../../types';
-import { RiskAssessmentSettings } from '../../../tools/auth0/handlers/riskAssessment';
+import { RiskAssessment } from '../../../tools/auth0/handlers/riskAssessment';
 
-type ParsedRiskAssessment = ParsedAsset<'riskAssessment', RiskAssessmentSettings>;
+type ParsedRiskAssessment = ParsedAsset<'riskAssessment', RiskAssessment>;
 
 function parse(context: DirectoryContext): ParsedRiskAssessment {
   const riskAssessmentDirectory = path.join(context.filePath, constants.RISK_ASSESSMENT_DIRECTORY);
