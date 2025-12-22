@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for managing `riskAssessment` settings. [#1217]
+- Add directory provisioning support for `google-apps` connections. [#1246]
+
 ## [8.23.2] - 2025-12-18
 
 ### Fixed
