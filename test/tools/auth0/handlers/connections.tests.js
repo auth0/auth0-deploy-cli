@@ -155,6 +155,34 @@ describe('#connections handler', () => {
       expect(getEnabledClientsCalledOnce).to.equal(true);
     });
 
+    it('should include directory provisioning configuration for google-apps connections', async () => {
+      const auth0 = {
+        connections: {
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con1', strategy: 'google-apps', name: 'gsuite', options: {} },
+            ]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      sinon.stub(connections, 'getConnectionEnabledClients').resolves(undefined);
+      const dirProvConfig = { mapping: [{ auth0: 'email', idp: 'mail' }] };
+      sinon.stub(handler, 'getConnectionDirectoryProvisioning').resolves(dirProvConfig);
+      handler.scimHandler.applyScimConfiguration = sinon.stub().resolves();
+
+      const data = await handler.getType();
+
+      expect(handler.getConnectionDirectoryProvisioning.calledOnceWith('con1')).to.be.true;
+      expect(data[0])
+        .to.have.property('directory_provisioning_configuration')
+        .that.deep.equals(dirProvConfig);
+    });
+
     it('should update connection', async () => {
       const auth0 = {
         connections: {
@@ -314,6 +342,174 @@ describe('#connections handler', () => {
       ];
 
       await stageFn.apply(handler, [{ connections: data }]);
+    });
+
+    it('should process directory provisioning create and update operations', async () => {
+      const poolExecutor = {
+        addEachTask: ({ data, generator }) => ({
+          promise: async () => {
+            // run all tasks sequentially to preserve order
+            for (const item of data || []) {
+              await generator(item);
+            }
+          },
+        }),
+      };
+
+      const auth0 = {
+        connections: {
+          directoryProvisioning: {},
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool: poolExecutor,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.existing = [
+        {
+          id: 'con1',
+          name: 'gsuite-existing',
+          strategy: 'google-apps',
+          directory_provisioning_configuration: { mapping: [{ auth0: 'email', idp: 'mail' }] },
+        },
+      ];
+
+      const updateStub = sinon
+        .stub(handler, 'updateConnectionDirectoryProvisioning')
+        .resolves(undefined);
+      const createStub = sinon
+        .stub(handler, 'createConnectionDirectoryProvisioning')
+        .resolves(undefined);
+      const deleteStub = sinon
+        .stub(handler, 'deleteConnectionDirectoryProvisioning')
+        .resolves(undefined);
+
+      await handler.processConnectionDirectoryProvisioning({
+        create: [
+          {
+            id: 'con2',
+            name: 'gsuite-new',
+            strategy: 'google-apps',
+            directory_provisioning_configuration: {
+              mapping: [{ auth0: 'name', idp: 'displayName' }],
+            },
+          },
+        ],
+        update: [
+          {
+            id: 'con1',
+            name: 'gsuite-existing',
+            strategy: 'google-apps',
+            directory_provisioning_configuration: { mapping: [{ auth0: 'email', idp: 'mail' }] },
+          },
+        ],
+        conflicts: [],
+        del: [],
+      });
+
+      expect(updateStub.calledOnceWith('con1', sinon.match.object)).to.be.true;
+      expect(createStub.calledOnceWith('con2', sinon.match.object)).to.be.true;
+      expect(deleteStub.called).to.be.false;
+    });
+
+    describe('directory provisioning helpers', () => {
+      const sampleMapping = [
+        { idp: 'id', auth0: 'external_id' },
+        { idp: 'primaryEmail', auth0: 'email' },
+        { idp: 'name.givenName', auth0: 'given_name' },
+        { idp: 'name.familyName', auth0: 'family_name' },
+      ];
+
+      it('should create directory provisioning configuration (POST)', async () => {
+        const createStub = sinon.stub().resolves();
+        const auth0 = {
+          connections: {
+            directoryProvisioning: {
+              create: createStub,
+            },
+          },
+          pool,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        await handler.createConnectionDirectoryProvisioning('con-post', {
+          mapping: sampleMapping,
+        });
+
+        expect(createStub.calledOnceWith('con-post', sinon.match.has('mapping', sampleMapping))).to
+          .be.true;
+      });
+
+      it('should retrieve directory provisioning configuration (GET)', async () => {
+        const dirProvConfig = { mapping: sampleMapping, synchronize_automatically: true };
+        const getStub = sinon.stub().resolves(dirProvConfig);
+        const poolExecutor = {
+          addEachTask: ({ data, generator }) => ({
+            promise: async () => {
+              for (const item of data || []) {
+                await generator(item);
+              }
+            },
+          }),
+        };
+
+        const auth0 = {
+          connections: {
+            directoryProvisioning: {
+              get: getStub,
+            },
+          },
+          pool: poolExecutor,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        const result = await handler.getConnectionDirectoryProvisioning('con-get');
+
+        expect(getStub.calledOnceWith('con-get')).to.be.true;
+        expect(result).to.deep.equal(dirProvConfig);
+      });
+
+      it('should update directory provisioning configuration (PATCH)', async () => {
+        const updateStub = sinon.stub().resolves();
+        const auth0 = {
+          connections: {
+            directoryProvisioning: {
+              update: updateStub,
+            },
+          },
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        await handler.updateConnectionDirectoryProvisioning('con-patch', {
+          mapping: sampleMapping,
+          synchronize_automatically: false,
+        });
+
+        expect(
+          updateStub.calledOnceWith('con-patch', {
+            mapping: sampleMapping,
+            synchronize_automatically: false,
+          })
+        ).to.be.true;
+      });
+
+      it('should delete directory provisioning configuration (DELETE)', async () => {
+        const deleteStub = sinon.stub().resolves();
+        const auth0 = {
+          connections: {
+            directoryProvisioning: {
+              delete: deleteStub,
+            },
+          },
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        await handler.deleteConnectionDirectoryProvisioning('con-del');
+
+        expect(deleteStub.calledOnceWith('con-del')).to.be.true;
+      });
     });
 
     it('should keep client ID in idpinitiated.client_id', async () => {
