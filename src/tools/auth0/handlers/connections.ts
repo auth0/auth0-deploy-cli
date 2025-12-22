@@ -1,6 +1,6 @@
 import dotProp from 'dot-prop';
 import { chunk, keyBy } from 'lodash';
-import { Management } from 'auth0';
+import { Management, ManagementError } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import { filterExcluded, convertClientNameToId, getEnabledClients, sleep } from '../../utils';
 import { CalculatedChanges, Asset, Assets, Auth0APIClient } from '../../../types';
@@ -52,12 +52,36 @@ export const schema = {
         required: ['active'],
         additionalProperties: false,
       },
+      directory_provisioning_configuration: {
+        type: 'object',
+        properties: {
+          mapping: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                auth0: { type: 'string', description: 'The field location in the Auth0 schema' },
+                idp: { type: 'string', description: 'The field location in the IDP schema' },
+              },
+            },
+          },
+          synchronize_automatically: {
+            type: 'boolean',
+            description: 'The field whether periodic automatic synchronization is enabled',
+          },
+        },
+      },
     },
     required: ['name', 'strategy'],
   },
 };
 
-export type Connection = Management.ConnectionForList;
+type DirectoryProvisioningConfig = Management.GetDirectoryProvisioningResponseContent;
+
+export type Connection = Management.ConnectionForList & {
+  enabled_clients?: string[];
+  directory_provisioning_configuration?: DirectoryProvisioningConfig;
+};
 
 // addExcludedConnectionPropertiesToChanges superimposes excluded properties on the `options` object. The Auth0 API
 // will overwrite the options property when updating connections, so it is necessary to add excluded properties back in to prevent those excluded properties from being deleted.
@@ -305,6 +329,213 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     }
   }
 
+  /**
+   * Retrieves directory provisioning configuration for a specific Auth0 connection.
+   * @param connectionId - The unique identifier of the connection
+   * @returns A promise that resolves to the configuration object, or null if not configured/supported
+   */
+  async getConnectionDirectoryProvisioning(
+    connectionId: string
+  ): Promise<DirectoryProvisioningConfig | null> {
+    if (!connectionId) return null;
+
+    const creates = [connectionId];
+    let config: DirectoryProvisioningConfig | null = null;
+
+    try {
+      await this.client.pool
+        .addEachTask({
+          data: creates || [],
+          generator: async (id: string) =>
+            this.client.connections.directoryProvisioning
+              .get(id)
+              .then((resp) => {
+                config = resp;
+              })
+              .catch((err) => {
+                throw new ManagementError(err);
+              }),
+        })
+        .promise();
+
+      const stripKeysFromOutput = [
+        'connection_id',
+        'connection_name',
+        'strategy',
+        'created_at',
+        'updated_at',
+      ];
+
+      stripKeysFromOutput.forEach((key) => {
+        if (config && key in config) {
+          delete (config as Partial<DirectoryProvisioningConfig>)[key];
+        }
+      });
+
+      return config;
+    } catch (error) {
+      const errLog = `Unable to fetch directory provisioning for connection '${connectionId}'. `;
+      if (error instanceof ManagementError) {
+        const bodyMessage = (error.body as any)?.message;
+        log.warn(errLog + bodyMessage);
+      } else {
+        log.error(errLog, error?.message);
+      }
+      return null;
+    }
+  }
+
+  /**
+   * Creates directory provisioning configuration for a connection.
+   */
+  private async createConnectionDirectoryProvisioning(
+    connectionId: string,
+    payload: Management.CreateDirectoryProvisioningRequestContent
+  ): Promise<void> {
+    if (!connectionId) {
+      throw new Error('Connection ID is required to create directory provisioning configuration.');
+    }
+    const createPayload: Management.CreateDirectoryProvisioningRequestContent = {
+      mapping: payload.mapping,
+      synchronize_automatically: payload.synchronize_automatically,
+    };
+    await this.client.connections.directoryProvisioning.create(connectionId, createPayload);
+    log.debug(`Created directory provisioning for connection '${connectionId}'`);
+  }
+
+  /**
+   * Updates directory provisioning configuration for a connection.
+   */
+  private async updateConnectionDirectoryProvisioning(
+    connectionId: string,
+    payload: Management.UpdateDirectoryProvisioningRequestContent
+  ): Promise<void> {
+    if (!connectionId) {
+      throw new Error('Connection ID is required to update directory provisioning configuration.');
+    }
+
+    const updatePayload: Management.UpdateDirectoryProvisioningRequestContent = {
+      mapping: payload.mapping,
+      synchronize_automatically: payload.synchronize_automatically,
+    };
+
+    await this.client.connections.directoryProvisioning.update(connectionId, updatePayload);
+    log.debug(`Updated directory provisioning for connection '${connectionId}'`);
+  }
+
+  /**
+   * Deletes directory provisioning configuration for a connection.
+   */
+  private async deleteConnectionDirectoryProvisioning(connectionId: string): Promise<void> {
+    if (!connectionId) {
+      throw new Error('Connection ID is required to delete directory provisioning configuration.');
+    }
+    await this.client.connections.directoryProvisioning.delete(connectionId);
+    log.debug(`Deleted directory provisioning for connection '${connectionId}'`);
+  }
+
+  /**
+   * This function processes directory provisioning for create, update, and conflict operations.
+   * Directory provisioning is only supported for google-apps strategy connections.
+   *
+   * @param changes - Object containing arrays of connections to create, update, and resolve conflicts for
+   */
+  async processConnectionDirectoryProvisioning(changes: CalculatedChanges): Promise<void> {
+    const { create, update, conflicts } = changes;
+
+    // Build a map of existing connections by ID for quick lookup
+    const existingConnectionsMap = keyBy(this.existing || [], 'id');
+
+    // Filter to only google-apps connections
+    const googleAppsWithDirProvFilter = (conn: Asset) => conn.strategy === 'google-apps';
+
+    const connectionsToProcess = [
+      ...update.filter(googleAppsWithDirProvFilter),
+      ...create.filter(googleAppsWithDirProvFilter),
+      ...conflicts.filter(googleAppsWithDirProvFilter),
+    ];
+
+    if (connectionsToProcess.length === 0) {
+      return;
+    }
+
+    const directoryConnectionsToUpdate: Connection[] = [];
+    const directoryConnectionsToCreate: Connection[] = [];
+    const directoryConnectionsToDelete: Connection[] = [];
+
+    for (const conn of connectionsToProcess) {
+      if (!conn.id) continue;
+
+      const existingConn = existingConnectionsMap[conn.id];
+      const existingConfig = existingConn?.directory_provisioning_configuration;
+      const proposedConfig = conn.directory_provisioning_configuration;
+
+      if (existingConfig && proposedConfig) {
+        directoryConnectionsToUpdate.push(conn);
+      } else if (!existingConfig && proposedConfig) {
+        directoryConnectionsToCreate.push(conn);
+      } else if (existingConfig && !proposedConfig) {
+        directoryConnectionsToDelete.push(conn);
+      }
+    }
+
+    // Process updates first
+    await this.client.pool
+      .addEachTask({
+        data: directoryConnectionsToUpdate || [],
+        generator: (conn) =>
+          this.updateConnectionDirectoryProvisioning(
+            conn.id!,
+            conn.directory_provisioning_configuration!
+          ).catch((err) => {
+            throw new Error(
+              `Failed to update directory provisioning for connection '${conn.id}':\n${err}`
+            );
+          }),
+      })
+      .promise();
+
+    // Process creates
+    await this.client.pool
+      .addEachTask({
+        data: directoryConnectionsToCreate || [],
+        generator: (conn) =>
+          this.createConnectionDirectoryProvisioning(
+            conn.id!,
+            conn.directory_provisioning_configuration!
+          ).catch((err) => {
+            throw new Error(
+              `Failed to create directory provisioning for connection '${conn.id}':\n${err}`
+            );
+          }),
+      })
+      .promise();
+
+    // Process deletes
+    if (
+      this.config('AUTH0_ALLOW_DELETE') === 'true' ||
+      this.config('AUTH0_ALLOW_DELETE') === true
+    ) {
+      await this.client.pool
+        .addEachTask({
+          data: directoryConnectionsToDelete || [],
+          generator: (conn) =>
+            this.deleteConnectionDirectoryProvisioning(conn.id!).catch((err) => {
+              throw new Error(
+                `Failed to delete directory provisioning for connection '${conn.id}':\n${err}`
+              );
+            }),
+        })
+        .promise();
+    } else if (directoryConnectionsToDelete.length) {
+      log.warn(
+        `Detected directory provisioning configs to delete. Deletes are disabled (set 'AUTH0_ALLOW_DELETE' to true to allow).\n${directoryConnectionsToDelete
+          .map((i) => this.objString(i))
+          .join('\n')}`
+      );
+    }
+  }
+
   async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
 
@@ -332,10 +563,22 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       filteredConnections.map(async (con) => {
         if (!con?.id) return con;
         const enabledClients = await getConnectionEnabledClients(this.client, con.id);
+
+        // Cast to Asset to allow adding properties
+        let connection: Connection = { ...con };
+
         if (enabledClients && enabledClients?.length) {
-          return { ...con, enabled_clients: enabledClients };
+          connection.enabled_clients = enabledClients;
         }
-        return con;
+
+        if (connection.strategy === 'google-apps') {
+          const dirProvConfig = await this.getConnectionDirectoryProvisioning(con.id);
+          if (dirProvConfig) {
+            connection.directory_provisioning_configuration = dirProvConfig;
+          }
+        }
+
+        return connection;
       })
     );
 
@@ -423,5 +666,8 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       this.type,
       filterExcluded(changes, excludedConnections)
     );
+
+    // process directory provisioning
+    await this.processConnectionDirectoryProvisioning(filterExcluded(changes, excludedConnections));
   }
 }
