@@ -107,6 +107,7 @@ const constants = {
   CONNECTIONS_ID_NAME: 'id',
   ROLES_DIRECTORY: 'roles',
   ATTACK_PROTECTION_DIRECTORY: 'attack-protection',
+  RISK_ASSESSMENT_DIRECTORY: 'risk-assessment',
   GUARDIAN_FACTORS: [
     'sms',
     'push-notification',
