@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.24.0] - 2025-12-22
+
 ### Added
 
 - Add support for managing `riskAssessment` settings. [#1217]
@@ -1580,6 +1582,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1211]: https://github.com/auth0/auth0-deploy-cli/issues/1211
 [#1212]: https://github.com/auth0/auth0-deploy-cli/issues/1212
 [#1214]: https://github.com/auth0/auth0-deploy-cli/issues/1214
+[#1217]: https://github.com/auth0/auth0-deploy-cli/issues/1217
 [#1221]: https://github.com/auth0/auth0-deploy-cli/issues/1221
 [#1223]: https://github.com/auth0/auth0-deploy-cli/issues/1223
 [#1224]: https://github.com/auth0/auth0-deploy-cli/issues/1224
@@ -1589,7 +1592,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1239]: https://github.com/auth0/auth0-deploy-cli/issues/1239
 [#1240]: https://github.com/auth0/auth0-deploy-cli/issues/1240
 [#1244]: https://github.com/auth0/auth0-deploy-cli/issues/1244
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.2...HEAD
+[#1246]: https://github.com/auth0/auth0-deploy-cli/issues/1246
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.24.0...HEAD
+[8.24.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.2...v8.24.0
 [8.23.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.1...v8.23.2
 [8.23.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.0...v8.23.1
 [8.23.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.22.0...v8.23.0
