@@ -232,6 +232,14 @@ export function mockMgmtClient() {
     tokenExchangeProfiles: {
       list: (params) => mockPagedData(params, 'tokenExchangeProfiles', []),
     },
+    riskAssessments: {
+      settings: {
+        get: () => Promise.resolve({ enabled: false }),
+        newDevice: {
+          get: () => Promise.resolve({ remember_for: 30 }),
+        },
+      },
+    },
   };
 }
 

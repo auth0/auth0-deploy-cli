@@ -18,6 +18,7 @@ import organizations from './organizations';
 import actions from './actions';
 import triggers from './triggers';
 import attackProtection from './attackProtection';
+import riskAssessment from './riskAssessment';
 import branding from './branding';
 import phoneProviders from './phoneProvider';
 import phoneTemplates from './phoneTemplates';
@@ -69,6 +70,7 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   organizations,
   triggers,
   attackProtection,
+  riskAssessment,
   branding,
   phoneProviders,
   phoneTemplates,

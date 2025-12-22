@@ -24,6 +24,7 @@ clients:
     client_aliases: []
     client_metadata: {}
     cross_origin_auth: false
+    cross_origin_authentication: false
     custom_login_page_on: true
     grant_types:
       - client_credentials
@@ -58,6 +59,7 @@ clients:
     client_aliases: []
     client_metadata: {}
     cross_origin_auth: false
+    cross_origin_authentication: false
     custom_login_page_on: true
     grant_types:
       - authorization_code
@@ -92,6 +94,7 @@ clients:
     client_metadata:
       foo: bar
     cross_origin_auth: false
+    cross_origin_authentication: false
     custom_login_page_on: true
     grant_types:
       - client_credentials
@@ -115,6 +118,7 @@ clients:
   - name: Terraform Provider
     app_type: non_interactive
     cross_origin_auth: false
+    cross_origin_authentication: false
     custom_login_page_on: true
     grant_types:
       - client_credentials
@@ -141,6 +145,7 @@ clients:
     client_aliases: []
     client_metadata: {}
     cross_origin_auth: false
+    cross_origin_authentication: false
     custom_login_page_on: true
     grant_types:
       - authorization_code
@@ -180,6 +185,7 @@ clients:
     client_aliases: []
     client_metadata: {}
     cross_origin_auth: false
+    cross_origin_authentication: false
     custom_login_page_on: true
     grant_types:
       - authorization_code
@@ -216,6 +222,7 @@ clients:
     client_aliases: []
     client_metadata: {}
     cross_origin_auth: false
+    cross_origin_authentication: false
     custom_login_page_on: true
     grant_types:
       - client_credentials
