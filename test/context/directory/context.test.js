@@ -15,7 +15,7 @@ describe('#directory context validation', () => {
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
     await context.loadAssetsFromLocal();
 
-    expect(Object.keys(context.assets).length).to.equal(Object.keys(handlers).length + 1);
+    expect(Object.keys(context.assets).length).to.equal(Object.keys(handlers).length + 2);
     Object.keys(context.assets).forEach((key) => {
       if (key === 'exclude') {
         expect(context.assets[key]).to.deep.equal({
@@ -25,6 +25,10 @@ describe('#directory context validation', () => {
           connections: [],
           resourceServers: [],
           defaults: [],
+        });
+      } else if (key === 'include') {
+        expect(context.assets[key]).to.deep.equal({
+          connections: [],
         });
       } else {
         expect(context.assets[key]).to.equal(null);
@@ -55,6 +59,20 @@ describe('#directory context validation', () => {
     expect(context.assets.exclude.connections).to.deep.equal(['conn']);
     expect(context.assets.exclude.resourceServers).to.deep.equal(['api']);
     expect(context.assets.exclude.defaults).to.deep.equal(['emailProvider']);
+  });
+
+  it('should load includes', async () => {
+    const dir = path.resolve(testDataDir, 'directory', 'empty');
+    cleanThenMkdir(dir);
+
+    const config = {
+      AUTH0_INPUT_FILE: dir,
+      AUTH0_INCLUDED_CONNECTIONS: ['github', 'google-oauth2'],
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.include.connections).to.deep.equal(['github', 'google-oauth2']);
   });
 
   it('should respect resource exclusion on import', async () => {

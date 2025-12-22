@@ -24,6 +24,7 @@ const nonPrimitiveProps: (keyof Config)[] = [
   'AUTH0_INCLUDED_ONLY',
   'EXCLUDED_PROPS',
   'INCLUDED_PROPS',
+  'AUTH0_INCLUDED_CONNECTIONS',
 ];
 
 const EA_FEATURES = [];
@@ -130,6 +131,21 @@ export const setupContext = async (
         `Usage of the ${usedDeprecatedParams.join(', ')} exclusion ${
           usedDeprecatedParams.length > 1 ? 'params are' : 'param is'
         } deprecated and may be removed from future major versions. See: https://github.com/auth0/auth0-deploy-cli/issues/451#user-content-deprecated-exclusion-props for details.`
+      );
+    }
+  })(config);
+
+  ((config: Config) => {
+    const hasIncludedConnections =
+      config.AUTH0_INCLUDED_CONNECTIONS !== undefined &&
+      config.AUTH0_INCLUDED_CONNECTIONS.length > 0;
+    const hasExcludedConnections =
+      config.AUTH0_EXCLUDED_CONNECTIONS !== undefined &&
+      config.AUTH0_EXCLUDED_CONNECTIONS.length > 0;
+
+    if (hasIncludedConnections && hasExcludedConnections) {
+      throw new Error(
+        'Both AUTH0_INCLUDED_CONNECTIONS and AUTH0_EXCLUDED_CONNECTIONS configuration values are defined, only one can be configured at a time.'
       );
     }
   })(config);

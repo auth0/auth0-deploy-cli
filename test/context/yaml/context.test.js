@@ -67,6 +67,23 @@ describe('#YAML context validation', () => {
     expect(context.assets.exclude.defaults).to.deep.equal(['emailProvider']);
   });
 
+  it('should load includes', async () => {
+    const dir = path.resolve(testDataDir, 'yaml', 'empty');
+    cleanThenMkdir(dir);
+    const yaml = path.join(dir, 'empty.yaml');
+    fs.writeFileSync(yaml, '');
+
+    const config = {
+      AUTH0_INPUT_FILE: yaml,
+      AUTH0_INCLUDED_CONNECTIONS: ['github', 'google-oauth2'],
+    };
+
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.include.connections).to.deep.equal(['github', 'google-oauth2']);
+  });
+
   it('should respect resource exclusion on import', async () => {
     /* Create empty directory */
     const dir = path.resolve(testDataDir, 'yaml', 'resource-exclusion');
