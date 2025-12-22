@@ -289,6 +289,14 @@ describe('#YAML context validation', () => {
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
       resourceServers: [],
+      riskAssessment: {
+        settings: {
+          enabled: false,
+        },
+        new_device: {
+          remember_for: 30,
+        },
+      },
       rules: [],
       hooks: [],
       actions: [],
@@ -421,6 +429,14 @@ describe('#YAML context validation', () => {
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
       resourceServers: [],
+      riskAssessment: {
+        settings: {
+          enabled: false,
+        },
+        new_device: {
+          remember_for: 30,
+        },
+      },
       rules: [],
       hooks: [],
       actions: [],
@@ -554,6 +570,14 @@ describe('#YAML context validation', () => {
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
       guardianPolicies: { policies: [] },
       resourceServers: [],
+      riskAssessment: {
+        settings: {
+          enabled: false,
+        },
+        new_device: {
+          remember_for: 30,
+        },
+      },
       rules: [],
       hooks: [],
       actions: [],

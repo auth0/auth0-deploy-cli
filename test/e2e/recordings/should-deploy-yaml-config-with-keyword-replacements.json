@@ -11,6 +11,9 @@
         },
         "status": 200,
         "response": {
+            "allowed_logout_urls": [
+                "https://mycompany.org/logoutCallback"
+            ],
             "change_password": {
                 "enabled": true,
                 "html": "<html>Change Password</html>\n"
@@ -28,35 +31,44 @@
                 "allow_legacy_delegation_grant_types": true,
                 "allow_legacy_ro_grant_types": true,
                 "cannot_change_enforce_client_authentication_on_passwordless_start": true,
+                "change_pwd_flow_v1": false,
                 "disable_impersonation": true,
-                "enable_dynamic_client_registration": true,
+                "enable_apis_section": false,
+                "enable_client_connections": false,
+                "enable_custom_domain_in_emails": false,
+                "enable_dynamic_client_registration": false,
+                "enable_legacy_logs_search_v2": false,
+                "enable_public_signup_user_exists_error": true,
                 "enable_sso": true,
                 "enforce_client_authentication_on_passwordless_start": true,
                 "new_universal_login_experience_enabled": true,
                 "universal_login": true,
+                "use_scope_descriptions_for_consent": false,
                 "revoke_refresh_token_grant": false,
-                "dashboard_new_onboarding": false,
-                "mfa_show_factor_list_on_enrollment": false,
-                "disable_clickjack_protection_headers": false
+                "disable_clickjack_protection_headers": false,
+                "enable_pipeline2": false
             },
             "friendly_name": "Tenant friendly name",
             "guardian_mfa_page": {
                 "enabled": true,
                 "html": "<html>MFA</html>\n"
             },
-            "picture_url": "https://cdn.auth0.com/manhattan/versions/1.3935.0/assets/badge.png",
-            "sandbox_version": "18",
-            "oidc_logout": {
-                "rp_logout_end_session_endpoint_discovery": true
-            },
+            "idle_session_lifetime": 1,
+            "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
+            "sandbox_version": "12",
+            "session_lifetime": 3.0166666666666666,
+            "support_email": "support@mycompany.org",
+            "support_url": "https://mycompany.org/support",
             "universal_login": {
                 "colors": {
-                    "page_background": "#000000",
-                    "primary": "#5ce4ff"
+                    "primary": "#F8F8F2",
+                    "page_background": "#222221"
                 },
-                "is_custom_theme_set": true,
-                "is_custom_template_set": true,
                 "identifier_first": true
+            },
+            "resource_parameter_profile": "audience",
+            "session_cookie": {
+                "mode": "non-persistent"
             }
         },
         "rawHeaders": [],
@@ -75,6 +87,9 @@
         },
         "status": 200,
         "response": {
+            "allowed_logout_urls": [
+                "https://mycompany.org/logoutCallback"
+            ],
             "change_password": {
                 "enabled": true,
                 "html": "<html>Change Password</html>\n"
@@ -93,35 +108,44 @@
                 "allow_legacy_delegation_grant_types": true,
                 "allow_legacy_ro_grant_types": true,
                 "cannot_change_enforce_client_authentication_on_passwordless_start": true,
+                "change_pwd_flow_v1": false,
                 "disable_impersonation": true,
-                "enable_dynamic_client_registration": true,
+                "enable_apis_section": false,
+                "enable_client_connections": false,
+                "enable_custom_domain_in_emails": false,
+                "enable_dynamic_client_registration": false,
+                "enable_legacy_logs_search_v2": false,
+                "enable_public_signup_user_exists_error": true,
                 "enable_sso": true,
                 "enforce_client_authentication_on_passwordless_start": true,
                 "new_universal_login_experience_enabled": true,
                 "universal_login": true,
+                "use_scope_descriptions_for_consent": false,
                 "revoke_refresh_token_grant": false,
-                "dashboard_new_onboarding": false,
-                "mfa_show_factor_list_on_enrollment": false,
-                "disable_clickjack_protection_headers": false
+                "disable_clickjack_protection_headers": false,
+                "enable_pipeline2": false
             },
             "friendly_name": "This is the Travel0 Tenant",
             "guardian_mfa_page": {
                 "enabled": true,
                 "html": "<html>MFA</html>\n"
             },
-            "picture_url": "https://cdn.auth0.com/manhattan/versions/1.3935.0/assets/badge.png",
-            "sandbox_version": "18",
-            "oidc_logout": {
-                "rp_logout_end_session_endpoint_discovery": true
-            },
+            "idle_session_lifetime": 1,
+            "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
+            "sandbox_version": "12",
+            "session_lifetime": 3.0166666666666666,
+            "support_email": "support@mycompany.org",
+            "support_url": "https://mycompany.org/support",
             "universal_login": {
                 "colors": {
-                    "page_background": "#000000",
-                    "primary": "#5ce4ff"
+                    "primary": "#F8F8F2",
+                    "page_background": "#222221"
                 },
-                "is_custom_theme_set": true,
-                "is_custom_template_set": true,
                 "identifier_first": true
+            },
+            "resource_parameter_profile": "audience",
+            "session_cookie": {
+                "mode": "non-persistent"
             }
         },
         "rawHeaders": [],
@@ -134,6 +158,9 @@
         "body": "",
         "status": 200,
         "response": {
+            "allowed_logout_urls": [
+                "https://mycompany.org/logoutCallback"
+            ],
             "change_password": {
                 "enabled": true,
                 "html": "<html>Change Password</html>\n"
@@ -151,35 +178,47 @@
                 "allow_changing_enable_sso": false,
                 "allow_legacy_delegation_grant_types": true,
                 "allow_legacy_ro_grant_types": true,
+                "change_pwd_flow_v1": false,
                 "disable_impersonation": true,
-                "enable_dynamic_client_registration": true,
+                "enable_apis_section": false,
+                "enable_client_connections": false,
+                "enable_custom_domain_in_emails": false,
+                "enable_dynamic_client_registration": false,
+                "enable_legacy_logs_search_v2": false,
+                "enable_public_signup_user_exists_error": true,
                 "enable_sso": true,
                 "new_universal_login_experience_enabled": true,
                 "universal_login": true,
+                "use_scope_descriptions_for_consent": false,
                 "revoke_refresh_token_grant": false,
-                "dashboard_new_onboarding": false,
-                "mfa_show_factor_list_on_enrollment": false,
-                "disable_clickjack_protection_headers": false
+                "disable_clickjack_protection_headers": false,
+                "enable_pipeline2": false
             },
             "friendly_name": "This is the Travel0 Tenant",
             "guardian_mfa_page": {
                 "enabled": true,
                 "html": "<html>MFA</html>\n"
             },
-            "picture_url": "https://cdn.auth0.com/manhattan/versions/1.3935.0/assets/badge.png",
-            "sandbox_version": "18",
-            "oidc_logout": {
-                "rp_logout_end_session_endpoint_discovery": true
-            },
+            "idle_session_lifetime": 1,
+            "picture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Grandmas_marathon_finishers.png",
+            "sandbox_version": "12",
+            "session_lifetime": 3.0166666666666666,
+            "support_email": "support@mycompany.org",
+            "support_url": "https://mycompany.org/support",
             "universal_login": {
                 "colors": {
-                    "page_background": "#000000",
-                    "primary": "#5ce4ff"
+                    "primary": "#F8F8F2",
+                    "page_background": "#222221"
                 }
             },
+            "resource_parameter_profile": "audience",
+            "session_cookie": {
+                "mode": "non-persistent"
+            },
             "sandbox_versions_available": [
+                "22",
                 "18",
-                "16"
+                "12"
             ]
         },
         "rawHeaders": [],

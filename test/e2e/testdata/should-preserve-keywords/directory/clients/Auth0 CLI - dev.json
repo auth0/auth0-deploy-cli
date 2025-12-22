@@ -5,6 +5,7 @@
     "callbacks": [],
     "client_aliases": [],
     "cross_origin_auth": false,
+    "cross_origin_authentication": false,
     "custom_login_page_on": true,
     "grant_types": ["client_credentials"],
     "is_first_party": true,
