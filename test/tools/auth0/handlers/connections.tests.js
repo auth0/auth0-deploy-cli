@@ -1344,9 +1344,9 @@ describe('#AUTH0_INCLUDED_CONNECTIONS functionality', () => {
       // enterprise-saml from assets should be filtered out and not appear in create/update
       expect(createAndUpdate.find((c) => c.name === 'enterprise-saml')).to.be.undefined;
 
-      // enterprise-saml exists in tenant but since all existing connections are compared
-      // against filtered assets, it will be marked for deletion
-      expect(changes.del.find((c) => c.name === 'enterprise-saml')).to.exist;
+      // enterprise-saml exists in tenant, but it is NOT in the include list.
+      // Therefore, it should NOT be marked for deletion.
+      expect(changes.del.find((c) => c.name === 'enterprise-saml')).to.be.undefined;
     });
 
     it('should process all connections when assets.include.connections is not configured', async () => {
@@ -1417,7 +1417,6 @@ describe('#AUTH0_INCLUDED_CONNECTIONS functionality', () => {
 
       const changes = await handler.calcChanges(assets);
 
-      // Should log that it's managing 1 connection and ignoring 2
       // Only github from assets should be processed
       const createAndUpdate = [...changes.create, ...changes.update];
       expect(createAndUpdate.every((c) => c.name === 'github')).to.be.true;
@@ -1555,11 +1554,11 @@ describe('#AUTH0_INCLUDED_CONNECTIONS functionality', () => {
       expect(updateCall.args[0]).to.deep.include({ id: 'con_1' });
       expect(updateCall.args[1]).to.deep.include({ options: { updated: true } });
 
-      // google-oauth2 from assets is filtered out and not processed
-      // Note: google-oauth2 from tenant will be marked for deletion (see other test)
+      // google-oauth2 is not in the include list, so it should not be deleted
+      expect(deleteStub.called).to.be.false;
     });
 
-    it('should delete all existing connections when assets is empty (current implementation)', async () => {
+    it('should only delete managed connections when assets is empty', async () => {
       config.data.AUTH0_ALLOW_DELETE = true;
 
       const deleteStub = sinon.stub().resolves({ data: {} });
@@ -1598,18 +1597,13 @@ describe('#AUTH0_INCLUDED_CONNECTIONS functionality', () => {
 
       await handler.processChanges(assets);
 
-      // Current behavior: Both connections get deleted because:
-      // 1. Filtered connections = [] (empty after filtering)
-      // 2. calcChanges compares empty array against ALL existing connections
-      // 3. All existing connections are marked for deletion
-      // Note: Ideally, only 'github' (in the managed list) should be considered for deletion,
-      // and 'google-oauth2' should be left alone since it's not managed
-      expect(deleteStub.calledTwice).to.be.true;
-      expect(deleteStub.firstCall.args[0]).to.equal('con_1'); // github (managed)
-      expect(deleteStub.secondCall.args[0]).to.equal('con_2'); // google-oauth2 (not managed, but still deleted)
+      // Only github should be deleted because it is in the include list but missing from assets.
+      // google-oauth2 is NOT in the include list, so it should be preserved.
+      expect(deleteStub.calledOnce).to.be.true;
+      expect(deleteStub.firstCall.args[0]).to.equal('con_1'); // github
     });
 
-    it('should update managed connection and delete unmanaged ones (current implementation)', async () => {
+    it('should update managed connection and ignore unmanaged ones', async () => {
       config.data.AUTH0_ALLOW_DELETE = true;
 
       const deleteStub = sinon.stub().resolves({ data: {} });
@@ -1651,14 +1645,12 @@ describe('#AUTH0_INCLUDED_CONNECTIONS functionality', () => {
 
       await handler.processChanges(assets);
 
-      // Current behavior:
-      // - github exists in both assets and tenant, so it's updated (matched and removed from del list)
-      // - google-oauth2 exists in tenant but not in filtered assets, so it's marked for deletion
-      // Note: Ideally, google-oauth2 should be ignored since it's not in the managed list
-      expect(deleteStub.calledOnce).to.be.true;
-      expect(deleteStub.firstCall.args[0]).to.equal('con_2'); // google-oauth2 gets deleted
+      // github exists in both assets and tenant, so it's updated
+      // google-oauth2 exists in tenant but not in filtered assets.
+      // HOWEVER, google-oauth2 is NOT in the include list, so it should NOT be deleted.
+      expect(deleteStub.called).to.be.false;
 
-      // Github should be updated, not deleted
+      // Github should be updated
       expect(scimHandlerMock.updateOverride.called).to.be.true;
     });
   });

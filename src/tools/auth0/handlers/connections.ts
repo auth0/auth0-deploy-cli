@@ -603,10 +603,6 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       };
 
     const includedConnections = (assets.include && assets.include.connections) || [];
-    const filteredConnections =
-      includedConnections.length > 0
-        ? connections.filter((conn) => includedConnections.includes(conn.name))
-        : connections;
 
     // Convert enabled_clients by name to the id
     const clients = await paginate<Client>(this.client.clients.list, {
@@ -619,6 +615,11 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       include_totals: true,
     });
 
+    const filteredConnections =
+      includedConnections.length > 0
+        ? connections.filter((conn) => includedConnections.includes(conn.name))
+        : connections;
+
     // Prepare an id map. We'll use this map later to get the `strategy` and SCIM enable status of the connections.
     await this.scimHandler.createIdMap(existingConnections);
 
@@ -627,7 +628,17 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       ...this.getFormattedOptions(connection, clients),
       enabled_clients: getEnabledClients(assets, connection, existingConnections, clients),
     }));
+
     const proposedChanges = await super.calcChanges({ ...assets, connections: formatted });
+
+    if (includedConnections.length > 0) {
+      proposedChanges.del = proposedChanges.del.filter((connection) =>
+        includedConnections.includes(connection.name)
+      );
+      proposedChanges.update = proposedChanges.update.filter((connection) =>
+        includedConnections.includes(connection.name)
+      );
+    }
 
     const proposedChangesWithExcludedProperties = addExcludedConnectionPropertiesToChanges({
       proposedChanges,
