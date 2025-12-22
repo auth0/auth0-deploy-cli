@@ -8,13 +8,14 @@
     "domain": "example.com",
     "tenant_domain": "example.com",
     "client_id": "some_client_id",
-    "client_secret": "some_client_secret"
+    "client_secret": "some_client_secret",
+    "api_enable_users": true
   },
   "directory_provisioning_configuration": {
     "mapping": [
       { "auth0": "email", "idp": "mail" },
       { "auth0": "name", "idp": "displayName" }
     ],
-    "synchronize_automatically": true
+    "synchronize_automatically": false
   }
 }
