@@ -66,6 +66,95 @@ describe('#YAML context actions', () => {
     expect(context.assets.actions).to.deep.equal(target);
   });
 
+  it('should process YAML with includes', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'includes');
+    cleanThenMkdir(dir);
+
+    const clientsYaml = `
+- name: "Test Client"
+  app_type: "spa"
+- name: "Test M2M"
+  app_type: "non_interactive"
+    `;
+    const clientsFile = path.join(dir, 'clients.yaml');
+    fs.writeFileSync(clientsFile, clientsYaml);
+
+    const mainYaml = `
+tenant:
+  friendly_name: 'Test Tenant'
+
+clients: !include clients.yaml
+    `;
+    const mainFile = path.join(dir, 'tenant.yaml');
+    fs.writeFileSync(mainFile, mainYaml);
+
+    const config = { AUTH0_INPUT_FILE: mainFile };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.tenant).to.deep.equal({
+      friendly_name: 'Test Tenant',
+    });
+    expect(context.assets.clients).to.deep.equal([
+      {
+        name: 'Test Client',
+        app_type: 'spa',
+      },
+      {
+        name: 'Test M2M',
+        app_type: 'non_interactive',
+      },
+    ]);
+  });
+
+  it('should handle nested includes', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'nested-includes');
+    cleanThenMkdir(dir);
+
+    const rolesYaml = `
+- name: Admin
+  description: Administrator
+- name: User
+  description: Regular User
+    `;
+    fs.writeFileSync(path.join(dir, 'roles.yaml'), rolesYaml);
+
+    const mainYaml = `
+tenant:
+  friendly_name: 'Main Tenant'
+
+roles: !include roles.yaml
+    `;
+    fs.writeFileSync(path.join(dir, 'tenant.yaml'), mainYaml);
+
+    const config = { AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.roles).to.deep.equal([
+      { name: 'Admin', description: 'Administrator' },
+      { name: 'User', description: 'Regular User' },
+    ]);
+  });
+
+  it('should error on missing include file', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'missing-include');
+    cleanThenMkdir(dir);
+
+    const mainYaml = `
+clients: !include missing.yaml
+    `;
+    fs.writeFileSync(path.join(dir, 'tenant.yaml'), mainYaml);
+
+    const config = { AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') };
+    const context = new Context(config, mockMgmtClient());
+    
+    await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(
+      Error,
+      /Include file not found/
+    );
+  });
+
   it('should dump actions', async () => {
     const dir = path.join(testDataDir, 'yaml', 'actionsDump');
     cleanThenMkdir(dir);
