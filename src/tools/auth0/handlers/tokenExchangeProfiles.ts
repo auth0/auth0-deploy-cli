@@ -16,10 +16,6 @@ export const schema = {
         type: 'string',
         description: 'The name of the token exchange profile',
       },
-      id: {
-        type: 'string',
-        description: 'The unique identifier of the token exchange profile',
-      },
       subject_token_type: {
         type: 'string',
         description: 'The URI representing the subject token type',
@@ -32,16 +28,6 @@ export const schema = {
         type: 'string',
         enum: ['custom_authentication'],
         description: 'The type of token exchange profile',
-      },
-      created_at: {
-        type: 'string',
-        format: 'date-time',
-        description: 'The timestamp when the profile was created',
-      },
-      updated_at: {
-        type: 'string',
-        format: 'date-time',
-        description: 'The timestamp when the profile was last updated',
       },
     },
     required: ['name', 'subject_token_type', 'action', 'type'],
@@ -60,8 +46,8 @@ export default class TokenExchangeProfilesHandler extends DefaultHandler {
       id: 'id',
       identifiers: ['id', 'name'],
       // Only name and subject_token_type can be updated
-      stripUpdateFields: ['id', 'created_at', 'updated_at', 'action_id', 'type'],
-      stripCreateFields: ['id', 'created_at', 'updated_at'],
+      stripUpdateFields: ['created_at', 'updated_at', 'action_id', 'type'],
+      stripCreateFields: ['created_at', 'updated_at'],
     });
   }
 
@@ -150,46 +136,51 @@ export default class TokenExchangeProfilesHandler extends DefaultHandler {
     // Do nothing if not set
     if (!tokenExchangeProfiles) return;
 
-    // Fetch actions to resolve action names to IDs
-    const actions = await this.getActions();
-
-    // Map action names to action_ids before processing
-    const sanitizedProfiles = tokenExchangeProfiles.map((profile) =>
-      this.sanitizeForAPI(profile as TokenExchangeProfile, actions)
-    );
-
-    // Create modified assets with sanitized profiles
-    const modifiedAssets = {
-      ...assets,
-      tokenExchangeProfiles: sanitizedProfiles as TokenExchangeProfile[],
-    };
-
     // Calculate changes
-    const { del, update, create, conflicts } = await this.calcChanges(modifiedAssets);
+    const { del, update, create, conflicts } = await this.calcChanges(assets);
 
     log.debug(
       `Start processChanges for tokenExchangeProfiles [delete:${del.length}] [update:${update.length}], [create:${create.length}], [conflicts:${conflicts.length}]`
     );
 
+    // Fetch actions to resolve action names to IDs
+    const actions = await this.getActions();
+
     // Process changes in order: delete, create, update
     if (del.length > 0) {
-      await this.deleteTokenExchangeProfiles(del);
+      await this.deleteTokenExchangeProfiles(
+        del.map((profile) => this.sanitizeForAPI(profile as TokenExchangeProfile, actions))
+      );
     }
 
     if (create.length > 0) {
-      await this.createTokenExchangeProfiles(create);
+      await this.createTokenExchangeProfiles(
+        create.map((profile) => this.sanitizeForAPI(profile as TokenExchangeProfile, actions))
+      );
     }
 
     if (update.length > 0) {
-      await this.updateTokenExchangeProfiles(update);
+      await this.updateTokenExchangeProfiles(
+        update.map((profile) => this.sanitizeForAPI(profile as TokenExchangeProfile, actions))
+      );
     }
   }
 
   async createTokenExchangeProfile(profile: TokenExchangeProfile): Promise<TokenExchangeProfile> {
-    const { id, created_at, updated_at, ...createParams } = profile;
-    const created = await this.client.tokenExchangeProfiles.create(
-      createParams as Management.CreateTokenExchangeProfileRequestContent
-    );
+    if (!profile.name || !profile.subject_token_type || !profile.action_id || !profile.type) {
+      throw new Error(`Cannot create token exchange profile missing required fields`);
+    }
+
+    const createParams: Management.CreateTokenExchangeProfileRequestContent & {
+      type: Management.TokenExchangeProfileTypeEnum;
+    } = {
+      name: profile.name,
+      subject_token_type: profile.subject_token_type,
+      action_id: profile.action_id,
+      type: profile.type,
+    };
+
+    const created = await this.client.tokenExchangeProfiles.create(createParams);
     return created;
   }
 
@@ -211,11 +202,16 @@ export default class TokenExchangeProfilesHandler extends DefaultHandler {
   }
 
   async updateTokenExchangeProfile(profile: TokenExchangeProfile): Promise<void> {
-    const { id, created_at, updated_at, action_id, type, ...updateParams } = profile;
+    const { id, name, subject_token_type } = profile;
 
     if (!id) {
       throw new Error(`Cannot update token exchange profile "${profile.name}" - missing id`);
     }
+
+    const updateParams: Management.UpdateTokenExchangeProfileRequestContent = {
+      name,
+      subject_token_type,
+    };
 
     await this.client.tokenExchangeProfiles.update(id, updateParams);
   }
