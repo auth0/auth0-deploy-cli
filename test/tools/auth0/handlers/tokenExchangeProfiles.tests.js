@@ -225,6 +225,10 @@ describe('#tokenExchangeProfiles handler', () => {
             expect(data.name).to.equal('CIS token exchange');
             expect(data.subject_token_type).to.equal('https://acme.com/cis-token');
             expect(data.action_id).to.equal('action_123'); // Should be mapped to action_id
+            expect(data.type).to.equal('custom_authentication');
+            expect(data.id).to.be.undefined;
+            expect(data.created_at).to.be.undefined;
+            expect(data.updated_at).to.be.undefined;
             return Promise.resolve({
               data: {
                 ...data,
@@ -266,6 +270,29 @@ describe('#tokenExchangeProfiles handler', () => {
           ],
         },
       ]);
+    });
+
+    it('should throw when creating token exchange profile without required fields', async () => {
+      const auth0 = {
+        tokenExchangeProfiles: {
+          create: () => Promise.resolve({}),
+        },
+        pool,
+      };
+
+      const handler = new tokenExchangeProfiles.default({ client: pageClient(auth0), config });
+
+      try {
+        await handler.createTokenExchangeProfile({
+          name: 'Incomplete token exchange',
+          subject_token_type: 'https://acme.com/cis-token',
+          type: 'custom_authentication',
+          // action_id missing
+        });
+        expect.fail('Should have thrown an error');
+      } catch (err) {
+        expect(err.message).to.include('missing required fields');
+      }
     });
 
     it('should update token exchange profile', async () => {
