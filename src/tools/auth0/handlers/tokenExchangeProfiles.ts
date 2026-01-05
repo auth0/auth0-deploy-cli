@@ -3,6 +3,7 @@ import DefaultHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
+import { Action } from './actions';
 
 // Define TokenExchangeProfile type
 export type TokenExchangeProfile = Management.TokenExchangeProfileResponseContent;
@@ -37,21 +38,24 @@ export const schema = {
 export default class TokenExchangeProfilesHandler extends DefaultHandler {
   existing: TokenExchangeProfile[];
 
-  private actions: Asset[] | null;
+  private actions: Action[] | null;
 
   constructor(config: DefaultHandler) {
     super({
       ...config,
       type: 'tokenExchangeProfiles',
       id: 'id',
-      identifiers: ['id', 'name'],
+      identifiers: ['id', 'subject_token_type'],
       // Only name and subject_token_type can be updated
       stripUpdateFields: ['created_at', 'updated_at', 'action_id', 'type'],
       stripCreateFields: ['created_at', 'updated_at'],
     });
   }
 
-  private sanitizeForExport(profile: TokenExchangeProfile, actions: Asset[]): TokenExchangeProfile {
+  private sanitizeForExport(
+    profile: TokenExchangeProfile,
+    actions: Action[]
+  ): TokenExchangeProfile {
     if (profile.action_id) {
       const action = actions?.find((a) => a.id === profile.action_id);
       if (action) {
@@ -112,10 +116,12 @@ export default class TokenExchangeProfilesHandler extends DefaultHandler {
       );
 
       // Fetch all actions to map action_id to action name
-      const actions = await this.getActions();
+      this.actions = await this.getActions();
 
       // Map action_id to action name for each profile
-      this.existing = profiles.map((profile) => this.sanitizeForExport(profile, actions));
+      this.existing = profiles.map((profile) =>
+        this.sanitizeForExport(profile, this.actions ?? [])
+      );
 
       return this.existing;
     } catch (err) {
@@ -144,24 +150,26 @@ export default class TokenExchangeProfilesHandler extends DefaultHandler {
     );
 
     // Fetch actions to resolve action names to IDs
-    const actions = await this.getActions();
+    if (!this.actions || this.actions.length === 0) {
+      this.actions = await this.getActions();
+    }
 
     // Process changes in order: delete, create, update
     if (del.length > 0) {
       await this.deleteTokenExchangeProfiles(
-        del.map((profile) => this.sanitizeForAPI(profile as TokenExchangeProfile, actions))
+        del.map((profile) => this.sanitizeForAPI(profile, this.actions ?? []))
       );
     }
 
     if (create.length > 0) {
       await this.createTokenExchangeProfiles(
-        create.map((profile) => this.sanitizeForAPI(profile as TokenExchangeProfile, actions))
+        create.map((profile) => this.sanitizeForAPI(profile, this.actions ?? []))
       );
     }
 
     if (update.length > 0) {
       await this.updateTokenExchangeProfiles(
-        update.map((profile) => this.sanitizeForAPI(profile as TokenExchangeProfile, actions))
+        update.map((profile) => this.sanitizeForAPI(profile, this.actions ?? []))
       );
     }
   }
