@@ -385,7 +385,7 @@ describe('#tokenExchangeProfiles handler', () => {
       await stageFn.apply(handler, [{ tokenExchangeProfiles: [] }]);
     });
 
-    it('should process deletes before creates to avoid race conditions', async () => {
+    it('should update when subject_token_type matches existing profile', async () => {
       const executionOrder = [];
       const auth0 = {
         tokenExchangeProfiles: {
@@ -393,7 +393,10 @@ describe('#tokenExchangeProfiles handler', () => {
             executionOrder.push('create');
             return Promise.resolve({ data: { ...data, id: 'tep_new' } });
           },
-          update: () => Promise.resolve({ data: [] }),
+          update: function (id, data) {
+            executionOrder.push('update');
+            return Promise.resolve({ data: { id, ...data } });
+          },
           delete: function (id) {
             executionOrder.push('delete');
             return new Promise((resolve) => setTimeout(() => resolve({ id }), 10));
@@ -444,7 +447,7 @@ describe('#tokenExchangeProfiles handler', () => {
         },
       ]);
 
-      expect(executionOrder).to.deep.equal(['delete', 'create']);
+      expect(executionOrder).to.deep.equal(['update']);
     });
 
     it('should throw error when action is not found during create', async () => {
