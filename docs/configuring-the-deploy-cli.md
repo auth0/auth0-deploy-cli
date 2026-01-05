@@ -115,7 +115,7 @@ When passing as an environment variable, use JSON array format:
 
 ```shell
 # JSON array format
-export AUTH0_INCLUDED_CONNECTIONS='["github","google-oauth2","Username-Password-Authentication"]'
+export AUTH0_INCLUDED_CONNECTIONS='["github","google-oauth2"]'
 
 # Or as a single-line array
 export AUTH0_INCLUDED_CONNECTIONS='["github"]'
