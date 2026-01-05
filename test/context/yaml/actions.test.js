@@ -137,6 +137,77 @@ roles: !include roles.yaml
     ]);
   });
 
+  it('should process logStreams with includes', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'logstreams-includes');
+    cleanThenMkdir(dir);
+
+    const logStreamsYaml = `
+- name: LoggingSAAS
+  isPriority: false
+  filters:
+  - type: category
+    name: auth.login.fail
+  - type: category
+    name: auth.login.notification
+  - type: category
+    name: auth.login.success
+  - type: category
+    name: auth.logout.fail
+  sink:
+    httpContentFormat: JSONLINES
+    httpContentType: application/json
+    httpEndpoint: "##LOGGING_WEBHOOK_URL##"
+  type: http
+- name: SIEM
+  isPriority: false
+  filters:
+  - type: category
+    name: auth.login.fail
+  - type: category
+    name: auth.login.notification
+  - type: category
+    name: auth.login.success
+  sink:
+    httpContentFormat: JSONLINES
+    httpContentType: application/json
+    httpEndpoint: "##SIEM_WEBHOOK_URL##"
+  type: http
+    `;
+    fs.writeFileSync(path.join(dir, 'logStreams.yaml'), logStreamsYaml);
+
+    const mainYaml = `
+tenant:
+  friendly_name: 'Test Tenant'
+
+logStreams: !include logStreams.yaml
+    `;
+    fs.writeFileSync(path.join(dir, 'tenant.yaml'), mainYaml);
+
+    const config = {
+      AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml'),
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: {
+        LOGGING_WEBHOOK_URL: 'https://logging.com/inputs/test',
+        SIEM_WEBHOOK_URL: 'https://siem.example.com/webhook'
+      }
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.logStreams).to.have.length(2);
+    expect(context.assets.logStreams[0]).to.deep.include({
+      name: 'LoggingSAAS',
+      isPriority: false,
+      type: 'http'
+    });
+    expect(context.assets.logStreams[0].sink.httpEndpoint).to.equal('https://logging.com/inputs/test');
+    expect(context.assets.logStreams[1]).to.deep.include({
+      name: 'SIEM',
+      isPriority: false,
+      type: 'http'
+    });
+    expect(context.assets.logStreams[1].sink.httpEndpoint).to.equal('https://siem.example.com/webhook');
+  });
+
   it('should error on missing include file', async () => {
     const dir = path.join(testDataDir, 'yaml', 'missing-include');
     cleanThenMkdir(dir);
@@ -154,7 +225,6 @@ clients: !include missing.yaml
       /Include file not found/
     );
   });
-
   it('should dump actions', async () => {
     const dir = path.join(testDataDir, 'yaml', 'actionsDump');
     cleanThenMkdir(dir);
