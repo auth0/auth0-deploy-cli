@@ -17,3 +17,4 @@ Makefile
 .github/chatmodes/*
 .github/prompts/*
 .github/agents/*
+.github/skills/*
