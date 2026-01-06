@@ -104,6 +104,7 @@ export default class YAMLContext {
 
     const initialAssets: Assets = {
       exclude: this.assets.exclude, // Keep the exclude rules in result assets
+      include: this.assets.include, // Keep the include rules in result assets
     };
     this.assets = Object.keys(this.assets).reduce((acc: Assets, key: AssetTypes) => {
       // Get the list of asset types to include
