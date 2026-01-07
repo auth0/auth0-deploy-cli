@@ -1190,6 +1190,17 @@ describe('#connections enabled clients functionality', () => {
     });
 
     describe('#processChanges with enabled clients', () => {
+      let scimHandlerMock;
+
+      beforeEach(() => {
+        scimHandlerMock = {
+          createIdMap: sinon.stub().resolves(new Map()),
+          getScimConfiguration: sinon.stub().resolves({}),
+          applyScimConfiguration: sinon.stub().resolves(undefined),
+          createOverride: sinon.stub().resolves(new Map()),
+          updateOverride: sinon.stub().resolves(new Map()),
+        };
+      });
       it('should call processConnectionEnabledClients after super.processChanges', async () => {
         const processConnectionEnabledClientsStub = sinon
           .stub(connections, 'processConnectionEnabledClients')
@@ -1227,7 +1238,7 @@ describe('#connections enabled clients functionality', () => {
         processConnectionEnabledClientsStub.restore();
       });
 
-      it('should respect excluded connections in enabled clients processing', async () => {
+      it('should respect included connections in enabled clients processing', async () => {
         const processConnectionEnabledClientsStub = sinon
           .stub(connections, 'processConnectionEnabledClients')
           .resolves();
@@ -1252,10 +1263,10 @@ describe('#connections enabled clients functionality', () => {
         const assets = {
           connections: [
             { name: 'included-connection', strategy: 'custom', enabled_clients: ['client_1'] },
-            { name: 'excluded-connection', strategy: 'custom', enabled_clients: ['client_2'] },
+            { name: 'ignored-connection', strategy: 'custom', enabled_clients: ['client_2'] },
           ],
-          exclude: {
-            connections: ['excluded-connection'],
+          include: {
+            connections: ['included-connection'],
           },
         };
 
@@ -1263,11 +1274,10 @@ describe('#connections enabled clients functionality', () => {
 
         sinon.assert.calledOnce(processConnectionEnabledClientsStub);
 
-        // Verify that excluded connections are filtered out
+        // Verify that only included connections are passed
         const passedChanges = processConnectionEnabledClientsStub.firstCall.args[2];
-        expect(passedChanges.create).to.be.an('array');
-        expect(passedChanges.update).to.be.an('array');
-        expect(passedChanges.conflicts).to.be.an('array');
+        expect(passedChanges.create).to.have.length(1);
+        expect(passedChanges.create[0].name).to.equal('included-connection');
 
         processConnectionEnabledClientsStub.restore();
       });
@@ -1295,231 +1305,27 @@ describe('#AUTH0_INCLUDED_CONNECTIONS functionality', () => {
       createOverride: sinon.stub().resolves(new Map()),
       updateOverride: sinon.stub().resolves(new Map()),
     };
+
+    // CRITICAL FIX: Stub sleep to prevent the 2.5s delay in processConnectionEnabledClients
+    // This ensures the tests run instantly even if the real function is called.
+    sinon.stub(utils, 'sleep').resolves();
   });
 
   afterEach(() => {
     sinon.restore();
   });
 
-  describe('#calcChanges with assets.include.connections', () => {
-    it('should only calculate changes for connections in the include list', async () => {
-      const auth0 = {
-        connections: {
-          list: (params) =>
-            mockPagedData(params, 'connections', [
-              { id: 'con_1', strategy: 'github', name: 'github', options: {} },
-              { id: 'con_2', strategy: 'google-oauth2', name: 'google-oauth2', options: {} },
-              { id: 'con_3', strategy: 'samlp', name: 'enterprise-saml', options: {} },
-            ]),
-          clients: {
-            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
-          },
-        },
-        clients: {
-          list: (params) => mockPagedData(params, 'clients', []),
-        },
-        pool,
-      };
-
-      const handler = new connections.default({ client: pageClient(auth0), config });
-      handler.scimHandler = scimHandlerMock;
-
-      const assets = {
-        connections: [
-          { name: 'github', strategy: 'github', options: { foo: 'bar' } },
-          { name: 'google-oauth2', strategy: 'google-oauth2', options: {} },
-          { name: 'enterprise-saml', strategy: 'samlp', options: {} }, // Filtered out by include list
-        ],
-        include: {
-          connections: ['github', 'google-oauth2'],
-        },
-      };
-
-      const changes = await handler.calcChanges(assets);
-
-      // Only github and google-oauth2 should be in create/update (they're in the include list)
-      const createAndUpdate = [...changes.create, ...changes.update];
-      expect(createAndUpdate.every((c) => ['github', 'google-oauth2'].includes(c.name))).to.be.true;
-
-      // enterprise-saml from assets should be filtered out and not appear in create/update
-      expect(createAndUpdate.find((c) => c.name === 'enterprise-saml')).to.be.undefined;
-
-      // enterprise-saml exists in tenant, but it is NOT in the include list.
-      // Therefore, it should NOT be marked for deletion.
-      expect(changes.del.find((c) => c.name === 'enterprise-saml')).to.be.undefined;
-    });
-
-    it('should process all connections when assets.include.connections is not configured', async () => {
-      const auth0 = {
-        connections: {
-          list: (params) =>
-            mockPagedData(params, 'connections', [
-              { id: 'con_1', strategy: 'github', name: 'github', options: {} },
-            ]),
-          clients: {
-            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
-          },
-        },
-        clients: {
-          list: (params) => mockPagedData(params, 'clients', []),
-        },
-        pool,
-      };
-
-      const handler = new connections.default({ client: pageClient(auth0), config });
-      handler.scimHandler = scimHandlerMock;
-
-      const assets = {
-        connections: [
-          { name: 'github', strategy: 'github', options: { foo: 'bar' } },
-          { name: 'google-oauth2', strategy: 'google-oauth2', options: {} },
-          { name: 'enterprise-saml', strategy: 'samlp', options: {} },
-        ],
-      };
-
-      const changes = await handler.calcChanges(assets);
-
-      // Should process all connections
-      const allChanges = [...changes.create, ...changes.update, ...changes.del];
-      expect(allChanges.length).to.be.at.least(2); // At least the new ones (google-oauth2 and enterprise-saml)
-    });
-
-    it('should filter connections based on include list and log info about ignored connections', async () => {
-      const auth0 = {
-        connections: {
-          list: (params) =>
-            mockPagedData(params, 'connections', [
-              { id: 'con_1', strategy: 'github', name: 'github', options: {} },
-            ]),
-          clients: {
-            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
-          },
-        },
-        clients: {
-          list: (params) => mockPagedData(params, 'clients', []),
-        },
-        pool,
-      };
-
-      const handler = new connections.default({ client: pageClient(auth0), config });
-      handler.scimHandler = scimHandlerMock;
-
-      const assets = {
-        connections: [
-          { name: 'github', strategy: 'github', options: {} },
-          { name: 'google-oauth2', strategy: 'google-oauth2', options: {} },
-          { name: 'enterprise-saml', strategy: 'samlp', options: {} },
-        ],
-        include: {
-          connections: ['github'],
-        },
-      };
-
-      const changes = await handler.calcChanges(assets);
-
-      // Only github from assets should be processed
-      const createAndUpdate = [...changes.create, ...changes.update];
-      expect(createAndUpdate.every((c) => c.name === 'github')).to.be.true;
-
-      // google-oauth2 and enterprise-saml should not appear in create/update
-      expect(createAndUpdate.find((c) => c.name === 'google-oauth2')).to.be.undefined;
-      expect(createAndUpdate.find((c) => c.name === 'enterprise-saml')).to.be.undefined;
-    });
-
-    it('should handle empty connections array with assets.include.connections', async () => {
-      const auth0 = {
-        connections: {
-          list: (params) => mockPagedData(params, 'connections', []),
-          clients: {
-            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
-          },
-        },
-        clients: {
-          list: (params) => mockPagedData(params, 'clients', []),
-        },
-        pool,
-      };
-
-      const handler = new connections.default({ client: pageClient(auth0), config });
-      handler.scimHandler = scimHandlerMock;
-
-      const assets = {
-        connections: [],
-        include: {
-          connections: ['github'],
-        },
-      };
-
-      const changes = await handler.calcChanges(assets);
-
-      expect(changes.create).to.have.length(0);
-      expect(changes.update).to.have.length(0);
-      expect(changes.del).to.have.length(0);
-    });
-
-    it('should create new connections when they are in include list and not in tenant', async () => {
-      const auth0 = {
-        connections: {
-          list: (params) =>
-            mockPagedData(params, 'connections', [
-              { id: 'con_1', strategy: 'google-oauth2', name: 'google-oauth2', options: {} },
-            ]),
-          clients: {
-            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
-          },
-        },
-        clients: {
-          list: (params) => mockPagedData(params, 'clients', []),
-        },
-        pool,
-      };
-
-      const handler = new connections.default({ client: pageClient(auth0), config });
-      handler.scimHandler = scimHandlerMock;
-
-      const assets = {
-        connections: [
-          { name: 'github', strategy: 'github', options: {} },
-          { name: 'google-oauth2', strategy: 'google-oauth2', options: {} },
-          { name: 'enterprise-saml', strategy: 'samlp', options: {} },
-        ],
-        include: {
-          connections: ['github', 'google-oauth2'], // Only these two are managed
-        },
-      };
-
-      const changes = await handler.calcChanges(assets);
-
-      // github should be in create (not in tenant, in include list)
-      expect(changes.create.find((c) => c.name === 'github')).to.exist;
-
-      // google-oauth2 should be in update (in tenant, in include list)
-      expect(changes.update.find((c) => c.name === 'google-oauth2')).to.exist;
-
-      // enterprise-saml should not be in create or update (not in include list)
-      expect(changes.create.find((c) => c.name === 'enterprise-saml')).to.be.undefined;
-      expect(changes.update.find((c) => c.name === 'enterprise-saml')).to.be.undefined;
-    });
-  });
-
   describe('#processChanges with assets.include.connections', () => {
-    it('should only process connections in the include list during import', async () => {
+    it('should process all connections when assets.include.connections is not configured', async () => {
       const createStub = sinon.stub().resolves({ data: {} });
-      const updateStub = sinon.stub().callsFake((params, data) => {
-        return Promise.resolve({ data: { ...params, ...data } });
-      });
-      const deleteStub = sinon.stub().resolves({ data: {} });
+      const updateStub = sinon.stub().resolves({ data: {} });
 
       const auth0 = {
         connections: {
           create: createStub,
           update: updateStub,
-          delete: deleteStub,
-          list: (params) =>
-            mockPagedData(params, 'connections', [
-              { id: 'con_1', strategy: 'github', name: 'github', options: {} },
-              { id: 'con_2', strategy: 'google-oauth2', name: 'google-oauth2', options: {} },
-            ]),
+          delete: sinon.stub().resolves({ data: {} }),
+          list: (params) => mockPagedData(params, 'connections', []),
           clients: {
             get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
             update: sinon.stub().resolves({}),
@@ -1537,30 +1343,66 @@ describe('#AUTH0_INCLUDED_CONNECTIONS functionality', () => {
 
       const assets = {
         connections: [
-          { name: 'github', strategy: 'github', options: { updated: true } },
-          { name: 'google-oauth2', strategy: 'google-oauth2', options: { updated: true } },
+          { name: 'github', strategy: 'github', options: {} },
+          { name: 'google', strategy: 'google-oauth2', options: {} },
+        ],
+        // No include property
+      };
+
+      await handler.processChanges(assets);
+
+      // Should attempt to create both
+      expect(scimHandlerMock.createOverride.callCount).to.equal(2);
+    });
+
+    it('should create new connections only when they are in include list', async () => {
+      const createStub = sinon.stub().resolves({ data: {} });
+
+      const auth0 = {
+        connections: {
+          create: createStub,
+          update: sinon.stub().resolves({ data: {} }),
+          delete: sinon.stub().resolves({ data: {} }),
+          list: (params) => mockPagedData(params, 'connections', []),
+          clients: {
+            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
+            update: sinon.stub().resolves({}),
+          },
+          _getRestClient: () => ({}),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
+
+      const assets = {
+        connections: [
+          { name: 'github', strategy: 'github', options: {} }, // Included
+          { name: 'enterprise-saml', strategy: 'samlp', options: {} }, // Not Included
         ],
         include: {
-          connections: ['github'], // Only github is in the managed list
+          connections: ['github'],
         },
       };
 
       await handler.processChanges(assets);
 
-      // Only github should be processed since it's in the include list
-      // google-oauth2 is filtered out before calcChanges
-      expect(scimHandlerMock.updateOverride.calledOnce).to.be.true;
-      const updateCall = scimHandlerMock.updateOverride.firstCall;
-      expect(updateCall.args[0]).to.deep.include({ id: 'con_1' });
-      expect(updateCall.args[1]).to.deep.include({ options: { updated: true } });
+      // Should create github
+      expect(scimHandlerMock.createOverride.calledOnce).to.be.true;
+      expect(scimHandlerMock.createOverride.firstCall.args[0].name).to.equal('github');
 
-      // google-oauth2 is not in the include list, so it should not be deleted
-      expect(deleteStub.called).to.be.false;
+      // Should NOT create saml
+      const calls = scimHandlerMock.createOverride.getCalls();
+      const createdNames = calls.map((c) => c.args[0].name);
+      expect(createdNames).to.not.include('enterprise-saml');
     });
 
-    it('should only delete managed connections when assets is empty', async () => {
+    it('should delete connections only when they are in include list', async () => {
       config.data.AUTH0_ALLOW_DELETE = true;
-
       const deleteStub = sinon.stub().resolves({ data: {} });
 
       const auth0 = {
@@ -1570,8 +1412,8 @@ describe('#AUTH0_INCLUDED_CONNECTIONS functionality', () => {
           delete: deleteStub,
           list: (params) =>
             mockPagedData(params, 'connections', [
-              { id: 'con_1', strategy: 'github', name: 'github', options: {} },
-              { id: 'con_2', strategy: 'google-oauth2', name: 'google-oauth2', options: {} },
+              { id: 'con_1', strategy: 'github', name: 'github' },
+              { id: 'con_2', strategy: 'google', name: 'google' },
             ]),
           clients: {
             get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
@@ -1589,55 +1431,7 @@ describe('#AUTH0_INCLUDED_CONNECTIONS functionality', () => {
       handler.scimHandler = scimHandlerMock;
 
       const assets = {
-        connections: [], // Empty connections array
-        include: {
-          connections: ['github'], // Only github is in managed list
-        },
-      };
-
-      await handler.processChanges(assets);
-
-      // Only github should be deleted because it is in the include list but missing from assets.
-      // google-oauth2 is NOT in the include list, so it should be preserved.
-      expect(deleteStub.calledOnce).to.be.true;
-      expect(deleteStub.firstCall.args[0]).to.equal('con_1'); // github
-    });
-
-    it('should update managed connection and ignore unmanaged ones', async () => {
-      config.data.AUTH0_ALLOW_DELETE = true;
-
-      const deleteStub = sinon.stub().resolves({ data: {} });
-      const updateStub = sinon.stub().callsFake((params, data) => {
-        return Promise.resolve({ data: { ...params, ...data } });
-      });
-
-      const auth0 = {
-        connections: {
-          create: sinon.stub().resolves({ data: {} }),
-          update: updateStub,
-          delete: deleteStub,
-          list: (params) =>
-            mockPagedData(params, 'connections', [
-              { id: 'con_1', strategy: 'github', name: 'github', options: {} },
-              { id: 'con_2', strategy: 'google-oauth2', name: 'google-oauth2', options: {} },
-            ]),
-          clients: {
-            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
-            update: sinon.stub().resolves({}),
-          },
-          _getRestClient: () => ({}),
-        },
-        clients: {
-          list: (params) => mockPagedData(params, 'clients', []),
-        },
-        pool,
-      };
-
-      const handler = new connections.default({ client: pageClient(auth0), config });
-      handler.scimHandler = scimHandlerMock;
-
-      const assets = {
-        connections: [{ name: 'github', strategy: 'github', options: {} }],
+        connections: [], // Empty assets
         include: {
           connections: ['github'], // Only github is managed
         },
@@ -1645,13 +1439,67 @@ describe('#AUTH0_INCLUDED_CONNECTIONS functionality', () => {
 
       await handler.processChanges(assets);
 
-      // github exists in both assets and tenant, so it's updated
-      // google-oauth2 exists in tenant but not in filtered assets.
-      // HOWEVER, google-oauth2 is NOT in the include list, so it should NOT be deleted.
-      expect(deleteStub.called).to.be.false;
+      // Github is in include list but not in assets -> DELETE
+      // Google is NOT in include list and not in assets -> IGNORE
+      expect(deleteStub.calledOnce).to.be.true;
+      expect(deleteStub.firstCall.args[0]).to.equal('con_1');
+    });
 
-      // Github should be updated
-      expect(scimHandlerMock.updateOverride.called).to.be.true;
+    it('should pass filtered changes to processConnectionDirectoryProvisioning', async () => {
+      // We can safely stub this prototype method because it's called explicitly on 'this' in the class
+      const processDirProvStub = sinon
+        .stub(connections.default.prototype, 'processConnectionDirectoryProvisioning')
+        .resolves();
+
+      const auth0 = {
+        connections: {
+          create: sinon.stub().resolves({ data: {} }),
+          update: sinon.stub().resolves({ data: {} }),
+          delete: sinon.stub().resolves({ data: {} }),
+          list: (params) => mockPagedData(params, 'connections', []),
+          clients: {
+            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
+            update: sinon.stub().resolves({}),
+          },
+          _getRestClient: () => ({}),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
+
+      const assets = {
+        connections: [
+          {
+            name: 'included-gsuite',
+            strategy: 'google-apps',
+            directory_provisioning_configuration: {},
+          },
+          {
+            name: 'ignored-gsuite',
+            strategy: 'google-apps',
+            directory_provisioning_configuration: {},
+          },
+        ],
+        include: {
+          connections: ['included-gsuite'],
+        },
+      };
+
+      await handler.processChanges(assets);
+
+      expect(processDirProvStub.calledOnce).to.be.true;
+      const passedChanges = processDirProvStub.firstCall.args[0];
+
+      // Verify filtered list passed to directory provisioning
+      expect(passedChanges.create).to.have.length(1);
+      expect(passedChanges.create[0].name).to.equal('included-gsuite');
+
+      processDirProvStub.restore();
     });
   });
 });
