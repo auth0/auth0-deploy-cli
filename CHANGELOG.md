@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `AUTH0_INCLUDED_CONNECTIONS` config property to include only selected `connection`. [#1242]
+
+### Fixed
+
+- Fix `token exchange` profiles handling. [#1253]
+
 ## [8.24.0] - 2025-12-22
 
 ### Added
@@ -1591,9 +1599,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1232]: https://github.com/auth0/auth0-deploy-cli/issues/1232
 [#1239]: https://github.com/auth0/auth0-deploy-cli/issues/1239
 [#1240]: https://github.com/auth0/auth0-deploy-cli/issues/1240
+[#1242]: https://github.com/auth0/auth0-deploy-cli/issues/1242
 [#1244]: https://github.com/auth0/auth0-deploy-cli/issues/1244
 [#1246]: https://github.com/auth0/auth0-deploy-cli/issues/1246
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.24.0...HEAD
+[#1253]: https://github.com/auth0/auth0-deploy-cli/issues/1253
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.25.0...HEAD
+[8.25.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.24.0...v8.25.0
 [8.24.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.2...v8.24.0
 [8.23.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.1...v8.23.2
 [8.23.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.0...v8.23.1
