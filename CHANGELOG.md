@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.24.1] - 2026-01-08
+
 ### Added
 
 - Add support of managed connection inclusion [#1242]
@@ -1599,9 +1601,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1232]: https://github.com/auth0/auth0-deploy-cli/issues/1232
 [#1239]: https://github.com/auth0/auth0-deploy-cli/issues/1239
 [#1240]: https://github.com/auth0/auth0-deploy-cli/issues/1240
+[#1242]: https://github.com/auth0/auth0-deploy-cli/issues/1242
 [#1244]: https://github.com/auth0/auth0-deploy-cli/issues/1244
 [#1246]: https://github.com/auth0/auth0-deploy-cli/issues/1246
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.24.0...HEAD
+[#1253]: https://github.com/auth0/auth0-deploy-cli/issues/1253
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.24.1...HEAD
+[8.24.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.24.0...v8.24.1
 [8.24.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.2...v8.24.0
 [8.23.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.1...v8.23.2
 [8.23.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.0...v8.23.1
