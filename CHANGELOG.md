@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix `tokenExchangeProfiles` profiles handling. [#1253]
-- Fix `idle_ephemeral_session_lifetime` and `ephemeral_session_lifetime` handling while importing [#1252]
+- Fix `idle_ephemeral_session_lifetime` and `ephemeral_session_lifetime` handling while importing [#1261]
 
 ## [8.24.0] - 2025-12-22
 
