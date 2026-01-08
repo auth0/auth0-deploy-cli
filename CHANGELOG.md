@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- fix `token exchange` profiles handling [#1253]
+- Fix `token exchange` profiles handling [#1253]
 
 ## [8.24.0] - 2025-12-22
 
