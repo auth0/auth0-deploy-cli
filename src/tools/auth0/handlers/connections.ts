@@ -2,7 +2,13 @@ import dotProp from 'dot-prop';
 import { chunk, keyBy } from 'lodash';
 import { Management, ManagementError } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
-import { filterExcluded, convertClientNameToId, getEnabledClients, sleep } from '../../utils';
+import {
+  filterExcluded,
+  convertClientNameToId,
+  getEnabledClients,
+  sleep,
+  filterIncluded,
+} from '../../utils';
 import { CalculatedChanges, Asset, Assets, Auth0APIClient } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
 import { paginate } from '../client';
@@ -621,6 +627,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       ...this.getFormattedOptions(connection, clients),
       enabled_clients: getEnabledClients(assets, connection, existingConnections, clients),
     }));
+
     const proposedChanges = await super.calcChanges({ ...assets, connections: formatted });
 
     const proposedChangesWithExcludedProperties = addExcludedConnectionPropertiesToChanges({
@@ -648,20 +655,20 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       );
     }
 
+    const includedConnections = (assets.include && assets.include.connections) || [];
     const excludedConnections = (assets.exclude && assets.exclude.connections) || [];
 
-    const changes = await this.calcChanges(assets);
+    let changes = await this.calcChanges(assets);
 
-    await super.processChanges(assets, filterExcluded(changes, excludedConnections));
+    changes = filterExcluded(changes, excludedConnections);
+    changes = filterIncluded(changes, includedConnections);
+
+    await super.processChanges(assets, changes);
 
     // process enabled clients
-    await processConnectionEnabledClients(
-      this.client,
-      this.type,
-      filterExcluded(changes, excludedConnections)
-    );
+    await processConnectionEnabledClients(this.client, this.type, changes);
 
     // process directory provisioning
-    await this.processConnectionDirectoryProvisioning(filterExcluded(changes, excludedConnections));
+    await this.processConnectionDirectoryProvisioning(changes);
   }
 }
