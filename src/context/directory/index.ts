@@ -40,6 +40,10 @@ export default class DirectoryContext {
       resourceServers: config.AUTH0_EXCLUDED_RESOURCE_SERVERS || [],
       defaults: config.AUTH0_EXCLUDED_DEFAULTS || [],
     };
+
+    this.assets.include = {
+      connections: config.AUTH0_INCLUDED_CONNECTIONS || [],
+    };
   }
 
   loadFile(f: string, folder: string) {
