@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add support of managed connection inclusion. [#1242]
+- `AUTH0_INCLUDED_CONNECTIONS` config property to include only selected `connection`. [#1242]
 
 ### Fixed
 
