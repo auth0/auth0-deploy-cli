@@ -91,6 +91,7 @@ Boolean. When enabled, will allow the tool to delete resources. Default: `false`
 Array of strings. Specifies which connections should be managed by the Deploy CLI. When configured, only the connections listed by name will be included in export and import operations. All other connections in the tenant will be completely ignored.
 
 This is particularly useful for:
+
 - Managing only specific connections while preserving others (e.g., self-service SSO connections, third-party integrations)
 - Preventing accidental modifications to connections managed by other systems
 - Isolating connection management to specific subsets of your tenant
