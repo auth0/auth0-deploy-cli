@@ -18,6 +18,52 @@ import { Assets, Config, Auth0APIClient, AssetTypes, KeywordMappings } from '../
 import { filterOnlyIncludedResourceTypes } from '..';
 import { preserveKeywords } from '../../keywordPreservation';
 
+// Custom YAML type for file includes
+const includeType = new yaml.Type('!include', {
+  kind: 'scalar',
+  resolve: (data) => typeof data === 'string',
+  construct: (data) => {
+    // This will be handled during the actual loading process
+    return { __include: data };
+  }
+});
+
+const schema = yaml.DEFAULT_SCHEMA.extend([includeType]);
+
+// Function to resolve includes
+function resolveIncludes(obj, basePath, mappings?: KeywordMappings, disableKeywordReplacement?: boolean) {
+  if (Array.isArray(obj)) {
+    return obj.map(item => resolveIncludes(item, basePath, mappings, disableKeywordReplacement));
+  }
+  
+  if (obj && typeof obj === 'object') {
+    if (obj.__include) {
+      const filePath = path.resolve(basePath, obj.__include);
+      if (fs.existsSync(filePath)) {
+        let content = fs.readFileSync(filePath, 'utf8');
+        
+        // Apply keyword replacement to included file content if mappings are provided
+        if (mappings && !disableKeywordReplacement) {
+          content = keywordReplace(content, mappings);
+        } else if (mappings && disableKeywordReplacement) {
+          content = wrapArrayReplaceMarkersInQuotes(content, mappings);
+        }
+        
+        return resolveIncludes(yaml.load(content, { schema }), path.dirname(filePath), mappings, disableKeywordReplacement);
+      }
+      throw new Error(`Include file not found: ${filePath}`);
+    }
+    
+    const result = {};
+    for (const [key, value] of Object.entries(obj)) {
+      result[key] = resolveIncludes(value, basePath, mappings, disableKeywordReplacement);
+    }
+    return result;
+  }
+  
+  return obj;
+}
+
 export default class YAMLContext {
   basePath: string;
   configFile: string;
@@ -62,6 +108,10 @@ export default class YAMLContext {
     if (!isFile(toLoad)) {
       // try load not relative to yaml file
       toLoad = f;
+      if (!isFile(toLoad)) {
+        // try absolute path resolution
+        toLoad = path.resolve(f);
+      }
     }
     return loadFileAndReplaceKeywords(path.resolve(toLoad), {
       mappings: this.mappings,
@@ -78,13 +128,16 @@ export default class YAMLContext {
       try {
         const fPath = path.resolve(this.configFile);
         log.debug(`Loading YAML from ${fPath}`);
+        const loadedYaml = yaml.load(
+          opts.disableKeywordReplacement
+            ? wrapArrayReplaceMarkersInQuotes(fs.readFileSync(fPath, 'utf8'), this.mappings)
+            : keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings),
+          { schema }
+        ) || {};
+        
         Object.assign(
           this.assets,
-          yaml.load(
-            opts.disableKeywordReplacement
-              ? wrapArrayReplaceMarkersInQuotes(fs.readFileSync(fPath, 'utf8'), this.mappings)
-              : keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)
-          ) || {}
+          resolveIncludes(loadedYaml, path.dirname(fPath), this.mappings, opts.disableKeywordReplacement)
         );
       } catch (err) {
         log.debug(err.stack);
