@@ -5,19 +5,37 @@ function hoursToMinutes(hours: number): number {
 export const sessionDurationsToMinutes = ({
   session_lifetime,
   idle_session_lifetime,
+  idle_ephemeral_session_lifetime,
+  ephemeral_session_lifetime,
 }: {
   session_lifetime?: number;
   idle_session_lifetime?: number;
-}): { session_lifetime_in_minutes?: number; idle_session_lifetime_in_minutes?: number } => {
+  idle_ephemeral_session_lifetime?: number;
+  ephemeral_session_lifetime?: number;
+}): {
+  session_lifetime_in_minutes?: number;
+  idle_session_lifetime_in_minutes?: number;
+  idle_ephemeral_session_lifetime_in_minutes?: number;
+  ephemeral_session_lifetime_in_minutes?: number;
+} => {
   const sessionDurations: {
     session_lifetime_in_minutes?: number;
     idle_session_lifetime_in_minutes?: number;
+    idle_ephemeral_session_lifetime_in_minutes?: number;
+    ephemeral_session_lifetime_in_minutes?: number;
   } = {};
 
   if (!!session_lifetime)
     sessionDurations.session_lifetime_in_minutes = hoursToMinutes(session_lifetime);
   if (!!idle_session_lifetime)
     sessionDurations.idle_session_lifetime_in_minutes = hoursToMinutes(idle_session_lifetime);
-
+  if (!!idle_ephemeral_session_lifetime)
+    sessionDurations.idle_ephemeral_session_lifetime_in_minutes = hoursToMinutes(
+      idle_ephemeral_session_lifetime
+    );
+  if (!!ephemeral_session_lifetime)
+    sessionDurations.ephemeral_session_lifetime_in_minutes = hoursToMinutes(
+      ephemeral_session_lifetime
+    );
   return sessionDurations;
 };

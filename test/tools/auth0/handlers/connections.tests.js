@@ -1190,6 +1190,17 @@ describe('#connections enabled clients functionality', () => {
     });
 
     describe('#processChanges with enabled clients', () => {
+      let scimHandlerMock;
+
+      beforeEach(() => {
+        scimHandlerMock = {
+          createIdMap: sinon.stub().resolves(new Map()),
+          getScimConfiguration: sinon.stub().resolves({}),
+          applyScimConfiguration: sinon.stub().resolves(undefined),
+          createOverride: sinon.stub().resolves(new Map()),
+          updateOverride: sinon.stub().resolves(new Map()),
+        };
+      });
       it('should call processConnectionEnabledClients after super.processChanges', async () => {
         const processConnectionEnabledClientsStub = sinon
           .stub(connections, 'processConnectionEnabledClients')
@@ -1227,7 +1238,7 @@ describe('#connections enabled clients functionality', () => {
         processConnectionEnabledClientsStub.restore();
       });
 
-      it('should respect excluded connections in enabled clients processing', async () => {
+      it('should respect included connections in enabled clients processing', async () => {
         const processConnectionEnabledClientsStub = sinon
           .stub(connections, 'processConnectionEnabledClients')
           .resolves();
@@ -1252,10 +1263,10 @@ describe('#connections enabled clients functionality', () => {
         const assets = {
           connections: [
             { name: 'included-connection', strategy: 'custom', enabled_clients: ['client_1'] },
-            { name: 'excluded-connection', strategy: 'custom', enabled_clients: ['client_2'] },
+            { name: 'ignored-connection', strategy: 'custom', enabled_clients: ['client_2'] },
           ],
-          exclude: {
-            connections: ['excluded-connection'],
+          include: {
+            connections: ['included-connection'],
           },
         };
 
@@ -1263,14 +1274,232 @@ describe('#connections enabled clients functionality', () => {
 
         sinon.assert.calledOnce(processConnectionEnabledClientsStub);
 
-        // Verify that excluded connections are filtered out
+        // Verify that only included connections are passed
         const passedChanges = processConnectionEnabledClientsStub.firstCall.args[2];
-        expect(passedChanges.create).to.be.an('array');
-        expect(passedChanges.update).to.be.an('array');
-        expect(passedChanges.conflicts).to.be.an('array');
+        expect(passedChanges.create).to.have.length(1);
+        expect(passedChanges.create[0].name).to.equal('included-connection');
 
         processConnectionEnabledClientsStub.restore();
       });
+    });
+  });
+});
+
+describe('#AUTH0_INCLUDED_CONNECTIONS functionality', () => {
+  const config = function (key) {
+    return config.data && config.data[key];
+  };
+
+  config.data = {
+    AUTH0_CLIENT_ID: 'client_id',
+    AUTH0_ALLOW_DELETE: true,
+  };
+
+  let scimHandlerMock;
+
+  beforeEach(() => {
+    scimHandlerMock = {
+      createIdMap: sinon.stub().resolves(new Map()),
+      getScimConfiguration: sinon.stub().resolves({}),
+      applyScimConfiguration: sinon.stub().resolves(undefined),
+      createOverride: sinon.stub().resolves(new Map()),
+      updateOverride: sinon.stub().resolves(new Map()),
+    };
+
+    // CRITICAL FIX: Stub sleep to prevent the 2.5s delay in processConnectionEnabledClients
+    // This ensures the tests run instantly even if the real function is called.
+    sinon.stub(utils, 'sleep').resolves();
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  describe('#processChanges with assets.include.connections', () => {
+    it('should process all connections when assets.include.connections is not configured', async () => {
+      const createStub = sinon.stub().resolves({ data: {} });
+      const updateStub = sinon.stub().resolves({ data: {} });
+
+      const auth0 = {
+        connections: {
+          create: createStub,
+          update: updateStub,
+          delete: sinon.stub().resolves({ data: {} }),
+          list: (params) => mockPagedData(params, 'connections', []),
+          clients: {
+            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
+            update: sinon.stub().resolves({}),
+          },
+          _getRestClient: () => ({}),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
+
+      const assets = {
+        connections: [
+          { name: 'github', strategy: 'github', options: {} },
+          { name: 'google', strategy: 'google-oauth2', options: {} },
+        ],
+        // No include property
+      };
+
+      await handler.processChanges(assets);
+
+      // Should attempt to create both
+      expect(scimHandlerMock.createOverride.callCount).to.equal(2);
+    });
+
+    it('should create new connections only when they are in include list', async () => {
+      const createStub = sinon.stub().resolves({ data: {} });
+
+      const auth0 = {
+        connections: {
+          create: createStub,
+          update: sinon.stub().resolves({ data: {} }),
+          delete: sinon.stub().resolves({ data: {} }),
+          list: (params) => mockPagedData(params, 'connections', []),
+          clients: {
+            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
+            update: sinon.stub().resolves({}),
+          },
+          _getRestClient: () => ({}),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
+
+      const assets = {
+        connections: [
+          { name: 'github', strategy: 'github', options: {} }, // Included
+          { name: 'enterprise-saml', strategy: 'samlp', options: {} }, // Not Included
+        ],
+        include: {
+          connections: ['github'],
+        },
+      };
+
+      await handler.processChanges(assets);
+
+      // Should create github
+      expect(scimHandlerMock.createOverride.calledOnce).to.be.true;
+      expect(scimHandlerMock.createOverride.firstCall.args[0].name).to.equal('github');
+
+      // Should NOT create saml
+      const calls = scimHandlerMock.createOverride.getCalls();
+      const createdNames = calls.map((c) => c.args[0].name);
+      expect(createdNames).to.not.include('enterprise-saml');
+    });
+
+    it('should delete connections only when they are in include list', async () => {
+      config.data.AUTH0_ALLOW_DELETE = true;
+      const deleteStub = sinon.stub().resolves({ data: {} });
+
+      const auth0 = {
+        connections: {
+          create: sinon.stub().resolves({ data: {} }),
+          update: sinon.stub().resolves({ data: {} }),
+          delete: deleteStub,
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con_1', strategy: 'github', name: 'github' },
+              { id: 'con_2', strategy: 'google', name: 'google' },
+            ]),
+          clients: {
+            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
+            update: sinon.stub().resolves({}),
+          },
+          _getRestClient: () => ({}),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
+
+      const assets = {
+        connections: [], // Empty assets
+        include: {
+          connections: ['github'], // Only github is managed
+        },
+      };
+
+      await handler.processChanges(assets);
+
+      // Github is in include list but not in assets -> DELETE
+      // Google is NOT in include list and not in assets -> IGNORE
+      expect(deleteStub.calledOnce).to.be.true;
+      expect(deleteStub.firstCall.args[0]).to.equal('con_1');
+    });
+
+    it('should pass filtered changes to processConnectionDirectoryProvisioning', async () => {
+      // We can safely stub this prototype method because it's called explicitly on 'this' in the class
+      const processDirProvStub = sinon
+        .stub(connections.default.prototype, 'processConnectionDirectoryProvisioning')
+        .resolves();
+
+      const auth0 = {
+        connections: {
+          create: sinon.stub().resolves({ data: {} }),
+          update: sinon.stub().resolves({ data: {} }),
+          delete: sinon.stub().resolves({ data: {} }),
+          list: (params) => mockPagedData(params, 'connections', []),
+          clients: {
+            get: sinon.stub().resolves(mockPagedData({}, 'clients', [])),
+            update: sinon.stub().resolves({}),
+          },
+          _getRestClient: () => ({}),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
+
+      const assets = {
+        connections: [
+          {
+            name: 'included-gsuite',
+            strategy: 'google-apps',
+            directory_provisioning_configuration: {},
+          },
+          {
+            name: 'ignored-gsuite',
+            strategy: 'google-apps',
+            directory_provisioning_configuration: {},
+          },
+        ],
+        include: {
+          connections: ['included-gsuite'],
+        },
+      };
+
+      await handler.processChanges(assets);
+
+      expect(processDirProvStub.calledOnce).to.be.true;
+      const passedChanges = processDirProvStub.firstCall.args[0];
+
+      // Verify filtered list passed to directory provisioning
+      expect(passedChanges.create).to.have.length(1);
+      expect(passedChanges.create[0].name).to.equal('included-gsuite');
+
+      processDirProvStub.restore();
     });
   });
 });

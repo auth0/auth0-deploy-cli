@@ -85,5 +85,10 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
 };
 
 export default auth0ApiHandlers as {
-  [key in AssetTypes]: { default: typeof APIHandler; excludeSchema?: any; schema: any };
+  [key in AssetTypes]: {
+    default: typeof APIHandler;
+    excludeSchema?: any;
+    schema: any;
+    includeSchema?: any;
+  };
 }; // TODO: apply stronger types to schema properties

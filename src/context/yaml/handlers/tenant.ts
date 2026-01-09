@@ -13,16 +13,25 @@ async function parse(context: YAMLContext): Promise<ParsedTenant> {
   const {
     session_lifetime,
     idle_session_lifetime,
+    idle_ephemeral_session_lifetime,
+    ephemeral_session_lifetime,
     ...tenant
   }: {
     session_lifetime?: number;
     idle_session_lifetime?: number;
+    idle_ephemeral_session_lifetime?: number;
+    ephemeral_session_lifetime?: number;
     [key: string]: any;
   } = context.assets.tenant;
 
   clearTenantFlags(tenant);
 
-  const sessionDurations = sessionDurationsToMinutes({ session_lifetime, idle_session_lifetime });
+  const sessionDurations = sessionDurationsToMinutes({
+    session_lifetime,
+    idle_session_lifetime,
+    idle_ephemeral_session_lifetime,
+    ephemeral_session_lifetime,
+  });
 
   return {
     tenant: {
