@@ -37,6 +37,34 @@ describe('#directory context tenant', () => {
     expect(context.assets.tenant).to.deep.equal(tenantTarget);
   });
 
+  // NEW TEST CASE: Verify ephemeral session processing
+  it('should process tenant with ephemeral session durations', async () => {
+    const tenantTest = {
+      'tenant.json': `{
+        "friendly_name": "Auth0 Ephemeral",
+        "ephemeral_session_lifetime": 1.5,
+        "idle_ephemeral_session_lifetime": 0.5,
+        "flags": {}
+      }`,
+    };
+
+    const tenantTarget = {
+      friendly_name: 'Auth0 Ephemeral',
+      ephemeral_session_lifetime_in_minutes: 90, // 1.5 * 60
+      idle_ephemeral_session_lifetime_in_minutes: 30, // 0.5 * 60
+    };
+
+    createDir(path.join(testDataDir, 'directory'), { tenantEphemeral: tenantTest });
+
+    const config = {
+      AUTH0_INPUT_FILE: path.join(testDataDir, 'directory', 'tenantEphemeral'),
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.tenant).to.deep.equal(tenantTarget);
+  });
+
   it('should process tenant without session durations', async () => {
     const tenantTest = {
       'tenant.json': `{
@@ -51,10 +79,10 @@ describe('#directory context tenant', () => {
       default_directory: 'users',
     };
 
-    createDir(path.join(testDataDir, 'directory'), { tenant1: tenantTest });
+    createDir(path.join(testDataDir, 'directory'), { tenant2: tenantTest });
 
     const config = {
-      AUTH0_INPUT_FILE: path.join(testDataDir, 'directory', 'tenant1'),
+      AUTH0_INPUT_FILE: path.join(testDataDir, 'directory', 'tenant2'),
       AUTH0_KEYWORD_REPLACE_MAPPINGS: { env: 'test' },
     };
     const context = new Context(config, mockMgmtClient());
@@ -70,6 +98,8 @@ describe('#directory context tenant', () => {
 
     context.assets.tenant = {
       friendly_name: 'Auth0 test',
+      session_lifetime_in_minutes: 60,
+      ephemeral_session_lifetime_in_minutes: 30,
     };
 
     await handler.dump(context);
@@ -79,7 +109,7 @@ describe('#directory context tenant', () => {
   });
 
   it('should dump tenant without flags', async () => {
-    const dir = path.join(testDataDir, 'directory', 'tenantDump');
+    const dir = path.join(testDataDir, 'directory', 'tenantDumpFlags');
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
     const tenant = {
