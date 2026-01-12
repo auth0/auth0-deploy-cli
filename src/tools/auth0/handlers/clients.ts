@@ -277,6 +277,64 @@ export const schema = {
           },
         },
       },
+      oidc_logout: {
+        type: ['object', 'null'],
+        description: 'Configuration for OIDC backchannel logout',
+        properties: {
+          backchannel_logout_urls: {
+            type: 'array',
+            description:
+              'Comma-separated list of URLs that are valid to call back from Auth0 for OIDC backchannel logout. Currently only one URL is allowed.',
+            items: {
+              type: 'string',
+            },
+          },
+          backchannel_logout_initiators: {
+            type: 'object',
+            description: 'Configuration for OIDC backchannel logout initiators',
+            properties: {
+              mode: {
+                type: 'string',
+                schemaName: 'ClientOIDCBackchannelLogoutInitiatorsModeEnum',
+                enum: ['custom', 'all'],
+                description:
+                  'The `mode` property determines the configuration method for enabling initiators. `custom` enables only the initiators listed in the selected_initiators array, `all` enables all current and future initiators.',
+              },
+              selected_initiators: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                  enum: [
+                    'rp-logout',
+                    'idp-logout',
+                    'password-changed',
+                    'session-expired',
+                    'session-revoked',
+                    'account-deleted',
+                    'email-identifier-changed',
+                    'mfa-phone-unenrolled',
+                    'account-deactivated',
+                  ],
+                  description:
+                    'The `selected_initiators` property contains the list of initiators to be enabled for the given application.',
+                },
+              },
+            },
+          },
+          backchannel_logout_session_metadata: {
+            type: ['object', 'null'],
+            description:
+              'Controls whether session metadata is included in the logout token. Default value is null.',
+            properties: {
+              include: {
+                type: 'boolean',
+                description:
+                  'The `include` property determines whether session metadata is included in the logout token.',
+              },
+            },
+          },
+        },
+      },
     },
     required: ['name'],
   },
