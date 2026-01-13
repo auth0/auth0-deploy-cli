@@ -346,11 +346,17 @@ export default class APIHandler {
         generator: (updateItem) =>
           retryWithExponentialBackoff(() => {
             const updateFN = this.getClientFN(this.functions.update);
+            const params = { [this.id]: updateItem[this.id] };
             const updatePayload = (() => {
               const data = stripFields({ ...updateItem }, this.stripUpdateFields);
               return stripObfuscatedFieldsFromPayload(data, this.sensitiveFieldsToObfuscate);
             })();
-            return updateFN(updateItem[this.id], updatePayload);
+            // node-auth0 v5 changed signature from update(params, data) to update(id, data)
+            if (typeof this.functions.update === 'string') {
+              return updateFN(updateItem[this.id], updatePayload);
+            } else {
+              return updateFN(params, updatePayload);
+            }
           }, retryConfig)
             .then((data) => this.didUpdate(data as Asset))
             .catch((err) => {
@@ -396,11 +402,17 @@ export default class APIHandler {
         generator: (updateItem) =>
           retryWithExponentialBackoff(() => {
             const updateFN = this.getClientFN(this.functions.update);
+            const params = { [this.id]: updateItem[this.id] };
             const updatePayload = (() => {
               const data = stripFields({ ...updateItem }, this.stripUpdateFields);
               return stripObfuscatedFieldsFromPayload(data, this.sensitiveFieldsToObfuscate);
             })();
-            return updateFN(updateItem[this.id], updatePayload);
+            // node-auth0 v5 changed signature from update(params, data) to update(id, data)
+            if (typeof this.functions.update === 'string') {
+              return updateFN(updateItem[this.id], updatePayload);
+            } else {
+              return updateFN(params, updatePayload);
+            }
           }, retryConfig)
             .then((data) => {
               this.didUpdate(data as Asset);
