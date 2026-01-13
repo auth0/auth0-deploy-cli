@@ -31,9 +31,14 @@ const includeType = new yaml.Type('!include', {
 const schema = yaml.DEFAULT_SCHEMA.extend([includeType]);
 
 // Function to resolve includes with cycle detection
-function resolveIncludes(obj, basePath, mappings?: KeywordMappings, disableKeywordReplacement?: boolean, visitedFiles = new Set<string>()) {
+function resolveIncludes(content: string, basePath: string, mappings?: KeywordMappings, disableKeywordReplacement?: boolean, visitedFiles = new Set<string>()): string {
+  const obj = yaml.load(content, { schema });
+  return resolveIncludesInObject(obj, basePath, mappings, disableKeywordReplacement, visitedFiles);
+}
+
+function resolveIncludesInObject(obj, basePath, mappings?: KeywordMappings, disableKeywordReplacement?: boolean, visitedFiles = new Set<string>()) {
   if (Array.isArray(obj)) {
-    return obj.map(item => resolveIncludes(item, basePath, mappings, disableKeywordReplacement, visitedFiles));
+    return obj.map(item => resolveIncludesInObject(item, basePath, mappings, disableKeywordReplacement, visitedFiles));
   }
   
   if (obj && typeof obj === 'object') {
@@ -55,7 +60,7 @@ function resolveIncludes(obj, basePath, mappings?: KeywordMappings, disableKeywo
           content = wrapArrayReplaceMarkersInQuotes(content, mappings);
         }
         
-        const result = resolveIncludes(yaml.load(content, { schema }), path.dirname(filePath), mappings, disableKeywordReplacement, new Set(visitedFiles));
+        const result = resolveIncludesInObject(yaml.load(content, { schema }), path.dirname(filePath), mappings, disableKeywordReplacement, new Set(visitedFiles));
         visitedFiles.delete(filePath);
         return result;
       }
@@ -64,7 +69,7 @@ function resolveIncludes(obj, basePath, mappings?: KeywordMappings, disableKeywo
     
     const result = {};
     for (const [key, value] of Object.entries(obj)) {
-      result[key] = resolveIncludes(value, basePath, mappings, disableKeywordReplacement, visitedFiles);
+      result[key] = resolveIncludesInObject(value, basePath, mappings, disableKeywordReplacement, visitedFiles);
     }
     return result;
   }
@@ -132,16 +137,13 @@ export default class YAMLContext {
       try {
         const fPath = path.resolve(this.configFile);
         log.debug(`Loading YAML from ${fPath}`);
-        const loadedYaml = yaml.load(
-          opts.disableKeywordReplacement
-            ? wrapArrayReplaceMarkersInQuotes(fs.readFileSync(fPath, 'utf8'), this.mappings)
-            : keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings),
-          { schema }
-        ) || {};
+        const content = opts.disableKeywordReplacement
+          ? wrapArrayReplaceMarkersInQuotes(fs.readFileSync(fPath, 'utf8'), this.mappings)
+          : keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings);
         
         Object.assign(
           this.assets,
-          resolveIncludes(loadedYaml, path.dirname(fPath), this.mappings, opts.disableKeywordReplacement)
+          resolveIncludes(content, path.dirname(fPath), this.mappings, opts.disableKeywordReplacement)
         );
       } catch (err) {
         log.debug(err.stack);
