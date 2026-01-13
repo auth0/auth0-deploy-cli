@@ -30,16 +30,22 @@ const includeType = new yaml.Type('!include', {
 
 const schema = yaml.DEFAULT_SCHEMA.extend([includeType]);
 
-// Function to resolve includes
-function resolveIncludes(obj, basePath, mappings?: KeywordMappings, disableKeywordReplacement?: boolean) {
+// Function to resolve includes with cycle detection
+function resolveIncludes(obj, basePath, mappings?: KeywordMappings, disableKeywordReplacement?: boolean, visitedFiles = new Set<string>()) {
   if (Array.isArray(obj)) {
-    return obj.map(item => resolveIncludes(item, basePath, mappings, disableKeywordReplacement));
+    return obj.map(item => resolveIncludes(item, basePath, mappings, disableKeywordReplacement, visitedFiles));
   }
   
   if (obj && typeof obj === 'object') {
     if (obj.__include) {
       const filePath = path.resolve(basePath, obj.__include);
+      
+      if (visitedFiles.has(filePath)) {
+        throw new Error(`Circular include detected: ${filePath}`);
+      }
+      
       if (fs.existsSync(filePath)) {
+        visitedFiles.add(filePath);
         let content = fs.readFileSync(filePath, 'utf8');
         
         // Apply keyword replacement to included file content if mappings are provided
@@ -49,14 +55,16 @@ function resolveIncludes(obj, basePath, mappings?: KeywordMappings, disableKeywo
           content = wrapArrayReplaceMarkersInQuotes(content, mappings);
         }
         
-        return resolveIncludes(yaml.load(content, { schema }), path.dirname(filePath), mappings, disableKeywordReplacement);
+        const result = resolveIncludes(yaml.load(content, { schema }), path.dirname(filePath), mappings, disableKeywordReplacement, new Set(visitedFiles));
+        visitedFiles.delete(filePath);
+        return result;
       }
       throw new Error(`Include file not found: ${filePath}`);
     }
     
     const result = {};
     for (const [key, value] of Object.entries(obj)) {
-      result[key] = resolveIncludes(value, basePath, mappings, disableKeywordReplacement);
+      result[key] = resolveIncludes(value, basePath, mappings, disableKeywordReplacement, visitedFiles);
     }
     return result;
   }
