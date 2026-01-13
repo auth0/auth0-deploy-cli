@@ -70,9 +70,6 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
         'created_at',
         'updated_at',
       ],
-      functions: {
-        update: (args, data) => this.client.customDomains.update(args.custom_domain_id, data),
-      },
     });
   }
 

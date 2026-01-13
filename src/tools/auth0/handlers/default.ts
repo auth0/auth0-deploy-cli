@@ -346,12 +346,11 @@ export default class APIHandler {
         generator: (updateItem) =>
           retryWithExponentialBackoff(() => {
             const updateFN = this.getClientFN(this.functions.update);
-            const params = { [this.id]: updateItem[this.id] };
             const updatePayload = (() => {
               const data = stripFields({ ...updateItem }, this.stripUpdateFields);
               return stripObfuscatedFieldsFromPayload(data, this.sensitiveFieldsToObfuscate);
             })();
-            return updateFN(params, updatePayload);
+            return updateFN(updateItem[this.id], updatePayload);
           }, retryConfig)
             .then((data) => this.didUpdate(data as Asset))
             .catch((err) => {
@@ -397,12 +396,11 @@ export default class APIHandler {
         generator: (updateItem) =>
           retryWithExponentialBackoff(() => {
             const updateFN = this.getClientFN(this.functions.update);
-            const params = { [this.id]: updateItem[this.id] };
             const updatePayload = (() => {
               const data = stripFields({ ...updateItem }, this.stripUpdateFields);
               return stripObfuscatedFieldsFromPayload(data, this.sensitiveFieldsToObfuscate);
             })();
-            return updateFN(params, updatePayload);
+            return updateFN(updateItem[this.id], updatePayload);
           }, retryConfig)
             .then((data) => {
               this.didUpdate(data as Asset);

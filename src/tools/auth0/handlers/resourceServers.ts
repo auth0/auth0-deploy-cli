@@ -96,7 +96,7 @@ export default class ResourceServersHandler extends DefaultHandler {
       stripCreateFields: ['client_id', 'is_system'],
       stripUpdateFields: ['identifier', 'client_id', 'is_system'],
       functions: {
-        update: (args, data) => this.updateResourceServer(args, data),
+        update: (id: string, data) => this.updateResourceServer(id, data),
       },
     });
   }
@@ -208,7 +208,7 @@ export default class ResourceServersHandler extends DefaultHandler {
   }
 
   async updateResourceServer(
-    args: { id: string },
+    id: string,
     update: ResourceServer
   ): Promise<Management.UpdateResourceServerResponseContent> {
     // Exclude name from update as it cannot be modified for system resource servers like Auth0 My Account API
@@ -221,9 +221,9 @@ export default class ResourceServersHandler extends DefaultHandler {
         subject_type_authorization: update.subject_type_authorization,
       };
 
-      return this.client.resourceServers.update(args?.id, updateFields);
+      return this.client.resourceServers.update(id, updateFields);
     }
 
-    return this.client.resourceServers.update(args?.id, update);
+    return this.client.resourceServers.update(id, update);
   }
 }
