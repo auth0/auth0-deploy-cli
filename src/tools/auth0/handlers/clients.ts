@@ -305,7 +305,6 @@ export default class ClientHandler extends DefaultAPIHandler {
       ],
       functions: {
         update: async (
-          // eslint-disable-next-line camelcase
           { client_id }: { client_id: string },
           bodyParams: Management.UpdateClientRequestContent
         ) => this.client.clients.update(client_id, bodyParams),
@@ -438,11 +437,60 @@ export default class ClientHandler extends DefaultAPIHandler {
 
     const sanitizedClients = this.sanitizeCrossOriginAuth(clients);
 
-    this.existing = sanitizedClients;
+    const clientsWithCredentials = await this.fetchCredentialsForClients(sanitizedClients);
+
+    this.existing = clientsWithCredentials;
     return this.existing;
   }
 
-  // convert names back to IDs for express configuration
+  async fetchCredentialsForClients(clients: Client[]): Promise<Client[]> {
+    const clientsWithCredentials = await Promise.all(
+      clients.map(async (client) => {
+        if (!client.client_id) return client;
+
+        try {
+          const credentials = await this.client.clients.credentials.list(client.client_id);
+
+          if (credentials && credentials.length > 0) {
+            const updatedClient = { ...client };
+
+            if (!updatedClient.client_authentication_methods) {
+              updatedClient.client_authentication_methods = {};
+            }
+
+            const credentialsList: Array<Management.CredentialId & { name?: string }> = credentials
+              .filter((cred): cred is typeof cred & { id: string } => !!cred.id)
+              .map((cred) => {
+                const credObj: Management.CredentialId & { name?: string } = {
+                  id: cred.id,
+                };
+                if (cred.name) {
+                  credObj.name = cred.name;
+                }
+                return credObj;
+              });
+
+            if (credentialsList.length > 0) {
+              updatedClient.client_authentication_methods.private_key_jwt = {
+                credentials: credentialsList,
+              };
+            }
+
+            return updatedClient;
+          }
+        } catch (err) {
+          if (err.statusCode !== 404 && err.statusCode !== 403) {
+            log.debug(`Unable to fetch credentials for client ${client.client_id}: ${err.message}`);
+          }
+        }
+
+        return client;
+      })
+    );
+
+    return clientsWithCredentials;
+  }
+
   async sanitizeMapExpressConfiguration(
     auth0Client: Auth0APIClient,
     clientList: Client[]
