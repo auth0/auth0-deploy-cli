@@ -339,13 +339,20 @@ export default class OrganizationsHandler extends DefaultHandler {
         (domain) => !existingDiscoveryDomains?.find((d) => d.domain === domain.domain)
       ) || [];
 
-    const orgDiscoveryDomainsToUpdate = existingDiscoveryDomains?.map((existingDomain) => {
-      const updatedDomain = organizationDiscoveryDomains?.find(
-        (d) => d.domain === existingDomain.domain
-      );
-      updatedDomain.id = existingDomain?.id; // setting remote id for update
-      return updatedDomain;
-    });
+    const orgDiscoveryDomainsToUpdate =
+      existingDiscoveryDomains
+        ?.map((existingDomain) => {
+          const updatedDomain = organizationDiscoveryDomains?.find(
+            (d) => d.domain === existingDomain.domain
+          );
+          if (!updatedDomain) return undefined;
+
+          return {
+            ...updatedDomain,
+            id: existingDomain.id, // setting remote id for update
+          };
+        })
+        .filter(Boolean) || [];
 
     for (const { id, domain, ...updateParams } of orgDiscoveryDomainsToUpdate) {
       try {
