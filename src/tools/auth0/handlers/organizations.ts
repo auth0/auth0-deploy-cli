@@ -73,6 +73,9 @@ export const schema = {
           properties: {
             domain: { type: 'string' },
             status: { type: 'string', enum: ['pending', 'verified'] },
+            use_for_organization_discovery: {
+              type: 'boolean',
+            },
           },
           required: ['domain', 'status'],
         },
@@ -173,6 +176,7 @@ export default class OrganizationsHandler extends DefaultHandler {
             this.createOrganizationDiscoveryDomain(created.id, {
               domain: discoveryDomain?.domain,
               status: discoveryDomain?.status,
+              use_for_organization_discovery: discoveryDomain?.use_for_organization_discovery,
             }).catch((err) => {
               throw new Error(
                 `Problem creating discovery domain ${discoveryDomain?.domain} for organization ${created.id}\n${err}`
@@ -335,66 +339,52 @@ export default class OrganizationsHandler extends DefaultHandler {
         (domain) => !existingDiscoveryDomains?.find((d) => d.domain === domain.domain)
       ) || [];
 
-    const orgDiscoveryDomainsToUpdate =
-      existingDiscoveryDomains
-        ?.filter((existingDomain) => {
-          const updatedDomain = organizationDiscoveryDomains?.find(
-            (d) => d.domain === existingDomain.domain
-          );
-          return updatedDomain && updatedDomain.status !== existingDomain.status;
-        })
-        .map((existingDomain) => ({
-          id: existingDomain.id,
-          domain: existingDomain.domain,
-          status: organizationDiscoveryDomains.find((d) => d.domain === existingDomain.domain)
-            .status,
-        })) || [];
+    const orgDiscoveryDomainsToUpdate = existingDiscoveryDomains?.map((existingDomain) => {
+      const updatedDomain = organizationDiscoveryDomains?.find(
+        (d) => d.domain === existingDomain.domain
+      );
+      updatedDomain.id = existingDomain?.id; // setting remote id for update
+      return updatedDomain;
+    });
 
-    // Handle updates first
-    await Promise.all(
-      orgDiscoveryDomainsToUpdate.map((domainUpdate) =>
-        this.updateOrganizationDiscoveryDomain(
-          params.id,
-          domainUpdate.id,
-          domainUpdate.domain,
-          domainUpdate.status
-        ).catch((err) => {
-          throw new Error(
-            `Problem updating discovery domain ${domainUpdate.domain} for organization ${params.id}\n${err.message}`
-          );
-        })
-      )
-    );
+    for (const { id, domain, ...updateParams } of orgDiscoveryDomainsToUpdate) {
+      try {
+        await this.updateOrganizationDiscoveryDomain(params.id, id, domain, updateParams);
+      } catch (err) {
+        throw new Error(
+          `Problem updating discovery domain ${domain} for organization ${params.id}\n${err.message}`
+        );
+      }
+    }
 
-    await Promise.all(
-      orgDiscoveryDomainsToAdd.map((domain) =>
-        this.createOrganizationDiscoveryDomain(params.id, {
+    for (const domain of orgDiscoveryDomainsToAdd) {
+      try {
+        await this.createOrganizationDiscoveryDomain(params.id, {
           domain: domain.domain,
           status: domain.status,
-        }).catch((err) => {
-          throw new Error(
-            `Problem adding discovery domain ${domain.domain} for organization ${params.id}\n${err.message}`
-          );
-        })
-      )
-    );
+          use_for_organization_discovery: domain.use_for_organization_discovery,
+        });
+      } catch (err) {
+        throw new Error(
+          `Problem adding discovery domain ${domain.domain} for organization ${params.id}\n${err.message}`
+        );
+      }
+    }
 
     if (orgDiscoveryDomainsToRemove.length > 0) {
       if (
         this.config('AUTH0_ALLOW_DELETE') === 'true' ||
         this.config('AUTH0_ALLOW_DELETE') === true
       ) {
-        await Promise.all(
-          orgDiscoveryDomainsToRemove.map((domain) =>
-            this.deleteOrganizationDiscoveryDomain(params.id, domain.domain, domain.id).catch(
-              (err) => {
-                throw new Error(
-                  `Problem removing discovery domain ${domain.domain} for organization ${params.id}\n${err.message}`
-                );
-              }
-            )
-          )
-        );
+        for (const domain of orgDiscoveryDomainsToRemove) {
+          try {
+            await this.deleteOrganizationDiscoveryDomain(params.id, domain.domain, domain.id);
+          } catch (err) {
+            throw new Error(
+              `Problem removing discovery domain ${domain.domain} for organization ${params.id}\n${err.message}`
+            );
+          }
+        }
       } else {
         log.warn(`Detected the following organization discovery domains should be deleted. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config
       \n${orgDiscoveryDomainsToRemove.map((i) => this.objString(i)).join('\n')}`);
@@ -668,7 +658,7 @@ export default class OrganizationsHandler extends DefaultHandler {
     organizationId: string,
     discoveryDomainId: string,
     discoveryDomain: string,
-    status: Management.OrganizationDiscoveryDomainStatus
+    discoveryDomainUpdate: Management.UpdateOrganizationDiscoveryDomainRequestContent
   ): Promise<Management.UpdateOrganizationDiscoveryDomainResponseContent> {
     log.debug(`Updating discovery domain ${discoveryDomain} for organization ${organizationId}`);
 
@@ -688,7 +678,8 @@ export default class OrganizationsHandler extends DefaultHandler {
         },
         generator: (args) =>
           this.client.organizations.discoveryDomains.update(args.id, args.discoveryDomainId, {
-            status: status,
+            status: discoveryDomainUpdate.status,
+            use_for_organization_discovery: discoveryDomainUpdate.use_for_organization_discovery,
           }),
       })
       .promise();

@@ -303,7 +303,7 @@ export type AllPromptsByLanguage = Partial<{
   [key in Language]: Partial<PromptsCustomText>;
 }>;
 
-export type ScreenRenderer = Management.AculResponseContent;
+export type ScreenRenderer = Management.GetAculResponseContent;
 
 export type Prompts = Partial<
   PromptSettings & {
