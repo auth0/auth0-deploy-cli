@@ -233,7 +233,7 @@ describe('ScimHandler', () => {
 
   describe('updateOverride', () => {
     it('should update SCIM configuration when updating connection during updateOverride', async () => {
-      const requestParams = { id: 'con_kzpLY0Afi4I8lvwM' };
+      const connectionId = 'con_kzpLY0Afi4I8lvwM';
       const bodyParams = { scim_configuration: { mapping: [], user_id_attribute: 'id' } };
 
       mockConnectionsManager.update.resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
@@ -245,13 +245,13 @@ describe('ScimHandler', () => {
         scimConfiguration: bodyParams.scim_configuration,
       });
 
-      await handler.updateOverride(requestParams, bodyParams);
+      await handler.updateOverride(connectionId, bodyParams);
       expect(mockConnectionsManager.update.calledOnce).to.be.true;
       expect(handler.updateScimConfiguration.calledOnce).to.be.true;
     });
 
     it('should remove directory provisioning configuration before updating connection', async () => {
-      const requestParams = { id: 'con_dirprov' };
+      const connectionId = 'con_dirprov';
       const bodyParams = {
         name: 'google-apps-connection',
         scim_configuration: { mapping: [], user_id_attribute: 'id' },
@@ -266,7 +266,7 @@ describe('ScimHandler', () => {
       mockConnectionsManager.update.resolves({ id: 'con_dirprov' });
       handler.updateScimConfiguration = sinon.stub().resolves({ connection_id: 'con_dirprov' });
 
-      await handler.updateOverride(requestParams, { ...bodyParams });
+      await handler.updateOverride(connectionId, { ...bodyParams });
 
       const [, updateBody] = mockConnectionsManager.update.firstCall.args;
       expect(updateBody).to.not.have.property('directory_provisioning_configuration');
@@ -276,7 +276,7 @@ describe('ScimHandler', () => {
     });
 
     it('should create SCIM configuration when updating connection during updateOverride', async () => {
-      const requestParams = { id: 'con_kzpLY0Afi4I8lvwM' };
+      const connectionId = 'con_kzpLY0Afi4I8lvwM';
       const bodyParams = { scim_configuration: { mapping: [], user_id_attribute: 'id' } };
 
       mockConnectionsManager.update.resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
@@ -284,13 +284,13 @@ describe('ScimHandler', () => {
         .stub()
         .resolves({ connection_id: 'con_kzpLY0Afi4I8lvwM' });
 
-      await handler.updateOverride(requestParams, bodyParams);
+      await handler.updateOverride(connectionId, bodyParams);
       expect(mockConnectionsManager.update.calledOnce).to.be.true;
       expect(handler.createScimConfiguration.calledOnce).to.be.true;
     });
 
     it('should delete SCIM configuration when updating connection during updateOverride', async () => {
-      const requestParams = { id: 'con_kzpLY0Afi4I8lvwM' };
+      const connectionId = 'con_kzpLY0Afi4I8lvwM';
       const bodyParams = {};
 
       mockConnectionsManager.update.resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
@@ -303,13 +303,13 @@ describe('ScimHandler', () => {
         .resolves({ connection_id: 'con_kzpLY0Afi4I8lvwM' });
       handler.config.returns(true); // Setting `AUTH0_ALLOW_DELETE` to true.
 
-      await handler.updateOverride(requestParams, bodyParams);
+      await handler.updateOverride(connectionId, bodyParams);
       expect(mockConnectionsManager.update.calledOnce).to.be.true;
       expect(handler.deleteScimConfiguration.calledOnce).to.be.true;
     });
 
     it('should not delete SCIM configuration when updating connection during updateOverride when AUTH0_ALLOW_DELETE is false', async () => {
-      const requestParams = { id: 'con_kzpLY0Afi4I8lvwM' };
+      const connectionId = 'con_kzpLY0Afi4I8lvwM';
       const bodyParams = {};
 
       mockConnectionsManager.update.resolves({ id: 'con_kzpLY0Afi4I8lvwM' });
@@ -322,13 +322,13 @@ describe('ScimHandler', () => {
         .resolves({ connection_id: 'con_kzpLY0Afi4I8lvwM' });
       handler.config.returns(false); // Setting `AUTH0_ALLOW_DELETE` to false.
 
-      await handler.updateOverride(requestParams, bodyParams);
+      await handler.updateOverride(connectionId, bodyParams);
       expect(mockConnectionsManager.update.calledOnce).to.be.true;
       expect(handler.deleteScimConfiguration.called).to.be.false;
     });
 
     it('should handle errors gracefully during updateOverride', async () => {
-      const requestParams = { id: 'con_kzpLY0Afi4I8lvwM' };
+      const connectionId = 'con_kzpLY0Afi4I8lvwM';
       const bodyParams = { scim_configuration: { mapping: [], user_id_attribute: 'id' } };
 
       mockConnectionsManager.update.rejects(new Error('Unexpected error'));
@@ -336,7 +336,7 @@ describe('ScimHandler', () => {
         .stub()
         .resolves({ connection_id: 'con_kzpLY0Afi4I8lvwM' });
 
-      await expect(handler.updateOverride(requestParams, bodyParams)).to.be.rejectedWith(
+      await expect(handler.updateOverride(connectionId, bodyParams)).to.be.rejectedWith(
         'Unexpected error'
       );
       expect(handler.updateScimConfiguration.called).to.be.false;

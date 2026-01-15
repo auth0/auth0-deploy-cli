@@ -302,8 +302,8 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       functions: {
         // When `connections` is updated, it can result in `update`,`create` or `delete` action on SCIM.
         // Because, `scim_configuration` is inside `connections`.
-        update: async (requestParams, bodyParams) =>
-          this.scimHandler.updateOverride(requestParams, bodyParams),
+        update: async (connectionId: string, bodyParams) =>
+          this.scimHandler.updateOverride(connectionId, bodyParams),
 
         // When a new `connection` is created. We can perform only `create` option on SCIM.
         // When a connection is `deleted`. `scim_configuration` is also deleted along with it; no action on SCIM is required.

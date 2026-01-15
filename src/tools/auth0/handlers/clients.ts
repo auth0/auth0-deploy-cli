@@ -303,13 +303,6 @@ export default class ClientHandler extends DefaultAPIHandler {
         'jwt_configuration.secret_encoded',
         'resource_server_identifier',
       ],
-      functions: {
-        update: async (
-          // eslint-disable-next-line camelcase
-          { client_id }: { client_id: string },
-          bodyParams: Management.UpdateClientRequestContent
-        ) => this.client.clients.update(client_id, bodyParams),
-      },
     });
   }
 
