@@ -105,6 +105,10 @@ export default class YAMLContext {
       defaults: config.AUTH0_EXCLUDED_DEFAULTS || [],
     };
 
+    this.assets.include = {
+      connections: config.AUTH0_INCLUDED_CONNECTIONS || [],
+    };
+
     this.basePath = (() => {
       if (!!config.AUTH0_BASE_PATH) return config.AUTH0_BASE_PATH;
       //@ts-ignore because this looks to be a bug, but do not want to introduce regression; more investigation needed
@@ -163,6 +167,7 @@ export default class YAMLContext {
 
     const initialAssets: Assets = {
       exclude: this.assets.exclude, // Keep the exclude rules in result assets
+      include: this.assets.include, // Keep the include rules in result assets
     };
     this.assets = Object.keys(this.assets).reduce((acc: Assets, key: AssetTypes) => {
       // Get the list of asset types to include
@@ -265,6 +270,7 @@ export default class YAMLContext {
 
     // Delete exclude as it's not part of the auth0 tenant config
     delete cleaned.exclude;
+    delete cleaned.include;
 
     // Optionally Strip identifiers
     if (!this.config.AUTH0_EXPORT_IDENTIFIERS) {

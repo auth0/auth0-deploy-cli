@@ -18,6 +18,16 @@ const excludeSchema = Object.entries(handlers).reduce(
   {}
 );
 
+const includeSchema = Object.entries(handlers).reduce(
+  (map: { [key: string]: Object }, [name, obj]) => {
+    if (obj.includeSchema) {
+      map[name] = obj.includeSchema;
+    }
+    return map;
+  },
+  {}
+);
+
 export default {
   type: 'object',
   $schema: 'http://json-schema.org/draft-07/schema#',
@@ -26,6 +36,11 @@ export default {
     exclude: {
       type: 'object',
       properties: { ...excludeSchema },
+      default: {},
+    },
+    include: {
+      type: 'object',
+      properties: { ...includeSchema },
       default: {},
     },
   },

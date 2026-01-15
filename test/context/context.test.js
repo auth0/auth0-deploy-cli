@@ -255,6 +255,49 @@ describe('#context loader validation', async () => {
       'Need to define at least one resource type in AUTH0_INCLUDED_ONLY configuration. See: https://github.com/auth0/auth0-deploy-cli/blob/master/docs/configuring-the-deploy-cli.md#auth0_included_only'
     );
   });
+
+  it('should error if trying to configure AUTH0_INCLUDED_CONNECTIONS and AUTH0_EXCLUDED_CONNECTIONS simultaneously', async () => {
+    const dir = path.resolve(testDataDir, 'context');
+    cleanThenMkdir(dir);
+    const yaml = path.join(dir, 'empty.yaml');
+    fs.writeFileSync(yaml, '');
+
+    await expect(
+      setupContext(
+        {
+          ...config,
+          AUTH0_INPUT_FILE: yaml,
+          AUTH0_INCLUDED_CONNECTIONS: ['github', 'google-oauth2'],
+          AUTH0_EXCLUDED_CONNECTIONS: ['facebook'],
+        },
+        'import'
+      )
+    ).to.be.rejectedWith(
+      'Both AUTH0_INCLUDED_CONNECTIONS and AUTH0_EXCLUDED_CONNECTIONS configuration values are defined, only one can be configured at a time.'
+    );
+
+    await expect(
+      setupContext(
+        {
+          ...config,
+          AUTH0_INCLUDED_CONNECTIONS: ['github', 'google-oauth2'],
+          AUTH0_INPUT_FILE: yaml,
+        },
+        'import'
+      )
+    ).to.be.not.rejected;
+
+    await expect(
+      setupContext(
+        {
+          ...config,
+          AUTH0_EXCLUDED_CONNECTIONS: ['facebook'],
+          AUTH0_INPUT_FILE: yaml,
+        },
+        'import'
+      )
+    ).to.be.not.rejected;
+  });
 });
 
 describe('#filterOnlyIncludedResourceTypes', async () => {
