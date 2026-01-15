@@ -101,6 +101,7 @@ const screenTypes = [
   'email-otp-challenge',
   'redeem-ticket',
   'organization-selection',
+  'pre-login-organization-picker',
   'accept-invitation',
   'login-passwordless-email-code',
   'login-passwordless-email-link',
