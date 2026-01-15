@@ -87,7 +87,7 @@ export default class ActionHandler extends DefaultAPIHandler {
       type: 'actions',
       functions: {
         create: (action: CreateActionRequestWithId) => this.createAction(action),
-        update: ({ id }: { id: string }, action: Management.UpdateActionRequestContent) =>
+        update: (id: string, action: Management.UpdateActionRequestContent) =>
           this.updateAction(id, action),
         delete: (actionId: string) => this.deleteAction(actionId),
       },
