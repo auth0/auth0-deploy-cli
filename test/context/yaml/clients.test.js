@@ -304,4 +304,58 @@ describe('#YAML context clients', () => {
 
     expect(context.assets.clients).to.deep.equal(target);
   });
+
+  it('should process clients with oidc_logout', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'clientsWithOidcLogout');
+    cleanThenMkdir(dir);
+
+    const yaml = `
+    clients:
+      -
+        name: "oidcLogoutClient"
+        app_type: "regular_web"
+        oidc_logout:
+          backchannel_logout_urls: ['https://example.com/logout']
+          backchannel_logout_initiators:
+            mode: 'custom'
+            selected_initiators: ['rp-logout', 'idp-logout']
+          backchannel_logout_session_metadata:
+            include: true
+      -
+        name: "simpleClient"
+        app_type: "spa"
+    `;
+
+    const target = [
+      {
+        name: 'oidcLogoutClient',
+        app_type: 'regular_web',
+        oidc_logout: {
+          backchannel_logout_urls: ['https://example.com/logout'],
+          backchannel_logout_initiators: {
+            mode: 'custom',
+            selected_initiators: ['rp-logout', 'idp-logout'],
+          },
+          backchannel_logout_session_metadata: {
+            include: true,
+          },
+        },
+      },
+      {
+        name: 'simpleClient',
+        app_type: 'spa',
+      },
+    ];
+
+    const yamlFile = path.join(dir, 'clients.yaml');
+    fs.writeFileSync(yamlFile, yaml);
+
+    const config = {
+      AUTH0_INPUT_FILE: yamlFile,
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.clients).to.deep.equal(target);
+  });
 });
