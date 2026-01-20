@@ -412,7 +412,7 @@ export default class ClientHandler extends DefaultAPIHandler {
 
     // Sanitize client fields
     const sanitizeClientFields = (list: Client[]): Client[] => {
-      const sanitizedClients = this.sanitizeCrossOriginAuth(list);
+      const sanitizedClients = this.sanitizeOidcLogout(this.sanitizeCrossOriginAuth(list));
 
       return sanitizedClients.map((item: Client) => {
         if (item.app_type === 'resource_server') {
@@ -473,6 +473,45 @@ export default class ClientHandler extends DefaultAPIHandler {
       log.warn(
         "The 'cross_origin_auth' parameter is deprecated in clients and scheduled for removal in future releases.\n" +
           `Use 'cross_origin_authentication' going forward. Clients using the deprecated setting: [${deprecatedClients.join(
+            ', '
+          )}]`
+      );
+    }
+
+    return updatedClients;
+  }
+
+  /**
+   * @description
+   * Sanitize the deprecated field `oidc_backchannel_logout` to `oidc_logout`
+   *
+   * @param {Client[]} clients - The client array to sanitize.
+   * @returns {Client[]} The sanitized array of clients.
+   */
+  private sanitizeOidcLogout(clients: Client[]): Client[] {
+    const deprecatedClients: string[] = [];
+
+    const updatedClients = clients.map((client) => {
+      let updated: Client = { ...client };
+
+      if (has(updated, 'oidc_backchannel_logout')) {
+        const clientName = client.name || client.client_id || 'unknown client';
+        deprecatedClients.push(clientName);
+
+        if (!has(updated, 'oidc_logout')) {
+          updated.oidc_logout = updated.oidc_backchannel_logout;
+        }
+
+        updated = omit(updated, 'oidc_backchannel_logout') as Client;
+      }
+
+      return updated;
+    });
+
+    if (deprecatedClients.length > 0) {
+      log.warn(
+        "The 'oidc_backchannel_logout' parameter is deprecated in clients and scheduled for removal in future releases.\n" +
+          `Use 'oidc_logout' going forward. Clients using the deprecated setting: [${deprecatedClients.join(
             ', '
           )}]`
       );
