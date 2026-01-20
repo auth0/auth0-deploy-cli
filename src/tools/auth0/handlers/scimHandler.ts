@@ -9,10 +9,6 @@ interface IdMapValue {
   scimConfiguration?: Asset;
 }
 
-interface ScimRequestParams {
-  id: string;
-}
-
 interface ScimBodyParams {
   user_id_attribute: string;
   mapping: { scim: string; auth0: string }[];
@@ -92,7 +88,7 @@ export default class ScimHandler {
           if (!this.isScimStrategy(connection.strategy)) return Promise.resolve(null);
 
           this.idMap.set(connection.id, { strategy: connection.strategy });
-          return this.getScimConfiguration({ id: connection.id })
+          return this.getScimConfiguration(connection.id)
             .then((response) => {
               const scimConfiguration = response;
               if (scimConfiguration) {
@@ -221,7 +217,7 @@ export default class ScimHandler {
    * Creates a new `SCIM` configuration.
    */
   async createScimConfiguration(
-    { id }: ScimRequestParams,
+    id: string,
     // eslint-disable-next-line camelcase
     { user_id_attribute, mapping }: ScimBodyParams
   ): Promise<Asset | null> {
@@ -238,9 +234,9 @@ export default class ScimHandler {
   /**
    * Retrieves `SCIM` configuration of an enterprise connection.
    */
-  async getScimConfiguration({
-    id,
-  }: ScimRequestParams): Promise<Management.GetScimConfigurationResponseContent | null> {
+  async getScimConfiguration(
+    id: string
+  ): Promise<Management.GetScimConfigurationResponseContent | null> {
     log.debug(`Getting SCIM configuration from connection ${id}`);
 
     return this.withErrorHandling(
@@ -254,7 +250,7 @@ export default class ScimHandler {
    * Updates an existing `SCIM` configuration.
    */
   async updateScimConfiguration(
-    { id }: ScimRequestParams,
+    id: string,
     // eslint-disable-next-line camelcase
     { user_id_attribute, mapping }: ScimBodyParams
   ): Promise<Asset | null> {
@@ -271,7 +267,7 @@ export default class ScimHandler {
   /**
    * Deletes an existing `SCIM` configuration.
    */
-  async deleteScimConfiguration({ id }: ScimRequestParams): Promise<Asset | null> {
+  async deleteScimConfiguration(id: string): Promise<Asset | null> {
     log.debug(`Deleting SCIM configuration on connection ${id}`);
 
     return this.withErrorHandling(
@@ -281,7 +277,7 @@ export default class ScimHandler {
     );
   }
 
-  async updateOverride(requestParams: ScimRequestParams, bodyParams: Asset) {
+  async updateOverride(connectionId: string, bodyParams: Asset) {
     // Extract `scim_configuration` from `bodyParams`.
     // Remove `scim_configuration` from `bodyParams`, because `connections.update` doesn't accept it.
     const { scim_configuration: scimBodyParams } = bodyParams;
@@ -289,8 +285,8 @@ export default class ScimHandler {
     delete bodyParams.directory_provisioning_configuration;
 
     // First, update `connections`.
-    const updated = await this.connectionsManager.update(requestParams.id, bodyParams);
-    const idMapEntry = this.idMap.get(requestParams.id);
+    const updated = await this.connectionsManager.update(connectionId, bodyParams);
+    const idMapEntry = this.idMap.get(connectionId);
 
     // Now, update `scim_configuration` inside the updated connection.
     // If `scim_configuration` exists in both local and remote -> updateScimConfiguration(...)
@@ -300,19 +296,19 @@ export default class ScimHandler {
     if (idMapEntry?.scimConfiguration) {
       if (scimBodyParams) {
         if (this.scimScopes.update) {
-          await this.updateScimConfiguration(requestParams, scimBodyParams);
+          await this.updateScimConfiguration(connectionId, scimBodyParams);
         }
       } else if (this.config('AUTH0_ALLOW_DELETE')) {
         if (this.scimScopes.delete) {
-          await this.deleteScimConfiguration(requestParams);
+          await this.deleteScimConfiguration(connectionId);
         }
       } else {
         log.warn(
-          `Skipping DELETE scim_configuration on \"${requestParams.id}\". Enable deletes by setting \"AUTH0_ALLOW_DELETE\" to true in your config.`
+          `Skipping DELETE scim_configuration on \"${connectionId}\". Enable deletes by setting \"AUTH0_ALLOW_DELETE\" to true in your config.`
         );
       }
     } else if (scimBodyParams && this.scimScopes.create) {
-      await this.createScimConfiguration(requestParams, scimBodyParams);
+      await this.createScimConfiguration(connectionId, scimBodyParams);
     }
 
     // Return response from connections.update(...).
@@ -333,7 +329,7 @@ export default class ScimHandler {
 
     if (data?.id && scimBodyParams && this.scimScopes.create) {
       // Now, create the `scim_configuration` for newly created `connection`.
-      await this.createScimConfiguration({ id: data.id }, scimBodyParams);
+      await this.createScimConfiguration(data.id, scimBodyParams);
     }
 
     // Return response from connections.create(...).

@@ -199,6 +199,23 @@ export function filterExcluded(changes: CalculatedChanges, exclude: string[]): C
   };
 }
 
+export function filterIncluded(changes: CalculatedChanges, include: string[]): CalculatedChanges {
+  const { del, update, create, conflicts } = changes;
+
+  if (!include || !include.length) {
+    return changes;
+  }
+
+  const filter = (list: Asset[]) => list.filter((item) => include.includes(item.name));
+
+  return {
+    del: filter(del),
+    update: filter(update),
+    create: filter(create),
+    conflicts: filter(conflicts),
+  };
+}
+
 export function areArraysEquals(x: any[], y: any[]): boolean {
   return _.isEqual(x && x.sort(), y && y.sort());
 }
