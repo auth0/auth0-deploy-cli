@@ -126,6 +126,39 @@ describe('#flowVaultConnections handler', () => {
       expect(data).to.deep.equal([sampleFlowVaultConnections]);
     });
 
+    it('should handle multi-page pagination for flowVaultConnections', async () => {
+      // Simulate 3 pages of flow vault connections
+      const page1 = [
+        { id: 'ac_1', name: 'Connection 1', app_id: 'HTTP' },
+        { id: 'ac_2', name: 'Connection 2', app_id: 'HTTP' },
+      ];
+      const page2 = [
+        { id: 'ac_3', name: 'Connection 3', app_id: 'HTTP' },
+      ];
+      const page3 = [
+        { id: 'ac_4', name: 'Connection 4', app_id: 'HTTP' },
+        { id: 'ac_5', name: 'Connection 5', app_id: 'HTTP' },
+      ];
+
+      const auth0 = {
+        flows: {
+          vault: {
+            connections: {
+              list: (params) => mockPagedData(params, 'connections', page1, [page2, page3]),
+            },
+          },
+        },
+        pool,
+      };
+
+      const handler = new flowVaultConnections.default({ client: pageClient(auth0), config });
+      const data = await handler.getType();
+
+      // Should include connections from ALL 3 pages
+      expect(data).to.have.length(5);
+      expect(data.map((c) => c.id)).to.deep.equal(['ac_1', 'ac_2', 'ac_3', 'ac_4', 'ac_5']);
+    });
+
     it('should update flowVaultConnections', async () => {
       const auth0 = {
         flows: {
