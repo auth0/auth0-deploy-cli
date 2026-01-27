@@ -31,6 +31,10 @@ export const schema = {
         },
         uniqueItems: true,
       },
+      allow_all_scopes: {
+        type: 'boolean',
+        description: 'When enabled, all scopes configured on the resource server are allowed for by this client grant.',
+      },
     },
     required: ['client_id', 'audience'],
   },
@@ -54,6 +58,25 @@ export default class ClientGrantsHandler extends DefaultHandler {
 
   objString(item): string {
     return super.objString({ id: item.id, client_id: item.client_id, audience: item.audience });
+  }
+
+  async validate(assets: Assets): Promise<void> {
+    const { clientGrants } = assets;
+
+    // Do nothing if not set
+    if (!clientGrants) return;
+
+    // Validate each client grant
+    clientGrants.forEach((grant) => {
+      // When allow_all_scopes is true, scope should not be present
+      if (grant.allow_all_scopes === true && grant.scope && grant.scope.length > 0) {
+        throw new Error(
+          `Client grant for client_id "${grant.client_id}" and audience "${grant.audience}": Cannot specify "scope" when "allow_all_scopes" is set to true. Remove the "scope" property or set "allow_all_scopes" to false.`
+        );
+      }
+    });
+
+    await super.validate(assets);
   }
 
   async getType(): Promise<ClientGrant[]> {
