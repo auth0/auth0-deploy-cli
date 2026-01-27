@@ -215,9 +215,6 @@ export default class ConnectionProfilesHandler extends DefaultAPIHandler {
       type: 'connectionProfiles',
       id: 'id',
       identifiers: ['id', 'name'],
-      functions: {
-        update: (args, data) => this.client.connectionProfiles.update(args?.id, data),
-      },
     });
   }
 

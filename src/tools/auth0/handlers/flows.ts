@@ -36,10 +36,6 @@ export default class FlowHandler extends DefaultHandler {
       id: 'id',
       stripCreateFields: ['created_at', 'updated_at', 'executed_at'],
       stripUpdateFields: ['created_at', 'updated_at', 'executed_at'],
-      functions: {
-        update: async ({ id }: { id: string }, bodyParams: Management.UpdateFlowRequestContent) =>
-          this.client.flows.update(id, bodyParams),
-      },
     });
   }
 

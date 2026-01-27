@@ -37,10 +37,6 @@ export default class FormsHandler extends DefaultHandler {
       id: 'id',
       stripCreateFields: ['created_at', 'updated_at', 'submitted_at', 'embedded_at'],
       stripUpdateFields: ['created_at', 'updated_at', 'submitted_at', 'embedded_at'],
-      functions: {
-        update: async ({ id }: { id: string }, bodyParams: Management.UpdateFormRequestContent) =>
-          this.client.forms.update(id, bodyParams),
-      },
     });
   }
 

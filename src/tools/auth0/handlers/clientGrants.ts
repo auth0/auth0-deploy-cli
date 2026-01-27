@@ -48,12 +48,6 @@ export default class ClientGrantsHandler extends DefaultHandler {
       id: 'id',
       // @ts-ignore because not sure why two-dimensional array passed in
       identifiers: ['id', ['client_id', 'audience']],
-      functions: {
-        update: async (
-          { id }: { id: string },
-          bodyParams: Management.UpdateClientGrantRequestContent
-        ) => this.client.clientGrants.update(id, bodyParams),
-      },
       stripUpdateFields: ['audience', 'client_id', 'subject_type', 'is_system'],
     });
   }

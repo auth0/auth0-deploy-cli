@@ -82,6 +82,7 @@ export type Config = {
   INCLUDED_PROPS?: {
     [key: string]: string[];
   };
+  AUTH0_INCLUDED_CONNECTIONS?: string[];
   AUTH0_IGNORE_UNAVAILABLE_MIGRATIONS?: boolean;
   // Eventually deprecate. See: https://github.com/auth0/auth0-deploy-cli/issues/451#user-content-deprecated-exclusion-props
   AUTH0_EXCLUDED_RULES?: string[];
@@ -136,6 +137,9 @@ export type Assets = Partial<{
   triggers: Asset[] | null;
   // non-resource types
   exclude?: {
+    [key: string]: string[];
+  };
+  include?: {
     [key: string]: string[];
   };
   clientsOrig: Asset[] | null;
