@@ -410,17 +410,21 @@ export default class ClientHandler extends DefaultAPIHandler {
     };
 
     const createClientSanitizer = (clients: Client[]): ClientSanitizerChain => {
+      let sanitized = clients;
+
       return {
-        sanitizeCrossOriginAuth() {
-          return this;
+        sanitizeCrossOriginAuth: () => {
+          sanitized = this.sanitizeCrossOriginAuth(sanitized);
+          return createClientSanitizer(sanitized);
         },
 
-        sanitizeOidcLogout() {
-          return this;
+        sanitizeOidcLogout: () => {
+          sanitized = this.sanitizeOidcLogout(sanitized);
+          return createClientSanitizer(sanitized);
         },
 
-        get() {
-          return clients;
+        get: () => {
+          return sanitized;
         },
       };
     };
@@ -428,8 +432,8 @@ export default class ClientHandler extends DefaultAPIHandler {
     // Sanitize client fields
     const sanitizeClientFields = (list: Client[]): Client[] => {
       const sanitizedClients = createClientSanitizer(list)
-        .sanitizeOidcLogout()
         .sanitizeCrossOriginAuth()
+        .sanitizeOidcLogout()
         .get();
 
       return sanitizedClients.map((item: Client) => {
