@@ -410,9 +410,34 @@ export default class ClientHandler extends DefaultAPIHandler {
           (!excludeThirdPartyClients || item.is_first_party)
       );
 
+    type ClientSanitizerChain = {
+      sanitizeOidcLogout(): ClientSanitizerChain;
+      sanitizeCrossOriginAuth(): ClientSanitizerChain;
+      get(): Client[];
+    };
+
+    const createClientSanitizer = (clients: Client[]): ClientSanitizerChain => {
+      return {
+        sanitizeCrossOriginAuth() {
+          return this;
+        },
+
+        sanitizeOidcLogout() {
+          return this;
+        },
+
+        get() {
+          return clients;
+        },
+      };
+    };
+
     // Sanitize client fields
     const sanitizeClientFields = (list: Client[]): Client[] => {
-      const sanitizedClients = this.sanitizeOidcLogout(this.sanitizeCrossOriginAuth(list));
+      const sanitizedClients = createClientSanitizer(list)
+        .sanitizeOidcLogout()
+        .sanitizeCrossOriginAuth()
+        .get();
 
       return sanitizedClients.map((item: Client) => {
         if (item.app_type === 'resource_server') {
