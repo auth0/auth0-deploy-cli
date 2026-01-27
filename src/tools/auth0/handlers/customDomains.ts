@@ -58,6 +58,7 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
         'certificate',
         'created_at',
         'updated_at',
+        'is_default',
       ],
       stripUpdateFields: [
         'status',
@@ -69,6 +70,7 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
         'certificate',
         'created_at',
         'updated_at',
+        'is_default',
       ],
     });
   }

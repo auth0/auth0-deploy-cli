@@ -369,6 +369,7 @@ describe('#customDomains handler', () => {
       primary: true, // should be stripped
       verification: { method: 'cname' }, // should be stripped
       verification_method: 'cname', // should be stripped
+      is_default: true, // should be stripped
       tls_policy: 'recommended', // should NOT be stripped
       domain_metadata: { key: 'value' }, // should NOT be stripped
     };
@@ -405,6 +406,7 @@ describe('#customDomains handler', () => {
     expect(updateCallData).to.not.have.property('primary');
     expect(updateCallData).to.not.have.property('verification');
     expect(updateCallData).to.not.have.property('verification_method');
+    expect(updateCallData).to.not.have.property('is_default');
 
     // Verify that allowed fields are present
     expect(updateCallData).to.have.property('tls_policy', 'recommended');
