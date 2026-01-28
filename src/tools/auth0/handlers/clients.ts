@@ -342,6 +342,86 @@ export const schema = {
 
 export type Client = Management.Client;
 
+type ClientSanitizerChain = {
+  sanitizeOidcLogout(): ClientSanitizerChain;
+  sanitizeCrossOriginAuth(): ClientSanitizerChain;
+  get(): Client[];
+};
+
+const createClientSanitizer = (clients: Client[]): ClientSanitizerChain => {
+  let sanitized = clients;
+
+  return {
+    sanitizeCrossOriginAuth() {
+      const deprecatedClients: string[] = [];
+
+      sanitized = sanitized.map((client) => {
+        let updated: Client = { ...client };
+
+        if (has(updated, 'cross_origin_auth')) {
+          const clientName = client.name || client.client_id || 'unknown client';
+          deprecatedClients.push(clientName);
+
+          if (!has(updated, 'cross_origin_authentication')) {
+            updated.cross_origin_authentication = updated.cross_origin_auth;
+          }
+
+          updated = omit(updated, 'cross_origin_auth') as Client;
+        }
+
+        return updated;
+      });
+
+      if (deprecatedClients.length > 0) {
+        log.warn(
+          "The 'cross_origin_auth' parameter is deprecated in clients and scheduled for removal in future releases.\n" +
+            `Use 'cross_origin_authentication' going forward. Clients using the deprecated setting: [${deprecatedClients.join(
+              ', '
+            )}]`
+        );
+      }
+
+      return this;
+    },
+
+    sanitizeOidcLogout() {
+      const deprecatedClients: string[] = [];
+
+      sanitized = sanitized.map((client) => {
+        let updated: Client = { ...client };
+
+        if (has(updated, 'oidc_backchannel_logout')) {
+          const clientName = client.name || client.client_id || 'unknown client';
+          deprecatedClients.push(clientName);
+
+          if (!has(updated, 'oidc_logout')) {
+            updated.oidc_logout = updated.oidc_backchannel_logout;
+          }
+
+          updated = omit(updated, 'oidc_backchannel_logout') as Client;
+        }
+
+        return updated;
+      });
+
+      if (deprecatedClients.length > 0) {
+        log.warn(
+          "The 'oidc_backchannel_logout' parameter is deprecated in clients and scheduled for removal in future releases.\n" +
+            `Use 'oidc_logout' going forward. Clients using the deprecated setting: [${deprecatedClients.join(
+              ', '
+            )}]`
+        );
+      }
+
+      return this;
+    },
+
+    get: () => {
+      return sanitized;
+    },
+  };
+};
+
 export default class ClientHandler extends DefaultAPIHandler {
   existing: Client[];
 
@@ -403,32 +483,6 @@ export default class ClientHandler extends DefaultAPIHandler {
           (!excludeThirdPartyClients || item.is_first_party)
       );
 
-    type ClientSanitizerChain = {
-      sanitizeOidcLogout(): ClientSanitizerChain;
-      sanitizeCrossOriginAuth(): ClientSanitizerChain;
-      get(): Client[];
-    };
-
-    const createClientSanitizer = (clients: Client[]): ClientSanitizerChain => {
-      let sanitized = clients;
-
-      return {
-        sanitizeCrossOriginAuth: () => {
-          sanitized = this.sanitizeCrossOriginAuth(sanitized);
-          return createClientSanitizer(sanitized);
-        },
-
-        sanitizeOidcLogout: () => {
-          sanitized = this.sanitizeOidcLogout(sanitized);
-          return createClientSanitizer(sanitized);
-        },
-
-        get: () => {
-          return sanitized;
-        },
-      };
-    };
-
     // Sanitize client fields
     const sanitizeClientFields = (list: Client[]): Client[] => {
       const sanitizedClients = createClientSanitizer(list)
@@ -464,84 +518,6 @@ export default class ClientHandler extends DefaultAPIHandler {
     });
   }
 
-  /**
-   * @description
-   * Sanitize the deprecated field `cross_origin_auth` to `cross_origin_authentication`
-   *
-   * @param {Client[]} clients - The client array to sanitize.
-   * @returns {Client[]} The sanitized array of clients.
-   */
-  private sanitizeCrossOriginAuth(clients: Client[]): Client[] {
-    const deprecatedClients: string[] = [];
-
-    const updatedClients = clients.map((client) => {
-      let updated: Client = { ...client };
-
-      if (has(updated, 'cross_origin_auth')) {
-        const clientName = client.name || client.client_id || 'unknown client';
-        deprecatedClients.push(clientName);
-
-        if (!has(updated, 'cross_origin_authentication')) {
-          updated.cross_origin_authentication = updated.cross_origin_auth;
-        }
-
-        updated = omit(updated, 'cross_origin_auth') as Client;
-      }
-
-      return updated;
-    });
-
-    if (deprecatedClients.length > 0) {
-      log.warn(
-        "The 'cross_origin_auth' parameter is deprecated in clients and scheduled for removal in future releases.\n" +
-          `Use 'cross_origin_authentication' going forward. Clients using the deprecated setting: [${deprecatedClients.join(
-            ', '
-          )}]`
-      );
-    }
-
-    return updatedClients;
-  }
-
-  /**
-   * @description
-   * Sanitize the deprecated field `oidc_backchannel_logout` to `oidc_logout`
-   *
-   * @param {Client[]} clients - The client array to sanitize.
-   * @returns {Client[]} The sanitized array of clients.
-   */
-  private sanitizeOidcLogout(clients: Client[]): Client[] {
-    const deprecatedClients: string[] = [];
-
-    const updatedClients = clients.map((client) => {
-      let updated: Client = { ...client };
-
-      if (has(updated, 'oidc_backchannel_logout')) {
-        const clientName = client.name || client.client_id || 'unknown client';
-        deprecatedClients.push(clientName);
-
-        if (!has(updated, 'oidc_logout')) {
-          updated.oidc_logout = updated.oidc_backchannel_logout;
-        }
-
-        updated = omit(updated, 'oidc_backchannel_logout') as Client;
-      }
-
-      return updated;
-    });
-
-    if (deprecatedClients.length > 0) {
-      log.warn(
-        "The 'oidc_backchannel_logout' parameter is deprecated in clients and scheduled for removal in future releases.\n" +
-          `Use 'oidc_logout' going forward. Clients using the deprecated setting: [${deprecatedClients.join(
-            ', '
-          )}]`
-      );
-    }
-
-    return updatedClients;
-  }
-
   async getType() {
     if (this.existing) return this.existing;
 
@@ -555,9 +531,7 @@ export default class ClientHandler extends DefaultAPIHandler {
       ...(excludeThirdPartyClients && { is_first_party: true }),
     });
 
-    const sanitizedClients = this.sanitizeCrossOriginAuth(clients);
-
-    this.existing = sanitizedClients;
+    this.existing = createClientSanitizer(clients).sanitizeCrossOriginAuth().get();
     return this.existing;
   }
 
