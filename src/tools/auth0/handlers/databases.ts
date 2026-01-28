@@ -52,7 +52,7 @@ export const schema = {
               },
             },
           },
-          disable_self_service_change_password: { type: 'boolean' },
+          disable_self_service_change_password: { type: 'boolean', default: false },
           customScripts: {
             type: 'object',
             properties: {
