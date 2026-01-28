@@ -171,13 +171,20 @@ describe('#connections handler', () => {
 
       const handler = new connections.default({ client: pageClient(auth0), config });
       sinon.stub(connections, 'getConnectionEnabledClients').resolves(undefined);
-      const dirProvConfig = { mapping: [{ auth0: 'email', idp: 'mail' }] };
-      sinon.stub(handler, 'getConnectionDirectoryProvisioning').resolves(dirProvConfig);
+      const dirProvConfig = { mapping: [{ auth0: 'email', idp: 'mail' }], synchronize_automatically: true };
+      const dirProvConfigs = [
+        {
+          connection_id: 'con1',
+          mapping: [{ auth0: 'email', idp: 'mail' }],
+          synchronize_automatically: true,
+        },
+      ];
+      sinon.stub(handler, 'getConnectionDirectoryProvisionings').resolves(dirProvConfigs);
       handler.scimHandler.applyScimConfiguration = sinon.stub().resolves();
 
       const data = await handler.getType();
 
-      expect(handler.getConnectionDirectoryProvisioning.calledOnceWith('con1')).to.be.true;
+      expect(handler.getConnectionDirectoryProvisionings.calledOnce).to.be.true;
       expect(data[0])
         .to.have.property('directory_provisioning_configuration')
         .that.deep.equals(dirProvConfig);
@@ -442,33 +449,33 @@ describe('#connections handler', () => {
           .be.true;
       });
 
-      it('should retrieve directory provisioning configuration (GET)', async () => {
-        const dirProvConfig = { mapping: sampleMapping, synchronize_automatically: true };
-        const getStub = sinon.stub().resolves(dirProvConfig);
-        const poolExecutor = {
-          addEachTask: ({ data, generator }) => ({
-            promise: async () => {
-              for (const item of data || []) {
-                await generator(item);
-              }
-            },
-          }),
-        };
+      it('should retrieve directory provisioning configurations list', async () => {
+        const dirProvConfigs = [
+          {
+            connection_id: 'con1',
+            mapping: sampleMapping,
+            synchronize_automatically: true,
+          },
+          {
+            connection_id: 'con2',
+            mapping: sampleMapping,
+            synchronize_automatically: false,
+          },
+        ];
 
         const auth0 = {
           connections: {
             directoryProvisioning: {
-              get: getStub,
+              list: (params) => mockPagedData(params, 'directory-provisioning', dirProvConfigs),
             },
           },
-          pool: poolExecutor,
+          pool,
         };
 
         const handler = new connections.default({ client: pageClient(auth0), config });
-        const result = await handler.getConnectionDirectoryProvisioning('con-get');
+        const result = await handler.getConnectionDirectoryProvisionings();
 
-        expect(getStub.calledOnceWith('con-get')).to.be.true;
-        expect(result).to.deep.equal(dirProvConfig);
+        expect(result).to.deep.equal(dirProvConfigs);
       });
 
       it('should update directory provisioning configuration (PATCH)', async () => {
@@ -927,20 +934,20 @@ describe('#connections enabled clients functionality', () => {
 
     it('should handle multi-page pagination correctly', async () => {
       const connectionId = 'con_123';
-      
+
       // Simulate 3 pages of results
       const page3 = {
         data: [{ client_id: 'client_7' }, { client_id: 'client_8' }],
         hasNextPage: () => false,
         getNextPage: async () => ({ data: [], hasNextPage: () => false }),
       };
-      
+
       const page2 = {
         data: [{ client_id: 'client_4' }, { client_id: 'client_5' }, { client_id: 'client_6' }],
         hasNextPage: () => true,
         getNextPage: async () => page3,
       };
-      
+
       const page1 = {
         data: [{ client_id: 'client_1' }, { client_id: 'client_2' }, { client_id: 'client_3' }],
         hasNextPage: () => true,
