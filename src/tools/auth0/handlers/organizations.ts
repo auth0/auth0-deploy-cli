@@ -560,10 +560,15 @@ export default class OrganizationsHandler extends DefaultHandler {
     let organizationConnections = await this.client.organizations.enabledConnections.list(
       organizationId
     );
-    do {
-      allOrganizationConnections.push(...organizationConnections.data);
+
+    // Process first page
+    allOrganizationConnections.push(...organizationConnections.data);
+
+    // Fetch remaining pages
+    while (organizationConnections.hasNextPage()) {
       organizationConnections = await organizationConnections.getNextPage();
-    } while (organizationConnections.hasNextPage());
+      allOrganizationConnections.push(...organizationConnections.data);
+    }
 
     return allOrganizationConnections;
   }
@@ -576,10 +581,15 @@ export default class OrganizationsHandler extends DefaultHandler {
     let organizationClientGrants = await this.client.organizations.clientGrants.list(
       organizationId
     );
-    do {
-      allOrganizationClientGrants.push(...organizationClientGrants.data);
+
+    // Process first page
+    allOrganizationClientGrants.push(...organizationClientGrants.data);
+
+    // Fetch remaining pages
+    while (organizationClientGrants.hasNextPage()) {
       organizationClientGrants = await organizationClientGrants.getNextPage();
-    } while (organizationClientGrants.hasNextPage());
+      allOrganizationClientGrants.push(...organizationClientGrants.data);
+    }
 
     return allOrganizationClientGrants;
   }
@@ -614,10 +624,15 @@ export default class OrganizationsHandler extends DefaultHandler {
       let orgDiscoveryDomain = await this.client.organizations.discoveryDomains.list(
         organizationId
       );
-      do {
-        allDiscoveryDomains.push(...orgDiscoveryDomain.data);
+
+      // Process first page
+      allDiscoveryDomains.push(...orgDiscoveryDomain.data);
+
+      // Fetch remaining pages
+      while (orgDiscoveryDomain.hasNextPage()) {
         orgDiscoveryDomain = await orgDiscoveryDomain.getNextPage();
-      } while (orgDiscoveryDomain.hasNextPage());
+        allDiscoveryDomains.push(...orgDiscoveryDomain.data);
+      }
 
       return allDiscoveryDomains;
     } catch (err) {
