@@ -5,6 +5,7 @@
     "tls_policy": "recommended",
     "domain_metadata": {
       "myKey": "value"
-    }
+    },
+    "relying_party_identifier": "domain.com"
   }
 ]
