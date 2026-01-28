@@ -34,6 +34,7 @@ describe('#YAML context databases', () => {
       {
         name: 'users',
         options: {
+          disable_self_service_change_password: false,
           import_mode: true,
           requires_username: true,
         },
@@ -74,6 +75,7 @@ describe('#YAML context databases', () => {
       {
         name: 'users',
         options: {
+          disable_self_service_change_password: false,
           import_mode: true,
           customScripts: {
             change_email: scriptValidate,
