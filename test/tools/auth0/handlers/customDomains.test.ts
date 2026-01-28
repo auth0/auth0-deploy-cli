@@ -552,4 +552,93 @@ describe('#customDomains handler', () => {
       owner: 'platform-team',
     });
   });
+
+  it('should create custom domains with relying_party_identifier field', async () => {
+    let didCreateFunctionGetCalled = false;
+    let createCallArgs = null;
+
+    const customDomainWithRelyingPartyId = {
+      domain: 'auth.example.com',
+      type: 'auth0_managed_certs',
+      relying_party_identifier: 'example.com',
+    };
+
+    const auth0ApiClientMock = {
+      customDomains: {
+        list: async () => [],
+        create: async (args) => {
+          didCreateFunctionGetCalled = true;
+          createCallArgs = args;
+          return customDomainWithRelyingPartyId;
+        },
+        update: async () => {},
+        delete: async () => {},
+      },
+      pool: new PromisePoolExecutor({
+        concurrencyLimit: 3,
+        frequencyLimit: 8,
+        frequencyWindow: 1000, // 1 sec
+      }),
+    };
+
+    // @ts-ignore
+    const handler = new customDomainsHandler({
+      config: () => {},
+      client: auth0ApiClientMock as unknown as Auth0APIClient,
+    });
+
+    await handler.processChanges({ customDomains: [customDomainWithRelyingPartyId] });
+
+    expect(didCreateFunctionGetCalled).to.equal(true);
+    expect(createCallArgs).to.have.property('relying_party_identifier', 'example.com');
+  });
+
+  it('should update custom domains with relying_party_identifier field', async () => {
+    let didUpdateFunctionGetCalled = false;
+    let updateCallData = null;
+
+    const existingCustomDomain = {
+      custom_domain_id: 'cd_456',
+      domain: 'auth.test.com',
+      type: 'auth0_managed_certs',
+      status: 'ready',
+    };
+
+    const updatedCustomDomainWithRelyingPartyId = {
+      custom_domain_id: 'cd_456',
+      domain: 'auth.test.com',
+      type: 'auth0_managed_certs',
+      relying_party_identifier: 'test.com',
+    };
+
+    const auth0ApiClientMock = {
+      customDomains: {
+        list: async () => [existingCustomDomain],
+        create: async () => {},
+        update: async (args, data) => {
+          didUpdateFunctionGetCalled = true;
+          updateCallData = data;
+          expect(args).to.equal('cd_456');
+          return updatedCustomDomainWithRelyingPartyId;
+        },
+        delete: async () => {},
+      },
+      pool: new PromisePoolExecutor({
+        concurrencyLimit: 3,
+        frequencyLimit: 8,
+        frequencyWindow: 1000, // 1 sec
+      }),
+    };
+
+    // @ts-ignore
+    const handler = new customDomainsHandler({
+      config: () => {},
+      client: auth0ApiClientMock as unknown as Auth0APIClient,
+    });
+
+    await handler.processChanges({ customDomains: [updatedCustomDomainWithRelyingPartyId] });
+
+    expect(didUpdateFunctionGetCalled).to.equal(true);
+    expect(updateCallData).to.have.property('relying_party_identifier', 'test.com');
+  });
 });
