@@ -338,6 +338,59 @@ describe('#organizations handler', () => {
       ]);
     });
 
+    it('should handle multi-page pagination for enabled connections', async () => {
+      // Simulate 3 pages of enabled connections
+      const connectionsPage1 = [
+        { connection_id: 'con_1', connection: { name: 'conn1' } },
+        { connection_id: 'con_2', connection: { name: 'conn2' } },
+      ];
+      const connectionsPage2 = [
+        { connection_id: 'con_3', connection: { name: 'conn3' } },
+      ];
+      const connectionsPage3 = [
+        { connection_id: 'con_4', connection: { name: 'conn4' } },
+        { connection_id: 'con_5', connection: { name: 'conn5' } },
+      ];
+
+      const auth0 = {
+        organizations: {
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          enabledConnections: {
+            list: () =>
+              mockPagedData(
+                {},
+                'enabled_connections',
+                connectionsPage1,
+                [connectionsPage2, connectionsPage3]
+              ),
+          },
+          clientGrants: {
+            list: () => mockPagedData({}, 'client_grants', []),
+          },
+          discoveryDomains: {
+            list: () => mockPagedData({}, 'discovery_domains', []),
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({ client: pageClient(auth0), config });
+      const data = await handler.getType();
+
+      // Should include connections from ALL 3 pages
+      expect(data[0].connections).to.have.length(5);
+      expect(data[0].connections.map((c) => c.connection_id)).to.deep.equal([
+        'con_1',
+        'con_2',
+        'con_3',
+        'con_4',
+        'con_5',
+      ]);
+    });
+
     it('should get all organizations', async function () {
       const organizationsPage1 = Array.from({ length: 3 }, (v, i) => ({
         id: 'org_' + i,

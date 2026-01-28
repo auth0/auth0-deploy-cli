@@ -35,6 +35,11 @@ export const schema = {
         description: 'Custom domain verification method. Must be `txt`.',
         defaultValue: 'txt',
       },
+      relying_party_identifier: {
+        type: ['string'],
+        description:
+          'Relying Party ID (rpId) to be used for Passkeys on this custom domain. If not provided or set to null, the full domain will be used.',
+      },
     },
     required: ['domain', 'type'],
   },
@@ -58,6 +63,7 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
         'certificate',
         'created_at',
         'updated_at',
+        'is_default',
       ],
       stripUpdateFields: [
         'status',
@@ -69,6 +75,7 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
         'certificate',
         'created_at',
         'updated_at',
+        'is_default',
       ],
     });
   }
