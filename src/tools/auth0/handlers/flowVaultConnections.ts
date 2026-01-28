@@ -30,10 +30,15 @@ export const getAllFlowConnections = async (
   const allFlowConnections: Management.FlowsVaultConnectionSummary[] = [];
 
   let vaultConnections = await auth0Client.flows.vault.connections.list();
-  do {
-    allFlowConnections.push(...vaultConnections.data);
+
+  // Process first page
+  allFlowConnections.push(...vaultConnections.data);
+
+  // Fetch remaining pages
+  while (vaultConnections.hasNextPage()) {
     vaultConnections = await vaultConnections.getNextPage();
-  } while (vaultConnections.hasNextPage());
+    allFlowConnections.push(...vaultConnections.data);
+  }
 
   return allFlowConnections;
 };
