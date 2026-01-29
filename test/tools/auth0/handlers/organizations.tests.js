@@ -345,9 +345,7 @@ describe('#organizations handler', () => {
         { connection_id: 'con_1', connection: { name: 'conn1' } },
         { connection_id: 'con_2', connection: { name: 'conn2' } },
       ];
-      const connectionsPage2 = [
-        { connection_id: 'con_3', connection: { name: 'conn3' } },
-      ];
+      const connectionsPage2 = [{ connection_id: 'con_3', connection: { name: 'conn3' } }];
       const connectionsPage3 = [
         { connection_id: 'con_4', connection: { name: 'conn4' } },
         { connection_id: 'con_5', connection: { name: 'conn5' } },
@@ -358,12 +356,10 @@ describe('#organizations handler', () => {
           list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
           enabledConnections: {
             list: () =>
-              mockPagedData(
-                {},
-                'enabled_connections',
-                connectionsPage1,
-                [connectionsPage2, connectionsPage3]
-              ),
+              mockPagedData({}, 'enabled_connections', connectionsPage1, [
+                connectionsPage2,
+                connectionsPage3,
+              ]),
           },
           clientGrants: {
             list: () => mockPagedData({}, 'client_grants', []),
