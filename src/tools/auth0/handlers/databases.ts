@@ -22,6 +22,37 @@ export const schema = {
       options: {
         type: 'object',
         properties: {
+          authentication_methods: {
+            type: 'object',
+            properties: {
+              passkey: {
+                type: 'object',
+                properties: {
+                  enabled: { type: 'boolean' },
+                },
+              },
+              password: {
+                type: 'object',
+                properties: {
+                  enabled: { type: 'boolean' },
+                  api_behavior: { type: 'string' },
+                },
+              },
+              email_otp: {
+                type: 'object',
+                properties: {
+                  enabled: { type: 'boolean' },
+                },
+              },
+              phone_otp: {
+                type: 'object',
+                properties: {
+                  enabled: { type: 'boolean' },
+                },
+              },
+            },
+          },
+          disable_self_service_change_password: { type: 'boolean', default: false },
           customScripts: {
             type: 'object',
             properties: {
@@ -42,6 +73,7 @@ export const schema = {
                     type: 'object',
                     properties: {
                       active: { type: 'boolean' },
+                      default_method: { type: 'string', enum: ['password', 'email_otp'] },
                     },
                   },
                   profile_required: { type: 'boolean' },
@@ -67,6 +99,7 @@ export const schema = {
                     type: 'object',
                     properties: {
                       active: { type: 'boolean' },
+                      default_method: { type: 'string', enum: ['password', 'phone_otp'] },
                     },
                   },
                   profile_required: { type: 'boolean' },
@@ -91,6 +124,7 @@ export const schema = {
                     type: 'object',
                     properties: {
                       active: { type: 'boolean' },
+                      default_method: { type: 'string', enum: ['password'] },
                     },
                   },
                   profile_required: { type: 'boolean' },
@@ -133,9 +167,33 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     // Validate each database
     databases.forEach((database) => {
       this.validateEmailUniqueConstraints(database);
+      this.validatePasswordlessSettings(database);
     });
 
     await super.validate(assets);
+  }
+
+  private validatePasswordlessSettings(payload: Asset): void {
+    const options = payload?.options;
+    if (!options) return;
+
+    const passwordEnabled = options?.authentication_methods?.password?.enabled;
+    const disableSelfServiceChangePassword = options?.disable_self_service_change_password;
+
+
+    if (passwordEnabled === undefined || disableSelfServiceChangePassword === undefined) return;
+
+    if (passwordEnabled === false && disableSelfServiceChangePassword !== true) {
+      throw new Error(
+        `Database "${payload.name}": When password authentication is disabled, disable_self_service_change_password must be true.`
+      );
+    }
+
+    if (passwordEnabled === true && disableSelfServiceChangePassword === true) {
+      throw new Error(
+        `Database "${payload.name}": disable_self_service_change_password must be false when password authentication is enabled.`
+      );
+    }
   }
 
   private validateEmailUniqueConstraints(payload: Asset): void {
