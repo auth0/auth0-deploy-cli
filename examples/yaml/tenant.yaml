@@ -37,6 +37,16 @@ clients:
     native_social_login:
       google:
         enabled: true
+    oidc_logout:
+      backchannel_logout_urls:
+        - "https://example.com/logout"
+      backchannel_logout_initiators:
+        mode: "custom"
+        selected_initiators:
+          - "rp-logout"
+          - "idp-logout"
+      backchannel_logout_session_metadata:
+        include: true
     # Add other client settings https://auth0.com/docs/api/management/v2#!/Clients/post_clients
   -
     name: "My Resource Server Client"
@@ -373,6 +383,7 @@ customDomains:
     tls_policy: 'recommended'
     domain_metadata:
       myKey: value
+    relying_party_identifier: domain.com
 
 attackProtection:
   botDetection:

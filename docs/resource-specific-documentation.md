@@ -500,6 +500,78 @@ For `universal_login` template `templates/` will be created.
 }
 ```
 
+## Custom Domains
+
+Custom domains allow you to use your own domain for authentication instead of the default Auth0 domain. The Deploy CLI supports managing custom domains in both directory and YAML modes.
+
+Custom domains have the following key properties:
+
+- `domain`: The custom domain name (required)
+- `type`: Certificate management type - either `auth0_managed_certs` or `self_managed_certs` (required)
+- `custom_client_ip_header`: Header to use for client IP detection (optional, one of: `true-client-ip`, `cf-connecting-ip`, `x-forwarded-for`, or `null`)
+- `tls_policy`: TLS policy to use (defaults to `recommended`)
+- `verification_method`: Domain verification method (defaults to `txt`)
+- `domain_metadata`: Metadata associated with the custom domain (optional, max 10 properties)
+- `relying_party_identifier`: Relying Party ID (rpId) to be used for Passkeys on this custom domain. If not provided or set to null, the full domain will be used. (optional)
+
+**Note**: The `relying_party_identifier` should be a suffix of the domain name. For example, if your domain is `auth.example.com`, the `relying_party_identifier` could be `example.com`.
+
+**YAML Example**
+
+```yaml
+# Contents of ./tenant.yaml
+customDomains:
+  - domain: 'auth.example.com'
+    type: 'auth0_managed_certs'
+    tls_policy: 'recommended'
+    custom_client_ip_header: 'cf-connecting-ip'
+    domain_metadata:
+      environment: 'production'
+      team: 'platform'
+    relying_party_identifier: 'example.com'
+  - domain: 'login.myapp.com'
+    type: 'self_managed_certs'
+    verification_method: 'txt'
+```
+
+**Directory Example**
+
+```
+Folder structure when in directory mode.
+
+./customDomains/
+    ./auth.example.com.json
+    ./login.myapp.com.json
+```
+
+Contents of `auth.example.com.json`:
+
+```json
+{
+  "domain": "auth.example.com",
+  "type": "auth0_managed_certs",
+  "tls_policy": "recommended",
+  "custom_client_ip_header": "cf-connecting-ip",
+  "domain_metadata": {
+    "environment": "production",
+    "team": "platform"
+  },
+  "relying_party_identifier": "example.com"
+}
+```
+
+Contents of `login.myapp.com.json`:
+
+```json
+{
+  "domain": "login.myapp.com",
+  "type": "self_managed_certs",
+  "verification_method": "txt"
+}
+```
+
+For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2#!/Custom_Domains).
+
 ## NetworkACL
 
 Tenant Network Access Control Lists (NetworkACLs) allow you to configure rules that control access to your Auth0 tenant based on IP addresses, geographical locations, and other network criteria. The Deploy CLI supports managing NetworkACLs in both directory and YAML modes.Refer [more](https://auth0.com/docs/secure/tenant-access-control-list/configure-rules) on this.

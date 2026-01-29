@@ -162,17 +162,22 @@ export const getConnectionEnabledClients = async (
 
     let enabledClients = await auth0Client.connections.clients.get(connectionId);
 
-    do {
-      if (enabledClients && enabledClients.data?.length > 0) {
-        enabledClients.data.forEach((client) => {
-          if (client?.client_id) {
-            enabledClientsFormatted.push(client.client_id);
-          }
-        });
+    // Process first page
+    enabledClients.data?.forEach((client) => {
+      if (client?.client_id) {
+        enabledClientsFormatted.push(client.client_id);
       }
+    });
 
+    // Fetch remaining pages
+    while (enabledClients.hasNextPage()) {
       enabledClients = await enabledClients.getNextPage();
-    } while (enabledClients.hasNextPage());
+      enabledClients.data?.forEach((client) => {
+        if (client?.client_id) {
+          enabledClientsFormatted.push(client.client_id);
+        }
+      });
+    }
 
     return enabledClientsFormatted;
   } catch (error) {

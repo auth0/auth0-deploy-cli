@@ -181,10 +181,15 @@ export default class RolesHandler extends DefaultHandler {
 
         const rolesId = roles[index].id as string;
         let permissions = await this.client.roles.permissions.list(rolesId, { per_page: 100 });
-        do {
-          allPermission.push(...permissions.data);
+
+        // Process first page
+        allPermission.push(...permissions.data);
+
+        // Fetch remaining pages
+        while (permissions.hasNextPage()) {
           permissions = await permissions.getNextPage();
-        } while (permissions.hasNextPage());
+          allPermission.push(...permissions.data);
+        }
 
         const strippedPerms = await Promise.all(
           allPermission.map(async (permission) => {

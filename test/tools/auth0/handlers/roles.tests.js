@@ -143,6 +143,54 @@ describe('#roles handler', () => {
       ]);
     });
 
+    it('should handle multi-page pagination for role permissions', async () => {
+      // Simulate 3 pages of permissions
+      const page1Permissions = [
+        { permission_name: 'read:users', resource_server_identifier: 'api1' },
+        { permission_name: 'write:users', resource_server_identifier: 'api1' },
+      ];
+      const page2Permissions = [
+        { permission_name: 'read:orders', resource_server_identifier: 'api2' },
+        { permission_name: 'write:orders', resource_server_identifier: 'api2' },
+      ];
+      const page3Permissions = [
+        { permission_name: 'delete:all', resource_server_identifier: 'api3' },
+      ];
+
+      const auth0 = {
+        roles: {
+          list: (params) =>
+            mockPagedData({ ...params, include_totals: true }, 'roles', [
+              {
+                name: 'adminRole',
+                id: 'role_123',
+                description: 'Admin role with multi-page permissions',
+              },
+            ]),
+          permissions: {
+            list: (roleId, params) =>
+              mockPagedData({ ...params, include_totals: true }, 'permissions', page1Permissions, [
+                page2Permissions,
+                page3Permissions,
+              ]),
+          },
+        },
+        pool,
+      };
+
+      const handler = new roles.default({ client: pageClient(auth0), config });
+      const data = await handler.getType();
+
+      // Should include permissions from ALL 3 pages
+      expect(data[0].permissions).to.deep.equal([
+        { permission_name: 'read:users', resource_server_identifier: 'api1' },
+        { permission_name: 'write:users', resource_server_identifier: 'api1' },
+        { permission_name: 'read:orders', resource_server_identifier: 'api2' },
+        { permission_name: 'write:orders', resource_server_identifier: 'api2' },
+        { permission_name: 'delete:all', resource_server_identifier: 'api3' },
+      ]);
+    });
+
     it('should return an empty array for 501 status code', async () => {
       const auth0 = {
         roles: {
