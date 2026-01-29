@@ -82,11 +82,11 @@ export const schema = {
   },
 };
 
-type DirectoryProvisioningConfig = Management.GetDirectoryProvisioningResponseContent;
+type DirectoryProvisioningConfig = Management.DirectoryProvisioning;
 
 export type Connection = Management.ConnectionForList & {
   enabled_clients?: string[];
-  directory_provisioning_configuration?: DirectoryProvisioningConfig;
+  directory_provisioning_configuration?: Pick<DirectoryProvisioningConfig, 'mapping' | 'synchronize_automatically'>;
 };
 
 // addExcludedConnectionPropertiesToChanges superimposes excluded properties on the `options` object. The Auth0 API
@@ -341,51 +341,23 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
   }
 
   /**
-   * Retrieves directory provisioning configuration for a specific Auth0 connection.
-   * @param connectionId - The unique identifier of the connection
-   * @returns A promise that resolves to the configuration object, or null if not configured/supported
+   * Retrieves all directory provisioning configurations for all connections.
+   * @returns A promise that resolves to the configurations object, or null if not configured/supported
    */
-  async getConnectionDirectoryProvisioning(
-    connectionId: string
-  ): Promise<DirectoryProvisioningConfig | null> {
-    if (!connectionId) return null;
-
-    const creates = [connectionId];
-    let config: DirectoryProvisioningConfig | null = null;
+  async getConnectionDirectoryProvisionings(): Promise<DirectoryProvisioningConfig[] | null> {
+    let directoryProvisioningConfigs: DirectoryProvisioningConfig[];
 
     try {
-      await this.client.pool
-        .addEachTask({
-          data: creates || [],
-          generator: async (id: string) =>
-            this.client.connections.directoryProvisioning
-              .get(id)
-              .then((resp) => {
-                config = resp;
-              })
-              .catch((err) => {
-                throw new ManagementError(err);
-              }),
-        })
-        .promise();
-
-      const stripKeysFromOutput = [
-        'connection_id',
-        'connection_name',
-        'strategy',
-        'created_at',
-        'updated_at',
-      ];
-
-      stripKeysFromOutput.forEach((key) => {
-        if (config && key in config) {
-          delete (config as Partial<DirectoryProvisioningConfig>)[key];
+      directoryProvisioningConfigs = await paginate<DirectoryProvisioningConfig>(
+        this.client.connections.directoryProvisioning.list,
+        {
+          checkpoint: true,
         }
-      });
+      );
 
-      return config;
+      return directoryProvisioningConfigs;
     } catch (error) {
-      const errLog = `Unable to fetch directory provisioning for connection '${connectionId}'. `;
+      const errLog = `Unable to fetch directory provisioning for connections. `;
       if (error instanceof ManagementError) {
         const bodyMessage = (error.body as any)?.message;
         log.warn(errLog + bodyMessage);
@@ -550,10 +522,12 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
   async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
 
-    const connections = await paginate<Connection>(this.client.connections.list, {
-      checkpoint: true,
-    });
-
+    const [connections, directoryProvisioningConfigs] = await Promise.all([
+      paginate<Connection>(this.client.connections.list, {
+        checkpoint: true,
+      }),
+      this.getConnectionDirectoryProvisionings(),
+    ]);
     // Filter out database connections as we have separate handler for it
     const filteredConnections = connections.filter((c) => c.strategy !== 'auth0');
 
@@ -582,10 +556,15 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
           connection.enabled_clients = enabledClients;
         }
 
-        if (connection.strategy === 'google-apps') {
-          const dirProvConfig = await this.getConnectionDirectoryProvisioning(con.id);
+        if (connection.strategy === 'google-apps' && directoryProvisioningConfigs) {
+          const dirProvConfig = directoryProvisioningConfigs.find(
+            (congigCon) => congigCon.connection_id === con.id
+          );
           if (dirProvConfig) {
-            connection.directory_provisioning_configuration = dirProvConfig;
+            connection.directory_provisioning_configuration = {
+              mapping: dirProvConfig.mapping,
+              synchronize_automatically: dirProvConfig.synchronize_automatically,
+            };
           }
         }
 
