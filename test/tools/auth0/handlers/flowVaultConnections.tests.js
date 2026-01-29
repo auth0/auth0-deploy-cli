@@ -132,9 +132,7 @@ describe('#flowVaultConnections handler', () => {
         { id: 'ac_1', name: 'Connection 1', app_id: 'HTTP' },
         { id: 'ac_2', name: 'Connection 2', app_id: 'HTTP' },
       ];
-      const page2 = [
-        { id: 'ac_3', name: 'Connection 3', app_id: 'HTTP' },
-      ];
+      const page2 = [{ id: 'ac_3', name: 'Connection 3', app_id: 'HTTP' }];
       const page3 = [
         { id: 'ac_4', name: 'Connection 4', app_id: 'HTTP' },
         { id: 'ac_5', name: 'Connection 5', app_id: 'HTTP' },

@@ -56,6 +56,41 @@ describe('#clientGrants handler', () => {
 
       await stageFn.apply(handler, [{ clientGrants: data }]);
     });
+
+    it('should not allow scope when allow_all_scopes is true', async () => {
+      const handler = new clientGrants.default({ client: {}, config });
+      const data = [
+        {
+          client_id: 'testClient',
+          audience: 'https://test.auth0.com/api/v2/',
+          allow_all_scopes: true,
+          scope: ['read:users', 'write:users'],
+        },
+      ];
+
+      try {
+        await handler.validate({ clientGrants: data });
+        expect.fail('Should have thrown an error');
+      } catch (err) {
+        expect(err).to.be.an.instanceof(Error);
+        expect(err.message).to.include('Cannot specify "scope" when "allow_all_scopes" is set to true');
+        expect(err.message).to.include('testClient');
+        expect(err.message).to.include('https://test.auth0.com/api/v2/');
+      }
+    });
+
+    it('should pass validation when allow_all_scopes is true and scope is not provided', async () => {
+      const handler = new clientGrants.default({ client: {}, config });
+      const data = [
+        {
+          client_id: 'testClient',
+          audience: 'https://test.auth0.com/api/v2/',
+          allow_all_scopes: true,
+        },
+      ];
+
+      await handler.validate({ clientGrants: data });
+    });
   });
 
   describe('#clientGrants process', () => {
@@ -83,6 +118,39 @@ describe('#clientGrants handler', () => {
       const data = [
         {
           name: 'someClientGrant',
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+    });
+
+    it('should create client grants with allow_all_scopes', async () => {
+      const auth0 = {
+        clientGrants: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('grantWithAllScopes');
+            expect(data.allow_all_scopes).to.equal(true);
+            expect(data.scope).to.be.undefined;
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'client_grants', []),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          name: 'grantWithAllScopes',
+          allow_all_scopes: true,
         },
       ];
 

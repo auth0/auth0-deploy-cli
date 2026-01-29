@@ -298,4 +298,83 @@ describe('#directory context clients', () => {
       organization_require_behavior: 'no_prompt',
     });
   });
+
+  it('should process clients with oidc_logout', async () => {
+    const files = {
+      [constants.CLIENTS_DIRECTORY]: {
+        'oidcLogoutClient.json':
+          '{ "app_type": "regular_web", "name": "oidcLogoutClient", "oidc_logout": { "backchannel_logout_urls": ["https://example.com/logout"], "backchannel_logout_initiators": { "mode": "custom", "selected_initiators": ["rp-logout", "idp-logout"] }, "backchannel_logout_session_metadata": { "include": true } } }',
+        'simpleClient.json': '{ "app_type": "spa", "name": "simpleClient" }',
+      },
+    };
+
+    const repoDir = path.join(testDataDir, 'directory', 'clientsWithOidcLogout');
+    createDir(repoDir, files);
+
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    const target = [
+      {
+        app_type: 'regular_web',
+        name: 'oidcLogoutClient',
+        oidc_logout: {
+          backchannel_logout_urls: ['https://example.com/logout'],
+          backchannel_logout_initiators: {
+            mode: 'custom',
+            selected_initiators: ['rp-logout', 'idp-logout'],
+          },
+          backchannel_logout_session_metadata: {
+            include: true,
+          },
+        },
+      },
+      { app_type: 'spa', name: 'simpleClient' },
+    ];
+    expect(context.assets.clients).to.deep.equal(target);
+  });
+
+  it('should dump clients with oidc_logout', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientsOidcLogoutDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.clients = [
+      {
+        name: 'oidcLogoutClient',
+        app_type: 'regular_web',
+        oidc_logout: {
+          backchannel_logout_urls: ['https://example.com/logout'],
+          backchannel_logout_initiators: {
+            mode: 'custom',
+            selected_initiators: ['rp-logout', 'idp-logout'],
+          },
+          backchannel_logout_session_metadata: {
+            include: true,
+          },
+        },
+      },
+    ];
+
+    await handler.dump(context);
+
+    const dumpedClient = loadJSON(path.join(dir, 'clients', 'oidcLogoutClient.json'));
+    expect(dumpedClient).to.deep.equal({
+      name: 'oidcLogoutClient',
+      app_type: 'regular_web',
+      oidc_logout: {
+        backchannel_logout_urls: ['https://example.com/logout'],
+        backchannel_logout_initiators: {
+          mode: 'custom',
+          selected_initiators: ['rp-logout', 'idp-logout'],
+        },
+        backchannel_logout_session_metadata: {
+          include: true,
+        },
+      },
+    });
+  });
 });

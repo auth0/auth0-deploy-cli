@@ -960,9 +960,14 @@ describe('#connections enabled clients functionality', () => {
 
       // Should include ALL clients from ALL 3 pages
       expect(result).to.deep.equal([
-        'client_1', 'client_2', 'client_3',  // Page 1
-        'client_4', 'client_5', 'client_6',  // Page 2
-        'client_7', 'client_8',              // Page 3
+        'client_1',
+        'client_2',
+        'client_3', // Page 1
+        'client_4',
+        'client_5',
+        'client_6', // Page 2
+        'client_7',
+        'client_8', // Page 3
       ]);
     });
   });
