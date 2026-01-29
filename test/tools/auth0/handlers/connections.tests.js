@@ -927,20 +927,20 @@ describe('#connections enabled clients functionality', () => {
 
     it('should handle multi-page pagination correctly', async () => {
       const connectionId = 'con_123';
-      
+
       // Simulate 3 pages of results
       const page3 = {
         data: [{ client_id: 'client_7' }, { client_id: 'client_8' }],
         hasNextPage: () => false,
         getNextPage: async () => ({ data: [], hasNextPage: () => false }),
       };
-      
+
       const page2 = {
         data: [{ client_id: 'client_4' }, { client_id: 'client_5' }, { client_id: 'client_6' }],
         hasNextPage: () => true,
         getNextPage: async () => page3,
       };
-      
+
       const page1 = {
         data: [{ client_id: 'client_1' }, { client_id: 'client_2' }, { client_id: 'client_3' }],
         hasNextPage: () => true,
@@ -953,9 +953,14 @@ describe('#connections enabled clients functionality', () => {
 
       // Should include ALL clients from ALL 3 pages
       expect(result).to.deep.equal([
-        'client_1', 'client_2', 'client_3',  // Page 1
-        'client_4', 'client_5', 'client_6',  // Page 2
-        'client_7', 'client_8',              // Page 3
+        'client_1',
+        'client_2',
+        'client_3', // Page 1
+        'client_4',
+        'client_5',
+        'client_6', // Page 2
+        'client_7',
+        'client_8', // Page 3
       ]);
     });
   });
