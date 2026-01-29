@@ -169,12 +169,10 @@ describe('#roles handler', () => {
             ]),
           permissions: {
             list: (roleId, params) =>
-              mockPagedData(
-                { ...params, include_totals: true },
-                'permissions',
-                page1Permissions,
-                [page2Permissions, page3Permissions]
-              ),
+              mockPagedData({ ...params, include_totals: true }, 'permissions', page1Permissions, [
+                page2Permissions,
+                page3Permissions,
+              ]),
           },
         },
         pool,
