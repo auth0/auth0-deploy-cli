@@ -913,6 +913,82 @@
                             "value": "delete:connection_profiles"
                         },
                         {
+                            "description": "Create Group Roles",
+                            "value": "create:group_roles"
+                        },
+                        {
+                            "description": "Delete Group Roles",
+                            "value": "delete:group_roles"
+                        },
+                        {
+                            "description": "Read User Effective Permissions",
+                            "value": "read:user_effective_permissions"
+                        },
+                        {
+                            "description": "Read User Effective Roles",
+                            "value": "read:user_effective_roles"
+                        },
+                        {
+                            "description": "Read Organization Member Effective Roles",
+                            "value": "read:organization_member_effective_roles"
+                        },
+                        {
+                            "description": "Read User Role Source Groups",
+                            "value": "read:user_role_source_groups"
+                        },
+                        {
+                            "description": "Read Organization Member Role Source Groups",
+                            "value": "read:organization_member_role_source_groups"
+                        },
+                        {
+                            "description": "Read User Permission Source Roles",
+                            "value": "read:user_permission_source_roles"
+                        },
+                        {
+                            "description": "Read Group Roles",
+                            "value": "read:group_roles"
+                        },
+                        {
+                            "description": "Read Organization Groups",
+                            "value": "read:organization_groups"
+                        },
+                        {
+                            "description": "Create Organization Groups",
+                            "value": "create:organization_groups"
+                        },
+                        {
+                            "description": "Delete Organization Groups",
+                            "value": "delete:organization_groups"
+                        },
+                        {
+                            "description": "Read Organization Group Roles",
+                            "value": "read:organization_group_roles"
+                        },
+                        {
+                            "description": "Create Organization Group Roles",
+                            "value": "create:organization_group_roles"
+                        },
+                        {
+                            "description": "Delete Organization Group Roles",
+                            "value": "delete:organization_group_roles"
+                        },
+                        {
+                            "description": "Create Token Exchange Profile",
+                            "value": "create:token_exchange_profiles"
+                        },
+                        {
+                            "description": "Read Token Exchange Profiles",
+                            "value": "read:token_exchange_profiles"
+                        },
+                        {
+                            "description": "Update Token Exchange Profile",
+                            "value": "update:token_exchange_profiles"
+                        },
+                        {
+                            "description": "Delete Token Exchange Profile",
+                            "value": "delete:token_exchange_profiles"
+                        },
+                        {
                             "value": "read:organization_client_grants",
                             "description": "Read Organization Client Grants"
                         },
@@ -923,22 +999,6 @@
                         {
                             "value": "delete:organization_client_grants",
                             "description": "Delete Organization Client Grants"
-                        },
-                        {
-                            "value": "create:token_exchange_profiles",
-                            "description": "Create Token Exchange Profile"
-                        },
-                        {
-                            "value": "read:token_exchange_profiles",
-                            "description": "Read Token Exchange Profiles"
-                        },
-                        {
-                            "value": "update:token_exchange_profiles",
-                            "description": "Update Token Exchange Profile"
-                        },
-                        {
-                            "value": "delete:token_exchange_profiles",
-                            "description": "Delete Token Exchange Profile"
                         },
                         {
                             "value": "read:security_metrics",
@@ -955,6 +1015,22 @@
                         {
                             "value": "create:connections_keys",
                             "description": "Create connection keys"
+                        },
+                        {
+                            "value": "create:directory_provisionings",
+                            "description": "Create Directory Provisionings"
+                        },
+                        {
+                            "value": "read:directory_provisionings",
+                            "description": "Read Directory Provisionings"
+                        },
+                        {
+                            "value": "update:directory_provisionings",
+                            "description": "Update Directory Provisionings"
+                        },
+                        {
+                            "value": "delete:directory_provisionings",
+                            "description": "Delete Directory Provisionings"
                         }
                     ],
                     "is_system": true
@@ -1544,7 +1620,21 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/webauthn-platform",
+        "path": "/api/v2/guardian/factors/otp",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
+        "path": "/api/v2/guardian/factors/email",
         "body": {
             "enabled": false
         },
@@ -1572,34 +1662,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/sms",
-        "body": {
-            "enabled": false
-        },
-        "status": 200,
-        "response": {
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PUT",
-        "path": "/api/v2/guardian/factors/otp",
-        "body": {
-            "enabled": false
-        },
-        "status": 200,
-        "response": {
-            "enabled": false
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PUT",
         "path": "/api/v2/guardian/factors/recovery-code",
         "body": {
             "enabled": false
@@ -1614,7 +1676,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/webauthn-roaming",
+        "path": "/api/v2/guardian/factors/sms",
         "body": {
             "enabled": false
         },
@@ -1628,7 +1690,21 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PUT",
-        "path": "/api/v2/guardian/factors/email",
+        "path": "/api/v2/guardian/factors/webauthn-platform",
+        "body": {
+            "enabled": false
+        },
+        "status": 200,
+        "response": {
+            "enabled": false
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PUT",
+        "path": "/api/v2/guardian/factors/webauthn-roaming",
         "body": {
             "enabled": false
         },
@@ -1819,34 +1895,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "PATCH",
-        "path": "/api/v2/attack-protection/brute-force-protection",
-        "body": {
-            "enabled": true,
-            "shields": [
-                "block",
-                "user_notification"
-            ],
-            "mode": "count_per_identifier_and_ip",
-            "allowlist": [],
-            "max_attempts": 10
-        },
-        "status": 200,
-        "response": {
-            "enabled": true,
-            "shields": [
-                "block",
-                "user_notification"
-            ],
-            "mode": "count_per_identifier_and_ip",
-            "allowlist": [],
-            "max_attempts": 10
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "PATCH",
         "path": "/api/v2/attack-protection/suspicious-ip-throttling",
         "body": {
             "enabled": true,
@@ -1916,6 +1964,34 @@
                     "shields": []
                 }
             }
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "PATCH",
+        "path": "/api/v2/attack-protection/brute-force-protection",
+        "body": {
+            "enabled": true,
+            "shields": [
+                "block",
+                "user_notification"
+            ],
+            "mode": "count_per_identifier_and_ip",
+            "allowlist": [],
+            "max_attempts": 10
+        },
+        "status": 200,
+        "response": {
+            "enabled": true,
+            "shields": [
+                "block",
+                "user_notification"
+            ],
+            "mode": "count_per_identifier_and_ip",
+            "allowlist": [],
+            "max_attempts": 10
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -2737,44 +2813,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/connections/con_i7HUXAErZAALFghC/clients?take=50",
-        "body": "",
-        "status": 200,
-        "response": {
-            "clients": [
-                {
-                    "client_id": "3NlaLNQ781BQqT4EOxFFT4pU5UGXhkB8"
-                },
-                {
-                    "client_id": "qB4mjSRBPT9RMWlnqFkB92PuyKGamvQC"
-                }
-            ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/connections/con_2rOPbLt331fHmJcF/clients?take=50",
-        "body": "",
-        "status": 200,
-        "response": {
-            "clients": [
-                {
-                    "client_id": "iBGDEOQX08xrKjF1cP4RT7rXRnmMlWhT"
-                },
-                {
-                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
-                }
-            ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/connections/con_2rOPbLt331fHmJcF",
         "body": "",
         "status": 200,
@@ -2854,7 +2892,8 @@
                         "api_behavior": "required"
                     }
                 },
-                "brute_force_protection": true
+                "brute_force_protection": true,
+                "disable_self_service_change_password": false
             },
             "realms": [
                 "Username-Password-Authentication"
@@ -2884,7 +2923,8 @@
                         "api_behavior": "required"
                     }
                 },
-                "brute_force_protection": true
+                "brute_force_protection": true,
+                "disable_self_service_change_password": false
             },
             "strategy": "auth0",
             "name": "Username-Password-Authentication",
@@ -3544,8 +3584,8 @@
                         "google-oauth2"
                     ],
                     "enabled_clients": [
-                        "3NlaLNQ781BQqT4EOxFFT4pU5UGXhkB8",
-                        "R0zsKXjlXDRy0ntbhacCpjjYDDs14rPo"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "iBGDEOQX08xrKjF1cP4RT7rXRnmMlWhT"
                     ]
                 },
                 {
@@ -3571,7 +3611,8 @@
                                 "api_behavior": "required"
                             }
                         },
-                        "brute_force_protection": true
+                        "brute_force_protection": true,
+                        "disable_self_service_change_password": false
                     },
                     "strategy": "auth0",
                     "name": "Username-Password-Authentication",
@@ -3694,8 +3735,8 @@
                         "google-oauth2"
                     ],
                     "enabled_clients": [
-                        "3NlaLNQ781BQqT4EOxFFT4pU5UGXhkB8",
-                        "R0zsKXjlXDRy0ntbhacCpjjYDDs14rPo"
+                        "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE",
+                        "iBGDEOQX08xrKjF1cP4RT7rXRnmMlWhT"
                     ]
                 },
                 {
@@ -3721,7 +3762,8 @@
                                 "api_behavior": "required"
                             }
                         },
-                        "brute_force_protection": true
+                        "brute_force_protection": true,
+                        "disable_self_service_change_password": false
                     },
                     "strategy": "auth0",
                     "name": "Username-Password-Authentication",
@@ -3754,29 +3796,10 @@
         "response": {
             "clients": [
                 {
-                    "client_id": "3NlaLNQ781BQqT4EOxFFT4pU5UGXhkB8"
+                    "client_id": "iBGDEOQX08xrKjF1cP4RT7rXRnmMlWhT"
                 },
                 {
-                    "client_id": "R0zsKXjlXDRy0ntbhacCpjjYDDs14rPo"
-                }
-            ]
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/connections/con_5PfCFRgL3RkxrwYu/clients?take=50",
-        "body": "",
-        "status": 200,
-        "response": {
-            "clients": [
-                {
-                    "client_id": "3NlaLNQ781BQqT4EOxFFT4pU5UGXhkB8"
-                },
-                {
-                    "client_id": "R0zsKXjlXDRy0ntbhacCpjjYDDs14rPo"
+                    "client_id": "Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE"
                 }
             ]
         },
@@ -4970,42 +4993,12 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles/rol_GuY3RUFXNV3Vw4s8/permissions?per_page=100&page=1&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "permissions": [],
-            "start": 100,
-            "limit": 100,
-            "total": 0
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/roles/rol_zeyP6bXU3wJ0PoZW/permissions?per_page=100&page=0&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
             "permissions": [],
             "start": 0,
-            "limit": 100,
-            "total": 0
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/roles/rol_zeyP6bXU3wJ0PoZW/permissions?per_page=100&page=1&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "permissions": [],
-            "start": 100,
             "limit": 100,
             "total": 0
         },
@@ -5030,21 +5023,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/roles/rol_QSF9Vg6MzQq4ECkD/permissions?per_page=100&page=1&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "permissions": [],
-            "start": 100,
-            "limit": 100,
-            "total": 0
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/roles/rol_rtEH3uIfRpFBeJbD/permissions?per_page=100&page=0&include_totals=true",
         "body": "",
         "status": 200,
@@ -5053,50 +5031,6 @@
             "start": 0,
             "limit": 100,
             "total": 0
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/roles/rol_rtEH3uIfRpFBeJbD/permissions?per_page=100&page=1&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "permissions": [],
-            "start": 100,
-            "limit": 100,
-            "total": 0
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/organizations?take=50",
-        "body": "",
-        "status": 200,
-        "response": {
-            "organizations": [
-                {
-                    "id": "org_dwsXwbutprxLQ7gl",
-                    "name": "org2",
-                    "display_name": "Organization2"
-                },
-                {
-                    "id": "org_k1k4elV3eYiPmJX0",
-                    "name": "org1",
-                    "display_name": "Organization",
-                    "branding": {
-                        "colors": {
-                            "page_background": "#fff5f5",
-                            "primary": "#57ddff"
-                        }
-                    }
-                }
-            ]
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -5624,14 +5558,28 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/organizations/org_dwsXwbutprxLQ7gl/enabled_connections?page=0&per_page=50&include_totals=true",
+        "path": "/api/v2/organizations?take=50",
         "body": "",
         "status": 200,
         "response": {
-            "enabled_connections": [],
-            "start": 0,
-            "limit": 0,
-            "total": 0
+            "organizations": [
+                {
+                    "id": "org_dwsXwbutprxLQ7gl",
+                    "name": "org2",
+                    "display_name": "Organization2"
+                },
+                {
+                    "id": "org_k1k4elV3eYiPmJX0",
+                    "name": "org1",
+                    "display_name": "Organization",
+                    "branding": {
+                        "colors": {
+                            "page_background": "#fff5f5",
+                            "primary": "#57ddff"
+                        }
+                    }
+                }
+            ]
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -5639,7 +5587,7 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/organizations/org_dwsXwbutprxLQ7gl/enabled_connections?page=1&per_page=50&include_totals=true",
+        "path": "/api/v2/organizations/org_dwsXwbutprxLQ7gl/enabled_connections?page=0&per_page=50&include_totals=true",
         "body": "",
         "status": 200,
         "response": {
@@ -5662,33 +5610,6 @@
             "start": 0,
             "limit": 50,
             "total": 0
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/organizations/org_dwsXwbutprxLQ7gl/client-grants?page=1&per_page=50&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "client_grants": [],
-            "start": 50,
-            "limit": 50,
-            "total": 0
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/organizations/org_dwsXwbutprxLQ7gl/discovery-domains?take=50",
-        "body": "",
-        "status": 200,
-        "response": {
-            "domains": []
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -5723,21 +5644,6 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
-        "path": "/api/v2/organizations/org_k1k4elV3eYiPmJX0/enabled_connections?page=1&per_page=50&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "enabled_connections": [],
-            "start": 0,
-            "limit": 0,
-            "total": 0
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
         "path": "/api/v2/organizations/org_k1k4elV3eYiPmJX0/client-grants?page=0&per_page=50&include_totals=true",
         "body": "",
         "status": 200,
@@ -5746,33 +5652,6 @@
             "start": 0,
             "limit": 50,
             "total": 0
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/organizations/org_k1k4elV3eYiPmJX0/client-grants?page=1&per_page=50&include_totals=true",
-        "body": "",
-        "status": 200,
-        "response": {
-            "client_grants": [],
-            "start": 50,
-            "limit": 50,
-            "total": 0
-        },
-        "rawHeaders": [],
-        "responseIsBinary": false
-    },
-    {
-        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
-        "method": "GET",
-        "path": "/api/v2/organizations/org_k1k4elV3eYiPmJX0/discovery-domains?take=50",
-        "body": "",
-        "status": 200,
-        "response": {
-            "domains": []
         },
         "rawHeaders": [],
         "responseIsBinary": false
@@ -5915,7 +5794,8 @@
                                 "api_behavior": "required"
                             }
                         },
-                        "brute_force_protection": true
+                        "brute_force_protection": true,
+                        "disable_self_service_change_password": false
                     },
                     "strategy": "auth0",
                     "name": "Username-Password-Authentication",
@@ -6999,61 +6879,11 @@
                 "id": "lst_0000000000025632",
                 "name": "Suspended DD Log Stream",
                 "type": "datadog",
-                "status": "active",
+                "status": "suspended",
                 "sink": {
                     "datadogApiKey": "some-sensitive-api-key",
                     "datadogRegion": "us"
                 },
-                "isPriority": false
-            },
-            {
-                "id": "lst_0000000000025633",
-                "name": "Amazon EventBridge",
-                "type": "eventbridge",
-                "status": "active",
-                "sink": {
-                    "awsAccountId": "123456789012",
-                    "awsRegion": "us-east-2",
-                    "awsPartnerEventSource": "aws.partner/auth0.com/auth0-deploy-cli-e2e-1ee67232-b5e7-4c85-8827-0b4d9bc347f4/auth0.logs"
-                },
-                "filters": [
-                    {
-                        "type": "category",
-                        "name": "auth.login.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.login.notification"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.login.fail"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.signup.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.logout.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.logout.fail"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.silent_auth.fail"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.silent_auth.success"
-                    },
-                    {
-                        "type": "category",
-                        "name": "auth.token_exchange.fail"
-                    }
-                ],
                 "isPriority": false
             }
         ],
