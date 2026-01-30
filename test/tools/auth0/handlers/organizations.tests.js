@@ -61,6 +61,7 @@ const sampleDiscoveryDomain = {
   id: 'dd_123',
   domain: 'login.acme.com',
   status: 'pending',
+  use_for_organization_discovery: true,
   verification_txt: 'auth0-domain-verification=xyz',
   verification_host: '_auth0-domain-verification.login.acme.com',
 };
@@ -946,6 +947,7 @@ describe('#organizations handler', () => {
               expect(domain).to.be.an('object');
               expect(domain.domain).to.equal('login.acme.com');
               expect(domain.status).to.equal('pending');
+              expect(domain.use_for_organization_discovery).to.equal(true);
               return Promise.resolve({ data: { ...domain, id: 'dd_new' } });
             },
           },
@@ -970,7 +972,7 @@ describe('#organizations handler', () => {
             {
               name: 'acme',
               display_name: 'Acme',
-              discovery_domains: [{ domain: 'login.acme.com', status: 'pending' }],
+              discovery_domains: [{ domain: 'login.acme.com', status: 'pending', use_for_organization_discovery: true }],
             },
           ],
         },
@@ -1001,11 +1003,13 @@ describe('#organizations handler', () => {
               expect(orgId).to.equal('123');
               expect(discoveryDomainId).to.equal('dd_123');
               expect(body.status).to.equal('verified');
-              return Promise.resolve({ data: { ...sampleDiscoveryDomain, status: 'verified' } });
+              expect(body.use_for_organization_discovery).to.equal(false);
+              return Promise.resolve({ data: { ...sampleDiscoveryDomain, status: 'verified', use_for_organization_discovery: false } });
             },
             create: (orgId, domain) => {
               expect(orgId).to.equal('123');
               expect(domain.domain).to.equal('auth.acme.com');
+              expect(domain.use_for_organization_discovery).to.equal(true);
               return Promise.resolve({ data: { ...domain, id: 'dd_new' } });
             },
             delete: (orgId, discoveryDomainId) => {
@@ -1038,8 +1042,8 @@ describe('#organizations handler', () => {
               name: 'acme',
               display_name: 'Acme Inc',
               discovery_domains: [
-                { domain: 'login.acme.com', status: 'verified' },
-                { domain: 'auth.acme.com', status: 'pending' },
+                { domain: 'login.acme.com', status: 'verified', use_for_organization_discovery: false },
+                { domain: 'auth.acme.com', status: 'pending', use_for_organization_discovery: true },
               ],
             },
           ],
