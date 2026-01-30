@@ -86,7 +86,10 @@ type DirectoryProvisioningConfig = Management.DirectoryProvisioning;
 
 export type Connection = Management.ConnectionForList & {
   enabled_clients?: string[];
-  directory_provisioning_configuration?: Pick<DirectoryProvisioningConfig, 'mapping' | 'synchronize_automatically'>;
+  directory_provisioning_configuration?: Pick<
+    DirectoryProvisioningConfig,
+    'mapping' | 'synchronize_automatically'
+  >;
 };
 
 // addExcludedConnectionPropertiesToChanges superimposes excluded properties on the `options` object. The Auth0 API

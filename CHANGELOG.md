@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for `use_for_organization_discovery` in organizations `discovery-domains`. [#1283]
+- Add support for passwordless authentication methods (`email_otp` and `phone_otp`) in `databases`. [#1282]
+- Add support for `relying_party_identifier` in `customDomains`. [#1280]
+- Add support for `allow_all_scopes` property in `clientGrants`. [#1278]
+- Add OIDC logout configuration support with session metadata in `clients`. [#1263]
+
+### Changed
+
+- Optimize directory provisioning configuration fetching for `connections`. [#1284]
+
+### Fixed
+
+- Fix exclude read-only `is_default` from `customDomains`. [#1279]
+- Fix pagination skipping last page. [#1277]
+
 ## [8.25.0] - 2026-01-08
 
 ### Added

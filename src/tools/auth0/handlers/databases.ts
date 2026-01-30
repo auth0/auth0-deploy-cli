@@ -180,7 +180,6 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     const passwordEnabled = options?.authentication_methods?.password?.enabled;
     const disableSelfServiceChangePassword = options?.disable_self_service_change_password;
 
-
     if (passwordEnabled === undefined || disableSelfServiceChangePassword === undefined) return;
 
     if (passwordEnabled === false && disableSelfServiceChangePassword !== true) {

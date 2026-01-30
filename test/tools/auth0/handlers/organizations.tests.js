@@ -972,7 +972,13 @@ describe('#organizations handler', () => {
             {
               name: 'acme',
               display_name: 'Acme',
-              discovery_domains: [{ domain: 'login.acme.com', status: 'pending', use_for_organization_discovery: true }],
+              discovery_domains: [
+                {
+                  domain: 'login.acme.com',
+                  status: 'pending',
+                  use_for_organization_discovery: true,
+                },
+              ],
             },
           ],
         },
@@ -1004,7 +1010,13 @@ describe('#organizations handler', () => {
               expect(discoveryDomainId).to.equal('dd_123');
               expect(body.status).to.equal('verified');
               expect(body.use_for_organization_discovery).to.equal(false);
-              return Promise.resolve({ data: { ...sampleDiscoveryDomain, status: 'verified', use_for_organization_discovery: false } });
+              return Promise.resolve({
+                data: {
+                  ...sampleDiscoveryDomain,
+                  status: 'verified',
+                  use_for_organization_discovery: false,
+                },
+              });
             },
             create: (orgId, domain) => {
               expect(orgId).to.equal('123');
@@ -1042,8 +1054,16 @@ describe('#organizations handler', () => {
               name: 'acme',
               display_name: 'Acme Inc',
               discovery_domains: [
-                { domain: 'login.acme.com', status: 'verified', use_for_organization_discovery: false },
-                { domain: 'auth.acme.com', status: 'pending', use_for_organization_discovery: true },
+                {
+                  domain: 'login.acme.com',
+                  status: 'verified',
+                  use_for_organization_discovery: false,
+                },
+                {
+                  domain: 'auth.acme.com',
+                  status: 'pending',
+                  use_for_organization_discovery: true,
+                },
               ],
             },
           ],

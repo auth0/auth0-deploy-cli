@@ -226,7 +226,11 @@ describe('#directory context organizations', () => {
 
     expect(dumpedRest).to.deep.equal(originalRest);
     expect(dumpedDiscoveryDomains).to.deep.equal(
-      originalDiscoveryDomains.map(({ domain, status, use_for_organization_discovery }) => ({ domain, status, use_for_organization_discovery }))
+      originalDiscoveryDomains.map(({ domain, status, use_for_organization_discovery }) => ({
+        domain,
+        status,
+        use_for_organization_discovery,
+      }))
     );
     expect(loadJSON(path.join(organizationsFolder, 'contoso.json'))).to.deep.equal(
       context.assets.organizations[1]

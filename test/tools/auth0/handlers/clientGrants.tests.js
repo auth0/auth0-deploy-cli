@@ -73,7 +73,9 @@ describe('#clientGrants handler', () => {
         expect.fail('Should have thrown an error');
       } catch (err) {
         expect(err).to.be.an.instanceof(Error);
-        expect(err.message).to.include('Cannot specify "scope" when "allow_all_scopes" is set to true');
+        expect(err.message).to.include(
+          'Cannot specify "scope" when "allow_all_scopes" is set to true'
+        );
         expect(err.message).to.include('testClient');
         expect(err.message).to.include('https://test.auth0.com/api/v2/');
       }

@@ -171,7 +171,10 @@ describe('#connections handler', () => {
 
       const handler = new connections.default({ client: pageClient(auth0), config });
       sinon.stub(connections, 'getConnectionEnabledClients').resolves(undefined);
-      const dirProvConfig = { mapping: [{ auth0: 'email', idp: 'mail' }], synchronize_automatically: true };
+      const dirProvConfig = {
+        mapping: [{ auth0: 'email', idp: 'mail' }],
+        synchronize_automatically: true,
+      };
       const dirProvConfigs = [
         {
           connection_id: 'con1',
