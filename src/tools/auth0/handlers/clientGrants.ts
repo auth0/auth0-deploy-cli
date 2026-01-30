@@ -33,7 +33,8 @@ export const schema = {
       },
       allow_all_scopes: {
         type: 'boolean',
-        description: 'When enabled, all scopes configured on the resource server are allowed for by this client grant.',
+        description:
+          'When enabled, all scopes configured on the resource server are allowed for by this client grant.',
       },
     },
     required: ['client_id', 'audience'],

@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.26.0] - 2026-01-30
+
+### Added
+
+- Add support for `use_for_organization_discovery` in organizations `discovery-domains`. [#1283]
+- Add support for passwordless authentication methods (`email_otp` and `phone_otp`) in `databases`. [#1282]
+- Add support for `relying_party_identifier` in `customDomains`. [#1280]
+- Add support for `allow_all_scopes` property in `clientGrants`. [#1278]
+- Add OIDC logout configuration support with session metadata in `clients`. [#1263]
+
+### Changed
+
+- Optimize directory provisioning configuration fetching for `connections`. [#1284]
+
+### Fixed
+
+- Fix exclude read-only `is_default` from `customDomains`. [#1279]
+- Fix pagination skipping last page. [#1277]
+
 ## [8.25.0] - 2026-01-08
 
 ### Added
@@ -1606,7 +1625,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1244]: https://github.com/auth0/auth0-deploy-cli/issues/1244
 [#1246]: https://github.com/auth0/auth0-deploy-cli/issues/1246
 [#1253]: https://github.com/auth0/auth0-deploy-cli/issues/1253
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.25.0...HEAD
+[#1261]: https://github.com/auth0/auth0-deploy-cli/issues/1261
+[#1263]: https://github.com/auth0/auth0-deploy-cli/issues/1263
+[#1277]: https://github.com/auth0/auth0-deploy-cli/issues/1277
+[#1278]: https://github.com/auth0/auth0-deploy-cli/issues/1278
+[#1279]: https://github.com/auth0/auth0-deploy-cli/issues/1279
+[#1280]: https://github.com/auth0/auth0-deploy-cli/issues/1280
+[#1282]: https://github.com/auth0/auth0-deploy-cli/issues/1282
+[#1283]: https://github.com/auth0/auth0-deploy-cli/issues/1283
+[#1284]: https://github.com/auth0/auth0-deploy-cli/issues/1284
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.26.0...HEAD
+[8.26.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.25.0...v8.26.0
 [8.25.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.24.0...v8.25.0
 [8.24.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.2...v8.24.0
 [8.23.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.1...v8.23.2

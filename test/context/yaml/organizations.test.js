@@ -178,7 +178,11 @@ describe('#YAML context organizations', () => {
     delete organizations[0].connections[0].connection;
     delete organizations[0].connections[0].connection_id;
     organizations[0].discovery_domains = organizations[0].discovery_domains.map(
-      ({ domain, status, use_for_organization_discovery }) => ({ domain, status, use_for_organization_discovery })
+      ({ domain, status, use_for_organization_discovery }) => ({
+        domain,
+        status,
+        use_for_organization_discovery,
+      })
     );
 
     expect(dumped).to.deep.equal({ organizations });
