@@ -15,6 +15,7 @@ import guardianPhoneFactorSelectedProvider from './guardianPhoneFactorSelectedPr
 import guardianPolicies from './guardianPolicies';
 import roles from './roles';
 import actions from './actions';
+import actionModules from './actionModules';
 import organizations from './organizations';
 import triggers from './triggers';
 import attackProtection from './attackProtection';
@@ -69,6 +70,7 @@ const directoryHandlers: {
   guardianPolicies,
   roles,
   actions,
+  actionModules,
   organizations,
   triggers,
   attackProtection,

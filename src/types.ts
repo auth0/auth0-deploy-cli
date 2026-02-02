@@ -1,6 +1,7 @@
 import { Management, ManagementClient } from 'auth0';
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { Action } from './tools/auth0/handlers/actions';
+import { ActionModule } from './tools/auth0/handlers/actionModules';
 import { Prompts } from './tools/auth0/handlers/prompts';
 import { Tenant } from './tools/auth0/handlers/tenant';
 import { Page } from './tools/auth0/handlers/pages';
@@ -98,6 +99,7 @@ export type Asset = { [key: string]: any };
 
 export type Assets = Partial<{
   actions: Action[] | null;
+  actionModules: ActionModule[] | null;
   attackProtection: AttackProtection | null;
   riskAssessment: RiskAssessment | null;
   branding:
@@ -183,6 +185,7 @@ export type AssetTypes =
   | 'guardianPolicies'
   | 'roles'
   | 'actions'
+  | 'actionModules'
   | 'organizations'
   | 'triggers'
   | 'attackProtection'

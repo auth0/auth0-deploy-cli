@@ -35,6 +35,7 @@ const constants = {
   OBFUSCATED_SECRET_VALUE,
   HOOKS_DIRECTORY: 'hooks',
   ACTIONS_DIRECTORY: 'actions',
+  ACTION_MODULES_DIRECTORY: 'action-modules',
   TRIGGERS_DIRECTORY: 'triggers',
   RULES_CONFIGS_DIRECTORY: 'rules-configs',
   PAGES_DIRECTORY: 'pages',

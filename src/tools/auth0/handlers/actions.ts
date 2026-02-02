@@ -117,6 +117,7 @@ export default class ActionHandler extends DefaultAPIHandler {
   }
 
   async updateAction(actionId: string, action: Management.UpdateActionRequestContent) {
+    console.log('[CLOG] data:', );
     return this.client.actions.update(actionId, action);
   }
 

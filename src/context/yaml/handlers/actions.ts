@@ -92,6 +92,10 @@ async function dump(context: YAMLContext): Promise<ParsedActions> {
       status: action.status,
       secrets: mapSecrets(action.secrets),
       supported_triggers: action.supported_triggers,
+      modules: action.modules?.map((module) => ({
+        module_name: module.module_name,
+        module_version_number: module.module_version_number,
+      })),
     })),
   };
 }

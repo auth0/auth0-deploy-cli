@@ -49,6 +49,9 @@ export function mockMgmtClient() {
     hooks: { list: (params) => mockPagedData(params, 'hooks', []) },
     actions: {
       list: () => mockPagedData({ include_totals: true }, 'actions', []),
+      modules: {
+        list: (params) => mockPagedData(params, 'modules', []),
+      },
       triggers: {
         list: () => {},
         bindings: {
