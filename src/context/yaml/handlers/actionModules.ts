@@ -67,6 +67,9 @@ async function dump(context: YAMLContext): Promise<ParsedActionModules> {
       code: mapModuleCode(context.basePath, module),
       dependencies: module.dependencies || [],
       secrets: mapSecrets(module.secrets),
+      actions_using_module_total: module.actions_using_module_total,
+      all_changes_published: module.all_changes_published,
+      latest_version_number: module.latest_version_number,
     })),
   };
 }

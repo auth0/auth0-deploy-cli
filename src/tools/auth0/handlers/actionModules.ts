@@ -53,14 +53,14 @@ export default class ActionModulesHandler extends DefaultAPIHandler {
       identifiers: ['id', 'name'],
       stripUpdateFields: [
         'name',
-        'bound_actions_total',
+        'actions_using_module_total',
         'all_changes_published',
         'latest_version_number',
         'created_at',
         'updated_at',
       ],
       stripCreateFields: [
-        'bound_actions_total',
+        'actions_using_module_total',
         'all_changes_published',
         'latest_version_number',
         'created_at',
@@ -121,8 +121,8 @@ export default class ActionModulesHandler extends DefaultAPIHandler {
     }
   }
 
-  // Run after actions are processed
-  @order('51')
+  // Before actions are processed
+  @order('50')
   async processChanges(assets: Assets): Promise<void> {
     const { actionModules } = assets;
 
