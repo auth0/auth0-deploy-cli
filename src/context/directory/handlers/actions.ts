@@ -88,7 +88,6 @@ function mapToAction(filePath, action, includeIdentifiers: boolean): Partial<Act
     modules: action.modules?.map((module) => ({
       module_name: module.module_name,
       module_version_number: module.module_version_number,
-      
     })),
   };
 }

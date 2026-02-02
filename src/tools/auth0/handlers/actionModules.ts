@@ -2,8 +2,7 @@ import DefaultAPIHandler, { order } from './default';
 import log from '../../../logger';
 import { Asset, Assets } from '../../../types';
 import { paginate } from '../client';
-import {Management} from 'auth0';
-
+import { Management } from 'auth0';
 
 export const schema = {
   type: 'array',
@@ -33,7 +32,7 @@ export const schema = {
             name: { type: 'string' },
             value: { type: 'string' },
           },
-          required:['name','value']
+          required: ['name', 'value'],
         },
       },
     },
@@ -96,12 +95,9 @@ export default class ActionModulesHandler extends DefaultAPIHandler {
     if (this.existing) return this.existing;
 
     try {
-      const modules = await paginate<ActionModule>(
-        this.client.actions.modules.list,
-        {
-          paginate: true,
-        }
-      );
+      const modules = await paginate<ActionModule>(this.client.actions.modules.list, {
+        paginate: true,
+      });
 
       this.existing = modules;
       return this.existing;
@@ -111,9 +107,7 @@ export default class ActionModulesHandler extends DefaultAPIHandler {
       }
 
       if (err.statusCode === 403 || err.errorCode === 'feature_not_enabled') {
-        log.debug(
-          'Skipping action modules because it is not enabled.'
-        );
+        log.debug('Skipping action modules because it is not enabled.');
         return null;
       }
 
