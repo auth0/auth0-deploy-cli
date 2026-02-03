@@ -3,7 +3,7 @@
 This README will document how to use the YAML Option of the Auth0-deploy-cli tool. Please refer to the main project [README.md](../../README.md) for more information on the Auth0 Deploy CLI.
 
 # Overview
-The YAML option supports exporting and importing the Auth0 tenant configuration via a YAML file.
+The YAML option supports exporting and importing the Auth0 tenant configuration via a YAML file. This includes support for all resource types such as clients, connections, rules, actions, action modules, and more.
 
 For more information on YAML please refer to [http://yaml.org/](http://yaml.org/)
 
