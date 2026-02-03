@@ -56,7 +56,7 @@ function mapModuleCode(basePath: string, module: ActionModule): string {
 async function dump(context: YAMLContext): Promise<ParsedActionModules> {
   const { actionModules } = context.assets;
 
-  if (!actionModules) return { actionModules: null };
+  if (!actionModules || actionModules.length === 0) return { actionModules: null };
 
   const includeIdentifiers = Boolean(context.config.AUTH0_EXPORT_IDENTIFIERS);
 

@@ -350,4 +350,66 @@ describe('#directory context actions', () => {
     await context.loadAssetsFromLocal();
     expect(context.assets.actions).to.deep.equal(target);
   });
+
+  it('should dump actions with modules', async () => {
+    const actionName = 'action-with-modules';
+    const dir = path.join(testDataDir, 'directory', 'test-action-modules');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    const codeValidation =
+      '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log("test-action"); return {}; };';
+
+    context.assets.actions = [
+      {
+        name: actionName,
+        code: codeValidation,
+        runtime: 'node12',
+        dependencies: [],
+        secrets: [],
+        supported_triggers: [
+          {
+            id: 'post-login',
+            version: 'v1',
+          },
+        ],
+        deployed: true,
+        status: 'built',
+        modules: [
+          {
+            module_name: 'test-module',
+            module_version_number: 1,
+          },
+        ],
+      },
+    ];
+
+    await handler.dump(context);
+
+    const actionsFolder = path.join(dir, constants.ACTIONS_DIRECTORY);
+
+    expect(loadJSON(path.join(actionsFolder, 'action-with-modules.json'))).to.deep.equal({
+      name: actionName,
+      code: './actions/action-with-modules/code.js',
+      runtime: 'node12',
+      dependencies: [],
+      secrets: [],
+      supported_triggers: [
+        {
+          id: 'post-login',
+          version: 'v1',
+        },
+      ],
+      deployed: true,
+      status: 'built',
+      modules: [
+        {
+          module_name: 'test-module',
+          module_version_number: 1,
+        },
+      ],
+    });
+    expect(
+      fs.readFileSync(path.join(actionsFolder, actionName, 'code.js'), 'utf8')
+    ).to.deep.equal(codeValidation);
+  });
 });

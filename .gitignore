@@ -13,6 +13,8 @@ yarn-error.log
 *.pub
 Makefile
 .vscode/*
+.claude/*
+CLAUDE.md
 .github/copilot-instructions.md
 .github/chatmodes/*
 .github/prompts/*

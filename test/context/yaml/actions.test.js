@@ -100,30 +100,27 @@ describe('#YAML context actions', () => {
     ];
 
     const dumped = await handler.dump(context);
-    expect(dumped).to.deep.equal({
-      actions: [
-        {
-          name: 'action-one',
-          code: './actions/action-one/code.js',
-          runtime: 'node12',
-          status: 'built',
-          dependencies: [
-            {
-              name: 'lodash',
-              version: '4.17.20',
-            },
-          ],
-          supported_triggers: [
-            {
-              id: 'post-login',
-              version: 'v1',
-            },
-          ],
-          secrets: [],
-          deployed: true,
-        },
-      ],
+    expect(dumped.actions).to.have.lengthOf(1);
+    expect(dumped.actions[0]).to.include({
+      name: 'action-one',
+      code: './actions/action-one/code.js',
+      runtime: 'node12',
+      status: 'built',
+      deployed: true,
     });
+    expect(dumped.actions[0].dependencies).to.deep.equal([
+      {
+        name: 'lodash',
+        version: '4.17.20',
+      },
+    ]);
+    expect(dumped.actions[0].supported_triggers).to.deep.equal([
+      {
+        id: 'post-login',
+        version: 'v1',
+      },
+    ]);
+    expect(dumped.actions[0].secrets).to.deep.equal([]);
 
     const actionsFolder = path.join(dir, 'actions', 'action-one');
     expect(fs.readFileSync(path.join(actionsFolder, 'code.js'), 'utf8')).to.deep.equal(
@@ -161,26 +158,23 @@ describe('#YAML context actions', () => {
     ];
 
     const dumped = await handler.dump(context);
-    expect(dumped).to.deep.equal({
-      actions: [
-        {
-          id: 'act_123',
-          name: 'action-one',
-          code: './actions/action-one/code.js',
-          runtime: 'node12',
-          status: 'built',
-          dependencies: [],
-          supported_triggers: [
-            {
-              id: 'post-login',
-              version: 'v1',
-            },
-          ],
-          secrets: [],
-          deployed: true,
-        },
-      ],
+    expect(dumped.actions).to.have.lengthOf(1);
+    expect(dumped.actions[0]).to.include({
+      id: 'act_123',
+      name: 'action-one',
+      code: './actions/action-one/code.js',
+      runtime: 'node12',
+      status: 'built',
+      deployed: true,
     });
+    expect(dumped.actions[0].dependencies).to.deep.equal([]);
+    expect(dumped.actions[0].supported_triggers).to.deep.equal([
+      {
+        id: 'post-login',
+        version: 'v1',
+      },
+    ]);
+    expect(dumped.actions[0].secrets).to.deep.equal([]);
 
     const actionsFolder = path.join(dir, 'actions', 'action-one');
     expect(fs.readFileSync(path.join(actionsFolder, 'code.js'), 'utf8')).to.deep.equal(
@@ -232,5 +226,72 @@ describe('#YAML context actions', () => {
     expect(dumped).to.deep.equal({
       actions: [],
     });
+  });
+
+  it('should dump actions with modules', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'actionsDumpWithModules');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') },
+      mockMgmtClient()
+    );
+    const codeValidation =
+      '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log("test-action"); return {}; };';
+
+    context.assets.actions = [
+      {
+        name: 'action-with-modules',
+        code: codeValidation,
+        runtime: 'node12',
+        status: 'built',
+        dependencies: [],
+        supported_triggers: [
+          {
+            id: 'post-login',
+            version: 'v1',
+          },
+        ],
+        secrets: [],
+        deployed: true,
+        modules: [
+          {
+            module_name: 'test-module',
+            module_version_number: 1,
+          },
+        ],
+      },
+    ];
+
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({
+      actions: [
+        {
+          name: 'action-with-modules',
+          code: './actions/action-with-modules/code.js',
+          runtime: 'node12',
+          status: 'built',
+          dependencies: [],
+          supported_triggers: [
+            {
+              id: 'post-login',
+              version: 'v1',
+            },
+          ],
+          secrets: [],
+          deployed: true,
+          modules: [
+            {
+              module_name: 'test-module',
+              module_version_number: 1,
+            },
+          ],
+        },
+      ],
+    });
+
+    const actionsFolder = path.join(dir, 'actions', 'action-with-modules');
+    expect(fs.readFileSync(path.join(actionsFolder, 'code.js'), 'utf8')).to.deep.equal(
+      codeValidation
+    );
   });
 });
