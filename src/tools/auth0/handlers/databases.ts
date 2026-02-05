@@ -1,7 +1,12 @@
 import { Management } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import constants from '../../constants';
-import { filterExcluded, getEnabledClients } from '../../utils';
+import {
+  filterExcluded,
+  getEnabledClients,
+  convertActionNameToId,
+  convertActionIdToName,
+} from '../../utils';
 import { CalculatedChanges, Assets, Asset } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
@@ -11,6 +16,7 @@ import {
   processConnectionEnabledClients,
 } from './connections';
 import { Client } from './clients';
+import { Action } from './actions';
 
 export const schema = {
   type: 'array',
@@ -158,6 +164,31 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     return super.objString({ name: db.name, id: db.id });
   }
 
+  getFormattedOptions(database, actions: Action[] = []) {
+    try {
+      const formattedOptions: any = {
+        options: {
+          ...database.options,
+        },
+      };
+
+      // Handle custom_password_hash.action_id conversion
+      if (database.options?.custom_password_hash?.action_id) {
+        formattedOptions.options.custom_password_hash = {
+          ...database.options.custom_password_hash,
+          action_id: convertActionNameToId(
+            database.options.custom_password_hash.action_id,
+            actions
+          ),
+        };
+      }
+
+      return formattedOptions;
+    } catch (e) {
+      return {};
+    }
+  }
+
   async validate(assets: Assets): Promise<void> {
     const { databases } = assets;
 
@@ -274,14 +305,43 @@ export default class DatabaseHandler extends DefaultAPIHandler {
       checkpoint: true,
     });
 
+    // Fetch actions for action_id to name conversion
+    let actions: Action[] = [];
+    try {
+      if (this.client.actions?.list) {
+        actions = await paginate<Action>(this.client.actions.list, {
+          paginate: true,
+          include_totals: true,
+        });
+      }
+    } catch (error) {
+      // Actions API might not be available, continue without it
+    }
+
     const dbConnectionsWithEnabledClients = await Promise.all(
       connections.map(async (con) => {
         if (!con?.id) return con;
+
         const enabledClients = await getConnectionEnabledClients(this.client, con.id);
+        let connection = { ...con };
+
         if (enabledClients && enabledClients?.length) {
-          return { ...con, enabled_clients: enabledClients };
+          connection.enabled_clients = enabledClients;
         }
-        return con;
+
+        // Convert action ID back to action name for export
+        const customPasswordHash = (connection.options as any)?.custom_password_hash;
+        if (customPasswordHash?.action_id) {
+          connection.options = {
+            ...connection.options,
+            custom_password_hash: {
+              ...customPasswordHash,
+              action_id: convertActionIdToName(customPasswordHash.action_id, actions),
+            },
+          };
+        }
+
+        return connection;
       })
     );
 
@@ -323,15 +383,29 @@ export default class DatabaseHandler extends DefaultAPIHandler {
       checkpoint: true,
       include_totals: true,
     });
+
+    // Fetch actions for action_id conversion
+    let actions: Action[] = [];
+    if (this.client.actions?.list) {
+      actions = await paginate<Action>(this.client.actions.list, {
+        paginate: true,
+        include_totals: true,
+      });
+    }
+
     const formatted = databases.map((db) => {
+      const formattedDb = { ...db, ...this.getFormattedOptions(db, actions) };
+
       if (db.enabled_clients) {
-        return {
-          ...db,
-          enabled_clients: getEnabledClients(assets, db, existingDatabasesConnections, clients),
-        };
+        formattedDb.enabled_clients = getEnabledClients(
+          assets,
+          db,
+          existingDatabasesConnections,
+          clients
+        );
       }
 
-      return db;
+      return formattedDb;
     });
 
     return super.calcChanges({ ...assets, databases: formatted });
