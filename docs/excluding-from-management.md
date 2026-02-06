@@ -57,7 +57,7 @@ Some resource types support exclusions of individual resource by name. This is p
 
 ### Excluding third-party clients
 
-You can also exclude all third-party clients at once using the `AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS` configuration option. When enabled, only first-party clients will be included in export and import operations. This is useful when you have Dynamic Client Registration (DCR) enabled and you have a lot of third-party clients in your tenant.
+You can also exclude all third-party clients at once using the `AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS` configuration option. When enabled, only first-party clients and their associated client grants will be included in export and import operations. This is useful when you have Dynamic Client Registration (DCR) enabled and you have a lot of third-party clients in your tenant.
 
 ```json
 {

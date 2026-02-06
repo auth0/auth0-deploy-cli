@@ -6,6 +6,7 @@ import DefaultAPIHandler from './default';
 import { getConnectionProfile } from './connectionProfiles';
 import { getUserAttributeProfiles } from './userAttributeProfiles';
 import log from '../../../logger';
+import { shouldExcludeThirdPartyClients } from '../../utils';
 
 const multiResourceRefreshTokenPoliciesSchema = {
   type: ['array', 'null'],
@@ -458,10 +459,6 @@ export default class ClientHandler extends DefaultAPIHandler {
 
     const excludedClients = (assets.exclude && assets.exclude.clients) || [];
 
-    const excludeThirdPartyClients =
-      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === 'true' ||
-      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === true;
-
     const { del, update, create, conflicts } = await this.calcChanges(assets);
 
     // Always filter out the client we are using to access Auth0 Management API
@@ -480,7 +477,7 @@ export default class ClientHandler extends DefaultAPIHandler {
           item.client_id !== currentClient &&
           item.name &&
           !excludedClients.includes(item.name) &&
-          (!excludeThirdPartyClients || item.is_first_party)
+          (!shouldExcludeThirdPartyClients(this.config) || item.is_first_party)
       );
 
     // Sanitize client fields
@@ -521,14 +518,10 @@ export default class ClientHandler extends DefaultAPIHandler {
   async getType() {
     if (this.existing) return this.existing;
 
-    const excludeThirdPartyClients =
-      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === 'true' ||
-      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === true;
-
     const clients = await paginate<Client>(this.client.clients.list, {
       paginate: true,
       is_global: false,
-      ...(excludeThirdPartyClients && { is_first_party: true }),
+      ...(shouldExcludeThirdPartyClients(this.config) && { is_first_party: true }),
     });
 
     this.existing = createClientSanitizer(clients).sanitizeCrossOriginAuth().get();
