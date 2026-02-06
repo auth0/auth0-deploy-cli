@@ -97,6 +97,24 @@ export default class ClientGrantsHandler extends DefaultHandler {
 
     this.existing = this.existing.filter((grant) => grant.client_id !== currentClient);
 
+    // Filter out third-party client grants when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is enabled
+    const excludeThirdPartyClients =
+      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === 'true' ||
+      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === true;
+
+    if (excludeThirdPartyClients) {
+      const clients = await paginate<Client>(this.client.clients.list, {
+        paginate: true,
+        is_first_party: true,
+      });
+
+      const firstPartyClientIds = new Set(clients.map((c) => c.client_id));
+
+      this.existing = this.existing.filter((grant) =>
+        firstPartyClientIds.has(grant.client_id)
+      );
+    }
+
     return this.existing;
   }
 
@@ -125,24 +143,45 @@ export default class ClientGrantsHandler extends DefaultHandler {
     // Always filter out the client we are using to access Auth0 Management API
     const currentClient = this.config('AUTH0_CLIENT_ID');
 
+    // Check if third-party clients should be excluded
+    const excludeThirdPartyClients =
+      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === 'true' ||
+      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === true;
+
+    // Build a set of third-party client IDs for efficient lookup
+    const thirdPartyClientIds = new Set(
+      clients.filter((c) => c.is_first_party === false).map((c) => c.client_id)
+    );
+
     const { del, update, create, conflicts } = await this.calcChanges({
       ...assets,
       clientGrants: formatted,
     });
 
     const filterGrants = (list: ClientGrant[]) => {
+      let filtered = list;
+
+      // Filter out the current client (Auth0 Management API client)
+      filtered = filtered.filter((item) => item.client_id !== currentClient);
+
+      // Filter out excluded clients
       if (excludedClients.length) {
-        return list.filter(
+        filtered = filtered.filter(
           (item) =>
-            item.client_id !== currentClient &&
             item.client_id &&
             ![...excludedClientsByNames, ...excludedClients].includes(item.client_id)
         );
       }
 
-      return list
-        .filter((item) => item.client_id !== currentClient)
-        .filter((item) => item.is_system !== true);
+      // Filter out system grants
+      filtered = filtered.filter((item) => item.is_system !== true);
+
+      // Filter out third-party client grants when flag is enabled
+      if (excludeThirdPartyClients) {
+        filtered = filtered.filter((item) => !thirdPartyClientIds.has(item.client_id));
+      }
+
+      return filtered;
     };
 
     const changes: CalculatedChanges = {
