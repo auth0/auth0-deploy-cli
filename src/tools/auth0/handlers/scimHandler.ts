@@ -283,6 +283,8 @@ export default class ScimHandler {
     const { scim_configuration: scimBodyParams } = bodyParams;
     delete bodyParams.scim_configuration;
     delete bodyParams.directory_provisioning_configuration;
+    // Remove deprecated enabled_clients field
+    if ('enabled_clients' in bodyParams) delete bodyParams.enabled_clients;
 
     // First, update `connections`.
     const updated = await this.connectionsManager.update(connectionId, bodyParams);
@@ -321,6 +323,8 @@ export default class ScimHandler {
     const { scim_configuration: scimBodyParams } = bodyParams;
     delete bodyParams.scim_configuration;
     delete bodyParams.directory_provisioning_configuration;
+    // Remove deprecated enabled_clients field
+    if ('enabled_clients' in bodyParams) delete bodyParams.enabled_clients;
 
     // First, create the new `connection`.
     const data = await this.connectionsManager.create(

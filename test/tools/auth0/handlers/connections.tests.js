@@ -100,19 +100,32 @@ describe('#connections handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someConnection');
-            return Promise.resolve({ data });
+            // Verify enabled_clients is NOT in the API payload (it's deprecated)
+            expect(data).to.not.have.property('enabled_clients');
+            return Promise.resolve({ data: { ...data, id: 'con_new1' } });
           },
+          get: () =>
+            Promise.resolve({
+              id: 'con_new1',
+              name: 'someConnection',
+              strategy: 'custom',
+              options: {},
+            }),
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
           list: (params) => mockPagedData(params, 'connections', []),
           _getRestClient: () => ({}),
           clients: {
             get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
-            update: () => Promise.resolve({}),
+            update: (connectionId) => {
+              expect(connectionId).to.equal('con_new1');
+              return Promise.resolve({});
+            },
           },
         },
         clients: {
-          list: (params) => mockPagedData(params, 'clients', []),
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ name: 'client1', client_id: 'client_id_1' }]),
         },
         pool,
       };
@@ -120,7 +133,9 @@ describe('#connections handler', () => {
       const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [{ connections: [{ name: 'someConnection' }] }]);
+      await stageFn.apply(handler, [
+        { connections: [{ name: 'someConnection', enabled_clients: ['client1'] }] },
+      ]);
     });
 
     it('should get connections', async () => {
@@ -205,8 +220,9 @@ describe('#connections handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(id).to.be.a('string');
             expect(id).to.equal('con1');
+            // Verify enabled_clients is NOT in the update payload (it's deprecated on this endpoint)
+            expect(data).to.not.have.property('enabled_clients');
             expect(data).to.deep.equal({
-              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               options: { passwordPolicy: 'testPolicy' },
               authentication: { active: false },
               connected_accounts: { active: false },
@@ -283,7 +299,6 @@ describe('#connections handler', () => {
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
-              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               options: {
                 passwordPolicy: 'testPolicy',
                 idpinitiated: {
@@ -528,7 +543,6 @@ describe('#connections handler', () => {
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.deep.equal({
-              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               name: 'someConnection-2',
               strategy: 'custom',
               options: {
@@ -547,7 +561,6 @@ describe('#connections handler', () => {
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
-              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               options: {
                 passwordPolicy: 'testPolicy',
                 idpinitiated: {
@@ -634,7 +647,6 @@ describe('#connections handler', () => {
             expect(id).to.be.a('string');
             expect(id).to.equal('con1');
             expect(data).to.deep.equal({
-              enabled_clients: ['client1-id', 'excluded-one-id'],
               options: { passwordPolicy: 'testPolicy' },
             });
 
