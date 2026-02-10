@@ -988,10 +988,11 @@ describe('#connections enabled clients functionality', () => {
   });
 
   describe('#updateConnectionEnabledClients', () => {
-    it('should update enabled clients successfully', async () => {
+    it('should update enabled clients successfully with no existing clients', async () => {
       const connectionId = 'con_123';
       const enabledClientIds = ['client_1', 'client_2', 'client_3'];
       const typeName = 'connection';
+      const existingConnections = [{ id: 'con_123', name: 'test-connection', enabled_clients: [] }];
 
       mockAuth0Client.connections.clients.update.resolves();
 
@@ -999,7 +1000,8 @@ describe('#connections enabled clients functionality', () => {
         mockAuth0Client,
         typeName,
         connectionId,
-        enabledClientIds
+        enabledClientIds,
+        existingConnections
       );
 
       expect(result).to.equal(true);
@@ -1014,6 +1016,7 @@ describe('#connections enabled clients functionality', () => {
       const connectionId = 'con_123';
       const enabledClientIds = Array.from({ length: 60 }, (_, i) => `client_${i + 1}`);
       const typeName = 'connection';
+      const existingConnections = [{ id: 'con_123', name: 'test-connection', enabled_clients: [] }];
 
       mockAuth0Client.connections.clients.update.resolves();
 
@@ -1021,7 +1024,8 @@ describe('#connections enabled clients functionality', () => {
         mockAuth0Client,
         typeName,
         connectionId,
-        enabledClientIds
+        enabledClientIds,
+        existingConnections
       );
 
       expect(result).to.equal(true);
@@ -1039,6 +1043,152 @@ describe('#connections enabled clients functionality', () => {
       expect(secondCall.args[1][0]).to.deep.equal({ client_id: 'client_51', status: true });
       expect(secondCall.args[1][9]).to.deep.equal({ client_id: 'client_60', status: true });
     });
+
+    it('should skip update when enabled clients are unchanged', async () => {
+      const connectionId = 'con_123';
+      const enabledClientIds = ['client_1', 'client_2', 'client_3'];
+      const typeName = 'connection';
+      const existingConnections = [
+        {
+          id: 'con_123',
+          name: 'test-connection',
+          enabled_clients: ['client_1', 'client_2', 'client_3'],
+        },
+      ];
+
+      mockAuth0Client.connections.clients.update.resolves();
+
+      const result = await updateConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        connectionId,
+        enabledClientIds,
+        existingConnections
+      );
+
+      expect(result).to.equal(true);
+      sinon.assert.notCalled(mockAuth0Client.connections.clients.update);
+    });
+
+    it('should disable removed clients', async () => {
+      const connectionId = 'con_123';
+      const enabledClientIds = ['client_1', 'client_2'];
+      const typeName = 'connection';
+      const existingConnections = [
+        {
+          id: 'con_123',
+          name: 'test-connection',
+          enabled_clients: ['client_1', 'client_2', 'client_3', 'client_4'],
+        },
+      ];
+
+      mockAuth0Client.connections.clients.update.resolves();
+
+      const result = await updateConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        connectionId,
+        enabledClientIds,
+        existingConnections
+      );
+
+      expect(result).to.equal(true);
+      sinon.assert.calledOnceWithExactly(mockAuth0Client.connections.clients.update, connectionId, [
+        { client_id: 'client_1', status: true },
+        { client_id: 'client_2', status: true },
+        { client_id: 'client_3', status: false },
+        { client_id: 'client_4', status: false },
+      ]);
+    });
+
+    it('should enable new clients and disable removed clients in one operation', async () => {
+      const connectionId = 'con_123';
+      const enabledClientIds = ['client_2', 'client_3', 'client_5'];
+      const typeName = 'connection';
+      const existingConnections = [
+        {
+          id: 'con_123',
+          name: 'test-connection',
+          enabled_clients: ['client_1', 'client_2', 'client_4'],
+        },
+      ];
+
+      mockAuth0Client.connections.clients.update.resolves();
+
+      const result = await updateConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        connectionId,
+        enabledClientIds,
+        existingConnections
+      );
+
+      expect(result).to.equal(true);
+      sinon.assert.calledOnceWithExactly(mockAuth0Client.connections.clients.update, connectionId, [
+        { client_id: 'client_2', status: true },
+        { client_id: 'client_3', status: true },
+        { client_id: 'client_5', status: true },
+        { client_id: 'client_1', status: false },
+        { client_id: 'client_4', status: false },
+      ]);
+    });
+
+    it('should handle existingConnections as null', async () => {
+      const connectionId = 'con_123';
+      const enabledClientIds = ['client_1', 'client_2'];
+      const typeName = 'connection';
+      const existingConnections = null;
+
+      mockAuth0Client.connections.clients.update.resolves();
+
+      const result = await updateConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        connectionId,
+        enabledClientIds,
+        existingConnections
+      );
+
+      expect(result).to.equal(true);
+      sinon.assert.calledOnceWithExactly(mockAuth0Client.connections.clients.update, connectionId, [
+        { client_id: 'client_1', status: true },
+        { client_id: 'client_2', status: true },
+      ]);
+    });
+
+    it('should handle large combined enable and disable operations (more than 50 clients)', async () => {
+      const connectionId = 'con_123';
+      const enabledClientIds = Array.from({ length: 35 }, (_, i) => `new_client_${i + 1}`);
+      const typeName = 'connection';
+      const existingEnabledClients = Array.from({ length: 25 }, (_, i) => `old_client_${i + 1}`);
+      const existingConnections = [
+        {
+          id: 'con_123',
+          name: 'test-connection',
+          enabled_clients: existingEnabledClients,
+        },
+      ];
+
+      mockAuth0Client.connections.clients.update.resolves();
+
+      const result = await updateConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        connectionId,
+        enabledClientIds,
+        existingConnections
+      );
+
+      expect(result).to.equal(true);
+      // Total: 35 enable + 25 disable = 60 operations, should be chunked into 50 + 10
+      sinon.assert.calledTwice(mockAuth0Client.connections.clients.update);
+
+      const firstCall = mockAuth0Client.connections.clients.update.getCall(0);
+      expect(firstCall.args[1]).to.have.length(50);
+
+      const secondCall = mockAuth0Client.connections.clients.update.getCall(1);
+      expect(secondCall.args[1]).to.have.length(10);
+    });
   });
 
   describe('#processConnectionEnabledClients', () => {
@@ -1051,6 +1201,7 @@ describe('#connections enabled clients functionality', () => {
 
     it('should process create operations with ID lookup', async () => {
       const typeName = 'connection';
+      const existingConnections = [];
       const changes = {
         create: [
           { name: 'new-connection-1', enabled_clients: ['client_1', 'client_2'] },
@@ -1074,7 +1225,12 @@ describe('#connections enabled clients functionality', () => {
       // Mock updateEnabledClients
       mockAuth0Client.connections.clients.update.resolves();
 
-      await processConnectionEnabledClients(mockAuth0Client, typeName, changes);
+      await processConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        existingConnections,
+        changes
+      );
 
       sinon.assert.calledOnceWithExactly(sleepStub, 2500);
       sinon.assert.calledTwice(mockAuth0Client.connections.list);
@@ -1083,6 +1239,10 @@ describe('#connections enabled clients functionality', () => {
 
     it('should process update operations', async () => {
       const typeName = 'connection';
+      const existingConnections = [
+        { id: 'con_1', name: 'existing-connection-1', enabled_clients: ['client_1'] },
+        { id: 'con_2', name: 'existing-connection-2', enabled_clients: [] },
+      ];
       const changes = {
         create: [],
         update: [
@@ -1094,7 +1254,12 @@ describe('#connections enabled clients functionality', () => {
 
       mockAuth0Client.connections.clients.update.resolves();
 
-      await processConnectionEnabledClients(mockAuth0Client, typeName, changes);
+      await processConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        existingConnections,
+        changes
+      );
 
       sinon.assert.notCalled(sleepStub);
       sinon.assert.calledTwice(mockAuth0Client.connections.clients.update);
@@ -1102,6 +1267,9 @@ describe('#connections enabled clients functionality', () => {
 
     it('should process conflict operations', async () => {
       const typeName = 'connection';
+      const existingConnections = [
+        { id: 'con_1', name: 'conflict-connection-1', enabled_clients: [] },
+      ];
       const changes = {
         create: [],
         update: [],
@@ -1110,13 +1278,19 @@ describe('#connections enabled clients functionality', () => {
 
       mockAuth0Client.connections.clients.update.resolves();
 
-      await processConnectionEnabledClients(mockAuth0Client, typeName, changes);
+      await processConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        existingConnections,
+        changes
+      );
 
       sinon.assert.calledOnce(mockAuth0Client.connections.clients.update);
     });
 
     it('should handle database type connections differently', async () => {
       const typeName = 'database';
+      const existingConnections = [];
       const changes = {
         create: [{ name: 'new-db-connection', enabled_clients: ['client_1'] }],
         update: [],
@@ -1128,7 +1302,12 @@ describe('#connections enabled clients functionality', () => {
       });
       mockAuth0Client.connections.clients.update.resolves();
 
-      await processConnectionEnabledClients(mockAuth0Client, typeName, changes);
+      await processConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        existingConnections,
+        changes
+      );
 
       sinon.assert.calledWith(mockAuth0Client.connections.list, {
         name: 'new-db-connection',
@@ -1136,6 +1315,36 @@ describe('#connections enabled clients functionality', () => {
         strategy: ['auth0'],
         include_fields: true,
       });
+    });
+
+    it('should skip update when enabled_clients are unchanged', async () => {
+      const typeName = 'connection';
+      const existingConnections = [
+        { id: 'con_1', name: 'existing-connection-1', enabled_clients: ['client_1', 'client_2'] },
+      ];
+      const changes = {
+        create: [],
+        update: [
+          {
+            id: 'con_1',
+            name: 'existing-connection-1',
+            enabled_clients: ['client_1', 'client_2'],
+          },
+        ],
+        conflicts: [],
+      };
+
+      mockAuth0Client.connections.clients.update.resolves();
+
+      await processConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        existingConnections,
+        changes
+      );
+
+      // Should not make any API calls when enabled_clients are unchanged
+      sinon.assert.notCalled(mockAuth0Client.connections.clients.update);
     });
   });
 
@@ -1336,7 +1545,7 @@ describe('#connections enabled clients functionality', () => {
         sinon.assert.calledOnce(processConnectionEnabledClientsStub);
 
         // Verify that only included connections are passed
-        const passedChanges = processConnectionEnabledClientsStub.firstCall.args[2];
+        const passedChanges = processConnectionEnabledClientsStub.firstCall.args[3];
         expect(passedChanges.create).to.have.length(1);
         expect(passedChanges.create[0].name).to.equal('included-connection');
 

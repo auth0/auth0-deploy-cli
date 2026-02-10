@@ -273,7 +273,7 @@ export const updateConnectionEnabledClients = async (
 export const processConnectionEnabledClients = async (
   auth0Client: Auth0APIClient,
   typeName: string,
-  existingConnections: Asset[] | Asset | null,
+  existingConnections: Asset[] | null,
   changes: CalculatedChanges,
   delayMs: number = 2500 // Default delay is 2.5 seconds
 ) => {

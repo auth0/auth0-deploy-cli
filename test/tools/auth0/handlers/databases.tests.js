@@ -2066,6 +2066,10 @@ describe('#databases handler with enabled clients integration', () => {
       sinon.assert.calledOnce(processConnectionEnabledClientsStub);
       expect(processConnectionEnabledClientsStub.firstCall.args[0]).to.equal(handler.client);
       expect(processConnectionEnabledClientsStub.firstCall.args[1]).to.equal(handler.type);
+      // Verify existingConnections parameter is passed
+      expect(processConnectionEnabledClientsStub.firstCall.args[2]).to.be.an('array');
+      // Verify changes parameter is passed
+      expect(processConnectionEnabledClientsStub.firstCall.args[3]).to.be.an('object');
 
       processConnectionEnabledClientsStub.restore();
     });
@@ -2106,7 +2110,7 @@ describe('#databases handler with enabled clients integration', () => {
       sinon.assert.calledOnce(processConnectionEnabledClientsStub);
 
       // Verify that excluded databases are filtered out
-      const passedChanges = processConnectionEnabledClientsStub.firstCall.args[2];
+      const passedChanges = processConnectionEnabledClientsStub.firstCall.args[3];
       expect(passedChanges.create).to.be.an('array');
       expect(passedChanges.update).to.be.an('array');
       expect(passedChanges.conflicts).to.be.an('array');

@@ -146,6 +146,7 @@ export const schema = {
 };
 
 export default class DatabaseHandler extends DefaultAPIHandler {
+  existing: Connection[] | null;
   constructor(config: DefaultAPIHandler) {
     super({
       ...config,
