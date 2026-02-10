@@ -369,6 +369,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     await processConnectionEnabledClients(
       this.client,
       this.type,
+      await this.existing,
       filterExcluded(changes, excludedConnections)
     );
   }
