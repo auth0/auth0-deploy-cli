@@ -256,6 +256,64 @@ describe('#clientGrants handler', () => {
       expect(data.map((g) => g.id)).to.deep.equal(['cg0', 'cg1', 'cg2', 'cg3', 'cg4']);
     });
 
+    it('should exclude third-party client grants in getType when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is enabled', async () => {
+      const configWithExclude = function (key) {
+        return configWithExclude.data && configWithExclude.data[key];
+      };
+
+      configWithExclude.data = {
+        AUTH0_CLIENT_ID: 'current_client',
+        AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS: true,
+      };
+
+      const clientId1 = 'first_party_client';
+      const clientId2 = 'third_party_client';
+      const clientGrant1 = {
+        audience: 'https://test.auth0.com/api/v2/',
+        client_id: clientId1,
+        id: 'cgr_first_party',
+        scope: ['read:logs'],
+      };
+      const clientGrant2 = {
+        audience: 'https://test.auth0.com/api/v2/',
+        client_id: clientId2,
+        id: 'cgr_third_party',
+        scope: ['read:logs'],
+      };
+
+      const auth0 = {
+        clientGrants: {
+          list: (params) => mockPagedData(params, 'client_grants', [clientGrant1, clientGrant2]),
+        },
+        clients: {
+          list: (params) => {
+            // When is_first_party filter is applied, only return first-party clients
+            if (params.is_first_party === true) {
+              return mockPagedData(params, 'clients', [
+                { name: 'First Party App', client_id: clientId1, is_first_party: true },
+              ]);
+            }
+            return mockPagedData(params, 'clients', [
+              { name: 'First Party App', client_id: clientId1, is_first_party: true },
+              { name: 'Third Party App', client_id: clientId2, is_first_party: false },
+            ]);
+          },
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({
+        client: pageClient(auth0),
+        config: configWithExclude,
+      });
+      const data = await handler.getType();
+
+      // Should only return the first-party client grant
+      expect(data).to.have.lengthOf(1);
+      expect(data[0].id).to.equal('cgr_first_party');
+      expect(data[0].client_id).to.equal(clientId1);
+    });
+
     it('should convert client_name to client_id', async () => {
       const auth0 = {
         clientGrants: {
@@ -691,5 +749,59 @@ describe('#clientGrants handler', () => {
     };
 
     await stageFn.apply(handler, [assets]);
+  });
+
+  it('should not delete client grants for third-party clients when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is enabled', async () => {
+    config.data = {
+      AUTH0_CLIENT_ID: 'current_client',
+      AUTH0_ALLOW_DELETE: true,
+      AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS: true,
+    };
+
+    let deletedGrantId = null;
+
+    const auth0 = {
+      clientGrants: {
+        create: (_params) => {
+          return Promise.resolve({ data: [] });
+        },
+        update: (_params) => {
+          return Promise.resolve({ data: [] });
+        },
+        delete: function (params) {
+          (() => expect(this).to.not.be.undefined)();
+          deletedGrantId = params;
+          return Promise.resolve({ data: [] });
+        },
+        list: (params) =>
+          mockPagedData(params, 'client_grants', [
+            { id: 'cg1', client_id: 'third_party_client', audience: 'audience1' },
+            { id: 'cg2', client_id: 'first_party_client', audience: 'audience2' },
+          ]),
+      },
+      clients: {
+        list: (params) =>
+          mockPagedData(params, 'clients', [
+            { name: 'Third Party App', client_id: 'third_party_client', is_first_party: false },
+            { name: 'My App', client_id: 'first_party_client', is_first_party: true },
+          ]),
+      },
+      pool,
+    };
+
+    const handler = new clientGrants.default({ client: pageClient(auth0), config });
+    const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+    // Empty array should delete all non-excluded grants
+    await stageFn.apply(handler, [{ clientGrants: [] }]);
+
+    // Should only delete the first-party client grant, not the third-party one
+    expect(deletedGrantId).to.equal('cg2');
+
+    // Reset config to default for subsequent tests
+    config.data = {
+      AUTH0_CLIENT_ID: 'client_id',
+      AUTH0_ALLOW_DELETE: true,
+    };
   });
 });

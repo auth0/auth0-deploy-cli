@@ -6,6 +6,9 @@ The Deploy CLI can be used as a standalone command line utility. Doing so provid
 
 Fetching configurations from Auth0 tenant to the local machine.
 
+> **Note**
+> Marketplace Actions (including Auth0-owned marketplace Actions) are not exported. If your tenant uses marketplace Actions, their installation and configuration must be handled manually.
+
 ### `--output_folder`, `-o`
 
 Path. Specifies the target directory for configuration files to be written to.
@@ -54,6 +57,9 @@ a0deploy export -c=config.json --format=yaml --output_folder=local --export_ids=
 ## `import` command
 
 Applying configurations from local machine to Auth0 tenant.
+
+> **Note**
+> Marketplace Actions cannot be installed by the Deploy CLI. If your configuration references marketplace Actions, install them manually in the target tenant before running `import`.
 
 ### `--input_file`, `-i`
 
