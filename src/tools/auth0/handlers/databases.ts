@@ -144,6 +144,12 @@ export const schema = {
               },
             },
           },
+          custom_password_hash: {
+            type: 'object',
+            properties: {
+              action_id: { type: 'string' },
+            },
+          },
         },
       },
     },
@@ -164,22 +170,15 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     return super.objString({ name: db.name, id: db.id });
   }
 
-  getFormattedOptions(database, actions: Action[] = []) {
+  getFormattedOptions(options, actions: Action[] = []) {
     try {
-      const formattedOptions: any = {
-        options: {
-          ...database.options,
-        },
-      };
+      const formattedOptions = { ...options };
 
       // Handle custom_password_hash.action_id conversion
-      if (database.options?.custom_password_hash?.action_id) {
-        formattedOptions.options.custom_password_hash = {
-          ...database.options.custom_password_hash,
-          action_id: convertActionNameToId(
-            database.options.custom_password_hash.action_id,
-            actions
-          ),
+      if (options?.custom_password_hash?.action_id) {
+        formattedOptions.custom_password_hash = {
+          ...options.custom_password_hash,
+          action_id: convertActionNameToId(options.custom_password_hash.action_id, actions),
         };
       }
 
@@ -300,53 +299,55 @@ export default class DatabaseHandler extends DefaultAPIHandler {
   async getType() {
     if (this.existing) return this.existing;
 
-    const connections = await paginate<Connection>(this.client.connections.list, {
-      strategy: [Management.ConnectionStrategyEnum.Auth0],
-      checkpoint: true,
-    });
-
-    // Fetch actions for action_id to name conversion
-    let actions: Action[] = [];
-    try {
-      if (this.client.actions?.list) {
-        actions = await paginate<Action>(this.client.actions.list, {
-          paginate: true,
-          include_totals: true,
-        });
-      }
-    } catch (error) {
-      // Actions API might not be available, continue without it
-    }
+    // Fetch connections and actions concurrently
+    const [connections, actions] = await Promise.all([
+      paginate<Connection>(this.client.connections.list, {
+        strategy: [Management.ConnectionStrategyEnum.Auth0],
+        checkpoint: true,
+      }),
+      paginate<Action>(this.client.actions.list, {
+        paginate: true,
+        include_totals: true,
+      }),
+    ]);
 
     const dbConnectionsWithEnabledClients = await Promise.all(
       connections.map(async (con) => {
         if (!con?.id) return con;
 
         const enabledClients = await getConnectionEnabledClients(this.client, con.id);
-        let connection = { ...con };
+        const connection = { ...con };
 
         if (enabledClients && enabledClients?.length) {
           connection.enabled_clients = enabledClients;
-        }
-
-        // Convert action ID back to action name for export
-        const customPasswordHash = (connection.options as any)?.custom_password_hash;
-        if (customPasswordHash?.action_id) {
-          connection.options = {
-            ...connection.options,
-            custom_password_hash: {
-              ...customPasswordHash,
-              action_id: convertActionIdToName(customPasswordHash.action_id, actions),
-            },
-          };
         }
 
         return connection;
       })
     );
 
+    // Convert action ID back to action name for export
+    const dbConnectionsWithActionNames = dbConnectionsWithEnabledClients.map((connection) => {
+      if (connection.options && 'custom_password_hash' in connection.options) {
+        const customPasswordHash = (connection.options as any)?.custom_password_hash;
+        if (customPasswordHash?.action_id) {
+          return {
+            ...connection,
+            options: {
+              ...connection.options,
+              custom_password_hash: {
+                ...customPasswordHash,
+                action_id: convertActionIdToName(customPasswordHash.action_id, actions),
+              },
+            },
+          };
+        }
+      }
+      return connection;
+    });
+
     // If options option is empty for all connection, log the missing options scope.
-    const isOptionExists = dbConnectionsWithEnabledClients.every(
+    const isOptionExists = dbConnectionsWithActionNames.every(
       (c) => c.options && Object.keys(c.options).length > 0
     );
     if (!isOptionExists) {
@@ -355,7 +356,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
       );
     }
 
-    this.existing = dbConnectionsWithEnabledClients;
+    this.existing = dbConnectionsWithActionNames;
 
     return this.existing;
   }
@@ -373,28 +374,26 @@ export default class DatabaseHandler extends DefaultAPIHandler {
       };
 
     // Convert enabled_clients by name to the id
-
-    const clients = await paginate<Client>(this.client.clients.list, {
-      paginate: true,
-    });
-
-    const existingDatabasesConnections = await paginate<Connection>(this.client.connections.list, {
-      strategy: [Management.ConnectionStrategyEnum.Auth0],
-      checkpoint: true,
-      include_totals: true,
-    });
-
-    // Fetch actions for action_id conversion
-    let actions: Action[] = [];
-    if (this.client.actions?.list) {
-      actions = await paginate<Action>(this.client.actions.list, {
+    // Fetch clients, connections, and actions concurrently
+    const [clients, existingDatabasesConnections, actions] = await Promise.all([
+      paginate<Client>(this.client.clients.list, {
+        paginate: true,
+      }),
+      paginate<Connection>(this.client.connections.list, {
+        strategy: [Management.ConnectionStrategyEnum.Auth0],
+        checkpoint: true,
+        include_totals: true,
+      }),
+      paginate<Action>(this.client.actions.list, {
         paginate: true,
         include_totals: true,
-      });
-    }
+      }),
+    ]);
 
     const formatted = databases.map((db) => {
-      const formattedDb = { ...db, ...this.getFormattedOptions(db, actions) };
+      const { options, ...rest } = db;
+      const formattedOptions = this.getFormattedOptions(options, actions);
+      const formattedDb: any = { ...rest, options: formattedOptions };
 
       if (db.enabled_clients) {
         formattedDb.enabled_clients = getEnabledClients(

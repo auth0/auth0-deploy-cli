@@ -143,6 +143,9 @@ describe('#databases handler', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -300,6 +303,9 @@ describe('#databases handler', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -341,6 +347,9 @@ describe('#databases handler', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -388,6 +397,9 @@ describe('#databases handler', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -470,6 +482,9 @@ describe('#databases handler', () => {
             (() => expect(this).to.not.be.undefined)();
             return mockPagedData(params, 'clients', [{ name: 'test client', client_id: clientId }]);
           },
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -590,6 +605,9 @@ describe('#databases handler', () => {
               { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
             ]),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -659,6 +677,9 @@ describe('#databases handler', () => {
               { name: 'excluded-two', client_id: 'excluded-two-id' },
             ]),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -720,6 +741,9 @@ describe('#databases handler', () => {
               { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
             ]),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -761,6 +785,9 @@ describe('#databases handler', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -797,6 +824,9 @@ describe('#databases handler', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -825,6 +855,9 @@ describe('#databases handler', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -862,6 +895,9 @@ describe('#databases handler', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -897,6 +933,9 @@ describe('#databases handler', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -974,6 +1013,9 @@ describe('#databases handler', () => {
         },
         clients: {
           list: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
+        },
+        actions: {
+          list: () => [],
         },
         pool,
       };
@@ -1060,6 +1102,9 @@ describe('#databases handler', () => {
         clients: {
           list: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
         },
+        actions: {
+          list: () => [],
+        },
         pool,
       };
 
@@ -1114,6 +1159,9 @@ describe('#databases handler', () => {
           list: sinon
             .stub()
             .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        actions: {
+          list: sinon.stub().resolves([]),
         },
         pool: pool,
       };
@@ -1253,6 +1301,9 @@ describe('#databases handler', () => {
           list: sinon
             .stub()
             .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        actions: {
+          list: sinon.stub().resolves([]),
         },
         pool: pool,
       };
@@ -1434,6 +1485,9 @@ describe('#databases handler', () => {
           list: sinon
             .stub()
             .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        actions: {
+          list: sinon.stub().resolves([]),
         },
         pool: pool,
       };
@@ -1565,6 +1619,9 @@ describe('#databases handler', () => {
         clients: {
           list: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
         },
+        actions: {
+          list: () => [],
+        },
         pool,
       };
 
@@ -1650,6 +1707,9 @@ describe('#databases handler', () => {
         clients: {
           list: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
         },
+        actions: {
+          list: () => [],
+        },
         pool,
       };
 
@@ -1704,6 +1764,9 @@ describe('#databases handler', () => {
           list: sinon
             .stub()
             .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        actions: {
+          list: sinon.stub().resolves([]),
         },
         pool: pool,
       };
@@ -1844,6 +1907,9 @@ describe('#databases handler', () => {
           list: sinon
             .stub()
             .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        actions: {
+          list: sinon.stub().resolves([]),
         },
         pool: pool,
       };
@@ -2025,6 +2091,9 @@ describe('#databases handler', () => {
           list: sinon
             .stub()
             .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        actions: {
+          list: sinon.stub().resolves([]),
         },
         pool: pool,
       };
@@ -2127,6 +2196,9 @@ describe('#databases handler with enabled clients integration', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -2172,6 +2244,9 @@ describe('#databases handler with enabled clients integration', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -2200,6 +2275,9 @@ describe('#databases handler with enabled clients integration', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -2234,6 +2312,9 @@ describe('#databases handler with enabled clients integration', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -2279,6 +2360,9 @@ describe('#databases handler with enabled clients integration', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -2311,6 +2395,9 @@ describe('#databases handler with enabled clients integration', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
