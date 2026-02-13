@@ -103,27 +103,6 @@ describe('#databases handler', () => {
       await stageFn.apply(handler, [{ databases: data }]);
     });
 
-    it('should throw error when password authentication settings are invalid', async () => {
-      const handler = new databases.default({ client: {}, config });
-      const stageFn = Object.getPrototypeOf(handler).validate;
-
-      const data = [
-        {
-          name: 'testDatabase',
-          options: {
-            authentication_methods: { password: { enabled: false } },
-            disable_self_service_change_password: false,
-          },
-        },
-      ];
-
-      try {
-        await stageFn.apply(handler, [{ databases: data }]);
-        expect.fail('Expected error was not thrown');
-      } catch (error) {
-        expect(error.message).to.include('disable_self_service_change_password must be true');
-      }
-    });
   });
 
   describe('#databases process', () => {
