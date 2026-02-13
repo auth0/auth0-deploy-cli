@@ -197,7 +197,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     // Validate each database
     databases.forEach((database) => {
       this.validateEmailUniqueConstraints(database);
-      this.validatePasswordlessSettings(database);
+      // this.validatePasswordlessSettings(database); // Enable only the feature is GA PR:#1282
     });
 
     await super.validate(assets);
