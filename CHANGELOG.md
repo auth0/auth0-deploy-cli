@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.27.0] - 2026-02-13
+
+### Added
+
+- Add support for `custom_password_hash.action_id` in `databases` (Universal Custom Password Hash EA). [#1288]
+- Add support for `allowed_strategies` in `selfServiceProfiles`. [#1298]
+
+### Fixed
+
+- Fix validation handling for `authentication_methods.password.enabled` and `disable_self_service_change_password` in `databases`. [#1297]
+- Fix stripping deprecated `enabled_clients` for `connections` with enhanced client management. [#1294]
+- Fix exclude third-party `clientGrants` when `AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS` is enabled. [#1289]
+
 ## [8.26.0] - 2026-01-30
 
 ### Added
@@ -1634,7 +1647,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1282]: https://github.com/auth0/auth0-deploy-cli/issues/1282
 [#1283]: https://github.com/auth0/auth0-deploy-cli/issues/1283
 [#1284]: https://github.com/auth0/auth0-deploy-cli/issues/1284
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.26.0...HEAD
+[#1288]: https://github.com/auth0/auth0-deploy-cli/issues/1288
+[#1289]: https://github.com/auth0/auth0-deploy-cli/issues/1289
+[#1294]: https://github.com/auth0/auth0-deploy-cli/issues/1294
+[#1297]: https://github.com/auth0/auth0-deploy-cli/issues/1297
+[#1298]: https://github.com/auth0/auth0-deploy-cli/issues/1298
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.27.0...HEAD
+[8.27.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.26.0...v8.27.0
 [8.26.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.25.0...v8.26.0
 [8.25.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.24.0...v8.25.0
 [8.24.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.2...v8.24.0
