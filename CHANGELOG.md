@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for `custom_password_hash.action_id` in `databases` (Universal Custom Password Hash EA). [#1288]
+- Add support for `allowed_strategies` in `selfServiceProfiles`. [#1298]
+
+### Fixed
+
+- Fix validation handling for `authentication_methods.password.enabled` and `disable_self_service_change_password` in `databases`. [#1297]
+- Fix stripping deprecated `enabled_clients` for `connections` with enhanced client management. [#1294]
+- Fix exclude third-party `clientGrants` when `AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS` is enabled. [#1289]
+
 ## [8.26.0] - 2026-01-30
 
 ### Added
