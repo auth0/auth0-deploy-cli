@@ -35,6 +35,7 @@ export const schema = {
           required: ['name', 'value'],
         },
       },
+      all_changes_published: { type: 'boolean' },
     },
   },
 };
@@ -60,7 +61,6 @@ export default class ActionModulesHandler extends DefaultAPIHandler {
       ],
       stripCreateFields: [
         'actions_using_module_total',
-        'all_changes_published',
         'latest_version_number',
         'created_at',
         'updated_at',
@@ -74,6 +74,10 @@ export default class ActionModulesHandler extends DefaultAPIHandler {
   }
 
   async createModule(module: Management.CreateActionModuleRequestContent) {
+
+    if ('all_changes_published' in module) {
+      delete module.all_changes_published;
+    }
     const createdModule = await this.client.actions.modules.create(module);
 
     return createdModule;
@@ -89,6 +93,25 @@ export default class ActionModulesHandler extends DefaultAPIHandler {
 
   objString(module: ActionModule): string {
     return super.objString({ id: module.id, name: module.name });
+  }
+
+  async publishActionModules(modules: ActionModule[]) {
+    await this.client.pool
+      .addEachTask({
+        data: modules || [],
+        generator: (module) =>
+          this.client.actions.modules.versions
+            .create(module.id!)
+            .then(() => {
+              log.info(`Published [${this.type}]: ${this.objString(module)}`);
+            })
+            .catch((err) => {
+              throw new Error(
+                `Problem Publishing ${this.type} ${this.objString(module)}\n${err}`
+              );
+            }),
+      })
+      .promise();
   }
 
   async getType(): Promise<Asset[] | null> {
@@ -125,5 +148,33 @@ export default class ActionModulesHandler extends DefaultAPIHandler {
 
     const changes = await this.calcChanges(assets);
     await super.processChanges(assets, changes);
+
+    // Refresh module list to get latest state with all_changes_published field
+    const postProcessedModules = await (async () => {
+      this.existing = null; // Clear the cache
+      return this.getType();
+    })();
+
+    // Publish modules that have unpublished changes
+    const modulesToPublish = [
+      ...changes.create
+        .filter((module) => module.all_changes_published === true)
+        .map((moduleWithoutId) => {
+          // Add IDs to just-created modules
+          const moduleId = postProcessedModules?.find(
+            (postProcessedModule) => postProcessedModule.name === moduleWithoutId.name
+          )?.id;
+
+          const module = postProcessedModules?.find(
+            (postProcessedModule) => postProcessedModule.id === moduleId
+          );
+
+          return module;
+        }),
+      ...changes.update
+        .filter((module) => module.all_changes_published === true)
+    ].filter((module): module is ActionModule => module !== undefined);
+
+    await this.publishActionModules(modulesToPublish);
   }
 }

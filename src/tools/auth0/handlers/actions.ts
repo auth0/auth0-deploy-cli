@@ -296,16 +296,25 @@ export default class ActionHandler extends DefaultAPIHandler {
         generator: async (module) => {
           const foundModule = modules.find((m) => m.name === module.module_name);
           if (foundModule && foundModule.id) {
-            const { versions: moduleVersions } = await this.client.actions.modules.versions.list(
-              foundModule.id
-            );
+          // paginate to get all versions of the module
+          const allModuleVersions: Management.ActionModuleVersion[] = []
+          let moduleVersions = await this.client.actions.modules.versions.list(foundModule.id)
+
+          // Process first page
+          allModuleVersions.push(...moduleVersions.data);
+
+          // Fetch remaining pages
+          while (moduleVersions.hasNextPage()) {
+            moduleVersions = await moduleVersions.getNextPage();
+            allModuleVersions.push(...moduleVersions.data);
+          }
 
             return {
               module_name: module.module_name,
               module_id: foundModule.id,
               module_version_number: module.module_version_number,
               module_version_id:
-                moduleVersions?.find((v) => v.version_number === module.module_version_number)
+                allModuleVersions?.find((v) => v.version_number === module.module_version_number)
                   ?.id || '',
             };
           }
