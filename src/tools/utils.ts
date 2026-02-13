@@ -72,6 +72,16 @@ export function convertClientNameToId(name: string, clients: Asset[]): string {
   return (found && found.client_id) || name;
 }
 
+export function convertActionNameToId(name: string, actions: Asset[]): string {
+  const found = actions.find((a) => a.name === name);
+  return (found && found.id) || name;
+}
+
+export function convertActionIdToName(id: string, actions: Asset[]): string {
+  const found = actions.find((a) => a.id === id);
+  return (found && found.name) || id;
+}
+
 export function convertClientNamesToIds(names: string[], clients: Asset[]): string[] {
   const resolvedNames = names.map((name) => ({ name, resolved: false }));
   const result = clients.reduce((acc: string[], client): string[] => {
