@@ -26,7 +26,6 @@ type SsProfile = Management.SelfServiceProfile;
 export type SsProfileWithCustomText = Omit<SsProfile, 'created_at' | 'updated_at'> & {
   customText?: customTextType;
 };
-
 export const schema = {
   type: 'array',
   items: {
@@ -56,6 +55,15 @@ export const schema = {
               type: 'boolean',
             },
           },
+        },
+      },
+      allowed_strategies: {
+        type: 'array',
+        description:
+          'List of IdP strategies that will be shown to users during the Self-Service SSO flow.',
+        items: {
+          type: 'string',
+          enum: Object.values(Management.SelfServiceProfileAllowedStrategyEnum),
         },
       },
       branding: {

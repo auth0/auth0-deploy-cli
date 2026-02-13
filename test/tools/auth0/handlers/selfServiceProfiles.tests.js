@@ -30,7 +30,18 @@ const sampleSsProfileWithOutId = {
       is_optional: true,
     },
   ],
-  allowed_strategies: ['adfs', 'google-apps', 'keycloak-samlp', 'oidc', 'okta', 'samlp', 'waad'],
+  allowed_strategies: [
+    'adfs',
+    'auth0-samlp',
+    'google-apps',
+    'keycloak-samlp',
+    'oidc',
+    'okta',
+    'okta-samlp',
+    'pingfederate',
+    'samlp',
+    'waad',
+  ],
   branding: { colors: { primary: '#19aecc' } },
 };
 
