@@ -52,7 +52,7 @@ describe('#YAML context selfServiceProfiles', () => {
             is_optional: true,
           },
         ],
-        ALLOWED_STRATEGIES: [
+        allowed_strategies: [
           'adfs',
           'auth0-samlp',
           'google-apps',
