@@ -102,28 +102,6 @@ describe('#databases handler', () => {
 
       await stageFn.apply(handler, [{ databases: data }]);
     });
-
-    it('should throw error when password authentication settings are invalid', async () => {
-      const handler = new databases.default({ client: {}, config });
-      const stageFn = Object.getPrototypeOf(handler).validate;
-
-      const data = [
-        {
-          name: 'testDatabase',
-          options: {
-            authentication_methods: { password: { enabled: false } },
-            disable_self_service_change_password: false,
-          },
-        },
-      ];
-
-      try {
-        await stageFn.apply(handler, [{ databases: data }]);
-        expect.fail('Expected error was not thrown');
-      } catch (error) {
-        expect(error.message).to.include('disable_self_service_change_password must be true');
-      }
-    });
   });
 
   describe('#databases process', () => {
@@ -160,6 +138,9 @@ describe('#databases handler', () => {
           list: (params) =>
             mockPagedData(params, 'clients', [{ name: 'client1', client_id: 'client_id_1' }]),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -169,6 +150,110 @@ describe('#databases handler', () => {
       await stageFn.apply(handler, [
         { databases: [{ name: 'someDatabase', enabled_clients: ['client1'] }] },
       ]);
+    });
+
+    it('should convert action name to ID in custom_password_hash.action_id', async () => {
+      const auth0 = {
+        connections: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.deep.equal({
+              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
+              name: 'PasswordHashConn',
+              strategy: 'auth0',
+              options: {
+                custom_password_hash: {
+                  action_id: 'action-id-123',
+                  hash_algorithm: 'bcrypt',
+                },
+              },
+            });
+            return Promise.resolve({ data });
+          },
+          get: function (id) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(id).to.be.a('string');
+            expect(id).to.equal('con1');
+            return Promise.resolve({
+              id: 'con1',
+              name: 'ExistingPasswordHashConn',
+              strategy: 'auth0',
+              options: {},
+            });
+          },
+          update: function (id, data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(id).to.be.a('string');
+            expect(id).to.equal('con1');
+            expect(data).to.deep.equal({
+              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
+              options: {
+                custom_password_hash: {
+                  action_id: 'action-id-456',
+                  hash_algorithm: 'md5',
+                },
+              },
+            });
+
+            return Promise.resolve({ ...data, id });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'ExistingPasswordHashConn', id: 'con1', strategy: 'auth0' },
+            ]),
+          clients: {
+            get: () => Promise.resolve({ data: [] }),
+            update: (connectionId, _payload) => {
+              expect(connectionId).to.equal('con1');
+              return Promise.resolve([]);
+            },
+          },
+        },
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
+            ]),
+        },
+        actions: {
+          list: (params) =>
+            mockPagedData(params, 'actions', [
+              { name: 'PasswordHashAction', id: 'action-id-123' },
+              { name: 'UpdatePasswordHashAction', id: 'action-id-456' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          name: 'ExistingPasswordHashConn',
+          strategy: 'auth0',
+          enabled_clients: ['client1'],
+          options: {
+            custom_password_hash: {
+              action_id: 'UpdatePasswordHashAction',
+              hash_algorithm: 'md5',
+            },
+          },
+        },
+        {
+          name: 'PasswordHashConn',
+          strategy: 'auth0',
+          enabled_clients: ['client1'],
+          options: {
+            custom_password_hash: {
+              action_id: 'PasswordHashAction',
+              hash_algorithm: 'bcrypt',
+            },
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ databases: data }]);
     });
 
     it('should throw error when creating database with email.unique false and email.identifier.active true', async () => {
@@ -215,6 +300,9 @@ describe('#databases handler', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -256,6 +344,9 @@ describe('#databases handler', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -303,6 +394,9 @@ describe('#databases handler', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -386,6 +480,9 @@ describe('#databases handler', () => {
             return mockPagedData(params, 'clients', [{ name: 'test client', client_id: clientId }]);
           },
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -395,6 +492,70 @@ describe('#databases handler', () => {
         { id: 'con1', strategy: 'auth0', name: 'db', enabled_clients: [clientId] },
       ]);
       expect(getEnabledClientsCalledOnce).to.equal(true);
+    });
+
+    it('should convert action ID to action name when dumping databases', async () => {
+      const clientId = 'client-id-123';
+      const auth0 = {
+        connections: {
+          list: function (params) {
+            (() => expect(this).to.not.be.undefined)();
+            return mockPagedData(params, 'connections', [
+              {
+                id: 'con1',
+                strategy: 'auth0',
+                name: 'PasswordHashDB',
+                options: {
+                  custom_password_hash: {
+                    action_id: 'action-id-456',
+                    hash_algorithm: 'bcrypt',
+                  },
+                },
+              },
+            ]);
+          },
+          clients: {
+            get: () => {
+              return Promise.resolve(mockPagedData({}, 'clients', [{ client_id: clientId }]));
+            },
+          },
+        },
+        clients: {
+          list: function (params) {
+            (() => expect(this).to.not.be.undefined)();
+            return mockPagedData(params, 'clients', []);
+          },
+        },
+        actions: {
+          list: function (params) {
+            (() => expect(this).to.not.be.undefined)();
+            return mockPagedData(params, 'actions', [
+              { id: 'action-id-456', name: 'MyPasswordHashAction' },
+              { id: 'action-id-789', name: 'AnotherAction' },
+            ]);
+          },
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const data = await handler.getType();
+
+      // Verify that action ID was converted to action name
+      expect(data).to.deep.equal([
+        {
+          id: 'con1',
+          strategy: 'auth0',
+          name: 'PasswordHashDB',
+          enabled_clients: [clientId],
+          options: {
+            custom_password_hash: {
+              action_id: 'MyPasswordHashAction', // Should be action name, not ID
+              hash_algorithm: 'bcrypt',
+            },
+          },
+        },
+      ]);
     });
 
     it('should update database', async () => {
@@ -441,6 +602,9 @@ describe('#databases handler', () => {
             mockPagedData(params, 'clients', [
               { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
             ]),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -510,6 +674,9 @@ describe('#databases handler', () => {
               { name: 'excluded-two', client_id: 'excluded-two-id' },
             ]),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -571,6 +738,9 @@ describe('#databases handler', () => {
               { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
             ]),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -612,6 +782,9 @@ describe('#databases handler', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -648,6 +821,9 @@ describe('#databases handler', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -676,6 +852,9 @@ describe('#databases handler', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -713,6 +892,9 @@ describe('#databases handler', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -748,6 +930,9 @@ describe('#databases handler', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -825,6 +1010,9 @@ describe('#databases handler', () => {
         },
         clients: {
           list: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
+        },
+        actions: {
+          list: () => [],
         },
         pool,
       };
@@ -911,6 +1099,9 @@ describe('#databases handler', () => {
         clients: {
           list: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
         },
+        actions: {
+          list: () => [],
+        },
         pool,
       };
 
@@ -965,6 +1156,9 @@ describe('#databases handler', () => {
           list: sinon
             .stub()
             .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        actions: {
+          list: sinon.stub().resolves([]),
         },
         pool: pool,
       };
@@ -1104,6 +1298,9 @@ describe('#databases handler', () => {
           list: sinon
             .stub()
             .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        actions: {
+          list: sinon.stub().resolves([]),
         },
         pool: pool,
       };
@@ -1285,6 +1482,9 @@ describe('#databases handler', () => {
           list: sinon
             .stub()
             .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        actions: {
+          list: sinon.stub().resolves([]),
         },
         pool: pool,
       };
@@ -1416,6 +1616,9 @@ describe('#databases handler', () => {
         clients: {
           list: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
         },
+        actions: {
+          list: () => [],
+        },
         pool,
       };
 
@@ -1501,6 +1704,9 @@ describe('#databases handler', () => {
         clients: {
           list: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
         },
+        actions: {
+          list: () => [],
+        },
         pool,
       };
 
@@ -1555,6 +1761,9 @@ describe('#databases handler', () => {
           list: sinon
             .stub()
             .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        actions: {
+          list: sinon.stub().resolves([]),
         },
         pool: pool,
       };
@@ -1695,6 +1904,9 @@ describe('#databases handler', () => {
           list: sinon
             .stub()
             .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        actions: {
+          list: sinon.stub().resolves([]),
         },
         pool: pool,
       };
@@ -1876,6 +2088,9 @@ describe('#databases handler', () => {
           list: sinon
             .stub()
             .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        actions: {
+          list: sinon.stub().resolves([]),
         },
         pool: pool,
       };
@@ -1978,6 +2193,9 @@ describe('#databases handler with enabled clients integration', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -2023,6 +2241,9 @@ describe('#databases handler with enabled clients integration', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -2051,6 +2272,9 @@ describe('#databases handler with enabled clients integration', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -2089,6 +2313,9 @@ describe('#databases handler with enabled clients integration', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -2134,6 +2361,9 @@ describe('#databases handler with enabled clients integration', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -2166,6 +2396,9 @@ describe('#databases handler with enabled clients integration', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };

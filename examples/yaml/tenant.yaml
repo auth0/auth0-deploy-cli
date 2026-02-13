@@ -103,6 +103,9 @@ databases:
           identifier:
             active: false  # Set to true when email.unique is false
           profile_required: false
+      # custom_password_hash:  # (Early Availability) Reference action by name
+      #   action_id: "MyPasswordHashAction"
+      #   hash_algorithm: "bcrypt"
 
 connections:
   - name: "myad-waad"

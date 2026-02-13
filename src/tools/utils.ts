@@ -72,6 +72,16 @@ export function convertClientNameToId(name: string, clients: Asset[]): string {
   return (found && found.client_id) || name;
 }
 
+export function convertActionNameToId(name: string, actions: Asset[]): string {
+  const found = actions.find((a) => a.name === name);
+  return (found && found.id) || name;
+}
+
+export function convertActionIdToName(id: string, actions: Asset[]): string {
+  const found = actions.find((a) => a.id === id);
+  return (found && found.name) || id;
+}
+
 export function convertClientNamesToIds(names: string[], clients: Asset[]): string[] {
   const resolvedNames = names.map((name) => ({ name, resolved: false }));
   const result = clients.reduce((acc: string[], client): string[] => {
@@ -329,3 +339,16 @@ export function maskSecretAtPath({
   }
   return maskOnObj;
 }
+
+/**
+ * Determines whether third-party clients should be excluded based on configuration.
+ * Checks the AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS config value and returns true if it's
+ * set to boolean true or string 'true'.
+ *
+ * @param configFn - The configuration function to retrieve the config value.
+ * @returns True if third-party clients should be excluded, false otherwise.
+ */
+export const shouldExcludeThirdPartyClients = (configFn: (key: string) => any): boolean => {
+  const value = configFn('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS');
+  return value === 'true' || value === true;
+};
