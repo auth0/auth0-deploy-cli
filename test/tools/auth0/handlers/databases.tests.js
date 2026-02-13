@@ -112,14 +112,39 @@ describe('#databases handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someDatabase');
-            return Promise.resolve({ data });
+            // Verify enabled_clients is NOT in the API payload (it's deprecated)
+            expect(data).to.not.have.property('enabled_clients');
+            return Promise.resolve({ data: { ...data, id: 'con_123' } });
           },
+          get: () =>
+            Promise.resolve({
+              id: 'con_123',
+              name: 'someDatabase',
+              strategy: 'auth0',
+              options: {},
+            }),
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          list: (params) => mockPagedData(params, 'connections', []),
+          list: (params) => {
+            // Return the newly created database when listing by name
+            if (params.name === 'someDatabase') {
+              return mockPagedData(params, 'connections', [
+                { id: 'con_123', name: 'someDatabase', strategy: 'auth0', options: {} },
+              ]);
+            }
+            return mockPagedData(params, 'connections', []);
+          },
+          clients: {
+            get: () => Promise.resolve({ data: [] }),
+            update: (connectionId) => {
+              expect(connectionId).to.equal('con_123');
+              return Promise.resolve({ data: [] });
+            },
+          },
         },
         clients: {
-          list: (params) => mockPagedData(params, 'clients', []),
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ name: 'client1', client_id: 'client_id_1' }]),
         },
         actions: {
           list: (params) => mockPagedData(params, 'actions', []),
@@ -130,7 +155,9 @@ describe('#databases handler', () => {
       const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [{ databases: [{ name: 'someDatabase' }] }]);
+      await stageFn.apply(handler, [
+        { databases: [{ name: 'someDatabase', enabled_clients: ['client1'] }] },
+      ]);
     });
 
     it('should convert action name to ID in custom_password_hash.action_id', async () => {
@@ -138,8 +165,9 @@ describe('#databases handler', () => {
         connections: {
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
+            // Verify enabled_clients is NOT in the API payload (it's deprecated)
+            expect(data).to.not.have.property('enabled_clients');
             expect(data).to.deep.equal({
-              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               name: 'PasswordHashConn',
               strategy: 'auth0',
               options: {
@@ -149,25 +177,39 @@ describe('#databases handler', () => {
                 },
               },
             });
-            return Promise.resolve({ data });
+            return Promise.resolve({ data: { ...data, id: 'con_new1' } });
           },
           get: function (id) {
             (() => expect(this).to.not.be.undefined)();
             expect(id).to.be.a('string');
-            expect(id).to.equal('con1');
-            return Promise.resolve({
-              id: 'con1',
-              name: 'ExistingPasswordHashConn',
-              strategy: 'auth0',
-              options: {},
-            });
+            if (id === 'con1') {
+              return Promise.resolve({
+                id: 'con1',
+                name: 'ExistingPasswordHashConn',
+                strategy: 'auth0',
+                options: {},
+              });
+            } else if (id === 'con_new1') {
+              return Promise.resolve({
+                id: 'con_new1',
+                name: 'PasswordHashConn',
+                strategy: 'auth0',
+                options: {
+                  custom_password_hash: {
+                    action_id: 'action-id-123',
+                    hash_algorithm: 'bcrypt',
+                  },
+                },
+              });
+            }
           },
           update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(id).to.be.a('string');
             expect(id).to.equal('con1');
+            // Verify enabled_clients is NOT in the update payload (it's deprecated on this endpoint)
+            expect(data).to.not.have.property('enabled_clients');
             expect(data).to.deep.equal({
-              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               options: {
                 custom_password_hash: {
                   action_id: 'action-id-456',
@@ -179,14 +221,31 @@ describe('#databases handler', () => {
             return Promise.resolve({ ...data, id });
           },
           delete: () => Promise.resolve({ data: [] }),
-          list: (params) =>
-            mockPagedData(params, 'connections', [
+          list: (params) => {
+            // Return appropriate connections based on the query
+            if (params.name === 'PasswordHashConn') {
+              return mockPagedData(params, 'connections', [
+                {
+                  id: 'con_new1',
+                  name: 'PasswordHashConn',
+                  strategy: 'auth0',
+                  options: {
+                    custom_password_hash: {
+                      action_id: 'action-id-123',
+                      hash_algorithm: 'bcrypt',
+                    },
+                  },
+                },
+              ]);
+            }
+            return mockPagedData(params, 'connections', [
               { name: 'ExistingPasswordHashConn', id: 'con1', strategy: 'auth0' },
-            ]),
+            ]);
+          },
           clients: {
             get: () => Promise.resolve({ data: [] }),
             update: (connectionId, _payload) => {
-              expect(connectionId).to.equal('con1');
+              expect(['con_new1', 'con1']).to.include(connectionId);
               return Promise.resolve([]);
             },
           },
@@ -557,8 +616,9 @@ describe('#databases handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(id).to.be.a('string');
             expect(id).to.equal('con1');
+            // Verify enabled_clients is NOT in the update payload (it's deprecated on this endpoint)
+            expect(data).to.not.have.property('enabled_clients');
             expect(data).to.deep.equal({
-              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               options: { passwordPolicy: 'testPolicy', someOldOption: true },
             });
 
@@ -623,7 +683,6 @@ describe('#databases handler', () => {
             expect(id).to.be.a('string');
             expect(id).to.equal('con1');
             expect(data).to.deep.equal({
-              enabled_clients: ['client1-id', 'excluded-one-id'],
               options: { passwordPolicy: 'testPolicy', someOldOption: true },
             });
 
@@ -2271,6 +2330,10 @@ describe('#databases handler with enabled clients integration', () => {
       sinon.assert.calledOnce(processConnectionEnabledClientsStub);
       expect(processConnectionEnabledClientsStub.firstCall.args[0]).to.equal(handler.client);
       expect(processConnectionEnabledClientsStub.firstCall.args[1]).to.equal(handler.type);
+      // Verify existingConnections parameter is passed
+      expect(processConnectionEnabledClientsStub.firstCall.args[2]).to.be.an('array');
+      // Verify changes parameter is passed
+      expect(processConnectionEnabledClientsStub.firstCall.args[3]).to.be.an('object');
 
       processConnectionEnabledClientsStub.restore();
     });
@@ -2314,7 +2377,7 @@ describe('#databases handler with enabled clients integration', () => {
       sinon.assert.calledOnce(processConnectionEnabledClientsStub);
 
       // Verify that excluded databases are filtered out
-      const passedChanges = processConnectionEnabledClientsStub.firstCall.args[2];
+      const passedChanges = processConnectionEnabledClientsStub.firstCall.args[3];
       expect(passedChanges.create).to.be.an('array');
       expect(passedChanges.update).to.be.an('array');
       expect(passedChanges.conflicts).to.be.an('array');

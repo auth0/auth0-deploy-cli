@@ -158,6 +158,7 @@ export const schema = {
 };
 
 export default class DatabaseHandler extends DefaultAPIHandler {
+  existing: Connection[] | null;
   constructor(config: DefaultAPIHandler) {
     super({
       ...config,
@@ -261,7 +262,11 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     // Override this as a database is actually a connection but we are treating them as a different object
 
     if (fn === 'create') {
-      return (payload) => this.client.connections.create(payload);
+      return (payload) => {
+        // Remove deprecated enabled_clients field
+        if ('enabled_clients' in payload) delete payload.enabled_clients;
+        return this.client.connections.create(payload);
+      };
     }
 
     // If we going to update database, we need to get current options first
@@ -289,6 +294,8 @@ export default class DatabaseHandler extends DefaultAPIHandler {
           if (payload.options && Object.keys(payload.options).length === 0) {
             delete payload.options;
           }
+          // Remove deprecated enabled_clients field
+          if ('enabled_clients' in payload) delete payload.enabled_clients;
           return this.client.connections.update(id, payload);
         });
     }
@@ -436,6 +443,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     await processConnectionEnabledClients(
       this.client,
       this.type,
+      await this.existing,
       filterExcluded(changes, excludedConnections)
     );
   }
