@@ -106,9 +106,7 @@ export default class ClientGrantsHandler extends DefaultHandler {
 
       const firstPartyClientIds = new Set(clients.map((c) => c.client_id));
 
-      this.existing = this.existing.filter((grant) =>
-        firstPartyClientIds.has(grant.client_id)
-      );
+      this.existing = this.existing.filter((grant) => firstPartyClientIds.has(grant.client_id));
     }
 
     return this.existing;
