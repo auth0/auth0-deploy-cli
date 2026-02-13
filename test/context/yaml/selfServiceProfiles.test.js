@@ -52,17 +52,17 @@ describe('#YAML context selfServiceProfiles', () => {
             is_optional: true,
           },
         ],
-        allowed_strategies: [
+        ALLOWED_STRATEGIES: [
           'adfs',
+          'auth0-samlp',
           'google-apps',
           'keycloak-samlp',
           'oidc',
           'okta',
-          'samlp',
-          'waad',
-          'auth0-samlp',
           'okta-samlp',
           'pingfederate',
+          'samlp',
+          'waad',
         ],
         branding: { colors: { primary: '#19aecc' } },
         customText: {
