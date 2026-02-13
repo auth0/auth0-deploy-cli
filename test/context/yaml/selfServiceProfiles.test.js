@@ -60,6 +60,9 @@ describe('#YAML context selfServiceProfiles', () => {
           'okta',
           'samlp',
           'waad',
+          'auth0-samlp',
+          'okta-samlp',
+          'pingfederate',
         ],
         branding: { colors: { primary: '#19aecc' } },
         customText: {

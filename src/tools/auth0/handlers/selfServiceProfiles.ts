@@ -26,20 +26,6 @@ type SsProfile = Management.SelfServiceProfile;
 export type SsProfileWithCustomText = Omit<SsProfile, 'created_at' | 'updated_at'> & {
   customText?: customTextType;
 };
-
-const supported_strategies = [
-  'oidc',
-  'samlp',
-  'waad',
-  'google-apps',
-  'adfs',
-  'okta',
-  'keycloak-samlp',
-  'pingfederate',
-  'auth0-samlp',
-  'okta-samlp',
-];
-
 export const schema = {
   type: 'array',
   items: {
@@ -77,8 +63,7 @@ export const schema = {
           'List of IdP strategies that will be shown to users during the Self-Service SSO flow.',
         items: {
           type: 'string',
-          schemaName: 'SelfServiceProfileAllowedStrategyEnum',
-          enum: supported_strategies,
+          enum: Object.values(Management.SelfServiceProfileAllowedStrategyEnum),
         },
       },
       branding: {
