@@ -833,6 +833,105 @@ clients:
         - client_id: 'client_id_of_mobile_app'
 ```
 
+For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2/self-service-profiles/get-self-service-profiles).
+
+## Self-Service Profiles
+
+Self-Service Profiles enable organizations to configure self-service SSO flows for their users. These profiles define the user attributes to collect, branding customization, and which identity provider strategies are allowed during the self-service setup process.
+
+**Note**: You cannot specify both `user_attribute_profile_id` and `user_attributes` in the same profile. Use `user_attribute_profile_id` to reference an existing User Attribute Profile, or define `user_attributes` inline.
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+selfServiceProfiles:
+  - name: 'Enterprise SSO Profile'
+    description: 'Self-service SSO for enterprise customers'
+    allowed_strategies:
+      - oidc
+      - samlp
+      - okta
+    user_attributes:
+      - name: email
+        description: Email of the User
+        is_optional: false
+      - name: name
+        description: Name of the User
+        is_optional: true
+    branding:
+      logo_url: 'https://example.com/logo.png'
+      colors:
+        primary: '#19aecc'
+    customText:
+      en:
+        get-started:
+          introduction: 'Welcome! With <p>only a few steps</p> you will be able to setup your new connection.'
+
+  - name: 'Simple SSO Profile'
+    description: 'Basic SSO profile'
+    user_attribute_profile_id: 'My User Attribute Profile'
+    allowed_strategies:
+      - google-apps
+      - adfs
+```
+
+### Directory Example
+
+```
+Folder structure when in directory mode.
+
+./self-service-profiles/
+    ./Enterprise SSO Profile.json
+    ./Simple SSO Profile.json
+```
+
+Contents of `Enterprise SSO Profile.json`:
+
+```json
+{
+  "name": "Enterprise SSO Profile",
+  "description": "Self-service SSO for enterprise customers",
+  "allowed_strategies": ["oidc", "samlp", "okta"],
+  "user_attributes": [
+    {
+      "name": "email",
+      "description": "Email of the User",
+      "is_optional": false
+    },
+    {
+      "name": "name",
+      "description": "Name of the User",
+      "is_optional": true
+    }
+  ],
+  "branding": {
+    "logo_url": "https://example.com/logo.png",
+    "colors": {
+      "primary": "#19aecc"
+    }
+  },
+  "customText": {
+    "en": {
+      "get-started": {
+        "introduction": "Welcome! With <p>only a few steps</p> you will be able to setup your new connection."
+      }
+    }
+  }
+}
+```
+
+Contents of `Simple SSO Profile.json`:
+
+```json
+{
+  "name": "Simple SSO Profile",
+  "description": "Basic SSO profile",
+  "user_attribute_profile_id": "My User Attribute Profile",
+  "allowed_strategies": ["google-apps", "adfs"]
+}
+```
+
 For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2).
 
 ## Risk Assessments

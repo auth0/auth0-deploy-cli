@@ -102,7 +102,6 @@ describe('#databases handler', () => {
 
       await stageFn.apply(handler, [{ databases: data }]);
     });
-
   });
 
   describe('#databases process', () => {
