@@ -113,7 +113,15 @@ describe('#connections handler', () => {
             }),
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          list: (params) => mockPagedData(params, 'connections', []),
+          list: (params) => {
+            // Return the newly created connection when listing by name
+            if (params.name === 'someConnection') {
+              return mockPagedData(params, 'connections', [
+                { id: 'con_new1', name: 'someConnection', strategy: 'custom', options: {} },
+              ]);
+            }
+            return mockPagedData(params, 'connections', []);
+          },
           _getRestClient: () => ({}),
           clients: {
             get: () => Promise.resolve(mockPagedData({}, 'clients', [])),

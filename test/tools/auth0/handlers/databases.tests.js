@@ -125,7 +125,15 @@ describe('#databases handler', () => {
             }),
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          list: (params) => mockPagedData(params, 'connections', []),
+          list: (params) => {
+            // Return the newly created database when listing by name
+            if (params.name === 'someDatabase') {
+              return mockPagedData(params, 'connections', [
+                { id: 'con_123', name: 'someDatabase', strategy: 'auth0', options: {} },
+              ]);
+            }
+            return mockPagedData(params, 'connections', []);
+          },
           clients: {
             get: () => Promise.resolve({ data: [] }),
             update: (connectionId) => {
@@ -157,8 +165,9 @@ describe('#databases handler', () => {
         connections: {
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
+            // Verify enabled_clients is NOT in the API payload (it's deprecated)
+            expect(data).to.not.have.property('enabled_clients');
             expect(data).to.deep.equal({
-              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               name: 'PasswordHashConn',
               strategy: 'auth0',
               options: {
@@ -168,25 +177,39 @@ describe('#databases handler', () => {
                 },
               },
             });
-            return Promise.resolve({ data });
+            return Promise.resolve({ data: { ...data, id: 'con_new1' } });
           },
           get: function (id) {
             (() => expect(this).to.not.be.undefined)();
             expect(id).to.be.a('string');
-            expect(id).to.equal('con1');
-            return Promise.resolve({
-              id: 'con1',
-              name: 'ExistingPasswordHashConn',
-              strategy: 'auth0',
-              options: {},
-            });
+            if (id === 'con1') {
+              return Promise.resolve({
+                id: 'con1',
+                name: 'ExistingPasswordHashConn',
+                strategy: 'auth0',
+                options: {},
+              });
+            } else if (id === 'con_new1') {
+              return Promise.resolve({
+                id: 'con_new1',
+                name: 'PasswordHashConn',
+                strategy: 'auth0',
+                options: {
+                  custom_password_hash: {
+                    action_id: 'action-id-123',
+                    hash_algorithm: 'bcrypt',
+                  },
+                },
+              });
+            }
           },
           update: function (id, data) {
             (() => expect(this).to.not.be.undefined)();
             expect(id).to.be.a('string');
             expect(id).to.equal('con1');
+            // Verify enabled_clients is NOT in the update payload (it's deprecated on this endpoint)
+            expect(data).to.not.have.property('enabled_clients');
             expect(data).to.deep.equal({
-              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               options: {
                 custom_password_hash: {
                   action_id: 'action-id-456',
@@ -198,14 +221,31 @@ describe('#databases handler', () => {
             return Promise.resolve({ ...data, id });
           },
           delete: () => Promise.resolve({ data: [] }),
-          list: (params) =>
-            mockPagedData(params, 'connections', [
+          list: (params) => {
+            // Return appropriate connections based on the query
+            if (params.name === 'PasswordHashConn') {
+              return mockPagedData(params, 'connections', [
+                {
+                  id: 'con_new1',
+                  name: 'PasswordHashConn',
+                  strategy: 'auth0',
+                  options: {
+                    custom_password_hash: {
+                      action_id: 'action-id-123',
+                      hash_algorithm: 'bcrypt',
+                    },
+                  },
+                },
+              ]);
+            }
+            return mockPagedData(params, 'connections', [
               { name: 'ExistingPasswordHashConn', id: 'con1', strategy: 'auth0' },
-            ]),
+            ]);
+          },
           clients: {
             get: () => Promise.resolve({ data: [] }),
             update: (connectionId, _payload) => {
-              expect(connectionId).to.equal('con1');
+              expect(['con_new1', 'con1']).to.include(connectionId);
               return Promise.resolve([]);
             },
           },
