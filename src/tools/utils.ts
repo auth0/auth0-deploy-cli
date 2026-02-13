@@ -339,3 +339,16 @@ export function maskSecretAtPath({
   }
   return maskOnObj;
 }
+
+/**
+ * Determines whether third-party clients should be excluded based on configuration.
+ * Checks the AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS config value and returns true if it's
+ * set to boolean true or string 'true'.
+ *
+ * @param configFn - The configuration function to retrieve the config value.
+ * @returns True if third-party clients should be excluded, false otherwise.
+ */
+export const shouldExcludeThirdPartyClients = (configFn: (key: string) => any): boolean => {
+  const value = configFn('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS');
+  return value === 'true' || value === true;
+};
