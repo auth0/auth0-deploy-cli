@@ -1,7 +1,12 @@
 import { Management } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import constants from '../../constants';
-import { filterExcluded, getEnabledClients } from '../../utils';
+import {
+  filterExcluded,
+  getEnabledClients,
+  convertActionNameToId,
+  convertActionIdToName,
+} from '../../utils';
 import { CalculatedChanges, Assets, Asset } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
@@ -11,6 +16,7 @@ import {
   processConnectionEnabledClients,
 } from './connections';
 import { Client } from './clients';
+import { Action } from './actions';
 
 export const schema = {
   type: 'array',
@@ -138,6 +144,12 @@ export const schema = {
               },
             },
           },
+          custom_password_hash: {
+            type: 'object',
+            properties: {
+              action_id: { type: 'string' },
+            },
+          },
         },
       },
     },
@@ -146,6 +158,7 @@ export const schema = {
 };
 
 export default class DatabaseHandler extends DefaultAPIHandler {
+  existing: Connection[] | null;
   constructor(config: DefaultAPIHandler) {
     super({
       ...config,
@@ -158,6 +171,24 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     return super.objString({ name: db.name, id: db.id });
   }
 
+  getFormattedOptions(options, actions: Action[] = []) {
+    try {
+      const formattedOptions = { ...options };
+
+      // Handle custom_password_hash.action_id conversion
+      if (options?.custom_password_hash?.action_id) {
+        formattedOptions.custom_password_hash = {
+          ...options.custom_password_hash,
+          action_id: convertActionNameToId(options.custom_password_hash.action_id, actions),
+        };
+      }
+
+      return formattedOptions;
+    } catch (e) {
+      return {};
+    }
+  }
+
   async validate(assets: Assets): Promise<void> {
     const { databases } = assets;
 
@@ -167,7 +198,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     // Validate each database
     databases.forEach((database) => {
       this.validateEmailUniqueConstraints(database);
-      this.validatePasswordlessSettings(database);
+      // this.validatePasswordlessSettings(database); // Enable only the feature is GA PR:#1282
     });
 
     await super.validate(assets);
@@ -231,7 +262,11 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     // Override this as a database is actually a connection but we are treating them as a different object
 
     if (fn === 'create') {
-      return (payload) => this.client.connections.create(payload);
+      return (payload) => {
+        // Remove deprecated enabled_clients field
+        if ('enabled_clients' in payload) delete payload.enabled_clients;
+        return this.client.connections.create(payload);
+      };
     }
 
     // If we going to update database, we need to get current options first
@@ -259,6 +294,8 @@ export default class DatabaseHandler extends DefaultAPIHandler {
           if (payload.options && Object.keys(payload.options).length === 0) {
             delete payload.options;
           }
+          // Remove deprecated enabled_clients field
+          if ('enabled_clients' in payload) delete payload.enabled_clients;
           return this.client.connections.update(id, payload);
         });
     }
@@ -269,24 +306,55 @@ export default class DatabaseHandler extends DefaultAPIHandler {
   async getType() {
     if (this.existing) return this.existing;
 
-    const connections = await paginate<Connection>(this.client.connections.list, {
-      strategy: [Management.ConnectionStrategyEnum.Auth0],
-      checkpoint: true,
-    });
+    // Fetch connections and actions concurrently
+    const [connections, actions] = await Promise.all([
+      paginate<Connection>(this.client.connections.list, {
+        strategy: [Management.ConnectionStrategyEnum.Auth0],
+        checkpoint: true,
+      }),
+      paginate<Action>(this.client.actions.list, {
+        paginate: true,
+        include_totals: true,
+      }),
+    ]);
 
     const dbConnectionsWithEnabledClients = await Promise.all(
       connections.map(async (con) => {
         if (!con?.id) return con;
+
         const enabledClients = await getConnectionEnabledClients(this.client, con.id);
+        const connection = { ...con };
+
         if (enabledClients && enabledClients?.length) {
-          return { ...con, enabled_clients: enabledClients };
+          connection.enabled_clients = enabledClients;
         }
-        return con;
+
+        return connection;
       })
     );
 
+    // Convert action ID back to action name for export
+    const dbConnectionsWithActionNames = dbConnectionsWithEnabledClients.map((connection) => {
+      if (connection.options && 'custom_password_hash' in connection.options) {
+        const customPasswordHash = (connection.options as any)?.custom_password_hash;
+        if (customPasswordHash?.action_id) {
+          return {
+            ...connection,
+            options: {
+              ...connection.options,
+              custom_password_hash: {
+                ...customPasswordHash,
+                action_id: convertActionIdToName(customPasswordHash.action_id, actions),
+              },
+            },
+          };
+        }
+      }
+      return connection;
+    });
+
     // If options option is empty for all connection, log the missing options scope.
-    const isOptionExists = dbConnectionsWithEnabledClients.every(
+    const isOptionExists = dbConnectionsWithActionNames.every(
       (c) => c.options && Object.keys(c.options).length > 0
     );
     if (!isOptionExists) {
@@ -295,7 +363,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
       );
     }
 
-    this.existing = dbConnectionsWithEnabledClients;
+    this.existing = dbConnectionsWithActionNames;
 
     return this.existing;
   }
@@ -313,25 +381,37 @@ export default class DatabaseHandler extends DefaultAPIHandler {
       };
 
     // Convert enabled_clients by name to the id
+    // Fetch clients, connections, and actions concurrently
+    const [clients, existingDatabasesConnections, actions] = await Promise.all([
+      paginate<Client>(this.client.clients.list, {
+        paginate: true,
+      }),
+      paginate<Connection>(this.client.connections.list, {
+        strategy: [Management.ConnectionStrategyEnum.Auth0],
+        checkpoint: true,
+        include_totals: true,
+      }),
+      paginate<Action>(this.client.actions.list, {
+        paginate: true,
+        include_totals: true,
+      }),
+    ]);
 
-    const clients = await paginate<Client>(this.client.clients.list, {
-      paginate: true,
-    });
-
-    const existingDatabasesConnections = await paginate<Connection>(this.client.connections.list, {
-      strategy: [Management.ConnectionStrategyEnum.Auth0],
-      checkpoint: true,
-      include_totals: true,
-    });
     const formatted = databases.map((db) => {
+      const { options, ...rest } = db;
+      const formattedOptions = this.getFormattedOptions(options, actions);
+      const formattedDb: any = { ...rest, options: formattedOptions };
+
       if (db.enabled_clients) {
-        return {
-          ...db,
-          enabled_clients: getEnabledClients(assets, db, existingDatabasesConnections, clients),
-        };
+        formattedDb.enabled_clients = getEnabledClients(
+          assets,
+          db,
+          existingDatabasesConnections,
+          clients
+        );
       }
 
-      return db;
+      return formattedDb;
     });
 
     return super.calcChanges({ ...assets, databases: formatted });
@@ -363,6 +443,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     await processConnectionEnabledClients(
       this.client,
       this.type,
+      await this.existing,
       filterExcluded(changes, excludedConnections)
     );
   }

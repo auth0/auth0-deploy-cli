@@ -202,15 +202,48 @@ export const updateConnectionEnabledClients = async (
   auth0Client: Auth0APIClient,
   typeName: string,
   connectionId: string,
-  enabledClientIds: string[]
+  enabledClientIds: string[],
+  existingConnections: Asset[] | Asset | null
 ): Promise<boolean> => {
   if (!connectionId || !Array.isArray(enabledClientIds) || !enabledClientIds.length) return false;
 
+  let existingEnabledClients: string[] = [];
+  if (Array.isArray(existingConnections)) {
+    const existingConnection = existingConnections.find((con) => con.id === connectionId);
+
+    existingEnabledClients = existingConnection?.enabled_clients ?? [];
+  }
+
+  // Determine which clients to enable vs. disable by comparing the incoming `enabledClientIds` with the `existingEnabledClients`.
+  const enabledClientIdSet = new Set(enabledClientIds);
+  const existingClientIdSet = new Set(existingEnabledClients);
+
+  // If both sets are identical, skip the update entirely.
+  if (
+    enabledClientIdSet.size === existingClientIdSet.size &&
+    [...enabledClientIdSet].every((id) => existingClientIdSet.has(id))
+  ) {
+    log.debug(`Enabled clients for ${typeName}: ${connectionId} are unchanged, skipping update`);
+    return true;
+  }
+
+  const clientsToEnable = enabledClientIds;
+  // Any client that exists on the tenant but not in the provided `enabledClientIds` should be disabled.
+  const clientsToDisable = existingEnabledClients.filter(
+    (clientId: string) => !enabledClientIdSet.has(clientId)
+  );
+
   const enabledClientUpdatePayloads: Management.UpdateEnabledClientConnectionsRequestContentItem[] =
-    enabledClientIds.map((clientId) => ({
-      client_id: clientId,
-      status: true,
-    }));
+    [
+      ...clientsToEnable.map((clientId) => ({
+        client_id: clientId,
+        status: true,
+      })),
+      ...clientsToDisable.map((clientId) => ({
+        client_id: clientId,
+        status: false,
+      })),
+    ];
 
   const payloadChunks = chunk(enabledClientUpdatePayloads, 50);
 
@@ -240,6 +273,7 @@ export const updateConnectionEnabledClients = async (
 export const processConnectionEnabledClients = async (
   auth0Client: Auth0APIClient,
   typeName: string,
+  existingConnections: Asset[] | null,
   changes: CalculatedChanges,
   delayMs: number = 2500 // Default delay is 2.5 seconds
 ) => {
@@ -286,13 +320,31 @@ export const processConnectionEnabledClients = async (
   // Delete is handled by the `processChanges` method, removed connection completely
   await Promise.all([
     ...createWithId.map((conn) =>
-      updateConnectionEnabledClients(auth0Client, typeName, conn.id, conn.enabled_clients)
+      updateConnectionEnabledClients(
+        auth0Client,
+        typeName,
+        conn.id,
+        conn.enabled_clients,
+        existingConnections
+      )
     ),
     ...update.map((conn) =>
-      updateConnectionEnabledClients(auth0Client, typeName, conn.id, conn.enabled_clients)
+      updateConnectionEnabledClients(
+        auth0Client,
+        typeName,
+        conn.id,
+        conn.enabled_clients,
+        existingConnections
+      )
     ),
     ...conflicts.map((conn) =>
-      updateConnectionEnabledClients(auth0Client, typeName, conn.id, conn.enabled_clients)
+      updateConnectionEnabledClients(
+        auth0Client,
+        typeName,
+        conn.id,
+        conn.enabled_clients,
+        existingConnections
+      )
     ),
   ]);
 };
@@ -653,7 +705,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     await super.processChanges(assets, changes);
 
     // process enabled clients
-    await processConnectionEnabledClients(this.client, this.type, changes);
+    await processConnectionEnabledClients(this.client, this.type, await this.existing, changes);
 
     // process directory provisioning
     await this.processConnectionDirectoryProvisioning(changes);
