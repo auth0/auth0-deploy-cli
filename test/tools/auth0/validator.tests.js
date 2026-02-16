@@ -60,7 +60,7 @@ describe('#schema validation tests', () => {
 
     auth0
       .validate()
-      .then(failedCb(done), passedCb(done, `should have required property '${field}'`));
+      .then(failedCb(done), passedCb(done, `must have required property '${field}'`));
   };
 
   const checkEnum = (data, done) => {
@@ -78,7 +78,7 @@ describe('#schema validation tests', () => {
 
     auth0
       .validate()
-      .then(failedCb(done), passedCb(done, 'should be equal to one of the allowed values'));
+      .then(failedCb(done), passedCb(done, 'must be equal to one of the allowed values'));
   };
 
   const checkTypeError = (field, expectedType, data, done) => {
@@ -94,7 +94,7 @@ describe('#schema validation tests', () => {
       mockConfigFn
     );
 
-    auth0.validate().then(failedCb(done), passedCb(done, `should be ${expectedType}`, field));
+    auth0.validate().then(failedCb(done), passedCb(done, `must be ${expectedType}`, field));
   };
 
   describe('#branding validate', () => {
@@ -117,7 +117,7 @@ describe('#schema validation tests', () => {
         mockConfigFn
       );
 
-      auth0.validate().then(failedCb(done), passedCb(done, 'should be object'));
+      auth0.validate().then(failedCb(done), passedCb(done, 'must be object'));
     });
 
     it('should pass validation', (done) => {
@@ -172,7 +172,7 @@ describe('#schema validation tests', () => {
         mockConfigFn
       );
 
-      auth0.validate().then(failedCb(done), passedCb(done, 'should be array'));
+      auth0.validate().then(failedCb(done), passedCb(done, 'must be array'));
     });
 
     it('should pass validation', (done) => {
@@ -220,7 +220,7 @@ describe('#schema validation tests', () => {
 
       auth0
         .validate()
-        .then(failedCb(done), passedCb(done, 'should NOT be shorter than 1 characters'));
+        .then(failedCb(done), passedCb(done, 'must NOT have fewer than 1 characters'));
     });
 
     it('should pass validation', (done) => {
@@ -321,7 +321,7 @@ describe('#schema validation tests', () => {
         mockConfigFn
       );
 
-      auth0.validate().then(failedCb(done), passedCb(done, 'should be object'));
+      auth0.validate().then(failedCb(done), passedCb(done, 'must be object'));
     });
 
     it('should pass validation', (done) => {
@@ -620,7 +620,7 @@ describe('#schema validation tests', () => {
         mockConfigFn
       );
 
-      auth0.validate().then(failedCb(done), passedCb(done, 'should be object'));
+      auth0.validate().then(failedCb(done), passedCb(done, 'must be object'));
     });
 
     it('should pass validation', (done) => {
@@ -760,7 +760,7 @@ describe('#schema validation tests', () => {
         mockConfigFn
       );
 
-      auth0.validate().then(failedCb(done), passedCb(done, 'should be object'));
+      auth0.validate().then(failedCb(done), passedCb(done, 'must be object'));
     });
 
     it('should pass validation', (done) => {
@@ -783,7 +783,7 @@ describe('#schema validation tests', () => {
 
       auth0
         .validate()
-        .then(failedCb(done), passedCb(done, "should have required property 'borders'"));
+        .then(failedCb(done), passedCb(done, "must have required property 'borders'"));
     });
 
     it('should pass validation', (done) => {
