@@ -32,7 +32,7 @@ export const schema = {
             name: { type: 'string' },
             value: { type: 'string' },
           },
-          required: ['name', 'value'],
+          required: ['name'],
         },
       },
       all_changes_published: { type: 'boolean' },
@@ -84,7 +84,12 @@ export default class ActionModulesHandler extends DefaultAPIHandler {
   }
 
   async updateModule(moduleId: string, module: Management.UpdateActionModuleRequestContent) {
-    return this.client.actions.modules.update(moduleId, module);
+    const updatableModule: Management.UpdateActionModuleRequestContent = {
+      code: module.code,
+      dependencies: module.dependencies,
+      secrets: module.secrets,
+    }
+    return this.client.actions.modules.update(moduleId, updatableModule);
   }
 
   async deleteModule(moduleId: string) {
