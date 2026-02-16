@@ -136,9 +136,9 @@ describe('#directory context actionModules', () => {
       all_changes_published: true,
       latest_version_number: 1,
     });
-    expect(
-      fs.readFileSync(path.join(modulesFolder, moduleName, 'code.js'), 'utf8')
-    ).to.deep.equal(codeValidation);
+    expect(fs.readFileSync(path.join(modulesFolder, moduleName, 'code.js'), 'utf8')).to.deep.equal(
+      codeValidation
+    );
   });
 
   it('should dump action modules with identifiers when AUTH0_EXPORT_IDENTIFIERS is true', async () => {
@@ -177,9 +177,9 @@ describe('#directory context actionModules', () => {
       all_changes_published: true,
       latest_version_number: 1,
     });
-    expect(
-      fs.readFileSync(path.join(modulesFolder, moduleName, 'code.js'), 'utf8')
-    ).to.deep.equal(codeValidation);
+    expect(fs.readFileSync(path.join(modulesFolder, moduleName, 'code.js'), 'utf8')).to.deep.equal(
+      codeValidation
+    );
   });
 
   it('should process action modules with @@KEYWORD@@ format in secrets', async () => {

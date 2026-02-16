@@ -1072,7 +1072,7 @@ module.exports = {
   async fetchUserData(userId) {
     const response = await axios.get(`https://api.example.com/users/${userId}`);
     return response.data;
-  }
+  },
 };
 ```
 

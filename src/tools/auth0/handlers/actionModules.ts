@@ -74,7 +74,6 @@ export default class ActionModulesHandler extends DefaultAPIHandler {
   }
 
   async createModule(module: Management.CreateActionModuleRequestContent) {
-
     if ('all_changes_published' in module) {
       delete module.all_changes_published;
     }
@@ -88,7 +87,7 @@ export default class ActionModulesHandler extends DefaultAPIHandler {
       code: module.code,
       dependencies: module.dependencies,
       secrets: module.secrets,
-    }
+    };
     return this.client.actions.modules.update(moduleId, updatableModule);
   }
 
@@ -111,9 +110,7 @@ export default class ActionModulesHandler extends DefaultAPIHandler {
               log.info(`Published [${this.type}]: ${this.objString(module)}`);
             })
             .catch((err) => {
-              throw new Error(
-                `Problem Publishing ${this.type} ${this.objString(module)}\n${err}`
-              );
+              throw new Error(`Problem Publishing ${this.type} ${this.objString(module)}\n${err}`);
             }),
       })
       .promise();
@@ -176,8 +173,7 @@ export default class ActionModulesHandler extends DefaultAPIHandler {
 
           return module;
         }),
-      ...changes.update
-        .filter((module) => module.all_changes_published === true)
+      ...changes.update.filter((module) => module.all_changes_published === true),
     ].filter((module): module is ActionModule => module !== undefined);
 
     await this.publishActionModules(modulesToPublish);

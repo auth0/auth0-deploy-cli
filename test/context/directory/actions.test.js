@@ -408,8 +408,8 @@ describe('#directory context actions', () => {
         },
       ],
     });
-    expect(
-      fs.readFileSync(path.join(actionsFolder, actionName, 'code.js'), 'utf8')
-    ).to.deep.equal(codeValidation);
+    expect(fs.readFileSync(path.join(actionsFolder, actionName, 'code.js'), 'utf8')).to.deep.equal(
+      codeValidation
+    );
   });
 });
