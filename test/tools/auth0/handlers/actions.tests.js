@@ -525,14 +525,14 @@ describe('#actions handler', () => {
               ]),
             versions: {
               list: () =>
-                Promise.resolve({
-                  versions: [
+                Promise.resolve(
+                  mockPagedData({ paginate: true }, 'versions', [
                     {
                       id: moduleVersionId,
                       version_number: 1,
                     },
-                  ],
-                }),
+                  ])
+                ),
             },
           },
         },
