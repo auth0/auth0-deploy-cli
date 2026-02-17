@@ -1061,7 +1061,7 @@ const axios = require('axios');
  */
 module.exports = {
   async validateToken(token) {
-    const secret = process.env.JWT_SECRET;
+    const secret = actions.secrets.JWT_SECRET;
     try {
       return jwt.verify(token, secret);
     } catch (error) {

@@ -12,7 +12,7 @@ module.exports = {
    * @returns {Promise<object>} Decoded token payload
    */
   async validateToken(token) {
-    const secret = process.env.JWT_SECRET;
+    const secret = actions.secrets.JWT_SECRET;
     try {
       return jwt.verify(token, secret);
     } catch (error) {
