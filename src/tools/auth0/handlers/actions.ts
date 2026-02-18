@@ -247,7 +247,7 @@ export default class ActionHandler extends DefaultAPIHandler {
   }
 
   async calcChanges(assets: Assets): Promise<CalculatedChanges> {
-    let { actions } = assets;
+    let { actions, actionModules } = assets;
 
     // Do nothing if not set
     if (!actions)
@@ -259,15 +259,19 @@ export default class ActionHandler extends DefaultAPIHandler {
       };
 
     let modules: ActionModule[] | null = null;
-    try {
-      modules = await paginate<ActionModule>(this.client.actions.modules.list, {
-        paginate: true,
-      });
-    } catch {
-      log.debug(
-        'Skipping actions modules enrichment because action modules could not be retrieved.'
-      );
-      modules = null;
+    if (actionModules && actionModules.length > 0) {
+      modules = actionModules;
+    } else {
+      try {
+        modules = await paginate<ActionModule>(this.client.actions.modules.list, {
+          paginate: true,
+        });
+      } catch {
+        log.debug(
+          'Skipping actions modules enrichment because action modules could not be retrieved.'
+        );
+        modules = null;
+      }
     }
 
     if (modules != null) {
