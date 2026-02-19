@@ -61,6 +61,13 @@ repository =>
       code.js
       current_version.js
     action1.json
+  action-modules
+    auth-helper
+      code.js
+    auth-helper.json
+    notification-helper
+      code.js
+    notification-helper.json
   triggers
     triggers.json
 ```

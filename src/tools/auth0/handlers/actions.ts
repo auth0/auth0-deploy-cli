@@ -5,6 +5,7 @@ import log from '../../../logger';
 import { areArraysEquals, sleep } from '../../utils';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
+import { ActionModule } from './actionModules';
 
 const MAX_ACTION_DEPLOY_RETRY_ATTEMPTS = 60; // 60 * 2s => 2 min timeout
 
@@ -59,6 +60,17 @@ export const schema = {
             id: { type: 'string', default: '' },
             version: { type: 'string' },
             url: { type: 'string' },
+          },
+        },
+      },
+      modules: {
+        type: 'array',
+        items: {
+          type: 'object',
+          required: ['module_name', 'module_version_number'],
+          properties: {
+            module_name: { type: 'string' },
+            module_version_number: { type: 'number' },
           },
         },
       },
@@ -192,6 +204,10 @@ export default class ActionHandler extends DefaultAPIHandler {
       actionChanges.supported_triggers = action.supported_triggers;
     }
 
+    if (!areArraysEquals(action.modules, found.modules)) {
+      actionChanges.modules = action.modules;
+    }
+
     return actionChanges;
   }
 
@@ -230,12 +246,100 @@ export default class ActionHandler extends DefaultAPIHandler {
     }
   }
 
-  @order('50')
+  async calcChanges(assets: Assets): Promise<CalculatedChanges> {
+    let { actions, actionModules } = assets;
+
+    // Do nothing if not set
+    if (!actions)
+      return {
+        del: [],
+        create: [],
+        update: [],
+        conflicts: [],
+      };
+
+    let modules: ActionModule[] | null = null;
+    if (actionModules && actionModules.length > 0) {
+      modules = actionModules;
+    } else {
+      try {
+        modules = await paginate<ActionModule>(this.client.actions.modules.list, {
+          paginate: true,
+        });
+      } catch {
+        log.debug(
+          'Skipping actions modules enrichment because action modules could not be retrieved.'
+        );
+        modules = null;
+      }
+    }
+
+    if (modules != null) {
+      // Use task queue to process actions in parallel
+      const processedActions = await this.client.pool
+        .addEachTask({
+          data: actions || [],
+          generator: (action) => this.enrichActionWithModuleIds(action, modules),
+        })
+        .promise();
+
+      actions = processedActions;
+    }
+
+    return super.calcChanges({ ...assets, actions });
+  }
+
+  async enrichActionWithModuleIds(action: Action, modules: ActionModule[]): Promise<Action> {
+    if (!action.modules || action.modules.length === 0) {
+      return action;
+    }
+
+    const updatedModules = await this.client.pool
+      .addEachTask({
+        data: action.modules,
+        generator: async (module) => {
+          const foundModule = modules.find((m) => m.name === module.module_name);
+          if (foundModule && foundModule.id) {
+            // paginate to get all versions of the module
+            const allModuleVersions: Management.ActionModuleVersion[] = [];
+            let moduleVersions = await this.client.actions.modules.versions.list(foundModule.id);
+
+            // Process first page
+            allModuleVersions.push(...moduleVersions.data);
+
+            // Fetch remaining pages
+            while (moduleVersions.hasNextPage()) {
+              moduleVersions = await moduleVersions.getNextPage();
+              allModuleVersions.push(...moduleVersions.data);
+            }
+
+            return {
+              module_name: module.module_name,
+              module_id: foundModule.id,
+              module_version_number: module.module_version_number,
+              module_version_id:
+                allModuleVersions?.find((v) => v.version_number === module.module_version_number)
+                  ?.id || '',
+            };
+          }
+          return module;
+        },
+      })
+      .promise();
+
+    return {
+      ...action,
+      modules: updatedModules,
+    } as Action;
+  }
+
+  @order('51')
   async processChanges(assets: Assets) {
     const { actions } = assets;
 
     // Do nothing if not set
     if (!actions) return;
+
     const changes = await this.calcChanges(assets);
 
     // Management of marketplace actions not currently supported, see ESD-23225.

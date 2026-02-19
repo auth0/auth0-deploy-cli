@@ -16,6 +16,7 @@ import guardianPolicies from './guardianPolicies';
 import roles from './roles';
 import organizations from './organizations';
 import actions from './actions';
+import actionModules from './actionModules';
 import triggers from './triggers';
 import attackProtection from './attackProtection';
 import riskAssessment from './riskAssessment';
@@ -67,6 +68,7 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   guardianPhoneFactorSelectedProvider,
   guardianPolicies,
   actions,
+  actionModules,
   organizations,
   triggers,
   attackProtection,

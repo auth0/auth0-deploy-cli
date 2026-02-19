@@ -970,3 +970,162 @@ File: `./risk-assessment/settings.json`
 ```
 
 For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2#!/Risk_Assessments/get_settings).
+
+## Action Modules
+
+Action modules are reusable code modules that can be shared across multiple Auth0 actions. They allow you to create common utility functions, helpers, and libraries that can be imported and used by any action in your tenant.
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+actionModules:
+  - name: auth-helper
+    code: ./action-modules/auth-helper/code.js
+    dependencies:
+      - name: axios
+        version: 1.6.0
+      - name: jsonwebtoken
+        version: 9.0.0
+    secrets:
+      - name: JWT_SECRET
+        value: ##JWT_SECRET##
+
+  - name: notification-helper
+    code: ./action-modules/notification-helper/code.js
+    dependencies:
+      - name: uuid
+        version: 9.0.0
+    secrets: []
+```
+
+Folder structure when in YAML mode:
+
+```
+./action-modules/
+    /auth-helper/
+        /code.js
+    /notification-helper/
+        /code.js
+./tenant.yaml
+```
+
+### Directory Example
+
+Folder structure when in directory mode:
+
+```
+./action-modules/
+    ./auth-helper.json
+    ./auth-helper/
+        ./code.js
+    ./notification-helper.json
+    ./notification-helper/
+        ./code.js
+```
+
+Contents of `auth-helper.json`:
+
+```json
+{
+  "name": "auth-helper",
+  "code": "./action-modules/auth-helper/code.js",
+  "dependencies": [
+    {
+      "name": "axios",
+      "version": "1.6.0"
+    },
+    {
+      "name": "jsonwebtoken",
+      "version": "9.0.0"
+    }
+  ],
+  "secrets": [
+    {
+      "name": "JWT_SECRET",
+      "value": "##JWT_SECRET##"
+    }
+  ]
+}
+```
+
+Contents of `auth-helper/code.js`:
+
+```javascript
+const jwt = require('jsonwebtoken');
+const axios = require('axios');
+
+/**
+ * Auth Helper Module
+ * Provides JWT validation and token refresh utilities
+ */
+module.exports = {
+  async validateToken(token) {
+    const secret = actions.secrets.JWT_SECRET;
+    try {
+      return jwt.verify(token, secret);
+    } catch (error) {
+      throw new Error('Invalid token: ' + error.message);
+    }
+  },
+
+  async fetchUserData(userId) {
+    const response = await axios.get(`https://api.example.com/users/${userId}`);
+    return response.data;
+  },
+};
+```
+
+### Using Action Modules in Actions
+
+Actions can reference action modules in their configuration:
+
+**YAML Example:**
+
+```yaml
+actions:
+  - name: send-phone-message
+    code: ./actions/send-phone-message/code.js
+    supported_triggers:
+      - id: send-phone-message
+        version: v1
+    modules:
+      - module_name: notification-helper
+        module_version_number: 1
+```
+
+**Directory Example:**
+
+Contents of `actions/send-phone-message.json`:
+
+```json
+{
+  "name": "send-phone-message",
+  "code": "./actions/send-phone-message/code.js",
+  "supported_triggers": [
+    {
+      "id": "send-phone-message",
+      "version": "v1"
+    }
+  ],
+  "modules": [
+    {
+      "module_name": "notification-helper",
+      "module_version_number": 1
+    }
+  ]
+}
+```
+
+The action can then import and use the module in its code:
+
+```javascript
+const notificationHelper = require('actions:notification-helper');
+
+exports.onExecuteSendPhoneMessage = async (event) => {
+  const message = notificationHelper.formatMessage(
+    event.user.phone_number,
+    'Your verification code'
+  );
+};
+```

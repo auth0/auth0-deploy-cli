@@ -295,6 +295,42 @@ actions:
       - id: post-login
         version: v1
 
+  - name: send-phone-message
+    code: ./actions/send-phone-message/code.js
+    dependencies:
+      - name: axios
+        version: 1.6.0
+      - name: uuid
+        version: 9.0.0
+    deployed: true
+    secrets: []
+    status: built
+    supported_triggers:
+      - id: send-phone-message
+        version: v1
+    modules:
+      - module_name: notification-helper
+        module_version_number: 1
+
+actionModules:
+  - name: auth-helper
+    code: ./action-modules/auth-helper/code.js
+    dependencies:
+      - name: axios
+        version: 1.6.0
+      - name: jsonwebtoken
+        version: 9.0.0
+    secrets:
+      - name: JWT_SECRET
+        value: ##JWT_SECRET##
+
+  - name: notification-helper
+    code: ./action-modules/notification-helper/code.js
+    dependencies:
+      - name: uuid
+        version: 9.0.0
+    secrets: []
+
 triggers:
   credentials-exchange: []
   post-change-password: []

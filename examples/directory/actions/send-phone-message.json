@@ -1,0 +1,29 @@
+{
+  "name": "send-phone-message",
+  "code": "./actions/send-phone-message/code.js",
+  "status": "built",
+  "dependencies": [
+    {
+      "name": "axios",
+      "version": "1.6.0"
+    },
+    {
+      "name": "uuid",
+      "version": "9.0.0"
+    }
+  ],
+  "secrets": [],
+  "supported_triggers": [
+    {
+      "id": "send-phone-message",
+      "version": "v1"
+    }
+  ],
+  "deployed": true,
+  "modules": [
+    {
+      "module_name": "notification-helper",
+      "module_version_number": 1
+    }
+  ]
+}

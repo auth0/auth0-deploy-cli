@@ -463,5 +463,152 @@ describe('#actions handler', () => {
 
       expect(wasDeleteCalled).to.equal(false);
     });
+
+    it('should enrich actions with module IDs and version IDs', async () => {
+      const actionId = 'action-with-modules-id';
+      const moduleId = 'module-id-1';
+      const moduleVersionId = 'version-id-1';
+
+      const action = {
+        name: 'action-with-modules',
+        supported_triggers: [
+          {
+            id: 'post-login',
+            version: 'v1',
+          },
+        ],
+        modules: [
+          {
+            module_name: 'test-module',
+            module_version_number: 1,
+          },
+        ],
+      };
+
+      const auth0 = {
+        actions: {
+          get: () => Promise.resolve({ data: { ...action, id: actionId } }),
+          create: (data) => Promise.resolve({ data: { ...data, id: actionId } }),
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: () => {
+            if (!auth0.listCalled) {
+              auth0.listCalled = true;
+              return mockPagedData({ include_totals: true }, 'actions', []);
+            }
+            return mockPagedData({ include_totals: true }, 'actions', [
+              {
+                name: action.name,
+                supported_triggers: action.supported_triggers,
+                id: actionId,
+              },
+            ]);
+          },
+          createVersion: () =>
+            Promise.resolve({
+              data: {
+                code: 'action-code',
+                dependencies: [],
+                id: 'version-id',
+                runtime: 'node12',
+                secrets: [],
+              },
+            }),
+          modules: {
+            list: () =>
+              mockPagedData({ paginate: true }, 'modules', [
+                {
+                  id: moduleId,
+                  name: 'test-module',
+                  code: 'module.exports = {};',
+                },
+              ]),
+            versions: {
+              list: () =>
+                Promise.resolve(
+                  mockPagedData({ paginate: true }, 'versions', [
+                    {
+                      id: moduleVersionId,
+                      version_number: 1,
+                    },
+                  ])
+                ),
+            },
+          },
+        },
+        pool: {
+          addEachTask: (data) => {
+            const results = data.data.map(data.generator);
+            return { promise: () => Promise.all(results) };
+          },
+        },
+        listCalled: false,
+      };
+
+      const handler = new actions.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ actions: [action] }]);
+    });
+
+    it('should handle actions without modules', async () => {
+      const actionId = 'action-no-modules-id';
+      const action = {
+        name: 'action-no-modules',
+        supported_triggers: [
+          {
+            id: 'post-login',
+            version: 'v1',
+          },
+        ],
+      };
+
+      const auth0 = {
+        actions: {
+          get: () => Promise.resolve({ data: { ...action, id: actionId } }),
+          create: (data) => Promise.resolve({ data: { ...data, id: actionId } }),
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: () => {
+            if (!auth0.listCalled) {
+              auth0.listCalled = true;
+              return mockPagedData({ include_totals: true }, 'actions', []);
+            }
+            return mockPagedData({ include_totals: true }, 'actions', [
+              {
+                name: action.name,
+                supported_triggers: action.supported_triggers,
+                id: actionId,
+              },
+            ]);
+          },
+          createVersion: () =>
+            Promise.resolve({
+              data: {
+                code: 'action-code',
+                dependencies: [],
+                id: 'version-id',
+                runtime: 'node12',
+                secrets: [],
+              },
+            }),
+          modules: {
+            list: () => mockPagedData({ paginate: true }, 'modules', []),
+          },
+        },
+        pool: {
+          addEachTask: (data) => {
+            const results = data.data.map(data.generator);
+            return { promise: () => Promise.all(results) };
+          },
+        },
+        listCalled: false,
+      };
+
+      const handler = new actions.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ actions: [action] }]);
+    });
   });
 });

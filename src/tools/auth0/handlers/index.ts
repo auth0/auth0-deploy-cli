@@ -22,6 +22,7 @@ import * as phoneProviders from './phoneProvider';
 import * as phoneTemplates from './phoneTemplates';
 import * as prompts from './prompts';
 import * as actions from './actions';
+import * as actionModules from './actionModules';
 import * as triggers from './triggers';
 import * as organizations from './organizations';
 import * as attackProtection from './attackProtection';
@@ -67,6 +68,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   //@ts-ignore because prompts have not been universally implemented yet
   prompts,
   actions,
+  actionModules,
   triggers,
   organizations,
   attackProtection,
