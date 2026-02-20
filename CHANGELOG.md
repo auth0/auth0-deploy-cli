@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for managing `action-modules`.(EA) [#1302]
+- Add support for managing `modules` in `actions`.(EA) [#1302]
+
 ## [8.27.0] - 2026-02-13
 
 ### Added
