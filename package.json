@@ -1,6 +1,6 @@
 {
   "name": "auth0-deploy-cli",
-  "version": "8.27.0",
+  "version": "8.28.0",
   "description": "A command line tool for deploying updates to your Auth0 tenant",
   "main": "lib/index.js",
   "bin": {
@@ -47,11 +47,11 @@
     "yargs": "^15.4.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@types/fs-extra": "^9.0.13",
     "@types/lodash": "^4.17.23",
     "@types/mocha": "^10.0.10",
     "@types/nconf": "^0.10.7",
-    "@eslint/js": "^9.39.2",
     "@typescript-eslint/eslint-plugin": "^8.55.0",
     "@typescript-eslint/parser": "^8.55.0",
     "chai": "^4.5.0",

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.28.0] - 2026-02-20
+
+### Added
+
+- Add support for managing `action-modules`.(EA) [#1302]
+- Add support for managing `modules` in `actions`.(EA) [#1302]
+
 ## [8.27.0] - 2026-02-13
 
 ### Added
@@ -1652,7 +1659,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1294]: https://github.com/auth0/auth0-deploy-cli/issues/1294
 [#1297]: https://github.com/auth0/auth0-deploy-cli/issues/1297
 [#1298]: https://github.com/auth0/auth0-deploy-cli/issues/1298
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.27.0...HEAD
+[#1302]: https://github.com/auth0/auth0-deploy-cli/issues/1302
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.28.0...HEAD
+[8.28.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.27.0...v8.28.0
 [8.27.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.26.0...v8.27.0
 [8.26.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.25.0...v8.26.0
 [8.25.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.24.0...v8.25.0
