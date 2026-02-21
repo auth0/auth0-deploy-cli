@@ -194,33 +194,16 @@ export const schema = {
     },
     customText: {
       type: 'object',
-      properties: languages.reduce(
-        (acc, language) => ({
-          ...acc,
-          [language]: {
-            type: 'object',
-            properties: promptTypes.reduce(
-              (promptAcc, promptType) => ({
-                ...promptAcc,
-                [promptType]: {
-                  type: 'object',
-                  properties: screenTypes.reduce(
-                    (screenAcc, screenType) => ({
-                      ...screenAcc,
-                      [screenType]: {
-                        type: 'object',
-                      },
-                    }),
-                    {}
-                  ),
-                },
-              }),
-              {}
-            ),
-          },
-        }),
-        {}
-      ),
+      propertyNames: { enum: [...languages] },
+      additionalProperties: {
+        type: 'object',
+        propertyNames: { enum: [...promptTypes] },
+        additionalProperties: {
+          type: 'object',
+          propertyNames: { enum: [...screenTypes] },
+          additionalProperties: { type: 'object' },
+        },
+      },
     },
     partials: {
       type: 'object',
@@ -264,24 +247,6 @@ export const schema = {
     },
     screenRenderers: {
       type: 'array',
-      properties: promptTypes.reduce(
-        (promptAcc, promptType) => ({
-          ...promptAcc,
-          [promptType]: {
-            type: 'array',
-            properties: screenTypes.reduce(
-              (screenAcc, screenType) => ({
-                ...screenAcc,
-                [screenType]: {
-                  type: 'string',
-                },
-              }),
-              {}
-            ),
-          },
-        }),
-        {}
-      ),
     },
   },
 };

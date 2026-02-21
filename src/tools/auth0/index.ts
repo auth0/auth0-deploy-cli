@@ -1,4 +1,5 @@
-import Ajv from 'ajv/lib/ajv';
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
 
 import pagedClient from './client';
 import schema from './schema';
@@ -95,7 +96,8 @@ export default class Auth0 {
   }
 
   async validate(): Promise<void> {
-    const ajv = new Ajv({ useDefaults: true, nullable: true });
+    const ajv = new Ajv({ useDefaults: true, strict: false, unicodeRegExp: false });
+    addFormats(ajv);
     const nonNullAssets = Object.keys(this.assets)
       .filter((k) => this.assets[k] != null)
       .reduce((a, k) => ({ ...a, [k]: this.assets[k] }), {});

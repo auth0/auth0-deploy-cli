@@ -10,8 +10,7 @@ export const schema = {
     properties: {
       custom_domain_id: { type: 'string' },
       custom_client_ip_header: {
-        type: 'string',
-        nullable: true,
+        type: ['string', 'null'],
         enum: ['true-client-ip', 'cf-connecting-ip', 'x-forwarded-for', null],
       },
       domain: { type: 'string' },
