@@ -246,6 +246,36 @@ Contents of `database.json`
 }
 ```
 
+## Resource Servers
+
+Resource servers (APIs) configuration supports the Management API payload schema. The following fields are supported:
+
+**YAML Example**
+
+```yaml
+resourceServers:
+  - name: My API
+    identifier: https://api.example.com
+    proof_of_possession:
+      mechanism: dpop
+      required: true
+      required_for: public_clients
+```
+
+**Directory Example**
+
+```json
+{
+  "name": "My API",
+  "identifier": "https://api.example.com",
+  "proof_of_possession": {
+    "mechanism": "mtls",
+    "required": true,
+    "required_for": "all_clients"
+  }
+}
+```
+
 ## Universal Login
 
 ### Pages

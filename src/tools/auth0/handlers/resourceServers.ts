@@ -41,6 +41,10 @@ export const schema = {
             enum: Object.values(Management.ResourceServerProofOfPossessionMechanismEnum),
           },
           required: { type: 'boolean' },
+          required_for: {
+            type: 'string',
+            enum: Object.values(Management.ResourceServerProofOfPossessionRequiredForEnum),
+          },
         },
         required: ['mechanism', 'required'],
       },
