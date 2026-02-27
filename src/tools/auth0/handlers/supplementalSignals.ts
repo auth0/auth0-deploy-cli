@@ -1,6 +1,7 @@
-import { Management } from 'auth0';
+import { Management, ManagementError } from 'auth0';
 import DefaultHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
+import log from '../../../logger';
 
 export const schema = {
   type: 'object',
@@ -26,9 +27,19 @@ export default class SupplementalSignalsHandler extends DefaultHandler {
   }
 
   async getType(): Promise<Asset> {
-    const supplementalSignals = await this.client.supplementalSignals.get();
-    this.existing = supplementalSignals;
-    return supplementalSignals;
+    try {
+      const supplementalSignals = await this.client.supplementalSignals.get();
+      this.existing = supplementalSignals;
+      return supplementalSignals;
+    } catch (err) {
+      if (err instanceof ManagementError && err.statusCode === 403) {
+        log.debug(
+          'Supplemental Signals feature is not available for this tenant. Please verify `scope` or contact Auth0 support to enable this feature.'
+        );
+        return {};
+      }
+      throw err;
+    }
   }
 
   async validate(assets: Assets): Promise<void> {

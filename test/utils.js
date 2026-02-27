@@ -243,6 +243,9 @@ export function mockMgmtClient() {
         },
       },
     },
+    supplementalSignals: {
+      get: () => Promise.resolve({ akamai_enabled: false }),
+    },
   };
 }
 
