@@ -1129,3 +1129,29 @@ exports.onExecuteSendPhoneMessage = async (event) => {
   );
 };
 ```
+
+## Supplemental Signals
+
+Supplemental signals configuration allows you to enable third-party integrations for enhanced security and risk assessment.
+
+- `akamai_enabled` (boolean): Enable processing of incoming Akamai headers for supplemental security signals
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+supplementalSignals:
+  akamai_enabled: true
+```
+
+### Directory Example
+
+Folder: `./supplemental-signals.json`
+
+```json
+{
+  "akamai_enabled": true
+}
+```
+
+For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2#!/Supplemental_Signals).

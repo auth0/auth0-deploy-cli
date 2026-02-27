@@ -137,6 +137,7 @@ export type Assets = Partial<{
   rulesConfigs: Asset[] | null;
   tenant: Tenant | null;
   triggers: Asset[] | null;
+  supplementalSignals: Management.GetSupplementalSignalsResponseContent | null;
   // non-resource types
   exclude?: {
     [key: string]: string[];
@@ -204,7 +205,8 @@ export type AssetTypes =
   | 'networkACLs'
   | 'userAttributeProfiles'
   | 'connectionProfiles'
-  | 'tokenExchangeProfiles';
+  | 'tokenExchangeProfiles'
+  | 'supplementalSignals';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 
