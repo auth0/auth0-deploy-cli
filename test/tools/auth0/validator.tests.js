@@ -738,6 +738,53 @@ describe('#schema validation tests', () => {
         done();
       });
     });
+
+    it('should pass validation with valid proof_of_possession including required_for', (done) => {
+      const data = [
+        {
+          name: 'name',
+          identifier: 'identifier',
+          proof_of_possession: {
+            mechanism: 'dpop',
+            required: true,
+            required_for: 'public_clients',
+          },
+        },
+      ];
+
+      checkPassed({ resourceServers: data }, done);
+    });
+
+    it('should fail validation if proof_of_possession has invalid required_for', (done) => {
+      const data = [
+        {
+          name: 'name',
+          identifier: 'identifier',
+          proof_of_possession: {
+            mechanism: 'dpop',
+            required: true,
+            required_for: 'invalid_value',
+          },
+        },
+      ];
+
+      const auth0 = new Auth0(
+        {
+          ...client,
+          resourceServers: {
+            getAll: async (params) => mockPagedData(params, 'resource_servers', []),
+          },
+        },
+        { resourceServers: data },
+        mockConfigFn
+      );
+
+      auth0.validate().then(failedCb(done), (err) => {
+        expect(err.message).to.contain('enum');
+        expect(err.message).to.contain('required_for');
+        done();
+      });
+    });
   });
 
   describe('#tenant validate', () => {

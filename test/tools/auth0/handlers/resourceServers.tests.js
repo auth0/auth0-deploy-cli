@@ -177,6 +177,88 @@ describe('#resourceServers handler', () => {
       ]);
     });
 
+    it('should create resource server with proof_of_possession and required_for(public_clients)', async () => {
+      const auth0 = {
+        resourceServers: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('dpopAPIWithRequiredFor');
+            expect(data.proof_of_possession).to.deep.equal({
+              mechanism: 'dpop',
+              required: true,
+              required_for: 'public_clients',
+            });
+            return Promise.resolve(data);
+          },
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => mockPagedData(params, 'resource_servers', []),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          resourceServers: [
+            {
+              name: 'dpopAPIWithRequiredFor',
+              identifier: 'https://dpop-api-required-for.example.com',
+              proof_of_possession: {
+                mechanism: 'dpop',
+                required: true,
+                required_for: 'public_clients',
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should create resource server with proof_of_possession and required_for(all_clients)', async () => {
+      const auth0 = {
+        resourceServers: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('mtlsAPIWithRequiredFor');
+            expect(data.proof_of_possession).to.deep.equal({
+              mechanism: 'mtls',
+              required: true,
+              required_for: 'all_clients',
+            });
+            return Promise.resolve(data);
+          },
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => mockPagedData(params, 'resource_servers', []),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          resourceServers: [
+            {
+              name: 'mtlsAPIWithRequiredFor',
+              identifier: 'https://mtls-api-required-for.example.com',
+              proof_of_possession: {
+                mechanism: 'mtls',
+                required: true,
+                required_for: 'all_clients',
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
     it('should create resource server with subject_type_authorization', async () => {
       const auth0 = {
         resourceServers: {
@@ -348,6 +430,50 @@ describe('#resourceServers handler', () => {
               proof_of_possession: {
                 mechanism: 'dpop',
                 required: false,
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should update resource server with proof_of_possession and required_for', async () => {
+      const auth0 = {
+        resourceServers: {
+          create: () => Promise.resolve([]),
+          update: function (id, data) {
+            expect(id).to.be.a('string');
+            expect(data).to.be.an('object');
+            expect(id).to.equal('rs1');
+            expect(data.proof_of_possession).to.deep.equal({
+              mechanism: 'dpop',
+              required: true,
+              required_for: 'public_clients',
+            });
+            return Promise.resolve(data);
+          },
+          delete: () => Promise.resolve([]),
+          list: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              { id: 'rs1', identifier: 'some-api', name: 'someAPI' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          resourceServers: [
+            {
+              name: 'someAPI',
+              identifier: 'some-api',
+              proof_of_possession: {
+                mechanism: 'dpop',
+                required: true,
+                required_for: 'public_clients',
               },
             },
           ],
