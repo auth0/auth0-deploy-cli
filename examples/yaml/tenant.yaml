@@ -525,3 +525,5 @@ riskAssessment:
   # new_device:
   #   remember_for: 30
 
+supplementalSignals:
+  akamai_enabled: true
