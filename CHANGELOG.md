@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add DPoP support for proof-of-possession mechanism in `resourceServers` (GA) [#1311]
+- Add `supplemental signals` configuration for Akamai integration.(EA) [#1310]
+
 ## [8.28.0] - 2026-02-20
 
 ### Added
