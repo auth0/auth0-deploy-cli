@@ -20,6 +20,7 @@ import { UserAttributeProfile } from './tools/auth0/handlers/userAttributeProfil
 import { AttackProtection } from './tools/auth0/handlers/attackProtection';
 import { TokenExchangeProfile } from './tools/auth0/handlers/tokenExchangeProfiles';
 import { RiskAssessment } from './tools/auth0/handlers/riskAssessment';
+import { SupplementalSignals } from './tools/auth0/handlers/supplementalSignals';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -137,7 +138,7 @@ export type Assets = Partial<{
   rulesConfigs: Asset[] | null;
   tenant: Tenant | null;
   triggers: Asset[] | null;
-  supplementalSignals: Management.GetSupplementalSignalsResponseContent | null;
+  supplementalSignals: SupplementalSignals | null;
   // non-resource types
   exclude?: {
     [key: string]: string[];

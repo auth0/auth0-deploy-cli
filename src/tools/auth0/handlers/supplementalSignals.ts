@@ -11,13 +11,12 @@ export const schema = {
       description: 'Enable Akamai supplemental signals integration',
     },
   },
-  additionalProperties: false,
 };
 
 export type SupplementalSignals = Management.GetSupplementalSignalsResponseContent;
 
 export default class SupplementalSignalsHandler extends DefaultHandler {
-  existing: SupplementalSignals;
+  existing: SupplementalSignals | null;
 
   constructor(options: DefaultHandler) {
     super({
@@ -26,7 +25,7 @@ export default class SupplementalSignalsHandler extends DefaultHandler {
     });
   }
 
-  async getType(): Promise<Asset> {
+  async getType(): Promise<Asset | null> {
     try {
       const supplementalSignals = await this.client.supplementalSignals.get();
       this.existing = supplementalSignals;
@@ -34,18 +33,12 @@ export default class SupplementalSignalsHandler extends DefaultHandler {
     } catch (err) {
       if (err instanceof ManagementError && err.statusCode === 403) {
         log.debug(
-          'Supplemental Signals feature is not available for this tenant. Please verify `scope` or contact Auth0 support to enable this feature.'
+          'Supplemental Signals unavailable: insufficient scope or missing attack_protection entitlement.'
         );
-        return {};
+        return null;
       }
       throw err;
     }
-  }
-
-  async validate(assets: Assets): Promise<void> {
-    const { supplementalSignals } = assets;
-
-    if (!supplementalSignals) return;
   }
 
   @order('100')
@@ -54,12 +47,22 @@ export default class SupplementalSignalsHandler extends DefaultHandler {
 
     if (!supplementalSignals) return;
 
-    if (supplementalSignals && Object.keys(supplementalSignals).length > 0) {
-      await this.client.supplementalSignals.patch(
-        supplementalSignals as Management.UpdateSupplementalSignalsRequestContent
-      );
-      this.updated += 1;
-      this.didUpdate(supplementalSignals);
+    if (Object.keys(supplementalSignals).length > 0) {
+      try {
+        await this.client.supplementalSignals.patch(
+          supplementalSignals as Management.UpdateSupplementalSignalsRequestContent
+        );
+        this.updated += 1;
+        this.didUpdate(supplementalSignals);
+      } catch (err) {
+        if (err instanceof ManagementError && err.statusCode === 403) {
+          log.debug(
+            'Supplemental Signals unavailable: insufficient scope or missing attack_protection entitlement.'
+          );
+          return;
+        }
+        throw err;
+      }
     }
   }
 }

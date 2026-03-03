@@ -1,8 +1,9 @@
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { ParsedAsset } from '../../../types';
+import { SupplementalSignals } from '../../../tools/auth0/handlers/supplementalSignals';
 
-type ParsedSupplementalSignals = ParsedAsset<'supplementalSignals', { akamai_enabled?: boolean }>;
+type ParsedSupplementalSignals = ParsedAsset<'supplementalSignals', SupplementalSignals>;
 
 async function parseAndDump(context: YAMLContext): Promise<ParsedSupplementalSignals> {
   const { supplementalSignals } = context.assets;

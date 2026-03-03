@@ -3,8 +3,9 @@ import { existsMustBeDir, isFile, dumpJSON, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { ParsedAsset } from '../../../types';
+import { SupplementalSignals } from '../../../tools/auth0/handlers/supplementalSignals';
 
-type ParsedSupplementalSignals = ParsedAsset<'supplementalSignals', { akamai_enabled?: boolean }>;
+type ParsedSupplementalSignals = ParsedAsset<'supplementalSignals', SupplementalSignals>;
 
 function parse(context: DirectoryContext): ParsedSupplementalSignals {
   const baseFolder = path.join(context.filePath);
