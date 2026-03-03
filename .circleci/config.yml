@@ -34,11 +34,11 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v<< parameters.v >>-npm-deps-{{ checksum "package-lock.json" }}
+            - v<< parameters.v >>-npm-deps-{{ checksum "package.json" }}
             - v<< parameters.v >>-npm-deps-
       - run: npm i
       - save_cache:
-          key: v<< parameters.v >>-npm-deps-{{ checksum "package-lock.json" }}
+          key: v<< parameters.v >>-npm-deps-{{ checksum "package.json" }}
           paths:
             - node_modules
       - run: npm run lint
