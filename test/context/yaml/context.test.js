@@ -337,6 +337,9 @@ describe('#YAML context validation', () => {
       flows: [],
       forms: [],
       selfServiceProfiles: [],
+      supplementalSignals: {
+        akamai_enabled: false,
+      },
       tokenExchangeProfiles: [],
       userAttributeProfiles: [],
       phoneTemplates: [],
@@ -477,6 +480,9 @@ describe('#YAML context validation', () => {
       flows: [],
       forms: [],
       selfServiceProfiles: [],
+      supplementalSignals: {
+        akamai_enabled: false,
+      },
       tokenExchangeProfiles: [],
       userAttributeProfiles: [],
       phoneTemplates: [],
@@ -618,6 +624,9 @@ describe('#YAML context validation', () => {
       flows: [],
       forms: [],
       selfServiceProfiles: [],
+      supplementalSignals: {
+        akamai_enabled: false,
+      },
       tokenExchangeProfiles: [],
       userAttributeProfiles: [],
       phoneTemplates: [],

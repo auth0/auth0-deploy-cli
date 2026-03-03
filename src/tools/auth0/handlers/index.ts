@@ -38,6 +38,7 @@ import * as networkACLs from './networkACLs';
 import * as userAttributeProfiles from './userAttributeProfiles';
 import * as connectionProfiles from './connectionProfiles';
 import * as tokenExchangeProfiles from './tokenExchangeProfiles';
+import * as supplementalSignals from './supplementalSignals';
 
 import { AssetTypes } from '../../../types';
 import APIHandler from './default';
@@ -84,6 +85,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   userAttributeProfiles,
   connectionProfiles,
   tokenExchangeProfiles,
+  supplementalSignals,
 };
 
 export default auth0ApiHandlers as {

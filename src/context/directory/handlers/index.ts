@@ -37,6 +37,7 @@ import networkACLs from './networkACLs';
 import userAttributeProfiles from './userAttributeProfiles';
 import connectionProfiles from './connectionProfiles';
 import tokenExchangeProfiles from './tokenExchangeProfiles';
+import supplementalSignals from './supplementalSignals';
 
 import DirectoryContext from '..';
 import { AssetTypes, Asset } from '../../../types';
@@ -90,6 +91,7 @@ const directoryHandlers: {
   userAttributeProfiles,
   connectionProfiles,
   tokenExchangeProfiles,
+  supplementalSignals,
 };
 
 export default directoryHandlers;

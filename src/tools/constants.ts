@@ -221,6 +221,7 @@ const constants = {
   USER_ATTRIBUTE_PROFILES_DIRECTORY: 'user-attribute-profiles',
   CONNECTION_PROFILES_DIRECTORY: 'connection-profiles',
   TOKEN_EXCHANGE_PROFILES_DIRECTORY: 'token-exchange-profiles',
+  SUPPLEMENTAL_SIGNALS_DIRECTORY: 'supplemental-signals',
 };
 
 export default constants;
