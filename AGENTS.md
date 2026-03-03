@@ -15,23 +15,23 @@ The Auth0 Deploy CLI is a TypeScript-based tool for managing Auth0 tenant config
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Build TypeScript to JavaScript
-npm run build
+pnpm run build
 
 # Build in watch mode during development
-npm run dev
+pnpm run dev
 
 # Run unit tests
-npm test
+pnpm test
 
 # Run E2E tests (requires Auth0 tenant)
-npm run test:e2e:node-module
-npm run test:e2e:cli
+pnpm run test:e2e:node-module
+pnpm run test:e2e:cli
 
 # Run linter
-npm run lint
+pnpm run lint
 ```
 
 ## Development Workflow
@@ -42,24 +42,24 @@ Common operations for working with the CLI:
 
 ```bash
 # Export tenant configuration to local/
-npm run build && node lib/index.js export -c config-dev.json -f directory -o ./local/
+pnpm run build && node lib/index.js export -c config-dev.json -f directory -o ./local/
 
 # Import configuration
-npm run build && node lib/index.js import -c config-dev.json -i ./local/tenant.json
+pnpm run build && node lib/index.js import -c config-dev.json -i ./local/tenant.json
 
 # Export as YAML
-npm run build && node lib/index.js export -c config-dev.json -f yaml -o ./local-export/
+pnpm run build && node lib/index.js export -c config-dev.json -f yaml -o ./local-export/
 
 # Import from YAML
-npm run build && node lib/index.js import -c config-dev.json -i ./local-export/tenant.yaml
+pnpm run build && node lib/index.js import -c config-dev.json -i ./local-export/tenant.yaml
 ```
 
 ### Build Process
 
 - Source TypeScript files live in `src/`
 - Compiled JavaScript output goes to `lib/` (published to npm)
-- Always run `npm run build` before testing CLI changes
-- Use `npm run dev` for watch mode during active development
+- Always run `pnpm run build` before testing CLI changes
+- Use `pnpm run dev` for watch mode during active development
 
 ### File Structure
 
@@ -121,13 +121,13 @@ class ResourceHandler {
 
 ```bash
 # Unit tests only (fast)
-npm test
+pnpm test
 
 # E2E tests as node module
-npm run test:e2e:node-module
+pnpm run test:e2e:node-module
 
 # E2E tests as CLI (requires real tenant credentials)
-npm run test:e2e:cli
+pnpm run test:e2e:cli
 ```
 
 ### Test Structure
@@ -172,10 +172,10 @@ const mockConfig = (key) => {
 
 ```bash
 # Run specific test file
-npm test -- test/tools/auth0/handlers/clients.test.js
+pnpm test -- test/tools/auth0/handlers/clients.test.js
 
 # Run tests matching pattern
-npm test -- --grep "should validate clients"
+pnpm test -- --grep "should validate clients"
 ```
 
 ## Common Development Tasks
@@ -210,9 +210,9 @@ npm test -- --grep "should validate clients"
 
 ```bash
 # Always run before commit
-npm run build
-npm test
-npm run lint
+pnpm run build
+pnpm test
+pnpm run lint
 ```
 
 ### PR Checklist
@@ -263,7 +263,7 @@ Follow conventional commits style:
 
 ```bash
 export AUTH0_DEBUG=true
-npm run build && node lib/index.js import -c config.json
+pnpm run build && node lib/index.js import -c config.json
 ```
 
 ### Common Issues
@@ -283,10 +283,10 @@ cat lib/index.js
 node lib/index.js export -c config.json --output_folder ./test-output
 
 # Run with verbose errors
-NODE_ENV=development npm test
+NODE_ENV=development pnpm test
 
 # Check Auth0 API pagination
-AUTH0_DEBUG=true npm run test:e2e:node-module
+AUTH0_DEBUG=true pnpm run test:e2e:node-module
 ```
 
 ## Architecture Notes

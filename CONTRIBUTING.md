@@ -48,23 +48,23 @@ git checkout -b feature/your-feature-name
 
 ```bash
 # Development with watch mode
-npm run dev
+pnpm run dev
 
 # Run tests
-npm test
+pnpm test
 
 # Run single test file
 npx ts-mocha test/path/to/specific.test.ts
 
 # Lint and format
-npm run lint:fix
-npm run format
+pnpm run lint:fix
+pnpm run format
 
 # Check TypeScript compilation
 npx tsc --noEmit
 
 # Run CLI locally for testing
-npm run build && node lib/index.js --help
+pnpm run build && node lib/index.js --help
 ```
 
 ### Testing Requirements
@@ -73,7 +73,7 @@ Before submitting a PR, ensure all tests pass:
 
 ```bash
 # Unit tests (required)
-npm test
+pnpm test
 ```
 
 ### Testing Your Changes Locally
@@ -82,7 +82,7 @@ To test your changes with the actual CLI:
 
 ```bash
 # Build the project
-npm run build
+pnpm run build
 
 # Run CLI commands locally
 node lib/index.js --help

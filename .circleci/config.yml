@@ -3,6 +3,18 @@ version: 2.1
 orbs:
   codecov: codecov/codecov@3
 
+commands:
+  install_pnpm:
+    description: Install pnpm via corepack and configure store directory
+    steps:
+      - run:
+          name: Install pnpm package manager
+          command: |
+            npm install --global corepack@latest
+            corepack enable
+            corepack prepare pnpm@latest-10 --activate
+            pnpm config set store-dir .pnpm-store
+
 jobs:
   e2e_test_as_node_module:
     docker:
@@ -10,8 +22,20 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - run: npm i
-      - run: AUTH0_HTTP_RECORDINGS="lockdown" npm run test:e2e:node-module
+      - install_pnpm
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - run:
+          name: Install Dependencies
+          command: pnpm install
+      - save_cache:
+          name: Save pnpm Package Cache
+          key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+          paths:
+            - .pnpm-store
+      - run: AUTH0_HTTP_RECORDINGS="lockdown" pnpm run test:e2e:node-module
 
   e2e_test_as_cli:
     docker:
@@ -19,8 +43,20 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - run: npm i
-      - run: npm run test:e2e:cli
+      - install_pnpm
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - run:
+          name: Install Dependencies
+          command: pnpm install
+      - save_cache:
+          name: Save pnpm Package Cache
+          key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+          paths:
+            - .pnpm-store
+      - run: pnpm run test:e2e:cli
 
   unit_test:
     parameters:
@@ -32,17 +68,22 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
+      - install_pnpm
       - restore_cache:
+          name: Restore pnpm Package Cache
           keys:
-            - v<< parameters.v >>-npm-deps-{{ checksum "package.json" }}
-            - v<< parameters.v >>-npm-deps-
-      - run: npm i
+            - v<< parameters.v >>-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+            - v<< parameters.v >>-pnpm-packages-
+      - run:
+          name: Install Dependencies
+          command: pnpm install
       - save_cache:
-          key: v<< parameters.v >>-npm-deps-{{ checksum "package.json" }}
+          name: Save pnpm Package Cache
+          key: v<< parameters.v >>-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
           paths:
-            - node_modules
-      - run: npm run lint
-      - run: npm run test:coverage
+            - .pnpm-store
+      - run: pnpm run lint
+      - run: pnpm run test:coverage
       - persist_to_workspace:
           root: ~/repo
           paths: .
@@ -59,12 +100,13 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/repo
+      - install_pnpm
       - run:
           name: Authenticate with registry
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
       - run:
           name: Publish package
-          command: npm publish
+          command: pnpm publish --no-git-checks
 
   deploy_beta:
     parameters:
@@ -77,12 +119,13 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/repo
+      - install_pnpm
       - run:
           name: Authenticate with registry
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
       - run:
           name: Publish beta package
-          command: npm publish --tag beta
+          command: pnpm publish --tag beta --no-git-checks
 
   does_typescript_compile:
     docker:
@@ -90,7 +133,19 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - run: npm i
+      - install_pnpm
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - run:
+          name: Install Dependencies
+          command: pnpm install
+      - save_cache:
+          name: Save pnpm Package Cache
+          key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+          paths:
+            - .pnpm-store
       - run: npx tsc --noEmit
 
   does_lint_pass:
@@ -99,8 +154,20 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - run: npm i
-      - run: npm run lint
+      - install_pnpm
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - run:
+          name: Install Dependencies
+          command: pnpm install
+      - save_cache:
+          name: Save pnpm Package Cache
+          key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+          paths:
+            - .pnpm-store
+      - run: pnpm run lint
 
 workflows:
   version: 2
