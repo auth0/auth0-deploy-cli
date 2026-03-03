@@ -4,9 +4,9 @@ set -e
 WORK_DIR="./local/cli"
 CONFIG_FILE="./config-cli-e2e.json"
 
-npm ci #Install all dependencies to allow for building
+npm i #Install all dependencies to allow for building
 npm run build
-npm ci --omit=dev  #Remove dev dependencies
+npm i --omit=dev  #Remove dev dependencies
 
 TARBALL_PATH=$(npm pack)
 sudo npm install -g $TARBALL_PATH
