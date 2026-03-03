@@ -10,7 +10,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - run: npm ci
+      - run: npm i
       - run: AUTH0_HTTP_RECORDINGS="lockdown" npm run test:e2e:node-module
 
   e2e_test_as_cli:
@@ -19,7 +19,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - run: npm ci
+      - run: npm i
       - run: npm run test:e2e:cli
 
   unit_test:
@@ -36,7 +36,7 @@ jobs:
           keys:
             - v<< parameters.v >>-npm-deps-{{ checksum "package-lock.json" }}
             - v<< parameters.v >>-npm-deps-
-      - run: npm ci
+      - run: npm i
       - save_cache:
           key: v<< parameters.v >>-npm-deps-{{ checksum "package-lock.json" }}
           paths:
@@ -90,7 +90,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - run: npm ci
+      - run: npm i
       - run: npx tsc --noEmit
 
   does_lint_pass:
@@ -99,7 +99,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - run: npm ci
+      - run: npm i
       - run: npm run lint
 
 workflows:
