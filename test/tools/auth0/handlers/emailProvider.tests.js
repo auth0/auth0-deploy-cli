@@ -74,7 +74,7 @@ describe('#emailProvider handler', () => {
 
       const handler = new emailProvider.default({
         client: auth0,
-        config: () => AUTH0_ALLOW_DELETE,
+        config: (key) => (key === 'AUTH0_ALLOW_DELETE' ? AUTH0_ALLOW_DELETE : false),
       });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 

@@ -5,15 +5,7 @@ import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedTenant = ParsedAsset<
-  'tenant',
-  {
-    session_lifetime: number;
-    idle_session_lifetime: number;
-  } & {
-    [key: string]: Asset;
-  }
->;
+type ParsedTenant = ParsedAsset<'tenant', Asset>;
 
 function parse(context: DirectoryContext): ParsedTenant {
   const baseFolder = path.join(context.filePath);
@@ -24,20 +16,8 @@ function parse(context: DirectoryContext): ParsedTenant {
   if (!isFile(tenantFile)) {
     return { tenant: null };
   }
-  /* eslint-disable camelcase */
-  const {
-    session_lifetime,
-    idle_session_lifetime,
-    idle_ephemeral_session_lifetime,
-    ephemeral_session_lifetime,
-    ...tenant
-  }: {
-    session_lifetime?: number;
-    idle_session_lifetime?: number;
-    idle_ephemeral_session_lifetime?: number;
-    ephemeral_session_lifetime?: number;
-    [key: string]: any;
-  } = loadJSON(tenantFile, {
+
+  const tenant = loadJSON(tenantFile, {
     mappings: context.mappings,
     disableKeywordReplacement: context.disableKeywordReplacement,
   });
@@ -45,18 +25,23 @@ function parse(context: DirectoryContext): ParsedTenant {
   clearTenantFlags(tenant);
 
   const sessionDurations = sessionDurationsToMinutes({
-    session_lifetime,
-    idle_session_lifetime,
-    idle_ephemeral_session_lifetime,
-    ephemeral_session_lifetime,
+    session_lifetime: tenant.session_lifetime,
+    idle_session_lifetime: tenant.idle_session_lifetime,
+    ephemeral_session_lifetime: tenant.ephemeral_session_lifetime,
+    idle_ephemeral_session_lifetime: tenant.idle_ephemeral_session_lifetime,
   });
 
+  if (Object.keys(sessionDurations).length > 0) {
+    delete tenant.session_lifetime;
+    delete tenant.idle_session_lifetime;
+    delete tenant.ephemeral_session_lifetime;
+    delete tenant.idle_ephemeral_session_lifetime;
+    Object.assign(tenant, sessionDurations);
+  }
+
   return {
-    //@ts-ignore
-    tenant: {
-      ...tenant,
-      ...sessionDurations,
-    },
+    // @ts-ignore
+    tenant,
   };
 }
 
@@ -69,7 +54,6 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   const tenantFile = path.join(context.filePath, 'tenant.json');
   dumpJSON(tenantFile, tenant);
-  return;
 }
 
 const tenantHandler: DirectoryHandler<ParsedTenant> = {

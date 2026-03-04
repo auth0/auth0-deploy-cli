@@ -1,10 +1,13 @@
 import { Management } from 'auth0';
+import { isEmpty } from 'lodash';
+import nconf from 'nconf';
 import ValidationError from '../../validationError';
 import DefaultHandler, { order } from './default';
 import { supportedPages, pageNameMap } from './pages';
-import { convertJsonToString } from '../../utils';
+import { convertJsonToString, isDryRun } from '../../utils';
 import { Asset, Assets } from '../../../types';
 import log from '../../../logger';
+import sessionDurationsToMinutes from '../../../sessionDurationsToMinutes';
 
 const tokenQuotaConfigurationSchema = {
   type: 'object',
@@ -121,14 +124,17 @@ export const removeUnallowedTenantFlags = (
   );
 
   if (removedFlags.length > 0) {
-    log.warn(
-      `The following tenant flag${
-        removedFlags.length > 1 ? 's have not been' : ' has not been'
-      } updated because deemed incompatible with the target tenant: ${removedFlags.join(', ')}
+    const logMsg = `The following tenant flag${
+      removedFlags.length > 1 ? 's have not been' : ' has not been'
+    } updated because deemed incompatible with the target tenant: ${removedFlags.join(', ')}
       ${
         removedFlags.length > 1 ? 'These flags' : 'This flag'
-      } can likely be removed from the tenant definition file. If you believe this removal is an error, please report via a Github issue.`
-    );
+      } can likely be removed from the tenant definition file. If you believe this removal is an error, please report via a Github issue.`;
+    if (nconf.get('AUTH0_DRY_RUN')) {
+      log.debug(logMsg);
+    } else {
+      log.warn(logMsg);
+    }
   }
 
   return filteredFlags;
@@ -182,6 +188,14 @@ export default class TenantHandler extends DefaultHandler {
     // Do nothing if not set
     if (!tenant) return;
 
+    if (isDryRun(this.config)) {
+      const { update } = await this.calcChanges(assets);
+
+      if (update.length === 0) {
+        return;
+      }
+    }
+
     const updatedTenant: Management.UpdateTenantSettingsRequestContent = {
       ...tenant,
       flags: tenant.flags
@@ -196,9 +210,27 @@ export default class TenantHandler extends DefaultHandler {
     }
 
     if (updatedTenant && Object.keys(updatedTenant).length > 0) {
-      await this.client.tenants.settings.update(updatedTenant);
+      const sessionDurations = sessionDurationsToMinutes({
+        session_lifetime: updatedTenant?.session_lifetime,
+        idle_session_lifetime: updatedTenant?.idle_session_lifetime,
+        ephemeral_session_lifetime: updatedTenant?.ephemeral_session_lifetime,
+        idle_ephemeral_session_lifetime: updatedTenant?.idle_ephemeral_session_lifetime,
+      });
+
+      let updateTenantPayload = updatedTenant;
+      if (!isEmpty(sessionDurations)) {
+        updateTenantPayload = { ...updateTenantPayload, ...sessionDurations };
+
+        // context: https://github.com/auth0/auth0-deploy-cli/pull/471
+        delete updateTenantPayload.session_lifetime;
+        delete updateTenantPayload.idle_session_lifetime;
+        delete updateTenantPayload.ephemeral_session_lifetime;
+        delete updateTenantPayload.idle_ephemeral_session_lifetime;
+      }
+
+      await this.client.tenants.settings.update(updateTenantPayload);
       this.updated += 1;
-      this.didUpdate(updatedTenant);
+      this.didUpdate(updateTenantPayload);
     }
   }
 }

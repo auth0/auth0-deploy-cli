@@ -1,5 +1,7 @@
 import { isEmpty } from 'lodash';
+import { isDryRun } from '../../utils';
 import { Management } from 'auth0';
+import log from '../../../logger';
 import DefaultHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
 
@@ -13,6 +15,7 @@ export default class EmailProviderHandler extends DefaultHandler {
     super({
       ...options,
       type: 'emailProvider',
+      ignoreDryRunFields: ['smtp.credentials.smtp_pass', 'mandrill.credentials.api_key'],
     });
   }
 
@@ -38,6 +41,14 @@ export default class EmailProviderHandler extends DefaultHandler {
     const { emailProvider } = assets;
 
     if (!emailProvider) return;
+
+    if (isDryRun(this.config)) {
+      const { del, update, create } = await this.calcChanges(assets);
+
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        return;
+      }
+    }
 
     const existing = await this.getType();
 

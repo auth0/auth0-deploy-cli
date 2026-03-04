@@ -3,9 +3,9 @@ import ValidationError from '../../validationError';
 
 import constants from '../../constants';
 import DefaultHandler from './default';
-import { calculateChanges } from '../../calculateChanges';
 import { Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
+import log from '../../../logger';
 
 export const excludeSchema = {
   type: 'array',
@@ -151,35 +151,6 @@ export default class ResourceServersHandler extends DefaultHandler {
     return this.existing;
   }
 
-  async calcChanges(assets: Assets): Promise<CalculatedChanges> {
-    let { resourceServers } = assets;
-
-    // Do nothing if not set
-    if (!resourceServers)
-      return {
-        del: [],
-        create: [],
-        conflicts: [],
-        update: [],
-      };
-
-    const excluded = (assets.exclude && assets.exclude.resourceServers) || [];
-
-    let existing = await this.getType();
-
-    // Filter excluded
-    resourceServers = resourceServers.filter((r) => r.name && !excluded.includes(r.name));
-    existing = existing.filter((r) => r.name && !excluded.includes(r.name));
-
-    return calculateChanges({
-      handler: this,
-      assets: resourceServers,
-      existing,
-      identifiers: this.identifiers,
-      allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
-    });
-  }
-
   async validate(assets: Assets): Promise<void> {
     const { resourceServers } = assets;
 
@@ -204,7 +175,18 @@ export default class ResourceServersHandler extends DefaultHandler {
     // Do nothing if not set
     if (!resourceServers) return;
 
-    const changes = await this.calcChanges(assets);
+    const excluded = (assets.exclude && assets.exclude.resourceServers) || [];
+
+    const filterResourceServer = (items) => items.filter((r) => !excluded.includes(r.name));
+
+    const { del, update, create, conflicts } = await this.calcChanges(assets);
+
+    const changes = {
+      del: filterResourceServer(del),
+      update: filterResourceServer(update),
+      create: filterResourceServer(create),
+      conflicts: filterResourceServer(conflicts),
+    };
 
     await super.processChanges(assets, {
       ...changes,
