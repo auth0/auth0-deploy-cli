@@ -10,7 +10,8 @@ import {
   detectInsufficientScopeError,
 } from '../../utils';
 import log from '../../../logger';
-import { calculateChanges, calculateDryRunChanges } from '../../calculateChanges';
+import { calculateChanges } from '../../calculateChanges';
+import { calculateDryRunChanges } from '../../calculateDryRunChanges';
 import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
 
@@ -152,7 +153,9 @@ export default class APIHandler {
     this.stripUpdateFields = [...(options.stripUpdateFields || []), this.id];
     this.sensitiveFieldsToObfuscate = options.sensitiveFieldsToObfuscate || [];
     this.stripCreateFields = options.stripCreateFields || [];
-    this.ignoreDryRunFields = options.ignoreDryRunFields || [];
+    this.ignoreDryRunFields = [...(options.ignoreDryRunFields || [])].filter(
+      (field, index, allFields) => allFields.indexOf(field) === index
+    );
 
     this.functions = {
       list: 'list',
@@ -219,13 +222,17 @@ export default class APIHandler {
     if (this.type === 'networkACLs') {
       return item.description || `priority:${item.priority}`;
     }
+    if (this.type === 'customDomains') {
+      return item.domain || 'unnamed custom domain';
+    }
     if (
       this.type === 'tenant' ||
       this.type === 'attackProtection' ||
       this.type === 'branding' ||
       this.type === 'emailProvider' ||
       this.type === 'guardianPhoneFactorSelectedProvider' ||
-      this.type === 'guardianPolicies'
+      this.type === 'guardianPolicies' ||
+      this.type === 'riskAssessment'
     ) {
       return `${this.type} settings`;
     }

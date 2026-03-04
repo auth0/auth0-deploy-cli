@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 function hoursToMinutes(hours: number): number {
-  return Math.round(hours * 60);
+  return parseFloat(Math.round(hours * 60).toFixed(4));
 }
 
 type SessionDurations = {

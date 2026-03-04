@@ -665,11 +665,15 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     // Prepare an id map. We'll use this map later to get the `strategy` and SCIM enable status of the connections.
     await this.scimHandler.createIdMap(existingConnections);
 
-    const formatted = connections.map((connection) => ({
-      ...connection,
-      ...this.getFormattedOptions(connection, clients),
-      enabled_clients: getEnabledClients(assets, connection, existingConnections, clients),
-    }));
+    const formatted = connections.map((connection) => {
+      const enabledClients = getEnabledClients(assets, connection, existingConnections, clients);
+
+      return {
+        ...connection,
+        ...this.getFormattedOptions(connection, clients),
+        ...(enabledClients !== undefined && { enabled_clients: enabledClients }),
+      };
+    });
 
     const proposedChanges = await super.calcChanges({ ...assets, connections: formatted });
 
@@ -680,6 +684,49 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     });
 
     return proposedChangesWithExcludedProperties;
+  }
+
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    const { connections } = assets;
+
+    if (!connections) {
+      return {
+        del: [],
+        create: [],
+        update: [],
+        conflicts: [],
+      };
+    }
+
+    const clients = await paginate<Client>(this.client.clients.list, {
+      paginate: true,
+      include_totals: true,
+    });
+
+    const existingConnections = await paginate<Connection>(this.client.connections.list, {
+      checkpoint: true,
+      include_totals: true,
+    });
+
+    await this.scimHandler.createIdMap(existingConnections);
+
+    const formatted = connections.map((connection) => {
+      const enabledClients = getEnabledClients(assets, connection, existingConnections, clients);
+
+      return {
+        ...connection,
+        ...this.getFormattedOptions(connection, clients),
+        ...(enabledClients !== undefined && { enabled_clients: enabledClients }),
+      };
+    });
+
+    const proposedChanges = await super.dryRunChanges({ ...assets, connections: formatted });
+
+    return addExcludedConnectionPropertiesToChanges({
+      proposedChanges,
+      existingConnections,
+      config: this.config,
+    });
   }
 
   // Run after clients are updated so we can convert all the enabled_clients names to id's

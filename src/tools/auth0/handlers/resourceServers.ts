@@ -3,9 +3,8 @@ import ValidationError from '../../validationError';
 
 import constants from '../../constants';
 import DefaultHandler from './default';
-import { Assets, CalculatedChanges } from '../../../types';
+import { Assets } from '../../../types';
 import { paginate } from '../client';
-import log from '../../../logger';
 
 export const excludeSchema = {
   type: 'array',

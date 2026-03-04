@@ -8,16 +8,16 @@ The Auth0 Deploy CLI supports a "dry run" mode that allows you to preview all po
 
 ### Command Line Interface
 
-Add the `--dry_run` flag to your import command:
+Add the `--dry-run` flag to your import command:
 
 ```bash
-a0deploy import --config_file=config.json --input_file=./tenant.yaml --dry_run
+a0deploy import --config_file=config.json --input_file=./tenant.yaml --dry-run
 ```
 
 Or use the shorter form:
 
 ```bash
-a0deploy import -c config.json -i ./tenant-directory --dry_run
+a0deploy import -c config.json -i ./tenant-directory --dry-run
 ```
 
 ### Node Module
@@ -44,7 +44,9 @@ deploy({
   });
 ```
 
-**Note**: Using `AUTH0_DRY_RUN` will present an interactive prompt to select options after displaying the dry run preview.
+**Note**: To get the interactive menu when using the Node module, also set `AUTH0_DRY_RUN_INTERACTIVE: true`.
+
+To show the preview and then apply without prompting when using the Node module, set `AUTH0_DRY_RUN_APPLY: true` alongside `AUTH0_DRY_RUN: true`.
 
 ### Environment Variable
 
@@ -53,6 +55,41 @@ You can also enable dry run mode using an environment variable:
 ```bash
 export AUTH0_DRY_RUN=true
 a0deploy import -c config.json -i ./tenant.yaml
+```
+
+## CI/CD Usage
+
+By default, `--dry-run` is non-interactive and safe for CI pipelines.
+
+### Preview Only
+
+Shows the plan and exits without applying changes:
+
+```bash
+a0deploy import -c config.json -i tenant.yaml --dry-run
+```
+
+GitHub Actions:
+
+```yaml
+- name: Preview Auth0 changes
+  run: a0deploy import -c config.json -i tenant.yaml --dry-run
+```
+
+### Deployment with Visibility
+
+Show the plan and apply without prompting:
+
+```bash
+a0deploy import -c config.json -i tenant.yaml --dry-run --apply
+```
+
+### Interactive Review (Manual Deployments)
+
+Add `--interactive` to get the menu (apply / export to file / exit):
+
+```bash
+a0deploy import -c config.json -i tenant.yaml --dry-run --interactive
 ```
 
 ## Understanding the Output
@@ -67,14 +104,16 @@ Input: local/tenant.yaml
 
 Simulating deployment... The following changes are proposed:
 
-| Resource      | Status  | Name / Identifier                |
-|---------------|---------|----------------------------------|
-| Actions       | CREATE  | Post-Login User Enrichment       |
-|               | CREATE  | Pre-Registration Validation      |
-|               | DELETE* | Deprecated Action                |
-| Clients       | CREATE  | New SPA Application              |
-|               | UPDATE  | Existing M2M Application         |
-| Connections   | UPDATE  | Username-Password-Authentication |
+┌─────────────┬─────────┬──────────────────────────────────┐
+│ Resource    │ Status  │ Name / Identifier                │
+├─────────────┼─────────┼──────────────────────────────────┤
+│ Actions     │ CREATE  │ Post-Login User Enrichment       │
+│             │ CREATE  │ Pre-Registration Validation      │
+│             │ DELETE* │ Deprecated Action                │
+│ Clients     │ CREATE  │ New SPA Application              │
+│             │ UPDATE  │ Existing M2M Application         │
+│ Connections │ UPDATE  │ Username-Password-Authentication │
+└─────────────┴─────────┴──────────────────────────────────┘
 
 * Requires AUTH0_ALLOW_DELETE to be enabled
 
@@ -104,7 +143,7 @@ When `AUTH0_ALLOW_DELETE` is enabled, dry run will show which resources would be
 ```bash
 # Enable deletions in your config
 export AUTH0_ALLOW_DELETE=true
-a0deploy import -c config.json -i ./tenant.yaml --dry_run
+a0deploy import -c config.json -i ./tenant.yaml --dry-run
 ```
 
 Resources marked for deletion will appear in the output with `DELETE*` status, and the asterisk note will explain that `AUTH0_ALLOW_DELETE` must be enabled for deletions to occur.

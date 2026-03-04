@@ -4,7 +4,7 @@ import { AuthenticationClient, ManagementClient } from 'auth0';
 import YAMLContext from './yaml';
 import DirectoryContext from './directory';
 
-import { isDirectory } from '../utils';
+import { isDirectory, isTruthy } from '../utils';
 import log from '../logger';
 import { AssetTypes, Config } from '../types';
 
@@ -220,6 +220,11 @@ export const setupContext = async (
     token: accessToken,
     headers: {
       'User-agent': `deploy-cli/${packageVersion} (node.js/${process.version.replace('v', '')})`,
+      ...(isTruthy(config.AUTH0_DRY_RUN)
+        ? {
+            'X-Auth0-Deploy-Mode': 'dry-run',
+          }
+        : {}),
     },
     maxRetries: config.AUTH0_API_MAX_RETRIES || 10,
   });

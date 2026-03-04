@@ -7,6 +7,10 @@ import { loadFileAndReplaceKeywords, Auth0 } from './tools';
 import log from './logger';
 import { Asset, Assets, Config, KeywordMappings } from './types';
 
+export function isTruthy(value: unknown): boolean {
+  return value === true || value === 'true';
+}
+
 export function isDirectory(filePath: string): boolean {
   try {
     return fs.statSync(path.resolve(filePath)).isDirectory();

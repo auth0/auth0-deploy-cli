@@ -170,9 +170,6 @@ export default class SelfServiceProfileHandler extends DefaultAPIHandler {
     // Do nothing if not set
     if (!selfServiceProfiles) return;
 
-    // Gets SsProfileWithCustomText from destination tenant
-    const existing = await this.getType();
-
     const userAttributeProfiles = await this.getUserAttributeProfiles(
       this.client,
       selfServiceProfiles

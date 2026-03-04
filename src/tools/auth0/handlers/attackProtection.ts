@@ -196,6 +196,14 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
     super({
       ...config,
       type: 'attackProtection',
+      ignoreDryRunFields: [
+        'captcha.arkose.secret',
+        'captcha.friendly_captcha.secret',
+        'captcha.hcaptcha.secret',
+        'captcha.recaptcha_enterprise.api_key',
+        'captcha.recaptcha_enterprise.project_id',
+        'captcha.recaptcha_v2.secret',
+      ],
     });
   }
 

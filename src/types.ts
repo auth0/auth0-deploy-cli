@@ -78,7 +78,9 @@ export type Config = {
   AUTH0_KEYWORD_REPLACE_MAPPINGS?: KeywordMappings;
   AUTH0_EXPORT_IDENTIFIERS?: boolean;
   AUTH0_CONNECTIONS_DIRECTORY?: string;
-  AUTH0_DRY_RUN?: boolean;
+  AUTH0_DRY_RUN?: boolean | 'preview';
+  AUTH0_DRY_RUN_INTERACTIVE?: boolean;
+  AUTH0_DRY_RUN_APPLY?: boolean;
   EXCLUDED_PROPS?: {
     [key: string]: string[];
   };

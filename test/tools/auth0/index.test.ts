@@ -1,5 +1,8 @@
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 import Auth0 from '../../../src/tools/auth0';
+import * as calculateDryRunChanges from '../../../src/tools/calculateDryRunChanges';
+import * as utils from '../../../src/tools/utils';
 import { Auth0APIClient, Assets } from '../../../src/types';
 
 const mockEmptyClient = {
@@ -9,9 +12,21 @@ const mockEmptyClient = {
     }),
   },
 } as Auth0APIClient;
+
 const mockEmptyAssets = {} as Assets;
 
 describe('#Auth0 class', () => {
+  let sandbox: sinon.SinonSandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.createSandbox();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+    delete process.env.AUTH0_DEBUG;
+  });
+
   describe('#resource exclusion', () => {
     it('should exclude handlers listed in AUTH0_EXCLUDED from Auth0 class', () => {
       const auth0WithoutExclusions = new Auth0(mockEmptyClient, mockEmptyAssets, (key) => {
@@ -63,6 +78,57 @@ describe('#Auth0 class', () => {
       });
 
       expect(auth0.handlers.length).to.be.greaterThan(0);
+    });
+  });
+
+  describe('#dry run preview', () => {
+    it('should render a boxed table with closed top and bottom borders', async () => {
+      process.env.AUTH0_DEBUG = 'true';
+
+      sandbox
+        .stub(calculateDryRunChanges, 'dryRunFormatAssets')
+        .callsFake(async (assets) => assets);
+
+      const printedMessages: string[] = [];
+      sandbox.stub(utils, 'printCLIMessage').callsFake((message: string) => {
+        printedMessages.push(message);
+      });
+
+      const auth0 = new Auth0(mockEmptyClient, mockEmptyAssets, (key) => {
+        const config = {
+          AUTH0_ALLOW_DELETE: true,
+          AUTH0_DOMAIN: 'example-tenant.auth0.com',
+          AUTH0_INPUT_FILE: './tenant.yaml',
+        };
+
+        return config[key];
+      });
+
+      auth0.handlers = [
+        {
+          type: 'resourceServers',
+          dryRunChanges: async () => ({
+            create: [],
+            update: [{ name: 'Role test API' }],
+            del: [],
+          }),
+          getResourceName: (item: { name: string }) => item.name,
+        },
+      ] as any;
+
+      const hasChanges = await auth0.dryRun();
+      const output = printedMessages[printedMessages.length - 1].replace(
+        new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g'),
+        ''
+      );
+
+      expect(hasChanges).to.equal(true);
+      expect(output).to.include('┌');
+      expect(output).to.include('└');
+      expect(output).to.match(/┌[─┬]+┐/);
+      expect(output).to.match(/│ Resource\s+│ Status\s+│ Name \/ Identifier\s+│/);
+      expect(output).to.match(/│ ResourceServers\s+│ UPDATE\s+│ Role test API\s+│/);
+      expect(output).to.match(/└[─┴]+┘/);
     });
   });
 });

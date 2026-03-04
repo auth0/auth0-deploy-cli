@@ -1,7 +1,6 @@
 import { isEmpty } from 'lodash';
 import { isDryRun } from '../../utils';
 import { Management } from 'auth0';
-import log from '../../../logger';
 import DefaultHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
 
