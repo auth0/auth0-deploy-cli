@@ -361,9 +361,29 @@ prompts:
           continueButtonText: Continue without a new passkey
           passkeyBenefit1Title: Sign in quickly with this device
           passkeyBenefit2Title: No need to remember a password
-  enable_ulp_wcag_compliance: false
   identifier_first: false
-  partials: {}
+  universal_login_experience: new
+  webauthn_platform_first_factor: false
+  partials:
+    login:
+      login:
+        form-content-start: |
+          <!-- Custom HTML injected at the start of the login form body -->
+          <div class="login-notice">
+            Welcome back! Please log in to continue.
+          </div>
+    signup:
+      signup:
+        form-content-start: |
+          <!-- Custom HTML injected at the start of the signup form body -->
+          <div class="signup-notice">
+            Create your account to get started.
+          </div>
+        form-content-end: |
+          <!-- Custom HTML injected at the end of the signup form body -->
+          <p class="signup-terms">
+            By signing up, you agree to our <a href="/terms">Terms of Service</a>.
+          </p>
   screenRenderers:
     - signup-id:
         signup-id: ./prompts/screenRenderSettings/signup-id_signup-id.json

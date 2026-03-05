@@ -14,18 +14,27 @@ Multilingual custom text prompts follow a particular hierarchy. Under the root-l
 
 RenderSettings of a prompt-screen follow a particular hierarchy. Under the root-level `prompts` we store `screenRenderers` property that is used to configure the rendering settings of a given prompt & screen. Thirdly is the prompt Name, followed by the screen Name mapped to the respective renderer configs file. Refer [more](https://auth0.com/docs/customize/login-pages/advanced-customizations/getting-started/configure-acul-screens) on this.
 
+Custom partials allow you to inject custom HTML (via Liquid templates) into specific insertion points of a prompt screen. Under `partials` is the prompt type, then the screen type, then the insertion point name mapped to the Liquid HTML content.
+
 **Hierarchy**
 
 ```yaml
 prompts:
+  identifier_first: true|false
+  universal_login_experience: new|classic
+  webauthn_platform_first_factor: true|false
   customText:
     <LANGUAGE>: # two character language code
       <PROMPT_ID>: # prompt ID
         <SCREEN_ID>: # prompt screen ID
           <TEXT_ID>: 'Some text'
-    screenRenderers:
-      - <PROMPT-NAME>:
-          <SCREEN-NAME>: ./prompts/screenRenderSettings/promptName_screenName.json #Add the renderer configs for a given prompt & a given screen
+  partials:
+    <PROMPT_TYPE>: # e.g. login, signup
+      <SCREEN_TYPE>: # e.g. login, signup
+        <INSERTION_POINT>: 'Liquid HTML content' # e.g. form-content-start, form-content-end
+  screenRenderers:
+    - <PROMPT-NAME>:
+        <SCREEN-NAME>: ./prompts/screenRenderSettings/promptName_screenName.json #Add the renderer configs for a given prompt & a given screen
 ```
 
 **YAML Example**
@@ -44,11 +53,14 @@ Folder structure when in YAML mode.
 ./tenant.yaml
 ```
 
+In YAML mode, partial Liquid content is inlined directly in `tenant.yaml`:
+
 ```yaml
 # Contents of ./tenant.yaml
 prompts:
-  identifier_first: true
-  universal_login_experience: classic
+  identifier_first: false
+  universal_login_experience: new
+  webauthn_platform_first_factor: false
   customText:
     en:
       login:
@@ -63,6 +75,23 @@ prompts:
         mfa-login-options:
           pageTitle: 'Log in to ${clientName}'
           authenticatorNamesSMS: 'SMS'
+  partials:
+    login:
+      login:
+        form-content-start: |
+          <div class="login-notice">
+            Welcome back! Please log in to continue.
+          </div>
+    signup:
+      signup:
+        form-content-start: |
+          <div class="signup-notice">
+            Create your account to get started.
+          </div>
+        form-content-end: |
+          <p class="signup-terms">
+            By signing up, you agree to our <a href="/terms">Terms of Service</a>.
+          </p>
   screenRenderers:
     - signup-id:
         signup-id: ./prompts/screenRenderSettings/signup-id_signup-id.json
@@ -77,6 +106,14 @@ prompts:
 Folder structure when in directory mode.
 
 ./prompts/
+    /partials
+        /login
+            /login
+                /form-content-start.liquid
+        /signup
+            /signup
+                /form-content-start.liquid
+                /form-content-end.liquid
     /screenRenderSettings
         /signup-id_signup-id.json
         /login-id_login-id.json
@@ -85,7 +122,57 @@ Folder structure when in directory mode.
         /login-password_login-password.json
         /signup-password_signup-password.json
     /custom-text.json
+    /partials.json
     /prompts.json
+```
+
+In directory mode, `partials.json` is a manifest that maps each insertion point to its `.liquid` file (paths are relative to the `prompts/` directory):
+
+Contents of `partials.json`:
+
+```json
+{
+  "login": [
+    {
+      "login": [
+        {
+          "name": "form-content-start",
+          "template": "partials/login/login/form-content-start.liquid"
+        }
+      ]
+    }
+  ],
+  "signup": [
+    {
+      "signup": [
+        {
+          "name": "form-content-start",
+          "template": "partials/signup/signup/form-content-start.liquid"
+        },
+        {
+          "name": "form-content-end",
+          "template": "partials/signup/signup/form-content-end.liquid"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Contents of `partials/login/login/form-content-start.liquid`:
+
+```liquid
+<div class="login-notice">
+  Welcome back! Please log in to continue.
+</div>
+```
+
+Contents of `partials/signup/signup/form-content-end.liquid`:
+
+```liquid
+<p class="signup-terms">
+  By signing up, you agree to our <a href="/terms">Terms of Service</a>.
+</p>
 ```
 
 Contents of `promptName_screenName.json`
