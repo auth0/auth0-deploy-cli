@@ -161,28 +161,12 @@ export const getConnectionEnabledClients = async (
   if (!connectionId) return null;
 
   try {
-    const enabledClientsFormatted: string[] = [];
+    const enabledClients = await paginate<Management.ConnectionEnabledClient>(
+      (params) => auth0Client.connections.clients.get(connectionId, params),
+      { checkpoint: true, take: 100 }
+    );
 
-    let enabledClients = await auth0Client.connections.clients.get(connectionId);
-
-    // Process first page
-    enabledClients.data?.forEach((client) => {
-      if (client?.client_id) {
-        enabledClientsFormatted.push(client.client_id);
-      }
-    });
-
-    // Fetch remaining pages
-    while (enabledClients.hasNextPage()) {
-      enabledClients = await enabledClients.getNextPage();
-      enabledClients.data?.forEach((client) => {
-        if (client?.client_id) {
-          enabledClientsFormatted.push(client.client_id);
-        }
-      });
-    }
-
-    return enabledClientsFormatted;
+    return enabledClients.filter((client) => !!client?.client_id).map((client) => client.client_id);
   } catch (error) {
     return null;
   }

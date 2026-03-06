@@ -926,29 +926,24 @@ describe('#connections enabled clients functionality', () => {
   describe('#getConnectionEnabledClients', () => {
     it('should return array of client IDs with single page', async () => {
       const connectionId = 'con_123';
-      const mockResponse = {
-        data: [{ client_id: 'client_1' }, { client_id: 'client_2' }, { client_id: 'client_3' }],
-        hasNextPage: () => false,
-        getNextPage: async () => ({ data: [], hasNextPage: () => false }),
-      };
-
-      mockAuth0Client.connections.clients.get.resolves(mockResponse);
+      mockAuth0Client.connections.clients.get.resolves([
+        { client_id: 'client_1' },
+        { client_id: 'client_2' },
+        { client_id: 'client_3' },
+      ]);
 
       const result = await getConnectionEnabledClients(mockAuth0Client, connectionId);
 
       expect(result).to.deep.equal(['client_1', 'client_2', 'client_3']);
-      sinon.assert.calledOnceWithExactly(mockAuth0Client.connections.clients.get, connectionId);
+      sinon.assert.calledOnceWithExactly(mockAuth0Client.connections.clients.get, connectionId, {
+        checkpoint: true,
+        take: 100,
+      });
     });
 
     it('should return empty array when no enabled clients', async () => {
       const connectionId = 'con_123';
-      const mockResponse = {
-        data: [],
-        hasNextPage: () => false,
-        getNextPage: async () => ({ data: [], hasNextPage: () => false }),
-      };
-
-      mockAuth0Client.connections.clients.get.resolves(mockResponse);
+      mockAuth0Client.connections.clients.get.resolves([]);
 
       const result = await getConnectionEnabledClients(mockAuth0Client, connectionId);
 
@@ -958,26 +953,17 @@ describe('#connections enabled clients functionality', () => {
     it('should handle multi-page pagination correctly', async () => {
       const connectionId = 'con_123';
 
-      // Simulate 3 pages of results
-      const page3 = {
-        data: [{ client_id: 'client_7' }, { client_id: 'client_8' }],
-        hasNextPage: () => false,
-        getNextPage: async () => ({ data: [], hasNextPage: () => false }),
-      };
-
-      const page2 = {
-        data: [{ client_id: 'client_4' }, { client_id: 'client_5' }, { client_id: 'client_6' }],
-        hasNextPage: () => true,
-        getNextPage: async () => page3,
-      };
-
-      const page1 = {
-        data: [{ client_id: 'client_1' }, { client_id: 'client_2' }, { client_id: 'client_3' }],
-        hasNextPage: () => true,
-        getNextPage: async () => page2,
-      };
-
-      mockAuth0Client.connections.clients.get.resolves(page1);
+      // Pagination is handled by the paginate helper; mock returns all clients as a flat array
+      mockAuth0Client.connections.clients.get.resolves([
+        { client_id: 'client_1' },
+        { client_id: 'client_2' },
+        { client_id: 'client_3' },
+        { client_id: 'client_4' },
+        { client_id: 'client_5' },
+        { client_id: 'client_6' },
+        { client_id: 'client_7' },
+        { client_id: 'client_8' },
+      ]);
 
       const result = await getConnectionEnabledClients(mockAuth0Client, connectionId);
 
@@ -985,12 +971,12 @@ describe('#connections enabled clients functionality', () => {
       expect(result).to.deep.equal([
         'client_1',
         'client_2',
-        'client_3', // Page 1
+        'client_3',
         'client_4',
         'client_5',
-        'client_6', // Page 2
+        'client_6',
         'client_7',
-        'client_8', // Page 3
+        'client_8',
       ]);
     });
   });
@@ -1407,11 +1393,9 @@ describe('#connections enabled clients functionality', () => {
         // Mock enabled clients responses
         getEnabledClientsStub
           .withArgs('con_1')
-          .resolves(
-            mockPagedData({}, 'clients', [{ client_id: 'client_1' }, { client_id: 'client_2' }])
-          )
+          .resolves([{ client_id: 'client_1' }, { client_id: 'client_2' }])
           .withArgs('con_2')
-          .resolves(mockPagedData({}, 'clients', [{ client_id: 'client_3' }]));
+          .resolves([{ client_id: 'client_3' }]);
 
         const handler = new connections.default({ client: pageClient(auth0), config });
         handler.scimHandler = scimHandlerMock;
