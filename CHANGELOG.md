@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.29.0] - 2026-03-03
+
+### Added
+
+- Add DPoP support for proof-of-possession mechanism in `resourceServers` (GA) [#1311]
+- Add `supplemental signals` configuration for Akamai integration.(EA) [#1310]
+
 ## [8.28.0] - 2026-02-20
 
 ### Added
@@ -1660,7 +1667,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1297]: https://github.com/auth0/auth0-deploy-cli/issues/1297
 [#1298]: https://github.com/auth0/auth0-deploy-cli/issues/1298
 [#1302]: https://github.com/auth0/auth0-deploy-cli/issues/1302
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.28.0...HEAD
+[#1310]: https://github.com/auth0/auth0-deploy-cli/issues/1310
+[#1311]: https://github.com/auth0/auth0-deploy-cli/issues/1311
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.0...HEAD
+[8.29.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.28.0...v8.29.0
 [8.28.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.27.0...v8.28.0
 [8.27.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.26.0...v8.27.0
 [8.26.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.25.0...v8.26.0
