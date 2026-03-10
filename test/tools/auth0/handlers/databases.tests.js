@@ -556,7 +556,7 @@ describe('#databases handler', () => {
           },
           clients: {
             get: () => {
-              return Promise.resolve(mockPagedData({}, 'clients', [{ client_id: clientId }]));
+              return Promise.resolve([{ client_id: clientId }]);
             },
           },
         },
@@ -2242,11 +2242,9 @@ describe('#databases handler with enabled clients integration', () => {
       // Mock enabled clients responses
       getEnabledClientsStub
         .withArgs('con_1')
-        .resolves(
-          mockPagedData({}, 'clients', [{ client_id: 'client_1' }, { client_id: 'client_2' }])
-        )
+        .resolves([{ client_id: 'client_1' }, { client_id: 'client_2' }])
         .withArgs('con_2')
-        .resolves(mockPagedData({}, 'clients', [{ client_id: 'client_3' }]));
+        .resolves([{ client_id: 'client_3' }]);
 
       const handler = new databases.default({ client: pageClient(auth0), config });
 
