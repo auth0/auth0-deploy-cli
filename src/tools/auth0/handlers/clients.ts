@@ -345,7 +345,7 @@ export type Client = Management.Client;
 
 type ClientSanitizerChain = {
   sanitizeOidcLogout(): ClientSanitizerChain;
-  sanitizeCrossOriginAuth(): ClientSanitizerChain;
+  sanitizeCrossOriginAuth(warn?: boolean): ClientSanitizerChain;
   get(): Client[];
 };
 
@@ -353,7 +353,7 @@ const createClientSanitizer = (clients: Client[]): ClientSanitizerChain => {
   let sanitized = clients;
 
   return {
-    sanitizeCrossOriginAuth() {
+    sanitizeCrossOriginAuth(warn = true) {
       const deprecatedClients: string[] = [];
 
       sanitized = sanitized.map((client) => {
@@ -373,7 +373,7 @@ const createClientSanitizer = (clients: Client[]): ClientSanitizerChain => {
         return updated;
       });
 
-      if (deprecatedClients.length > 0) {
+      if (warn && deprecatedClients.length > 0) {
         log.warn(
           "The 'cross_origin_auth' parameter is deprecated in clients and scheduled for removal in future releases.\n" +
             `Use 'cross_origin_authentication' going forward. Clients using the deprecated setting: [${deprecatedClients.join(
@@ -524,7 +524,7 @@ export default class ClientHandler extends DefaultAPIHandler {
       ...(shouldExcludeThirdPartyClients(this.config) && { is_first_party: true }),
     });
 
-    this.existing = createClientSanitizer(clients).sanitizeCrossOriginAuth().get();
+    this.existing = createClientSanitizer(clients).sanitizeCrossOriginAuth(false).get();
     return this.existing;
   }
 
