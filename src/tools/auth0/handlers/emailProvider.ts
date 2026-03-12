@@ -44,6 +44,8 @@ export default class EmailProviderHandler extends DefaultHandler {
     // HTTP DELETE on emails/provider is not supported, as this is not part of our vNext SDK.
     if (Object.keys(emailProvider).length === 0) {
       if (this.config('AUTH0_ALLOW_DELETE') === true) {
+        // If no existing provider, there is nothing to delete
+        if (!existing.name) return;
         // await this.client.emails.delete(); is not supported
         if (isEmpty(existing.credentials)) {
           delete existing.credentials;
