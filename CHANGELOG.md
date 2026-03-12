@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.29.1] - 2026-03-12
+
 ### Fixed
 
 - Fix bad request error when no `emailProvider` is configured. [#1321]
@@ -1674,7 +1676,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1302]: https://github.com/auth0/auth0-deploy-cli/issues/1302
 [#1310]: https://github.com/auth0/auth0-deploy-cli/issues/1310
 [#1311]: https://github.com/auth0/auth0-deploy-cli/issues/1311
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.0...HEAD
+[#1320]: https://github.com/auth0/auth0-deploy-cli/issues/1320
+[#1321]: https://github.com/auth0/auth0-deploy-cli/issues/1321
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.1...HEAD
+[8.29.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.0...v8.29.1
 [8.29.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.28.0...v8.29.0
 [8.28.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.27.0...v8.28.0
 [8.27.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.26.0...v8.27.0
