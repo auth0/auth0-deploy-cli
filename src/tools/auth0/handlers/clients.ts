@@ -375,10 +375,7 @@ const createClientSanitizer = (clients: Client[]): ClientSanitizerChain => {
 
       if (warn && deprecatedClients.length > 0) {
         log.warn(
-          "The 'cross_origin_auth' parameter is deprecated in clients and scheduled for removal in future releases.\n" +
-            `Use 'cross_origin_authentication' going forward. Clients using the deprecated setting: [${deprecatedClients.join(
-              ', '
-            )}]`
+          "The 'cross_origin_auth' parameter is deprecated. Use 'cross_origin_authentication' going forward."
         );
       }
 
