@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+                                                                                                                                                                              
+  - Fix false-positive deprecation warning for `cross_origin_auth` when `cross_origin_authentication` is correctly used in config. [#1322]                                  
+  - Fix update dependencies for security and compatibility. [#1325]
+
 ## [8.29.1] - 2026-03-12
 
 ### Fixed
