@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.29.2] - 2026-03-17
+
+### Fixed
+
+- Fix false-positive deprecation warning for `cross_origin_auth` when `cross_origin_authentication` is correctly used in config. [#1322]
+
 ## [8.29.1] - 2026-03-12
 
 ### Fixed
@@ -1678,7 +1684,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1311]: https://github.com/auth0/auth0-deploy-cli/issues/1311
 [#1320]: https://github.com/auth0/auth0-deploy-cli/issues/1320
 [#1321]: https://github.com/auth0/auth0-deploy-cli/issues/1321
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.1...HEAD
+[#1322]: https://github.com/auth0/auth0-deploy-cli/issues/1322
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.2...HEAD
+[8.29.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.1...v8.29.2
 [8.29.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.0...v8.29.1
 [8.29.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.28.0...v8.29.0
 [8.28.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.27.0...v8.28.0
