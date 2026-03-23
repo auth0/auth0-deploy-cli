@@ -123,8 +123,11 @@ const customPartialsPromptTypes = [
   'signup',
   'signup-id',
   'signup-password',
-  'passkeys'
+  'passkeys',
 ];
+
+// Prompts that may not be available on all tenants (early access features)
+const optionalPartialsPromptTypes = ['passkeys'];
 
 export type CustomPartialsPromptTypes = (typeof customPartialsPromptTypes)[number];
 
@@ -431,6 +434,27 @@ export default class PromptsHandler extends DefaultHandler {
         );
         this.IsFeatureSupported = false;
         return null;
+      }
+
+      // Handle 400 errors for prompt types not available on all tenants (early access features)
+      // Error format: "Path validation error: 'Invalid value \"passkeys\"' on property prompt (Name of the prompt)."
+      if (
+        error &&
+        error?.statusCode === 400 &&
+        error.message?.includes('Path validation error') &&
+        error.message?.includes('on property prompt')
+      ) {
+        // Check if the error message contains any of the optional prompt types
+        const unavailablePrompt = optionalPartialsPromptTypes.find((promptType) =>
+          error.message?.includes(promptType)
+        );
+
+        if (unavailablePrompt) {
+          log.warn(
+            `Skipping partials for prompt type '${unavailablePrompt}' because it is not available on this tenant.`
+          );
+          return null;
+        }
       }
 
       if (error && error.statusCode === 429) {
