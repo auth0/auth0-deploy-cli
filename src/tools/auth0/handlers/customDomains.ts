@@ -40,6 +40,11 @@ export const schema = {
         description:
           'Relying Party ID (rpId) to be used for Passkeys on this custom domain. If not provided or set to null, the full domain will be used.',
       },
+      is_default: {
+        type: 'boolean',
+        description:
+          'Whether this custom domain is the default domain used for email notifications. Set via PATCH /api/v2/custom-domains/default.',
+      },
     },
     required: ['domain', 'type'],
   },
@@ -128,5 +133,37 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
 
     const changes = await this.calcChanges(assets);
     await super.processChanges(assets, changes);
+
+    // Set default domain via PATCH /api/v2/custom-domains/default if declared in assets.
+    // This endpoint is not yet in the auth0 SDK, so we call it directly.
+    const defaultDomain = customDomains.find((d) => d.is_default === true);
+    if (defaultDomain) {
+      await this.setDefaultDomain(defaultDomain.domain);
+      log.info(`Set default custom domain: ${defaultDomain.domain}`);
+    }
+  }
+
+  private async setDefaultDomain(domain: string): Promise<void> {
+    // PATCH /api/v2/custom-domains/default is not yet in the auth0 Node.js SDK.
+    // Access the SDK client's internal auth provider to reuse its token management.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sdkOptions = (this.client.customDomains as any)._options;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const authRequest = await (sdkOptions.authProvider as any).getAuthRequest();
+    const baseUrl: string = (await sdkOptions.baseUrl) ?? (await sdkOptions.environment);
+
+    const response = await fetch(`${baseUrl}/api/v2/custom-domains/default`, {
+      method: 'PATCH',
+      headers: {
+        ...authRequest.headers,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ domain }),
+    });
+
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(`Failed to set default custom domain: ${response.status} ${body}`);
+    }
   }
 }

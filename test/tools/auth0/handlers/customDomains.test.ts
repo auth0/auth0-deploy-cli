@@ -369,13 +369,19 @@ describe('#customDomains handler', () => {
       primary: true, // should be stripped
       verification: { method: 'cname' }, // should be stripped
       verification_method: 'cname', // should be stripped
-      is_default: true, // should be stripped
+      is_default: true, // should be stripped from update call; sets default domain via separate endpoint
       tls_policy: 'recommended', // should NOT be stripped
       domain_metadata: { key: 'value' }, // should NOT be stripped
     };
 
     const auth0ApiClientMock = {
       customDomains: {
+        _options: {
+          authProvider: {
+            getAuthRequest: async () => ({ headers: { Authorization: 'Bearer test-token' } }),
+          },
+          baseUrl: 'https://test.auth0.com',
+        },
         list: async () => [existingCustomDomain],
         create: async () => {},
         update: async (args, data) => {
@@ -391,13 +397,22 @@ describe('#customDomains handler', () => {
       }),
     };
 
+    // Mock global fetch for the setDefaultDomain call
+    const originalFetch = globalThis.fetch;
     // @ts-ignore
-    const handler = new customDomainsHandler({
-      config: () => {},
-      client: auth0ApiClientMock as unknown as Auth0APIClient,
-    });
+    globalThis.fetch = async () => ({ ok: true, text: async () => '' });
 
-    await handler.processChanges({ customDomains: [updatedCustomDomainWithExtraFields] });
+    try {
+      // @ts-ignore
+      const handler = new customDomainsHandler({
+        config: () => {},
+        client: auth0ApiClientMock as unknown as Auth0APIClient,
+      });
+
+      await handler.processChanges({ customDomains: [updatedCustomDomainWithExtraFields] });
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
 
     // Verify that stripped fields are not present
     expect(updateCallData).to.not.have.property('domain');
