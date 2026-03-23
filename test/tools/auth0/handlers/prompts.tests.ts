@@ -162,6 +162,7 @@ describe('#prompts handler', () => {
       getCustomPartial.withArgs({ prompt: 'signup' }).resolves(signupPartial);
       // Stub new prompts to return empty for retrieval test
       getCustomPartial.withArgs({ prompt: 'brute-force-protection' }).resolves({});
+      getCustomPartial.withArgs({ prompt: 'passkeys' }).resolves({});
 
       const data = await handler.getType();
       expect(data).to.deep.equal({
@@ -638,6 +639,7 @@ describe('#prompts handler', () => {
       getCustomPartial.withArgs({ prompt: 'signup-id' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'brute-force-protection' }).resolves({});
+      getCustomPartial.withArgs({ prompt: 'passkeys' }).resolves({});
 
       const data = await handler.getType();
       expect(data).to.deep.equal({
