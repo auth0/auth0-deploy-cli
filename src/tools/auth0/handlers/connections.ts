@@ -161,13 +161,19 @@ export const getConnectionEnabledClients = async (
   if (!connectionId) return null;
 
   try {
-    const enabledClients = await paginate<Management.ConnectionEnabledClient>(
-      (params) => auth0Client.connections.clients.get(connectionId, params),
-      { checkpoint: true, take: 100 }
-    );
+    const allClients: Management.ConnectionEnabledClient[] = [];
+    let page = await auth0Client.connections.clients.get(connectionId, { take: 100 });
 
-    return enabledClients.filter((client) => !!client?.client_id).map((client) => client.client_id);
+    allClients.push(...(page.data || []));
+
+    while (page.hasNextPage && page.hasNextPage()) {
+      page = await page.getNextPage();
+      allClients.push(...(page.data || []));
+    }
+
+    return allClients.filter((client) => !!client?.client_id).map((client) => client.client_id);
   } catch (error) {
+    log.warn(`Unable to retrieve enabled clients for connection ${connectionId}: ${error?.message}`);
     return null;
   }
 };
