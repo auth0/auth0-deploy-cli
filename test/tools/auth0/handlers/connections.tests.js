@@ -151,10 +151,12 @@ describe('#connections handler', () => {
       let getEnabledClientsCalledOnce = false;
       const auth0 = {
         connections: {
+          // Real API does NOT include enabled_clients in the list response;
+          // they are fetched separately via connections.clients.get.
           list: (params) =>
             mockPagedData(params, 'connections', [
-              { id: 'con1', strategy: 'github', name: 'github', enabled_clients: [clientId] },
-              { id: 'con2', strategy: 'auth0', name: 'db-should-be-ignored', enabled_clients: [] },
+              { id: 'con1', strategy: 'github', name: 'github' },
+              { id: 'con2', strategy: 'auth0', name: 'db-should-be-ignored' },
             ]),
           clients: {
             get: () => {
@@ -924,60 +926,88 @@ describe('#connections enabled clients functionality', () => {
   });
 
   describe('#getConnectionEnabledClients', () => {
-    it('should return array of client IDs with single page', async () => {
+    it('should return array of client IDs from a single-page SDK PagedResponse', async () => {
       const connectionId = 'con_123';
-      mockAuth0Client.connections.clients.get.resolves([
-        { client_id: 'client_1' },
-        { client_id: 'client_2' },
-        { client_id: 'client_3' },
-      ]);
+      // Auth0 SDK v5 .get() returns a PagedResponse object, not a flat array
+      mockAuth0Client.connections.clients.get.resolves(
+        mockPagedData({}, 'clients', [
+          { client_id: 'client_1' },
+          { client_id: 'client_2' },
+          { client_id: 'client_3' },
+        ])
+      );
 
       const result = await getConnectionEnabledClients(mockAuth0Client, connectionId);
 
       expect(result).to.deep.equal(['client_1', 'client_2', 'client_3']);
       sinon.assert.calledOnceWithExactly(mockAuth0Client.connections.clients.get, connectionId, {
-        checkpoint: true,
         take: 100,
       });
     });
 
     it('should return empty array when no enabled clients', async () => {
       const connectionId = 'con_123';
-      mockAuth0Client.connections.clients.get.resolves([]);
+      mockAuth0Client.connections.clients.get.resolves(mockPagedData({}, 'clients', []));
 
       const result = await getConnectionEnabledClients(mockAuth0Client, connectionId);
 
       expect(result).to.deep.equal([]);
     });
 
-    it('should handle multi-page pagination correctly', async () => {
+    it('should follow hasNextPage/getNextPage to collect all pages', async () => {
       const connectionId = 'con_123';
 
-      // Pagination is handled by the paginate helper; mock returns all clients as a flat array
-      mockAuth0Client.connections.clients.get.resolves([
-        { client_id: 'client_1' },
-        { client_id: 'client_2' },
-        { client_id: 'client_3' },
-        { client_id: 'client_4' },
-        { client_id: 'client_5' },
-        { client_id: 'client_6' },
-        { client_id: 'client_7' },
-        { client_id: 'client_8' },
-      ]);
+      // Simulate two pages via the PagedResponse format
+      mockAuth0Client.connections.clients.get.resolves(
+        mockPagedData(
+          {},
+          'clients',
+          [{ client_id: 'client_1' }, { client_id: 'client_2' }],
+          [[{ client_id: 'client_3' }, { client_id: 'client_4' }]]
+        )
+      );
 
       const result = await getConnectionEnabledClients(mockAuth0Client, connectionId);
 
-      // Should include ALL clients from ALL 3 pages
-      expect(result).to.deep.equal([
-        'client_1',
-        'client_2',
-        'client_3',
-        'client_4',
-        'client_5',
-        'client_6',
-        'client_7',
-        'client_8',
+      expect(result).to.deep.equal(['client_1', 'client_2', 'client_3', 'client_4']);
+    });
+
+    it('should return null without throwing when .get() rejects', async () => {
+      const connectionId = 'con_123';
+      mockAuth0Client.connections.clients.get.rejects(new Error('network error'));
+
+      const result = await getConnectionEnabledClients(mockAuth0Client, connectionId);
+
+      expect(result).to.be.null;
+    });
+
+    it('should return null without throwing when connectionId is empty', async () => {
+      const result = await getConnectionEnabledClients(mockAuth0Client, '');
+      expect(result).to.be.null;
+      sinon.assert.notCalled(mockAuth0Client.connections.clients.get);
+    });
+
+    // Regression test for the bug introduced in commit 7e07417:
+    // paginate() was called with .get() instead of .list(), bypassing the pagedClient proxy.
+    // The SDK v5 .get() returns a PagedResponse object; calling .filter() on it threw a
+    // TypeError that was silently swallowed, causing enabled_clients to be absent from exports.
+    it('should not silently drop clients when SDK returns a PagedResponse (regression: 7e07417)', async () => {
+      const connectionId = 'con_regression';
+      const pagedResponse = mockPagedData({}, 'clients', [
+        { client_id: 'client_a' },
+        { client_id: 'client_b' },
       ]);
+
+      // Confirm the mock is a PagedResponse object (has .data), not a flat array
+      expect(Array.isArray(pagedResponse)).to.equal(false);
+      expect(pagedResponse.data).to.be.an('array');
+
+      mockAuth0Client.connections.clients.get.resolves(pagedResponse);
+
+      const result = await getConnectionEnabledClients(mockAuth0Client, connectionId);
+
+      // Before the fix, result was null because .filter() threw on the PagedResponse object
+      expect(result).to.deep.equal(['client_a', 'client_b']);
     });
   });
 
@@ -1390,12 +1420,14 @@ describe('#connections enabled clients functionality', () => {
           pool,
         };
 
-        // Mock enabled clients responses
+        // Mock enabled clients responses — SDK v5 .get() returns a PagedResponse, not a flat array
         getEnabledClientsStub
-          .withArgs('con_1')
-          .resolves([{ client_id: 'client_1' }, { client_id: 'client_2' }])
-          .withArgs('con_2')
-          .resolves([{ client_id: 'client_3' }]);
+          .withArgs('con_1', { take: 100 })
+          .resolves(
+            mockPagedData({}, 'clients', [{ client_id: 'client_1' }, { client_id: 'client_2' }])
+          )
+          .withArgs('con_2', { take: 100 })
+          .resolves(mockPagedData({}, 'clients', [{ client_id: 'client_3' }]));
 
         const handler = new connections.default({ client: pageClient(auth0), config });
         handler.scimHandler = scimHandlerMock;
