@@ -959,9 +959,12 @@ describe('#connections enabled clients functionality', () => {
 
       // Simulate two pages via the PagedResponse format
       mockAuth0Client.connections.clients.get.resolves(
-        mockPagedData({}, 'clients', [{ client_id: 'client_1' }, { client_id: 'client_2' }], [
-          [{ client_id: 'client_3' }, { client_id: 'client_4' }],
-        ])
+        mockPagedData(
+          {},
+          'clients',
+          [{ client_id: 'client_1' }, { client_id: 'client_2' }],
+          [[{ client_id: 'client_3' }, { client_id: 'client_4' }]]
+        )
       );
 
       const result = await getConnectionEnabledClients(mockAuth0Client, connectionId);
@@ -1420,7 +1423,9 @@ describe('#connections enabled clients functionality', () => {
         // Mock enabled clients responses — SDK v5 .get() returns a PagedResponse, not a flat array
         getEnabledClientsStub
           .withArgs('con_1', { take: 100 })
-          .resolves(mockPagedData({}, 'clients', [{ client_id: 'client_1' }, { client_id: 'client_2' }]))
+          .resolves(
+            mockPagedData({}, 'clients', [{ client_id: 'client_1' }, { client_id: 'client_2' }])
+          )
           .withArgs('con_2', { take: 100 })
           .resolves(mockPagedData({}, 'clients', [{ client_id: 'client_3' }]));
 
@@ -1442,6 +1447,74 @@ describe('#connections enabled clients functionality', () => {
           name: 'google-connection',
         });
         expect(result[1].enabled_clients).to.deep.equal(['client_3']);
+      });
+
+      it('should use the pool to fetch enabled clients and preserve connection order', async () => {
+        const addEachTaskStub = sinon.stub();
+        const poolExecutor = {
+          addSingleTask: ({ data, generator }) => ({
+            promise: async () => generator(data),
+          }),
+          addEachTask: addEachTaskStub,
+        };
+
+        addEachTaskStub.callsFake(({ data, generator }) => ({
+          promise: async () => {
+            const results = [];
+
+            for (const task of [...(data || [])].reverse()) {
+              results.push(await generator(task));
+            }
+
+            return results;
+          },
+        }));
+
+        const getEnabledClientsStub = sinon.stub();
+        const auth0 = {
+          connections: {
+            list: (params) =>
+              mockPagedData(params, 'connections', [
+                { id: 'con_1', strategy: 'github', name: 'github-connection' },
+                { id: 'con_2', strategy: 'google', name: 'google-connection' },
+                { strategy: 'auth0', name: 'db-should-be-ignored' },
+              ]),
+            clients: {
+              get: getEnabledClientsStub,
+            },
+            _getRestClient: () => ({}),
+          },
+          clients: {
+            list: (params) => mockPagedData(params, 'clients', []),
+          },
+        };
+
+        getEnabledClientsStub
+          .withArgs('con_1', { take: 100 })
+          .resolves(mockPagedData({}, 'clients', [{ client_id: 'client_1' }]))
+          .withArgs('con_2', { take: 100 })
+          .resolves(mockPagedData({}, 'clients', [{ client_id: 'client_2' }]));
+
+        const client = pageClient(auth0);
+        client.pool = poolExecutor;
+
+        const handler = new connections.default({ client, config });
+        handler.scimHandler = scimHandlerMock;
+        sinon.stub(handler, 'getConnectionDirectoryProvisionings').resolves(null);
+
+        const result = await handler.getType();
+
+        sinon.assert.calledOnce(addEachTaskStub);
+        expect(addEachTaskStub.firstCall.args[0].data).to.have.length(2);
+        expect(addEachTaskStub.firstCall.args[0].data.map(({ con }) => con.id)).to.deep.equal([
+          'con_1',
+          'con_2',
+        ]);
+        expect(addEachTaskStub.firstCall.args[0].generator).to.be.a('function');
+
+        expect(result.map((connection) => connection.id)).to.deep.equal(['con_1', 'con_2']);
+        expect(result[0].enabled_clients).to.deep.equal(['client_1']);
+        expect(result[1].enabled_clients).to.deep.equal(['client_2']);
       });
 
       it('should handle connections without enabled clients', async () => {
