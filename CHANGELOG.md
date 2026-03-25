@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix Universal Login Authentication Profile reverting to Identifier+Password after import when branding is included. [#1333]
+- Fix efficiency and reliability of fetching `enabled_clients` for `connections`. [#1334]
+
 ## [8.29.2] - 2026-03-17
 
 ### Fixed
