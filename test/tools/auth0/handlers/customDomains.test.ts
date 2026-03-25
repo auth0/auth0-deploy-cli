@@ -642,4 +642,77 @@ describe('#customDomains handler', () => {
     expect(didUpdateFunctionGetCalled).to.equal(true);
     expect(updateCallData).to.have.property('relying_party_identifier', 'test.com');
   });
+
+  it('should call setDefault with the correct domain when is_default is true', async () => {
+    let setDefaultCallArgs = null;
+
+    const customDomainWithDefault = {
+      domain: 'default.example.com',
+      type: 'auth0_managed_certs',
+      is_default: true,
+    };
+
+    const auth0ApiClientMock = {
+      customDomains: {
+        list: async () => [],
+        create: async () => customDomainWithDefault,
+        update: async () => {},
+        delete: async () => {},
+        setDefault: async (args) => {
+          setDefaultCallArgs = args;
+        },
+      },
+      pool: new PromisePoolExecutor({
+        concurrencyLimit: 3,
+        frequencyLimit: 8,
+        frequencyWindow: 1000, // 1 sec
+      }),
+    };
+
+    // @ts-ignore
+    const handler = new customDomainsHandler({
+      config: () => {},
+      client: auth0ApiClientMock as unknown as Auth0APIClient,
+    });
+
+    await handler.processChanges({ customDomains: [customDomainWithDefault] });
+
+    expect(setDefaultCallArgs).to.deep.equal({ domain: 'default.example.com' });
+  });
+
+  it('should not call setDefault when no domain has is_default set', async () => {
+    let setDefaultCalled = false;
+
+    const customDomainWithoutDefault = {
+      domain: 'noddefault.example.com',
+      type: 'auth0_managed_certs',
+    };
+
+    const auth0ApiClientMock = {
+      customDomains: {
+        list: async () => [],
+        create: async () => customDomainWithoutDefault,
+        update: async () => {},
+        delete: async () => {},
+        setDefault: async () => {
+          setDefaultCalled = true;
+        },
+      },
+      pool: new PromisePoolExecutor({
+        concurrencyLimit: 3,
+        frequencyLimit: 8,
+        frequencyWindow: 1000, // 1 sec
+      }),
+    };
+
+    // @ts-ignore
+    const handler = new customDomainsHandler({
+      config: () => {},
+      client: auth0ApiClientMock as unknown as Auth0APIClient,
+    });
+
+    await handler.processChanges({ customDomains: [customDomainWithoutDefault] });
+
+    expect(setDefaultCalled).to.equal(false);
+  });
 });
