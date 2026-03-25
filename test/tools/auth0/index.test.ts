@@ -130,5 +130,196 @@ describe('#Auth0 class', () => {
       expect(output).to.match(/│ ResourceServers\s+│ UPDATE\s+│ Role test API\s+│/);
       expect(output).to.match(/└[─┴]+┘/);
     });
+
+    it('should output "No changes detected" when all handlers report no changes', async () => {
+      process.env.AUTH0_DEBUG = 'true';
+
+      sandbox
+        .stub(calculateDryRunChanges, 'dryRunFormatAssets')
+        .callsFake(async (assets) => assets);
+
+      const printedMessages: string[] = [];
+      sandbox.stub(utils, 'printCLIMessage').callsFake((message: string) => {
+        printedMessages.push(message);
+      });
+
+      const auth0 = new Auth0(mockEmptyClient, mockEmptyAssets, (key) => {
+        const config = {
+          AUTH0_DOMAIN: 'example-tenant.auth0.com',
+          AUTH0_INPUT_FILE: './tenant.yaml',
+        };
+        return config[key];
+      });
+
+      auth0.handlers = [
+        {
+          type: 'clients',
+          dryRunChanges: async () => ({ create: [], update: [], del: [] }),
+          getResourceName: (item: { name: string }) => item.name,
+        },
+      ] as any;
+
+      const hasChanges = await auth0.dryRun();
+      const output = printedMessages[printedMessages.length - 1].replace(
+        new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g'),
+        ''
+      );
+
+      expect(hasChanges).to.equal(false);
+      expect(output).to.include('No changes detected');
+    });
+
+    it('should show DELETE with asterisk note when AUTH0_ALLOW_DELETE is false', async () => {
+      process.env.AUTH0_DEBUG = 'true';
+
+      sandbox
+        .stub(calculateDryRunChanges, 'dryRunFormatAssets')
+        .callsFake(async (assets) => assets);
+
+      const printedMessages: string[] = [];
+      sandbox.stub(utils, 'printCLIMessage').callsFake((message: string) => {
+        printedMessages.push(message);
+      });
+
+      const auth0 = new Auth0(mockEmptyClient, mockEmptyAssets, (key) => {
+        const config = {
+          AUTH0_ALLOW_DELETE: false,
+          AUTH0_DOMAIN: 'example-tenant.auth0.com',
+          AUTH0_INPUT_FILE: './tenant.yaml',
+        };
+        return config[key];
+      });
+
+      auth0.handlers = [
+        {
+          type: 'clients',
+          dryRunChanges: async () => ({
+            create: [],
+            update: [],
+            del: [{ name: 'Old App' }],
+          }),
+          getResourceName: (item: { name: string }) => item.name,
+        },
+      ] as any;
+
+      const hasChanges = await auth0.dryRun();
+      const output = printedMessages[printedMessages.length - 1].replace(
+        new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g'),
+        ''
+      );
+
+      expect(hasChanges).to.equal(true);
+      expect(output).to.include('Requires AUTH0_ALLOW_DELETE to be enabled');
+      expect(output).to.include('DELETE');
+    });
+
+    it('should show CREATE changes in the table', async () => {
+      process.env.AUTH0_DEBUG = 'true';
+
+      sandbox
+        .stub(calculateDryRunChanges, 'dryRunFormatAssets')
+        .callsFake(async (assets) => assets);
+
+      const printedMessages: string[] = [];
+      sandbox.stub(utils, 'printCLIMessage').callsFake((message: string) => {
+        printedMessages.push(message);
+      });
+
+      const auth0 = new Auth0(mockEmptyClient, mockEmptyAssets, (key) => {
+        const config = {
+          AUTH0_DOMAIN: 'example-tenant.auth0.com',
+          AUTH0_INPUT_FILE: './tenant.yaml',
+        };
+        return config[key];
+      });
+
+      auth0.handlers = [
+        {
+          type: 'actions',
+          dryRunChanges: async () => ({
+            create: [{ name: 'New Action' }],
+            update: [],
+            del: [],
+          }),
+          getResourceName: (item: { name: string }) => item.name,
+        },
+      ] as any;
+
+      const hasChanges = await auth0.dryRun();
+      const output = printedMessages[printedMessages.length - 1].replace(
+        new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g'),
+        ''
+      );
+
+      expect(hasChanges).to.equal(true);
+      expect(output).to.include('CREATE');
+      expect(output).to.include('New Action');
+    });
+
+    it('should propagate handler errors with type and stage annotations', async () => {
+      process.env.AUTH0_DEBUG = 'true';
+
+      sandbox
+        .stub(calculateDryRunChanges, 'dryRunFormatAssets')
+        .callsFake(async (assets) => assets);
+
+      sandbox.stub(utils, 'printCLIMessage');
+
+      const auth0 = new Auth0(mockEmptyClient, mockEmptyAssets, (key) => {
+        const config = {
+          AUTH0_DOMAIN: 'example-tenant.auth0.com',
+        };
+        return config[key];
+      });
+
+      auth0.handlers = [
+        {
+          type: 'clients',
+          dryRunChanges: async () => {
+            throw new Error('API failure');
+          },
+          getResourceName: (item: { name: string }) => item.name,
+        },
+      ] as any;
+
+      try {
+        await auth0.dryRun();
+        expect.fail('Expected dryRun to throw');
+      } catch (err) {
+        expect(err.message).to.equal('API failure');
+        expect(err.type).to.equal('clients');
+        expect(err.stage).to.equal('dryRun');
+      }
+    });
+
+    it('should use default input path when AUTH0_INPUT_FILE is not set', async () => {
+      process.env.AUTH0_DEBUG = 'true';
+
+      sandbox
+        .stub(calculateDryRunChanges, 'dryRunFormatAssets')
+        .callsFake(async (assets) => assets);
+
+      const printedMessages: string[] = [];
+      sandbox.stub(utils, 'printCLIMessage').callsFake((message: string) => {
+        printedMessages.push(message);
+      });
+
+      const auth0 = new Auth0(mockEmptyClient, mockEmptyAssets, (key) => {
+        const config = {
+          AUTH0_DOMAIN: 'example-tenant.auth0.com',
+        };
+        return config[key];
+      });
+
+      auth0.handlers = [] as any;
+
+      await auth0.dryRun();
+      const output = printedMessages[printedMessages.length - 1].replace(
+        new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g'),
+        ''
+      );
+
+      expect(output).to.include('./tenant-config-directory/');
+    });
   });
 });

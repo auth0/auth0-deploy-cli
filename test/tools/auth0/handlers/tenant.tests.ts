@@ -226,4 +226,45 @@ describe('#tenant handler', () => {
       expect(() => removeUnallowedTenantFlags({})).to.not.throw();
     });
   });
+
+  describe('#tenant processChanges dry-run', () => {
+    it('should convert session durations from hours to minutes in update payload', async () => {
+      let capturedPayload: any = null;
+      const auth0 = {
+        tenants: {
+          settings: {
+            get: () => ({
+              friendly_name: 'Test',
+              session_lifetime_in_minutes: 60,
+              idle_session_lifetime_in_minutes: 120,
+            }),
+            update: (data: any) => {
+              capturedPayload = data;
+              return Promise.resolve(data);
+            },
+          },
+        },
+      };
+
+      // @ts-ignore — standard test pattern
+      const handler = new tenantHandler({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          tenant: {
+            friendly_name: 'Updated Test',
+            session_lifetime: 2,
+            idle_session_lifetime: 3,
+          },
+        },
+      ]);
+
+      expect(capturedPayload).to.not.be.null;
+      expect(capturedPayload.session_lifetime_in_minutes).to.equal(120);
+      expect(capturedPayload.idle_session_lifetime_in_minutes).to.equal(180);
+      expect(capturedPayload).to.not.have.property('session_lifetime');
+      expect(capturedPayload).to.not.have.property('idle_session_lifetime');
+    });
+  });
 });

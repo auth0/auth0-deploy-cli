@@ -1,6 +1,13 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import { calculateDryRunChanges, dryRunFormatAssets } from '../../src/tools/calculateDryRunChanges';
+import fs from 'node:fs/promises';
+import {
+  calculateDryRunChanges,
+  dryRunFormatAssets,
+  getObjectDifferences,
+  hasObjectDifferences,
+  exportDiffLog,
+} from '../../src/tools/calculateDryRunChanges';
 import DefaultHandler from '../../src/tools/auth0/handlers/default';
 import { configFactory } from '../../src/configFactory';
 import AttackProtectionHandler from '../../src/tools/auth0/handlers/attackProtection';
@@ -370,5 +377,354 @@ describe('#utils calculateDryRunChanges', () => {
     expect(changes.update).to.have.length(1);
     expect(changes.update[0].name).to.equal('Existing Test App');
     expect(changes.del).to.have.length(0);
+  });
+
+  it('should handle compound array identifiers for matching assets', () => {
+    const changes = calculateDryRunChanges({
+      type: 'clientGrants',
+      assets: [{ client_id: 'cli_123', audience: 'https://api.example.com', scope: ['read:data'] }],
+      existing: [
+        { client_id: 'cli_123', audience: 'https://api.example.com', scope: ['read:data'] },
+      ],
+      identifiers: [['client_id', 'audience']],
+      ignoreDryRunFields: [],
+    });
+
+    expect(changes.create).to.have.length(0);
+    expect(changes.update).to.have.length(0);
+    expect(changes.del).to.have.length(0);
+  });
+
+  it('should detect updates when using compound array identifiers', () => {
+    const changes = calculateDryRunChanges({
+      type: 'clientGrants',
+      assets: [
+        {
+          client_id: 'cli_123',
+          audience: 'https://api.example.com',
+          scope: ['read:data', 'write:data'],
+        },
+      ],
+      existing: [
+        { client_id: 'cli_123', audience: 'https://api.example.com', scope: ['read:data'] },
+      ],
+      identifiers: [['client_id', 'audience']],
+      ignoreDryRunFields: [],
+    });
+
+    expect(changes.update).to.have.length(1);
+    expect(changes.create).to.have.length(0);
+    expect(changes.del).to.have.length(0);
+  });
+
+  it('should detect creates and deletes with compound array identifiers', () => {
+    const changes = calculateDryRunChanges({
+      type: 'clientGrants',
+      assets: [{ client_id: 'cli_new', audience: 'https://api.example.com', scope: ['read'] }],
+      existing: [{ client_id: 'cli_old', audience: 'https://api.example.com', scope: ['read'] }],
+      identifiers: [['client_id', 'audience']],
+      ignoreDryRunFields: [],
+    });
+
+    expect(changes.create).to.have.length(1);
+    expect(changes.del).to.have.length(1);
+  });
+
+  it('should handle single asset objects (non-array) for existing and assets', () => {
+    const changes = calculateDryRunChanges({
+      type: 'tenant',
+      assets: { friendly_name: 'My Tenant' },
+      existing: { friendly_name: 'My Tenant' },
+      identifiers: ['friendly_name'],
+      ignoreDryRunFields: [],
+    });
+
+    expect(changes.update).to.have.length(0);
+    expect(changes.create).to.have.length(0);
+    expect(changes.del).to.have.length(0);
+  });
+
+  it('should backfill identifier fields from remote during update', () => {
+    const changes = calculateDryRunChanges({
+      type: 'clients',
+      assets: [{ name: 'My App', app_type: 'spa' }],
+      existing: [{ name: 'My App', client_id: 'cli_abc', app_type: 'regular_web' }],
+      identifiers: ['client_id', 'name'],
+      ignoreDryRunFields: [],
+    });
+
+    expect(changes.update).to.have.length(1);
+    expect(changes.update[0].client_id).to.equal('cli_abc');
+  });
+});
+
+describe('#getObjectDifferences', () => {
+  it('should detect key present locally but not remotely', () => {
+    const diffs = getObjectDifferences({ newKey: 'value' }, {}, '', 'test');
+    expect(diffs).to.have.length(1);
+    expect(diffs[0]).to.include('newKey');
+    expect(diffs[0]).to.include("found in 'localObj' but not in 'remoteObj'");
+  });
+
+  it('should detect primitive value differences', () => {
+    const diffs = getObjectDifferences({ name: 'updated' }, { name: 'original' }, '', 'test');
+    expect(diffs).to.have.length(1);
+    expect(diffs[0]).to.include('Value difference for [name]');
+  });
+
+  it('should detect array length mismatches', () => {
+    const diffs = getObjectDifferences({ items: [1, 2, 3] }, { items: [1, 2] }, '', 'test');
+    expect(diffs.some((d) => d.includes('Array'))).to.be.true;
+  });
+
+  it('should detect differences in object arrays element-by-element', () => {
+    const diffs = getObjectDifferences(
+      { items: [{ a: 1 }, { a: 3 }, { a: 4 }] },
+      { items: [{ a: 1 }, { a: 2 }] },
+      '',
+      'test'
+    );
+    // Array length mismatch + element-level difference
+    expect(diffs.length).to.be.greaterThan(0);
+  });
+
+  it('should detect differences in primitive arrays', () => {
+    const diffs = getObjectDifferences({ tags: ['a', 'c'] }, { tags: ['a', 'b'] }, '', 'test');
+    expect(diffs.some((d) => d.includes('Array content difference'))).to.be.true;
+  });
+
+  it('should return no differences for identical primitive arrays with different order', () => {
+    const diffs = getObjectDifferences({ tags: ['b', 'a'] }, { tags: ['a', 'b'] }, '', 'test');
+    expect(diffs).to.have.length(0);
+  });
+
+  it('should recurse into nested objects', () => {
+    const diffs = getObjectDifferences(
+      { outer: { inner: 'new' } },
+      { outer: { inner: 'old' } },
+      '',
+      'test'
+    );
+    expect(diffs).to.have.length(1);
+    expect(diffs[0]).to.include('outer.inner');
+  });
+
+  it('should respect ignoreDryRunFields', () => {
+    const diffs = getObjectDifferences(
+      { secret: 'new-secret', name: 'same' },
+      { secret: 'old-secret', name: 'same' },
+      '',
+      'test',
+      ['secret']
+    );
+    expect(diffs).to.have.length(0);
+  });
+
+  it('should respect ignoreDryRunFields with nested paths', () => {
+    const diffs = getObjectDifferences(
+      { captcha: { recaptcha_v2: { secret: 'new' } } },
+      { captcha: { recaptcha_v2: { secret: 'old' } } },
+      '',
+      'test',
+      ['captcha.recaptcha_v2.secret']
+    );
+    expect(diffs).to.have.length(0);
+  });
+
+  it('should return empty array for identical objects', () => {
+    const diffs = getObjectDifferences(
+      { name: 'test', enabled: true },
+      { name: 'test', enabled: true },
+      '',
+      'test'
+    );
+    expect(diffs).to.have.length(0);
+  });
+
+  it('should handle array item differences for non-object items in mixed check', () => {
+    const diffs = getObjectDifferences(
+      { items: [{ a: 1 }, 'literal'] },
+      { items: [{ a: 1 }, 'different'] },
+      '',
+      'test'
+    );
+    expect(diffs.length).to.be.greaterThan(0);
+  });
+});
+
+describe('#hasObjectDifferences', () => {
+  it('should return true when objects differ and log to diff store', () => {
+    const result = hasObjectDifferences(
+      { name: 'updated' },
+      { name: 'original' },
+      '',
+      'testResource'
+    );
+    expect(result).to.be.true;
+  });
+
+  it('should return false for identical objects', () => {
+    const result = hasObjectDifferences({ name: 'same' }, { name: 'same' }, '', 'testResource');
+    expect(result).to.be.false;
+  });
+});
+
+describe('#exportDiffLog', () => {
+  let sandbox: sinon.SinonSandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.createSandbox();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should write diff log to a file', async () => {
+    const writeStub = sandbox.stub(fs, 'writeFile').resolves();
+
+    await exportDiffLog('test-output.json');
+
+    expect(writeStub.calledOnce).to.be.true;
+    expect(writeStub.firstCall.args[0]).to.equal('./test-output.json');
+  });
+
+  it('should write diff log for a specific resource type', async () => {
+    const writeStub = sandbox.stub(fs, 'writeFile').resolves();
+
+    await exportDiffLog('test-output.json', 'clients');
+
+    expect(writeStub.calledOnce).to.be.true;
+  });
+
+  it('should handle write errors gracefully', async () => {
+    sandbox.stub(fs, 'writeFile').rejects(new Error('EACCES'));
+
+    // Should not throw
+    await exportDiffLog('test-output.json');
+  });
+});
+
+describe('#dryRunFormatAssets additional paths', () => {
+  it('should convert clientGrants client_id from name to id', async () => {
+    const auth0Client = mockMgmtClient() as any;
+    auth0Client.clients.list = () => [{ name: 'My M2M App', client_id: 'cli_m2m' }];
+
+    const assets = await dryRunFormatAssets(
+      {
+        clientGrants: [
+          { client_id: 'My M2M App', audience: 'https://api.example.com', scope: ['read'] },
+        ],
+      },
+      auth0Client
+    );
+
+    expect(assets.clientGrants![0].client_id).to.equal('cli_m2m');
+  });
+
+  it('should convert database enabled_clients from names to ids', async () => {
+    const auth0Client = mockMgmtClient() as any;
+    auth0Client.clients.list = () => [
+      { name: 'App One', client_id: 'cli_one' },
+      { name: 'App Two', client_id: 'cli_two' },
+    ];
+
+    const assets = await dryRunFormatAssets(
+      {
+        clients: [{ name: 'App One' }, { name: 'App Two' }],
+        databases: [{ name: 'db-one', enabled_clients: ['App One', 'App Two'] }],
+      },
+      auth0Client
+    );
+
+    expect(assets.databases![0].enabled_clients).to.deep.equal(['cli_one', 'cli_two']);
+  });
+
+  it('should rename action deployed field to all_changes_deployed', async () => {
+    const auth0Client = mockMgmtClient() as any;
+    auth0Client.clients.list = () => [];
+
+    const assets = await dryRunFormatAssets(
+      {
+        actions: [{ name: 'action-one', deployed: true }],
+      },
+      auth0Client
+    );
+
+    expect(assets.actions![0]).to.have.property('all_changes_deployed', true);
+    expect(assets.actions![0]).to.not.have.property('deployed');
+  });
+
+  it('should decode base64 cert for samlp connections', async () => {
+    const auth0Client = mockMgmtClient() as any;
+    auth0Client.clients.list = () => [];
+
+    const certPem = '-----BEGIN CERTIFICATE-----\nTEST\n-----END CERTIFICATE-----';
+    const certBase64 = Buffer.from(certPem).toString('base64');
+
+    const assets = await dryRunFormatAssets(
+      {
+        connections: [
+          {
+            name: 'saml-conn',
+            strategy: 'samlp',
+            options: { cert: certBase64 },
+          },
+        ],
+      },
+      auth0Client
+    );
+
+    expect(assets.connections![0].options.cert).to.equal(certPem);
+  });
+
+  it('should convert connection enabled_clients from names to ids', async () => {
+    const auth0Client = mockMgmtClient() as any;
+    auth0Client.clients.list = () => [{ name: 'App A', client_id: 'cli_a' }];
+
+    const assets = await dryRunFormatAssets(
+      {
+        connections: [
+          {
+            name: 'google-oauth2',
+            strategy: 'google-oauth2',
+            enabled_clients: ['App A'],
+          },
+        ],
+      },
+      auth0Client
+    );
+
+    expect(assets.connections![0].enabled_clients).to.deep.equal(['cli_a']);
+  });
+
+  it('should remove empty branding templates array', async () => {
+    const auth0Client = mockMgmtClient() as any;
+    auth0Client.clients.list = () => [];
+
+    const assets = await dryRunFormatAssets(
+      {
+        branding: { logo_url: 'https://example.com/logo.png', templates: [] },
+      },
+      auth0Client
+    );
+
+    expect(assets.branding).to.not.have.property('templates');
+    expect(assets.branding!.logo_url).to.equal('https://example.com/logo.png');
+  });
+
+  it('should not skip databases when localAssets.clients is missing', async () => {
+    const auth0Client = mockMgmtClient() as any;
+    auth0Client.clients.list = () => [];
+
+    const assets = await dryRunFormatAssets(
+      {
+        databases: [{ name: 'db-one', enabled_clients: ['App One'] }],
+      },
+      auth0Client
+    );
+
+    // Without clients, the databases branch is skipped — enabled_clients remain as names
+    expect(assets.databases![0].enabled_clients).to.deep.equal(['App One']);
   });
 });

@@ -2,7 +2,7 @@
 
 The Auth0 Deploy CLI supports a "dry run" mode that allows you to preview all potential changes to your Auth0 tenant without actually applying them. This feature provides a safety net for validating configurations and understanding the impact of deployments before they occur.
 
-[Discussions thread](https://github.com/auth0/auth0-deploy-cli/discussions/1092?sort=new)
+[Discussions thread](https://github.com/auth0/auth0-deploy-cli/discussions/1149)
 
 ## Usage
 

@@ -6,7 +6,9 @@ import DatabasesHandler from '../../../../src/tools/auth0/handlers/databases';
 import HooksHandler from '../../../../src/tools/auth0/handlers/hooks';
 import RulesConfigsHandler from '../../../../src/tools/auth0/handlers/rulesConfigs';
 import RulesHandler from '../../../../src/tools/auth0/handlers/rules';
+import DefaultHandler from '../../../../src/tools/auth0/handlers/default';
 import constants from '../../../../src/tools/constants';
+import { configFactory } from '../../../../src/configFactory';
 import { mockPagedData } from '../../../utils';
 
 const pool = {
@@ -296,5 +298,88 @@ describe('#handler dryRunChanges', () => {
 
     expect(changes.update).to.have.length(1);
     expect(changes.update[0].secrets).to.equal(undefined);
+  });
+});
+
+describe('#getResourceName', () => {
+  function createHandler(type: string): DefaultHandler {
+    return new DefaultHandler({
+      // @ts-ignore test stub
+      config: configFactory(),
+      type,
+      id: 'id',
+      identifiers: ['id', 'name'],
+    });
+  }
+
+  it('should return name when present', () => {
+    const handler = createHandler('clients');
+    expect(handler.getResourceName({ name: 'My App' })).to.equal('My App');
+  });
+
+  it('should return display_name when name is absent', () => {
+    const handler = createHandler('clients');
+    expect(handler.getResourceName({ display_name: 'My Display Name' })).to.equal(
+      'My Display Name'
+    );
+  });
+
+  it('should return template when name and display_name are absent', () => {
+    const handler = createHandler('emailTemplates');
+    expect(handler.getResourceName({ template: 'verify_email' })).to.equal('verify_email');
+  });
+
+  it('should return email property as fallback', () => {
+    const handler = createHandler('users');
+    expect(handler.getResourceName({ email: 'test@example.com' })).to.equal('test@example.com');
+  });
+
+  it('should format clientGrants as "client_id -> audience"', () => {
+    const handler = createHandler('clientGrants');
+    expect(
+      handler.getResourceName({ client_id: 'cli_123', audience: 'https://api.example.com' })
+    ).to.equal('cli_123 -> https://api.example.com');
+  });
+
+  it('should return name or type for guardianFactors', () => {
+    const handler = createHandler('guardianFactors');
+    expect(handler.getResourceName({ type: 'sms' })).to.equal('sms');
+  });
+
+  it('should return template for emailTemplates type when no name', () => {
+    const handler = createHandler('emailTemplates');
+    expect(handler.getResourceName({ template: 'welcome_email' })).to.equal('welcome_email');
+  });
+
+  it('should return description or priority for networkACLs', () => {
+    const handler = createHandler('networkACLs');
+    expect(handler.getResourceName({ description: 'Block list' })).to.equal('Block list');
+    expect(handler.getResourceName({ priority: 10 })).to.equal('priority:10');
+  });
+
+  it('should return domain for customDomains', () => {
+    const handler = createHandler('customDomains');
+    expect(handler.getResourceName({ domain: 'auth.example.com' })).to.equal('auth.example.com');
+  });
+
+  it('should return "{type} settings" for singleton resource types', () => {
+    const singletonTypes = [
+      'tenant',
+      'attackProtection',
+      'branding',
+      'emailProvider',
+      'guardianPhoneFactorSelectedProvider',
+      'guardianPolicies',
+      'riskAssessment',
+    ];
+    singletonTypes.forEach((type) => {
+      const handler = createHandler(type);
+      expect(handler.getResourceName({})).to.equal(`${type} settings`);
+    });
+  });
+
+  it('should return "unnamed resource" as fallback', () => {
+    const handler = createHandler('unknownType');
+    expect(handler.getResourceName({})).to.equal('unnamed resource');
   });
 });
