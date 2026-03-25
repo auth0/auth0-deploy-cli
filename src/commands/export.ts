@@ -15,6 +15,7 @@ export default async function exportCMD(params: ExportParams) {
     config_file: configFile,
     config: configObj,
     export_ids: exportIds,
+    sortKeys,
     secret: clientSecret,
     env: shouldInheritEnv = false,
     experimental_ea: experimentalEA,
@@ -43,6 +44,11 @@ export default async function exportCMD(params: ExportParams) {
   // Allow passed in export_ids to override the configured one
   if (exportIds) {
     overrides.AUTH0_EXPORT_IDENTIFIERS = exportIds;
+  }
+
+  // Allow passed in sort_keys to override the configured one
+  if (sortKeys) {
+    overrides.AUTH0_SORT_JSON_KEYS = sortKeys;
   }
 
   // Overrides AUTH0_INCLUDE_EXPERIMENTAL_EA is experimental_ea passed in command line

@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
+import nconf from 'nconf';
 import sanitizeName from 'sanitize-filename';
 import dotProp from 'dot-prop';
 import { forOwn, isObject } from 'lodash';
@@ -51,10 +52,27 @@ export function loadJSON(
   }
 }
 
+function sortedKeysReplacer(_key: string, value: unknown): unknown {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return Object.keys(value as object)
+      .sort()
+      .reduce(
+        (acc, k) => {
+          (acc as Record<string, unknown>)[k] = (value as Record<string, unknown>)[k];
+          return acc;
+        },
+        {} as Record<string, unknown>
+      );
+  }
+  return value;
+}
+
 export function dumpJSON(file: string, mappings: { [key: string]: any }): void {
   try {
     log.info(`Writing ${file}`);
-    const jsonBody = JSON.stringify(mappings, null, 2);
+    const sortKeys = Boolean(nconf.get('AUTH0_SORT_JSON_KEYS'));
+    const replacer = sortKeys ? sortedKeysReplacer : undefined;
+    const jsonBody = JSON.stringify(mappings, replacer, 2);
     fs.writeFileSync(file, jsonBody.endsWith('\n') ? jsonBody : `${jsonBody}\n`);
   } catch (e) {
     throw new Error(`Error writing JSON to metadata file: ${file}, because: ${e.message}`);
