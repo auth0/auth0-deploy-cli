@@ -376,12 +376,6 @@ describe('#customDomains handler', () => {
 
     const auth0ApiClientMock = {
       customDomains: {
-        _options: {
-          authProvider: {
-            getAuthRequest: async () => ({ headers: { Authorization: 'Bearer test-token' } }),
-          },
-          baseUrl: 'https://test.auth0.com',
-        },
         list: async () => [existingCustomDomain],
         create: async () => {},
         update: async (args, data) => {
@@ -389,6 +383,7 @@ describe('#customDomains handler', () => {
           return {};
         },
         delete: async () => {},
+        setDefault: async () => {},
       },
       pool: new PromisePoolExecutor({
         concurrencyLimit: 3,
@@ -397,22 +392,13 @@ describe('#customDomains handler', () => {
       }),
     };
 
-    // Mock global fetch for the setDefaultDomain call
-    const originalFetch = globalThis.fetch;
     // @ts-ignore
-    globalThis.fetch = async () => ({ ok: true, text: async () => '' });
+    const handler = new customDomainsHandler({
+      config: () => {},
+      client: auth0ApiClientMock as unknown as Auth0APIClient,
+    });
 
-    try {
-      // @ts-ignore
-      const handler = new customDomainsHandler({
-        config: () => {},
-        client: auth0ApiClientMock as unknown as Auth0APIClient,
-      });
-
-      await handler.processChanges({ customDomains: [updatedCustomDomainWithExtraFields] });
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
+    await handler.processChanges({ customDomains: [updatedCustomDomainWithExtraFields] });
 
     // Verify that stripped fields are not present
     expect(updateCallData).to.not.have.property('domain');
