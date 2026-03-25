@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.29.3] - 2026-03-25
+
 ### Fixed
 
 - Fix Universal Login Authentication Profile reverting to Identifier+Password after import when branding is included. [#1333]
@@ -1690,7 +1692,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1320]: https://github.com/auth0/auth0-deploy-cli/issues/1320
 [#1321]: https://github.com/auth0/auth0-deploy-cli/issues/1321
 [#1322]: https://github.com/auth0/auth0-deploy-cli/issues/1322
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.2...HEAD
+[#1333]: https://github.com/auth0/auth0-deploy-cli/issues/1333
+[#1334]: https://github.com/auth0/auth0-deploy-cli/issues/1334
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.3...HEAD
+[8.29.3]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.2...v8.29.3
 [8.29.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.1...v8.29.2
 [8.29.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.0...v8.29.1
 [8.29.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.28.0...v8.29.0
