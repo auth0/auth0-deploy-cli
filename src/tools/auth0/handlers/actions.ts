@@ -315,7 +315,7 @@ export default class ActionHandler extends DefaultAPIHandler {
               )?.id
               if (!moduleVersionId) {
                 throw new Error(
-                  `Could not find module version id for module '${module.module_name}' version '${module.module_version_number}'`
+                  `Could not find action module version id for module '${module.module_name}' version '${module.module_version_number}'`
                 );
               }
 
