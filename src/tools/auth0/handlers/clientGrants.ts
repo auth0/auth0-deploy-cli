@@ -52,7 +52,11 @@ export default class ClientGrantsHandler extends DefaultHandler {
       type: 'clientGrants',
       id: 'id',
       // @ts-ignore because not sure why two-dimensional array passed in
-      identifiers: ['id', ['client_id', 'audience']],
+      // ['client_id', 'audience', 'subject_type'] is tried first to correctly distinguish grants
+      // that share the same client_id+audience but have different subject_type values.
+      // Because subject_type can be null (falsy), the calculateChanges matching naturally falls
+      // through to ['client_id', 'audience'] for grants that have no subject_type.
+      identifiers: ['id', ['client_id', 'audience', 'subject_type'], ['client_id', 'audience']],
       stripUpdateFields: ['audience', 'client_id', 'subject_type', 'is_system'],
     });
   }

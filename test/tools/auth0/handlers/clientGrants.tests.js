@@ -433,6 +433,70 @@ describe('#clientGrants handler', () => {
       await stageFn.apply(handler, [{ clientGrants: data }]);
     });
 
+    it('should match grants by subject_type and be order-independent when multiple grants share the same client_id+audience', async () => {
+      const updatedIds = [];
+      const updatedScopes = {};
+
+      const auth0 = {
+        clientGrants: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (id, data) {
+            updatedIds.push(id);
+            updatedScopes[id] = data.scope;
+            return Promise.resolve({ data: { id, ...data } });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'client_grants', [
+              {
+                id: 'cg_regular',
+                client_id: 'client1',
+                audience: 'https://api.example.com',
+                scope: ['read:data'],
+                subject_type: null,
+              },
+              {
+                id: 'cg_exchange',
+                client_id: 'client1',
+                audience: 'https://api.example.com',
+                scope: ['write:data'],
+                subject_type: 'client',
+              },
+            ]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // YAML in reversed order vs API order — should still match correctly by subject_type
+      const data = [
+        {
+          client_id: 'client1',
+          audience: 'https://api.example.com',
+          scope: ['write:data'],
+          subject_type: 'client',
+        },
+        {
+          client_id: 'client1',
+          audience: 'https://api.example.com',
+          scope: ['read:data'],
+          subject_type: null,
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+
+      // cg_regular (subject_type: null) must keep its scope ['read:data']
+      expect(updatedScopes['cg_regular']).to.deep.equal(['read:data']);
+      // cg_exchange (subject_type: 'client') must keep its scope ['write:data']
+      expect(updatedScopes['cg_exchange']).to.deep.equal(['write:data']);
+    });
+
     it('should delete client grant and create another one instead', async () => {
       const auth0 = {
         clientGrants: {
