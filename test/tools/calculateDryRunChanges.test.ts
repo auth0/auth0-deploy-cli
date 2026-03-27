@@ -727,4 +727,73 @@ describe('#dryRunFormatAssets additional paths', () => {
     // Without clients, the databases branch is skipped — enabled_clients remain as names
     expect(assets.databases![0].enabled_clients).to.deep.equal(['App One']);
   });
+
+  it('should preserve non-empty branding templates array', async () => {
+    const auth0Client = mockMgmtClient() as any;
+    auth0Client.clients.list = () => [];
+
+    const assets = await dryRunFormatAssets(
+      {
+        branding: {
+          logo_url: 'https://example.com/logo.png',
+          templates: [{ template: 'login', body: '<html>...</html>' }],
+        },
+      },
+      auth0Client
+    );
+
+    expect(assets.branding!.templates).to.have.length(1);
+  });
+
+  it('should leave actions without a deployed field unchanged', async () => {
+    const auth0Client = mockMgmtClient() as any;
+    auth0Client.clients.list = () => [];
+
+    const assets = await dryRunFormatAssets(
+      {
+        actions: [{ name: 'action-no-deployed', runtime: 'node18' }],
+      },
+      auth0Client
+    );
+
+    expect(assets.actions![0]).to.not.have.property('deployed');
+    expect(assets.actions![0]).to.not.have.property('all_changes_deployed');
+  });
+});
+
+describe('#calculateDryRunChanges null-safety', () => {
+  it('should treat all local assets as creates when existing is null', () => {
+    const changes = calculateDryRunChanges({
+      type: 'clients',
+      assets: [{ name: 'New App', app_type: 'spa' }],
+      existing: null,
+      identifiers: ['name'],
+      ignoreDryRunFields: [],
+    });
+
+    expect(changes.create).to.have.length(1);
+    expect(changes.create[0].name).to.equal('New App');
+    expect(changes.update).to.have.length(0);
+    expect(changes.del).to.have.length(0);
+  });
+
+  it('should preserve non-empty tenant flags during dry-run comparison', () => {
+    const changes = calculateDryRunChanges({
+      type: 'tenant',
+      assets: {
+        friendly_name: 'Auth0 test',
+        flags: { mfa_show_factor_list_on_enrollment: true },
+      },
+      existing: {
+        friendly_name: 'Auth0 test',
+        flags: { mfa_show_factor_list_on_enrollment: true },
+      },
+      identifiers: ['friendly_name'],
+      ignoreDryRunFields: [],
+    });
+
+    expect(changes.update).to.have.length(0);
+    expect(changes.create).to.have.length(0);
+    expect(changes.del).to.have.length(0);
+  });
 });

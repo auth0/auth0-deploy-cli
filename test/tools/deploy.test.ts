@@ -88,4 +88,63 @@ describe('#tools deploy dry-run modes', () => {
     sinon.assert.calledOnceWithExactly(dryRunStub, { interactive: false });
     sinon.assert.notCalled(processChangesStub);
   });
+
+  it('should throw before validate when AUTH0_DRY_RUN is an invalid value', async () => {
+    const validateStub = sandbox.stub(Auth0.prototype, 'validate').resolves();
+    sandbox.stub(Auth0.prototype, 'processChanges').resolves();
+
+    const config = buildConfig({ AUTH0_DRY_RUN: 'not-a-mode' });
+
+    try {
+      await deploy({}, {} as any, config);
+      throw new Error('Expected deploy to throw');
+    } catch (err) {
+      sinon.assert.notCalled(validateStub);
+      if ((err as Error).message === 'Expected deploy to throw') throw err;
+    }
+  });
+
+  it('should call processChanges and return handler summary when dry-run is not set', async () => {
+    sandbox.stub(Auth0.prototype, 'validate').resolves();
+    const dryRunStub = sandbox.stub(Auth0.prototype, 'dryRun').resolves(true);
+    const processChangesStub = sandbox.stub(Auth0.prototype, 'processChanges').resolves();
+
+    const config = buildConfig({});
+    const result = await deploy({}, {} as any, config);
+
+    sinon.assert.notCalled(dryRunStub);
+    sinon.assert.calledOnce(processChangesStub);
+    sinon.assert.match(result, sinon.match.object);
+  });
+
+  it('should pass interactive=true to dryRun when AUTH0_DRY_RUN_INTERACTIVE is set', async () => {
+    sandbox.stub(Auth0.prototype, 'validate').resolves();
+    const dryRunStub = sandbox.stub(Auth0.prototype, 'dryRun').resolves(false);
+    sandbox.stub(Auth0.prototype, 'processChanges').resolves();
+
+    const config = buildConfig({
+      AUTH0_DRY_RUN: 'preview',
+      AUTH0_DRY_RUN_INTERACTIVE: true,
+      AUTH0_DRY_RUN_APPLY: false,
+    });
+
+    await deploy({}, {} as any, config);
+
+    sinon.assert.calledOnceWithExactly(dryRunStub, { interactive: true });
+  });
+
+  it('should normalize AUTH0_DRY_RUN=true (boolean) to preview mode', async () => {
+    sandbox.stub(Auth0.prototype, 'validate').resolves();
+    const dryRunStub = sandbox.stub(Auth0.prototype, 'dryRun').resolves(false);
+    sandbox.stub(Auth0.prototype, 'processChanges').resolves();
+
+    const config = buildConfig({
+      AUTH0_DRY_RUN: true,
+      AUTH0_DRY_RUN_INTERACTIVE: false,
+    });
+
+    await deploy({}, {} as any, config);
+
+    sinon.assert.calledOnceWithExactly(dryRunStub, { interactive: false });
+  });
 });

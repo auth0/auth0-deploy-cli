@@ -24,6 +24,11 @@ export default async function deploy(
   const dryRunMode = config('AUTH0_DRY_RUN');
   // Normalize boolean true (EA compat) → 'preview'
   const effectiveMode = dryRunMode === true || dryRunMode === 'true' ? 'preview' : dryRunMode;
+
+  if (dryRunMode && effectiveMode !== 'preview') {
+    throw new Error(`Invalid AUTH0_DRY_RUN value: ${dryRunMode}. Use true or 'preview'.`);
+  }
+
   const isInteractive = !!config('AUTH0_DRY_RUN_INTERACTIVE');
   const shouldApplyAfterPreview = isTruthy(config('AUTH0_DRY_RUN_APPLY'));
 
@@ -45,10 +50,6 @@ export default async function deploy(
     if (!shouldApplyAfterPreview || !hasChanges) {
       return zeroChangeSummary(auth0);
     }
-  }
-
-  if (dryRunMode && effectiveMode !== 'preview') {
-    throw new Error(`Invalid AUTH0_DRY_RUN value: ${dryRunMode}. Use true or 'preview'.`);
   }
 
   // Process changes

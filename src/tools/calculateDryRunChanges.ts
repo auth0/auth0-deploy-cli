@@ -311,12 +311,12 @@ export function calculateDryRunChanges({
   const create: Asset[] = [];
   const conflicts: Asset[] = [];
 
-  const localAssets: Asset[] = (Array.isArray(assets) ? [...assets] : [assets]).map((asset) =>
-    type === 'tenant' ? normalizeTenantForDryRun(asset) : asset
-  );
-  const remoteAssets: Asset[] = (Array.isArray(existing) ? [...existing] : [existing]).map(
-    (asset) => (type === 'tenant' ? normalizeTenantForDryRun(asset) : asset)
-  );
+  const localAssets: Asset[] = (Array.isArray(assets) ? [...assets] : [assets])
+    .filter((asset): asset is Asset => asset != null)
+    .map((asset) => (type === 'tenant' ? normalizeTenantForDryRun(asset) : asset));
+  const remoteAssets: Asset[] = (Array.isArray(existing) ? [...existing] : [existing])
+    .filter((asset): asset is Asset => asset != null)
+    .map((asset) => (type === 'tenant' ? normalizeTenantForDryRun(asset) : asset));
 
   // Helper: returns true if a local and remote asset share at least one identifier value
   const assetsMatch = (localAsset: Asset, remoteAsset: Asset) =>
