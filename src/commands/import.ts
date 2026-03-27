@@ -37,6 +37,14 @@ export default async function importCMD(params: ImportParams) {
     throw new Error('--apply must be used with --dry-run.');
   }
 
+  if (interactive && !effectiveDryRun) {
+    throw new Error('--interactive must be used with --dry-run.');
+  }
+
+  if (interactive && apply) {
+    throw new Error('--interactive and --apply cannot be used together.');
+  }
+
   if (shouldInheritEnv) {
     nconf.env().use('memory');
 
@@ -61,7 +69,7 @@ export default async function importCMD(params: ImportParams) {
     overrides.AUTH0_CLIENT_SECRET = clientSecret;
   }
 
-  // Overrides AUTH0_INCLUDE_EXPERIMENTAL_EA is experimental_ea passed in command line
+  // Overrides AUTH0_EXPERIMENTAL_EA if experimental_ea is passed in command line
   if (experimentalEA) {
     overrides.AUTH0_EXPERIMENTAL_EA = experimentalEA;
 

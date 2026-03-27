@@ -87,6 +87,38 @@ describe('#import command dry-run behavior', () => {
     }
   });
 
+  it('should require --dry-run when interactive is enabled', async () => {
+    try {
+      await importCMD({
+        _: ['import'],
+        input_file: 'tenant.yaml',
+        interactive: true,
+        env: false,
+      } as any);
+      expect.fail('Expected importCMD to reject when --interactive is used without --dry-run.');
+    } catch (error) {
+      expect((error as Error).message).to.equal('--interactive must be used with --dry-run.');
+    }
+  });
+
+  it('should reject when --interactive and --apply are used together', async () => {
+    try {
+      await importCMD({
+        _: ['import'],
+        input_file: 'tenant.yaml',
+        dry_run: true,
+        interactive: true,
+        apply: true,
+        env: false,
+      } as any);
+      expect.fail('Expected importCMD to reject when --interactive and --apply are both set.');
+    } catch (error) {
+      expect((error as Error).message).to.equal(
+        '--interactive and --apply cannot be used together.'
+      );
+    }
+  });
+
   it('should set AUTH0_DRY_RUN_APPLY when apply is enabled', async () => {
     await importCMD({
       _: ['import'],

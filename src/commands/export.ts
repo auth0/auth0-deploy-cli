@@ -45,7 +45,7 @@ export default async function exportCMD(params: ExportParams) {
     overrides.AUTH0_EXPORT_IDENTIFIERS = exportIds;
   }
 
-  // Overrides AUTH0_INCLUDE_EXPERIMENTAL_EA is experimental_ea passed in command line
+  // Overrides AUTH0_EXPERIMENTAL_EA if experimental_ea is passed in command line
   if (experimentalEA) {
     overrides.AUTH0_EXPERIMENTAL_EA = experimentalEA;
 
