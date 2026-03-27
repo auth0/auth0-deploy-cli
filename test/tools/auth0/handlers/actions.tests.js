@@ -630,6 +630,69 @@ describe('#actions handler', () => {
       expect(createCalledWith.modules[0].module_id).to.equal(moduleId);
     });
 
+    it('should throw an error when the requested module version number is not found in API', async () => {
+      const actionId = 'action-missing-version-id';
+      const moduleId = 'module-id-from-api';
+
+      const action = {
+        name: 'action-missing-version',
+        supported_triggers: [{ id: 'post-login', version: 'v1' }],
+        // references version 99 which does not exist in the API
+        modules: [{ module_name: 'test-module', module_version_number: 99 }],
+      };
+
+      const auth0 = {
+        actions: {
+          get: () => Promise.resolve({ data: { ...action, id: actionId } }),
+          create: (data) => Promise.resolve({ data: { ...data, id: actionId } }),
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: () => {
+            if (!auth0.listCalled) {
+              auth0.listCalled = true;
+              return mockPagedData({ include_totals: true }, 'actions', []);
+            }
+            return mockPagedData({ include_totals: true }, 'actions', [
+              { name: action.name, supported_triggers: action.supported_triggers, id: actionId },
+            ]);
+          },
+          createVersion: () =>
+            Promise.resolve({
+              data: { code: 'action-code', dependencies: [], id: 'version-id', runtime: 'node12', secrets: [] },
+            }),
+          modules: {
+            list: () =>
+              mockPagedData({ paginate: true }, 'modules', [
+                { id: moduleId, name: 'test-module', code: 'module.exports = {};' },
+              ]),
+            versions: {
+              list: () =>
+                Promise.resolve(
+                  // Only version 1 exists — version 99 is absent
+                  mockPagedData({ paginate: true }, 'versions', [{ id: 'v1-uuid', version_number: 1 }])
+                ),
+            },
+          },
+        },
+        pool: {
+          addEachTask: (data) => {
+            const results = data.data.map(data.generator);
+            return { promise: () => Promise.all(results) };
+          },
+        },
+        listCalled: false,
+      };
+
+      const handler = new actions.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await expect(
+        stageFn.apply(handler, [{ actions: [action] }])
+      ).to.be.rejectedWith(
+        /Could not find action module version id for module 'test-module' version '99'/
+      );
+    });
+
     it('should handle actions without modules', async () => {
       const actionId = 'action-no-modules-id';
       const action = {
