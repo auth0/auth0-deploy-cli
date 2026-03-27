@@ -48,7 +48,7 @@ export default async function exportCMD(params: ExportParams) {
 
   // Allow passed in sort_keys to override the configured one
   if (sortKeys) {
-    overrides.AUTH0_SORT_JSON_KEYS = sortKeys;
+    overrides.AUTH0_EXPORT_ORDERED = sortKeys;
   }
 
   // Overrides AUTH0_INCLUDE_EXPERIMENTAL_EA is experimental_ea passed in command line

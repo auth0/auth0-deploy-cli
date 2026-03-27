@@ -37,6 +37,10 @@ Boolean. Enables more verbose error logging; useful during troubleshooting. Defa
 
 A url for proxying requests. Only set this if you are behind a proxy.
 
+### `--sort-keys`
+
+Boolean. When enabled, exports resource configuration files with keys sorted alphabetically, producing stable and deterministic output. Useful for reducing noise in diffs. Default: `false`.
+
 ### `--experimental_ea`
 
 Boolean. When enabled, gain early access Auth0 resources support and experimental features. Default: `false`.

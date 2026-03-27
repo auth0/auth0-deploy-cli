@@ -54,15 +54,8 @@ export function loadJSON(
 
 function sortedKeysReplacer(_key: string, value: unknown): unknown {
   if (value && typeof value === 'object' && !Array.isArray(value)) {
-    return Object.keys(value as object)
-      .sort()
-      .reduce(
-        (acc, k) => {
-          (acc as Record<string, unknown>)[k] = (value as Record<string, unknown>)[k];
-          return acc;
-        },
-        {} as Record<string, unknown>
-      );
+    const obj = value as Record<string, unknown>;
+    return Object.fromEntries(Object.keys(obj).sort().map((k) => [k, obj[k]]));
   }
   return value;
 }
@@ -70,7 +63,7 @@ function sortedKeysReplacer(_key: string, value: unknown): unknown {
 export function dumpJSON(file: string, mappings: { [key: string]: any }): void {
   try {
     log.info(`Writing ${file}`);
-    const sortKeys = Boolean(nconf.get('AUTH0_SORT_JSON_KEYS'));
+    const sortKeys = Boolean(nconf.get('AUTH0_EXPORT_ORDERED'));
     const replacer = sortKeys ? sortedKeysReplacer : undefined;
     const jsonBody = JSON.stringify(mappings, replacer, 2);
     fs.writeFileSync(file, jsonBody.endsWith('\n') ? jsonBody : `${jsonBody}\n`);

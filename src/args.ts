@@ -111,9 +111,9 @@ function getParams(): CliParams {
         type: 'boolean',
         default: false,
       },
-      sort_keys: {
+      export_ordered: {
         alias: 's',
-        describe: 'Sort keys in exported JSON files for consistent diffs.',
+        describe: 'Order keys in exported JSON files for consistent diffs.',
         type: 'boolean',
         default: false,
       },

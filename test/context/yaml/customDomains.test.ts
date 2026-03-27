@@ -49,7 +49,7 @@ describe('#YAML context custom domains', () => {
     expect(dumped).to.deep.equal({ customDomains: context.assets.customDomains });
   });
 
-  it('should write YAML file with sorted keys when AUTH0_SORT_JSON_KEYS is true', async () => {
+  it('should write YAML file with sorted keys when AUTH0_EXPORT_ORDERED is true', async () => {
     const dir = path.join(testDataDir, 'yaml', 'custom_domains_sorted');
     cleanThenMkdir(dir);
 
@@ -67,7 +67,7 @@ describe('#YAML context custom domains', () => {
     const context = new Context(
       {
         AUTH0_INPUT_FILE: yamlFile,
-        AUTH0_SORT_JSON_KEYS: true,
+        AUTH0_EXPORT_ORDERED: true,
         AUTH0_INCLUDED_ONLY: ['customDomains'],
       } as any,
       mockClient as any

@@ -226,7 +226,7 @@ describe('#utils', function () {
       }).throws(/Error writing JSON.*/);
     });
 
-    describe('with AUTH0_SORT_JSON_KEYS=true', () => {
+    describe('with AUTH0_EXPORT_ORDERED=true', () => {
       const unsortedObject = {
         zebra: 'z',
         apple: 'a',
@@ -235,7 +235,7 @@ describe('#utils', function () {
       const sortedFile = path.join(dir, 'test_sorted.json');
 
       before(() => {
-        nconf.overrides({ AUTH0_SORT_JSON_KEYS: true });
+        nconf.overrides({ AUTH0_EXPORT_ORDERED: true });
         dumpJSON(sortedFile, unsortedObject);
         nconf.overrides({});
       });
