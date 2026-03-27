@@ -551,6 +551,85 @@ describe('#actions handler', () => {
       await stageFn.apply(handler, [{ actions: [action] }]);
     });
 
+    it('should fetch modules from API even when actionModules are provided in assets', async () => {
+      const actionId = 'action-with-modules-id';
+      const moduleId = 'module-id-from-api';
+      const moduleVersionId = 'version-uuid-from-api';
+
+      const action = {
+        name: 'action-with-modules',
+        supported_triggers: [{ id: 'post-login', version: 'v1' }],
+        modules: [{ module_name: 'test-module', module_version_number: 1 }],
+      };
+
+      // Local config module — has no `id` field (desired state only)
+      const localConfigModule = { name: 'test-module', code: 'module.exports = {};' };
+
+      let modulesListCalled = false;
+      let createCalledWith = null;
+
+      const auth0 = {
+        actions: {
+          get: () => Promise.resolve({ data: { ...action, id: actionId } }),
+          create: (data) => {
+            createCalledWith = data;
+            return Promise.resolve({ data: { ...data, id: actionId } });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: () => {
+            if (!auth0.listCalled) {
+              auth0.listCalled = true;
+              return mockPagedData({ include_totals: true }, 'actions', []);
+            }
+            return mockPagedData({ include_totals: true }, 'actions', [
+              { name: action.name, supported_triggers: action.supported_triggers, id: actionId },
+            ]);
+          },
+          createVersion: () =>
+            Promise.resolve({
+              data: { code: 'action-code', dependencies: [], id: 'version-id', runtime: 'node12', secrets: [] },
+            }),
+          modules: {
+            list: () => {
+              modulesListCalled = true;
+              return mockPagedData({ paginate: true }, 'modules', [
+                { id: moduleId, name: 'test-module', code: 'module.exports = {};' },
+              ]);
+            },
+            versions: {
+              list: () =>
+                Promise.resolve(
+                  mockPagedData({ paginate: true }, 'versions', [
+                    { id: moduleVersionId, version_number: 1 },
+                  ])
+                ),
+            },
+          },
+        },
+        pool: {
+          addEachTask: (data) => {
+            const results = data.data.map(data.generator);
+            return { promise: () => Promise.all(results) };
+          },
+        },
+        listCalled: false,
+      };
+
+      const handler = new actions.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Pass both actions and actionModules in assets (the bug scenario)
+      await stageFn.apply(handler, [{ actions: [action], actionModules: [localConfigModule] }]);
+
+      // API must have been called to resolve module IDs — not the local config shortcut
+      expect(modulesListCalled).to.equal(true);
+
+      // The created action must have a valid module_version_id, not undefined or ''
+      expect(createCalledWith.modules[0].module_version_id).to.equal(moduleVersionId);
+      expect(createCalledWith.modules[0].module_id).to.equal(moduleId);
+    });
+
     it('should handle actions without modules', async () => {
       const actionId = 'action-no-modules-id';
       const action = {
