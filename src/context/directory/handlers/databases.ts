@@ -103,9 +103,15 @@ function parse(context: DirectoryContext): ParsedDatabases {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const { databases } = context.assets;
+  let { databases } = context.assets;
 
   if (!databases) return; // Skip, nothing to dump
+
+  // Filter excluded databases
+  const excludedDatabases = (context.assets.exclude && context.assets.exclude.databases) || [];
+  if (excludedDatabases.length) {
+    databases = databases.filter((database) => !excludedDatabases.includes(database.name));
+  }
 
   const databasesFolder = path.join(context.filePath, constants.DATABASE_CONNECTIONS_DIRECTORY);
   fs.ensureDirSync(databasesFolder);
