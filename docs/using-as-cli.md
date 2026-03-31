@@ -25,6 +25,10 @@ Options: yaml or directory. Determines the file format of the exported resource 
 
 Boolean. When enabled, will export the identifier fields for each resource. Default: `false`.
 
+### `--export_ordered`, `-s`
+
+Boolean. When enabled, exports resource configuration files with keys sorted alphabetically, producing stable and deterministic output. Useful for reducing noise in diffs. Default: `false`.
+
 ### `--env`
 
 Boolean. Indicates if the tool should ingest environment variables or not. Default: `true`.
@@ -36,10 +40,6 @@ Boolean. Enables more verbose error logging; useful during troubleshooting. Defa
 ### `--proxy_url`, `-p`
 
 A url for proxying requests. Only set this if you are behind a proxy.
-
-### `--sort-keys`
-
-Boolean. When enabled, exports resource configuration files with keys sorted alphabetically, producing stable and deterministic output. Useful for reducing noise in diffs. Default: `false`.
 
 ### `--experimental_ea`
 

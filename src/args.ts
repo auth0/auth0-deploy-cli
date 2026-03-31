@@ -20,7 +20,7 @@ type ExportSpecificParams = {
   format: 'yaml' | 'directory';
   output_folder: string;
   export_ids?: boolean;
-  sortKeys?: boolean;
+  export_ordered?: boolean;
 };
 
 export type ExportParams = ExportSpecificParams & SharedParams;
