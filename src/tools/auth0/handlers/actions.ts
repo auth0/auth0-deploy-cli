@@ -309,15 +309,14 @@ export default class ActionHandler extends DefaultAPIHandler {
               allModuleVersions.push(...moduleVersions.data);
             }
 
-
-            const moduleVersionId =allModuleVersions?.find(
-                (v) => v.version_number === module.module_version_number
-              )?.id
-              if (!moduleVersionId) {
-                throw new Error(
-                  `Could not find action module version id for module '${module.module_name}' version '${module.module_version_number}'`
-                );
-              }
+            const moduleVersionId = allModuleVersions?.find(
+              (v) => v.version_number === module.module_version_number
+            )?.id;
+            if (!moduleVersionId) {
+              throw new Error(
+                `Could not find action module version id for module '${module.module_name}' version '${module.module_version_number}'`
+              );
+            }
 
             return {
               module_name: module.module_name,

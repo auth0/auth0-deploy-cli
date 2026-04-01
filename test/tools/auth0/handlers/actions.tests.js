@@ -588,7 +588,13 @@ describe('#actions handler', () => {
           },
           createVersion: () =>
             Promise.resolve({
-              data: { code: 'action-code', dependencies: [], id: 'version-id', runtime: 'node12', secrets: [] },
+              data: {
+                code: 'action-code',
+                dependencies: [],
+                id: 'version-id',
+                runtime: 'node12',
+                secrets: [],
+              },
             }),
           modules: {
             list: () => {
@@ -658,7 +664,13 @@ describe('#actions handler', () => {
           },
           createVersion: () =>
             Promise.resolve({
-              data: { code: 'action-code', dependencies: [], id: 'version-id', runtime: 'node12', secrets: [] },
+              data: {
+                code: 'action-code',
+                dependencies: [],
+                id: 'version-id',
+                runtime: 'node12',
+                secrets: [],
+              },
             }),
           modules: {
             list: () =>
@@ -669,7 +681,9 @@ describe('#actions handler', () => {
               list: () =>
                 Promise.resolve(
                   // Only version 1 exists — version 99 is absent
-                  mockPagedData({ paginate: true }, 'versions', [{ id: 'v1-uuid', version_number: 1 }])
+                  mockPagedData({ paginate: true }, 'versions', [
+                    { id: 'v1-uuid', version_number: 1 },
+                  ])
                 ),
             },
           },
@@ -686,9 +700,7 @@ describe('#actions handler', () => {
       const handler = new actions.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await expect(
-        stageFn.apply(handler, [{ actions: [action] }])
-      ).to.be.rejectedWith(
+      await expect(stageFn.apply(handler, [{ actions: [action] }])).to.be.rejectedWith(
         /Could not find action module version id for module 'test-module' version '99'/
       );
     });
