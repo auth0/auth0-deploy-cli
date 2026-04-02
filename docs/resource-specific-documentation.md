@@ -26,14 +26,18 @@ Folder structure when in YAML mode.
 ./prompts/
     /screenRenderSettings
         /signup-id_signup-id.json
+        /login-id_login-id.json
+        /login-passwordless_login-passwordless-email-code.json
+        /login-passwordless_login-passwordless-sms-otp.json
 ./tenant.yaml
 ```
 
 ```yaml
 # Contents of ./tenant.yaml
 prompts:
-  identifier_first: true
-  universal_login_experience: classic
+  identifier_first: false
+  universal_login_experience: new
+  webauthn_platform_first_factor: false
   customText:
     en:
       login:
@@ -47,24 +51,28 @@ prompts:
   partials:
     login:
       login:
-        form-content-start: >-
+        form-content-start: |
           <div class="custom-login-banner">
             <p>Welcome! Please log in to continue.</p>
           </div>
     passkeys:
       passkeys-enrollment:
-        form-content-start: >-
+        form-content-start: |
           <div class="passkey-enrollment-header">
             <p>Enhance your account security by creating a passkey.</p>
           </div>
       passkeys-enrollment-local:
-        form-footer-end: >-
+        form-footer-end: |
           <div class="passkey-local-enrollment-info">
             <p>This passkey will be saved to this device only.</p>
           </div>
   screenRenderers:
     - signup-id:
         signup-id: ./prompts/screenRenderSettings/signup-id_signup-id.json
+    - login-passwordless:
+        login-passwordless-email-code: ./prompts/screenRenderSettings/login-passwordless_login-passwordless-email-code.json
+        login-passwordless-sms-otp: ./prompts/screenRenderSettings/login-passwordless_login-passwordless-sms-otp.json
+```
 ```
 
 **Directory Example**
@@ -89,10 +97,11 @@ Folder structure when in directory mode.
         /login-passwordless_login-passwordless-sms-otp.json
         /login-password_login-password.json
         /signup-password_signup-password.json
-    /partials.json
     /custom-text.json
+    /partials.json
     /prompts.json
 ```
+In directory mode, `partials.json` is a manifest that maps each insertion point to its `.liquid` file (paths are relative to the `prompts/` directory):
 
 Contents of `custom-text.json`:
 
@@ -148,6 +157,14 @@ Contents of `partials.json`:
 }
 ```
 
+Contents of `partials/login/login/form-content-start.liquid`:
+
+```liquid
+<div class="login-notice">
+  Welcome back! Please log in to continue.
+</div>
+```
+
 Contents of `partials/passkeys/passkeys-enrollment/form-content-start.liquid`:
 
 ```liquid
@@ -177,6 +194,15 @@ Contents of `screenRenderSettings/signup-id_signup-id.json`:
       }
     }
   ],
+  "filters": {
+    "match_type": "includes_any",
+    "clients": [
+      {
+        "id": "SeunfRe6p8EXxV6I0g9kMYdT1DxpfC38",
+        "metadata": { "key1": "value1" }
+      }
+    ]
+  },
   "use_page_template": false
 }
 ```
