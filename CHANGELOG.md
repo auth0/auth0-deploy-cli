@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.30.0] - 2026-04-02
+
 ### Added
 
 - Add support for passkey enrollment in `prompts` partials. [#1328]
@@ -1702,9 +1704,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1320]: https://github.com/auth0/auth0-deploy-cli/issues/1320
 [#1321]: https://github.com/auth0/auth0-deploy-cli/issues/1321
 [#1322]: https://github.com/auth0/auth0-deploy-cli/issues/1322
+[#1328]: https://github.com/auth0/auth0-deploy-cli/issues/1328
 [#1333]: https://github.com/auth0/auth0-deploy-cli/issues/1333
 [#1334]: https://github.com/auth0/auth0-deploy-cli/issues/1334
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.3...HEAD
+[#1340]: https://github.com/auth0/auth0-deploy-cli/issues/1340
+[#1342]: https://github.com/auth0/auth0-deploy-cli/issues/1342
+[#1343]: https://github.com/auth0/auth0-deploy-cli/issues/1343
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.30.0...HEAD
+[8.30.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.3...v8.30.0
 [8.29.3]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.2...v8.29.3
 [8.29.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.1...v8.29.2
 [8.29.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.0...v8.29.1
