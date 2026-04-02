@@ -123,6 +123,26 @@ describe('#YAML context clients', () => {
     ).to.deep.equal('html code');
   });
 
+  it('should not dump excluded clients', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'clientsDumpExclude');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, './test.yml') },
+      mockMgmtClient()
+    );
+
+    context.assets.clients = [
+      { name: 'includedClient', app_type: 'spa' },
+      { name: 'excludedClient', app_type: 'spa' },
+    ];
+    context.assets.exclude = { clients: ['excludedClient'] };
+
+    const dumped = await handler.dump(context);
+
+    expect(dumped.clients).to.have.length(1);
+    expect(dumped.clients[0].name).to.equal('includedClient');
+  });
+
   it('should process clients with async_approval_notification_channels', async () => {
     const dir = path.join(testDataDir, 'yaml', 'clientsWithChannels');
     cleanThenMkdir(dir);

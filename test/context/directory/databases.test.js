@@ -380,4 +380,22 @@ describe('#directory context databases', () => {
     expect(dumpedDB.name).to.equal('users');
     expect(dumpedDB.strategy).to.equal('auth0');
   });
+
+  it('should not dump excluded databases', async () => {
+    const dir = path.join(testDataDir, 'directory', 'databasesDumpExclude');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.databases = [
+      { name: 'includedDb', strategy: 'auth0', options: {} },
+      { name: 'excludedDb', strategy: 'auth0', options: {} },
+    ];
+    context.assets.exclude = { databases: ['excludedDb'] };
+
+    await handler.dump(context);
+    const dbFolder = path.join(dir, constants.DATABASE_CONNECTIONS_DIRECTORY);
+
+    expect(fs.existsSync(path.join(dbFolder, 'includedDb'))).to.equal(true);
+    expect(fs.existsSync(path.join(dbFolder, 'excludedDb'))).to.equal(false);
+  });
 });
