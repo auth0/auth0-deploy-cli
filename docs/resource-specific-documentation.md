@@ -73,34 +73,34 @@ prompts:
         login-passwordless-email-code: ./prompts/screenRenderSettings/login-passwordless_login-passwordless-email-code.json
         login-passwordless-sms-otp: ./prompts/screenRenderSettings/login-passwordless_login-passwordless-sms-otp.json
 ```
-```
 
-**Directory Example**
+Directory example:
 
-```
+```text
 Folder structure when in directory mode.
 
 ./prompts/
-    /partials
-        /login
-            /login
-                /form-content-start.liquid
-        /passkeys
-            /passkeys-enrollment
-                /form-content-start.liquid
-            /passkeys-enrollment-local
-                /form-footer-end.liquid
-    /screenRenderSettings
-        /signup-id_signup-id.json
-        /login-id_login-id.json
-        /login-passwordless_login-passwordless-email-code.json
-        /login-passwordless_login-passwordless-sms-otp.json
-        /login-password_login-password.json
-        /signup-password_signup-password.json
-    /custom-text.json
-    /partials.json
-    /prompts.json
+  ./partials/
+    ./login/
+      ./login/
+        ./form-content-start.liquid
+    ./passkeys/
+      ./passkeys-enrollment/
+        ./form-content-start.liquid
+      ./passkeys-enrollment-local/
+        ./form-footer-end.liquid
+  ./screenRenderSettings/
+    ./signup-id_signup-id.json
+    ./login-id_login-id.json
+    ./login-passwordless_login-passwordless-email-code.json
+    ./login-passwordless_login-passwordless-sms-otp.json
+    ./login-password_login-password.json
+    ./signup-password_signup-password.json
+  ./custom-text.json
+  ./partials.json
+  ./prompts.json
 ```
+
 In directory mode, `partials.json` is a manifest that maps each insertion point to its `.liquid` file (paths are relative to the `prompts/` directory):
 
 Contents of `custom-text.json`:

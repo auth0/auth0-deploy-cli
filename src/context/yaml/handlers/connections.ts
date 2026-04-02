@@ -72,7 +72,9 @@ async function dump(context: YAMLContext): Promise<ParsedConnections> {
   // Filter excluded connections
   const excludedConnections = (context.assets.exclude && context.assets.exclude.connections) || [];
   if (excludedConnections.length) {
-    connections = connections.filter((connection) => !excludedConnections.includes(connection.name));
+    connections = connections.filter(
+      (connection) => !excludedConnections.includes(connection.name)
+    );
   }
 
   return {
