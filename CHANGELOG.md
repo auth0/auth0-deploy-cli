@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for passkey enrollment in `prompts` partials. [#1328]
+- Add support for `dpop_signing_alg` validation in OIDC and Okta `connections`. [#1343]
+
+### Fixed
+
+- Fix action module fetching logic to resolve correct module IDs. [#1340]
+- Fix `AUTH0_EXCLUDED_*` options not respected during export. [#1342]
+
 ## [8.29.3] - 2026-03-25
 
 ### Fixed
