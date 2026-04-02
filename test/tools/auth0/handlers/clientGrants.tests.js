@@ -645,6 +645,124 @@ describe('#clientGrants handler', () => {
       await stageFn.apply(handler, [{ clientGrants: [] }]);
     });
 
+    it('should delete and recreate a grant when local subject_type explicitly differs from remote', async () => {
+      config.data = {
+        AUTH0_CLIENT_ID: 'client_id',
+        AUTH0_ALLOW_DELETE: true,
+      };
+
+      let deletedId = null;
+      let createdData = null;
+      let updatedId = null;
+
+      const remoteGrant = {
+        id: 'cg1',
+        client_id: 'client1',
+        audience: 'https://api.example.com',
+        scope: ['read:data'],
+        subject_type: 'client_credentials',
+      };
+
+      const auth0 = {
+        clientGrants: {
+          create: function (data) {
+            createdData = data;
+            return Promise.resolve({ data });
+          },
+          update: function (id, data) {
+            updatedId = id;
+            return Promise.resolve({ data });
+          },
+          delete: function (params) {
+            deletedId = params;
+            return Promise.resolve({ data: [] });
+          },
+          list: (params) => mockPagedData(params, 'client_grants', [remoteGrant]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Local explicitly sets subject_type: null — differs from remote 'client_credentials'.
+      // Since subject_type is immutable, this must become DELETE + CREATE, not UPDATE.
+      const data = [
+        {
+          client_id: 'client1',
+          audience: 'https://api.example.com',
+          scope: ['read:data'],
+          subject_type: null,
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+
+      expect(deletedId).to.equal('cg1');
+      expect(createdData).to.not.be.null;
+      expect(createdData.client_id).to.equal('client1');
+      expect(updatedId).to.be.null;
+    });
+
+    it('should update (not delete+create) a grant when local config omits subject_type', async () => {
+      config.data = {
+        AUTH0_CLIENT_ID: 'client_id',
+        AUTH0_ALLOW_DELETE: true,
+      };
+
+      let deletedId = null;
+      let updatedId = null;
+
+      const remoteGrant = {
+        id: 'cg1',
+        client_id: 'client1',
+        audience: 'https://api.example.com',
+        scope: ['read:data'],
+        subject_type: 'client_credentials',
+      };
+
+      const auth0 = {
+        clientGrants: {
+          create: function () {
+            throw new Error('create should not be called when subject_type is omitted');
+          },
+          update: function (id, data) {
+            updatedId = id;
+            return Promise.resolve({ data });
+          },
+          delete: function (params) {
+            deletedId = params;
+            return Promise.resolve({ data: [] });
+          },
+          list: (params) => mockPagedData(params, 'client_grants', [remoteGrant]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Local does NOT specify subject_type at all — backward-compat: should update, not delete+create.
+      const data = [
+        {
+          client_id: 'client1',
+          audience: 'https://api.example.com',
+          scope: ['write:data'],
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+
+      expect(deletedId).to.be.null;
+      expect(updatedId).to.equal('cg1');
+    });
+
     it('should not touch client grants of excluded clients', async () => {
       config.data = {
         EXTENSION_SECRET: 'some-secret',

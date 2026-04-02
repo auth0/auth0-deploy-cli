@@ -157,6 +157,10 @@ export default class ClientGrantsHandler extends DefaultHandler {
     // silently preserve the wrong subject_type. Detect these mismatches and convert them
     // from UPDATE → DELETE + CREATE so the tenant converges to the desired state.
     const subjectTypeMismatches = update.filter((localGrant) => {
+      // Only flag a mismatch when local config explicitly specifies subject_type.
+      // If subject_type is absent (undefined) in local config, the user is not
+      // expressing intent to change it — treat as no mismatch.
+      if (localGrant.subject_type === undefined) return false;
       const remoteGrant = (this.existing || []).find((e) => e.id === localGrant.id);
       return (
         remoteGrant && (remoteGrant.subject_type ?? null) !== (localGrant.subject_type ?? null)
