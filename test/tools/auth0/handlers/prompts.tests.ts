@@ -721,7 +721,7 @@ describe('#prompts handler', () => {
       const error = {
         statusCode: 400,
         message:
-          "Path validation error: 'Invalid value \"passkeys\"' on property prompt (Name of the prompt).",
+          'Path validation error: \'Invalid value "passkeys"\' on property prompt (Name of the prompt).',
       };
       const callback = sandbox.stub().rejects(error);
       const logWarn = sandbox.stub(log, 'warn');
