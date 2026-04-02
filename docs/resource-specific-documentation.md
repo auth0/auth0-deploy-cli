@@ -122,7 +122,7 @@ Contents of `custom-text.json`:
     }
   }
 }
-````
+```
 
 Contents of `partials.json`:
 
