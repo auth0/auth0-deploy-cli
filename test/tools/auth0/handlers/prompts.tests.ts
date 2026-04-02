@@ -162,6 +162,7 @@ describe('#prompts handler', () => {
       getCustomPartial.withArgs({ prompt: 'signup' }).resolves(signupPartial);
       // Stub new prompts to return empty for retrieval test
       getCustomPartial.withArgs({ prompt: 'brute-force-protection' }).resolves({});
+      getCustomPartial.withArgs({ prompt: 'passkeys' }).resolves({});
 
       const data = await handler.getType();
       expect(data).to.deep.equal({
@@ -638,6 +639,7 @@ describe('#prompts handler', () => {
       getCustomPartial.withArgs({ prompt: 'signup-id' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'brute-force-protection' }).resolves({});
+      getCustomPartial.withArgs({ prompt: 'passkeys' }).resolves({});
 
       const data = await handler.getType();
       expect(data).to.deep.equal({
@@ -711,6 +713,25 @@ describe('#prompts handler', () => {
       expect(
         logWarn.calledWith(
           'Partial Prompts feature requires at least one custom domain to be configured for the tenant'
+        )
+      ).to.be.true;
+    });
+
+    it('should handle 400 path validation error for passkeys prompt and return null', async () => {
+      const error = {
+        statusCode: 400,
+        message:
+          "Path validation error: 'Invalid value \"passkeys\"' on property prompt (Name of the prompt).",
+      };
+      const callback = sandbox.stub().rejects(error);
+      const logWarn = sandbox.stub(log, 'warn');
+
+      const result = await handler.withErrorHandling(callback);
+      expect(result).to.be.null;
+      expect(handler.IsFeatureSupported).to.be.true;
+      expect(
+        logWarn.calledWith(
+          "Skipping partials for prompt type 'passkeys' because it is not available on this tenant."
         )
       ).to.be.true;
     });
