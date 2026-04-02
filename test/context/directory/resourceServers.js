@@ -195,4 +195,22 @@ describe('#directory context resourceServers', () => {
     expect(dumpedResourceServer.name).to.equal('API with Client');
     expect(dumpedResourceServer.identifier).to.equal('http://api.example.com');
   });
+
+  it('should not dump excluded resource servers', async () => {
+    const dir = path.join(testDataDir, 'directory', 'resourceServersDumpExclude');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.resourceServers = [
+      { name: 'includedAPI', identifier: 'https://included.example.com/', scopes: [] },
+      { name: 'excludedAPI', identifier: 'https://excluded.example.com/', scopes: [] },
+    ];
+    context.assets.exclude = { resourceServers: ['excludedAPI'] };
+
+    await handler.dump(context);
+    const resourceServersFolder = path.join(dir, constants.RESOURCE_SERVERS_DIRECTORY);
+
+    expect(fs.existsSync(path.join(resourceServersFolder, 'includedAPI.json'))).to.equal(true);
+    expect(fs.existsSync(path.join(resourceServersFolder, 'excludedAPI.json'))).to.equal(false);
+  });
 });

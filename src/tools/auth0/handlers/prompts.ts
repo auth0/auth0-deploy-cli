@@ -1,6 +1,6 @@
 import { isEmpty } from 'lodash';
 import { Management } from 'auth0';
-import DefaultHandler from './default';
+import DefaultHandler, { order } from './default';
 import { Assets, Language, languages } from '../../../types';
 import log from '../../../logger';
 import { paginate } from '../client';
@@ -506,6 +506,7 @@ export default class PromptsHandler extends DefaultHandler {
     );
   }
 
+  @order('80')
   async processChanges(assets: Assets): Promise<void> {
     const { prompts } = assets;
 
