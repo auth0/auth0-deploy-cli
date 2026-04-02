@@ -151,6 +151,41 @@ export default class ClientGrantsHandler extends DefaultHandler {
       clientGrants: formatted,
     });
 
+    // subject_type is immutable via the Auth0 API (it's in stripUpdateFields and cannot
+    // be changed via an update call). If calcChanges matched two grants with different
+    // subject_types via the ['client_id', 'audience'] fallback identifier, an update would
+    // silently preserve the wrong subject_type. Detect these mismatches and convert them
+    // from UPDATE → DELETE + CREATE so the tenant converges to the desired state.
+    const subjectTypeMismatches = update.filter((localGrant) => {
+      const remoteGrant = (this.existing || []).find((e) => e.id === localGrant.id);
+      return (
+        remoteGrant && (remoteGrant.subject_type ?? null) !== (localGrant.subject_type ?? null)
+      );
+    });
+
+    const adjustedUpdate = update.filter((u) => !subjectTypeMismatches.includes(u));
+
+    const adjustedDel = [
+      ...del,
+      ...subjectTypeMismatches
+        .map((u) => (this.existing || []).find((e) => e.id === u.id))
+        .filter((e): e is ClientGrant => e !== undefined),
+    ];
+
+    const adjustedCreate = [
+      ...create,
+      ...subjectTypeMismatches
+        .map((u) =>
+          formatted.find(
+            (f) =>
+              f.client_id === u.client_id &&
+              f.audience === u.audience &&
+              (f.subject_type ?? null) === (u.subject_type ?? null)
+          )
+        )
+        .filter((g): g is ClientGrant => g !== undefined),
+    ];
+
     const filterGrants = (list: ClientGrant[]) => {
       let filtered = list;
 
@@ -179,11 +214,11 @@ export default class ClientGrantsHandler extends DefaultHandler {
 
     const changes: CalculatedChanges = {
       // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
-      del: filterGrants(del),
+      del: filterGrants(adjustedDel),
       // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
-      update: filterGrants(update),
+      update: filterGrants(adjustedUpdate),
       // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
-      create: filterGrants(create),
+      create: filterGrants(adjustedCreate),
       // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
       conflicts: filterGrants(conflicts),
     };
