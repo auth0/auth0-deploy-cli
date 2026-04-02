@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: 22.14.0
           registry-url: https://registry.npmjs.org
-          cache: npm
+          package-manager-cache: false
 
       - name: Update npm for trusted publishing
         run: npm install --global npm@11
