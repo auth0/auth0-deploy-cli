@@ -225,4 +225,22 @@ describe('#directory context connections', () => {
       )} does not exist for connection. Ensure the existence of this file to proceed with deployment.`
     );
   });
+
+  it('should not dump excluded connections', async () => {
+    const dir = path.join(testDataDir, 'directory', 'connectionsDumpExclude');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.connections = [
+      { name: 'includedConnection', strategy: 'waad' },
+      { name: 'excludedConnection', strategy: 'waad' },
+    ];
+    context.assets.exclude = { connections: ['excludedConnection'] };
+
+    await handler.dump(context);
+    const connectionsFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
+
+    expect(fs.existsSync(path.join(connectionsFolder, 'includedConnection.json'))).to.equal(true);
+    expect(fs.existsSync(path.join(connectionsFolder, 'excludedConnection.json'))).to.equal(false);
+  });
 });

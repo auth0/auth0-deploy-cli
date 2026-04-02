@@ -254,4 +254,24 @@ describe('#YAML context connections', () => {
       'html code'
     );
   });
+
+  it('should not dump excluded connections', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'connectionsDumpExclude');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') },
+      mockMgmtClient()
+    );
+
+    context.assets.connections = [
+      { name: 'includedConnection', strategy: 'waad' },
+      { name: 'excludedConnection', strategy: 'waad' },
+    ];
+    context.assets.exclude = { connections: ['excludedConnection'] };
+
+    const dumped = await handler.dump(context);
+
+    expect(dumped.connections).to.have.length(1);
+    expect(dumped.connections[0].name).to.equal('includedConnection');
+  });
 });
