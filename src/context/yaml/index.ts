@@ -216,7 +216,7 @@ export default class YAMLContext {
 
     // Write YAML File
     const exportOrdered = Boolean(this.config.AUTH0_EXPORT_ORDERED);
-    const raw = yaml.dump(cleaned, { exportOrdered });
+    const raw = yaml.dump(cleaned, { sortKeys: exportOrdered });
     log.info(`Writing ${this.configFile}`);
     fs.writeFileSync(this.configFile, raw);
   }

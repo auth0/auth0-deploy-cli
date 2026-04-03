@@ -115,7 +115,6 @@ function getParams(): CliParams {
         alias: 's',
         describe: 'Order keys in exported JSON files for consistent diffs.',
         type: 'boolean',
-        default: false,
       },
     })
     .example(
