@@ -53,10 +53,16 @@ function parse(context: DirectoryContext): ParsedClients {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const { clients } = context.assets;
+  let { clients } = context.assets;
   const { userAttributeProfiles, connectionProfiles } = context.assets;
 
   if (!clients) return; // Skip, nothing to dump
+
+  // Filter excluded clients
+  const excludedClients = (context.assets.exclude && context.assets.exclude.clients) || [];
+  if (excludedClients.length) {
+    clients = clients.filter((client) => !excludedClients.includes(client.name ?? ''));
+  }
 
   const clientsFolder = path.join(context.filePath, constants.CLIENTS_DIRECTORY);
   fs.ensureDirSync(clientsFolder);

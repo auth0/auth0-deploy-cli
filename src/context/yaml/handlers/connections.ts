@@ -64,9 +64,18 @@ const getFormattedOptions = (connection, clients) => {
 };
 
 async function dump(context: YAMLContext): Promise<ParsedConnections> {
-  const { connections, clients } = context.assets;
+  let { connections } = context.assets;
+  const { clients } = context.assets;
 
   if (!connections) return { connections: null };
+
+  // Filter excluded connections
+  const excludedConnections = (context.assets.exclude && context.assets.exclude.connections) || [];
+  if (excludedConnections.length) {
+    connections = connections.filter(
+      (connection) => !excludedConnections.includes(connection.name)
+    );
+  }
 
   return {
     connections: connections.map((connection) => {

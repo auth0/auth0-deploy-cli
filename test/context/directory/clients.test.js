@@ -143,6 +143,26 @@ describe('#directory context clients', () => {
     ).to.equal('html code');
   });
 
+  it('should not dump excluded clients', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientsDumpExclude');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.clients = [
+      { app_type: 'spa', name: 'includedClient' },
+      { app_type: 'spa', name: 'excludedClient' },
+    ];
+    context.assets.exclude = { clients: ['excludedClient'] };
+
+    await handler.dump(context);
+    const clientFolder = path.join(dir, constants.CLIENTS_DIRECTORY);
+
+    expect(loadJSON(path.join(clientFolder, 'includedClient.json'))).to.deep.equal(
+      context.assets.clients[0]
+    );
+    expect(fs.existsSync(path.join(clientFolder, 'excludedClient.json'))).to.equal(false);
+  });
+
   it('should dump clients sanitized', async () => {
     const dir = path.join(testDataDir, 'directory', 'clientsDump');
     cleanThenMkdir(dir);
