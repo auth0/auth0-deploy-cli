@@ -60,7 +60,13 @@ describe('#YAML context custom domains', () => {
     // so we can verify sort actually changes the output order
     const mockClient = {
       customDomains: {
-        list: () => [{ type: 'self_managed_certs', domain: 'auth.example.com', custom_client_ip_header: 'cf-connecting-ip' }],
+        list: () => [
+          {
+            type: 'self_managed_certs',
+            domain: 'auth.example.com',
+            custom_client_ip_header: 'cf-connecting-ip',
+          },
+        ],
       },
     };
 
@@ -91,5 +97,4 @@ describe('#YAML context custom domains', () => {
       custom_client_ip_header: 'cf-connecting-ip',
     });
   });
-
 });
