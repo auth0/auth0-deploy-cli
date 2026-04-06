@@ -34,8 +34,9 @@ describe('#connections handler', () => {
 
   describe('#connections schema', () => {
     it('should expose the supported dpop_signing_alg values', () => {
-      expect(connections.schema.items.properties.options.properties.dpop_signing_alg.enum).to.deep
-        .equal(Object.values(Management.ConnectionDpopSigningAlgEnum));
+      expect(
+        connections.schema.items.properties.options.properties.dpop_signing_alg.enum
+      ).to.deep.equal(Object.values(Management.ConnectionDpopSigningAlgEnum));
     });
 
     it('should allow supported dpop_signing_alg values', () => {

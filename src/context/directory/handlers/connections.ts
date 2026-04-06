@@ -69,7 +69,9 @@ async function dump(context: DirectoryContext): Promise<void> {
   // Filter excluded connections
   const excludedConnections = (context.assets.exclude && context.assets.exclude.connections) || [];
   if (excludedConnections.length) {
-    connections = connections.filter((connection) => !excludedConnections.includes(connection.name));
+    connections = connections.filter(
+      (connection) => !excludedConnections.includes(connection.name)
+    );
   }
 
   const connectionsFolder = path.join(context.filePath, constants.CONNECTIONS_DIRECTORY);
