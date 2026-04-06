@@ -4,8 +4,7 @@ import { constants } from '../../../tools';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 
-import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
-import log from '../../../logger';
+import { getFiles, existsMustBeDir, loadJSON, dumpJSON } from '../../../utils';
 import { Asset, ParsedAsset } from '../../../types';
 
 type ParsedTriggers = ParsedAsset<'triggers', Asset>;
@@ -36,8 +35,7 @@ async function dump(context: DirectoryContext): Promise<void> {
   const triggersFolder = path.join(context.filePath, constants.TRIGGERS_DIRECTORY);
   fs.ensureDirSync(triggersFolder);
   const triggerFile = path.join(triggersFolder, 'triggers.json');
-  log.info(`Writing ${triggerFile}`);
-  fs.writeFileSync(triggerFile, JSON.stringify(triggers, null, 2));
+  dumpJSON(triggerFile, triggers);
 }
 
 const triggersHandler: DirectoryHandler<ParsedTriggers> = {
