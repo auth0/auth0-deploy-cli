@@ -55,7 +55,11 @@ export function loadJSON(
 function orderedKeysReplacer(_key: string, value: unknown): unknown {
   if (value && typeof value === 'object' && !Array.isArray(value)) {
     const obj = value as Record<string, unknown>;
-    return Object.fromEntries(Object.keys(obj).sort().map((k) => [k, obj[k]]));
+    return Object.fromEntries(
+      Object.keys(obj)
+        .sort()
+        .map((k) => [k, obj[k]])
+    );
   }
   return value;
 }
