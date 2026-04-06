@@ -52,10 +52,8 @@ export default class ClientGrantsHandler extends DefaultHandler {
       type: 'clientGrants',
       id: 'id',
       // @ts-ignore because not sure why two-dimensional array passed in
-      // ['client_id', 'audience', 'subject_type'] is tried first to correctly distinguish grants
-      // that share the same client_id+audience but have different subject_type values.
-      // Because subject_type can be null (falsy), the calculateChanges matching naturally falls
-      // through to ['client_id', 'audience'] for grants that have no subject_type.
+      // Try ['client_id', 'audience', 'subject_type'] first; falls through to
+      // ['client_id', 'audience'] when subject_type is null (falsy).
       identifiers: ['id', ['client_id', 'audience', 'subject_type'], ['client_id', 'audience']],
       stripUpdateFields: ['audience', 'client_id', 'subject_type', 'is_system'],
     });
@@ -151,15 +149,11 @@ export default class ClientGrantsHandler extends DefaultHandler {
       clientGrants: formatted,
     });
 
-    // subject_type is immutable via the Auth0 API (it's in stripUpdateFields and cannot
-    // be changed via an update call). If calcChanges matched two grants with different
-    // subject_types via the ['client_id', 'audience'] fallback identifier, an update would
-    // silently preserve the wrong subject_type. Detect these mismatches and convert them
-    // from UPDATE → DELETE + CREATE so the tenant converges to the desired state.
+    // subject_type is immutable (in stripUpdateFields). Grants matched via the
+    // ['client_id', 'audience'] fallback with a mismatched subject_type must become
+    // DELETE + CREATE, not UPDATE, so the tenant converges to the desired state.
     const subjectTypeMismatches = update.filter((localGrant) => {
-      // Only flag a mismatch when local config explicitly specifies subject_type.
-      // If subject_type is absent (undefined) in local config, the user is not
-      // expressing intent to change it — treat as no mismatch.
+      // Only flag when local explicitly specifies subject_type (backward compat).
       if (localGrant.subject_type === undefined) return false;
       const remoteGrant = (this.existing || []).find((e) => e.id === localGrant.id);
       return (
