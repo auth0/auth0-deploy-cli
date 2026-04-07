@@ -16,12 +16,15 @@ import ScimHandler from './scimHandler';
 import log from '../../../logger';
 import { Client } from './clients';
 
+// @ts-ignore - ConnectionDpopSigningAlgEnum may not exist in older SDK versions
+const dpopSigningAlgValues: string[] = Object.values((Management as any).ConnectionDpopSigningAlgEnum ?? {});
+
 const connectionOptionsSchema = {
   type: 'object',
   properties: {
     dpop_signing_alg: {
       type: 'string',
-      enum: Object.values(Management.ConnectionDpopSigningAlgEnum),
+      ...(dpopSigningAlgValues.length > 0 && { enum: dpopSigningAlgValues }),
     },
   },
 };
