@@ -1,8 +1,10 @@
 import pageClient from '../../../../src/tools/auth0/client';
 
 /* eslint-disable consistent-return */
+const Ajv = require('ajv');
 const { expect } = require('chai');
 const sinon = require('sinon');
+const { Management } = require('auth0');
 const connections = require('../../../../src/tools/auth0/handlers/connections');
 const utils = require('../../../../src/tools/utils');
 const { mockPagedData } = require('../../../utils');
@@ -29,6 +31,63 @@ describe('#connections handler', () => {
     AUTH0_CLIENT_ID: 'client_id',
     AUTH0_ALLOW_DELETE: true,
   };
+
+  describe('#connections schema', () => {
+    it('should expose the supported dpop_signing_alg values', () => {
+      expect(
+        connections.schema.items.properties.options.properties.dpop_signing_alg.enum
+      ).to.deep.equal(Object.values(Management.ConnectionDpopSigningAlgEnum));
+    });
+
+    it('should allow supported dpop_signing_alg values', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'oidc-connection',
+          strategy: 'oidc',
+          options: {
+            dpop_signing_alg: 'ES256',
+          },
+        },
+        {
+          name: 'okta-connection',
+          strategy: 'okta',
+          options: {
+            dpop_signing_alg: 'Ed25519',
+          },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should reject unsupported dpop_signing_alg values', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'oidc-connection',
+          strategy: 'oidc',
+          options: {
+            dpop_signing_alg: 'RS256',
+          },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(false);
+      expect(ajv.errors).to.have.length.greaterThan(0);
+      expect(ajv.errors[0]).to.include({
+        keyword: 'enum',
+      });
+      expect(ajv.errors[0].params).to.deep.equal({
+        allowedValues: Object.values(Management.ConnectionDpopSigningAlgEnum),
+      });
+    });
+  });
 
   describe('#connections validate', () => {
     it('should not allow same names', async () => {

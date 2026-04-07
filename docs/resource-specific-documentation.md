@@ -10,32 +10,13 @@ The Deploy CLI's own client grant is intentionally not exported nor configurable
 
 ## Prompts
 
-Multilingual custom text prompts follow a particular hierarchy. Under the root-level `prompts` resource property is a proprietary `customText` property that is used to bundle custom text translations with other prompts settings. Underneath `customText` is the two-character language code. Thirdly is the prompt ID, followed by the screen ID, followed by text ID.
+The prompts resource allows you to configure Universal Login pages, including custom text, custom HTML partials, and screen renderers.
 
-RenderSettings of a prompt-screen follow a particular hierarchy. Under the root-level `prompts` we store `screenRenderers` property that is used to configure the rendering settings of a given prompt & screen. Thirdly is the prompt Name, followed by the screen Name mapped to the respective renderer configs file. Refer [more](https://auth0.com/docs/customize/login-pages/advanced-customizations/getting-started/configure-acul-screens) on this.
+**Custom Text**: Multilingual text translations follow a hierarchy - language code → prompt ID → screen ID → text ID.
 
-Custom partials allow you to inject custom HTML (via Liquid templates) into specific insertion points of a prompt screen. Under `partials` is the prompt type, then the screen type, then the insertion point name mapped to the Liquid HTML content.
+**Partials**: Custom HTML that can be injected at specific insertion points in prompts.
 
-**Hierarchy**
-
-```yaml
-prompts:
-  identifier_first: true|false
-  universal_login_experience: new|classic
-  webauthn_platform_first_factor: true|false
-  customText:
-    <LANGUAGE>: # two character language code
-      <PROMPT_ID>: # prompt ID
-        <SCREEN_ID>: # prompt screen ID
-          <TEXT_ID>: 'Some text'
-  partials:
-    <PROMPT_TYPE>: # e.g. login, signup
-      <SCREEN_TYPE>: # e.g. login, signup
-        <INSERTION_POINT>: 'Liquid HTML content' # e.g. form-content-start, form-content-end
-  screenRenderers:
-    - <PROMPT-NAME>:
-        <SCREEN-NAME>: ./prompts/screenRenderSettings/promptName_screenName.json #Add the renderer configs for a given prompt & a given screen
-```
+**Screen Renderers**: Configure rendering settings for specific prompt-screen combinations. Refer to the [Advanced Customizations documentation](https://auth0.com/docs/customize/login-pages/advanced-customizations/getting-started/configure-acul-screens) for more details.
 
 **YAML Example**
 
@@ -48,12 +29,8 @@ Folder structure when in YAML mode.
         /login-id_login-id.json
         /login-passwordless_login-passwordless-email-code.json
         /login-passwordless_login-passwordless-sms-otp.json
-        /login-password_login-password.json
-        /signup-password_signup-password.json
 ./tenant.yaml
 ```
-
-In YAML mode, partial Liquid content is inlined directly in `tenant.yaml`:
 
 ```yaml
 # Contents of ./tenant.yaml
@@ -67,31 +44,28 @@ prompts:
         login:
           description: Login description in english
           buttonText: Button text
-      mfa:
-        mfa-detect-browser-capabilities:
-          pickAuthenticatorText: 'Try another method'
-          reloadButtonText: 'Reload'
-          noJSErrorTitle: 'JavaScript Required'
-        mfa-login-options:
-          pageTitle: 'Log in to ${clientName}'
-          authenticatorNamesSMS: 'SMS'
+      passkeys:
+        passkey-enrollment:
+          title: Create a passkey for ${clientName}
+          createButtonText: Create a passkey
   partials:
     login:
       login:
         form-content-start: |
-          <div class="login-notice">
-            Welcome back! Please log in to continue.
+          <div class="custom-login-banner">
+            <p>Welcome! Please log in to continue.</p>
           </div>
-    signup:
-      signup:
+    passkeys:
+      passkeys-enrollment:
         form-content-start: |
-          <div class="signup-notice">
-            Create your account to get started.
+          <div class="passkey-enrollment-header">
+            <p>Enhance your account security by creating a passkey.</p>
           </div>
-        form-content-end: |
-          <p class="signup-terms">
-            By signing up, you agree to our <a href="/terms">Terms of Service</a>.
-          </p>
+      passkeys-enrollment-local:
+        form-footer-end: |
+          <div class="passkey-local-enrollment-info">
+            <p>This passkey will be saved to this device only.</p>
+          </div>
   screenRenderers:
     - signup-id:
         signup-id: ./prompts/screenRenderSettings/signup-id_signup-id.json
@@ -100,33 +74,55 @@ prompts:
         login-passwordless-sms-otp: ./prompts/screenRenderSettings/login-passwordless_login-passwordless-sms-otp.json
 ```
 
-**Directory Example**
+Directory example:
 
-```
+```text
 Folder structure when in directory mode.
 
 ./prompts/
-    /partials
-        /login
-            /login
-                /form-content-start.liquid
-        /signup
-            /signup
-                /form-content-start.liquid
-                /form-content-end.liquid
-    /screenRenderSettings
-        /signup-id_signup-id.json
-        /login-id_login-id.json
-        /login-passwordless_login-passwordless-email-code.json
-        /login-passwordless_login-passwordless-sms-otp.json
-        /login-password_login-password.json
-        /signup-password_signup-password.json
-    /custom-text.json
-    /partials.json
-    /prompts.json
+  ./partials/
+    ./login/
+      ./login/
+        ./form-content-start.liquid
+    ./passkeys/
+      ./passkeys-enrollment/
+        ./form-content-start.liquid
+      ./passkeys-enrollment-local/
+        ./form-footer-end.liquid
+  ./screenRenderSettings/
+    ./signup-id_signup-id.json
+    ./login-id_login-id.json
+    ./login-passwordless_login-passwordless-email-code.json
+    ./login-passwordless_login-passwordless-sms-otp.json
+    ./login-password_login-password.json
+    ./signup-password_signup-password.json
+  ./custom-text.json
+  ./partials.json
+  ./prompts.json
 ```
 
 In directory mode, `partials.json` is a manifest that maps each insertion point to its `.liquid` file (paths are relative to the `prompts/` directory):
+
+Contents of `custom-text.json`:
+
+```json
+{
+  "en": {
+    "login": {
+      "login": {
+        "description": "Login description in english",
+        "buttonText": "Button text"
+      }
+    },
+    "passkeys": {
+      "passkey-enrollment": {
+        "title": "Create a passkey for ${clientName}",
+        "createButtonText": "Create a passkey"
+      }
+    }
+  }
+}
+```
 
 Contents of `partials.json`:
 
@@ -142,16 +138,18 @@ Contents of `partials.json`:
       ]
     }
   ],
-  "signup": [
+  "passkeys": [
     {
-      "signup": [
+      "passkeys-enrollment": [
         {
           "name": "form-content-start",
-          "template": "partials/signup/signup/form-content-start.liquid"
-        },
+          "template": "partials/passkeys/passkeys-enrollment/form-content-start.liquid"
+        }
+      ],
+      "passkeys-enrollment-local": [
         {
-          "name": "form-content-end",
-          "template": "partials/signup/signup/form-content-end.liquid"
+          "name": "form-footer-end",
+          "template": "partials/passkeys/passkeys-enrollment-local/form-footer-end.liquid"
         }
       ]
     }
@@ -167,15 +165,16 @@ Contents of `partials/login/login/form-content-start.liquid`:
 </div>
 ```
 
-Contents of `partials/signup/signup/form-content-end.liquid`:
+Contents of `partials/passkeys/passkeys-enrollment/form-content-start.liquid`:
 
 ```liquid
-<p class="signup-terms">
-  By signing up, you agree to our <a href="/terms">Terms of Service</a>.
-</p>
+<div class="passkey-enrollment-header">
+  <p>Enhance your account security by creating a passkey.</p>
+  <p>Passkeys provide a faster and more secure way to sign in.</p>
+</div>
 ```
 
-Contents of `promptName_screenName.json`
+Contents of `screenRenderSettings/signup-id_signup-id.json`:
 
 ```json
 {

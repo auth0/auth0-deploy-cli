@@ -16,6 +16,16 @@ import ScimHandler from './scimHandler';
 import log from '../../../logger';
 import { Client } from './clients';
 
+const connectionOptionsSchema = {
+  type: 'object',
+  properties: {
+    dpop_signing_alg: {
+      type: 'string',
+      enum: Object.values(Management.ConnectionDpopSigningAlgEnum),
+    },
+  },
+};
+
 export const schema = {
   type: 'array',
   items: {
@@ -23,7 +33,7 @@ export const schema = {
     properties: {
       name: { type: 'string' },
       strategy: { type: 'string' },
-      options: { type: 'object' },
+      options: connectionOptionsSchema,
       enabled_clients: { type: 'array', items: { type: 'string' } },
       realms: { type: 'array', items: { type: 'string' } },
       metadata: { type: 'object' },

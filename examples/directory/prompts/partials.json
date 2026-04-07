@@ -9,16 +9,12 @@
       ]
     }
   ],
-  "signup": [
+  "passkeys": [
     {
-      "signup": [
+      "passkeys-enrollment": [
         {
           "name": "form-content-start",
-          "template": "partials/signup/signup/form-content-start.liquid"
-        },
-        {
-          "name": "form-content-end",
-          "template": "partials/signup/signup/form-content-end.liquid"
+          "template": "partials/passkeys/passkeys-enrollment/form-content-start.liquid"
         }
       ]
     }

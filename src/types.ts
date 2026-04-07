@@ -77,6 +77,7 @@ export type Config = {
   AUTH0_RETRY_MAX_DELAY_MS?: number;
   AUTH0_KEYWORD_REPLACE_MAPPINGS?: KeywordMappings;
   AUTH0_EXPORT_IDENTIFIERS?: boolean;
+  AUTH0_EXPORT_ORDERED?: boolean;
   AUTH0_CONNECTIONS_DIRECTORY?: string;
   EXCLUDED_PROPS?: {
     [key: string]: string[];

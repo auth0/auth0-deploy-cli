@@ -25,6 +25,10 @@ Options: yaml or directory. Determines the file format of the exported resource 
 
 Boolean. When enabled, will export the identifier fields for each resource. Default: `false`.
 
+### `--export_ordered`, `-s`
+
+Boolean. When enabled, exports resource configuration files with keys sorted alphabetically, producing stable and deterministic output. Useful for reducing noise in diffs. Default: `false`.
+
 ### `--env`
 
 Boolean. Indicates if the tool should ingest environment variables or not. Default: `true`.
