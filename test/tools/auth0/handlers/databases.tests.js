@@ -2242,7 +2242,9 @@ describe('#databases handler with enabled clients integration', () => {
       // Mock enabled clients responses — SDK v5 .get() returns a PagedResponse, not a flat array
       getEnabledClientsStub
         .withArgs('con_1', { take: 100 })
-        .resolves(mockPagedData({}, 'clients', [{ client_id: 'client_1' }, { client_id: 'client_2' }]))
+        .resolves(
+          mockPagedData({}, 'clients', [{ client_id: 'client_1' }, { client_id: 'client_2' }])
+        )
         .withArgs('con_2', { take: 100 })
         .resolves(mockPagedData({}, 'clients', [{ client_id: 'client_3' }]));
 

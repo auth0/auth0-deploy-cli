@@ -35,6 +35,8 @@ describe('#tenant handler', () => {
           get: () => ({
             friendly_name: 'Test',
             default_directory: 'users',
+            client_id_metadata_document_supported: true,
+            resource_parameter_profile: 'compatibility',
             flags: {
               ...mockAllowedFlags,
               'unallowed-flag-1': false,
@@ -51,6 +53,8 @@ describe('#tenant handler', () => {
     expect(data).to.deep.equal({
       friendly_name: 'Test',
       default_directory: 'users',
+      client_id_metadata_document_supported: true,
+      resource_parameter_profile: 'compatibility',
       flags: mockAllowedFlags,
     });
   });
@@ -69,6 +73,8 @@ describe('#tenant handler', () => {
               expect(data).to.be.an('object');
               expect(data.sandbox_version).to.equal('4');
               expect(data.skip_non_verifiable_callback_uri_confirmation_prompt).to.equal(null);
+              expect(data.client_id_metadata_document_supported).to.equal(true);
+              expect(data.resource_parameter_profile).to.equal('compatibility');
               expect(data.flags).to.equal(undefined);
               return Promise.resolve(data);
             },
@@ -85,6 +91,8 @@ describe('#tenant handler', () => {
           tenant: {
             sandbox_version: '4',
             skip_non_verifiable_callback_uri_confirmation_prompt: null,
+            client_id_metadata_document_supported: true,
+            resource_parameter_profile: 'compatibility',
           },
         },
       ]);

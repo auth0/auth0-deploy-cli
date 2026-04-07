@@ -161,19 +161,23 @@ export const getConnectionEnabledClients = async (
   if (!connectionId) return null;
 
   try {
-    const allClients: Management.ConnectionEnabledClient[] = [];
+    log.debug(`Getting enabled clients for connection ${connectionId}`);
+
+    const enabledClients: Management.ConnectionEnabledClient[] = [];
     let page = await auth0Client.connections.clients.get(connectionId, { take: 100 });
 
-    allClients.push(...(page.data || []));
+    enabledClients.push(...(page.data || []));
 
     while (page.hasNextPage && page.hasNextPage()) {
       page = await page.getNextPage();
-      allClients.push(...(page.data || []));
+      enabledClients.push(...(page.data || []));
     }
 
-    return allClients.filter((client) => !!client?.client_id).map((client) => client.client_id);
+    return enabledClients.filter((client) => !!client?.client_id).map((client) => client.client_id);
   } catch (error) {
-    log.warn(`Unable to retrieve enabled clients for connection ${connectionId}: ${error?.message}`);
+    log.warn(
+      `Unable to retrieve enabled clients for connection ${connectionId}: ${error?.message}`
+    );
     return null;
   }
 };
@@ -589,35 +593,45 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     this.existing = filteredConnections;
     if (this.existing === null) return [];
 
-    const connectionsWithEnabledClients = await Promise.all(
-      filteredConnections.map(async (con) => {
-        if (!con?.id) return con;
-        const enabledClients = await getConnectionEnabledClients(this.client, con.id);
+    const connectionTasks = filteredConnections.map((con, index) => ({ con, index }));
 
-        // Cast to Asset to allow adding properties
-        let connection: Connection = { ...con };
-
-        if (enabledClients && enabledClients?.length) {
-          connection.enabled_clients = enabledClients;
-        }
-
-        if (connection.strategy === 'google-apps' && directoryProvisioningConfigs) {
-          const dirProvConfig = directoryProvisioningConfigs.find(
-            (congigCon) => congigCon.connection_id === con.id
-          );
-          if (dirProvConfig) {
-            connection.directory_provisioning_configuration = {
-              mapping: dirProvConfig.mapping,
-              synchronize_automatically: dirProvConfig.synchronize_automatically,
-            };
+    const connectionsWithEnabledClients = await this.client.pool
+      .addEachTask({
+        data: connectionTasks,
+        generator: async ({ con, index }) => {
+          if (!con?.id) {
+            return { index, connection: con as Connection };
           }
-        }
 
-        return connection;
+          const enabledClients = await getConnectionEnabledClients(this.client, con.id);
+
+          let connection: Connection = { ...con };
+
+          if (enabledClients?.length) {
+            connection.enabled_clients = enabledClients;
+          }
+
+          if (connection.strategy === 'google-apps' && directoryProvisioningConfigs) {
+            const dirProvConfig = directoryProvisioningConfigs.find(
+              (configCon) => configCon.connection_id === con.id
+            );
+
+            if (dirProvConfig) {
+              connection.directory_provisioning_configuration = {
+                mapping: dirProvConfig.mapping,
+                synchronize_automatically: dirProvConfig.synchronize_automatically,
+              };
+            }
+          }
+
+          return { index, connection };
+        },
       })
-    );
+      .promise();
 
-    this.existing = connectionsWithEnabledClients;
+    this.existing = connectionsWithEnabledClients
+      .sort((a, b) => a.index - b.index)
+      .map(({ connection }) => connection);
 
     // Apply `scim_configuration` to all the relevant `SCIM` connections. This method mutates `this.existing`.
     await this.scimHandler.applyScimConfiguration(this.existing);
