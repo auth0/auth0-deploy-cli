@@ -52,7 +52,9 @@ export default class ClientGrantsHandler extends DefaultHandler {
       type: 'clientGrants',
       id: 'id',
       // @ts-ignore because not sure why two-dimensional array passed in
-      identifiers: ['id', ['client_id', 'audience']],
+      // Try ['client_id', 'audience', 'subject_type'] first; falls through to
+      // ['client_id', 'audience'] when subject_type is null (falsy).
+      identifiers: ['id', ['client_id', 'audience', 'subject_type'], ['client_id', 'audience']],
       stripUpdateFields: ['audience', 'client_id', 'subject_type', 'is_system'],
     });
   }
@@ -147,6 +149,41 @@ export default class ClientGrantsHandler extends DefaultHandler {
       clientGrants: formatted,
     });
 
+    // subject_type is immutable (in stripUpdateFields). Grants matched via the
+    // ['client_id', 'audience'] fallback with a mismatched subject_type must become
+    // DELETE + CREATE, not UPDATE, so the tenant converges to the desired state.
+    const subjectTypeMismatches = update.filter((localGrant) => {
+      // Only flag when local explicitly specifies subject_type (backward compat).
+      if (localGrant.subject_type === undefined) return false;
+      const remoteGrant = (this.existing || []).find((e) => e.id === localGrant.id);
+      return (
+        remoteGrant && (remoteGrant.subject_type ?? null) !== (localGrant.subject_type ?? null)
+      );
+    });
+
+    const adjustedUpdate = update.filter((u) => !subjectTypeMismatches.includes(u));
+
+    const adjustedDel = [
+      ...del,
+      ...subjectTypeMismatches
+        .map((u) => (this.existing || []).find((e) => e.id === u.id))
+        .filter((e): e is ClientGrant => e !== undefined),
+    ];
+
+    const adjustedCreate = [
+      ...create,
+      ...subjectTypeMismatches
+        .map((u) =>
+          formatted.find(
+            (f) =>
+              f.client_id === u.client_id &&
+              f.audience === u.audience &&
+              (f.subject_type ?? null) === (u.subject_type ?? null)
+          )
+        )
+        .filter((g): g is ClientGrant => g !== undefined),
+    ];
+
     const filterGrants = (list: ClientGrant[]) => {
       let filtered = list;
 
@@ -175,11 +212,11 @@ export default class ClientGrantsHandler extends DefaultHandler {
 
     const changes: CalculatedChanges = {
       // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
-      del: filterGrants(del),
+      del: filterGrants(adjustedDel),
       // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
-      update: filterGrants(update),
+      update: filterGrants(adjustedUpdate),
       // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
-      create: filterGrants(create),
+      create: filterGrants(adjustedCreate),
       // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
       conflicts: filterGrants(conflicts),
     };
