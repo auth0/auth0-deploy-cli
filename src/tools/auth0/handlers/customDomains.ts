@@ -1,5 +1,6 @@
 import { Management } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
+import ValidationError from '../../validationError';
 import { Asset, Assets } from '../../../types';
 import log from '../../../logger';
 
@@ -112,6 +113,20 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
     }
   }
 
+  async validate(assets: Assets): Promise<void> {
+    await super.validate(assets);
+
+    const { customDomains } = assets;
+    if (!customDomains) return;
+
+    const defaultDomains = customDomains.filter((d) => d.is_default === true);
+    if (defaultDomains.length > 1) {
+      throw new ValidationError(
+        `Only one custom domain can be set as default (is_default: true), but found ${defaultDomains.length}: ${defaultDomains.map((d) => d.domain).join(', ')}`
+      );
+    }
+  }
+
   @order('50')
   async processChanges(assets: Assets): Promise<void> {
     const { customDomains } = assets;
@@ -137,8 +152,12 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
     // If a domain is marked as is_default, set it as the tenant's default custom domain.
     const defaultDomain = customDomains.find((d) => d.is_default === true);
     if (defaultDomain) {
-      await this.client.customDomains.setDefault({ domain: defaultDomain.domain });
-      log.info(`Set default custom domain: ${defaultDomain.domain}`);
+      try {
+        await this.client.customDomains.setDefault({ domain: defaultDomain.domain });
+        log.info(`Set default custom domain: ${defaultDomain.domain}`);
+      } catch (err) {
+        throw new Error(`Problem setting default custom domain ${defaultDomain.domain}\n${err}`);
+      }
     }
   }
 }

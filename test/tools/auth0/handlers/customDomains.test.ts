@@ -715,4 +715,40 @@ describe('#customDomains handler', () => {
 
     expect(setDefaultCalled).to.equal(false);
   });
+
+  it('should throw a ValidationError when multiple domains have is_default: true', async () => {
+    const auth0ApiClientMock = {
+      customDomains: {
+        list: async () => [],
+        create: async () => {},
+        update: async () => {},
+        delete: async () => {},
+        setDefault: async () => {},
+      },
+      pool: new PromisePoolExecutor({
+        concurrencyLimit: 3,
+        frequencyLimit: 8,
+        frequencyWindow: 1000,
+      }),
+    };
+
+    // @ts-ignore
+    const handler = new customDomainsHandler({
+      config: () => {},
+      client: auth0ApiClientMock as unknown as Auth0APIClient,
+    });
+
+    try {
+      await handler.validate({
+        customDomains: [
+          { domain: 'foo.example.com', type: 'auth0_managed_certs', is_default: true },
+          { domain: 'bar.example.com', type: 'auth0_managed_certs', is_default: true },
+        ],
+      });
+      expect.fail('Expected a ValidationError to be thrown');
+    } catch (err) {
+      expect(err.message).to.include('foo.example.com');
+      expect(err.message).to.include('bar.example.com');
+    }
+  });
 });
