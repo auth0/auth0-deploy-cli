@@ -4,7 +4,6 @@ import pageClient from '../../../../src/tools/auth0/client';
 const Ajv = require('ajv');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { Management } = require('auth0');
 const connections = require('../../../../src/tools/auth0/handlers/connections');
 const utils = require('../../../../src/tools/utils');
 const { mockPagedData } = require('../../../utils');
