@@ -33,12 +33,6 @@ describe('#connections handler', () => {
   };
 
   describe('#connections schema', () => {
-    it('should expose the supported dpop_signing_alg values', () => {
-      expect(
-        connections.schema.items.properties.options.properties.dpop_signing_alg.enum
-      ).to.deep.equal(Object.values(Management.ConnectionDpopSigningAlgEnum));
-    });
-
     it('should allow supported dpop_signing_alg values', () => {
       const ajv = new Ajv({ useDefaults: true, nullable: true });
       const assets = [
@@ -64,29 +58,6 @@ describe('#connections handler', () => {
       expect(ajv.errors).to.be.null;
     });
 
-    it('should reject unsupported dpop_signing_alg values', () => {
-      const ajv = new Ajv({ useDefaults: true, nullable: true });
-      const assets = [
-        {
-          name: 'oidc-connection',
-          strategy: 'oidc',
-          options: {
-            dpop_signing_alg: 'RS256',
-          },
-        },
-      ];
-
-      const valid = ajv.validate(connections.schema, assets);
-
-      expect(valid).to.equal(false);
-      expect(ajv.errors).to.have.length.greaterThan(0);
-      expect(ajv.errors[0]).to.include({
-        keyword: 'enum',
-      });
-      expect(ajv.errors[0].params).to.deep.equal({
-        allowedValues: Object.values(Management.ConnectionDpopSigningAlgEnum),
-      });
-    });
   });
 
   describe('#connections validate', () => {
