@@ -36,6 +36,24 @@ export const schema = {
     type: 'object',
     properties: {
       name: { type: 'string', minLength: 1, pattern: '[^<>]+' },
+      external_client_id: {
+        type: 'string',
+        description:
+          'Alternative identifier for the client. For CIMD clients, this is the HTTPS URL to the OAuth 2.0 Client ID Metadata Document. Client name should match the client_name value in the metadata document.',
+      },
+      external_metadata_type: {
+        type: 'string',
+        description: 'Type of external client registration metadata.',
+      },
+      external_metadata_created_by: {
+        type: 'string',
+        description:
+          'Indicates who created the external metadata client: admin for Management API, client for dynamic registration.',
+      },
+      jwks_uri: {
+        type: 'string',
+        description: 'JSON Web Key Set endpoint associated with the client.',
+      },
       mobile: {
         type: 'object',
         properties: {
@@ -428,8 +446,9 @@ export default class ClientHandler extends DefaultAPIHandler {
       ...config,
       type: 'clients',
       id: 'client_id',
-      identifiers: ['client_id', 'name'],
+      identifiers: ['client_id', 'name', 'external_client_id'],
       objectFields: ['client_metadata'],
+      stripCreateFields: ['external_metadata_type', 'external_metadata_created_by', 'jwks_uri'],
       stripUpdateFields: [
         // Fields not allowed during updates
         'callback_url_template',
@@ -438,7 +457,14 @@ export default class ClientHandler extends DefaultAPIHandler {
         'tenant',
         'jwt_configuration.secret_encoded',
         'resource_server_identifier',
+        'external_metadata_type',
+        'external_metadata_created_by',
+        'jwks_uri',
       ],
+      functions: {
+        create: (client: Client) => this.createClient(client),
+        update: (clientId: string, client: Client) => this.updateClient(clientId, client),
+      },
     });
   }
 
@@ -523,6 +549,61 @@ export default class ClientHandler extends DefaultAPIHandler {
 
     this.existing = createClientSanitizer(clients).sanitizeCrossOriginAuth(false).get();
     return this.existing;
+  }
+
+  private isCimdClient(client: Client): boolean {
+    return !!client.external_client_id;
+  }
+
+  private async createClient(
+    client: Client
+  ): Promise<Management.RegisterCimdClientResponseContent | Client> {
+    if (!this.isCimdClient(client)) {
+      return this.client.clients.create(client as Management.CreateClientRequestContent);
+    }
+
+    if (!client.external_client_id) {
+      throw new Error(`CIMD client '${client.name}' is missing external_client_id.`);
+    }
+
+    const externalClientId = client.external_client_id;
+
+    const registration = await this.client.clients.registerCimdClient({
+      external_client_id: externalClientId,
+    });
+
+    return registration;
+  }
+
+  private getCIMDEditableFields(client: Client): Management.UpdateClientRequestContent {
+    // Only a subset of fields are editable for CIMD clients, so we pick those out here and ignore the rest
+    return omit(client, [
+      'name',
+      'external_client_id',
+      'third_party_security_mode',
+      'token_endpoint_auth_method',
+      'is_first_party',
+      'callbacks',
+    ]) as Management.UpdateClientRequestContent;
+  }
+
+  private async updateClient(clientId: string, client: Client): Promise<Client> {
+    if (!this.isCimdClient(client)) {
+      return this.client.clients.update(clientId, client as Management.UpdateClientRequestContent);
+    }
+
+    if (!client.external_client_id) {
+      throw new Error(`CIMD client '${client.name}' is missing external_client_id.`);
+    }
+
+    const updatePayload = this.getCIMDEditableFields(client);
+    const registrationClientId = client.client_id || clientId;
+
+    if (registrationClientId && Object.keys(updatePayload).length > 0) {
+      return this.client.clients.update(registrationClientId, updatePayload);
+    }
+
+    return client;
   }
 
   // convert names back to IDs for express configuration
