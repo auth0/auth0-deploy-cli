@@ -42,7 +42,7 @@ function parse(context: DirectoryContext): ParsedClientGrants {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const { clientGrants } = context.assets;
+  let { clientGrants } = context.assets;
 
   if (!clientGrants) return; // Skip, nothing to dump
 
@@ -50,6 +50,8 @@ async function dump(context: DirectoryContext): Promise<void> {
   fs.ensureDirSync(grantsFolder);
 
   if (clientGrants.length === 0) return;
+
+  const excludedClientsByNames = (context.assets.exclude && context.assets.exclude.clients) || [];
 
   const allResourceServers = await paginate<ResourceServer>(
     context.mgmtClient.resourceServers.list,
@@ -63,6 +65,18 @@ async function dump(context: DirectoryContext): Promise<void> {
     paginate: true,
     include_totals: true,
   });
+
+  // Filter out grants for excluded clients
+  if (excludedClientsByNames.length) {
+    const excludedClientIds = new Set(
+      allClients
+        .filter((c) => c.name !== undefined && excludedClientsByNames.includes(c.name))
+        .map((c) => c.client_id)
+    );
+    clientGrants = clientGrants.filter(
+      (grant: ClientGrant) => !excludedClientIds.has(grant.client_id)
+    );
+  }
 
   // Convert client_id to the client name for readability
   clientGrants.forEach((grant: ClientGrant) => {

@@ -195,6 +195,47 @@ describe('#directory context clientGrants', () => {
     ).to.deep.equal(context.assets.clientGrants[2]);
   });
 
+  it('should not dump grants for excluded clients', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientGrantsDumpExclude');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: dir },
+      {
+        ...mockMgmtClient(),
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              { client_id: 'client-id-1', name: 'IncludedClient' },
+              { client_id: 'client-id-2', name: 'ExcludedClient' },
+            ]),
+        },
+        resourceServers: {
+          list: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              {
+                id: 'resource-server-1',
+                name: 'Some API',
+                identifier: 'https://some.api.com',
+              },
+            ]),
+        },
+      }
+    );
+
+    context.assets.clientGrants = [
+      { audience: 'https://some.api.com', client_id: 'client-id-1', scope: ['read:data'] },
+      { audience: 'https://some.api.com', client_id: 'client-id-2', scope: ['write:data'] },
+    ];
+    context.assets.exclude = { clients: ['ExcludedClient'] };
+
+    await handler.dump(context);
+    const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
+    const files = getFiles(clientGrantsFolder, ['.json']);
+
+    expect(files).to.have.length(1);
+    expect(files[0]).to.equal(path.join(clientGrantsFolder, 'IncludedClient-Some API.json'));
+  });
+
   it('should not fetch clients and resource servers if no client grants defined', async () => {
     const dir = path.join(testDataDir, 'directory', 'clientGrantsDump');
     cleanThenMkdir(dir);
