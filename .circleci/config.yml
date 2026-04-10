@@ -45,7 +45,8 @@ jobs:
       - run: npm run test:coverage
       - persist_to_workspace:
           root: ~/repo
-          paths: .
+          paths:
+            - .
       - codecov/upload
 
   does_typescript_compile:
@@ -56,6 +57,15 @@ jobs:
       - checkout
       - run: npm i
       - run: npx tsc --noEmit
+
+  does_format_pass:
+    docker:
+      - image: cimg/node:22.19.0
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run: npm i
+      - run: npm run format:check
 
   does_lint_pass:
     docker:
@@ -83,6 +93,8 @@ workflows:
     jobs:
       - does_typescript_compile:
           name: Does Typescript compile?
+      - does_format_pass:
+          name: Does format pass?
       - does_lint_pass:
           name: Does lint pass?
       - unit_test:
