@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for `is_default` on `customDomains`. [#1330]
+- Add `AUTH0_EXPORT_ORDERED` config property and `--export_ordered` flag for stable exports. [#1335]
+
+### Fixed
+
+- Fix `clientGrants` matching when multiple grants share the same `client_id` and `audience`. [#1341]
+
 ## [8.30.0] - 2026-04-02
 
 ### Added
