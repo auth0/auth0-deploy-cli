@@ -6,7 +6,7 @@ CONFIG_FILE="./config-cli-e2e.json"
 
 npm i #Install all dependencies to allow for building
 npm run build
-HUSKY=0 npm i --omit=dev  #Remove dev dependencies without running git hooks setup
+npm i --omit=dev  #Remove dev dependencies without running git hooks setup
 
 TARBALL_PATH=$(npm pack)
 sudo npm install -g $TARBALL_PATH

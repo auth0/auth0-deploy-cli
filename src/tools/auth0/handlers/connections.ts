@@ -23,8 +23,7 @@ const connectionOptionsSchema = {
   type: 'object',
   properties: {
     dpop_signing_alg: {
-      type: 'string',
-      ...(dpopSigningAlgValues.length > 0 && { enum: dpopSigningAlgValues }),
+      type: 'string'
     },
   },
 };
