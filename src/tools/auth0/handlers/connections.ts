@@ -20,7 +20,7 @@ const connectionOptionsSchema = {
   type: 'object',
   properties: {
     dpop_signing_alg: {
-      type: 'string'
+      type: 'string',
     },
   },
 };
