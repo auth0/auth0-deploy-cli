@@ -1,5 +1,6 @@
 import { Management } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
+import ValidationError from '../../validationError';
 import { Asset, Assets } from '../../../types';
 import log from '../../../logger';
 
@@ -39,6 +40,11 @@ export const schema = {
         type: ['string'],
         description:
           'Relying Party ID (rpId) to be used for Passkeys on this custom domain. If not provided or set to null, the full domain will be used.',
+      },
+      is_default: {
+        type: 'boolean',
+        description:
+          'Whether this custom domain is the default domain used for email notifications.',
       },
     },
     required: ['domain', 'type'],
@@ -107,6 +113,20 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
     }
   }
 
+  async validate(assets: Assets): Promise<void> {
+    await super.validate(assets);
+
+    const { customDomains } = assets;
+    if (!customDomains) return;
+
+    const defaultDomains = customDomains.filter((d) => d.is_default === true);
+    if (defaultDomains.length > 1) {
+      throw new ValidationError(
+        `Only one custom domain can be set as default (is_default: true), but found ${defaultDomains.length}: ${defaultDomains.map((d) => d.domain).join(', ')}`
+      );
+    }
+  }
+
   @order('50')
   async processChanges(assets: Assets): Promise<void> {
     const { customDomains } = assets;
@@ -128,5 +148,16 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
 
     const changes = await this.calcChanges(assets);
     await super.processChanges(assets, changes);
+
+    // If a domain is marked as is_default, set it as the tenant's default custom domain.
+    const defaultDomain = customDomains.find((d) => d.is_default === true);
+    if (defaultDomain) {
+      try {
+        await this.client.customDomains.setDefault({ domain: defaultDomain.domain });
+        log.info(`Set default custom domain: ${defaultDomain.domain}`);
+      } catch (err) {
+        throw new Error(`Problem setting default custom domain ${defaultDomain.domain}\n${err}`);
+      }
+    }
   }
 }

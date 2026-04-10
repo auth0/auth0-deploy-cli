@@ -448,6 +448,7 @@ customDomains:
   - domain: my_domain.com
     type: auth0_managed_certs
     tls_policy: 'recommended'
+    is_default: true
     domain_metadata:
       myKey: value
     relying_party_identifier: domain.com
