@@ -56,7 +56,6 @@ describe('#connections handler', () => {
       expect(valid).to.equal(true);
       expect(ajv.errors).to.be.null;
     });
-
   });
 
   describe('#connections validate', () => {

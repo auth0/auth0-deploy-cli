@@ -122,7 +122,9 @@ export default class CustomDomainsHadnler extends DefaultAPIHandler {
     const defaultDomains = customDomains.filter((d) => d.is_default === true);
     if (defaultDomains.length > 1) {
       throw new ValidationError(
-        `Only one custom domain can be set as default (is_default: true), but found ${defaultDomains.length}: ${defaultDomains.map((d) => d.domain).join(', ')}`
+        `Only one custom domain can be set as default (is_default: true), but found ${
+          defaultDomains.length
+        }: ${defaultDomains.map((d) => d.domain).join(', ')}`
       );
     }
   }
