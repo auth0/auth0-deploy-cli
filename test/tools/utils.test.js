@@ -581,6 +581,102 @@ describe('#filterExcluded', () => {
       );
     });
   });
+
+  describe('#stripUnresolvedPlaceholders', () => {
+    it('should strip a top-level field that contains an unresolved placeholder', () => {
+      const asset = {
+        id: 'asset-id-1',
+        name: 'my-resource',
+        secret: '##MY_SECRET##',
+      };
+
+      const result = utils.stripUnresolvedPlaceholders(asset, 'connections', 'my-resource');
+      expect(result).to.deep.equal({ id: 'asset-id-1', name: 'my-resource' });
+    });
+
+    it('should strip a nested field that contains an unresolved placeholder', () => {
+      const asset = {
+        id: 'asset-id-2',
+        options: {
+          client_secret: '##CLIENT_SECRET##',
+          domain: 'example.auth0.com',
+        },
+      };
+
+      const result = utils.stripUnresolvedPlaceholders(asset, 'connections', 'my-connection');
+      expect(result).to.deep.equal({
+        id: 'asset-id-2',
+        options: { domain: 'example.auth0.com' },
+      });
+    });
+
+    it('should log a warning with the full dotted path for each stripped field', () => {
+      const warnMessages = [];
+      const originalWarn = log.warn;
+      log.warn = (msg) => warnMessages.push(msg);
+
+      const asset = {
+        id: 'asset-id-3',
+        options: { client_secret: '##CLIENT_SECRET##' },
+      };
+
+      utils.stripUnresolvedPlaceholders(asset, 'connections', 'my-connection');
+
+      log.warn = originalWarn;
+
+      expect(warnMessages).to.have.length(1);
+      expect(warnMessages[0]).to.include('options.client_secret');
+      expect(warnMessages[0]).to.include('connections');
+      expect(warnMessages[0]).to.include('my-connection');
+      expect(warnMessages[0]).to.include('##CLIENT_SECRET##');
+    });
+
+    it('should not strip fields with resolved (non-placeholder) values', () => {
+      const asset = {
+        id: 'asset-id-4',
+        name: 'resolved-resource',
+        secret: 'a-real-secret-value',
+        options: { domain: 'example.auth0.com' },
+      };
+
+      const result = utils.stripUnresolvedPlaceholders(asset, 'clients', 'resolved-resource');
+      expect(result).to.deep.equal(asset);
+    });
+
+    it('should leave array field values intact', () => {
+      const asset = {
+        id: 'asset-id-5',
+        allowed_origins: ['https://example.com', 'https://other.com'],
+      };
+
+      const result = utils.stripUnresolvedPlaceholders(asset, 'clients', 'my-client');
+      expect(result).to.deep.equal(asset);
+    });
+
+    it('should return null when input is null', () => {
+      const result = utils.stripUnresolvedPlaceholders(null, 'clients', 'my-client');
+      expect(result).to.be.null;
+    });
+
+    it('should strip multiple unresolved placeholders at different depths and log a warning for each', () => {
+      const warnMessages = [];
+      const originalWarn = log.warn;
+      log.warn = (msg) => warnMessages.push(msg);
+
+      const asset = {
+        id: 'asset-id-6',
+        api_key: '##API_KEY##',
+        options: { client_secret: '##CLIENT_SECRET##' },
+      };
+
+      const result = utils.stripUnresolvedPlaceholders(asset, 'connections', 'multi-conn');
+
+      log.warn = originalWarn;
+
+      expect(result).to.deep.equal({ id: 'asset-id-6', options: {} });
+      expect(warnMessages).to.have.length(2);
+    });
+  });
 });
 
 describe('#detectInsufficientScopeError', () => {

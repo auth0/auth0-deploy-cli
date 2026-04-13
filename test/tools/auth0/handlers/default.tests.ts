@@ -173,4 +173,75 @@ describe('#default handler', () => {
     });
     expect(didCreateFunctionGetCalled).to.equal(true);
   });
+
+  it('should strip unresolved placeholders from payload when creating assets', async () => {
+    let didCreateFunctionGetCalled = false;
+
+    const handler = new mockHandler({
+      client: mockApiClient,
+      config,
+      type: mockAssetType,
+      functions: {
+        //@ts-ignore
+        create: async (payload) => {
+          didCreateFunctionGetCalled = true;
+          expect(payload).to.deep.equal({
+            id: 'some-id',
+            // `unresolved_field` stripped — contained ##PLACEHOLDER##
+            resolved_field: 'a-real-value',
+          });
+          return payload;
+        },
+      },
+    });
+
+    await handler.processChanges({} as Assets, {
+      del: [],
+      update: [],
+      conflicts: [],
+      create: [
+        {
+          id: 'some-id',
+          unresolved_field: '##UNRESOLVED_PLACEHOLDER##',
+          resolved_field: 'a-real-value',
+        },
+      ],
+    });
+    expect(didCreateFunctionGetCalled).to.equal(true);
+  });
+
+  it('should strip unresolved placeholders from payload when updating assets', async () => {
+    let didUpdateFunctionGetCalled = false;
+
+    const handler = new mockHandler({
+      client: mockApiClient,
+      config,
+      type: mockAssetType,
+      functions: {
+        //@ts-ignore
+        update: async (_identifiers, payload) => {
+          didUpdateFunctionGetCalled = true;
+          expect(payload).to.deep.equal({
+            // `secret` stripped — contained ##PLACEHOLDER##
+            non_sensitive_property: 'regular value',
+          });
+          return payload;
+        },
+      },
+    });
+
+    await handler.processChanges({} as Assets, {
+      del: [],
+      create: [],
+      conflicts: [],
+      update: [
+        {
+          id: 'foo',
+          secret: '##UNRESOLVED_SECRET##',
+          non_sensitive_property: 'regular value',
+        },
+      ],
+    });
+    expect(didUpdateFunctionGetCalled).to.equal(true);
+  });
 });
