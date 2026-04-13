@@ -175,6 +175,10 @@ See also: [Preserving Keywords on Export](keyword-replacement.md#preserving-keyw
 
 Boolean. When enabled, will return identifiers of all resources. May be useful for certain debugging or record-keeping scenarios within a single-tenant context. Default: `false`.
 
+### `AUTH0_EXPORT_ORDERED`
+
+Boolean. When enabled, exports JSON and YAML resources with keys sorted alphabetically, producing stable and deterministic output. Useful for reducing noise in diffs when keys would otherwise appear in non-deterministic order. Default: `false`.
+
 ### `EXCLUDED_PROPS`
 
 Provides ability to exclude any unwanted properties from management.

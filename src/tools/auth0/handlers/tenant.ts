@@ -195,6 +195,14 @@ export default class TenantHandler extends DefaultHandler {
       }
     }
 
+    if ((tenant.flags as Record<string, unknown>)?.enable_custom_domain_in_emails !== undefined) {
+      log.warn(
+        'The "enable_custom_domain_in_emails" tenant flag is deprecated. ' +
+          'Use the "is_default" field on customDomains to configure the default domain instead. ' +
+          'The flag will still be applied for now but will be removed in a future release.'
+      );
+    }
+
     if (updatedTenant && Object.keys(updatedTenant).length > 0) {
       await this.client.tenants.settings.update(updatedTenant);
       this.updated += 1;

@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import { constants } from '../../../tools';
 
-import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
+import { getFiles, existsMustBeDir, loadJSON, sanitize, dumpJSON } from '../../../utils';
 import log from '../../../logger';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
@@ -115,11 +115,7 @@ async function dump(context: DirectoryContext): Promise<void> {
     // Dump template metadata
     const name = sanitize(action.name);
     const actionFile = path.join(actionsFolder, `${name}.json`);
-    log.info(`Writing ${actionFile}`);
-    fs.writeFileSync(
-      actionFile,
-      JSON.stringify(mapToAction(context.filePath, action, includeIdentifiers), null, 2)
-    );
+    dumpJSON(actionFile, mapToAction(context.filePath, action, includeIdentifiers));
   });
 }
 

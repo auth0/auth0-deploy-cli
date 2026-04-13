@@ -361,29 +361,37 @@ prompts:
           continueButtonText: Continue without a new passkey
           passkeyBenefit1Title: Sign in quickly with this device
           passkeyBenefit2Title: No need to remember a password
+  enable_ulp_wcag_compliance: false
   identifier_first: false
-  universal_login_experience: new
-  webauthn_platform_first_factor: false
   partials:
     login:
       login:
-        form-content-start: |
-          <!-- Custom HTML injected at the start of the login form body -->
-          <div class="login-notice">
-            Welcome back! Please log in to continue.
+        form-content-start: >-
+          <div class="custom-login-banner">
+            <p>Welcome! Please log in to continue.</p>
           </div>
     signup:
       signup:
-        form-content-start: |
-          <!-- Custom HTML injected at the start of the signup form body -->
-          <div class="signup-notice">
-            Create your account to get started.
+        form-content-end: >-
+          <div class="custom-signup-footer">
+            <p>By signing up, you agree to our terms and conditions.</p>
           </div>
-        form-content-end: |
-          <!-- Custom HTML injected at the end of the signup form body -->
-          <p class="signup-terms">
-            By signing up, you agree to our <a href="/terms">Terms of Service</a>.
-          </p>
+    passkeys:
+      passkeys-enrollment:
+        form-content-start: >-
+          <div class="passkey-enrollment-header">
+            <p>Enhance your account security by creating a passkey.</p>
+            <p>Passkeys provide a faster and more secure way to sign in.</p>
+          </div>
+        secondary-actions-start: >-
+          <div class="passkey-help-link">
+            <a href="https://example.com/passkeys-help" target="_blank">Learn more about passkeys</a>
+          </div>
+      passkeys-enrollment-local:
+        form-footer-end: >-
+          <div class="passkey-local-enrollment-info">
+            <p>This passkey will be saved to this device only.</p>
+          </div>
   screenRenderers:
     - signup-id:
         signup-id: ./prompts/screenRenderSettings/signup-id_signup-id.json
@@ -440,6 +448,7 @@ customDomains:
   - domain: my_domain.com
     type: auth0_managed_certs
     tls_policy: 'recommended'
+    is_default: true
     domain_metadata:
       myKey: value
     relying_party_identifier: domain.com

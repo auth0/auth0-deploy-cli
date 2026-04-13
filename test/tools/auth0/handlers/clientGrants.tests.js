@@ -433,6 +433,70 @@ describe('#clientGrants handler', () => {
       await stageFn.apply(handler, [{ clientGrants: data }]);
     });
 
+    it('should match grants by subject_type and be order-independent when multiple grants share the same client_id+audience', async () => {
+      const updatedIds = [];
+      const updatedScopes = {};
+
+      const auth0 = {
+        clientGrants: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (id, data) {
+            updatedIds.push(id);
+            updatedScopes[id] = data.scope;
+            return Promise.resolve({ data: { id, ...data } });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'client_grants', [
+              {
+                id: 'cg_regular',
+                client_id: 'client1',
+                audience: 'https://api.example.com',
+                scope: ['read:data'],
+                subject_type: null,
+              },
+              {
+                id: 'cg_exchange',
+                client_id: 'client1',
+                audience: 'https://api.example.com',
+                scope: ['write:data'],
+                subject_type: 'client',
+              },
+            ]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // YAML in reversed order vs API order — should still match correctly by subject_type
+      const data = [
+        {
+          client_id: 'client1',
+          audience: 'https://api.example.com',
+          scope: ['write:data'],
+          subject_type: 'client',
+        },
+        {
+          client_id: 'client1',
+          audience: 'https://api.example.com',
+          scope: ['read:data'],
+          subject_type: null,
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+
+      // cg_regular (subject_type: null) must keep its scope ['read:data']
+      expect(updatedScopes['cg_regular']).to.deep.equal(['read:data']);
+      // cg_exchange (subject_type: 'client') must keep its scope ['write:data']
+      expect(updatedScopes['cg_exchange']).to.deep.equal(['write:data']);
+    });
+
     it('should delete client grant and create another one instead', async () => {
       const auth0 = {
         clientGrants: {
@@ -579,6 +643,245 @@ describe('#clientGrants handler', () => {
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ clientGrants: [] }]);
+    });
+
+    it('should delete and recreate a grant when local subject_type explicitly differs from remote', async () => {
+      config.data = {
+        AUTH0_CLIENT_ID: 'client_id',
+        AUTH0_ALLOW_DELETE: true,
+      };
+
+      let deletedId = null;
+      let createdData = null;
+      let updatedId = null;
+
+      const remoteGrant = {
+        id: 'cg1',
+        client_id: 'client1',
+        audience: 'https://api.example.com',
+        scope: ['read:data'],
+        subject_type: 'client_credentials',
+      };
+
+      const auth0 = {
+        clientGrants: {
+          create: function (data) {
+            createdData = data;
+            return Promise.resolve({ data });
+          },
+          update: function (id, data) {
+            updatedId = id;
+            return Promise.resolve({ data });
+          },
+          delete: function (params) {
+            deletedId = params;
+            return Promise.resolve({ data: [] });
+          },
+          list: (params) => mockPagedData(params, 'client_grants', [remoteGrant]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Local explicitly sets subject_type: null — differs from remote 'client_credentials'.
+      // Since subject_type is immutable, this must become DELETE + CREATE, not UPDATE.
+      const data = [
+        {
+          client_id: 'client1',
+          audience: 'https://api.example.com',
+          scope: ['read:data'],
+          subject_type: null,
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+
+      expect(deletedId).to.equal('cg1');
+      expect(createdData).to.not.be.null;
+      expect(createdData.client_id).to.equal('client1');
+      expect(updatedId).to.be.null;
+    });
+
+    it('should update (not delete+create) a grant when local config omits subject_type', async () => {
+      config.data = {
+        AUTH0_CLIENT_ID: 'client_id',
+        AUTH0_ALLOW_DELETE: true,
+      };
+
+      let deletedId = null;
+      let updatedId = null;
+
+      const remoteGrant = {
+        id: 'cg1',
+        client_id: 'client1',
+        audience: 'https://api.example.com',
+        scope: ['read:data'],
+        subject_type: 'client_credentials',
+      };
+
+      const auth0 = {
+        clientGrants: {
+          create: function () {
+            throw new Error('create should not be called when subject_type is omitted');
+          },
+          update: function (id, data) {
+            updatedId = id;
+            return Promise.resolve({ data });
+          },
+          delete: function (params) {
+            deletedId = params;
+            return Promise.resolve({ data: [] });
+          },
+          list: (params) => mockPagedData(params, 'client_grants', [remoteGrant]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Local does NOT specify subject_type at all — backward-compat: should update, not delete+create.
+      const data = [
+        {
+          client_id: 'client1',
+          audience: 'https://api.example.com',
+          scope: ['write:data'],
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+
+      expect(deletedId).to.be.null;
+      expect(updatedId).to.equal('cg1');
+    });
+
+    it('should update (not delete+create) a grant when both local and remote subject_type are null', async () => {
+      config.data = { AUTH0_CLIENT_ID: 'client_id', AUTH0_ALLOW_DELETE: true };
+
+      let deletedId = null;
+      let updatedId = null;
+
+      const auth0 = {
+        clientGrants: {
+          create: function () {
+            throw new Error('create should not be called when subject_types match');
+          },
+          update: function (id, data) {
+            updatedId = id;
+            return Promise.resolve({ data });
+          },
+          delete: function (params) {
+            deletedId = params;
+            return Promise.resolve({ data: [] });
+          },
+          list: (params) =>
+            mockPagedData(params, 'client_grants', [
+              {
+                id: 'cg1',
+                client_id: 'client1',
+                audience: 'https://api.example.com',
+                scope: ['read:data'],
+                subject_type: null,
+              },
+            ]),
+        },
+        clients: { list: (params) => mockPagedData(params, 'clients', []) },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Both local and remote have subject_type: null — no mismatch, should just UPDATE.
+      const data = [
+        {
+          client_id: 'client1',
+          audience: 'https://api.example.com',
+          scope: ['read:data', 'write:data'],
+          subject_type: null,
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+
+      expect(deletedId).to.be.null;
+      expect(updatedId).to.equal('cg1');
+    });
+
+    it('should correctly handle 3 grants sharing client_id+audience with mixed subject_types', async () => {
+      config.data = { AUTH0_CLIENT_ID: 'client_id', AUTH0_ALLOW_DELETE: true };
+
+      const updatedIds = [];
+      let deletedId = null;
+
+      const auth0 = {
+        clientGrants: {
+          create: function () {
+            throw new Error('create should not be called when subject_types match');
+          },
+          update: function (id, data) {
+            updatedIds.push(id);
+            return Promise.resolve({ data });
+          },
+          delete: function (params) {
+            deletedId = params;
+            return Promise.resolve({ data: [] });
+          },
+          list: (params) =>
+            mockPagedData(params, 'client_grants', [
+              {
+                id: 'cg_null',
+                client_id: 'client1',
+                audience: 'https://api.example.com',
+                scope: ['read:data'],
+                subject_type: null,
+              },
+              {
+                id: 'cg_client',
+                client_id: 'client1',
+                audience: 'https://api.example.com',
+                scope: ['write:data'],
+                subject_type: 'client',
+              },
+            ]),
+        },
+        clients: { list: (params) => mockPagedData(params, 'clients', []) },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Mixed subject_types with updated scopes — should UPDATE each grant
+      // matched by subject_type, no delete+create needed.
+      const data = [
+        {
+          client_id: 'client1',
+          audience: 'https://api.example.com',
+          scope: ['read:data', 'read:profile'],
+          subject_type: null,
+        },
+        {
+          client_id: 'client1',
+          audience: 'https://api.example.com',
+          scope: ['write:data', 'write:profile'],
+          subject_type: 'client',
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+
+      expect(deletedId).to.be.null;
+      expect(updatedIds).to.include('cg_null');
+      expect(updatedIds).to.include('cg_client');
     });
 
     it('should not touch client grants of excluded clients', async () => {

@@ -20,7 +20,7 @@ async function parse(context: YAMLContext): Promise<ParsedClientGrants> {
 
 async function dump(context: YAMLContext): Promise<ParsedClientGrants> {
   let { clients } = context.assets;
-  const { clientGrants } = context.assets;
+  let { clientGrants } = context.assets;
 
   if (!clientGrants) return { clientGrants: null };
 
@@ -29,6 +29,17 @@ async function dump(context: YAMLContext): Promise<ParsedClientGrants> {
       paginate: true,
       include_totals: true,
     });
+  }
+
+  // Filter out grants for excluded clients
+  const excludedClientsByNames = (context.assets.exclude && context.assets.exclude.clients) || [];
+  if (excludedClientsByNames.length) {
+    const excludedClientIds = new Set(
+      (clients || [])
+        .filter((c) => c.name !== undefined && excludedClientsByNames.includes(c.name))
+        .map((c) => c.client_id)
+    );
+    clientGrants = clientGrants.filter((grant) => !excludedClientIds.has(grant.client_id));
   }
 
   // Convert client_id to the client name for readability

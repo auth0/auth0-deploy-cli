@@ -46,6 +46,12 @@ async function dump(context: YAMLContext): Promise<ParsedClients> {
 
   if (!clients) return { clients: null };
 
+  // Filter excluded clients
+  const excludedClients = (context.assets.exclude && context.assets.exclude.clients) || [];
+  if (excludedClients.length) {
+    clients = clients.filter((client) => !excludedClients.includes(client.name ?? ''));
+  }
+
   // map ids to names for user attribute profiles and connection profiles
   clients = clients.map((client) => {
     const userAttributeProfileId = client?.express_configuration?.user_attribute_profile_id;
