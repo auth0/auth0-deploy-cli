@@ -249,6 +249,36 @@ export const obfuscateSensitiveValues = (
   return newAsset;
 };
 
+const UNRESOLVED_PLACEHOLDER_REGEX = /^##.+##$/;
+
+// Recursively scans all fields in an asset and strips any value that is still an unresolved
+// ##...## keyword placeholder. Logs a warning for each stripped field so the user knows
+// the existing value on the tenant will not be changed.
+export const stripUnresolvedPlaceholders = (
+  data: Asset | null,
+  resourceType: string,
+  resourceName: string,
+  parentPath = ''
+): Asset | null => {
+  if (data === null || typeof data !== 'object') return data;
+
+  const newAsset = { ...data };
+  Object.keys(newAsset).forEach((key) => {
+    const fullPath = parentPath ? `${parentPath}.${key}` : key;
+    const value = newAsset[key];
+    if (typeof value === 'string' && UNRESOLVED_PLACEHOLDER_REGEX.test(value)) {
+      log.warn(
+        `Skipping field "${fullPath}" for ${resourceType} "${resourceName}" because it contains an unresolved placeholder "${value}". The existing value on the tenant will not be changed.`
+      );
+      delete newAsset[key];
+    } else if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+      newAsset[key] = stripUnresolvedPlaceholders(value, resourceType, resourceName, fullPath);
+    }
+  });
+
+  return newAsset;
+};
+
 // The reverse of `obfuscateSensitiveValues()`, preventing an obfuscated value from being passed to the API
 export const stripObfuscatedFieldsFromPayload = (
   data: Asset | Asset[] | null,
