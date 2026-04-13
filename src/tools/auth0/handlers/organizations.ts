@@ -25,9 +25,15 @@ export const schema = {
           type: 'object',
           properties: {
             connection_id: { type: 'string' },
+            organization_connection_name: { type: 'string' },
             assign_membership_on_login: { type: 'boolean' },
             show_as_button: { type: 'boolean' },
             is_signup_enabled: { type: 'boolean' },
+            organization_access_level: {
+              type: 'string',
+              enum: Object.values(Management.OrganizationAccessLevelEnum),
+            },
+            is_enabled: { type: 'boolean' },
           },
         },
       },
@@ -249,7 +255,10 @@ export default class OrganizationsHandler extends DefaultHandler {
           x.connection_id === c.connection_id &&
           (x.assign_membership_on_login !== c.assign_membership_on_login ||
             x.show_as_button !== c.show_as_button ||
-            x.is_signup_enabled !== c.is_signup_enabled)
+            x.is_signup_enabled !== c.is_signup_enabled ||
+            x.organization_access_level !== c.organization_access_level ||
+            x.organization_connection_name !== c.organization_connection_name ||
+            x.is_enabled !== c.is_enabled)
       )
     );
 
