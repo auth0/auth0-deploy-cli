@@ -68,7 +68,7 @@ const myOrganizationConfigurationSchema = {
       description: 'The deletion behavior for My Organization connections created by this client',
     },
   },
-  required: ['allowed_strategies', 'connection_deletion_behavior']
+  required: ['allowed_strategies', 'connection_deletion_behavior'],
 };
 
 export const schema = {

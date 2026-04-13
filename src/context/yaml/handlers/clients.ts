@@ -75,7 +75,9 @@ async function dump(context: YAMLContext): Promise<ParsedClients> {
     const myOrganizationUserAttributeProfileId =
       client?.my_organization_configuration?.user_attribute_profile_id;
     if (client.my_organization_configuration && myOrganizationUserAttributeProfileId) {
-      const p = userAttributeProfiles?.find((uap) => uap.id === myOrganizationUserAttributeProfileId);
+      const p = userAttributeProfiles?.find(
+        (uap) => uap.id === myOrganizationUserAttributeProfileId
+      );
       client.my_organization_configuration.user_attribute_profile_id =
         p?.name || myOrganizationUserAttributeProfileId;
     }

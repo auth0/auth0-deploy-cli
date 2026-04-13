@@ -108,7 +108,9 @@ async function dump(context: DirectoryContext): Promise<void> {
       const myOrganizationUserAttributeProfileId =
         client.my_organization_configuration.user_attribute_profile_id;
       if (myOrganizationUserAttributeProfileId) {
-        const p = userAttributeProfiles?.find((uap) => uap.id === myOrganizationUserAttributeProfileId);
+        const p = userAttributeProfiles?.find(
+          (uap) => uap.id === myOrganizationUserAttributeProfileId
+        );
         client.my_organization_configuration.user_attribute_profile_id =
           p?.name || myOrganizationUserAttributeProfileId;
       }
