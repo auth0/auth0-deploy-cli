@@ -349,8 +349,15 @@ export default class APIHandler {
             const updateFN = this.getClientFN(this.functions.update);
             const updatePayload = (() => {
               const data = stripFields({ ...updateItem }, this.stripUpdateFields);
-              const stripped = stripObfuscatedFieldsFromPayload(data, this.sensitiveFieldsToObfuscate);
-              return stripUnresolvedPlaceholders(stripped as Asset, this.type, this.objString(updateItem));
+              const stripped = stripObfuscatedFieldsFromPayload(
+                data,
+                this.sensitiveFieldsToObfuscate
+              );
+              return stripUnresolvedPlaceholders(
+                stripped as Asset,
+                this.type,
+                this.objString(updateItem)
+              );
             })();
 
             return updateFN(updateItem[this.id], updatePayload);
@@ -377,7 +384,11 @@ export default class APIHandler {
                 strippedPayload,
                 this.sensitiveFieldsToObfuscate
               );
-              return stripUnresolvedPlaceholders(stripped as Asset, this.type, this.objString(createItem));
+              return stripUnresolvedPlaceholders(
+                stripped as Asset,
+                this.type,
+                this.objString(createItem)
+              );
             })();
             return createFunction(createPayload);
           }, retryConfig)
@@ -402,8 +413,15 @@ export default class APIHandler {
             const updateFN = this.getClientFN(this.functions.update);
             const updatePayload = (() => {
               const data = stripFields({ ...updateItem }, this.stripUpdateFields);
-              const stripped = stripObfuscatedFieldsFromPayload(data, this.sensitiveFieldsToObfuscate);
-              return stripUnresolvedPlaceholders(stripped as Asset, this.type, this.objString(updateItem));
+              const stripped = stripObfuscatedFieldsFromPayload(
+                data,
+                this.sensitiveFieldsToObfuscate
+              );
+              return stripUnresolvedPlaceholders(
+                stripped as Asset,
+                this.type,
+                this.objString(updateItem)
+              );
             })();
 
             return updateFN(updateItem[this.id], updatePayload);
