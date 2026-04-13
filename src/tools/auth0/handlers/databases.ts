@@ -289,6 +289,26 @@ export default class DatabaseHandler extends DefaultAPIHandler {
             delete connection.options?.attributes;
           }
 
+          // When switching between flexible and legacy password policy, remove the conflicting
+          // group from the existing state before merging to avoid a 400 from the API.
+          const passwordOptions = payload?.options?.password_options;
+          const legacyPasswordSettings =
+            payload?.options?.passwordPolicy ||
+            payload?.options?.password_complexity_options ||
+            payload?.options?.password_history ||
+            payload?.options?.password_no_personal_info ||
+            payload?.options?.password_dictionary;
+
+          if (passwordOptions) {
+            delete connection.options?.passwordPolicy;
+            delete connection.options?.password_complexity_options;
+            delete connection.options?.password_history;
+            delete connection.options?.password_no_personal_info;
+            delete connection.options?.password_dictionary;
+          } else if (legacyPasswordSettings) {
+            delete connection.options?.password_options;
+          }
+
           payload.options = { ...connection.options, ...payload.options };
 
           if (payload.options && Object.keys(payload.options).length === 0) {
