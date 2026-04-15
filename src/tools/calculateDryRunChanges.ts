@@ -171,7 +171,23 @@ export function getObjectDifferences(
     // Handle arrays — normalize order before comparing
     if (Array.isArray(localValue) && Array.isArray(remoteValue)) {
       const normalizedLocalValue = normalizeArrayValues(localValue);
-      const normalizedRemoteValue = normalizeArrayValues(remoteValue);
+
+      // Strip extra keys from remote objects before sorting — extra remote keys shift sort order,
+      // misaligning arrays and causing false "key in local but not in remote" differences.
+      const localKeySet = new Set(
+        localValue.flatMap((item) =>
+          typeof item === 'object' && item !== null ? Object.keys(item) : []
+        )
+      );
+      const remoteValueFiltered =
+        localKeySet.size > 0
+          ? remoteValue.map((item) =>
+              typeof item === 'object' && item !== null
+                ? Object.fromEntries(Object.entries(item).filter(([k]) => localKeySet.has(k)))
+                : item
+            )
+          : remoteValue;
+      const normalizedRemoteValue = normalizeArrayValues(remoteValueFiltered);
 
       if (normalizedLocalValue.length !== normalizedRemoteValue.length) {
         const message = `Array length difference for [${currentPath}]: local:${normalizedLocalValue.length} vs remote:${normalizedRemoteValue.length}`;
