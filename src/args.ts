@@ -25,6 +25,7 @@ type ExportSpecificParams = {
   format: 'yaml' | 'directory';
   output_folder: string;
   export_ids?: boolean;
+  export_ordered?: boolean;
 };
 
 export type ExportParams = ExportSpecificParams & SharedParams;
@@ -131,6 +132,11 @@ function getParams(): CliParams {
         describe: 'Export identifier field for each object type.',
         type: 'boolean',
         default: false,
+      },
+      export_ordered: {
+        alias: 's',
+        describe: 'Order keys in exported JSON files for consistent diffs.',
+        type: 'boolean',
       },
     })
     .example(

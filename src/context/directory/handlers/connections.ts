@@ -62,9 +62,18 @@ function parse(context: DirectoryContext): ParsedConnections {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const { connections, clientsOrig } = context.assets;
+  let { connections } = context.assets;
+  const { clientsOrig } = context.assets;
 
   if (!connections) return; // Skip, nothing to dump
+
+  // Filter excluded connections
+  const excludedConnections = (context.assets.exclude && context.assets.exclude.connections) || [];
+  if (excludedConnections.length) {
+    connections = connections.filter(
+      (connection) => !excludedConnections.includes(connection.name)
+    );
+  }
 
   const connectionsFolder = path.join(context.filePath, constants.CONNECTIONS_DIRECTORY);
   fs.ensureDirSync(connectionsFolder);

@@ -1,8 +1,10 @@
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 import tenantHandler, {
   allowedTenantFlags,
   removeUnallowedTenantFlags,
 } from '../../../../src/tools/auth0/handlers/tenant';
+import log from '../../../../src/logger';
 
 const mockAllowedFlags = Object.values(allowedTenantFlags).reduce<Record<string, boolean>>(
   (acc, cur) => {
@@ -199,6 +201,30 @@ describe('#tenant handler', () => {
         const { processChanges } = Object.getPrototypeOf(handler);
 
         await processChanges.apply(handler, [{ tenant: { flags: proposedFlags } }]);
+      });
+
+      it('should log a deprecation warning when enable_custom_domain_in_emails is set', async () => {
+        const logWarnStub = sinon.stub(log, 'warn');
+
+        const auth0 = {
+          tenants: {
+            settings: {
+              update: async () => {},
+            },
+          },
+        };
+
+        // @ts-ignore
+        const handler = new tenantHandler({ client: auth0 });
+        const { processChanges } = Object.getPrototypeOf(handler);
+
+        await processChanges.apply(handler, [
+          { tenant: { flags: { enable_custom_domain_in_emails: true } } },
+        ]);
+
+        expect(logWarnStub.calledWithMatch('enable_custom_domain_in_emails')).to.equal(true);
+
+        logWarnStub.restore();
       });
     });
   });

@@ -1,6 +1,7 @@
 import pageClient from '../../../../src/tools/auth0/client';
 
 /* eslint-disable consistent-return */
+const Ajv = require('ajv');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const connections = require('../../../../src/tools/auth0/handlers/connections');
@@ -29,6 +30,33 @@ describe('#connections handler', () => {
     AUTH0_CLIENT_ID: 'client_id',
     AUTH0_ALLOW_DELETE: true,
   };
+
+  describe('#connections schema', () => {
+    it('should allow supported dpop_signing_alg values', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'oidc-connection',
+          strategy: 'oidc',
+          options: {
+            dpop_signing_alg: 'ES256',
+          },
+        },
+        {
+          name: 'okta-connection',
+          strategy: 'okta',
+          options: {
+            dpop_signing_alg: 'Ed25519',
+          },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+  });
 
   describe('#connections validate', () => {
     it('should not allow same names', async () => {

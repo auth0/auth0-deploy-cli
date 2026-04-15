@@ -287,4 +287,24 @@ describe('#YAML context databases', () => {
       ],
     });
   });
+
+  it('should not dump excluded databases', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'databasesDumpExclude');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') },
+      mockMgmtClient()
+    );
+
+    context.assets.databases = [
+      { name: 'includedDb', strategy: 'auth0', options: {} },
+      { name: 'excludedDb', strategy: 'auth0', options: {} },
+    ];
+    context.assets.exclude = { databases: ['excludedDb'] };
+
+    const dumped = await handler.dump(context);
+
+    expect(dumped.databases).to.have.length(1);
+    expect(dumped.databases[0].name).to.equal('includedDb');
+  });
 });
