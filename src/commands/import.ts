@@ -37,6 +37,14 @@ export default async function importCMD(params: ImportParams) {
     throw new Error('--apply must be used with --dry-run.');
   }
 
+  if (interactive && !effectiveDryRun) {
+    throw new Error('--interactive must be used with --dry-run.');
+  }
+
+  if (interactive && apply) {
+    throw new Error('--interactive and --apply cannot be used together.');
+  }
+
   if (shouldInheritEnv) {
     nconf.env().use('memory');
 
