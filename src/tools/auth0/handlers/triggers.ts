@@ -61,7 +61,9 @@ export default class TriggersHandler extends DefaultHandler {
         const triggerId = triggers[i];
         let bindings;
         try {
-          const { data } = await this.client.actions.triggers.bindings.list(triggerId);
+          const { data } = await this.client.actions.triggers.bindings.list(
+            triggerId as Management.ActionTriggerTypeEnum
+          );
 
           bindings = data;
         } catch (err) {
@@ -114,7 +116,10 @@ export default class TriggersHandler extends DefaultHandler {
           display_name: binding.display_name,
         }));
 
-        await this.client.actions.triggers.bindings.updateMany(name, { bindings });
+        await this.client.actions.triggers.bindings.updateMany(
+          name as Management.ActionTriggerTypeEnum,
+          { bindings }
+        );
         this.didUpdate({ trigger_id: name });
         this.updated += 1;
       })

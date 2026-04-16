@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.31.0] - 2026-04-10
+
+### Added
+
+- Add support for `is_default` on `customDomains`. [#1330]
+- Add `AUTH0_EXPORT_ORDERED` config property and `--export_ordered` flag for stable exports. [#1335]
+
+### Fixed
+
+- Fix `clientGrants` matching when multiple grants share the same `client_id` and `audience`. [#1341]
+
 ## [8.30.0] - 2026-04-02
 
 ### Added
@@ -1710,7 +1721,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1340]: https://github.com/auth0/auth0-deploy-cli/issues/1340
 [#1342]: https://github.com/auth0/auth0-deploy-cli/issues/1342
 [#1343]: https://github.com/auth0/auth0-deploy-cli/issues/1343
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.30.0...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.31.0...HEAD
+[8.31.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.30.0...v8.31.0
 [8.30.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.3...v8.30.0
 [8.29.3]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.2...v8.29.3
 [8.29.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.1...v8.29.2
