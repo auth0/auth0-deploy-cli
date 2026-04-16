@@ -1,5 +1,5 @@
 import { Management } from 'auth0';
-import { has, omit } from 'lodash';
+import { has, omit, pick } from 'lodash';
 import { Assets, Auth0APIClient } from '../../../types';
 import { paginate } from '../client';
 import DefaultAPIHandler from './default';
@@ -576,18 +576,27 @@ export default class ClientHandler extends DefaultAPIHandler {
   }
 
   private getCIMDEditableFields(client: Client): Management.UpdateClientRequestContent {
-    // Only a subset of fields are editable for CIMD clients, so we pick those out here and ignore the rest
-    return omit(client, [
-      'name',
-      'external_client_id',
-      'third_party_security_mode',
-      'token_endpoint_auth_method',
-      'is_first_party',
-      'callbacks',
+    // Only a subset of fields are editable for CIMD clients.
+    return pick(client, [
+      'description',
+      'app_type',
+      'allowed_origins',
+      'web_origins',
+      'grant_types',
+      'oidc_conformant',
+      'organization_discovery_methods',
+      'client_metadata',
+      'default_organization',
+      'require_proof_of_possession',
+      'token_quota',
+      'skip_non_verifiable_callback_uri_confirmation_prompt',
+      'jwt_configuration',
+      'refresh_token',
     ]) as Management.UpdateClientRequestContent;
   }
 
   private async updateClient(clientId: string, client: Client): Promise<Client> {
+    // For non-CIMD clients
     if (!this.isCimdClient(client)) {
       return this.client.clients.update(clientId, client as Management.UpdateClientRequestContent);
     }
