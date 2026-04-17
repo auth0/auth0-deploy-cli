@@ -156,7 +156,7 @@ describe('#organizations handler', () => {
             expect(data.display_name).to.equal('Acme');
             expect(data.connections).to.equal(undefined);
             data.id = 'fake';
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
           update: () => Promise.resolve([]),
           delete: () => Promise.resolve([]),
@@ -275,7 +275,7 @@ describe('#organizations handler', () => {
               },
             });
             data.id = 'fake';
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
@@ -935,7 +935,7 @@ describe('#organizations handler', () => {
             expect(data.name).to.equal('acme');
             expect(data.discovery_domains).to.equal(undefined);
             data.id = 'fake';
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
