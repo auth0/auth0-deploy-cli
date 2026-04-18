@@ -190,7 +190,11 @@ export default class Auth0 {
               let updated = 0;
               let deleted = 0;
 
-              promptsLog.info(`Calculating dry run changes for ${handler.type}...`);
+              if (isDebug) {
+                promptsLog.info(`Calculating dry run changes for ${handler.type}...`);
+              } else {
+                s.message(`Calculating dry run changes for ${handler.type}...`);
+              }
 
               const changes: CalculatedChanges = await handler.dryRunChanges(this.assets);
 
