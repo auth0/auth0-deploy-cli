@@ -497,7 +497,12 @@ export async function dryRunFormatAssets(
     const { clientGrants } = localAssets;
     localAssets.clientGrants = clientGrants.map((clientGrant) => {
       if (clientGrant.client_id) {
-        clientGrant.client_id = convertClientNameToId(clientGrant.client_id, clientsRemoteData);
+        const originalName = clientGrant.client_id;
+        const resolvedId = convertClientNameToId(originalName, clientsRemoteData);
+        if (resolvedId !== originalName) {
+          (clientGrant as Asset)._clientName = originalName;
+        }
+        clientGrant.client_id = resolvedId;
       }
       return clientGrant;
     });

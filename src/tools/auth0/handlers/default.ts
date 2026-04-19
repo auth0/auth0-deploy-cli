@@ -211,7 +211,8 @@ export default class APIHandler {
 
     // For some resources, create a descriptive name
     if (this.type === 'clientGrants') {
-      return `${item.client_id} -> ${item.audience}`;
+      const clientLabel = (item._clientName as string) || item.client_id;
+      return `${clientLabel} -> ${item.audience}`;
     }
     if (this.type === 'guardianFactors') {
       return item.name || item.type || 'unknown factor';

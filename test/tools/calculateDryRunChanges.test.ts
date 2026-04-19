@@ -119,6 +119,50 @@ describe('#utils calculateDryRunChanges', () => {
     expect(assets.tenant).to.not.have.property('idle_ephemeral_session_lifetime');
   });
 
+  it('should preserve client name as _clientName on clientGrants when client_id is resolved from name', async () => {
+    const auth0Client = mockMgmtClient() as any;
+
+    auth0Client.clients.list = () => [{ name: 'My M2M App', client_id: 'cli_abc123' }];
+    auth0Client.connectionProfiles.list = () => [];
+    auth0Client.userAttributeProfiles.list = () => [];
+    auth0Client.connections.list = () => [];
+
+    const assets = await dryRunFormatAssets(
+      {
+        clientGrants: [
+          { client_id: 'My M2M App', audience: 'https://api.example.com', scope: ['read:data'] },
+        ],
+      } as any,
+      auth0Client
+    );
+
+    const grant = assets.clientGrants?.[0] as any;
+    expect(grant.client_id).to.equal('cli_abc123');
+    expect(grant._clientName).to.equal('My M2M App');
+  });
+
+  it('should not set _clientName on clientGrants when client_id is already a raw ID', async () => {
+    const auth0Client = mockMgmtClient() as any;
+
+    auth0Client.clients.list = () => [{ name: 'My M2M App', client_id: 'cli_abc123' }];
+    auth0Client.connectionProfiles.list = () => [];
+    auth0Client.userAttributeProfiles.list = () => [];
+    auth0Client.connections.list = () => [];
+
+    const assets = await dryRunFormatAssets(
+      {
+        clientGrants: [
+          { client_id: 'cli_abc123', audience: 'https://api.example.com', scope: ['read:data'] },
+        ],
+      } as any,
+      auth0Client
+    );
+
+    const grant = assets.clientGrants?.[0] as any;
+    expect(grant.client_id).to.equal('cli_abc123');
+    expect(grant).to.not.have.property('_clientName');
+  });
+
   it('should not report tenant dry-run diffs for equivalent hour and minute values', () => {
     const changes = calculateDryRunChanges({
       type: 'tenant',
@@ -498,6 +542,29 @@ describe('#utils calculateDryRunChanges', () => {
 
     expect(changes.update).to.have.length(1);
     expect(changes.update[0].client_id).to.equal('cli_abc');
+  });
+
+  it('should use _clientName in the UPDATE identifier for clientGrants', () => {
+    const changes = calculateDryRunChanges({
+      type: 'clientGrants',
+      assets: [
+        {
+          client_id: 'cli_abc123',
+          _clientName: 'My M2M App',
+          audience: 'https://api.example.com',
+          scope: ['read:data', 'write:data'],
+        },
+      ],
+      existing: [
+        { client_id: 'cli_abc123', audience: 'https://api.example.com', scope: ['read:data'] },
+      ],
+      identifiers: [['client_id', 'audience']],
+      ignoreDryRunFields: [],
+    });
+
+    expect(changes.update).to.have.length(1);
+    const updatedGrant = changes.update[0] as any;
+    expect(updatedGrant._clientName).to.equal('My M2M App');
   });
 });
 
