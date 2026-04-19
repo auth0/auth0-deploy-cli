@@ -166,6 +166,48 @@ describe('#utils calculateDryRunChanges', () => {
     expect(changes.del).to.have.length(0);
   });
 
+  it('should detect tenant flag changes as UPDATE using default identifiers [id, name]', () => {
+    // Regression: singleton resources like tenant have no id/name, so the strict update matcher
+    // previously found no match and discarded all flag changes silently.
+    const changes = calculateDryRunChanges({
+      type: 'tenant',
+      assets: {
+        friendly_name: 'Auth0 test',
+        flags: { enable_sso: true },
+      },
+      existing: {
+        friendly_name: 'Auth0 test',
+        flags: { enable_sso: false },
+      },
+      identifiers: ['id', 'name'],
+      ignoreDryRunFields: [],
+    });
+
+    expect(changes.update).to.have.length(1);
+    expect(changes.create).to.have.length(0);
+    expect(changes.del).to.have.length(0);
+  });
+
+  it('should not report UPDATE for unchanged tenant using default identifiers [id, name]', () => {
+    const changes = calculateDryRunChanges({
+      type: 'tenant',
+      assets: {
+        friendly_name: 'Auth0 test',
+        flags: { enable_sso: false },
+      },
+      existing: {
+        friendly_name: 'Auth0 test',
+        flags: { enable_sso: false },
+      },
+      identifiers: ['id', 'name'],
+      ignoreDryRunFields: [],
+    });
+
+    expect(changes.update).to.have.length(0);
+    expect(changes.create).to.have.length(0);
+    expect(changes.del).to.have.length(0);
+  });
+
   it('should ignore attack protection secrets during dry-run comparisons', async () => {
     const handler = new AttackProtectionHandler({
       // @ts-ignore test stub

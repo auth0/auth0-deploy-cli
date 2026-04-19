@@ -358,6 +358,20 @@ export function calculateDryRunChanges({
   // Identify updated: local assets that match a remote asset and have differences
   const updatedAssets = localAssets.filter((localAsset) => {
     const matchingRemoteAsset = remoteAssets.find((remoteAsset) => {
+      // Detect singleton resources (e.g. tenant) that carry none of the identifier fields on either
+      // side.  For these, fall back to the lenient assetsMatch() used for CREATE/DELETE detection
+      // so that value-only changes (e.g. a flag flip) are still surfaced as UPDATE.
+      const isSingleton = identifiers.every((id) => {
+        if (Array.isArray(id)) {
+          return id.every((i) => localAsset[i] === undefined && remoteAsset[i] === undefined);
+        }
+        return localAsset[id] === undefined && remoteAsset[id] === undefined;
+      });
+
+      if (isSingleton) {
+        return assetsMatch(localAsset, remoteAsset);
+      }
+
       // Stricter match check: identifier values must be non-null on both sides
       return identifiers.some((id) => {
         if (Array.isArray(id)) {
