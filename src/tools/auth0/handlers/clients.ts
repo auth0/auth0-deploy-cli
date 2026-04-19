@@ -64,7 +64,6 @@ const myOrganizationConfigurationSchema = {
     connection_deletion_behavior: {
       type: 'string',
       enum: ['allow', 'allow_if_empty'],
-      default: 'allow',
       description: 'The deletion behavior for My Organization connections created by this client',
     },
   },
