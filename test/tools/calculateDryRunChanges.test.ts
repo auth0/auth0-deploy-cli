@@ -7,6 +7,7 @@ import {
   getObjectDifferences,
   hasObjectDifferences,
   exportDiffLog,
+  getDiffLog,
 } from '../../src/tools/calculateDryRunChanges';
 import DefaultHandler from '../../src/tools/auth0/handlers/default';
 import { configFactory } from '../../src/configFactory';
@@ -591,6 +592,49 @@ describe('#getObjectDifferences', () => {
       'test'
     );
     expect(diffs.length).to.be.greaterThan(0);
+  });
+});
+
+describe('#calculateDryRunChanges - diff log labels', () => {
+  it('should prefix diff messages with type-N for resources without a name field', () => {
+    calculateDryRunChanges({
+      type: 'clientGrants',
+      assets: [
+        {
+          client_id: 'cli_abc',
+          audience: 'https://api.example.com',
+          scope: ['read:users', 'write:users'],
+        },
+      ],
+      existing: [
+        {
+          id: 'cgr_1',
+          client_id: 'cli_abc',
+          audience: 'https://api.example.com',
+          scope: ['read:users'],
+        },
+      ],
+      identifiers: ['id', ['client_id', 'audience']],
+      ignoreDryRunFields: [],
+    });
+
+    const messages = getDiffLog('clientGrants') as string[];
+    expect(messages.length).to.be.greaterThan(0);
+    expect(messages.some((m) => m.includes('clientGrants-1'))).to.be.true;
+  });
+
+  it('should prefix diff messages with the asset name when the name field is present', () => {
+    calculateDryRunChanges({
+      type: 'clients',
+      assets: [{ name: 'My App', app_type: 'spa' }],
+      existing: [{ name: 'My App', client_id: 'cli_abc', app_type: 'regular_web' }],
+      identifiers: ['client_id', 'name'],
+      ignoreDryRunFields: [],
+    });
+
+    const messages = getDiffLog('clients') as string[];
+    expect(messages.length).to.be.greaterThan(0);
+    expect(messages.some((m) => m.includes('My App'))).to.be.true;
   });
 });
 

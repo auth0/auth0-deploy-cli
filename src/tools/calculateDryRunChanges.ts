@@ -69,8 +69,19 @@ const diffLog = (resourceTypeName: string, message: string[]): void => {
   logStore[resourceTypeName].push(...message);
 };
 
-const getDiffLog = (resourceTypeName?: string): string[] | { [key: string]: string[] } =>
+export const getDiffLog = (resourceTypeName?: string): string[] | { [key: string]: string[] } =>
   resourceTypeName ? logStore[resourceTypeName] || [] : logStore;
+
+/**
+ * Returns a human-readable label for an asset used as the keyObjPath prefix in diff messages.
+ * Named resources (those with a `name` field) use the name directly.
+ * Unnamed resources fall back to `${type}-${index + 1}` (1-based)
+ */
+function getAssetLabel(asset: Asset, type: string, index: number): string {
+  return typeof asset.name === 'string' && asset.name.length > 0
+    ? asset.name
+    : `${type}-${index + 1}`;
+}
 
 function shouldIgnoreDryRunField(currentPath: string, ignoreDryRunFields: string[]): boolean {
   return ignoreDryRunFields.some(
@@ -356,7 +367,7 @@ export function calculateDryRunChanges({
   create.push(...createdAssets);
 
   // Identify updated: local assets that match a remote asset and have differences
-  const updatedAssets = localAssets.filter((localAsset) => {
+  const updatedAssets = localAssets.filter((localAsset, localAssetIndex) => {
     const matchingRemoteAsset = remoteAssets.find((remoteAsset) => {
       // Detect singleton resources (e.g. tenant) that carry none of the identifier fields on either
       // side.  For these, fall back to the lenient assetsMatch() used for CREATE/DELETE detection
@@ -408,7 +419,7 @@ export function calculateDryRunChanges({
       return hasObjectDifferences(
         localAsset,
         matchingRemoteAsset,
-        matchingRemoteAsset.name ?? '',
+        getAssetLabel(localAsset, type, localAssetIndex),
         type,
         ignoreDryRunFields
       );
