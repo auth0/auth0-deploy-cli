@@ -30,16 +30,6 @@ const multiResourceRefreshTokenPoliciesSchema = {
   },
 };
 
-const myOrganizationAllowedStrategies = [
-  'pingfederate',
-  'adfs',
-  'waad',
-  'google-apps',
-  'okta',
-  'oidc',
-  'samlp',
-];
-
 const myOrganizationConfigurationSchema = {
   type: ['object', 'null'],
   description: 'Configuration related to the My Organization API for the client.',
@@ -57,13 +47,13 @@ const myOrganizationConfigurationSchema = {
       description: 'The allowed connection strategies for the My Organization configuration',
       items: {
         type: 'string',
-        enum: myOrganizationAllowedStrategies,
+        enum: Object.values(Management.ClientMyOrganizationConfigurationAllowedStrategiesEnum),
       },
       uniqueItems: true,
     },
     connection_deletion_behavior: {
       type: 'string',
-      enum: ['allow', 'allow_if_empty'],
+      enum: Object.values(Management.ClientMyOrganizationDeletionBehaviorEnum),
       description: 'The deletion behavior for My Organization connections created by this client',
     },
   },
