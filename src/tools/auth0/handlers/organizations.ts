@@ -154,31 +154,25 @@ export default class OrganizationsHandler extends DefaultHandler {
     const { data: created } = await this.client.organizations.create(organization);
 
     if (typeof org.connections !== 'undefined' && org.connections.length > 0) {
-      await this.client.pool
-        .addEachTask({
-          data: org.connections,
-          generator: (conn) =>
-            this.client.organizations.connections.create(
-              created.id,
-              conn as Management.CreateOrganizationAllConnectionRequestParameters
-            ),
-        })
-        .promise();
+      await Promise.all(
+        org.connections.map((conn) =>
+          this.client.organizations.connections.create(
+            created.id,
+            conn as Management.CreateOrganizationAllConnectionRequestParameters
+          )
+        )
+      );
     }
 
     if (typeof org.client_grants !== 'undefined' && org.client_grants.length > 0) {
-      await this.client.pool
-        .addEachTask({
-          data: org.client_grants,
-          generator: (
-            organizationClientGrants: Management.AssociateOrganizationClientGrantResponseContent
-          ) =>
-            this.createOrganizationClientGrants(
-              created.id,
-              this.getClientGrantIDByClientName(organizationClientGrants.client_id as string)
-            ),
-        })
-        .promise();
+      await Promise.all(
+        org.client_grants.map((organizationClientGrants) =>
+          this.createOrganizationClientGrants(
+            created.id,
+            this.getClientGrantIDByClientName(organizationClientGrants.client_id as string)
+          )
+        )
+      );
     }
 
     if (typeof org.discovery_domains !== 'undefined' && org.discovery_domains.length > 0) {
@@ -263,60 +257,54 @@ export default class OrganizationsHandler extends DefaultHandler {
     );
 
     // Handle updates first
-    await this.client.pool
-      .addEachTask({
-        data: connectionsToUpdate,
-        generator: (conn: Management.CreateOrganizationAllConnectionRequestParameters) =>
-          this.client.organizations.connections
-            .update(params.id, conn.connection_id, {
-              organization_connection_name: conn.organization_connection_name,
-              assign_membership_on_login: conn.assign_membership_on_login,
-              show_as_button: conn.show_as_button,
-              is_signup_enabled: conn.is_signup_enabled,
-              is_enabled: conn.is_enabled,
-              organization_access_level: conn.organization_access_level,
-            })
-            .catch(() => {
-              throw new Error(
-                `Problem updating Enabled Connection ${conn.connection_id} for organizations ${params.id}`
-              );
-            }),
-      })
-      .promise();
+    await Promise.all(
+      connectionsToUpdate.map((conn: Management.CreateOrganizationAllConnectionRequestParameters) =>
+        this.client.organizations.connections
+          .update(params.id, conn.connection_id, {
+            organization_connection_name: conn.organization_connection_name,
+            assign_membership_on_login: conn.assign_membership_on_login,
+            show_as_button: conn.show_as_button,
+            is_signup_enabled: conn.is_signup_enabled,
+            is_enabled: conn.is_enabled,
+            organization_access_level: conn.organization_access_level,
+          })
+          .catch(() => {
+            throw new Error(
+              `Problem updating Enabled Connection ${conn.connection_id} for organizations ${params.id}`
+            );
+          })
+      )
+    );
 
-    await this.client.pool
-      .addEachTask({
-        data: connectionsToAdd,
-        generator: (conn: Management.CreateOrganizationAllConnectionRequestParameters) =>
-          this.client.organizations.connections
-            .create(
-              params.id,
-              omit<Management.OrganizationConnection>(
-                conn,
-                'connection'
-              ) as Management.AddOrganizationConnectionRequestContent
-            )
-            .catch(() => {
-              throw new Error(
-                `Problem adding Enabled Connection ${conn.connection_id} for organizations ${params.id}`
-              );
-            }),
-      })
-      .promise();
+    await Promise.all(
+      connectionsToAdd.map((conn: Management.CreateOrganizationAllConnectionRequestParameters) =>
+        this.client.organizations.connections
+          .create(
+            params.id,
+            omit<Management.OrganizationConnection>(
+              conn,
+              'connection'
+            ) as Management.AddOrganizationConnectionRequestContent
+          )
+          .catch(() => {
+            throw new Error(
+              `Problem adding Enabled Connection ${conn.connection_id} for organizations ${params.id}`
+            );
+          })
+      )
+    );
 
-    await this.client.pool
-      .addEachTask({
-        data: connectionsToRemove,
-        generator: (conn: Management.OrganizationConnection) =>
-          this.client.organizations.connections
-            .delete(params.id, conn.connection_id as string)
-            .catch(() => {
-              throw new Error(
-                `Problem removing Enabled Connection ${conn.connection_id} for organizations ${params.id}`
-              );
-            }),
-      })
-      .promise();
+    await Promise.all(
+      connectionsToRemove.map((conn: Management.OrganizationConnection) =>
+        this.client.organizations.connections
+          .delete(params.id, conn.connection_id as string)
+          .catch(() => {
+            throw new Error(
+              `Problem removing Enabled Connection ${conn.connection_id} for organizations ${params.id}`
+            );
+          })
+      )
+    );
 
     // organization client_grants
     const orgClientGrantsToRemove =
