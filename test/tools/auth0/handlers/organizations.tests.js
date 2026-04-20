@@ -1228,5 +1228,67 @@ describe('#organizations handler', () => {
         },
       ]);
     });
+
+    it('REPRO: creating 3 orgs with discovery_domains deadlocks the pool', async function () {
+      this.timeout(5000); // test FAILS with timeout = deadlock reproduced
+
+      const createdDomains = [];
+
+      const auth0 = {
+        organizations: {
+          create: (data) => {
+            data.id = `org_${data.name}`;
+            return Promise.resolve(data);
+          },
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => mockPagedData(params, 'organizations', []),
+          enabledConnections: {
+            add: () => Promise.resolve(),
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          clientGrants: {
+            create: () => Promise.resolve(),
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          discoveryDomains: {
+            create: (_orgId, domain) => {
+              createdDomains.push(domain.domain);
+              return Promise.resolve({ data: { id: `dd_${domain.domain}`, ...domain } });
+            },
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+        },
+        connections: {
+          list: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        clientGrants: {
+          list: (params) => mockPagedData(params, 'client_grants', []),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          organizations: ['a', 'b', 'c'].map((x) => ({
+            name: `org-${x}`,
+            display_name: `Org ${x}`,
+            client_grants: [],
+            connections: [],
+            discovery_domains: [
+              { domain: `${x}test.io`, status: 'pending', use_for_organization_discovery: false },
+            ],
+          })),
+        },
+      ]);
+
+      expect(createdDomains).to.have.lengthOf(3);
+    });
   });
 });
