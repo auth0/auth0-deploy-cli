@@ -148,10 +148,9 @@ export default class OrganizationsHandler extends DefaultHandler {
     const created = await this.client.organizations.create(organization);
 
     if (!created.id) {
-      log.error(
+      throw new Error(
         `Organization "${organization.name}" was created but the response did not include an ID. Skipping connection/grant association.`
       );
-      return created;
     }
 
     const createdId = created.id;
