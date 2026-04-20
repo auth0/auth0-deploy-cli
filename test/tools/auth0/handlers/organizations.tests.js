@@ -156,7 +156,7 @@ describe('#organizations handler', () => {
             expect(data.display_name).to.equal('Acme');
             expect(data.connections).to.equal(undefined);
             data.id = 'fake';
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
           update: () => Promise.resolve([]),
           delete: () => Promise.resolve([]),
@@ -275,7 +275,7 @@ describe('#organizations handler', () => {
               },
             });
             data.id = 'fake';
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
@@ -893,7 +893,9 @@ describe('#organizations handler', () => {
     it('should delete organizations', async () => {
       const auth0 = {
         organizations: {
-          create: () => Promise.resolve([]),
+          create: () => {
+            throw new Error('create should not be called when deleting organizations');
+          },
           update: () => Promise.resolve([]),
           delete: (orgId) => {
             expect(orgId).to.equal(sampleOrg.id);
@@ -923,7 +925,7 @@ describe('#organizations handler', () => {
       };
       const handler = new organizations.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
-      await stageFn.apply(handler, [{ organizations: [{}] }]);
+      await stageFn.apply(handler, [{ organizations: [] }]);
     });
 
     it('should create organization with discovery domains', async () => {
@@ -935,7 +937,7 @@ describe('#organizations handler', () => {
             expect(data.name).to.equal('acme');
             expect(data.discovery_domains).to.equal(undefined);
             data.id = 'fake';
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
