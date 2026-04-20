@@ -151,7 +151,15 @@ export default class OrganizationsHandler extends DefaultHandler {
       delete organization.discovery_domains;
     }
 
-    const { data: created } = await this.client.organizations.create(organization);
+    const created = await this.client.organizations.create(organization);
+
+    if (!created.id) {
+      throw new Error(
+        `Organization "${organization.name}" was created but the response did not include an ID. Skipping connection/grant association.`
+      );
+    }
+
+    const createdId = created.id;
 
     if (typeof org.connections !== 'undefined' && org.connections.length > 0) {
       await Promise.all(
@@ -182,13 +190,13 @@ export default class OrganizationsHandler extends DefaultHandler {
           generator: (
             discoveryDomain: Management.CreateOrganizationDiscoveryDomainRequestContent
           ) =>
-            this.createOrganizationDiscoveryDomain(created.id, {
+            this.createOrganizationDiscoveryDomain(createdId, {
               domain: discoveryDomain?.domain,
               status: discoveryDomain?.status,
               use_for_organization_discovery: discoveryDomain?.use_for_organization_discovery,
             }).catch((err) => {
               throw new Error(
-                `Problem creating discovery domain ${discoveryDomain?.domain} for organization ${created.id}\n${err}`
+                `Problem creating discovery domain ${discoveryDomain?.domain} for organization ${createdId}\n${err}`
               );
             }),
         })
