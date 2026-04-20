@@ -47,6 +47,24 @@ describe('#getEnabledClients', () => {
     expect(enabledClients).to.deep.equal(expectedEnabledClients);
   });
 
+  it('should not crash when existing connection has undefined enabled_clients and excluded clients are configured', () => {
+    // When the legacy "Management of Connection's Enabled Clients" toggle is off,
+    // the API no longer returns enabled_clients on connection objects, so it may be undefined.
+    const clients = [{ name: 'Client 1', client_id: 'client-1-id' }];
+    const mockConnection = {
+      enabled_clients: ['Client 1'],
+      name: 'Existing connection',
+    };
+    const assets = {
+      exclude: { clients: ['Client 1'] },
+    };
+    const existing = [{ name: 'Existing connection', enabled_clients: undefined }];
+
+    const enabledClients = getEnabledClients(assets, mockConnection, existing, clients);
+
+    expect(enabledClients).to.deep.equal([]);
+  });
+
   it('should return undefined when enable clients is not defined', () => {
     const mockConnection = {
       enabled_clients: undefined, // This connection has no defined clients enabled. See: GH issue #523
