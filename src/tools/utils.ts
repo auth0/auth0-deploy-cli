@@ -157,9 +157,10 @@ export function getEnabledClients(
 
   const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
   const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
+  const allExcluded = [...excludedClientsByNames, ...excludedClients];
   const enabledClients = [
     ...convertClientNamesToIds(connection.enabled_clients || [], clients).filter(
-      (item) => ![...excludedClientsByNames, ...excludedClients].includes(item)
+      (item) => !allExcluded.includes(item)
     ),
   ];
   // If client is excluded and in the existing connection this client is enabled, it should keep enabled
@@ -167,7 +168,7 @@ export function getEnabledClients(
   existing.forEach((conn) => {
     if (conn.name === connection.name) {
       excludedClients.forEach((excludedClient) => {
-        if (conn.enabled_clients.includes(excludedClient)) {
+        if (conn.enabled_clients?.includes(excludedClient)) {
           enabledClients.push(excludedClient);
         }
       });
