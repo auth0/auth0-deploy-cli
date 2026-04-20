@@ -1238,7 +1238,7 @@ describe('#organizations handler', () => {
         organizations: {
           create: (data) => {
             data.id = `org_${data.name}`;
-            return Promise.resolve({ data });
+            return Promise.resolve(data);
           },
           update: () => Promise.resolve([]),
           delete: () => Promise.resolve([]),

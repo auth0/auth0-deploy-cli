@@ -178,7 +178,7 @@ export default class OrganizationsHandler extends DefaultHandler {
       await Promise.all(
         org.discovery_domains.map(
           (discoveryDomain: Management.CreateOrganizationDiscoveryDomainRequestContent) =>
-            this.createOrganizationDiscoveryDomain(created.id, {
+            this.createOrganizationDiscoveryDomain(createdId, {
               domain: discoveryDomain?.domain,
               status: discoveryDomain?.status,
               use_for_organization_discovery: discoveryDomain?.use_for_organization_discovery,
