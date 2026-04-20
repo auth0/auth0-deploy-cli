@@ -658,6 +658,29 @@ describe('#filterExcluded', () => {
       expect(result).to.be.null;
     });
 
+    it('should strip a top-level field that contains an unresolved @@...@@ array placeholder', () => {
+      const asset = {
+        id: 'asset-id-arr',
+        name: 'my-resource',
+        allowed_clients: '@@MY_CLIENTS@@',
+      };
+
+      const result = utils.stripUnresolvedPlaceholders(asset, 'connections', 'my-resource');
+      expect(result).to.deep.equal({ id: 'asset-id-arr', name: 'my-resource' });
+    });
+
+    it('should strip both ##...## and @@...@@ unresolved placeholders in the same asset', () => {
+      const asset = {
+        id: 'asset-id-mixed',
+        secret: '##MY_SECRET##',
+        allowed_clients: '@@MY_CLIENTS@@',
+        name: 'resolved-name',
+      };
+
+      const result = utils.stripUnresolvedPlaceholders(asset, 'connections', 'mixed-conn');
+      expect(result).to.deep.equal({ id: 'asset-id-mixed', name: 'resolved-name' });
+    });
+
     it('should strip multiple unresolved placeholders at different depths and log a warning for each', () => {
       const warnMessages = [];
       const originalWarn = log.warn;

@@ -250,11 +250,11 @@ export const obfuscateSensitiveValues = (
   return newAsset;
 };
 
-const UNRESOLVED_PLACEHOLDER_REGEX = /^##.+##$/;
+const UNRESOLVED_PLACEHOLDER_REGEX = /^(##.+##|@@.+@@)$/;
 
 // Recursively scans all fields in an asset and strips any value that is still an unresolved
-// ##...## keyword placeholder. Logs a warning for each stripped field so the user knows
-// the existing value on the tenant will not be changed.
+// ##...## (string) or @@...@@ (array) keyword placeholder. Logs a warning for each stripped
+// field so the user knows the existing value on the tenant will not be changed.
 export const stripUnresolvedPlaceholders = (
   data: Asset | null,
   resourceType: string,
