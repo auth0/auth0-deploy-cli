@@ -165,7 +165,7 @@ export default class OrganizationsHandler extends DefaultHandler {
       await Promise.all(
         org.connections.map((conn) =>
           this.client.organizations.connections.create(
-            created.id,
+            createdId,
             conn as Management.CreateOrganizationAllConnectionRequestParameters
           )
         )
@@ -176,7 +176,7 @@ export default class OrganizationsHandler extends DefaultHandler {
       await Promise.all(
         org.client_grants.map((organizationClientGrants) =>
           this.createOrganizationClientGrants(
-            created.id,
+            createdId,
             this.getClientGrantIDByClientName(organizationClientGrants.client_id as string)
           )
         )
