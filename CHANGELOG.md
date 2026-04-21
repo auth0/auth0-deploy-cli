@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.31.1] - 2026-04-21
+
 ### Fixed
 
 - Fix silent process exit when deploying 3 or more organizations with discovery domains. [#1354]
@@ -1722,12 +1724,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1321]: https://github.com/auth0/auth0-deploy-cli/issues/1321
 [#1322]: https://github.com/auth0/auth0-deploy-cli/issues/1322
 [#1328]: https://github.com/auth0/auth0-deploy-cli/issues/1328
+[#1330]: https://github.com/auth0/auth0-deploy-cli/issues/1330
 [#1333]: https://github.com/auth0/auth0-deploy-cli/issues/1333
 [#1334]: https://github.com/auth0/auth0-deploy-cli/issues/1334
+[#1335]: https://github.com/auth0/auth0-deploy-cli/issues/1335
 [#1340]: https://github.com/auth0/auth0-deploy-cli/issues/1340
+[#1341]: https://github.com/auth0/auth0-deploy-cli/issues/1341
 [#1342]: https://github.com/auth0/auth0-deploy-cli/issues/1342
 [#1343]: https://github.com/auth0/auth0-deploy-cli/issues/1343
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.31.0...HEAD
+[#1354]: https://github.com/auth0/auth0-deploy-cli/issues/1354
+[#1364]: https://github.com/auth0/auth0-deploy-cli/issues/1364
+[#1365]: https://github.com/auth0/auth0-deploy-cli/issues/1365
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.31.1...HEAD
+[8.31.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.31.0...v8.31.1
 [8.31.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.30.0...v8.31.0
 [8.30.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.3...v8.30.0
 [8.29.3]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.2...v8.29.3
