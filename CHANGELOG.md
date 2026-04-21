@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix silent process exit when deploying 3 or more organizations with discovery domains. [#1354]
+- Fix organization creation response handling to correctly extract created organization from API response. [#1365]
+- Fix TypeError when existing connection has undefined `enabled_clients` and excluded clients are configured. [#1364]
+
 ## [8.31.0] - 2026-04-10
 
 ### Added
