@@ -72,6 +72,24 @@ async function dump(context: YAMLContext): Promise<ParsedClients> {
       client.express_configuration.okta_oin_client_id = o?.name || oktaOinClientId;
     }
 
+    const myOrganizationUserAttributeProfileId =
+      client?.my_organization_configuration?.user_attribute_profile_id;
+    if (client.my_organization_configuration && myOrganizationUserAttributeProfileId) {
+      const p = userAttributeProfiles?.find(
+        (uap) => uap.id === myOrganizationUserAttributeProfileId
+      );
+      client.my_organization_configuration.user_attribute_profile_id =
+        p?.name || myOrganizationUserAttributeProfileId;
+    }
+
+    const myOrganizationConnectionProfileId =
+      client?.my_organization_configuration?.connection_profile_id;
+    if (client.my_organization_configuration && myOrganizationConnectionProfileId) {
+      const c = connectionProfiles?.find((cp) => cp.id === myOrganizationConnectionProfileId);
+      client.my_organization_configuration.connection_profile_id =
+        c?.name || myOrganizationConnectionProfileId;
+    }
+
     return client;
   });
 
