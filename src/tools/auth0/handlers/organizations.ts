@@ -25,9 +25,15 @@ export const schema = {
           type: 'object',
           properties: {
             connection_id: { type: 'string' },
+            organization_connection_name: { type: 'string' },
             assign_membership_on_login: { type: 'boolean' },
             show_as_button: { type: 'boolean' },
             is_signup_enabled: { type: 'boolean' },
+            organization_access_level: {
+              type: 'string',
+              enum: Object.values(Management.OrganizationAccessLevelEnum),
+            },
+            is_enabled: { type: 'boolean' },
           },
         },
       },
@@ -158,7 +164,10 @@ export default class OrganizationsHandler extends DefaultHandler {
     if (typeof org.connections !== 'undefined' && org.connections.length > 0) {
       await Promise.all(
         org.connections.map((conn) =>
-          this.client.organizations.enabledConnections.add(createdId, conn)
+          this.client.organizations.connections.create(
+            createdId,
+            conn as Management.CreateOrganizationAllConnectionRequestParameters
+          )
         )
       );
     }
@@ -168,7 +177,7 @@ export default class OrganizationsHandler extends DefaultHandler {
         org.client_grants.map((organizationClientGrants) =>
           this.createOrganizationClientGrants(
             createdId,
-            this.getClientGrantIDByClientName(organizationClientGrants.client_id)
+            this.getClientGrantIDByClientName(organizationClientGrants.client_id as string)
           )
         )
       );
@@ -245,18 +254,24 @@ export default class OrganizationsHandler extends DefaultHandler {
           x.connection_id === c.connection_id &&
           (x.assign_membership_on_login !== c.assign_membership_on_login ||
             x.show_as_button !== c.show_as_button ||
-            x.is_signup_enabled !== c.is_signup_enabled)
+            x.is_signup_enabled !== c.is_signup_enabled ||
+            x.organization_access_level !== c.organization_access_level ||
+            x.organization_connection_name !== c.organization_connection_name ||
+            x.is_enabled !== (c.is_enabled ?? true))
       )
     );
 
     // Handle updates first
     await Promise.all(
-      connectionsToUpdate.map((conn) =>
-        this.client.organizations.enabledConnections
+      connectionsToUpdate.map((conn: Management.CreateOrganizationAllConnectionRequestParameters) =>
+        this.client.organizations.connections
           .update(params.id, conn.connection_id, {
+            organization_connection_name: conn.organization_connection_name,
             assign_membership_on_login: conn.assign_membership_on_login,
             show_as_button: conn.show_as_button,
             is_signup_enabled: conn.is_signup_enabled,
+            is_enabled: conn.is_enabled,
+            organization_access_level: conn.organization_access_level,
           })
           .catch(() => {
             throw new Error(
@@ -267,9 +282,9 @@ export default class OrganizationsHandler extends DefaultHandler {
     );
 
     await Promise.all(
-      connectionsToAdd.map((conn) =>
-        this.client.organizations.enabledConnections
-          .add(
+      connectionsToAdd.map((conn: Management.CreateOrganizationAllConnectionRequestParameters) =>
+        this.client.organizations.connections
+          .create(
             params.id,
             omit<Management.OrganizationConnection>(
               conn,
@@ -285,9 +300,9 @@ export default class OrganizationsHandler extends DefaultHandler {
     );
 
     await Promise.all(
-      connectionsToRemove.map((conn) =>
-        this.client.organizations.enabledConnections
-          .delete(params.id, conn.connection_id)
+      connectionsToRemove.map((conn: Management.OrganizationConnection) =>
+        this.client.organizations.connections
+          .delete(params.id, conn.connection_id as string)
           .catch(() => {
             throw new Error(
               `Problem removing Enabled Connection ${conn.connection_id} for organizations ${params.id}`
@@ -471,7 +486,7 @@ export default class OrganizationsHandler extends DefaultHandler {
           throw new Error(`Organization ${index} is missing an ID`);
         }
 
-        const connections = await this.getOrganizationEnabledConnections(org.id);
+        const connections = await this.getOrganizationConnections(org.id);
 
         org.connections = connections;
 
@@ -554,14 +569,12 @@ export default class OrganizationsHandler extends DefaultHandler {
     }
   }
 
-  async getOrganizationEnabledConnections(
+  async getOrganizationConnections(
     organizationId: string
   ): Promise<Management.OrganizationConnection[]> {
     const allOrganizationConnections: Management.OrganizationConnection[] = [];
 
-    let organizationConnections = await this.client.organizations.enabledConnections.list(
-      organizationId
-    );
+    let organizationConnections = await this.client.organizations.connections.list(organizationId);
 
     // Process first page
     allOrganizationConnections.push(...organizationConnections.data);

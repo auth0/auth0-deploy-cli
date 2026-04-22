@@ -104,6 +104,26 @@ async function dump(context: DirectoryContext): Promise<void> {
       }
     }
 
+    if (client.my_organization_configuration) {
+      const myOrganizationUserAttributeProfileId =
+        client.my_organization_configuration.user_attribute_profile_id;
+      if (myOrganizationUserAttributeProfileId) {
+        const p = userAttributeProfiles?.find(
+          (uap) => uap.id === myOrganizationUserAttributeProfileId
+        );
+        client.my_organization_configuration.user_attribute_profile_id =
+          p?.name || myOrganizationUserAttributeProfileId;
+      }
+
+      const myOrganizationConnectionProfileId =
+        client.my_organization_configuration.connection_profile_id;
+      if (myOrganizationConnectionProfileId) {
+        const c = connectionProfiles?.find((cp) => cp.id === myOrganizationConnectionProfileId);
+        client.my_organization_configuration.connection_profile_id =
+          c?.name || myOrganizationConnectionProfileId;
+      }
+    }
+
     if (client.app_type === 'express_configuration') {
       // only keep relevant fields for express configuration
       client = {

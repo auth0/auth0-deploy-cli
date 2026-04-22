@@ -343,6 +343,58 @@ describe('#clients handler', () => {
       expect(wasCreateCalled).to.be.equal(true);
     });
 
+    it('should create client with my_organization_configuration and map names to IDs', async () => {
+      let wasCreateCalled = false;
+      const clientWithMyOrganizationConfig = {
+        name: 'Client With My Org Config',
+        app_type: 'regular_web',
+        my_organization_configuration: {
+          user_attribute_profile_id: 'My User Attribute Profile',
+          connection_profile_id: 'My Connection Profile',
+          allowed_strategies: ['okta', 'samlp'],
+          connection_deletion_behavior: 'allow_if_empty',
+        },
+      };
+
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            wasCreateCalled = true;
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('Client With My Org Config');
+            expect(data.my_organization_configuration).to.deep.equal({
+              user_attribute_profile_id: 'uap_123',
+              connection_profile_id: 'cp_123',
+              allowed_strategies: ['okta', 'samlp'],
+              connection_deletion_behavior: 'allow_if_empty',
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        connectionProfiles: {
+          list: (params) =>
+            mockPagedData(params, 'connectionProfiles', [
+              { id: 'cp_123', name: 'My Connection Profile' },
+            ]),
+        },
+        userAttributeProfiles: {
+          list: (params) =>
+            mockPagedData(params, 'userAttributeProfiles', [
+              { id: 'uap_123', name: 'My User Attribute Profile' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ clients: [clientWithMyOrganizationConfig] }]);
+      expect(wasCreateCalled).to.be.equal(true);
+    });
+
     it('should create client with skip_non_verifiable_callback_uri_confirmation_prompt', async () => {
       let wasCreateCalled = false;
       const clientWithSkipConfirmation = {
@@ -653,6 +705,51 @@ describe('#clients handler', () => {
             {
               name: 'someClient',
               skip_non_verifiable_callback_uri_confirmation_prompt: false,
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should update client and remove my_organization_configuration by setting it to null', async () => {
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (client_id, data) {
+            expect(client_id).to.equal('client1');
+            expect(data).to.have.property('my_organization_configuration', null);
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'My Client',
+                my_organization_configuration: {
+                  user_attribute_profile_id: 'uap_123',
+                  allowed_strategies: ['okta'],
+                  connection_deletion_behavior: 'allow',
+                },
+              },
+            ]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'My Client',
+              my_organization_configuration: null,
             },
           ],
         },

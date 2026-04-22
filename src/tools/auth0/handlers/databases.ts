@@ -41,7 +41,8 @@ export const schema = {
                 type: 'object',
                 properties: {
                   enabled: { type: 'boolean' },
-                  api_behavior: { type: 'string' },
+                  api_behavior: { type: 'string', enum: ['required', 'optional'] },
+                  signup_behavior: { type: 'string', enum: ['allow', 'block'] },
                 },
               },
               email_otp: {
@@ -150,6 +151,54 @@ export const schema = {
               action_id: { type: 'string' },
             },
           },
+          password_options: {
+            type: 'object',
+            properties: {
+              complexity: {
+                type: 'object',
+                properties: {
+                  min_length: { type: 'integer', minimum: 1, maximum: 72 },
+                  character_types: {
+                    type: 'array',
+                    items: {
+                      type: 'string',
+                      enum: ['uppercase', 'lowercase', 'number', 'special'],
+                    },
+                  },
+                  character_type_rule: { type: 'string', enum: ['all', 'three_of_four'] },
+                  identical_characters: { type: 'string', enum: ['allow', 'block'] },
+                  sequential_characters: { type: 'string', enum: ['allow', 'block'] },
+                  max_length_exceeded: { type: 'string', enum: ['truncate', 'error'] },
+                },
+              },
+              profile_data: {
+                type: 'object',
+                properties: {
+                  active: { type: 'boolean' },
+                  blocked_fields: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    maxItems: 12,
+                  },
+                },
+              },
+              history: {
+                type: 'object',
+                properties: {
+                  active: { type: 'boolean' },
+                  size: { type: 'integer', minimum: 1, maximum: 24 },
+                },
+              },
+              dictionary: {
+                type: 'object',
+                properties: {
+                  active: { type: 'boolean' },
+                  default: { type: 'string', enum: ['en_10k', 'en_100k'] },
+                  custom: { type: 'array', items: { type: 'string' } },
+                },
+              },
+            },
+          },
         },
       },
     },
@@ -198,10 +247,56 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     // Validate each database
     databases.forEach((database) => {
       this.validateEmailUniqueConstraints(database);
-      // this.validatePasswordlessSettings(database); // Enable only the feature is GA PR:#1282
+      this.validatePasswordOptions(database);
+      // this.validatePasswordlessSettings(database); // Enable only when feature is GA PR:#1282
     });
 
     await super.validate(assets);
+  }
+
+  private validatePasswordOptions(payload: Asset): void {
+    const options = payload?.options;
+    if (!options?.password_options) return;
+
+    const legacyFields = [
+      'passwordPolicy',
+      'password_complexity_options',
+      'password_history',
+      'password_no_personal_info',
+      'password_dictionary',
+    ];
+    const conflictingField = legacyFields.find((field) => field in options);
+    if (conflictingField) {
+      throw new Error(
+        `Database "${payload.name}": Cannot use both legacy password policy field "${conflictingField}" and "password_options". Please migrate fully to "password_options".`
+      );
+    }
+
+    const complexity = options.password_options?.complexity;
+    if (complexity?.character_type_rule === 'three_of_four') {
+      const allTypes = ['uppercase', 'lowercase', 'number', 'special'];
+      const hasAllTypes = allTypes.every((t) => complexity?.character_types?.includes(t));
+      if (!hasAllTypes) {
+        throw new Error(
+          `Database "${payload.name}": "character_type_rule" can only be set to "three_of_four" when all four character types (uppercase, lowercase, number, special) are specified in "character_types".`
+        );
+      }
+    }
+
+    const blockedFields = options.password_options?.profile_data?.blocked_fields;
+    if (blockedFields) {
+      if (blockedFields.length > 12) {
+        throw new Error(
+          `Database "${payload.name}": "profile_data.blocked_fields" cannot contain more than 12 items.`
+        );
+      }
+      const tooLong = blockedFields.find((f: string) => f.length > 100);
+      if (tooLong) {
+        throw new Error(
+          `Database "${payload.name}": Each item in "profile_data.blocked_fields" must not exceed 100 characters.`
+        );
+      }
+    }
   }
 
   private validatePasswordlessSettings(payload: Asset): void {
@@ -222,6 +317,15 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     if (passwordEnabled === true && disableSelfServiceChangePassword === true) {
       throw new Error(
         `Database "${payload.name}": disable_self_service_change_password must be false when password authentication is enabled.`
+      );
+    }
+
+    const apiBehavior = options?.authentication_methods?.password?.api_behavior;
+    const signupBehavior = options?.authentication_methods?.password?.signup_behavior;
+
+    if (signupBehavior === 'block' && apiBehavior !== 'optional') {
+      throw new Error(
+        `Database "${payload.name}": When "signup_behavior" is "block", "api_behavior" must be "optional".`
       );
     }
   }
@@ -287,6 +391,45 @@ export default class DatabaseHandler extends DefaultAPIHandler {
             delete connection.options?.requires_username;
           } else if (requiresUsername || validation) {
             delete connection.options?.attributes;
+          }
+
+          // When switching between flexible and legacy password policy, strip the conflicting
+          // group from the existing state before merging to avoid a 400 from the API.
+          const payloadHasPasswordOptions = !!payload?.options?.password_options;
+          const payloadHasLegacyPasswordFields =
+            payload?.options?.passwordPolicy ||
+            payload?.options?.password_complexity_options ||
+            payload?.options?.password_history ||
+            payload?.options?.password_no_personal_info ||
+            payload?.options?.password_dictionary;
+
+          if (payloadHasPasswordOptions) {
+            delete connection.options?.passwordPolicy;
+            delete connection.options?.password_complexity_options;
+            delete connection.options?.password_history;
+            delete connection.options?.password_no_personal_info;
+            delete connection.options?.password_dictionary;
+          } else if (payloadHasLegacyPasswordFields) {
+            delete connection.options?.password_options;
+          }
+
+          // If signup_behavior is being set to "block", api_behavior must be "optional".
+          // Check the merged result upfront so the user gets a clear error rather than a
+          // cryptic 400 from the API.
+          const mergedApiBehavior =
+            payload?.options?.authentication_methods?.password?.api_behavior ??
+            (connection.options as any)?.authentication_methods?.password?.api_behavior;
+          const payloadSignupBehavior =
+            payload?.options?.authentication_methods?.password?.signup_behavior;
+
+          if (payloadSignupBehavior === 'block' && mergedApiBehavior !== 'optional') {
+            throw new Error(
+              `Database "${payload.name}": Cannot set "signup_behavior" to "block" without "api_behavior" set to "optional". ` +
+                `The existing tenant value for "api_behavior" is "${
+                  mergedApiBehavior ?? 'required (default)'
+                }". ` +
+                `Please explicitly set "api_behavior" to "optional" in your config.`
+            );
           }
 
           payload.options = { ...connection.options, ...payload.options };
