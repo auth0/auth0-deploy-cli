@@ -1321,10 +1321,6 @@ describe('#clients handler', () => {
           delete: () => Promise.resolve({ data: [] }),
           list: (params) => mockPagedData(params, 'clients', []),
         },
-        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
-        userAttributeProfiles: {
-          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
-        },
         pool,
       };
 
@@ -1359,10 +1355,6 @@ describe('#clients handler', () => {
                 },
               },
             ]),
-        },
-        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
-        userAttributeProfiles: {
-          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
         },
         pool,
       };
