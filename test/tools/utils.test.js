@@ -590,9 +590,9 @@ describe('#filterExcluded', () => {
         secret: '##MY_SECRET##',
       };
 
-      expect(() => utils.validateNoUnresolvedPlaceholders(asset, 'connections', 'my-resource')).to.throw(
-        /Unresolved placeholder/
-      );
+      expect(() =>
+        utils.validateNoUnresolvedPlaceholders(asset, 'connections', 'my-resource')
+      ).to.throw(/Unresolved placeholder/);
     });
 
     it('should throw when a nested field contains an unresolved placeholder', () => {
@@ -660,9 +660,9 @@ describe('#filterExcluded', () => {
         allowed_clients: '@@MY_CLIENTS@@',
       };
 
-      expect(() => utils.validateNoUnresolvedPlaceholders(asset, 'connections', 'my-resource')).to.throw(
-        /@@MY_CLIENTS@@/
-      );
+      expect(() =>
+        utils.validateNoUnresolvedPlaceholders(asset, 'connections', 'my-resource')
+      ).to.throw(/@@MY_CLIENTS@@/);
     });
 
     it('should throw and list all unresolved placeholders (##...## and @@...@@) in the error', () => {
