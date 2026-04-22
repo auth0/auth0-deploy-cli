@@ -1,8 +1,9 @@
 import { Management } from 'auth0';
 import { has, omit, pick } from 'lodash';
-import { Assets, Auth0APIClient } from '../../../types';
+import { Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import DefaultAPIHandler from './default';
+import { calculateChanges } from '../../calculateChanges';
 import { getConnectionProfile } from './connectionProfiles';
 import { getUserAttributeProfiles } from './userAttributeProfiles';
 import log from '../../../logger';
@@ -446,7 +447,7 @@ export default class ClientHandler extends DefaultAPIHandler {
       ...config,
       type: 'clients',
       id: 'client_id',
-      identifiers: ['client_id', 'name', 'external_client_id'],
+      identifiers: ['client_id', 'name'],
       objectFields: ['client_metadata'],
       stripCreateFields: ['external_metadata_type', 'external_metadata_created_by', 'jwks_uri'],
       stripUpdateFields: [
@@ -470,6 +471,49 @@ export default class ClientHandler extends DefaultAPIHandler {
 
   objString(item): string {
     return super.objString({ name: item.name, client_id: item.client_id });
+  }
+
+  async calcChanges(assets: Assets): Promise<CalculatedChanges> {
+    const clients = assets[this.type];
+
+    if (!clients) {
+      return { del: [], create: [], conflicts: [], update: [] };
+    }
+
+    const existing = await this.getType();
+    const allowDelete = !!this.config('AUTH0_ALLOW_DELETE');
+
+    const cimdClients = clients.filter((c: Client) => this.isCimdClient(c));
+    const existingCimd = (existing || []).filter((c: Client) => this.isCimdClient(c));
+
+    const regularClients = clients.filter((c: Client) => !this.isCimdClient(c));
+    const existingRegular = (existing || []).filter((c: Client) => !this.isCimdClient(c));
+
+    const regularChanges = calculateChanges({
+      handler: this,
+      assets: regularClients,
+      existing: existingRegular,
+      identifiers: ['client_id', 'name'],
+      allowDelete,
+    });
+
+    // CIMD clients:
+    // If external_client_id changes (and no client_id match), old client is deleted
+    // and new registration is created with the new external_client_id.
+    const cimdChanges = calculateChanges({
+      handler: this,
+      assets: cimdClients,
+      existing: existingCimd,
+      identifiers: ['client_id', 'external_client_id'],
+      allowDelete,
+    });
+
+    return {
+      del: [...regularChanges.del, ...cimdChanges.del],
+      update: [...regularChanges.update, ...cimdChanges.update],
+      create: [...regularChanges.create, ...cimdChanges.create],
+      conflicts: [...regularChanges.conflicts, ...cimdChanges.conflicts],
+    };
   }
 
   async processChanges(assets: Assets): Promise<void> {
