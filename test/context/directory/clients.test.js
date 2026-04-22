@@ -293,6 +293,42 @@ describe('#directory context clients', () => {
     });
   });
 
+  it('should dump clients with my_organization_configuration', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientsDumpMyOrganization');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.clients = [
+      {
+        name: 'someClient',
+        app_type: 'regular_web',
+        my_organization_configuration: {
+          user_attribute_profile_id: 'uap_123',
+          connection_profile_id: 'cp_123',
+          allowed_strategies: ['okta', 'samlp'],
+          connection_deletion_behavior: 'allow_if_empty',
+        },
+      },
+    ];
+
+    context.assets.userAttributeProfiles = [{ id: 'uap_123', name: 'My User Attribute Profile' }];
+    context.assets.connectionProfiles = [{ id: 'cp_123', name: 'My Connection Profile' }];
+
+    await handler.dump(context);
+
+    const dumpedClient = loadJSON(path.join(dir, 'clients', 'someClient.json'));
+    expect(dumpedClient).to.deep.equal({
+      name: 'someClient',
+      app_type: 'regular_web',
+      my_organization_configuration: {
+        user_attribute_profile_id: 'My User Attribute Profile',
+        connection_profile_id: 'My Connection Profile',
+        allowed_strategies: ['okta', 'samlp'],
+        connection_deletion_behavior: 'allow_if_empty',
+      },
+    });
+  });
+
   it('should dump clients with app_type express_configuration and filter fields', async () => {
     const dir = path.join(testDataDir, 'directory', 'clientsDumpExpressAppType');
     cleanThenMkdir(dir);
