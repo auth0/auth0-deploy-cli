@@ -257,7 +257,7 @@ export default class OrganizationsHandler extends DefaultHandler {
             x.is_signup_enabled !== c.is_signup_enabled ||
             x.organization_access_level !== c.organization_access_level ||
             x.organization_connection_name !== c.organization_connection_name ||
-            x.is_enabled !== c.is_enabled)
+            x.is_enabled !== (c.is_enabled ?? true))
       )
     );
 
