@@ -102,6 +102,250 @@ describe('#databases handler', () => {
 
       await stageFn.apply(handler, [{ databases: data }]);
     });
+
+    describe('#validatePasswordOptions', () => {
+      it('should pass validation for a valid password_options payload', async () => {
+        const handler = new databases.default({ client: {}, config });
+        const stageFn = Object.getPrototypeOf(handler).validate;
+
+        await stageFn.apply(handler, [
+          {
+            databases: [
+              {
+                name: 'testDatabase',
+                options: {
+                  password_options: {
+                    complexity: {
+                      min_length: 12,
+                      character_types: ['uppercase', 'lowercase', 'number', 'special'],
+                      character_type_rule: 'all',
+                      identical_characters: 'block',
+                      sequential_characters: 'block',
+                      max_length_exceeded: 'error',
+                    },
+                    profile_data: { active: true, blocked_fields: ['name', 'email'] },
+                    history: { active: true, size: 5 },
+                    dictionary: { active: true, default: 'en_100k', custom: ['password123'] },
+                  },
+                },
+              },
+            ],
+          },
+        ]);
+      });
+
+      it('should throw when password_options and legacy passwordPolicy are both set', async () => {
+        const handler = new databases.default({ client: {}, config });
+        const stageFn = Object.getPrototypeOf(handler).validate;
+
+        try {
+          await stageFn.apply(handler, [
+            {
+              databases: [
+                {
+                  name: 'testDatabase',
+                  options: {
+                    passwordPolicy: 'good',
+                    password_options: { complexity: { min_length: 10 } },
+                  },
+                },
+              ],
+            },
+          ]);
+          expect.fail('should have thrown');
+        } catch (err) {
+          expect(err.message).to.include('testDatabase');
+          expect(err.message).to.include('passwordPolicy');
+          expect(err.message).to.include('password_options');
+        }
+      });
+
+      it('should throw when password_options and legacy password_complexity_options are both set', async () => {
+        const handler = new databases.default({ client: {}, config });
+        const stageFn = Object.getPrototypeOf(handler).validate;
+
+        try {
+          await stageFn.apply(handler, [
+            {
+              databases: [
+                {
+                  name: 'testDatabase',
+                  options: {
+                    password_complexity_options: { min_length: 8 },
+                    password_options: { complexity: { min_length: 10 } },
+                  },
+                },
+              ],
+            },
+          ]);
+          expect.fail('should have thrown');
+        } catch (err) {
+          expect(err.message).to.include('testDatabase');
+          expect(err.message).to.include('password_complexity_options');
+        }
+      });
+
+      it('should throw when character_type_rule is three_of_four but not all four types are specified', async () => {
+        const handler = new databases.default({ client: {}, config });
+        const stageFn = Object.getPrototypeOf(handler).validate;
+
+        try {
+          await stageFn.apply(handler, [
+            {
+              databases: [
+                {
+                  name: 'testDatabase',
+                  options: {
+                    password_options: {
+                      complexity: {
+                        character_types: ['uppercase', 'lowercase'],
+                        character_type_rule: 'three_of_four',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          ]);
+          expect.fail('should have thrown');
+        } catch (err) {
+          expect(err.message).to.include('testDatabase');
+          expect(err.message).to.include('three_of_four');
+        }
+      });
+
+      it('should pass when character_type_rule is three_of_four and all four types are specified', async () => {
+        const handler = new databases.default({ client: {}, config });
+        const stageFn = Object.getPrototypeOf(handler).validate;
+
+        await stageFn.apply(handler, [
+          {
+            databases: [
+              {
+                name: 'testDatabase',
+                options: {
+                  password_options: {
+                    complexity: {
+                      character_types: ['uppercase', 'lowercase', 'number', 'special'],
+                      character_type_rule: 'three_of_four',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ]);
+      });
+
+      it('should throw when profile_data.blocked_fields exceeds 12 items', async () => {
+        const handler = new databases.default({ client: {}, config });
+        const stageFn = Object.getPrototypeOf(handler).validate;
+
+        try {
+          await stageFn.apply(handler, [
+            {
+              databases: [
+                {
+                  name: 'testDatabase',
+                  options: {
+                    password_options: {
+                      profile_data: {
+                        active: true,
+                        blocked_fields: [
+                          'f1',
+                          'f2',
+                          'f3',
+                          'f4',
+                          'f5',
+                          'f6',
+                          'f7',
+                          'f8',
+                          'f9',
+                          'f10',
+                          'f11',
+                          'f12',
+                          'f13',
+                        ],
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          ]);
+          expect.fail('should have thrown');
+        } catch (err) {
+          expect(err.message).to.include('testDatabase');
+          expect(err.message).to.include('blocked_fields');
+          expect(err.message).to.include('12');
+        }
+      });
+
+      it('should throw when a profile_data.blocked_fields item exceeds 100 characters', async () => {
+        const handler = new databases.default({ client: {}, config });
+        const stageFn = Object.getPrototypeOf(handler).validate;
+
+        try {
+          await stageFn.apply(handler, [
+            {
+              databases: [
+                {
+                  name: 'testDatabase',
+                  options: {
+                    password_options: {
+                      profile_data: {
+                        active: true,
+                        blocked_fields: ['a'.repeat(101)],
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          ]);
+          expect.fail('should have thrown');
+        } catch (err) {
+          expect(err.message).to.include('testDatabase');
+          expect(err.message).to.include('100 characters');
+        }
+      });
+
+      it('should pass when profile_data.blocked_fields has exactly 12 items each under 100 chars', async () => {
+        const handler = new databases.default({ client: {}, config });
+        const stageFn = Object.getPrototypeOf(handler).validate;
+
+        await stageFn.apply(handler, [
+          {
+            databases: [
+              {
+                name: 'testDatabase',
+                options: {
+                  password_options: {
+                    profile_data: {
+                      active: true,
+                      blocked_fields: [
+                        'f1',
+                        'f2',
+                        'f3',
+                        'f4',
+                        'f5',
+                        'f6',
+                        'f7',
+                        'f8',
+                        'f9',
+                        'f10',
+                        'f11',
+                        'f12',
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ]);
+      });
+    });
   });
 
   describe('#databases process', () => {
@@ -661,6 +905,216 @@ describe('#databases handler', () => {
       ];
 
       await stageFn.apply(handler, [{ databases: data }]);
+    });
+
+    it('should strip legacy password fields from existing state when switching to password_options', async () => {
+      let updatePayload;
+      const auth0 = {
+        connections: {
+          get: () =>
+            Promise.resolve({
+              options: {
+                passwordPolicy: 'good',
+                password_complexity_options: { min_length: 8 },
+                password_history: { enable: true, size: 3 },
+                password_no_personal_info: { enable: true },
+                password_dictionary: { enable: false },
+                someOtherOption: true,
+              },
+            }),
+          update: (id, data) => {
+            updatePayload = data;
+            return Promise.resolve({ ...data, id });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someDatabase', id: 'con1', strategy: 'auth0' },
+            ]),
+          clients: {
+            get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
+            update: () => Promise.resolve({}),
+          },
+        },
+        clients: { list: (params) => mockPagedData(params, 'clients', []) },
+        actions: { list: (params) => mockPagedData(params, 'actions', []) },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          databases: [
+            {
+              name: 'someDatabase',
+              strategy: 'auth0',
+              options: { password_options: { complexity: { min_length: 16 } } },
+            },
+          ],
+        },
+      ]);
+
+      expect(updatePayload.options).to.have.property('password_options');
+      expect(updatePayload.options).to.have.property('someOtherOption');
+      expect(updatePayload.options).to.not.have.property('passwordPolicy');
+      expect(updatePayload.options).to.not.have.property('password_complexity_options');
+      expect(updatePayload.options).to.not.have.property('password_history');
+      expect(updatePayload.options).to.not.have.property('password_no_personal_info');
+      expect(updatePayload.options).to.not.have.property('password_dictionary');
+    });
+
+    it('should strip password_options from existing state when switching to legacy password fields', async () => {
+      let updatePayload;
+      const auth0 = {
+        connections: {
+          get: () =>
+            Promise.resolve({
+              options: {
+                password_options: { complexity: { min_length: 16 } },
+                someOtherOption: true,
+              },
+            }),
+          update: (id, data) => {
+            updatePayload = data;
+            return Promise.resolve({ ...data, id });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someDatabase', id: 'con1', strategy: 'auth0' },
+            ]),
+          clients: {
+            get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
+            update: () => Promise.resolve({}),
+          },
+        },
+        clients: { list: (params) => mockPagedData(params, 'clients', []) },
+        actions: { list: (params) => mockPagedData(params, 'actions', []) },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          databases: [
+            {
+              name: 'someDatabase',
+              strategy: 'auth0',
+              options: { passwordPolicy: 'good' },
+            },
+          ],
+        },
+      ]);
+
+      expect(updatePayload.options).to.have.property('passwordPolicy');
+      expect(updatePayload.options).to.have.property('someOtherOption');
+      expect(updatePayload.options).to.not.have.property('password_options');
+    });
+
+    it('should throw when signup_behavior is block but existing tenant has api_behavior required', async () => {
+      const auth0 = {
+        connections: {
+          get: () =>
+            Promise.resolve({
+              options: {
+                authentication_methods: {
+                  password: { enabled: true, api_behavior: 'required' },
+                },
+              },
+            }),
+          update: () => Promise.resolve({}),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someDatabase', id: 'con1', strategy: 'auth0' },
+            ]),
+          clients: {
+            get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
+            update: () => Promise.resolve({}),
+          },
+        },
+        clients: { list: (params) => mockPagedData(params, 'clients', []) },
+        actions: { list: (params) => mockPagedData(params, 'actions', []) },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      try {
+        await stageFn.apply(handler, [
+          {
+            databases: [
+              {
+                name: 'someDatabase',
+                strategy: 'auth0',
+                options: {
+                  authentication_methods: {
+                    password: { signup_behavior: 'block' },
+                  },
+                },
+              },
+            ],
+          },
+        ]);
+        expect.fail('should have thrown');
+      } catch (err) {
+        expect(err.message).to.include('someDatabase');
+        expect(err.message).to.include('signup_behavior');
+        expect(err.message).to.include('api_behavior');
+        expect(err.message).to.include('optional');
+      }
+    });
+
+    it('should not throw when signup_behavior is block and api_behavior is set to optional in the payload', async () => {
+      const auth0 = {
+        connections: {
+          get: () =>
+            Promise.resolve({
+              options: {
+                authentication_methods: {
+                  password: { enabled: true, api_behavior: 'required' },
+                },
+              },
+            }),
+          update: () => Promise.resolve({}),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someDatabase', id: 'con1', strategy: 'auth0' },
+            ]),
+          clients: {
+            get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
+            update: () => Promise.resolve({}),
+          },
+        },
+        clients: { list: (params) => mockPagedData(params, 'clients', []) },
+        actions: { list: (params) => mockPagedData(params, 'actions', []) },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          databases: [
+            {
+              name: 'someDatabase',
+              strategy: 'auth0',
+              options: {
+                authentication_methods: {
+                  password: { api_behavior: 'optional', signup_behavior: 'block' },
+                },
+              },
+            },
+          ],
+        },
+      ]);
     });
 
     // If client is excluded and in the existing connection this client is enabled, it should keep enabled

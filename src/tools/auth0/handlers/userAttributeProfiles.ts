@@ -113,7 +113,6 @@ export const schema = {
                     },
                     scim_mapping: {
                       type: 'string',
-                      default: 'externalId',
                     },
                   },
                 },

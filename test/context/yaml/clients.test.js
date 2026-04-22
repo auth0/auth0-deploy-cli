@@ -260,6 +260,39 @@ describe('#YAML context clients', () => {
     });
   });
 
+  it('should dump clients with my_organization_configuration', async () => {
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+
+    context.assets.clients = [
+      {
+        name: 'someClient',
+        app_type: 'regular_web',
+        my_organization_configuration: {
+          user_attribute_profile_id: 'uap_123',
+          connection_profile_id: 'cp_123',
+          allowed_strategies: ['okta', 'samlp'],
+          connection_deletion_behavior: 'allow_if_empty',
+        },
+      },
+    ];
+
+    context.assets.userAttributeProfiles = [{ id: 'uap_123', name: 'My User Attribute Profile' }];
+    context.assets.connectionProfiles = [{ id: 'cp_123', name: 'My Connection Profile' }];
+
+    const dumped = await handler.dump(context);
+
+    expect(dumped.clients[0]).to.deep.equal({
+      name: 'someClient',
+      app_type: 'regular_web',
+      my_organization_configuration: {
+        user_attribute_profile_id: 'My User Attribute Profile',
+        connection_profile_id: 'My Connection Profile',
+        allowed_strategies: ['okta', 'samlp'],
+        connection_deletion_behavior: 'allow_if_empty',
+      },
+    });
+  });
+
   it('should dump clients with app_type express_configuration and filter fields', async () => {
     const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
 
