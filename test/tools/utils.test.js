@@ -582,7 +582,7 @@ describe('#filterExcluded', () => {
     });
   });
 
-  describe('#stripUnresolvedPlaceholders', () => {
+  describe('#validateNoUnresolvedPlaceholders', () => {
     it('should throw when a top-level field contains an unresolved ##...## placeholder', () => {
       const asset = {
         id: 'asset-id-1',
@@ -590,7 +590,7 @@ describe('#filterExcluded', () => {
         secret: '##MY_SECRET##',
       };
 
-      expect(() => utils.stripUnresolvedPlaceholders(asset, 'connections', 'my-resource')).to.throw(
+      expect(() => utils.validateNoUnresolvedPlaceholders(asset, 'connections', 'my-resource')).to.throw(
         /Unresolved placeholder/
       );
     });
@@ -605,7 +605,7 @@ describe('#filterExcluded', () => {
       };
 
       expect(() =>
-        utils.stripUnresolvedPlaceholders(asset, 'connections', 'my-connection')
+        utils.validateNoUnresolvedPlaceholders(asset, 'connections', 'my-connection')
       ).to.throw(/options\.client_secret/);
     });
 
@@ -615,7 +615,7 @@ describe('#filterExcluded', () => {
         options: { client_secret: '##CLIENT_SECRET##' },
       };
 
-      expect(() => utils.stripUnresolvedPlaceholders(asset, 'connections', 'my-connection'))
+      expect(() => utils.validateNoUnresolvedPlaceholders(asset, 'connections', 'my-connection'))
         .to.throw()
         .and.satisfy((err) => {
           expect(err.message).to.include('options.client_secret');
@@ -634,7 +634,7 @@ describe('#filterExcluded', () => {
         options: { domain: 'example.auth0.com' },
       };
 
-      const result = utils.stripUnresolvedPlaceholders(asset, 'clients', 'resolved-resource');
+      const result = utils.validateNoUnresolvedPlaceholders(asset, 'clients', 'resolved-resource');
       expect(result).to.deep.equal(asset);
     });
 
@@ -644,12 +644,12 @@ describe('#filterExcluded', () => {
         allowed_origins: ['https://example.com', 'https://other.com'],
       };
 
-      const result = utils.stripUnresolvedPlaceholders(asset, 'clients', 'my-client');
+      const result = utils.validateNoUnresolvedPlaceholders(asset, 'clients', 'my-client');
       expect(result).to.deep.equal(asset);
     });
 
     it('should return null when input is null', () => {
-      const result = utils.stripUnresolvedPlaceholders(null, 'clients', 'my-client');
+      const result = utils.validateNoUnresolvedPlaceholders(null, 'clients', 'my-client');
       expect(result).to.be.null;
     });
 
@@ -660,7 +660,7 @@ describe('#filterExcluded', () => {
         allowed_clients: '@@MY_CLIENTS@@',
       };
 
-      expect(() => utils.stripUnresolvedPlaceholders(asset, 'connections', 'my-resource')).to.throw(
+      expect(() => utils.validateNoUnresolvedPlaceholders(asset, 'connections', 'my-resource')).to.throw(
         /@@MY_CLIENTS@@/
       );
     });
@@ -673,7 +673,7 @@ describe('#filterExcluded', () => {
         name: 'resolved-name',
       };
 
-      expect(() => utils.stripUnresolvedPlaceholders(asset, 'connections', 'mixed-conn'))
+      expect(() => utils.validateNoUnresolvedPlaceholders(asset, 'connections', 'mixed-conn'))
         .to.throw()
         .and.satisfy((err) => {
           expect(err.message).to.include('##MY_SECRET##');
@@ -689,7 +689,7 @@ describe('#filterExcluded', () => {
         options: { client_secret: '##CLIENT_SECRET##' },
       };
 
-      expect(() => utils.stripUnresolvedPlaceholders(asset, 'connections', 'multi-conn'))
+      expect(() => utils.validateNoUnresolvedPlaceholders(asset, 'connections', 'multi-conn'))
         .to.throw()
         .and.satisfy((err) => {
           expect(err.message).to.include('api_key');

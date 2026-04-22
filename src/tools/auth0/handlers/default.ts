@@ -7,7 +7,7 @@ import {
   duplicateItems,
   obfuscateSensitiveValues,
   stripObfuscatedFieldsFromPayload,
-  stripUnresolvedPlaceholders,
+  validateNoUnresolvedPlaceholders,
   detectInsufficientScopeError,
 } from '../../utils';
 import log from '../../../logger';
@@ -353,7 +353,7 @@ export default class APIHandler {
                 data,
                 this.sensitiveFieldsToObfuscate
               );
-              return stripUnresolvedPlaceholders(
+              return validateNoUnresolvedPlaceholders(
                 stripped as Asset,
                 this.type,
                 this.objString(updateItem)
@@ -384,7 +384,7 @@ export default class APIHandler {
                 strippedPayload,
                 this.sensitiveFieldsToObfuscate
               );
-              return stripUnresolvedPlaceholders(
+              return validateNoUnresolvedPlaceholders(
                 stripped as Asset,
                 this.type,
                 this.objString(createItem)
@@ -417,7 +417,7 @@ export default class APIHandler {
                 data,
                 this.sensitiveFieldsToObfuscate
               );
-              return stripUnresolvedPlaceholders(
+              return validateNoUnresolvedPlaceholders(
                 stripped as Asset,
                 this.type,
                 this.objString(updateItem)

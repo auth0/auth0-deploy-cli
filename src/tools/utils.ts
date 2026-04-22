@@ -275,7 +275,7 @@ const collectUnresolvedPlaceholders = (
 
 // Throws an error if any field in the asset contains an unresolved ##...## or @@...@@ placeholder,
 // listing all offending fields so the user can fix them before deploying.
-export const stripUnresolvedPlaceholders = (
+export const validateNoUnresolvedPlaceholders = (
   data: Asset | null,
   resourceType: string,
   resourceName: string
