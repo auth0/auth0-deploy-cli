@@ -157,9 +157,10 @@ export function getEnabledClients(
 
   const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
   const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
+  const allExcluded = [...excludedClientsByNames, ...excludedClients];
   const enabledClients = [
     ...convertClientNamesToIds(connection.enabled_clients || [], clients).filter(
-      (item) => ![...excludedClientsByNames, ...excludedClients].includes(item)
+      (item) => !allExcluded.includes(item)
     ),
   ];
   // If client is excluded and in the existing connection this client is enabled, it should keep enabled
@@ -167,7 +168,7 @@ export function getEnabledClients(
   existing.forEach((conn) => {
     if (conn.name === connection.name) {
       excludedClients.forEach((excludedClient) => {
-        if (conn.enabled_clients.includes(excludedClient)) {
+        if (conn.enabled_clients?.includes(excludedClient)) {
           enabledClients.push(excludedClient);
         }
       });
@@ -247,6 +248,49 @@ export const obfuscateSensitiveValues = (
   });
 
   return newAsset;
+};
+
+const UNRESOLVED_PLACEHOLDER_REGEX = /^(##.+##|@@.+@@)$/;
+
+// Recursively collects all fields in an asset that still contain an unresolved
+// ##...## (string) or @@...@@ (array) keyword placeholder.
+const collectUnresolvedPlaceholders = (
+  data: Asset | null,
+  parentPath = ''
+): { path: string; value: string }[] => {
+  if (data === null || typeof data !== 'object') return [];
+
+  const found: { path: string; value: string }[] = [];
+  Object.keys(data).forEach((key) => {
+    const fullPath = parentPath ? `${parentPath}.${key}` : key;
+    const value = data[key];
+    if (typeof value === 'string' && UNRESOLVED_PLACEHOLDER_REGEX.test(value)) {
+      found.push({ path: fullPath, value });
+    } else if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+      found.push(...collectUnresolvedPlaceholders(value, fullPath));
+    }
+  });
+  return found;
+};
+
+// Throws an error if any field in the asset contains an unresolved ##...## or @@...@@ placeholder,
+// listing all offending fields so the user can fix them before deploying.
+export const validateNoUnresolvedPlaceholders = (
+  data: Asset | null,
+  resourceType: string,
+  resourceName: string
+): Asset | null => {
+  if (data === null) return data;
+
+  const unresolved = collectUnresolvedPlaceholders(data);
+  if (unresolved.length > 0) {
+    const fields = unresolved.map(({ path, value }) => `  - "${path}": ${value}`).join('\n');
+    throw new Error(
+      `Unresolved placeholder(s) found in ${resourceType} "${resourceName}":\n${fields}\nPlease ensure all keyword mappings are defined before deploying.`
+    );
+  }
+
+  return data;
 };
 
 // The reverse of `obfuscateSensitiveValues()`, preventing an obfuscated value from being passed to the API
