@@ -145,12 +145,20 @@ export default class OrganizationsHandler extends DefaultHandler {
       delete organization.discovery_domains;
     }
 
-    const { data: created } = await this.client.organizations.create(organization);
+    const created = await this.client.organizations.create(organization);
+
+    if (!created.id) {
+      throw new Error(
+        `Organization "${organization.name}" was created but the response did not include an ID. Skipping connection/grant association.`
+      );
+    }
+
+    const createdId = created.id;
 
     if (typeof org.connections !== 'undefined' && org.connections.length > 0) {
       await Promise.all(
         org.connections.map((conn) =>
-          this.client.organizations.enabledConnections.add(created.id, conn)
+          this.client.organizations.enabledConnections.add(createdId, conn)
         )
       );
     }
@@ -159,7 +167,7 @@ export default class OrganizationsHandler extends DefaultHandler {
       await Promise.all(
         org.client_grants.map((organizationClientGrants) =>
           this.createOrganizationClientGrants(
-            created.id,
+            createdId,
             this.getClientGrantIDByClientName(organizationClientGrants.client_id)
           )
         )
@@ -167,23 +175,20 @@ export default class OrganizationsHandler extends DefaultHandler {
     }
 
     if (typeof org.discovery_domains !== 'undefined' && org.discovery_domains.length > 0) {
-      await this.client.pool
-        .addEachTask({
-          data: org.discovery_domains,
-          generator: (
-            discoveryDomain: Management.CreateOrganizationDiscoveryDomainRequestContent
-          ) =>
-            this.createOrganizationDiscoveryDomain(created.id, {
+      await Promise.all(
+        org.discovery_domains.map(
+          (discoveryDomain: Management.CreateOrganizationDiscoveryDomainRequestContent) =>
+            this.createOrganizationDiscoveryDomain(createdId, {
               domain: discoveryDomain?.domain,
               status: discoveryDomain?.status,
               use_for_organization_discovery: discoveryDomain?.use_for_organization_discovery,
             }).catch((err) => {
               throw new Error(
-                `Problem creating discovery domain ${discoveryDomain?.domain} for organization ${created.id}\n${err}`
+                `Problem creating discovery domain ${discoveryDomain?.domain} for organization ${createdId}\n${err}`
               );
-            }),
-        })
-        .promise();
+            })
+        )
+      );
     }
     return created;
   }
@@ -664,15 +669,10 @@ export default class OrganizationsHandler extends DefaultHandler {
     log.debug(
       `Creating discovery domain ${discoveryDomain.domain} for organization ${organizationId}`
     );
-    const orgDiscoveryDomain = await this.client.pool
-      .addSingleTask({
-        data: {
-          id: organizationId,
-        },
-        generator: (args) =>
-          this.client.organizations.discoveryDomains.create(args.id, discoveryDomain),
-      })
-      .promise();
+    const orgDiscoveryDomain = await this.client.organizations.discoveryDomains.create(
+      organizationId,
+      discoveryDomain
+    );
     return orgDiscoveryDomain;
   }
 
@@ -692,19 +692,14 @@ export default class OrganizationsHandler extends DefaultHandler {
       )}`
     );
 
-    const discoveryDomainUpdated = await this.client.pool
-      .addSingleTask({
-        data: {
-          id: organizationId,
-          discoveryDomainId: discoveryDomainId,
-        },
-        generator: (args) =>
-          this.client.organizations.discoveryDomains.update(args.id, args.discoveryDomainId, {
-            status: discoveryDomainUpdate.status,
-            use_for_organization_discovery: discoveryDomainUpdate.use_for_organization_discovery,
-          }),
-      })
-      .promise();
+    const discoveryDomainUpdated = await this.client.organizations.discoveryDomains.update(
+      organizationId,
+      discoveryDomainId,
+      {
+        status: discoveryDomainUpdate.status,
+        use_for_organization_discovery: discoveryDomainUpdate.use_for_organization_discovery,
+      }
+    );
     return discoveryDomainUpdated;
   }
 
@@ -714,15 +709,6 @@ export default class OrganizationsHandler extends DefaultHandler {
     discoveryDomainId: string
   ): Promise<void> {
     log.debug(`Deleting discovery domain ${discoveryDomain} for organization ${organizationId}`);
-    await this.client.pool
-      .addSingleTask({
-        data: {
-          id: organizationId,
-          discoveryDomainId: discoveryDomainId,
-        },
-        generator: (args) =>
-          this.client.organizations.discoveryDomains.delete(args.id, args.discoveryDomainId),
-      })
-      .promise();
+    await this.client.organizations.discoveryDomains.delete(organizationId, discoveryDomainId);
   }
 }
