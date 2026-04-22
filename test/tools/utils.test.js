@@ -590,9 +590,9 @@ describe('#filterExcluded', () => {
         secret: '##MY_SECRET##',
       };
 
-      expect(() =>
-        utils.stripUnresolvedPlaceholders(asset, 'connections', 'my-resource')
-      ).to.throw(/Unresolved placeholder/);
+      expect(() => utils.stripUnresolvedPlaceholders(asset, 'connections', 'my-resource')).to.throw(
+        /Unresolved placeholder/
+      );
     });
 
     it('should throw when a nested field contains an unresolved placeholder', () => {
@@ -615,9 +615,7 @@ describe('#filterExcluded', () => {
         options: { client_secret: '##CLIENT_SECRET##' },
       };
 
-      expect(() =>
-        utils.stripUnresolvedPlaceholders(asset, 'connections', 'my-connection')
-      )
+      expect(() => utils.stripUnresolvedPlaceholders(asset, 'connections', 'my-connection'))
         .to.throw()
         .and.satisfy((err) => {
           expect(err.message).to.include('options.client_secret');
@@ -662,9 +660,9 @@ describe('#filterExcluded', () => {
         allowed_clients: '@@MY_CLIENTS@@',
       };
 
-      expect(() =>
-        utils.stripUnresolvedPlaceholders(asset, 'connections', 'my-resource')
-      ).to.throw(/@@MY_CLIENTS@@/);
+      expect(() => utils.stripUnresolvedPlaceholders(asset, 'connections', 'my-resource')).to.throw(
+        /@@MY_CLIENTS@@/
+      );
     });
 
     it('should throw and list all unresolved placeholders (##...## and @@...@@) in the error', () => {
@@ -675,9 +673,7 @@ describe('#filterExcluded', () => {
         name: 'resolved-name',
       };
 
-      expect(() =>
-        utils.stripUnresolvedPlaceholders(asset, 'connections', 'mixed-conn')
-      )
+      expect(() => utils.stripUnresolvedPlaceholders(asset, 'connections', 'mixed-conn'))
         .to.throw()
         .and.satisfy((err) => {
           expect(err.message).to.include('##MY_SECRET##');
@@ -693,9 +689,7 @@ describe('#filterExcluded', () => {
         options: { client_secret: '##CLIENT_SECRET##' },
       };
 
-      expect(() =>
-        utils.stripUnresolvedPlaceholders(asset, 'connections', 'multi-conn')
-      )
+      expect(() => utils.stripUnresolvedPlaceholders(asset, 'connections', 'multi-conn'))
         .to.throw()
         .and.satisfy((err) => {
           expect(err.message).to.include('api_key');
