@@ -252,32 +252,45 @@ export const obfuscateSensitiveValues = (
 
 const UNRESOLVED_PLACEHOLDER_REGEX = /^(##.+##|@@.+@@)$/;
 
-// Recursively scans all fields in an asset and strips any value that is still an unresolved
-// ##...## (string) or @@...@@ (array) keyword placeholder. Logs a warning for each stripped
-// field so the user knows the existing value on the tenant will not be changed.
+// Recursively collects all fields in an asset that still contain an unresolved
+// ##...## (string) or @@...@@ (array) keyword placeholder.
+const collectUnresolvedPlaceholders = (
+  data: Asset | null,
+  parentPath = ''
+): { path: string; value: string }[] => {
+  if (data === null || typeof data !== 'object') return [];
+
+  const found: { path: string; value: string }[] = [];
+  Object.keys(data).forEach((key) => {
+    const fullPath = parentPath ? `${parentPath}.${key}` : key;
+    const value = data[key];
+    if (typeof value === 'string' && UNRESOLVED_PLACEHOLDER_REGEX.test(value)) {
+      found.push({ path: fullPath, value });
+    } else if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+      found.push(...collectUnresolvedPlaceholders(value, fullPath));
+    }
+  });
+  return found;
+};
+
+// Throws an error if any field in the asset contains an unresolved ##...## or @@...@@ placeholder,
+// listing all offending fields so the user can fix them before deploying.
 export const stripUnresolvedPlaceholders = (
   data: Asset | null,
   resourceType: string,
-  resourceName: string,
-  parentPath = ''
+  resourceName: string
 ): Asset | null => {
-  if (data === null || typeof data !== 'object') return data;
+  if (data === null) return data;
 
-  const newAsset = { ...data };
-  Object.keys(newAsset).forEach((key) => {
-    const fullPath = parentPath ? `${parentPath}.${key}` : key;
-    const value = newAsset[key];
-    if (typeof value === 'string' && UNRESOLVED_PLACEHOLDER_REGEX.test(value)) {
-      log.warn(
-        `Skipping field "${fullPath}" for ${resourceType} "${resourceName}" because it contains an unresolved placeholder "${value}". The existing value on the tenant will not be changed.`
-      );
-      delete newAsset[key];
-    } else if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-      newAsset[key] = stripUnresolvedPlaceholders(value, resourceType, resourceName, fullPath);
-    }
-  });
+  const unresolved = collectUnresolvedPlaceholders(data);
+  if (unresolved.length > 0) {
+    const fields = unresolved.map(({ path, value }) => `  - "${path}": ${value}`).join('\n');
+    throw new Error(
+      `Unresolved placeholder(s) found in ${resourceType} "${resourceName}":\n${fields}\nPlease ensure all keyword mappings are defined before deploying.`
+    );
+  }
 
-  return newAsset;
+  return data;
 };
 
 // The reverse of `obfuscateSensitiveValues()`, preventing an obfuscated value from being passed to the API
