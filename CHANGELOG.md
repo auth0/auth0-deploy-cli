@@ -17,10 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `My Org` client references support and expand organization connection sync. [#1367]
 - Add dry-run mode (GA) with `--dry-run`, `--dry-run --interactive`, and `--dry-run --apply` flags. [#1336]
 
-### Changed
-
-- Upgrade `auth0` SDK to v5.8.0. [#1370]
-
 ### Fixed
 
 - Fix silent process exit when deploying 3+ organizations with discovery domains. [#1354]
@@ -1754,7 +1750,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1366]: https://github.com/auth0/auth0-deploy-cli/issues/1366
 [#1367]: https://github.com/auth0/auth0-deploy-cli/issues/1367
 [#1369]: https://github.com/auth0/auth0-deploy-cli/issues/1369
-[#1370]: https://github.com/auth0/auth0-deploy-cli/issues/1370
 [Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.32.0...HEAD
 [8.32.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.31.0...v8.32.0
 [8.31.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.30.0...v8.31.0
