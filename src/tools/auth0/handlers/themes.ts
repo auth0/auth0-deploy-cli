@@ -2,6 +2,7 @@ import { Management } from 'auth0';
 import { Assets } from '../../../types';
 import log from '../../../logger';
 import DefaultHandler, { order } from './default';
+import { isDryRun } from '../../utils';
 
 /**
  * Schema
@@ -452,12 +453,20 @@ export default class ThemesHandler extends DefaultHandler {
       return;
     }
 
-    // Empty array means themes should be deleted
-    if (themes.length === 0) {
-      return this.deleteThemes();
+    if (isDryRun(this.config)) {
+      const { del, update } = await this.calcChanges(assets);
+
+      if (update.length === 0 && del.length === 0) {
+        return;
+      }
     }
 
-    return this.updateThemes(themes);
+    // Empty array means themes should be deleted
+    if (themes.length === 0) {
+      await this.deleteThemes();
+    } else {
+      await this.updateThemes(themes);
+    }
   }
 
   async deleteThemes(): Promise<void> {

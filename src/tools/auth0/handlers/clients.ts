@@ -323,7 +323,7 @@ export const schema = {
             description: 'List of enabled token exchange profile types for this client',
             items: {
               type: 'string',
-              enum: ['custom_authentication'],
+              enum: ['custom_authentication', 'on_behalf_of_token_exchange'],
             },
           },
         },

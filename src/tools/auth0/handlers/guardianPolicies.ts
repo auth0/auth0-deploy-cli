@@ -2,6 +2,7 @@ import { Management } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Assets } from '../../../types';
+import { isDryRun } from '../../utils';
 
 export const schema = {
   type: 'object',
@@ -43,6 +44,14 @@ export default class GuardianPoliciesHandler extends DefaultHandler {
 
     // Do nothing if not set
     if (!guardianPolicies || !guardianPolicies.policies) return;
+
+    if (isDryRun(this.config)) {
+      const { del, update, create } = await this.calcChanges(assets);
+
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        return;
+      }
+    }
 
     const data = guardianPolicies.policies as Management.SetGuardianPoliciesRequestContent;
     await this.client.guardian.policies.set(data);

@@ -268,6 +268,33 @@ describe('#userAttributeProfiles handler', () => {
       await stageFn.apply(handler, [{ userAttributeProfiles: [] }]);
     });
 
+    it('should short-circuit when dry run finds no userAttributeProfiles changes', async () => {
+      config.data.AUTH0_DRY_RUN = true;
+
+      const auth0 = {
+        userAttributeProfiles: {
+          create: () => {
+            expect.fail('create should not be called when dry run has no changes');
+          },
+          update: () => {
+            expect.fail('update should not be called when dry run has no changes');
+          },
+          delete: () => {
+            expect.fail('delete should not be called when dry run has no changes');
+          },
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', [sampleUAPWithId]),
+        },
+        pool,
+      };
+
+      const handler = new userAttributeProfiles.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ userAttributeProfiles: [cloneDeep(sampleUAPWithId)] }]);
+
+      config.data.AUTH0_DRY_RUN = undefined;
+    });
+
     it('should handle 403 error when not enabled on tenant', async () => {
       const auth0 = {
         userAttributeProfiles: {

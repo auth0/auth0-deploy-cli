@@ -12,8 +12,13 @@ type SharedParams = {
   experimental_ea?: boolean;
 };
 
+export type DryRunMode = 'preview';
+
 type ImportSpecificParams = {
   input_file: string;
+  dry_run?: boolean | '' | DryRunMode;
+  interactive?: boolean;
+  apply?: boolean;
 };
 
 type ExportSpecificParams = {
@@ -74,6 +79,23 @@ function getParams(): CliParams {
           'The client secret, this allows you to encrypt the secret in your build configuration instead of storing it in a config file',
         type: 'string',
       },
+      dry_run: {
+        alias: 'dry-run',
+        describe:
+          'Dry-run mode. Show plan without applying changes. Use --interactive for the menu or --apply to show the plan and apply without prompting.',
+        type: 'string',
+      },
+      interactive: {
+        describe:
+          'Use with --dry-run to enable the interactive menu (apply / export to file / exit). Not available in non-TTY environments.',
+        type: 'boolean',
+        default: false,
+      },
+      apply: {
+        describe: 'Use with --dry-run to show the plan and then apply without prompting.',
+        type: 'boolean',
+        default: false,
+      },
     })
     .command(['export', 'dump'], 'Export Auth0 Tenant Configuration', {
       output_folder: {
@@ -127,6 +149,18 @@ function getParams(): CliParams {
     )
     .example('$0 import -c config.json -i tenant.yaml', 'Deploy Auth0 via YAML')
     .example('$0 import -c config.json -i path/to/files', 'Deploy Auth0 via Path')
+    .example(
+      '$0 import -c config.json -i tenant.yaml --dry-run',
+      'Preview changes and exit without applying changes'
+    )
+    .example(
+      '$0 import -c config.json -i tenant.yaml --dry-run --apply',
+      'Show plan and apply without prompting (CI deployment)'
+    )
+    .example(
+      '$0 import -c config.json -i tenant.yaml --dry-run --interactive',
+      'Show plan with interactive menu (apply / export / exit)'
+    )
     .example(
       '$0 dump -c config.json -f yaml -o path/to/export',
       'Dump Auth0 config to folder in YAML format'

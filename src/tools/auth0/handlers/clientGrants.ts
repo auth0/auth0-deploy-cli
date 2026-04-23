@@ -56,6 +56,7 @@ export default class ClientGrantsHandler extends DefaultHandler {
       // ['client_id', 'audience'] when subject_type is null (falsy).
       identifiers: ['id', ['client_id', 'audience', 'subject_type'], ['client_id', 'audience']],
       stripUpdateFields: ['audience', 'client_id', 'subject_type', 'is_system'],
+      ignoreDryRunFields: ['_clientName'],
     });
   }
 

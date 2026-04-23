@@ -285,6 +285,48 @@ export default class ActionHandler extends DefaultAPIHandler {
     return super.calcChanges({ ...assets, actions });
   }
 
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    let { actions, actionModules } = assets;
+
+    if (!actions) {
+      return {
+        del: [],
+        create: [],
+        update: [],
+        conflicts: [],
+      };
+    }
+
+    let modules: ActionModule[] | null = null;
+    if (actionModules && actionModules.length > 0) {
+      modules = actionModules;
+    } else {
+      try {
+        modules = await paginate<ActionModule>(this.client.actions.modules.list, {
+          paginate: true,
+        });
+      } catch {
+        log.debug(
+          'Skipping actions modules enrichment because action modules could not be retrieved.'
+        );
+        modules = null;
+      }
+    }
+
+    if (modules != null) {
+      const processedActions = await this.client.pool
+        .addEachTask({
+          data: actions || [],
+          generator: (action) => this.enrichActionWithModuleIds(action, modules),
+        })
+        .promise();
+
+      actions = processedActions;
+    }
+
+    return super.dryRunChanges({ ...assets, actions });
+  }
+
   async enrichActionWithModuleIds(action: Action, modules: ActionModule[]): Promise<Action> {
     if (!action.modules || action.modules.length === 0) {
       return action;

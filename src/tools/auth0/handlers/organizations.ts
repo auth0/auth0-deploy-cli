@@ -6,6 +6,7 @@ import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import { convertClientIdToName } from '../../../utils';
+import { isDryRun } from '../../utils';
 import { Client } from './clients';
 import { Connection } from './connections';
 import { ClientGrant } from './clientGrants';
@@ -519,6 +520,14 @@ export default class OrganizationsHandler extends DefaultHandler {
     const { organizations } = assets;
     // Do nothing if not set
     if (!organizations) return;
+
+    if (isDryRun(this.config)) {
+      const { del, update, create } = await this.calcChanges(assets);
+
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        return;
+      }
+    }
     // Gets organizations from destination tenant
     const existing = await this.getType();
 

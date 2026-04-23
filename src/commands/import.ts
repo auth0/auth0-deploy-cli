@@ -4,6 +4,7 @@ import { deploy as toolsDeploy } from '../tools';
 import log from '../logger';
 import { setupContext } from '../context';
 import { ImportParams } from '../args';
+import { isTruthy } from '../utils';
 
 export default async function importCMD(params: ImportParams) {
   const {
@@ -14,7 +15,35 @@ export default async function importCMD(params: ImportParams) {
     env: shouldInheritEnv = false,
     secret: clientSecret,
     experimental_ea: experimentalEA,
+    dry_run: dryRun,
+    interactive = false,
+    apply = false,
   } = params;
+
+  const normalizedDryRun = dryRun === true || dryRun === '' ? 'preview' : dryRun;
+  let effectiveDryRun: 'preview' | undefined;
+
+  if (!normalizedDryRun) {
+    effectiveDryRun = undefined;
+  } else if (normalizedDryRun !== 'preview') {
+    throw new Error(
+      `Invalid value for --dry-run: ${normalizedDryRun}. Use --dry-run or --dry-run=preview.`
+    );
+  } else {
+    effectiveDryRun = normalizedDryRun;
+  }
+
+  if (apply && !effectiveDryRun) {
+    throw new Error('--apply must be used with --dry-run.');
+  }
+
+  if (interactive && !effectiveDryRun) {
+    throw new Error('--interactive must be used with --dry-run.');
+  }
+
+  if (interactive && apply) {
+    throw new Error('--interactive and --apply cannot be used together.');
+  }
 
   if (shouldInheritEnv) {
     nconf.env().use('memory');
@@ -48,6 +77,21 @@ export default async function importCMD(params: ImportParams) {
     nconf.set('AUTH0_EXPERIMENTAL_EA', experimentalEA);
   }
 
+  // Override AUTH0_DRY_RUN if dry_run passed in command line
+  if (effectiveDryRun) {
+    overrides.AUTH0_DRY_RUN = effectiveDryRun;
+    nconf.set('AUTH0_DRY_RUN', effectiveDryRun);
+  }
+  if (interactive) {
+    overrides.AUTH0_DRY_RUN_INTERACTIVE = interactive;
+    nconf.set('AUTH0_DRY_RUN_INTERACTIVE', interactive);
+  }
+  const existingDryRunApply = nconf.get('AUTH0_DRY_RUN_APPLY');
+  if (apply || isTruthy(existingDryRunApply)) {
+    overrides.AUTH0_DRY_RUN_APPLY = true;
+    nconf.set('AUTH0_DRY_RUN_APPLY', true);
+  }
+
   nconf.overrides(overrides);
 
   // Setup context and load
@@ -57,8 +101,10 @@ export default async function importCMD(params: ImportParams) {
   const config = configFactory();
   config.setProvider((key) => nconf.get(key));
 
-  //@ts-ignore because context and assets still need to be typed TODO: type assets and type context
+  // @ts-ignore because context and assets still need to be typed TODO: type assets and type context
   await toolsDeploy(context.assets, context.mgmtClient, config);
 
-  log.info('Import Successful');
+  if (!effectiveDryRun) {
+    log.info('Import Successful');
+  }
 }
