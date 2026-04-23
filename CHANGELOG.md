@@ -10,7 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [8.32.0] - 2026-04-23
 ### Added
 - Add support for CIMD client registration via `external_client_id`, allowing clients to be registered from an OAuth 2.0 Client ID Metadata Document. [#1369]
-- Add tenant schema support for `client_id_metadata_document_supported` and `resource_parameter_profile` settings. [#1369]
 - Add `on_behalf_of_token_exchange` to supported `token_exchange.allow_any_profile_of_type` values for clients. [#1366]
 - Add Flexible Password Policy support for database connections. [#1362]
 - Add `My Org` client references support and expand organization connection sync. [#1367]
