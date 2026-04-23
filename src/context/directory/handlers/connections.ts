@@ -13,6 +13,7 @@ import {
   ensureProp,
   mapClientID2NameSorted,
   encodeCertStringToBase64,
+  getFormattedOptions,
 } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
@@ -81,6 +82,7 @@ async function dump(context: DirectoryContext): Promise<void> {
   connections.forEach((connection) => {
     let dumpedConnection = {
       ...connection,
+      ...getFormattedOptions(connection, clientsOrig),
       ...(connection.enabled_clients && {
         enabled_clients: mapClientID2NameSorted(connection.enabled_clients, clientsOrig || []),
       }),

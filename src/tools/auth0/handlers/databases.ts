@@ -10,6 +10,7 @@ import {
 import { CalculatedChanges, Assets, Asset } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
+import { calculateDryRunChanges } from '../../calculateDryRunChanges';
 import {
   Connection,
   getConnectionEnabledClients,
@@ -558,6 +559,59 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     });
 
     return super.calcChanges({ ...assets, databases: formatted });
+  }
+
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    const { databases } = assets;
+
+    if (!databases) {
+      return {
+        del: [],
+        create: [],
+        update: [],
+        conflicts: [],
+      };
+    }
+
+    const [clients, existingDatabasesConnections, actions] = await Promise.all([
+      paginate<Client>(this.client.clients.list, {
+        paginate: true,
+      }),
+      paginate<Connection>(this.client.connections.list, {
+        strategy: [Management.ConnectionStrategyEnum.Auth0],
+        checkpoint: true,
+        include_totals: true,
+      }),
+      paginate<Action>(this.client.actions.list, {
+        paginate: true,
+        include_totals: true,
+      }),
+    ]);
+
+    const formatted = databases.map((db) => {
+      const { options, ...rest } = db;
+      const formattedOptions = this.getFormattedOptions(options, actions);
+      const formattedDb: any = { ...rest, options: formattedOptions };
+
+      if (db.enabled_clients) {
+        formattedDb.enabled_clients = getEnabledClients(
+          assets,
+          db,
+          existingDatabasesConnections,
+          clients
+        );
+      }
+
+      return formattedDb;
+    });
+
+    return calculateDryRunChanges({
+      type: this.type,
+      assets: formatted,
+      existing: existingDatabasesConnections,
+      identifiers: this.identifiers,
+      ignoreDryRunFields: this.ignoreDryRunFields,
+    });
   }
 
   // Run after clients are updated so we can convert all the enabled_clients names to id's

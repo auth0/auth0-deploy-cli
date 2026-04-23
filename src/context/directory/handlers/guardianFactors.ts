@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { constants } from '../../../tools';
+import { sortGuardianFactors } from '../../../tools/utils';
 
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
@@ -19,7 +20,7 @@ function parse(context: DirectoryContext): ParsedGuardianFactors {
 
   const foundFiles = getFiles(factorsFolder, ['.json']);
 
-  const guardianFactors = foundFiles
+  let guardianFactors = foundFiles
     .map((f) =>
       loadJSON(f, {
         mappings: context.mappings,
@@ -27,6 +28,8 @@ function parse(context: DirectoryContext): ParsedGuardianFactors {
       })
     )
     .filter((p) => Object.keys(p).length > 0); // Filter out empty guardianFactors
+
+  guardianFactors = sortGuardianFactors(guardianFactors);
 
   return {
     guardianFactors,

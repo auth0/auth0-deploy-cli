@@ -3,6 +3,7 @@ import { Management } from 'auth0';
 import DefaultHandler, { order } from './default';
 import { Assets, Language, languages } from '../../../types';
 import log from '../../../logger';
+import { isDryRun } from '../../utils';
 import { paginate } from '../client';
 
 const promptTypes = [
@@ -511,6 +512,14 @@ export default class PromptsHandler extends DefaultHandler {
     const { prompts } = assets;
 
     if (!prompts) return;
+
+    if (isDryRun(this.config)) {
+      const { del, update, create } = await this.calcChanges(assets);
+
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        return;
+      }
+    }
 
     const { partials, customText, screenRenderers, ...promptSettings } = prompts;
 

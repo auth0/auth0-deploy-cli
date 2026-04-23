@@ -4,7 +4,7 @@ import DefaultAPIHandler, { order } from './default';
 import { Assets, Auth0APIClient } from '../../../types';
 import log from '../../../logger';
 import { paginate } from '../client';
-import { calculateChanges } from '../../calculateChanges';
+import { isDryRun } from '../../utils';
 
 const strategies = ['pingfederate', 'ad', 'adfs', 'waad', 'google-apps', 'okta', 'oidc', 'samlp'];
 const strategyOverrides = {
@@ -250,15 +250,25 @@ export default class UserAttributeProfilesHandler extends DefaultAPIHandler {
     // Do nothing if not set
     if (!userAttributeProfiles) return;
 
-    const existing = await this.getType();
+    const { del, update, create, conflicts } = await this.calcChanges(assets);
 
-    const changes = calculateChanges({
-      handler: this,
-      assets: userAttributeProfiles,
-      existing,
-      identifiers: this.identifiers,
-      allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
-    });
+    if (isDryRun(this.config)) {
+      if (
+        create.length === 0 &&
+        update.length === 0 &&
+        del.length === 0 &&
+        conflicts.length === 0
+      ) {
+        return;
+      }
+    }
+
+    const changes = {
+      del,
+      update,
+      create,
+      conflicts,
+    };
 
     log.debug(
       `Start processChanges for userAttributeProfile [delete:${changes.del.length}] [update:${changes.update.length}], [create:${changes.create.length}]`

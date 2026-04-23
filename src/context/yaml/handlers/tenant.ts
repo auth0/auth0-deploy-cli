@@ -42,7 +42,7 @@ async function parse(context: YAMLContext): Promise<ParsedTenant> {
 }
 
 async function dump(context: YAMLContext): Promise<ParsedTenant> {
-  const tenant = context.assets.tenant;
+  const { tenant } = context.assets;
 
   if (!tenant) return { tenant: null };
 

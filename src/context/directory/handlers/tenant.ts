@@ -5,15 +5,7 @@ import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
 
-type ParsedTenant = ParsedAsset<
-  'tenant',
-  {
-    session_lifetime: number;
-    idle_session_lifetime: number;
-  } & {
-    [key: string]: Asset;
-  }
->;
+type ParsedTenant = ParsedAsset<'tenant', Asset>;
 
 function parse(context: DirectoryContext): ParsedTenant {
   const baseFolder = path.join(context.filePath);
@@ -69,7 +61,6 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   const tenantFile = path.join(context.filePath, 'tenant.json');
   dumpJSON(tenantFile, tenant);
-  return;
 }
 
 const tenantHandler: DirectoryHandler<ParsedTenant> = {

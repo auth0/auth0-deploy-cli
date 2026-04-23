@@ -6,6 +6,7 @@ import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import { findKeyPathWithValue } from '../../../utils';
+import { isDryRun } from '../../utils';
 
 export type Form = {
   name: string;
@@ -145,6 +146,19 @@ export default class FormsHandler extends DefaultHandler {
     // Do nothing if not set
     if (!forms) return;
 
+    const { del, update, create, conflicts } = await this.calcChanges(assets);
+
+    if (isDryRun(this.config)) {
+      if (
+        create.length === 0 &&
+        update.length === 0 &&
+        del.length === 0 &&
+        conflicts.length === 0
+      ) {
+        return;
+      }
+    }
+
     const flows = await paginate<Management.FlowSummary>(this.client.flows.list, {
       paginate: true,
       include_totals: true,
@@ -157,8 +171,6 @@ export default class FormsHandler extends DefaultHandler {
     });
 
     assets.forms = await this.pargeFormFlowName(forms, flowNamMap);
-
-    const { del, update, create, conflicts } = await this.calcChanges(assets);
 
     const changes: CalculatedChanges = {
       del: del,

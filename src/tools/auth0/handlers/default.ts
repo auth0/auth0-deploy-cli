@@ -12,6 +12,7 @@ import {
 } from '../../utils';
 import log from '../../../logger';
 import { calculateChanges } from '../../calculateChanges';
+import { calculateDryRunChanges } from '../../calculateDryRunChanges';
 import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
 
@@ -123,6 +124,7 @@ export default class APIHandler {
     create: ApiMethodOverride;
     delete: ApiMethodOverride;
   };
+  ignoreDryRunFields: string[];
 
   constructor(options: {
     id?: APIHandler['id'];
@@ -140,6 +142,7 @@ export default class APIHandler {
       create?: ApiMethodOverride;
       delete?: ApiMethodOverride;
     };
+    ignoreDryRunFields: APIHandler['ignoreDryRunFields'];
   }) {
     this.config = options.config;
     this.type = options.type;
@@ -151,6 +154,9 @@ export default class APIHandler {
     this.stripUpdateFields = [...(options.stripUpdateFields || []), this.id];
     this.sensitiveFieldsToObfuscate = options.sensitiveFieldsToObfuscate || [];
     this.stripCreateFields = options.stripCreateFields || [];
+    this.ignoreDryRunFields = [...(options.ignoreDryRunFields || [])].filter(
+      (field, index, allFields) => allFields.indexOf(field) === index
+    );
 
     this.functions = {
       list: 'list',
@@ -197,6 +203,45 @@ export default class APIHandler {
     return convertJsonToString(item);
   }
 
+  getResourceName(item: Asset): string {
+    // Get a human-readable identifier for the resource
+    if (item.name) return item.name;
+    if (item.display_name) return item.display_name;
+    if (item.template) return item.template;
+    if (item.email) return item.email;
+
+    // For some resources, create a descriptive name
+    if (this.type === 'clientGrants') {
+      const clientLabel = (item._clientName as string) || item.client_id;
+      return `${clientLabel} -> ${item.audience}`;
+    }
+    if (this.type === 'guardianFactors') {
+      return item.name || item.type || 'unknown factor';
+    }
+    if (this.type === 'emailTemplates') {
+      return item.template || 'unknown template';
+    }
+    if (this.type === 'networkACLs') {
+      return item.description || `priority:${item.priority}`;
+    }
+    if (this.type === 'customDomains') {
+      return item.domain || 'unnamed custom domain';
+    }
+    if (
+      this.type === 'tenant' ||
+      this.type === 'attackProtection' ||
+      this.type === 'branding' ||
+      this.type === 'emailProvider' ||
+      this.type === 'guardianPhoneFactorSelectedProvider' ||
+      this.type === 'guardianPolicies' ||
+      this.type === 'riskAssessment'
+    ) {
+      return `${this.type} settings`;
+    }
+
+    return 'unnamed resource';
+  }
+
   async getType(): Promise<Asset | Asset[] | null> {
     // Each type to impl how to get the existing as its not consistent across the mgnt api.
     throw new Error(`Must implement getType for type ${this.type}`);
@@ -236,14 +281,54 @@ export default class APIHandler {
 
     const existing = await this.getType();
 
+    // if we are in dry run mode, calculate the changes
+    // Figure out what needs to be updated vs created
+    if (this.config('AUTH0_DRY_RUN') === true || this.config('AUTH0_DRY_RUN') === 'true') {
+      return calculateDryRunChanges({
+        type: this.type,
+        assets: typeAssets,
+        // @ts-ignore TODO: investigate what happens when `existing` is null
+        existing,
+        identifiers: this.identifiers,
+        ignoreDryRunFields: this.ignoreDryRunFields,
+      });
+    }
+
+    // if we are not in dry run mode, calculate the changes
     // Figure out what needs to be updated vs created
     return calculateChanges({
       handler: this,
       assets: typeAssets,
       allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
-      //@ts-ignore TODO: investigate what happens when `existing` is null
+      // @ts-ignore TODO: investigate what happens when `existing` is null
       existing,
       identifiers: this.identifiers,
+    });
+  }
+
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    const typeAssets = assets[this.type];
+
+    // Do nothing if not set
+    if (!typeAssets) {
+      return {
+        del: [],
+        create: [],
+        conflicts: [],
+        update: [],
+      };
+    }
+
+    const existing = await this.getType();
+
+    // Figure out what needs to be created, updated or deleted
+    return calculateDryRunChanges({
+      type: this.type,
+      assets: typeAssets,
+      // @ts-ignore TODO: investigate what happens when `existing` is null
+      existing,
+      identifiers: this.identifiers,
+      ignoreDryRunFields: this.ignoreDryRunFields,
     });
   }
 

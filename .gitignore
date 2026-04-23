@@ -11,6 +11,7 @@ config*.json
 yarn-error.log
 *.pem
 *.pub
+dry-run-diff-log*.json
 Makefile
 .vscode/*
 .claude/*
@@ -20,3 +21,4 @@ Makefile
 .github/agents/*
 .github/skills/*
 package-lock.json
+.github/hooks/*

@@ -213,6 +213,19 @@ export default class HooksHandler extends DefaultHandler {
     };
   }
 
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    const { del, update, create, conflicts } = await super.dryRunChanges(assets);
+
+    const stripSecrets = (list) => list.map((item) => ({ ...item, secrets: undefined }));
+
+    return {
+      del,
+      update: stripSecrets(update),
+      create: stripSecrets(create),
+      conflicts: stripSecrets(conflicts),
+    };
+  }
+
   async validate(assets): Promise<void> {
     const { hooks } = assets;
 

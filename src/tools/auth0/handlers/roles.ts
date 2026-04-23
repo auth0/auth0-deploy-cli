@@ -4,6 +4,7 @@ import { calculateChanges } from '../../calculateChanges';
 import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
+import { isDryRun } from '../../utils';
 
 export const schema = {
   type: 'array',
@@ -216,6 +217,14 @@ export default class RolesHandler extends DefaultHandler {
     const { roles } = assets;
     // Do nothing if not set
     if (!roles) return;
+
+    if (isDryRun(this.config)) {
+      const { del, update, create } = await this.calcChanges(assets);
+
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        return;
+      }
+    }
     // Gets roles from destination tenant
     const existing = await this.getType();
 

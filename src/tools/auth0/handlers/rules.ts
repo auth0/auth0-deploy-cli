@@ -151,6 +151,17 @@ export default class RulesHandler extends DefaultHandler {
     };
   }
 
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    const { del, update, create, conflicts } = await this.calcChanges(assets);
+
+    return {
+      del,
+      update,
+      create,
+      conflicts,
+    };
+  }
+
   async validate(assets: Assets): Promise<void> {
     const { rules } = assets;
 

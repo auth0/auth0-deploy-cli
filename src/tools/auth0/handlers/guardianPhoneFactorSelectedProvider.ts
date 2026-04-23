@@ -2,7 +2,7 @@ import { Management } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Asset, Assets } from '../../../types';
-import { isForbiddenFeatureError } from '../../utils';
+import { isDryRun, isForbiddenFeatureError } from '../../utils';
 
 export const schema = {
   type: 'object',
@@ -68,8 +68,17 @@ export default class GuardianPhoneSelectedProviderHandler extends DefaultHandler
     const { guardianPhoneFactorSelectedProvider } = assets;
 
     // Do nothing if not set
-    if (!guardianPhoneFactorSelectedProvider || !guardianPhoneFactorSelectedProvider.provider)
+    if (!guardianPhoneFactorSelectedProvider || !guardianPhoneFactorSelectedProvider.provider) {
       return;
+    }
+
+    if (isDryRun(this.config)) {
+      const { del, update, create } = await this.calcChanges(assets);
+
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        return;
+      }
+    }
 
     const data = guardianPhoneFactorSelectedProvider;
     await this.client.guardian.factors.phone.setProvider(
