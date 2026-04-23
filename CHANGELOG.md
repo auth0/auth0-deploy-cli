@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for CIMD client registration via `external_client_id`, allowing clients to be registered from an OAuth 2.0 Client ID Metadata Document. [#1369]
+- Add tenant schema support for `client_id_metadata_document_supported` and `resource_parameter_profile` settings. [#1369]
+- Add `on_behalf_of_token_exchange` to supported `token_exchange.allow_any_profile_of_type` values for clients. [#1366]
+- Add Flexible Password Policy support for database connections. [#1362]
+- Add `My Org` client references support and expand organization connection sync. [#1367]
+- Add dry-run mode (GA) with `--dry-run`, `--dry-run --interactive`, and `--dry-run --apply` flags. [#1336]
+
+### Fixed
+
+- Fix silent process exit when deploying 3+ organizations with discovery domains. [#1354]
+- Fix organization creation response handling and add ID validation. [#1365]
+- Fix undefined `enabled_clients` handling in `getEnabledClients`. [#1364]
+- Fix unresolved keyword placeholders being sent in API payloads before deploy. [#1360]
+
+### Changed
+
+- Upgrade `auth0` SDK to v5.8.0. [#1370]
+
 ## [8.31.0] - 2026-04-10
 
 ### Added
