@@ -38,6 +38,11 @@ const tokenQuotaConfigurationSchema = {
 export const schema = {
   type: 'object',
   properties: {
+    client_id_metadata_document_supported: {
+      type: 'boolean',
+      description:
+        'Whether the authorization server supports retrieving client metadata from a client_id URL.',
+    },
     default_token_quota: {
       type: 'object',
       properties: {
@@ -51,12 +56,21 @@ export const schema = {
       type: ['boolean', 'null'],
       description: 'Whether to skip the confirmation prompt for non-verifiable callback URIs',
     },
+    resource_parameter_profile: {
+      type: 'string',
+      enum: ['audience', 'compatibility'],
+      description:
+        'OAuth resource parameter compatibility mode for specifying the protected resource.',
+    },
   },
 };
 
 // export type Tenant = TenantSettings;
 
-export type Tenant = Management.GetTenantSettingsResponseContent;
+export interface Tenant extends Management.GetTenantSettingsResponseContent {
+  client_id_metadata_document_supported?: boolean;
+  resource_parameter_profile?: Management.TenantSettingsResourceParameterProfile;
+}
 type TenantSettingsFlags = Management.TenantSettingsFlags;
 
 const blockPageKeys = [
@@ -196,7 +210,9 @@ export default class TenantHandler extends DefaultHandler {
       }
     }
 
-    const updatedTenant: Management.UpdateTenantSettingsRequestContent = {
+    const updatedTenant: Management.UpdateTenantSettingsRequestContent & {
+      client_id_metadata_document_supported?: boolean;
+    } = {
       ...tenant,
       flags: tenant.flags
         ? (removeUnallowedTenantFlags(tenant.flags) as TenantSettingsFlags)

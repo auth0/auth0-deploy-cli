@@ -1,8 +1,9 @@
 import { Management } from 'auth0';
-import { has, omit } from 'lodash';
-import { Assets, Auth0APIClient } from '../../../types';
+import { has, omit, pick } from 'lodash';
+import { Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import DefaultAPIHandler from './default';
+import { calculateChanges } from '../../calculateChanges';
 import { getConnectionProfile } from './connectionProfiles';
 import { getUserAttributeProfiles } from './userAttributeProfiles';
 import log from '../../../logger';
@@ -66,6 +67,24 @@ export const schema = {
     type: 'object',
     properties: {
       name: { type: 'string', minLength: 1, pattern: '[^<>]+' },
+      external_client_id: {
+        type: 'string',
+        description:
+          'Alternative identifier for the client. For CIMD clients, this is the HTTPS URL to the OAuth 2.0 Client ID Metadata Document. Client name should match the client_name value in the metadata document.',
+      },
+      external_metadata_type: {
+        type: 'string',
+        description: 'Type of external client registration metadata.',
+      },
+      external_metadata_created_by: {
+        type: 'string',
+        description:
+          'Indicates who created the external metadata client: admin for Management API, client for dynamic registration.',
+      },
+      jwks_uri: {
+        type: 'string',
+        description: 'JSON Web Key Set endpoint associated with the client.',
+      },
       mobile: {
         type: 'object',
         properties: {
@@ -461,6 +480,7 @@ export default class ClientHandler extends DefaultAPIHandler {
       id: 'client_id',
       identifiers: ['client_id', 'name'],
       objectFields: ['client_metadata'],
+      stripCreateFields: ['external_metadata_type', 'external_metadata_created_by', 'jwks_uri'],
       stripUpdateFields: [
         // Fields not allowed during updates
         'callback_url_template',
@@ -469,12 +489,62 @@ export default class ClientHandler extends DefaultAPIHandler {
         'tenant',
         'jwt_configuration.secret_encoded',
         'resource_server_identifier',
+        'external_metadata_type',
+        'external_metadata_created_by',
+        'jwks_uri',
       ],
+      functions: {
+        create: (client: Client) => this.createClient(client),
+        update: (clientId: string, client: Client) => this.updateClient(clientId, client),
+      },
     });
   }
 
   objString(item): string {
     return super.objString({ name: item.name, client_id: item.client_id });
+  }
+
+  async calcChanges(assets: Assets): Promise<CalculatedChanges> {
+    const clients = assets[this.type];
+
+    if (!clients) {
+      return { del: [], create: [], conflicts: [], update: [] };
+    }
+
+    const existing = await this.getType();
+    const allowDelete = !!this.config('AUTH0_ALLOW_DELETE');
+
+    const cimdClients = clients.filter((c: Client) => this.isCimdClient(c));
+    const existingCimd = (existing || []).filter((c: Client) => this.isCimdClient(c));
+
+    const regularClients = clients.filter((c: Client) => !this.isCimdClient(c));
+    const existingRegular = (existing || []).filter((c: Client) => !this.isCimdClient(c));
+
+    const regularChanges = calculateChanges({
+      handler: this,
+      assets: regularClients,
+      existing: existingRegular,
+      identifiers: ['client_id', 'name'],
+      allowDelete,
+    });
+
+    // CIMD clients:
+    // If external_client_id changes (and no client_id match), old client is deleted
+    // and new registration is created with the new external_client_id.
+    const cimdChanges = calculateChanges({
+      handler: this,
+      assets: cimdClients,
+      existing: existingCimd,
+      identifiers: ['client_id', 'external_client_id'],
+      allowDelete,
+    });
+
+    return {
+      del: [...regularChanges.del, ...cimdChanges.del],
+      update: [...regularChanges.update, ...cimdChanges.update],
+      create: [...regularChanges.create, ...cimdChanges.create],
+      conflicts: [...regularChanges.conflicts, ...cimdChanges.conflicts],
+    };
   }
 
   async processChanges(assets: Assets): Promise<void> {
@@ -554,6 +624,62 @@ export default class ClientHandler extends DefaultAPIHandler {
 
     this.existing = createClientSanitizer(clients).sanitizeCrossOriginAuth(false).get();
     return this.existing;
+  }
+
+  private isCimdClient(client: Client): boolean {
+    return !!client.external_client_id;
+  }
+
+  private async createClient(
+    client: Client
+  ): Promise<Management.RegisterCimdClientResponseContent | Client> {
+    if (!this.isCimdClient(client)) {
+      return this.client.clients.create(client as Management.CreateClientRequestContent);
+    }
+
+    const externalClientId = client.external_client_id!;
+
+    const registration = await this.client.clients.registerCimdClient({
+      external_client_id: externalClientId,
+    });
+
+    return registration;
+  }
+
+  private getCIMDEditableFields(client: Client): Management.UpdateClientRequestContent {
+    // Only a subset of fields are editable for CIMD clients.
+    return pick(client, [
+      'description',
+      'app_type',
+      'allowed_origins',
+      'web_origins',
+      'grant_types',
+      'oidc_conformant',
+      'organization_discovery_methods',
+      'client_metadata',
+      'default_organization',
+      'require_proof_of_possession',
+      'token_quota',
+      'skip_non_verifiable_callback_uri_confirmation_prompt',
+      'jwt_configuration',
+      'refresh_token',
+    ]) as Management.UpdateClientRequestContent;
+  }
+
+  private async updateClient(clientId: string, client: Client): Promise<Client> {
+    // For non-CIMD clients
+    if (!this.isCimdClient(client)) {
+      return this.client.clients.update(clientId, client as Management.UpdateClientRequestContent);
+    }
+
+    const updatePayload = this.getCIMDEditableFields(client);
+    const registrationClientId = client.client_id || clientId;
+
+    if (registrationClientId && Object.keys(updatePayload).length > 0) {
+      return this.client.clients.update(registrationClientId, updatePayload);
+    }
+
+    return client;
   }
 
   // convert names back to IDs for client reference-based configuration

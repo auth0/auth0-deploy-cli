@@ -83,6 +83,140 @@ describe('#clients handler', () => {
   });
 
   describe('#clients process', () => {
+    it('should create CIMD client using the register endpoint without a follow-up patch', async () => {
+      const registeredRequests = [];
+      const updatedRequests = [];
+
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (clientId, data) {
+            updatedRequests.push({ clientId, data });
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+          registerCimdClient: ({ external_client_id }) => {
+            registeredRequests.push(external_client_id);
+            return Promise.resolve({
+              client_id: 'cimd_client_123',
+              mapped_fields: {
+                client_name: 'MCP Tool Server',
+              },
+              validation: {
+                valid: true,
+                warnings: [],
+              },
+            });
+          },
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'Manual CIMD Client',
+              description: 'editable after registration',
+              external_client_id: 'https://mcpserver.example.com/client.json',
+              external_metadata_type: 'cimd',
+              external_metadata_created_by: 'admin',
+              jwks_uri: 'https://mcpserver.example.com/jwks.json',
+            },
+          ],
+        },
+      ]);
+
+      expect(registeredRequests).to.deep.equal(['https://mcpserver.example.com/client.json']);
+      expect(updatedRequests).to.have.lengthOf(0);
+    });
+
+    it('should match CIMD clients by external_client_id when updating editable fields', async () => {
+      const registeredRequests = [];
+      const updatedClients = [];
+      let deletedClientId;
+
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (clientId, data) {
+            updatedClients.push({ clientId, data });
+            return Promise.resolve({ data });
+          },
+          delete: (clientId) => {
+            deletedClientId = clientId;
+            return Promise.resolve({ data: [] });
+          },
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'MCP Tool Server',
+                external_client_id: 'https://mcpserver.example.com/client.json',
+                external_metadata_type: 'cimd',
+                external_metadata_created_by: 'admin',
+                jwks_uri: 'https://mcpserver.example.com/jwks.json',
+              },
+            ]),
+          registerCimdClient: ({ external_client_id }) => {
+            registeredRequests.push(external_client_id);
+            return Promise.resolve({
+              client_id: 'client1',
+              mapped_fields: {
+                external_client_id,
+              },
+              validation: {
+                valid: true,
+                warnings: [],
+              },
+            });
+          },
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'Renamed MCP Tool Server',
+              description: 'updated description',
+              external_client_id: 'https://mcpserver.example.com/client.json',
+              external_metadata_type: 'cimd',
+              external_metadata_created_by: 'admin',
+              jwks_uri: 'https://mcpserver.example.com/jwks.json',
+            },
+          ],
+        },
+      ]);
+
+      expect(registeredRequests).to.deep.equal([]);
+      expect(deletedClientId).to.equal(undefined);
+      expect(updatedClients).to.deep.equal([
+        {
+          clientId: 'client1',
+          data: {
+            description: 'updated description',
+          },
+        },
+      ]);
+    });
+
     it('should create client', async () => {
       const auth0 = {
         clients: {
@@ -1488,6 +1622,24 @@ describe('#clients handler', () => {
                   include: false,
                 },
               },
+            },
+          ],
+        },
+      ]);
+    });
+  });
+
+  describe('#clients validate', () => {
+    it('should allow validation when external_metadata_type is set without external_client_id', async () => {
+      const handler = new clients.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'broken-cimd-client',
+              external_metadata_type: 'cimd',
             },
           ],
         },
