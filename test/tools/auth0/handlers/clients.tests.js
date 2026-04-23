@@ -343,6 +343,58 @@ describe('#clients handler', () => {
       expect(wasCreateCalled).to.be.equal(true);
     });
 
+    it('should create client with my_organization_configuration and map names to IDs', async () => {
+      let wasCreateCalled = false;
+      const clientWithMyOrganizationConfig = {
+        name: 'Client With My Org Config',
+        app_type: 'regular_web',
+        my_organization_configuration: {
+          user_attribute_profile_id: 'My User Attribute Profile',
+          connection_profile_id: 'My Connection Profile',
+          allowed_strategies: ['okta', 'samlp'],
+          connection_deletion_behavior: 'allow_if_empty',
+        },
+      };
+
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            wasCreateCalled = true;
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('Client With My Org Config');
+            expect(data.my_organization_configuration).to.deep.equal({
+              user_attribute_profile_id: 'uap_123',
+              connection_profile_id: 'cp_123',
+              allowed_strategies: ['okta', 'samlp'],
+              connection_deletion_behavior: 'allow_if_empty',
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        connectionProfiles: {
+          list: (params) =>
+            mockPagedData(params, 'connectionProfiles', [
+              { id: 'cp_123', name: 'My Connection Profile' },
+            ]),
+        },
+        userAttributeProfiles: {
+          list: (params) =>
+            mockPagedData(params, 'userAttributeProfiles', [
+              { id: 'uap_123', name: 'My User Attribute Profile' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ clients: [clientWithMyOrganizationConfig] }]);
+      expect(wasCreateCalled).to.be.equal(true);
+    });
+
     it('should create client with skip_non_verifiable_callback_uri_confirmation_prompt', async () => {
       let wasCreateCalled = false;
       const clientWithSkipConfirmation = {
@@ -653,6 +705,51 @@ describe('#clients handler', () => {
             {
               name: 'someClient',
               skip_non_verifiable_callback_uri_confirmation_prompt: false,
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should update client and remove my_organization_configuration by setting it to null', async () => {
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (client_id, data) {
+            expect(client_id).to.equal('client1');
+            expect(data).to.have.property('my_organization_configuration', null);
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'My Client',
+                my_organization_configuration: {
+                  user_attribute_profile_id: 'uap_123',
+                  allowed_strategies: ['okta'],
+                  connection_deletion_behavior: 'allow',
+                },
+              },
+            ]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'My Client',
+              my_organization_configuration: null,
             },
           ],
         },
@@ -1198,6 +1295,86 @@ describe('#clients handler', () => {
       const newOnlyClient = updatedClients.find((c) => c.client_id === 'client3');
       expect(newOnlyClient).to.not.have.property('cross_origin_auth');
       expect(newOnlyClient.cross_origin_authentication).to.equal(false);
+    });
+
+    it('should create client with on_behalf_of_token_exchange in token_exchange', async () => {
+      let wasCreateCalled = false;
+      const clientWithOnBehalfOf = {
+        name: 'My On-Behalf-Of Client',
+        token_exchange: {
+          allow_any_profile_of_type: ['on_behalf_of_token_exchange'],
+        },
+      };
+
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            wasCreateCalled = true;
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('My On-Behalf-Of Client');
+            expect(data.token_exchange).to.deep.equal({
+              allow_any_profile_of_type: ['on_behalf_of_token_exchange'],
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ clients: [clientWithOnBehalfOf] }]);
+      expect(wasCreateCalled).to.be.true;
+    });
+
+    it('should update client with on_behalf_of_token_exchange in token_exchange', async () => {
+      let wasUpdateCalled = false;
+
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (client_id, data) {
+            wasUpdateCalled = true;
+            expect(client_id).to.equal('client1');
+            expect(data.token_exchange).to.deep.equal({
+              allow_any_profile_of_type: ['on_behalf_of_token_exchange'],
+            });
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'My Client',
+                token_exchange: {
+                  allow_any_profile_of_type: ['custom_authentication'],
+                },
+              },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'My Client',
+              token_exchange: {
+                allow_any_profile_of_type: ['on_behalf_of_token_exchange'],
+              },
+            },
+          ],
+        },
+      ]);
+      expect(wasUpdateCalled).to.be.true;
     });
 
     it('should create client with oidc_logout configuration', async () => {

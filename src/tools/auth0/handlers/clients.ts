@@ -30,6 +30,36 @@ const multiResourceRefreshTokenPoliciesSchema = {
   },
 };
 
+const myOrganizationConfigurationSchema = {
+  type: ['object', 'null'],
+  description: 'Configuration related to the My Organization API for the client.',
+  properties: {
+    connection_profile_id: {
+      type: 'string',
+      description: 'The name of the connection profile to use for this application',
+    },
+    user_attribute_profile_id: {
+      type: 'string',
+      description: 'The name of the user attribute profile to use for this application',
+    },
+    allowed_strategies: {
+      type: 'array',
+      description: 'The allowed connection strategies for the My Organization configuration',
+      items: {
+        type: 'string',
+        enum: Object.values(Management.ClientMyOrganizationConfigurationAllowedStrategiesEnum),
+      },
+      uniqueItems: true,
+    },
+    connection_deletion_behavior: {
+      type: 'string',
+      enum: Object.values(Management.ClientMyOrganizationDeletionBehaviorEnum),
+      description: 'The deletion behavior for My Organization connections created by this client',
+    },
+  },
+  required: ['allowed_strategies', 'connection_deletion_behavior'],
+};
+
 export const schema = {
   type: 'array',
   items: {
@@ -183,6 +213,7 @@ export const schema = {
           enum: ['email', 'organization_name'],
         },
       },
+      my_organization_configuration: myOrganizationConfigurationSchema,
       async_approval_notification_channels: {
         type: ['array', 'null'],
         description:
@@ -273,7 +304,7 @@ export const schema = {
             description: 'List of enabled token exchange profile types for this client',
             items: {
               type: 'string',
-              enum: ['custom_authentication'],
+              enum: ['custom_authentication', 'on_behalf_of_token_exchange'],
             },
           },
         },
@@ -452,7 +483,7 @@ export default class ClientHandler extends DefaultAPIHandler {
     // Do nothing if not set
     if (!clients) return;
 
-    assets.clients = await this.sanitizeMapExpressConfiguration(this.client, clients);
+    assets.clients = await this.sanitizeMapClientReferences(this.client, clients);
 
     const excludedClients = (assets.exclude && assets.exclude.clients) || [];
 
@@ -525,13 +556,17 @@ export default class ClientHandler extends DefaultAPIHandler {
     return this.existing;
   }
 
-  // convert names back to IDs for express configuration
-  async sanitizeMapExpressConfiguration(
+  // convert names back to IDs for client reference-based configuration
+  async sanitizeMapClientReferences(
     auth0Client: Auth0APIClient,
     clientList: Client[]
   ): Promise<Client[]> {
-    // if no clients have express configuration, return early
-    if (!clientList.some((p) => p.express_configuration)) {
+    const hasExpressConfiguration = clientList.some((client) => client.express_configuration);
+    const hasMyOrganizationConfiguration = clientList.some(
+      (client) => client.my_organization_configuration
+    );
+
+    if (!hasExpressConfiguration && !hasMyOrganizationConfiguration) {
       return clientList;
     }
 
@@ -540,33 +575,59 @@ export default class ClientHandler extends DefaultAPIHandler {
     const userAttributeProfiles = await getUserAttributeProfiles(auth0Client);
 
     return clientList.map((client) => {
-      if (!client.express_configuration) return client;
+      if (client.express_configuration) {
+        const userAttributeProfileName = client.express_configuration.user_attribute_profile_id;
+        if (userAttributeProfileName) {
+          const userAttributeProfile = userAttributeProfiles?.find(
+            (uap) => uap.name === userAttributeProfileName
+          );
+          if (userAttributeProfile?.id) {
+            client.express_configuration.user_attribute_profile_id = userAttributeProfile.id;
+          }
+        }
 
-      const userAttributeProfileName = client.express_configuration?.user_attribute_profile_id;
-      if (userAttributeProfileName) {
+        const connectionProfileName = client.express_configuration.connection_profile_id;
+        if (connectionProfileName) {
+          const connectionProfile = connectionProfiles?.find(
+            (cp) => cp.name === connectionProfileName
+          );
+          if (connectionProfile?.id) {
+            client.express_configuration.connection_profile_id = connectionProfile.id;
+          }
+        }
+
+        const oktaOinClientName = client.express_configuration.okta_oin_client_id;
+        if (oktaOinClientName) {
+          const oktaOinClient = clientData?.find((c) => c.name === oktaOinClientName);
+          if (oktaOinClient?.client_id) {
+            client.express_configuration.okta_oin_client_id = oktaOinClient.client_id;
+          }
+        }
+      }
+
+      if (!client.my_organization_configuration) {
+        return client;
+      }
+
+      const myOrganizationUserAttributeProfileName =
+        client.my_organization_configuration.user_attribute_profile_id;
+      if (myOrganizationUserAttributeProfileName) {
         const userAttributeProfile = userAttributeProfiles?.find(
-          (uap) => uap.name === userAttributeProfileName
+          (uap) => uap.name === myOrganizationUserAttributeProfileName
         );
         if (userAttributeProfile?.id) {
-          client.express_configuration.user_attribute_profile_id = userAttributeProfile.id;
+          client.my_organization_configuration.user_attribute_profile_id = userAttributeProfile.id;
         }
       }
 
-      const connectionProfileName = client.express_configuration.connection_profile_id;
-      if (connectionProfileName) {
+      const myOrganizationConnectionProfileName =
+        client.my_organization_configuration.connection_profile_id;
+      if (myOrganizationConnectionProfileName) {
         const connectionProfile = connectionProfiles?.find(
-          (cp) => cp.name === connectionProfileName
+          (cp) => cp.name === myOrganizationConnectionProfileName
         );
         if (connectionProfile?.id) {
-          client.express_configuration.connection_profile_id = connectionProfile.id;
-        }
-      }
-
-      const oktaOinClientName = client.express_configuration.okta_oin_client_id;
-      if (oktaOinClientName) {
-        const oktaOinClient = clientData?.find((c) => c.name === oktaOinClientName);
-        if (oktaOinClient?.client_id) {
-          client.express_configuration.okta_oin_client_id = oktaOinClient.client_id;
+          client.my_organization_configuration.connection_profile_id = connectionProfile.id;
         }
       }
 

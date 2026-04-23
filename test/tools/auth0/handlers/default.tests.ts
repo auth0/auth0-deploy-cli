@@ -1,4 +1,7 @@
-const { expect } = require('chai');
+import chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
+chai.use(chaiAsPromised);
+const { expect } = chai;
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import mockHandler from '../../../../src/tools/auth0/handlers/default';
 import constants from '../../../../src/tools/constants';
@@ -172,5 +175,59 @@ describe('#default handler', () => {
       ],
     });
     expect(didCreateFunctionGetCalled).to.equal(true);
+  });
+
+  it('should throw when creating an asset with an unresolved placeholder', async () => {
+    const handler = new mockHandler({
+      client: mockApiClient,
+      config,
+      type: mockAssetType,
+      functions: {
+        //@ts-ignore
+        create: async (payload) => payload,
+      },
+    });
+
+    await expect(
+      handler.processChanges({} as Assets, {
+        del: [],
+        update: [],
+        conflicts: [],
+        create: [
+          {
+            id: 'some-id',
+            unresolved_field: '##UNRESOLVED_PLACEHOLDER##',
+            resolved_field: 'a-real-value',
+          },
+        ],
+      })
+    ).to.be.rejectedWith(/Unresolved placeholder/);
+  });
+
+  it('should throw when updating an asset with an unresolved placeholder', async () => {
+    const handler = new mockHandler({
+      client: mockApiClient,
+      config,
+      type: mockAssetType,
+      functions: {
+        //@ts-ignore
+        update: async (_identifiers, payload) => payload,
+      },
+    });
+
+    await expect(
+      handler.processChanges({} as Assets, {
+        del: [],
+        create: [],
+        conflicts: [],
+        update: [
+          {
+            id: 'foo',
+            secret: '##UNRESOLVED_SECRET##',
+            non_sensitive_property: 'regular value',
+          },
+        ],
+      })
+    ).to.be.rejectedWith(/Unresolved placeholder/);
   });
 });
