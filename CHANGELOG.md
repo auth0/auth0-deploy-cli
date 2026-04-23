@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.32.0] - 2026-04-23
+
+### Added
+
+- Add support for CIMD client registration via `external_client_id`, allowing clients to be registered from an OAuth 2.0 Client ID Metadata Document. [#1369]
+- Add `on_behalf_of_token_exchange` to supported `token_exchange.allow_any_profile_of_type` values for clients. [#1366]
+- Add Flexible Password Policy support for database connections. [#1362]
+- Add `My Org` client references support and expand organization connection sync. [#1367]
+- Add dry-run mode (GA) with `--dry-run`, `--dry-run --interactive`, and `--dry-run --apply` flags. [#1336]
+
+### Fixed
+
+- Fix silent process exit when deploying 3+ organizations with discovery domains. [#1354]
+- Fix organization creation response handling and add ID validation. [#1365]
+- Fix undefined `enabled_clients` handling in `getEnabledClients`. [#1364]
+- Fix unresolved keyword placeholders being sent in API payloads before deploy. [#1360]
+
 ## [8.31.0] - 2026-04-10
 
 ### Added
@@ -1716,12 +1733,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1321]: https://github.com/auth0/auth0-deploy-cli/issues/1321
 [#1322]: https://github.com/auth0/auth0-deploy-cli/issues/1322
 [#1328]: https://github.com/auth0/auth0-deploy-cli/issues/1328
+[#1330]: https://github.com/auth0/auth0-deploy-cli/issues/1330
 [#1333]: https://github.com/auth0/auth0-deploy-cli/issues/1333
 [#1334]: https://github.com/auth0/auth0-deploy-cli/issues/1334
+[#1335]: https://github.com/auth0/auth0-deploy-cli/issues/1335
+[#1336]: https://github.com/auth0/auth0-deploy-cli/issues/1336
 [#1340]: https://github.com/auth0/auth0-deploy-cli/issues/1340
+[#1341]: https://github.com/auth0/auth0-deploy-cli/issues/1341
 [#1342]: https://github.com/auth0/auth0-deploy-cli/issues/1342
 [#1343]: https://github.com/auth0/auth0-deploy-cli/issues/1343
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.31.0...HEAD
+[#1354]: https://github.com/auth0/auth0-deploy-cli/issues/1354
+[#1360]: https://github.com/auth0/auth0-deploy-cli/issues/1360
+[#1362]: https://github.com/auth0/auth0-deploy-cli/issues/1362
+[#1364]: https://github.com/auth0/auth0-deploy-cli/issues/1364
+[#1365]: https://github.com/auth0/auth0-deploy-cli/issues/1365
+[#1366]: https://github.com/auth0/auth0-deploy-cli/issues/1366
+[#1367]: https://github.com/auth0/auth0-deploy-cli/issues/1367
+[#1369]: https://github.com/auth0/auth0-deploy-cli/issues/1369
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.32.0...HEAD
+[8.32.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.31.0...v8.32.0
 [8.31.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.30.0...v8.31.0
 [8.30.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.3...v8.30.0
 [8.29.3]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.2...v8.29.3
