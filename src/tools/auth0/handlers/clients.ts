@@ -637,10 +637,6 @@ export default class ClientHandler extends DefaultAPIHandler {
       return this.client.clients.create(client as Management.CreateClientRequestContent);
     }
 
-    if (!client.external_client_id) {
-      throw new Error(`CIMD client '${client.name}' is missing external_client_id.`);
-    }
-
     const externalClientId = client.external_client_id;
 
     const registration = await this.client.clients.registerCimdClient({
@@ -674,10 +670,6 @@ export default class ClientHandler extends DefaultAPIHandler {
     // For non-CIMD clients
     if (!this.isCimdClient(client)) {
       return this.client.clients.update(clientId, client as Management.UpdateClientRequestContent);
-    }
-
-    if (!client.external_client_id) {
-      throw new Error(`CIMD client '${client.name}' is missing external_client_id.`);
     }
 
     const updatePayload = this.getCIMDEditableFields(client);

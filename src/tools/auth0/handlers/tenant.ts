@@ -202,11 +202,6 @@ export default class TenantHandler extends DefaultHandler {
     // Do nothing if not set
     if (!tenant) return;
 
-<<<<<<< DXCDT-1515-cimd-manual-registration
-    const updatedTenant: Management.UpdateTenantSettingsRequestContent & {
-      client_id_metadata_document_supported?: boolean;
-    } = {
-=======
     if (isDryRun(this.config)) {
       const { update } = await this.calcChanges(assets);
 
@@ -215,8 +210,9 @@ export default class TenantHandler extends DefaultHandler {
       }
     }
 
-    const updatedTenant: Management.UpdateTenantSettingsRequestContent = {
->>>>>>> master
+    const updatedTenant: Management.UpdateTenantSettingsRequestContent & {
+      client_id_metadata_document_supported?: boolean;
+    } = {
       ...tenant,
       flags: tenant.flags
         ? (removeUnallowedTenantFlags(tenant.flags) as TenantSettingsFlags)
