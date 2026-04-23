@@ -637,7 +637,7 @@ export default class ClientHandler extends DefaultAPIHandler {
       return this.client.clients.create(client as Management.CreateClientRequestContent);
     }
 
-    const externalClientId = client.external_client_id;
+    const externalClientId = client.external_client_id!;
 
     const registration = await this.client.clients.registerCimdClient({
       external_client_id: externalClientId,
