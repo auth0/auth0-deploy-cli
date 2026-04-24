@@ -18,6 +18,65 @@ import { Assets, Config, Auth0APIClient, AssetTypes, KeywordMappings } from '../
 import { filterOnlyIncludedResourceTypes } from '..';
 import { preserveKeywords } from '../../keywordPreservation';
 
+// Custom YAML type for file includes
+const includeType = new yaml.Type('!include', {
+  kind: 'scalar',
+  resolve: (data) => typeof data === 'string',
+  construct: (data) => {
+    // This will be handled during the actual loading process
+    return { __include: data };
+  }
+});
+
+const schema = yaml.DEFAULT_SCHEMA.extend([includeType]);
+
+// Function to resolve includes with cycle detection
+function resolveIncludes(content: string, basePath: string, mappings?: KeywordMappings, disableKeywordReplacement?: boolean, visitedFiles = new Set<string>()): string {
+  const obj = yaml.load(content, { schema });
+  return resolveIncludesInObject(obj, basePath, mappings, disableKeywordReplacement, visitedFiles);
+}
+
+function resolveIncludesInObject(obj, basePath, mappings?: KeywordMappings, disableKeywordReplacement?: boolean, visitedFiles = new Set<string>()) {
+  if (Array.isArray(obj)) {
+    return obj.map(item => resolveIncludesInObject(item, basePath, mappings, disableKeywordReplacement, visitedFiles));
+  }
+  
+  if (obj && typeof obj === 'object') {
+    if (obj.__include) {
+      const filePath = path.resolve(basePath, obj.__include);
+      
+      if (visitedFiles.has(filePath)) {
+        throw new Error(`Circular include detected: ${filePath}`);
+      }
+      
+      if (fs.existsSync(filePath)) {
+        visitedFiles.add(filePath);
+        let content = fs.readFileSync(filePath, 'utf8');
+        
+        // Apply keyword replacement to included file content if mappings are provided
+        if (mappings && !disableKeywordReplacement) {
+          content = keywordReplace(content, mappings);
+        } else if (mappings && disableKeywordReplacement) {
+          content = wrapArrayReplaceMarkersInQuotes(content, mappings);
+        }
+        
+        const result = resolveIncludesInObject(yaml.load(content, { schema }), path.dirname(filePath), mappings, disableKeywordReplacement, new Set(visitedFiles));
+        visitedFiles.delete(filePath);
+        return result;
+      }
+      throw new Error(`Include file not found: ${filePath}`);
+    }
+    
+    const result = {};
+    for (const [key, value] of Object.entries(obj)) {
+      result[key] = resolveIncludesInObject(value, basePath, mappings, disableKeywordReplacement, visitedFiles);
+    }
+    return result;
+  }
+  
+  return obj;
+}
+
 export default class YAMLContext {
   basePath: string;
   configFile: string;
@@ -62,6 +121,10 @@ export default class YAMLContext {
     if (!isFile(toLoad)) {
       // try load not relative to yaml file
       toLoad = f;
+      if (!isFile(toLoad)) {
+        // try absolute path resolution
+        toLoad = path.resolve(f);
+      }
     }
     return loadFileAndReplaceKeywords(path.resolve(toLoad), {
       mappings: this.mappings,
@@ -78,13 +141,13 @@ export default class YAMLContext {
       try {
         const fPath = path.resolve(this.configFile);
         log.debug(`Loading YAML from ${fPath}`);
+        const content = opts.disableKeywordReplacement
+          ? wrapArrayReplaceMarkersInQuotes(fs.readFileSync(fPath, 'utf8'), this.mappings)
+          : keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings);
+        
         Object.assign(
           this.assets,
-          yaml.load(
-            opts.disableKeywordReplacement
-              ? wrapArrayReplaceMarkersInQuotes(fs.readFileSync(fPath, 'utf8'), this.mappings)
-              : keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)
-          ) || {}
+          resolveIncludes(content, path.dirname(fPath), this.mappings, opts.disableKeywordReplacement)
         );
       } catch (err) {
         log.debug(err.stack);
