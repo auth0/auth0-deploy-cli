@@ -57,16 +57,10 @@ export default class ClientGrantsHandler extends DefaultHandler {
       ...config,
       type: 'clientGrants',
       id: 'id',
-      // @ts-ignore because not sure why two-dimensional array passed in
-      // Try ['client_id', 'audience', 'subject_type'] first; falls through to
-      // ['client_id', 'audience'] for regular grants, or ['default_for', 'audience']
+      // @ts-ignore nested arrays not reflected in type; try ['client_id', 'audience', 'subject_type']
+      // first, then ['client_id', 'audience'] for regular grants, then ['default_for', 'audience']
       // for default third-party grants which have no client_id.
-      identifiers: [
-        'id',
-        ['client_id', 'audience', 'subject_type'],
-        ['client_id', 'audience'],
-        ['default_for', 'audience'],
-      ],
+      identifiers: ['id', ['client_id', 'audience', 'subject_type'], ['client_id', 'audience'], ['default_for', 'audience']],
       stripUpdateFields: ['audience', 'client_id', 'subject_type', 'is_system', 'default_for'],
       ignoreDryRunFields: ['_clientName'],
     });
