@@ -43,7 +43,7 @@ export const schema = {
           'Indicates that a client grant is the default client grant for third party clients.',
       },
     },
-    required: ['client_id', 'audience'],
+    required: ['audience'],
   },
 };
 
@@ -59,8 +59,9 @@ export default class ClientGrantsHandler extends DefaultHandler {
       id: 'id',
       // @ts-ignore because not sure why two-dimensional array passed in
       // Try ['client_id', 'audience', 'subject_type'] first; falls through to
-      // ['client_id', 'audience'] when subject_type is null (falsy).
-      identifiers: ['id', ['client_id', 'audience', 'subject_type'], ['client_id', 'audience']],
+      // ['client_id', 'audience'] for regular grants, or ['default_for', 'audience']
+      // for default third-party grants which have no client_id.
+      identifiers: ['id', ['client_id', 'audience', 'subject_type'], ['client_id', 'audience'], ['default_for', 'audience']],
       stripUpdateFields: ['audience', 'client_id', 'subject_type', 'is_system', 'default_for'],
       ignoreDryRunFields: ['_clientName'],
     });
@@ -78,6 +79,20 @@ export default class ClientGrantsHandler extends DefaultHandler {
 
     // Validate each client grant
     clientGrants.forEach((grant) => {
+      // client_id and default_for are mutually exclusive; exactly one must be present
+      const hasClientId = !!grant.client_id;
+      const hasDefaultFor = !!grant.default_for;
+      if (hasClientId && hasDefaultFor) {
+        throw new Error(
+          `Client grant for audience "${grant.audience}": Cannot specify both "client_id" and "default_for". They are mutually exclusive.`
+        );
+      }
+      if (!hasClientId && !hasDefaultFor) {
+        throw new Error(
+          `Client grant for audience "${grant.audience}": One of "client_id" or "default_for" is required.`
+        );
+      }
+
       // When allow_all_scopes is true, scope should not be present
       if (grant.allow_all_scopes === true && grant.scope && grant.scope.length > 0) {
         throw new Error(
@@ -115,7 +130,10 @@ export default class ClientGrantsHandler extends DefaultHandler {
 
       const firstPartyClientIds = new Set(clients.map((c) => c.client_id));
 
-      this.existing = this.existing.filter((grant) => firstPartyClientIds.has(grant.client_id));
+      // default_for grants have no client_id and are not tied to a specific client; always keep them
+      this.existing = this.existing.filter(
+        (grant) => !grant.client_id || firstPartyClientIds.has(grant.client_id)
+      );
     }
 
     return this.existing;
@@ -197,11 +215,11 @@ export default class ClientGrantsHandler extends DefaultHandler {
       // Filter out the current client (Auth0 Management API client)
       filtered = filtered.filter((item) => item.client_id !== currentClient);
 
-      // Filter out excluded clients
+      // Filter out excluded clients; default_for grants have no client_id and are never excluded
       if (excludedClients.length) {
         filtered = filtered.filter(
           (item) =>
-            item.client_id &&
+            !item.client_id ||
             ![...excludedClientsByNames, ...excludedClients].includes(item.client_id)
         );
       }

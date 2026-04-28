@@ -130,14 +130,28 @@ describe('#schema validation tests', () => {
   });
 
   describe('#clientGrants validate', () => {
-    it('should fail validation if no "client_id" provided', (done) => {
+    it('should fail validation if neither "client_id" nor "default_for" provided', (done) => {
       const data = [
         {
-          name: 'name',
+          audience: 'https://example.com/api',
         },
       ];
 
-      checkRequired('client_id', { clientGrants: data }, done);
+      const auth0 = new Auth0(
+        {
+          prompts: {
+            _getRestClient: (endpoint) => ({
+              get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            }),
+          },
+        },
+        { clientGrants: data },
+        mockConfigFn
+      );
+
+      auth0
+        .validate()
+        .then(failedCb(done), passedCb(done, 'One of "client_id" or "default_for" is required'));
     });
 
     it('should fail validation if no "audience" provided', (done) => {

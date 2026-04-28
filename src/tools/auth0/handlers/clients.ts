@@ -504,6 +504,8 @@ export default class ClientHandler extends DefaultAPIHandler {
         'external_metadata_type',
         'external_metadata_created_by',
         'jwks_uri',
+        // third_party_security_mode is immutable after creation; PATCH returns 400
+        'third_party_security_mode',
       ],
       functions: {
         create: (client: Client) => this.createClient(client),
