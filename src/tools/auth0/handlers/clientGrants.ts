@@ -36,6 +36,11 @@ export const schema = {
         description:
           'When enabled, all scopes configured on the resource server are allowed for by this client grant.',
       },
+      default_for: {
+        type: 'string',
+        enum: ['third_party_clients'],
+        description: 'Indicates that a client grant is the default client grant for third party clients.',
+      },
     },
     required: ['client_id', 'audience'],
   },
@@ -55,7 +60,7 @@ export default class ClientGrantsHandler extends DefaultHandler {
       // Try ['client_id', 'audience', 'subject_type'] first; falls through to
       // ['client_id', 'audience'] when subject_type is null (falsy).
       identifiers: ['id', ['client_id', 'audience', 'subject_type'], ['client_id', 'audience']],
-      stripUpdateFields: ['audience', 'client_id', 'subject_type', 'is_system'],
+      stripUpdateFields: ['audience', 'client_id', 'subject_type', 'is_system', 'default_for'],
       ignoreDryRunFields: ['_clientName'],
     });
   }
