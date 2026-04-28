@@ -39,7 +39,8 @@ export const schema = {
       default_for: {
         type: 'string',
         enum: ['third_party_clients'],
-        description: 'Indicates that a client grant is the default client grant for third party clients.',
+        description:
+          'Indicates that a client grant is the default client grant for third party clients.',
       },
     },
     required: ['client_id', 'audience'],
