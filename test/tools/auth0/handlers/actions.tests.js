@@ -721,8 +721,7 @@ describe('#actions handler', () => {
       const auth0 = {
         actions: {
           get: (params) => Promise.resolve({ data: { id: params.id } }),
-          create: (data) =>
-            Promise.resolve({ data: { ...data, id: `${data.name}-id` } }),
+          create: (data) => Promise.resolve({ data: { ...data, id: `${data.name}-id` } }),
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
           list: () => {
@@ -733,7 +732,11 @@ describe('#actions handler', () => {
             return mockPagedData(
               { include_totals: true },
               'actions',
-              actions3.map((a) => ({ name: a.name, supported_triggers: a.supported_triggers, id: `${a.name}-id` }))
+              actions3.map((a) => ({
+                name: a.name,
+                supported_triggers: a.supported_triggers,
+                id: `${a.name}-id`,
+              }))
             );
           },
           modules: {
