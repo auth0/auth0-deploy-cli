@@ -142,7 +142,6 @@ describe('#connections handler', () => {
         expect(err.message).to.include('Found strategy "samlp"');
       }
     });
-
   });
 
   describe('#connections process', () => {

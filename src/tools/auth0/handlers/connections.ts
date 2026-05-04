@@ -441,7 +441,9 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
         throw new ValidationError(
           `Connection "${connection.name}": option(s) ${unsupportedFields
             .map((field) => `"${field}"`)
-            .join(', ')} are only supported for strategies "oidc" and "okta". Found strategy "${strategy || 'unknown'}".`
+            .join(', ')} are only supported for strategies "oidc" and "okta". Found strategy "${
+            strategy || 'unknown'
+          }".`
         );
       }
     });
