@@ -485,6 +485,67 @@ describe('#clientGrants handler', () => {
       expect(updatedData).to.not.have.property('default_for');
     });
 
+    it('should match a default_for grant by [default_for, audience] and update it (not create)', async () => {
+      config.data = {
+        AUTH0_CLIENT_ID: 'client_id',
+        AUTH0_ALLOW_DELETE: true,
+      };
+
+      let updatedId = null;
+      let updatedData = null;
+      let createCalled = false;
+
+      const auth0 = {
+        clientGrants: {
+          create: function () {
+            createCalled = true;
+            return Promise.resolve({ data: [] });
+          },
+          update: function (id, data) {
+            updatedId = id;
+            updatedData = data;
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          // Remote has a default_for grant with NO client_id — only matchable via ['default_for', 'audience']
+          list: (params) =>
+            mockPagedData(params, 'client_grants', [
+              {
+                id: 'cg_default',
+                audience: 'https://api.example.com',
+                default_for: 'third_party_clients',
+                scope: ['read:users'],
+              },
+            ]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Local config: same default_for grant, updated scope, no client_id
+      const data = [
+        {
+          audience: 'https://api.example.com',
+          default_for: 'third_party_clients',
+          scope: ['read:users', 'write:users'],
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+
+      // Must match via ['default_for', 'audience'] and UPDATE — not create a duplicate
+      expect(createCalled).to.equal(false);
+      expect(updatedId).to.equal('cg_default');
+      expect(updatedData.scope).to.deep.equal(['read:users', 'write:users']);
+      // default_for is in stripUpdateFields, so must be absent from the update payload
+      expect(updatedData).to.not.have.property('default_for');
+    });
+
     it('should update client grants with authorization_details_types', async () => {
       const auth0 = {
         clientGrants: {
