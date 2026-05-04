@@ -332,45 +332,47 @@ export default class ActionHandler extends DefaultAPIHandler {
       return action;
     }
 
-    const updatedModules = await this.client.pool
-      .addEachTask({
-        data: action.modules,
-        generator: async (module) => {
-          const foundModule = modules.find((m) => m.name === module.module_name);
-          if (foundModule && foundModule.id) {
-            // paginate to get all versions of the module
-            const allModuleVersions: Management.ActionModuleVersion[] = [];
-            let moduleVersions = await this.client.actions.modules.versions.list(foundModule.id);
+    // Process modules sequentially to avoid a pool deadlock.
+    // This function is called as a task inside the shared pool (via addEachTask in calcChanges).
+    // If we submitted further addEachTask calls on the same pool here, all concurrency slots
+    // could be held by outer action tasks waiting for inner module tasks that can never start
+    // (because no slots are free), causing a hang with 3+ actions that have modules.
+    const updatedModules: (typeof action.modules)[0][] = [];
+    for (const module of action.modules) {
+      const foundModule = modules.find((m) => m.name === module.module_name);
+      if (foundModule && foundModule.id) {
+        // paginate to get all versions of the module
+        const allModuleVersions: Management.ActionModuleVersion[] = [];
+        let moduleVersions = await this.client.actions.modules.versions.list(foundModule.id);
 
-            // Process first page
-            allModuleVersions.push(...moduleVersions.data);
+        // Process first page
+        allModuleVersions.push(...moduleVersions.data);
 
-            // Fetch remaining pages
-            while (moduleVersions.hasNextPage()) {
-              moduleVersions = await moduleVersions.getNextPage();
-              allModuleVersions.push(...moduleVersions.data);
-            }
+        // Fetch remaining pages
+        while (moduleVersions.hasNextPage()) {
+          moduleVersions = await moduleVersions.getNextPage();
+          allModuleVersions.push(...moduleVersions.data);
+        }
 
-            const moduleVersionId = allModuleVersions?.find(
-              (v) => v.version_number === module.module_version_number
-            )?.id;
-            if (!moduleVersionId) {
-              throw new Error(
-                `Could not find action module version id for module '${module.module_name}' version '${module.module_version_number}'`
-              );
-            }
+        const moduleVersionId = allModuleVersions?.find(
+          (v) => v.version_number === module.module_version_number
+        )?.id;
+        if (!moduleVersionId) {
+          throw new Error(
+            `Could not find action module version id for module '${module.module_name}' version '${module.module_version_number}'`
+          );
+        }
 
-            return {
-              module_name: module.module_name,
-              module_id: foundModule.id,
-              module_version_number: module.module_version_number,
-              module_version_id: moduleVersionId,
-            };
-          }
-          return module;
-        },
-      })
-      .promise();
+        updatedModules.push({
+          module_name: module.module_name,
+          module_id: foundModule.id,
+          module_version_number: module.module_version_number,
+          module_version_id: moduleVersionId,
+        });
+      } else {
+        updatedModules.push(module);
+      }
+    }
 
     return {
       ...action,

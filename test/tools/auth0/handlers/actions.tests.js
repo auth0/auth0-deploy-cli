@@ -705,6 +705,62 @@ describe('#actions handler', () => {
       );
     });
 
+    it('should successfully process three or more actions that each have modules (regression: pool deadlock)', async () => {
+      const moduleId = 'module-id-1';
+      const moduleVersionId = 'version-id-1';
+
+      const makeAction = (n) => ({
+        name: `action-with-modules-${n}`,
+        supported_triggers: [{ id: 'post-login', version: 'v1' }],
+        modules: [{ module_name: 'test-module', module_version_number: 1 }],
+      });
+
+      const actions3 = [makeAction(1), makeAction(2), makeAction(3)];
+
+      let listCallCount = 0;
+      const auth0 = {
+        actions: {
+          get: (params) => Promise.resolve({ data: { id: params.id } }),
+          create: (data) =>
+            Promise.resolve({ data: { ...data, id: `${data.name}-id` } }),
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: () => {
+            listCallCount += 1;
+            if (listCallCount === 1) {
+              return mockPagedData({ include_totals: true }, 'actions', []);
+            }
+            return mockPagedData(
+              { include_totals: true },
+              'actions',
+              actions3.map((a) => ({ name: a.name, supported_triggers: a.supported_triggers, id: `${a.name}-id` }))
+            );
+          },
+          modules: {
+            list: () =>
+              mockPagedData({ paginate: true }, 'modules', [
+                { id: moduleId, name: 'test-module', code: 'module.exports = {};' },
+              ]),
+            versions: {
+              list: () =>
+                Promise.resolve(
+                  mockPagedData({ paginate: true }, 'versions', [
+                    { id: moduleVersionId, version_number: 1 },
+                  ])
+                ),
+            },
+          },
+        },
+      };
+
+      // Use real pool via pageClient — this is the scenario that deadlocked before the fix.
+      const handler = new actions.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Before the fix this would hang indefinitely; now it should resolve.
+      await stageFn.apply(handler, [{ actions: actions3 }]);
+    });
+
     it('should handle actions without modules', async () => {
       const actionId = 'action-no-modules-id';
       const action = {
