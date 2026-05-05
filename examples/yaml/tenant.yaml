@@ -151,6 +151,34 @@ connections:
           idp: "displayName"
       synchronize_automatically: false
 
+  - name: "enterprise-oidc"
+    strategy: "oidc"
+    enabled_clients:
+      - "My SPA"
+    options:
+      type: "back_channel"
+      issuer: "https://example-idp.com"
+      jwks_uri: "https://example-idp.com/.well-known/jwks.json"
+      token_endpoint_auth_signing_alg: "RS384"
+      id_token_signed_response_algs:
+        - "RS256"
+        - "RS384"
+      token_endpoint_jwtca_aud_format: "token_endpoint"
+
+  - name: "enterprise-okta"
+    strategy: "okta"
+    enabled_clients:
+      - "My SPA"
+    options:
+      type: "back_channel"
+      issuer: "https://example.okta.com/oauth2/default"
+      jwks_uri: "https://example.okta.com/oauth2/default/v1/keys"
+      token_endpoint_auth_signing_alg: "PS256"
+      id_token_signed_response_algs:
+        - "RS256"
+        - "PS256"
+      token_endpoint_jwtca_aud_format: "issuer"
+
 
 resourceServers:
   -
