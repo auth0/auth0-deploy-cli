@@ -26,15 +26,18 @@ const connectionOptionsSchema = {
     },
     token_endpoint_auth_signing_alg: {
       type: 'string',
-      enum: ['RS256', 'RS384', 'RS512', 'PS256', 'PS384', 'ES256', 'ES384'],
+      enum: Object.values(Management.ConnectionTokenEndpointAuthSigningAlgEnum),
     },
     id_token_signed_response_algs: {
       type: 'array',
-      items: { type: 'string' },
+      items: {
+        type: 'string',
+        enum: Object.values(Management.ConnectionIdTokenSignedResponseAlgEnum),
+      },
     },
     token_endpoint_jwtca_aud_format: {
       type: 'string',
-      enum: ['issuer', 'token_endpoint'],
+      enum: Object.values(Management.ConnectionTokenEndpointJwtcaAudFormatEnumOidc),
     },
   },
 };
@@ -430,7 +433,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     connections.forEach((connection) => {
       if (!connection?.options) return;
 
-      const strategy = connection?.strategy || '';
+      const strategy = connection?.strategy ?? 'unknown';
       if (oidcOktaStrategies.has(strategy)) return;
 
       const unsupportedFields = oidcOktaOnlyConnectionOptionFields.filter(
@@ -441,9 +444,9 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
         throw new ValidationError(
           `Connection "${connection.name}": option(s) ${unsupportedFields
             .map((field) => `"${field}"`)
-            .join(', ')} are only supported for strategies "oidc" and "okta". Found strategy "${
-            strategy || 'unknown'
-          }".`
+            .join(
+              ', '
+            )} are only supported for strategies "oidc" and "okta". Found strategy "${strategy}".`
         );
       }
     });

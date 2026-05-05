@@ -267,7 +267,7 @@ connections:
 For enterprise connections with strategy `oidc` or `okta`, the Deploy CLI supports these optional fields under `connections[].options`:
 
 - `token_endpoint_auth_signing_alg` (string): Allowed values are `RS256`, `RS384`, `RS512`, `PS256`, `PS384`, `ES256`, `ES384`.
-- `id_token_signed_response_algs` (string[]): Allow-list for incoming ID token signing algorithms.
+- `id_token_signed_response_algs` (string[]): Allow-list for incoming ID token signing algorithms. Allowed values are `RS256`, `RS384`, `RS512`, `PS256`, `PS384`, `ES256`, `ES384`.
 - `token_endpoint_jwtca_aud_format` (string): Allowed values are `issuer` or `token_endpoint`.
 
 **YAML Example**
