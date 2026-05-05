@@ -90,6 +90,58 @@ describe('#connections handler', () => {
 
       await stageFn.apply(handler, [{ connections: data }]);
     });
+
+    it('should allow supported oidc/okta auth signing algorithms', async () => {
+      const handler = new connections.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        {
+          name: 'oidc-connection',
+          strategy: 'oidc',
+          options: {
+            token_endpoint_auth_signing_alg: 'RS256',
+            id_token_signed_response_algs: ['RS256', 'RS512'],
+            token_endpoint_jwtca_aud_format: 'issuer',
+          },
+        },
+        {
+          name: 'okta-connection',
+          strategy: 'okta',
+          options: {
+            token_endpoint_auth_signing_alg: 'RS384',
+            id_token_signed_response_algs: ['RS384'],
+            token_endpoint_jwtca_aud_format: 'token_endpoint',
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ connections: data }]);
+    });
+
+    it('should reject oidc/okta-only options for non-oidc/okta strategies', async () => {
+      const handler = new connections.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        {
+          name: 'saml-connection',
+          strategy: 'samlp',
+          options: {
+            token_endpoint_auth_signing_alg: 'RS256',
+            id_token_signed_response_algs: ['RS256'],
+            token_endpoint_jwtca_aud_format: 'issuer',
+          },
+        },
+      ];
+
+      try {
+        await stageFn.apply(handler, [{ connections: data }]);
+        throw new Error('Expected validation to fail');
+      } catch (err) {
+        expect(err).to.be.an('object');
+        expect(err.message).to.include('only supported for strategies "oidc" and "okta"');
+        expect(err.message).to.include('Found strategy "samlp"');
+      }
+    });
   });
 
   describe('#connections process', () => {

@@ -262,6 +262,55 @@ connections:
 }
 ```
 
+## Connections (OIDC and Okta token endpoint authentication options)
+
+For enterprise connections with strategy `oidc` or `okta`, the Deploy CLI supports these optional fields under `connections[].options`:
+
+- `token_endpoint_auth_signing_alg` (string): Allowed values are `RS256`, `RS384`, `RS512`, `PS256`, `PS384`, `ES256`, `ES384`.
+- `id_token_signed_response_algs` (string[]): Allow-list for incoming ID token signing algorithms. Allowed values are `RS256`, `RS384`, `RS512`, `PS256`, `PS384`, `ES256`, `ES384`.
+- `token_endpoint_jwtca_aud_format` (string): Allowed values are `issuer` or `token_endpoint`.
+
+**YAML Example**
+
+```yaml
+connections:
+  - name: enterprise-oidc
+    strategy: oidc
+    enabled_clients:
+      - My SPA
+    options:
+      type: back_channel
+      issuer: https://example-idp.com
+      jwks_uri: https://example-idp.com/.well-known/jwks.json
+      token_endpoint_auth_signing_alg: RS384
+      id_token_signed_response_algs:
+        - RS256
+        - RS384
+      token_endpoint_jwtca_aud_format: token_endpoint
+```
+
+**Directory Example**
+
+```
+./connections/enterprise-oidc.json
+```
+
+```json
+{
+  "name": "enterprise-oidc",
+  "strategy": "oidc",
+  "enabled_clients": ["My SPA"],
+  "options": {
+    "type": "back_channel",
+    "issuer": "https://example-idp.com",
+    "jwks_uri": "https://example-idp.com/.well-known/jwks.json",
+    "token_endpoint_auth_signing_alg": "RS384",
+    "id_token_signed_response_algs": ["RS256", "RS384"],
+    "token_endpoint_jwtca_aud_format": "token_endpoint"
+  }
+}
+```
+
 ## Databases
 
 When managing database connections, the values of `options.customScripts` point to specific javascript files relative to

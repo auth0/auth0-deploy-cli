@@ -14,16 +14,40 @@ import { ConfigFunction } from '../../../configFactory';
 import { paginate } from '../client';
 import ScimHandler from './scimHandler';
 import log from '../../../logger';
+import ValidationError from '../../validationError';
 import { Client } from './clients';
 
 const connectionOptionsSchema = {
   type: 'object',
+  additionalProperties: true,
   properties: {
     dpop_signing_alg: {
       type: 'string',
     },
+    token_endpoint_auth_signing_alg: {
+      type: 'string',
+      enum: Object.values(Management.ConnectionTokenEndpointAuthSigningAlgEnum),
+    },
+    id_token_signed_response_algs: {
+      type: 'array',
+      items: {
+        type: 'string',
+        enum: Object.values(Management.ConnectionIdTokenSignedResponseAlgEnum),
+      },
+    },
+    token_endpoint_jwtca_aud_format: {
+      type: 'string',
+      enum: Object.values(Management.ConnectionTokenEndpointJwtcaAudFormatEnumOidc),
+    },
   },
 };
+
+const oidcOktaStrategies = new Set(['oidc', 'okta']);
+const oidcOktaOnlyConnectionOptionFields = [
+  'token_endpoint_auth_signing_alg',
+  'id_token_signed_response_algs',
+  'token_endpoint_jwtca_aud_format',
+];
 
 export const schema = {
   type: 'array',
@@ -396,6 +420,38 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     } catch (e) {
       return {};
     }
+  }
+
+  async validate(assets: Assets): Promise<void> {
+    const { connections } = assets;
+
+    if (!connections) {
+      await super.validate(assets);
+      return;
+    }
+
+    connections.forEach((connection) => {
+      if (!connection?.options) return;
+
+      const strategy = connection?.strategy ?? 'unknown';
+      if (oidcOktaStrategies.has(strategy)) return;
+
+      const unsupportedFields = oidcOktaOnlyConnectionOptionFields.filter(
+        (field) => field in connection.options
+      );
+
+      if (unsupportedFields.length > 0) {
+        throw new ValidationError(
+          `Connection "${connection.name}": option(s) ${unsupportedFields
+            .map((field) => `"${field}"`)
+            .join(
+              ', '
+            )} are only supported for strategies "oidc" and "okta". Found strategy "${strategy}".`
+        );
+      }
+    });
+
+    await super.validate(assets);
   }
 
   /**
