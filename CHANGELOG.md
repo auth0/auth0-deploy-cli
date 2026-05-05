@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.33.0] - 2026-05-05
+
+### Added
+
+- Add support for Third Party Apps CORE EA Release 1 properties, including updated `clientGrants` matching and `clients` schema handling. [#1372]
+- Add support for additional signing algorithms (`token_endpoint_auth_signing_alg`, `id_token_signed_response_algs`) in OIDC and Okta enterprise connections. [#1375]
+
+### Fixed
+
+- Fix Deploy CLI hanging indefinitely when importing 3 or more actions that reference action modules, caused by a deadlock in the shared rate-limiting pool. [#1374]
+
 ## [8.32.0] - 2026-04-23
 
 ### Added
@@ -1750,7 +1761,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1366]: https://github.com/auth0/auth0-deploy-cli/issues/1366
 [#1367]: https://github.com/auth0/auth0-deploy-cli/issues/1367
 [#1369]: https://github.com/auth0/auth0-deploy-cli/issues/1369
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.32.0...HEAD
+[#1372]: https://github.com/auth0/auth0-deploy-cli/issues/1372
+[#1374]: https://github.com/auth0/auth0-deploy-cli/issues/1374
+[#1375]: https://github.com/auth0/auth0-deploy-cli/issues/1375
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.33.0...HEAD
+[8.33.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.32.0...v8.33.0
 [8.32.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.31.0...v8.32.0
 [8.31.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.30.0...v8.31.0
 [8.30.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.3...v8.30.0
