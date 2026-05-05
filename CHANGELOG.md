@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for Third Party Apps CORE EA Release 1 properties, including updated `clientGrants` matching and `clients` schema handling. [#1372]
+- Add support for additional signing algorithms (`token_endpoint_auth_signing_alg`, `id_token_signed_response_algs`) in OIDC and Okta enterprise connections. [#1375]
+
+### Fixed
+
+- Fix Deploy CLI hanging indefinitely when importing 3 or more actions that reference action modules, caused by a deadlock in the shared rate-limiting pool. [#1374]
+
 ## [8.32.0] - 2026-04-23
 
 ### Added
