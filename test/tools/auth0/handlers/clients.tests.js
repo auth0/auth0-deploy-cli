@@ -80,6 +80,20 @@ describe('#clients handler', () => {
 
       await stageFn.apply(handler, [{ clients: data }]);
     });
+
+    it('should pass validation with third_party_security_mode and redirection_policy', async () => {
+      const handler = new clients.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        {
+          name: 'someThirdPartyClient',
+          third_party_security_mode: 'strict',
+          redirection_policy: 'open_redirect_protection',
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clients: data }]);
+    });
   });
 
   describe('#clients process', () => {

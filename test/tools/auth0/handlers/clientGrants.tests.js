@@ -31,9 +31,13 @@ describe('#clientGrants handler', () => {
       const data = [
         {
           name: 'someClientGrant',
+          client_id: 'client1',
+          audience: 'https://example.com/api',
         },
         {
           name: 'someClientGrant',
+          client_id: 'client2',
+          audience: 'https://example.com/api',
         },
       ];
 
@@ -51,6 +55,8 @@ describe('#clientGrants handler', () => {
       const data = [
         {
           name: 'someClientGrant',
+          client_id: 'client1',
+          audience: 'https://example.com/api',
         },
       ];
 
@@ -92,6 +98,53 @@ describe('#clientGrants handler', () => {
       ];
 
       await handler.validate({ clientGrants: data });
+    });
+
+    it('should pass validation with default_for property (no client_id)', async () => {
+      const handler = new clientGrants.default({ client: {}, config });
+      const data = [
+        {
+          audience: 'https://test.auth0.com/api/v2/',
+          default_for: 'third_party_clients',
+        },
+      ];
+
+      await handler.validate({ clientGrants: data });
+    });
+
+    it('should fail validation when both client_id and default_for are specified', async () => {
+      const handler = new clientGrants.default({ client: {}, config });
+      const data = [
+        {
+          client_id: 'testClient',
+          audience: 'https://test.auth0.com/api/v2/',
+          default_for: 'third_party_clients',
+        },
+      ];
+
+      try {
+        await handler.validate({ clientGrants: data });
+        expect.fail('Should have thrown an error');
+      } catch (err) {
+        expect(err.message).to.include('mutually exclusive');
+      }
+    });
+
+    it('should fail validation when neither client_id nor default_for are specified', async () => {
+      const handler = new clientGrants.default({ client: {}, config });
+      const data = [
+        {
+          audience: 'https://test.auth0.com/api/v2/',
+          scope: ['read:users'],
+        },
+      ];
+
+      try {
+        await handler.validate({ clientGrants: data });
+        expect.fail('Should have thrown an error');
+      } catch (err) {
+        expect(err.message).to.include('One of "client_id" or "default_for" is required');
+      }
     });
   });
 
@@ -389,6 +442,108 @@ describe('#clientGrants handler', () => {
       ];
 
       await stageFn.apply(handler, [{ clientGrants: data }]);
+    });
+
+    it('should not include default_for in update payload', async () => {
+      let updatedData = null;
+      const auth0 = {
+        clientGrants: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (id, data) {
+            updatedData = data;
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'client_grants', [
+              {
+                id: 'cg1',
+                client_id: 'client1',
+                audience: 'audience',
+                default_for: 'third_party_clients',
+              },
+            ]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          client_id: 'client1',
+          audience: 'audience',
+          scope: ['read:users'],
+          default_for: 'third_party_clients',
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+      expect(updatedData).to.not.have.property('default_for');
+    });
+
+    it('should match a default_for grant by [default_for, audience] and update it (not create)', async () => {
+      config.data = {
+        AUTH0_CLIENT_ID: 'client_id',
+        AUTH0_ALLOW_DELETE: true,
+      };
+
+      let updatedId = null;
+      let updatedData = null;
+      let createCalled = false;
+
+      const auth0 = {
+        clientGrants: {
+          create: function () {
+            createCalled = true;
+            return Promise.resolve({ data: [] });
+          },
+          update: function (id, data) {
+            updatedId = id;
+            updatedData = data;
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          // Remote has a default_for grant with NO client_id — only matchable via ['default_for', 'audience']
+          list: (params) =>
+            mockPagedData(params, 'client_grants', [
+              {
+                id: 'cg_default',
+                audience: 'https://api.example.com',
+                default_for: 'third_party_clients',
+                scope: ['read:users'],
+              },
+            ]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Local config: same default_for grant, updated scope, no client_id
+      const data = [
+        {
+          audience: 'https://api.example.com',
+          default_for: 'third_party_clients',
+          scope: ['read:users', 'write:users'],
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+
+      // Must match via ['default_for', 'audience'] and UPDATE — not create a duplicate
+      expect(createCalled).to.equal(false);
+      expect(updatedId).to.equal('cg_default');
+      expect(updatedData.scope).to.deep.equal(['read:users', 'write:users']);
+      // default_for is in stripUpdateFields, so must be absent from the update payload
+      expect(updatedData).to.not.have.property('default_for');
     });
 
     it('should update client grants with authorization_details_types', async () => {

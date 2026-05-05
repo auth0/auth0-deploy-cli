@@ -62,6 +62,12 @@ export const schema = {
       description:
         'OAuth resource parameter compatibility mode for specifying the protected resource.',
     },
+    dynamic_client_registration_security_mode: {
+      type: 'string',
+      enum: ['strict', 'permissive'],
+      description:
+        'Indicates the security mode for new clients created through the Dynamic Client Registration endpoint.',
+    },
   },
 };
 

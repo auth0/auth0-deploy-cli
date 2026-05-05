@@ -328,6 +328,18 @@ export const schema = {
           },
         },
       },
+      third_party_security_mode: {
+        type: 'string',
+        enum: ['strict', 'permissive'],
+        description:
+          'Indicates the security mode for a Third Party Client, to apply new security semantics and improvements.',
+      },
+      redirection_policy: {
+        type: 'string',
+        enum: ['allow_always', 'open_redirect_protection'],
+        description:
+          'Determines how OAuth2/OIDC errors are handled when a non-recoverable error happens.',
+      },
       oidc_logout: {
         type: ['object', 'null'],
         description: 'Configuration for OIDC backchannel logout',
@@ -492,6 +504,8 @@ export default class ClientHandler extends DefaultAPIHandler {
         'external_metadata_type',
         'external_metadata_created_by',
         'jwks_uri',
+        // third_party_security_mode is immutable after creation; PATCH returns 400
+        'third_party_security_mode',
       ],
       functions: {
         create: (client: Client) => this.createClient(client),
