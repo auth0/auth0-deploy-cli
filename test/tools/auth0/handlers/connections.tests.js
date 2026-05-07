@@ -862,9 +862,7 @@ describe('#connections handler', () => {
         const setSyncGroupsStub = sinon
           .stub(handler, 'updateConnectionSynchronizedGroups')
           .resolves();
-        const createStub = sinon
-          .stub(handler, 'createConnectionDirectoryProvisioning')
-          .resolves();
+        const createStub = sinon.stub(handler, 'createConnectionDirectoryProvisioning').resolves();
 
         await handler.processConnectionDirectoryProvisioning({
           create: [
@@ -885,9 +883,7 @@ describe('#connections handler', () => {
         });
 
         expect(createStub.calledOnce).to.be.true;
-        expect(
-          setSyncGroupsStub.calledOnceWith('con1', [{ id: 'group1' }])
-        ).to.be.true;
+        expect(setSyncGroupsStub.calledOnceWith('con1', [{ id: 'group1' }])).to.be.true;
       });
 
       it('should not call set() when synchronize_groups is not selected', async () => {
