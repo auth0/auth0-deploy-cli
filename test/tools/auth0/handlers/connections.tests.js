@@ -32,9 +32,16 @@ describe('#connections handler', () => {
   };
 
   describe('#connections schema', () => {
-    it('should allow supported dpop_signing_alg values', () => {
+    it('should allow explicitly supported connection option fields', () => {
       const ajv = new Ajv({ useDefaults: true, nullable: true });
       const assets = [
+        {
+          name: 'google-workspace',
+          strategy: 'google-apps',
+          options: {
+            api_enable_groups: true,
+          },
+        },
         {
           name: 'oidc-connection',
           strategy: 'oidc',
@@ -223,6 +230,81 @@ describe('#connections handler', () => {
 
       await stageFn.apply(handler, [
         { connections: [{ name: 'someConnection', enabled_clients: ['client1'] }] },
+      ]);
+    });
+
+    it('should preserve api_enable_groups in connection options', async () => {
+      const auth0 = {
+        connections: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data).to.deep.equal({
+              name: 'google-workspace',
+              strategy: 'google-apps',
+              options: {
+                domain: 'example.com',
+                api_enable_groups: true,
+              },
+            });
+            return Promise.resolve({ data: { ...data, id: 'con_google' } });
+          },
+          get: () =>
+            Promise.resolve({
+              id: 'con_google',
+              name: 'google-workspace',
+              strategy: 'google-apps',
+              options: { domain: 'example.com', api_enable_groups: true },
+            }),
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => {
+            if (params.name === 'google-workspace') {
+              return mockPagedData(params, 'connections', [
+                {
+                  id: 'con_google',
+                  name: 'google-workspace',
+                  strategy: 'google-apps',
+                  options: { domain: 'example.com', api_enable_groups: true },
+                },
+              ]);
+            }
+
+            return mockPagedData(params, 'connections', []);
+          },
+          _getRestClient: () => ({}),
+          clients: {
+            get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
+            update: (connectionId) => {
+              expect(connectionId).to.equal('con_google');
+              return Promise.resolve({});
+            },
+          },
+        },
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ name: 'client1', client_id: 'client_id_1' }]),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          connections: [
+            {
+              name: 'google-workspace',
+              strategy: 'google-apps',
+              enabled_clients: ['client1'],
+              options: {
+                domain: 'example.com',
+                api_enable_groups: true,
+              },
+            },
+          ],
+        },
       ]);
     });
 
@@ -624,6 +706,231 @@ describe('#connections handler', () => {
         await handler.deleteConnectionDirectoryProvisioning('con-del');
 
         expect(deleteStub.calledOnceWith('con-del')).to.be.true;
+      });
+
+      it('should include synchronize_groups in create payload', async () => {
+        const createStub = sinon.stub().resolves();
+        const auth0 = {
+          connections: { directoryProvisioning: { create: createStub } },
+          pool,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        await handler.createConnectionDirectoryProvisioning('con1', {
+          mapping: sampleMapping,
+          synchronize_groups: 'selected',
+        });
+
+        expect(
+          createStub.calledOnceWith(
+            'con1',
+            sinon.match({ mapping: sampleMapping, synchronize_groups: 'selected' })
+          )
+        ).to.be.true;
+      });
+
+      it('should omit synchronize_groups from create payload when not provided', async () => {
+        const createStub = sinon.stub().resolves();
+        const auth0 = {
+          connections: { directoryProvisioning: { create: createStub } },
+          pool,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        await handler.createConnectionDirectoryProvisioning('con1', { mapping: sampleMapping });
+
+        const calledPayload = createStub.firstCall.args[1];
+        expect(calledPayload).to.not.have.property('synchronize_groups');
+      });
+
+      it('should include synchronize_groups in update payload', async () => {
+        const updateStub = sinon.stub().resolves();
+        const auth0 = { connections: { directoryProvisioning: { update: updateStub } } };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        await handler.updateConnectionDirectoryProvisioning('con1', {
+          mapping: sampleMapping,
+          synchronize_automatically: true,
+          synchronize_groups: 'all',
+        });
+
+        expect(
+          updateStub.calledOnceWith(
+            'con1',
+            sinon.match({ synchronize_groups: 'all', synchronize_automatically: true })
+          )
+        ).to.be.true;
+      });
+
+      it('should omit synchronize_groups from update payload when not provided', async () => {
+        const updateStub = sinon.stub().resolves();
+        const auth0 = { connections: { directoryProvisioning: { update: updateStub } } };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        await handler.updateConnectionDirectoryProvisioning('con1', {
+          mapping: sampleMapping,
+          synchronize_automatically: false,
+        });
+
+        const calledPayload = updateStub.firstCall.args[1];
+        expect(calledPayload).to.not.have.property('synchronize_groups');
+      });
+
+      it('should fetch and paginate synchronized groups', async () => {
+        const page1 = {
+          data: [{ id: 'group1' }, { id: 'group2' }],
+          hasNextPage: sinon.stub().onFirstCall().returns(true).onSecondCall().returns(false),
+        };
+        page1.getNextPage = sinon.stub().resolves({
+          data: [{ id: 'group3' }],
+          hasNextPage: sinon.stub().returns(false),
+        });
+
+        const auth0 = {
+          connections: {
+            directoryProvisioning: {
+              listSynchronizedGroups: sinon.stub().resolves(page1),
+            },
+          },
+          pool,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        const result = await handler.getConnectionSynchronizedGroups('con1');
+
+        expect(result).to.deep.equal([{ id: 'group1' }, { id: 'group2' }, { id: 'group3' }]);
+      });
+
+      it('should return null and log warning when listSynchronizedGroups returns 403', async () => {
+        const err = new Error('Forbidden');
+        err.statusCode = 403;
+        err.body = { message: 'Feature not enabled' };
+
+        const auth0 = {
+          connections: {
+            directoryProvisioning: {
+              listSynchronizedGroups: sinon.stub().rejects(err),
+            },
+          },
+          pool,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        const result = await handler.getConnectionSynchronizedGroups('con1');
+
+        expect(result).to.be.null;
+      });
+
+      it('should call set() when updating synchronized groups', async () => {
+        const setStub = sinon.stub().resolves();
+        const auth0 = {
+          connections: { directoryProvisioning: { set: setStub } },
+          pool,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        await handler.updateConnectionSynchronizedGroups('con1', [
+          { id: 'group1' },
+          { id: 'group2' },
+        ]);
+
+        expect(
+          setStub.calledOnceWith('con1', {
+            groups: [{ id: 'group1' }, { id: 'group2' }],
+          })
+        ).to.be.true;
+      });
+
+      it('should call set() for connections with synchronize_groups === selected in processConnectionDirectoryProvisioning', async () => {
+        const poolExecutor = {
+          addEachTask: ({ data, generator }) => ({
+            promise: async () => {
+              for (const item of data || []) await generator(item);
+            },
+          }),
+        };
+
+        const auth0 = {
+          connections: { directoryProvisioning: {} },
+          clients: { list: (params) => mockPagedData(params, 'clients', []) },
+          pool: poolExecutor,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        handler.existing = [];
+
+        const setSyncGroupsStub = sinon
+          .stub(handler, 'updateConnectionSynchronizedGroups')
+          .resolves();
+        const createStub = sinon
+          .stub(handler, 'createConnectionDirectoryProvisioning')
+          .resolves();
+
+        await handler.processConnectionDirectoryProvisioning({
+          create: [
+            {
+              id: 'con1',
+              name: 'gsuite-new',
+              strategy: 'google-apps',
+              directory_provisioning_configuration: {
+                mapping: sampleMapping,
+                synchronize_groups: 'selected',
+                synchronized_groups: [{ id: 'group1' }],
+              },
+            },
+          ],
+          update: [],
+          conflicts: [],
+          del: [],
+        });
+
+        expect(createStub.calledOnce).to.be.true;
+        expect(
+          setSyncGroupsStub.calledOnceWith('con1', [{ id: 'group1' }])
+        ).to.be.true;
+      });
+
+      it('should not call set() when synchronize_groups is not selected', async () => {
+        const poolExecutor = {
+          addEachTask: ({ data, generator }) => ({
+            promise: async () => {
+              for (const item of data || []) await generator(item);
+            },
+          }),
+        };
+
+        const auth0 = {
+          connections: { directoryProvisioning: {} },
+          clients: { list: (params) => mockPagedData(params, 'clients', []) },
+          pool: poolExecutor,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        handler.existing = [];
+
+        const setSyncGroupsStub = sinon
+          .stub(handler, 'updateConnectionSynchronizedGroups')
+          .resolves();
+        sinon.stub(handler, 'createConnectionDirectoryProvisioning').resolves();
+
+        await handler.processConnectionDirectoryProvisioning({
+          create: [
+            {
+              id: 'con1',
+              name: 'gsuite-new',
+              strategy: 'google-apps',
+              directory_provisioning_configuration: {
+                mapping: sampleMapping,
+                synchronize_groups: 'all',
+              },
+            },
+          ],
+          update: [],
+          conflicts: [],
+          del: [],
+        });
+
+        expect(setSyncGroupsStub.called).to.be.false;
       });
     });
 

@@ -224,6 +224,7 @@ connections:
       tenant_domain: example.com
       client_id: 'some_client_id'
       client_secret: 'some_client_secret'
+      api_enable_groups: true
       api_enable_users: true
     directory_provisioning_configuration:
       mapping:
@@ -250,6 +251,7 @@ connections:
     "tenant_domain": "example.com",
     "client_id": "some_client_id",
     "client_secret": "some_client_secret",
+    "api_enable_groups": true,
     "api_enable_users": true
   },
   "directory_provisioning_configuration": {
