@@ -422,7 +422,7 @@ resourceServers:
   - name: Auth0 My Account API
     identifier: https://your-tenant.auth0.com/me/
     authorization_policy:
-      policy_id: "019b76da-a800-73c9-b656-b349ae415c17"
+      policy_id: '019b76da-a800-73c9-b656-b349ae415c17'
 ```
 
 To clear the policy, set it to `null`:
