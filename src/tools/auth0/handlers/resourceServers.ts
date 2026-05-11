@@ -132,6 +132,7 @@ export default class ResourceServersHandler extends DefaultHandler {
             'identifier',
             'id',
             'is_system',
+            'authorization_policy',
           ];
           const sanitized: any = {};
           allowedKeys.forEach((key) => {
@@ -204,6 +205,7 @@ export default class ResourceServersHandler extends DefaultHandler {
         skip_consent_for_verifiable_first_party_clients:
           update.skip_consent_for_verifiable_first_party_clients,
         subject_type_authorization: update.subject_type_authorization,
+        authorization_policy: update.authorization_policy,
       };
 
       return this.client.resourceServers.update(id, updateFields);
