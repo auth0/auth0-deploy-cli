@@ -22,6 +22,7 @@ describe('#YAML context connections', () => {
           domain: somedomain.com
           waad_protocol: "openid-connect"
           api_enable_users: true
+          api_enable_groups: true
           basic_profile: true
           ext_profile: true
           ext_groups: true
@@ -46,6 +47,7 @@ describe('#YAML context connections', () => {
       {
         name: 'test-waad',
         options: {
+          api_enable_groups: true,
           api_enable_users: true,
           basic_profile: true,
           client_id: 'my_client_id',
