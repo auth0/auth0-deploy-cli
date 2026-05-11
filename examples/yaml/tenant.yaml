@@ -192,6 +192,12 @@ resourceServers:
         description: "read account"
     # client_id: "if linked to a resource server client (readonly)"
     # Add other resource server settings (https://auth0.com/docs/api/management/v2#!/Resource_Servers/post_resource_servers)
+  -
+    name: "Auth0 My Account API"
+    identifier: "https://##AUTH0_DOMAIN##/me/"
+    # authorization_policy is only applicable to the My Account API when the acr feature flag is enabled
+    authorization_policy:
+      policy_id: "019b76da-a800-73c9-b656-b349ae415c17"
 
 tokenExchangeProfiles:
   - name: "Custom Authentication Profile"
