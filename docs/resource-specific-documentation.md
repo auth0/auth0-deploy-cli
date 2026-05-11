@@ -213,6 +213,8 @@ The Deploy CLI supports managing the `directory_provisioning_configuration` for 
 
 The `mapping` array pairs Auth0 user fields with IdP fields, and `synchronize_automatically` controls whether Auth0 runs scheduled sync jobs for the connection.
 
+The `synchronize_groups` field controls group provisioning.
+
 **YAML Example**
 
 ```yaml
@@ -224,6 +226,7 @@ connections:
       tenant_domain: example.com
       client_id: 'some_client_id'
       client_secret: 'some_client_secret'
+      api_enable_groups: true
       api_enable_users: true
     directory_provisioning_configuration:
       mapping:
@@ -232,6 +235,10 @@ connections:
         - auth0: name
           idp: displayName
       synchronize_automatically: false
+      synchronize_groups: selected
+      synchronized_groups:
+        - id: 'group-id-1'
+        - id: 'group-id-2'
 ```
 
 **Directory Example**
@@ -250,6 +257,7 @@ connections:
     "tenant_domain": "example.com",
     "client_id": "some_client_id",
     "client_secret": "some_client_secret",
+    "api_enable_groups": true,
     "api_enable_users": true
   },
   "directory_provisioning_configuration": {
@@ -257,7 +265,9 @@ connections:
       { "auth0": "email", "idp": "mail" },
       { "auth0": "name", "idp": "displayName" }
     ],
-    "synchronize_automatically": false
+    "synchronize_automatically": false,
+    "synchronize_groups": "selected",
+    "synchronized_groups": [{ "id": "group-id-1" }, { "id": "group-id-2" }]
   }
 }
 ```
@@ -410,6 +420,43 @@ resourceServers:
   }
 }
 ```
+
+### Auth0 My Account API — `authorization_policy`
+
+The `authorization_policy` field can be set on the **Auth0 My Account API** resource server (the system resource server with identifier `https://<tenant-domain>/me/`) when the `acr` feature flag is enabled on the tenant. It specifies an Authentication Context Class Reference (ACR) policy that controls the authentication assurance requirements for access tokens issued to that API.
+
+**YAML Example**
+
+```yaml
+resourceServers:
+  - name: Auth0 My Account API
+    identifier: https://your-tenant.auth0.com/me/
+    authorization_policy:
+      policy_id: '019b76da-a800-73c9-b656-b349ae415c17'
+```
+
+To clear the policy, set it to `null`:
+
+```yaml
+resourceServers:
+  - name: Auth0 My Account API
+    identifier: https://your-tenant.auth0.com/me/
+    authorization_policy: null
+```
+
+**Directory Example**
+
+```json
+{
+  "name": "Auth0 My Account API",
+  "identifier": "https://your-tenant.auth0.com/me/",
+  "authorization_policy": {
+    "policy_id": "019b76da-a800-73c9-b656-b349ae415c17"
+  }
+}
+```
+
+> **Note:** `authorization_policy` is only accepted by the Auth0 API for the My Account resource server and only when the `acr` feature flag is enabled on the tenant.
 
 ## Universal Login
 

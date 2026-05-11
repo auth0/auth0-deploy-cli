@@ -21,6 +21,9 @@ const connectionOptionsSchema = {
   type: 'object',
   additionalProperties: true,
   properties: {
+    api_enable_groups: {
+      type: 'boolean',
+    },
     dpop_signing_alg: {
       type: 'string',
     },
@@ -108,6 +111,20 @@ export const schema = {
             type: 'boolean',
             description: 'The field whether periodic automatic synchronization is enabled',
           },
+          synchronize_groups: {
+            type: 'string',
+            enum: Object.values(Management.SynchronizeGroupsEnum),
+          },
+          synchronized_groups: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+              },
+              required: ['id'],
+            },
+          },
         },
       },
     },
@@ -121,8 +138,10 @@ export type Connection = Management.ConnectionForList & {
   enabled_clients?: string[];
   directory_provisioning_configuration?: Pick<
     DirectoryProvisioningConfig,
-    'mapping' | 'synchronize_automatically'
-  >;
+    'mapping' | 'synchronize_automatically' | 'synchronize_groups'
+  > & {
+    synchronized_groups?: Array<{ id: string }>;
+  };
 };
 
 // addExcludedConnectionPropertiesToChanges superimposes excluded properties on the `options` object. The Auth0 API
@@ -495,6 +514,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     const createPayload: Management.CreateDirectoryProvisioningRequestContent = {
       mapping: payload.mapping,
       synchronize_automatically: payload.synchronize_automatically,
+      ...(payload.synchronize_groups && { synchronize_groups: payload.synchronize_groups }),
     };
     await this.client.connections.directoryProvisioning.create(connectionId, createPayload);
     log.debug(`Created directory provisioning for connection '${connectionId}'`);
@@ -514,6 +534,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     const updatePayload: Management.UpdateDirectoryProvisioningRequestContent = {
       mapping: payload.mapping,
       synchronize_automatically: payload.synchronize_automatically,
+      ...(payload.synchronize_groups && { synchronize_groups: payload.synchronize_groups }),
     };
 
     await this.client.connections.directoryProvisioning.update(connectionId, updatePayload);
@@ -529,6 +550,48 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     }
     await this.client.connections.directoryProvisioning.delete(connectionId);
     log.debug(`Deleted directory provisioning for connection '${connectionId}'`);
+  }
+
+  /**
+   * Retrieves all synchronized groups for a connection using checkpoint pagination.
+   */
+  async getConnectionSynchronizedGroups(
+    connectionId: string
+  ): Promise<Array<{ id: string }> | null> {
+    try {
+      const groups: Array<{ id: string }> = [];
+      let page = await this.client.connections.directoryProvisioning.listSynchronizedGroups(
+        connectionId,
+        {}
+      );
+      for (const g of page.data ?? []) groups.push({ id: g.id });
+      while (page.hasNextPage?.()) {
+        page = await page.getNextPage();
+        for (const g of page.data ?? []) groups.push({ id: g.id });
+      }
+      return groups;
+    } catch (error) {
+      const errLog = `Unable to fetch synchronized groups for connection '${connectionId}'. `;
+      const statusCode = (error as any)?.statusCode;
+      if (statusCode != null && [403, 404, 501].includes(statusCode)) {
+        const bodyMessage =
+          error instanceof ManagementError ? (error.body as any)?.message : error.message;
+        log.warn(errLog + bodyMessage);
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Replaces the synchronized groups for a connection (PUT replace-all semantics).
+   */
+  private async updateConnectionSynchronizedGroups(
+    connectionId: string,
+    groups: Array<{ id: string }>
+  ): Promise<void> {
+    await this.client.connections.directoryProvisioning.set(connectionId, { groups });
+    log.debug(`Updated synchronized groups for connection '${connectionId}'`);
   }
 
   /**
@@ -631,6 +694,31 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
           .join('\n')}`
       );
     }
+
+    // Process synchronized groups for connections where synchronize_groups === 'selected'
+    const connectionsToSyncGroups = [
+      ...directoryConnectionsToCreate,
+      ...directoryConnectionsToUpdate,
+    ].filter(
+      (conn) =>
+        conn.directory_provisioning_configuration?.synchronize_groups === 'selected' &&
+        conn.directory_provisioning_configuration?.synchronized_groups !== undefined
+    );
+
+    await this.client.pool
+      .addEachTask({
+        data: connectionsToSyncGroups,
+        generator: (conn) =>
+          this.updateConnectionSynchronizedGroups(
+            conn.id!,
+            conn.directory_provisioning_configuration!.synchronized_groups!
+          ).catch((err) => {
+            throw new Error(
+              `Failed to update synchronized groups for connection '${conn.id}':\n${err}`
+            );
+          }),
+      })
+      .promise();
   }
 
   async getType(): Promise<Asset[] | null> {
@@ -685,7 +773,18 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
               connection.directory_provisioning_configuration = {
                 mapping: dirProvConfig.mapping,
                 synchronize_automatically: dirProvConfig.synchronize_automatically,
+                ...(dirProvConfig.synchronize_groups && {
+                  synchronize_groups: dirProvConfig.synchronize_groups,
+                }),
               };
+
+              if (dirProvConfig.synchronize_groups === 'selected') {
+                const syncedGroups = await this.getConnectionSynchronizedGroups(con.id);
+                if (syncedGroups?.length) {
+                  connection.directory_provisioning_configuration.synchronized_groups =
+                    syncedGroups;
+                }
+              }
             }
           }
 
