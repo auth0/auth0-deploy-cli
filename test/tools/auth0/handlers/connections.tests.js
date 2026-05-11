@@ -380,6 +380,48 @@ describe('#connections handler', () => {
         .that.deep.equals(dirProvConfig);
     });
 
+    it('should include synchronized_groups in export when synchronize_groups is selected', async () => {
+      const auth0 = {
+        connections: {
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con1', strategy: 'google-apps', name: 'gsuite', options: {} },
+            ]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      sinon.stub(connections, 'getConnectionEnabledClients').resolves(undefined);
+      const dirProvConfigs = [
+        {
+          connection_id: 'con1',
+          mapping: [{ auth0: 'email', idp: 'mail' }],
+          synchronize_automatically: false,
+          synchronize_groups: 'selected',
+        },
+      ];
+      const syncedGroups = [{ id: 'group1' }, { id: 'group2' }];
+      sinon.stub(handler, 'getConnectionDirectoryProvisionings').resolves(dirProvConfigs);
+      sinon.stub(handler, 'getConnectionSynchronizedGroups').resolves(syncedGroups);
+      handler.scimHandler.applyScimConfiguration = sinon.stub().resolves();
+
+      const data = await handler.getType();
+
+      expect(handler.getConnectionSynchronizedGroups.calledOnceWith('con1')).to.be.true;
+      expect(data[0])
+        .to.have.property('directory_provisioning_configuration')
+        .that.deep.equals({
+          mapping: [{ auth0: 'email', idp: 'mail' }],
+          synchronize_automatically: false,
+          synchronize_groups: 'selected',
+          synchronized_groups: syncedGroups,
+        });
+    });
+
     it('should update connection', async () => {
       const auth0 = {
         connections: {

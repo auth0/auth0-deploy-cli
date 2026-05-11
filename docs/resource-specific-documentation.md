@@ -213,6 +213,8 @@ The Deploy CLI supports managing the `directory_provisioning_configuration` for 
 
 The `mapping` array pairs Auth0 user fields with IdP fields, and `synchronize_automatically` controls whether Auth0 runs scheduled sync jobs for the connection.
 
+The `synchronize_groups` field controls group provisioning.
+
 **YAML Example**
 
 ```yaml
@@ -233,6 +235,10 @@ connections:
         - auth0: name
           idp: displayName
       synchronize_automatically: false
+      synchronize_groups: selected
+      synchronized_groups:
+        - id: 'group-id-1'
+        - id: 'group-id-2'
 ```
 
 **Directory Example**
@@ -259,7 +265,9 @@ connections:
       { "auth0": "email", "idp": "mail" },
       { "auth0": "name", "idp": "displayName" }
     ],
-    "synchronize_automatically": false
+    "synchronize_automatically": false,
+    "synchronize_groups": "selected",
+    "synchronized_groups": [{ "id": "group-id-1" }, { "id": "group-id-2" }]
   }
 }
 ```
