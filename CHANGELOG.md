@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for `authorization_policy` on the Auth0 My Account API resource server, enabling ACR (Authentication Context Class Reference) policy configuration via Deploy CLI. [#1381]
+- Add Google Workspace inbound group sync support to directory provisioning configuration. [#1380]
+
+### Fixed
+
+- Fix keyword replacement mappings (e.g. `##ENV##`) not being applied to `theme.json` during import. [#1379]
+
 ## [8.33.0] - 2026-05-05
 
 ### Added
