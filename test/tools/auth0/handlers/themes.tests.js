@@ -2,6 +2,7 @@ const { expect, assert, use } = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const { omit, cloneDeep } = require('lodash');
 const { default: ThemesHandler } = require('../../../../src/tools/auth0/handlers/themes');
+const { preserveKeywords } = require('../../../../src/keywordPreservation');
 
 use(chaiAsPromised);
 
@@ -320,6 +321,51 @@ describe('#themes handler', () => {
     expect(auth0.branding.themes.delete.called).to.equal(false);
     expect(auth0.branding.themes.update.called).to.equal(false);
     expect(auth0.branding.themes.create.called).to.equal(false);
+  });
+});
+
+describe('#themes keyword preservation', () => {
+  const CDN_URL = 'https://cdn.example.com';
+  const themeId = 'my-theme-id';
+
+  const localThemeWithKeywords = {
+    themeId,
+    fonts: { font_url: '##CDN_URL##/fonts/custom.woff2' },
+    widget: { logo_url: '##CDN_URL##/logo.png' },
+  };
+
+  const remoteThemeWithResolvedUrls = {
+    themeId,
+    fonts: { font_url: `${CDN_URL}/fonts/custom.woff2` },
+    widget: { logo_url: `${CDN_URL}/logo.png` },
+  };
+
+  it('should preserve keyword placeholders in theme fields when themeId is in handler identifiers', () => {
+    const result = preserveKeywords({
+      localAssets: { themes: [localThemeWithKeywords] },
+      remoteAssets: { themes: [remoteThemeWithResolvedUrls] },
+      keywordMappings: { CDN_URL },
+      auth0Handlers: [{ id: 'themeId', identifiers: ['themeId'], type: 'themes' }],
+    });
+
+    expect(result.themes[0].fonts.font_url).to.equal('##CDN_URL##/fonts/custom.woff2');
+    expect(result.themes[0].widget.logo_url).to.equal('##CDN_URL##/logo.png');
+  });
+
+  it('should NOT preserve keyword placeholders when themeId is absent from handler identifiers', () => {
+    // Regression: prior to the fix, ThemesHandler used identifiers ['id', 'name'].
+    // getPreservableFieldsFromAssets looks for the identifier field on each array item to build
+    // a dot-notation address; if the field is missing (themes have themeId, not id/name),
+    // it silently returns no addresses and the raw remote URLs are returned unchanged.
+    const result = preserveKeywords({
+      localAssets: { themes: [localThemeWithKeywords] },
+      remoteAssets: { themes: [remoteThemeWithResolvedUrls] },
+      keywordMappings: { CDN_URL },
+      auth0Handlers: [{ id: 'themeId', identifiers: ['id', 'name'], type: 'themes' }],
+    });
+
+    expect(result.themes[0].fonts.font_url).to.equal(`${CDN_URL}/fonts/custom.woff2`);
+    expect(result.themes[0].widget.logo_url).to.equal(`${CDN_URL}/logo.png`);
   });
 });
 
