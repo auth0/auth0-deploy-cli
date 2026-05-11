@@ -429,6 +429,7 @@ export default class ThemesHandler extends DefaultHandler {
       ...options,
       type: 'themes',
       id: 'themeId',
+      identifiers: ['themeId'],
     });
   }
 
