@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.34.0] - 2026-05-11
+
 ### Added
 
 - Add support for `authorization_policy` on the Auth0 My Account API resource server, enabling ACR (Authentication Context Class Reference) policy configuration via Deploy CLI. [#1381]
@@ -1773,7 +1775,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1372]: https://github.com/auth0/auth0-deploy-cli/issues/1372
 [#1374]: https://github.com/auth0/auth0-deploy-cli/issues/1374
 [#1375]: https://github.com/auth0/auth0-deploy-cli/issues/1375
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.33.0...HEAD
+[#1379]: https://github.com/auth0/auth0-deploy-cli/issues/1379
+[#1380]: https://github.com/auth0/auth0-deploy-cli/issues/1380
+[#1381]: https://github.com/auth0/auth0-deploy-cli/issues/1381
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.34.0...HEAD
+[8.34.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.33.0...v8.34.0
 [8.33.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.32.0...v8.33.0
 [8.32.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.31.0...v8.32.0
 [8.31.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.30.0...v8.31.0
