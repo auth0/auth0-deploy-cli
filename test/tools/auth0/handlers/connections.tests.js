@@ -488,6 +488,66 @@ describe('#connections handler', () => {
       await stageFn.apply(handler, [{ connections: data }]);
     });
 
+    it('should update connection with organization_id in connected_accounts', async () => {
+      const auth0 = {
+        connections: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('undefined');
+            return Promise.resolve({ data });
+          },
+          update: function (id, data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(id).to.equal('con1');
+            expect(data).to.not.have.property('enabled_clients');
+            expect(data).to.deep.equal({
+              options: { passwordPolicy: 'testPolicy' },
+              connected_accounts: { active: true, organization_id: 'org_abc123' },
+            });
+            return Promise.resolve({ ...data, id });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someConnection', id: 'con1', strategy: 'custom' },
+            ]),
+          _getRestClient: () => ({}),
+          clients: {
+            update: (connectionId) => {
+              expect(connectionId).to.equal('con1');
+              return Promise.resolve({});
+            },
+          },
+        },
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          name: 'someConnection',
+          strategy: 'custom',
+          enabled_clients: ['client1'],
+          options: {
+            passwordPolicy: 'testPolicy',
+          },
+          connected_accounts: {
+            active: true,
+            organization_id: 'org_abc123',
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ connections: data }]);
+    });
+
     it('should convert client name with ID in idpinitiated.client_id', async () => {
       const auth0 = {
         connections: {
