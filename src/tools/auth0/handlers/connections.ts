@@ -90,6 +90,7 @@ export const schema = {
         type: 'object',
         properties: {
           active: { type: 'boolean' },
+          organization_id: { type: 'string' },
         },
         required: ['active'],
         additionalProperties: false,
