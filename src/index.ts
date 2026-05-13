@@ -10,6 +10,7 @@ import { Stage } from './tools/auth0';
 
 import importCMD from './commands/import';
 import exportCMD from './commands/export';
+import auditCMD from './commands/audit';
 
 async function run(params: CliParams): Promise<void> {
   // Run command
@@ -38,6 +39,9 @@ async function run(params: CliParams): Promise<void> {
   }
   if (['dump', 'export'].includes(command) && 'output_folder' in params) {
     await exportCMD(params);
+  }
+  if (command === 'audit' && 'input_file' in params) {
+    await auditCMD(params as any);
   }
   log.debug(`Finished command ${command}`);
 }

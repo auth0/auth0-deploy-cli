@@ -31,8 +31,16 @@ type ExportSpecificParams = {
 export type ExportParams = ExportSpecificParams & SharedParams;
 export type ImportParams = ImportSpecificParams & SharedParams;
 
-export type CliParams = (ExportParams | ImportParams) & {
-  _: ['export' | 'import' | 'deploy' | 'dump'];
+type AuditSpecificParams = {
+  input_file: string;
+};
+
+export type AuditParams = AuditSpecificParams & SharedParams & {
+  _: ['audit'];
+};
+
+export type CliParams = (ExportParams | ImportParams | AuditParams) & {
+  _: ['export' | 'import' | 'deploy' | 'dump' | 'audit'];
 };
 
 function getParams(): CliParams {
@@ -171,6 +179,16 @@ function getParams(): CliParams {
     )
     .example('$0 deploy -c config.json -i tenant.yaml', 'Deploy Auth0 via YAML')
     .example('$0 deploy -c config.json -i path/to/files', 'Deploy Auth0 via Path')
+    .command(['audit'], 'Scan Auth0 config files for security misconfigurations', {
+      input_file: {
+        alias: 'i',
+        describe: 'Path to tenant.yaml or exported directory to audit.',
+        type: 'string',
+        demandOption: true,
+      },
+    })
+    .example('$0 audit -i tenant.yaml', 'Scan tenant.yaml for security issues')
+    .example('$0 audit -i path/to/export', 'Scan exported directory for security issues')
     .epilogue(
       'See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.'
     )
