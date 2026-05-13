@@ -137,6 +137,33 @@ const MatchSchema = {
       minItems: 1,
       maxItems: 10,
     },
+    hostnames: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      uniqueItems: true,
+      minItems: 1,
+      maxItems: 10,
+    },
+    connecting_ipv4_cidrs: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      uniqueItems: true,
+      minItems: 1,
+      maxItems: 10,
+    },
+    connecting_ipv6_cidrs: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      uniqueItems: true,
+      minItems: 1,
+      maxItems: 10,
+    },
   },
   additionalProperties: false,
 };
