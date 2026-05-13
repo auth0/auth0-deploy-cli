@@ -488,7 +488,7 @@ describe('#connections handler', () => {
       await stageFn.apply(handler, [{ connections: data }]);
     });
 
-    it('should update connection with organization_id in connected_accounts', async () => {
+    it('should resolve organization_name to organization_id in connected_accounts on import', async () => {
       const auth0 = {
         connections: {
           create: function (data) {
@@ -500,9 +500,9 @@ describe('#connections handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(id).to.equal('con1');
             expect(data).to.not.have.property('enabled_clients');
-            expect(data).to.deep.equal({
-              options: { passwordPolicy: 'testPolicy' },
-              connected_accounts: { active: true, organization_id: 'org_abc123' },
+            expect(data.connected_accounts).to.deep.equal({
+              active: true,
+              organization_id: 'org_abc123',
             });
             return Promise.resolve({ ...data, id });
           },
@@ -525,6 +525,12 @@ describe('#connections handler', () => {
               { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
             ]),
         },
+        organizations: {
+          list: (params) =>
+            mockPagedData(params, 'organizations', [
+              { id: 'org_abc123', name: 'My Org' },
+            ]),
+        },
         pool,
       };
 
@@ -535,17 +541,51 @@ describe('#connections handler', () => {
           name: 'someConnection',
           strategy: 'custom',
           enabled_clients: ['client1'],
-          options: {
-            passwordPolicy: 'testPolicy',
-          },
+          options: { passwordPolicy: 'testPolicy' },
           connected_accounts: {
             active: true,
-            organization_id: 'org_abc123',
+            organization_name: 'My Org',
           },
         },
       ];
 
       await stageFn.apply(handler, [{ connections: data }]);
+    });
+
+    it('should resolve organization_id to organization_name in connected_accounts on export', async () => {
+      const auth0 = {
+        connections: {
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              {
+                id: 'con1',
+                strategy: 'github',
+                name: 'github',
+                connected_accounts: { active: true, organization_id: 'org_abc123' },
+              },
+            ]),
+          clients: {
+            get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        organizations: {
+          list: (params) =>
+            mockPagedData(params, 'organizations', [{ id: 'org_abc123', name: 'My Org' }]),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      sinon.stub(connections, 'getConnectionEnabledClients').resolves(undefined);
+      handler.scimHandler.applyScimConfiguration = sinon.stub().resolves();
+
+      const data = await handler.getType();
+
+      expect(data[0].connected_accounts).to.deep.equal({ active: true, organization_name: 'My Org' });
+      expect(data[0].connected_accounts).to.not.have.property('organization_id');
     });
 
     it('should convert client name with ID in idpinitiated.client_id', async () => {

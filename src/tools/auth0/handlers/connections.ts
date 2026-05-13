@@ -90,7 +90,7 @@ export const schema = {
         type: 'object',
         properties: {
           active: { type: 'boolean' },
-          organization_id: { type: 'string' },
+          organization_name: { type: 'string' },
         },
         required: ['active'],
         additionalProperties: false,
@@ -142,6 +142,10 @@ export type Connection = Management.ConnectionForList & {
     'mapping' | 'synchronize_automatically' | 'synchronize_groups'
   > & {
     synchronized_groups?: Array<{ id: string }>;
+  };
+  connected_accounts?: Management.ConnectionConnectedAccountsPurpose & {
+    organization_id?: string;
+    organization_name?: string;
   };
 };
 
@@ -725,11 +729,14 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
   async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
 
-    const [connections, directoryProvisioningConfigs] = await Promise.all([
+    const [connections, directoryProvisioningConfigs, organizations] = await Promise.all([
       paginate<Connection>(this.client.connections.list, {
         checkpoint: true,
       }),
       this.getConnectionDirectoryProvisionings(),
+      paginate<Management.Organization>(this.client.organizations.list, {
+        checkpoint: true,
+      }).catch(() => [] as Management.Organization[]),
     ]);
     // Filter out database connections as we have separate handler for it
     const filteredConnections = connections.filter((c) => c.strategy !== 'auth0');
@@ -763,6 +770,15 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
 
           if (enabledClients?.length) {
             connection.enabled_clients = enabledClients;
+          }
+
+          const connectedAccounts = connection.connected_accounts;
+          if (connectedAccounts?.organization_id) {
+            const org = organizations.find((o) => o.id === connectedAccounts.organization_id);
+            if (org?.name) {
+              const { organization_id, ...rest } = connectedAccounts;
+              connection.connected_accounts = { ...rest, organization_name: org.name };
+            }
           }
 
           if (connection.strategy === 'google-apps' && directoryProvisioningConfigs) {
@@ -817,15 +833,19 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       };
 
     // Convert enabled_clients by name to the id
-    const clients = await paginate<Client>(this.client.clients.list, {
-      paginate: true,
-      include_totals: true,
-    });
-
-    const existingConnections = await paginate<Connection>(this.client.connections.list, {
-      checkpoint: true,
-      include_totals: true,
-    });
+    const [clients, existingConnections, organizations] = await Promise.all([
+      paginate<Client>(this.client.clients.list, {
+        paginate: true,
+        include_totals: true,
+      }),
+      paginate<Connection>(this.client.connections.list, {
+        checkpoint: true,
+        include_totals: true,
+      }),
+      paginate<Management.Organization>(this.client.organizations.list, {
+        checkpoint: true,
+      }).catch(() => [] as Management.Organization[]),
+    ]);
 
     // Prepare an id map. We'll use this map later to get the `strategy` and SCIM enable status of the connections.
     await this.scimHandler.createIdMap(existingConnections);
@@ -833,10 +853,20 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     const formatted = connections.map((connection) => {
       const enabledClients = getEnabledClients(assets, connection, existingConnections, clients);
 
+      let connected_accounts = connection.connected_accounts;
+      if (connected_accounts?.organization_name) {
+        const org = organizations.find((o) => o.name === connected_accounts.organization_name);
+        if (org?.id) {
+          const { organization_name, ...rest } = connected_accounts;
+          connected_accounts = { ...rest, organization_id: org.id };
+        }
+      }
+
       return {
         ...connection,
         ...this.getFormattedOptions(connection, clients),
         ...(enabledClients !== undefined && { enabled_clients: enabledClients }),
+        ...(connected_accounts !== connection.connected_accounts && { connected_accounts }),
       };
     });
 
@@ -863,25 +893,39 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       };
     }
 
-    const clients = await paginate<Client>(this.client.clients.list, {
-      paginate: true,
-      include_totals: true,
-    });
-
-    const existingConnections = await paginate<Connection>(this.client.connections.list, {
-      checkpoint: true,
-      include_totals: true,
-    });
+    const [clients, existingConnections, organizations] = await Promise.all([
+      paginate<Client>(this.client.clients.list, {
+        paginate: true,
+        include_totals: true,
+      }),
+      paginate<Connection>(this.client.connections.list, {
+        checkpoint: true,
+        include_totals: true,
+      }),
+      paginate<Management.Organization>(this.client.organizations.list, {
+        checkpoint: true,
+      }).catch(() => [] as Management.Organization[]),
+    ]);
 
     await this.scimHandler.createIdMap(existingConnections);
 
     const formatted = connections.map((connection) => {
       const enabledClients = getEnabledClients(assets, connection, existingConnections, clients);
 
+      let connected_accounts = connection.connected_accounts;
+      if (connected_accounts?.organization_name) {
+        const org = organizations.find((o) => o.name === connected_accounts.organization_name);
+        if (org?.id) {
+          const { organization_name, ...rest } = connected_accounts;
+          connected_accounts = { ...rest, organization_id: org.id };
+        }
+      }
+
       return {
         ...connection,
         ...this.getFormattedOptions(connection, clients),
         ...(enabledClients !== undefined && { enabled_clients: enabledClients }),
+        ...(connected_accounts !== connection.connected_accounts && { connected_accounts }),
       };
     });
 
