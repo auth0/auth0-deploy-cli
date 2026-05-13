@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `AUTH0_IGNORE_DRY_RUN_FIELDS` configuration option, a map of handler type → field paths to exclude from `--dry-run` diff comparisons. Merges additively with each handler's built-in defaults so users can suppress noise from fields the Management API never returns (e.g. `client_secret`, action `secrets`, email provider `credentials.api_key`) without losing the curated defaults.
+
 ## [8.34.0] - 2026-05-11
 
 ### Added

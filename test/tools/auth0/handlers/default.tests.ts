@@ -230,4 +230,97 @@ describe('#default handler', () => {
       })
     ).to.be.rejectedWith(/Unresolved placeholder/);
   });
+
+  describe('AUTH0_IGNORE_DRY_RUN_FIELDS', () => {
+    it('should merge user-configured ignore fields with handler defaults', () => {
+      const configWithIgnore = ((key: string) => {
+        if (key === 'AUTH0_IGNORE_DRY_RUN_FIELDS') {
+          return { [mockAssetType]: ['user.added.field', 'another_user_field'] };
+        }
+        return undefined;
+      }) as any;
+
+      const handler = new mockHandler({
+        client: mockApiClient,
+        config: configWithIgnore,
+        type: mockAssetType,
+        ignoreDryRunFields: ['handler.default.field'],
+        functions: {},
+      });
+
+      expect(handler.getEffectiveIgnoreDryRunFields()).to.have.members([
+        'handler.default.field',
+        'user.added.field',
+        'another_user_field',
+      ]);
+    });
+
+    it('should dedupe overlapping ignore fields between config and handler defaults', () => {
+      const configWithIgnore = ((key: string) => {
+        if (key === 'AUTH0_IGNORE_DRY_RUN_FIELDS') {
+          return { [mockAssetType]: ['shared.field', 'user.only.field'] };
+        }
+        return undefined;
+      }) as any;
+
+      const handler = new mockHandler({
+        client: mockApiClient,
+        config: configWithIgnore,
+        type: mockAssetType,
+        ignoreDryRunFields: ['shared.field', 'handler.only.field'],
+        functions: {},
+      });
+
+      const effective = handler.getEffectiveIgnoreDryRunFields();
+      expect(effective).to.have.members(['shared.field', 'handler.only.field', 'user.only.field']);
+      expect(effective.filter((f) => f === 'shared.field')).to.have.length(1);
+    });
+
+    it('should ignore config entries for other handler types', () => {
+      const configWithIgnore = ((key: string) => {
+        if (key === 'AUTH0_IGNORE_DRY_RUN_FIELDS') {
+          return { 'some-other-type': ['unrelated.field'] };
+        }
+        return undefined;
+      }) as any;
+
+      const handler = new mockHandler({
+        client: mockApiClient,
+        config: configWithIgnore,
+        type: mockAssetType,
+        ignoreDryRunFields: ['handler.default.field'],
+        functions: {},
+      });
+
+      expect(handler.getEffectiveIgnoreDryRunFields()).to.deep.equal(['handler.default.field']);
+    });
+
+    it('should default to handler-only fields when config returns undefined', () => {
+      const handler = new mockHandler({
+        client: mockApiClient,
+        config,
+        type: mockAssetType,
+        ignoreDryRunFields: ['handler.default.field'],
+        functions: {},
+      });
+
+      expect(handler.getEffectiveIgnoreDryRunFields()).to.deep.equal(['handler.default.field']);
+    });
+
+    it('should tolerate a config provider that throws (e.g. uninitialized configFactory)', () => {
+      const throwingConfig = (() => {
+        throw new Error('A configuration provider has not been set');
+      }) as any;
+
+      const handler = new mockHandler({
+        client: mockApiClient,
+        config: throwingConfig,
+        type: mockAssetType,
+        ignoreDryRunFields: ['handler.default.field'],
+        functions: {},
+      });
+
+      expect(handler.getEffectiveIgnoreDryRunFields()).to.deep.equal(['handler.default.field']);
+    });
+  });
 });
