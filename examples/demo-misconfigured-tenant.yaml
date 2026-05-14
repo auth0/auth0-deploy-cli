@@ -1,0 +1,228 @@
+# ============================================================
+#  AUTH0 DEMO — DELIBERATELY MISCONFIGURED TENANT
+#  Run: a0deploy audit -i examples/demo-misconfigured-tenant.yaml
+#  Expected: 11 issues — 3 critical  6 high  2 medium
+#
+#  Breach references:
+#    #5  → Scattered Spider / MGM Resorts (Sep 2023, ~$100M loss)
+#    #6  → 0ktapus campaign (2022, 130+ companies incl. Twilio, Cloudflare)
+#    #8  → ROPC — used in large-scale credential-stuffing via phishing proxies
+#    #9  → Breached password detection off (RockYou2021, LinkedIn 2016, etc.)
+#    #10 → Okta Support System breach (Oct 2023, weeks undetected)
+# ============================================================
+
+tenant:
+  friendly_name: "Acme Corp (Demo — DO NOT DEPLOY)"
+  session_lifetime: 24
+  idle_session_lifetime: 8
+  flags:
+    allow_legacy_delegation_grant_types: false
+    revoke_refresh_token_grant: false
+    # FINDING 8 (HIGH): ROPC grant enabled
+    # Real-world risk: ROPC sends the user's password directly to the app,
+    # bypassing Universal Login and MFA entirely. Used in phishing proxy attacks.
+    allow_legacy_ro_grant_types: true
+
+clients:
+  - name: "Acme SPA"
+    app_type: "spa"
+    oidc_conformant: true
+
+    # FINDING 4 (HIGH): Wildcard callback — open redirect / auth code theft
+    # Attack: attacker registers attacker.acme.com (subdomain takeover via dangling DNS),
+    # constructs a login URL with redirect_uri=https://attacker.acme.com/callback,
+    # and receives the auth code. Wildcard matches, Auth0 redirects, attacker gets the code.
+    callbacks:
+      - "https://*.acme.com/callback"
+    allowed_logout_urls:
+      - "https://app.acme.com/logout"
+    allowed_origins:
+      - "https://app.acme.com"
+    web_origins:
+      - "https://app.acme.com"
+
+    grant_types:
+      - "authorization_code"
+      - "refresh_token"
+
+    token_endpoint_auth_method: "none"
+
+    # FINDING 9 (MEDIUM): 48-hour access token lifetime
+    # Attack: stolen access token (e.g. via XSS, log exposure, browser extension)
+    # remains valid for 2 full days. No revocation signal possible for access tokens.
+    access_token_lifetime: 172800
+
+    # FINDING 1 (CRITICAL): Non-expiring + non-rotating refresh token on a public SPA
+    # Attack: a single stolen refresh token grants permanent account access.
+    # Non-rotating means the same token works forever. Non-expiring means it never
+    # times out. The victim has no way to detect or revoke it short of changing their password.
+    refresh_token:
+      expiration_type: "non-expiring"
+      rotation_type: "non-rotating"
+
+  - name: "Acme Backend Service"
+    app_type: "non_interactive"
+    oidc_conformant: true
+    token_endpoint_auth_method: "client_secret_basic"
+
+connections:
+  # FINDING 2 (CRITICAL): MFA explicitly disabled on the primary auth connection
+  # Attack: phishing, credential stuffing, or password spray against any Acme user.
+  # No second factor required — one leaked password = full account access.
+  - name: "Username-Password-Authentication"
+    strategy: "auth0"
+    enabled_clients:
+      - "Acme SPA"
+    options:
+      mfa:
+        active: false
+        return_enroll_settings: false
+      passwordPolicy: "good"
+      password_complexity_options:
+        min_length: 8
+      password_history:
+        enable: true
+        size: 5
+      password_dictionary:
+        enable: true
+      brute_force_protection: true
+
+databases:
+  - name: "Username-Password-Authentication"
+    strategy: "auth0"
+    enabled_clients:
+      - "Acme SPA"
+    options:
+      passwordPolicy: "good"
+      password_history:
+        enable: true
+        size: 5
+      password_dictionary:
+        enable: true
+
+resourceServers:
+  - name: "Acme API"
+    identifier: "https://api.acme.com/v1"
+    scopes:
+      - value: "read:data"
+        description: "Read application data"
+      - value: "write:data"
+        description: "Write application data"
+  - name: "Auth0 Management API"
+    identifier: "https://acme.auth0.com/api/v2/"
+
+clientGrants:
+  # FINDING 3 (CRITICAL): SPA (public client) has a Management API grant
+  # Attack: the SPA's access token carries Management API audience.
+  # Any authenticated end user can call /api/v2/users, /api/v2/logs, etc.
+  # using their own browser session — no server-side escalation needed.
+  - client_id: "Acme SPA"
+    audience: "https://acme.auth0.com/api/v2/"
+    scope:
+      - "read:users"
+      - "read:logs"
+
+  - client_id: "Acme Backend Service"
+    audience: "https://api.acme.com/v1"
+    scope:
+      - "read:data"
+      - "write:data"
+
+attackProtection:
+  bruteForceProtection:
+    # FINDING 7 (HIGH): Brute force protection on, but 'block' shield missing
+    # Attack: automated password spray continues indefinitely. The system logs each
+    # attempt and notifies the admin by email — but the attacker is never blocked.
+    # Eventually one password works and there's nothing to stop it.
+    enabled: true
+    shields:
+      - user_notification
+      # 'block' intentionally omitted
+    mode: "count_per_identifier_and_ip"
+    allowlist: []
+    max_attempts: 10
+
+  suspiciousIpThrottling:
+    enabled: true
+    shields:
+      - block
+      - admin_notification
+    allowlist: []
+    stage:
+      pre-login:
+        max_attempts: 100
+        rate: 864000
+      pre-user-registration:
+        max_attempts: 50
+        rate: 1200
+
+  # FINDING 9 (HIGH): Breached password detection disabled
+  # Real-world risk: credentials from RockYou2021 (8.4B records), LinkedIn 2016,
+  # and hundreds of other breaches work silently — no block, no alert, no friction.
+  breachedPasswordDetection:
+    enabled: false
+    shields:
+      - block
+      - admin_notification
+    admin_notification_frequency:
+      - immediately
+    method: standard
+
+  botDetection:
+    bot_detection_level: medium
+    challenge_password_policy: when_risky
+    challenge_passwordless_policy: when_risky
+    challenge_password_reset_policy: when_risky
+    allowlist: []
+    monitoring_mode_enabled: false
+
+  captcha:
+    active_provider_id: friendly_captcha
+    friendly_captcha:
+      site_key: "##CAPTCHA_SITE_KEY##"
+      secret: "##CAPTCHA_SECRET##"
+
+guardianFactors:
+  - name: sms
+    enabled: true
+  - name: otp
+    enabled: true
+  - name: push-notification
+    enabled: false
+  - name: email
+    enabled: false
+
+# FINDING 5 (HIGH): Guardian policy not enforced tenant-wide
+# Reference: Scattered Spider / MGM Resorts (Sep 2023, ~$100M loss)
+# Attack: the group targeted orgs where individual apps could opt out of MFA.
+# Without 'all-applications', a single misconfigured app bypasses tenant-wide MFA.
+guardianPolicies:
+  policies:
+    - selected-applications  # should be 'all-applications'
+
+# FINDING 6 (HIGH): Risk assessment disabled
+# Reference: 0ktapus (2022) — 130+ companies compromised via SMS phishing kit.
+# Attack: stolen OTP replayed immediately. Risk assessment (impossible travel,
+# new device, velocity) would have re-challenged every stolen session.
+riskAssessment:
+  settings:
+    enabled: false
+
+# FINDING 10 (MEDIUM): No log streams configured
+# Reference: Okta Support System breach (Oct 2023) — breach undetected for weeks.
+# Attack: no SIEM, no real-time alerts on anomalous admin access.
+logStreams: []
+
+roles:
+  - name: "user"
+    description: "Standard application user"
+    permissions:
+      - permission_name: "read:data"
+        resource_server_identifier: "https://api.acme.com/v1"
+  - name: "admin"
+    description: "Application administrator"
+    permissions:
+      - permission_name: "read:data"
+        resource_server_identifier: "https://api.acme.com/v1"
+      - permission_name: "write:data"
+        resource_server_identifier: "https://api.acme.com/v1"

@@ -8,6 +8,11 @@ import { checkClientGrantScopes } from './rules/clientGrantScopes';
 import { checkTokenLifetime } from './rules/tokenLifetime';
 import { checkBruteForceProtection } from './rules/bruteForceProtection';
 import { checkBotAndCaptcha } from './rules/botAndCaptcha';
+import { checkRiskAssessmentDisabled } from './rules/riskAssessmentDisabled';
+import { checkLogStreamsEmpty } from './rules/logStreamsEmpty';
+import { checkGuardianPolicyNotTenantWide } from './rules/guardianPolicyNotTenantWide';
+import { checkLegacyGrantTypes } from './rules/legacyGrantTypes';
+import { checkBreachedPasswordDetection } from './rules/breachedPasswordDetection';
 
 export function runAuditChecks(assets: Assets): Finding[] {
   return [
@@ -19,6 +24,11 @@ export function runAuditChecks(assets: Assets): Finding[] {
     ...checkTokenLifetime(assets),
     ...checkBruteForceProtection(assets),
     ...checkBotAndCaptcha(assets),
+    ...checkRiskAssessmentDisabled(assets),
+    ...checkLogStreamsEmpty(assets),
+    ...checkGuardianPolicyNotTenantWide(assets),
+    ...checkLegacyGrantTypes(assets),
+    ...checkBreachedPasswordDetection(assets),
   ];
 }
 

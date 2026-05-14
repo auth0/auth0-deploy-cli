@@ -33,6 +33,8 @@ export type ImportParams = ImportSpecificParams & SharedParams;
 
 type AuditSpecificParams = {
   input_file: string;
+  ai?: boolean;
+  output?: string;
 };
 
 export type AuditParams = AuditSpecificParams & SharedParams & {
@@ -186,9 +188,20 @@ function getParams(): CliParams {
         type: 'string',
         demandOption: true,
       },
+      ai: {
+        describe: 'After running deterministic rules, call Claude AI for threat narratives and remediation priorities. Requires ANTHROPIC_API_KEY env var.',
+        type: 'boolean',
+        default: false,
+      },
+      output: {
+        alias: 'o',
+        describe: 'Write the audit report to a file (e.g. report.txt).',
+        type: 'string',
+      },
     })
     .example('$0 audit -i tenant.yaml', 'Scan tenant.yaml for security issues')
     .example('$0 audit -i path/to/export', 'Scan exported directory for security issues')
+    .example('$0 audit --ai -i tenant.yaml', 'Scan and get AI-powered threat analysis')
     .epilogue(
       'See README (https://github.com/auth0/auth0-deploy-cli) for more in-depth information on configuration and setup.'
     )
