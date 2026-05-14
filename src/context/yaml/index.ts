@@ -58,12 +58,14 @@ export default class YAMLContext {
   }
 
   loadFile(f) {
-    let toLoad = path.join(this.basePath, f);
-    if (!isFile(toLoad)) {
-      // try load not relative to yaml file
-      toLoad = f;
+    const resolvedBase = path.resolve(this.basePath);
+    const toLoad = path.resolve(this.basePath, f);
+
+    if (!toLoad.startsWith(resolvedBase + path.sep)) {
+      throw new Error(`Path traversal detected: "${f}" resolves outside the config directory.`);
     }
-    return loadFileAndReplaceKeywords(path.resolve(toLoad), {
+
+    return loadFileAndReplaceKeywords(toLoad, {
       mappings: this.mappings,
       disableKeywordReplacement: this.disableKeywordReplacement,
     });

@@ -25,24 +25,22 @@ describe('#YAML context pages', () => {
     cleanThenMkdir(dir);
 
     const htmlContext = '<html>this is a ##val1## @@val2@@</html>';
-    const htmlFile = path.join(testDataDir, 'page.html');
-    fs.writeFileSync(htmlFile, htmlContext);
 
     const errorPageUrl = 'https://example.com';
     const yaml = `
     pages:
       - name: "login"
-        html: "${htmlFile}"
+        html: "page.html"
 
       - name: "password_reset"
-        html: "${htmlFile}"
+        html: "page.html"
 
       - name: "guardian_multifactor"
-        html: "${htmlFile}"
+        html: "page.html"
         enabled: false
 
       - name: "error_page"
-        html: "${htmlFile}"
+        html: "page.html"
         url: "${errorPageUrl}"
         show_log_link: false
     `;
@@ -70,6 +68,8 @@ describe('#YAML context pages', () => {
       },
     ];
     createPagesDir(dir, target);
+    // Write page.html after createPagesDir since createPagesDir calls cleanThenMkdir(dir)
+    fs.writeFileSync(path.join(dir, 'page.html'), htmlContext);
     const yamlFile = path.join(dir, 'rule1.yaml');
     fs.writeFileSync(yamlFile, yaml);
 

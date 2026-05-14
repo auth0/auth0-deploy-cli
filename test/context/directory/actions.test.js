@@ -15,7 +15,7 @@ const actionFiles = {
       '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log(@@replace@@); return {}; };',
     'action-one.json': `{
       "name": "action-one",
-      "code": "./local/testData/directory/test1/actions/code.js",
+      "code": "./actions/code.js",
       "runtime": "node12",
       "dependencies": [
         {
@@ -42,7 +42,7 @@ const actionFilesWin32 = {
       '/** @type {PostLoginAction} */ module.exports = async (event, context) => { console.log(@@replace@@); return {}; };',
     'action-one.json': `{
       "name": "action-one",
-      "code": "local\\\\testData\\\\directory\\\\test1\\\\actions\\\\code.js",
+      "code": "actions\\\\code.js",
       "runtime": "node12",
       "dependencies": [
         {

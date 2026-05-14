@@ -47,12 +47,15 @@ export default class DirectoryContext {
   }
 
   loadFile(f: string, folder: string) {
-    const basePath = path.join(this.filePath, folder);
-    let toLoad = path.join(basePath, f);
-    if (!isFile(toLoad)) {
-      // try load not relative to yaml file
-      toLoad = f;
+    const resolvedBase = path.resolve(this.filePath);
+    const inSubfolder = path.resolve(this.filePath, folder, f);
+    const inRoot = path.resolve(this.filePath, f);
+    const toLoad = isFile(inSubfolder) ? inSubfolder : inRoot;
+
+    if (!toLoad.startsWith(resolvedBase + path.sep)) {
+      throw new Error(`Path traversal detected: "${f}" resolves outside the config directory.`);
     }
+
     return loadFileAndReplaceKeywords(toLoad, {
       mappings: this.mappings,
       disableKeywordReplacement: this.disableKeywordReplacement,

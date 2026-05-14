@@ -30,13 +30,7 @@ function parse(context: DirectoryContext): ParsedActions {
     if (action.code) {
       // Convert `action.code` path to Unix-style path by replacing backslashes and multiple slashes with a single forward slash, and remove leading drive letters or './'.
       const unixPath = action.code.replace(/[\\/]+/g, '/').replace(/^([a-zA-Z]+:|\.\/)/, '');
-      if (fs.existsSync(unixPath)) {
-        // If the Unix-style path exists, load the file from that path
-        action.code = context.loadFile(unixPath, actionFolder);
-      } else {
-        // Otherwise, load the file from the context's file path
-        action.code = context.loadFile(path.join(context.filePath, action.code), actionFolder);
-      }
+      action.code = context.loadFile(unixPath, actionFolder);
     }
 
     return action;
