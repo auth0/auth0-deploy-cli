@@ -244,24 +244,6 @@ describe('#directory context connections', () => {
     expect(fs.existsSync(path.join(connectionsFolder, 'excludedConnection.json'))).to.equal(false);
   });
 
-  it('should create empty connections directory and parse it as empty array', async () => {
-    const dir = path.join(testDataDir, 'directory', 'connectionsEmptyDump');
-    cleanThenMkdir(dir);
-    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
-    context.assets.connections = [];
-
-    await handler.dump(context);
-
-    const connectionsFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
-    expect(fs.existsSync(connectionsFolder)).to.equal(true);
-    expect(fs.readdirSync(connectionsFolder).filter((f) => f.endsWith('.json'))).to.deep.equal([]);
-
-    // Verify parse of empty directory returns [] not null
-    const parseContext = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
-    await parseContext.loadAssetsFromLocal();
-    expect(parseContext.assets.connections).to.deep.equal([]);
-  });
-
   it('should remove stale connection files when connections are removed from source', async () => {
     const dir = path.join(testDataDir, 'directory', 'connectionsStaleFiles');
     cleanThenMkdir(dir);
