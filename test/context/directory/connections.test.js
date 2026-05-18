@@ -280,9 +280,7 @@ describe('#directory context connections', () => {
 
     await handler.dump(context);
 
-    const remainingJsonFiles = fs
-      .readdirSync(connectionsFolder)
-      .filter((f) => f.endsWith('.json'));
+    const remainingJsonFiles = fs.readdirSync(connectionsFolder).filter((f) => f.endsWith('.json'));
     expect(remainingJsonFiles).to.deep.equal([]);
 
     // Verify parse of now-empty directory returns [] not null (enabling deletions on import)
