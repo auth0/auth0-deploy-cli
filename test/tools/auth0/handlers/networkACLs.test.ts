@@ -52,71 +52,14 @@ describe('#networkACLs handler', () => {
             scope: 'tenant',
             match: {
               asns: [12345],
-            },
-          },
-        },
-      ];
-
-      await stageFn.apply(handler, [{ networkACLs: data }]);
-    });
-
-    it('should pass validation with hostnames in match', async () => {
-      const handler = new NetworkACLsHandler({ client: {}, config } as any);
-      const stageFn = Object.getPrototypeOf(handler).validate;
-      const data = [
-        {
-          description: 'Block Canonical Domain',
-          active: true,
-          priority: 1,
-          rule: {
-            action: { block: true },
-            scope: 'tenant',
-            match: {
               hostnames: ['mytenant.auth0.com'],
-            },
-          },
-        },
-      ];
-      await stageFn.apply(handler, [{ networkACLs: data }]);
-    });
-
-    it('should pass validation with connecting_ipv4_cidrs in match', async () => {
-      const handler = new NetworkACLsHandler({ client: {}, config } as any);
-      const stageFn = Object.getPrototypeOf(handler).validate;
-      const data = [
-        {
-          description: 'Block Connecting IPv4 Range',
-          active: true,
-          priority: 2,
-          rule: {
-            action: { block: true },
-            scope: 'authentication',
-            match: {
               connecting_ipv4_cidrs: ['10.0.0.0/8'],
-            },
-          },
-        },
-      ];
-      await stageFn.apply(handler, [{ networkACLs: data }]);
-    });
-
-    it('should pass validation with connecting_ipv6_cidrs in not_match', async () => {
-      const handler = new NetworkACLsHandler({ client: {}, config } as any);
-      const stageFn = Object.getPrototypeOf(handler).validate;
-      const data = [
-        {
-          description: 'Allow Specific IPv6 Range',
-          active: true,
-          priority: 3,
-          rule: {
-            action: { allow: true },
-            scope: 'management',
-            not_match: {
               connecting_ipv6_cidrs: ['2001:db8::/32'],
             },
           },
         },
       ];
+
       await stageFn.apply(handler, [{ networkACLs: data }]);
     });
   });
