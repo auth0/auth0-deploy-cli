@@ -81,10 +81,7 @@ export const getPreservableFieldsFromAssets = (
         );
 
         if (specificAddress.length === 0) {
-          // If identifiers are registered for this resource type but none were found on the
-          // local array item (e.g. themeId stripped by default export), fall back to positional
-          // index so keyword markers are still preserved. Safe for singletons like themes.
-          // If no identifiers are registered at all (unrecognized nested arrays), skip.
+          // No identifiers registered: skip. Identifiers registered but absent from item: fall back to positional index.
           if (resourceIdentifiers.length === 0) {
             return [];
           }
