@@ -191,6 +191,25 @@ Provides ability to exclude any unwanted properties from management.
 }
 ```
 
+### `AUTH0_IGNORE_DRY_RUN_FIELDS`
+
+Object keyed by resource handler type, with values that are arrays of field paths to exclude from `--dry-run` diff comparisons. Useful for suppressing noisy diffs on fields the Management API never returns (e.g. secret values), so dry-run output focuses on changes you can actually verify.
+
+User-supplied fields are merged with the handler's built-in defaults; they do not replace them. Field paths support exact match, `.endsWith('.<field>')` suffix match, and `.endsWith('[<field>]')` suffix match (see `calculateDryRunChanges#shouldIgnoreDryRunField`).
+
+This option only affects `--dry-run` reporting. A non-dry-run import still sends every local field to the Management API.
+
+#### Example
+
+```json
+{
+  "clients": ["client_secret"],
+  "connections": ["options.client_secret"],
+  "actions": ["secrets"],
+  "emailProvider": ["credentials.api_key"]
+}
+```
+
 ### `AUTH0_AUDIENCE`
 
 String. Separate value from audience value while retrieving an access token for management API. Useful when default Management API endpoints are not publicly exposed.
