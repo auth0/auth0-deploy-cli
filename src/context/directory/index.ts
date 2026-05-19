@@ -53,7 +53,9 @@ export default class DirectoryContext {
     const toLoad = isFile(inSubfolder) ? inSubfolder : inRoot;
 
     if (!toLoad.startsWith(resolvedBase + path.sep)) {
-      throw new Error(`File reference "${f}" must be relative to the config directory. Absolute paths and paths outside the config root are not supported.`);
+      throw new Error(
+        `File reference "${f}" must be relative to the config directory. Absolute paths and paths outside the config root are not supported.`
+      );
     }
 
     return loadFileAndReplaceKeywords(toLoad, {
