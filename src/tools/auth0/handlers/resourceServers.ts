@@ -30,6 +30,9 @@ export const schema = {
           },
         },
       },
+      allow_offline_access: { type: 'boolean' },
+      allow_online_access: { type: 'boolean' },
+      allow_online_access_with_ephemeral_sessions: { type: 'boolean' },
       enforce_policies: { type: 'boolean' },
       token_dialect: { type: 'string' },
       proof_of_possession: {

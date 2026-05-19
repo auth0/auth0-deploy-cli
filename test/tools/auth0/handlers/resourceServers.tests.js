@@ -306,6 +306,74 @@ describe('#resourceServers handler', () => {
       ]);
     });
 
+    it('should create resource server with allow_online_access', async () => {
+      const auth0 = {
+        resourceServers: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('onlineAccessAPI');
+            expect(data.allow_online_access).to.equal(true);
+            return Promise.resolve(data);
+          },
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => mockPagedData(params, 'resource_servers', []),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          resourceServers: [
+            {
+              name: 'onlineAccessAPI',
+              identifier: 'https://online-access-api.example.com',
+              allow_online_access: true,
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should create resource server with allow_online_access and allow_online_access_with_ephemeral_sessions', async () => {
+      const auth0 = {
+        resourceServers: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('onlineAccessEphemeralAPI');
+            expect(data.allow_online_access).to.equal(true);
+            expect(data.allow_online_access_with_ephemeral_sessions).to.equal(true);
+            return Promise.resolve(data);
+          },
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => mockPagedData(params, 'resource_servers', []),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          resourceServers: [
+            {
+              name: 'onlineAccessEphemeralAPI',
+              identifier: 'https://online-access-ephemeral-api.example.com',
+              allow_online_access: true,
+              allow_online_access_with_ephemeral_sessions: true,
+            },
+          ],
+        },
+      ]);
+    });
+
     it('should get resource servers', async () => {
       const auth0 = {
         resourceServers: {
