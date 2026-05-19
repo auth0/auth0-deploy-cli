@@ -76,29 +76,7 @@ async function dump(context: DirectoryContext): Promise<void> {
   }
 
   const connectionsFolder = path.join(context.filePath, constants.CONNECTIONS_DIRECTORY);
-  fs.ensureDirSync(connectionsFolder);
-
-  // Build the set of expected filenames for the current connections so stale
-  // files left over from previously-exported connections can be removed.
-  const expectedFiles = new Set<string>(
-    connections.flatMap((connection) => {
-      const connectionName = sanitize(connection.name);
-      const files = [`${connectionName}.json`];
-      if (connection.strategy === 'email') {
-        files.push(`${connectionName}.html`);
-      }
-      return files;
-    })
-  );
-
-  // Remove stale files that no longer correspond to a current connection.
-  getFiles(connectionsFolder, ['.json', '.html']).forEach((filePath) => {
-    const fileName = path.basename(filePath);
-    if (!expectedFiles.has(fileName)) {
-      log.info(`Deleting stale connection file: ${filePath}`);
-      fs.removeSync(filePath);
-    }
-  });
+  fs.emptyDirSync(connectionsFolder);
 
   // Convert enabled_clients from id to name
   connections.forEach((connection) => {
