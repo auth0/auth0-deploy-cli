@@ -73,7 +73,7 @@ function getDatabase(
         const toLoad = path.resolve(folder, script);
         if (!toLoad.startsWith(resolvedBase + path.sep)) {
           throw new Error(
-            `Path traversal detected in database custom script "${name}": "${script}" resolves outside the config directory.`
+            `File reference "${script}" in database custom script "${name}" must be relative to the config directory. Absolute paths and paths outside the config root are not supported.`
           );
         }
         database.options.customScripts[name] = loadFileAndReplaceKeywords(toLoad, mappingOpts);

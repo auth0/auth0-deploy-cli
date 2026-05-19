@@ -62,7 +62,7 @@ export default class YAMLContext {
     const toLoad = path.resolve(this.basePath, f);
 
     if (!toLoad.startsWith(resolvedBase + path.sep)) {
-      throw new Error(`Path traversal detected: "${f}" resolves outside the config directory.`);
+      throw new Error(`File reference "${f}" must be relative to the config directory. Absolute paths and paths outside the config root are not supported.`);
     }
 
     return loadFileAndReplaceKeywords(toLoad, {
