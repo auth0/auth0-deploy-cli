@@ -243,4 +243,49 @@ describe('#directory context connections', () => {
     expect(fs.existsSync(path.join(connectionsFolder, 'includedConnection.json'))).to.equal(true);
     expect(fs.existsSync(path.join(connectionsFolder, 'excludedConnection.json'))).to.equal(false);
   });
+
+  it('should remove stale connection files when connections are removed from source', async () => {
+    const dir = path.join(testDataDir, 'directory', 'connectionsStaleFiles');
+    cleanThenMkdir(dir);
+
+    // Simulate a previous export that created connection files
+    const connectionsFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
+    fs.ensureDirSync(connectionsFolder);
+    fs.writeFileSync(path.join(connectionsFolder, 'facebook.json'), '{"name":"facebook"}');
+    fs.writeFileSync(path.join(connectionsFolder, 'github.json'), '{"name":"github"}');
+
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    // Re-export with only one connection (facebook removed)
+    context.assets.connections = [{ name: 'github', strategy: 'github' }];
+
+    await handler.dump(context);
+
+    expect(fs.existsSync(path.join(connectionsFolder, 'github.json'))).to.equal(true);
+    expect(fs.existsSync(path.join(connectionsFolder, 'facebook.json'))).to.equal(false);
+  });
+
+  it('should remove all stale connection files when all connections are removed from source', async () => {
+    const dir = path.join(testDataDir, 'directory', 'connectionsAllStale');
+    cleanThenMkdir(dir);
+
+    // Simulate a previous export that created connection files
+    const connectionsFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
+    fs.ensureDirSync(connectionsFolder);
+    fs.writeFileSync(path.join(connectionsFolder, 'facebook.json'), '{"name":"facebook"}');
+    fs.writeFileSync(path.join(connectionsFolder, 'github.json'), '{"name":"github"}');
+
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    // Re-export with zero connections
+    context.assets.connections = [];
+
+    await handler.dump(context);
+
+    const remainingJsonFiles = fs.readdirSync(connectionsFolder).filter((f) => f.endsWith('.json'));
+    expect(remainingJsonFiles).to.deep.equal([]);
+
+    // Verify parse of now-empty directory returns [] not null (enabling deletions on import)
+    const parseContext = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    await parseContext.loadAssetsFromLocal();
+    expect(parseContext.assets.connections).to.deep.equal([]);
+  });
 });

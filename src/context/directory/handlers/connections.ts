@@ -76,7 +76,7 @@ async function dump(context: DirectoryContext): Promise<void> {
   }
 
   const connectionsFolder = path.join(context.filePath, constants.CONNECTIONS_DIRECTORY);
-  fs.ensureDirSync(connectionsFolder);
+  fs.emptyDirSync(connectionsFolder);
 
   // Convert enabled_clients from id to name
   connections.forEach((connection) => {
