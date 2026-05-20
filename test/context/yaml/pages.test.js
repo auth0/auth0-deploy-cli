@@ -116,10 +116,7 @@ describe('#YAML context pages', () => {
     fs.writeFileSync(yamlFile, yaml);
     fs.writeFileSync(path.join(dir, 'page.html'), htmlContent);
 
-    const context = new Context(
-      { AUTH0_INPUT_FILE: yamlFile },
-      mockMgmtClient()
-    );
+    const context = new Context({ AUTH0_INPUT_FILE: yamlFile }, mockMgmtClient());
     await context.loadAssetsFromLocal();
     expect(context.assets.pages[0].html).to.equal(htmlContent);
   });
