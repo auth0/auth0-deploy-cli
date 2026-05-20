@@ -11,7 +11,7 @@ import {
 import pagedClient from '../../tools/auth0/client';
 
 import log from '../../logger';
-import { isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter } from '../../utils';
+import { toConfigFn, stripIdentifiers, formatResults, recordsSorter } from '../../utils';
 import handlers, { YAMLHandler } from './handlers';
 import cleanAssets from '../../readonly';
 import { Assets, Config, Auth0APIClient, AssetTypes, KeywordMappings } from '../../types';
@@ -58,12 +58,16 @@ export default class YAMLContext {
   }
 
   loadFile(f) {
-    let toLoad = path.join(this.basePath, f);
-    if (!isFile(toLoad)) {
-      // try load not relative to yaml file
-      toLoad = f;
+    const resolvedBase = path.resolve(this.basePath);
+    const toLoad = path.resolve(this.basePath, f);
+
+    if (!toLoad.startsWith(resolvedBase + path.sep)) {
+      throw new Error(
+        `File reference "${f}" must be relative to the config directory. Absolute paths and paths outside the config root are not supported.`
+      );
     }
-    return loadFileAndReplaceKeywords(path.resolve(toLoad), {
+
+    return loadFileAndReplaceKeywords(toLoad, {
       mappings: this.mappings,
       disableKeywordReplacement: this.disableKeywordReplacement,
     });

@@ -25,24 +25,22 @@ describe('#YAML context pages', () => {
     cleanThenMkdir(dir);
 
     const htmlContext = '<html>this is a ##val1## @@val2@@</html>';
-    const htmlFile = path.join(testDataDir, 'page.html');
-    fs.writeFileSync(htmlFile, htmlContext);
 
     const errorPageUrl = 'https://example.com';
     const yaml = `
     pages:
       - name: "login"
-        html: "${htmlFile}"
+        html: "page.html"
 
       - name: "password_reset"
-        html: "${htmlFile}"
+        html: "page.html"
 
       - name: "guardian_multifactor"
-        html: "${htmlFile}"
+        html: "page.html"
         enabled: false
 
       - name: "error_page"
-        html: "${htmlFile}"
+        html: "page.html"
         url: "${errorPageUrl}"
         show_log_link: false
     `;
@@ -70,6 +68,8 @@ describe('#YAML context pages', () => {
       },
     ];
     createPagesDir(dir, target);
+    // Write page.html after createPagesDir since createPagesDir calls cleanThenMkdir(dir)
+    fs.writeFileSync(path.join(dir, 'page.html'), htmlContext);
     const yamlFile = path.join(dir, 'rule1.yaml');
     fs.writeFileSync(yamlFile, yaml);
 
@@ -81,6 +81,44 @@ describe('#YAML context pages', () => {
     await context.loadAssetsFromLocal();
 
     expect(context.assets.pages).to.deep.equal(target);
+  });
+
+  it('should reject page html with a path outside the config directory', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'pages-path-traversal');
+    cleanThenMkdir(dir);
+
+    const yaml = `
+    pages:
+      - name: "login"
+        html: "/absolute/path/outside/config/login.html"
+    `;
+    const yamlFile = path.join(dir, 'config.yaml');
+    fs.writeFileSync(yamlFile, yaml);
+
+    const context = new Context({ AUTH0_INPUT_FILE: yamlFile }, mockMgmtClient());
+    await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(
+      Error,
+      'must be relative to the config directory'
+    );
+  });
+
+  it('should accept page html with a path relative to the config directory', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'pages-relative-path');
+    cleanThenMkdir(dir);
+
+    const htmlContent = '<html>login page</html>';
+    const yaml = `
+    pages:
+      - name: "login"
+        html: "page.html"
+    `;
+    const yamlFile = path.join(dir, 'config.yaml');
+    fs.writeFileSync(yamlFile, yaml);
+    fs.writeFileSync(path.join(dir, 'page.html'), htmlContent);
+
+    const context = new Context({ AUTH0_INPUT_FILE: yamlFile }, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+    expect(context.assets.pages[0].html).to.equal(htmlContent);
   });
 
   it('should dump pages', async () => {
