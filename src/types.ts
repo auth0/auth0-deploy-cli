@@ -82,6 +82,9 @@ export type Config = {
   AUTH0_DRY_RUN?: boolean | 'preview';
   AUTH0_DRY_RUN_INTERACTIVE?: boolean;
   AUTH0_DRY_RUN_APPLY?: boolean;
+  AUTH0_IGNORE_DRY_RUN_FIELDS?: {
+    [handlerType: string]: string[];
+  };
   EXCLUDED_PROPS?: {
     [key: string]: string[];
   };
