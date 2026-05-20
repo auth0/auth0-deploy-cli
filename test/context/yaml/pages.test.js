@@ -83,6 +83,47 @@ describe('#YAML context pages', () => {
     expect(context.assets.pages).to.deep.equal(target);
   });
 
+  it('should reject page html with a path outside the config directory', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'pages-path-traversal');
+    cleanThenMkdir(dir);
+
+    const yaml = `
+    pages:
+      - name: "login"
+        html: "/absolute/path/outside/config/login.html"
+    `;
+    const yamlFile = path.join(dir, 'config.yaml');
+    fs.writeFileSync(yamlFile, yaml);
+
+    const context = new Context({ AUTH0_INPUT_FILE: yamlFile }, mockMgmtClient());
+    await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(
+      Error,
+      'must be relative to the config directory'
+    );
+  });
+
+  it('should accept page html with a path relative to the config directory', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'pages-relative-path');
+    cleanThenMkdir(dir);
+
+    const htmlContent = '<html>login page</html>';
+    const yaml = `
+    pages:
+      - name: "login"
+        html: "page.html"
+    `;
+    const yamlFile = path.join(dir, 'config.yaml');
+    fs.writeFileSync(yamlFile, yaml);
+    fs.writeFileSync(path.join(dir, 'page.html'), htmlContent);
+
+    const context = new Context(
+      { AUTH0_INPUT_FILE: yamlFile },
+      mockMgmtClient()
+    );
+    await context.loadAssetsFromLocal();
+    expect(context.assets.pages[0].html).to.equal(htmlContent);
+  });
+
   it('should dump pages', async () => {
     const dir = path.join(testDataDir, 'yaml', 'pagesDump');
     cleanThenMkdir(dir);

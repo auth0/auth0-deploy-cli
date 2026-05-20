@@ -150,6 +150,40 @@ describe('#directory context actions', () => {
     expect(context.assets.actions).to.deep.equal(actionsTarget);
   });
 
+  it('should reject action code with a path outside the config directory', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'test-path-traversal');
+    createDir(repoDir, {
+      [constants.ACTIONS_DIRECTORY]: {
+        'action-one.json': JSON.stringify({
+          name: 'action-one',
+          code: '/absolute/path/outside/config/code.js',
+          runtime: 'node12',
+          dependencies: [],
+          secrets: [],
+          supported_triggers: [{ id: 'post-login', version: 'v1' }],
+          deployed: true,
+        }),
+      },
+    });
+    const context = new Context({ AUTH0_INPUT_FILE: repoDir }, mockMgmtClient());
+    await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(
+      Error,
+      'must be relative to the config directory'
+    );
+  });
+
+  it('should accept action code with a path relative to the config directory', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'test1');
+    createDir(repoDir, actionFiles);
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { replace: 'test-action' },
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+    expect(context.assets.actions).to.deep.equal(actionsTarget);
+  });
+
   it('should ignore bad actions directory', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'test2');
     cleanThenMkdir(repoDir);
