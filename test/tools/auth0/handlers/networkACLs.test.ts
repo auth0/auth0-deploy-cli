@@ -23,6 +23,9 @@ const sampleNetworkACL = {
     scope: 'tenant',
     match: {
       asns: [12345],
+      hostnames: ['mytenant.auth0.com'],
+      connecting_ipv4_cidrs: ['10.0.0.0/8'],
+      connecting_ipv6_cidrs: ['2001:db8::/32'],
     },
   },
 };
