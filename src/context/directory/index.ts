@@ -52,6 +52,11 @@ export default class DirectoryContext {
     if (!isFile(toLoad)) {
       // try load not relative to yaml file
       toLoad = f;
+      log.warn(
+        `Deprecation notice: file reference "${f}" could not be resolved relative to the config directory and fell back to an absolute or external path. ` +
+          `Support for absolute paths and paths outside the config root will be removed in a future major version. ` +
+          `Please update your configuration to use paths relative to the config directory.`
+      );
     }
     return loadFileAndReplaceKeywords(toLoad, {
       mappings: this.mappings,
