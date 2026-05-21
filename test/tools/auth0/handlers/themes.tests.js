@@ -352,16 +352,68 @@ describe('#themes keyword preservation', () => {
     expect(result.themes[0].widget.logo_url).to.equal('##CDN_URL##/logo.png');
   });
 
-  it('should NOT preserve keyword placeholders when themeId is absent from handler identifiers', () => {
-    // Regression: prior to the fix, ThemesHandler used identifiers ['id', 'name'].
-    // getPreservableFieldsFromAssets looks for the identifier field on each array item to build
-    // a dot-notation address; if the field is missing (themes have themeId, not id/name),
-    // it silently returns no addresses and the raw remote URLs are returned unchanged.
+  it('should preserve keyword placeholders in theme fields when themeId is absent from local file (default export without AUTH0_EXPORT_IDENTIFIERS)', () => {
+    // Real-world scenario: exported with AUTH0_EXPORT_IDENTIFIERS: false (the default),
+    // so themeId is stripped from the local file. Keyword preservation must still work
+    // using displayName as a fallback identifier.
+    const localThemeWithoutThemeId = {
+      displayName: 'Default theme',
+      fonts: { font_url: '##CDN_URL##/fonts/custom.woff2' },
+      widget: { logo_url: '##CDN_URL##/logo.png' },
+    };
+
+    const remoteThemeWithThemeId = {
+      themeId,
+      displayName: 'Default theme',
+      fonts: { font_url: `${CDN_URL}/fonts/custom.woff2` },
+      widget: { logo_url: `${CDN_URL}/logo.png` },
+    };
+
+    const result = preserveKeywords({
+      localAssets: { themes: [localThemeWithoutThemeId] },
+      remoteAssets: { themes: [remoteThemeWithThemeId] },
+      keywordMappings: { CDN_URL },
+      auth0Handlers: [{ id: 'themeId', identifiers: ['themeId', 'displayName'], type: 'themes' }],
+    });
+
+    expect(result.themes[0].fonts.font_url).to.equal('##CDN_URL##/fonts/custom.woff2');
+    expect(result.themes[0].widget.logo_url).to.equal('##CDN_URL##/logo.png');
+  });
+
+  it('should preserve keyword placeholders using index fallback when neither themeId nor displayName is in local file', () => {
+    // The exact customer scenario: AUTH0_EXPORT_IDENTIFIERS defaults to false AND no displayName
+    // is set on the theme. The local file has no identifier fields at all — only keyword markers.
+    // The index-based fallback should still preserve the keywords.
+    const localThemeNoIdentifiers = {
+      fonts: { font_url: '##CDN_URL##/fonts/custom.woff2' },
+      widget: { logo_url: '##CDN_URL##/logo.png' },
+    };
+
+    const remoteThemeWithThemeId = {
+      themeId,
+      fonts: { font_url: `${CDN_URL}/fonts/custom.woff2` },
+      widget: { logo_url: `${CDN_URL}/logo.png` },
+    };
+
+    const result = preserveKeywords({
+      localAssets: { themes: [localThemeNoIdentifiers] },
+      remoteAssets: { themes: [remoteThemeWithThemeId] },
+      keywordMappings: { CDN_URL },
+      auth0Handlers: [{ id: 'themeId', identifiers: ['themeId', 'displayName'], type: 'themes' }],
+    });
+
+    expect(result.themes[0].fonts.font_url).to.equal('##CDN_URL##/fonts/custom.woff2');
+    expect(result.themes[0].widget.logo_url).to.equal('##CDN_URL##/logo.png');
+  });
+
+  it('should NOT preserve keyword placeholders for unregistered array types (no identifiers configured)', () => {
+    // When identifiers is empty, the handler has not registered this array type for preservation.
+    // No index fallback should apply — raw remote values are returned unchanged.
     const result = preserveKeywords({
       localAssets: { themes: [localThemeWithKeywords] },
       remoteAssets: { themes: [remoteThemeWithResolvedUrls] },
       keywordMappings: { CDN_URL },
-      auth0Handlers: [{ id: 'themeId', identifiers: ['id', 'name'], type: 'themes' }],
+      auth0Handlers: [{ id: 'themeId', identifiers: [], type: 'themes' }],
     });
 
     expect(result.themes[0].fonts.font_url).to.equal(`${CDN_URL}/fonts/custom.woff2`);

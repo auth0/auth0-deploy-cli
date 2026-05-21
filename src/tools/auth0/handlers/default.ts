@@ -171,6 +171,29 @@ export default class APIHandler {
     this.deleted = 0;
   }
 
+  /**
+   * Returns the effective `ignoreDryRunFields` for this handler, merging the
+   * handler's hardcoded defaults with any user-supplied entries from the
+   * `AUTH0_IGNORE_DRY_RUN_FIELDS[<type>]` config key. Read lazily so that the
+   * constructor remains free of config-provider invocations.
+   */
+  getEffectiveIgnoreDryRunFields(): string[] {
+    let configured: string[] = [];
+    try {
+      const map = this.config('AUTH0_IGNORE_DRY_RUN_FIELDS') as
+        | { [handlerType: string]: string[] }
+        | undefined;
+      if (map && Array.isArray(map[this.type])) {
+        configured = map[this.type];
+      }
+    } catch {
+      configured = [];
+    }
+    return [...this.ignoreDryRunFields, ...configured].filter(
+      (field, index, allFields) => allFields.indexOf(field) === index
+    );
+  }
+
   getClientFN(fn: ApiMethodOverride): Function {
     if (typeof fn === 'string') {
       const client = this.client[this.type];
@@ -290,7 +313,7 @@ export default class APIHandler {
         // @ts-ignore TODO: investigate what happens when `existing` is null
         existing,
         identifiers: this.identifiers,
-        ignoreDryRunFields: this.ignoreDryRunFields,
+        ignoreDryRunFields: this.getEffectiveIgnoreDryRunFields(),
       });
     }
 
@@ -328,7 +351,7 @@ export default class APIHandler {
       // @ts-ignore TODO: investigate what happens when `existing` is null
       existing,
       identifiers: this.identifiers,
-      ignoreDryRunFields: this.ignoreDryRunFields,
+      ignoreDryRunFields: this.getEffectiveIgnoreDryRunFields(),
     });
   }
 
