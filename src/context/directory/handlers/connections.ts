@@ -76,7 +76,16 @@ async function dump(context: DirectoryContext): Promise<void> {
   }
 
   const connectionsFolder = path.join(context.filePath, constants.CONNECTIONS_DIRECTORY);
-  fs.emptyDirSync(connectionsFolder);
+  fs.ensureDirSync(connectionsFolder);
+
+  // Track files that should remain after dump (written + excluded).
+  // Seed from exclude names directly so excluded connections' files are preserved
+  // regardless of whether the connection still exists on the tenant.
+  const expectedFiles = new Set<string>();
+  for (const name of excludedConnections) {
+    expectedFiles.add(`${sanitize(name)}.json`);
+    expectedFiles.add(`${sanitize(name)}.html`);
+  }
 
   // Convert enabled_clients from id to name
   connections.forEach((connection) => {
@@ -118,7 +127,19 @@ async function dump(context: DirectoryContext): Promise<void> {
 
     const connectionFile = path.join(connectionsFolder, `${connectionName}.json`);
     dumpJSON(connectionFile, dumpedConnection);
+    expectedFiles.add(`${connectionName}.json`);
+    if (dumpedConnection.strategy === 'email') expectedFiles.add(`${connectionName}.html`);
   });
+
+  // Remove files that belong to connections no longer present (and not excluded)
+  if (fs.existsSync(connectionsFolder)) {
+    for (const existing of fs.readdirSync(connectionsFolder)) {
+      const fullPath = path.join(connectionsFolder, existing);
+      if (fs.statSync(fullPath).isFile() && !expectedFiles.has(existing)) {
+        fs.removeSync(fullPath);
+      }
+    }
+  }
 }
 
 const connectionsHandler: DirectoryHandler<ParsedConnections> = {

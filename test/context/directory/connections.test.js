@@ -244,6 +244,28 @@ describe('#directory context connections', () => {
     expect(fs.existsSync(path.join(connectionsFolder, 'excludedConnection.json'))).to.equal(false);
   });
 
+  it('should preserve pre-existing files for excluded connections on re-dump', async () => {
+    const dir = path.join(testDataDir, 'directory', 'connectionsDumpExclude');
+    cleanThenMkdir(dir);
+
+    // Simulate a prior export that wrote the excluded connection's file
+    const connectionsFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
+    fs.ensureDirSync(connectionsFolder);
+    fs.writeFileSync(
+      path.join(connectionsFolder, 'excludedConnection.json'),
+      '{"name":"excludedConnection"}'
+    );
+
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    context.assets.connections = [{ name: 'includedConnection', strategy: 'waad' }];
+    context.assets.exclude = { connections: ['excludedConnection'] };
+
+    await handler.dump(context);
+
+    expect(fs.existsSync(path.join(connectionsFolder, 'includedConnection.json'))).to.equal(true);
+    expect(fs.existsSync(path.join(connectionsFolder, 'excludedConnection.json'))).to.equal(true);
+  });
+
   it('should remove stale connection files when connections are removed from source', async () => {
     const dir = path.join(testDataDir, 'directory', 'connectionsStaleFiles');
     cleanThenMkdir(dir);
