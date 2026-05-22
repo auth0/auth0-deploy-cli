@@ -26,6 +26,7 @@ const connectionOptionsSchema = {
     },
     dpop_signing_alg: {
       type: 'string',
+      enum: ['ES256', 'ES384', 'ES512', 'Ed25519'],
     },
     token_endpoint_auth_signing_alg: {
       type: 'string',

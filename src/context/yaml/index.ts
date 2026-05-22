@@ -62,6 +62,11 @@ export default class YAMLContext {
     if (!isFile(toLoad)) {
       // try load not relative to yaml file
       toLoad = f;
+      log.warn(
+        `Support for absolute paths and paths outside the config root will be deprecated in a future version to improve the security of the tool. ` +
+          `Please update your configuration to use paths relative to the config directory. ` +
+          `Current absolute path used: ["${f}"]`
+      );
     }
     return loadFileAndReplaceKeywords(path.resolve(toLoad), {
       mappings: this.mappings,
