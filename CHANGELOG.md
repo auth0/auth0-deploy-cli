@@ -7,9 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.35.0] - 2026-05-22
+
 ### Added
 
-- Add `AUTH0_IGNORE_DRY_RUN_FIELDS` configuration option, a map of handler type → field paths to exclude from `--dry-run` diff comparisons. Merges additively with each handler's built-in defaults so users can suppress noise from fields the Management API never returns (e.g. `client_secret`, action `secrets`, email provider `credentials.api_key`) without losing the curated defaults.
+- Add `AUTH0_IGNORE_DRY_RUN_FIELDS` config option to exclude specified fields from `--dry-run` diff output per handler type. [#1385]
+- Add hostnames and CIDR fields to network ACL match schema. [#1386]
+- Add `ES384` and `ES512` as valid `dpop_signing_alg` values for OIDC and Okta enterprise connections (GA). [#1391]
+
+### Deprecated
+
+- Deprecate absolute and external file path references in config handlers; a warning is emitted when detected. Support will be removed in a future major version. [#1392]
+
+### Fixed
+
+- Fix keyword markers in themes not being preserved during default export configuration. [#1387]
 
 ## [8.34.0] - 2026-05-11
 
@@ -1782,7 +1794,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1379]: https://github.com/auth0/auth0-deploy-cli/issues/1379
 [#1380]: https://github.com/auth0/auth0-deploy-cli/issues/1380
 [#1381]: https://github.com/auth0/auth0-deploy-cli/issues/1381
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.34.0...HEAD
+[#1385]: https://github.com/auth0/auth0-deploy-cli/issues/1385
+[#1386]: https://github.com/auth0/auth0-deploy-cli/issues/1386
+[#1387]: https://github.com/auth0/auth0-deploy-cli/issues/1387
+[#1391]: https://github.com/auth0/auth0-deploy-cli/issues/1391
+[#1392]: https://github.com/auth0/auth0-deploy-cli/issues/1392
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.35.0...HEAD
+[8.35.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.34.0...v8.35.0
 [8.34.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.33.0...v8.34.0
 [8.33.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.32.0...v8.33.0
 [8.32.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.31.0...v8.32.0
