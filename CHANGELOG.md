@@ -9,7 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add `AUTH0_IGNORE_DRY_RUN_FIELDS` configuration option, a map of handler type → field paths to exclude from `--dry-run` diff comparisons. Merges additively with each handler's built-in defaults so users can suppress noise from fields the Management API never returns (e.g. `client_secret`, action `secrets`, email provider `credentials.api_key`) without losing the curated defaults.
+- Add `AUTH0_IGNORE_DRY_RUN_FIELDS` configuration option, a map of handler type → field paths to exclude from `--dry-run` diff comparisons. Merges additively with each handler's built-in defaults so users can suppress noise from fields the Management API never returns (e.g. `client_secret`, action `secrets`, email provider `credentials.api_key`) without losing the curated defaults. [#1385]
+- Add hostnames and CIDR fields to network ACL match schema. [#1386]
+- Add `ES384` and `ES512` as valid `dpop_signing_alg` values for OIDC and Okta enterprise connections (GA). [#1391]
+
+### Fixed
+
+- Fix keyword markers in themes not being preserved during default export configuration. [#1387]
+
+### Deprecated
+
+- Deprecate support for absolute paths and paths outside the config root in config file handlers (`actions`, `actionModules`, `databases`, directory and YAML contexts). A warning is now emitted when such paths are detected. Support will be removed in a future major version. [#1392]
 
 ## [8.34.0] - 2026-05-11
 
