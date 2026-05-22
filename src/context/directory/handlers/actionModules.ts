@@ -32,9 +32,9 @@ function parse(context: DirectoryContext): ParsedActionModules {
       const unixPath = module.code.replace(/[\\/]+/g, '/').replace(/^([a-zA-Z]+:|\.\/)/, '');
       if (fs.existsSync(unixPath)) {
         log.warn(
-          `Deprecation notice: action module code path "${module.code}" is resolved as an absolute or external path. ` +
-            `Support for absolute paths and paths outside the config root will be removed in a future major version. ` +
-            `Please update your configuration to use paths relative to the config directory.`
+          `Support for absolute paths and paths outside the config root will be deprecated in a future version to improve the security of the tool. ` +
+            `Please update your configuration to use paths relative to the config directory. ` +
+            `Current absolute path used: ["${module.code}"]`
         );
         module.code = context.loadFile(unixPath, moduleFolder);
       } else {

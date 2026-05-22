@@ -33,9 +33,9 @@ function parse(context: DirectoryContext): ParsedActions {
       if (fs.existsSync(unixPath)) {
         // If the Unix-style path exists, load the file from that path
         log.warn(
-          `Deprecation notice: action code path "${action.code}" is resolved as an absolute or external path. ` +
-            `Support for absolute paths and paths outside the config root will be removed in a future major version. ` +
-            `Please update your configuration to use paths relative to the config directory.`
+          `Support for absolute paths and paths outside the config root will be deprecated in a future version to improve the security of the tool. ` +
+            `Please update your configuration to use paths relative to the config directory. ` +
+            `Current absolute path used: ["${action.code}"]`
         );
         action.code = context.loadFile(unixPath, actionFolder);
       } else {

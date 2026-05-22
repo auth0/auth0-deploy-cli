@@ -63,9 +63,9 @@ export default class YAMLContext {
       // try load not relative to yaml file
       toLoad = f;
       log.warn(
-        `Deprecation notice: file reference "${f}" could not be resolved relative to the config directory and fell back to an absolute or external path. ` +
-          `Support for absolute paths and paths outside the config root will be removed in a future major version. ` +
-          `Please update your configuration to use paths relative to the config directory.`
+        `Support for absolute paths and paths outside the config root will be deprecated in a future version to improve the security of the tool. ` +
+          `Please update your configuration to use paths relative to the config directory. ` +
+          `Current absolute path used: ["${f}"]`
       );
     }
     return loadFileAndReplaceKeywords(path.resolve(toLoad), {
