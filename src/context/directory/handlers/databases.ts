@@ -33,6 +33,7 @@ type DatabaseMetadata = {
 
 function getDatabase(
   folder: string,
+  configRoot: string,
   mappingOpts: { mappings: KeywordMappings; disableKeywordReplacement: boolean }
 ): {} {
   const metaFile = path.join(folder, 'database.json');
@@ -68,10 +69,16 @@ function getDatabase(
         // skip invalid keys in customScripts object
         log.warn('Skipping invalid database configuration: ' + name);
       } else {
-        database.options.customScripts[name] = loadFileAndReplaceKeywords(
-          path.join(folder, script),
-          mappingOpts
-        );
+        const resolvedBase = path.resolve(configRoot);
+        const toLoad = path.resolve(folder, script);
+        if (!toLoad.startsWith(resolvedBase + path.sep)) {
+          log.warn(
+            `Support for absolute paths and paths outside the config root will be deprecated in a future version to improve the security of the tool. ` +
+              `Please update your configuration to use paths relative to the config directory. ` +
+              `Current absolute path used: ["${script}"]`
+          );
+        }
+        database.options.customScripts[name] = loadFileAndReplaceKeywords(toLoad, mappingOpts);
       }
     });
   }
@@ -90,7 +97,7 @@ function parse(context: DirectoryContext): ParsedDatabases {
 
   const databases = folders
     .map((f) =>
-      getDatabase(f, {
+      getDatabase(f, context.filePath, {
         mappings: context.mappings,
         disableKeywordReplacement: context.disableKeywordReplacement,
       })

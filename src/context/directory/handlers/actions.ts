@@ -32,6 +32,11 @@ function parse(context: DirectoryContext): ParsedActions {
       const unixPath = action.code.replace(/[\\/]+/g, '/').replace(/^([a-zA-Z]+:|\.\/)/, '');
       if (fs.existsSync(unixPath)) {
         // If the Unix-style path exists, load the file from that path
+        log.warn(
+          `Support for absolute paths and paths outside the config root will be deprecated in a future version to improve the security of the tool. ` +
+            `Please update your configuration to use paths relative to the config directory. ` +
+            `Current absolute path used: ["${action.code}"]`
+        );
         action.code = context.loadFile(unixPath, actionFolder);
       } else {
         // Otherwise, load the file from the context's file path
