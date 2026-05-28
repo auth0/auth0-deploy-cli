@@ -50,6 +50,20 @@ describe('#connections handler', () => {
           },
         },
         {
+          name: 'oidc-connection-es384',
+          strategy: 'oidc',
+          options: {
+            dpop_signing_alg: 'ES384',
+          },
+        },
+        {
+          name: 'oidc-connection-es512',
+          strategy: 'oidc',
+          options: {
+            dpop_signing_alg: 'ES512',
+          },
+        },
+        {
           name: 'okta-connection',
           strategy: 'okta',
           options: {
