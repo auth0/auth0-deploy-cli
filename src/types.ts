@@ -21,6 +21,7 @@ import { AttackProtection } from './tools/auth0/handlers/attackProtection';
 import { TokenExchangeProfile } from './tools/auth0/handlers/tokenExchangeProfiles';
 import { RiskAssessment } from './tools/auth0/handlers/riskAssessment';
 import { SupplementalSignals } from './tools/auth0/handlers/supplementalSignals';
+import { RateLimitPolicy } from './tools/auth0/handlers/rateLimitPolicies';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -164,6 +165,7 @@ export type Assets = Partial<{
   userAttributeProfilesWithId: UserAttributeProfile[] | null;
   connectionProfiles: Asset[] | null;
   tokenExchangeProfiles: TokenExchangeProfile[] | null;
+  rateLimitPolicies: RateLimitPolicy[] | null;
 }>;
 
 export type CalculatedChanges = {
@@ -229,7 +231,8 @@ export type AssetTypes =
   | 'userAttributeProfiles'
   | 'connectionProfiles'
   | 'tokenExchangeProfiles'
-  | 'supplementalSignals';
+  | 'supplementalSignals'
+  | 'rateLimitPolicies';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 

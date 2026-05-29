@@ -222,6 +222,7 @@ const constants = {
   CONNECTION_PROFILES_DIRECTORY: 'connection-profiles',
   TOKEN_EXCHANGE_PROFILES_DIRECTORY: 'token-exchange-profiles',
   SUPPLEMENTAL_SIGNALS_DIRECTORY: 'supplemental-signals',
+  RATE_LIMIT_POLICIES_DIRECTORY: 'rate-limit-policies',
 };
 
 export default constants;
