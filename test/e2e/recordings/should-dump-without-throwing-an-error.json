@@ -3965,4 +3965,20 @@
         "rawHeaders": [],
         "responseIsBinary": false
     }
+,
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/rate-limit-policies?take=50",
+        "body": "",
+        "status": 403,
+        "response": {
+            "statusCode": 403,
+            "error": "Forbidden",
+            "message": "Rate Limit Policies feature is not enabled for this tenant.",
+            "errorCode": "insufficient_scope"
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    }
 ]
