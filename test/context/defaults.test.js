@@ -176,6 +176,20 @@ describe('#context defaults', () => {
 
       expect(result.options.client_secret).to.equal('real_secret_value');
     });
+
+    it('should not mask client_secret when AUTH0_EXPORT_SECRETS is the string "true"', () => {
+      const connection = {
+        name: 'Test Connection',
+        strategy: 'oauth2',
+        options: {
+          client_secret: 'real_secret_value',
+        },
+      };
+
+      const result = connectionDefaults(connection, { AUTH0_EXPORT_SECRETS: 'true' });
+
+      expect(result.options.client_secret).to.equal('real_secret_value');
+    });
   });
 
   describe('logStreamDefaults', () => {
