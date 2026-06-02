@@ -4,11 +4,16 @@ import { Config } from '../types';
 
 // env vars arrive as strings, so check both forms
 function isExportSecrets(config?: Pick<Config, 'AUTH0_EXPORT_SECRETS'>): boolean {
-  return config?.AUTH0_EXPORT_SECRETS === true || (config?.AUTH0_EXPORT_SECRETS as unknown) === 'true';
+  return (
+    config?.AUTH0_EXPORT_SECRETS === true || (config?.AUTH0_EXPORT_SECRETS as unknown) === 'true'
+  );
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export function emailProviderDefaults(emailProvider, config?: Pick<Config, 'AUTH0_EXPORT_SECRETS'>) {
+export function emailProviderDefaults(
+  emailProvider,
+  config?: Pick<Config, 'AUTH0_EXPORT_SECRETS'>
+) {
   // eslint-disable-line
   if (isExportSecrets(config)) return emailProvider;
 

@@ -60,6 +60,9 @@ a0deploy export -c=config.json --format=directory --output_folder=local
 
 # Fetching Auth0 tenant configurations with IDs of all assets
 a0deploy export -c=config.json --format=yaml --output_folder=local --export_ids=true
+
+# Fetching Auth0 tenant configurations including real secret values
+a0deploy export -c=config.json --format=directory --output_folder=local --export_secrets
 ```
 
 ## `import` command
