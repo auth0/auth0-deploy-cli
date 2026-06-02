@@ -1,9 +1,17 @@
 import { AttackProtection } from '../tools/auth0/handlers/attackProtection';
 import { maskSecretAtPath } from '../tools/utils';
+import { Config } from '../types';
+
+// env vars arrive as strings, so check both forms
+function isExportSecrets(config?: Pick<Config, 'AUTH0_EXPORT_SECRETS'>): boolean {
+  return config?.AUTH0_EXPORT_SECRETS === true || (config?.AUTH0_EXPORT_SECRETS as unknown) === 'true';
+}
 
 // eslint-disable-next-line import/prefer-default-export
-export function emailProviderDefaults(emailProvider) {
+export function emailProviderDefaults(emailProvider, config?: Pick<Config, 'AUTH0_EXPORT_SECRETS'>) {
   // eslint-disable-line
+  if (isExportSecrets(config)) return emailProvider;
+
   const updated = { ...emailProvider };
 
   const apiKeyProviders = ['mailgun', 'mandrill', 'sendgrid', 'sparkpost'];
@@ -111,8 +119,8 @@ export function phoneTemplatesDefaults(phoneTemplate) {
   return updated;
 }
 
-export function connectionDefaults(connection) {
-  if (connection.options) {
+export function connectionDefaults(connection, config?: Pick<Config, 'AUTH0_EXPORT_SECRETS'>) {
+  if (!isExportSecrets(config) && connection.options) {
     // Mask secret for key: connection.options.client_secret
     maskSecretAtPath({
       resourceTypeName: 'connections',
@@ -124,7 +132,9 @@ export function connectionDefaults(connection) {
   return connection;
 }
 
-export function logStreamDefaults(logStreams) {
+export function logStreamDefaults(logStreams, config?: Pick<Config, 'AUTH0_EXPORT_SECRETS'>) {
+  if (isExportSecrets(config)) return logStreams;
+
   // masked sensitive fields
   const sensitiveKeys = [
     'httpAuthorization',
@@ -152,7 +162,12 @@ export function logStreamDefaults(logStreams) {
   return maskedLogStreams;
 }
 
-export function attackProtectionDefaults(attackProtection: AttackProtection) {
+export function attackProtectionDefaults(
+  attackProtection: AttackProtection,
+  config?: Pick<Config, 'AUTH0_EXPORT_SECRETS'>
+) {
+  if (isExportSecrets(config)) return attackProtection;
+
   const { captcha } = attackProtection;
 
   if (captcha) {

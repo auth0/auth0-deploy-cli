@@ -72,7 +72,7 @@ async function dump(context: YAMLContext): Promise<ParsedConnections> {
       };
 
       // Mask secrets
-      dumpedConnection = connectionDefaults(dumpedConnection);
+      dumpedConnection = connectionDefaults(dumpedConnection, context.config);
 
       if (dumpedConnection.strategy === 'email') {
         ensureProp(connection, 'options.email.body');

@@ -29,6 +29,10 @@ Boolean. When enabled, will export the identifier fields for each resource. Defa
 
 Boolean. When enabled, exports resource configuration files with keys sorted alphabetically, producing stable and deterministic output. Useful for reducing noise in diffs. Default: `false`.
 
+### `--export_secrets`
+
+Boolean. When enabled, exports actual secret values instead of replacing them with placeholder markers (e.g. `##SMTP_PASS##`). Useful for backup and restore scenarios. **Warning:** real credentials will be written to exported files. Default: `false`.
+
 ### `--env`
 
 Boolean. Indicates if the tool should ingest environment variables or not. Default: `true`.

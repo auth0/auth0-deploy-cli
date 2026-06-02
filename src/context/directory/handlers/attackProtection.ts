@@ -85,7 +85,7 @@ async function dump(context: DirectoryContext): Promise<void> {
   const files = attackProtectionFiles(context.filePath);
   fs.ensureDirSync(files.directory);
 
-  const maskedAttackProtection = attackProtectionDefaults(attackProtection);
+  const maskedAttackProtection = attackProtectionDefaults(attackProtection, context.config);
 
   if (maskedAttackProtection.botDetection) {
     dumpJSON(files.botDetection, maskedAttackProtection.botDetection);
