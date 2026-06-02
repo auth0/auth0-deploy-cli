@@ -4,6 +4,7 @@ import {
   emailProviderDefaults,
   connectionDefaults,
   logStreamDefaults,
+  attackProtectionDefaults,
 } from '../../src/context/defaults';
 
 describe('#context defaults', () => {
@@ -422,6 +423,20 @@ describe('#context defaults', () => {
       const result = emailProviderDefaults(emailProvider, { AUTH0_EXPORT_SECRETS: true });
 
       expect(result).to.deep.equal(emailProvider);
+    });
+  });
+
+  describe('attackProtectionDefaults with AUTH0_EXPORT_SECRETS', () => {
+    it('should not mask captcha secrets when AUTH0_EXPORT_SECRETS is true', () => {
+      const attackProtection = {
+        captcha: {
+          hcaptcha: { secret: 'real-hcaptcha-secret' },
+        },
+      };
+
+      const result = attackProtectionDefaults(attackProtection, { AUTH0_EXPORT_SECRETS: true });
+
+      expect(result.captcha.hcaptcha.secret).to.equal('real-hcaptcha-secret');
     });
   });
 });
