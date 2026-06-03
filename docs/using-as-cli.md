@@ -29,6 +29,10 @@ Boolean. When enabled, will export the identifier fields for each resource. Defa
 
 Boolean. When enabled, exports resource configuration files with keys sorted alphabetically, producing stable and deterministic output. Useful for reducing noise in diffs. Default: `false`.
 
+### `--export_secrets`
+
+Boolean. When enabled, exports actual secret values instead of replacing them with placeholder markers (e.g. `##SMTP_PASS##`). Useful for backup and restore scenarios. **Warning:** real credentials will be written to exported files. Default: `false`.
+
 ### `--env`
 
 Boolean. Indicates if the tool should ingest environment variables or not. Default: `true`.
@@ -56,6 +60,9 @@ a0deploy export -c=config.json --format=directory --output_folder=local
 
 # Fetching Auth0 tenant configurations with IDs of all assets
 a0deploy export -c=config.json --format=yaml --output_folder=local --export_ids=true
+
+# Fetching Auth0 tenant configurations including real secret values
+a0deploy export -c=config.json --format=directory --output_folder=local --export_secrets
 ```
 
 ## `import` command

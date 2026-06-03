@@ -4,6 +4,7 @@ import {
   emailProviderDefaults,
   connectionDefaults,
   logStreamDefaults,
+  attackProtectionDefaults,
 } from '../../src/context/defaults';
 
 describe('#context defaults', () => {
@@ -161,6 +162,34 @@ describe('#context defaults', () => {
       const result = connectionDefaults(connection);
 
       expect(result.options.client_secret).to.equal('##CONNECTIONS_CUSTOM_OAUTH_2_0_SECRET##');
+    });
+
+    it('should not mask client_secret when AUTH0_EXPORT_SECRETS is true', () => {
+      const connection = {
+        name: 'Test Connection',
+        strategy: 'oauth2',
+        options: {
+          client_secret: 'real_secret_value',
+        },
+      };
+
+      const result = connectionDefaults(connection, { AUTH0_EXPORT_SECRETS: true });
+
+      expect(result.options.client_secret).to.equal('real_secret_value');
+    });
+
+    it('should not mask client_secret when AUTH0_EXPORT_SECRETS is the string "true"', () => {
+      const connection = {
+        name: 'Test Connection',
+        strategy: 'oauth2',
+        options: {
+          client_secret: 'real_secret_value',
+        },
+      };
+
+      const result = connectionDefaults(connection, { AUTH0_EXPORT_SECRETS: 'true' });
+
+      expect(result.options.client_secret).to.equal('real_secret_value');
     });
   });
 
@@ -360,6 +389,54 @@ describe('#context defaults', () => {
       const result = logStreamDefaults(logStreams);
 
       expect(result[0].sink.httpAuthorization).to.equal('##LOGSTREAMS_CUSTOM_HTTP_2_0_SECRET##');
+    });
+
+    it('should not mask sensitive fields when AUTH0_EXPORT_SECRETS is true', () => {
+      const logStreams = [
+        {
+          name: 'HTTP Stream',
+          type: 'http',
+          sink: {
+            httpEndpoint: 'https://example.com/logs',
+            httpAuthorization: 'Bearer real_token',
+          },
+        },
+      ];
+
+      const result = logStreamDefaults(logStreams, { AUTH0_EXPORT_SECRETS: true });
+
+      expect(result[0].sink.httpAuthorization).to.equal('Bearer real_token');
+      expect(result[0].sink.httpEndpoint).to.equal('https://example.com/logs');
+    });
+  });
+
+  describe('emailProviderDefaults with AUTH0_EXPORT_SECRETS', () => {
+    it('should not mask credentials when AUTH0_EXPORT_SECRETS is true', () => {
+      const emailProvider = {
+        name: 'smtp',
+        credentials: {
+          smtp_host: 'mail.example.com',
+          smtp_pass: 'real_password',
+        },
+      };
+
+      const result = emailProviderDefaults(emailProvider, { AUTH0_EXPORT_SECRETS: true });
+
+      expect(result).to.deep.equal(emailProvider);
+    });
+  });
+
+  describe('attackProtectionDefaults with AUTH0_EXPORT_SECRETS', () => {
+    it('should not mask captcha secrets when AUTH0_EXPORT_SECRETS is true', () => {
+      const attackProtection = {
+        captcha: {
+          hcaptcha: { secret: 'real-hcaptcha-secret' },
+        },
+      };
+
+      const result = attackProtectionDefaults(attackProtection, { AUTH0_EXPORT_SECRETS: true });
+
+      expect(result.captcha.hcaptcha.secret).to.equal('real-hcaptcha-secret');
     });
   });
 });
