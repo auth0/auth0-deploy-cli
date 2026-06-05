@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add optional flag to skip secret masking during export. [#1396]
+
+### Fixed
+
+- Remove stale connection files from directory export when connections are deleted. [#1389]
+
 ## [8.35.0] - 2026-05-22
 
 ### Added
