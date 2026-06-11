@@ -305,9 +305,14 @@ describe('#directory context clients', () => {
         my_organization_configuration: {
           user_attribute_profile_id: 'uap_123',
           connection_profile_id: 'cp_123',
+          invitation_landing_client_id: 'cli_abc',
           allowed_strategies: ['okta', 'samlp'],
           connection_deletion_behavior: 'allow_if_empty',
         },
+      },
+      {
+        client_id: 'cli_abc',
+        name: 'My Invitation Landing Client',
       },
     ];
 
@@ -323,6 +328,7 @@ describe('#directory context clients', () => {
       my_organization_configuration: {
         user_attribute_profile_id: 'My User Attribute Profile',
         connection_profile_id: 'My Connection Profile',
+        invitation_landing_client_id: 'My Invitation Landing Client',
         allowed_strategies: ['okta', 'samlp'],
         connection_deletion_behavior: 'allow_if_empty',
       },

@@ -499,6 +499,7 @@ describe('#clients handler', () => {
         my_organization_configuration: {
           user_attribute_profile_id: 'My User Attribute Profile',
           connection_profile_id: 'My Connection Profile',
+          invitation_landing_client_id: 'My Invitation Landing Client',
           allowed_strategies: ['okta', 'samlp'],
           connection_deletion_behavior: 'allow_if_empty',
         },
@@ -513,6 +514,7 @@ describe('#clients handler', () => {
             expect(data.my_organization_configuration).to.deep.equal({
               user_attribute_profile_id: 'uap_123',
               connection_profile_id: 'cp_123',
+              invitation_landing_client_id: 'cli_abc',
               allowed_strategies: ['okta', 'samlp'],
               connection_deletion_behavior: 'allow_if_empty',
             });
@@ -520,7 +522,10 @@ describe('#clients handler', () => {
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          list: (params) => mockPagedData(params, 'clients', []),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              { client_id: 'cli_abc', name: 'My Invitation Landing Client' },
+            ]),
         },
         connectionProfiles: {
           list: (params) =>
