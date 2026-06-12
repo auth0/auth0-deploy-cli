@@ -408,13 +408,7 @@ export const schema = {
   },
 };
 
-export type Client = Omit<Management.Client, 'my_organization_configuration'> & {
-  my_organization_configuration?:
-    | (Management.ClientMyOrganizationResponseConfiguration & {
-        invitation_landing_client_id?: string;
-      })
-    | null;
-};
+export type Client = Management.Client;
 
 type ClientSanitizerChain = {
   sanitizeOidcLogout(): ClientSanitizerChain;
