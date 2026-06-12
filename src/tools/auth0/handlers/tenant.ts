@@ -99,7 +99,6 @@ export const allowedTenantFlags = [
   'enable_apis_section',
   'enable_pipeline2',
   'enable_dynamic_client_registration',
-  'enable_custom_domain_in_emails',
   'allow_legacy_tokeninfo_endpoint',
   'enable_legacy_profile',
   'enable_idtoken_api2',
@@ -233,9 +232,9 @@ export default class TenantHandler extends DefaultHandler {
 
     if ((tenant.flags as Record<string, unknown>)?.enable_custom_domain_in_emails !== undefined) {
       log.warn(
-        'The "enable_custom_domain_in_emails" tenant flag is deprecated. ' +
-          'Use the "is_default" field on customDomains to configure the default domain instead. ' +
-          'The flag will still be applied for now but will be removed in a future release.'
+        'The "enable_custom_domain_in_emails" tenant flag is deprecated and has been removed from management. ' +
+          'It will not be applied during import. ' +
+          'Use the "is_default" field on customDomains to configure the default domain instead.'
       );
     }
 
