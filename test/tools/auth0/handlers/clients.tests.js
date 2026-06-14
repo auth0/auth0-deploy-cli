@@ -505,19 +505,34 @@ describe('#clients handler', () => {
         },
       };
 
+      const clientWithUnknownInvitation = {
+        name: 'Client With Unknown Invitation',
+        app_type: 'regular_web',
+        my_organization_configuration: {
+          invitation_landing_client_id: 'Unknown Client',
+          allowed_strategies: ['okta'],
+          connection_deletion_behavior: 'allow_if_empty',
+        },
+      };
+
       const auth0 = {
         clients: {
           create: function (data) {
             wasCreateCalled = true;
             expect(data).to.be.an('object');
-            expect(data.name).to.equal('Client With My Org Config');
-            expect(data.my_organization_configuration).to.deep.equal({
-              user_attribute_profile_id: 'uap_123',
-              connection_profile_id: 'cp_123',
-              invitation_landing_client_id: 'cli_abc',
-              allowed_strategies: ['okta', 'samlp'],
-              connection_deletion_behavior: 'allow_if_empty',
-            });
+            if (data.name === 'Client With My Org Config') {
+              expect(data.my_organization_configuration).to.deep.equal({
+                user_attribute_profile_id: 'uap_123',
+                connection_profile_id: 'cp_123',
+                invitation_landing_client_id: 'cli_abc',
+                allowed_strategies: ['okta', 'samlp'],
+                connection_deletion_behavior: 'allow_if_empty',
+              });
+            } else if (data.name === 'Client With Unknown Invitation') {
+              expect(
+                data.my_organization_configuration.invitation_landing_client_id
+              ).to.equal('Unknown Client');
+            }
             return Promise.resolve({ data });
           },
           update: () => Promise.resolve({ data: [] }),
@@ -544,7 +559,9 @@ describe('#clients handler', () => {
 
       const handler = new clients.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
-      await stageFn.apply(handler, [{ clients: [clientWithMyOrganizationConfig] }]);
+      await stageFn.apply(handler, [
+        { clients: [clientWithMyOrganizationConfig, clientWithUnknownInvitation] },
+      ]);
       expect(wasCreateCalled).to.be.equal(true);
     });
 

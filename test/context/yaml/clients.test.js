@@ -276,6 +276,15 @@ describe('#YAML context clients', () => {
         },
       },
       {
+        name: 'someClientUnknownInvitation',
+        app_type: 'regular_web',
+        my_organization_configuration: {
+          invitation_landing_client_id: 'cli_unknown',
+          allowed_strategies: ['okta'],
+          connection_deletion_behavior: 'allow_if_empty',
+        },
+      },
+      {
         client_id: 'cli_abc',
         name: 'My Invitation Landing Client',
       },
@@ -297,6 +306,10 @@ describe('#YAML context clients', () => {
         connection_deletion_behavior: 'allow_if_empty',
       },
     });
+
+    expect(
+      dumped.clients[1].my_organization_configuration.invitation_landing_client_id
+    ).to.equal('cli_unknown');
   });
 
   it('should dump clients with app_type express_configuration and filter fields', async () => {
