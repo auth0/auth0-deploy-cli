@@ -529,9 +529,9 @@ describe('#clients handler', () => {
                 connection_deletion_behavior: 'allow_if_empty',
               });
             } else if (data.name === 'Client With Unknown Invitation') {
-              expect(
-                data.my_organization_configuration.invitation_landing_client_id
-              ).to.equal('Unknown Client');
+              expect(data.my_organization_configuration.invitation_landing_client_id).to.equal(
+                'Unknown Client'
+              );
             }
             return Promise.resolve({ data });
           },

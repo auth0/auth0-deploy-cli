@@ -307,9 +307,9 @@ describe('#YAML context clients', () => {
       },
     });
 
-    expect(
-      dumped.clients[1].my_organization_configuration.invitation_landing_client_id
-    ).to.equal('cli_unknown');
+    expect(dumped.clients[1].my_organization_configuration.invitation_landing_client_id).to.equal(
+      'cli_unknown'
+    );
   });
 
   it('should dump clients with app_type express_configuration and filter fields', async () => {
