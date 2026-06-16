@@ -103,12 +103,13 @@ export default class BrandingHandler extends DefaultHandler {
     }
 
     if (brandingSettings && Object.keys(brandingSettings).length) {
-      // If colors is absent from the config, preserve existing colors to avoid a known API side-effect
-      // where PATCH /api/v2/branding without colors silently resets the Authentication Profile.
-      if (!brandingSettings.colors && this.existing?.colors) {
-        brandingSettings.colors = this.existing.colors;
-      }
+      // Fetch prompt settings before PATCHing branding — the API resets identifier_first
+      // when colors is absent from the payload. Re-apply after to undo the side-effect.
+      const promptSettings = await this.client.prompts.getSettings().catch(() => null);
       await this.client.branding.update(brandingSettings);
+      if (promptSettings) {
+        await this.client.prompts.updateSettings(promptSettings);
+      }
       this.updated += 1;
       this.didUpdate(brandingSettings);
     }

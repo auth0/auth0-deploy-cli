@@ -136,6 +136,10 @@ describe('#branding handler', () => {
             },
           },
         },
+        prompts: {
+          getSettings: () => Promise.resolve({ identifier_first: true }),
+          updateSettings: () => Promise.resolve(),
+        },
       };
 
       const handler = new branding.default({ client: auth0 });
@@ -173,6 +177,10 @@ describe('#branding handler', () => {
               }
             },
           },
+        },
+        prompts: {
+          getSettings: () => Promise.resolve({ identifier_first: true }),
+          updateSettings: () => Promise.resolve(),
         },
       };
 
@@ -212,6 +220,10 @@ describe('#branding handler', () => {
             expect(data.logo_url).to.be.undefined; // eslint-disable-line no-unused-expressions
             wasUpdateCalled = true;
           },
+        },
+        prompts: {
+          getSettings: () => Promise.resolve({ identifier_first: true }),
+          updateSettings: () => Promise.resolve(),
         },
       };
 
@@ -262,75 +274,35 @@ describe('#branding handler', () => {
       expect(wasUpdateCalled).to.equal(false);
     });
 
-    it('should preserve existing colors in payload when config has no colors', async () => {
-      let updatePayload = null;
+    it('should re-apply prompt settings after branding update to prevent Authentication Profile reset', async () => {
+      const callOrder = [];
 
       const auth0 = {
         branding: {
-          update: (data) => {
-            updatePayload = data;
+          update: () => {
+            callOrder.push('branding.update');
+            return Promise.resolve();
+          },
+        },
+        prompts: {
+          getSettings: () => {
+            callOrder.push('prompts.getSettings');
+            return Promise.resolve({ identifier_first: true, universal_login_experience: 'new' });
+          },
+          updateSettings: (data) => {
+            callOrder.push('prompts.updateSettings');
+            expect(data).to.deep.equal({ identifier_first: true, universal_login_experience: 'new' });
+            return Promise.resolve();
           },
         },
       };
 
       const handler = new branding.default({ client: auth0 });
-      handler.existing = { logo_url: 'https://example.com/old-logo.svg', colors: { primary: '#FF0000', page_background: '#FFFFFF' } };
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [{ branding: { logo_url: 'https://example.com/new-logo.svg' } }]);
+      await stageFn.apply(handler, [{ branding: { logo_url: 'https://example.com/logo.png' } }]);
 
-      expect(updatePayload).to.deep.equal({
-        logo_url: 'https://example.com/new-logo.svg',
-        colors: { primary: '#FF0000', page_background: '#FFFFFF' },
-      });
-    });
-
-    it('should use config colors when provided, not fall back to existing', async () => {
-      let updatePayload = null;
-
-      const auth0 = {
-        branding: {
-          update: (data) => {
-            updatePayload = data;
-          },
-        },
-      };
-
-      const handler = new branding.default({ client: auth0 });
-      handler.existing = { colors: { primary: '#FF0000', page_background: '#FFFFFF' } };
-      const stageFn = Object.getPrototypeOf(handler).processChanges;
-
-      await stageFn.apply(handler, [{
-        branding: {
-          logo_url: 'https://example.com/new-logo.svg',
-          colors: { primary: '#00FF00', page_background: '#000000' },
-        },
-      }]);
-
-      expect(updatePayload).to.deep.equal({
-        logo_url: 'https://example.com/new-logo.svg',
-        colors: { primary: '#00FF00', page_background: '#000000' },
-      });
-    });
-
-    it('should not add colors if neither config nor existing has colors', async () => {
-      let updatePayload = null;
-
-      const auth0 = {
-        branding: {
-          update: (data) => {
-            updatePayload = data;
-          },
-        },
-      };
-
-      const handler = new branding.default({ client: auth0 });
-      handler.existing = { logo_url: 'https://example.com/old-logo.svg' };
-      const stageFn = Object.getPrototypeOf(handler).processChanges;
-
-      await stageFn.apply(handler, [{ branding: { logo_url: 'https://example.com/new-logo.svg' } }]);
-
-      expect(updatePayload).to.deep.equal({ logo_url: 'https://example.com/new-logo.svg' });
+      expect(callOrder).to.deep.equal(['prompts.getSettings', 'branding.update', 'prompts.updateSettings']);
     });
 
     it('should not throw, and be no-op if branding not set in context', async () => {

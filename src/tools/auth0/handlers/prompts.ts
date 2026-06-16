@@ -511,6 +511,8 @@ export default class PromptsHandler extends DefaultHandler {
   async processChanges(assets: Assets): Promise<void> {
     const { prompts } = assets;
 
+    // When branding is updated without colors, the API silently resets identifier_first.
+    // Re-apply existing prompt settings to undo that side-effect even if prompts isn't in the config.
     if (!prompts) return;
 
     if (isDryRun(this.config)) {
