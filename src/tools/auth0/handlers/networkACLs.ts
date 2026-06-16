@@ -179,7 +179,6 @@ export const schema = {
       priority: {
         type: 'number',
         minimum: 1,
-        maximum: 10,
       },
       rule: {
         anyOf: [

@@ -792,7 +792,7 @@ NetworkACLs have the following key properties:
 
 - `description`: A descriptive name for the rule
 - `active`: Boolean indicating if the rule is active
-- `priority`: Number between 1-10 determining the order of rule evaluation (lower numbers have higher priority)
+- `priority`: Number (minimum 1) determining the order of rule evaluation (lower numbers have higher priority)
 - `rule`: The rule configuration containing:
   - `action`: The action to take (block, allow, log, or redirect)
   - `scope`: The scope of the rule ('management', 'authentication', or 'tenant')
