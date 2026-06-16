@@ -1,5 +1,5 @@
 import { Management } from 'auth0';
-import { isEmpty } from 'lodash';
+import { isEmpty, omit } from 'lodash';
 import nconf from 'nconf';
 import ValidationError from '../../validationError';
 import DefaultHandler, { order } from './default';
@@ -202,7 +202,7 @@ export default class TenantHandler extends DefaultHandler {
   // Run after other updates so objected can be referenced such as default directory
   @order('100')
   async processChanges(assets: Assets): Promise<void> {
-    const { tenant } = assets;
+    let { tenant } = assets;
 
     // Do nothing if not set
     if (!tenant) return;
@@ -213,6 +213,18 @@ export default class TenantHandler extends DefaultHandler {
       if (update.length === 0) {
         return;
       }
+    }
+
+    if ((tenant.flags as Record<string, unknown>)?.enable_custom_domain_in_emails !== undefined) {
+      log.warn(
+        'The "enable_custom_domain_in_emails" tenant flag is deprecated and has been removed from management. ' +
+          'It will not be applied during import. ' +
+          'Use the "is_default" field on customDomains to configure the default domain instead.'
+      );
+      tenant = {
+        ...tenant,
+        flags: omit(tenant.flags, 'enable_custom_domain_in_emails') as TenantSettingsFlags,
+      };
     }
 
     const updatedTenant: Management.UpdateTenantSettingsRequestContent & {
@@ -228,14 +240,6 @@ export default class TenantHandler extends DefaultHandler {
       if (updatedTenant.flags === undefined || Object.keys(updatedTenant.flags).length === 0) {
         delete updatedTenant.flags;
       }
-    }
-
-    if ((tenant.flags as Record<string, unknown>)?.enable_custom_domain_in_emails !== undefined) {
-      log.warn(
-        'The "enable_custom_domain_in_emails" tenant flag is deprecated and has been removed from management. ' +
-          'It will not be applied during import. ' +
-          'Use the "is_default" field on customDomains to configure the default domain instead.'
-      );
     }
 
     if (updatedTenant && Object.keys(updatedTenant).length > 0) {
