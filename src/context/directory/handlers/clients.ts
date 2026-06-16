@@ -122,6 +122,14 @@ async function dump(context: DirectoryContext): Promise<void> {
         client.my_organization_configuration.connection_profile_id =
           c?.name || myOrganizationConnectionProfileId;
       }
+
+      const invitationLandingClientId =
+        client.my_organization_configuration.invitation_landing_client_id;
+      if (invitationLandingClientId) {
+        const c = clients?.find((cl) => cl.client_id === invitationLandingClientId);
+        client.my_organization_configuration.invitation_landing_client_id =
+          c?.name || invitationLandingClientId;
+      }
     }
 
     if (client.app_type === 'express_configuration') {
