@@ -90,6 +90,14 @@ async function dump(context: YAMLContext): Promise<ParsedClients> {
         c?.name || myOrganizationConnectionProfileId;
     }
 
+    const invitationLandingClientId =
+      client?.my_organization_configuration?.invitation_landing_client_id;
+    if (client.my_organization_configuration && invitationLandingClientId) {
+      const c = clients?.find((cl) => cl.client_id === invitationLandingClientId);
+      client.my_organization_configuration.invitation_landing_client_id =
+        c?.name || invitationLandingClientId;
+    }
+
     return client;
   });
 
