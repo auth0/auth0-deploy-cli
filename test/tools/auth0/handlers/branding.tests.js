@@ -262,6 +262,77 @@ describe('#branding handler', () => {
       expect(wasUpdateCalled).to.equal(false);
     });
 
+    it('should preserve existing colors in payload when config has no colors', async () => {
+      let updatePayload = null;
+
+      const auth0 = {
+        branding: {
+          update: (data) => {
+            updatePayload = data;
+          },
+        },
+      };
+
+      const handler = new branding.default({ client: auth0 });
+      handler.existing = { logo_url: 'https://example.com/old-logo.svg', colors: { primary: '#FF0000', page_background: '#FFFFFF' } };
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ branding: { logo_url: 'https://example.com/new-logo.svg' } }]);
+
+      expect(updatePayload).to.deep.equal({
+        logo_url: 'https://example.com/new-logo.svg',
+        colors: { primary: '#FF0000', page_background: '#FFFFFF' },
+      });
+    });
+
+    it('should use config colors when provided, not fall back to existing', async () => {
+      let updatePayload = null;
+
+      const auth0 = {
+        branding: {
+          update: (data) => {
+            updatePayload = data;
+          },
+        },
+      };
+
+      const handler = new branding.default({ client: auth0 });
+      handler.existing = { colors: { primary: '#FF0000', page_background: '#FFFFFF' } };
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{
+        branding: {
+          logo_url: 'https://example.com/new-logo.svg',
+          colors: { primary: '#00FF00', page_background: '#000000' },
+        },
+      }]);
+
+      expect(updatePayload).to.deep.equal({
+        logo_url: 'https://example.com/new-logo.svg',
+        colors: { primary: '#00FF00', page_background: '#000000' },
+      });
+    });
+
+    it('should not add colors if neither config nor existing has colors', async () => {
+      let updatePayload = null;
+
+      const auth0 = {
+        branding: {
+          update: (data) => {
+            updatePayload = data;
+          },
+        },
+      };
+
+      const handler = new branding.default({ client: auth0 });
+      handler.existing = { logo_url: 'https://example.com/old-logo.svg' };
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ branding: { logo_url: 'https://example.com/new-logo.svg' } }]);
+
+      expect(updatePayload).to.deep.equal({ logo_url: 'https://example.com/new-logo.svg' });
+    });
+
     it('should not throw, and be no-op if branding not set in context', async () => {
       const auth0 = {
         branding: {
