@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.37.0] - 2026-06-17
+
+### Added
+
+- Add `invitation_landing_client_id` support to `my_organization_configuration` on the Client entity, with client ID-to-name resolution on export and name-to-ID resolution on import. [#1400]
+
+### Fixed
+
+- Remove `enable_custom_domain_in_emails` from managed tenant flags to prevent import failures on tenants without a ready custom domain. [#1401]
+- Remove incorrect `maximum: 10` constraint on Network ACL `priority` field in schema validation. [#1403]
+
 ## [8.36.0] - 2026-06-05
 
 ### Added
@@ -1811,7 +1822,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1391]: https://github.com/auth0/auth0-deploy-cli/issues/1391
 [#1392]: https://github.com/auth0/auth0-deploy-cli/issues/1392
 [#1396]: https://github.com/auth0/auth0-deploy-cli/issues/1396
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.36.0...HEAD
+[#1400]: https://github.com/auth0/auth0-deploy-cli/issues/1400
+[#1401]: https://github.com/auth0/auth0-deploy-cli/issues/1401
+[#1403]: https://github.com/auth0/auth0-deploy-cli/issues/1403
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.37.0...HEAD
+[8.37.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.36.0...v8.37.0
 [8.36.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.35.0...v8.36.0
 [8.35.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.34.0...v8.35.0
 [8.34.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.33.0...v8.34.0
