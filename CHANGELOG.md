@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `invitation_landing_client_id` support to `my_organization_configuration` on the Client entity, with client ID-to-name resolution on export and name-to-ID resolution on import. [#1400]
+
+### Fixed
+
+- Remove `enable_custom_domain_in_emails` from managed tenant flags to prevent import failures on tenants without a ready custom domain. [#1401]
+- Remove incorrect `maximum: 10` constraint on Network ACL `priority` field in schema validation. [#1403]
+
 ## [8.36.0] - 2026-06-05
 
 ### Added
