@@ -312,6 +312,35 @@ describe('#branding handler', () => {
       ]);
     });
 
+    it('should not throw if prompt settings fetch fails during branding update', async () => {
+      let wasUpdateCalled = false;
+      let wasPromptUpdateCalled = false;
+
+      const auth0 = {
+        branding: {
+          update: () => {
+            wasUpdateCalled = true;
+            return Promise.resolve();
+          },
+        },
+        prompts: {
+          getSettings: () => Promise.reject(new Error('Insufficient scope')),
+          updateSettings: () => {
+            wasPromptUpdateCalled = true;
+            return Promise.resolve();
+          },
+        },
+      };
+
+      const handler = new branding.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ branding: { logo_url: 'https://example.com/logo.png' } }]);
+
+      expect(wasUpdateCalled).to.equal(true);
+      expect(wasPromptUpdateCalled).to.equal(false);
+    });
+
     it('should not throw, and be no-op if branding not set in context', async () => {
       const auth0 = {
         branding: {
