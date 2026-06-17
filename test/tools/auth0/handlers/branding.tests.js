@@ -291,7 +291,10 @@ describe('#branding handler', () => {
           },
           updateSettings: (data) => {
             callOrder.push('prompts.updateSettings');
-            expect(data).to.deep.equal({ identifier_first: true, universal_login_experience: 'new' });
+            expect(data).to.deep.equal({
+              identifier_first: true,
+              universal_login_experience: 'new',
+            });
             return Promise.resolve();
           },
         },
@@ -302,7 +305,11 @@ describe('#branding handler', () => {
 
       await stageFn.apply(handler, [{ branding: { logo_url: 'https://example.com/logo.png' } }]);
 
-      expect(callOrder).to.deep.equal(['prompts.getSettings', 'branding.update', 'prompts.updateSettings']);
+      expect(callOrder).to.deep.equal([
+        'prompts.getSettings',
+        'branding.update',
+        'prompts.updateSettings',
+      ]);
     });
 
     it('should not throw, and be no-op if branding not set in context', async () => {
