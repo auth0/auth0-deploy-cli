@@ -305,9 +305,23 @@ describe('#directory context clients', () => {
         my_organization_configuration: {
           user_attribute_profile_id: 'uap_123',
           connection_profile_id: 'cp_123',
+          invitation_landing_client_id: 'cli_abc',
           allowed_strategies: ['okta', 'samlp'],
           connection_deletion_behavior: 'allow_if_empty',
         },
+      },
+      {
+        name: 'someClientUnknownInvitation',
+        app_type: 'regular_web',
+        my_organization_configuration: {
+          invitation_landing_client_id: 'cli_unknown',
+          allowed_strategies: ['okta'],
+          connection_deletion_behavior: 'allow_if_empty',
+        },
+      },
+      {
+        client_id: 'cli_abc',
+        name: 'My Invitation Landing Client',
       },
     ];
 
@@ -323,10 +337,18 @@ describe('#directory context clients', () => {
       my_organization_configuration: {
         user_attribute_profile_id: 'My User Attribute Profile',
         connection_profile_id: 'My Connection Profile',
+        invitation_landing_client_id: 'My Invitation Landing Client',
         allowed_strategies: ['okta', 'samlp'],
         connection_deletion_behavior: 'allow_if_empty',
       },
     });
+
+    const dumpedClientUnknown = loadJSON(
+      path.join(dir, 'clients', 'someClientUnknownInvitation.json')
+    );
+    expect(dumpedClientUnknown.my_organization_configuration.invitation_landing_client_id).to.equal(
+      'cli_unknown'
+    );
   });
 
   it('should dump clients with app_type express_configuration and filter fields', async () => {
