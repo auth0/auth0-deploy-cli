@@ -103,8 +103,7 @@ export default class BrandingHandler extends DefaultHandler {
     }
 
     if (brandingSettings && Object.keys(brandingSettings).length) {
-      // Fetch prompt settings before PATCHing branding — the API resets identifier_first
-      // when colors is absent from the payload. Re-apply after to undo the side-effect.
+      // Save prompt settings, update branding, then restore prompt settings to avoid mgmt API overwriting prompt settings
       const promptSettings = await this.client.prompts.getSettings().catch(() => null);
       await this.client.branding.update(brandingSettings);
       if (promptSettings) {
