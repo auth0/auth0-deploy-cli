@@ -103,7 +103,12 @@ export default class BrandingHandler extends DefaultHandler {
     }
 
     if (brandingSettings && Object.keys(brandingSettings).length) {
+      // Save prompt settings, update branding, then restore prompt settings to avoid mgmt API overwriting prompt settings
+      const promptSettings = await this.client.prompts.getSettings().catch(() => null);
       await this.client.branding.update(brandingSettings);
+      if (promptSettings) {
+        await this.client.prompts.updateSettings(promptSettings);
+      }
       this.updated += 1;
       this.didUpdate(brandingSettings);
     }
