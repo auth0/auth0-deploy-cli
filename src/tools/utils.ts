@@ -251,7 +251,7 @@ export const obfuscateSensitiveValues = (
   return newAsset;
 };
 
-const UNRESOLVED_PLACEHOLDER_REGEX = /^(##.+##|@@.+@@)$/;
+const UNRESOLVED_PLACEHOLDER_REGEX = /^(##[A-Z0-9_]+##|@@[A-Z0-9_]+@@)$/;
 
 // Recursively collects all fields in an asset that still contain an unresolved
 // ##...## (string) or @@...@@ (array) keyword placeholder.
