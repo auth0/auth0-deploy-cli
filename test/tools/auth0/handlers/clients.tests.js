@@ -94,6 +94,36 @@ describe('#clients handler', () => {
 
       await stageFn.apply(handler, [{ clients: data }]);
     });
+
+    it('should pass validation with fedcm_login', async () => {
+      const handler = new clients.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        {
+          name: 'someFedCMClient',
+          fedcm_login: {
+            google: {
+              is_enabled: true,
+            },
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clients: data }]);
+    });
+
+    it('should pass validation with fedcm_login set to null', async () => {
+      const handler = new clients.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        {
+          name: 'someFedCMClient',
+          fedcm_login: null,
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clients: data }]);
+    });
   });
 
   describe('#clients process', () => {
@@ -305,6 +335,45 @@ describe('#clients handler', () => {
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ clients: [someNativeClient] }]);
+    });
+
+    it('should create client with fedcm_login', async () => {
+      const fedcmClient = {
+        name: 'someFedCMClient',
+        fedcm_login: {
+          google: {
+            is_enabled: true,
+          },
+        },
+      };
+
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('someFedCMClient');
+            expect(data.fedcm_login).to.deep.equal({
+              google: {
+                is_enabled: true,
+              },
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ clients: [fedcmClient] }]);
     });
 
     it('should create client with refresh token policies', async () => {

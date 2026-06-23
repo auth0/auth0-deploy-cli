@@ -403,6 +403,18 @@ export const schema = {
           },
         },
       },
+      fedcm_login: {
+        type: ['object', 'null'],
+        description: 'Configuration for FedCM (Federated Credential Management) login',
+        properties: {
+          google: {
+            type: 'object',
+            properties: {
+              is_enabled: { type: 'boolean' },
+            },
+          },
+        },
+      },
     },
     required: ['name'],
   },
