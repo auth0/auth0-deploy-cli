@@ -141,7 +141,6 @@ describe('#clients handler', () => {
 
       await stageFn.apply(handler, [{ clients: data }]);
     });
-
   });
 
   describe('#clients process', () => {
