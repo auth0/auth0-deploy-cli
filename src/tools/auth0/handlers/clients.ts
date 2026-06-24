@@ -412,8 +412,10 @@ export const schema = {
             properties: {
               is_enabled: { type: 'boolean' },
             },
+            required: ['is_enabled'],
           },
         },
+        required: ['google'],
       },
     },
     required: ['name'],

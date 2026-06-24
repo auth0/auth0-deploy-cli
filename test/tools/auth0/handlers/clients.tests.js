@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 import pageClient from '../../../../src/tools/auth0/client';
 
+const Ajv = require('ajv');
 const { expect } = require('chai');
 const clients = require('../../../../src/tools/auth0/handlers/clients');
 const { mockPagedData } = require('../../../utils');
@@ -47,6 +48,52 @@ describe('#clients handler', () => {
     AUTH0_CLIENT_ID: 'client_id',
     AUTH0_ALLOW_DELETE: true,
   };
+
+  describe('#clients schema', () => {
+    const ajv = new Ajv({ useDefaults: true, nullable: true });
+
+    it('should pass validation with fedcm_login', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someFedCMClient',
+          fedcm_login: { google: { is_enabled: true } },
+        },
+      ]);
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should pass validation with fedcm_login set to null', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someFedCMClient',
+          fedcm_login: null,
+        },
+      ]);
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should fail validation with fedcm_login missing google', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someFedCMClient',
+          fedcm_login: {},
+        },
+      ]);
+      expect(valid).to.equal(false);
+    });
+
+    it('should fail validation with fedcm_login.google missing is_enabled', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someFedCMClient',
+          fedcm_login: { google: {} },
+        },
+      ]);
+      expect(valid).to.equal(false);
+    });
+  });
 
   describe('#clients validate', () => {
     it('should not allow same names', async () => {
@@ -95,35 +142,6 @@ describe('#clients handler', () => {
       await stageFn.apply(handler, [{ clients: data }]);
     });
 
-    it('should pass validation with fedcm_login', async () => {
-      const handler = new clients.default({ client: {}, config });
-      const stageFn = Object.getPrototypeOf(handler).validate;
-      const data = [
-        {
-          name: 'someFedCMClient',
-          fedcm_login: {
-            google: {
-              is_enabled: true,
-            },
-          },
-        },
-      ];
-
-      await stageFn.apply(handler, [{ clients: data }]);
-    });
-
-    it('should pass validation with fedcm_login set to null', async () => {
-      const handler = new clients.default({ client: {}, config });
-      const stageFn = Object.getPrototypeOf(handler).validate;
-      const data = [
-        {
-          name: 'someFedCMClient',
-          fedcm_login: null,
-        },
-      ];
-
-      await stageFn.apply(handler, [{ clients: data }]);
-    });
   });
 
   describe('#clients process', () => {
