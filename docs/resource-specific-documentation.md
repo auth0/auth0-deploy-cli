@@ -458,6 +458,35 @@ resourceServers:
 
 > **Note:** `authorization_policy` is only accepted by the Auth0 API for the My Account resource server and only when the `acr` feature flag is enabled on the tenant.
 
+### Online Refresh Tokens — `allow_online_access` and `allow_online_access_with_ephemeral_sessions`
+
+The `allow_online_access` field enables issuance of Online Refresh Tokens (ORTs) for a resource server. ORTs are stateless, non-rotating tokens bound to the Auth0 session lifetime — when the session expires or is revoked, the ORT becomes invalid.
+
+`allow_online_access_with_ephemeral_sessions` permits ORT issuance even when the session uses a non-persistent (ephemeral) cookie. This field can only be set to `true` if `allow_online_access` is also `true`.
+
+Both fields default to `false` and require the `online_refresh_tokens` feature flag to be enabled on the tenant.
+
+**YAML Example**
+
+```yaml
+resourceServers:
+  - name: My API
+    identifier: https://api.example.com
+    allow_online_access: true
+    allow_online_access_with_ephemeral_sessions: false
+```
+
+**Directory Example**
+
+```json
+{
+  "name": "My API",
+  "identifier": "https://api.example.com",
+  "allow_online_access": true,
+  "allow_online_access_with_ephemeral_sessions": false
+}
+```
+
 ## Universal Login
 
 ### Pages
