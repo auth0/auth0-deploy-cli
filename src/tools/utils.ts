@@ -251,6 +251,7 @@ export const obfuscateSensitiveValues = (
   return newAsset;
 };
 
+// Uppercase-only to avoid false positives on lowercase Auth0 template variables like @@password@@
 const UNRESOLVED_PLACEHOLDER_REGEX = /^(##[A-Z0-9_]+##|@@[A-Z0-9_]+@@)$/;
 
 // Recursively collects all fields in an asset that still contain an unresolved
