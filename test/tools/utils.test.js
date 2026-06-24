@@ -631,7 +631,7 @@ describe('#filterExcluded', () => {
         id: 'asset-id-4',
         name: 'resolved-resource',
         secret: 'a-real-secret-value',
-        options: { domain: 'example.auth0.com' },
+        options: { domain: 'example.auth0.com', template: '@@password@@' },
       };
 
       const result = utils.validateNoUnresolvedPlaceholders(asset, 'clients', 'resolved-resource');
