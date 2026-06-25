@@ -100,7 +100,7 @@ async function dump(context: DirectoryContext): Promise<void> {
     const connectionName = sanitize(dumpedConnection.name);
 
     // Mask secrets
-    dumpedConnection = connectionDefaults(dumpedConnection);
+    dumpedConnection = connectionDefaults(dumpedConnection, context.config);
 
     if (dumpedConnection.strategy === 'email') {
       ensureProp(dumpedConnection, 'options.email.body');

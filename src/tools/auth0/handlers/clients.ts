@@ -57,6 +57,11 @@ const myOrganizationConfigurationSchema = {
       enum: Object.values(Management.ClientMyOrganizationDeletionBehaviorEnum),
       description: 'The deletion behavior for My Organization connections created by this client',
     },
+    invitation_landing_client_id: {
+      type: 'string',
+      description:
+        'The client ID of the invitation landing client for the My Organization configuration',
+    },
   },
   required: ['allowed_strategies', 'connection_deletion_behavior'],
 };
@@ -204,6 +209,25 @@ export const schema = {
             description:
               "Indicates whether Refresh Tokens created during a native-to-web session are tied to that session's lifetime. This determines if such refresh tokens should be automatically revoked when their corresponding sessions are. Usually configured in the web application.",
             default: true,
+          },
+          delegation: {
+            type: 'object',
+            description:
+              'Settings for impersonation via session transfer. Required to accept Session Transfer Tokens that contain an Actor.',
+            properties: {
+              allow_delegated_access: {
+                type: 'boolean',
+                description:
+                  'Allows clients to access an impersonated session via SSO by accepting STTs that contain an Actor.',
+              },
+              enforce_device_binding: {
+                type: 'string',
+                description:
+                  "Enforces device binding for impersonation sessions. Defaults to 'ip' when omitted.",
+                enum: ['ip', 'asn'],
+              },
+            },
+            additionalProperties: false,
           },
         },
         additionalProperties: true,
@@ -397,6 +421,20 @@ export const schema = {
             },
           },
         },
+      },
+      fedcm_login: {
+        type: ['object', 'null'],
+        description: 'Configuration for FedCM (Federated Credential Management) login',
+        properties: {
+          google: {
+            type: 'object',
+            properties: {
+              is_enabled: { type: 'boolean' },
+            },
+            required: ['is_enabled'],
+          },
+        },
+        required: ['google'],
       },
     },
     required: ['name'],
@@ -768,6 +806,18 @@ export default class ClientHandler extends DefaultAPIHandler {
         );
         if (connectionProfile?.id) {
           client.my_organization_configuration.connection_profile_id = connectionProfile.id;
+        }
+      }
+
+      const invitationLandingClientName =
+        client.my_organization_configuration.invitation_landing_client_id;
+      if (invitationLandingClientName) {
+        const invitationLandingClient = clientData?.find(
+          (c) => c.name === invitationLandingClientName
+        );
+        if (invitationLandingClient?.client_id) {
+          client.my_organization_configuration.invitation_landing_client_id =
+            invitationLandingClient.client_id;
         }
       }
 

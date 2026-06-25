@@ -65,6 +65,29 @@ describe('#networkACLs handler', () => {
 
       await stageFn.apply(handler, [{ networkACLs: data }]);
     });
+
+    it('should pass validation for priority greater than 10', async () => {
+      const handler = new NetworkACLsHandler({ client: {}, config } as any);
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        {
+          description: 'High Priority Rule',
+          active: true,
+          priority: 15,
+          rule: {
+            action: {
+              block: true,
+            },
+            scope: 'tenant',
+            match: {
+              asns: [12345],
+            },
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ networkACLs: data }]);
+    });
   });
 
   describe('#networkACLs process', () => {

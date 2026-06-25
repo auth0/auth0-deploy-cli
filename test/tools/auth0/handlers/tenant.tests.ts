@@ -236,13 +236,16 @@ describe('#tenant handler', () => {
         await processChanges.apply(handler, [{ tenant: { flags: proposedFlags } }]);
       });
 
-      it('should log a deprecation warning when enable_custom_domain_in_emails is set', async () => {
+      it('should log a deprecation warning and not send enable_custom_domain_in_emails to the API', async () => {
         const logWarnStub = sinon.stub(log, 'warn');
+        let capturedPayload: any = null;
 
         const auth0 = {
           tenants: {
             settings: {
-              update: async () => {},
+              update: async (data) => {
+                capturedPayload = data;
+              },
             },
           },
         };
@@ -256,6 +259,7 @@ describe('#tenant handler', () => {
         ]);
 
         expect(logWarnStub.calledWithMatch('enable_custom_domain_in_emails')).to.equal(true);
+        expect(capturedPayload?.flags?.enable_custom_domain_in_emails).to.equal(undefined);
 
         logWarnStub.restore();
       });

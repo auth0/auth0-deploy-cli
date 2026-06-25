@@ -179,6 +179,12 @@ Boolean. When enabled, will return identifiers of all resources. May be useful f
 
 Boolean. When enabled, exports JSON and YAML resources with keys sorted alphabetically, producing stable and deterministic output. Useful for reducing noise in diffs when keys would otherwise appear in non-deterministic order. Default: `false`.
 
+### `AUTH0_EXPORT_SECRETS`
+
+Boolean. When enabled, exports actual secret values (e.g. connection `client_secret`, log stream tokens, email provider credentials, attack protection CAPTCHA secrets) instead of replacing them with placeholder markers like `##CONNECTIONS_OAUTH2_SECRET##`. Useful for backup and restore scenarios where secrets need to be preserved. Default: `false`.
+
+> **Warning:** Enabling this option will write real credentials to exported files. Use with caution in shared or version-controlled environments.
+
 ### `EXCLUDED_PROPS`
 
 Provides ability to exclude any unwanted properties from management.
