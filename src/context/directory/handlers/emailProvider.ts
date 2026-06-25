@@ -36,7 +36,7 @@ async function dump(context: DirectoryContext): Promise<void> {
     const excludedDefaults = context.assets.exclude?.defaults || [];
     if (!excludedDefaults.includes('emailProvider')) {
       // Add placeholder for credentials as they cannot be exported
-      return emailProviderDefaults(context.assets.emailProvider);
+      return emailProviderDefaults(context.assets.emailProvider, context.config);
     }
     return context.assets.emailProvider;
   })();

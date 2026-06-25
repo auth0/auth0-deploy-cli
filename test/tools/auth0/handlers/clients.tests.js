@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 import pageClient from '../../../../src/tools/auth0/client';
 
+const Ajv = require('ajv');
 const { expect } = require('chai');
 const clients = require('../../../../src/tools/auth0/handlers/clients');
 const { mockPagedData } = require('../../../utils');
@@ -47,6 +48,52 @@ describe('#clients handler', () => {
     AUTH0_CLIENT_ID: 'client_id',
     AUTH0_ALLOW_DELETE: true,
   };
+
+  describe('#clients schema', () => {
+    const ajv = new Ajv({ useDefaults: true, nullable: true });
+
+    it('should pass validation with fedcm_login', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someFedCMClient',
+          fedcm_login: { google: { is_enabled: true } },
+        },
+      ]);
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should pass validation with fedcm_login set to null', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someFedCMClient',
+          fedcm_login: null,
+        },
+      ]);
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should fail validation with fedcm_login missing google', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someFedCMClient',
+          fedcm_login: {},
+        },
+      ]);
+      expect(valid).to.equal(false);
+    });
+
+    it('should fail validation with fedcm_login.google missing is_enabled', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someFedCMClient',
+          fedcm_login: { google: {} },
+        },
+      ]);
+      expect(valid).to.equal(false);
+    });
+  });
 
   describe('#clients validate', () => {
     it('should not allow same names', async () => {
@@ -307,6 +354,45 @@ describe('#clients handler', () => {
       await stageFn.apply(handler, [{ clients: [someNativeClient] }]);
     });
 
+    it('should create client with fedcm_login', async () => {
+      const fedcmClient = {
+        name: 'someFedCMClient',
+        fedcm_login: {
+          google: {
+            is_enabled: true,
+          },
+        },
+      };
+
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('someFedCMClient');
+            expect(data.fedcm_login).to.deep.equal({
+              google: {
+                is_enabled: true,
+              },
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ clients: [fedcmClient] }]);
+    });
+
     it('should create client with refresh token policies', async () => {
       const clientWithRefreshTokenPolicies = {
         name: 'clientWithRefreshTokenPolicies',
@@ -499,7 +585,18 @@ describe('#clients handler', () => {
         my_organization_configuration: {
           user_attribute_profile_id: 'My User Attribute Profile',
           connection_profile_id: 'My Connection Profile',
+          invitation_landing_client_id: 'My Invitation Landing Client',
           allowed_strategies: ['okta', 'samlp'],
+          connection_deletion_behavior: 'allow_if_empty',
+        },
+      };
+
+      const clientWithUnknownInvitation = {
+        name: 'Client With Unknown Invitation',
+        app_type: 'regular_web',
+        my_organization_configuration: {
+          invitation_landing_client_id: 'Unknown Client',
+          allowed_strategies: ['okta'],
           connection_deletion_behavior: 'allow_if_empty',
         },
       };
@@ -509,18 +606,27 @@ describe('#clients handler', () => {
           create: function (data) {
             wasCreateCalled = true;
             expect(data).to.be.an('object');
-            expect(data.name).to.equal('Client With My Org Config');
-            expect(data.my_organization_configuration).to.deep.equal({
-              user_attribute_profile_id: 'uap_123',
-              connection_profile_id: 'cp_123',
-              allowed_strategies: ['okta', 'samlp'],
-              connection_deletion_behavior: 'allow_if_empty',
-            });
+            if (data.name === 'Client With My Org Config') {
+              expect(data.my_organization_configuration).to.deep.equal({
+                user_attribute_profile_id: 'uap_123',
+                connection_profile_id: 'cp_123',
+                invitation_landing_client_id: 'cli_abc',
+                allowed_strategies: ['okta', 'samlp'],
+                connection_deletion_behavior: 'allow_if_empty',
+              });
+            } else if (data.name === 'Client With Unknown Invitation') {
+              expect(data.my_organization_configuration.invitation_landing_client_id).to.equal(
+                'Unknown Client'
+              );
+            }
             return Promise.resolve({ data });
           },
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          list: (params) => mockPagedData(params, 'clients', []),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              { client_id: 'cli_abc', name: 'My Invitation Landing Client' },
+            ]),
         },
         connectionProfiles: {
           list: (params) =>
@@ -539,7 +645,9 @@ describe('#clients handler', () => {
 
       const handler = new clients.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
-      await stageFn.apply(handler, [{ clients: [clientWithMyOrganizationConfig] }]);
+      await stageFn.apply(handler, [
+        { clients: [clientWithMyOrganizationConfig, clientWithUnknownInvitation] },
+      ]);
       expect(wasCreateCalled).to.be.equal(true);
     });
 

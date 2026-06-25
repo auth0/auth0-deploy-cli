@@ -16,6 +16,7 @@ export default async function exportCMD(params: ExportParams) {
     config: configObj,
     export_ids: exportIds,
     export_ordered: exportOrdered,
+    export_secrets: exportSecrets,
     secret: clientSecret,
     env: shouldInheritEnv = false,
     experimental_ea: experimentalEA,
@@ -49,6 +50,11 @@ export default async function exportCMD(params: ExportParams) {
   // Allow passed in export_ordered to override the configured one
   if (exportOrdered) {
     overrides.AUTH0_EXPORT_ORDERED = exportOrdered;
+  }
+
+  // Allow passed in export_secrets to override the configured one
+  if (exportSecrets) {
+    overrides.AUTH0_EXPORT_SECRETS = exportSecrets;
   }
 
   // Overrides AUTH0_INCLUDE_EXPERIMENTAL_EA is experimental_ea passed in command line

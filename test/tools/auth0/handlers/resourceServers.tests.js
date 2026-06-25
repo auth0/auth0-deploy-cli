@@ -82,6 +82,8 @@ describe('#resourceServers handler', () => {
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someAPI');
             expect(data.identifier).to.equal('https://api.example.com');
+            expect(data.allow_online_access).to.equal(true);
+            expect(data.allow_online_access_with_ephemeral_sessions).to.equal(false);
             return Promise.resolve(data);
           },
           update: () => Promise.resolve([]),
@@ -95,7 +97,16 @@ describe('#resourceServers handler', () => {
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
-        { resourceServers: [{ name: 'someAPI', identifier: 'https://api.example.com' }] },
+        {
+          resourceServers: [
+            {
+              name: 'someAPI',
+              identifier: 'https://api.example.com',
+              allow_online_access: true,
+              allow_online_access_with_ephemeral_sessions: false,
+            },
+          ],
+        },
       ]);
     });
 
@@ -334,6 +345,8 @@ describe('#resourceServers handler', () => {
             expect(data).to.be.an('object');
             expect(id).to.equal('rs1');
             expect(data.scope).to.equal('new:scope');
+            expect(data.allow_online_access).to.equal(true);
+            expect(data.allow_online_access_with_ephemeral_sessions).to.equal(false);
             return Promise.resolve(data);
           },
           delete: () => Promise.resolve([]),
@@ -349,7 +362,17 @@ describe('#resourceServers handler', () => {
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [
-        { resourceServers: [{ name: 'someAPI', identifier: 'some-api', scope: 'new:scope' }] },
+        {
+          resourceServers: [
+            {
+              name: 'someAPI',
+              identifier: 'some-api',
+              scope: 'new:scope',
+              allow_online_access: true,
+              allow_online_access_with_ephemeral_sessions: false,
+            },
+          ],
+        },
       ]);
     });
 

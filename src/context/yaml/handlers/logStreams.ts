@@ -21,7 +21,7 @@ async function dump(context: YAMLContext): Promise<ParsedLogStreams> {
   if (!logStreams) return { logStreams: null };
 
   // masked sensitive fields
-  const maskedLogStreams = logStreamDefaults(logStreams);
+  const maskedLogStreams = logStreamDefaults(logStreams, context.config);
 
   return {
     logStreams: maskedLogStreams,

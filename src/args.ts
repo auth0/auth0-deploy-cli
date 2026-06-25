@@ -26,6 +26,7 @@ type ExportSpecificParams = {
   output_folder: string;
   export_ids?: boolean;
   export_ordered?: boolean;
+  export_secrets?: boolean;
 };
 
 export type ExportParams = ExportSpecificParams & SharedParams;
@@ -137,6 +138,11 @@ function getParams(): CliParams {
         alias: 's',
         describe: 'Order keys in exported JSON files for consistent diffs.',
         type: 'boolean',
+      },
+      export_secrets: {
+        describe: 'Export actual secret values instead of placeholder markers.',
+        type: 'boolean',
+        default: false,
       },
     })
     .example(

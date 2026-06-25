@@ -57,6 +57,11 @@ const myOrganizationConfigurationSchema = {
       enum: Object.values(Management.ClientMyOrganizationDeletionBehaviorEnum),
       description: 'The deletion behavior for My Organization connections created by this client',
     },
+    invitation_landing_client_id: {
+      type: 'string',
+      description:
+        'The client ID of the invitation landing client for the My Organization configuration',
+    },
   },
   required: ['allowed_strategies', 'connection_deletion_behavior'],
 };
@@ -397,6 +402,20 @@ export const schema = {
             },
           },
         },
+      },
+      fedcm_login: {
+        type: ['object', 'null'],
+        description: 'Configuration for FedCM (Federated Credential Management) login',
+        properties: {
+          google: {
+            type: 'object',
+            properties: {
+              is_enabled: { type: 'boolean' },
+            },
+            required: ['is_enabled'],
+          },
+        },
+        required: ['google'],
       },
     },
     required: ['name'],
@@ -768,6 +787,18 @@ export default class ClientHandler extends DefaultAPIHandler {
         );
         if (connectionProfile?.id) {
           client.my_organization_configuration.connection_profile_id = connectionProfile.id;
+        }
+      }
+
+      const invitationLandingClientName =
+        client.my_organization_configuration.invitation_landing_client_id;
+      if (invitationLandingClientName) {
+        const invitationLandingClient = clientData?.find(
+          (c) => c.name === invitationLandingClientName
+        );
+        if (invitationLandingClient?.client_id) {
+          client.my_organization_configuration.invitation_landing_client_id =
+            invitationLandingClient.client_id;
         }
       }
 
