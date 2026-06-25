@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.38.0] - 2026-06-25
+
 ### Added
 
 - Add `session_transfer` delegation config support for CTE impersonation on the Client entity. [#1406]
@@ -1834,10 +1836,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1391]: https://github.com/auth0/auth0-deploy-cli/issues/1391
 [#1392]: https://github.com/auth0/auth0-deploy-cli/issues/1392
 [#1396]: https://github.com/auth0/auth0-deploy-cli/issues/1396
+[#1398]: https://github.com/auth0/auth0-deploy-cli/issues/1398
 [#1400]: https://github.com/auth0/auth0-deploy-cli/issues/1400
 [#1401]: https://github.com/auth0/auth0-deploy-cli/issues/1401
 [#1403]: https://github.com/auth0/auth0-deploy-cli/issues/1403
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.37.0...HEAD
+[#1404]: https://github.com/auth0/auth0-deploy-cli/issues/1404
+[#1406]: https://github.com/auth0/auth0-deploy-cli/issues/1406
+[#1407]: https://github.com/auth0/auth0-deploy-cli/issues/1407
+[#1408]: https://github.com/auth0/auth0-deploy-cli/issues/1408
+[#1409]: https://github.com/auth0/auth0-deploy-cli/issues/1409
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.38.0...HEAD
+[8.38.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.37.0...v8.38.0
 [8.37.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.36.0...v8.37.0
 [8.36.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.35.0...v8.36.0
 [8.35.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.34.0...v8.35.0
