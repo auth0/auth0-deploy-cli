@@ -491,6 +491,46 @@ describe('#clients handler', () => {
       expect(wasCreateCalled).to.be.true;
     });
 
+    it('should allow valid session_transfer delegation property in client', async () => {
+      const clientWithDelegation = {
+        name: 'clientWithDelegation',
+        session_transfer: {
+          delegation: {
+            allow_delegated_access: true,
+            enforce_device_binding: 'ip',
+          },
+        },
+      };
+      let wasCreateCalled = false;
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            wasCreateCalled = true;
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('clientWithDelegation');
+            expect(data.session_transfer.delegation).to.deep.equal({
+              allow_delegated_access: true,
+              enforce_device_binding: 'ip',
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ clients: [clientWithDelegation] }]);
+      // eslint-disable-next-line no-unused-expressions
+      expect(wasCreateCalled).to.be.true;
+    });
+
     it('should create resource server client', async () => {
       let wasCreateCalled = false;
       const resourceServerClient = {
