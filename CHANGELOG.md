@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `session_transfer` delegation config support for CTE impersonation on the Client entity. [#1406]
+- Add `fedcm_login` support for Google One Tap / FedCM in Universal Login on the Client entity. [#1407]
+- Add `login-post-identifier` and `signup-post-identifier` as supported action triggers. [#1409]
+- Add `allow_online_access` and `allow_online_access_with_ephemeral_sessions` fields to resource server. [#1398]
+
+### Fixed
+
+- Fix keyword placeholder validation to allow lowercase Auth0 template variables (e.g. `@@password@@`). [#1408]
+- Re-apply prompt settings after branding update to prevent Authentication Profile reset. [#1404]
+
 ## [8.37.0] - 2026-06-17
 
 ### Added
