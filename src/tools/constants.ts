@@ -70,6 +70,8 @@ const constants = {
     'send-phone-message',
     'password-reset-post-challenge',
     'custom-token-exchange',
+    'login-post-identifier',
+    'signup-post-identifier',
   ],
   EMAIL_TEMPLATES_DIRECTORY: 'emails',
   EMAIL_VERIFY,

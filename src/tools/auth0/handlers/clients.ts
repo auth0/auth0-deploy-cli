@@ -210,6 +210,25 @@ export const schema = {
               "Indicates whether Refresh Tokens created during a native-to-web session are tied to that session's lifetime. This determines if such refresh tokens should be automatically revoked when their corresponding sessions are. Usually configured in the web application.",
             default: true,
           },
+          delegation: {
+            type: 'object',
+            description:
+              'Settings for impersonation via session transfer. Required to accept Session Transfer Tokens that contain an Actor.',
+            properties: {
+              allow_delegated_access: {
+                type: 'boolean',
+                description:
+                  'Allows clients to access an impersonated session via SSO by accepting STTs that contain an Actor.',
+              },
+              enforce_device_binding: {
+                type: 'string',
+                description:
+                  "Enforces device binding for impersonation sessions. Defaults to 'ip' when omitted.",
+                enum: ['ip', 'asn'],
+              },
+            },
+            additionalProperties: false,
+          },
         },
         additionalProperties: true,
       },
@@ -402,6 +421,20 @@ export const schema = {
             },
           },
         },
+      },
+      fedcm_login: {
+        type: ['object', 'null'],
+        description: 'Configuration for FedCM (Federated Credential Management) login',
+        properties: {
+          google: {
+            type: 'object',
+            properties: {
+              is_enabled: { type: 'boolean' },
+            },
+            required: ['is_enabled'],
+          },
+        },
+        required: ['google'],
       },
     },
     required: ['name'],
