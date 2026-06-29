@@ -246,6 +246,14 @@ export function mockMgmtClient() {
     supplementalSignals: {
       get: () => Promise.resolve({ akamai_enabled: false }),
     },
+    eventStreams: {
+      list: () =>
+        Promise.resolve({
+          data: [],
+          hasNextPage: () => false,
+          getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+        }),
+    },
   };
 }
 

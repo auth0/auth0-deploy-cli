@@ -1367,3 +1367,100 @@ Folder: `./supplemental-signals.json`
 ```
 
 For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2#!/Supplemental_Signals).
+
+## Event Streams
+
+Event Streams allow you to subscribe to Auth0 tenant events and forward them to external destinations (webhook, AWS EventBridge, or an Auth0 Action).
+
+### Schema Properties
+
+- `name` (string, required): Display name for the event stream.
+- `status` (string): `enabled` or `disabled`.
+- `subscriptions` (array): List of event types to subscribe to. Each entry has an `event_type` string (e.g. `user.created`, `organization.member.added`). If omitted, no events are forwarded.
+- `destination` (object, required): Destination configuration.
+  - `type` (string): `webhook`, `eventbridge`, or `action`.
+  - `configuration` (object): Destination-specific settings.
+
+#### Webhook destination
+
+```json
+{
+  "type": "webhook",
+  "configuration": {
+    "webhook_endpoint": "https://example.com/events",
+    "webhook_authorization": {
+      "method": "bearer"
+    }
+  }
+}
+```
+
+Supported `webhook_authorization` methods: `basic` (username only returned), `bearer`, `custom_header`. Secrets are masked on export unless `AUTH0_EXPORT_SECRETS: true`.
+
+#### AWS EventBridge destination
+
+```json
+{
+  "type": "eventbridge",
+  "configuration": {
+    "aws_account_id": "123456789012",
+    "aws_region": "us-east-1"
+  }
+}
+```
+
+Note: EventBridge streams cannot have their `destination` updated after creation. Only `name`, `subscriptions`, and `status` can be patched.
+
+#### Action destination
+
+```json
+{
+  "type": "action",
+  "configuration": {
+    "action_id": "act_abc123"
+  }
+}
+```
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+eventStreams:
+  - name: My Webhook Stream
+    status: enabled
+    subscriptions:
+      - event_type: user.created
+      - event_type: user.deleted
+    destination:
+      type: webhook
+      configuration:
+        webhook_endpoint: https://example.com/events
+        webhook_authorization:
+          method: bearer
+```
+
+### Directory Example
+
+Folder: `./event-streams/`
+
+Each event stream is stored as a separate JSON file named after the stream (e.g. `my-webhook-stream.json`):
+
+```json
+{
+  "name": "My Webhook Stream",
+  "status": "enabled",
+  "subscriptions": [{ "event_type": "user.created" }],
+  "destination": {
+    "type": "webhook",
+    "configuration": {
+      "webhook_endpoint": "https://example.com/events",
+      "webhook_authorization": {
+        "method": "bearer"
+      }
+    }
+  }
+}
+```
+
+For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2/event-streams/get-event-streams).

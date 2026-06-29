@@ -38,6 +38,7 @@ import userAttributeProfiles from './userAttributeProfiles';
 import connectionProfiles from './connectionProfiles';
 import tokenExchangeProfiles from './tokenExchangeProfiles';
 import supplementalSignals from './supplementalSignals';
+import eventStreams from './eventStreams';
 
 import DirectoryContext from '..';
 import { AssetTypes, Asset } from '../../../types';
@@ -92,6 +93,7 @@ const directoryHandlers: {
   connectionProfiles,
   tokenExchangeProfiles,
   supplementalSignals,
+  eventStreams,
 };
 
 export default directoryHandlers;
