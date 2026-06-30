@@ -384,6 +384,8 @@ triggers:
   post-user-registration: []
   pre-user-registration: []
   send-phone-message: []
+  login-post-identifier: []
+  signup-post-identifier: []
 
 prompts:
   customText:
@@ -600,3 +602,25 @@ riskAssessment:
 
 supplementalSignals:
   akamai_enabled: true
+
+eventStreams:
+  - name: My Webhook Stream
+    status: enabled
+    subscriptions:
+      - event_type: user.created
+      - event_type: user.deleted
+    destination:
+      type: webhook
+      configuration:
+        webhook_endpoint: https://example.com/events
+        webhook_authorization:
+          method: bearer
+          token: "##EVENT_STREAM_WEBHOOK_BEARER_TOKEN##"
+  - name: My Action Stream
+    status: enabled
+    subscriptions:
+      - event_type: user.created
+    destination:
+      type: action
+      configuration:
+        action_id: "action-name"

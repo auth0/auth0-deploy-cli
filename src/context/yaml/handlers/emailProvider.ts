@@ -23,7 +23,7 @@ async function dump(context: YAMLContext): Promise<ParsedEmailProvider> {
     const excludedDefaults = context.assets.exclude?.defaults || [];
     if (emailProvider && !excludedDefaults.includes('emailProvider')) {
       // Add placeholder for credentials as they cannot be exported
-      return emailProviderDefaults(emailProvider);
+      return emailProviderDefaults(emailProvider, context.config);
     }
     return emailProvider;
   })();

@@ -7,9 +7,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.38.0] - 2026-06-25
+
 ### Added
 
-- Add `AUTH0_IGNORE_DRY_RUN_FIELDS` configuration option, a map of handler type → field paths to exclude from `--dry-run` diff comparisons. Merges additively with each handler's built-in defaults so users can suppress noise from fields the Management API never returns (e.g. `client_secret`, action `secrets`, email provider `credentials.api_key`) without losing the curated defaults.
+- Add `session_transfer` delegation config support for CTE impersonation on the Client entity. [#1406]
+- Add `fedcm_login` support for Google One Tap / FedCM in Universal Login on the Client entity. [#1407]
+- Add `login-post-identifier` and `signup-post-identifier` as supported action triggers. [#1409]
+- Add `allow_online_access` and `allow_online_access_with_ephemeral_sessions` fields to resource server. [#1398]
+
+### Fixed
+
+- Fix keyword placeholder validation to allow lowercase Auth0 template variables (e.g. `@@password@@`). [#1408]
+- Re-apply prompt settings after branding update to prevent Authentication Profile reset. [#1404]
+
+## [8.37.0] - 2026-06-17
+
+### Added
+
+- Add `invitation_landing_client_id` support to `my_organization_configuration` on the Client entity, with client ID-to-name resolution on export and name-to-ID resolution on import. [#1400]
+
+### Fixed
+
+- Remove `enable_custom_domain_in_emails` from managed tenant flags to prevent import failures on tenants without a ready custom domain. [#1401]
+- Remove incorrect `maximum: 10` constraint on Network ACL `priority` field in schema validation. [#1403]
+
+## [8.36.0] - 2026-06-05
+
+### Added
+
+- Add optional flag to skip secret masking during export. [#1396]
+
+### Fixed
+
+- Remove stale connection files from directory export when connections are deleted. [#1389]
+
+## [8.35.0] - 2026-05-22
+
+### Added
+
+- Add `AUTH0_IGNORE_DRY_RUN_FIELDS` config option to exclude specified fields from `--dry-run` diff output per handler type. [#1385]
+- Add hostnames and CIDR fields to network ACL match schema. [#1386]
+- Add `ES384` and `ES512` as valid `dpop_signing_alg` values for OIDC and Okta enterprise connections (GA). [#1391]
+
+### Deprecated
+
+- Deprecate absolute and external file path references in config handlers; a warning is emitted when detected. Support will be removed in a future major version. [#1392]
+
+### Fixed
+
+- Fix keyword markers in themes not being preserved during default export configuration. [#1387]
 
 ## [8.34.0] - 2026-05-11
 
@@ -1782,7 +1829,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1379]: https://github.com/auth0/auth0-deploy-cli/issues/1379
 [#1380]: https://github.com/auth0/auth0-deploy-cli/issues/1380
 [#1381]: https://github.com/auth0/auth0-deploy-cli/issues/1381
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.34.0...HEAD
+[#1385]: https://github.com/auth0/auth0-deploy-cli/issues/1385
+[#1386]: https://github.com/auth0/auth0-deploy-cli/issues/1386
+[#1387]: https://github.com/auth0/auth0-deploy-cli/issues/1387
+[#1389]: https://github.com/auth0/auth0-deploy-cli/issues/1389
+[#1391]: https://github.com/auth0/auth0-deploy-cli/issues/1391
+[#1392]: https://github.com/auth0/auth0-deploy-cli/issues/1392
+[#1396]: https://github.com/auth0/auth0-deploy-cli/issues/1396
+[#1398]: https://github.com/auth0/auth0-deploy-cli/issues/1398
+[#1400]: https://github.com/auth0/auth0-deploy-cli/issues/1400
+[#1401]: https://github.com/auth0/auth0-deploy-cli/issues/1401
+[#1403]: https://github.com/auth0/auth0-deploy-cli/issues/1403
+[#1404]: https://github.com/auth0/auth0-deploy-cli/issues/1404
+[#1406]: https://github.com/auth0/auth0-deploy-cli/issues/1406
+[#1407]: https://github.com/auth0/auth0-deploy-cli/issues/1407
+[#1408]: https://github.com/auth0/auth0-deploy-cli/issues/1408
+[#1409]: https://github.com/auth0/auth0-deploy-cli/issues/1409
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.38.0...HEAD
+[8.38.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.37.0...v8.38.0
+[8.37.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.36.0...v8.37.0
+[8.36.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.35.0...v8.36.0
+[8.35.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.34.0...v8.35.0
 [8.34.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.33.0...v8.34.0
 [8.33.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.32.0...v8.33.0
 [8.32.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.31.0...v8.32.0

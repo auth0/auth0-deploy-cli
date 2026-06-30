@@ -136,6 +136,10 @@ describe('#branding handler', () => {
             },
           },
         },
+        prompts: {
+          getSettings: () => Promise.resolve({ identifier_first: true }),
+          updateSettings: () => Promise.resolve(),
+        },
       };
 
       const handler = new branding.default({ client: auth0 });
@@ -173,6 +177,10 @@ describe('#branding handler', () => {
               }
             },
           },
+        },
+        prompts: {
+          getSettings: () => Promise.resolve({ identifier_first: true }),
+          updateSettings: () => Promise.resolve(),
         },
       };
 
@@ -212,6 +220,10 @@ describe('#branding handler', () => {
             expect(data.logo_url).to.be.undefined; // eslint-disable-line no-unused-expressions
             wasUpdateCalled = true;
           },
+        },
+        prompts: {
+          getSettings: () => Promise.resolve({ identifier_first: true }),
+          updateSettings: () => Promise.resolve(),
         },
       };
 
@@ -260,6 +272,73 @@ describe('#branding handler', () => {
       ]);
 
       expect(wasUpdateCalled).to.equal(false);
+    });
+
+    it('should re-apply prompt settings after branding update to prevent Authentication Profile reset', async () => {
+      const callOrder = [];
+
+      const auth0 = {
+        branding: {
+          update: () => {
+            callOrder.push('branding.update');
+            return Promise.resolve();
+          },
+        },
+        prompts: {
+          getSettings: () => {
+            callOrder.push('prompts.getSettings');
+            return Promise.resolve({ identifier_first: true, universal_login_experience: 'new' });
+          },
+          updateSettings: (data) => {
+            callOrder.push('prompts.updateSettings');
+            expect(data).to.deep.equal({
+              identifier_first: true,
+              universal_login_experience: 'new',
+            });
+            return Promise.resolve();
+          },
+        },
+      };
+
+      const handler = new branding.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ branding: { logo_url: 'https://example.com/logo.png' } }]);
+
+      expect(callOrder).to.deep.equal([
+        'prompts.getSettings',
+        'branding.update',
+        'prompts.updateSettings',
+      ]);
+    });
+
+    it('should not throw if prompt settings fetch fails during branding update', async () => {
+      let wasUpdateCalled = false;
+      let wasPromptUpdateCalled = false;
+
+      const auth0 = {
+        branding: {
+          update: () => {
+            wasUpdateCalled = true;
+            return Promise.resolve();
+          },
+        },
+        prompts: {
+          getSettings: () => Promise.reject(new Error('Insufficient scope')),
+          updateSettings: () => {
+            wasPromptUpdateCalled = true;
+            return Promise.resolve();
+          },
+        },
+      };
+
+      const handler = new branding.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ branding: { logo_url: 'https://example.com/logo.png' } }]);
+
+      expect(wasUpdateCalled).to.equal(true);
+      expect(wasPromptUpdateCalled).to.equal(false);
     });
 
     it('should not throw, and be no-op if branding not set in context', async () => {

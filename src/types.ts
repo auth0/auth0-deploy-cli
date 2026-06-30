@@ -21,6 +21,7 @@ import { AttackProtection } from './tools/auth0/handlers/attackProtection';
 import { TokenExchangeProfile } from './tools/auth0/handlers/tokenExchangeProfiles';
 import { RiskAssessment } from './tools/auth0/handlers/riskAssessment';
 import { SupplementalSignals } from './tools/auth0/handlers/supplementalSignals';
+import { EventStream } from './tools/auth0/handlers/eventStreams';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -78,6 +79,7 @@ export type Config = {
   AUTH0_KEYWORD_REPLACE_MAPPINGS?: KeywordMappings;
   AUTH0_EXPORT_IDENTIFIERS?: boolean;
   AUTH0_EXPORT_ORDERED?: boolean;
+  AUTH0_EXPORT_SECRETS?: boolean;
   AUTH0_CONNECTIONS_DIRECTORY?: string;
   AUTH0_DRY_RUN?: boolean | 'preview';
   AUTH0_DRY_RUN_INTERACTIVE?: boolean;
@@ -164,6 +166,7 @@ export type Assets = Partial<{
   userAttributeProfilesWithId: UserAttributeProfile[] | null;
   connectionProfiles: Asset[] | null;
   tokenExchangeProfiles: TokenExchangeProfile[] | null;
+  eventStreams: EventStream[] | null;
 }>;
 
 export type CalculatedChanges = {
@@ -229,7 +232,8 @@ export type AssetTypes =
   | 'userAttributeProfiles'
   | 'connectionProfiles'
   | 'tokenExchangeProfiles'
-  | 'supplementalSignals';
+  | 'supplementalSignals'
+  | 'eventStreams';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 

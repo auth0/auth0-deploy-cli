@@ -70,6 +70,8 @@ const constants = {
     'send-phone-message',
     'password-reset-post-challenge',
     'custom-token-exchange',
+    'login-post-identifier',
+    'signup-post-identifier',
   ],
   EMAIL_TEMPLATES_DIRECTORY: 'emails',
   EMAIL_VERIFY,
@@ -222,6 +224,7 @@ const constants = {
   CONNECTION_PROFILES_DIRECTORY: 'connection-profiles',
   TOKEN_EXCHANGE_PROFILES_DIRECTORY: 'token-exchange-profiles',
   SUPPLEMENTAL_SIGNALS_DIRECTORY: 'supplemental-signals',
+  EVENT_STREAMS_DIRECTORY: 'event-streams',
 };
 
 export default constants;

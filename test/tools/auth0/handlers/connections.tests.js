@@ -50,6 +50,20 @@ describe('#connections handler', () => {
           },
         },
         {
+          name: 'oidc-connection-es384',
+          strategy: 'oidc',
+          options: {
+            dpop_signing_alg: 'ES384',
+          },
+        },
+        {
+          name: 'oidc-connection-es512',
+          strategy: 'oidc',
+          options: {
+            dpop_signing_alg: 'ES512',
+          },
+        },
+        {
           name: 'okta-connection',
           strategy: 'okta',
           options: {
@@ -109,6 +123,7 @@ describe('#connections handler', () => {
             token_endpoint_auth_signing_alg: 'RS256',
             id_token_signed_response_algs: ['RS256', 'RS512'],
             token_endpoint_jwtca_aud_format: 'issuer',
+            id_token_session_expiry_supported: true,
           },
         },
         {
@@ -118,6 +133,7 @@ describe('#connections handler', () => {
             token_endpoint_auth_signing_alg: 'RS384',
             id_token_signed_response_algs: ['RS384'],
             token_endpoint_jwtca_aud_format: 'token_endpoint',
+            id_token_session_expiry_supported: false,
           },
         },
       ];
@@ -136,6 +152,7 @@ describe('#connections handler', () => {
             token_endpoint_auth_signing_alg: 'RS256',
             id_token_signed_response_algs: ['RS256'],
             token_endpoint_jwtca_aud_format: 'issuer',
+            id_token_session_expiry_supported: true,
           },
         },
       ];

@@ -1,9 +1,22 @@
 import { AttackProtection } from '../tools/auth0/handlers/attackProtection';
 import { maskSecretAtPath } from '../tools/utils';
+import { Config } from '../types';
+
+// env vars arrive as strings, so check both forms
+function isExportSecrets(config?: Pick<Config, 'AUTH0_EXPORT_SECRETS'>): boolean {
+  return (
+    config?.AUTH0_EXPORT_SECRETS === true || (config?.AUTH0_EXPORT_SECRETS as unknown) === 'true'
+  );
+}
 
 // eslint-disable-next-line import/prefer-default-export
-export function emailProviderDefaults(emailProvider) {
+export function emailProviderDefaults(
+  emailProvider,
+  config?: Pick<Config, 'AUTH0_EXPORT_SECRETS'>
+) {
   // eslint-disable-line
+  if (isExportSecrets(config)) return emailProvider;
+
   const updated = { ...emailProvider };
 
   const apiKeyProviders = ['mailgun', 'mandrill', 'sendgrid', 'sparkpost'];
@@ -111,8 +124,8 @@ export function phoneTemplatesDefaults(phoneTemplate) {
   return updated;
 }
 
-export function connectionDefaults(connection) {
-  if (connection.options) {
+export function connectionDefaults(connection, config?: Pick<Config, 'AUTH0_EXPORT_SECRETS'>) {
+  if (!isExportSecrets(config) && connection.options) {
     // Mask secret for key: connection.options.client_secret
     maskSecretAtPath({
       resourceTypeName: 'connections',
@@ -124,7 +137,9 @@ export function connectionDefaults(connection) {
   return connection;
 }
 
-export function logStreamDefaults(logStreams) {
+export function logStreamDefaults(logStreams, config?: Pick<Config, 'AUTH0_EXPORT_SECRETS'>) {
+  if (isExportSecrets(config)) return logStreams;
+
   // masked sensitive fields
   const sensitiveKeys = [
     'httpAuthorization',
@@ -152,7 +167,61 @@ export function logStreamDefaults(logStreams) {
   return maskedLogStreams;
 }
 
-export function attackProtectionDefaults(attackProtection: AttackProtection) {
+export function eventStreamDefaults(
+  eventStreams: any[],
+  config?: Pick<Config, 'AUTH0_EXPORT_SECRETS'>
+): any[] {
+  return eventStreams.map((stream) => {
+    const { created_at: _ca, updated_at: _ua, ...rest } = stream;
+    stream = rest;
+
+    if (isExportSecrets(config)) return stream;
+    if (stream.destination?.type !== 'webhook') return stream;
+
+    const auth = stream.destination.configuration?.webhook_authorization;
+    if (!auth) return stream;
+
+    const method = auth.method;
+    let maskedAuth: { [key: string]: any };
+
+    if (method === 'basic') {
+      maskedAuth = {
+        method,
+        username: auth.username ?? '',
+        password: `##EVENT_STREAM_WEBHOOK_BASIC_AUTH_PASSWORD##`,
+      };
+    } else if (method === 'bearer') {
+      maskedAuth = { method, token: `##EVENT_STREAM_WEBHOOK_BEARER_TOKEN##` };
+    } else if (method === 'custom_header') {
+      maskedAuth = {
+        method,
+        header_key: auth.header_key ?? '',
+        header_value: `##EVENT_STREAM_WEBHOOK_HEADER_VALUE##`,
+      };
+    } else {
+      // Unknown auth method — preserve as-is rather than silently dropping credentials
+      return stream;
+    }
+
+    return {
+      ...stream,
+      destination: {
+        ...stream.destination,
+        configuration: {
+          ...stream.destination.configuration,
+          webhook_authorization: maskedAuth,
+        },
+      },
+    };
+  });
+}
+
+export function attackProtectionDefaults(
+  attackProtection: AttackProtection,
+  config?: Pick<Config, 'AUTH0_EXPORT_SECRETS'>
+) {
+  if (isExportSecrets(config)) return attackProtection;
+
   const { captcha } = attackProtection;
 
   if (captcha) {

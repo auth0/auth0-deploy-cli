@@ -1,0 +1,13 @@
+{
+  "name": "My Action Stream",
+  "status": "enabled",
+  "subscriptions": [
+    { "event_type": "user.created" }
+  ],
+  "destination": {
+    "type": "action",
+    "configuration": {
+      "action_id": "action-name"
+    }
+  }
+}

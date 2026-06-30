@@ -26,6 +26,7 @@ const connectionOptionsSchema = {
     },
     dpop_signing_alg: {
       type: 'string',
+      enum: ['ES256', 'ES384', 'ES512', 'Ed25519'],
     },
     token_endpoint_auth_signing_alg: {
       type: 'string',
@@ -50,6 +51,7 @@ const oidcOktaOnlyConnectionOptionFields = [
   'token_endpoint_auth_signing_alg',
   'id_token_signed_response_algs',
   'token_endpoint_jwtca_aud_format',
+  'id_token_session_expiry_supported',
 ];
 
 export const schema = {
