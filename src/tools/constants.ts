@@ -224,6 +224,7 @@ const constants = {
   CONNECTION_PROFILES_DIRECTORY: 'connection-profiles',
   TOKEN_EXCHANGE_PROFILES_DIRECTORY: 'token-exchange-profiles',
   SUPPLEMENTAL_SIGNALS_DIRECTORY: 'supplemental-signals',
+  EVENT_STREAMS_DIRECTORY: 'event-streams',
 };
 
 export default constants;
