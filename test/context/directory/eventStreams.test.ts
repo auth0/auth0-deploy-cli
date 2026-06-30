@@ -205,4 +205,38 @@ describe('#directory context event streams', () => {
     const parsed = handler.parse(context);
     expect(parsed.eventStreams).to.equal(null);
   });
+
+  it('should remove stale event stream files not present in current tenant export', async () => {
+    const fs = require('fs-extra');
+    const dir = path.join(testDataDir, 'directory', 'eventStreamsStaleCleanup');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    const eventStreamsDir = path.join(dir, constants.EVENT_STREAMS_DIRECTORY);
+    fs.ensureDirSync(eventStreamsDir);
+
+    // Pre-seed a stale file representing a previously-exported stream
+    fs.writeJsonSync(path.join(eventStreamsDir, 'deleted-stream.json'), {
+      name: 'deleted-stream',
+      status: 'enabled',
+    });
+
+    // Dump with only the surviving stream
+    context.assets.eventStreams = [
+      {
+        name: 'surviving-stream',
+        status: 'enabled',
+        destination: {
+          type: 'eventbridge',
+          configuration: { aws_account_id: '123456789012', aws_region: 'us-east-1' },
+        },
+      },
+    ];
+
+    await handler.dump(context);
+
+    const remaining = fs.readdirSync(eventStreamsDir);
+    expect(remaining).to.include('surviving-stream.json');
+    expect(remaining).to.not.include('deleted-stream.json');
+  });
 });

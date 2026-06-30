@@ -40,10 +40,22 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   const maskedEventStreams = eventStreamDefaults(eventStreams, context.config);
 
+  const expectedFiles = new Set<string>();
+
   maskedEventStreams.forEach((eventStream) => {
-    const streamFile = path.join(eventStreamsDirectory, `${sanitize(eventStream.name)}.json`);
+    const fileName = `${sanitize(eventStream.name)}.json`;
+    const streamFile = path.join(eventStreamsDirectory, fileName);
     dumpJSON(streamFile, eventStream);
+    expectedFiles.add(fileName);
   });
+
+  // Remove files for event streams no longer present in the tenant
+  for (const existing of fs.readdirSync(eventStreamsDirectory)) {
+    const fullPath = path.join(eventStreamsDirectory, existing);
+    if (fs.statSync(fullPath).isFile() && !expectedFiles.has(existing)) {
+      fs.removeSync(fullPath);
+    }
+  }
 }
 
 const eventStreamsHandler: DirectoryHandler<ParsedEventStreams> = {
