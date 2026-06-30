@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `eventStreams` support. [#1412]
+- Add `id_token_session_expiry_supported` validation for enterprise connections. [#1411]
+
 ## [8.38.0] - 2026-06-25
 
 ### Added
