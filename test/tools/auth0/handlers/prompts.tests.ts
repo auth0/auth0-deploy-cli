@@ -440,8 +440,9 @@ describe('#prompts handler', () => {
             return Promise.resolve({ data });
           },
           rendering: {
-            update: () => {
+            update: (_prompt: string, _screen: string, payload: { default_head_tags_disabled?: boolean | null }) => {
               didCallUpdateScreenRenderer = true;
+              expect(payload).to.have.property('default_head_tags_disabled', false);
               return Promise.resolve({ data: {} });
             },
           },
@@ -649,6 +650,39 @@ describe('#prompts handler', () => {
         screenRenderers: [],
       });
       sinon.restore();
+    });
+
+    it('should send default_head_tags_disabled: false to the API (not drop it as undefined)', async () => {
+      let capturedPayload: any = null;
+
+      const auth0 = {
+        prompts: {
+          rendering: {
+            update: (_prompt: string, _screen: string, payload: any) => {
+              capturedPayload = payload;
+              return Promise.resolve({ data: {} });
+            },
+          },
+        },
+        pool: new PromisePoolExecutor({
+          concurrencyLimit: 3,
+          frequencyLimit: 1000,
+          frequencyWindow: 1000,
+        }),
+      };
+
+      const handler = new promptsHandler({ client: auth0, config: config });
+
+      await handler.updateScreenRenderer({
+        prompt: 'login',
+        screen: 'login',
+        rendering_mode: 'advanced',
+        default_head_tags_disabled: false,
+        head_tags: [],
+      });
+
+      expect(capturedPayload).to.not.equal(null);
+      expect(capturedPayload).to.have.property('default_head_tags_disabled', false);
     });
   });
   describe('withErrorHandling', () => {
