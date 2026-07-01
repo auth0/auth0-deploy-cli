@@ -148,7 +148,9 @@ export default class Auth0 {
       .reduce((a, k) => ({ ...a, [k]: this.assets[k] }), {});
     const valid = validateSchema(nonNullAssets);
     if (!valid) {
-      throw new Error(`Schema validation failed loading ${JSON.stringify(validateSchema.errors, null, 4)}`);
+      throw new Error(
+        `Schema validation failed loading ${JSON.stringify(validateSchema.errors, null, 4)}`
+      );
     }
 
     await this.runStage('validate');
