@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.39.0] - 2026-06-30
+
+### Added
+
+- Add `eventStreams` support. [#1412]
+- Add `id_token_session_expiry_supported` validation for enterprise connections. [#1411]
+
+## [8.38.0] - 2026-06-25
+
+### Added
+
+- Add `session_transfer` delegation config support for CTE impersonation on the Client entity. [#1406]
+- Add `fedcm_login` support for Google One Tap / FedCM in Universal Login on the Client entity. [#1407]
+- Add `login-post-identifier` and `signup-post-identifier` as supported action triggers. [#1409]
+- Add `allow_online_access` and `allow_online_access_with_ephemeral_sessions` fields to resource server. [#1398]
+
+### Fixed
+
+- Fix keyword placeholder validation to allow lowercase Auth0 template variables (e.g. `@@password@@`). [#1408]
+- Re-apply prompt settings after branding update to prevent Authentication Profile reset. [#1404]
+
 ## [8.37.0] - 2026-06-17
 
 ### Added
@@ -1822,10 +1843,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1391]: https://github.com/auth0/auth0-deploy-cli/issues/1391
 [#1392]: https://github.com/auth0/auth0-deploy-cli/issues/1392
 [#1396]: https://github.com/auth0/auth0-deploy-cli/issues/1396
+[#1398]: https://github.com/auth0/auth0-deploy-cli/issues/1398
 [#1400]: https://github.com/auth0/auth0-deploy-cli/issues/1400
 [#1401]: https://github.com/auth0/auth0-deploy-cli/issues/1401
 [#1403]: https://github.com/auth0/auth0-deploy-cli/issues/1403
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.37.0...HEAD
+[#1404]: https://github.com/auth0/auth0-deploy-cli/issues/1404
+[#1406]: https://github.com/auth0/auth0-deploy-cli/issues/1406
+[#1407]: https://github.com/auth0/auth0-deploy-cli/issues/1407
+[#1408]: https://github.com/auth0/auth0-deploy-cli/issues/1408
+[#1409]: https://github.com/auth0/auth0-deploy-cli/issues/1409
+[#1411]: https://github.com/auth0/auth0-deploy-cli/issues/1411
+[#1412]: https://github.com/auth0/auth0-deploy-cli/issues/1412
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.39.0...HEAD
+[8.39.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.38.0...v8.39.0
+[8.38.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.37.0...v8.38.0
 [8.37.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.36.0...v8.37.0
 [8.36.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.35.0...v8.36.0
 [8.35.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.34.0...v8.35.0

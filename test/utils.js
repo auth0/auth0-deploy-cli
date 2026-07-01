@@ -249,6 +249,14 @@ export function mockMgmtClient() {
     rateLimitPolicies: {
       list: (params) => mockPagedData(params, 'rate_limit_policies', []),
     },
+    eventStreams: {
+      list: () =>
+        Promise.resolve({
+          data: [],
+          hasNextPage: () => false,
+          getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+        }),
+    },
   };
 }
 

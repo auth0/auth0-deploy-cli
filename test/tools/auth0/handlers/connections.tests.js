@@ -123,6 +123,7 @@ describe('#connections handler', () => {
             token_endpoint_auth_signing_alg: 'RS256',
             id_token_signed_response_algs: ['RS256', 'RS512'],
             token_endpoint_jwtca_aud_format: 'issuer',
+            id_token_session_expiry_supported: true,
           },
         },
         {
@@ -132,6 +133,7 @@ describe('#connections handler', () => {
             token_endpoint_auth_signing_alg: 'RS384',
             id_token_signed_response_algs: ['RS384'],
             token_endpoint_jwtca_aud_format: 'token_endpoint',
+            id_token_session_expiry_supported: false,
           },
         },
       ];
@@ -150,6 +152,7 @@ describe('#connections handler', () => {
             token_endpoint_auth_signing_alg: 'RS256',
             id_token_signed_response_algs: ['RS256'],
             token_endpoint_jwtca_aud_format: 'issuer',
+            id_token_session_expiry_supported: true,
           },
         },
       ];
