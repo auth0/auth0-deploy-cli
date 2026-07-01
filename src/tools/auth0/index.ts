@@ -8,11 +8,6 @@ import pagedClient from './client';
 import schema from './schema';
 import handlers from './handlers';
 
-// Cache the compiled AJV validator to avoid recompiling the schema on every validate() call.
-// Schema compilation is expensive (~5s) due to the complexity of the combined resource schema.
-const ajv = new Ajv({ useDefaults: true, nullable: true });
-const validateSchema = ajv.compile(schema);
-
 import {
   Assets,
   AssetTypes,
@@ -143,12 +138,13 @@ export default class Auth0 {
   }
 
   async validate(): Promise<void> {
+    const ajv = new Ajv({ useDefaults: true, nullable: true });
     const nonNullAssets = Object.keys(this.assets)
       .filter((k) => this.assets[k] != null)
       .reduce((a, k) => ({ ...a, [k]: this.assets[k] }), {});
-    const valid = validateSchema(nonNullAssets);
+    const valid = ajv.validate(schema, nonNullAssets);
     if (!valid) {
-      throw new Error(`Schema validation failed loading ${JSON.stringify(validateSchema.errors, null, 4)}`);
+      throw new Error(`Schema validation failed loading ${JSON.stringify(ajv.errors, null, 4)}`);
     }
 
     await this.runStage('validate');
