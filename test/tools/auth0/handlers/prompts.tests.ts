@@ -440,7 +440,11 @@ describe('#prompts handler', () => {
             return Promise.resolve({ data });
           },
           rendering: {
-            update: (_prompt: string, _screen: string, payload: { default_head_tags_disabled?: boolean | null }) => {
+            update: (
+              _prompt: string,
+              _screen: string,
+              payload: { default_head_tags_disabled?: boolean | null }
+            ) => {
               didCallUpdateScreenRenderer = true;
               expect(payload).to.have.property('default_head_tags_disabled', false);
               return Promise.resolve({ data: {} });
