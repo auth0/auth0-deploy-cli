@@ -233,7 +233,8 @@ export type AssetTypes =
   | 'connectionProfiles'
   | 'tokenExchangeProfiles'
   | 'supplementalSignals'
-  | 'eventStreams';
+  | 'eventStreams'
+  | 'clientAuthCredentials';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 
