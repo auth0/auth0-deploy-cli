@@ -72,10 +72,8 @@ function getDatabase(
         const resolvedBase = path.resolve(configRoot);
         const toLoad = path.resolve(folder, script);
         if (!toLoad.startsWith(resolvedBase + path.sep)) {
-          log.warn(
-            `Support for absolute paths and paths outside the config root will be deprecated in a future version to improve the security of the tool. ` +
-              `Please update your configuration to use paths relative to the config directory. ` +
-              `Current absolute path used: ["${script}"]`
+          throw new Error(
+            `File reference "${script}" in database custom script "${name}" must be relative to the config directory. Absolute paths and paths outside the config root are not supported.`
           );
         }
         database.options.customScripts[name] = loadFileAndReplaceKeywords(toLoad, mappingOpts);
