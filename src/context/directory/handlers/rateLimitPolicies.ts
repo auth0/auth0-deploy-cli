@@ -42,6 +42,7 @@ async function dump(context: DirectoryContext): Promise<void> {
   fs.ensureDirSync(rateLimitPoliciesDirectory);
 
   const removeKeysFromOutput = ['id', 'created_at', 'updated_at'];
+  const expectedFiles = new Set<string>();
 
   rateLimitPolicies.forEach((policy) => {
     const policyToWrite = { ...policy };
@@ -51,8 +52,17 @@ async function dump(context: DirectoryContext): Promise<void> {
 
     const fileName = sanitize(policy.consumer_selector);
     const filePath = path.join(rateLimitPoliciesDirectory, `${fileName}.json`);
+    expectedFiles.add(`${fileName}.json`);
     dumpJSON(filePath, policyToWrite);
   });
+
+  // Remove files for policies that no longer exist in the tenant
+  for (const existing of fs.readdirSync(rateLimitPoliciesDirectory)) {
+    const fullPath = path.join(rateLimitPoliciesDirectory, existing);
+    if (fs.statSync(fullPath).isFile() && !expectedFiles.has(existing)) {
+      fs.removeSync(fullPath);
+    }
+  }
 }
 
 const rateLimitPoliciesHandler: DirectoryHandler<ParsedRateLimitPolicies> = {

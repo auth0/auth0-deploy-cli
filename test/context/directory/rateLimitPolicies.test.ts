@@ -154,4 +154,34 @@ describe('#directory context rateLimitPolicies', () => {
     expect(myClientContent.configuration.limit).to.equal(50);
     expect(myClientContent.configuration.redirect_uri).to.equal('https://example.com/blocked');
   });
+
+  it('should remove stale rate limit policy files when policies are removed from source', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'rateLimitPolicies-stale');
+    cleanThenMkdir(repoDir);
+
+    const rateLimitPoliciesDir = path.join(repoDir, constants.RATE_LIMIT_POLICIES_DIRECTORY);
+    fs.ensureDirSync(rateLimitPoliciesDir);
+    fs.writeFileSync(path.join(rateLimitPoliciesDir, 'old-client.json'), '{"consumer_selector":"old-client"}');
+    fs.writeFileSync(path.join(rateLimitPoliciesDir, 'my-client-id.json'), '{"consumer_selector":"my-client-id"}');
+
+    const context = new Context(
+      { AUTH0_INPUT_FILE: repoDir } as Config,
+      mockMgmtClient() as unknown as ManagementClient
+    );
+    // Re-export with only one policy (old-client removed)
+    context.assets.rateLimitPolicies = [
+      {
+        id: 'rlp_456',
+        resource: 'oauth_authentication_api',
+        consumer: 'client',
+        consumer_selector: 'my-client-id',
+        configuration: { action: 'block', limit: 50 },
+      },
+    ] as any;
+
+    await handler.dump(context);
+
+    expect(fs.existsSync(path.join(rateLimitPoliciesDir, 'my-client-id.json'))).to.equal(true);
+    expect(fs.existsSync(path.join(rateLimitPoliciesDir, 'old-client.json'))).to.equal(false);
+  });
 });

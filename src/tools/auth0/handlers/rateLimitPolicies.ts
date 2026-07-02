@@ -139,13 +139,13 @@ export default class RateLimitPoliciesHandler extends DefaultAPIHandler {
       changes.map(async (change) => {
         switch (true) {
           case change.del && change.del.length > 0:
-            await this.deleteRateLimitPolicies(change.del || []);
+            await this.deleteRateLimitPolicies(change.del);
             break;
           case change.create && change.create.length > 0:
             await this.createRateLimitPolicies(change.create);
             break;
           case change.update && change.update.length > 0:
-            if (change.update) await this.updateRateLimitPolicies(change.update);
+            await this.updateRateLimitPolicies(change.update);
             break;
           default:
             break;
