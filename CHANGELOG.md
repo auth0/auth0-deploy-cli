@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.0.0-beta.1] - 2026-07-02
+
 ### Security
 
 - Prevent path traversal attacks in config file handlers for directory and YAML contexts. [#1418]
@@ -1858,7 +1860,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1409]: https://github.com/auth0/auth0-deploy-cli/issues/1409
 [#1411]: https://github.com/auth0/auth0-deploy-cli/issues/1411
 [#1412]: https://github.com/auth0/auth0-deploy-cli/issues/1412
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.39.0...HEAD
+[#1418]: https://github.com/auth0/auth0-deploy-cli/issues/1418
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v9.0.0-beta.1...HEAD
+[9.0.0-beta.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.39.0...v9.0.0-beta.1
 [8.39.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.38.0...v8.39.0
 [8.38.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.37.0...v8.38.0
 [8.37.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.36.0...v8.37.0
