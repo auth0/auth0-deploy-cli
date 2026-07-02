@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- Prevent path traversal attacks in config file handlers for directory and YAML contexts. [#1418]
+
 ## [8.39.0] - 2026-06-30
 
 ### Added
