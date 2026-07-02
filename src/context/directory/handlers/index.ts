@@ -38,6 +38,7 @@ import userAttributeProfiles from './userAttributeProfiles';
 import connectionProfiles from './connectionProfiles';
 import tokenExchangeProfiles from './tokenExchangeProfiles';
 import supplementalSignals from './supplementalSignals';
+import rateLimitPolicies from './rateLimitPolicies';
 import eventStreams from './eventStreams';
 
 import DirectoryContext from '..';
@@ -93,6 +94,7 @@ const directoryHandlers: {
   connectionProfiles,
   tokenExchangeProfiles,
   supplementalSignals,
+  rateLimitPolicies,
   eventStreams,
 };
 

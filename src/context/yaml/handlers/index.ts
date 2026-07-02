@@ -38,6 +38,7 @@ import userAttributeProfiles from './userAttributeProfiles';
 import connectionProfiles from './connectionProfiles';
 import tokenExchangeProfiles from './tokenExchangeProfiles';
 import supplementalSignals from './supplementalSignals';
+import rateLimitPolicies from './rateLimitPolicies';
 import eventStreams from './eventStreams';
 
 import YAMLContext from '..';
@@ -91,6 +92,7 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   connectionProfiles,
   tokenExchangeProfiles,
   supplementalSignals,
+  rateLimitPolicies,
   eventStreams,
 };
 
