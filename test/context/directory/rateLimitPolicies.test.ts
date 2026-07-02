@@ -161,8 +161,14 @@ describe('#directory context rateLimitPolicies', () => {
 
     const rateLimitPoliciesDir = path.join(repoDir, constants.RATE_LIMIT_POLICIES_DIRECTORY);
     fs.ensureDirSync(rateLimitPoliciesDir);
-    fs.writeFileSync(path.join(rateLimitPoliciesDir, 'old-client.json'), '{"consumer_selector":"old-client"}');
-    fs.writeFileSync(path.join(rateLimitPoliciesDir, 'my-client-id.json'), '{"consumer_selector":"my-client-id"}');
+    fs.writeFileSync(
+      path.join(rateLimitPoliciesDir, 'old-client.json'),
+      '{"consumer_selector":"old-client"}'
+    );
+    fs.writeFileSync(
+      path.join(rateLimitPoliciesDir, 'my-client-id.json'),
+      '{"consumer_selector":"my-client-id"}'
+    );
 
     const context = new Context(
       { AUTH0_INPUT_FILE: repoDir } as Config,
