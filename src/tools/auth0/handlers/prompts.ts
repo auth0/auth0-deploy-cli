@@ -610,7 +610,7 @@ export default class PromptsHandler extends DefaultHandler {
       updatePayload = {
         ...updatePrams,
         rendering_mode: Management.AculRenderingModeEnum.Advanced,
-        default_head_tags_disabled: screenRenderer.default_head_tags_disabled || undefined,
+        default_head_tags_disabled: screenRenderer.default_head_tags_disabled ?? undefined,
         head_tags: screenRenderer.head_tags as Management.AculHeadTag[],
       };
     }
