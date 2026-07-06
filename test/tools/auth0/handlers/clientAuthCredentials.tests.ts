@@ -338,7 +338,7 @@ describe('#clientAuthCredentials handler', () => {
             list: () =>
               Promise.resolve([{ id: 'cred_old', name: 'old-key', credential_type: 'public_key' }]),
             create: () => Promise.resolve({ id: 'cred_new' }),
-            delete: (clientId, credId) => {
+            delete: (_clientId, _credId) => {
               callOrder.push('delete');
               return Promise.resolve({});
             },
