@@ -2,6 +2,7 @@ import { Management } from 'auth0';
 import DefaultAPIHandler from './default';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
+import { isDryRun } from '../../utils';
 import log from '../../../logger';
 
 export type RateLimitPolicyConfiguration = Management.RateLimitPolicyConfiguration;
@@ -115,6 +116,12 @@ export default class RateLimitPoliciesHandler extends DefaultAPIHandler {
     if (!rateLimitPolicies) return;
 
     const { del, update, create } = await this.calcChanges(assets);
+
+    if (isDryRun(this.config)) {
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        return;
+      }
+    }
 
     log.debug(
       `Start processChanges for rateLimitPolicies [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
