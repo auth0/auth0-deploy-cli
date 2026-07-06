@@ -1,7 +1,10 @@
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { expect } from 'chai';
+const Ajv = require('ajv');
 
-import RateLimitPoliciesHandler from '../../../../src/tools/auth0/handlers/rateLimitPolicies';
+import RateLimitPoliciesHandler, {
+  schema,
+} from '../../../../src/tools/auth0/handlers/rateLimitPolicies';
 import pageClient from '../../../../src/tools/auth0/client';
 import { mockPagedData } from '../../../utils';
 
@@ -31,6 +34,71 @@ describe('#rateLimitPolicies handler', () => {
     AUTH0_ALLOW_DELETE: false,
   };
 
+  describe('#rateLimitPolicies schema', () => {
+    const ajv = new Ajv({ useDefaults: true, nullable: true });
+
+    it('should pass schema validation for all valid action types', () => {
+      const valid = ajv.validate(schema, [
+        {
+          resource: 'oauth_authentication_api',
+          consumer: 'client',
+          consumer_selector: 'default',
+          configuration: { action: 'allow' },
+        },
+        {
+          resource: 'oauth_authentication_api',
+          consumer: 'client',
+          consumer_selector: 'third_party_clients',
+          configuration: { action: 'block', limit: 100 },
+        },
+        {
+          resource: 'oauth_authentication_api',
+          consumer: 'client',
+          consumer_selector: 'client_id:some-client',
+          configuration: { action: 'redirect', limit: 10, redirect_uri: 'https://example.com' },
+        },
+      ]);
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should fail schema validation when limit is missing for block action', () => {
+      const valid = ajv.validate(schema, [
+        {
+          resource: 'oauth_authentication_api',
+          consumer: 'client',
+          consumer_selector: 'default',
+          configuration: { action: 'block' },
+        },
+      ]);
+      expect(valid).to.equal(false);
+    });
+
+    it('should fail schema validation when redirect_uri is missing for redirect action', () => {
+      const valid = ajv.validate(schema, [
+        {
+          resource: 'oauth_authentication_api',
+          consumer: 'client',
+          consumer_selector: 'default',
+          configuration: { action: 'redirect', limit: 10 },
+        },
+      ]);
+      expect(valid).to.equal(false);
+    });
+
+    it('should fail schema validation when resource is invalid', () => {
+      const valid = ajv.validate(schema, [
+        {
+          resource: 'invalid_resource',
+          consumer: 'client',
+          consumer_selector: 'default',
+          configuration: { action: 'allow' },
+        },
+      ]);
+      expect(valid).to.equal(false);
+    });
+  });
+
   describe('#rateLimitPolicies validate', () => {
     it('should pass validation', async () => {
       const handler = new RateLimitPoliciesHandler({ client: {}, config } as any);
@@ -52,6 +120,36 @@ describe('#rateLimitPolicies handler', () => {
   });
 
   describe('#rateLimitPolicies process', () => {
+    it('should not apply changes when dry run finds no differences', async () => {
+      config.data.AUTH0_DRY_RUN = true;
+
+      const auth0 = {
+        rateLimitPolicies: {
+          create: () => {
+            expect.fail('create should not be called in dry run mode');
+          },
+          update: () => {
+            expect.fail('update should not be called in dry run mode');
+          },
+          delete: () => {
+            expect.fail('delete should not be called in dry run mode');
+          },
+          list: (params) => mockPagedData(params, 'rate_limit_policies', [sampleRateLimitPolicy]),
+        },
+        pool,
+      };
+
+      const handler = new RateLimitPoliciesHandler({
+        client: pageClient(auth0 as any),
+        config,
+      } as any);
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ rateLimitPolicies: [{ ...sampleRateLimitPolicy }] }]);
+
+      config.data.AUTH0_DRY_RUN = undefined;
+    });
+
     it('should return empty if no rateLimitPolicies asset', async () => {
       const auth0 = {
         rateLimitPolicies: {},

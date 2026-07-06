@@ -15,11 +15,11 @@ export const schema = {
     properties: {
       resource: {
         type: 'string',
-        enum: ['oauth_authentication_api'],
+        enum: Object.values(Management.RateLimitPolicyResourceEnum),
       },
       consumer: {
         type: 'string',
-        enum: ['client'],
+        enum: Object.values(Management.RateLimitPolicyConsumerEnum),
       },
       consumer_selector: {
         type: 'string',
