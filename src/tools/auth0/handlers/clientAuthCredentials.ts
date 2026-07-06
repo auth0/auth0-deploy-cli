@@ -1,6 +1,7 @@
 import { order } from './default';
 import { Assets, Auth0APIClient } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
+import { paginate } from '../client';
 import log from '../../../logger';
 
 export const schema = {
@@ -29,6 +30,15 @@ export default class ClientAuthCredentialsHandler {
     return null;
   }
 
+  async load() {
+    log.info(`Retrieving ${this.type} data from Auth0`);
+    return { [this.type]: null };
+  }
+
+  async validate() {
+    return null;
+  }
+
   @order('70')
   async processChanges(assets: Assets): Promise<void> {
     const { clients } = assets;
@@ -37,8 +47,19 @@ export default class ClientAuthCredentialsHandler {
     const allowDelete =
       this.config('AUTH0_ALLOW_DELETE') === true || this.config('AUTH0_ALLOW_DELETE') === 'true';
 
+    // Fetch existing clients from Auth0 so we can resolve names to IDs
+    // when client_id is null (directory mode strips it from exported JSON)
+    const existingClients = await paginate(this.client.clients.list, {
+      paginate: true,
+      is_global: false,
+    });
+    const clientIdByName = new Map(existingClients.map((c: any) => [c.name, c.client_id]));
+
     for (const client of clients) {
-      if (!client.client_id || !client.client_authentication_methods) continue;
+      if (!client.client_authentication_methods) continue;
+      const clientId = (client.client_id || clientIdByName.get(client.name)) as string | undefined;
+      if (!clientId) continue;
+      client.client_id = clientId;
 
       // Collect all desired credentials across all auth methods
       const desired: { name: string; pem?: string; credential_type: string; method: string }[] =
@@ -59,9 +80,6 @@ export default class ClientAuthCredentialsHandler {
         }
       }
 
-      if (desired.length === 0) continue;
-
-      const clientId = client.client_id as string;
       const clientName = client.name || clientId;
 
       let existing: any[] = [];
@@ -71,6 +89,9 @@ export default class ClientAuthCredentialsHandler {
         log.warn(`clientAuthCredentials: failed to list credentials for client "${clientName}": ${err}`);
         continue;
       }
+
+      // If no pem-based credentials in config and nothing in Auth0, nothing to do
+      if (desired.length === 0 && existing.length === 0) continue;
 
       // Warn if duplicate names exist in Auth0 — we can't match safely
       const existingNames = existing.map((c) => c.name);
@@ -89,7 +110,8 @@ export default class ClientAuthCredentialsHandler {
       const toDelete = existing.filter((e) => !desiredNames.has(e.name));
 
       // Creates first — Auth0 allows max 2 credentials; both must exist simultaneously during rotation
-      const createdIds: string[] = [];
+      // Track name→id so we can correctly attribute each created credential to its method later.
+      const createdIdByName = new Map<string, string>();
       for (const cred of toCreate) {
         try {
           const created = await (this.client.clients.credentials.create as Function)(clientId, {
@@ -98,13 +120,53 @@ export default class ClientAuthCredentialsHandler {
             credential_type: cred.credential_type,
           });
           log.info(`clientAuthCredentials: created credential "${cred.name}" on client "${clientName}"`);
-          createdIds.push(created.id);
+          createdIdByName.set(cred.name, created.id);
         } catch (err) {
           log.warn(`clientAuthCredentials: failed to create credential "${cred.name}" on client "${clientName}": ${err}`);
         }
       }
 
-      // Deletes after — gated by AUTH0_ALLOW_DELETE
+      // Re-wire client_authentication_methods with final IDs (kept + newly created).
+      // This must happen BEFORE deletes — Auth0 rejects deleting a credential that
+      // is still referenced in client_authentication_methods.
+      const keptIds = existing
+        .filter((e) => desiredNames.has(e.name))
+        .map((e) => e.id);
+      const createdIds = [...createdIdByName.values()];
+      const finalIds = [...keptIds, ...createdIds];
+
+      if (finalIds.length > 0) {
+        // Build method→ids map. For kept credentials use Auth0's stored type to infer method;
+        // for created credentials use the method from the user's config entry (by name).
+        const methodToIds: Record<string, string[]> = {};
+        for (const id of finalIds) {
+          const fromExisting = existing.find((e) => e.id === id);
+          const createdName = [...createdIdByName.entries()].find(([, cid]) => cid === id)?.[0];
+          const fromDesired = createdName ? desired.find((d) => d.name === createdName) : undefined;
+          const methodKey =
+            (fromExisting && this.inferMethodFromType(fromExisting.credential_type)) ||
+            (fromDesired && fromDesired.method) ||
+            Object.keys(client.client_authentication_methods as object)[0];
+          if (!methodToIds[methodKey]) methodToIds[methodKey] = [];
+          methodToIds[methodKey].push(id);
+        }
+
+        const updatedAuthMethods: Record<string, any> = {};
+        for (const [methodKey, ids] of Object.entries(methodToIds)) {
+          updatedAuthMethods[methodKey] = { credentials: ids.map((id) => ({ id })) };
+        }
+
+        try {
+          await (this.client.clients.update as Function)(clientId, {
+            client_authentication_methods: updatedAuthMethods,
+          });
+          log.info(`clientAuthCredentials: updated client_authentication_methods on client "${clientName}"`);
+        } catch (err) {
+          log.warn(`clientAuthCredentials: failed to update client_authentication_methods on client "${clientName}": ${err}`);
+        }
+      }
+
+      // Deletes last — after client_authentication_methods no longer references them
       if (toDelete.length > 0) {
         if (!allowDelete) {
           log.warn(
@@ -120,42 +182,6 @@ export default class ClientAuthCredentialsHandler {
             }
           }
         }
-      }
-
-      // Re-wire client_authentication_methods with the final resolved credential IDs
-      const keptIds = existing
-        .filter((e) => desiredNames.has(e.name))
-        .map((e) => e.id);
-      const finalIds = [...keptIds, ...createdIds];
-
-      if (finalIds.length === 0) continue;
-
-      // Group final IDs by method key
-      const methodToIds: Record<string, string[]> = {};
-      for (const id of finalIds) {
-        // find which method this credential belongs to
-        const fromExisting = existing.find((e) => e.id === id);
-        const fromDesired = desired.find((d) => createdIds.includes(id) && d.name);
-        const methodKey =
-          (fromExisting && this.inferMethodFromType(fromExisting.credential_type)) ||
-          (fromDesired && fromDesired.method) ||
-          Object.keys(client.client_authentication_methods as object)[0];
-        if (!methodToIds[methodKey]) methodToIds[methodKey] = [];
-        methodToIds[methodKey].push(id);
-      }
-
-      const updatedAuthMethods: Record<string, any> = {};
-      for (const [methodKey, ids] of Object.entries(methodToIds)) {
-        updatedAuthMethods[methodKey] = { credentials: ids.map((id) => ({ id })) };
-      }
-
-      try {
-        await (this.client.clients.update as Function)(clientId, {
-          client_authentication_methods: updatedAuthMethods,
-        });
-        log.info(`clientAuthCredentials: updated client_authentication_methods on client "${clientName}"`);
-      } catch (err) {
-        log.warn(`clientAuthCredentials: failed to update client_authentication_methods on client "${clientName}": ${err}`);
       }
     }
   }
