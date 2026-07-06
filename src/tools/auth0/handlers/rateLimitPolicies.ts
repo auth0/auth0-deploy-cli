@@ -1,23 +1,11 @@
+import { Management } from 'auth0';
 import DefaultAPIHandler from './default';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
 
-// Types will align with Management.RateLimitPolicy once node-auth0 PR #1348 is merged
-export type RateLimitPolicyConfiguration =
-  | { action: 'allow' }
-  | { action: 'block' | 'log'; limit: number }
-  | { action: 'redirect'; limit: number; redirect_uri: string };
-
-export type RateLimitPolicy = {
-  id?: string;
-  resource: string;
-  consumer: string;
-  consumer_selector: string;
-  configuration: RateLimitPolicyConfiguration;
-  created_at?: string;
-  updated_at?: string;
-};
+export type RateLimitPolicyConfiguration = Management.RateLimitPolicyConfiguration;
+export type RateLimitPolicy = Management.RateLimitPolicy;
 
 export const schema = {
   type: 'array',
@@ -66,7 +54,6 @@ export const schema = {
       },
     },
     required: ['resource', 'consumer', 'consumer_selector', 'configuration'],
-    additionalProperties: false,
   },
 };
 
