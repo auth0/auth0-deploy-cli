@@ -654,8 +654,8 @@ export default class ClientHandler extends DefaultAPIHandler {
         // from the PATCH payload — the clientAuthCredentials handler (order 70)
         // will create the credentials and re-wire it with the resulting IDs.
         if (item.client_authentication_methods) {
-          const hasPem = Object.values(item.client_authentication_methods).some(
-            (method: any) => method?.credentials?.some((c: any) => c.pem)
+          const hasPem = Object.values(item.client_authentication_methods).some((method: any) =>
+            method?.credentials?.some((c: any) => c.pem)
           );
           if (hasPem) {
             delete item.client_authentication_methods;

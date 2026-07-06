@@ -62,8 +62,7 @@ export default class ClientAuthCredentialsHandler {
       client.client_id = clientId;
 
       // Collect all desired credentials across all auth methods
-      const desired: { name: string; pem?: string; credential_type: string; method: string }[] =
-        [];
+      const desired: { name: string; pem?: string; credential_type: string; method: string }[] = [];
 
       for (const [methodKey, methodVal] of Object.entries(
         client.client_authentication_methods as Record<string, any>
@@ -86,7 +85,9 @@ export default class ClientAuthCredentialsHandler {
       try {
         existing = (await this.client.clients.credentials.list(clientId)) as any[];
       } catch (err) {
-        log.warn(`clientAuthCredentials: failed to list credentials for client "${clientName}": ${err}`);
+        log.warn(
+          `clientAuthCredentials: failed to list credentials for client "${clientName}": ${err}`
+        );
         continue;
       }
 
@@ -98,7 +99,9 @@ export default class ClientAuthCredentialsHandler {
       const duplicateNames = existingNames.filter((n, i) => existingNames.indexOf(n) !== i);
       if (duplicateNames.length > 0) {
         log.warn(
-          `clientAuthCredentials: client "${clientName}" has duplicate credential names in Auth0 [${duplicateNames.join(', ')}] — skipping credential reconciliation for this client`
+          `clientAuthCredentials: client "${clientName}" has duplicate credential names in Auth0 [${duplicateNames.join(
+            ', '
+          )}] — skipping credential reconciliation for this client`
         );
         continue;
       }
@@ -119,19 +122,21 @@ export default class ClientAuthCredentialsHandler {
             pem: cred.pem,
             credential_type: cred.credential_type,
           });
-          log.info(`clientAuthCredentials: created credential "${cred.name}" on client "${clientName}"`);
+          log.info(
+            `clientAuthCredentials: created credential "${cred.name}" on client "${clientName}"`
+          );
           createdIdByName.set(cred.name, created.id);
         } catch (err) {
-          log.warn(`clientAuthCredentials: failed to create credential "${cred.name}" on client "${clientName}": ${err}`);
+          log.warn(
+            `clientAuthCredentials: failed to create credential "${cred.name}" on client "${clientName}": ${err}`
+          );
         }
       }
 
       // Re-wire client_authentication_methods with final IDs (kept + newly created).
       // This must happen BEFORE deletes — Auth0 rejects deleting a credential that
       // is still referenced in client_authentication_methods.
-      const keptIds = existing
-        .filter((e) => desiredNames.has(e.name))
-        .map((e) => e.id);
+      const keptIds = existing.filter((e) => desiredNames.has(e.name)).map((e) => e.id);
       const createdIds = [...createdIdByName.values()];
       const finalIds = [...keptIds, ...createdIds];
 
@@ -160,9 +165,13 @@ export default class ClientAuthCredentialsHandler {
           await (this.client.clients.update as Function)(clientId, {
             client_authentication_methods: updatedAuthMethods,
           });
-          log.info(`clientAuthCredentials: updated client_authentication_methods on client "${clientName}"`);
+          log.info(
+            `clientAuthCredentials: updated client_authentication_methods on client "${clientName}"`
+          );
         } catch (err) {
-          log.warn(`clientAuthCredentials: failed to update client_authentication_methods on client "${clientName}": ${err}`);
+          log.warn(
+            `clientAuthCredentials: failed to update client_authentication_methods on client "${clientName}": ${err}`
+          );
         }
       }
 
@@ -170,15 +179,21 @@ export default class ClientAuthCredentialsHandler {
       if (toDelete.length > 0) {
         if (!allowDelete) {
           log.warn(
-            `clientAuthCredentials: the following credentials on client "${clientName}" would be deleted but AUTH0_ALLOW_DELETE is not set:\n${toDelete.map((c) => `  ${c.name} (${c.id})`).join('\n')}`
+            `clientAuthCredentials: the following credentials on client "${clientName}" would be deleted but AUTH0_ALLOW_DELETE is not set:\n${toDelete
+              .map((c) => `  ${c.name} (${c.id})`)
+              .join('\n')}`
           );
         } else {
           for (const cred of toDelete) {
             try {
               await (this.client.clients.credentials.delete as Function)(clientId, cred.id);
-              log.info(`clientAuthCredentials: deleted credential "${cred.name}" on client "${clientName}"`);
+              log.info(
+                `clientAuthCredentials: deleted credential "${cred.name}" on client "${clientName}"`
+              );
             } catch (err) {
-              log.warn(`clientAuthCredentials: failed to delete credential "${cred.name}" on client "${clientName}": ${err}`);
+              log.warn(
+                `clientAuthCredentials: failed to delete credential "${cred.name}" on client "${clientName}": ${err}`
+              );
             }
           }
         }
