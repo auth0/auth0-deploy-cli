@@ -47,17 +47,24 @@ export default class ClientAuthCredentialsHandler {
     const allowDelete =
       this.config('AUTH0_ALLOW_DELETE') === true || this.config('AUTH0_ALLOW_DELETE') === 'true';
 
-    // Fetch existing clients from Auth0 so we can resolve names to IDs
-    // when client_id is null (directory mode strips it from exported JSON)
-    const existingClients = await paginate(this.client.clients.list, {
-      paginate: true,
-      is_global: false,
-    });
-    const clientIdByName = new Map(existingClients.map((c: any) => [c.name, c.client_id]));
+    const needsNameResolution = clients.some(
+      (c) => !c.client_id && c.client_authentication_methods
+    );
+
+    // Only fetch all clients when directory mode has stripped client_id (null) from any entry
+    // that also has client_authentication_methods — avoids an extra API call in the common case.
+    let clientIdByName = new Map<string, string>();
+    if (needsNameResolution) {
+      const existingClients = await paginate(this.client.clients.list, {
+        paginate: true,
+        is_global: false,
+      });
+      clientIdByName = new Map(existingClients.map((c: any) => [c.name, c.client_id]));
+    }
 
     for (const client of clients) {
       if (!client.client_authentication_methods) continue;
-      const clientId = (client.client_id || clientIdByName.get(client.name)) as string | undefined;
+      const clientId = client.client_id || (client.name && clientIdByName.get(client.name));
       if (!clientId) continue;
       client.client_id = clientId;
 
@@ -140,6 +147,7 @@ export default class ClientAuthCredentialsHandler {
       const createdIds = [...createdIdByName.values()];
       const finalIds = [...keptIds, ...createdIds];
 
+      let updatedAuthMethods: Record<string, any> = {};
       if (finalIds.length > 0) {
         // Build method→ids map. For kept credentials use Auth0's stored type to infer method;
         // for created credentials use the method from the user's config entry (by name).
@@ -155,12 +163,15 @@ export default class ClientAuthCredentialsHandler {
           if (!methodToIds[methodKey]) methodToIds[methodKey] = [];
           methodToIds[methodKey].push(id);
         }
-
-        const updatedAuthMethods: Record<string, any> = {};
         for (const [methodKey, ids] of Object.entries(methodToIds)) {
           updatedAuthMethods[methodKey] = { credentials: ids.map((id) => ({ id })) };
         }
+      }
 
+      // Always update client_authentication_methods before deletes:
+      // - When finalIds > 0: re-wire to the remaining credentials
+      // - When finalIds === 0 but toDelete > 0: clear references so Auth0 allows the deletes
+      if (finalIds.length > 0 || toDelete.length > 0) {
         try {
           await (this.client.clients.update as Function)(clientId, {
             client_authentication_methods: updatedAuthMethods,

@@ -321,20 +321,25 @@ describe('#clientAuthCredentials handler', () => {
       expect(callOrder).to.deep.equal(['create', 'update', 'delete']);
     });
 
-    it('should delete all stale credentials when config has empty credentials array', async () => {
-      const deleteCalls: any[] = [];
+    it('should clear client_authentication_methods then delete when config has empty credentials array', async () => {
+      const callOrder: string[] = [];
+      const updatePayloads: any[] = [];
 
       const client = makeClient({
         clients: {
           list: (params) =>
             mockPagedData(params, 'clients', [{ client_id: 'client1', name: 'My App' }]),
-          update: () => Promise.resolve({ data: {} }),
+          update: (id, data) => {
+            callOrder.push('update');
+            updatePayloads.push(data);
+            return Promise.resolve({ data });
+          },
           credentials: {
             list: () =>
               Promise.resolve([{ id: 'cred_old', name: 'old-key', credential_type: 'public_key' }]),
             create: () => Promise.resolve({ id: 'cred_new' }),
             delete: (clientId, credId) => {
-              deleteCalls.push(credId);
+              callOrder.push('delete');
               return Promise.resolve({});
             },
           },
@@ -357,7 +362,9 @@ describe('#clientAuthCredentials handler', () => {
         },
       ]);
 
-      expect(deleteCalls).to.deep.equal(['cred_old']);
+      // update must clear references before delete, otherwise Auth0 rejects the delete
+      expect(callOrder).to.deep.equal(['update', 'delete']);
+      expect(updatePayloads[0].client_authentication_methods).to.deep.equal({});
     });
 
     it('should skip client with duplicate credential names in Auth0', async () => {
