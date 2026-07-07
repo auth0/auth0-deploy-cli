@@ -67,7 +67,7 @@ describe('#clientAuthCredentials handler', () => {
       expect(credListCalled).to.equal(false);
     });
 
-    it('should not create or delete when no credential has a pem field and Auth0 has no credentials', async () => {
+    it('should skip all reconciliation when no credential has a pem field, even if Auth0 has existing credentials', async () => {
       const createCalls: any[] = [];
       const deleteCalls: any[] = [];
       const client = makeClient({
@@ -321,25 +321,24 @@ describe('#clientAuthCredentials handler', () => {
       expect(callOrder).to.deep.equal(['create', 'update', 'delete']);
     });
 
-    it('should clear client_authentication_methods then delete when config has empty credentials array', async () => {
-      const callOrder: string[] = [];
-      const updatePayloads: any[] = [];
+    it('should skip reconciliation when credentials array is empty (no pem present)', async () => {
+      const deleteCalls: any[] = [];
+      const updateCalls: any[] = [];
 
       const client = makeClient({
         clients: {
           list: (params) =>
             mockPagedData(params, 'clients', [{ client_id: 'client1', name: 'My App' }]),
           update: (id, data) => {
-            callOrder.push('update');
-            updatePayloads.push(data);
+            updateCalls.push(data);
             return Promise.resolve({ data });
           },
           credentials: {
             list: () =>
               Promise.resolve([{ id: 'cred_old', name: 'old-key', credential_type: 'public_key' }]),
             create: () => Promise.resolve({ id: 'cred_new' }),
-            delete: (_clientId, _credId) => {
-              callOrder.push('delete');
+            delete: (_clientId, credId) => {
+              deleteCalls.push(credId);
               return Promise.resolve({});
             },
           },
@@ -362,9 +361,9 @@ describe('#clientAuthCredentials handler', () => {
         },
       ]);
 
-      // update must clear references before delete, otherwise Auth0 rejects the delete
-      expect(callOrder).to.deep.equal(['update', 'delete']);
-      expect(updatePayloads[0].client_authentication_methods).to.deep.equal({});
+      // empty credentials = no pem = skip reconciliation; existing Auth0 credentials untouched
+      expect(deleteCalls).to.have.lengthOf(0);
+      expect(updateCalls).to.have.lengthOf(0);
     });
 
     it('should skip client with duplicate credential names in Auth0', async () => {

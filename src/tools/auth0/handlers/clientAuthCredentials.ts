@@ -98,8 +98,10 @@ export default class ClientAuthCredentialsHandler {
         continue;
       }
 
-      // If no pem-based credentials in config and nothing in Auth0, nothing to do
-      if (desired.length === 0 && existing.length === 0) continue;
+      // Skip reconciliation entirely when no pem is present — pem is the opt-in signal.
+      // Without this guard, a plain export→deploy would delete all existing credentials
+      // because desired would be empty (exported credentials never have pem).
+      if (desired.length === 0) continue;
 
       // Warn if duplicate names exist in Auth0 — we can't match safely
       const existingNames = existing.map((c) => c.name);
