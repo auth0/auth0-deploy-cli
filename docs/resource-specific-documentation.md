@@ -1493,3 +1493,66 @@ Each event stream is stored as a separate JSON file named after the stream (e.g.
 ```
 
 For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2/event-streams/get-event-streams).
+
+## Rate Limit Policies
+
+Rate Limit Policies allow you to control the rate at which clients can make authentication requests to the OAuth authentication API. Each policy targets a specific consumer selector (e.g. a specific client, all third-party clients, or a default fallback) and defines the action to take when the limit is exceeded.
+
+### Schema Properties
+
+| Property                     | Type     | Required                                | Description                                                                                                                                                                                                                                                      |
+| ---------------------------- | -------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `resource`                   | `string` | Yes                                     | The API protected by the policy. Currently only `oauth_authentication_api` is supported.                                                                                                                                                                         |
+| `consumer`                   | `string` | Yes                                     | The consumer type. Currently only `client` is supported.                                                                                                                                                                                                         |
+| `consumer_selector`          | `string` | Yes                                     | Identifies the target within the consumer. Supported values: `client_id:<client_id>` to target a specific client, `cimd_clients` for all CIMD clients, `third_party_clients` for all third-party clients, or `default` as a fallback for any unmatched consumer. |
+| `configuration.action`       | `string` | Yes                                     | The action to take when the rate limit is exceeded. One of: `allow`, `block`, `log`, `redirect`.                                                                                                                                                                 |
+| `configuration.limit`        | `number` | Required for `block`, `log`, `redirect` | Maximum number of requests allowed in a refresh window.                                                                                                                                                                                                          |
+| `configuration.redirect_uri` | `string` | Required for `redirect`                 | The HTTPS URI to redirect to when the rate limit is exceeded.                                                                                                                                                                                                    |
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+rateLimitPolicies:
+  - resource: oauth_authentication_api
+    consumer: client
+    consumer_selector: default
+    configuration:
+      action: block
+      limit: 100
+
+  - resource: oauth_authentication_api
+    consumer: client
+    consumer_selector: third_party_clients
+    configuration:
+      action: log
+      limit: 50
+
+  - resource: oauth_authentication_api
+    consumer: client
+    consumer_selector: client_id:some-client-id
+    configuration:
+      action: redirect
+      limit: 10
+      redirect_uri: https://example.com/rate-limited
+```
+
+### Directory Example
+
+Folder: `./rate-limit-policies/`
+
+Each rate limit policy is stored as a separate JSON file named after its `consumer_selector` (e.g. `default.json`):
+
+```json
+{
+  "resource": "oauth_authentication_api",
+  "consumer": "client",
+  "consumer_selector": "default",
+  "configuration": {
+    "action": "block",
+    "limit": 100
+  }
+}
+```
+
+For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2/rate-limit-policies/get-rate-limit-policies).

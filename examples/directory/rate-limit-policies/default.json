@@ -1,0 +1,9 @@
+{
+  "resource": "oauth_authentication_api",
+  "consumer": "client",
+  "consumer_selector": "default",
+  "configuration": {
+    "action": "block",
+    "limit": 100
+  }
+}

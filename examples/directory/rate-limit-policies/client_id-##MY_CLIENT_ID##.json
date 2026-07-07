@@ -1,0 +1,10 @@
+{
+  "resource": "oauth_authentication_api",
+  "consumer": "client",
+  "consumer_selector": "client_id:##MY_CLIENT_ID##",
+  "configuration": {
+    "action": "redirect",
+    "limit": 10,
+    "redirect_uri": "https://example.com/rate-limited"
+  }
+}
