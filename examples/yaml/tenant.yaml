@@ -624,3 +624,23 @@ eventStreams:
       type: action
       configuration:
         action_id: "action-name"
+rateLimitPolicies:
+  - resource: oauth_authentication_api
+    consumer: client
+    consumer_selector: default
+    configuration:
+      action: block
+      limit: 100
+  - resource: oauth_authentication_api
+    consumer: client
+    consumer_selector: third_party_clients
+    configuration:
+      action: log
+      limit: 50
+  - resource: oauth_authentication_api
+    consumer: client
+    consumer_selector: "client_id:##MY_CLIENT_ID##"
+    configuration:
+      action: redirect
+      limit: 10
+      redirect_uri: https://example.com/rate-limited

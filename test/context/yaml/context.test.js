@@ -341,6 +341,7 @@ describe('#YAML context validation', () => {
       supplementalSignals: {
         akamai_enabled: false,
       },
+      rateLimitPolicies: [],
       tokenExchangeProfiles: [],
       userAttributeProfiles: [],
       phoneTemplates: [],
@@ -485,6 +486,7 @@ describe('#YAML context validation', () => {
       supplementalSignals: {
         akamai_enabled: false,
       },
+      rateLimitPolicies: [],
       tokenExchangeProfiles: [],
       userAttributeProfiles: [],
       phoneTemplates: [],
@@ -630,6 +632,7 @@ describe('#YAML context validation', () => {
       supplementalSignals: {
         akamai_enabled: false,
       },
+      rateLimitPolicies: [],
       tokenExchangeProfiles: [],
       userAttributeProfiles: [],
       phoneTemplates: [],

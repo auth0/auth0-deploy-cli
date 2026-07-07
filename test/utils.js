@@ -246,6 +246,9 @@ export function mockMgmtClient() {
     supplementalSignals: {
       get: () => Promise.resolve({ akamai_enabled: false }),
     },
+    rateLimitPolicies: {
+      list: (params) => mockPagedData(params, 'rate_limit_policies', []),
+    },
     eventStreams: {
       list: () =>
         Promise.resolve({

@@ -39,6 +39,7 @@ import * as userAttributeProfiles from './userAttributeProfiles';
 import * as connectionProfiles from './connectionProfiles';
 import * as tokenExchangeProfiles from './tokenExchangeProfiles';
 import * as supplementalSignals from './supplementalSignals';
+import * as rateLimitPolicies from './rateLimitPolicies';
 import * as eventStreams from './eventStreams';
 import * as clientAuthCredentials from './clientAuthCredentials';
 
@@ -88,6 +89,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   connectionProfiles,
   tokenExchangeProfiles,
   supplementalSignals,
+  rateLimitPolicies,
   eventStreams,
   clientAuthCredentials,
 };
