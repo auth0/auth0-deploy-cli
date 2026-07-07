@@ -87,6 +87,10 @@ export const schema = {
           required: ['domain', 'status'],
         },
       },
+      third_party_client_access: {
+        type: 'string',
+        enum: ['allow', 'block'],
+      },
     },
     required: ['name'],
   },
