@@ -644,3 +644,12 @@ rateLimitPolicies:
       action: redirect
       limit: 10
       redirect_uri: https://example.com/rate-limited
+
+organizations:
+  - name: my-organization
+    display_name: My Organization
+    # Controls whether third-party clients can perform standard user flows (e.g. Authorization Code,
+    # Refresh Token exchange) within the context of this organization.
+    # Requires the organizations_third_party_client_support feature flag to be enabled on the tenant.
+    # Allowed values: allow, block (defaults to block)
+    third_party_client_access: block
