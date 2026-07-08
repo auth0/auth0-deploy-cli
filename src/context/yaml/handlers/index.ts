@@ -40,6 +40,7 @@ import tokenExchangeProfiles from './tokenExchangeProfiles';
 import supplementalSignals from './supplementalSignals';
 import rateLimitPolicies from './rateLimitPolicies';
 import eventStreams from './eventStreams';
+import clientAuthCredentials from './clientAuthCredentials';
 
 import YAMLContext from '..';
 import { AssetTypes } from '../../../types';
@@ -94,6 +95,7 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   supplementalSignals,
   rateLimitPolicies,
   eventStreams,
+  clientAuthCredentials,
 };
 
 export default yamlHandlers;
