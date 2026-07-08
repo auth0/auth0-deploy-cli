@@ -77,6 +77,42 @@ describe('#connections handler', () => {
       expect(valid).to.equal(true);
       expect(ajv.errors).to.be.null;
     });
+
+    it('should allow cross_app_access_resource_app with enabled status', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'saml-xaa-connection',
+          strategy: 'samlp',
+          cross_app_access_resource_app: { status: 'enabled' },
+        },
+        {
+          name: 'oidc-xaa-connection',
+          strategy: 'oidc',
+          cross_app_access_resource_app: { status: 'disabled' },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should reject cross_app_access_resource_app with invalid status', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'bad-xaa-connection',
+          strategy: 'samlp',
+          cross_app_access_resource_app: { status: 'invalid_value' },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(false);
+    });
   });
 
   describe('#connections validate', () => {

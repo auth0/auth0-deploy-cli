@@ -129,6 +129,14 @@ export const schema = {
           },
         },
       },
+      cross_app_access_resource_app: {
+        type: 'object',
+        properties: {
+          status: { type: 'string', enum: ['enabled', 'disabled'] },
+        },
+        required: ['status'],
+        additionalProperties: false,
+      },
     },
     required: ['name', 'strategy'],
   },
@@ -143,6 +151,9 @@ export type Connection = Management.ConnectionForList & {
     'mapping' | 'synchronize_automatically' | 'synchronize_groups'
   > & {
     synchronized_groups?: Array<{ id: string }>;
+  };
+  cross_app_access_resource_app?: {
+    status: 'enabled' | 'disabled';
   };
 };
 
