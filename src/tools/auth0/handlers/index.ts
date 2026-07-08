@@ -41,6 +41,7 @@ import * as tokenExchangeProfiles from './tokenExchangeProfiles';
 import * as supplementalSignals from './supplementalSignals';
 import * as rateLimitPolicies from './rateLimitPolicies';
 import * as eventStreams from './eventStreams';
+import * as clientAuthCredentials from './clientAuthCredentials';
 
 import { AssetTypes } from '../../../types';
 import APIHandler from './default';
@@ -90,6 +91,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   supplementalSignals,
   rateLimitPolicies,
   eventStreams,
+  clientAuthCredentials,
 };
 
 export default auth0ApiHandlers as {
