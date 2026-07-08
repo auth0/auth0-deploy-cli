@@ -77,6 +77,43 @@ describe('#connections handler', () => {
       expect(valid).to.equal(true);
       expect(ajv.errors).to.be.null;
     });
+
+    it('should allow cross_app_access_requesting_app with active boolean', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'oidc-connection',
+          strategy: 'oidc',
+          cross_app_access_requesting_app: { active: true },
+        },
+        {
+          name: 'okta-connection',
+          strategy: 'okta',
+          cross_app_access_requesting_app: { active: false },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should reject cross_app_access_requesting_app with unknown properties', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'oidc-connection',
+          strategy: 'oidc',
+          cross_app_access_requesting_app: { active: true, unknown_field: 'value' },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(false);
+      expect(ajv.errors).to.not.be.null;
+    });
   });
 
   describe('#connections validate', () => {
@@ -499,6 +536,44 @@ describe('#connections handler', () => {
           connected_accounts: {
             active: false,
           },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ connections: data }]);
+    });
+
+    it('should pass cross_app_access_requesting_app through in the update payload', async () => {
+      const auth0 = {
+        connections: {
+          create: () => Promise.resolve({ data: {} }),
+          update: function (id, data) {
+            expect(id).to.equal('con1');
+            expect(data).to.have.deep.property('cross_app_access_requesting_app', { active: true });
+            return Promise.resolve({ ...data, id });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someConnection', id: 'con1', strategy: 'custom' },
+            ]),
+          _getRestClient: () => ({}),
+          clients: {
+            update: () => Promise.resolve({}),
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          name: 'someConnection',
+          strategy: 'custom',
+          cross_app_access_requesting_app: { active: true },
         },
       ];
 

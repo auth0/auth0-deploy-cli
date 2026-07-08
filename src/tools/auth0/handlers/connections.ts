@@ -96,6 +96,13 @@ export const schema = {
         required: ['active'],
         additionalProperties: false,
       },
+      cross_app_access_requesting_app: {
+        type: 'object',
+        properties: {
+          active: { type: 'boolean' },
+        },
+        additionalProperties: false,
+      },
       directory_provisioning_configuration: {
         type: 'object',
         properties: {

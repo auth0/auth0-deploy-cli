@@ -321,6 +321,49 @@ connections:
 }
 ```
 
+## Connections (Cross App Access — Requesting Application)
+
+> **Early Access:** Requires the `token_vault_xaa` feature flag to be enabled on the tenant.
+
+For enterprise connections with strategy `oidc` or `okta`, the Deploy CLI supports configuring the connection as a Requesting Application for Cross App Access via the top-level `cross_app_access_requesting_app` field:
+
+- `cross_app_access_requesting_app.active` (boolean): Set to `true` to enable the connection as a Requesting Application for Cross App Access. Defaults to `true`.
+
+**YAML Example**
+
+```yaml
+connections:
+  - name: enterprise-oidc
+    strategy: oidc
+    cross_app_access_requesting_app:
+      active: true
+    options:
+      type: back_channel
+      issuer: https://example-idp.com
+      jwks_uri: https://example-idp.com/.well-known/jwks.json
+```
+
+**Directory Example**
+
+```
+./connections/enterprise-oidc.json
+```
+
+```json
+{
+  "name": "enterprise-oidc",
+  "strategy": "oidc",
+  "cross_app_access_requesting_app": {
+    "active": true
+  },
+  "options": {
+    "type": "back_channel",
+    "issuer": "https://example-idp.com",
+    "jwks_uri": "https://example-idp.com/.well-known/jwks.json"
+  }
+}
+```
+
 ## Databases
 
 When managing database connections, the values of `options.customScripts` point to specific javascript files relative to
