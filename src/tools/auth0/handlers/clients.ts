@@ -649,6 +649,19 @@ export default class ClientHandler extends DefaultAPIHandler {
             delete item.refresh_token;
           }
         }
+
+        // If any credential has a pem field, strip client_authentication_methods
+        // from the PATCH payload — the clientAuthCredentials handler (order 70)
+        // will create the credentials and re-wire it with the resulting IDs.
+        if (item.client_authentication_methods) {
+          const hasPem = Object.values(item.client_authentication_methods).some((method: any) =>
+            method?.credentials?.some((c: any) => c.pem)
+          );
+          if (hasPem) {
+            delete item.client_authentication_methods;
+          }
+        }
+
         return item;
       });
     };
@@ -674,7 +687,30 @@ export default class ClientHandler extends DefaultAPIHandler {
       ...(shouldExcludeThirdPartyClients(this.config) && { is_first_party: true }),
     });
 
-    this.existing = createClientSanitizer(clients).sanitizeCrossOriginAuth(false).get();
+    const sanitized = createClientSanitizer(clients).sanitizeCrossOriginAuth(false).get();
+
+    // Enrich credential stubs with full metadata (name, credential_type, kid, alg).
+    // Auth0 does not return pem on read — enrichment is metadata only.
+    await Promise.all(
+      sanitized.map(async (client) => {
+        if (!client.client_authentication_methods) return;
+        try {
+          const creds = await this.client.clients.credentials.list(client.client_id as string);
+          const credMap = new Map((creds as any[]).map((c) => [c.id, c]));
+          Object.values(client.client_authentication_methods).forEach((method: any) => {
+            if (method?.credentials) {
+              method.credentials = method.credentials.map((stub: any) =>
+                credMap.has(stub.id) ? { ...credMap.get(stub.id) } : stub
+              );
+            }
+          });
+        } catch (_) {
+          // leave stubs as-is if the credentials API call fails
+        }
+      })
+    );
+
+    this.existing = sanitized;
     return this.existing;
   }
 

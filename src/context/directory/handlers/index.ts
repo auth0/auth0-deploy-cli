@@ -40,6 +40,7 @@ import tokenExchangeProfiles from './tokenExchangeProfiles';
 import supplementalSignals from './supplementalSignals';
 import rateLimitPolicies from './rateLimitPolicies';
 import eventStreams from './eventStreams';
+import clientAuthCredentials from './clientAuthCredentials';
 
 import DirectoryContext from '..';
 import { AssetTypes, Asset } from '../../../types';
@@ -96,6 +97,7 @@ const directoryHandlers: {
   supplementalSignals,
   rateLimitPolicies,
   eventStreams,
+  clientAuthCredentials,
 };
 
 export default directoryHandlers;
