@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Add client credential lifecycle management for Private Key JWT and mTLS authentication methods. [#1417]
+- Add Rate Limit Policies (EA) support. [#1395]
+
+### Fixed
+- Preserve `false` value for `default_head_tags_disabled` in screen renderer update. [#1416]
+
 ## [8.39.0] - 2026-06-30
 
 ### Added
