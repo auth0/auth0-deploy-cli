@@ -687,8 +687,8 @@ export default class ClientHandler extends DefaultAPIHandler {
 
     const sanitized = createClientSanitizer(clients).sanitizeCrossOriginAuth(false).get();
 
-    // Enrich credential stubs with full metadata (name, credential_type, kid, alg).
-    // Auth0 does not return pem on read — enrichment is metadata only.
+    // Enrich credential stubs with name and credential_type for export.
+    // Auth0 does not return pem on read — it is never exported.
     await Promise.all(
       sanitized.map(async (client) => {
         if (!client.client_authentication_methods) return;

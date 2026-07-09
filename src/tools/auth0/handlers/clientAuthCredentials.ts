@@ -49,8 +49,7 @@ export default class ClientAuthCredentialsHandler {
 
     const needsNameResolution = clients.some((c) => !c.client_id);
 
-    // Only fetch all clients when directory mode has stripped client_id (null) from any entry
-    // that also has client_authentication_methods — avoids an extra API call in the common case.
+    // Only fetch all clients when any entry is missing a client_id (directory mode strips it).
     let clientIdByName = new Map<string, string>();
     if (needsNameResolution) {
       const existingClients = await paginate(this.client.clients.list, {
@@ -87,10 +86,8 @@ export default class ClientAuthCredentialsHandler {
         }
       }
 
-      // When client_authentication_methods is present but no credential has a pem,
-      // skip reconciliation — pem is the opt-in signal and a plain export→deploy must
-      // never delete credentials. When absent entirely, fall through to the delete path
-      // so that removing the field from config is treated as intentional deletion.
+      // pem is the opt-in signal: present field with no pem = skip (safe export→deploy);
+      // absent field = fall through to delete path (intentional removal).
       if (desired.length === 0 && client.client_authentication_methods) continue;
 
       let existing: any[] = [];
