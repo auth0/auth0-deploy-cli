@@ -1575,23 +1575,25 @@ The Deploy CLI supports managing client authentication credentials for Private K
 
 ### Supported credential types
 
-| `credential_type` | Auth method key | Use case |
-|---|---|---|
-| `public_key` | `private_key_jwt` | Private Key JWT |
-| `x509_cert` | `self_signed_tls_client_auth` | mTLS (self-signed cert) |
-| `cert_subject_dn` | `tls_client_auth` | mTLS (CA-signed cert, subject DN) |
+| `credential_type` | Auth method key               | Use case                          |
+| ----------------- | ----------------------------- | --------------------------------- |
+| `public_key`      | `private_key_jwt`             | Private Key JWT                   |
+| `x509_cert`       | `self_signed_tls_client_auth` | mTLS (self-signed cert)           |
+| `cert_subject_dn` | `tls_client_auth`             | mTLS (CA-signed cert, subject DN) |
 
 ### Workflow
 
 To add or rotate a credential:
 
 1. Generate a key pair:
+
    ```bash
    openssl genrsa -out private.key 2048
    openssl rsa -in private.key -pubout -out public.pem
    ```
 
 2. Add the credential to your client config with the public key `pem`:
+
    ```yaml
    clients:
      - name: My API Client

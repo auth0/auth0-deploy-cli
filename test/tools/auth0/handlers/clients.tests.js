@@ -1864,7 +1864,9 @@ describe('#clients handler', () => {
                 client_id: 'client2',
                 name: 'App Without PEM',
                 client_authentication_methods: {
-                  private_key_jwt: { credentials: [{ name: 'other-key', credential_type: 'public_key' }] },
+                  private_key_jwt: {
+                    credentials: [{ name: 'other-key', credential_type: 'public_key' }],
+                  },
                 },
               },
             ]),
@@ -1905,7 +1907,9 @@ describe('#clients handler', () => {
               client_id: 'client2',
               name: 'App Without PEM',
               client_authentication_methods: {
-                private_key_jwt: { credentials: [{ name: 'other-key', credential_type: 'public_key' }] },
+                private_key_jwt: {
+                  credentials: [{ name: 'other-key', credential_type: 'public_key' }],
+                },
               },
             },
           ],
