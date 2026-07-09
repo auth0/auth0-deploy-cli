@@ -653,6 +653,11 @@ export default class ClientHandler extends DefaultAPIHandler {
         // Always strip client_authentication_methods from the PATCH payload —
         // the clientAuthCredentials handler (order 70) owns this field entirely.
         // Auth0 rejects credential objects with name/credential_type in PATCH.
+        // Also always strip token_endpoint_auth_method — Auth0 rejects it while
+        // client_authentication_methods is active, and we cannot know at this point
+        // whether the existing Auth0 state has credentials. The clientAuthCredentials
+        // handler (order 70) sets token_endpoint_auth_method when clearing credentials.
+        delete item.token_endpoint_auth_method;
         delete item.client_authentication_methods;
 
         return item;

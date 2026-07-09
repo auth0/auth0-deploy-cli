@@ -179,9 +179,11 @@ export default class ClientAuthCredentialsHandler {
           const payload: Record<string, any> = {
             client_authentication_methods: updatedAuthMethods ?? null,
           };
-          // Auth0 requires token_endpoint_auth_method when clearing client_authentication_methods.
-          // Use the value from the client config if available, otherwise fall back to the default.
-          if (!updatedAuthMethods) {
+          // Auth0 requires token_endpoint_auth_method: null when setting client_authentication_methods,
+          // and a non-null value when clearing it.
+          if (updatedAuthMethods) {
+            payload.token_endpoint_auth_method = null;
+          } else {
             payload.token_endpoint_auth_method =
               (client as any).token_endpoint_auth_method || 'client_secret_post';
           }
