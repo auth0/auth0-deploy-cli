@@ -650,17 +650,10 @@ export default class ClientHandler extends DefaultAPIHandler {
           }
         }
 
-        // If any credential has a pem field, strip client_authentication_methods
-        // from the PATCH payload — the clientAuthCredentials handler (order 70)
-        // will create the credentials and re-wire it with the resulting IDs.
-        if (item.client_authentication_methods) {
-          const hasPem = Object.values(item.client_authentication_methods).some((method: any) =>
-            method?.credentials?.some((c: any) => c.pem)
-          );
-          if (hasPem) {
-            delete item.client_authentication_methods;
-          }
-        }
+        // Always strip client_authentication_methods from the PATCH payload —
+        // the clientAuthCredentials handler (order 70) owns this field entirely.
+        // Auth0 rejects credential objects with name/credential_type in PATCH.
+        delete item.client_authentication_methods;
 
         return item;
       });
@@ -699,9 +692,13 @@ export default class ClientHandler extends DefaultAPIHandler {
           const credMap = new Map((creds as any[]).map((c) => [c.id, c]));
           Object.values(client.client_authentication_methods).forEach((method: any) => {
             if (method?.credentials) {
-              method.credentials = method.credentials.map((stub: any) =>
-                credMap.has(stub.id) ? { ...credMap.get(stub.id) } : stub
-              );
+              method.credentials = method.credentials
+                .map((stub: any) => {
+                  const full = credMap.get(stub.id);
+                  if (!full?.name) return null;
+                  return { name: full.name, credential_type: full.credential_type };
+                })
+                .filter(Boolean);
             }
           });
         } catch (_) {

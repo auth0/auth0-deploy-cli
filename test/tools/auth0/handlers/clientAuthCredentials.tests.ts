@@ -42,20 +42,24 @@ const makeClient = (overrides: any = {}) => {
 
 describe('#clientAuthCredentials handler', () => {
   describe('#processChanges', () => {
-    it('should skip clients with no client_authentication_methods', async () => {
-      let credListCalled = false;
+    it('should not create or delete when no client_authentication_methods and Auth0 has no credentials', async () => {
+      const createCalls: any[] = [];
+      const deleteCalls: any[] = [];
       const client = makeClient({
         clients: {
           list: (params) =>
             mockPagedData(params, 'clients', [{ client_id: 'client1', name: 'My App' }]),
           update: () => Promise.resolve({ data: {} }),
           credentials: {
-            list: () => {
-              credListCalled = true;
-              return Promise.resolve([]);
+            list: () => Promise.resolve([]),
+            create: (_id, data) => {
+              createCalls.push(data);
+              return Promise.resolve({ id: 'cred_new' });
             },
-            create: () => Promise.resolve({ id: 'cred_new' }),
-            delete: () => Promise.resolve({}),
+            delete: (_id, credId) => {
+              deleteCalls.push(credId);
+              return Promise.resolve({});
+            },
           },
         },
       });
@@ -64,7 +68,34 @@ describe('#clientAuthCredentials handler', () => {
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       await stageFn.apply(handler, [{ clients: [{ client_id: 'client1', name: 'My App' }] }]);
 
-      expect(credListCalled).to.equal(false);
+      expect(createCalls).to.have.lengthOf(0);
+      expect(deleteCalls).to.have.lengthOf(0);
+    });
+
+    it('should delete credentials when client_authentication_methods is absent and Auth0 has credentials', async () => {
+      const deleteCalls: any[] = [];
+      const client = makeClient({
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ client_id: 'client1', name: 'My App' }]),
+          update: () => Promise.resolve({ data: {} }),
+          credentials: {
+            list: () =>
+              Promise.resolve([{ id: 'cred_old', name: 'old-key', credential_type: 'public_key' }]),
+            create: () => Promise.resolve({ id: 'cred_new' }),
+            delete: (_clientId, credId) => {
+              deleteCalls.push(credId);
+              return Promise.resolve({});
+            },
+          },
+        },
+      });
+
+      const handler = new clientAuthCredentials({ client, config: makeConfig() });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ clients: [{ client_id: 'client1', name: 'My App' }] }]);
+
+      expect(deleteCalls).to.deep.equal(['cred_old']);
     });
 
     it('should skip all reconciliation when no credential has a pem field, even if Auth0 has existing credentials', async () => {

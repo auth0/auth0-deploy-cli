@@ -47,9 +47,7 @@ export default class ClientAuthCredentialsHandler {
     const allowDelete =
       this.config('AUTH0_ALLOW_DELETE') === true || this.config('AUTH0_ALLOW_DELETE') === 'true';
 
-    const needsNameResolution = clients.some(
-      (c) => !c.client_id && c.client_authentication_methods
-    );
+    const needsNameResolution = clients.some((c) => !c.client_id);
 
     // Only fetch all clients when directory mode has stripped client_id (null) from any entry
     // that also has client_authentication_methods — avoids an extra API call in the common case.
@@ -63,30 +61,37 @@ export default class ClientAuthCredentialsHandler {
     }
 
     for (const client of clients) {
-      if (!client.client_authentication_methods) continue;
       const clientId = client.client_id || (client.name && clientIdByName.get(client.name));
       if (!clientId) continue;
       client.client_id = clientId;
 
-      // Collect all desired credentials across all auth methods
+      const clientName = client.name || clientId;
+
+      // Collect all desired credentials across all auth methods (only pem-bearing entries)
       const desired: { name: string; pem?: string; credential_type: string; method: string }[] = [];
 
-      for (const [methodKey, methodVal] of Object.entries(
-        client.client_authentication_methods as Record<string, any>
-      )) {
-        const credentials: any[] = methodVal?.credentials || [];
-        for (const cred of credentials) {
-          if (!cred.pem) continue; // only manage credentials the user has explicitly provided a pem for
-          desired.push({
-            name: cred.name,
-            pem: cred.pem,
-            credential_type: cred.credential_type || this.inferCredentialType(methodKey),
-            method: methodKey,
-          });
+      if (client.client_authentication_methods) {
+        for (const [methodKey, methodVal] of Object.entries(
+          client.client_authentication_methods as Record<string, any>
+        )) {
+          const credentials: any[] = methodVal?.credentials || [];
+          for (const cred of credentials) {
+            if (!cred.pem) continue;
+            desired.push({
+              name: cred.name,
+              pem: cred.pem,
+              credential_type: cred.credential_type || this.inferCredentialType(methodKey),
+              method: methodKey,
+            });
+          }
         }
       }
 
-      const clientName = client.name || clientId;
+      // When client_authentication_methods is present but no credential has a pem,
+      // skip reconciliation — pem is the opt-in signal and a plain export→deploy must
+      // never delete credentials. When absent entirely, fall through to the delete path
+      // so that removing the field from config is treated as intentional deletion.
+      if (desired.length === 0 && client.client_authentication_methods) continue;
 
       let existing: any[] = [];
       try {
@@ -97,11 +102,6 @@ export default class ClientAuthCredentialsHandler {
         );
         continue;
       }
-
-      // Skip reconciliation entirely when no pem is present — pem is the opt-in signal.
-      // Without this guard, a plain export→deploy would delete all existing credentials
-      // because desired would be empty (exported credentials never have pem).
-      if (desired.length === 0) continue;
 
       // Warn if duplicate names exist in Auth0 — we can't match safely
       const existingNames = existing.map((c) => c.name);
@@ -149,7 +149,7 @@ export default class ClientAuthCredentialsHandler {
       const createdIds = [...createdIdByName.values()];
       const finalIds = [...keptIds, ...createdIds];
 
-      let updatedAuthMethods: Record<string, any> = {};
+      let updatedAuthMethods: Record<string, any> | null = null;
       if (finalIds.length > 0) {
         // Build method→ids map. For kept credentials use Auth0's stored type to infer method;
         // for created credentials use the method from the user's config entry (by name).
@@ -165,6 +165,7 @@ export default class ClientAuthCredentialsHandler {
           if (!methodToIds[methodKey]) methodToIds[methodKey] = [];
           methodToIds[methodKey].push(id);
         }
+        updatedAuthMethods = {};
         for (const [methodKey, ids] of Object.entries(methodToIds)) {
           updatedAuthMethods[methodKey] = { credentials: ids.map((id) => ({ id })) };
         }
@@ -172,12 +173,19 @@ export default class ClientAuthCredentialsHandler {
 
       // Always update client_authentication_methods before deletes:
       // - When finalIds > 0: re-wire to the remaining credentials
-      // - When finalIds === 0 but toDelete > 0: clear references so Auth0 allows the deletes
+      // - When finalIds === 0 but toDelete > 0: set to null so Auth0 de-references them first
       if (finalIds.length > 0 || toDelete.length > 0) {
         try {
-          await (this.client.clients.update as Function)(clientId, {
-            client_authentication_methods: updatedAuthMethods,
-          });
+          const payload: Record<string, any> = {
+            client_authentication_methods: updatedAuthMethods ?? null,
+          };
+          // Auth0 requires token_endpoint_auth_method when clearing client_authentication_methods.
+          // Use the value from the client config if available, otherwise fall back to the default.
+          if (!updatedAuthMethods) {
+            payload.token_endpoint_auth_method =
+              (client as any).token_endpoint_auth_method || 'client_secret_post';
+          }
+          await (this.client.clients.update as Function)(clientId, payload);
           log.info(
             `clientAuthCredentials: updated client_authentication_methods on client "${clientName}"`
           );
