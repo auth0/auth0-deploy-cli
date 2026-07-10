@@ -1451,6 +1451,8 @@ Note: EventBridge streams cannot have their `destination` updated after creation
 }
 ```
 
+Note: like EventBridge, Action streams cannot have their `destination` updated after creation. Only `name`, `subscriptions`, and `status` can be patched — the `destination` is stripped from update payloads (an info message is logged when this happens).
+
 ### YAML Example
 
 ```yaml
