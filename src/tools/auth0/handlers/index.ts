@@ -93,7 +93,9 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   rateLimitPolicies,
   eventStreams,
   clientAuthCredentials,
-  clientAuthCredentialsPre,
+  // clientAuthCredentialsPre is a deploy-only pre-pass handler (order 40) — not a user-facing
+  // asset type so it is not in AssetTypes, but must be registered here to run during deploy.
+  ...{ clientAuthCredentialsPre },
 };
 
 export default auth0ApiHandlers as {
