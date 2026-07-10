@@ -41,6 +41,7 @@ import supplementalSignals from './supplementalSignals';
 import rateLimitPolicies from './rateLimitPolicies';
 import eventStreams from './eventStreams';
 import clientAuthCredentials from './clientAuthCredentials';
+const clientAuthCredentialsPre = clientAuthCredentials;
 
 import DirectoryContext from '..';
 import { AssetTypes, Asset } from '../../../types';
@@ -98,6 +99,7 @@ const directoryHandlers: {
   rateLimitPolicies,
   eventStreams,
   clientAuthCredentials,
+  clientAuthCredentialsPre,
 };
 
 export default directoryHandlers;

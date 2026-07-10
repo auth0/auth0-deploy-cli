@@ -47,9 +47,14 @@ export default class ClientAuthCredentialsHandler {
     const allowDelete =
       this.config('AUTH0_ALLOW_DELETE') === true || this.config('AUTH0_ALLOW_DELETE') === 'true';
 
-    const needsNameResolution = clients.some((c) => !c.client_id);
+    // Only process clients that have client_authentication_methods in config.
+    // Full deletion (absent field) is handled by ClientAuthCredentialsPreHandler at order 40,
+    // before clients.ts runs. This handler only manages create and partial delete.
+    const clientsWithCam = clients.filter((c) => c.client_authentication_methods !== undefined);
+    if (clientsWithCam.length === 0) return;
 
-    // Only fetch all clients when any entry is missing a client_id (directory mode strips it).
+    // In directory mode client_id is stripped. Resolve names for PKI clients only.
+    const needsNameResolution = clientsWithCam.some((c) => !c.client_id);
     let clientIdByName = new Map<string, string>();
     if (needsNameResolution) {
       const existingClients = await paginate(this.client.clients.list, {
@@ -59,7 +64,7 @@ export default class ClientAuthCredentialsHandler {
       clientIdByName = new Map(existingClients.map((c: any) => [c.name, c.client_id]));
     }
 
-    for (const client of clients) {
+    for (const client of clientsWithCam) {
       const clientId = client.client_id || (client.name && clientIdByName.get(client.name));
       if (!clientId) continue;
       client.client_id = clientId;
@@ -99,6 +104,9 @@ export default class ClientAuthCredentialsHandler {
         );
         continue;
       }
+
+      // No credentials in Auth0 and none desired — nothing to do.
+      if (existing.length === 0 && desired.length === 0) continue;
 
       // Warn if duplicate names exist in Auth0 — we can't match safely
       const existingNames = existing.map((c) => c.name);

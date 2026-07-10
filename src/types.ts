@@ -237,7 +237,8 @@ export type AssetTypes =
   | 'supplementalSignals'
   | 'rateLimitPolicies'
   | 'eventStreams'
-  | 'clientAuthCredentials';
+  | 'clientAuthCredentials'
+  | 'clientAuthCredentialsPre';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 
