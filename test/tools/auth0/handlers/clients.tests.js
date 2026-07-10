@@ -1832,16 +1832,16 @@ describe('#clients handler', () => {
       const result = await handler.getType();
 
       const cred = result[0].client_authentication_methods.private_key_jwt.credentials[0];
-      expect(cred.id).to.equal('cred_abc');
       expect(cred.name).to.equal('my-key');
       expect(cred.credential_type).to.equal('public_key');
-      expect(cred.kid).to.equal('kid123');
-      expect(cred.alg).to.equal('RS256');
+      expect(cred.id).to.equal(undefined);
+      expect(cred.kid).to.equal(undefined);
+      expect(cred.alg).to.equal(undefined);
     });
   });
 
   describe('#clients pem stripping in processChanges', () => {
-    it('should strip client_authentication_methods from PATCH only when credential has pem', async () => {
+    it('should always strip client_authentication_methods from PATCH', async () => {
       const updatePayloads = {};
       const auth0 = {
         clients: {
@@ -1864,7 +1864,9 @@ describe('#clients handler', () => {
                 client_id: 'client2',
                 name: 'App Without PEM',
                 client_authentication_methods: {
-                  private_key_jwt: { credentials: [{ id: 'cred_xyz' }] },
+                  private_key_jwt: {
+                    credentials: [{ name: 'other-key', credential_type: 'public_key' }],
+                  },
                 },
               },
             ]),
@@ -1905,7 +1907,9 @@ describe('#clients handler', () => {
               client_id: 'client2',
               name: 'App Without PEM',
               client_authentication_methods: {
-                private_key_jwt: { credentials: [{ id: 'cred_xyz' }] },
+                private_key_jwt: {
+                  credentials: [{ name: 'other-key', credential_type: 'public_key' }],
+                },
               },
             },
           ],
@@ -1913,7 +1917,7 @@ describe('#clients handler', () => {
       ]);
 
       expect(updatePayloads['client1']).to.not.have.property('client_authentication_methods');
-      expect(updatePayloads['client2']).to.have.property('client_authentication_methods');
+      expect(updatePayloads['client2']).to.not.have.property('client_authentication_methods');
     });
   });
 

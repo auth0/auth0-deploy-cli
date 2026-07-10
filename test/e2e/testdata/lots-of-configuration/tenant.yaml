@@ -89,6 +89,21 @@ clients:
     sso_disabled: false
     token_endpoint_auth_method: client_secret_post
     web_origins: []
+    client_authentication_methods:
+      private_key_jwt:
+        credentials:
+          - name: e2e-test-key
+            credential_type: public_key
+            pem: |
+              -----BEGIN PUBLIC KEY-----
+              MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs8/9RN2qV8HZMunRt8mx
+              ihqnIX726YqxGwF+7x1A0gpk4TWRpMUWnaaL2D3Nt/Kd5obKM0THZPCuE+Xwncf4
+              QloizZEn4jM3PNldweL9qwG160o2wXif2R5zLVQat9/188+Ko/sU/LorHgh23DMp
+              znSwIN30AdLG1WRPxqP5s9abVT0WgBt1VuQobw4TS6QltFUnMSEMBsNtMSPK+NPJ
+              pz9s3ozqkNMLNSLZMTwgODQWchUr2YJeZa5RbM0u5Xt9oF0HtXH8db3L6Rp3TdIA
+              uISnZ+mC7zRiCzWljkJZSBrqgtx6Su5wSve9cYGPS23zu3yeSapJWP7pki3G/GBz
+              JQIDAQAB
+              -----END PUBLIC KEY-----
   - name: Quickstarts API (Test Application)
     app_type: non_interactive
     client_metadata:

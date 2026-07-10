@@ -1558,3 +1558,100 @@ Each rate limit policy is stored as a separate JSON file named after its `consum
 ```
 
 For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2/rate-limit-policies/get-rate-limit-policies).
+
+## Client Credentials (Private Key JWT / mTLS)
+
+The Deploy CLI supports managing client authentication credentials for Private Key JWT and mTLS. Credentials are child resources of clients, managed via the `/clients/{id}/credentials` API.
+
+### How it works
+
+**Export**: `client_authentication_methods` is exported with credential stubs containing only `name` and `credential_type`. The `pem` field is never exported — Auth0 does not return it after creation. If no named credentials exist for a client, `client_authentication_methods` is omitted entirely from the export.
+
+**Deploy**: Credential reconciliation only activates when at least one credential in the config contains a `pem` field. This means a plain export→deploy will never delete existing credentials — `pem` is the explicit opt-in signal.
+
+- Creates credentials present in config but missing in Auth0
+- Deletes credentials removed from config (requires `AUTH0_ALLOW_DELETE=true`)
+- Creates always run before deletes — Auth0 allows max 2 credentials per client, so both exist simultaneously during the rotation window
+- Re-wires `client_authentication_methods` with resolved credential IDs after reconciliation
+- If `client_authentication_methods` is **absent** from the client config entirely, it is treated as intentional deletion — all existing credentials are removed (requires `AUTH0_ALLOW_DELETE=true`)
+
+### Supported credential types
+
+| `credential_type` | Auth method key               | Use case                          |
+| ----------------- | ----------------------------- | --------------------------------- |
+| `public_key`      | `private_key_jwt`             | Private Key JWT                   |
+| `x509_cert`       | `self_signed_tls_client_auth` | mTLS (self-signed cert)           |
+| `cert_subject_dn` | `tls_client_auth`             | mTLS (CA-signed cert, subject DN) |
+
+### Workflow
+
+To add or rotate a credential:
+
+1. Generate a key pair:
+
+   ```bash
+   openssl genrsa -out private.key 2048
+   openssl rsa -in private.key -pubout -out public.pem
+   ```
+
+2. Add the credential to your client config with the public key `pem`:
+
+   ```yaml
+   clients:
+     - name: My API Client
+       client_authentication_methods:
+         private_key_jwt:
+           credentials:
+             - name: my-key-v2
+               credential_type: public_key
+               pem: |
+                 -----BEGIN PUBLIC KEY-----
+                 MIIBIjANBgkq...
+                 -----END PUBLIC KEY-----
+   ```
+
+3. Deploy — the credential is created in Auth0 and `client_authentication_methods` is updated.
+
+4. To rotate: add the new key alongside the old one (both exist simultaneously), then remove the old one in a subsequent deploy.
+
+### Export shape (name and credential_type only)
+
+```yaml
+clients:
+  - name: My API Client
+    client_authentication_methods:
+      private_key_jwt:
+        credentials:
+          - name: my-key-v2
+            credential_type: public_key
+```
+
+If no credentials exist for the client, `client_authentication_methods` is omitted entirely — not exported as an empty object.
+
+### Directory Example
+
+```
+./clients/
+    ./My API Client.json
+```
+
+Contents of `My API Client.json` (deploy-time, with pem):
+
+```json
+{
+  "name": "My API Client",
+  "client_authentication_methods": {
+    "private_key_jwt": {
+      "credentials": [
+        {
+          "name": "my-key-v2",
+          "credential_type": "public_key",
+          "pem": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkq...\n-----END PUBLIC KEY-----\n"
+        }
+      ]
+    }
+  }
+}
+```
+
+> **Note:** The `pem` field must be supplied manually from your key generation step. Never commit private keys — only the public key PEM goes in the config.
