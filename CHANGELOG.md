@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Preserve `false` value for `default_head_tags_disabled` in screen renderer update. [#1416]
+- Skip destination update for action event streams as the destination type cannot be changed after creation. [#1425]
 
 ## [8.39.0] - 2026-06-30
 
@@ -1868,6 +1869,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1412]: https://github.com/auth0/auth0-deploy-cli/issues/1412
 [#1416]: https://github.com/auth0/auth0-deploy-cli/issues/1416
 [#1417]: https://github.com/auth0/auth0-deploy-cli/issues/1417
+[#1425]: https://github.com/auth0/auth0-deploy-cli/issues/1425
 [Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.40.0...HEAD
 [8.40.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.39.0...v8.40.0
 [8.39.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.38.0...v8.39.0
