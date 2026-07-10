@@ -3,6 +3,7 @@ import DefaultAPIHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
 import { paginate } from '../client';
 import { Action } from './actions';
+import log from '../../../logger';
 
 export const schema = {
   type: 'array',
@@ -141,8 +142,16 @@ export default class EventStreamsHandler extends DefaultAPIHandler {
       create: changesResponse.create.map((stream: any) => this.resolveActionId(stream)),
       update: changesResponse.update.map((stream: EventStream) => {
         const resolved = this.resolveActionId(stream);
-        // EventBridge destinations cannot be patched — the API rejects destination on PATCH
-        if (resolved.destination?.type === 'eventbridge') {
+        // A destination's type cannot be changed once an event stream is created. The API
+        // rejects the destination on PATCH for eventbridge and action streams, so strip it
+        // from the update payload and only apply the other mutable fields.
+        if (
+          resolved.destination?.type === 'eventbridge' ||
+          resolved.destination?.type === 'action'
+        ) {
+          log.info(
+            `Skipping destination update for event stream "${resolved.name}": ${resolved.destination.type} destinations cannot be changed after creation.`
+          );
           const { destination: _dest, ...rest } = resolved as any;
           return rest;
         }
