@@ -62,9 +62,7 @@ export default class ClientAuthCredentialsPreHandler {
     // Only act on clients where client_authentication_methods is absent from config.
     // Absent = intentional full deletion. Clients with the field present (including partial
     // deletion) are fully handled by ClientAuthCredentialsHandler at order 70.
-    const deletionCandidates = clients.filter(
-      (c) => c.client_authentication_methods === undefined
-    );
+    const deletionCandidates = clients.filter((c) => c.client_authentication_methods === undefined);
     if (deletionCandidates.length === 0) return;
 
     // In directory mode client_id is stripped. Resolve names once for all candidates.

@@ -705,9 +705,7 @@ describe('#clientAuthCredentialsPre handler', () => {
 
       const handler = new clientAuthCredentialsPre({ client, config: makeConfig() });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
-      await stageFn.apply(handler, [
-        { clients: [{ client_id: null, name: 'My App' }] },
-      ]);
+      await stageFn.apply(handler, [{ clients: [{ client_id: null, name: 'My App' }] }]);
 
       expect(deleteCalls).to.have.lengthOf(1);
       expect(deleteCalls[0].clientId).to.equal('client1');
