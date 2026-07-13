@@ -1451,6 +1451,8 @@ Note: EventBridge streams cannot have their `destination` updated after creation
 }
 ```
 
+Note: like EventBridge, Action streams cannot have their `destination` updated after creation. Only `name`, `subscriptions`, and `status` can be patched — the `destination` is stripped from update payloads (an info message is logged when this happens).
+
 ### YAML Example
 
 ```yaml
@@ -1493,3 +1495,163 @@ Each event stream is stored as a separate JSON file named after the stream (e.g.
 ```
 
 For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2/event-streams/get-event-streams).
+
+## Rate Limit Policies
+
+Rate Limit Policies allow you to control the rate at which clients can make authentication requests to the OAuth authentication API. Each policy targets a specific consumer selector (e.g. a specific client, all third-party clients, or a default fallback) and defines the action to take when the limit is exceeded.
+
+### Schema Properties
+
+| Property                     | Type     | Required                                | Description                                                                                                                                                                                                                                                      |
+| ---------------------------- | -------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `resource`                   | `string` | Yes                                     | The API protected by the policy. Currently only `oauth_authentication_api` is supported.                                                                                                                                                                         |
+| `consumer`                   | `string` | Yes                                     | The consumer type. Currently only `client` is supported.                                                                                                                                                                                                         |
+| `consumer_selector`          | `string` | Yes                                     | Identifies the target within the consumer. Supported values: `client_id:<client_id>` to target a specific client, `cimd_clients` for all CIMD clients, `third_party_clients` for all third-party clients, or `default` as a fallback for any unmatched consumer. |
+| `configuration.action`       | `string` | Yes                                     | The action to take when the rate limit is exceeded. One of: `allow`, `block`, `log`, `redirect`.                                                                                                                                                                 |
+| `configuration.limit`        | `number` | Required for `block`, `log`, `redirect` | Maximum number of requests allowed in a refresh window.                                                                                                                                                                                                          |
+| `configuration.redirect_uri` | `string` | Required for `redirect`                 | The HTTPS URI to redirect to when the rate limit is exceeded.                                                                                                                                                                                                    |
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+rateLimitPolicies:
+  - resource: oauth_authentication_api
+    consumer: client
+    consumer_selector: default
+    configuration:
+      action: block
+      limit: 100
+
+  - resource: oauth_authentication_api
+    consumer: client
+    consumer_selector: third_party_clients
+    configuration:
+      action: log
+      limit: 50
+
+  - resource: oauth_authentication_api
+    consumer: client
+    consumer_selector: client_id:some-client-id
+    configuration:
+      action: redirect
+      limit: 10
+      redirect_uri: https://example.com/rate-limited
+```
+
+### Directory Example
+
+Folder: `./rate-limit-policies/`
+
+Each rate limit policy is stored as a separate JSON file named after its `consumer_selector` (e.g. `default.json`):
+
+```json
+{
+  "resource": "oauth_authentication_api",
+  "consumer": "client",
+  "consumer_selector": "default",
+  "configuration": {
+    "action": "block",
+    "limit": 100
+  }
+}
+```
+
+For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2/rate-limit-policies/get-rate-limit-policies).
+
+## Client Credentials (Private Key JWT / mTLS)
+
+The Deploy CLI supports managing client authentication credentials for Private Key JWT and mTLS. Credentials are child resources of clients, managed via the `/clients/{id}/credentials` API.
+
+### How it works
+
+**Export**: `client_authentication_methods` is exported with credential stubs containing only `name` and `credential_type`. The `pem` field is never exported — Auth0 does not return it after creation. If no named credentials exist for a client, `client_authentication_methods` is omitted entirely from the export.
+
+**Deploy**: Credential reconciliation only activates when at least one credential in the config contains a `pem` field. This means a plain export→deploy will never delete existing credentials — `pem` is the explicit opt-in signal.
+
+- Creates credentials present in config but missing in Auth0
+- Deletes credentials removed from config (requires `AUTH0_ALLOW_DELETE=true`)
+- Creates always run before deletes — Auth0 allows max 2 credentials per client, so both exist simultaneously during the rotation window
+- Re-wires `client_authentication_methods` with resolved credential IDs after reconciliation
+- If `client_authentication_methods` is **absent** from the client config entirely, it is treated as intentional deletion — all existing credentials are removed (requires `AUTH0_ALLOW_DELETE=true`)
+
+### Supported credential types
+
+| `credential_type` | Auth method key               | Use case                          |
+| ----------------- | ----------------------------- | --------------------------------- |
+| `public_key`      | `private_key_jwt`             | Private Key JWT                   |
+| `x509_cert`       | `self_signed_tls_client_auth` | mTLS (self-signed cert)           |
+| `cert_subject_dn` | `tls_client_auth`             | mTLS (CA-signed cert, subject DN) |
+
+### Workflow
+
+To add or rotate a credential:
+
+1. Generate a key pair:
+
+   ```bash
+   openssl genrsa -out private.key 2048
+   openssl rsa -in private.key -pubout -out public.pem
+   ```
+
+2. Add the credential to your client config with the public key `pem`:
+
+   ```yaml
+   clients:
+     - name: My API Client
+       client_authentication_methods:
+         private_key_jwt:
+           credentials:
+             - name: my-key-v2
+               credential_type: public_key
+               pem: |
+                 -----BEGIN PUBLIC KEY-----
+                 MIIBIjANBgkq...
+                 -----END PUBLIC KEY-----
+   ```
+
+3. Deploy — the credential is created in Auth0 and `client_authentication_methods` is updated.
+
+4. To rotate: add the new key alongside the old one (both exist simultaneously), then remove the old one in a subsequent deploy.
+
+### Export shape (name and credential_type only)
+
+```yaml
+clients:
+  - name: My API Client
+    client_authentication_methods:
+      private_key_jwt:
+        credentials:
+          - name: my-key-v2
+            credential_type: public_key
+```
+
+If no credentials exist for the client, `client_authentication_methods` is omitted entirely — not exported as an empty object.
+
+### Directory Example
+
+```
+./clients/
+    ./My API Client.json
+```
+
+Contents of `My API Client.json` (deploy-time, with pem):
+
+```json
+{
+  "name": "My API Client",
+  "client_authentication_methods": {
+    "private_key_jwt": {
+      "credentials": [
+        {
+          "name": "my-key-v2",
+          "credential_type": "public_key",
+          "pem": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkq...\n-----END PUBLIC KEY-----\n"
+        }
+      ]
+    }
+  }
+}
+```
+
+> **Note:** The `pem` field must be supplied manually from your key generation step. Never commit private keys — only the public key PEM goes in the config.

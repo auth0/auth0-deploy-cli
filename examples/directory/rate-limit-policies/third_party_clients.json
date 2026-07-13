@@ -1,0 +1,9 @@
+{
+  "resource": "oauth_authentication_api",
+  "consumer": "client",
+  "consumer_selector": "third_party_clients",
+  "configuration": {
+    "action": "log",
+    "limit": 50
+  }
+}

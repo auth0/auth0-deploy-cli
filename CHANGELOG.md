@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.40.0] - 2026-07-09
+
+### Added
+
+- Add client credential lifecycle management for Private Key JWT and mTLS authentication methods. [#1417]
+- Add Rate Limit Policies (EA) support. [#1395]
+
+### Fixed
+
+- Preserve `false` value for `default_head_tags_disabled` in screen renderer update. [#1416]
+- Skip destination update for action event streams as the destination type cannot be changed after creation. [#1425]
+
 ## [8.39.0] - 2026-06-30
 
 ### Added
@@ -1842,6 +1854,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1389]: https://github.com/auth0/auth0-deploy-cli/issues/1389
 [#1391]: https://github.com/auth0/auth0-deploy-cli/issues/1391
 [#1392]: https://github.com/auth0/auth0-deploy-cli/issues/1392
+[#1395]: https://github.com/auth0/auth0-deploy-cli/issues/1395
 [#1396]: https://github.com/auth0/auth0-deploy-cli/issues/1396
 [#1398]: https://github.com/auth0/auth0-deploy-cli/issues/1398
 [#1400]: https://github.com/auth0/auth0-deploy-cli/issues/1400
@@ -1854,7 +1867,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1409]: https://github.com/auth0/auth0-deploy-cli/issues/1409
 [#1411]: https://github.com/auth0/auth0-deploy-cli/issues/1411
 [#1412]: https://github.com/auth0/auth0-deploy-cli/issues/1412
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.39.0...HEAD
+[#1416]: https://github.com/auth0/auth0-deploy-cli/issues/1416
+[#1417]: https://github.com/auth0/auth0-deploy-cli/issues/1417
+[#1425]: https://github.com/auth0/auth0-deploy-cli/issues/1425
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.40.0...HEAD
+[8.40.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.39.0...v8.40.0
 [8.39.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.38.0...v8.39.0
 [8.38.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.37.0...v8.38.0
 [8.37.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.36.0...v8.37.0

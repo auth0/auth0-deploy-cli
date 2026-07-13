@@ -649,6 +649,19 @@ export default class ClientHandler extends DefaultAPIHandler {
             delete item.refresh_token;
           }
         }
+
+        // Strip client_authentication_methods — the clientAuthCredentials handler (order 70)
+        // owns this field entirely. Auth0 rejects credential objects with name/credential_type in PATCH.
+        // Strip token_endpoint_auth_method only when client_authentication_methods is present in config:
+        // Auth0 rejects it in PATCH while a client has active credentials. For these clients the
+        // clientAuthCredentials handler (order 70) owns token_endpoint_auth_method too.
+        // For clients without client_authentication_methods, credentials were already cleared by
+        // clientAuthCredentialsPre (order 40), so token_endpoint_auth_method passes through safely.
+        if (item.client_authentication_methods) {
+          delete item.token_endpoint_auth_method;
+        }
+        delete item.client_authentication_methods;
+
         return item;
       });
     };
@@ -674,7 +687,34 @@ export default class ClientHandler extends DefaultAPIHandler {
       ...(shouldExcludeThirdPartyClients(this.config) && { is_first_party: true }),
     });
 
-    this.existing = createClientSanitizer(clients).sanitizeCrossOriginAuth(false).get();
+    const sanitized = createClientSanitizer(clients).sanitizeCrossOriginAuth(false).get();
+
+    // Enrich credential stubs with name and credential_type for export.
+    // Auth0 does not return pem on read — it is never exported.
+    await Promise.all(
+      sanitized.map(async (client) => {
+        if (!client.client_authentication_methods) return;
+        try {
+          const creds = await this.client.clients.credentials.list(client.client_id as string);
+          const credMap = new Map((creds as any[]).map((c) => [c.id, c]));
+          Object.values(client.client_authentication_methods).forEach((method: any) => {
+            if (method?.credentials) {
+              method.credentials = method.credentials
+                .map((stub: any) => {
+                  const full = credMap.get(stub.id);
+                  if (!full?.name) return null;
+                  return { name: full.name, credential_type: full.credential_type };
+                })
+                .filter(Boolean);
+            }
+          });
+        } catch (_) {
+          // leave stubs as-is if the credentials API call fails
+        }
+      })
+    );
+
+    this.existing = sanitized;
     return this.existing;
   }
 
