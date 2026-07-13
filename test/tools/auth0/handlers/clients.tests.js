@@ -1791,6 +1791,136 @@ describe('#clients handler', () => {
     });
   });
 
+  describe('#clients getType credential enrichment', () => {
+    it('should enrich credential stubs with full metadata for clients with client_authentication_methods', async () => {
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: {} }),
+          update: () => Promise.resolve({ data: {} }),
+          delete: () => Promise.resolve({ data: {} }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'My App',
+                client_authentication_methods: {
+                  private_key_jwt: { credentials: [{ id: 'cred_abc' }] },
+                },
+              },
+            ]),
+          credentials: {
+            list: () =>
+              Promise.resolve([
+                {
+                  id: 'cred_abc',
+                  name: 'my-key',
+                  credential_type: 'public_key',
+                  kid: 'kid123',
+                  alg: 'RS256',
+                },
+              ]),
+          },
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const result = await handler.getType();
+
+      const cred = result[0].client_authentication_methods.private_key_jwt.credentials[0];
+      expect(cred.name).to.equal('my-key');
+      expect(cred.credential_type).to.equal('public_key');
+      expect(cred.id).to.equal(undefined);
+      expect(cred.kid).to.equal(undefined);
+      expect(cred.alg).to.equal(undefined);
+    });
+  });
+
+  describe('#clients pem stripping in processChanges', () => {
+    it('should always strip client_authentication_methods from PATCH', async () => {
+      const updatePayloads = {};
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: {} }),
+          update: (clientId, data) => {
+            updatePayloads[clientId] = data;
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: {} }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'App With PEM',
+                client_authentication_methods: {
+                  private_key_jwt: { credentials: [{ id: 'cred_abc', name: 'my-key' }] },
+                },
+              },
+              {
+                client_id: 'client2',
+                name: 'App Without PEM',
+                client_authentication_methods: {
+                  private_key_jwt: {
+                    credentials: [{ name: 'other-key', credential_type: 'public_key' }],
+                  },
+                },
+              },
+            ]),
+          credentials: {
+            list: () =>
+              Promise.resolve([{ id: 'cred_abc', name: 'my-key', credential_type: 'public_key' }]),
+          },
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              client_id: 'client1',
+              name: 'App With PEM',
+              client_authentication_methods: {
+                private_key_jwt: {
+                  credentials: [
+                    {
+                      name: 'my-key',
+                      pem: '-----BEGIN PUBLIC KEY-----\nabc\n-----END PUBLIC KEY-----\n',
+                      credential_type: 'public_key',
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              client_id: 'client2',
+              name: 'App Without PEM',
+              client_authentication_methods: {
+                private_key_jwt: {
+                  credentials: [{ name: 'other-key', credential_type: 'public_key' }],
+                },
+              },
+            },
+          ],
+        },
+      ]);
+
+      expect(updatePayloads['client1']).to.not.have.property('client_authentication_methods');
+      expect(updatePayloads['client2']).to.not.have.property('client_authentication_methods');
+    });
+  });
+
   describe('#clients validate', () => {
     it('should allow validation when external_metadata_type is set without external_client_id', async () => {
       const handler = new clients.default({ client: {}, config });
