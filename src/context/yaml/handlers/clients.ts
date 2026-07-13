@@ -125,14 +125,20 @@ async function dump(context: YAMLContext): Promise<ParsedClients> {
             organization_require_behavior: client.organization_require_behavior,
           } as Client;
         } else {
-          // strip id-only credentials — they carry no useful info and would
-          // confuse the clientAuthCredentials handler on deploy
+          // strip id-only credentials and remove client_authentication_methods entirely
+          // if no named credentials remain — an absent field is treated as deletion on deploy
           if (client.client_authentication_methods) {
             Object.values(client.client_authentication_methods).forEach((method: any) => {
               if (method?.credentials) {
                 method.credentials = method.credentials.filter((c: any) => c.name);
               }
             });
+            const hasAnyCredentials = Object.values(
+              client.client_authentication_methods as Record<string, any>
+            ).some((method: any) => method?.credentials?.length > 0);
+            if (!hasAnyCredentials) {
+              delete client.client_authentication_methods;
+            }
           }
         }
 
