@@ -89,7 +89,7 @@ export const schema = {
       },
       third_party_client_access: {
         type: 'string',
-        enum: ['allow', 'block'],
+        enum: Object.values(Management.OrganizationThirdPartyClientAccessEnum),
       },
     },
     required: ['name'],
