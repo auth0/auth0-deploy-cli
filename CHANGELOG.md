@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `third_party_client_access` support for organizations. [#1421]
+
 ## [8.40.0] - 2026-07-09
 
 ### Added
