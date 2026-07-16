@@ -119,6 +119,7 @@ export const allowedTenantFlags = [
   'require_pushed_authorization_requests',
   'mfa_show_factor_list_on_enrollment',
   'improved_signup_bot_detection_in_classic',
+  'use_scope_descriptions_for_consent',
 ];
 
 export const removeUnallowedTenantFlags = (
