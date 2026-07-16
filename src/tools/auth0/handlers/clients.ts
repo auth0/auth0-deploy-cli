@@ -436,12 +436,26 @@ export const schema = {
         },
         required: ['google'],
       },
+      identity_assertion_authorization_grant: {
+        type: 'object',
+        description:
+          'Configuration for Cross App Access (XAA) ID-JAG token exchange. Enables this client to participate in identity assertion authorization grant exchanges.',
+        properties: {
+          active: { type: 'boolean' },
+        },
+        required: ['active'],
+        additionalProperties: false,
+      },
     },
     required: ['name'],
   },
 };
 
-export type Client = Management.Client;
+export type Client = Management.Client & {
+  identity_assertion_authorization_grant?: {
+    active: boolean;
+  };
+};
 
 type ClientSanitizerChain = {
   sanitizeOidcLogout(): ClientSanitizerChain;

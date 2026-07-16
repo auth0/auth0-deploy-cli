@@ -93,6 +93,46 @@ describe('#clients handler', () => {
       ]);
       expect(valid).to.equal(false);
     });
+
+    it('should pass validation with identity_assertion_authorization_grant active', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someXAAClient',
+          identity_assertion_authorization_grant: { active: true },
+        },
+      ]);
+      expect(valid).to.equal(true);
+    });
+
+    it('should pass validation with identity_assertion_authorization_grant inactive', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someXAAClient',
+          identity_assertion_authorization_grant: { active: false },
+        },
+      ]);
+      expect(valid).to.equal(true);
+    });
+
+    it('should fail validation with identity_assertion_authorization_grant missing active', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someXAAClient',
+          identity_assertion_authorization_grant: {},
+        },
+      ]);
+      expect(valid).to.equal(false);
+    });
+
+    it('should fail validation with identity_assertion_authorization_grant having extra properties', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someXAAClient',
+          identity_assertion_authorization_grant: { active: true, unknown: 'field' },
+        },
+      ]);
+      expect(valid).to.equal(false);
+    });
   });
 
   describe('#clients validate', () => {
