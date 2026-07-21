@@ -308,6 +308,53 @@ describe('#organizations handler', () => {
       expect(wasCreateCalled).to.be.true;
     });
 
+    it('should allow valid third_party_client_access property in organization', async () => {
+      for (const value of ['allow', 'block']) {
+        const orgWithTpa = {
+          name: `org-tpa-${value}`,
+          third_party_client_access: value,
+        };
+        let wasCreateCalled = false;
+        const auth0 = {
+          organizations: {
+            create: function (data) {
+              wasCreateCalled = true;
+              expect(data.third_party_client_access).to.equal(value);
+              data.id = 'fake';
+              return Promise.resolve(data);
+            },
+            update: () => Promise.resolve({ data: [] }),
+            delete: () => Promise.resolve({ data: [] }),
+            list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+            connections: {
+              list: () => mockPagedData({}, 'connections', []),
+            },
+            clientGrants: {
+              list: () => mockPagedData({}, 'client_grants', []),
+            },
+            discoveryDomains: {
+              list: () => mockPagedData({}, 'discovery_domains', []),
+            },
+          },
+          connections: {
+            list: (params) => mockPagedData(params, 'connections', []),
+          },
+          clients: {
+            list: (params) => mockPagedData(params, 'clients', sampleClients),
+          },
+          clientGrants: {
+            list: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+          },
+          pool,
+        };
+        const handler = new organizations.default({ client: pageClient(auth0), config });
+        const stageFn = Object.getPrototypeOf(handler).processChanges;
+        await stageFn.apply(handler, [{ organizations: [orgWithTpa] }]);
+        // eslint-disable-next-line no-unused-expressions
+        expect(wasCreateCalled).to.be.true;
+      }
+    });
+
     it('should get organizations', async () => {
       const auth0 = {
         organizations: {
