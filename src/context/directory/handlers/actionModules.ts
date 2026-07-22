@@ -30,16 +30,7 @@ function parse(context: DirectoryContext): ParsedActionModules {
       // The `module.code` can be a file path. It needs to be loaded.
       // It can be a relative path, so we need to handle both cases.
       const unixPath = module.code.replace(/[\\/]+/g, '/').replace(/^([a-zA-Z]+:|\.\/)/, '');
-      if (fs.existsSync(unixPath)) {
-        log.warn(
-          `Support for absolute paths and paths outside the config root will be deprecated in a future version to improve the security of the tool. ` +
-            `Please update your configuration to use paths relative to the config directory. ` +
-            `Current absolute path used: ["${module.code}"]`
-        );
-        module.code = context.loadFile(unixPath, moduleFolder);
-      } else {
-        module.code = context.loadFile(path.join(context.filePath, module.code), moduleFolder);
-      }
+      module.code = context.loadFile(unixPath, moduleFolder);
     }
 
     return module;
