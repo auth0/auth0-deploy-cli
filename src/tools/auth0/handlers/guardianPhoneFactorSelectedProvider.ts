@@ -81,9 +81,17 @@ export default class GuardianPhoneSelectedProviderHandler extends DefaultHandler
     }
 
     const data = guardianPhoneFactorSelectedProvider;
-    await this.client.guardian.factors.phone.setProvider(
-      data as Management.SetGuardianFactorsProviderPhoneRequestContent
-    );
+    try {
+      await this.client.guardian.factors.phone.setProvider(
+        data as Management.SetGuardianFactorsProviderPhoneRequestContent
+      );
+    } catch (err) {
+      if (isFeatureUnavailableError(err) || isForbiddenFeatureError(err, this.type)) {
+        // Feature is deprecated/disabled on this tenant; warn and skip instead of failing the import.
+        return;
+      }
+      throw err;
+    }
     this.updated += 1;
     this.didUpdate(guardianPhoneFactorSelectedProvider);
   }

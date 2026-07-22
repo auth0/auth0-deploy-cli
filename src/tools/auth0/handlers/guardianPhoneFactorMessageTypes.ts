@@ -84,9 +84,17 @@ export default class GuardianPhoneMessageTypesHandler extends DefaultHandler {
     }
 
     const data = guardianPhoneFactorMessageTypes;
-    await this.client.guardian.factors.phone.setMessageTypes(
-      data as unknown as Management.SetGuardianFactorPhoneMessageTypesRequestContent
-    );
+    try {
+      await this.client.guardian.factors.phone.setMessageTypes(
+        data as unknown as Management.SetGuardianFactorPhoneMessageTypesRequestContent
+      );
+    } catch (err) {
+      if (isFeatureUnavailableError(err) || isForbiddenFeatureError(err, this.type)) {
+        // Feature is deprecated/disabled on this tenant; warn and skip instead of failing the import.
+        return;
+      }
+      throw err;
+    }
     this.updated += 1;
     this.didUpdate(guardianPhoneFactorMessageTypes);
   }
