@@ -101,6 +101,7 @@ export const schema = {
         properties: {
           active: { type: 'boolean' },
         },
+        required: ['active'],
         additionalProperties: false,
       },
       directory_provisioning_configuration: {

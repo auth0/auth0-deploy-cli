@@ -99,6 +99,22 @@ describe('#connections handler', () => {
       expect(ajv.errors).to.be.null;
     });
 
+    it('should reject cross_app_access_requesting_app without active field', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'oidc-connection',
+          strategy: 'oidc',
+          cross_app_access_requesting_app: {},
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(false);
+      expect(ajv.errors).to.not.be.null;
+    });
+
     it('should reject cross_app_access_requesting_app with unknown properties', () => {
       const ajv = new Ajv({ useDefaults: true, nullable: true });
       const assets = [
