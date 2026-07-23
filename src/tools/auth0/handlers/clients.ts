@@ -232,6 +232,20 @@ export const schema = {
         },
         additionalProperties: true,
       },
+      identity_assertion_authorization_grant: {
+        type: 'object',
+        description:
+          'Settings for Cross App Access (ID-JAG) token exchange. Early Access. Enables the client to request identity assertion authorization grants.',
+        properties: {
+          active: {
+            type: 'boolean',
+            description:
+              'Indicates whether the client can request an identity assertion authorization grant (ID-JAG) via token exchange.',
+          },
+        },
+        required: ['active'],
+        additionalProperties: false,
+      },
       app_type: {
         type: 'string',
         description: 'The type of application this client represents',
