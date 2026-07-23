@@ -66,6 +66,45 @@ const myOrganizationConfigurationSchema = {
   required: ['allowed_strategies', 'connection_deletion_behavior'],
 };
 
+const tokenVaultPrivilegedAccessSchema = {
+  type: ['object', 'null'],
+  description:
+    'Settings for Token Vault Privileged Access, hardening a privileged client by restricting the caller IPs, connections, and scopes it may use at runtime. Early Access, gated by the token_vault_subject_type_jwt_ea_rollout feature flag.',
+  properties: {
+    ip_allowlist: {
+      type: 'array',
+      description:
+        'IPv4/IPv6 addresses or CIDR ranges permitted to call token exchange on behalf of this privileged client. When the EA flag is on, this is required (non-empty) on create if token_vault_privileged_access is being set.',
+      items: {
+        type: 'string',
+      },
+    },
+    grants: {
+      type: 'array',
+      description:
+        'Connection/scope pin objects restricting which federated connections and OAuth scopes the privileged client may use at runtime. Maximum 5 connections; maximum 20 scopes in total across all connections.',
+      items: {
+        type: 'object',
+        properties: {
+          connection: {
+            type: 'string',
+            description:
+              'The connection name (e.g. google-oauth2). Validated at runtime; the connection need not exist at configuration time.',
+          },
+          scopes: {
+            type: 'array',
+            description: 'The OAuth scopes permitted for that connection.',
+            items: {
+              type: 'string',
+            },
+          },
+        },
+        required: ['connection', 'scopes'],
+      },
+    },
+  },
+};
+
 export const schema = {
   type: 'array',
   items: {
@@ -352,6 +391,7 @@ export const schema = {
           },
         },
       },
+      token_vault_privileged_access: tokenVaultPrivilegedAccessSchema,
       third_party_security_mode: {
         type: 'string',
         enum: ['strict', 'permissive'],

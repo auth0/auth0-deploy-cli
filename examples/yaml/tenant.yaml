@@ -79,6 +79,22 @@ clients:
         - "custom_authentication"
         - "on_behalf_of_token_exchange"
   -
+    name: "My Token Vault Privileged App"
+    app_type: "non_interactive"
+    # Early Access: requires the token_vault_subject_type_jwt_ea_rollout feature flag.
+    token_vault_privileged_access:
+      ip_allowlist:
+        - "192.168.1.0/24"
+        - "10.0.0.1"
+      grants:
+        - connection: "google-oauth2"
+          scopes:
+            - "https://www.googleapis.com/auth/calendar.readonly"
+        - connection: "slack"
+          scopes:
+            - "chat:write"
+            - "channels:read"
+  -
     name: "My CIMD Client"
     external_client_id: "https://mcpserver.example.com/.well-known/client.json"
     app_type: "regular_web"
