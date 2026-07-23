@@ -1705,10 +1705,10 @@ Contents of `My API Client.json` (deploy-time, with pem):
 
 The Deploy CLI supports the `token_vault_privileged_access` property on clients, which hardens a privileged Token Vault worker by restricting the caller IPs, connections, and scopes it may use at runtime.
 
-| Field          | Type              | Description                                                                                                                           |
-| -------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `ip_allowlist` | array of strings  | IPv4/IPv6 addresses or CIDR ranges permitted to call token exchange on behalf of this client.                                         |
-| `grants`       | array of objects  | Connection/scope pin objects. Each has a `connection` (name) and `scopes` (array). Max 5 connections; max 20 scopes total.             |
+| Field          | Type             | Description                                                                                                                |
+| -------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `ip_allowlist` | array of strings | IPv4/IPv6 addresses or CIDR ranges permitted to call token exchange on behalf of this client.                              |
+| `grants`       | array of objects | Connection/scope pin objects. Each has a `connection` (name) and `scopes` (array). Max 5 connections; max 20 scopes total. |
 
 ```yaml
 clients:
@@ -1716,16 +1716,16 @@ clients:
     app_type: non_interactive
     token_vault_privileged_access:
       ip_allowlist:
-        - "192.168.1.0/24"
-        - "10.0.0.1"
+        - '192.168.1.0/24'
+        - '10.0.0.1'
       grants:
         - connection: google-oauth2
           scopes:
-            - "https://www.googleapis.com/auth/calendar.readonly"
+            - 'https://www.googleapis.com/auth/calendar.readonly'
         - connection: slack
           scopes:
-            - "chat:write"
-            - "channels:read"
+            - 'chat:write'
+            - 'channels:read'
 ```
 
 > **Note:** The `credentials` sub-object of `token_vault_privileged_access` is **not** managed by the Deploy CLI. On read, Auth0 returns it as credential references (`id`) rather than names or key material, and the Deploy CLI never syncs IDs. Manage the privileged client's credentials directly on the tenant.
