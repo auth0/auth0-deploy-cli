@@ -20,16 +20,7 @@ const isFeatureUnavailableError = (err) => {
     // Older Management API version where the endpoint is not available.
     return true;
   }
-  if (
-    err.statusCode === 403 &&
-    err.originalError &&
-    err.originalError.response &&
-    err.originalError.response.body &&
-    err.originalError.response.body.errorCode === 'hooks_not_allowed'
-  ) {
-    // Recent Management API version, but with feature explicitly disabled.
-    return true;
-  }
+  // 403s (feature explicitly disabled) are handled by isForbiddenFeatureError.
   return false;
 };
 
