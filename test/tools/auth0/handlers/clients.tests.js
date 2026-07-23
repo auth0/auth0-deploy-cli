@@ -491,6 +491,62 @@ describe('#clients handler', () => {
       expect(wasCreateCalled).to.be.true;
     });
 
+    it('should allow valid token_vault_privileged_access property in client', async () => {
+      const clientWithTokenVault = {
+        name: 'clientWithTokenVault',
+        token_vault_privileged_access: {
+          ip_allowlist: ['192.168.1.0/24', '10.0.0.1'],
+          grants: [
+            {
+              connection: 'google-oauth2',
+              scopes: ['https://www.googleapis.com/auth/calendar.readonly'],
+            },
+            {
+              connection: 'slack',
+              scopes: ['chat:write', 'channels:read'],
+            },
+          ],
+        },
+      };
+      let wasCreateCalled = false;
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            wasCreateCalled = true;
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('clientWithTokenVault');
+            expect(data.token_vault_privileged_access).to.deep.equal({
+              ip_allowlist: ['192.168.1.0/24', '10.0.0.1'],
+              grants: [
+                {
+                  connection: 'google-oauth2',
+                  scopes: ['https://www.googleapis.com/auth/calendar.readonly'],
+                },
+                {
+                  connection: 'slack',
+                  scopes: ['chat:write', 'channels:read'],
+                },
+              ],
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ clients: [clientWithTokenVault] }]);
+      // eslint-disable-next-line no-unused-expressions
+      expect(wasCreateCalled).to.be.true;
+    });
+
     it('should allow valid session_transfer delegation property in client', async () => {
       const clientWithDelegation = {
         name: 'clientWithDelegation',
