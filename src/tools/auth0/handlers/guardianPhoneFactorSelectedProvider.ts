@@ -20,16 +20,7 @@ const isFeatureUnavailableError = (err) => {
     // Older Management API version where the endpoint is not available.
     return true;
   }
-  if (
-    err.statusCode === 403 &&
-    err.originalError &&
-    err.originalError.response &&
-    err.originalError.response.body &&
-    err.originalError.response.body.errorCode === 'hooks_not_allowed'
-  ) {
-    // Recent Management API version, but with feature explicitly disabled.
-    return true;
-  }
+  // 403s (feature explicitly disabled) are handled by isForbiddenFeatureError.
   return false;
 };
 
@@ -81,9 +72,17 @@ export default class GuardianPhoneSelectedProviderHandler extends DefaultHandler
     }
 
     const data = guardianPhoneFactorSelectedProvider;
-    await this.client.guardian.factors.phone.setProvider(
-      data as Management.SetGuardianFactorsProviderPhoneRequestContent
-    );
+    try {
+      await this.client.guardian.factors.phone.setProvider(
+        data as Management.SetGuardianFactorsProviderPhoneRequestContent
+      );
+    } catch (err) {
+      if (isFeatureUnavailableError(err) || isForbiddenFeatureError(err, this.type)) {
+        // Feature is deprecated/disabled on this tenant; warn and skip instead of failing the import.
+        return;
+      }
+      throw err;
+    }
     this.updated += 1;
     this.didUpdate(guardianPhoneFactorSelectedProvider);
   }
