@@ -209,6 +209,42 @@ export const schema = {
         pattern: '^[^<>]*$',
         type: 'string',
       },
+      identifiers: {
+        additionalProperties: false,
+        description:
+          'Identifier display settings on the theme. Requires the `universal_login_theme_identifiers` feature flag to be enabled on the tenant.',
+        properties: {
+          login_display: {
+            description: 'Login display mode',
+            enum: ['separate', 'unified'],
+            type: 'string',
+          },
+          otp_autocomplete: {
+            description: 'Whether OTP autocomplete is enabled',
+            type: 'boolean',
+          },
+          phone_display: {
+            additionalProperties: false,
+            description: 'Phone number display settings',
+            properties: {
+              formatting: {
+                description: 'Phone number formatting style',
+                enum: ['international', 'regional'],
+                type: 'string',
+              },
+              masking: {
+                description: 'Phone number masking strategy',
+                enum: ['hide_country_code', 'mask_digits', 'show_all'],
+                type: 'string',
+              },
+            },
+            required: ['formatting', 'masking'],
+            type: 'object',
+          },
+        },
+        required: ['login_display', 'otp_autocomplete', 'phone_display'],
+        type: 'object',
+      },
       fonts: {
         additionalProperties: false,
         properties: {

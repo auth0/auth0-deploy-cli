@@ -262,6 +262,74 @@ describe('#themes handler', () => {
       expect(auth0.branding.themes.create.called).to.equal(false);
       expect(auth0.branding.themes.delete.called).to.equal(false);
     });
+
+    it('should create the theme with identifiers when default theme does not exist', async () => {
+      const theme = mockTheme();
+      theme.identifiers = {
+        login_display: 'unified',
+        otp_autocomplete: true,
+        phone_display: {
+          masking: 'mask_digits',
+          formatting: 'international',
+        },
+      };
+
+      const auth0 = {
+        branding: {
+          themes: {
+            getDefault: stub().returns(Promise.reject(errorWithStatusCode(404))),
+            create: stub().returns(Promise.resolve(theme)),
+            update: stub().returns(Promise.reject(new Error('update should not have been called'))),
+            delete: stub().returns(Promise.reject(new Error('delete should not have been called'))),
+          },
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0 });
+      const assets = { themes: [theme] };
+
+      await handler.processChanges(assets);
+
+      expect(auth0.branding.themes.create.called).to.equal(true);
+      expect(auth0.branding.themes.create.callCount).to.equal(1);
+      expect(auth0.branding.themes.create.calledWith(theme)).to.equal(true);
+      expect(auth0.branding.themes.update.called).to.equal(false);
+    });
+
+    it('should update the theme with identifiers when default exists', async () => {
+      const theme = mockTheme({ withThemeId: 'myThemeId' });
+      theme.identifiers = {
+        login_display: 'separate',
+        otp_autocomplete: false,
+        phone_display: {
+          masking: 'show_all',
+          formatting: 'regional',
+        },
+      };
+
+      const auth0 = {
+        branding: {
+          themes: {
+            getDefault: stub().returns(theme),
+            create: stub().returns(Promise.reject(new Error('create should not have been called'))),
+            update: stub().returns(Promise.resolve(theme)),
+            delete: stub().returns(Promise.reject(new Error('delete should not have been called'))),
+          },
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0 });
+      const assets = { themes: [omit(theme, 'themeId')] };
+
+      await handler.processChanges(assets);
+
+      expect(auth0.branding.themes.update.called).to.equal(true);
+      expect(auth0.branding.themes.update.callCount).to.equal(1);
+      expect(
+        auth0.branding.themes.update.calledWith('myThemeId', omit(theme, 'themeId'))
+      ).to.deep.equal(true);
+      expect(auth0.branding.themes.create.called).to.equal(false);
+    });
   });
 
   it('should delete the theme when default theme exists and AUTH0_ALLOW_DELETE: true', async () => {
