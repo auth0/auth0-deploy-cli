@@ -220,7 +220,7 @@ describe('#attackProtection handler', () => {
       ]);
     });
 
-    it('should handle 403 error when fetching bot detection and captcha configs', async () => {
+    it('should handle 403 error when fetching bot detection and preserve captcha data', async () => {
       const auth0 = {
         attackProtection: {
           botDetection: {
@@ -231,11 +231,10 @@ describe('#attackProtection handler', () => {
             },
           },
           captcha: {
-            get: () => {
-              const err = new Error('Forbidden');
-              err.statusCode = 403;
-              throw err;
-            },
+            get: () => ({
+              selected: 'friendly_captcha',
+              policy: 'always',
+            }),
           },
           breachedPasswordDetection: {
             get: () => ({
@@ -277,39 +276,76 @@ describe('#attackProtection handler', () => {
       const handler = new attackProtection.default({ client: auth0 });
       const data = await handler.getType();
 
-      // Should return data without botDetection and captcha
-      expect(data).to.deep.equal({
-        breachedPasswordDetection: {
-          admin_notification_frequency: [],
-          enabled: true,
-          method: 'standard',
-          shields: [],
-        },
-        bruteForceProtection: {
-          allowlist: [],
-          enabled: true,
-          max_attempts: 10,
-          mode: 'count_per_identifier_and_ip',
-          shields: ['block', 'user_notification'],
-        },
-        suspiciousIpThrottling: {
-          allowlist: ['127.0.0.1'],
-          enabled: true,
-          shields: ['block', 'admin_notification'],
-          stage: {
-            'pre-login': {
-              max_attempts: 100,
-              rate: 864000,
-            },
-            'pre-user-registration': {
-              max_attempts: 50,
-              rate: 1200,
+      // botDetection should be skipped, captcha should still be present
+      expect(data).to.not.have.property('botDetection');
+      expect(data).to.have.property('captcha').that.deep.equals({
+        selected: 'friendly_captcha',
+        policy: 'always',
+      });
+      expect(data).to.have.property('breachedPasswordDetection');
+      expect(data).to.have.property('bruteForceProtection');
+      expect(data).to.have.property('suspiciousIpThrottling');
+    });
+
+    it('should handle 403 error when fetching captcha and preserve bot detection data', async () => {
+      const auth0 = {
+        attackProtection: {
+          botDetection: {
+            get: () => ({
+              bot_detection_level: 'medium',
+              monitoring_mode_enabled: false,
+            }),
+          },
+          captcha: {
+            get: () => {
+              const err = new Error('Forbidden');
+              err.statusCode = 403;
+              throw err;
             },
           },
+          breachedPasswordDetection: {
+            get: () => ({
+              admin_notification_frequency: [],
+              enabled: true,
+              method: 'standard',
+              shields: [],
+            }),
+          },
+          bruteForceProtection: {
+            get: () => ({
+              allowlist: [],
+              enabled: true,
+              max_attempts: 10,
+              mode: 'count_per_identifier_and_ip',
+              shields: ['block', 'user_notification'],
+            }),
+          },
+          suspiciousIpThrottling: {
+            get: () => ({
+              allowlist: ['127.0.0.1'],
+              enabled: true,
+              shields: ['block', 'admin_notification'],
+              stage: {
+                'pre-login': { max_attempts: 100, rate: 864000 },
+                'pre-user-registration': { max_attempts: 50, rate: 1200 },
+              },
+            }),
+          },
         },
-      });
-      expect(data).to.not.have.property('botDetection');
+      };
+
+      const handler = new attackProtection.default({ client: auth0 });
+      const data = await handler.getType();
+
+      // captcha should be skipped, botDetection should still be present
       expect(data).to.not.have.property('captcha');
+      expect(data).to.have.property('botDetection').that.deep.equals({
+        bot_detection_level: 'medium',
+        monitoring_mode_enabled: false,
+      });
+      expect(data).to.have.property('breachedPasswordDetection');
+      expect(data).to.have.property('bruteForceProtection');
+      expect(data).to.have.property('suspiciousIpThrottling');
     });
 
     it('should skip updates when attackProtection is null', async () => {

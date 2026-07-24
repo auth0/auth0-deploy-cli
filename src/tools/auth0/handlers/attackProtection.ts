@@ -258,15 +258,26 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
     let captcha: Asset | null = null;
 
     try {
-      [botDetection, captcha] = await Promise.all([
-        this.client.attackProtection.botDetection.get(),
-        this.client.attackProtection.captcha.get(),
-      ]);
+      botDetection = await this.client.attackProtection.botDetection.get();
     } catch (err) {
       if (err.statusCode === 403) {
         log.warn(
-          'Bot Detection API are not enabled for this tenant. Please verify `scope` or contact Auth0 support to enable this feature.'
+          'Bot detection is not available on this tenant\'s current plan. Skipping bot detection settings.'
         );
+      } else {
+        throw err;
+      }
+    }
+
+    try {
+      captcha = await this.client.attackProtection.captcha.get();
+    } catch (err) {
+      if (err.statusCode === 403) {
+        log.warn(
+          'Captcha is not available on this tenant\'s current plan. Skipping captcha settings.'
+        );
+      } else {
+        throw err;
       }
     }
 
