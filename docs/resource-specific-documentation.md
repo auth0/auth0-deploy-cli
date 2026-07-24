@@ -784,6 +784,99 @@ For `universal_login` template `templates/` will be created.
 }
 ```
 
+## Themes (Identifier display settings)
+
+> **Early Access:** Requires the `universal_login_theme_identifiers` feature flag to be enabled on the tenant. When the flag is off, the Auth0 API rejects a theme write that includes `identifiers` and strips the field from responses.
+
+The Deploy CLI supports configuring identifier display settings on the branding theme via the top-level `identifiers` object. All three members are required when `identifiers` is supplied:
+
+- `identifiers.login_display` (string): Login display mode. One of `separate`, `unified`.
+- `identifiers.otp_autocomplete` (boolean): Whether OTP autocomplete is enabled.
+- `identifiers.phone_display` (object): Phone number display settings.
+  - `identifiers.phone_display.formatting` (string): One of `international`, `regional`.
+  - `identifiers.phone_display.masking` (string): One of `hide_country_code`, `mask_digits`, `show_all`.
+
+**YAML Example**
+
+```yaml
+themes:
+  - displayName: Default theme
+    borders: { ... }
+    colors: { ... }
+    fonts: { ... }
+    page_background: { ... }
+    widget: { ... }
+    identifiers:
+      login_display: unified
+      otp_autocomplete: true
+      phone_display:
+        masking: mask_digits
+        formatting: international
+```
+
+**Directory Example**
+
+```
+./themes/Default theme.json
+```
+
+```json
+{
+  "displayName": "Default theme",
+  "borders": { "...": "..." },
+  "colors": { "...": "..." },
+  "fonts": { "...": "..." },
+  "page_background": { "...": "..." },
+  "widget": { "...": "..." },
+  "identifiers": {
+    "login_display": "unified",
+    "otp_autocomplete": true,
+    "phone_display": {
+      "masking": "mask_digits",
+      "formatting": "international"
+    }
+  }
+}
+```
+
+## Tenant Settings (Country codes)
+
+> **Early Access:** Requires the `tenant_country_codes_filtering` feature flag to be enabled on the tenant. When the flag is off, the Auth0 API rejects a tenant settings write that includes `country_codes`.
+
+The Deploy CLI supports configuring phone country code filtering for identifier input via the top-level `country_codes` object in tenant settings:
+
+- `country_codes.list` (array of string): ISO 3166-1 alpha-2 codes (e.g. `US`, `GB`). Must be non-empty and unique.
+- `country_codes.mode` (string): Whether the list is an allowlist or denylist. One of `allow`, `deny`.
+
+Set `country_codes: null` to remove filtering (allow all countries).
+
+**YAML Example**
+
+```yaml
+tenant:
+  country_codes:
+    list:
+      - US
+      - GB
+      - CA
+    mode: allow
+```
+
+**Directory Example**
+
+```
+./tenant.json
+```
+
+```json
+{
+  "country_codes": {
+    "list": ["US", "GB", "CA"],
+    "mode": "allow"
+  }
+}
+```
+
 ## Custom Domains
 
 Custom domains allow you to use your own domain for authentication instead of the default Auth0 domain. The Deploy CLI supports managing custom domains in both directory and YAML modes.
