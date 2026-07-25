@@ -6,6 +6,7 @@ import DatabasesHandler from '../../../../src/tools/auth0/handlers/databases';
 import HooksHandler from '../../../../src/tools/auth0/handlers/hooks';
 import RulesConfigsHandler from '../../../../src/tools/auth0/handlers/rulesConfigs';
 import RulesHandler from '../../../../src/tools/auth0/handlers/rules';
+import ThemesHandler from '../../../../src/tools/auth0/handlers/themes';
 import DefaultHandler from '../../../../src/tools/auth0/handlers/default';
 import constants from '../../../../src/tools/constants';
 import { configFactory } from '../../../../src/configFactory';
@@ -276,7 +277,7 @@ describe('#handler dryRunChanges', () => {
           enabled: true,
         }),
         secrets: {
-          get: async () => ({ data: { SECRET_ONE: constants.HOOKS_HIDDEN_SECRET_VALUE } }),
+          get: async () => ({ SECRET_ONE: constants.HOOKS_HIDDEN_SECRET_VALUE }),
         },
       },
       pool,
@@ -299,12 +300,130 @@ describe('#handler dryRunChanges', () => {
     expect(changes.update).to.have.length(1);
     expect(changes.update[0].secrets).to.equal(undefined);
   });
+
+  it('rules should produce no changes on a clean export/dry-run cycle', async () => {
+    const auth0 = {
+      rules: {
+        list: (params: any) =>
+          mockPagedData(params, 'rules', [
+            {
+              id: 'rule-id-1',
+              name: 'Add voucherID to AccessToken',
+              order: 1,
+              stage: 'login_success',
+              enabled: true,
+              script: 'function (user, context, callback) { callback(null, user, context); }',
+            },
+            {
+              id: 'rule-id-2',
+              name: 'Block Implicit Grant',
+              order: 2,
+              stage: 'login_success',
+              enabled: true,
+              script: 'function (user, context, callback) { callback(null, user, context); }',
+            },
+          ]),
+      },
+      pool,
+    };
+
+    const handler = new RulesHandler({
+      client: pageClient(auth0 as any),
+      config,
+    } as any);
+
+    // Simulate what export produces: rules by name, no id
+    const changes = await handler.dryRunChanges({
+      rules: [
+        {
+          name: 'Add voucherID to AccessToken',
+          order: 1,
+          stage: 'login_success',
+          enabled: true,
+          script: 'function (user, context, callback) { callback(null, user, context); }',
+        },
+        {
+          name: 'Block Implicit Grant',
+          order: 2,
+          stage: 'login_success',
+          enabled: true,
+          script: 'function (user, context, callback) { callback(null, user, context); }',
+        },
+      ],
+    } as any);
+
+    expect(changes.create).to.have.length(0);
+    expect(changes.update).to.have.length(0);
+    expect(changes.del).to.have.length(0);
+  });
+
+  it('themes should not propose create/delete when local theme lacks themeId (exported without --export_ids)', async () => {
+    const remoteTheme = {
+      themeId: 'remote-theme-id',
+      displayName: 'Default Theme',
+      colors: { primary_button: '#635dff', error: '#d32f2f' },
+    };
+
+    const auth0 = {
+      branding: {
+        themes: {
+          getDefault: async () => remoteTheme,
+        },
+      },
+    };
+
+    const handler = new ThemesHandler({ client: auth0, config } as any);
+
+    const changes = await handler.dryRunChanges({
+      themes: [
+        {
+          // no themeId — mirrors a default export where AUTH0_EXPORT_IDENTIFIERS is false
+          displayName: 'Default Theme',
+          colors: { primary_button: '#635dff', error: '#d32f2f' },
+        },
+      ],
+    } as any);
+
+    expect(changes.create).to.have.length(0);
+    expect(changes.del).to.have.length(0);
+  });
+
+  it('themes should propose update (not create/delete) when content differs and local theme lacks themeId', async () => {
+    const remoteTheme = {
+      themeId: 'remote-theme-id',
+      displayName: 'Default Theme',
+      colors: { primary_button: '#635dff', error: '#d32f2f' },
+    };
+
+    const auth0 = {
+      branding: {
+        themes: {
+          getDefault: async () => remoteTheme,
+        },
+      },
+    };
+
+    const handler = new ThemesHandler({ client: auth0, config } as any);
+
+    const changes = await handler.dryRunChanges({
+      themes: [
+        {
+          displayName: 'Default Theme',
+          colors: { primary_button: '#ff0000', error: '#d32f2f' }, // primary_button changed
+        },
+      ],
+    } as any);
+
+    expect(changes.create).to.have.length(0);
+    expect(changes.del).to.have.length(0);
+    expect(changes.update).to.have.length(1);
+  });
 });
 
 describe('#getResourceName', () => {
   function createHandler(type: string): DefaultHandler {
+    // @ts-ignore test stub — omits required runtime fields (client, functions, ignoreDryRunFields)
     return new DefaultHandler({
-      // @ts-ignore test stub
       config: configFactory(),
       type,
       id: 'id',

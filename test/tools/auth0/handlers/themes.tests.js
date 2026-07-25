@@ -322,6 +322,97 @@ describe('#themes handler', () => {
     expect(auth0.branding.themes.update.called).to.equal(false);
     expect(auth0.branding.themes.create.called).to.equal(false);
   });
+
+  describe('#themes dryRunChanges', () => {
+    it('should produce no create/delete when local theme lacks themeId (exported without --export_ids)', async () => {
+      const remoteTheme = mockTheme({ withThemeId: 'remote-theme-id' });
+      const localTheme = omit(cloneDeep(remoteTheme), 'themeId');
+
+      const auth0 = {
+        branding: {
+          themes: {
+            getDefault: stub().returns(Promise.resolve(remoteTheme)),
+          },
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0 });
+      const changes = await handler.dryRunChanges({ themes: [localTheme] });
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+    });
+
+    it('should produce no update when local theme lacks themeId and content is identical', async () => {
+      const remoteTheme = mockTheme({ withThemeId: 'remote-theme-id' });
+      const localTheme = omit(cloneDeep(remoteTheme), 'themeId');
+
+      const auth0 = {
+        branding: {
+          themes: {
+            getDefault: stub().returns(Promise.resolve(remoteTheme)),
+          },
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0 });
+      const changes = await handler.dryRunChanges({ themes: [localTheme] });
+
+      expect(changes.update).to.have.length(0);
+    });
+
+    it('should propose update (not create/delete) when content differs and local theme lacks themeId', async () => {
+      const remoteTheme = mockTheme({ withThemeId: 'remote-theme-id' });
+      const localTheme = {
+        ...omit(cloneDeep(remoteTheme), 'themeId'),
+        colors: { ...remoteTheme.colors, primary_button: '#aabbcc' },
+      };
+
+      const auth0 = {
+        branding: {
+          themes: {
+            getDefault: stub().returns(Promise.resolve(remoteTheme)),
+          },
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0 });
+      const changes = await handler.dryRunChanges({ themes: [localTheme] });
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.update).to.have.length(1);
+    });
+
+    it('should produce no changes when local theme already has themeId and content matches', async () => {
+      const remoteTheme = mockTheme({ withThemeId: 'remote-theme-id' });
+
+      const auth0 = {
+        branding: {
+          themes: {
+            getDefault: stub().returns(Promise.resolve(remoteTheme)),
+          },
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0 });
+      const changes = await handler.dryRunChanges({ themes: [cloneDeep(remoteTheme)] });
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+    });
+
+    it('should return empty changes when themes is not present in assets', async () => {
+      const handler = new ThemesHandler({ client: {} });
+      const changes = await handler.dryRunChanges({});
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+  });
 });
 
 describe('#themes keyword preservation', () => {

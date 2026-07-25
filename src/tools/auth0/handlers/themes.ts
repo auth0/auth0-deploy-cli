@@ -1,8 +1,9 @@
 import { Management } from 'auth0';
-import { Assets } from '../../../types';
+import { Assets, CalculatedChanges } from '../../../types';
 import log from '../../../logger';
 import DefaultHandler, { order } from './default';
 import { isDryRun } from '../../utils';
+import { calculateDryRunChanges } from '../../calculateDryRunChanges';
 
 /**
  * Schema
@@ -435,6 +436,35 @@ export default class ThemesHandler extends DefaultHandler {
 
   objString(theme: Theme): string {
     return theme.displayName || JSON.stringify(theme);
+  }
+
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    const { themes } = assets;
+
+    if (!themes) {
+      return { del: [], create: [], conflicts: [], update: [] };
+    }
+
+    const existing = await this.getType();
+
+    // Themes are singletons — at most one per tenant. If the local theme has no
+    // themeId (stripped during export when --export_ids is not set), backfill it
+    // from the remote so the matcher can find a match without requiring --export_ids.
+    const normalizedThemes = themes.map((theme) => {
+      if (!theme.themeId && existing && existing.length > 0 && existing[0].themeId) {
+        return { ...theme, themeId: existing[0].themeId };
+      }
+      return theme;
+    });
+
+    return calculateDryRunChanges({
+      type: this.type,
+      assets: normalizedThemes,
+      // @ts-ignore
+      existing,
+      identifiers: this.identifiers,
+      ignoreDryRunFields: this.getEffectiveIgnoreDryRunFields(),
+    });
   }
 
   async getType(): Promise<Theme[] | null> {

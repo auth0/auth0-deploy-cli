@@ -182,7 +182,7 @@ export default class HooksHandler extends DefaultHandler {
             .then((hookWithCode) =>
               this.client.hooks.secrets
                 .get(hook.id)
-                .then(({ data: secrets }) => ({ ...hookWithCode, secrets }))
+                .then((secrets) => ({ ...hookWithCode, secrets }))
             )
         )
       );
