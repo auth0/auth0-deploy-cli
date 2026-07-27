@@ -316,6 +316,33 @@ export const stripObfuscatedFieldsFromPayload = (
   return newAsset;
 };
 
+// Strips unresolved ##...## / @@...@@ placeholders before sending to Auth0.
+// Keyword replacement runs first; any remaining placeholder means no mapping was
+// provided. The field is dropped so Auth0 preserves its existing value.
+export const stripUnresolvedPlaceholders = (
+  data: Asset | null,
+  resourceType: string,
+  resourceName: string
+): Asset | null => {
+  if (data === null) return data;
+
+  const unresolved = collectUnresolvedPlaceholders(data);
+  if (unresolved.length === 0) return data;
+
+  const newAsset = { ...data };
+  unresolved.forEach(({ path, value }) => {
+    log.warn(
+      `Stripping unresolved placeholder for ${resourceType} "${resourceName}" field "${path}": ${value}. ` +
+        `To use this value, define ${path
+          .split('.')
+          .pop()
+          ?.toUpperCase()} in AUTH0_KEYWORD_REPLACE_MAPPINGS. The existing value on Auth0 will be preserved.`
+    );
+    dotProp.delete(newAsset, path);
+  });
+  return newAsset;
+};
+
 export const detectInsufficientScopeError = async <T>(
   fn: Function
 ): Promise<
