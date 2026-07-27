@@ -262,7 +262,7 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
     } catch (err) {
       if (err.statusCode === 403) {
         log.warn(
-          'Bot detection is not available on this tenant\'s current plan. Skipping bot detection settings.'
+          "Bot detection is not available on this tenant's current plan. Skipping bot detection settings."
         );
       } else {
         throw err;
@@ -274,7 +274,7 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
     } catch (err) {
       if (err.statusCode === 403) {
         log.warn(
-          'Captcha is not available on this tenant\'s current plan. Skipping captcha settings.'
+          "Captcha is not available on this tenant's current plan. Skipping captcha settings."
         );
       } else {
         throw err;
