@@ -81,7 +81,9 @@ clients:
   -
     name: "My Token Vault Privileged App"
     app_type: "non_interactive"
-    # Early Access: requires the token_vault_subject_type_jwt_ea_rollout feature flag.
+    # Export-only: token_vault_privileged_access is exported for visibility but is NOT
+    # deployed by the CLI (it is stripped from import). Manage it directly on the tenant.
+    # See docs/resource-specific-documentation.md#token-vault-privileged-access.
     token_vault_privileged_access:
       ip_allowlist:
         - "192.168.1.0/24"

@@ -69,7 +69,7 @@ const myOrganizationConfigurationSchema = {
 const tokenVaultPrivilegedAccessSchema = {
   type: ['object', 'null'],
   description:
-    'Settings for Token Vault Privileged Access, hardening a privileged client by restricting the caller IPs, connections, and scopes it may use at runtime. Early Access, gated by the token_vault_subject_type_jwt_ea_rollout feature flag.',
+    'Settings for Token Vault Privileged Access, hardening a privileged client by restricting the caller IPs, connections, and scopes it may use at runtime. Early Access, gated by the token_vault_subject_type_jwt_ea_rollout feature flag. Export-only: this object is exported for visibility but is not deployed by the Deploy CLI (it is stripped from create/update payloads because the required credentials are tenant-specific ids). Manage it directly on the tenant.',
   properties: {
     ip_allowlist: {
       type: 'array',

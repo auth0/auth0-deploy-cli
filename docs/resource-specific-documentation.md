@@ -1762,7 +1762,7 @@ Contents of `My API Client.json` (deploy-time, with pem):
 
 ## Token Vault Privileged Access
 
-> **Early Access:** Enforcement of `ip_allowlist` and `grants` requires the `token_vault_subject_type_jwt_ea_rollout` feature flag to be enabled on the tenant. When the flag is off the fields are accepted but not stored or returned.
+> **Early Access:** `token_vault_privileged_access` requires the `token_vault_subject_type_jwt_ea_rollout` feature flag to be enabled on the tenant, and writes additionally require the `create:client_token_vault_privileged_access` / `update:client_token_vault_privileged_access` scopes. This field is export-only in the Deploy CLI (see below), so these requirements affect only manual configuration on the tenant, not the CLI.
 
 The Deploy CLI exports the `token_vault_privileged_access` property on clients, which hardens a privileged Token Vault worker by restricting the caller IPs, connections, and scopes it may use at runtime.
 
