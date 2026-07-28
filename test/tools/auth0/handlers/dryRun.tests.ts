@@ -6,6 +6,8 @@ import DatabasesHandler from '../../../../src/tools/auth0/handlers/databases';
 import HooksHandler from '../../../../src/tools/auth0/handlers/hooks';
 import RulesConfigsHandler from '../../../../src/tools/auth0/handlers/rulesConfigs';
 import RulesHandler from '../../../../src/tools/auth0/handlers/rules';
+import ClientAuthCredentialsHandler from '../../../../src/tools/auth0/handlers/clientAuthCredentials';
+import ClientAuthCredentialsPreHandler from '../../../../src/tools/auth0/handlers/clientAuthCredentialsPre';
 import DefaultHandler from '../../../../src/tools/auth0/handlers/default';
 import constants from '../../../../src/tools/constants';
 import { configFactory } from '../../../../src/configFactory';
@@ -298,6 +300,32 @@ describe('#handler dryRunChanges', () => {
 
     expect(changes.update).to.have.length(1);
     expect(changes.update[0].secrets).to.equal(undefined);
+  });
+
+  it('clientAuthCredentials should return empty changes without crashing during dry run', async () => {
+    const handler = new ClientAuthCredentialsHandler({
+      client: pageClient({ pool } as any),
+      config,
+    } as any);
+
+    const changes = await handler.dryRunChanges({
+      clients: [{ name: 'my-app', client_authentication_methods: {} }],
+    } as any);
+
+    expect(changes).to.deep.equal({ del: [], create: [], conflicts: [], update: [] });
+  });
+
+  it('clientAuthCredentialsPre should return empty changes without crashing during dry run', async () => {
+    const handler = new ClientAuthCredentialsPreHandler({
+      client: pageClient({ pool } as any),
+      config,
+    } as any);
+
+    const changes = await handler.dryRunChanges({
+      clients: [{ name: 'my-app' }],
+    } as any);
+
+    expect(changes).to.deep.equal({ del: [], create: [], conflicts: [], update: [] });
   });
 });
 
