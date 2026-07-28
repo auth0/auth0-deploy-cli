@@ -364,6 +364,67 @@ connections:
 }
 ```
 
+## Connections (Cross App Access — Resource Application)
+
+> **Early Access:** Part of the XAA (Cross App Access) — Auth0 as Resource Application Authorization Server feature.
+
+The Deploy CLI supports configuring a connection as a Resource Application for Cross App Access via the top-level `cross_app_access_resource_app` field. This is supported for enterprise connections including SAML (`strategy: samlp`) and OIDC (`strategy: oidc`).
+
+- `cross_app_access_resource_app.status` (`"enabled"` | `"disabled"`): Enables or disables the connection as a Resource Application for Cross App Access.
+
+For SAML connections, the `discovery_url` and `oidc_metadata` connection options — previously only supported for OIDC connections — are now also accepted under `options`.
+
+**YAML Example**
+
+```yaml
+connections:
+  - name: enterprise-saml
+    strategy: samlp
+    cross_app_access_resource_app:
+      status: enabled
+    options:
+      discovery_url: https://example-idp.com/.well-known/openid-configuration
+      oidc_metadata:
+        issuer: https://example-idp.com
+```
+
+**Directory Example**
+
+```
+./connections/enterprise-saml.json
+```
+
+```json
+{
+  "name": "enterprise-saml",
+  "strategy": "samlp",
+  "cross_app_access_resource_app": {
+    "status": "enabled"
+  },
+  "options": {
+    "discovery_url": "https://example-idp.com/.well-known/openid-configuration",
+    "oidc_metadata": {
+      "issuer": "https://example-idp.com"
+    }
+  }
+}
+```
+
+## Clients (Cross App Access — Identity Assertion Authorization Grant)
+
+> **Early Access:** Part of the XAA (Cross App Access) — Auth0 as Resource Application Authorization Server feature.
+
+The Deploy CLI supports the `identity_assertion_authorization_grant` property on clients, which enables the client to participate in Cross App Access (ID-JAG) token exchange.
+
+- `identity_assertion_authorization_grant.active` (boolean): Set to `true` to enable ID-JAG exchange for the client.
+
+```yaml
+clients:
+  - name: My XAA Client
+    identity_assertion_authorization_grant:
+      active: true
+```
+
 ## Databases
 
 When managing database connections, the values of `options.customScripts` point to specific javascript files relative to
