@@ -531,6 +531,42 @@ describe('#clients handler', () => {
       expect(wasCreateCalled).to.be.true;
     });
 
+    it('should allow valid identity_assertion_authorization_grant property in client', async () => {
+      const clientWithIdJag = {
+        name: 'clientWithIdJag',
+        identity_assertion_authorization_grant: {
+          active: true,
+        },
+      };
+      let wasCreateCalled = false;
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            wasCreateCalled = true;
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('clientWithIdJag');
+            expect(data.identity_assertion_authorization_grant).to.deep.equal({
+              active: true,
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ clients: [clientWithIdJag] }]);
+      // eslint-disable-next-line no-unused-expressions
+      expect(wasCreateCalled).to.be.true;
+    });
+
     it('should create resource server client', async () => {
       let wasCreateCalled = false;
       const resourceServerClient = {
