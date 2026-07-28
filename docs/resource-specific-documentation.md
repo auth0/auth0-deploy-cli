@@ -975,6 +975,7 @@ Folder structure when in directory mode.
 ./networkACLs/
     ./Allow Specific Countries-p-2.json
     ./Redirect Specific User Agents-p-3.json
+    ./Block iCloud Private Relay Exits-p-4.json
 ```
 
 Contents of `Allow Specific Countries-p-2.json`:
@@ -1010,6 +1011,25 @@ Contents of `Redirect Specific User Agents-p-3.json`:
     "scope": "management",
     "match": {
       "user_agents": ["BadBot/1.0"]
+    }
+  }
+}
+```
+
+Contents of `Block iCloud Private Relay Exits-p-4.json`:
+
+```json
+{
+  "description": "Block iCloud Private Relay Exits",
+  "active": true,
+  "priority": 4,
+  "rule": {
+    "action": {
+      "block": true
+    },
+    "scope": "tenant",
+    "match": {
+      "auth0_managed": ["auth0.icloud_relay_proxy"]
     }
   }
 }

@@ -1,6 +1,6 @@
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { expect } from 'chai';
-const Ajv = require('ajv');
+import Ajv from 'ajv';
 
 import NetworkACLsHandler, { schema } from '../../../../src/tools/auth0/handlers/networkACLs';
 import pageClient from '../../../../src/tools/auth0/client';
