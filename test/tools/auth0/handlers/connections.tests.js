@@ -70,6 +70,14 @@ describe('#connections handler', () => {
             dpop_signing_alg: 'Ed25519',
           },
         },
+        {
+          name: 'samlp-connection',
+          strategy: 'samlp',
+          options: {
+            discovery_url: 'https://example-idp.com/.well-known/openid-configuration',
+            oidc_metadata: { issuer: 'https://example-idp.com' },
+          },
+        },
       ];
 
       const valid = ajv.validate(connections.schema, assets);
@@ -122,6 +130,43 @@ describe('#connections handler', () => {
           name: 'oidc-connection',
           strategy: 'oidc',
           cross_app_access_requesting_app: { active: true, unknown_field: 'value' },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(false);
+      expect(ajv.errors).to.not.be.null;
+    });
+
+    it('should allow cross_app_access_resource_app with status enum', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'samlp-connection',
+          strategy: 'samlp',
+          cross_app_access_resource_app: { status: 'enabled' },
+        },
+        {
+          name: 'oidc-connection',
+          strategy: 'oidc',
+          cross_app_access_resource_app: { status: 'disabled' },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should reject cross_app_access_resource_app with invalid status', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'samlp-connection',
+          strategy: 'samlp',
+          cross_app_access_resource_app: { status: 'on' },
         },
       ];
 
@@ -590,6 +635,46 @@ describe('#connections handler', () => {
           name: 'someConnection',
           strategy: 'custom',
           cross_app_access_requesting_app: { active: true },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ connections: data }]);
+    });
+
+    it('should pass cross_app_access_resource_app through in the update payload', async () => {
+      const auth0 = {
+        connections: {
+          create: () => Promise.resolve({ data: {} }),
+          update: function (id, data) {
+            expect(id).to.equal('con1');
+            expect(data).to.have.deep.property('cross_app_access_resource_app', {
+              status: 'enabled',
+            });
+            return Promise.resolve({ ...data, id });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someConnection', id: 'con1', strategy: 'custom' },
+            ]),
+          _getRestClient: () => ({}),
+          clients: {
+            update: () => Promise.resolve({}),
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          name: 'someConnection',
+          strategy: 'custom',
+          cross_app_access_resource_app: { status: 'enabled' },
         },
       ];
 
