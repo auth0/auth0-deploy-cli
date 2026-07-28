@@ -561,19 +561,39 @@ const createClientSanitizer = (clients: Client[]): ClientSanitizerChain => {
 };
 
 /**
- * Remove `credentials` from `token_vault_privileged_access`.
+ * On export, remove `credentials` from `token_vault_privileged_access`.
  *
  * Auth0 returns these as tenant-specific credential references (`{ id }`) — never
- * names or key material — so they are neither portable nor manageable by the Deploy
- * CLI. On export they must not be written to disk; on write they must not be re-sent.
- * `ip_allowlist` and `grants` are preserved. Mutates and returns the same client.
+ * names or key material — so they are not portable across tenants and must never be
+ * written to disk. `ip_allowlist` and `grants` are kept for visibility. Mutates and
+ * returns the same client.
  */
-const stripTokenVaultCredentials = (client: Client): Client => {
+const stripTokenVaultCredentialsOnExport = (client: Client): Client => {
   const tvpa = (client as { token_vault_privileged_access?: { credentials?: unknown } })
     .token_vault_privileged_access;
 
   if (tvpa && 'credentials' in tvpa) {
     delete tvpa.credentials;
+  }
+
+  return client;
+};
+
+/**
+ * On write (create/update), remove the entire `token_vault_privileged_access` object.
+ *
+ * The Management API requires `credentials` whenever `token_vault_privileged_access`
+ * is present in the payload, but those credentials are tenant-specific ids that the
+ * Deploy CLI intentionally never persists (see stripTokenVaultCredentialsOnExport).
+ * Sending the object without `credentials` fails validation ("Missing required
+ * property: credentials"); sending it with exported ids would re-send stale ids on a
+ * cross-tenant deploy. The Deploy CLI therefore does not manage this field — it is
+ * export-only. Manage `token_vault_privileged_access` directly on the tenant.
+ * Mutates and returns the same client.
+ */
+const stripTokenVaultPrivilegedAccessOnWrite = (client: Client): Client => {
+  if ('token_vault_privileged_access' in client) {
+    delete (client as { token_vault_privileged_access?: unknown }).token_vault_privileged_access;
   }
 
   return client;
@@ -721,10 +741,10 @@ export default class ClientHandler extends DefaultAPIHandler {
         }
         delete item.client_authentication_methods;
 
-        // token_vault_privileged_access.credentials are tenant-specific ids managed
-        // outside the Deploy CLI. Strip them so stale ids are never sent on create/update,
-        // while preserving ip_allowlist and grants.
-        stripTokenVaultCredentials(item);
+        // token_vault_privileged_access requires tenant-specific credential ids that
+        // the Deploy CLI never persists. Strip the whole object on write so we neither
+        // re-send stale ids nor fail validation for the missing credentials property.
+        stripTokenVaultPrivilegedAccessOnWrite(item);
 
         return item;
       });
@@ -756,7 +776,7 @@ export default class ClientHandler extends DefaultAPIHandler {
       .get()
       // token_vault_privileged_access.credentials are returned as tenant-specific
       // ids — strip them so they are never exported to disk.
-      .map(stripTokenVaultCredentials);
+      .map(stripTokenVaultCredentialsOnExport);
 
     // Enrich credential stubs with name and credential_type for export.
     // Auth0 does not return pem on read — it is never exported.

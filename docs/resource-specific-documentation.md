@@ -1703,12 +1703,16 @@ Contents of `My API Client.json` (deploy-time, with pem):
 
 > **Early Access:** Enforcement of `ip_allowlist` and `grants` requires the `token_vault_subject_type_jwt_ea_rollout` feature flag to be enabled on the tenant. When the flag is off the fields are accepted but not stored or returned.
 
-The Deploy CLI supports the `token_vault_privileged_access` property on clients, which hardens a privileged Token Vault worker by restricting the caller IPs, connections, and scopes it may use at runtime.
+The Deploy CLI exports the `token_vault_privileged_access` property on clients, which hardens a privileged Token Vault worker by restricting the caller IPs, connections, and scopes it may use at runtime.
+
+> **Export-only field:** `token_vault_privileged_access` is exported for visibility but **is not deployed** by the Deploy CLI — it is stripped from create/update payloads. The Management API requires a `credentials` array (tenant-specific credential `id` references) whenever the object is sent, and those ids are never persisted by the CLI because they are not portable across tenants. Sending the object without them fails validation, and sending exported ids would re-send stale references on a cross-tenant deploy. Manage `token_vault_privileged_access` directly on the tenant.
 
 | Field          | Type             | Description                                                                                                                |
 | -------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `ip_allowlist` | array of strings | IPv4/IPv6 addresses or CIDR ranges permitted to call token exchange on behalf of this client.                              |
 | `grants`       | array of objects | Connection/scope pin objects. Each has a `connection` (name) and `scopes` (array). Max 5 connections; max 20 scopes total. |
+
+Exported shape (`credentials` is stripped; `ip_allowlist` and `grants` are kept for visibility):
 
 ```yaml
 clients:
@@ -1727,5 +1731,3 @@ clients:
             - 'chat:write'
             - 'channels:read'
 ```
-
-> **Note:** The `credentials` sub-object of `token_vault_privileged_access` is **not** managed by the Deploy CLI. On read, Auth0 returns it as tenant-specific credential references (`id`) rather than names or key material, and the Deploy CLI never syncs IDs. It is therefore stripped on export (never written to disk) and on deploy (never sent on create/update), so an export→deploy round-trip will never re-send stale credential IDs. Only `ip_allowlist` and `grants` are managed. Manage the privileged client's credentials directly on the tenant.
