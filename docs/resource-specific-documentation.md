@@ -1728,4 +1728,4 @@ clients:
             - 'channels:read'
 ```
 
-> **Note:** The `credentials` sub-object of `token_vault_privileged_access` is **not** managed by the Deploy CLI. On read, Auth0 returns it as credential references (`id`) rather than names or key material, and the Deploy CLI never syncs IDs. Manage the privileged client's credentials directly on the tenant.
+> **Note:** The `credentials` sub-object of `token_vault_privileged_access` is **not** managed by the Deploy CLI. On read, Auth0 returns it as tenant-specific credential references (`id`) rather than names or key material, and the Deploy CLI never syncs IDs. It is therefore stripped on export (never written to disk) and on deploy (never sent on create/update), so an export→deploy round-trip will never re-send stale credential IDs. Only `ip_allowlist` and `grants` are managed. Manage the privileged client's credentials directly on the tenant.

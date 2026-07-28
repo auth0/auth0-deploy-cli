@@ -1894,6 +1894,41 @@ describe('#clients handler', () => {
       expect(cred.kid).to.equal(undefined);
       expect(cred.alg).to.equal(undefined);
     });
+
+    it('should strip token_vault_privileged_access.credentials on export while keeping ip_allowlist and grants', async () => {
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: {} }),
+          update: () => Promise.resolve({ data: {} }),
+          delete: () => Promise.resolve({ data: {} }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'Privileged App',
+                token_vault_privileged_access: {
+                  credentials: [{ id: 'cred_abc' }],
+                  ip_allowlist: ['10.0.0.1'],
+                  grants: [{ connection: 'google-oauth2', scopes: ['openid'] }],
+                },
+              },
+            ]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const result = await handler.getType();
+
+      const tvpa = result[0].token_vault_privileged_access;
+      expect(tvpa).to.not.have.property('credentials');
+      expect(tvpa.ip_allowlist).to.deep.equal(['10.0.0.1']);
+      expect(tvpa.grants).to.deep.equal([{ connection: 'google-oauth2', scopes: ['openid'] }]);
+    });
   });
 
   describe('#clients pem stripping in processChanges', () => {
@@ -1974,6 +2009,70 @@ describe('#clients handler', () => {
 
       expect(updatePayloads['client1']).to.not.have.property('client_authentication_methods');
       expect(updatePayloads['client2']).to.not.have.property('client_authentication_methods');
+    });
+
+    it('should strip token_vault_privileged_access.credentials from create/update while keeping ip_allowlist and grants', async () => {
+      const createPayloads = [];
+      const updatePayloads = {};
+      const auth0 = {
+        clients: {
+          create: (data) => {
+            createPayloads.push(data);
+            return Promise.resolve({ data });
+          },
+          update: (clientId, data) => {
+            updatePayloads[clientId] = data;
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: {} }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'Existing Privileged App',
+              },
+            ]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      const tvpa = {
+        credentials: [{ id: 'cred_stale' }],
+        ip_allowlist: ['10.0.0.1'],
+        grants: [{ connection: 'google-oauth2', scopes: ['openid'] }],
+      };
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            // Existing client -> update
+            {
+              client_id: 'client1',
+              name: 'Existing Privileged App',
+              token_vault_privileged_access: { ...tvpa },
+            },
+            // New client -> create
+            { name: 'New Privileged App', token_vault_privileged_access: { ...tvpa } },
+          ],
+        },
+      ]);
+
+      const updated = updatePayloads['client1'].token_vault_privileged_access;
+      expect(updated).to.not.have.property('credentials');
+      expect(updated.ip_allowlist).to.deep.equal(['10.0.0.1']);
+      expect(updated.grants).to.deep.equal([{ connection: 'google-oauth2', scopes: ['openid'] }]);
+
+      const created = createPayloads[0].token_vault_privileged_access;
+      expect(created).to.not.have.property('credentials');
+      expect(created.ip_allowlist).to.deep.equal(['10.0.0.1']);
+      expect(created.grants).to.deep.equal([{ connection: 'google-oauth2', scopes: ['openid'] }]);
     });
   });
 

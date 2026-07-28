@@ -560,6 +560,25 @@ const createClientSanitizer = (clients: Client[]): ClientSanitizerChain => {
   };
 };
 
+/**
+ * Remove `credentials` from `token_vault_privileged_access`.
+ *
+ * Auth0 returns these as tenant-specific credential references (`{ id }`) — never
+ * names or key material — so they are neither portable nor manageable by the Deploy
+ * CLI. On export they must not be written to disk; on write they must not be re-sent.
+ * `ip_allowlist` and `grants` are preserved. Mutates and returns the same client.
+ */
+const stripTokenVaultCredentials = (client: Client): Client => {
+  const tvpa = (client as { token_vault_privileged_access?: { credentials?: unknown } })
+    .token_vault_privileged_access;
+
+  if (tvpa && 'credentials' in tvpa) {
+    delete tvpa.credentials;
+  }
+
+  return client;
+};
+
 export default class ClientHandler extends DefaultAPIHandler {
   existing: Client[];
 
@@ -702,6 +721,11 @@ export default class ClientHandler extends DefaultAPIHandler {
         }
         delete item.client_authentication_methods;
 
+        // token_vault_privileged_access.credentials are tenant-specific ids managed
+        // outside the Deploy CLI. Strip them so stale ids are never sent on create/update,
+        // while preserving ip_allowlist and grants.
+        stripTokenVaultCredentials(item);
+
         return item;
       });
     };
@@ -727,7 +751,12 @@ export default class ClientHandler extends DefaultAPIHandler {
       ...(shouldExcludeThirdPartyClients(this.config) && { is_first_party: true }),
     });
 
-    const sanitized = createClientSanitizer(clients).sanitizeCrossOriginAuth(false).get();
+    const sanitized = createClientSanitizer(clients)
+      .sanitizeCrossOriginAuth(false)
+      .get()
+      // token_vault_privileged_access.credentials are returned as tenant-specific
+      // ids — strip them so they are never exported to disk.
+      .map(stripTokenVaultCredentials);
 
     // Enrich credential stubs with name and credential_type for export.
     // Auth0 does not return pem on read — it is never exported.
