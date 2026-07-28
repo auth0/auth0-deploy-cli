@@ -1,7 +1,8 @@
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { expect } from 'chai';
+import Ajv from 'ajv';
 
-import NetworkACLsHandler from '../../../../src/tools/auth0/handlers/networkACLs';
+import NetworkACLsHandler, { schema } from '../../../../src/tools/auth0/handlers/networkACLs';
 import pageClient from '../../../../src/tools/auth0/client';
 import { mockPagedData } from '../../../utils';
 
@@ -87,6 +88,66 @@ describe('#networkACLs handler', () => {
       ];
 
       await stageFn.apply(handler, [{ networkACLs: data }]);
+    });
+  });
+
+  describe('#networkACLs schema', () => {
+    const ajv = new Ajv({ useDefaults: true, nullable: true });
+
+    it('should pass schema validation for auth0_managed in match', () => {
+      const valid = ajv.validate(schema, [
+        {
+          description: 'Block iCloud Private Relay Exits',
+          active: true,
+          priority: 1,
+          rule: {
+            action: { block: true },
+            scope: 'tenant',
+            match: {
+              auth0_managed: ['auth0.icloud_relay_proxy'],
+            },
+          },
+        },
+      ]);
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should pass schema validation for auth0_managed in not_match', () => {
+      const valid = ajv.validate(schema, [
+        {
+          description: 'Allow unless low-reputation',
+          active: true,
+          priority: 1,
+          rule: {
+            action: { allow: true },
+            scope: 'tenant',
+            not_match: {
+              auth0_managed: ['auth0.low_reputation'],
+            },
+          },
+        },
+      ]);
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should fail schema validation for auth0_managed values not matching the pattern', () => {
+      const valid = ajv.validate(schema, [
+        {
+          description: 'Invalid auth0_managed value',
+          active: true,
+          priority: 1,
+          rule: {
+            action: { block: true },
+            scope: 'tenant',
+            match: {
+              auth0_managed: ['icloud_relay_proxy'],
+            },
+          },
+        },
+      ]);
+      expect(valid).to.equal(false);
     });
   });
 

@@ -1024,6 +1024,8 @@ NetworkACLs have the following key properties:
   - `scope`: The scope of the rule ('management', 'authentication', or 'tenant')
   - `match` or `not_match`: Criteria for matching requests
 
+The `match` and `not_match` criteria also support an `auth0_managed` array for matching Auth0-managed IP ranges (e.g. `auth0.icloud_relay_proxy`, `auth0.low_reputation`). Each value must follow the pattern `^auth0\.[^.\s]+$`. This is an Early Access feature gated behind the `tenant_acl_curated_blocklists` feature flag and requires the `advanced-breached-password-detection` entitlement; the API rejects rules using `auth0_managed` with an HTTP 403 if the tenant is not entitled.
+
 **YAML Example**
 
 ```yaml
@@ -1047,6 +1049,15 @@ networkACLs:
       scope: 'management'
       not_match:
         user_agents: ['BadBot/1.0']
+  - description: 'Block iCloud Private Relay Exits'
+    active: true
+    priority: 4
+    rule:
+      action:
+        block: true
+      scope: 'tenant'
+      match:
+        auth0_managed: ['auth0.icloud_relay_proxy']
 ```
 
 **Directory Example**
@@ -1057,6 +1068,7 @@ Folder structure when in directory mode.
 ./networkACLs/
     ./Allow Specific Countries-p-2.json
     ./Redirect Specific User Agents-p-3.json
+    ./Block iCloud Private Relay Exits-p-4.json
 ```
 
 Contents of `Allow Specific Countries-p-2.json`:
@@ -1092,6 +1104,25 @@ Contents of `Redirect Specific User Agents-p-3.json`:
     "scope": "management",
     "match": {
       "user_agents": ["BadBot/1.0"]
+    }
+  }
+}
+```
+
+Contents of `Block iCloud Private Relay Exits-p-4.json`:
+
+```json
+{
+  "description": "Block iCloud Private Relay Exits",
+  "active": true,
+  "priority": 4,
+  "rule": {
+    "action": {
+      "block": true
+    },
+    "scope": "tenant",
+    "match": {
+      "auth0_managed": ["auth0.icloud_relay_proxy"]
     }
   }
 }
