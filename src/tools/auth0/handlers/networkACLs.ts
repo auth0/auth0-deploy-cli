@@ -73,6 +73,15 @@ const MatchSchema = {
       uniqueItems: true,
       minItems: 1,
     },
+    auth0_managed: {
+      type: 'array',
+      items: {
+        type: 'string',
+        pattern: '^auth0\\.[^.\\s]+$',
+      },
+      uniqueItems: true,
+      minItems: 1,
+    },
     geo_country_codes: {
       type: 'array',
       items: {
