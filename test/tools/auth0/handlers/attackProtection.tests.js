@@ -1,5 +1,8 @@
-const { expect } = require('chai');
+const { expect, use } = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 const attackProtection = require('../../../../src/tools/auth0/handlers/attackProtection');
+
+use(chaiAsPromised);
 
 describe('#attackProtection handler', () => {
   describe('#attackProtection process', () => {
@@ -540,6 +543,66 @@ describe('#attackProtection handler', () => {
       expect(capturedCaptcha).to.not.have.property('simple_captcha');
       expect(capturedCaptcha).to.have.property('friendly_captcha');
       expect(handler.updated).to.equal(1);
+    });
+
+    it('should rethrow non-403 errors from botDetection.get()', async () => {
+      const serverError = new Error('Internal Server Error');
+      serverError.statusCode = 500;
+
+      const auth0 = {
+        attackProtection: {
+          botDetection: {
+            get: () => {
+              throw serverError;
+            },
+          },
+          captcha: {
+            get: () => ({ active_provider_id: 'friendly_captcha' }),
+          },
+          breachedPasswordDetection: {
+            get: () => ({ enabled: true }),
+          },
+          bruteForceProtection: {
+            get: () => ({ enabled: true }),
+          },
+          suspiciousIpThrottling: {
+            get: () => ({ enabled: true }),
+          },
+        },
+      };
+
+      const handler = new attackProtection.default({ client: auth0 });
+      await expect(handler.getType()).to.be.rejectedWith('Internal Server Error');
+    });
+
+    it('should rethrow non-403 errors from captcha.get()', async () => {
+      const serverError = new Error('Internal Server Error');
+      serverError.statusCode = 500;
+
+      const auth0 = {
+        attackProtection: {
+          botDetection: {
+            get: () => ({ bot_detection_level: 'medium' }),
+          },
+          captcha: {
+            get: () => {
+              throw serverError;
+            },
+          },
+          breachedPasswordDetection: {
+            get: () => ({ enabled: true }),
+          },
+          bruteForceProtection: {
+            get: () => ({ enabled: true }),
+          },
+          suspiciousIpThrottling: {
+            get: () => ({ enabled: true }),
+          },
+        },
+      };
+
+      const handler = new attackProtection.default({ client: auth0 });
+      await expect(handler.getType()).to.be.rejectedWith('Internal Server Error');
     });
 
     it('should return cached existing data on subsequent calls', async () => {
