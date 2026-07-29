@@ -4,6 +4,7 @@ import Auth0 from '../../../src/tools/auth0';
 import * as calculateDryRunChanges from '../../../src/tools/calculateDryRunChanges';
 import * as utils from '../../../src/tools/utils';
 import { Auth0APIClient, Assets } from '../../../src/types';
+import log from '../../../src/logger';
 
 const mockEmptyClient = {
   prompts: {
@@ -167,6 +168,47 @@ describe('#Auth0 class', () => {
 
       expect(hasChanges).to.equal(false);
       expect(output).to.include('No changes detected');
+    });
+
+    it('should skip a handler that does not implement dryRunChanges instead of crashing', async () => {
+      process.env.AUTH0_DEBUG = 'true';
+
+      sandbox
+        .stub(calculateDryRunChanges, 'dryRunFormatAssets')
+        .callsFake(async (assets) => assets);
+
+      const printedMessages: string[] = [];
+      sandbox.stub(utils, 'printCLIMessage').callsFake((message: string) => {
+        printedMessages.push(message);
+      });
+
+      const warnStub = sandbox.stub(log, 'warn');
+
+      const auth0 = new Auth0(mockEmptyClient, mockEmptyAssets, (key) => {
+        const config = {
+          AUTH0_DOMAIN: 'example-tenant.auth0.com',
+          AUTH0_INPUT_FILE: './tenant.yaml',
+        };
+        return config[key];
+      });
+
+      // A deploy-only handler with no dryRunChanges alongside a conforming one — the run must
+      // warn and skip the former rather than throw "handler.dryRunChanges is not a function".
+      auth0.handlers = [
+        { type: 'clientAuthCredentials' },
+        {
+          type: 'clients',
+          dryRunChanges: async () => ({ create: [], update: [], del: [] }),
+          getResourceName: (item: { name: string }) => item.name,
+        },
+      ] as any;
+
+      const hasChanges = await auth0.dryRun();
+
+      expect(hasChanges).to.equal(false);
+      expect(warnStub.calledOnce).to.equal(true);
+      expect(warnStub.firstCall.args[0]).to.include('clientAuthCredentials');
+      expect(warnStub.firstCall.args[0]).to.include('does not implement dryRunChanges');
     });
 
     it('should show DELETE with asterisk note when AUTH0_ALLOW_DELETE is false', async () => {
