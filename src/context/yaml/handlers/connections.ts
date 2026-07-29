@@ -61,6 +61,12 @@ async function dump(context: YAMLContext): Promise<ParsedConnections> {
     );
   }
 
+  // Filter to included connections
+  const includedConnections = (context.assets.include && context.assets.include.connections) || [];
+  if (includedConnections.length) {
+    connections = connections.filter((connection) => includedConnections.includes(connection.name));
+  }
+
   return {
     connections: connections.map((connection) => {
       let dumpedConnection = {

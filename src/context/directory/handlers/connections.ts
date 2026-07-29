@@ -75,6 +75,12 @@ async function dump(context: DirectoryContext): Promise<void> {
     );
   }
 
+  // Filter to included connections
+  const includedConnections = (context.assets.include && context.assets.include.connections) || [];
+  if (includedConnections.length) {
+    connections = connections.filter((connection) => includedConnections.includes(connection.name));
+  }
+
   const connectionsFolder = path.join(context.filePath, constants.CONNECTIONS_DIRECTORY);
   fs.ensureDirSync(connectionsFolder);
 
@@ -131,11 +137,23 @@ async function dump(context: DirectoryContext): Promise<void> {
     if (dumpedConnection.strategy === 'email') expectedFiles.add(`${connectionName}.html`);
   });
 
+  // With an include list configured, connections outside it are unmanaged, so limit pruning
+  // to the listed names rather than every file in the folder.
+  const prunableFiles = includedConnections.length
+    ? new Set(
+        includedConnections.flatMap((name) => [`${sanitize(name)}.json`, `${sanitize(name)}.html`])
+      )
+    : null;
+
   // Remove files that belong to connections no longer present (and not excluded)
   if (fs.existsSync(connectionsFolder)) {
     for (const existing of fs.readdirSync(connectionsFolder)) {
       const fullPath = path.join(connectionsFolder, existing);
-      if (fs.statSync(fullPath).isFile() && !expectedFiles.has(existing)) {
+      if (
+        fs.statSync(fullPath).isFile() &&
+        !expectedFiles.has(existing) &&
+        (prunableFiles === null || prunableFiles.has(existing))
+      ) {
         fs.removeSync(fullPath);
       }
     }

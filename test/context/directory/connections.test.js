@@ -266,6 +266,69 @@ describe('#directory context connections', () => {
     expect(fs.existsSync(path.join(connectionsFolder, 'excludedConnection.json'))).to.equal(true);
   });
 
+  it('should only dump included connections', async () => {
+    const dir = path.join(testDataDir, 'directory', 'connectionsDumpInclude');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.connections = [
+      { name: 'includedConnection', strategy: 'waad' },
+      { name: 'unmanagedConnection', strategy: 'samlp' },
+    ];
+    context.assets.include = { connections: ['includedConnection'] };
+
+    await handler.dump(context);
+    const connectionsFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
+
+    expect(fs.existsSync(path.join(connectionsFolder, 'includedConnection.json'))).to.equal(true);
+    expect(fs.existsSync(path.join(connectionsFolder, 'unmanagedConnection.json'))).to.equal(false);
+  });
+
+  it('should preserve pre-existing files for connections outside the include list on re-dump', async () => {
+    const dir = path.join(testDataDir, 'directory', 'connectionsDumpInclude');
+    cleanThenMkdir(dir);
+
+    // Simulate a prior export that wrote a connection now outside the include list
+    const connectionsFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
+    fs.ensureDirSync(connectionsFolder);
+    fs.writeFileSync(
+      path.join(connectionsFolder, 'unmanagedConnection.json'),
+      '{"name":"unmanagedConnection"}'
+    );
+
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    context.assets.connections = [
+      { name: 'includedConnection', strategy: 'waad' },
+      { name: 'unmanagedConnection', strategy: 'samlp' },
+    ];
+    context.assets.include = { connections: ['includedConnection'] };
+
+    await handler.dump(context);
+
+    expect(fs.existsSync(path.join(connectionsFolder, 'includedConnection.json'))).to.equal(true);
+    expect(fs.existsSync(path.join(connectionsFolder, 'unmanagedConnection.json'))).to.equal(true);
+  });
+
+  it('should remove stale files for included connections no longer present on the tenant', async () => {
+    const dir = path.join(testDataDir, 'directory', 'connectionsIncludeStaleFiles');
+    cleanThenMkdir(dir);
+
+    // Simulate a previous export of two included connections, one since deleted on the tenant
+    const connectionsFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
+    fs.ensureDirSync(connectionsFolder);
+    fs.writeFileSync(path.join(connectionsFolder, 'facebook.json'), '{"name":"facebook"}');
+    fs.writeFileSync(path.join(connectionsFolder, 'github.json'), '{"name":"github"}');
+
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    context.assets.connections = [{ name: 'github', strategy: 'github' }];
+    context.assets.include = { connections: ['facebook', 'github'] };
+
+    await handler.dump(context);
+
+    expect(fs.existsSync(path.join(connectionsFolder, 'github.json'))).to.equal(true);
+    expect(fs.existsSync(path.join(connectionsFolder, 'facebook.json'))).to.equal(false);
+  });
+
   it('should remove stale connection files when connections are removed from source', async () => {
     const dir = path.join(testDataDir, 'directory', 'connectionsStaleFiles');
     cleanThenMkdir(dir);

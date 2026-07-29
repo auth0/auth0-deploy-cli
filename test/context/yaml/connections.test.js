@@ -276,4 +276,24 @@ describe('#YAML context connections', () => {
     expect(dumped.connections).to.have.length(1);
     expect(dumped.connections[0].name).to.equal('includedConnection');
   });
+
+  it('should only dump included connections', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'connectionsDumpInclude');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') },
+      mockMgmtClient()
+    );
+
+    context.assets.connections = [
+      { name: 'includedConnection', strategy: 'waad' },
+      { name: 'unmanagedConnection', strategy: 'samlp' },
+    ];
+    context.assets.include = { connections: ['includedConnection'] };
+
+    const dumped = await handler.dump(context);
+
+    expect(dumped.connections).to.have.length(1);
+    expect(dumped.connections[0].name).to.equal('includedConnection');
+  });
 });
