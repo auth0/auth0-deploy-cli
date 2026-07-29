@@ -174,5 +174,31 @@ describe('#guardianPhoneFactorMessageTypes handler', () => {
 
       await stageFn.apply(handler, [{ guardianPhoneFactorMessageTypes: null }]);
     });
+
+    it('should warn and skip when the legacy feature is not allowed on the tenant', async () => {
+      const auth0 = {
+        guardian: {
+          factors: {
+            phone: {
+              setMessageTypes: () => {
+                const err = new Error('This endpoint is disabled for your tenant.');
+                err.statusCode = 403;
+                err.errorCode = 'voice_mfa_not_allowed';
+                return Promise.reject(err);
+              },
+            },
+          },
+        },
+      };
+
+      const handler = new guardianPhoneFactorMessageTypes.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Should resolve (not throw) even though the API rejects with a 403.
+      await stageFn.apply(handler, [
+        { guardianPhoneFactorMessageTypes: { message_types: ['sms', 'voice'] } },
+      ]);
+      expect(handler.updated).to.equal(0);
+    });
   });
 });
