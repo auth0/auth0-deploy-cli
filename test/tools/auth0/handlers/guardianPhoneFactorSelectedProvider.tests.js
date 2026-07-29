@@ -174,5 +174,31 @@ describe('#guardianPhoneFactorSelectedProvider handler', () => {
 
       await stageFn.apply(handler, [{ guardianPhoneFactorSelectedProvider: null }]);
     });
+
+    it('should warn and skip when the legacy feature is not allowed on the tenant', async () => {
+      const auth0 = {
+        guardian: {
+          factors: {
+            phone: {
+              setProvider: () => {
+                const err = new Error('This endpoint is disabled for your tenant.');
+                err.statusCode = 403;
+                err.errorCode = 'legacy_mfa_phone_provider_not_allowed';
+                return Promise.reject(err);
+              },
+            },
+          },
+        },
+      };
+
+      const handler = new guardianPhoneFactorSelectedProvider.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Should resolve (not throw) even though the API rejects with a 403.
+      await stageFn.apply(handler, [
+        { guardianPhoneFactorSelectedProvider: { provider: 'twilio' } },
+      ]);
+      expect(handler.updated).to.equal(0);
+    });
   });
 });
