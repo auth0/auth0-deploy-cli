@@ -333,7 +333,10 @@ export const stripUnresolvedPlaceholders = (
   unresolved.forEach(({ path, value }) => {
     log.warn(
       `Stripping unresolved placeholder for ${resourceType} "${resourceName}" field "${path}": ${value}. ` +
-        `To use this value, define ${value.replace(/^##|##$|^@@|@@$/g, '')} in AUTH0_KEYWORD_REPLACE_MAPPINGS. The existing value on Auth0 will be preserved.`
+        `To use this value, define ${value.replace(
+          /^##|##$|^@@|@@$/g,
+          ''
+        )} in AUTH0_KEYWORD_REPLACE_MAPPINGS. The existing value on Auth0 will be preserved.`
     );
     dotProp.delete(newAsset, path);
   });
