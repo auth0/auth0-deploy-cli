@@ -1790,3 +1790,36 @@ Contents of `My API Client.json` (deploy-time, with pem):
 ```
 
 > **Note:** The `pem` field must be supplied manually from your key generation step. Never commit private keys — only the public key PEM goes in the config.
+
+## Token Vault Privileged Access
+
+> **Early Access:** `token_vault_privileged_access` requires the `token_vault_subject_type_jwt_ea_rollout` feature flag to be enabled on the tenant, and writes additionally require the `create:client_token_vault_privileged_access` / `update:client_token_vault_privileged_access` scopes. This field is export-only in the Deploy CLI (see below), so these requirements affect only manual configuration on the tenant, not the CLI.
+
+The Deploy CLI exports the `token_vault_privileged_access` property on clients, which hardens a privileged Token Vault worker by restricting the caller IPs, connections, and scopes it may use at runtime.
+
+> **Export-only field:** `token_vault_privileged_access` is exported for visibility but **is not deployed** by the Deploy CLI — it is stripped from create/update payloads. The Management API requires a `credentials` array (tenant-specific credential `id` references) whenever the object is sent, and those ids are never persisted by the CLI because they are not portable across tenants. Sending the object without them fails validation, and sending exported ids would re-send stale references on a cross-tenant deploy. Manage `token_vault_privileged_access` directly on the tenant.
+
+| Field          | Type             | Description                                                                                                                |
+| -------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `ip_allowlist` | array of strings | IPv4/IPv6 addresses or CIDR ranges permitted to call token exchange on behalf of this client.                              |
+| `grants`       | array of objects | Connection/scope pin objects. Each has a `connection` (name) and `scopes` (array). Max 5 connections; max 20 scopes total. |
+
+Exported shape (`credentials` is stripped; `ip_allowlist` and `grants` are kept for visibility):
+
+```yaml
+clients:
+  - name: My Token Vault Privileged App
+    app_type: non_interactive
+    token_vault_privileged_access:
+      ip_allowlist:
+        - '192.168.1.0/24'
+        - '10.0.0.1'
+      grants:
+        - connection: google-oauth2
+          scopes:
+            - 'https://www.googleapis.com/auth/calendar.readonly'
+        - connection: slack
+          scopes:
+            - 'chat:write'
+            - 'channels:read'
+```
