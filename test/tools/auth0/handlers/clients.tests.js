@@ -491,6 +491,30 @@ describe('#clients handler', () => {
       expect(wasCreateCalled).to.be.true;
     });
 
+    it('should pass schema validation for a valid token_vault_privileged_access property', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'clientWithTokenVault',
+          token_vault_privileged_access: {
+            ip_allowlist: ['192.168.1.0/24', '10.0.0.1'],
+            grants: [
+              {
+                connection: 'google-oauth2',
+                scopes: ['https://www.googleapis.com/auth/calendar.readonly'],
+              },
+              {
+                connection: 'slack',
+                scopes: ['chat:write', 'channels:read'],
+              },
+            ],
+          },
+        },
+      ]);
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
     it('should allow valid session_transfer delegation property in client', async () => {
       const clientWithDelegation = {
         name: 'clientWithDelegation',
@@ -1874,6 +1898,41 @@ describe('#clients handler', () => {
       expect(cred.kid).to.equal(undefined);
       expect(cred.alg).to.equal(undefined);
     });
+
+    it('should strip token_vault_privileged_access.credentials on export while keeping ip_allowlist and grants', async () => {
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: {} }),
+          update: () => Promise.resolve({ data: {} }),
+          delete: () => Promise.resolve({ data: {} }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'Privileged App',
+                token_vault_privileged_access: {
+                  credentials: [{ id: 'cred_abc' }],
+                  ip_allowlist: ['10.0.0.1'],
+                  grants: [{ connection: 'google-oauth2', scopes: ['openid'] }],
+                },
+              },
+            ]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const result = await handler.getType();
+
+      const tvpa = result[0].token_vault_privileged_access;
+      expect(tvpa).to.not.have.property('credentials');
+      expect(tvpa.ip_allowlist).to.deep.equal(['10.0.0.1']);
+      expect(tvpa.grants).to.deep.equal([{ connection: 'google-oauth2', scopes: ['openid'] }]);
+    });
   });
 
   describe('#clients pem stripping in processChanges', () => {
@@ -1954,6 +2013,66 @@ describe('#clients handler', () => {
 
       expect(updatePayloads['client1']).to.not.have.property('client_authentication_methods');
       expect(updatePayloads['client2']).to.not.have.property('client_authentication_methods');
+    });
+
+    it('should strip the entire token_vault_privileged_access object from create/update', async () => {
+      const createPayloads = [];
+      const updatePayloads = {};
+      const auth0 = {
+        clients: {
+          create: (data) => {
+            createPayloads.push(data);
+            return Promise.resolve({ data });
+          },
+          update: (clientId, data) => {
+            updatePayloads[clientId] = data;
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: {} }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'Existing Privileged App',
+              },
+            ]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      const tvpa = {
+        credentials: [{ id: 'cred_stale' }],
+        ip_allowlist: ['10.0.0.1'],
+        grants: [{ connection: 'google-oauth2', scopes: ['openid'] }],
+      };
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            // Existing client -> update
+            {
+              client_id: 'client1',
+              name: 'Existing Privileged App',
+              token_vault_privileged_access: { ...tvpa },
+            },
+            // New client -> create
+            { name: 'New Privileged App', token_vault_privileged_access: { ...tvpa } },
+          ],
+        },
+      ]);
+
+      // The Management API requires credentials whenever token_vault_privileged_access
+      // is sent, but those are non-portable tenant-specific ids the CLI never persists.
+      // The whole object is therefore stripped on write — the field is export-only.
+      expect(updatePayloads['client1']).to.not.have.property('token_vault_privileged_access');
+      expect(createPayloads[0]).to.not.have.property('token_vault_privileged_access');
     });
   });
 
