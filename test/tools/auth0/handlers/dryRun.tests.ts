@@ -258,6 +258,44 @@ describe('#handler dryRunChanges', () => {
     expect(changes.del).to.have.length(0);
   });
 
+  it('rules should return empty changes when rules asset is not provided', async () => {
+    const handler = new RulesHandler({
+      client: pageClient({
+        rules: { list: (params: any) => mockPagedData(params, 'rules', []) },
+        pool,
+      } as any),
+      config,
+    } as any);
+
+    const changes = await handler.dryRunChanges({} as any);
+
+    expect(changes.create).to.have.length(0);
+    expect(changes.update).to.have.length(0);
+    expect(changes.del).to.have.length(0);
+    expect(changes.conflicts).to.have.length(0);
+  });
+
+  it('rules should return empty changes when getType returns null', async () => {
+    const handler = new RulesHandler({
+      client: pageClient({
+        rules: { list: (params: any) => mockPagedData(params, 'rules', []) },
+        pool,
+      } as any),
+      config,
+    } as any);
+
+    (handler as any).getType = async () => null;
+
+    const changes = await handler.dryRunChanges({
+      rules: [{ name: 'some-rule', script: 'function(){}', enabled: true }],
+    } as any);
+
+    expect(changes.create).to.have.length(0);
+    expect(changes.update).to.have.length(0);
+    expect(changes.del).to.have.length(0);
+    expect(changes.conflicts).to.have.length(0);
+  });
+
   it('hooks should not expose secret values in dry run updates', async () => {
     const auth0 = {
       hooks: {
