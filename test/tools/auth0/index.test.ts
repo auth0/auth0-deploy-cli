@@ -322,4 +322,23 @@ describe('#Auth0 class', () => {
       expect(output).to.include('./tenant-config-directory/');
     });
   });
+
+  describe('#dryRunChanges handler conformance', () => {
+    // Auth0.dryRun calls dryRunChanges on every handler in the assembled handlers array. A handler
+    // that does not implement it crashes the entire dry run (see ESD-64945: the standalone
+    // clientAuthCredentials handlers did not extend the base APIHandler). Assert at build time that
+    // every registered handler conforms, so a new standalone handler cannot silently regress.
+    it('every registered handler implements dryRunChanges', () => {
+      const auth0 = new Auth0(mockEmptyClient, mockEmptyAssets, () => undefined);
+
+      const nonConforming = auth0.handlers
+        .filter((handler) => typeof handler.dryRunChanges !== 'function')
+        .map((handler) => handler.type);
+
+      expect(
+        nonConforming,
+        `handlers missing dryRunChanges: ${nonConforming.join(', ')}`
+      ).to.have.length(0);
+    });
+  });
 });
