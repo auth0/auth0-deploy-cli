@@ -480,6 +480,31 @@ describe('#themes handler', () => {
       expect(changes.update).to.have.length(0);
       expect(changes.conflicts).to.have.length(0);
     });
+
+    it('should return empty changes when getType returns null (no-code not enabled on tenant)', async () => {
+      const auth0 = {
+        branding: {
+          themes: {
+            getDefault: stub().returns(
+              Promise.reject(
+                errorWithStatusCode(
+                  400,
+                  'Your account does not have universal login customizations enabled'
+                )
+              )
+            ),
+          },
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0 });
+      const changes = await handler.dryRunChanges({ themes: [{ displayName: 'Default Theme' }] });
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
   });
 });
 

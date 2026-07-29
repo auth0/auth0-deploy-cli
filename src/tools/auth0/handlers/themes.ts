@@ -483,11 +483,17 @@ export default class ThemesHandler extends DefaultHandler {
 
     const existing = await this.getType();
 
+    // getType() returns null when Universal Login customizations are not enabled
+    // on the tenant (the 400 "no-code not enabled" path in getThemes).
+    if (existing === null) {
+      return { del: [], create: [], conflicts: [], update: [] };
+    }
+
     // Themes are singletons — at most one per tenant. If the local theme has no
     // themeId (stripped during export when --export_ids is not set), backfill it
     // from the remote so the matcher can find a match without requiring --export_ids.
     const normalizedThemes = themes.map((theme) => {
-      if (!theme.themeId && existing && existing.length > 0 && existing[0].themeId) {
+      if (!theme.themeId && existing.length > 0 && existing[0].themeId) {
         return { ...theme, themeId: existing[0].themeId };
       }
       return theme;
@@ -496,7 +502,6 @@ export default class ThemesHandler extends DefaultHandler {
     return calculateDryRunChanges({
       type: this.type,
       assets: normalizedThemes,
-      // @ts-ignore
       existing,
       identifiers: this.identifiers,
       ignoreDryRunFields: this.getEffectiveIgnoreDryRunFields(),
