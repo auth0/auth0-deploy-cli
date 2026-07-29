@@ -357,7 +357,12 @@ export const isDeprecatedError = (err: { message: string; statusCode: number }):
 
 export const isForbiddenFeatureError = (err, type): boolean => {
   if (err.statusCode === 403) {
-    log.warn(`${err.message};${err.errorCode ?? ''} - Skipping ${type}`);
+    // The SDK error's top-level `message` is the full serialized response body; the clean,
+    // human-readable message and errorCode live on the response body itself.
+    const body = err.originalError?.response?.body ?? {};
+    const message = body.message ?? err.message;
+    const errorCode = body.errorCode ?? err.errorCode ?? '';
+    log.warn(`${message}${errorCode ? ` (${errorCode})` : ''} - Skipping ${type}`);
     return true;
   }
   return false;

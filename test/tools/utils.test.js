@@ -805,7 +805,7 @@ describe('#isForbiddenFeatureError', () => {
 
     // eslint-disable-next-line no-unused-expressions
     expect(utils.isForbiddenFeatureError(error, resourceType)).to.be.true;
-    expect(warnMessage).to.equal('Forbidden resource access; - Skipping connections');
+    expect(warnMessage).to.equal('Forbidden resource access - Skipping connections');
 
     // Restore original warn function
     log.warn = originalWarn;
@@ -829,7 +829,44 @@ describe('#isForbiddenFeatureError', () => {
     // eslint-disable-next-line no-unused-expressions
     expect(utils.isForbiddenFeatureError(error, resourceType)).to.be.true;
     expect(warnMessage).to.equal(
-      'Forbidden resource access;forbidden_resource_error - Skipping actions'
+      'Forbidden resource access (forbidden_resource_error) - Skipping actions'
+    );
+
+    // Restore original warn function
+    log.warn = originalWarn;
+  });
+
+  it('should use the clean message and errorCode from the response body when available', () => {
+    let warnMessage;
+    const originalWarn = log.warn;
+    // Mock the log.warn function
+    log.warn = (msg) => {
+      warnMessage = msg;
+    };
+
+    // Mirrors the real SDK ForbiddenError: top-level `message` is the full serialized body,
+    // while the human-readable message and errorCode live on originalError.response.body.
+    const error = {
+      message:
+        'ForbiddenError\nStatus code: 403\nBody: {\n  "statusCode": 403,\n  "errorCode": "legacy_mfa_phone_provider_not_allowed"\n}',
+      statusCode: 403,
+      originalError: {
+        response: {
+          body: {
+            statusCode: 403,
+            error: 'Forbidden',
+            message: 'Insufficient privileges to use this deprecated feature.',
+            errorCode: 'legacy_mfa_phone_provider_not_allowed',
+          },
+        },
+      },
+    };
+    const resourceType = 'guardianPhoneFactorSelectedProvider';
+
+    // eslint-disable-next-line no-unused-expressions
+    expect(utils.isForbiddenFeatureError(error, resourceType)).to.be.true;
+    expect(warnMessage).to.equal(
+      'Insufficient privileges to use this deprecated feature. (legacy_mfa_phone_provider_not_allowed) - Skipping guardianPhoneFactorSelectedProvider'
     );
 
     // Restore original warn function
