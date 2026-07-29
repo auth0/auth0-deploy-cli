@@ -931,6 +931,8 @@ NetworkACLs have the following key properties:
   - `scope`: The scope of the rule ('management', 'authentication', or 'tenant')
   - `match` or `not_match`: Criteria for matching requests
 
+The `match` and `not_match` criteria also support an `auth0_managed` array for matching Auth0-managed IP ranges (e.g. `auth0.icloud_relay_proxy`, `auth0.low_reputation`). Each value must follow the pattern `^auth0\.[^.\s]+$`. This is an Early Access feature gated behind the `tenant_acl_curated_blocklists` feature flag and requires the `advanced-breached-password-detection` entitlement; the API rejects rules using `auth0_managed` with an HTTP 403 if the tenant is not entitled.
+
 **YAML Example**
 
 ```yaml
@@ -954,6 +956,15 @@ networkACLs:
       scope: 'management'
       not_match:
         user_agents: ['BadBot/1.0']
+  - description: 'Block iCloud Private Relay Exits'
+    active: true
+    priority: 4
+    rule:
+      action:
+        block: true
+      scope: 'tenant'
+      match:
+        auth0_managed: ['auth0.icloud_relay_proxy']
 ```
 
 **Directory Example**
@@ -964,6 +975,7 @@ Folder structure when in directory mode.
 ./networkACLs/
     ./Allow Specific Countries-p-2.json
     ./Redirect Specific User Agents-p-3.json
+    ./Block iCloud Private Relay Exits-p-4.json
 ```
 
 Contents of `Allow Specific Countries-p-2.json`:
@@ -999,6 +1011,25 @@ Contents of `Redirect Specific User Agents-p-3.json`:
     "scope": "management",
     "match": {
       "user_agents": ["BadBot/1.0"]
+    }
+  }
+}
+```
+
+Contents of `Block iCloud Private Relay Exits-p-4.json`:
+
+```json
+{
+  "description": "Block iCloud Private Relay Exits",
+  "active": true,
+  "priority": 4,
+  "rule": {
+    "action": {
+      "block": true
+    },
+    "scope": "tenant",
+    "match": {
+      "auth0_managed": ["auth0.icloud_relay_proxy"]
     }
   }
 }
@@ -1759,3 +1790,36 @@ Contents of `My API Client.json` (deploy-time, with pem):
 ```
 
 > **Note:** The `pem` field must be supplied manually from your key generation step. Never commit private keys — only the public key PEM goes in the config.
+
+## Token Vault Privileged Access
+
+> **Early Access:** `token_vault_privileged_access` requires the `token_vault_subject_type_jwt_ea_rollout` feature flag to be enabled on the tenant, and writes additionally require the `create:client_token_vault_privileged_access` / `update:client_token_vault_privileged_access` scopes. This field is export-only in the Deploy CLI (see below), so these requirements affect only manual configuration on the tenant, not the CLI.
+
+The Deploy CLI exports the `token_vault_privileged_access` property on clients, which hardens a privileged Token Vault worker by restricting the caller IPs, connections, and scopes it may use at runtime.
+
+> **Export-only field:** `token_vault_privileged_access` is exported for visibility but **is not deployed** by the Deploy CLI — it is stripped from create/update payloads. The Management API requires a `credentials` array (tenant-specific credential `id` references) whenever the object is sent, and those ids are never persisted by the CLI because they are not portable across tenants. Sending the object without them fails validation, and sending exported ids would re-send stale references on a cross-tenant deploy. Manage `token_vault_privileged_access` directly on the tenant.
+
+| Field          | Type             | Description                                                                                                                |
+| -------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `ip_allowlist` | array of strings | IPv4/IPv6 addresses or CIDR ranges permitted to call token exchange on behalf of this client.                              |
+| `grants`       | array of objects | Connection/scope pin objects. Each has a `connection` (name) and `scopes` (array). Max 5 connections; max 20 scopes total. |
+
+Exported shape (`credentials` is stripped; `ip_allowlist` and `grants` are kept for visibility):
+
+```yaml
+clients:
+  - name: My Token Vault Privileged App
+    app_type: non_interactive
+    token_vault_privileged_access:
+      ip_allowlist:
+        - '192.168.1.0/24'
+        - '10.0.0.1'
+      grants:
+        - connection: google-oauth2
+          scopes:
+            - 'https://www.googleapis.com/auth/calendar.readonly'
+        - connection: slack
+          scopes:
+            - 'chat:write'
+            - 'channels:read'
+```
