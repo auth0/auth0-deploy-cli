@@ -250,6 +250,44 @@ describe('#default handler', () => {
     });
   });
 
+  it('should strip all unresolved placeholders and not throw when processing conflicts', async () => {
+    let capturedPayload: object | null = null;
+
+    const handler = new mockHandler({
+      client: mockApiClient,
+      config,
+      type: mockAssetType,
+      functions: {
+        //@ts-ignore
+        update: async (_id, payload) => {
+          capturedPayload = payload;
+          return payload;
+        },
+      },
+    });
+
+    await handler.processChanges({} as Assets, {
+      del: [],
+      create: [],
+      update: [],
+      conflicts: [
+        {
+          id: 'foo',
+          options: {
+            client_secret: '##CONNECTIONS_WAAD_SECRET##',
+            client_id: 'real-client-id',
+          },
+          non_sensitive_property: 'regular value',
+        },
+      ],
+    });
+
+    expect(capturedPayload).to.deep.equal({
+      options: { client_id: 'real-client-id' },
+      non_sensitive_property: 'regular value',
+    });
+  });
+
   describe('AUTH0_IGNORE_DRY_RUN_FIELDS', () => {
     it('should merge user-configured ignore fields with handler defaults', () => {
       const configWithIgnore = ((key: string) => {
