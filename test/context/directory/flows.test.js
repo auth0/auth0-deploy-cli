@@ -63,4 +63,37 @@ describe('#directory context flows', () => {
       context.assets.flows[1]
     );
   });
+
+  it('should dump flows with id when AUTH0_EXPORT_IDENTIFIERS is true', async () => {
+    const dir = path.join(testDataDir, 'directory', 'flowsDumpWithId');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: dir, AUTH0_EXPORT_IDENTIFIERS: true },
+      mockMgmtClient()
+    );
+
+    context.assets.flows = [{ id: 'flow-id-1', name: 'someFlow' }];
+
+    await handler.dump(context);
+    const flowsFolder = path.join(dir, constants.FLOWS_DIRECTORY);
+    expect(loadJSON(path.join(flowsFolder, 'someFlow.json'))).to.deep.equal({
+      id: 'flow-id-1',
+      name: 'someFlow',
+    });
+  });
+
+  it('should dump flows without id when AUTH0_EXPORT_IDENTIFIERS is false', async () => {
+    const dir = path.join(testDataDir, 'directory', 'flowsDumpNoId');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: dir, AUTH0_EXPORT_IDENTIFIERS: false },
+      mockMgmtClient()
+    );
+
+    context.assets.flows = [{ id: 'flow-id-1', name: 'someFlow' }];
+
+    await handler.dump(context);
+    const flowsFolder = path.join(dir, constants.FLOWS_DIRECTORY);
+    expect(loadJSON(path.join(flowsFolder, 'someFlow.json'))).to.deep.equal({ name: 'someFlow' });
+  });
 });

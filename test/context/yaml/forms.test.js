@@ -67,4 +67,40 @@ describe('#YAML context forms', () => {
       JSON.parse(fs.readFileSync(path.join(formsFolder, 'Sample Form 2.json'), 'utf8'))
     ).to.deep.equal({ name: 'Sample Form 2' });
   });
+
+  it('should dump forms with id when AUTH0_EXPORT_IDENTIFIERS is true', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'formsWithId');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, './test.yml'), AUTH0_EXPORT_IDENTIFIERS: true },
+      mockMgmtClient()
+    );
+
+    context.assets.forms = [{ id: 'form-id-1', name: 'Sample Form 1' }];
+
+    await handler.dump(context);
+    const formsFolder = path.join(dir, 'forms');
+
+    expect(
+      JSON.parse(fs.readFileSync(path.join(formsFolder, 'Sample Form 1.json'), 'utf8'))
+    ).to.deep.equal({ id: 'form-id-1', name: 'Sample Form 1' });
+  });
+
+  it('should dump forms without id when AUTH0_EXPORT_IDENTIFIERS is false', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'formsNoId');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, './test.yml'), AUTH0_EXPORT_IDENTIFIERS: false },
+      mockMgmtClient()
+    );
+
+    context.assets.forms = [{ id: 'form-id-1', name: 'Sample Form 1' }];
+
+    await handler.dump(context);
+    const formsFolder = path.join(dir, 'forms');
+
+    expect(
+      JSON.parse(fs.readFileSync(path.join(formsFolder, 'Sample Form 1.json'), 'utf8'))
+    ).to.deep.equal({ name: 'Sample Form 1' });
+  });
 });
