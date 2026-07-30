@@ -321,8 +321,10 @@ describe('#YAML context validation', () => {
         enabled_locales: ['en'],
       },
       attackProtection: {
+        botDetection: {},
         breachedPasswordDetection: {},
         bruteForceProtection: {},
+        captcha: {},
         suspiciousIpThrottling: {},
       },
       logStreams: [],
@@ -466,8 +468,10 @@ describe('#YAML context validation', () => {
         enabled_locales: ['en'],
       },
       attackProtection: {
+        botDetection: {},
         breachedPasswordDetection: {},
         bruteForceProtection: {},
+        captcha: {},
         suspiciousIpThrottling: {},
       },
       logStreams: [],
@@ -612,8 +616,10 @@ describe('#YAML context validation', () => {
         enabled_locales: ['en'],
       },
       attackProtection: {
+        botDetection: {},
         breachedPasswordDetection: {},
         bruteForceProtection: {},
+        captcha: {},
         suspiciousIpThrottling: {},
       },
       prompts: {

@@ -68,6 +68,30 @@ export const schema = {
       description:
         'Indicates the security mode for new clients created through the Dynamic Client Registration endpoint.',
     },
+    country_codes: {
+      type: ['object', 'null'],
+      description:
+        'Phone country code configuration for identifier input. Set to `null` to remove filtering (allow all countries). Requires the `tenant_country_codes_filtering` feature flag to be enabled on the tenant.',
+      properties: {
+        list: {
+          type: 'array',
+          description: 'ISO 3166-1 alpha-2 country codes (e.g. `US`, `GB`).',
+          items: {
+            type: 'string',
+            pattern: '^[A-Z]{2}$',
+          },
+          minItems: 1,
+          uniqueItems: true,
+        },
+        mode: {
+          type: 'string',
+          enum: ['allow', 'deny'],
+          description: 'Whether the list is an allowlist or denylist.',
+        },
+      },
+      required: ['list', 'mode'],
+      additionalProperties: false,
+    },
   },
 };
 
@@ -119,6 +143,7 @@ export const allowedTenantFlags = [
   'require_pushed_authorization_requests',
   'mfa_show_factor_list_on_enrollment',
   'improved_signup_bot_detection_in_classic',
+  'use_scope_descriptions_for_consent',
 ];
 
 export const removeUnallowedTenantFlags = (

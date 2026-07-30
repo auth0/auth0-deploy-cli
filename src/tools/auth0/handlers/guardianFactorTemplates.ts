@@ -67,14 +67,22 @@ export default class GuardianFactorTemplatesHandler extends DefaultHandler {
       guardianFactorTemplates.map(async (fatorTemplates) => {
         const { name, ...data } = fatorTemplates;
         const params = { name: fatorTemplates.name };
-        if (name === 'sms') {
-          await this.client.guardian.factors.sms.setTemplates(
-            data as Management.SetGuardianFactorSmsTemplatesRequestContent
-          );
-        } else if (name === 'phone') {
-          await this.client.guardian.factors.phone.setTemplates(
-            data as Management.SetGuardianFactorPhoneTemplatesRequestContent
-          );
+        try {
+          if (name === 'sms') {
+            await this.client.guardian.factors.sms.setTemplates(
+              data as Management.SetGuardianFactorSmsTemplatesRequestContent
+            );
+          } else if (name === 'phone') {
+            await this.client.guardian.factors.phone.setTemplates(
+              data as Management.SetGuardianFactorPhoneTemplatesRequestContent
+            );
+          }
+        } catch (err) {
+          if (isForbiddenFeatureError(err, this.type)) {
+            // Feature is deprecated/disabled on this tenant; warn and skip instead of failing the import.
+            return;
+          }
+          throw err;
         }
         this.didUpdate(params);
         this.updated += 1;

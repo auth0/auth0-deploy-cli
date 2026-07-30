@@ -96,6 +96,22 @@ export const schema = {
         required: ['active'],
         additionalProperties: false,
       },
+      cross_app_access_requesting_app: {
+        type: 'object',
+        properties: {
+          active: { type: 'boolean' },
+        },
+        required: ['active'],
+        additionalProperties: false,
+      },
+      cross_app_access_resource_app: {
+        type: 'object',
+        properties: {
+          status: { type: 'string', enum: ['enabled', 'disabled'] },
+        },
+        required: ['status'],
+        additionalProperties: false,
+      },
       directory_provisioning_configuration: {
         type: 'object',
         properties: {

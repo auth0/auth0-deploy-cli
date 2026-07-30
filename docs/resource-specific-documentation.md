@@ -321,6 +321,110 @@ connections:
 }
 ```
 
+## Connections (Cross App Access — Requesting Application)
+
+> **Early Access:** Requires the `token_vault_xaa` feature flag to be enabled on the tenant.
+
+For enterprise connections with strategy `oidc` or `okta`, the Deploy CLI supports configuring the connection as a Requesting Application for Cross App Access via the top-level `cross_app_access_requesting_app` field:
+
+- `cross_app_access_requesting_app.active` (boolean): Set to `true` to enable the connection as a Requesting Application for Cross App Access. Defaults to `true`.
+
+**YAML Example**
+
+```yaml
+connections:
+  - name: enterprise-oidc
+    strategy: oidc
+    cross_app_access_requesting_app:
+      active: true
+    options:
+      type: back_channel
+      issuer: https://example-idp.com
+      jwks_uri: https://example-idp.com/.well-known/jwks.json
+```
+
+**Directory Example**
+
+```
+./connections/enterprise-oidc.json
+```
+
+```json
+{
+  "name": "enterprise-oidc",
+  "strategy": "oidc",
+  "cross_app_access_requesting_app": {
+    "active": true
+  },
+  "options": {
+    "type": "back_channel",
+    "issuer": "https://example-idp.com",
+    "jwks_uri": "https://example-idp.com/.well-known/jwks.json"
+  }
+}
+```
+
+## Connections (Cross App Access — Resource Application)
+
+> **Early Access:** Part of the XAA (Cross App Access) — Auth0 as Resource Application Authorization Server feature.
+
+The Deploy CLI supports configuring a connection as a Resource Application for Cross App Access via the top-level `cross_app_access_resource_app` field. This is supported for enterprise connections including SAML (`strategy: samlp`) and OIDC (`strategy: oidc`).
+
+- `cross_app_access_resource_app.status` (`"enabled"` | `"disabled"`): Enables or disables the connection as a Resource Application for Cross App Access.
+
+For SAML connections, the `discovery_url` and `oidc_metadata` connection options — previously only supported for OIDC connections — are now also accepted under `options`.
+
+**YAML Example**
+
+```yaml
+connections:
+  - name: enterprise-saml
+    strategy: samlp
+    cross_app_access_resource_app:
+      status: enabled
+    options:
+      discovery_url: https://example-idp.com/.well-known/openid-configuration
+      oidc_metadata:
+        issuer: https://example-idp.com
+```
+
+**Directory Example**
+
+```
+./connections/enterprise-saml.json
+```
+
+```json
+{
+  "name": "enterprise-saml",
+  "strategy": "samlp",
+  "cross_app_access_resource_app": {
+    "status": "enabled"
+  },
+  "options": {
+    "discovery_url": "https://example-idp.com/.well-known/openid-configuration",
+    "oidc_metadata": {
+      "issuer": "https://example-idp.com"
+    }
+  }
+}
+```
+
+## Clients (Cross App Access — Identity Assertion Authorization Grant)
+
+> **Early Access:** Part of the XAA (Cross App Access) — Auth0 as Resource Application Authorization Server feature.
+
+The Deploy CLI supports the `identity_assertion_authorization_grant` property on clients, which enables the client to participate in Cross App Access (ID-JAG) token exchange.
+
+- `identity_assertion_authorization_grant.active` (boolean): Set to `true` to enable ID-JAG exchange for the client.
+
+```yaml
+clients:
+  - name: My XAA Client
+    identity_assertion_authorization_grant:
+      active: true
+```
+
 ## Databases
 
 When managing database connections, the values of `options.customScripts` point to specific javascript files relative to
@@ -741,6 +845,99 @@ For `universal_login` template `templates/` will be created.
 }
 ```
 
+## Themes (Identifier display settings)
+
+> **Early Access:** Requires the `universal_login_theme_identifiers` feature flag to be enabled on the tenant. When the flag is off, the Auth0 API rejects a theme write that includes `identifiers` and strips the field from responses.
+
+The Deploy CLI supports configuring identifier display settings on the branding theme via the top-level `identifiers` object. All three members are required when `identifiers` is supplied:
+
+- `identifiers.login_display` (string): Login display mode. One of `separate`, `unified`.
+- `identifiers.otp_autocomplete` (boolean): Whether OTP autocomplete is enabled.
+- `identifiers.phone_display` (object): Phone number display settings.
+  - `identifiers.phone_display.formatting` (string): One of `international`, `regional`.
+  - `identifiers.phone_display.masking` (string): One of `hide_country_code`, `mask_digits`, `show_all`.
+
+**YAML Example**
+
+```yaml
+themes:
+  - displayName: Default theme
+    borders: { ... }
+    colors: { ... }
+    fonts: { ... }
+    page_background: { ... }
+    widget: { ... }
+    identifiers:
+      login_display: unified
+      otp_autocomplete: true
+      phone_display:
+        masking: mask_digits
+        formatting: international
+```
+
+**Directory Example**
+
+```
+./themes/Default theme.json
+```
+
+```json
+{
+  "displayName": "Default theme",
+  "borders": { "...": "..." },
+  "colors": { "...": "..." },
+  "fonts": { "...": "..." },
+  "page_background": { "...": "..." },
+  "widget": { "...": "..." },
+  "identifiers": {
+    "login_display": "unified",
+    "otp_autocomplete": true,
+    "phone_display": {
+      "masking": "mask_digits",
+      "formatting": "international"
+    }
+  }
+}
+```
+
+## Tenant Settings (Country codes)
+
+> **Early Access:** Requires the `tenant_country_codes_filtering` feature flag to be enabled on the tenant. When the flag is off, the Auth0 API rejects a tenant settings write that includes `country_codes`.
+
+The Deploy CLI supports configuring phone country code filtering for identifier input via the top-level `country_codes` object in tenant settings:
+
+- `country_codes.list` (array of string): ISO 3166-1 alpha-2 codes (e.g. `US`, `GB`). Must be non-empty and unique.
+- `country_codes.mode` (string): Whether the list is an allowlist or denylist. One of `allow`, `deny`.
+
+Set `country_codes: null` to remove filtering (allow all countries).
+
+**YAML Example**
+
+```yaml
+tenant:
+  country_codes:
+    list:
+      - US
+      - GB
+      - CA
+    mode: allow
+```
+
+**Directory Example**
+
+```
+./tenant.json
+```
+
+```json
+{
+  "country_codes": {
+    "list": ["US", "GB", "CA"],
+    "mode": "allow"
+  }
+}
+```
+
 ## Custom Domains
 
 Custom domains allow you to use your own domain for authentication instead of the default Auth0 domain. The Deploy CLI supports managing custom domains in both directory and YAML modes.
@@ -827,6 +1024,8 @@ NetworkACLs have the following key properties:
   - `scope`: The scope of the rule ('management', 'authentication', or 'tenant')
   - `match` or `not_match`: Criteria for matching requests
 
+The `match` and `not_match` criteria also support an `auth0_managed` array for matching Auth0-managed IP ranges (e.g. `auth0.icloud_relay_proxy`, `auth0.low_reputation`). Each value must follow the pattern `^auth0\.[^.\s]+$`. This is an Early Access feature gated behind the `tenant_acl_curated_blocklists` feature flag and requires the `advanced-breached-password-detection` entitlement; the API rejects rules using `auth0_managed` with an HTTP 403 if the tenant is not entitled.
+
 **YAML Example**
 
 ```yaml
@@ -850,6 +1049,15 @@ networkACLs:
       scope: 'management'
       not_match:
         user_agents: ['BadBot/1.0']
+  - description: 'Block iCloud Private Relay Exits'
+    active: true
+    priority: 4
+    rule:
+      action:
+        block: true
+      scope: 'tenant'
+      match:
+        auth0_managed: ['auth0.icloud_relay_proxy']
 ```
 
 **Directory Example**
@@ -860,6 +1068,7 @@ Folder structure when in directory mode.
 ./networkACLs/
     ./Allow Specific Countries-p-2.json
     ./Redirect Specific User Agents-p-3.json
+    ./Block iCloud Private Relay Exits-p-4.json
 ```
 
 Contents of `Allow Specific Countries-p-2.json`:
@@ -895,6 +1104,25 @@ Contents of `Redirect Specific User Agents-p-3.json`:
     "scope": "management",
     "match": {
       "user_agents": ["BadBot/1.0"]
+    }
+  }
+}
+```
+
+Contents of `Block iCloud Private Relay Exits-p-4.json`:
+
+```json
+{
+  "description": "Block iCloud Private Relay Exits",
+  "active": true,
+  "priority": 4,
+  "rule": {
+    "action": {
+      "block": true
+    },
+    "scope": "tenant",
+    "match": {
+      "auth0_managed": ["auth0.icloud_relay_proxy"]
     }
   }
 }
@@ -1655,3 +1883,36 @@ Contents of `My API Client.json` (deploy-time, with pem):
 ```
 
 > **Note:** The `pem` field must be supplied manually from your key generation step. Never commit private keys — only the public key PEM goes in the config.
+
+## Token Vault Privileged Access
+
+> **Early Access:** `token_vault_privileged_access` requires the `token_vault_subject_type_jwt_ea_rollout` feature flag to be enabled on the tenant, and writes additionally require the `create:client_token_vault_privileged_access` / `update:client_token_vault_privileged_access` scopes. This field is export-only in the Deploy CLI (see below), so these requirements affect only manual configuration on the tenant, not the CLI.
+
+The Deploy CLI exports the `token_vault_privileged_access` property on clients, which hardens a privileged Token Vault worker by restricting the caller IPs, connections, and scopes it may use at runtime.
+
+> **Export-only field:** `token_vault_privileged_access` is exported for visibility but **is not deployed** by the Deploy CLI — it is stripped from create/update payloads. The Management API requires a `credentials` array (tenant-specific credential `id` references) whenever the object is sent, and those ids are never persisted by the CLI because they are not portable across tenants. Sending the object without them fails validation, and sending exported ids would re-send stale references on a cross-tenant deploy. Manage `token_vault_privileged_access` directly on the tenant.
+
+| Field          | Type             | Description                                                                                                                |
+| -------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `ip_allowlist` | array of strings | IPv4/IPv6 addresses or CIDR ranges permitted to call token exchange on behalf of this client.                              |
+| `grants`       | array of objects | Connection/scope pin objects. Each has a `connection` (name) and `scopes` (array). Max 5 connections; max 20 scopes total. |
+
+Exported shape (`credentials` is stripped; `ip_allowlist` and `grants` are kept for visibility):
+
+```yaml
+clients:
+  - name: My Token Vault Privileged App
+    app_type: non_interactive
+    token_vault_privileged_access:
+      ip_allowlist:
+        - '192.168.1.0/24'
+        - '10.0.0.1'
+      grants:
+        - connection: google-oauth2
+          scopes:
+            - 'https://www.googleapis.com/auth/calendar.readonly'
+        - connection: slack
+          scopes:
+            - 'chat:write'
+            - 'channels:read'
+```

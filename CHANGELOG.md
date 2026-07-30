@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.42.0] - 2026-07-30
+
+### Added
+
+- Add UL identifier input support for themes and tenant settings. [#1433]
+- Add `token_vault_privileged_access` support for clients. [#1430]
+- Add `auth0_managed` field support for network ACLs (Curated Blocklists - EA). [#1435]
+- Add Cross App Access (XAA) resource app support for connections and clients. [#1431]
+- Add `cross_app_access_requesting_app` support for connections (EA). [#1422]
+
+### Fixed
+
+- Prevent dry-run crash on `clientAuthCredentials` handler. [#1438]
+- Resolve spurious dry-run diffs for rules, themes, and hooks. [#1437]
+- Strip unresolved placeholders on deploy instead of throwing. [#1436]
+- Handle 403 entitlement errors for bot detection and captcha on export. [#1434]
+- Warn and skip deprecated guardian phone provider on 403 during import. [#1429]
+- Add `use_scope_descriptions_for_consent` to allowed tenant flags. [#1428]
+
+## [8.41.0] - 2026-07-16
+
+### Added
+
+- Add `third_party_client_access` support for organizations. [#1421]
+
 ## [8.40.0] - 2026-07-09
 
 ### Added
@@ -1869,8 +1894,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1412]: https://github.com/auth0/auth0-deploy-cli/issues/1412
 [#1416]: https://github.com/auth0/auth0-deploy-cli/issues/1416
 [#1417]: https://github.com/auth0/auth0-deploy-cli/issues/1417
+[#1421]: https://github.com/auth0/auth0-deploy-cli/issues/1421
+[#1422]: https://github.com/auth0/auth0-deploy-cli/issues/1422
 [#1425]: https://github.com/auth0/auth0-deploy-cli/issues/1425
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.40.0...HEAD
+[#1428]: https://github.com/auth0/auth0-deploy-cli/issues/1428
+[#1429]: https://github.com/auth0/auth0-deploy-cli/issues/1429
+[#1430]: https://github.com/auth0/auth0-deploy-cli/issues/1430
+[#1431]: https://github.com/auth0/auth0-deploy-cli/issues/1431
+[#1433]: https://github.com/auth0/auth0-deploy-cli/issues/1433
+[#1434]: https://github.com/auth0/auth0-deploy-cli/issues/1434
+[#1435]: https://github.com/auth0/auth0-deploy-cli/issues/1435
+[#1436]: https://github.com/auth0/auth0-deploy-cli/issues/1436
+[#1437]: https://github.com/auth0/auth0-deploy-cli/issues/1437
+[#1438]: https://github.com/auth0/auth0-deploy-cli/issues/1438
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.42.0...HEAD
+[8.42.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.41.0...v8.42.0
+[8.41.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.40.0...v8.41.0
 [8.40.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.39.0...v8.40.0
 [8.39.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.38.0...v8.39.0
 [8.38.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.37.0...v8.38.0
