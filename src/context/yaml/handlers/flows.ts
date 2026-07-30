@@ -79,7 +79,13 @@ async function dump(context: YAMLContext): Promise<ParsedFlows> {
     log.info(`Writing ${jsonFile}`);
 
     const includeIdentifiers = Boolean(context.config.AUTH0_EXPORT_IDENTIFIERS);
-    const removeKeysFromOutput = [...(!includeIdentifiers ? ['id'] : []), 'created_at', 'updated_at', 'submitted_at', 'embedded_at'];
+    const removeKeysFromOutput = [
+      ...(!includeIdentifiers ? ['id'] : []),
+      'created_at',
+      'updated_at',
+      'submitted_at',
+      'embedded_at',
+    ];
     removeKeysFromOutput.forEach((key) => {
       if (key in flow) {
         delete flow[key];

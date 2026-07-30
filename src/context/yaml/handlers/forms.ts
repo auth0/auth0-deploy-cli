@@ -79,7 +79,11 @@ async function dump(context: YAMLContext): Promise<ParsedForms> {
     log.info(`Writing ${jsonFile}`);
 
     const includeIdentifiers = Boolean(context.config.AUTH0_EXPORT_IDENTIFIERS);
-    const removeKeysFromOutput = [...(!includeIdentifiers ? ['id'] : []), 'created_at', 'updated_at'];
+    const removeKeysFromOutput = [
+      ...(!includeIdentifiers ? ['id'] : []),
+      'created_at',
+      'updated_at',
+    ];
     removeKeysFromOutput.forEach((key) => {
       if (key in form) {
         delete form[key];
