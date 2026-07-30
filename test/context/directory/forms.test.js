@@ -63,4 +63,37 @@ describe('#directory context forms', () => {
       context.assets.forms[1]
     );
   });
+
+  it('should dump forms with id when AUTH0_EXPORT_IDENTIFIERS is true', async () => {
+    const dir = path.join(testDataDir, 'directory', 'formsDumpWithId');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: dir, AUTH0_EXPORT_IDENTIFIERS: true },
+      mockMgmtClient()
+    );
+
+    context.assets.forms = [{ id: 'form-id-1', name: 'someForm' }];
+
+    await handler.dump(context);
+    const formsFolder = path.join(dir, constants.FORMS_DIRECTORY);
+    expect(loadJSON(path.join(formsFolder, 'someForm.json'))).to.deep.equal({
+      id: 'form-id-1',
+      name: 'someForm',
+    });
+  });
+
+  it('should dump forms without id when AUTH0_EXPORT_IDENTIFIERS is false', async () => {
+    const dir = path.join(testDataDir, 'directory', 'formsDumpNoId');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: dir, AUTH0_EXPORT_IDENTIFIERS: false },
+      mockMgmtClient()
+    );
+
+    context.assets.forms = [{ id: 'form-id-1', name: 'someForm' }];
+
+    await handler.dump(context);
+    const formsFolder = path.join(dir, constants.FORMS_DIRECTORY);
+    expect(loadJSON(path.join(formsFolder, 'someForm.json'))).to.deep.equal({ name: 'someForm' });
+  });
 });

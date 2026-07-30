@@ -67,4 +67,40 @@ describe('#YAML context flows', () => {
       JSON.parse(fs.readFileSync(path.join(flowsFolder, 'Sample Flow 2.json'), 'utf8'))
     ).to.deep.equal({ name: 'Sample Flow 2' });
   });
+
+  it('should dump flows with id when AUTH0_EXPORT_IDENTIFIERS is true', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'flowsWithId');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, './test.yml'), AUTH0_EXPORT_IDENTIFIERS: true },
+      mockMgmtClient()
+    );
+
+    context.assets.flows = [{ id: 'flow-id-1', name: 'Sample Flow 1' }];
+
+    await handler.dump(context);
+    const flowsFolder = path.join(dir, 'flows');
+
+    expect(
+      JSON.parse(fs.readFileSync(path.join(flowsFolder, 'Sample Flow 1.json'), 'utf8'))
+    ).to.deep.equal({ id: 'flow-id-1', name: 'Sample Flow 1' });
+  });
+
+  it('should dump flows without id when AUTH0_EXPORT_IDENTIFIERS is false', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'flowsNoId');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, './test.yml'), AUTH0_EXPORT_IDENTIFIERS: false },
+      mockMgmtClient()
+    );
+
+    context.assets.flows = [{ id: 'flow-id-1', name: 'Sample Flow 1' }];
+
+    await handler.dump(context);
+    const flowsFolder = path.join(dir, 'flows');
+
+    expect(
+      JSON.parse(fs.readFileSync(path.join(flowsFolder, 'Sample Flow 1.json'), 'utf8'))
+    ).to.deep.equal({ name: 'Sample Flow 1' });
+  });
 });

@@ -68,7 +68,8 @@ async function dump(context: DirectoryContext) {
     const formFile = path.join(formsFolder, sanitize(`${form.name}.json`));
     log.info(`Writing ${formFile}`);
 
-    const removeKeysFromOutput = ['id', 'created_at', 'updated_at'];
+    const includeIdentifiers = Boolean(context.config.AUTH0_EXPORT_IDENTIFIERS);
+    const removeKeysFromOutput = [...(!includeIdentifiers ? ['id'] : []), 'created_at', 'updated_at'];
     removeKeysFromOutput.forEach((key) => {
       if (key in form) {
         delete form[key];
