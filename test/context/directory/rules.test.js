@@ -1,7 +1,9 @@
 import path from 'path';
 import fs from 'fs-extra';
+import sinon from 'sinon';
 import { expect } from 'chai';
 import { constants } from '../../../src/tools';
+import log from '../../../src/logger';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/rules';
@@ -126,6 +128,27 @@ describe('#directory context rules', () => {
     expect(fs.readFileSync(path.join(rulesFolder, 'some-Rule.js'), 'utf8')).to.deep.equal(
       scriptValidation
     );
+  });
+
+  it('should throw error when rule script path resolves outside the config root', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'rules-traversal-warn');
+    const outsideFile = path.join(testDataDir, 'directory', 'outside-rule.js');
+    fs.ensureDirSync(path.join(repoDir, constants.RULES_DIRECTORY));
+    fs.writeFileSync(outsideFile, 'function outside() {}');
+    const traversalRules = {
+      'somerule.json': '{ "name": "somerule", "enabled": true, "script": "../../outside-rule.js" }',
+    };
+    createDir(repoDir, { [constants.RULES_DIRECTORY]: traversalRules });
+    const config = { AUTH0_INPUT_FILE: repoDir };
+    const context = new Context(config, mockMgmtClient());
+    try {
+      await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(
+        Error,
+        'is outside the config directory'
+      );
+    } finally {
+      fs.removeSync(outsideFile);
+    }
   });
 
   it('should not dump excluded rules', async () => {

@@ -34,7 +34,8 @@ type DatabaseMetadata = {
 function getDatabase(
   folder: string,
   configRoot: string,
-  mappingOpts: { mappings: KeywordMappings; disableKeywordReplacement: boolean }
+  mappingOpts: { mappings: KeywordMappings; disableKeywordReplacement: boolean },
+  allowExternalPaths?: boolean
 ): {} {
   const metaFile = path.join(folder, 'database.json');
 
@@ -70,11 +71,18 @@ function getDatabase(
         log.warn('Skipping invalid database configuration: ' + name);
       } else {
         const resolvedBase = path.resolve(configRoot);
-        const toLoad = path.resolve(folder, script);
+        const toLoad = path.resolve(folder, script.replace(/\\/g, '/'));
         if (!toLoad.startsWith(resolvedBase + path.sep)) {
-          throw new Error(
-            `File reference "${script}" in database custom script "${name}" must be relative to the config directory. Absolute paths and paths outside the config root are not supported.`
-          );
+          if (allowExternalPaths) {
+            log.debug(
+              `Loading file outside config directory (AUTH0_ALLOW_EXTERNAL_CODE_PATHS enabled): "${script}"`
+            );
+          } else {
+            throw new Error(
+              `Path "${script}" resolves to "${toLoad}" which is outside the config directory "${resolvedBase}". ` +
+                `Move the file inside your config directory or set AUTH0_ALLOW_EXTERNAL_CODE_PATHS=true to allow it.`
+            );
+          }
         }
         database.options.customScripts[name] = loadFileAndReplaceKeywords(toLoad, mappingOpts);
       }
@@ -95,10 +103,15 @@ function parse(context: DirectoryContext): ParsedDatabases {
 
   const databases = folders
     .map((f) =>
-      getDatabase(f, context.filePath, {
-        mappings: context.mappings,
-        disableKeywordReplacement: context.disableKeywordReplacement,
-      })
+      getDatabase(
+        f,
+        context.filePath,
+        {
+          mappings: context.mappings,
+          disableKeywordReplacement: context.disableKeywordReplacement,
+        },
+        context.config.AUTH0_ALLOW_EXTERNAL_CODE_PATHS
+      )
     )
     .filter((p) => Object.keys(p).length > 1);
 
