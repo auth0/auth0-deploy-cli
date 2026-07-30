@@ -177,58 +177,115 @@ describe('#default handler', () => {
     expect(didCreateFunctionGetCalled).to.equal(true);
   });
 
-  it('should throw when creating an asset with an unresolved placeholder', async () => {
+  it('should strip all unresolved placeholders and not throw when creating', async () => {
+    let capturedPayload: object | null = null;
+
     const handler = new mockHandler({
       client: mockApiClient,
       config,
       type: mockAssetType,
       functions: {
         //@ts-ignore
-        create: async (payload) => payload,
+        create: async (payload) => {
+          capturedPayload = payload;
+          return payload;
+        },
       },
     });
 
-    await expect(
-      handler.processChanges({} as Assets, {
-        del: [],
-        update: [],
-        conflicts: [],
-        create: [
-          {
-            id: 'some-id',
-            unresolved_field: '##UNRESOLVED_PLACEHOLDER##',
-            resolved_field: 'a-real-value',
-          },
-        ],
-      })
-    ).to.be.rejectedWith(/Unresolved placeholder/);
+    await handler.processChanges({} as Assets, {
+      del: [],
+      update: [],
+      conflicts: [],
+      create: [
+        {
+          id: 'some-id',
+          unresolved_field: '##UNRESOLVED_PLACEHOLDER##',
+          resolved_field: 'a-real-value',
+        },
+      ],
+    });
+
+    expect(capturedPayload).to.deep.equal({
+      id: 'some-id',
+      resolved_field: 'a-real-value',
+    });
   });
 
-  it('should throw when updating an asset with an unresolved placeholder', async () => {
+  it('should strip all unresolved placeholders and not throw when updating', async () => {
+    let capturedPayload: object | null = null;
+
     const handler = new mockHandler({
       client: mockApiClient,
       config,
       type: mockAssetType,
       functions: {
         //@ts-ignore
-        update: async (_identifiers, payload) => payload,
+        update: async (_id, payload) => {
+          capturedPayload = payload;
+          return payload;
+        },
       },
     });
 
-    await expect(
-      handler.processChanges({} as Assets, {
-        del: [],
-        create: [],
-        conflicts: [],
-        update: [
-          {
-            id: 'foo',
-            secret: '##UNRESOLVED_SECRET##',
-            non_sensitive_property: 'regular value',
+    await handler.processChanges({} as Assets, {
+      del: [],
+      create: [],
+      conflicts: [],
+      update: [
+        {
+          id: 'foo',
+          options: {
+            client_secret: '##CONNECTIONS_WAAD_SECRET##',
+            client_id: 'real-client-id',
           },
-        ],
-      })
-    ).to.be.rejectedWith(/Unresolved placeholder/);
+          non_sensitive_property: 'regular value',
+        },
+      ],
+    });
+
+    expect(capturedPayload).to.deep.equal({
+      options: { client_id: 'real-client-id' },
+      non_sensitive_property: 'regular value',
+    });
+  });
+
+  it('should strip all unresolved placeholders and not throw when processing conflicts', async () => {
+    let capturedPayload: object | null = null;
+
+    const handler = new mockHandler({
+      client: mockApiClient,
+      config,
+      type: mockAssetType,
+      functions: {
+        //@ts-ignore
+        update: async (_id, payload) => {
+          capturedPayload = payload;
+          return payload;
+        },
+      },
+    });
+
+    await handler.processChanges({} as Assets, {
+      del: [],
+      create: [],
+      update: [],
+      conflicts: [
+        {
+          id: 'foo',
+          options: {
+            client_secret: '##CONNECTIONS_WAAD_SECRET##',
+            client_id: 'real-client-id',
+          },
+          non_sensitive_property: 'regular value',
+        },
+      ],
+    });
+
+    expect(capturedPayload).to.deep.equal({
+      options: { client_id: 'real-client-id' },
+      non_sensitive_property: 'regular value',
+    });
   });
 
   describe('AUTH0_IGNORE_DRY_RUN_FIELDS', () => {
