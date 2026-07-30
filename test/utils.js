@@ -149,10 +149,16 @@ export function mockMgmtClient() {
       getCustomTextByLanguage: () => Promise.resolve({}),
     },
     attackProtection: {
+      botDetection: {
+        get: () => ({}),
+      },
       breachedPasswordDetection: {
         get: () => ({}),
       },
       bruteForceProtection: {
+        get: () => ({}),
+      },
+      captcha: {
         get: () => ({}),
       },
       suspiciousIpThrottling: {
