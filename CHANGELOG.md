@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.42.0] - 2026-07-30
+
 ### Added
 
 - Add UL identifier input support for themes and tenant settings. [#1433]
@@ -1893,8 +1895,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1416]: https://github.com/auth0/auth0-deploy-cli/issues/1416
 [#1417]: https://github.com/auth0/auth0-deploy-cli/issues/1417
 [#1421]: https://github.com/auth0/auth0-deploy-cli/issues/1421
+[#1422]: https://github.com/auth0/auth0-deploy-cli/issues/1422
 [#1425]: https://github.com/auth0/auth0-deploy-cli/issues/1425
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.41.0...HEAD
+[#1428]: https://github.com/auth0/auth0-deploy-cli/issues/1428
+[#1429]: https://github.com/auth0/auth0-deploy-cli/issues/1429
+[#1430]: https://github.com/auth0/auth0-deploy-cli/issues/1430
+[#1431]: https://github.com/auth0/auth0-deploy-cli/issues/1431
+[#1433]: https://github.com/auth0/auth0-deploy-cli/issues/1433
+[#1434]: https://github.com/auth0/auth0-deploy-cli/issues/1434
+[#1435]: https://github.com/auth0/auth0-deploy-cli/issues/1435
+[#1436]: https://github.com/auth0/auth0-deploy-cli/issues/1436
+[#1437]: https://github.com/auth0/auth0-deploy-cli/issues/1437
+[#1438]: https://github.com/auth0/auth0-deploy-cli/issues/1438
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.42.0...HEAD
+[8.42.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.41.0...v8.42.0
 [8.41.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.40.0...v8.41.0
 [8.40.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.39.0...v8.40.0
 [8.39.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.38.0...v8.39.0
