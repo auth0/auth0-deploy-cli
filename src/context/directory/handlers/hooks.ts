@@ -26,7 +26,11 @@ function parse(context: DirectoryContext): ParsedHooks {
     if (hook.script) {
       const normalizedScript = hook.script.replace(/\\/g, '/');
       const configRoot = path.resolve(context.filePath);
-      const resolvedPath = path.resolve(context.filePath, constants.HOOKS_DIRECTORY, normalizedScript);
+      const resolvedPath = path.resolve(
+        context.filePath,
+        constants.HOOKS_DIRECTORY,
+        normalizedScript
+      );
       if (!resolvedPath.startsWith(configRoot + path.sep)) {
         if (context.config.AUTH0_ALLOW_EXTERNAL_CODE_PATHS) {
           log.debug(

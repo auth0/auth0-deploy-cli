@@ -27,7 +27,11 @@ function parse(context: DirectoryContext): ParsedRules {
     if (rule.script) {
       const normalizedScript = rule.script.replace(/\\/g, '/');
       const configRoot = path.resolve(context.filePath);
-      const resolvedPath = path.resolve(context.filePath, constants.RULES_DIRECTORY, normalizedScript);
+      const resolvedPath = path.resolve(
+        context.filePath,
+        constants.RULES_DIRECTORY,
+        normalizedScript
+      );
       if (!resolvedPath.startsWith(configRoot + path.sep)) {
         if (context.config.AUTH0_ALLOW_EXTERNAL_CODE_PATHS) {
           log.debug(
