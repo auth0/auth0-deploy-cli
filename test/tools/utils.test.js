@@ -698,6 +698,81 @@ describe('#filterExcluded', () => {
         });
     });
   });
+
+  describe('#stripUnresolvedPlaceholders', () => {
+    it('should strip a nested field containing an unresolved ##...## placeholder', () => {
+      const asset = {
+        id: 'con-1',
+        name: 'my-waad-connection',
+        options: {
+          client_id: 'real-client-id',
+          client_secret: '##CONNECTIONS_WAAD_SECRET##',
+          domain: 'example.onmicrosoft.com',
+        },
+      };
+
+      const result = utils.stripUnresolvedPlaceholders(asset, 'connections', 'my-waad-connection');
+      expect(result).to.deep.equal({
+        id: 'con-1',
+        name: 'my-waad-connection',
+        options: {
+          client_id: 'real-client-id',
+          domain: 'example.onmicrosoft.com',
+        },
+      });
+    });
+
+    it('should strip a field containing an unresolved @@...@@ placeholder', () => {
+      const asset = {
+        id: 'con-2',
+        options: {
+          client_secret: '@@CONNECTIONS_WAAD_SECRET@@',
+          client_id: 'abc',
+        },
+      };
+
+      const result = utils.stripUnresolvedPlaceholders(asset, 'connections', 'con-2');
+      expect(result).to.deep.equal({
+        id: 'con-2',
+        options: { client_id: 'abc' },
+      });
+    });
+
+    it('should strip ALL unresolved placeholders across all fields', () => {
+      const asset = {
+        id: 'con-3',
+        options: {
+          client_secret: '##CONNECTIONS_OIDC_SECRET##',
+          api_key: '##SOME_API_KEY##',
+          domain: 'real-domain.com',
+        },
+      };
+
+      const result = utils.stripUnresolvedPlaceholders(asset, 'connections', 'con-3');
+      expect(result).to.deep.equal({
+        id: 'con-3',
+        options: { domain: 'real-domain.com' },
+      });
+    });
+
+    it('should not strip a field that has a resolved (real) value', () => {
+      const asset = {
+        id: 'con-4',
+        options: {
+          client_secret: 'the-real-secret',
+          client_id: 'abc',
+        },
+      };
+
+      const result = utils.stripUnresolvedPlaceholders(asset, 'connections', 'con-4');
+      expect(result).to.deep.equal(asset);
+    });
+
+    it('should return null when input is null', () => {
+      const result = utils.stripUnresolvedPlaceholders(null, 'connections', 'con-5');
+      expect(result).to.be.null;
+    });
+  });
 });
 
 describe('#detectInsufficientScopeError', () => {
