@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { constants } from '../../../tools';
+import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
 import log from '../../../logger';
@@ -24,7 +24,26 @@ function parse(context: DirectoryContext): ParsedHooks {
       }),
     };
     if (hook.script) {
-      hook.script = context.loadFile(hook.script, constants.HOOKS_DIRECTORY);
+      const normalizedScript = hook.script.replace(/\\/g, '/');
+      const configRoot = path.resolve(context.filePath);
+      const resolvedPath = path.resolve(context.filePath, constants.HOOKS_DIRECTORY, normalizedScript);
+      if (!resolvedPath.startsWith(configRoot + path.sep)) {
+        if (context.config.AUTH0_ALLOW_EXTERNAL_CODE_PATHS) {
+          log.debug(
+            `Loading file outside config directory (AUTH0_ALLOW_EXTERNAL_CODE_PATHS enabled): "${hook.script}"`
+          );
+        } else {
+          log.warn(
+            `Path "${hook.script}" resolves to "${resolvedPath}" which is outside the config directory "${configRoot}". ` +
+              `This will be blocked as an error in the next major release. ` +
+              `Move the file inside your config directory or set AUTH0_ALLOW_EXTERNAL_CODE_PATHS=true to allow it.`
+          );
+        }
+      }
+      hook.script = loadFileAndReplaceKeywords(resolvedPath, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      });
     }
 
     hook.name = hook.name.toLowerCase().replace(/\s/g, '-');
