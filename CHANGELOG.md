@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add UL identifier input support for themes and tenant settings. [#1433]
+- Add `token_vault_privileged_access` support for clients. [#1430]
+- Add `auth0_managed` field support for network ACLs (Curated Blocklists - EA). [#1435]
+- Add Cross App Access (XAA) resource app support for connections and clients. [#1431]
+- Add `cross_app_access_requesting_app` support for connections (EA). [#1422]
+
+### Fixed
+
+- Prevent dry-run crash on `clientAuthCredentials` handler. [#1438]
+- Resolve spurious dry-run diffs for rules, themes, and hooks. [#1437]
+- Strip unresolved placeholders on deploy instead of throwing. [#1436]
+- Handle 403 entitlement errors for bot detection and captcha on export. [#1434]
+- Warn and skip deprecated guardian phone provider on 403 during import. [#1429]
+- Add `use_scope_descriptions_for_consent` to allowed tenant flags. [#1428]
+
 ## [8.41.0] - 2026-07-16
 
 ### Added
