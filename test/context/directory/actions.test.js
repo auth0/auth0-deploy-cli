@@ -373,6 +373,7 @@ describe('#directory context actions', () => {
     createDir(repoDir, files);
     const config = { AUTH0_INPUT_FILE: repoDir };
     const context = new Context(config, mockMgmtClient());
+    if (log.warn.restore) log.warn.restore();
     const warnSpy = sinon.spy(log, 'warn');
     try {
       await context.loadAssetsFromLocal();
@@ -407,6 +408,7 @@ describe('#directory context actions', () => {
     createDir(repoDir, files);
     const config = { AUTH0_INPUT_FILE: repoDir };
     const context = new Context(config, mockMgmtClient());
+    if (log.warn.restore) log.warn.restore();
     const warnSpy = sinon.spy(log, 'warn');
     try {
       await context.loadAssetsFromLocal();
@@ -442,6 +444,7 @@ describe('#directory context actions', () => {
     createDir(repoDir, files);
     const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_ALLOW_EXTERNAL_CODE_PATHS: true };
     const context = new Context(config, mockMgmtClient());
+    if (log.warn.restore) log.warn.restore();
     const warnSpy = sinon.spy(log, 'warn');
     try {
       await context.loadAssetsFromLocal();

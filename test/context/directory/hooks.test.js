@@ -89,6 +89,7 @@ describe('#directory context hooks', () => {
     createDir(repoDir, { [constants.HOOKS_DIRECTORY]: traversalHooks });
     const config = { AUTH0_INPUT_FILE: repoDir };
     const context = new Context(config, mockMgmtClient());
+    if (log.warn.restore) log.warn.restore();
     const warnSpy = sinon.spy(log, 'warn');
     try {
       await context.loadAssetsFromLocal();
