@@ -1,10 +1,8 @@
 import path from 'path';
 import fs from 'fs-extra';
-import sinon from 'sinon';
 
 import { expect } from 'chai';
 import { constants } from '../../../src/tools';
-import log from '../../../src/logger';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/actions';
