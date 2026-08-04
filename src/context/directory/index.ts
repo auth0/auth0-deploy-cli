@@ -6,7 +6,7 @@ import pagedClient from '../../tools/auth0/client';
 import cleanAssets from '../../readonly';
 import log from '../../logger';
 import handlers, { DirectoryHandler } from './handlers';
-import { isDirectory, isFile, stripIdentifiers, toConfigFn } from '../../utils';
+import { isDirectory, stripIdentifiers, toConfigFn } from '../../utils';
 import { Assets, Auth0APIClient, Config, AssetTypes } from '../../types';
 import { filterOnlyIncludedResourceTypes } from '..';
 import { preserveKeywords } from '../../keywordPreservation';

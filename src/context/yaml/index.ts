@@ -11,7 +11,7 @@ import {
 import pagedClient from '../../tools/auth0/client';
 
 import log from '../../logger';
-import { isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter } from '../../utils';
+import { toConfigFn, stripIdentifiers, formatResults, recordsSorter } from '../../utils';
 import handlers, { YAMLHandler } from './handlers';
 import cleanAssets from '../../readonly';
 import { Assets, Config, Auth0APIClient, AssetTypes, KeywordMappings } from '../../types';
