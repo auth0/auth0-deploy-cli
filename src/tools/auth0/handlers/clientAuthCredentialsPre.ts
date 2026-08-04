@@ -1,5 +1,5 @@
 import { order } from './default';
-import { Assets, Auth0APIClient } from '../../../types';
+import { Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
 import { paginate } from '../client';
 import log from '../../../logger';
@@ -45,6 +45,12 @@ export default class ClientAuthCredentialsPreHandler {
 
   async validate() {
     return null;
+  }
+
+  // Deploy-only pre-pass handler with no dry-run representation. Return empty changes so the
+  // dry-run loop (which calls dryRunChanges on every registered handler) does not crash.
+  async dryRunChanges(_assets: Assets): Promise<CalculatedChanges> {
+    return { del: [], create: [], conflicts: [], update: [] };
   }
 
   @order('40')

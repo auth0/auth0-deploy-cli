@@ -1,8 +1,9 @@
 import { Management } from 'auth0';
-import { Assets } from '../../../types';
+import { Assets, CalculatedChanges } from '../../../types';
 import log from '../../../logger';
 import DefaultHandler, { order } from './default';
 import { isDryRun } from '../../utils';
+import { calculateDryRunChanges } from '../../calculateDryRunChanges';
 
 /**
  * Schema
@@ -208,6 +209,42 @@ export const schema = {
         maxLength: 2048,
         pattern: '^[^<>]*$',
         type: 'string',
+      },
+      identifiers: {
+        additionalProperties: false,
+        description:
+          'Identifier display settings on the theme. Requires the `universal_login_theme_identifiers` feature flag to be enabled on the tenant.',
+        properties: {
+          login_display: {
+            description: 'Login display mode',
+            enum: ['separate', 'unified'],
+            type: 'string',
+          },
+          otp_autocomplete: {
+            description: 'Whether OTP autocomplete is enabled',
+            type: 'boolean',
+          },
+          phone_display: {
+            additionalProperties: false,
+            description: 'Phone number display settings',
+            properties: {
+              formatting: {
+                description: 'Phone number formatting style',
+                enum: ['international', 'regional'],
+                type: 'string',
+              },
+              masking: {
+                description: 'Phone number masking strategy',
+                enum: ['hide_country_code', 'mask_digits', 'show_all'],
+                type: 'string',
+              },
+            },
+            required: ['formatting', 'masking'],
+            type: 'object',
+          },
+        },
+        required: ['login_display', 'otp_autocomplete', 'phone_display'],
+        type: 'object',
       },
       fonts: {
         additionalProperties: false,
@@ -435,6 +472,40 @@ export default class ThemesHandler extends DefaultHandler {
 
   objString(theme: Theme): string {
     return theme.displayName || JSON.stringify(theme);
+  }
+
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    const { themes } = assets;
+
+    if (!themes) {
+      return { del: [], create: [], conflicts: [], update: [] };
+    }
+
+    const existing = await this.getType();
+
+    // getType() returns null when Universal Login customizations are not enabled
+    // on the tenant (the 400 "no-code not enabled" path in getThemes).
+    if (existing === null) {
+      return { del: [], create: [], conflicts: [], update: [] };
+    }
+
+    // Themes are singletons — at most one per tenant. If the local theme has no
+    // themeId (stripped during export when --export_ids is not set), backfill it
+    // from the remote so the matcher can find a match without requiring --export_ids.
+    const normalizedThemes = themes.map((theme) => {
+      if (!theme.themeId && existing.length > 0 && existing[0].themeId) {
+        return { ...theme, themeId: existing[0].themeId };
+      }
+      return theme;
+    });
+
+    return calculateDryRunChanges({
+      type: this.type,
+      assets: normalizedThemes,
+      existing,
+      identifiers: this.identifiers,
+      ignoreDryRunFields: this.getEffectiveIgnoreDryRunFields(),
+    });
   }
 
   async getType(): Promise<Theme[] | null> {

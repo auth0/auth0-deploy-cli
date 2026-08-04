@@ -125,6 +125,54 @@ describe('#tenant handler', () => {
       expect(updatedData.dynamic_client_registration_security_mode).to.equal('strict');
     });
 
+    it('should update tenant with country_codes', async () => {
+      let updatedData = null;
+      const auth0 = {
+        tenants: {
+          settings: {
+            update: (data) => {
+              updatedData = data;
+              return Promise.resolve(data);
+            },
+          },
+        },
+      };
+
+      // @ts-ignore
+      const handler = new tenantHandler({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        { tenant: { country_codes: { list: ['US', 'GB', 'CA'], mode: 'allow' } } },
+      ]);
+
+      expect(updatedData).to.not.be.null;
+      expect(updatedData.country_codes).to.deep.equal({ list: ['US', 'GB', 'CA'], mode: 'allow' });
+    });
+
+    it('should update tenant with country_codes set to null to remove filtering', async () => {
+      let updatedData = null;
+      const auth0 = {
+        tenants: {
+          settings: {
+            update: (data) => {
+              updatedData = data;
+              return Promise.resolve(data);
+            },
+          },
+        },
+      };
+
+      // @ts-ignore
+      const handler = new tenantHandler({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ tenant: { country_codes: null } }]);
+
+      expect(updatedData).to.not.be.null;
+      expect(updatedData.country_codes).to.equal(null);
+    });
+
     it('should allow valid default_token_quota property in tenant', async () => {
       const tenantWithDefaultTokenQuota = {
         default_token_quota: {

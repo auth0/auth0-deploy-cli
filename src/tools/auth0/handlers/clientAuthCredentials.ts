@@ -1,5 +1,5 @@
 import { order } from './default';
-import { Assets, Auth0APIClient } from '../../../types';
+import { Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
 import { paginate } from '../client';
 import log from '../../../logger';
@@ -37,6 +37,14 @@ export default class ClientAuthCredentialsHandler {
 
   async validate() {
     return null;
+  }
+
+  // Credentials are per-client sub-resources with no top-level asset list, so they are not
+  // modeled in the dry-run diff. Return empty changes so the dry-run loop (which calls
+  // dryRunChanges on every handler) does not crash. Credential changes are still applied
+  // during a real import via processChanges.
+  async dryRunChanges(_assets: Assets): Promise<CalculatedChanges> {
+    return { del: [], create: [], conflicts: [], update: [] };
   }
 
   @order('70')
