@@ -1,7 +1,7 @@
 /* eslint-disable consistent-return */
 import path from 'path';
 import fs from 'fs-extra';
-import { constants } from '../../../tools';
+import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
 import { getFiles, existsMustBeDir, loadJSON, sanitize, dumpJSON } from '../../../utils';
 import log from '../../../logger';
@@ -25,12 +25,26 @@ function parse(context: DirectoryContext): ParsedActions {
         disableKeywordReplacement: context.disableKeywordReplacement,
       }),
     };
-    const actionFolder = path.join(constants.ACTIONS_DIRECTORY, `${action.name}`);
-
     if (action.code) {
-      // Convert `action.code` path to Unix-style path by replacing backslashes and multiple slashes with a single forward slash, and remove leading drive letters or './'.
-      const unixPath = action.code.replace(/[\\/]+/g, '/').replace(/^([a-zA-Z]+:|\.\/)/, '');
-      action.code = context.loadFile(unixPath, actionFolder);
+      const normalizedCode = action.code.replace(/\\/g, '/');
+      const configRoot = path.resolve(context.filePath);
+      const resolvedPath = path.resolve(context.filePath, normalizedCode);
+      if (!resolvedPath.startsWith(configRoot + path.sep)) {
+        if (context.config.AUTH0_ALLOW_EXTERNAL_CODE_PATHS) {
+          log.debug(
+            `Loading file outside config directory (AUTH0_ALLOW_EXTERNAL_CODE_PATHS enabled): "${action.code}"`
+          );
+        } else {
+          throw new Error(
+            `Path "${action.code}" resolves to "${resolvedPath}" which is outside the config directory "${configRoot}". ` +
+              `Move the file inside your config directory or set AUTH0_ALLOW_EXTERNAL_CODE_PATHS=true to allow it.`
+          );
+        }
+      }
+      action.code = loadFileAndReplaceKeywords(resolvedPath, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      });
     }
 
     return action;

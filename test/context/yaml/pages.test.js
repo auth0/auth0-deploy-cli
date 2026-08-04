@@ -98,7 +98,7 @@ describe('#YAML context pages', () => {
     const context = new Context({ AUTH0_INPUT_FILE: yamlFile }, mockMgmtClient());
     await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(
       Error,
-      'must be relative to the config directory'
+      'is outside the config directory'
     );
   });
 

@@ -58,15 +58,20 @@ export default class YAMLContext {
   }
 
   loadFile(f) {
-    const resolvedBase = path.resolve(this.basePath);
-    const toLoad = path.resolve(this.basePath, f);
-
-    if (!toLoad.startsWith(resolvedBase + path.sep)) {
-      throw new Error(
-        `File reference "${f}" must be relative to the config directory. Absolute paths and paths outside the config root are not supported.`
-      );
+    const configRoot = path.resolve(this.basePath);
+    const toLoad = path.resolve(this.basePath, f.replace(/\\/g, '/'));
+    if (!toLoad.startsWith(configRoot + path.sep)) {
+      if (this.config.AUTH0_ALLOW_EXTERNAL_CODE_PATHS) {
+        log.debug(
+          `Loading file outside config directory (AUTH0_ALLOW_EXTERNAL_CODE_PATHS enabled): "${f}"`
+        );
+      } else {
+        throw new Error(
+          `Path "${f}" resolves to "${toLoad}" which is outside the config directory "${configRoot}". ` +
+            `Move the file inside your config directory or set AUTH0_ALLOW_EXTERNAL_CODE_PATHS=true to allow it.`
+        );
+      }
     }
-
     return loadFileAndReplaceKeywords(toLoad, {
       mappings: this.mappings,
       disableKeywordReplacement: this.disableKeywordReplacement,

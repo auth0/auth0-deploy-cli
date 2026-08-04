@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { constants } from '../../../tools';
+import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
 import { getFiles, existsMustBeDir, loadJSON, sanitize, dumpJSON } from '../../../utils';
 import log from '../../../logger';
@@ -24,13 +24,26 @@ function parse(context: DirectoryContext): ParsedActionModules {
         disableKeywordReplacement: context.disableKeywordReplacement,
       }),
     };
-    const moduleFolder = path.join(constants.ACTION_MODULES_DIRECTORY, `${module.name}`);
-
     if (module.code) {
-      // The `module.code` can be a file path. It needs to be loaded.
-      // It can be a relative path, so we need to handle both cases.
-      const unixPath = module.code.replace(/[\\/]+/g, '/').replace(/^([a-zA-Z]+:|\.\/)/, '');
-      module.code = context.loadFile(unixPath, moduleFolder);
+      const normalizedCode = module.code.replace(/\\/g, '/');
+      const configRoot = path.resolve(context.filePath);
+      const resolvedPath = path.resolve(context.filePath, normalizedCode);
+      if (!resolvedPath.startsWith(configRoot + path.sep)) {
+        if (context.config.AUTH0_ALLOW_EXTERNAL_CODE_PATHS) {
+          log.debug(
+            `Loading file outside config directory (AUTH0_ALLOW_EXTERNAL_CODE_PATHS enabled): "${module.code}"`
+          );
+        } else {
+          throw new Error(
+            `Path "${module.code}" resolves to "${resolvedPath}" which is outside the config directory "${configRoot}". ` +
+              `Move the file inside your config directory or set AUTH0_ALLOW_EXTERNAL_CODE_PATHS=true to allow it.`
+          );
+        }
+      }
+      module.code = loadFileAndReplaceKeywords(resolvedPath, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      });
     }
 
     return module;

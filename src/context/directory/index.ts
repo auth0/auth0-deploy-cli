@@ -6,7 +6,7 @@ import pagedClient from '../../tools/auth0/client';
 import cleanAssets from '../../readonly';
 import log from '../../logger';
 import handlers, { DirectoryHandler } from './handlers';
-import { isDirectory, isFile, stripIdentifiers, toConfigFn } from '../../utils';
+import { isDirectory, stripIdentifiers, toConfigFn } from '../../utils';
 import { Assets, Auth0APIClient, Config, AssetTypes } from '../../types';
 import { filterOnlyIncludedResourceTypes } from '..';
 import { preserveKeywords } from '../../keywordPreservation';
@@ -47,15 +47,20 @@ export default class DirectoryContext {
   }
 
   loadFile(f: string, folder: string) {
-    const resolvedBase = path.resolve(this.filePath);
-    const inSubfolder = path.resolve(this.filePath, folder, f);
-    const inRoot = path.resolve(this.filePath, f);
-    const toLoad = isFile(inSubfolder) ? inSubfolder : inRoot;
-
-    if (!toLoad.startsWith(resolvedBase + path.sep)) {
-      throw new Error(
-        `File reference "${f}" must be relative to the config directory. Absolute paths and paths outside the config root are not supported.`
-      );
+    const configRoot = path.resolve(this.filePath);
+    const basePath = path.resolve(this.filePath, folder);
+    const toLoad = path.resolve(basePath, f.replace(/\\/g, '/'));
+    if (!toLoad.startsWith(configRoot + path.sep)) {
+      if (this.config.AUTH0_ALLOW_EXTERNAL_CODE_PATHS) {
+        log.debug(
+          `Loading file outside config directory (AUTH0_ALLOW_EXTERNAL_CODE_PATHS enabled): "${f}"`
+        );
+      } else {
+        throw new Error(
+          `Path "${f}" resolves to "${toLoad}" which is outside the config directory "${configRoot}". ` +
+            `Move the file inside your config directory or set AUTH0_ALLOW_EXTERNAL_CODE_PATHS=true to allow it.`
+        );
+      }
     }
 
     return loadFileAndReplaceKeywords(toLoad, {

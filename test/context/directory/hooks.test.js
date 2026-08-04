@@ -75,6 +75,28 @@ describe('#directory context hooks', () => {
       .and.have.property('message', errorMessage);
   });
 
+  it('should throw error when hook script path resolves outside the config root', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'hooks-traversal-warn');
+    const outsideFile = path.join(testDataDir, 'directory', 'outside-hook.js');
+    fs.ensureDirSync(path.join(repoDir, constants.HOOKS_DIRECTORY));
+    fs.writeFileSync(outsideFile, 'function outside() {}');
+    const traversalHooks = {
+      'some-hook.json':
+        '{ "name": "Some Hook", "enabled": true, "script": "../../outside-hook.js", "triggerId": "credentials-exchange" }',
+    };
+    createDir(repoDir, { [constants.HOOKS_DIRECTORY]: traversalHooks });
+    const config = { AUTH0_INPUT_FILE: repoDir };
+    const context = new Context(config, mockMgmtClient());
+    try {
+      await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(
+        Error,
+        'is outside the config directory'
+      );
+    } finally {
+      fs.removeSync(outsideFile);
+    }
+  });
+
   it('should dump hooks', async () => {
     const dir = path.join(testDataDir, 'yaml', 'hooksDump');
     cleanThenMkdir(dir);
