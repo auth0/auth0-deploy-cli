@@ -149,9 +149,12 @@ export default class RolesHandler extends DefaultHandler {
     }
 
     try {
+      // Only manage tenant-level roles; exclude org-scoped roles surfaced when
+      // the api2_org_level_roles_ea flag is enabled.
       const roles = await paginate<Role>(this.client.roles.list, {
         paginate: true,
         include_totals: true,
+        type: 'tenant',
       });
 
       for (let index = 0; index < roles.length; index++) {

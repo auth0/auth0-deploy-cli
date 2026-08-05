@@ -110,16 +110,19 @@ describe('#roles handler', () => {
         resource_server_identifier: 'organise',
       });
 
+      let listParams;
       const auth0 = {
         roles: {
-          list: (params) =>
-            mockPagedData({ ...params, include_totals: true }, 'roles', [
+          list: (params) => {
+            listParams = params;
+            return mockPagedData({ ...params, include_totals: true }, 'roles', [
               {
                 name: 'myRole',
                 id: 'myRoleId',
                 description: 'myDescription',
               },
-            ]),
+            ]);
+          },
           permissions: {
             list: (roleId, params) =>
               mockPagedData({ ...params, include_totals: true }, 'permissions', permissions),
@@ -130,6 +133,8 @@ describe('#roles handler', () => {
 
       const handler = new roles.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
+      // org-scoped roles must be excluded from the tenant baseline
+      expect(listParams.type).to.equal('tenant');
       expect(data).to.deep.equal([
         {
           name: 'myRole',
