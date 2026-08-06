@@ -120,6 +120,7 @@ describe('#roles handler', () => {
                 name: 'myRole',
                 id: 'myRoleId',
                 description: 'myDescription',
+                type: 'tenant',
               },
             ]);
           },
@@ -135,11 +136,13 @@ describe('#roles handler', () => {
       const data = await handler.getType();
       // org-scoped roles must be excluded from the tenant baseline
       expect(listParams.type).to.equal('tenant');
+      // the type field is preserved on the exported role shape
       expect(data).to.deep.equal([
         {
           name: 'myRole',
           id: 'myRoleId',
           description: 'myDescription',
+          type: 'tenant',
           permissions: new Array(150).fill({
             permission_name: 'Create:cal_entry',
             resource_server_identifier: 'organise',
