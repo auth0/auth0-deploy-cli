@@ -97,18 +97,50 @@ export default class PhoneTemplatesHandler extends DefaultHandler {
       await this.deletePhoneTemplates(del);
     }
 
-    if (create.length > 0) {
-      await this.createPhoneTemplates(create);
+    // On newly created tenants the phone templates returned by the API have no
+    // ID until they are explicitly created. calcChanges matches assets by `type`
+    // and routes them all to `update`, but PATCH requires an ID. Split out the
+    // templates whose existing counterpart has no ID yet and create them instead.
+    const missingId: CalculatedChanges['update'] = [];
+    const hasId: CalculatedChanges['update'] = [];
+    update.forEach((template) => {
+      const existing = this.existing?.find((t) => t.type === template.type);
+      if (existing?.id) {
+        hasId.push(template);
+      } else {
+        missingId.push(template);
+      }
+    });
+
+    const toCreate = [...create, ...missingId];
+
+    if (toCreate.length > 0) {
+      await this.createPhoneTemplates(toCreate);
     }
 
-    if (update.length > 0) {
-      await this.updatePhoneTemplates(update);
+    if (hasId.length > 0) {
+      await this.updatePhoneTemplates(hasId);
     }
   }
 
   async createPhoneTemplate(template): Promise<Asset> {
-    const created = await this.client.branding.phone.templates.create(template);
-    return created;
+    try {
+      const created = await this.client.branding.phone.templates.create(template);
+      return created;
+    } catch (err) {
+      // A 409 means the template already exists on the tenant (it was created
+      // between our list call and this create, or the list endpoint didn't
+      // surface its ID). Re-fetch to pick up the ID and fall back to an update.
+      if (err.statusCode === 409) {
+        log.debug(
+          `Phone template type '${template.type}' already exists, falling back to update`
+        );
+        const response = await this.client.branding.phone.templates.list();
+        this.existing = response.templates ?? [];
+        return this.updatePhoneTemplate(template);
+      }
+      throw err;
+    }
   }
 
   async createPhoneTemplates(creates: CalculatedChanges['create']): Promise<void> {
