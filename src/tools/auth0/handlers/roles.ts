@@ -14,6 +14,7 @@ export const schema = {
       name: { type: 'string' },
       id: { type: 'string' },
       description: { type: 'string' },
+      type: { type: 'string', enum: ['tenant', 'organization'] },
       permissions: {
         type: 'array',
         items: {
@@ -110,6 +111,7 @@ export default class RolesHandler extends DefaultHandler {
 
     delete data.permissions;
     delete data.id;
+    delete data.type; // immutable; set at creation only, never send on update
 
     await this.client.roles.update(params.id, data);
 
@@ -149,9 +151,12 @@ export default class RolesHandler extends DefaultHandler {
     }
 
     try {
+      // Only manage tenant-level roles; exclude org-scoped roles surfaced when
+      // the api2_org_level_roles_ea flag is enabled.
       const roles = await paginate<Role>(this.client.roles.list, {
         paginate: true,
         include_totals: true,
+        type: 'tenant',
       });
 
       for (let index = 0; index < roles.length; index++) {
