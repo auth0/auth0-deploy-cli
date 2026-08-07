@@ -1481,7 +1481,6 @@ describe('#organizations handler', () => {
     });
 
     it('should add, update, and remove org-client associations on update', async () => {
-      const existingOrgClient = { client_id: 'deploy client', use_for_member_access: false };
       const existingOrgClientFromApi = {
         client_id: 'xyz_123',
         use_for_member_access: false,
