@@ -505,9 +505,20 @@ export default class OrganizationsHandler extends DefaultHandler {
     }
 
     if (orgClientsToRemove.length > 0) {
-      await this.deleteOrganizationClients(params.id, orgClientsToRemove).catch((err) => {
-        throw new Error(`Problem removing org clients for organization ${params.id}\n${err}`);
-      });
+      if (
+        this.config('AUTH0_ALLOW_DELETE') === 'true' ||
+        this.config('AUTH0_ALLOW_DELETE') === true
+      ) {
+        await this.deleteOrganizationClients(params.id, orgClientsToRemove).catch((err) => {
+          throw new Error(`Problem removing org clients for organization ${params.id}\n${err}`);
+        });
+      } else {
+        log.warn(
+          `Detected the following organization client associations should be removed. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config\n${orgClientsToRemove.join(
+            '\n'
+          )}`
+        );
+      }
     }
 
     await Promise.all(

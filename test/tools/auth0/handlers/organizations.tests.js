@@ -1633,6 +1633,74 @@ describe('#organizations handler', () => {
       expect(removedClientIds).to.deep.equal(['abc_123']);
     });
 
+    it('should not remove org-client associations when AUTH0_ALLOW_DELETE is false', async () => {
+      const configNoDelete = function (key) {
+        return configNoDelete.data && configNoDelete.data[key];
+      };
+      configNoDelete.data = { AUTH0_ALLOW_DELETE: false };
+
+      const existingOrgClientFromApi = {
+        client_id: 'abc_123',
+        use_for_member_access: true,
+        client: {
+          name: 'test client',
+          app_type: 'regular_web',
+          is_first_party: true,
+          grant_types: [],
+          organization_usage: 'allow',
+        },
+      };
+
+      const auth0 = {
+        organizations: {
+          create: () => Promise.resolve([]),
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          connections: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          clientGrants: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          discoveryDomains: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          clients: {
+            list: () => ({ data: [existingOrgClientFromApi], hasNextPage: () => false }),
+            delete: () => {
+              throw new Error(
+                'deleteOrganizationClients should not be called when AUTH0_ALLOW_DELETE is false'
+              );
+            },
+          },
+        },
+        connections: {
+          list: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        clientGrants: {
+          list: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({
+        client: pageClient(auth0),
+        config: configNoDelete,
+      });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Should not throw — delete is skipped and a warning is emitted instead
+      await stageFn.apply(handler, [
+        {
+          organizations: [{ id: '123', name: 'acme', display_name: 'Acme Inc', clients: [] }],
+        },
+      ]);
+    });
+
     it('should gracefully handle when org-clients feature is not enabled (403)', async () => {
       const freshOrg = {
         id: '999',
