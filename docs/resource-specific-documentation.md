@@ -1147,6 +1147,55 @@ Contents of `Block iCloud Private Relay Exits-p-4.json`:
 }
 ```
 
+## Organizations
+
+The deploy CLI supports managing organizations, including their connections, client grants, discovery domains, and org-to-app entitlement settings.
+
+### Org-to-App Entitlement (`is_app_entitlement_active` / `clients`)
+
+> **Note:** Requires the `org_to_app_entitlement_enabled` feature flag to be enabled on the tenant.
+
+`is_app_entitlement_active` controls whether org-to-app entitlement is active for an organization. When active, the `clients` array specifies which client applications org members are entitled to use for login.
+
+Each entry in `clients` has:
+
+- `client_id` — the **name** of the client application (resolved to the actual ID at deploy time)
+- `use_for_member_access` — when `true`, org members can use this client to log in
+
+**YAML Example**
+
+```yaml
+organizations:
+  - name: my-organization
+    display_name: My Organization
+    is_app_entitlement_active: true
+    clients:
+      - client_id: My App
+        use_for_member_access: true
+```
+
+**Directory Example**
+
+```
+./organizations/my-organization.json
+```
+
+```json
+{
+  "name": "my-organization",
+  "display_name": "My Organization",
+  "is_app_entitlement_active": true,
+  "clients": [
+    {
+      "client_id": "My App",
+      "use_for_member_access": true
+    }
+  ]
+}
+```
+
+> **Note:** When exporting, `client_id` values are resolved to client **names** for portability across environments. On deploy, names are resolved back to IDs. The M2M application used by the deploy CLI requires the `read:organization_clients`, `create:organization_clients`, `update:organization_clients`, and `delete:organization_clients` scopes.
+
 ## PhoneProviders
 
 When managing phone providers, credentials are never exported.
