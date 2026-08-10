@@ -45,8 +45,8 @@ export default class RolesHandler extends DefaultHandler {
   async createRole(data): Promise<Asset> {
     const role = { ...data };
     delete role.permissions;
-    // `type` is a read-only field returned by the roles GET endpoint but rejected
-    // by the roles create/update endpoints. Strip it to keep exports round-trippable.
+    // deploy-cli only manages tenant-level roles, so `type` is stripped on write; it
+    // defaults to `tenant` on create. This keeps exports (which carry `type`) round-trippable.
     delete role.type;
 
     const created = await this.client.roles.create(role);
@@ -114,8 +114,8 @@ export default class RolesHandler extends DefaultHandler {
 
     delete data.permissions;
     delete data.id;
-    // `type` is read-only on the roles GET endpoint and rejected by update; strip it
-    // so files that already contain it (from a prior export) can still be imported.
+    // deploy-cli only manages tenant-level roles, so `type` is stripped on write; this
+    // lets files that already carry it (from a prior export) be imported cleanly.
     delete data.type;
 
     await this.client.roles.update(params.id, data);
@@ -211,9 +211,6 @@ export default class RolesHandler extends DefaultHandler {
         );
 
         (roles[index] as any).permissions = strippedPerms;
-        // `type` is a read-only field (e.g. 'tenant') that the roles create/update
-        // endpoints reject, so omit it from the export to keep the round-trip valid.
-        delete (roles[index] as any).type;
       }
       this.existing = roles;
       return this.existing;
