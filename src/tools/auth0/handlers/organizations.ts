@@ -91,6 +91,19 @@ export const schema = {
         type: 'string',
         enum: Object.values(Management.OrganizationThirdPartyClientAccessEnum),
       },
+      is_app_entitlement_active: { type: 'boolean' },
+      clients: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            client_id: { type: 'string' },
+            use_for_member_access: { type: 'boolean' },
+          },
+          required: ['client_id', 'use_for_member_access'],
+        },
+        default: [],
+      },
     },
     required: ['name'],
   },
@@ -105,10 +118,17 @@ type FormattedClientGrants = {
   client_id: string | undefined;
 };
 
+type OrgClientAssociation = {
+  client_id: string | undefined;
+  use_for_member_access: boolean | undefined;
+};
+
 export default class OrganizationsHandler extends DefaultHandler {
   existing: Asset[];
 
   formattedClientGrants: FormattedClientGrants[];
+
+  allClients: Client[];
 
   constructor(config: DefaultHandler) {
     super({
@@ -151,6 +171,7 @@ export default class OrganizationsHandler extends DefaultHandler {
     const organization = { ...org };
     delete organization.connections;
     delete organization.client_grants;
+    delete organization.clients;
 
     if ('discovery_domains' in organization) {
       delete organization.discovery_domains;
@@ -204,6 +225,22 @@ export default class OrganizationsHandler extends DefaultHandler {
         )
       );
     }
+
+    if (typeof org.clients !== 'undefined' && org.clients.length > 0) {
+      const clientsToCreate = (org.clients as OrgClientAssociation[])
+        .map((oc) => ({
+          client_id: this.getClientIdByClientName(oc.client_id as string),
+          use_for_member_access: oc.use_for_member_access as boolean,
+        }))
+        .filter((oc) => !!oc.client_id);
+
+      if (clientsToCreate.length > 0) {
+        await this.createOrganizationClients(createdId, clientsToCreate).catch((err) => {
+          throw new Error(`Problem creating org clients for organization ${createdId}\n${err}`);
+        });
+      }
+    }
+
     return created;
   }
 
@@ -229,6 +266,7 @@ export default class OrganizationsHandler extends DefaultHandler {
       connections: existingConnections,
       client_grants: existingClientGrants,
       discovery_domains: existingDiscoveryDomains,
+      clients: existingOrgClients = [],
     } = await organizations.find((orgToUpdate) => orgToUpdate.name === org.name);
 
     const params = { id: org.id };
@@ -236,6 +274,7 @@ export default class OrganizationsHandler extends DefaultHandler {
       connections,
       client_grants: organizationClientGrants,
       discovery_domains: organizationDiscoveryDomains,
+      clients: organizationClients,
     } = org;
 
     delete org.connections;
@@ -243,6 +282,7 @@ export default class OrganizationsHandler extends DefaultHandler {
     delete org.id;
     delete org.client_grants;
     delete org.discovery_domains;
+    delete org.clients;
 
     await this.client.organizations.update(params.id, org);
 
@@ -423,12 +463,89 @@ export default class OrganizationsHandler extends DefaultHandler {
       }
     }
 
+    // organization clients
+    const orgClientsToAdd = ((organizationClients as OrgClientAssociation[]) || [])
+      .filter(
+        (c) =>
+          !(existingOrgClients as OrgClientAssociation[]).find((x) => x.client_id === c.client_id)
+      )
+      .map((oc) => ({
+        client_id: this.getClientIdByClientName(oc.client_id as string),
+        use_for_member_access: oc.use_for_member_access as boolean,
+      }))
+      .filter((oc) => !!oc.client_id);
+
+    const orgClientsToRemove = ((existingOrgClients as OrgClientAssociation[]) || [])
+      .filter(
+        (c) =>
+          !((organizationClients as OrgClientAssociation[]) || []).find(
+            (x) => x.client_id === c.client_id
+          )
+      )
+      .map((oc) => this.getClientIdByClientName(oc.client_id as string))
+      .filter(Boolean);
+
+    const orgClientsToUpdate = ((organizationClients as OrgClientAssociation[]) || [])
+      .filter((c) => {
+        const existing = (existingOrgClients as OrgClientAssociation[]).find(
+          (x) => x.client_id === c.client_id
+        );
+        return existing && existing.use_for_member_access !== c.use_for_member_access;
+      })
+      .map((oc) => ({
+        client_id: this.getClientIdByClientName(oc.client_id as string),
+        use_for_member_access: oc.use_for_member_access as boolean,
+      }))
+      .filter((oc) => !!oc.client_id);
+
+    if (orgClientsToAdd.length > 0) {
+      await this.createOrganizationClients(params.id, orgClientsToAdd).catch((err) => {
+        throw new Error(`Problem adding org clients for organization ${params.id}\n${err}`);
+      });
+    }
+
+    if (orgClientsToRemove.length > 0) {
+      if (
+        this.config('AUTH0_ALLOW_DELETE') === 'true' ||
+        this.config('AUTH0_ALLOW_DELETE') === true
+      ) {
+        await this.deleteOrganizationClients(params.id, orgClientsToRemove).catch((err) => {
+          throw new Error(`Problem removing org clients for organization ${params.id}\n${err}`);
+        });
+      } else {
+        log.warn(
+          `Detected the following organization client associations should be removed. Doing so may be destructive.\nYou can enable deletes by setting 'AUTH0_ALLOW_DELETE' to true in the config\n${orgClientsToRemove.join(
+            '\n'
+          )}`
+        );
+      }
+    }
+
+    await Promise.all(
+      orgClientsToUpdate.map((oc) =>
+        this.client.organizations.clients
+          .update(params.id, oc.client_id, {
+            use_for_member_access: oc.use_for_member_access,
+          })
+          .catch((err) => {
+            throw new Error(
+              `Problem updating org client ${oc.client_id} for organization ${params.id}\n${err}`
+            );
+          })
+      )
+    );
+
     return params;
   }
 
   getClientGrantIDByClientName(clientsName: string): string {
     const found = this.formattedClientGrants.find((c) => c.client_id === clientsName);
     return found?.grant_id || '';
+  }
+
+  getClientIdByClientName(clientName: string): string {
+    const found = this.allClients?.find((c) => c.name === clientName);
+    return found?.client_id || '';
   }
 
   async getFormattedClientGrants(): Promise<FormattedClientGrants[]> {
@@ -440,6 +557,9 @@ export default class OrganizationsHandler extends DefaultHandler {
         paginate: true,
       }),
     ]);
+
+    // Store clients for org-client name→ID resolution
+    this.allClients = clients;
 
     // Convert clients by name to the id and store it in the formattedClientGrants
     const formattedClientGrantsMapping = clientGrants?.map((clientGrant) => {
@@ -505,6 +625,15 @@ export default class OrganizationsHandler extends DefaultHandler {
         const organizationDiscoveryDomains = await this.getAllOrganizationDiscoveryDomains(org.id);
         if (organizationDiscoveryDomains) {
           org.discovery_domains = organizationDiscoveryDomains;
+        }
+
+        // Get org-client associations
+        const orgClients = await this.getAllOrganizationClients(org.id);
+        if (orgClients) {
+          org.clients = orgClients.map((oc) => ({
+            client_id: convertClientIdToName(oc.client_id, clients),
+            use_for_member_access: oc.use_for_member_access,
+          }));
         }
       }
 
@@ -736,5 +865,56 @@ export default class OrganizationsHandler extends DefaultHandler {
   ): Promise<void> {
     log.debug(`Deleting discovery domain ${discoveryDomain} for organization ${organizationId}`);
     await this.client.organizations.discoveryDomains.delete(organizationId, discoveryDomainId);
+  }
+
+  async getAllOrganizationClients(
+    organizationId: string
+  ): Promise<Management.OrganizationClient[] | null> {
+    const allOrgClients: Management.OrganizationClient[] = [];
+
+    try {
+      let orgClients = await this.client.organizations.clients.list(organizationId);
+
+      allOrgClients.push(...orgClients.data);
+
+      while (orgClients.hasNextPage()) {
+        orgClients = await orgClients.getNextPage();
+        allOrgClients.push(...orgClients.data);
+      }
+
+      return allOrgClients;
+    } catch (err) {
+      if (err.statusCode === 404 || err.statusCode === 501) {
+        return null;
+      }
+      if (err.statusCode === 403 || err.errorCode === 'feature_not_enabled') {
+        log.debug(
+          'Org-to-app entitlement is not enabled for this tenant. Skipping org-client associations.'
+        );
+        return null;
+      }
+      throw err;
+    }
+  }
+
+  async createOrganizationClients(
+    organizationId: string,
+    clients: Array<{ client_id: string; use_for_member_access: boolean }>
+  ): Promise<void> {
+    const BATCH_SIZE = 10;
+    for (let i = 0; i < clients.length; i += BATCH_SIZE) {
+      const batch = clients.slice(i, i + BATCH_SIZE);
+      log.debug(`Creating ${batch.length} org client(s) for organization ${organizationId}`);
+      await this.client.organizations.clients.create(organizationId, { clients: batch });
+    }
+  }
+
+  async deleteOrganizationClients(organizationId: string, clientIds: string[]): Promise<void> {
+    const BATCH_SIZE = 10;
+    for (let i = 0; i < clientIds.length; i += BATCH_SIZE) {
+      const batch = clientIds.slice(i, i + BATCH_SIZE);
+      log.debug(`Deleting ${batch.length} org client(s) for organization ${organizationId}`);
+      await this.client.organizations.clients.delete(organizationId, { clients: batch });
+    }
   }
 }
