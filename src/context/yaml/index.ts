@@ -25,7 +25,7 @@ const includeType = new yaml.Type('!include', {
   construct: (data) => {
     // This will be handled during the actual loading process
     return { __include: data };
-  }
+  },
 });
 
 const schema = yaml.DEFAULT_SCHEMA.extend([includeType]);

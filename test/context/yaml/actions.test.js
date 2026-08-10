@@ -187,8 +187,8 @@ logStreams: !include logStreams.yaml
       AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml'),
       AUTH0_KEYWORD_REPLACE_MAPPINGS: {
         LOGGING_WEBHOOK_URL: 'https://logging.com/inputs/test',
-        SIEM_WEBHOOK_URL: 'https://siem.example.com/webhook'
-      }
+        SIEM_WEBHOOK_URL: 'https://siem.example.com/webhook',
+      },
     };
     const context = new Context(config, mockMgmtClient());
     await context.loadAssetsFromLocal();
@@ -197,15 +197,19 @@ logStreams: !include logStreams.yaml
     expect(context.assets.logStreams[0]).to.deep.include({
       name: 'LoggingSAAS',
       isPriority: false,
-      type: 'http'
+      type: 'http',
     });
-    expect(context.assets.logStreams[0].sink.httpEndpoint).to.equal('https://logging.com/inputs/test');
+    expect(context.assets.logStreams[0].sink.httpEndpoint).to.equal(
+      'https://logging.com/inputs/test'
+    );
     expect(context.assets.logStreams[1]).to.deep.include({
       name: 'SIEM',
       isPriority: false,
-      type: 'http'
+      type: 'http',
     });
-    expect(context.assets.logStreams[1].sink.httpEndpoint).to.equal('https://siem.example.com/webhook');
+    expect(context.assets.logStreams[1].sink.httpEndpoint).to.equal(
+      'https://siem.example.com/webhook'
+    );
   });
 
   it('should error on missing include file', async () => {
@@ -219,7 +223,7 @@ clients: !include missing.yaml
 
     const config = { AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') };
     const context = new Context(config, mockMgmtClient());
-    
+
     await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(
       Error,
       /Include file not found/
