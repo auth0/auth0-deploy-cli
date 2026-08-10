@@ -671,3 +671,12 @@ organizations:
     # Requires the organizations_third_party_client_support feature flag to be enabled on the tenant.
     # Allowed values: allow, block (defaults to block)
     third_party_client_access: block
+    # Controls whether org-to-app entitlement is active for this organization.
+    # Requires the org_to_app_entitlement_enabled feature flag to be enabled on the tenant.
+    is_app_entitlement_active: false
+    # List of client applications that org members are entitled to use for login.
+    # Only relevant when is_app_entitlement_active is true.
+    # use_for_member_access: when true, org members can use this client to log in.
+    clients:
+      - client_id: My App
+        use_for_member_access: true
