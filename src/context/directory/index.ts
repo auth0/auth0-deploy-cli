@@ -51,16 +51,10 @@ export default class DirectoryContext {
     const basePath = path.resolve(this.filePath, folder);
     const toLoad = path.resolve(basePath, f.replace(/\\/g, '/'));
     if (!toLoad.startsWith(configRoot + path.sep)) {
-      if (this.config.AUTH0_ALLOW_EXTERNAL_CODE_PATHS) {
-        log.debug(
-          `Loading file outside config directory (AUTH0_ALLOW_EXTERNAL_CODE_PATHS enabled): "${f}"`
-        );
-      } else {
-        throw new Error(
-          `Path "${f}" resolves to "${toLoad}" which is outside the config directory "${configRoot}". ` +
-            `Move the file inside your config directory or set AUTH0_ALLOW_EXTERNAL_CODE_PATHS=true to allow it.`
-        );
-      }
+      throw new Error(
+        `Path "${f}" resolves to "${toLoad}" which is outside the config directory "${configRoot}". ` +
+          `Move the file inside your config directory.`
+      );
     }
 
     return loadFileAndReplaceKeywords(toLoad, {

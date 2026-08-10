@@ -447,35 +447,6 @@ describe('#directory context actions', () => {
     }
   });
 
-  it('should not throw error when AUTH0_ALLOW_EXTERNAL_CODE_PATHS is true and path is outside config root', async () => {
-    const repoDir = path.join(testDataDir, 'directory', 'test-escape-hatch');
-    const outsideFile = path.join(testDataDir, 'directory', 'escape-hatch-code.js');
-    fs.ensureDirSync(path.join(repoDir, constants.ACTIONS_DIRECTORY));
-    fs.writeFileSync(outsideFile, 'module.exports = () => {};');
-    const files = {
-      [constants.ACTIONS_DIRECTORY]: {
-        'action-one.json': `{
-          "name": "action-one",
-          "code": "../escape-hatch-code.js",
-          "runtime": "node18",
-          "dependencies": [],
-          "secrets": [],
-          "status": "built",
-          "supported_triggers": [{ "id": "post-login", "version": "v3" }],
-          "deployed": true
-        }`,
-      },
-    };
-    createDir(repoDir, files);
-    const config = { AUTH0_INPUT_FILE: repoDir, AUTH0_ALLOW_EXTERNAL_CODE_PATHS: true };
-    const context = new Context(config, mockMgmtClient());
-    try {
-      await expect(context.loadAssetsFromLocal()).to.not.be.rejected;
-    } finally {
-      fs.removeSync(outsideFile);
-    }
-  });
-
   it('should dump actions with modules', async () => {
     const actionName = 'action-with-modules';
     const dir = path.join(testDataDir, 'directory', 'test-action-modules');

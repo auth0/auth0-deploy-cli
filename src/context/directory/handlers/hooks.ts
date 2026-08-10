@@ -32,16 +32,10 @@ function parse(context: DirectoryContext): ParsedHooks {
         normalizedScript
       );
       if (!resolvedPath.startsWith(configRoot + path.sep)) {
-        if (context.config.AUTH0_ALLOW_EXTERNAL_CODE_PATHS) {
-          log.debug(
-            `Loading file outside config directory (AUTH0_ALLOW_EXTERNAL_CODE_PATHS enabled): "${hook.script}"`
-          );
-        } else {
-          throw new Error(
-            `Path "${hook.script}" resolves to "${resolvedPath}" which is outside the config directory "${configRoot}". ` +
-              `Move the file inside your config directory or set AUTH0_ALLOW_EXTERNAL_CODE_PATHS=true to allow it.`
-          );
-        }
+        throw new Error(
+          `Path "${hook.script}" resolves to "${resolvedPath}" which is outside the config directory "${configRoot}". ` +
+            `Move the file inside your config directory.`
+        );
       }
       hook.script = loadFileAndReplaceKeywords(resolvedPath, {
         mappings: context.mappings,

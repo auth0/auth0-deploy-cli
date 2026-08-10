@@ -103,7 +103,6 @@ export type Config = {
   AUTH0_EXCLUDED_RESOURCE_SERVERS?: string[];
   AUTH0_EXCLUDED_DEFAULTS?: string[];
   AUTH0_EXPERIMENTAL_EA: boolean;
-  AUTH0_ALLOW_EXTERNAL_CODE_PATHS?: boolean;
 }; // TODO: replace with a more accurate representation of the Config type
 
 export type Asset = { [key: string]: any };

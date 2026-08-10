@@ -61,16 +61,10 @@ export default class YAMLContext {
     const configRoot = path.resolve(this.basePath);
     const toLoad = path.resolve(this.basePath, f.replace(/\\/g, '/'));
     if (!toLoad.startsWith(configRoot + path.sep)) {
-      if (this.config.AUTH0_ALLOW_EXTERNAL_CODE_PATHS) {
-        log.debug(
-          `Loading file outside config directory (AUTH0_ALLOW_EXTERNAL_CODE_PATHS enabled): "${f}"`
-        );
-      } else {
-        throw new Error(
-          `Path "${f}" resolves to "${toLoad}" which is outside the config directory "${configRoot}". ` +
-            `Move the file inside your config directory or set AUTH0_ALLOW_EXTERNAL_CODE_PATHS=true to allow it.`
-        );
-      }
+      throw new Error(
+        `Path "${f}" resolves to "${toLoad}" which is outside the config directory "${configRoot}". ` +
+          `Move the file inside your config directory.`
+      );
     }
     return loadFileAndReplaceKeywords(toLoad, {
       mappings: this.mappings,
