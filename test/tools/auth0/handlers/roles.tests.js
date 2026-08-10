@@ -66,6 +66,7 @@ describe('#roles handler', () => {
             expect(data).to.be.an('object');
             expect(data.name).to.equal('myRole');
             expect(data.description).to.equal('myDescription');
+            expect(data).to.not.have.property('type');
             return Promise.resolve(data);
           },
           update: () => Promise.resolve([]),
@@ -97,6 +98,7 @@ describe('#roles handler', () => {
               name: 'myRole',
               id: 'myRoleId',
               description: 'myDescription',
+              type: 'tenant',
               permissions: [],
             },
           ],
@@ -269,6 +271,7 @@ describe('#roles handler', () => {
             expect(data).to.be.an('object');
             expect(data.name).to.equal('myRole');
             expect(data.description).to.equal('myDescription');
+            expect(data).to.not.have.property('type');
 
             return Promise.resolve(data);
           },
@@ -314,6 +317,7 @@ describe('#roles handler', () => {
               name: 'myRole',
               id: 'myRoleId',
               description: 'myDescription',
+              type: 'tenant',
               permissions: [
                 {
                   permission_name: 'Create:cal_entry',
