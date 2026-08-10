@@ -72,7 +72,15 @@ const MatchSchema = {
       },
       uniqueItems: true,
       minItems: 1,
-      maxItems: 10,
+    },
+    auth0_managed: {
+      type: 'array',
+      items: {
+        type: 'string',
+        pattern: '^auth0\\.[^.\\s]+$',
+      },
+      uniqueItems: true,
+      minItems: 1,
     },
     geo_country_codes: {
       type: 'array',
@@ -81,7 +89,6 @@ const MatchSchema = {
       },
       uniqueItems: true,
       minItems: 1,
-      maxItems: 10,
     },
     geo_subdivision_codes: {
       type: 'array',
@@ -90,7 +97,6 @@ const MatchSchema = {
       },
       uniqueItems: true,
       minItems: 1,
-      maxItems: 10,
     },
     ipv4_cidrs: {
       type: 'array',
@@ -99,7 +105,6 @@ const MatchSchema = {
       },
       uniqueItems: true,
       minItems: 1,
-      maxItems: 10,
     },
     ipv6_cidrs: {
       type: 'array',
@@ -108,7 +113,6 @@ const MatchSchema = {
       },
       uniqueItems: true,
       minItems: 1,
-      maxItems: 10,
     },
     ja3_fingerprints: {
       type: 'array',
@@ -117,7 +121,6 @@ const MatchSchema = {
       },
       uniqueItems: true,
       minItems: 1,
-      maxItems: 10,
     },
     ja4_fingerprints: {
       type: 'array',
@@ -126,7 +129,6 @@ const MatchSchema = {
       },
       uniqueItems: true,
       minItems: 1,
-      maxItems: 10,
     },
     user_agents: {
       type: 'array',
@@ -135,7 +137,27 @@ const MatchSchema = {
       },
       uniqueItems: true,
       minItems: 1,
-      maxItems: 10,
+    },
+    hostnames: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      uniqueItems: true,
+    },
+    connecting_ipv4_cidrs: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      uniqueItems: true,
+    },
+    connecting_ipv6_cidrs: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      uniqueItems: true,
     },
   },
   additionalProperties: false,
@@ -158,7 +180,6 @@ export const schema = {
       priority: {
         type: 'number',
         minimum: 1,
-        maximum: 10,
       },
       rule: {
         anyOf: [

@@ -43,7 +43,7 @@ async function dump(context: YAMLContext): Promise<ParsedAttackProtection> {
     attackProtectionConfig.captcha = captcha;
   }
 
-  const maskedAttackProtection = attackProtectionDefaults(attackProtectionConfig);
+  const maskedAttackProtection = attackProtectionDefaults(attackProtectionConfig, context.config);
 
   return {
     attackProtection: maskedAttackProtection,

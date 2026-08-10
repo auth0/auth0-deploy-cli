@@ -1,4 +1,5 @@
 import { isEmpty } from 'lodash';
+import { isDryRun } from '../../utils';
 import { Management } from 'auth0';
 import DefaultHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
@@ -13,6 +14,7 @@ export default class EmailProviderHandler extends DefaultHandler {
     super({
       ...options,
       type: 'emailProvider',
+      ignoreDryRunFields: ['smtp.credentials.smtp_pass', 'mandrill.credentials.api_key'],
     });
   }
 
@@ -39,11 +41,21 @@ export default class EmailProviderHandler extends DefaultHandler {
 
     if (!emailProvider) return;
 
+    if (isDryRun(this.config)) {
+      const { del, update, create } = await this.calcChanges(assets);
+
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        return;
+      }
+    }
+
     const existing = await this.getType();
 
     // HTTP DELETE on emails/provider is not supported, as this is not part of our vNext SDK.
     if (Object.keys(emailProvider).length === 0) {
       if (this.config('AUTH0_ALLOW_DELETE') === true) {
+        // If no existing provider, there is nothing to delete
+        if (!existing.name) return;
         // await this.client.emails.delete(); is not supported
         if (isEmpty(existing.credentials)) {
           delete existing.credentials;

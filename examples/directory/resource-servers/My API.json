@@ -2,6 +2,8 @@
     "name": "My API",
     "identifier": "https://##ENV##.myapp.com/api/v1",
     "allow_offline_access": false,
+    "allow_online_access": false,
+    "allow_online_access_with_ephemeral_sessions": false,
     "skip_consent_for_verifiable_first_party_clients": true,
     "token_lifetime": 86400,
     "token_lifetime_for_web": 7200,

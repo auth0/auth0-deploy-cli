@@ -37,9 +37,16 @@ async function parse(context: YAMLContext): Promise<ParsedDatabases> {
 }
 
 async function dump(context: YAMLContext): Promise<ParsedDatabases> {
-  const { databases, clients } = context.assets;
+  let { databases } = context.assets;
+  const { clients } = context.assets;
 
   if (!databases) return { databases: null };
+
+  // Filter excluded databases
+  const excludedDatabases = (context.assets.exclude && context.assets.exclude.databases) || [];
+  if (excludedDatabases.length) {
+    databases = databases.filter((database) => !excludedDatabases.includes(database.name));
+  }
 
   const sortCustomScripts = ([name1]: [string, Function], [name2]: [string, Function]): number => {
     if (name1 === name2) return 0;

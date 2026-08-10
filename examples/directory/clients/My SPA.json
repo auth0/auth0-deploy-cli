@@ -39,7 +39,8 @@
 	],
 	 "token_exchange": {
 		"allow_any_profile_of_type": [
-			"custom_authentication"
+			"custom_authentication",
+			"on_behalf_of_token_exchange"
 		]
   	}
 }

@@ -241,6 +241,10 @@ describe('#end-to-end dump and deploy cycle', function () {
         AUTH0_CLIENT_ID,
         AUTH0_CLIENT_SECRET,
         AUTH0_ACCESS_TOKEN,
+        AUTH0_KEYWORD_REPLACE_MAPPINGS: {
+          LOGSTREAMS_DATADOG_SECRET: 'some-sensitive-api-key',
+          EVENT_STREAM_WEBHOOK_BEARER_TOKEN: 'some-sensitive-token',
+        },
       },
     });
 

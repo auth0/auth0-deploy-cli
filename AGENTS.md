@@ -63,7 +63,7 @@ npm run build && node lib/index.js import -c config-dev.json -i ./local-export/t
 
 ### File Structure
 
-```
+```text
 src/                                # TypeScript source
 ├── index.ts                        # CLI entry point
 ├── commands/                       # import.ts, export.ts
@@ -224,6 +224,26 @@ npm run lint
 - [ ] Added entry to `CHANGELOG.md` if user-facing change
 - [ ] Tested with both YAML and directory formats if applicable
 - [ ] Checked backward compatibility
+
+### Checklist for Every Feature or Fix
+
+#### Completion
+
+- [ ] Change is complete and matches the intended feature or fix
+- [ ] TypeScript compiles and tests pass locally
+
+#### Format and behavior
+
+- [ ] Works for both YAML and directory flows when the resource supports both
+- [ ] Keyword preservation still works as expected
+- [ ] Sorted-key output stays stable; no unintended order changes were introduced
+- [ ] Exported configs do not rely on IDs by default; resources should link by names where possible
+
+#### Safety and compatibility
+
+- [ ] Dry-run output is correct and non-destructive
+- [ ] Unit tests cover the changed path and any important edge cases
+- [ ] Backward compatibility was checked and no existing behavior was unintentionally broken
 
 ### Commit Message Format
 

@@ -1,0 +1,22 @@
+{
+  "login": [
+    {
+      "login": [
+        {
+          "name": "form-content-start",
+          "template": "partials/login/login/form-content-start.liquid"
+        }
+      ]
+    }
+  ],
+  "passkeys": [
+    {
+      "passkeys-enrollment": [
+        {
+          "name": "form-content-start",
+          "template": "partials/passkeys/passkeys-enrollment/form-content-start.liquid"
+        }
+      ]
+    }
+  ]
+}

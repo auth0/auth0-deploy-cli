@@ -1,6 +1,7 @@
 import pageClient from '../../../../src/tools/auth0/client';
 
 /* eslint-disable consistent-return */
+const Ajv = require('ajv');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const connections = require('../../../../src/tools/auth0/handlers/connections');
@@ -29,6 +30,201 @@ describe('#connections handler', () => {
     AUTH0_CLIENT_ID: 'client_id',
     AUTH0_ALLOW_DELETE: true,
   };
+
+  describe('#connections schema', () => {
+    it('should allow explicitly supported connection option fields', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'google-workspace',
+          strategy: 'google-apps',
+          options: {
+            api_enable_groups: true,
+          },
+        },
+        {
+          name: 'oidc-connection',
+          strategy: 'oidc',
+          options: {
+            dpop_signing_alg: 'ES256',
+          },
+        },
+        {
+          name: 'oidc-connection-es384',
+          strategy: 'oidc',
+          options: {
+            dpop_signing_alg: 'ES384',
+          },
+        },
+        {
+          name: 'oidc-connection-es512',
+          strategy: 'oidc',
+          options: {
+            dpop_signing_alg: 'ES512',
+          },
+        },
+        {
+          name: 'okta-connection',
+          strategy: 'okta',
+          options: {
+            dpop_signing_alg: 'Ed25519',
+          },
+        },
+        {
+          name: 'samlp-connection',
+          strategy: 'samlp',
+          options: {
+            discovery_url: 'https://example-idp.com/.well-known/openid-configuration',
+            oidc_metadata: { issuer: 'https://example-idp.com' },
+          },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should allow cross_app_access_requesting_app with active boolean', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'oidc-connection',
+          strategy: 'oidc',
+          cross_app_access_requesting_app: { active: true },
+        },
+        {
+          name: 'okta-connection',
+          strategy: 'okta',
+          cross_app_access_requesting_app: { active: false },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should reject cross_app_access_requesting_app without active field', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'oidc-connection',
+          strategy: 'oidc',
+          cross_app_access_requesting_app: {},
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(false);
+      expect(ajv.errors).to.not.be.null;
+    });
+
+    it('should reject cross_app_access_requesting_app with unknown properties', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'oidc-connection',
+          strategy: 'oidc',
+          cross_app_access_requesting_app: { active: true, unknown_field: 'value' },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(false);
+      expect(ajv.errors).to.not.be.null;
+    });
+
+    it('should allow cross_app_access_resource_app with status enum', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'samlp-connection',
+          strategy: 'samlp',
+          cross_app_access_resource_app: { status: 'enabled' },
+        },
+        {
+          name: 'oidc-connection',
+          strategy: 'oidc',
+          cross_app_access_resource_app: { status: 'disabled' },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should reject cross_app_access_resource_app with invalid status', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'samlp-connection',
+          strategy: 'samlp',
+          cross_app_access_resource_app: { status: 'on' },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(false);
+      expect(ajv.errors).to.not.be.null;
+    });
+
+    it('should allow synchronized_groups items with full GA metadata (id, name, email, direct_members_count)', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'google-workspace',
+          strategy: 'google-apps',
+          directory_provisioning_configuration: {
+            mapping: [{ auth0: 'email', idp: 'mail' }],
+            synchronize_automatically: false,
+            synchronize_groups: 'selected',
+            synchronized_groups: [
+              {
+                id: 'group1',
+                name: 'Engineering',
+                email: 'engineering@example.com',
+                direct_members_count: 42,
+              },
+            ],
+          },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should allow synchronized_groups items with only id (backward compatibility)', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'google-workspace',
+          strategy: 'google-apps',
+          directory_provisioning_configuration: {
+            mapping: [],
+            synchronize_automatically: false,
+            synchronize_groups: 'selected',
+            synchronized_groups: [{ id: 'group1' }, { id: 'group2' }],
+          },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+  });
 
   describe('#connections validate', () => {
     it('should not allow same names', async () => {
@@ -61,6 +257,61 @@ describe('#connections handler', () => {
       ];
 
       await stageFn.apply(handler, [{ connections: data }]);
+    });
+
+    it('should allow supported oidc/okta auth signing algorithms', async () => {
+      const handler = new connections.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        {
+          name: 'oidc-connection',
+          strategy: 'oidc',
+          options: {
+            token_endpoint_auth_signing_alg: 'RS256',
+            id_token_signed_response_algs: ['RS256', 'RS512'],
+            token_endpoint_jwtca_aud_format: 'issuer',
+            id_token_session_expiry_supported: true,
+          },
+        },
+        {
+          name: 'okta-connection',
+          strategy: 'okta',
+          options: {
+            token_endpoint_auth_signing_alg: 'RS384',
+            id_token_signed_response_algs: ['RS384'],
+            token_endpoint_jwtca_aud_format: 'token_endpoint',
+            id_token_session_expiry_supported: false,
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ connections: data }]);
+    });
+
+    it('should reject oidc/okta-only options for non-oidc/okta strategies', async () => {
+      const handler = new connections.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        {
+          name: 'saml-connection',
+          strategy: 'samlp',
+          options: {
+            token_endpoint_auth_signing_alg: 'RS256',
+            id_token_signed_response_algs: ['RS256'],
+            token_endpoint_jwtca_aud_format: 'issuer',
+            id_token_session_expiry_supported: true,
+          },
+        },
+      ];
+
+      try {
+        await stageFn.apply(handler, [{ connections: data }]);
+        throw new Error('Expected validation to fail');
+      } catch (err) {
+        expect(err).to.be.an('object');
+        expect(err.message).to.include('only supported for strategies "oidc" and "okta"');
+        expect(err.message).to.include('Found strategy "samlp"');
+      }
     });
   });
 
@@ -100,19 +351,40 @@ describe('#connections handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someConnection');
-            return Promise.resolve({ data });
+            // Verify enabled_clients is NOT in the API payload (it's deprecated)
+            expect(data).to.not.have.property('enabled_clients');
+            return Promise.resolve({ data: { ...data, id: 'con_new1' } });
           },
+          get: () =>
+            Promise.resolve({
+              id: 'con_new1',
+              name: 'someConnection',
+              strategy: 'custom',
+              options: {},
+            }),
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          list: (params) => mockPagedData(params, 'connections', []),
+          list: (params) => {
+            // Return the newly created connection when listing by name
+            if (params.name === 'someConnection') {
+              return mockPagedData(params, 'connections', [
+                { id: 'con_new1', name: 'someConnection', strategy: 'custom', options: {} },
+              ]);
+            }
+            return mockPagedData(params, 'connections', []);
+          },
           _getRestClient: () => ({}),
           clients: {
             get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
-            update: () => Promise.resolve({}),
+            update: (connectionId) => {
+              expect(connectionId).to.equal('con_new1');
+              return Promise.resolve({});
+            },
           },
         },
         clients: {
-          list: (params) => mockPagedData(params, 'clients', []),
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ name: 'client1', client_id: 'client_id_1' }]),
         },
         pool,
       };
@@ -120,7 +392,84 @@ describe('#connections handler', () => {
       const handler = new connections.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [{ connections: [{ name: 'someConnection' }] }]);
+      await stageFn.apply(handler, [
+        { connections: [{ name: 'someConnection', enabled_clients: ['client1'] }] },
+      ]);
+    });
+
+    it('should preserve api_enable_groups in connection options', async () => {
+      const auth0 = {
+        connections: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data).to.deep.equal({
+              name: 'google-workspace',
+              strategy: 'google-apps',
+              options: {
+                domain: 'example.com',
+                api_enable_groups: true,
+              },
+            });
+            return Promise.resolve({ data: { ...data, id: 'con_google' } });
+          },
+          get: () =>
+            Promise.resolve({
+              id: 'con_google',
+              name: 'google-workspace',
+              strategy: 'google-apps',
+              options: { domain: 'example.com', api_enable_groups: true },
+            }),
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => {
+            if (params.name === 'google-workspace') {
+              return mockPagedData(params, 'connections', [
+                {
+                  id: 'con_google',
+                  name: 'google-workspace',
+                  strategy: 'google-apps',
+                  options: { domain: 'example.com', api_enable_groups: true },
+                },
+              ]);
+            }
+
+            return mockPagedData(params, 'connections', []);
+          },
+          _getRestClient: () => ({}),
+          clients: {
+            get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
+            update: (connectionId) => {
+              expect(connectionId).to.equal('con_google');
+              return Promise.resolve({});
+            },
+          },
+        },
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ name: 'client1', client_id: 'client_id_1' }]),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          connections: [
+            {
+              name: 'google-workspace',
+              strategy: 'google-apps',
+              enabled_clients: ['client1'],
+              options: {
+                domain: 'example.com',
+                api_enable_groups: true,
+              },
+            },
+          ],
+        },
+      ]);
     });
 
     it('should get connections', async () => {
@@ -128,10 +477,12 @@ describe('#connections handler', () => {
       let getEnabledClientsCalledOnce = false;
       const auth0 = {
         connections: {
+          // Real API does NOT include enabled_clients in the list response;
+          // they are fetched separately via connections.clients.get.
           list: (params) =>
             mockPagedData(params, 'connections', [
-              { id: 'con1', strategy: 'github', name: 'github', enabled_clients: [clientId] },
-              { id: 'con2', strategy: 'auth0', name: 'db-should-be-ignored', enabled_clients: [] },
+              { id: 'con1', strategy: 'github', name: 'github' },
+              { id: 'con2', strategy: 'auth0', name: 'db-should-be-ignored' },
             ]),
           clients: {
             get: () => {
@@ -171,16 +522,107 @@ describe('#connections handler', () => {
 
       const handler = new connections.default({ client: pageClient(auth0), config });
       sinon.stub(connections, 'getConnectionEnabledClients').resolves(undefined);
-      const dirProvConfig = { mapping: [{ auth0: 'email', idp: 'mail' }] };
-      sinon.stub(handler, 'getConnectionDirectoryProvisioning').resolves(dirProvConfig);
+      const dirProvConfig = {
+        mapping: [{ auth0: 'email', idp: 'mail' }],
+        synchronize_automatically: true,
+      };
+      const dirProvConfigs = [
+        {
+          connection_id: 'con1',
+          mapping: [{ auth0: 'email', idp: 'mail' }],
+          synchronize_automatically: true,
+        },
+      ];
+      sinon.stub(handler, 'getConnectionDirectoryProvisionings').resolves(dirProvConfigs);
       handler.scimHandler.applyScimConfiguration = sinon.stub().resolves();
 
       const data = await handler.getType();
 
-      expect(handler.getConnectionDirectoryProvisioning.calledOnceWith('con1')).to.be.true;
+      expect(handler.getConnectionDirectoryProvisionings.calledOnce).to.be.true;
       expect(data[0])
         .to.have.property('directory_provisioning_configuration')
         .that.deep.equals(dirProvConfig);
+    });
+
+    it('should include synchronized_groups in export when synchronize_groups is selected', async () => {
+      const auth0 = {
+        connections: {
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con1', strategy: 'google-apps', name: 'gsuite', options: {} },
+            ]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      sinon.stub(connections, 'getConnectionEnabledClients').resolves(undefined);
+      const dirProvConfigs = [
+        {
+          connection_id: 'con1',
+          mapping: [{ auth0: 'email', idp: 'mail' }],
+          synchronize_automatically: false,
+          synchronize_groups: 'selected',
+        },
+      ];
+      const syncedGroups = [{ id: 'group1' }, { id: 'group2' }];
+      sinon.stub(handler, 'getConnectionDirectoryProvisionings').resolves(dirProvConfigs);
+      sinon.stub(handler, 'getConnectionSynchronizedGroups').resolves(syncedGroups);
+      handler.scimHandler.applyScimConfiguration = sinon.stub().resolves();
+
+      const data = await handler.getType();
+
+      expect(handler.getConnectionSynchronizedGroups.calledOnceWith('con1')).to.be.true;
+      expect(data[0])
+        .to.have.property('directory_provisioning_configuration')
+        .that.deep.equals({
+          mapping: [{ auth0: 'email', idp: 'mail' }],
+          synchronize_automatically: false,
+          synchronize_groups: 'selected',
+          synchronized_groups: syncedGroups,
+        });
+    });
+
+    it('should export full group metadata (name, email, direct_members_count) when present in synchronized_groups', async () => {
+      const auth0 = {
+        connections: {
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con1', strategy: 'google-apps', name: 'gsuite', options: {} },
+            ]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      sinon.stub(connections, 'getConnectionEnabledClients').resolves(undefined);
+      const dirProvConfigs = [
+        {
+          connection_id: 'con1',
+          mapping: [{ auth0: 'email', idp: 'mail' }],
+          synchronize_automatically: false,
+          synchronize_groups: 'selected',
+        },
+      ];
+      const syncedGroupsWithMetadata = [
+        { id: 'group1', name: 'Engineering', email: 'eng@example.com', direct_members_count: 10 },
+        { id: 'group2', name: 'Design', email: 'design@example.com', direct_members_count: 5 },
+      ];
+      sinon.stub(handler, 'getConnectionDirectoryProvisionings').resolves(dirProvConfigs);
+      sinon.stub(handler, 'getConnectionSynchronizedGroups').resolves(syncedGroupsWithMetadata);
+      handler.scimHandler.applyScimConfiguration = sinon.stub().resolves();
+
+      const data = await handler.getType();
+
+      expect(data[0].directory_provisioning_configuration.synchronized_groups).to.deep.equal(
+        syncedGroupsWithMetadata
+      );
     });
 
     it('should update connection', async () => {
@@ -195,8 +637,9 @@ describe('#connections handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(id).to.be.a('string');
             expect(id).to.equal('con1');
+            // Verify enabled_clients is NOT in the update payload (it's deprecated on this endpoint)
+            expect(data).to.not.have.property('enabled_clients');
             expect(data).to.deep.equal({
-              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               options: { passwordPolicy: 'testPolicy' },
               authentication: { active: false },
               connected_accounts: { active: false },
@@ -248,6 +691,84 @@ describe('#connections handler', () => {
       await stageFn.apply(handler, [{ connections: data }]);
     });
 
+    it('should pass cross_app_access_requesting_app through in the update payload', async () => {
+      const auth0 = {
+        connections: {
+          create: () => Promise.resolve({ data: {} }),
+          update: function (id, data) {
+            expect(id).to.equal('con1');
+            expect(data).to.have.deep.property('cross_app_access_requesting_app', { active: true });
+            return Promise.resolve({ ...data, id });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someConnection', id: 'con1', strategy: 'custom' },
+            ]),
+          _getRestClient: () => ({}),
+          clients: {
+            update: () => Promise.resolve({}),
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          name: 'someConnection',
+          strategy: 'custom',
+          cross_app_access_requesting_app: { active: true },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ connections: data }]);
+    });
+
+    it('should pass cross_app_access_resource_app through in the update payload', async () => {
+      const auth0 = {
+        connections: {
+          create: () => Promise.resolve({ data: {} }),
+          update: function (id, data) {
+            expect(id).to.equal('con1');
+            expect(data).to.have.deep.property('cross_app_access_resource_app', {
+              status: 'enabled',
+            });
+            return Promise.resolve({ ...data, id });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someConnection', id: 'con1', strategy: 'custom' },
+            ]),
+          _getRestClient: () => ({}),
+          clients: {
+            update: () => Promise.resolve({}),
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          name: 'someConnection',
+          strategy: 'custom',
+          cross_app_access_resource_app: { status: 'enabled' },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ connections: data }]);
+    });
+
     it('should convert client name with ID in idpinitiated.client_id', async () => {
       const auth0 = {
         connections: {
@@ -273,7 +794,6 @@ describe('#connections handler', () => {
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
-              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               options: {
                 passwordPolicy: 'testPolicy',
                 idpinitiated: {
@@ -442,33 +962,33 @@ describe('#connections handler', () => {
           .be.true;
       });
 
-      it('should retrieve directory provisioning configuration (GET)', async () => {
-        const dirProvConfig = { mapping: sampleMapping, synchronize_automatically: true };
-        const getStub = sinon.stub().resolves(dirProvConfig);
-        const poolExecutor = {
-          addEachTask: ({ data, generator }) => ({
-            promise: async () => {
-              for (const item of data || []) {
-                await generator(item);
-              }
-            },
-          }),
-        };
+      it('should retrieve directory provisioning configurations list', async () => {
+        const dirProvConfigs = [
+          {
+            connection_id: 'con1',
+            mapping: sampleMapping,
+            synchronize_automatically: true,
+          },
+          {
+            connection_id: 'con2',
+            mapping: sampleMapping,
+            synchronize_automatically: false,
+          },
+        ];
 
         const auth0 = {
           connections: {
             directoryProvisioning: {
-              get: getStub,
+              list: (params) => mockPagedData(params, 'directory-provisioning', dirProvConfigs),
             },
           },
-          pool: poolExecutor,
+          pool,
         };
 
         const handler = new connections.default({ client: pageClient(auth0), config });
-        const result = await handler.getConnectionDirectoryProvisioning('con-get');
+        const result = await handler.getConnectionDirectoryProvisionings();
 
-        expect(getStub.calledOnceWith('con-get')).to.be.true;
-        expect(result).to.deep.equal(dirProvConfig);
+        expect(result).to.deep.equal(dirProvConfigs);
       });
 
       it('should update directory provisioning configuration (PATCH)', async () => {
@@ -510,6 +1030,355 @@ describe('#connections handler', () => {
 
         expect(deleteStub.calledOnceWith('con-del')).to.be.true;
       });
+
+      it('should include synchronize_groups in create payload', async () => {
+        const createStub = sinon.stub().resolves();
+        const auth0 = {
+          connections: { directoryProvisioning: { create: createStub } },
+          pool,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        await handler.createConnectionDirectoryProvisioning('con1', {
+          mapping: sampleMapping,
+          synchronize_groups: 'selected',
+        });
+
+        expect(
+          createStub.calledOnceWith(
+            'con1',
+            sinon.match({ mapping: sampleMapping, synchronize_groups: 'selected' })
+          )
+        ).to.be.true;
+      });
+
+      it('should omit synchronize_groups from create payload when not provided', async () => {
+        const createStub = sinon.stub().resolves();
+        const auth0 = {
+          connections: { directoryProvisioning: { create: createStub } },
+          pool,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        await handler.createConnectionDirectoryProvisioning('con1', { mapping: sampleMapping });
+
+        const calledPayload = createStub.firstCall.args[1];
+        expect(calledPayload).to.not.have.property('synchronize_groups');
+      });
+
+      it('should include synchronize_groups in update payload', async () => {
+        const updateStub = sinon.stub().resolves();
+        const auth0 = { connections: { directoryProvisioning: { update: updateStub } } };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        await handler.updateConnectionDirectoryProvisioning('con1', {
+          mapping: sampleMapping,
+          synchronize_automatically: true,
+          synchronize_groups: 'all',
+        });
+
+        expect(
+          updateStub.calledOnceWith(
+            'con1',
+            sinon.match({ synchronize_groups: 'all', synchronize_automatically: true })
+          )
+        ).to.be.true;
+      });
+
+      it('should omit synchronize_groups from update payload when not provided', async () => {
+        const updateStub = sinon.stub().resolves();
+        const auth0 = { connections: { directoryProvisioning: { update: updateStub } } };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        await handler.updateConnectionDirectoryProvisioning('con1', {
+          mapping: sampleMapping,
+          synchronize_automatically: false,
+        });
+
+        const calledPayload = updateStub.firstCall.args[1];
+        expect(calledPayload).to.not.have.property('synchronize_groups');
+      });
+
+      it('should fetch and paginate synchronized groups', async () => {
+        const page1 = {
+          data: [{ id: 'group1' }, { id: 'group2' }],
+          hasNextPage: sinon.stub().onFirstCall().returns(true).onSecondCall().returns(false),
+        };
+        page1.getNextPage = sinon.stub().resolves({
+          data: [{ id: 'group3' }],
+          hasNextPage: sinon.stub().returns(false),
+        });
+
+        const auth0 = {
+          connections: {
+            directoryProvisioning: {
+              listSynchronizedGroups: sinon.stub().resolves(page1),
+            },
+          },
+          pool,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        const result = await handler.getConnectionSynchronizedGroups('con1');
+
+        expect(result).to.deep.equal([{ id: 'group1' }, { id: 'group2' }, { id: 'group3' }]);
+      });
+
+      it('should preserve full group metadata (name, email, direct_members_count) across pages', async () => {
+        const page1 = {
+          data: [
+            {
+              id: 'group1',
+              name: 'Engineering',
+              email: 'eng@example.com',
+              direct_members_count: 10,
+            },
+            { id: 'group2', name: 'Design', email: 'design@example.com', direct_members_count: 5 },
+          ],
+          hasNextPage: sinon.stub().onFirstCall().returns(true).onSecondCall().returns(false),
+        };
+        page1.getNextPage = sinon.stub().resolves({
+          data: [{ id: 'group3', name: 'Ops', email: 'ops@example.com', direct_members_count: 3 }],
+          hasNextPage: sinon.stub().returns(false),
+        });
+
+        const auth0 = {
+          connections: {
+            directoryProvisioning: {
+              listSynchronizedGroups: sinon.stub().resolves(page1),
+            },
+          },
+          pool,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        const result = await handler.getConnectionSynchronizedGroups('con1');
+
+        expect(result).to.deep.equal([
+          { id: 'group1', name: 'Engineering', email: 'eng@example.com', direct_members_count: 10 },
+          { id: 'group2', name: 'Design', email: 'design@example.com', direct_members_count: 5 },
+          { id: 'group3', name: 'Ops', email: 'ops@example.com', direct_members_count: 3 },
+        ]);
+      });
+
+      it('should omit undefined metadata fields and only include id when metadata is absent', async () => {
+        const page1 = {
+          data: [{ id: 'group1' }, { id: 'group2' }],
+          hasNextPage: sinon.stub().returns(false),
+        };
+
+        const auth0 = {
+          connections: {
+            directoryProvisioning: {
+              listSynchronizedGroups: sinon.stub().resolves(page1),
+            },
+          },
+          pool,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        const result = await handler.getConnectionSynchronizedGroups('con1');
+
+        expect(result).to.deep.equal([{ id: 'group1' }, { id: 'group2' }]);
+        expect(result[0]).to.not.have.property('name');
+        expect(result[0]).to.not.have.property('email');
+        expect(result[0]).to.not.have.property('direct_members_count');
+      });
+
+      it('should return null and log warning when listSynchronizedGroups returns 403', async () => {
+        const err = new Error('Forbidden');
+        err.statusCode = 403;
+        err.body = { message: 'Feature not enabled' };
+
+        const auth0 = {
+          connections: {
+            directoryProvisioning: {
+              listSynchronizedGroups: sinon.stub().rejects(err),
+            },
+          },
+          pool,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        const result = await handler.getConnectionSynchronizedGroups('con1');
+
+        expect(result).to.be.null;
+      });
+
+      it('should call set() when updating synchronized groups', async () => {
+        const setStub = sinon.stub().resolves();
+        const auth0 = {
+          connections: { directoryProvisioning: { set: setStub } },
+          pool,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        await handler.updateConnectionSynchronizedGroups('con1', [
+          { id: 'group1' },
+          { id: 'group2' },
+        ]);
+
+        expect(
+          setStub.calledOnceWith('con1', {
+            groups: [{ id: 'group1' }, { id: 'group2' }],
+          })
+        ).to.be.true;
+      });
+
+      it('should pass full group objects (name, email, direct_members_count) to set()', async () => {
+        const setStub = sinon.stub().resolves();
+        const auth0 = {
+          connections: { directoryProvisioning: { set: setStub } },
+          pool,
+        };
+
+        const fullGroups = [
+          { id: 'group1', name: 'Engineering', email: 'eng@example.com', direct_members_count: 10 },
+          { id: 'group2', name: 'Design', email: 'design@example.com', direct_members_count: 5 },
+        ];
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        await handler.updateConnectionSynchronizedGroups('con1', fullGroups);
+
+        expect(setStub.calledOnceWith('con1', { groups: fullGroups })).to.be.true;
+      });
+
+      it('should call set() for connections with synchronize_groups === selected in processConnectionDirectoryProvisioning', async () => {
+        const poolExecutor = {
+          addEachTask: ({ data, generator }) => ({
+            promise: async () => {
+              for (const item of data || []) await generator(item);
+            },
+          }),
+        };
+
+        const auth0 = {
+          connections: { directoryProvisioning: {} },
+          clients: { list: (params) => mockPagedData(params, 'clients', []) },
+          pool: poolExecutor,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        handler.existing = [];
+
+        const setSyncGroupsStub = sinon
+          .stub(handler, 'updateConnectionSynchronizedGroups')
+          .resolves();
+        const createStub = sinon.stub(handler, 'createConnectionDirectoryProvisioning').resolves();
+
+        await handler.processConnectionDirectoryProvisioning({
+          create: [
+            {
+              id: 'con1',
+              name: 'gsuite-new',
+              strategy: 'google-apps',
+              directory_provisioning_configuration: {
+                mapping: sampleMapping,
+                synchronize_groups: 'selected',
+                synchronized_groups: [{ id: 'group1' }],
+              },
+            },
+          ],
+          update: [],
+          conflicts: [],
+          del: [],
+        });
+
+        expect(createStub.calledOnce).to.be.true;
+        expect(setSyncGroupsStub.calledOnceWith('con1', [{ id: 'group1' }])).to.be.true;
+      });
+
+      it('should pass full group objects to updateConnectionSynchronizedGroups when synchronize_groups is selected', async () => {
+        const poolExecutor = {
+          addEachTask: ({ data, generator }) => ({
+            promise: async () => {
+              for (const item of data || []) await generator(item);
+            },
+          }),
+        };
+
+        const auth0 = {
+          connections: { directoryProvisioning: {} },
+          clients: { list: (params) => mockPagedData(params, 'clients', []) },
+          pool: poolExecutor,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        handler.existing = [];
+
+        const setSyncGroupsStub = sinon
+          .stub(handler, 'updateConnectionSynchronizedGroups')
+          .resolves();
+        sinon.stub(handler, 'createConnectionDirectoryProvisioning').resolves();
+
+        const fullGroups = [
+          { id: 'group1', name: 'Engineering', email: 'eng@example.com', direct_members_count: 10 },
+          { id: 'group2', name: 'Design', email: 'design@example.com', direct_members_count: 5 },
+        ];
+
+        await handler.processConnectionDirectoryProvisioning({
+          create: [
+            {
+              id: 'con1',
+              name: 'gsuite-new',
+              strategy: 'google-apps',
+              directory_provisioning_configuration: {
+                mapping: sampleMapping,
+                synchronize_groups: 'selected',
+                synchronized_groups: fullGroups,
+              },
+            },
+          ],
+          update: [],
+          conflicts: [],
+          del: [],
+        });
+
+        expect(setSyncGroupsStub.calledOnceWith('con1', fullGroups)).to.be.true;
+      });
+
+      it('should not call set() when synchronize_groups is not selected', async () => {
+        const poolExecutor = {
+          addEachTask: ({ data, generator }) => ({
+            promise: async () => {
+              for (const item of data || []) await generator(item);
+            },
+          }),
+        };
+
+        const auth0 = {
+          connections: { directoryProvisioning: {} },
+          clients: { list: (params) => mockPagedData(params, 'clients', []) },
+          pool: poolExecutor,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        handler.existing = [];
+
+        const setSyncGroupsStub = sinon
+          .stub(handler, 'updateConnectionSynchronizedGroups')
+          .resolves();
+        sinon.stub(handler, 'createConnectionDirectoryProvisioning').resolves();
+
+        await handler.processConnectionDirectoryProvisioning({
+          create: [
+            {
+              id: 'con1',
+              name: 'gsuite-new',
+              strategy: 'google-apps',
+              directory_provisioning_configuration: {
+                mapping: sampleMapping,
+                synchronize_groups: 'all',
+              },
+            },
+          ],
+          update: [],
+          conflicts: [],
+          del: [],
+        });
+
+        expect(setSyncGroupsStub.called).to.be.false;
+      });
     });
 
     it('should keep client ID in idpinitiated.client_id', async () => {
@@ -518,7 +1387,6 @@ describe('#connections handler', () => {
           create: function (data) {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.deep.equal({
-              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               name: 'someConnection-2',
               strategy: 'custom',
               options: {
@@ -537,7 +1405,6 @@ describe('#connections handler', () => {
             expect(params).to.be.an('object');
             expect(params.id).to.equal('con1');
             expect(data).to.deep.equal({
-              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               options: {
                 passwordPolicy: 'testPolicy',
                 idpinitiated: {
@@ -624,7 +1491,6 @@ describe('#connections handler', () => {
             expect(id).to.be.a('string');
             expect(id).to.equal('con1');
             expect(data).to.deep.equal({
-              enabled_clients: ['client1-id', 'excluded-one-id'],
               options: { passwordPolicy: 'testPolicy' },
             });
 
@@ -894,43 +1760,97 @@ describe('#connections enabled clients functionality', () => {
   });
 
   describe('#getConnectionEnabledClients', () => {
-    it('should return array of client IDs with single page', async () => {
+    it('should return array of client IDs from a single-page SDK PagedResponse', async () => {
       const connectionId = 'con_123';
-      const mockResponse = {
-        data: [{ client_id: 'client_1' }, { client_id: 'client_2' }, { client_id: 'client_3' }],
-        hasNextPage: () => false,
-        getNextPage: async () => ({ data: [], hasNextPage: () => false }),
-      };
-
-      mockAuth0Client.connections.clients.get.resolves(mockResponse);
+      // Auth0 SDK v5 .get() returns a PagedResponse object, not a flat array
+      mockAuth0Client.connections.clients.get.resolves(
+        mockPagedData({}, 'clients', [
+          { client_id: 'client_1' },
+          { client_id: 'client_2' },
+          { client_id: 'client_3' },
+        ])
+      );
 
       const result = await getConnectionEnabledClients(mockAuth0Client, connectionId);
 
       expect(result).to.deep.equal(['client_1', 'client_2', 'client_3']);
-      sinon.assert.calledOnceWithExactly(mockAuth0Client.connections.clients.get, connectionId);
+      sinon.assert.calledOnceWithExactly(mockAuth0Client.connections.clients.get, connectionId, {
+        take: 100,
+      });
     });
 
     it('should return empty array when no enabled clients', async () => {
       const connectionId = 'con_123';
-      const mockResponse = {
-        data: [],
-        hasNextPage: () => false,
-        getNextPage: async () => ({ data: [], hasNextPage: () => false }),
-      };
-
-      mockAuth0Client.connections.clients.get.resolves(mockResponse);
+      mockAuth0Client.connections.clients.get.resolves(mockPagedData({}, 'clients', []));
 
       const result = await getConnectionEnabledClients(mockAuth0Client, connectionId);
 
       expect(result).to.deep.equal([]);
     });
+
+    it('should follow hasNextPage/getNextPage to collect all pages', async () => {
+      const connectionId = 'con_123';
+
+      // Simulate two pages via the PagedResponse format
+      mockAuth0Client.connections.clients.get.resolves(
+        mockPagedData(
+          {},
+          'clients',
+          [{ client_id: 'client_1' }, { client_id: 'client_2' }],
+          [[{ client_id: 'client_3' }, { client_id: 'client_4' }]]
+        )
+      );
+
+      const result = await getConnectionEnabledClients(mockAuth0Client, connectionId);
+
+      expect(result).to.deep.equal(['client_1', 'client_2', 'client_3', 'client_4']);
+    });
+
+    it('should return null without throwing when .get() rejects', async () => {
+      const connectionId = 'con_123';
+      mockAuth0Client.connections.clients.get.rejects(new Error('network error'));
+
+      const result = await getConnectionEnabledClients(mockAuth0Client, connectionId);
+
+      expect(result).to.be.null;
+    });
+
+    it('should return null without throwing when connectionId is empty', async () => {
+      const result = await getConnectionEnabledClients(mockAuth0Client, '');
+      expect(result).to.be.null;
+      sinon.assert.notCalled(mockAuth0Client.connections.clients.get);
+    });
+
+    // Regression test for the bug introduced in commit 7e07417:
+    // paginate() was called with .get() instead of .list(), bypassing the pagedClient proxy.
+    // The SDK v5 .get() returns a PagedResponse object; calling .filter() on it threw a
+    // TypeError that was silently swallowed, causing enabled_clients to be absent from exports.
+    it('should not silently drop clients when SDK returns a PagedResponse (regression: 7e07417)', async () => {
+      const connectionId = 'con_regression';
+      const pagedResponse = mockPagedData({}, 'clients', [
+        { client_id: 'client_a' },
+        { client_id: 'client_b' },
+      ]);
+
+      // Confirm the mock is a PagedResponse object (has .data), not a flat array
+      expect(Array.isArray(pagedResponse)).to.equal(false);
+      expect(pagedResponse.data).to.be.an('array');
+
+      mockAuth0Client.connections.clients.get.resolves(pagedResponse);
+
+      const result = await getConnectionEnabledClients(mockAuth0Client, connectionId);
+
+      // Before the fix, result was null because .filter() threw on the PagedResponse object
+      expect(result).to.deep.equal(['client_a', 'client_b']);
+    });
   });
 
   describe('#updateConnectionEnabledClients', () => {
-    it('should update enabled clients successfully', async () => {
+    it('should update enabled clients successfully with no existing clients', async () => {
       const connectionId = 'con_123';
       const enabledClientIds = ['client_1', 'client_2', 'client_3'];
       const typeName = 'connection';
+      const existingConnections = [{ id: 'con_123', name: 'test-connection', enabled_clients: [] }];
 
       mockAuth0Client.connections.clients.update.resolves();
 
@@ -938,7 +1858,8 @@ describe('#connections enabled clients functionality', () => {
         mockAuth0Client,
         typeName,
         connectionId,
-        enabledClientIds
+        enabledClientIds,
+        existingConnections
       );
 
       expect(result).to.equal(true);
@@ -953,6 +1874,7 @@ describe('#connections enabled clients functionality', () => {
       const connectionId = 'con_123';
       const enabledClientIds = Array.from({ length: 60 }, (_, i) => `client_${i + 1}`);
       const typeName = 'connection';
+      const existingConnections = [{ id: 'con_123', name: 'test-connection', enabled_clients: [] }];
 
       mockAuth0Client.connections.clients.update.resolves();
 
@@ -960,7 +1882,8 @@ describe('#connections enabled clients functionality', () => {
         mockAuth0Client,
         typeName,
         connectionId,
-        enabledClientIds
+        enabledClientIds,
+        existingConnections
       );
 
       expect(result).to.equal(true);
@@ -978,6 +1901,152 @@ describe('#connections enabled clients functionality', () => {
       expect(secondCall.args[1][0]).to.deep.equal({ client_id: 'client_51', status: true });
       expect(secondCall.args[1][9]).to.deep.equal({ client_id: 'client_60', status: true });
     });
+
+    it('should skip update when enabled clients are unchanged', async () => {
+      const connectionId = 'con_123';
+      const enabledClientIds = ['client_1', 'client_2', 'client_3'];
+      const typeName = 'connection';
+      const existingConnections = [
+        {
+          id: 'con_123',
+          name: 'test-connection',
+          enabled_clients: ['client_1', 'client_2', 'client_3'],
+        },
+      ];
+
+      mockAuth0Client.connections.clients.update.resolves();
+
+      const result = await updateConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        connectionId,
+        enabledClientIds,
+        existingConnections
+      );
+
+      expect(result).to.equal(true);
+      sinon.assert.notCalled(mockAuth0Client.connections.clients.update);
+    });
+
+    it('should disable removed clients', async () => {
+      const connectionId = 'con_123';
+      const enabledClientIds = ['client_1', 'client_2'];
+      const typeName = 'connection';
+      const existingConnections = [
+        {
+          id: 'con_123',
+          name: 'test-connection',
+          enabled_clients: ['client_1', 'client_2', 'client_3', 'client_4'],
+        },
+      ];
+
+      mockAuth0Client.connections.clients.update.resolves();
+
+      const result = await updateConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        connectionId,
+        enabledClientIds,
+        existingConnections
+      );
+
+      expect(result).to.equal(true);
+      sinon.assert.calledOnceWithExactly(mockAuth0Client.connections.clients.update, connectionId, [
+        { client_id: 'client_1', status: true },
+        { client_id: 'client_2', status: true },
+        { client_id: 'client_3', status: false },
+        { client_id: 'client_4', status: false },
+      ]);
+    });
+
+    it('should enable new clients and disable removed clients in one operation', async () => {
+      const connectionId = 'con_123';
+      const enabledClientIds = ['client_2', 'client_3', 'client_5'];
+      const typeName = 'connection';
+      const existingConnections = [
+        {
+          id: 'con_123',
+          name: 'test-connection',
+          enabled_clients: ['client_1', 'client_2', 'client_4'],
+        },
+      ];
+
+      mockAuth0Client.connections.clients.update.resolves();
+
+      const result = await updateConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        connectionId,
+        enabledClientIds,
+        existingConnections
+      );
+
+      expect(result).to.equal(true);
+      sinon.assert.calledOnceWithExactly(mockAuth0Client.connections.clients.update, connectionId, [
+        { client_id: 'client_2', status: true },
+        { client_id: 'client_3', status: true },
+        { client_id: 'client_5', status: true },
+        { client_id: 'client_1', status: false },
+        { client_id: 'client_4', status: false },
+      ]);
+    });
+
+    it('should handle existingConnections as null', async () => {
+      const connectionId = 'con_123';
+      const enabledClientIds = ['client_1', 'client_2'];
+      const typeName = 'connection';
+      const existingConnections = null;
+
+      mockAuth0Client.connections.clients.update.resolves();
+
+      const result = await updateConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        connectionId,
+        enabledClientIds,
+        existingConnections
+      );
+
+      expect(result).to.equal(true);
+      sinon.assert.calledOnceWithExactly(mockAuth0Client.connections.clients.update, connectionId, [
+        { client_id: 'client_1', status: true },
+        { client_id: 'client_2', status: true },
+      ]);
+    });
+
+    it('should handle large combined enable and disable operations (more than 50 clients)', async () => {
+      const connectionId = 'con_123';
+      const enabledClientIds = Array.from({ length: 35 }, (_, i) => `new_client_${i + 1}`);
+      const typeName = 'connection';
+      const existingEnabledClients = Array.from({ length: 25 }, (_, i) => `old_client_${i + 1}`);
+      const existingConnections = [
+        {
+          id: 'con_123',
+          name: 'test-connection',
+          enabled_clients: existingEnabledClients,
+        },
+      ];
+
+      mockAuth0Client.connections.clients.update.resolves();
+
+      const result = await updateConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        connectionId,
+        enabledClientIds,
+        existingConnections
+      );
+
+      expect(result).to.equal(true);
+      // Total: 35 enable + 25 disable = 60 operations, should be chunked into 50 + 10
+      sinon.assert.calledTwice(mockAuth0Client.connections.clients.update);
+
+      const firstCall = mockAuth0Client.connections.clients.update.getCall(0);
+      expect(firstCall.args[1]).to.have.length(50);
+
+      const secondCall = mockAuth0Client.connections.clients.update.getCall(1);
+      expect(secondCall.args[1]).to.have.length(10);
+    });
   });
 
   describe('#processConnectionEnabledClients', () => {
@@ -990,6 +2059,7 @@ describe('#connections enabled clients functionality', () => {
 
     it('should process create operations with ID lookup', async () => {
       const typeName = 'connection';
+      const existingConnections = [];
       const changes = {
         create: [
           { name: 'new-connection-1', enabled_clients: ['client_1', 'client_2'] },
@@ -1013,7 +2083,12 @@ describe('#connections enabled clients functionality', () => {
       // Mock updateEnabledClients
       mockAuth0Client.connections.clients.update.resolves();
 
-      await processConnectionEnabledClients(mockAuth0Client, typeName, changes);
+      await processConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        existingConnections,
+        changes
+      );
 
       sinon.assert.calledOnceWithExactly(sleepStub, 2500);
       sinon.assert.calledTwice(mockAuth0Client.connections.list);
@@ -1022,6 +2097,10 @@ describe('#connections enabled clients functionality', () => {
 
     it('should process update operations', async () => {
       const typeName = 'connection';
+      const existingConnections = [
+        { id: 'con_1', name: 'existing-connection-1', enabled_clients: ['client_1'] },
+        { id: 'con_2', name: 'existing-connection-2', enabled_clients: [] },
+      ];
       const changes = {
         create: [],
         update: [
@@ -1033,7 +2112,12 @@ describe('#connections enabled clients functionality', () => {
 
       mockAuth0Client.connections.clients.update.resolves();
 
-      await processConnectionEnabledClients(mockAuth0Client, typeName, changes);
+      await processConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        existingConnections,
+        changes
+      );
 
       sinon.assert.notCalled(sleepStub);
       sinon.assert.calledTwice(mockAuth0Client.connections.clients.update);
@@ -1041,6 +2125,9 @@ describe('#connections enabled clients functionality', () => {
 
     it('should process conflict operations', async () => {
       const typeName = 'connection';
+      const existingConnections = [
+        { id: 'con_1', name: 'conflict-connection-1', enabled_clients: [] },
+      ];
       const changes = {
         create: [],
         update: [],
@@ -1049,13 +2136,19 @@ describe('#connections enabled clients functionality', () => {
 
       mockAuth0Client.connections.clients.update.resolves();
 
-      await processConnectionEnabledClients(mockAuth0Client, typeName, changes);
+      await processConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        existingConnections,
+        changes
+      );
 
       sinon.assert.calledOnce(mockAuth0Client.connections.clients.update);
     });
 
     it('should handle database type connections differently', async () => {
       const typeName = 'database';
+      const existingConnections = [];
       const changes = {
         create: [{ name: 'new-db-connection', enabled_clients: ['client_1'] }],
         update: [],
@@ -1067,7 +2160,12 @@ describe('#connections enabled clients functionality', () => {
       });
       mockAuth0Client.connections.clients.update.resolves();
 
-      await processConnectionEnabledClients(mockAuth0Client, typeName, changes);
+      await processConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        existingConnections,
+        changes
+      );
 
       sinon.assert.calledWith(mockAuth0Client.connections.list, {
         name: 'new-db-connection',
@@ -1075,6 +2173,36 @@ describe('#connections enabled clients functionality', () => {
         strategy: ['auth0'],
         include_fields: true,
       });
+    });
+
+    it('should skip update when enabled_clients are unchanged', async () => {
+      const typeName = 'connection';
+      const existingConnections = [
+        { id: 'con_1', name: 'existing-connection-1', enabled_clients: ['client_1', 'client_2'] },
+      ];
+      const changes = {
+        create: [],
+        update: [
+          {
+            id: 'con_1',
+            name: 'existing-connection-1',
+            enabled_clients: ['client_1', 'client_2'],
+          },
+        ],
+        conflicts: [],
+      };
+
+      mockAuth0Client.connections.clients.update.resolves();
+
+      await processConnectionEnabledClients(
+        mockAuth0Client,
+        typeName,
+        existingConnections,
+        changes
+      );
+
+      // Should not make any API calls when enabled_clients are unchanged
+      sinon.assert.notCalled(mockAuth0Client.connections.clients.update);
     });
   });
 
@@ -1126,13 +2254,13 @@ describe('#connections enabled clients functionality', () => {
           pool,
         };
 
-        // Mock enabled clients responses
+        // Mock enabled clients responses — SDK v5 .get() returns a PagedResponse, not a flat array
         getEnabledClientsStub
-          .withArgs('con_1')
+          .withArgs('con_1', { take: 100 })
           .resolves(
             mockPagedData({}, 'clients', [{ client_id: 'client_1' }, { client_id: 'client_2' }])
           )
-          .withArgs('con_2')
+          .withArgs('con_2', { take: 100 })
           .resolves(mockPagedData({}, 'clients', [{ client_id: 'client_3' }]));
 
         const handler = new connections.default({ client: pageClient(auth0), config });
@@ -1153,6 +2281,74 @@ describe('#connections enabled clients functionality', () => {
           name: 'google-connection',
         });
         expect(result[1].enabled_clients).to.deep.equal(['client_3']);
+      });
+
+      it('should use the pool to fetch enabled clients and preserve connection order', async () => {
+        const addEachTaskStub = sinon.stub();
+        const poolExecutor = {
+          addSingleTask: ({ data, generator }) => ({
+            promise: async () => generator(data),
+          }),
+          addEachTask: addEachTaskStub,
+        };
+
+        addEachTaskStub.callsFake(({ data, generator }) => ({
+          promise: async () => {
+            const results = [];
+
+            for (const task of [...(data || [])].reverse()) {
+              results.push(await generator(task));
+            }
+
+            return results;
+          },
+        }));
+
+        const getEnabledClientsStub = sinon.stub();
+        const auth0 = {
+          connections: {
+            list: (params) =>
+              mockPagedData(params, 'connections', [
+                { id: 'con_1', strategy: 'github', name: 'github-connection' },
+                { id: 'con_2', strategy: 'google', name: 'google-connection' },
+                { strategy: 'auth0', name: 'db-should-be-ignored' },
+              ]),
+            clients: {
+              get: getEnabledClientsStub,
+            },
+            _getRestClient: () => ({}),
+          },
+          clients: {
+            list: (params) => mockPagedData(params, 'clients', []),
+          },
+        };
+
+        getEnabledClientsStub
+          .withArgs('con_1', { take: 100 })
+          .resolves(mockPagedData({}, 'clients', [{ client_id: 'client_1' }]))
+          .withArgs('con_2', { take: 100 })
+          .resolves(mockPagedData({}, 'clients', [{ client_id: 'client_2' }]));
+
+        const client = pageClient(auth0);
+        client.pool = poolExecutor;
+
+        const handler = new connections.default({ client, config });
+        handler.scimHandler = scimHandlerMock;
+        sinon.stub(handler, 'getConnectionDirectoryProvisionings').resolves(null);
+
+        const result = await handler.getType();
+
+        sinon.assert.calledOnce(addEachTaskStub);
+        expect(addEachTaskStub.firstCall.args[0].data).to.have.length(2);
+        expect(addEachTaskStub.firstCall.args[0].data.map(({ con }) => con.id)).to.deep.equal([
+          'con_1',
+          'con_2',
+        ]);
+        expect(addEachTaskStub.firstCall.args[0].generator).to.be.a('function');
+
+        expect(result.map((connection) => connection.id)).to.deep.equal(['con_1', 'con_2']);
+        expect(result[0].enabled_clients).to.deep.equal(['client_1']);
+        expect(result[1].enabled_clients).to.deep.equal(['client_2']);
       });
 
       it('should handle connections without enabled clients', async () => {
@@ -1275,7 +2471,7 @@ describe('#connections enabled clients functionality', () => {
         sinon.assert.calledOnce(processConnectionEnabledClientsStub);
 
         // Verify that only included connections are passed
-        const passedChanges = processConnectionEnabledClientsStub.firstCall.args[2];
+        const passedChanges = processConnectionEnabledClientsStub.firstCall.args[3];
         expect(passedChanges.create).to.have.length(1);
         expect(passedChanges.create[0].name).to.equal('included-connection');
 

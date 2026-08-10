@@ -52,6 +52,11 @@ export default class DirectoryContext {
     if (!isFile(toLoad)) {
       // try load not relative to yaml file
       toLoad = f;
+      log.warn(
+        `Support for absolute paths and paths outside the config root will be deprecated in a future version to improve the security of the tool. ` +
+          `Please update your configuration to use paths relative to the config directory. ` +
+          `Current absolute path used: ["${f}"]`
+      );
     }
     return loadFileAndReplaceKeywords(toLoad, {
       mappings: this.mappings,
@@ -106,6 +111,19 @@ export default class DirectoryContext {
     } else {
       this.assets = auth0.assets;
     }
+
+    // Re-attach exclude/include config lost when assets was overwritten above
+    this.assets.exclude = {
+      rules: this.config.AUTH0_EXCLUDED_RULES || [],
+      clients: this.config.AUTH0_EXCLUDED_CLIENTS || [],
+      databases: this.config.AUTH0_EXCLUDED_DATABASES || [],
+      connections: this.config.AUTH0_EXCLUDED_CONNECTIONS || [],
+      resourceServers: this.config.AUTH0_EXCLUDED_RESOURCE_SERVERS || [],
+      defaults: this.config.AUTH0_EXCLUDED_DEFAULTS || [],
+    };
+    this.assets.include = {
+      connections: this.config.AUTH0_INCLUDED_CONNECTIONS || [],
+    };
 
     // Clean known read only fields
     this.assets = cleanAssets(this.assets, this.config);

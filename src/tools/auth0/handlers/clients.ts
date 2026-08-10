@@ -1,11 +1,13 @@
 import { Management } from 'auth0';
-import { has, omit } from 'lodash';
-import { Assets, Auth0APIClient } from '../../../types';
+import { has, omit, pick } from 'lodash';
+import { Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import DefaultAPIHandler from './default';
+import { calculateChanges } from '../../calculateChanges';
 import { getConnectionProfile } from './connectionProfiles';
 import { getUserAttributeProfiles } from './userAttributeProfiles';
 import log from '../../../logger';
+import { shouldExcludeThirdPartyClients } from '../../utils';
 
 const multiResourceRefreshTokenPoliciesSchema = {
   type: ['array', 'null'],
@@ -29,12 +31,104 @@ const multiResourceRefreshTokenPoliciesSchema = {
   },
 };
 
+const myOrganizationConfigurationSchema = {
+  type: ['object', 'null'],
+  description: 'Configuration related to the My Organization API for the client.',
+  properties: {
+    connection_profile_id: {
+      type: 'string',
+      description: 'The name of the connection profile to use for this application',
+    },
+    user_attribute_profile_id: {
+      type: 'string',
+      description: 'The name of the user attribute profile to use for this application',
+    },
+    allowed_strategies: {
+      type: 'array',
+      description: 'The allowed connection strategies for the My Organization configuration',
+      items: {
+        type: 'string',
+        enum: Object.values(Management.ClientMyOrganizationConfigurationAllowedStrategiesEnum),
+      },
+      uniqueItems: true,
+    },
+    connection_deletion_behavior: {
+      type: 'string',
+      enum: Object.values(Management.ClientMyOrganizationDeletionBehaviorEnum),
+      description: 'The deletion behavior for My Organization connections created by this client',
+    },
+    invitation_landing_client_id: {
+      type: 'string',
+      description:
+        'The client ID of the invitation landing client for the My Organization configuration',
+    },
+  },
+  required: ['allowed_strategies', 'connection_deletion_behavior'],
+};
+
+const tokenVaultPrivilegedAccessSchema = {
+  type: ['object', 'null'],
+  description:
+    'Settings for Token Vault Privileged Access, hardening a privileged client by restricting the caller IPs, connections, and scopes it may use at runtime. Early Access, gated by the token_vault_subject_type_jwt_ea_rollout feature flag. Export-only: this object is exported for visibility but is not deployed by the Deploy CLI (it is stripped from create/update payloads because the required credentials are tenant-specific ids). Manage it directly on the tenant.',
+  properties: {
+    ip_allowlist: {
+      type: 'array',
+      description:
+        'IPv4/IPv6 addresses or CIDR ranges permitted to call token exchange on behalf of this privileged client. When the EA flag is on, this is required (non-empty) on create if token_vault_privileged_access is being set.',
+      items: {
+        type: 'string',
+      },
+    },
+    grants: {
+      type: 'array',
+      description:
+        'Connection/scope pin objects restricting which federated connections and OAuth scopes the privileged client may use at runtime. Maximum 5 connections; maximum 20 scopes in total across all connections.',
+      items: {
+        type: 'object',
+        properties: {
+          connection: {
+            type: 'string',
+            description:
+              'The connection name (e.g. google-oauth2). Validated at runtime; the connection need not exist at configuration time.',
+          },
+          scopes: {
+            type: 'array',
+            description: 'The OAuth scopes permitted for that connection.',
+            items: {
+              type: 'string',
+            },
+          },
+        },
+        required: ['connection', 'scopes'],
+      },
+    },
+  },
+};
+
 export const schema = {
   type: 'array',
   items: {
     type: 'object',
     properties: {
       name: { type: 'string', minLength: 1, pattern: '[^<>]+' },
+      external_client_id: {
+        type: 'string',
+        description:
+          'Alternative identifier for the client. For CIMD clients, this is the HTTPS URL to the OAuth 2.0 Client ID Metadata Document. Client name should match the client_name value in the metadata document.',
+      },
+      external_metadata_type: {
+        type: 'string',
+        description: 'Type of external client registration metadata.',
+      },
+      external_metadata_created_by: {
+        type: 'string',
+        description:
+          'Indicates who created the external metadata client: admin for Management API, client for dynamic registration.',
+      },
+      jwks_uri: {
+        type: 'string',
+        description: 'JSON Web Key Set endpoint associated with the client.',
+      },
       mobile: {
         type: 'object',
         properties: {
@@ -155,8 +249,41 @@ export const schema = {
               "Indicates whether Refresh Tokens created during a native-to-web session are tied to that session's lifetime. This determines if such refresh tokens should be automatically revoked when their corresponding sessions are. Usually configured in the web application.",
             default: true,
           },
+          delegation: {
+            type: 'object',
+            description:
+              'Settings for impersonation via session transfer. Required to accept Session Transfer Tokens that contain an Actor.',
+            properties: {
+              allow_delegated_access: {
+                type: 'boolean',
+                description:
+                  'Allows clients to access an impersonated session via SSO by accepting STTs that contain an Actor.',
+              },
+              enforce_device_binding: {
+                type: 'string',
+                description:
+                  "Enforces device binding for impersonation sessions. Defaults to 'ip' when omitted.",
+                enum: ['ip', 'asn'],
+              },
+            },
+            additionalProperties: false,
+          },
         },
         additionalProperties: true,
+      },
+      identity_assertion_authorization_grant: {
+        type: 'object',
+        description:
+          'Settings for Cross App Access (ID-JAG) token exchange. Early Access. Enables the client to request identity assertion authorization grants.',
+        properties: {
+          active: {
+            type: 'boolean',
+            description:
+              'Indicates whether the client can request an identity assertion authorization grant (ID-JAG) via token exchange.',
+          },
+        },
+        required: ['active'],
+        additionalProperties: false,
       },
       app_type: {
         type: 'string',
@@ -182,6 +309,7 @@ export const schema = {
           enum: ['email', 'organization_name'],
         },
       },
+      my_organization_configuration: myOrganizationConfigurationSchema,
       async_approval_notification_channels: {
         type: ['array', 'null'],
         description:
@@ -272,10 +400,95 @@ export const schema = {
             description: 'List of enabled token exchange profile types for this client',
             items: {
               type: 'string',
-              enum: ['custom_authentication'],
+              enum: ['custom_authentication', 'on_behalf_of_token_exchange'],
             },
           },
         },
+      },
+      token_vault_privileged_access: tokenVaultPrivilegedAccessSchema,
+      third_party_security_mode: {
+        type: 'string',
+        enum: ['strict', 'permissive'],
+        description:
+          'Indicates the security mode for a Third Party Client, to apply new security semantics and improvements.',
+      },
+      redirection_policy: {
+        type: 'string',
+        enum: ['allow_always', 'open_redirect_protection'],
+        description:
+          'Determines how OAuth2/OIDC errors are handled when a non-recoverable error happens.',
+      },
+      oidc_logout: {
+        type: ['object', 'null'],
+        description: 'Configuration for OIDC backchannel logout',
+        properties: {
+          backchannel_logout_urls: {
+            type: 'array',
+            description:
+              'Comma-separated list of URLs that are valid to call back from Auth0 for OIDC backchannel logout. Currently only one URL is allowed.',
+            items: {
+              type: 'string',
+            },
+          },
+          backchannel_logout_initiators: {
+            type: 'object',
+            description: 'Configuration for OIDC backchannel logout initiators',
+            properties: {
+              mode: {
+                type: 'string',
+                schemaName: 'ClientOIDCBackchannelLogoutInitiatorsModeEnum',
+                enum: ['custom', 'all'],
+                description:
+                  'The `mode` property determines the configuration method for enabling initiators. `custom` enables only the initiators listed in the selected_initiators array, `all` enables all current and future initiators.',
+              },
+              selected_initiators: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                  enum: [
+                    'rp-logout',
+                    'idp-logout',
+                    'password-changed',
+                    'session-expired',
+                    'session-revoked',
+                    'account-deleted',
+                    'email-identifier-changed',
+                    'mfa-phone-unenrolled',
+                    'account-deactivated',
+                  ],
+                  description:
+                    'The `selected_initiators` property contains the list of initiators to be enabled for the given application.',
+                },
+              },
+            },
+          },
+          backchannel_logout_session_metadata: {
+            type: ['object', 'null'],
+            description:
+              'Controls whether session metadata is included in the logout token. Default value is null.',
+            properties: {
+              include: {
+                type: 'boolean',
+                description:
+                  'The `include` property determines whether session metadata is included in the logout token.',
+              },
+            },
+          },
+        },
+      },
+      fedcm_login: {
+        type: ['object', 'null'],
+        description: 'Configuration for FedCM (Federated Credential Management) login',
+        properties: {
+          google: {
+            type: 'object',
+            properties: {
+              is_enabled: { type: 'boolean' },
+            },
+            required: ['is_enabled'],
+          },
+        },
+        required: ['google'],
       },
     },
     required: ['name'],
@@ -283,6 +496,122 @@ export const schema = {
 };
 
 export type Client = Management.Client;
+
+type ClientSanitizerChain = {
+  sanitizeOidcLogout(): ClientSanitizerChain;
+  sanitizeCrossOriginAuth(warn?: boolean): ClientSanitizerChain;
+  get(): Client[];
+};
+
+const createClientSanitizer = (clients: Client[]): ClientSanitizerChain => {
+  let sanitized = clients;
+
+  return {
+    sanitizeCrossOriginAuth(warn = true) {
+      const deprecatedClients: string[] = [];
+
+      sanitized = sanitized.map((client) => {
+        let updated: Client = { ...client };
+
+        if (has(updated, 'cross_origin_auth')) {
+          const clientName = client.name || client.client_id || 'unknown client';
+          deprecatedClients.push(clientName);
+
+          if (!has(updated, 'cross_origin_authentication')) {
+            updated.cross_origin_authentication = updated.cross_origin_auth;
+          }
+
+          updated = omit(updated, 'cross_origin_auth') as Client;
+        }
+
+        return updated;
+      });
+
+      if (warn && deprecatedClients.length > 0) {
+        log.warn(
+          "The 'cross_origin_auth' parameter is deprecated. Use 'cross_origin_authentication' going forward."
+        );
+      }
+
+      return this;
+    },
+
+    sanitizeOidcLogout() {
+      const deprecatedClients: string[] = [];
+
+      sanitized = sanitized.map((client) => {
+        let updated: Client = { ...client };
+
+        if (has(updated, 'oidc_backchannel_logout')) {
+          const clientName = client.name || client.client_id || 'unknown client';
+          deprecatedClients.push(clientName);
+
+          if (!has(updated, 'oidc_logout')) {
+            updated.oidc_logout = updated.oidc_backchannel_logout;
+          }
+
+          updated = omit(updated, 'oidc_backchannel_logout') as Client;
+        }
+
+        return updated;
+      });
+
+      if (deprecatedClients.length > 0) {
+        log.warn(
+          "The 'oidc_backchannel_logout' parameter is deprecated in clients and scheduled for removal in future releases.\n" +
+            `Use 'oidc_logout' going forward. Clients using the deprecated setting: [${deprecatedClients.join(
+              ', '
+            )}]`
+        );
+      }
+
+      return this;
+    },
+
+    get: () => {
+      return sanitized;
+    },
+  };
+};
+
+/**
+ * On export, remove `credentials` from `token_vault_privileged_access`.
+ *
+ * Auth0 returns these as tenant-specific credential references (`{ id }`) — never
+ * names or key material — so they are not portable across tenants and must never be
+ * written to disk. `ip_allowlist` and `grants` are kept for visibility. Mutates and
+ * returns the same client.
+ */
+const stripTokenVaultCredentialsOnExport = (client: Client): Client => {
+  const tvpa = (client as { token_vault_privileged_access?: { credentials?: unknown } })
+    .token_vault_privileged_access;
+
+  if (tvpa && 'credentials' in tvpa) {
+    delete tvpa.credentials;
+  }
+
+  return client;
+};
+
+/**
+ * On write (create/update), remove the entire `token_vault_privileged_access` object.
+ *
+ * The Management API requires `credentials` whenever `token_vault_privileged_access`
+ * is present in the payload, but those credentials are tenant-specific ids that the
+ * Deploy CLI intentionally never persists (see stripTokenVaultCredentialsOnExport).
+ * Sending the object without `credentials` fails validation ("Missing required
+ * property: credentials"); sending it with exported ids would re-send stale ids on a
+ * cross-tenant deploy. The Deploy CLI therefore does not manage this field — it is
+ * export-only. Manage `token_vault_privileged_access` directly on the tenant.
+ * Mutates and returns the same client.
+ */
+const stripTokenVaultPrivilegedAccessOnWrite = (client: Client): Client => {
+  if ('token_vault_privileged_access' in client) {
+    delete (client as { token_vault_privileged_access?: unknown }).token_vault_privileged_access;
+  }
+
+  return client;
+};
 
 export default class ClientHandler extends DefaultAPIHandler {
   existing: Client[];
@@ -294,6 +623,7 @@ export default class ClientHandler extends DefaultAPIHandler {
       id: 'client_id',
       identifiers: ['client_id', 'name'],
       objectFields: ['client_metadata'],
+      stripCreateFields: ['external_metadata_type', 'external_metadata_created_by', 'jwks_uri'],
       stripUpdateFields: [
         // Fields not allowed during updates
         'callback_url_template',
@@ -302,12 +632,64 @@ export default class ClientHandler extends DefaultAPIHandler {
         'tenant',
         'jwt_configuration.secret_encoded',
         'resource_server_identifier',
+        'external_metadata_type',
+        'external_metadata_created_by',
+        'jwks_uri',
+        // third_party_security_mode is immutable after creation; PATCH returns 400
+        'third_party_security_mode',
       ],
+      functions: {
+        create: (client: Client) => this.createClient(client),
+        update: (clientId: string, client: Client) => this.updateClient(clientId, client),
+      },
     });
   }
 
   objString(item): string {
     return super.objString({ name: item.name, client_id: item.client_id });
+  }
+
+  async calcChanges(assets: Assets): Promise<CalculatedChanges> {
+    const clients = assets[this.type];
+
+    if (!clients) {
+      return { del: [], create: [], conflicts: [], update: [] };
+    }
+
+    const existing = await this.getType();
+    const allowDelete = !!this.config('AUTH0_ALLOW_DELETE');
+
+    const cimdClients = clients.filter((c: Client) => this.isCimdClient(c));
+    const existingCimd = (existing || []).filter((c: Client) => this.isCimdClient(c));
+
+    const regularClients = clients.filter((c: Client) => !this.isCimdClient(c));
+    const existingRegular = (existing || []).filter((c: Client) => !this.isCimdClient(c));
+
+    const regularChanges = calculateChanges({
+      handler: this,
+      assets: regularClients,
+      existing: existingRegular,
+      identifiers: ['client_id', 'name'],
+      allowDelete,
+    });
+
+    // CIMD clients:
+    // If external_client_id changes (and no client_id match), old client is deleted
+    // and new registration is created with the new external_client_id.
+    const cimdChanges = calculateChanges({
+      handler: this,
+      assets: cimdClients,
+      existing: existingCimd,
+      identifiers: ['client_id', 'external_client_id'],
+      allowDelete,
+    });
+
+    return {
+      del: [...regularChanges.del, ...cimdChanges.del],
+      update: [...regularChanges.update, ...cimdChanges.update],
+      create: [...regularChanges.create, ...cimdChanges.create],
+      conflicts: [...regularChanges.conflicts, ...cimdChanges.conflicts],
+    };
   }
 
   async processChanges(assets: Assets): Promise<void> {
@@ -316,13 +698,9 @@ export default class ClientHandler extends DefaultAPIHandler {
     // Do nothing if not set
     if (!clients) return;
 
-    assets.clients = await this.sanitizeMapExpressConfiguration(this.client, clients);
+    assets.clients = await this.sanitizeMapClientReferences(this.client, clients);
 
     const excludedClients = (assets.exclude && assets.exclude.clients) || [];
-
-    const excludeThirdPartyClients =
-      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === 'true' ||
-      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === true;
 
     const { del, update, create, conflicts } = await this.calcChanges(assets);
 
@@ -342,12 +720,15 @@ export default class ClientHandler extends DefaultAPIHandler {
           item.client_id !== currentClient &&
           item.name &&
           !excludedClients.includes(item.name) &&
-          (!excludeThirdPartyClients || item.is_first_party)
+          (!shouldExcludeThirdPartyClients(this.config) || item.is_first_party)
       );
 
     // Sanitize client fields
     const sanitizeClientFields = (list: Client[]): Client[] => {
-      const sanitizedClients = this.sanitizeCrossOriginAuth(list);
+      const sanitizedClients = createClientSanitizer(list)
+        .sanitizeCrossOriginAuth()
+        .sanitizeOidcLogout()
+        .get();
 
       return sanitizedClients.map((item: Client) => {
         if (item.app_type === 'resource_server') {
@@ -361,6 +742,24 @@ export default class ClientHandler extends DefaultAPIHandler {
             delete item.refresh_token;
           }
         }
+
+        // Strip client_authentication_methods — the clientAuthCredentials handler (order 70)
+        // owns this field entirely. Auth0 rejects credential objects with name/credential_type in PATCH.
+        // Strip token_endpoint_auth_method only when client_authentication_methods is present in config:
+        // Auth0 rejects it in PATCH while a client has active credentials. For these clients the
+        // clientAuthCredentials handler (order 70) owns token_endpoint_auth_method too.
+        // For clients without client_authentication_methods, credentials were already cleared by
+        // clientAuthCredentialsPre (order 40), so token_endpoint_auth_method passes through safely.
+        if (item.client_authentication_methods) {
+          delete item.token_endpoint_auth_method;
+        }
+        delete item.client_authentication_methods;
+
+        // token_vault_privileged_access requires tenant-specific credential ids that
+        // the Deploy CLI never persists. Strip the whole object on write so we neither
+        // re-send stale ids nor fail validation for the missing credentials property.
+        stripTokenVaultPrivilegedAccessOnWrite(item);
+
         return item;
       });
     };
@@ -377,71 +776,118 @@ export default class ClientHandler extends DefaultAPIHandler {
     });
   }
 
-  /**
-   * @description
-   * Sanitize the deprecated field `cross_origin_auth` to `cross_origin_authentication`
-   *
-   * @param {Client[]} clients - The client array to sanitize.
-   * @returns {Client[]} The sanitized array of clients.
-   */
-  private sanitizeCrossOriginAuth(clients: Client[]): Client[] {
-    const deprecatedClients: string[] = [];
-
-    const updatedClients = clients.map((client) => {
-      let updated: Client = { ...client };
-
-      if (has(updated, 'cross_origin_auth')) {
-        const clientName = client.name || client.client_id || 'unknown client';
-        deprecatedClients.push(clientName);
-
-        if (!has(updated, 'cross_origin_authentication')) {
-          updated.cross_origin_authentication = updated.cross_origin_auth;
-        }
-
-        updated = omit(updated, 'cross_origin_auth') as Client;
-      }
-
-      return updated;
-    });
-
-    if (deprecatedClients.length > 0) {
-      log.warn(
-        "The 'cross_origin_auth' parameter is deprecated in clients and scheduled for removal in future releases.\n" +
-          `Use 'cross_origin_authentication' going forward. Clients using the deprecated setting: [${deprecatedClients.join(
-            ', '
-          )}]`
-      );
-    }
-
-    return updatedClients;
-  }
-
   async getType() {
     if (this.existing) return this.existing;
-
-    const excludeThirdPartyClients =
-      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === 'true' ||
-      this.config('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS') === true;
 
     const clients = await paginate<Client>(this.client.clients.list, {
       paginate: true,
       is_global: false,
-      ...(excludeThirdPartyClients && { is_first_party: true }),
+      ...(shouldExcludeThirdPartyClients(this.config) && { is_first_party: true }),
     });
 
-    const sanitizedClients = this.sanitizeCrossOriginAuth(clients);
+    const sanitized = createClientSanitizer(clients)
+      .sanitizeCrossOriginAuth(false)
+      .get()
+      // token_vault_privileged_access.credentials are returned as tenant-specific
+      // ids — strip them so they are never exported to disk.
+      .map(stripTokenVaultCredentialsOnExport);
 
-    this.existing = sanitizedClients;
+    // Enrich credential stubs with name and credential_type for export.
+    // Auth0 does not return pem on read — it is never exported.
+    await Promise.all(
+      sanitized.map(async (client) => {
+        if (!client.client_authentication_methods) return;
+        try {
+          const creds = await this.client.clients.credentials.list(client.client_id as string);
+          const credMap = new Map((creds as any[]).map((c) => [c.id, c]));
+          Object.values(client.client_authentication_methods).forEach((method: any) => {
+            if (method?.credentials) {
+              method.credentials = method.credentials
+                .map((stub: any) => {
+                  const full = credMap.get(stub.id);
+                  if (!full?.name) return null;
+                  return { name: full.name, credential_type: full.credential_type };
+                })
+                .filter(Boolean);
+            }
+          });
+        } catch (_) {
+          // leave stubs as-is if the credentials API call fails
+        }
+      })
+    );
+
+    this.existing = sanitized;
     return this.existing;
   }
 
-  // convert names back to IDs for express configuration
-  async sanitizeMapExpressConfiguration(
+  private isCimdClient(client: Client): boolean {
+    return !!client.external_client_id;
+  }
+
+  private async createClient(
+    client: Client
+  ): Promise<Management.RegisterCimdClientResponseContent | Client> {
+    if (!this.isCimdClient(client)) {
+      return this.client.clients.create(client as Management.CreateClientRequestContent);
+    }
+
+    const externalClientId = client.external_client_id!;
+
+    const registration = await this.client.clients.registerCimdClient({
+      external_client_id: externalClientId,
+    });
+
+    return registration;
+  }
+
+  private getCIMDEditableFields(client: Client): Management.UpdateClientRequestContent {
+    // Only a subset of fields are editable for CIMD clients.
+    return pick(client, [
+      'description',
+      'app_type',
+      'allowed_origins',
+      'web_origins',
+      'grant_types',
+      'oidc_conformant',
+      'organization_discovery_methods',
+      'client_metadata',
+      'default_organization',
+      'require_proof_of_possession',
+      'token_quota',
+      'skip_non_verifiable_callback_uri_confirmation_prompt',
+      'jwt_configuration',
+      'refresh_token',
+    ]) as Management.UpdateClientRequestContent;
+  }
+
+  private async updateClient(clientId: string, client: Client): Promise<Client> {
+    // For non-CIMD clients
+    if (!this.isCimdClient(client)) {
+      return this.client.clients.update(clientId, client as Management.UpdateClientRequestContent);
+    }
+
+    const updatePayload = this.getCIMDEditableFields(client);
+    const registrationClientId = client.client_id || clientId;
+
+    if (registrationClientId && Object.keys(updatePayload).length > 0) {
+      return this.client.clients.update(registrationClientId, updatePayload);
+    }
+
+    return client;
+  }
+
+  // convert names back to IDs for client reference-based configuration
+  async sanitizeMapClientReferences(
     auth0Client: Auth0APIClient,
     clientList: Client[]
   ): Promise<Client[]> {
-    // if no clients have express configuration, return early
-    if (!clientList.some((p) => p.express_configuration)) {
+    const hasExpressConfiguration = clientList.some((client) => client.express_configuration);
+    const hasMyOrganizationConfiguration = clientList.some(
+      (client) => client.my_organization_configuration
+    );
+
+    if (!hasExpressConfiguration && !hasMyOrganizationConfiguration) {
       return clientList;
     }
 
@@ -450,33 +896,71 @@ export default class ClientHandler extends DefaultAPIHandler {
     const userAttributeProfiles = await getUserAttributeProfiles(auth0Client);
 
     return clientList.map((client) => {
-      if (!client.express_configuration) return client;
+      if (client.express_configuration) {
+        const userAttributeProfileName = client.express_configuration.user_attribute_profile_id;
+        if (userAttributeProfileName) {
+          const userAttributeProfile = userAttributeProfiles?.find(
+            (uap) => uap.name === userAttributeProfileName
+          );
+          if (userAttributeProfile?.id) {
+            client.express_configuration.user_attribute_profile_id = userAttributeProfile.id;
+          }
+        }
 
-      const userAttributeProfileName = client.express_configuration?.user_attribute_profile_id;
-      if (userAttributeProfileName) {
+        const connectionProfileName = client.express_configuration.connection_profile_id;
+        if (connectionProfileName) {
+          const connectionProfile = connectionProfiles?.find(
+            (cp) => cp.name === connectionProfileName
+          );
+          if (connectionProfile?.id) {
+            client.express_configuration.connection_profile_id = connectionProfile.id;
+          }
+        }
+
+        const oktaOinClientName = client.express_configuration.okta_oin_client_id;
+        if (oktaOinClientName) {
+          const oktaOinClient = clientData?.find((c) => c.name === oktaOinClientName);
+          if (oktaOinClient?.client_id) {
+            client.express_configuration.okta_oin_client_id = oktaOinClient.client_id;
+          }
+        }
+      }
+
+      if (!client.my_organization_configuration) {
+        return client;
+      }
+
+      const myOrganizationUserAttributeProfileName =
+        client.my_organization_configuration.user_attribute_profile_id;
+      if (myOrganizationUserAttributeProfileName) {
         const userAttributeProfile = userAttributeProfiles?.find(
-          (uap) => uap.name === userAttributeProfileName
+          (uap) => uap.name === myOrganizationUserAttributeProfileName
         );
         if (userAttributeProfile?.id) {
-          client.express_configuration.user_attribute_profile_id = userAttributeProfile.id;
+          client.my_organization_configuration.user_attribute_profile_id = userAttributeProfile.id;
         }
       }
 
-      const connectionProfileName = client.express_configuration.connection_profile_id;
-      if (connectionProfileName) {
+      const myOrganizationConnectionProfileName =
+        client.my_organization_configuration.connection_profile_id;
+      if (myOrganizationConnectionProfileName) {
         const connectionProfile = connectionProfiles?.find(
-          (cp) => cp.name === connectionProfileName
+          (cp) => cp.name === myOrganizationConnectionProfileName
         );
         if (connectionProfile?.id) {
-          client.express_configuration.connection_profile_id = connectionProfile.id;
+          client.my_organization_configuration.connection_profile_id = connectionProfile.id;
         }
       }
 
-      const oktaOinClientName = client.express_configuration.okta_oin_client_id;
-      if (oktaOinClientName) {
-        const oktaOinClient = clientData?.find((c) => c.name === oktaOinClientName);
-        if (oktaOinClient?.client_id) {
-          client.express_configuration.okta_oin_client_id = oktaOinClient.client_id;
+      const invitationLandingClientName =
+        client.my_organization_configuration.invitation_landing_client_id;
+      if (invitationLandingClientName) {
+        const invitationLandingClient = clientData?.find(
+          (c) => c.name === invitationLandingClientName
+        );
+        if (invitationLandingClient?.client_id) {
+          client.my_organization_configuration.invitation_landing_client_id =
+            invitationLandingClient.client_id;
         }
       }
 

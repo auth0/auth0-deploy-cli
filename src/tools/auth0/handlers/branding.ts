@@ -3,6 +3,7 @@ import DefaultHandler, { order } from './default';
 import constants from '../../constants';
 import log from '../../../logger';
 import { Asset, Assets } from '../../../types';
+import { isDryRun } from '../../utils';
 
 export const schema = {
   type: 'object',
@@ -86,6 +87,14 @@ export default class BrandingHandler extends DefaultHandler {
   async processChanges(assets: Assets) {
     if (!assets.branding) return;
 
+    if (isDryRun(this.config)) {
+      const { del, update, create } = await this.calcChanges(assets);
+
+      if (del.length === 0 && update.length === 0 && create.length === 0) {
+        return;
+      }
+    }
+
     const { templates, ...brandingSettings } = assets.branding;
 
     if (brandingSettings.logo_url === '') {
@@ -94,7 +103,12 @@ export default class BrandingHandler extends DefaultHandler {
     }
 
     if (brandingSettings && Object.keys(brandingSettings).length) {
+      // Save prompt settings, update branding, then restore prompt settings to avoid mgmt API overwriting prompt settings
+      const promptSettings = await this.client.prompts.getSettings().catch(() => null);
       await this.client.branding.update(brandingSettings);
+      if (promptSettings) {
+        await this.client.prompts.updateSettings(promptSettings);
+      }
       this.updated += 1;
       this.didUpdate(brandingSettings);
     }

@@ -89,6 +89,21 @@ clients:
     sso_disabled: false
     token_endpoint_auth_method: client_secret_post
     web_origins: []
+    client_authentication_methods:
+      private_key_jwt:
+        credentials:
+          - name: e2e-test-key
+            credential_type: public_key
+            pem: |
+              -----BEGIN PUBLIC KEY-----
+              MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs8/9RN2qV8HZMunRt8mx
+              ihqnIX726YqxGwF+7x1A0gpk4TWRpMUWnaaL2D3Nt/Kd5obKM0THZPCuE+Xwncf4
+              QloizZEn4jM3PNldweL9qwG160o2wXif2R5zLVQat9/188+Ko/sU/LorHgh23DMp
+              znSwIN30AdLG1WRPxqP5s9abVT0WgBt1VuQobw4TS6QltFUnMSEMBsNtMSPK+NPJ
+              pz9s3ozqkNMLNSLZMTwgODQWchUr2YJeZa5RbM0u5Xt9oF0HtXH8db3L6Rp3TdIA
+              uISnZ+mC7zRiCzWljkJZSBrqgtx6Su5wSve9cYGPS23zu3yeSapJWP7pki3G/GBz
+              JQIDAQAB
+              -----END PUBLIC KEY-----
   - name: Quickstarts API (Test Application)
     app_type: non_interactive
     client_metadata:
@@ -307,7 +322,6 @@ tenant:
     change_pwd_flow_v1: false
     enable_apis_section: false
     enable_client_connections: false
-    enable_custom_domain_in_emails: false
     enable_dynamic_client_registration: false
     enable_legacy_logs_search_v2: false
     enable_public_signup_user_exists_error: true
@@ -328,26 +342,26 @@ tenant:
   support_url: https://mycompany.org/support
   universal_login:
     colors:
-      primary: '#F8F8F2'
-      page_background: '#222221'
+      primary: "#F8F8F2"
+      page_background: "#222221"
 emailProvider:
   name: mandrill
   credentials:
-    api_key: '##MANDRILL_API_KEY##'
+    api_key: "##MANDRILL_API_KEY##"
   default_from_address: auth0-user@auth0.com
   enabled: false
 emailTemplates:
   - template: verify_email
     body: ./emailTemplates/verify_email.html
     enabled: true
-    from: ''
-    subject: ''
+    from: ""
+    subject: ""
     syntax: liquid
     urlLifetimeInSeconds: 432000
   - template: welcome_email
     body: ./emailTemplates/welcome_email.html
     enabled: false
-    from: ''
+    from: ""
     resultUrl: https://example.com/welcome
     subject: Welcome
     syntax: liquid
@@ -678,8 +692,8 @@ organizations:
   - name: org1
     branding:
       colors:
-        page_background: '#fff5f5'
-        primary: '#57ddff'
+        page_background: "#fff5f5"
+        primary: "#57ddff"
     connections: []
     display_name: Organization
   - name: org2
@@ -734,7 +748,7 @@ logStreams:
       - type: category
         name: auth.token_exchange.fail
     sink:
-      awsAccountId: '123456789012'
+      awsAccountId: "123456789012"
       awsRegion: us-east-2
       awsPartnerEventSource: >-
         aws.partner/auth0.com/auth0-user-79f1a6de-7fc2-47de-9202-4b7b15c9d601/auth0.logs
@@ -745,6 +759,19 @@ logStreams:
       datadogApiKey: some-sensitive-api-key
       datadogRegion: us
     type: datadog
+eventStreams:
+  - name: e2e-webhook-stream
+    status: disabled
+    subscriptions:
+      - event_type: user.created
+      - event_type: user.deleted
+    destination:
+      type: webhook
+      configuration:
+        webhook_endpoint: https://example.com/test/v2/check/webhook
+        webhook_authorization:
+          method: bearer
+          token: some-sensitive-token
 forms:
   - name: Blank-form
     body: ./forms/Blank-form.json
@@ -755,7 +782,7 @@ selfServiceProfiles:
       - okta
     branding:
       colors:
-        primary: '#19aecc'
+        primary: "#19aecc"
     description: test description self-service-profile-1
     user_attributes:
       - name: email
@@ -765,15 +792,15 @@ selfServiceProfiles:
         description: Name of the User
         is_optional: true
 networkACLs:
-      - description: 'Allow Specific Countries'
-        active: false
-        priority: 1
-        rule:
-          action:
-            allow: true
-          scope: 'authentication'
-          match:
-             geo_country_codes: ['US']
+  - description: "Allow Specific Countries"
+    active: false
+    priority: 1
+    rule:
+      action:
+        allow: true
+      scope: "authentication"
+      match:
+        geo_country_codes: ["US"]
 userAttributeProfiles:
   - name: test-user-attribute-profile
     user_attributes:

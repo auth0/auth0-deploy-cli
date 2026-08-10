@@ -14,5 +14,7 @@
       "action_name": "ldoorz",
       "display_name": "ldoorz"
     }
-  ]
+  ],
+  "login-post-identifier": [],
+  "signup-post-identifier": []
 }

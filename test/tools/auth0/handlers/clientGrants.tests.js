@@ -31,9 +31,13 @@ describe('#clientGrants handler', () => {
       const data = [
         {
           name: 'someClientGrant',
+          client_id: 'client1',
+          audience: 'https://example.com/api',
         },
         {
           name: 'someClientGrant',
+          client_id: 'client2',
+          audience: 'https://example.com/api',
         },
       ];
 
@@ -51,10 +55,96 @@ describe('#clientGrants handler', () => {
       const data = [
         {
           name: 'someClientGrant',
+          client_id: 'client1',
+          audience: 'https://example.com/api',
         },
       ];
 
       await stageFn.apply(handler, [{ clientGrants: data }]);
+    });
+
+    it('should not allow scope when allow_all_scopes is true', async () => {
+      const handler = new clientGrants.default({ client: {}, config });
+      const data = [
+        {
+          client_id: 'testClient',
+          audience: 'https://test.auth0.com/api/v2/',
+          allow_all_scopes: true,
+          scope: ['read:users', 'write:users'],
+        },
+      ];
+
+      try {
+        await handler.validate({ clientGrants: data });
+        expect.fail('Should have thrown an error');
+      } catch (err) {
+        expect(err).to.be.an.instanceof(Error);
+        expect(err.message).to.include(
+          'Cannot specify "scope" when "allow_all_scopes" is set to true'
+        );
+        expect(err.message).to.include('testClient');
+        expect(err.message).to.include('https://test.auth0.com/api/v2/');
+      }
+    });
+
+    it('should pass validation when allow_all_scopes is true and scope is not provided', async () => {
+      const handler = new clientGrants.default({ client: {}, config });
+      const data = [
+        {
+          client_id: 'testClient',
+          audience: 'https://test.auth0.com/api/v2/',
+          allow_all_scopes: true,
+        },
+      ];
+
+      await handler.validate({ clientGrants: data });
+    });
+
+    it('should pass validation with default_for property (no client_id)', async () => {
+      const handler = new clientGrants.default({ client: {}, config });
+      const data = [
+        {
+          audience: 'https://test.auth0.com/api/v2/',
+          default_for: 'third_party_clients',
+        },
+      ];
+
+      await handler.validate({ clientGrants: data });
+    });
+
+    it('should fail validation when both client_id and default_for are specified', async () => {
+      const handler = new clientGrants.default({ client: {}, config });
+      const data = [
+        {
+          client_id: 'testClient',
+          audience: 'https://test.auth0.com/api/v2/',
+          default_for: 'third_party_clients',
+        },
+      ];
+
+      try {
+        await handler.validate({ clientGrants: data });
+        expect.fail('Should have thrown an error');
+      } catch (err) {
+        expect(err.message).to.include('mutually exclusive');
+      }
+    });
+
+    it('should fail validation when neither client_id nor default_for are specified', async () => {
+      const handler = new clientGrants.default({ client: {}, config });
+      const data = [
+        {
+          audience: 'https://test.auth0.com/api/v2/',
+          scope: ['read:users'],
+        },
+      ];
+
+      try {
+        await handler.validate({ clientGrants: data });
+        expect.fail('Should have thrown an error');
+      } catch (err) {
+        expect(err.message).to.include('One of "client_id" or "default_for" is required');
+      }
     });
   });
 
@@ -83,6 +173,39 @@ describe('#clientGrants handler', () => {
       const data = [
         {
           name: 'someClientGrant',
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+    });
+
+    it('should create client grants with allow_all_scopes', async () => {
+      const auth0 = {
+        clientGrants: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('grantWithAllScopes');
+            expect(data.allow_all_scopes).to.equal(true);
+            expect(data.scope).to.be.undefined;
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'client_grants', []),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          name: 'grantWithAllScopes',
+          allow_all_scopes: true,
         },
       ];
 
@@ -186,6 +309,64 @@ describe('#clientGrants handler', () => {
       expect(data.map((g) => g.id)).to.deep.equal(['cg0', 'cg1', 'cg2', 'cg3', 'cg4']);
     });
 
+    it('should exclude third-party client grants in getType when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is enabled', async () => {
+      const configWithExclude = function (key) {
+        return configWithExclude.data && configWithExclude.data[key];
+      };
+
+      configWithExclude.data = {
+        AUTH0_CLIENT_ID: 'current_client',
+        AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS: true,
+      };
+
+      const clientId1 = 'first_party_client';
+      const clientId2 = 'third_party_client';
+      const clientGrant1 = {
+        audience: 'https://test.auth0.com/api/v2/',
+        client_id: clientId1,
+        id: 'cgr_first_party',
+        scope: ['read:logs'],
+      };
+      const clientGrant2 = {
+        audience: 'https://test.auth0.com/api/v2/',
+        client_id: clientId2,
+        id: 'cgr_third_party',
+        scope: ['read:logs'],
+      };
+
+      const auth0 = {
+        clientGrants: {
+          list: (params) => mockPagedData(params, 'client_grants', [clientGrant1, clientGrant2]),
+        },
+        clients: {
+          list: (params) => {
+            // When is_first_party filter is applied, only return first-party clients
+            if (params.is_first_party === true) {
+              return mockPagedData(params, 'clients', [
+                { name: 'First Party App', client_id: clientId1, is_first_party: true },
+              ]);
+            }
+            return mockPagedData(params, 'clients', [
+              { name: 'First Party App', client_id: clientId1, is_first_party: true },
+              { name: 'Third Party App', client_id: clientId2, is_first_party: false },
+            ]);
+          },
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({
+        client: pageClient(auth0),
+        config: configWithExclude,
+      });
+      const data = await handler.getType();
+
+      // Should only return the first-party client grant
+      expect(data).to.have.lengthOf(1);
+      expect(data[0].id).to.equal('cgr_first_party');
+      expect(data[0].client_id).to.equal(clientId1);
+    });
+
     it('should convert client_name to client_id', async () => {
       const auth0 = {
         clientGrants: {
@@ -263,6 +444,108 @@ describe('#clientGrants handler', () => {
       await stageFn.apply(handler, [{ clientGrants: data }]);
     });
 
+    it('should not include default_for in update payload', async () => {
+      let updatedData = null;
+      const auth0 = {
+        clientGrants: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (id, data) {
+            updatedData = data;
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'client_grants', [
+              {
+                id: 'cg1',
+                client_id: 'client1',
+                audience: 'audience',
+                default_for: 'third_party_clients',
+              },
+            ]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          client_id: 'client1',
+          audience: 'audience',
+          scope: ['read:users'],
+          default_for: 'third_party_clients',
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+      expect(updatedData).to.not.have.property('default_for');
+    });
+
+    it('should match a default_for grant by [default_for, audience] and update it (not create)', async () => {
+      config.data = {
+        AUTH0_CLIENT_ID: 'client_id',
+        AUTH0_ALLOW_DELETE: true,
+      };
+
+      let updatedId = null;
+      let updatedData = null;
+      let createCalled = false;
+
+      const auth0 = {
+        clientGrants: {
+          create: function () {
+            createCalled = true;
+            return Promise.resolve({ data: [] });
+          },
+          update: function (id, data) {
+            updatedId = id;
+            updatedData = data;
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          // Remote has a default_for grant with NO client_id — only matchable via ['default_for', 'audience']
+          list: (params) =>
+            mockPagedData(params, 'client_grants', [
+              {
+                id: 'cg_default',
+                audience: 'https://api.example.com',
+                default_for: 'third_party_clients',
+                scope: ['read:users'],
+              },
+            ]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Local config: same default_for grant, updated scope, no client_id
+      const data = [
+        {
+          audience: 'https://api.example.com',
+          default_for: 'third_party_clients',
+          scope: ['read:users', 'write:users'],
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+
+      // Must match via ['default_for', 'audience'] and UPDATE — not create a duplicate
+      expect(createCalled).to.equal(false);
+      expect(updatedId).to.equal('cg_default');
+      expect(updatedData.scope).to.deep.equal(['read:users', 'write:users']);
+      // default_for is in stripUpdateFields, so must be absent from the update payload
+      expect(updatedData).to.not.have.property('default_for');
+    });
+
     it('should update client grants with authorization_details_types', async () => {
       const auth0 = {
         clientGrants: {
@@ -303,6 +586,70 @@ describe('#clientGrants handler', () => {
       ];
 
       await stageFn.apply(handler, [{ clientGrants: data }]);
+    });
+
+    it('should match grants by subject_type and be order-independent when multiple grants share the same client_id+audience', async () => {
+      const updatedIds = [];
+      const updatedScopes = {};
+
+      const auth0 = {
+        clientGrants: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (id, data) {
+            updatedIds.push(id);
+            updatedScopes[id] = data.scope;
+            return Promise.resolve({ data: { id, ...data } });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'client_grants', [
+              {
+                id: 'cg_regular',
+                client_id: 'client1',
+                audience: 'https://api.example.com',
+                scope: ['read:data'],
+                subject_type: null,
+              },
+              {
+                id: 'cg_exchange',
+                client_id: 'client1',
+                audience: 'https://api.example.com',
+                scope: ['write:data'],
+                subject_type: 'client',
+              },
+            ]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // YAML in reversed order vs API order — should still match correctly by subject_type
+      const data = [
+        {
+          client_id: 'client1',
+          audience: 'https://api.example.com',
+          scope: ['write:data'],
+          subject_type: 'client',
+        },
+        {
+          client_id: 'client1',
+          audience: 'https://api.example.com',
+          scope: ['read:data'],
+          subject_type: null,
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+
+      // cg_regular (subject_type: null) must keep its scope ['read:data']
+      expect(updatedScopes['cg_regular']).to.deep.equal(['read:data']);
+      // cg_exchange (subject_type: 'client') must keep its scope ['write:data']
+      expect(updatedScopes['cg_exchange']).to.deep.equal(['write:data']);
     });
 
     it('should delete client grant and create another one instead', async () => {
@@ -451,6 +798,245 @@ describe('#clientGrants handler', () => {
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ clientGrants: [] }]);
+    });
+
+    it('should delete and recreate a grant when local subject_type explicitly differs from remote', async () => {
+      config.data = {
+        AUTH0_CLIENT_ID: 'client_id',
+        AUTH0_ALLOW_DELETE: true,
+      };
+
+      let deletedId = null;
+      let createdData = null;
+      let updatedId = null;
+
+      const remoteGrant = {
+        id: 'cg1',
+        client_id: 'client1',
+        audience: 'https://api.example.com',
+        scope: ['read:data'],
+        subject_type: 'client_credentials',
+      };
+
+      const auth0 = {
+        clientGrants: {
+          create: function (data) {
+            createdData = data;
+            return Promise.resolve({ data });
+          },
+          update: function (id, data) {
+            updatedId = id;
+            return Promise.resolve({ data });
+          },
+          delete: function (params) {
+            deletedId = params;
+            return Promise.resolve({ data: [] });
+          },
+          list: (params) => mockPagedData(params, 'client_grants', [remoteGrant]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Local explicitly sets subject_type: null — differs from remote 'client_credentials'.
+      // Since subject_type is immutable, this must become DELETE + CREATE, not UPDATE.
+      const data = [
+        {
+          client_id: 'client1',
+          audience: 'https://api.example.com',
+          scope: ['read:data'],
+          subject_type: null,
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+
+      expect(deletedId).to.equal('cg1');
+      expect(createdData).to.not.be.null;
+      expect(createdData.client_id).to.equal('client1');
+      expect(updatedId).to.be.null;
+    });
+
+    it('should update (not delete+create) a grant when local config omits subject_type', async () => {
+      config.data = {
+        AUTH0_CLIENT_ID: 'client_id',
+        AUTH0_ALLOW_DELETE: true,
+      };
+
+      let deletedId = null;
+      let updatedId = null;
+
+      const remoteGrant = {
+        id: 'cg1',
+        client_id: 'client1',
+        audience: 'https://api.example.com',
+        scope: ['read:data'],
+        subject_type: 'client_credentials',
+      };
+
+      const auth0 = {
+        clientGrants: {
+          create: function () {
+            throw new Error('create should not be called when subject_type is omitted');
+          },
+          update: function (id, data) {
+            updatedId = id;
+            return Promise.resolve({ data });
+          },
+          delete: function (params) {
+            deletedId = params;
+            return Promise.resolve({ data: [] });
+          },
+          list: (params) => mockPagedData(params, 'client_grants', [remoteGrant]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Local does NOT specify subject_type at all — backward-compat: should update, not delete+create.
+      const data = [
+        {
+          client_id: 'client1',
+          audience: 'https://api.example.com',
+          scope: ['write:data'],
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+
+      expect(deletedId).to.be.null;
+      expect(updatedId).to.equal('cg1');
+    });
+
+    it('should update (not delete+create) a grant when both local and remote subject_type are null', async () => {
+      config.data = { AUTH0_CLIENT_ID: 'client_id', AUTH0_ALLOW_DELETE: true };
+
+      let deletedId = null;
+      let updatedId = null;
+
+      const auth0 = {
+        clientGrants: {
+          create: function () {
+            throw new Error('create should not be called when subject_types match');
+          },
+          update: function (id, data) {
+            updatedId = id;
+            return Promise.resolve({ data });
+          },
+          delete: function (params) {
+            deletedId = params;
+            return Promise.resolve({ data: [] });
+          },
+          list: (params) =>
+            mockPagedData(params, 'client_grants', [
+              {
+                id: 'cg1',
+                client_id: 'client1',
+                audience: 'https://api.example.com',
+                scope: ['read:data'],
+                subject_type: null,
+              },
+            ]),
+        },
+        clients: { list: (params) => mockPagedData(params, 'clients', []) },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Both local and remote have subject_type: null — no mismatch, should just UPDATE.
+      const data = [
+        {
+          client_id: 'client1',
+          audience: 'https://api.example.com',
+          scope: ['read:data', 'write:data'],
+          subject_type: null,
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+
+      expect(deletedId).to.be.null;
+      expect(updatedId).to.equal('cg1');
+    });
+
+    it('should correctly handle 3 grants sharing client_id+audience with mixed subject_types', async () => {
+      config.data = { AUTH0_CLIENT_ID: 'client_id', AUTH0_ALLOW_DELETE: true };
+
+      const updatedIds = [];
+      let deletedId = null;
+
+      const auth0 = {
+        clientGrants: {
+          create: function () {
+            throw new Error('create should not be called when subject_types match');
+          },
+          update: function (id, data) {
+            updatedIds.push(id);
+            return Promise.resolve({ data });
+          },
+          delete: function (params) {
+            deletedId = params;
+            return Promise.resolve({ data: [] });
+          },
+          list: (params) =>
+            mockPagedData(params, 'client_grants', [
+              {
+                id: 'cg_null',
+                client_id: 'client1',
+                audience: 'https://api.example.com',
+                scope: ['read:data'],
+                subject_type: null,
+              },
+              {
+                id: 'cg_client',
+                client_id: 'client1',
+                audience: 'https://api.example.com',
+                scope: ['write:data'],
+                subject_type: 'client',
+              },
+            ]),
+        },
+        clients: { list: (params) => mockPagedData(params, 'clients', []) },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Mixed subject_types with updated scopes — should UPDATE each grant
+      // matched by subject_type, no delete+create needed.
+      const data = [
+        {
+          client_id: 'client1',
+          audience: 'https://api.example.com',
+          scope: ['read:data', 'read:profile'],
+          subject_type: null,
+        },
+        {
+          client_id: 'client1',
+          audience: 'https://api.example.com',
+          scope: ['write:data', 'write:profile'],
+          subject_type: 'client',
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clientGrants: data }]);
+
+      expect(deletedId).to.be.null;
+      expect(updatedIds).to.include('cg_null');
+      expect(updatedIds).to.include('cg_client');
     });
 
     it('should not touch client grants of excluded clients', async () => {
@@ -621,5 +1207,59 @@ describe('#clientGrants handler', () => {
     };
 
     await stageFn.apply(handler, [assets]);
+  });
+
+  it('should not delete client grants for third-party clients when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is enabled', async () => {
+    config.data = {
+      AUTH0_CLIENT_ID: 'current_client',
+      AUTH0_ALLOW_DELETE: true,
+      AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS: true,
+    };
+
+    let deletedGrantId = null;
+
+    const auth0 = {
+      clientGrants: {
+        create: (_params) => {
+          return Promise.resolve({ data: [] });
+        },
+        update: (_params) => {
+          return Promise.resolve({ data: [] });
+        },
+        delete: function (params) {
+          (() => expect(this).to.not.be.undefined)();
+          deletedGrantId = params;
+          return Promise.resolve({ data: [] });
+        },
+        list: (params) =>
+          mockPagedData(params, 'client_grants', [
+            { id: 'cg1', client_id: 'third_party_client', audience: 'audience1' },
+            { id: 'cg2', client_id: 'first_party_client', audience: 'audience2' },
+          ]),
+      },
+      clients: {
+        list: (params) =>
+          mockPagedData(params, 'clients', [
+            { name: 'Third Party App', client_id: 'third_party_client', is_first_party: false },
+            { name: 'My App', client_id: 'first_party_client', is_first_party: true },
+          ]),
+      },
+      pool,
+    };
+
+    const handler = new clientGrants.default({ client: pageClient(auth0), config });
+    const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+    // Empty array should delete all non-excluded grants
+    await stageFn.apply(handler, [{ clientGrants: [] }]);
+
+    // Should only delete the first-party client grant, not the third-party one
+    expect(deletedGrantId).to.equal('cg2');
+
+    // Reset config to default for subsequent tests
+    config.data = {
+      AUTH0_CLIENT_ID: 'client_id',
+      AUTH0_ALLOW_DELETE: true,
+    };
   });
 });

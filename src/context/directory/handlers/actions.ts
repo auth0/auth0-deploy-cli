@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import { constants } from '../../../tools';
 
-import { getFiles, existsMustBeDir, loadJSON, sanitize } from '../../../utils';
+import { getFiles, existsMustBeDir, loadJSON, sanitize, dumpJSON } from '../../../utils';
 import log from '../../../logger';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
@@ -32,6 +32,11 @@ function parse(context: DirectoryContext): ParsedActions {
       const unixPath = action.code.replace(/[\\/]+/g, '/').replace(/^([a-zA-Z]+:|\.\/)/, '');
       if (fs.existsSync(unixPath)) {
         // If the Unix-style path exists, load the file from that path
+        log.warn(
+          `Support for absolute paths and paths outside the config root will be deprecated in a future version to improve the security of the tool. ` +
+            `Please update your configuration to use paths relative to the config directory. ` +
+            `Current absolute path used: ["${action.code}"]`
+        );
         action.code = context.loadFile(unixPath, actionFolder);
       } else {
         // Otherwise, load the file from the context's file path
@@ -85,6 +90,10 @@ function mapToAction(filePath, action, includeIdentifiers: boolean): Partial<Act
     supported_triggers: action.supported_triggers,
     deployed: action.deployed || action.all_changes_deployed,
     installed_integration_id: action.installed_integration_id,
+    modules: action.modules?.map((module) => ({
+      module_name: module.module_name,
+      module_version_number: module.module_version_number,
+    })),
   };
 }
 
@@ -111,11 +120,7 @@ async function dump(context: DirectoryContext): Promise<void> {
     // Dump template metadata
     const name = sanitize(action.name);
     const actionFile = path.join(actionsFolder, `${name}.json`);
-    log.info(`Writing ${actionFile}`);
-    fs.writeFileSync(
-      actionFile,
-      JSON.stringify(mapToAction(context.filePath, action, includeIdentifiers), null, 2)
-    );
+    dumpJSON(actionFile, mapToAction(context.filePath, action, includeIdentifiers));
   });
 }
 

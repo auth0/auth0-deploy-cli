@@ -581,6 +581,198 @@ describe('#filterExcluded', () => {
       );
     });
   });
+
+  describe('#validateNoUnresolvedPlaceholders', () => {
+    it('should throw when a top-level field contains an unresolved ##...## placeholder', () => {
+      const asset = {
+        id: 'asset-id-1',
+        name: 'my-resource',
+        secret: '##MY_SECRET##',
+      };
+
+      expect(() =>
+        utils.validateNoUnresolvedPlaceholders(asset, 'connections', 'my-resource')
+      ).to.throw(/Unresolved placeholder/);
+    });
+
+    it('should throw when a nested field contains an unresolved placeholder', () => {
+      const asset = {
+        id: 'asset-id-2',
+        options: {
+          client_secret: '##CLIENT_SECRET##',
+          domain: 'example.auth0.com',
+        },
+      };
+
+      expect(() =>
+        utils.validateNoUnresolvedPlaceholders(asset, 'connections', 'my-connection')
+      ).to.throw(/options\.client_secret/);
+    });
+
+    it('should include the resource type, resource name, field path and placeholder value in the error', () => {
+      const asset = {
+        id: 'asset-id-3',
+        options: { client_secret: '##CLIENT_SECRET##' },
+      };
+
+      expect(() => utils.validateNoUnresolvedPlaceholders(asset, 'connections', 'my-connection'))
+        .to.throw()
+        .and.satisfy((err) => {
+          expect(err.message).to.include('options.client_secret');
+          expect(err.message).to.include('connections');
+          expect(err.message).to.include('my-connection');
+          expect(err.message).to.include('##CLIENT_SECRET##');
+          return true;
+        });
+    });
+
+    it('should not throw for fields with resolved (non-placeholder) values', () => {
+      const asset = {
+        id: 'asset-id-4',
+        name: 'resolved-resource',
+        secret: 'a-real-secret-value',
+        options: { domain: 'example.auth0.com', template: '@@password@@' },
+      };
+
+      const result = utils.validateNoUnresolvedPlaceholders(asset, 'clients', 'resolved-resource');
+      expect(result).to.deep.equal(asset);
+    });
+
+    it('should not throw for array field values', () => {
+      const asset = {
+        id: 'asset-id-5',
+        allowed_origins: ['https://example.com', 'https://other.com'],
+      };
+
+      const result = utils.validateNoUnresolvedPlaceholders(asset, 'clients', 'my-client');
+      expect(result).to.deep.equal(asset);
+    });
+
+    it('should return null when input is null', () => {
+      const result = utils.validateNoUnresolvedPlaceholders(null, 'clients', 'my-client');
+      expect(result).to.be.null;
+    });
+
+    it('should throw when a top-level field contains an unresolved @@...@@ array placeholder', () => {
+      const asset = {
+        id: 'asset-id-arr',
+        name: 'my-resource',
+        allowed_clients: '@@MY_CLIENTS@@',
+      };
+
+      expect(() =>
+        utils.validateNoUnresolvedPlaceholders(asset, 'connections', 'my-resource')
+      ).to.throw(/@@MY_CLIENTS@@/);
+    });
+
+    it('should throw and list all unresolved placeholders (##...## and @@...@@) in the error', () => {
+      const asset = {
+        id: 'asset-id-mixed',
+        secret: '##MY_SECRET##',
+        allowed_clients: '@@MY_CLIENTS@@',
+        name: 'resolved-name',
+      };
+
+      expect(() => utils.validateNoUnresolvedPlaceholders(asset, 'connections', 'mixed-conn'))
+        .to.throw()
+        .and.satisfy((err) => {
+          expect(err.message).to.include('##MY_SECRET##');
+          expect(err.message).to.include('@@MY_CLIENTS@@');
+          return true;
+        });
+    });
+
+    it('should list all unresolved placeholders across different depths in a single error', () => {
+      const asset = {
+        id: 'asset-id-6',
+        api_key: '##API_KEY##',
+        options: { client_secret: '##CLIENT_SECRET##' },
+      };
+
+      expect(() => utils.validateNoUnresolvedPlaceholders(asset, 'connections', 'multi-conn'))
+        .to.throw()
+        .and.satisfy((err) => {
+          expect(err.message).to.include('api_key');
+          expect(err.message).to.include('options.client_secret');
+          return true;
+        });
+    });
+  });
+
+  describe('#stripUnresolvedPlaceholders', () => {
+    it('should strip a nested field containing an unresolved ##...## placeholder', () => {
+      const asset = {
+        id: 'con-1',
+        name: 'my-waad-connection',
+        options: {
+          client_id: 'real-client-id',
+          client_secret: '##CONNECTIONS_WAAD_SECRET##',
+          domain: 'example.onmicrosoft.com',
+        },
+      };
+
+      const result = utils.stripUnresolvedPlaceholders(asset, 'connections', 'my-waad-connection');
+      expect(result).to.deep.equal({
+        id: 'con-1',
+        name: 'my-waad-connection',
+        options: {
+          client_id: 'real-client-id',
+          domain: 'example.onmicrosoft.com',
+        },
+      });
+    });
+
+    it('should strip a field containing an unresolved @@...@@ placeholder', () => {
+      const asset = {
+        id: 'con-2',
+        options: {
+          client_secret: '@@CONNECTIONS_WAAD_SECRET@@',
+          client_id: 'abc',
+        },
+      };
+
+      const result = utils.stripUnresolvedPlaceholders(asset, 'connections', 'con-2');
+      expect(result).to.deep.equal({
+        id: 'con-2',
+        options: { client_id: 'abc' },
+      });
+    });
+
+    it('should strip ALL unresolved placeholders across all fields', () => {
+      const asset = {
+        id: 'con-3',
+        options: {
+          client_secret: '##CONNECTIONS_OIDC_SECRET##',
+          api_key: '##SOME_API_KEY##',
+          domain: 'real-domain.com',
+        },
+      };
+
+      const result = utils.stripUnresolvedPlaceholders(asset, 'connections', 'con-3');
+      expect(result).to.deep.equal({
+        id: 'con-3',
+        options: { domain: 'real-domain.com' },
+      });
+    });
+
+    it('should not strip a field that has a resolved (real) value', () => {
+      const asset = {
+        id: 'con-4',
+        options: {
+          client_secret: 'the-real-secret',
+          client_id: 'abc',
+        },
+      };
+
+      const result = utils.stripUnresolvedPlaceholders(asset, 'connections', 'con-4');
+      expect(result).to.deep.equal(asset);
+    });
+
+    it('should return null when input is null', () => {
+      const result = utils.stripUnresolvedPlaceholders(null, 'connections', 'con-5');
+      expect(result).to.be.null;
+    });
+  });
 });
 
 describe('#detectInsufficientScopeError', () => {
@@ -688,7 +880,7 @@ describe('#isForbiddenFeatureError', () => {
 
     // eslint-disable-next-line no-unused-expressions
     expect(utils.isForbiddenFeatureError(error, resourceType)).to.be.true;
-    expect(warnMessage).to.equal('Forbidden resource access; - Skipping connections');
+    expect(warnMessage).to.equal('Forbidden resource access - Skipping connections');
 
     // Restore original warn function
     log.warn = originalWarn;
@@ -712,7 +904,44 @@ describe('#isForbiddenFeatureError', () => {
     // eslint-disable-next-line no-unused-expressions
     expect(utils.isForbiddenFeatureError(error, resourceType)).to.be.true;
     expect(warnMessage).to.equal(
-      'Forbidden resource access;forbidden_resource_error - Skipping actions'
+      'Forbidden resource access (forbidden_resource_error) - Skipping actions'
+    );
+
+    // Restore original warn function
+    log.warn = originalWarn;
+  });
+
+  it('should use the clean message and errorCode from the response body when available', () => {
+    let warnMessage;
+    const originalWarn = log.warn;
+    // Mock the log.warn function
+    log.warn = (msg) => {
+      warnMessage = msg;
+    };
+
+    // Mirrors the real SDK ForbiddenError: top-level `message` is the full serialized body,
+    // while the human-readable message and errorCode live on originalError.response.body.
+    const error = {
+      message:
+        'ForbiddenError\nStatus code: 403\nBody: {\n  "statusCode": 403,\n  "errorCode": "legacy_mfa_phone_provider_not_allowed"\n}',
+      statusCode: 403,
+      originalError: {
+        response: {
+          body: {
+            statusCode: 403,
+            error: 'Forbidden',
+            message: 'Insufficient privileges to use this deprecated feature.',
+            errorCode: 'legacy_mfa_phone_provider_not_allowed',
+          },
+        },
+      },
+    };
+    const resourceType = 'guardianPhoneFactorSelectedProvider';
+
+    // eslint-disable-next-line no-unused-expressions
+    expect(utils.isForbiddenFeatureError(error, resourceType)).to.be.true;
+    expect(warnMessage).to.equal(
+      'Insufficient privileges to use this deprecated feature. (legacy_mfa_phone_provider_not_allowed) - Skipping guardianPhoneFactorSelectedProvider'
     );
 
     // Restore original warn function

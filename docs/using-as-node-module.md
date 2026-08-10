@@ -6,6 +6,9 @@ The Deploy CLI can not only be used as a standalone CLI, but as a node module. D
 
 Fetches configurations from Auth0 tenant to the local machine.
 
+> **Note**
+> Marketplace Actions (including Auth0-owned marketplace Actions) are not exported. If your tenant uses marketplace Actions, their installation and configuration must be handled manually.
+
 ### Example
 
 ```ts
@@ -61,6 +64,9 @@ A url for proxying requests. Only set this if you are behind a proxy.
 ## `deploy` function
 
 Applies configurations from local machine to Auth0 tenant.
+
+> **Note**
+> Marketplace Actions cannot be installed by the Deploy CLI. If your configuration references marketplace Actions, install them manually in the target tenant before running `deploy`.
 
 ### Argument parameters
 

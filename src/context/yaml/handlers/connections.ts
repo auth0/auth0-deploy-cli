@@ -7,9 +7,9 @@ import {
   isFile,
   sanitize,
   ensureProp,
-  convertClientIdToName,
   mapClientID2NameSorted,
   encodeCertStringToBase64,
+  getFormattedOptions,
 } from '../../../utils';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
@@ -47,26 +47,19 @@ async function parse(context: YAMLContext): Promise<ParsedConnections> {
   };
 }
 
-const getFormattedOptions = (connection, clients) => {
-  try {
-    return {
-      options: {
-        ...connection.options,
-        idpinitiated: {
-          ...connection.options.idpinitiated,
-          client_id: convertClientIdToName(connection.options.idpinitiated.client_id, clients),
-        },
-      },
-    };
-  } catch (e) {
-    return {};
-  }
-};
-
 async function dump(context: YAMLContext): Promise<ParsedConnections> {
-  const { connections, clients } = context.assets;
+  let { connections } = context.assets;
+  const { clients } = context.assets;
 
   if (!connections) return { connections: null };
+
+  // Filter excluded connections
+  const excludedConnections = (context.assets.exclude && context.assets.exclude.connections) || [];
+  if (excludedConnections.length) {
+    connections = connections.filter(
+      (connection) => !excludedConnections.includes(connection.name)
+    );
+  }
 
   return {
     connections: connections.map((connection) => {
@@ -79,7 +72,7 @@ async function dump(context: YAMLContext): Promise<ParsedConnections> {
       };
 
       // Mask secrets
-      dumpedConnection = connectionDefaults(dumpedConnection);
+      dumpedConnection = connectionDefaults(dumpedConnection, context.config);
 
       if (dumpedConnection.strategy === 'email') {
         ensureProp(connection, 'options.email.body');

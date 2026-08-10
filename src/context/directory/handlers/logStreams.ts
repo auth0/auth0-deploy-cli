@@ -40,7 +40,7 @@ async function dump(context: DirectoryContext): Promise<void> {
   fs.ensureDirSync(logStreamsDirectory);
 
   // masked sensitive fields
-  const maskedLogStreams = logStreamDefaults(logStreams);
+  const maskedLogStreams = logStreamDefaults(logStreams, context.config);
 
   maskedLogStreams.forEach((logStream) => {
     const ruleFile = path.join(logStreamsDirectory, `${sanitize(logStream.name)}.json`);

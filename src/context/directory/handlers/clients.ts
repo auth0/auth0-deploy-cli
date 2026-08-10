@@ -53,10 +53,16 @@ function parse(context: DirectoryContext): ParsedClients {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const { clients } = context.assets;
+  let { clients } = context.assets;
   const { userAttributeProfiles, connectionProfiles } = context.assets;
 
   if (!clients) return; // Skip, nothing to dump
+
+  // Filter excluded clients
+  const excludedClients = (context.assets.exclude && context.assets.exclude.clients) || [];
+  if (excludedClients.length) {
+    clients = clients.filter((client) => !excludedClients.includes(client.name ?? ''));
+  }
 
   const clientsFolder = path.join(context.filePath, constants.CLIENTS_DIRECTORY);
   fs.ensureDirSync(clientsFolder);
@@ -98,6 +104,34 @@ async function dump(context: DirectoryContext): Promise<void> {
       }
     }
 
+    if (client.my_organization_configuration) {
+      const myOrganizationUserAttributeProfileId =
+        client.my_organization_configuration.user_attribute_profile_id;
+      if (myOrganizationUserAttributeProfileId) {
+        const p = userAttributeProfiles?.find(
+          (uap) => uap.id === myOrganizationUserAttributeProfileId
+        );
+        client.my_organization_configuration.user_attribute_profile_id =
+          p?.name || myOrganizationUserAttributeProfileId;
+      }
+
+      const myOrganizationConnectionProfileId =
+        client.my_organization_configuration.connection_profile_id;
+      if (myOrganizationConnectionProfileId) {
+        const c = connectionProfiles?.find((cp) => cp.id === myOrganizationConnectionProfileId);
+        client.my_organization_configuration.connection_profile_id =
+          c?.name || myOrganizationConnectionProfileId;
+      }
+
+      const invitationLandingClientId =
+        client.my_organization_configuration.invitation_landing_client_id;
+      if (invitationLandingClientId) {
+        const c = clients?.find((cl) => cl.client_id === invitationLandingClientId);
+        client.my_organization_configuration.invitation_landing_client_id =
+          c?.name || invitationLandingClientId;
+      }
+    }
+
     if (client.app_type === 'express_configuration') {
       // only keep relevant fields for express configuration
       client = {
@@ -106,6 +140,22 @@ async function dump(context: DirectoryContext): Promise<void> {
         client_authentication_methods: client.client_authentication_methods,
         organization_require_behavior: client.organization_require_behavior,
       } as Client;
+    } else {
+      // strip id-only credentials and remove client_authentication_methods entirely
+      // if no named credentials remain — an absent field is treated as deletion on deploy
+      if (client.client_authentication_methods) {
+        Object.values(client.client_authentication_methods).forEach((method: any) => {
+          if (method?.credentials) {
+            method.credentials = method.credentials.filter((c: any) => c.name);
+          }
+        });
+        const hasAnyCredentials = Object.values(
+          client.client_authentication_methods as Record<string, any>
+        ).some((method: any) => method?.credentials?.length > 0);
+        if (!hasAnyCredentials) {
+          delete client.client_authentication_methods;
+        }
+      }
     }
 
     dumpJSON(clientFile, clearClientArrays(client));

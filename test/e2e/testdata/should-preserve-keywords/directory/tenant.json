@@ -9,7 +9,6 @@
     "change_pwd_flow_v1": false,
     "enable_apis_section": false,
     "enable_client_connections": false,
-    "enable_custom_domain_in_emails": false,
     "enable_dynamic_client_registration": false,
     "enable_legacy_logs_search_v2": false,
     "enable_public_signup_user_exists_error": true,

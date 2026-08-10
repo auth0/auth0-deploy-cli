@@ -71,6 +71,13 @@ describe('#YAML context prompts', () => {
             login-id:
               form-content-end: >-
                 <div>TEST</div>
+          passkeys:
+            passkeys-enrollment:
+              form-content-start: >-
+                <div>PASSKEY ENROLLMENT TEST</div>
+            passkeys-enrollment-local:
+              form-footer-end: >-
+                <div>PASSKEY LOCAL TEST</div>
         screenRenderers:
           - signup-id:
               signup-id: ./screenRenderSettings/signup-id_signup-id.json
@@ -157,6 +164,14 @@ describe('#YAML context prompts', () => {
         'login-id': {
           'login-id': {
             'form-content-end': '<div>TEST</div>',
+          },
+        },
+        passkeys: {
+          'passkeys-enrollment': {
+            'form-content-start': '<div>PASSKEY ENROLLMENT TEST</div>',
+          },
+          'passkeys-enrollment-local': {
+            'form-footer-end': '<div>PASSKEY LOCAL TEST</div>',
           },
         },
       },
@@ -315,6 +330,14 @@ describe('#YAML context prompts', () => {
         'login-id': {
           'login-id': {
             'form-content-end': '<div>TEST</div>',
+          },
+        },
+        passkeys: {
+          'passkeys-enrollment': {
+            'form-content-start': '<div>PASSKEY ENROLLMENT TEST</div>',
+          },
+          'passkeys-enrollment-local': {
+            'form-footer-end': '<div>PASSKEY LOCAL TEST</div>',
           },
         },
       },

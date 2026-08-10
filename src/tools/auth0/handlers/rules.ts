@@ -4,6 +4,7 @@ import { convertJsonToString, stripFields, duplicateItems, isDeprecatedError } f
 import DefaultHandler from './default';
 import log from '../../../logger';
 import { calculateChanges } from '../../calculateChanges';
+import { calculateDryRunChanges } from '../../calculateDryRunChanges';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 
@@ -149,6 +150,31 @@ export default class RulesHandler extends DefaultHandler {
       reOrder,
       conflicts,
     };
+  }
+
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    let { rules } = assets;
+
+    if (!rules) {
+      return { del: [], create: [], conflicts: [], update: [] };
+    }
+
+    const excludedRules = (assets.exclude && assets.exclude.rules) || [];
+    rules = rules.filter((r) => !excludedRules.includes(r.name));
+
+    let existing = await this.getType();
+    if (existing === null) {
+      return { del: [], create: [], conflicts: [], update: [] };
+    }
+    existing = existing.filter((r) => !excludedRules.includes(r.name));
+
+    return calculateDryRunChanges({
+      type: this.type,
+      assets: rules,
+      existing,
+      identifiers: this.identifiers,
+      ignoreDryRunFields: this.getEffectiveIgnoreDryRunFields(),
+    });
   }
 
   async validate(assets: Assets): Promise<void> {

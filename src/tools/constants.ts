@@ -35,6 +35,7 @@ const constants = {
   OBFUSCATED_SECRET_VALUE,
   HOOKS_DIRECTORY: 'hooks',
   ACTIONS_DIRECTORY: 'actions',
+  ACTION_MODULES_DIRECTORY: 'action-modules',
   TRIGGERS_DIRECTORY: 'triggers',
   RULES_CONFIGS_DIRECTORY: 'rules-configs',
   PAGES_DIRECTORY: 'pages',
@@ -69,6 +70,8 @@ const constants = {
     'send-phone-message',
     'password-reset-post-challenge',
     'custom-token-exchange',
+    'login-post-identifier',
+    'signup-post-identifier',
   ],
   EMAIL_TEMPLATES_DIRECTORY: 'emails',
   EMAIL_VERIFY,
@@ -220,6 +223,9 @@ const constants = {
   USER_ATTRIBUTE_PROFILES_DIRECTORY: 'user-attribute-profiles',
   CONNECTION_PROFILES_DIRECTORY: 'connection-profiles',
   TOKEN_EXCHANGE_PROFILES_DIRECTORY: 'token-exchange-profiles',
+  SUPPLEMENTAL_SIGNALS_DIRECTORY: 'supplemental-signals',
+  RATE_LIMIT_POLICIES_DIRECTORY: 'rate-limit-policies',
+  EVENT_STREAMS_DIRECTORY: 'event-streams',
 };
 
 export default constants;

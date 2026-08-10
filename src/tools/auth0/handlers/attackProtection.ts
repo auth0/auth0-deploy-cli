@@ -1,5 +1,6 @@
 import DefaultAPIHandler from './default';
 import { Asset, Assets } from '../../../types';
+import { isDryRun } from '../../utils';
 import log from '../../../logger';
 
 export const CAPTCHA_PROVIDERS = [
@@ -195,6 +196,14 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
     super({
       ...config,
       type: 'attackProtection',
+      ignoreDryRunFields: [
+        'captcha.arkose.secret',
+        'captcha.friendly_captcha.secret',
+        'captcha.hcaptcha.secret',
+        'captcha.recaptcha_enterprise.api_key',
+        'captcha.recaptcha_enterprise.project_id',
+        'captcha.recaptcha_v2.secret',
+      ],
     });
   }
 
@@ -249,15 +258,26 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
     let captcha: Asset | null = null;
 
     try {
-      [botDetection, captcha] = await Promise.all([
-        this.client.attackProtection.botDetection.get(),
-        this.client.attackProtection.captcha.get(),
-      ]);
+      botDetection = await this.client.attackProtection.botDetection.get();
     } catch (err) {
       if (err.statusCode === 403) {
         log.warn(
-          'Bot Detection API are not enabled for this tenant. Please verify `scope` or contact Auth0 support to enable this feature.'
+          "Bot detection is not available on this tenant's current plan. Skipping bot detection settings."
         );
+      } else {
+        throw err;
+      }
+    }
+
+    try {
+      captcha = await this.client.attackProtection.captcha.get();
+    } catch (err) {
+      if (err.statusCode === 403) {
+        log.warn(
+          "Captcha is not available on this tenant's current plan. Skipping captcha settings."
+        );
+      } else {
+        throw err;
       }
     }
 
@@ -285,6 +305,14 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
 
     if (!attackProtection || !Object.keys(attackProtection).length) {
       return;
+    }
+
+    if (isDryRun(this.config)) {
+      const { del, update, create } = await this.calcChanges(assets);
+
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        return;
+      }
     }
 
     const updates: Promise<unknown>[] = [];

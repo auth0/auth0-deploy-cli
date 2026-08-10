@@ -29,6 +29,7 @@ describe('#YAML context organizations', () => {
         discovery_domains:
           - domain: login.acme.com
             status: pending
+            use_for_organization_discovery: true
       - name: contoso
         branding:
           colors:
@@ -75,10 +76,12 @@ describe('#YAML context organizations', () => {
           },
         ],
         client_grants: [],
+        clients: [],
         discovery_domains: [
           {
             domain: 'login.acme.com',
             status: 'pending',
+            use_for_organization_discovery: true,
           },
         ],
       },
@@ -100,6 +103,7 @@ describe('#YAML context organizations', () => {
           },
         ],
         client_grants: [],
+        clients: [],
       },
       {
         name: 'org-snow',
@@ -123,6 +127,7 @@ describe('#YAML context organizations', () => {
             client_id: 'Org Snow app',
           },
         ],
+        clients: [],
       },
     ];
 
@@ -163,6 +168,7 @@ describe('#YAML context organizations', () => {
           {
             domain: 'login.acme.com',
             status: 'verified',
+            use_for_organization_discovery: false,
             id: 'dd_123',
           },
         ],
@@ -175,7 +181,11 @@ describe('#YAML context organizations', () => {
     delete organizations[0].connections[0].connection;
     delete organizations[0].connections[0].connection_id;
     organizations[0].discovery_domains = organizations[0].discovery_domains.map(
-      ({ domain, status }) => ({ domain, status })
+      ({ domain, status, use_for_organization_discovery }) => ({
+        domain,
+        status,
+        use_for_organization_discovery,
+      })
     );
 
     expect(dumped).to.deep.equal({ organizations });

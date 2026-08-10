@@ -74,7 +74,7 @@ describe('#emailProvider handler', () => {
 
       const handler = new emailProvider.default({
         client: auth0,
-        config: () => AUTH0_ALLOW_DELETE,
+        config: (key) => (key === 'AUTH0_ALLOW_DELETE' ? AUTH0_ALLOW_DELETE : false),
       });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
@@ -82,6 +82,38 @@ describe('#emailProvider handler', () => {
 
       expect(wasDeleteCalled).to.equal(false);
       expect(wasUpdateCalled).to.equal(true);
+    });
+
+    it('should not call update when emailProvider is empty and no existing provider exists, even when AUTH0_ALLOW_DELETE is true', async () => {
+      const AUTH0_ALLOW_DELETE = true;
+      let wasUpdateCalled = false;
+      let wasCreateCalled = false;
+      const auth0 = {
+        emails: {
+          provider: {
+            create: () => {
+              wasCreateCalled = true;
+              return Promise.resolve({});
+            },
+            update: () => {
+              wasUpdateCalled = true;
+              return Promise.resolve({});
+            },
+            get: () => Promise.resolve({}),
+          },
+        },
+      };
+
+      const handler = new emailProvider.default({
+        client: auth0,
+        config: () => AUTH0_ALLOW_DELETE,
+      });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ emailProvider: {} }]);
+
+      expect(wasUpdateCalled).to.equal(false);
+      expect(wasCreateCalled).to.equal(false);
     });
 
     it('should not delete email provider if set to empty object and if AUTH0_ALLOW_DELETE is false', async () => {

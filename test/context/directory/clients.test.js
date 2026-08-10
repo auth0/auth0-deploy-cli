@@ -143,6 +143,26 @@ describe('#directory context clients', () => {
     ).to.equal('html code');
   });
 
+  it('should not dump excluded clients', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientsDumpExclude');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.clients = [
+      { app_type: 'spa', name: 'includedClient' },
+      { app_type: 'spa', name: 'excludedClient' },
+    ];
+    context.assets.exclude = { clients: ['excludedClient'] };
+
+    await handler.dump(context);
+    const clientFolder = path.join(dir, constants.CLIENTS_DIRECTORY);
+
+    expect(loadJSON(path.join(clientFolder, 'includedClient.json'))).to.deep.equal(
+      context.assets.clients[0]
+    );
+    expect(fs.existsSync(path.join(clientFolder, 'excludedClient.json'))).to.equal(false);
+  });
+
   it('should dump clients sanitized', async () => {
     const dir = path.join(testDataDir, 'directory', 'clientsDump');
     cleanThenMkdir(dir);
@@ -273,6 +293,64 @@ describe('#directory context clients', () => {
     });
   });
 
+  it('should dump clients with my_organization_configuration', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientsDumpMyOrganization');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.clients = [
+      {
+        name: 'someClient',
+        app_type: 'regular_web',
+        my_organization_configuration: {
+          user_attribute_profile_id: 'uap_123',
+          connection_profile_id: 'cp_123',
+          invitation_landing_client_id: 'cli_abc',
+          allowed_strategies: ['okta', 'samlp'],
+          connection_deletion_behavior: 'allow_if_empty',
+        },
+      },
+      {
+        name: 'someClientUnknownInvitation',
+        app_type: 'regular_web',
+        my_organization_configuration: {
+          invitation_landing_client_id: 'cli_unknown',
+          allowed_strategies: ['okta'],
+          connection_deletion_behavior: 'allow_if_empty',
+        },
+      },
+      {
+        client_id: 'cli_abc',
+        name: 'My Invitation Landing Client',
+      },
+    ];
+
+    context.assets.userAttributeProfiles = [{ id: 'uap_123', name: 'My User Attribute Profile' }];
+    context.assets.connectionProfiles = [{ id: 'cp_123', name: 'My Connection Profile' }];
+
+    await handler.dump(context);
+
+    const dumpedClient = loadJSON(path.join(dir, 'clients', 'someClient.json'));
+    expect(dumpedClient).to.deep.equal({
+      name: 'someClient',
+      app_type: 'regular_web',
+      my_organization_configuration: {
+        user_attribute_profile_id: 'My User Attribute Profile',
+        connection_profile_id: 'My Connection Profile',
+        invitation_landing_client_id: 'My Invitation Landing Client',
+        allowed_strategies: ['okta', 'samlp'],
+        connection_deletion_behavior: 'allow_if_empty',
+      },
+    });
+
+    const dumpedClientUnknown = loadJSON(
+      path.join(dir, 'clients', 'someClientUnknownInvitation.json')
+    );
+    expect(dumpedClientUnknown.my_organization_configuration.invitation_landing_client_id).to.equal(
+      'cli_unknown'
+    );
+  });
+
   it('should dump clients with app_type express_configuration and filter fields', async () => {
     const dir = path.join(testDataDir, 'directory', 'clientsDumpExpressAppType');
     cleanThenMkdir(dir);
@@ -296,6 +374,85 @@ describe('#directory context clients', () => {
       app_type: 'express_configuration',
       client_authentication_methods: {},
       organization_require_behavior: 'no_prompt',
+    });
+  });
+
+  it('should process clients with oidc_logout', async () => {
+    const files = {
+      [constants.CLIENTS_DIRECTORY]: {
+        'oidcLogoutClient.json':
+          '{ "app_type": "regular_web", "name": "oidcLogoutClient", "oidc_logout": { "backchannel_logout_urls": ["https://example.com/logout"], "backchannel_logout_initiators": { "mode": "custom", "selected_initiators": ["rp-logout", "idp-logout"] }, "backchannel_logout_session_metadata": { "include": true } } }',
+        'simpleClient.json': '{ "app_type": "spa", "name": "simpleClient" }',
+      },
+    };
+
+    const repoDir = path.join(testDataDir, 'directory', 'clientsWithOidcLogout');
+    createDir(repoDir, files);
+
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    const target = [
+      {
+        app_type: 'regular_web',
+        name: 'oidcLogoutClient',
+        oidc_logout: {
+          backchannel_logout_urls: ['https://example.com/logout'],
+          backchannel_logout_initiators: {
+            mode: 'custom',
+            selected_initiators: ['rp-logout', 'idp-logout'],
+          },
+          backchannel_logout_session_metadata: {
+            include: true,
+          },
+        },
+      },
+      { app_type: 'spa', name: 'simpleClient' },
+    ];
+    expect(context.assets.clients).to.deep.equal(target);
+  });
+
+  it('should dump clients with oidc_logout', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientsOidcLogoutDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.clients = [
+      {
+        name: 'oidcLogoutClient',
+        app_type: 'regular_web',
+        oidc_logout: {
+          backchannel_logout_urls: ['https://example.com/logout'],
+          backchannel_logout_initiators: {
+            mode: 'custom',
+            selected_initiators: ['rp-logout', 'idp-logout'],
+          },
+          backchannel_logout_session_metadata: {
+            include: true,
+          },
+        },
+      },
+    ];
+
+    await handler.dump(context);
+
+    const dumpedClient = loadJSON(path.join(dir, 'clients', 'oidcLogoutClient.json'));
+    expect(dumpedClient).to.deep.equal({
+      name: 'oidcLogoutClient',
+      app_type: 'regular_web',
+      oidc_logout: {
+        backchannel_logout_urls: ['https://example.com/logout'],
+        backchannel_logout_initiators: {
+          mode: 'custom',
+          selected_initiators: ['rp-logout', 'idp-logout'],
+        },
+        backchannel_logout_session_metadata: {
+          include: true,
+        },
+      },
     });
   });
 });

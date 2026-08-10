@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 import pageClient from '../../../../src/tools/auth0/client';
 
+const Ajv = require('ajv');
 const { expect } = require('chai');
 const clients = require('../../../../src/tools/auth0/handlers/clients');
 const { mockPagedData } = require('../../../utils');
@@ -48,6 +49,52 @@ describe('#clients handler', () => {
     AUTH0_ALLOW_DELETE: true,
   };
 
+  describe('#clients schema', () => {
+    const ajv = new Ajv({ useDefaults: true, nullable: true });
+
+    it('should pass validation with fedcm_login', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someFedCMClient',
+          fedcm_login: { google: { is_enabled: true } },
+        },
+      ]);
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should pass validation with fedcm_login set to null', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someFedCMClient',
+          fedcm_login: null,
+        },
+      ]);
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should fail validation with fedcm_login missing google', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someFedCMClient',
+          fedcm_login: {},
+        },
+      ]);
+      expect(valid).to.equal(false);
+    });
+
+    it('should fail validation with fedcm_login.google missing is_enabled', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someFedCMClient',
+          fedcm_login: { google: {} },
+        },
+      ]);
+      expect(valid).to.equal(false);
+    });
+  });
+
   describe('#clients validate', () => {
     it('should not allow same names', async () => {
       const handler = new clients.default({ client: {}, config });
@@ -80,9 +127,157 @@ describe('#clients handler', () => {
 
       await stageFn.apply(handler, [{ clients: data }]);
     });
+
+    it('should pass validation with third_party_security_mode and redirection_policy', async () => {
+      const handler = new clients.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        {
+          name: 'someThirdPartyClient',
+          third_party_security_mode: 'strict',
+          redirection_policy: 'open_redirect_protection',
+        },
+      ];
+
+      await stageFn.apply(handler, [{ clients: data }]);
+    });
   });
 
   describe('#clients process', () => {
+    it('should create CIMD client using the register endpoint without a follow-up patch', async () => {
+      const registeredRequests = [];
+      const updatedRequests = [];
+
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (clientId, data) {
+            updatedRequests.push({ clientId, data });
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+          registerCimdClient: ({ external_client_id }) => {
+            registeredRequests.push(external_client_id);
+            return Promise.resolve({
+              client_id: 'cimd_client_123',
+              mapped_fields: {
+                client_name: 'MCP Tool Server',
+              },
+              validation: {
+                valid: true,
+                warnings: [],
+              },
+            });
+          },
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'Manual CIMD Client',
+              description: 'editable after registration',
+              external_client_id: 'https://mcpserver.example.com/client.json',
+              external_metadata_type: 'cimd',
+              external_metadata_created_by: 'admin',
+              jwks_uri: 'https://mcpserver.example.com/jwks.json',
+            },
+          ],
+        },
+      ]);
+
+      expect(registeredRequests).to.deep.equal(['https://mcpserver.example.com/client.json']);
+      expect(updatedRequests).to.have.lengthOf(0);
+    });
+
+    it('should match CIMD clients by external_client_id when updating editable fields', async () => {
+      const registeredRequests = [];
+      const updatedClients = [];
+      let deletedClientId;
+
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (clientId, data) {
+            updatedClients.push({ clientId, data });
+            return Promise.resolve({ data });
+          },
+          delete: (clientId) => {
+            deletedClientId = clientId;
+            return Promise.resolve({ data: [] });
+          },
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'MCP Tool Server',
+                external_client_id: 'https://mcpserver.example.com/client.json',
+                external_metadata_type: 'cimd',
+                external_metadata_created_by: 'admin',
+                jwks_uri: 'https://mcpserver.example.com/jwks.json',
+              },
+            ]),
+          registerCimdClient: ({ external_client_id }) => {
+            registeredRequests.push(external_client_id);
+            return Promise.resolve({
+              client_id: 'client1',
+              mapped_fields: {
+                external_client_id,
+              },
+              validation: {
+                valid: true,
+                warnings: [],
+              },
+            });
+          },
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'Renamed MCP Tool Server',
+              description: 'updated description',
+              external_client_id: 'https://mcpserver.example.com/client.json',
+              external_metadata_type: 'cimd',
+              external_metadata_created_by: 'admin',
+              jwks_uri: 'https://mcpserver.example.com/jwks.json',
+            },
+          ],
+        },
+      ]);
+
+      expect(registeredRequests).to.deep.equal([]);
+      expect(deletedClientId).to.equal(undefined);
+      expect(updatedClients).to.deep.equal([
+        {
+          clientId: 'client1',
+          data: {
+            description: 'updated description',
+          },
+        },
+      ]);
+    });
+
     it('should create client', async () => {
       const auth0 = {
         clients: {
@@ -157,6 +352,45 @@ describe('#clients handler', () => {
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ clients: [someNativeClient] }]);
+    });
+
+    it('should create client with fedcm_login', async () => {
+      const fedcmClient = {
+        name: 'someFedCMClient',
+        fedcm_login: {
+          google: {
+            is_enabled: true,
+          },
+        },
+      };
+
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('someFedCMClient');
+            expect(data.fedcm_login).to.deep.equal({
+              google: {
+                is_enabled: true,
+              },
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ clients: [fedcmClient] }]);
     });
 
     it('should create client with refresh token policies', async () => {
@@ -257,6 +491,106 @@ describe('#clients handler', () => {
       expect(wasCreateCalled).to.be.true;
     });
 
+    it('should pass schema validation for a valid token_vault_privileged_access property', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'clientWithTokenVault',
+          token_vault_privileged_access: {
+            ip_allowlist: ['192.168.1.0/24', '10.0.0.1'],
+            grants: [
+              {
+                connection: 'google-oauth2',
+                scopes: ['https://www.googleapis.com/auth/calendar.readonly'],
+              },
+              {
+                connection: 'slack',
+                scopes: ['chat:write', 'channels:read'],
+              },
+            ],
+          },
+        },
+      ]);
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should allow valid session_transfer delegation property in client', async () => {
+      const clientWithDelegation = {
+        name: 'clientWithDelegation',
+        session_transfer: {
+          delegation: {
+            allow_delegated_access: true,
+            enforce_device_binding: 'ip',
+          },
+        },
+      };
+      let wasCreateCalled = false;
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            wasCreateCalled = true;
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('clientWithDelegation');
+            expect(data.session_transfer.delegation).to.deep.equal({
+              allow_delegated_access: true,
+              enforce_device_binding: 'ip',
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ clients: [clientWithDelegation] }]);
+      // eslint-disable-next-line no-unused-expressions
+      expect(wasCreateCalled).to.be.true;
+    });
+
+    it('should allow valid identity_assertion_authorization_grant property in client', async () => {
+      const clientWithIdJag = {
+        name: 'clientWithIdJag',
+        identity_assertion_authorization_grant: {
+          active: true,
+        },
+      };
+      let wasCreateCalled = false;
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            wasCreateCalled = true;
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('clientWithIdJag');
+            expect(data.identity_assertion_authorization_grant).to.deep.equal({
+              active: true,
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ clients: [clientWithIdJag] }]);
+      // eslint-disable-next-line no-unused-expressions
+      expect(wasCreateCalled).to.be.true;
+    });
+
     it('should create resource server client', async () => {
       let wasCreateCalled = false;
       const resourceServerClient = {
@@ -340,6 +674,80 @@ describe('#clients handler', () => {
       const handler = new clients.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
       await stageFn.apply(handler, [{ clients: [clientWithExpressConfig] }]);
+      expect(wasCreateCalled).to.be.equal(true);
+    });
+
+    it('should create client with my_organization_configuration and map names to IDs', async () => {
+      let wasCreateCalled = false;
+      const clientWithMyOrganizationConfig = {
+        name: 'Client With My Org Config',
+        app_type: 'regular_web',
+        my_organization_configuration: {
+          user_attribute_profile_id: 'My User Attribute Profile',
+          connection_profile_id: 'My Connection Profile',
+          invitation_landing_client_id: 'My Invitation Landing Client',
+          allowed_strategies: ['okta', 'samlp'],
+          connection_deletion_behavior: 'allow_if_empty',
+        },
+      };
+
+      const clientWithUnknownInvitation = {
+        name: 'Client With Unknown Invitation',
+        app_type: 'regular_web',
+        my_organization_configuration: {
+          invitation_landing_client_id: 'Unknown Client',
+          allowed_strategies: ['okta'],
+          connection_deletion_behavior: 'allow_if_empty',
+        },
+      };
+
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            wasCreateCalled = true;
+            expect(data).to.be.an('object');
+            if (data.name === 'Client With My Org Config') {
+              expect(data.my_organization_configuration).to.deep.equal({
+                user_attribute_profile_id: 'uap_123',
+                connection_profile_id: 'cp_123',
+                invitation_landing_client_id: 'cli_abc',
+                allowed_strategies: ['okta', 'samlp'],
+                connection_deletion_behavior: 'allow_if_empty',
+              });
+            } else if (data.name === 'Client With Unknown Invitation') {
+              expect(data.my_organization_configuration.invitation_landing_client_id).to.equal(
+                'Unknown Client'
+              );
+            }
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              { client_id: 'cli_abc', name: 'My Invitation Landing Client' },
+            ]),
+        },
+        connectionProfiles: {
+          list: (params) =>
+            mockPagedData(params, 'connectionProfiles', [
+              { id: 'cp_123', name: 'My Connection Profile' },
+            ]),
+        },
+        userAttributeProfiles: {
+          list: (params) =>
+            mockPagedData(params, 'userAttributeProfiles', [
+              { id: 'uap_123', name: 'My User Attribute Profile' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [
+        { clients: [clientWithMyOrganizationConfig, clientWithUnknownInvitation] },
+      ]);
       expect(wasCreateCalled).to.be.equal(true);
     });
 
@@ -653,6 +1061,51 @@ describe('#clients handler', () => {
             {
               name: 'someClient',
               skip_non_verifiable_callback_uri_confirmation_prompt: false,
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should update client and remove my_organization_configuration by setting it to null', async () => {
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (client_id, data) {
+            expect(client_id).to.equal('client1');
+            expect(data).to.have.property('my_organization_configuration', null);
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'My Client',
+                my_organization_configuration: {
+                  user_attribute_profile_id: 'uap_123',
+                  allowed_strategies: ['okta'],
+                  connection_deletion_behavior: 'allow',
+                },
+              },
+            ]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'My Client',
+              my_organization_configuration: null,
             },
           ],
         },
@@ -1198,6 +1651,446 @@ describe('#clients handler', () => {
       const newOnlyClient = updatedClients.find((c) => c.client_id === 'client3');
       expect(newOnlyClient).to.not.have.property('cross_origin_auth');
       expect(newOnlyClient.cross_origin_authentication).to.equal(false);
+    });
+
+    it('should create client with on_behalf_of_token_exchange in token_exchange', async () => {
+      let wasCreateCalled = false;
+      const clientWithOnBehalfOf = {
+        name: 'My On-Behalf-Of Client',
+        token_exchange: {
+          allow_any_profile_of_type: ['on_behalf_of_token_exchange'],
+        },
+      };
+
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            wasCreateCalled = true;
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('My On-Behalf-Of Client');
+            expect(data.token_exchange).to.deep.equal({
+              allow_any_profile_of_type: ['on_behalf_of_token_exchange'],
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [{ clients: [clientWithOnBehalfOf] }]);
+      expect(wasCreateCalled).to.be.true;
+    });
+
+    it('should update client with on_behalf_of_token_exchange in token_exchange', async () => {
+      let wasUpdateCalled = false;
+
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (client_id, data) {
+            wasUpdateCalled = true;
+            expect(client_id).to.equal('client1');
+            expect(data.token_exchange).to.deep.equal({
+              allow_any_profile_of_type: ['on_behalf_of_token_exchange'],
+            });
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'My Client',
+                token_exchange: {
+                  allow_any_profile_of_type: ['custom_authentication'],
+                },
+              },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'My Client',
+              token_exchange: {
+                allow_any_profile_of_type: ['on_behalf_of_token_exchange'],
+              },
+            },
+          ],
+        },
+      ]);
+      expect(wasUpdateCalled).to.be.true;
+    });
+
+    it('should create client with oidc_logout configuration', async () => {
+      const clientWithOidcLogout = {
+        name: 'My Client with OIDC Logout',
+        app_type: 'regular_web',
+        oidc_logout: {
+          backchannel_logout_urls: ['https://example.com/logout'],
+          backchannel_logout_initiators: {
+            mode: 'custom',
+            selected_initiators: ['rp-logout', 'idp-logout'],
+          },
+          backchannel_logout_session_metadata: {
+            include: true,
+          },
+        },
+      };
+
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data).to.be.an('object');
+            expect(data.name).to.equal('My Client with OIDC Logout');
+            expect(data.oidc_logout).to.deep.equal({
+              backchannel_logout_urls: ['https://example.com/logout'],
+              backchannel_logout_initiators: {
+                mode: 'custom',
+                selected_initiators: ['rp-logout', 'idp-logout'],
+              },
+              backchannel_logout_session_metadata: {
+                include: true,
+              },
+            });
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ clients: [clientWithOidcLogout] }]);
+    });
+
+    it('should update client with oidc_logout configuration', async () => {
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (client_id, data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(client_id).to.equal('client1');
+            expect(data.oidc_logout).to.deep.equal({
+              backchannel_logout_urls: ['https://new-example.com/logout'],
+              backchannel_logout_initiators: {
+                mode: 'all',
+                selected_initiators: [],
+              },
+              backchannel_logout_session_metadata: {
+                include: false,
+              },
+            });
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'My Client',
+                oidc_logout: {
+                  backchannel_logout_urls: ['https://example.com/logout'],
+                  backchannel_logout_initiators: {
+                    mode: 'custom',
+                    selected_initiators: ['rp-logout'],
+                  },
+                },
+              },
+            ]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'My Client',
+              oidc_logout: {
+                backchannel_logout_urls: ['https://new-example.com/logout'],
+                backchannel_logout_initiators: {
+                  mode: 'all',
+                  selected_initiators: [],
+                },
+                backchannel_logout_session_metadata: {
+                  include: false,
+                },
+              },
+            },
+          ],
+        },
+      ]);
+    });
+  });
+
+  describe('#clients getType credential enrichment', () => {
+    it('should enrich credential stubs with full metadata for clients with client_authentication_methods', async () => {
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: {} }),
+          update: () => Promise.resolve({ data: {} }),
+          delete: () => Promise.resolve({ data: {} }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'My App',
+                client_authentication_methods: {
+                  private_key_jwt: { credentials: [{ id: 'cred_abc' }] },
+                },
+              },
+            ]),
+          credentials: {
+            list: () =>
+              Promise.resolve([
+                {
+                  id: 'cred_abc',
+                  name: 'my-key',
+                  credential_type: 'public_key',
+                  kid: 'kid123',
+                  alg: 'RS256',
+                },
+              ]),
+          },
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const result = await handler.getType();
+
+      const cred = result[0].client_authentication_methods.private_key_jwt.credentials[0];
+      expect(cred.name).to.equal('my-key');
+      expect(cred.credential_type).to.equal('public_key');
+      expect(cred.id).to.equal(undefined);
+      expect(cred.kid).to.equal(undefined);
+      expect(cred.alg).to.equal(undefined);
+    });
+
+    it('should strip token_vault_privileged_access.credentials on export while keeping ip_allowlist and grants', async () => {
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: {} }),
+          update: () => Promise.resolve({ data: {} }),
+          delete: () => Promise.resolve({ data: {} }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'Privileged App',
+                token_vault_privileged_access: {
+                  credentials: [{ id: 'cred_abc' }],
+                  ip_allowlist: ['10.0.0.1'],
+                  grants: [{ connection: 'google-oauth2', scopes: ['openid'] }],
+                },
+              },
+            ]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const result = await handler.getType();
+
+      const tvpa = result[0].token_vault_privileged_access;
+      expect(tvpa).to.not.have.property('credentials');
+      expect(tvpa.ip_allowlist).to.deep.equal(['10.0.0.1']);
+      expect(tvpa.grants).to.deep.equal([{ connection: 'google-oauth2', scopes: ['openid'] }]);
+    });
+  });
+
+  describe('#clients pem stripping in processChanges', () => {
+    it('should always strip client_authentication_methods from PATCH', async () => {
+      const updatePayloads = {};
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: {} }),
+          update: (clientId, data) => {
+            updatePayloads[clientId] = data;
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: {} }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'App With PEM',
+                client_authentication_methods: {
+                  private_key_jwt: { credentials: [{ id: 'cred_abc', name: 'my-key' }] },
+                },
+              },
+              {
+                client_id: 'client2',
+                name: 'App Without PEM',
+                client_authentication_methods: {
+                  private_key_jwt: {
+                    credentials: [{ name: 'other-key', credential_type: 'public_key' }],
+                  },
+                },
+              },
+            ]),
+          credentials: {
+            list: () =>
+              Promise.resolve([{ id: 'cred_abc', name: 'my-key', credential_type: 'public_key' }]),
+          },
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              client_id: 'client1',
+              name: 'App With PEM',
+              client_authentication_methods: {
+                private_key_jwt: {
+                  credentials: [
+                    {
+                      name: 'my-key',
+                      pem: '-----BEGIN PUBLIC KEY-----\nabc\n-----END PUBLIC KEY-----\n',
+                      credential_type: 'public_key',
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              client_id: 'client2',
+              name: 'App Without PEM',
+              client_authentication_methods: {
+                private_key_jwt: {
+                  credentials: [{ name: 'other-key', credential_type: 'public_key' }],
+                },
+              },
+            },
+          ],
+        },
+      ]);
+
+      expect(updatePayloads['client1']).to.not.have.property('client_authentication_methods');
+      expect(updatePayloads['client2']).to.not.have.property('client_authentication_methods');
+    });
+
+    it('should strip the entire token_vault_privileged_access object from create/update', async () => {
+      const createPayloads = [];
+      const updatePayloads = {};
+      const auth0 = {
+        clients: {
+          create: (data) => {
+            createPayloads.push(data);
+            return Promise.resolve({ data });
+          },
+          update: (clientId, data) => {
+            updatePayloads[clientId] = data;
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: {} }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'Existing Privileged App',
+              },
+            ]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      const tvpa = {
+        credentials: [{ id: 'cred_stale' }],
+        ip_allowlist: ['10.0.0.1'],
+        grants: [{ connection: 'google-oauth2', scopes: ['openid'] }],
+      };
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            // Existing client -> update
+            {
+              client_id: 'client1',
+              name: 'Existing Privileged App',
+              token_vault_privileged_access: { ...tvpa },
+            },
+            // New client -> create
+            { name: 'New Privileged App', token_vault_privileged_access: { ...tvpa } },
+          ],
+        },
+      ]);
+
+      // The Management API requires credentials whenever token_vault_privileged_access
+      // is sent, but those are non-portable tenant-specific ids the CLI never persists.
+      // The whole object is therefore stripped on write — the field is export-only.
+      expect(updatePayloads['client1']).to.not.have.property('token_vault_privileged_access');
+      expect(createPayloads[0]).to.not.have.property('token_vault_privileged_access');
+    });
+  });
+
+  describe('#clients validate', () => {
+    it('should allow validation when external_metadata_type is set without external_client_id', async () => {
+      const handler = new clients.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'broken-cimd-client',
+              external_metadata_type: 'cimd',
+            },
+          ],
+        },
+      ]);
     });
   });
 });

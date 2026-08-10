@@ -1,5 +1,5 @@
 import log from '../logger';
-import APIHandler from '../tools/auth0/handlers/default';
+import APIHandler from './auth0/handlers/default';
 import { Asset, CalculatedChanges } from '../types';
 
 /**
@@ -93,14 +93,20 @@ export function calculateChanges({
 }: {
   handler: APIHandler;
   assets: Asset[];
-  existing: Asset[] | null;
+  existing: Asset[] | Asset | null;
   identifiers: string[];
   allowDelete: boolean;
 }): CalculatedChanges {
   // Calculate the changes required between two sets of assets.
   const update: Asset[] = [];
-  let del: Asset[] = [...(existing || [])];
-  let create: Asset[] = [...assets];
+  let del: Asset[] = [];
+  if (existing) {
+    del = Array.isArray(existing) ? [...existing] : [existing];
+  }
+  let create: Asset[] = [];
+  if (assets) {
+    create = Array.isArray(assets) ? [...assets] : [assets];
+  }
   const conflicts: Asset[] = [];
 
   const findByKeyValue = (key: string, value: string, arr: Asset[]): Asset | undefined =>
@@ -163,10 +169,9 @@ export function calculateChanges({
   // Loop through identifiers (in order) to try match assets to existing
   // If existing then update if not create
   // The remainder will be deleted
-  for (const id of identifiers) {
-    // eslint-disable-line
+  identifiers.forEach((id) => {
     processAssets(id, [...create]);
-  }
+  });
 
   // Check if there are assets with names that will conflict with existing names during the update process
   // This will rename those assets to a temp random name first
@@ -178,7 +183,15 @@ export function calculateChanges({
       // If the conflicting item is going to be deleted then skip
       const inDeleted = del.filter((e) => e.name === a.name && e[uniqueID] !== a[uniqueID])[0];
       if (!inDeleted) {
-        const conflict = (existing || []).filter(
+        let existingArray: Asset[];
+        if (Array.isArray(existing)) {
+          existingArray = existing;
+        } else if (existing) {
+          existingArray = [existing];
+        } else {
+          existingArray = [];
+        }
+        const conflict = existingArray.filter(
           (e) => e.name === a.name && e[uniqueID] !== a[uniqueID]
         )[0];
         if (conflict) {

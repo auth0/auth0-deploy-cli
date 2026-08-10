@@ -32,6 +32,12 @@ async function dump(context: YAMLContext): Promise<ParsedRules> {
     return { rules: null };
   }
 
+  // Filter excluded rules
+  const excludedRules = (context.assets.exclude && context.assets.exclude.rules) || [];
+  if (excludedRules.length) {
+    rules = rules.filter((rule) => !excludedRules.includes(rule.name));
+  }
+
   // Create Rules folder
   const rulesFolder = path.join(context.basePath, 'rules');
   fs.ensureDirSync(rulesFolder);

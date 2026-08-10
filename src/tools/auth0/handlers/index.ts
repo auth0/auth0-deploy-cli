@@ -22,6 +22,7 @@ import * as phoneProviders from './phoneProvider';
 import * as phoneTemplates from './phoneTemplates';
 import * as prompts from './prompts';
 import * as actions from './actions';
+import * as actionModules from './actionModules';
 import * as triggers from './triggers';
 import * as organizations from './organizations';
 import * as attackProtection from './attackProtection';
@@ -37,6 +38,11 @@ import * as networkACLs from './networkACLs';
 import * as userAttributeProfiles from './userAttributeProfiles';
 import * as connectionProfiles from './connectionProfiles';
 import * as tokenExchangeProfiles from './tokenExchangeProfiles';
+import * as supplementalSignals from './supplementalSignals';
+import * as rateLimitPolicies from './rateLimitPolicies';
+import * as eventStreams from './eventStreams';
+import * as clientAuthCredentials from './clientAuthCredentials';
+import * as clientAuthCredentialsPre from './clientAuthCredentialsPre';
 
 import { AssetTypes } from '../../../types';
 import APIHandler from './default';
@@ -67,6 +73,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   //@ts-ignore because prompts have not been universally implemented yet
   prompts,
   actions,
+  actionModules,
   triggers,
   organizations,
   attackProtection,
@@ -82,6 +89,13 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   userAttributeProfiles,
   connectionProfiles,
   tokenExchangeProfiles,
+  supplementalSignals,
+  rateLimitPolicies,
+  eventStreams,
+  clientAuthCredentials,
+  // clientAuthCredentialsPre is a deploy-only pre-pass handler (order 40) — not a user-facing
+  // asset type so it is not in AssetTypes, but must be registered here to run during deploy.
+  ...{ clientAuthCredentialsPre },
 };
 
 export default auth0ApiHandlers as {

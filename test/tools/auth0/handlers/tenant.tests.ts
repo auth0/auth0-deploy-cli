@@ -1,8 +1,10 @@
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 import tenantHandler, {
   allowedTenantFlags,
   removeUnallowedTenantFlags,
 } from '../../../../src/tools/auth0/handlers/tenant';
+import log from '../../../../src/logger';
 
 const mockAllowedFlags = Object.values(allowedTenantFlags).reduce<Record<string, boolean>>(
   (acc, cur) => {
@@ -35,6 +37,8 @@ describe('#tenant handler', () => {
           get: () => ({
             friendly_name: 'Test',
             default_directory: 'users',
+            client_id_metadata_document_supported: true,
+            resource_parameter_profile: 'compatibility',
             flags: {
               ...mockAllowedFlags,
               'unallowed-flag-1': false,
@@ -51,6 +55,8 @@ describe('#tenant handler', () => {
     expect(data).to.deep.equal({
       friendly_name: 'Test',
       default_directory: 'users',
+      client_id_metadata_document_supported: true,
+      resource_parameter_profile: 'compatibility',
       flags: mockAllowedFlags,
     });
   });
@@ -69,6 +75,8 @@ describe('#tenant handler', () => {
               expect(data).to.be.an('object');
               expect(data.sandbox_version).to.equal('4');
               expect(data.skip_non_verifiable_callback_uri_confirmation_prompt).to.equal(null);
+              expect(data.client_id_metadata_document_supported).to.equal(true);
+              expect(data.resource_parameter_profile).to.equal('compatibility');
               expect(data.flags).to.equal(undefined);
               return Promise.resolve(data);
             },
@@ -85,9 +93,84 @@ describe('#tenant handler', () => {
           tenant: {
             sandbox_version: '4',
             skip_non_verifiable_callback_uri_confirmation_prompt: null,
+            client_id_metadata_document_supported: true,
+            resource_parameter_profile: 'compatibility',
           },
         },
       ]);
+    });
+
+    it('should update tenant with dynamic_client_registration_security_mode', async () => {
+      let updatedData = null;
+      const auth0 = {
+        tenants: {
+          settings: {
+            update: (data) => {
+              updatedData = data;
+              return Promise.resolve(data);
+            },
+          },
+        },
+      };
+
+      // @ts-ignore
+      const handler = new tenantHandler({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        { tenant: { dynamic_client_registration_security_mode: 'strict' } },
+      ]);
+
+      expect(updatedData).to.not.be.null;
+      expect(updatedData.dynamic_client_registration_security_mode).to.equal('strict');
+    });
+
+    it('should update tenant with country_codes', async () => {
+      let updatedData = null;
+      const auth0 = {
+        tenants: {
+          settings: {
+            update: (data) => {
+              updatedData = data;
+              return Promise.resolve(data);
+            },
+          },
+        },
+      };
+
+      // @ts-ignore
+      const handler = new tenantHandler({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        { tenant: { country_codes: { list: ['US', 'GB', 'CA'], mode: 'allow' } } },
+      ]);
+
+      expect(updatedData).to.not.be.null;
+      expect(updatedData.country_codes).to.deep.equal({ list: ['US', 'GB', 'CA'], mode: 'allow' });
+    });
+
+    it('should update tenant with country_codes set to null to remove filtering', async () => {
+      let updatedData = null;
+      const auth0 = {
+        tenants: {
+          settings: {
+            update: (data) => {
+              updatedData = data;
+              return Promise.resolve(data);
+            },
+          },
+        },
+      };
+
+      // @ts-ignore
+      const handler = new tenantHandler({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ tenant: { country_codes: null } }]);
+
+      expect(updatedData).to.not.be.null;
+      expect(updatedData.country_codes).to.equal(null);
     });
 
     it('should allow valid default_token_quota property in tenant', async () => {
@@ -200,6 +283,34 @@ describe('#tenant handler', () => {
 
         await processChanges.apply(handler, [{ tenant: { flags: proposedFlags } }]);
       });
+
+      it('should log a deprecation warning and not send enable_custom_domain_in_emails to the API', async () => {
+        const logWarnStub = sinon.stub(log, 'warn');
+        let capturedPayload: any = null;
+
+        const auth0 = {
+          tenants: {
+            settings: {
+              update: async (data) => {
+                capturedPayload = data;
+              },
+            },
+          },
+        };
+
+        // @ts-ignore
+        const handler = new tenantHandler({ client: auth0 });
+        const { processChanges } = Object.getPrototypeOf(handler);
+
+        await processChanges.apply(handler, [
+          { tenant: { flags: { enable_custom_domain_in_emails: true } } },
+        ]);
+
+        expect(logWarnStub.calledWithMatch('enable_custom_domain_in_emails')).to.equal(true);
+        expect(capturedPayload?.flags?.enable_custom_domain_in_emails).to.equal(undefined);
+
+        logWarnStub.restore();
+      });
     });
   });
 
@@ -224,6 +335,47 @@ describe('#tenant handler', () => {
 
     it('should not throw if allow empty flag objects passed', () => {
       expect(() => removeUnallowedTenantFlags({})).to.not.throw();
+    });
+  });
+
+  describe('#tenant processChanges dry-run', () => {
+    it('should convert session durations from hours to minutes in update payload', async () => {
+      let capturedPayload: any = null;
+      const auth0 = {
+        tenants: {
+          settings: {
+            get: () => ({
+              friendly_name: 'Test',
+              session_lifetime_in_minutes: 60,
+              idle_session_lifetime_in_minutes: 120,
+            }),
+            update: (data: any) => {
+              capturedPayload = data;
+              return Promise.resolve(data);
+            },
+          },
+        },
+      };
+
+      // @ts-ignore — standard test pattern
+      const handler = new tenantHandler({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          tenant: {
+            friendly_name: 'Updated Test',
+            session_lifetime: 2,
+            idle_session_lifetime: 3,
+          },
+        },
+      ]);
+
+      expect(capturedPayload).to.not.be.null;
+      expect(capturedPayload.session_lifetime_in_minutes).to.equal(120);
+      expect(capturedPayload.idle_session_lifetime_in_minutes).to.equal(180);
+      expect(capturedPayload).to.not.have.property('session_lifetime');
+      expect(capturedPayload).to.not.have.property('idle_session_lifetime');
     });
   });
 });

@@ -1,0 +1,20 @@
+{
+  "name": "auth-helper",
+  "code": "./action-modules/auth-helper/code.js",
+  "dependencies": [
+    {
+      "name": "axios",
+      "version": "1.6.0"
+    },
+    {
+      "name": "jsonwebtoken",
+      "version": "9.0.0"
+    }
+  ],
+  "secrets": [
+    {
+      "name": "JWT_SECRET",
+      "value": "##JWT_SECRET##"
+    }
+  ]
+}

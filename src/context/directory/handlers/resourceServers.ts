@@ -39,10 +39,19 @@ function parse(context: DirectoryContext): ParsedResourceServers {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const { resourceServers } = context.assets;
+  let { resourceServers } = context.assets;
   let { clients } = context.assets;
 
   if (!resourceServers) return; // Skip, nothing to dump
+
+  // Filter excluded resource servers
+  const excludedResourceServers =
+    (context.assets.exclude && context.assets.exclude.resourceServers) || [];
+  if (excludedResourceServers.length) {
+    resourceServers = resourceServers.filter(
+      (resourceServer) => !excludedResourceServers.includes(resourceServer.name ?? '')
+    );
+  }
 
   const resourceServersFolder = path.join(context.filePath, constants.RESOURCE_SERVERS_DIRECTORY);
   fs.ensureDirSync(resourceServersFolder);

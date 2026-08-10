@@ -9,6 +9,7 @@
     "tenant_domain": "example.com",
     "client_id": "some_client_id",
     "client_secret": "some_client_secret",
+    "api_enable_groups": true,
     "api_enable_users": true
   },
   "directory_provisioning_configuration": {
@@ -16,6 +17,15 @@
       { "auth0": "email", "idp": "mail" },
       { "auth0": "name", "idp": "displayName" }
     ],
-    "synchronize_automatically": false
+    "synchronize_automatically": false,
+    "synchronize_groups": "selected",
+    "synchronized_groups": [
+      {
+        "id": "some_google_group_id",
+        "name": "Engineering",
+        "email": "engineering@example.com",
+        "direct_members_count": 42
+      }
+    ]
   }
 }

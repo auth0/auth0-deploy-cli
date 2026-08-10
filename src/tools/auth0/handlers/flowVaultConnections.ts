@@ -4,6 +4,7 @@ import DefaultHandler, { order } from './default';
 import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import constants from '../../constants';
 import log from '../../../logger';
+import { isDryRun } from '../../utils';
 
 export type FlowVaultConnection = Management.GetFlowsVaultConnectionResponseContent;
 
@@ -30,10 +31,15 @@ export const getAllFlowConnections = async (
   const allFlowConnections: Management.FlowsVaultConnectionSummary[] = [];
 
   let vaultConnections = await auth0Client.flows.vault.connections.list();
-  do {
-    allFlowConnections.push(...vaultConnections.data);
+
+  // Process first page
+  allFlowConnections.push(...vaultConnections.data);
+
+  // Fetch remaining pages
+  while (vaultConnections.hasNextPage()) {
     vaultConnections = await vaultConnections.getNextPage();
-  } while (vaultConnections.hasNextPage());
+    allFlowConnections.push(...vaultConnections.data);
+  }
 
   return allFlowConnections;
 };
@@ -74,9 +80,11 @@ export default class FlowVaultHandler extends DefaultHandler {
 
     const { del, update, create } = await this.calcChanges(assets);
 
-    log.debug(
-      `Start processChanges for flow vault connections [delete:${del.length}] [update:${update.length}], [create:${create.length}]`
-    );
+    if (isDryRun(this.config)) {
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        return;
+      }
+    }
 
     if (del.length > 0) {
       await this.deleteVaultConnections(del);

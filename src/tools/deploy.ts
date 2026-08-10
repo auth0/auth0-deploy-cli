@@ -2,6 +2,14 @@ import Auth0 from './auth0';
 import log from '../logger';
 import { ConfigFunction } from '../configFactory';
 import { Assets, Auth0APIClient } from '../types';
+import { isTruthy } from '../utils';
+
+function zeroChangeSummary(auth0: Auth0) {
+  return auth0.handlers.reduce((accum, h) => {
+    accum[h.type] = { deleted: 0, created: 0, updated: 0 };
+    return accum;
+  }, {});
+}
 
 export default async function deploy(
   assets: Assets,
@@ -9,7 +17,20 @@ export default async function deploy(
   config: ConfigFunction
 ) {
   // Setup log level
-  log.level = process.env.AUTH0_DEBUG === 'true' ? 'debug' : 'info';
+
+  const isDebug = process.env.AUTH0_DEBUG === 'true';
+  log.level = isDebug ? 'debug' : 'info';
+
+  const dryRunMode = config('AUTH0_DRY_RUN');
+  // Normalize boolean true (EA compat) → 'preview'
+  const effectiveMode = dryRunMode === true || dryRunMode === 'true' ? 'preview' : dryRunMode;
+
+  if (dryRunMode && effectiveMode !== 'preview') {
+    throw new Error(`Invalid AUTH0_DRY_RUN value: ${dryRunMode}. Use true or 'preview'.`);
+  }
+
+  const isInteractive = !!config('AUTH0_DRY_RUN_INTERACTIVE');
+  const shouldApplyAfterPreview = isTruthy(config('AUTH0_DRY_RUN_APPLY'));
 
   log.info(
     `Getting access token for ${
@@ -21,6 +42,15 @@ export default async function deploy(
 
   // Validate Assets
   await auth0.validate();
+
+  if (effectiveMode === 'preview') {
+    const hasChanges = await auth0.dryRun({
+      interactive: isInteractive && !shouldApplyAfterPreview,
+    });
+    if (!shouldApplyAfterPreview || !hasChanges) {
+      return zeroChangeSummary(auth0);
+    }
+  }
 
   // Process changes
   await auth0.processChanges();

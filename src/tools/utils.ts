@@ -5,6 +5,7 @@ import _ from 'lodash';
 import log from '../logger';
 import { Asset, Assets, CalculatedChanges, KeywordMappings } from '../types';
 import constants from './constants';
+import { ConfigFunction } from '../configFactory';
 
 export const keywordReplaceArrayRegExp = (key) => {
   const pattern = `@@${key}@@`;
@@ -70,6 +71,16 @@ export function wrapArrayReplaceMarkersInQuotes(body: string, mappings: KeywordM
 export function convertClientNameToId(name: string, clients: Asset[]): string {
   const found = clients.find((c) => c.name === name);
   return (found && found.client_id) || name;
+}
+
+export function convertActionNameToId(name: string, actions: Asset[]): string {
+  const found = actions.find((a) => a.name === name);
+  return (found && found.id) || name;
+}
+
+export function convertActionIdToName(id: string, actions: Asset[]): string {
+  const found = actions.find((a) => a.id === id);
+  return (found && found.name) || id;
 }
 
 export function convertClientNamesToIds(names: string[], clients: Asset[]): string[] {
@@ -147,9 +158,10 @@ export function getEnabledClients(
 
   const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
   const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
+  const allExcluded = [...excludedClientsByNames, ...excludedClients];
   const enabledClients = [
     ...convertClientNamesToIds(connection.enabled_clients || [], clients).filter(
-      (item) => ![...excludedClientsByNames, ...excludedClients].includes(item)
+      (item) => !allExcluded.includes(item)
     ),
   ];
   // If client is excluded and in the existing connection this client is enabled, it should keep enabled
@@ -157,7 +169,7 @@ export function getEnabledClients(
   existing.forEach((conn) => {
     if (conn.name === connection.name) {
       excludedClients.forEach((excludedClient) => {
-        if (conn.enabled_clients.includes(excludedClient)) {
+        if (conn.enabled_clients?.includes(excludedClient)) {
           enabledClients.push(excludedClient);
         }
       });
@@ -239,6 +251,50 @@ export const obfuscateSensitiveValues = (
   return newAsset;
 };
 
+// Uppercase-only to avoid false positives on lowercase Auth0 template variables like @@password@@
+const UNRESOLVED_PLACEHOLDER_REGEX = /^(##[A-Z0-9_]+##|@@[A-Z0-9_]+@@)$/;
+
+// Recursively collects all fields in an asset that still contain an unresolved
+// ##...## (string) or @@...@@ (array) keyword placeholder.
+const collectUnresolvedPlaceholders = (
+  data: Asset | null,
+  parentPath = ''
+): { path: string; value: string }[] => {
+  if (data === null || typeof data !== 'object') return [];
+
+  const found: { path: string; value: string }[] = [];
+  Object.keys(data).forEach((key) => {
+    const fullPath = parentPath ? `${parentPath}.${key}` : key;
+    const value = data[key];
+    if (typeof value === 'string' && UNRESOLVED_PLACEHOLDER_REGEX.test(value)) {
+      found.push({ path: fullPath, value });
+    } else if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+      found.push(...collectUnresolvedPlaceholders(value, fullPath));
+    }
+  });
+  return found;
+};
+
+// Throws an error if any field in the asset contains an unresolved ##...## or @@...@@ placeholder,
+// listing all offending fields so the user can fix them before deploying.
+export const validateNoUnresolvedPlaceholders = (
+  data: Asset | null,
+  resourceType: string,
+  resourceName: string
+): Asset | null => {
+  if (data === null) return data;
+
+  const unresolved = collectUnresolvedPlaceholders(data);
+  if (unresolved.length > 0) {
+    const fields = unresolved.map(({ path, value }) => `  - "${path}": ${value}`).join('\n');
+    throw new Error(
+      `Unresolved placeholder(s) found in ${resourceType} "${resourceName}":\n${fields}\nPlease ensure all keyword mappings are defined before deploying.`
+    );
+  }
+
+  return data;
+};
+
 // The reverse of `obfuscateSensitiveValues()`, preventing an obfuscated value from being passed to the API
 export const stripObfuscatedFieldsFromPayload = (
   data: Asset | Asset[] | null,
@@ -257,6 +313,33 @@ export const stripObfuscatedFieldsFromPayload = (
     }
   });
 
+  return newAsset;
+};
+
+// Strips unresolved ##...## / @@...@@ placeholders before sending to Auth0.
+// Keyword replacement runs first; any remaining placeholder means no mapping was
+// provided. The field is dropped so Auth0 preserves its existing value.
+export const stripUnresolvedPlaceholders = (
+  data: Asset | null,
+  resourceType: string,
+  resourceName: string
+): Asset | null => {
+  if (data === null) return data;
+
+  const unresolved = collectUnresolvedPlaceholders(data);
+  if (unresolved.length === 0) return data;
+
+  const newAsset = { ...data };
+  unresolved.forEach(({ path, value }) => {
+    log.warn(
+      `Stripping unresolved placeholder for ${resourceType} "${resourceName}" field "${path}": ${value}. ` +
+        `To use this value, define ${value.replace(
+          /^##|##$|^@@|@@$/g,
+          ''
+        )} in AUTH0_KEYWORD_REPLACE_MAPPINGS. The existing value on Auth0 will be preserved.`
+    );
+    dotProp.delete(newAsset, path);
+  });
   return newAsset;
 };
 
@@ -301,7 +384,12 @@ export const isDeprecatedError = (err: { message: string; statusCode: number }):
 
 export const isForbiddenFeatureError = (err, type): boolean => {
   if (err.statusCode === 403) {
-    log.warn(`${err.message};${err.errorCode ?? ''} - Skipping ${type}`);
+    // The SDK error's top-level `message` is the full serialized response body; the clean,
+    // human-readable message and errorCode live on the response body itself.
+    const body = err.originalError?.response?.body ?? {};
+    const message = body.message ?? err.message;
+    const errorCode = body.errorCode ?? err.errorCode ?? '';
+    log.warn(`${message}${errorCode ? ` (${errorCode})` : ''} - Skipping ${type}`);
     return true;
   }
   return false;
@@ -328,4 +416,43 @@ export function maskSecretAtPath({
     dotProp.set(maskOnObj, keyJsonPath, maskValue);
   }
   return maskOnObj;
+}
+
+/**
+ * Determines whether third-party clients should be excluded based on configuration.
+ * Checks the AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS config value and returns true if it's
+ * set to boolean true or string 'true'.
+ *
+ * @param configFn - The configuration function to retrieve the config value.
+ * @returns True if third-party clients should be excluded, false otherwise.
+ */
+export const shouldExcludeThirdPartyClients = (configFn: (key: string) => any): boolean => {
+  const value = configFn('AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS');
+  return value === 'true' || value === true;
+};
+
+// Sort guardian factors by name
+export function sortGuardianFactors(factors: Asset[]): Asset[] {
+  // if no factors, return empty array
+  if (!factors || factors.length === 0) return [];
+
+  return factors.sort((a, b) => {
+    const nameA = a.name || '';
+    const nameB = b.name || '';
+
+    if (nameA < nameB) return -1;
+    if (nameA > nameB) return 1;
+    return 0;
+  });
+}
+
+// Check if dry-run flag is enabled
+export function isDryRun(config: ConfigFunction): boolean {
+  if (typeof config !== 'function') return false;
+  return config('AUTH0_DRY_RUN') === true || config('AUTH0_DRY_RUN') === 'true';
+}
+
+// Print a message to the CLI message console
+export function printCLIMessage(message: string): void {
+  process.stdout.write(message + '\n');
 }

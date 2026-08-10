@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { getEnabledClients } from '../../src/tools/utils';
+import { getEnabledClients, isDryRun, sortGuardianFactors } from '../../src/tools/utils';
 import { hasKeywordMarkers, mapClientID2NameSorted } from '../../src/utils';
 
 describe('#getEnabledClients', () => {
@@ -45,6 +45,24 @@ describe('#getEnabledClients', () => {
     );
 
     expect(enabledClients).to.deep.equal(expectedEnabledClients);
+  });
+
+  it('should not crash when existing connection has undefined enabled_clients and excluded clients are configured', () => {
+    // When the legacy "Management of Connection's Enabled Clients" toggle is off,
+    // the API no longer returns enabled_clients on connection objects, so it may be undefined.
+    const clients = [{ name: 'Client 1', client_id: 'client-1-id' }];
+    const mockConnection = {
+      enabled_clients: ['Client 1'],
+      name: 'Existing connection',
+    };
+    const assets = {
+      exclude: { clients: ['Client 1'] },
+    };
+    const existing = [{ name: 'Existing connection', enabled_clients: undefined }];
+
+    const enabledClients = getEnabledClients(assets, mockConnection, existing, clients);
+
+    expect(enabledClients).to.deep.equal([]);
   });
 
   it('should return undefined when enable clients is not defined', () => {
@@ -132,5 +150,59 @@ describe('#mapClientID2NameSorted', () => {
 
     const expectedClientsWithKeywords = ['##CLIENT_KEYWORD##', 'Client A'];
     expect(result).to.deep.equal(expectedClientsWithKeywords);
+  });
+});
+
+describe('#isDryRun', () => {
+  it('should return true when config returns boolean true', () => {
+    const config = (key: string) => (key === 'AUTH0_DRY_RUN' ? true : undefined);
+    expect(isDryRun(config)).to.be.true;
+  });
+
+  it('should return true when config returns string "true"', () => {
+    const config = (key: string) => (key === 'AUTH0_DRY_RUN' ? 'true' : undefined);
+    expect(isDryRun(config)).to.be.true;
+  });
+
+  it('should return false when config returns "preview"', () => {
+    const config = (key: string) => (key === 'AUTH0_DRY_RUN' ? 'preview' : undefined);
+    expect(isDryRun(config)).to.be.false;
+  });
+
+  it('should return false when config returns undefined', () => {
+    const config = (_key: string) => undefined;
+    expect(isDryRun(config)).to.be.false;
+  });
+
+  it('should return false when config is not a function', () => {
+    expect(isDryRun('not-a-function' as any)).to.be.false;
+    expect(isDryRun(null as any)).to.be.false;
+  });
+});
+
+describe('#sortGuardianFactors', () => {
+  it('should sort factors alphabetically by name', () => {
+    const factors = [
+      { name: 'sms', enabled: true },
+      { name: 'email', enabled: false },
+      { name: 'duo', enabled: false },
+    ];
+    const sorted = sortGuardianFactors(factors);
+    expect(sorted.map((f) => f.name)).to.deep.equal(['duo', 'email', 'sms']);
+  });
+
+  it('should return empty array for null input', () => {
+    expect(sortGuardianFactors(null as any)).to.deep.equal([]);
+  });
+
+  it('should return empty array for empty array input', () => {
+    expect(sortGuardianFactors([])).to.deep.equal([]);
+  });
+
+  it('should handle factors without name property', () => {
+    const factors = [{ enabled: true }, { name: 'abc', enabled: false }];
+    const sorted = sortGuardianFactors(factors);
+    expect(sorted[0].name).to.equal(undefined);
+    expect(sorted[1].name).to.equal('abc');
   });
 });

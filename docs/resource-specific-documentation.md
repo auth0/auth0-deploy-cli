@@ -10,23 +10,13 @@ The Deploy CLI's own client grant is intentionally not exported nor configurable
 
 ## Prompts
 
-Multilingual custom text prompts follow a particular hierarchy. Under the root-level `prompts` resource property is a proprietary `customText` property that is used to bundle custom text translations with other prompts settings. Underneath `customText` is the two-character language code. Thirdly is the prompt ID, followed by the screen ID, followed by text ID.
+The prompts resource allows you to configure Universal Login pages, including custom text, custom HTML partials, and screen renderers.
 
-RenderSettings of a prompt-screen follow a particular hierarchy. Under the root-level `prompts` we store `screenRenderers` property that is used to configure the rendering settings of a given prompt & screen. Thirdly is the prompt Name, followed by the screen Name mapped to the respective renderer configs file. Refer [more](https://auth0.com/docs/customize/login-pages/advanced-customizations/getting-started/configure-acul-screens) on this.
+**Custom Text**: Multilingual text translations follow a hierarchy - language code → prompt ID → screen ID → text ID.
 
-**Hierarchy**
+**Partials**: Custom HTML that can be injected at specific insertion points in prompts.
 
-```yaml
-prompts:
-  customText:
-    <LANGUAGE>: # two character language code
-      <PROMPT_ID>: # prompt ID
-        <SCREEN_ID>: # prompt screen ID
-          <TEXT_ID>: 'Some text'
-    screenRenderers:
-      - <PROMPT-NAME>:
-          <SCREEN-NAME>: ./prompts/screenRenderSettings/promptName_screenName.json #Add the renderer configs for a given prompt & a given screen
-```
+**Screen Renderers**: Configure rendering settings for specific prompt-screen combinations. Refer to the [Advanced Customizations documentation](https://auth0.com/docs/customize/login-pages/advanced-customizations/getting-started/configure-acul-screens) for more details.
 
 **YAML Example**
 
@@ -39,30 +29,43 @@ Folder structure when in YAML mode.
         /login-id_login-id.json
         /login-passwordless_login-passwordless-email-code.json
         /login-passwordless_login-passwordless-sms-otp.json
-        /login-password_login-password.json
-        /signup-password_signup-password.json
 ./tenant.yaml
 ```
 
 ```yaml
 # Contents of ./tenant.yaml
 prompts:
-  identifier_first: true
-  universal_login_experience: classic
+  identifier_first: false
+  universal_login_experience: new
+  webauthn_platform_first_factor: false
   customText:
     en:
       login:
         login:
           description: Login description in english
           buttonText: Button text
-      mfa:
-        mfa-detect-browser-capabilities:
-          pickAuthenticatorText: 'Try another method'
-          reloadButtonText: 'Reload'
-          noJSErrorTitle: 'JavaScript Required'
-        mfa-login-options:
-          pageTitle: 'Log in to ${clientName}'
-          authenticatorNamesSMS: 'SMS'
+      passkeys:
+        passkey-enrollment:
+          title: Create a passkey for ${clientName}
+          createButtonText: Create a passkey
+  partials:
+    login:
+      login:
+        form-content-start: |
+          <div class="custom-login-banner">
+            <p>Welcome! Please log in to continue.</p>
+          </div>
+    passkeys:
+      passkeys-enrollment:
+        form-content-start: |
+          <div class="passkey-enrollment-header">
+            <p>Enhance your account security by creating a passkey.</p>
+          </div>
+      passkeys-enrollment-local:
+        form-footer-end: |
+          <div class="passkey-local-enrollment-info">
+            <p>This passkey will be saved to this device only.</p>
+          </div>
   screenRenderers:
     - signup-id:
         signup-id: ./prompts/screenRenderSettings/signup-id_signup-id.json
@@ -71,24 +74,107 @@ prompts:
         login-passwordless-sms-otp: ./prompts/screenRenderSettings/login-passwordless_login-passwordless-sms-otp.json
 ```
 
-**Directory Example**
+Directory example:
 
-```
+```text
 Folder structure when in directory mode.
 
 ./prompts/
-    /screenRenderSettings
-        /signup-id_signup-id.json
-        /login-id_login-id.json
-        /login-passwordless_login-passwordless-email-code.json
-        /login-passwordless_login-passwordless-sms-otp.json
-        /login-password_login-password.json
-        /signup-password_signup-password.json
-    /custom-text.json
-    /prompts.json
+  ./partials/
+    ./login/
+      ./login/
+        ./form-content-start.liquid
+    ./passkeys/
+      ./passkeys-enrollment/
+        ./form-content-start.liquid
+      ./passkeys-enrollment-local/
+        ./form-footer-end.liquid
+  ./screenRenderSettings/
+    ./signup-id_signup-id.json
+    ./login-id_login-id.json
+    ./login-passwordless_login-passwordless-email-code.json
+    ./login-passwordless_login-passwordless-sms-otp.json
+    ./login-password_login-password.json
+    ./signup-password_signup-password.json
+  ./custom-text.json
+  ./partials.json
+  ./prompts.json
 ```
 
-Contents of `promptName_screenName.json`
+In directory mode, `partials.json` is a manifest that maps each insertion point to its `.liquid` file (paths are relative to the `prompts/` directory):
+
+Contents of `custom-text.json`:
+
+```json
+{
+  "en": {
+    "login": {
+      "login": {
+        "description": "Login description in english",
+        "buttonText": "Button text"
+      }
+    },
+    "passkeys": {
+      "passkey-enrollment": {
+        "title": "Create a passkey for ${clientName}",
+        "createButtonText": "Create a passkey"
+      }
+    }
+  }
+}
+```
+
+Contents of `partials.json`:
+
+```json
+{
+  "login": [
+    {
+      "login": [
+        {
+          "name": "form-content-start",
+          "template": "partials/login/login/form-content-start.liquid"
+        }
+      ]
+    }
+  ],
+  "passkeys": [
+    {
+      "passkeys-enrollment": [
+        {
+          "name": "form-content-start",
+          "template": "partials/passkeys/passkeys-enrollment/form-content-start.liquid"
+        }
+      ],
+      "passkeys-enrollment-local": [
+        {
+          "name": "form-footer-end",
+          "template": "partials/passkeys/passkeys-enrollment-local/form-footer-end.liquid"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Contents of `partials/login/login/form-content-start.liquid`:
+
+```liquid
+<div class="login-notice">
+  Welcome back! Please log in to continue.
+</div>
+```
+
+Contents of `partials/passkeys/passkeys-enrollment/form-content-start.liquid`:
+
+```liquid
+<div class="passkey-enrollment-header">
+  <p>Enhance your account security by creating a passkey.</p>
+  <p>Passkeys provide a faster and more secure way to sign in.</p>
+</div>
+```
+
+Contents of `screenRenderSettings/signup-id_signup-id.json`:
 
 ```json
 {
@@ -127,6 +213,8 @@ The Deploy CLI supports managing the `directory_provisioning_configuration` for 
 
 The `mapping` array pairs Auth0 user fields with IdP fields, and `synchronize_automatically` controls whether Auth0 runs scheduled sync jobs for the connection.
 
+The `synchronize_groups` field controls group provisioning. Accepted values are `off`, `all`, and `selected`. When set to `selected`, the `synchronized_groups` array specifies which Google Workspace groups to sync. Each group object contains `id` (required) and optional metadata fields `name`, `email`, and `direct_members_count` populated by the API.
+
 **YAML Example**
 
 ```yaml
@@ -138,6 +226,7 @@ connections:
       tenant_domain: example.com
       client_id: 'some_client_id'
       client_secret: 'some_client_secret'
+      api_enable_groups: true
       api_enable_users: true
     directory_provisioning_configuration:
       mapping:
@@ -146,6 +235,16 @@ connections:
         - auth0: name
           idp: displayName
       synchronize_automatically: false
+      synchronize_groups: selected
+      synchronized_groups:
+        - id: 'group-id-1'
+          name: 'Engineering'
+          email: 'engineering@example.com'
+          direct_members_count: 42
+        - id: 'group-id-2'
+          name: 'Design'
+          email: 'design@example.com'
+          direct_members_count: 10
 ```
 
 **Directory Example**
@@ -164,6 +263,7 @@ connections:
     "tenant_domain": "example.com",
     "client_id": "some_client_id",
     "client_secret": "some_client_secret",
+    "api_enable_groups": true,
     "api_enable_users": true
   },
   "directory_provisioning_configuration": {
@@ -171,9 +271,177 @@ connections:
       { "auth0": "email", "idp": "mail" },
       { "auth0": "name", "idp": "displayName" }
     ],
-    "synchronize_automatically": false
+    "synchronize_automatically": false,
+    "synchronize_groups": "selected",
+    "synchronized_groups": [
+      {
+        "id": "group-id-1",
+        "name": "Engineering",
+        "email": "engineering@example.com",
+        "direct_members_count": 42
+      },
+      {
+        "id": "group-id-2",
+        "name": "Design",
+        "email": "design@example.com",
+        "direct_members_count": 10
+      }
+    ]
   }
 }
+```
+
+## Connections (OIDC and Okta token endpoint authentication options)
+
+For enterprise connections with strategy `oidc` or `okta`, the Deploy CLI supports these optional fields under `connections[].options`:
+
+- `token_endpoint_auth_signing_alg` (string): Allowed values are `RS256`, `RS384`, `RS512`, `PS256`, `PS384`, `ES256`, `ES384`.
+- `id_token_signed_response_algs` (string[]): Allow-list for incoming ID token signing algorithms. Allowed values are `RS256`, `RS384`, `RS512`, `PS256`, `PS384`, `ES256`, `ES384`.
+- `token_endpoint_jwtca_aud_format` (string): Allowed values are `issuer` or `token_endpoint`.
+
+**YAML Example**
+
+```yaml
+connections:
+  - name: enterprise-oidc
+    strategy: oidc
+    enabled_clients:
+      - My SPA
+    options:
+      type: back_channel
+      issuer: https://example-idp.com
+      jwks_uri: https://example-idp.com/.well-known/jwks.json
+      token_endpoint_auth_signing_alg: RS384
+      id_token_signed_response_algs:
+        - RS256
+        - RS384
+      token_endpoint_jwtca_aud_format: token_endpoint
+```
+
+**Directory Example**
+
+```
+./connections/enterprise-oidc.json
+```
+
+```json
+{
+  "name": "enterprise-oidc",
+  "strategy": "oidc",
+  "enabled_clients": ["My SPA"],
+  "options": {
+    "type": "back_channel",
+    "issuer": "https://example-idp.com",
+    "jwks_uri": "https://example-idp.com/.well-known/jwks.json",
+    "token_endpoint_auth_signing_alg": "RS384",
+    "id_token_signed_response_algs": ["RS256", "RS384"],
+    "token_endpoint_jwtca_aud_format": "token_endpoint"
+  }
+}
+```
+
+## Connections (Cross App Access — Requesting Application)
+
+> **Early Access:** Requires the `token_vault_xaa` feature flag to be enabled on the tenant.
+
+For enterprise connections with strategy `oidc` or `okta`, the Deploy CLI supports configuring the connection as a Requesting Application for Cross App Access via the top-level `cross_app_access_requesting_app` field:
+
+- `cross_app_access_requesting_app.active` (boolean): Set to `true` to enable the connection as a Requesting Application for Cross App Access. Defaults to `true`.
+
+**YAML Example**
+
+```yaml
+connections:
+  - name: enterprise-oidc
+    strategy: oidc
+    cross_app_access_requesting_app:
+      active: true
+    options:
+      type: back_channel
+      issuer: https://example-idp.com
+      jwks_uri: https://example-idp.com/.well-known/jwks.json
+```
+
+**Directory Example**
+
+```
+./connections/enterprise-oidc.json
+```
+
+```json
+{
+  "name": "enterprise-oidc",
+  "strategy": "oidc",
+  "cross_app_access_requesting_app": {
+    "active": true
+  },
+  "options": {
+    "type": "back_channel",
+    "issuer": "https://example-idp.com",
+    "jwks_uri": "https://example-idp.com/.well-known/jwks.json"
+  }
+}
+```
+
+## Connections (Cross App Access — Resource Application)
+
+> **Early Access:** Part of the XAA (Cross App Access) — Auth0 as Resource Application Authorization Server feature.
+
+The Deploy CLI supports configuring a connection as a Resource Application for Cross App Access via the top-level `cross_app_access_resource_app` field. This is supported for enterprise connections including SAML (`strategy: samlp`) and OIDC (`strategy: oidc`).
+
+- `cross_app_access_resource_app.status` (`"enabled"` | `"disabled"`): Enables or disables the connection as a Resource Application for Cross App Access.
+
+For SAML connections, the `discovery_url` and `oidc_metadata` connection options — previously only supported for OIDC connections — are now also accepted under `options`.
+
+**YAML Example**
+
+```yaml
+connections:
+  - name: enterprise-saml
+    strategy: samlp
+    cross_app_access_resource_app:
+      status: enabled
+    options:
+      discovery_url: https://example-idp.com/.well-known/openid-configuration
+      oidc_metadata:
+        issuer: https://example-idp.com
+```
+
+**Directory Example**
+
+```
+./connections/enterprise-saml.json
+```
+
+```json
+{
+  "name": "enterprise-saml",
+  "strategy": "samlp",
+  "cross_app_access_resource_app": {
+    "status": "enabled"
+  },
+  "options": {
+    "discovery_url": "https://example-idp.com/.well-known/openid-configuration",
+    "oidc_metadata": {
+      "issuer": "https://example-idp.com"
+    }
+  }
+}
+```
+
+## Clients (Cross App Access — Identity Assertion Authorization Grant)
+
+> **Early Access:** Part of the XAA (Cross App Access) — Auth0 as Resource Application Authorization Server feature.
+
+The Deploy CLI supports the `identity_assertion_authorization_grant` property on clients, which enables the client to participate in Cross App Access (ID-JAG) token exchange.
+
+- `identity_assertion_authorization_grant.active` (boolean): Set to `true` to enable ID-JAG exchange for the client.
+
+```yaml
+clients:
+  - name: My XAA Client
+    identity_assertion_authorization_grant:
+      active: true
 ```
 
 ## Databases
@@ -243,6 +511,102 @@ Contents of `database.json`
       "verify": "./verify.js"
     }
   }
+}
+```
+
+## Resource Servers
+
+Resource servers (APIs) configuration supports the Management API payload schema. The following fields are supported:
+
+**YAML Example**
+
+```yaml
+resourceServers:
+  - name: My API
+    identifier: https://api.example.com
+    proof_of_possession:
+      mechanism: dpop
+      required: true
+      required_for: public_clients
+```
+
+**Directory Example**
+
+```json
+{
+  "name": "My API",
+  "identifier": "https://api.example.com",
+  "proof_of_possession": {
+    "mechanism": "mtls",
+    "required": true,
+    "required_for": "all_clients"
+  }
+}
+```
+
+### Auth0 My Account API — `authorization_policy`
+
+The `authorization_policy` field can be set on the **Auth0 My Account API** resource server (the system resource server with identifier `https://<tenant-domain>/me/`) when the `acr` feature flag is enabled on the tenant. It specifies an Authentication Context Class Reference (ACR) policy that controls the authentication assurance requirements for access tokens issued to that API.
+
+**YAML Example**
+
+```yaml
+resourceServers:
+  - name: Auth0 My Account API
+    identifier: https://your-tenant.auth0.com/me/
+    authorization_policy:
+      policy_id: '019b76da-a800-73c9-b656-b349ae415c17'
+```
+
+To clear the policy, set it to `null`:
+
+```yaml
+resourceServers:
+  - name: Auth0 My Account API
+    identifier: https://your-tenant.auth0.com/me/
+    authorization_policy: null
+```
+
+**Directory Example**
+
+```json
+{
+  "name": "Auth0 My Account API",
+  "identifier": "https://your-tenant.auth0.com/me/",
+  "authorization_policy": {
+    "policy_id": "019b76da-a800-73c9-b656-b349ae415c17"
+  }
+}
+```
+
+> **Note:** `authorization_policy` is only accepted by the Auth0 API for the My Account resource server and only when the `acr` feature flag is enabled on the tenant.
+
+### Online Refresh Tokens — `allow_online_access` and `allow_online_access_with_ephemeral_sessions`
+
+The `allow_online_access` field enables issuance of Online Refresh Tokens (ORTs) for a resource server. ORTs are stateless, non-rotating tokens bound to the Auth0 session lifetime — when the session expires or is revoked, the ORT becomes invalid.
+
+`allow_online_access_with_ephemeral_sessions` permits ORT issuance even when the session uses a non-persistent (ephemeral) cookie. This field can only be set to `true` if `allow_online_access` is also `true`.
+
+Both fields default to `false` and require the `online_refresh_tokens` feature flag to be enabled on the tenant.
+
+**YAML Example**
+
+```yaml
+resourceServers:
+  - name: My API
+    identifier: https://api.example.com
+    allow_online_access: true
+    allow_online_access_with_ephemeral_sessions: false
+```
+
+**Directory Example**
+
+```json
+{
+  "name": "My API",
+  "identifier": "https://api.example.com",
+  "allow_online_access": true,
+  "allow_online_access_with_ephemeral_sessions": false
 }
 ```
 
@@ -500,6 +864,171 @@ For `universal_login` template `templates/` will be created.
 }
 ```
 
+## Themes (Identifier display settings)
+
+> **Early Access:** Requires the `universal_login_theme_identifiers` feature flag to be enabled on the tenant. When the flag is off, the Auth0 API rejects a theme write that includes `identifiers` and strips the field from responses.
+
+The Deploy CLI supports configuring identifier display settings on the branding theme via the top-level `identifiers` object. All three members are required when `identifiers` is supplied:
+
+- `identifiers.login_display` (string): Login display mode. One of `separate`, `unified`.
+- `identifiers.otp_autocomplete` (boolean): Whether OTP autocomplete is enabled.
+- `identifiers.phone_display` (object): Phone number display settings.
+  - `identifiers.phone_display.formatting` (string): One of `international`, `regional`.
+  - `identifiers.phone_display.masking` (string): One of `hide_country_code`, `mask_digits`, `show_all`.
+
+**YAML Example**
+
+```yaml
+themes:
+  - displayName: Default theme
+    borders: { ... }
+    colors: { ... }
+    fonts: { ... }
+    page_background: { ... }
+    widget: { ... }
+    identifiers:
+      login_display: unified
+      otp_autocomplete: true
+      phone_display:
+        masking: mask_digits
+        formatting: international
+```
+
+**Directory Example**
+
+```
+./themes/Default theme.json
+```
+
+```json
+{
+  "displayName": "Default theme",
+  "borders": { "...": "..." },
+  "colors": { "...": "..." },
+  "fonts": { "...": "..." },
+  "page_background": { "...": "..." },
+  "widget": { "...": "..." },
+  "identifiers": {
+    "login_display": "unified",
+    "otp_autocomplete": true,
+    "phone_display": {
+      "masking": "mask_digits",
+      "formatting": "international"
+    }
+  }
+}
+```
+
+## Tenant Settings (Country codes)
+
+> **Early Access:** Requires the `tenant_country_codes_filtering` feature flag to be enabled on the tenant. When the flag is off, the Auth0 API rejects a tenant settings write that includes `country_codes`.
+
+The Deploy CLI supports configuring phone country code filtering for identifier input via the top-level `country_codes` object in tenant settings:
+
+- `country_codes.list` (array of string): ISO 3166-1 alpha-2 codes (e.g. `US`, `GB`). Must be non-empty and unique.
+- `country_codes.mode` (string): Whether the list is an allowlist or denylist. One of `allow`, `deny`.
+
+Set `country_codes: null` to remove filtering (allow all countries).
+
+**YAML Example**
+
+```yaml
+tenant:
+  country_codes:
+    list:
+      - US
+      - GB
+      - CA
+    mode: allow
+```
+
+**Directory Example**
+
+```
+./tenant.json
+```
+
+```json
+{
+  "country_codes": {
+    "list": ["US", "GB", "CA"],
+    "mode": "allow"
+  }
+}
+```
+
+## Custom Domains
+
+Custom domains allow you to use your own domain for authentication instead of the default Auth0 domain. The Deploy CLI supports managing custom domains in both directory and YAML modes.
+
+Custom domains have the following key properties:
+
+- `domain`: The custom domain name (required)
+- `type`: Certificate management type - either `auth0_managed_certs` or `self_managed_certs` (required)
+- `custom_client_ip_header`: Header to use for client IP detection (optional, one of: `true-client-ip`, `cf-connecting-ip`, `x-forwarded-for`, or `null`)
+- `tls_policy`: TLS policy to use (defaults to `recommended`)
+- `verification_method`: Domain verification method (defaults to `txt`)
+- `domain_metadata`: Metadata associated with the custom domain (optional, max 10 properties)
+- `relying_party_identifier`: Relying Party ID (rpId) to be used for Passkeys on this custom domain. If not provided or set to null, the full domain will be used. (optional)
+
+**Note**: The `relying_party_identifier` should be a suffix of the domain name. For example, if your domain is `auth.example.com`, the `relying_party_identifier` could be `example.com`.
+
+**YAML Example**
+
+```yaml
+# Contents of ./tenant.yaml
+customDomains:
+  - domain: 'auth.example.com'
+    type: 'auth0_managed_certs'
+    tls_policy: 'recommended'
+    custom_client_ip_header: 'cf-connecting-ip'
+    domain_metadata:
+      environment: 'production'
+      team: 'platform'
+    relying_party_identifier: 'example.com'
+  - domain: 'login.myapp.com'
+    type: 'self_managed_certs'
+    verification_method: 'txt'
+```
+
+**Directory Example**
+
+```
+Folder structure when in directory mode.
+
+./customDomains/
+    ./auth.example.com.json
+    ./login.myapp.com.json
+```
+
+Contents of `auth.example.com.json`:
+
+```json
+{
+  "domain": "auth.example.com",
+  "type": "auth0_managed_certs",
+  "tls_policy": "recommended",
+  "custom_client_ip_header": "cf-connecting-ip",
+  "domain_metadata": {
+    "environment": "production",
+    "team": "platform"
+  },
+  "relying_party_identifier": "example.com"
+}
+```
+
+Contents of `login.myapp.com.json`:
+
+```json
+{
+  "domain": "login.myapp.com",
+  "type": "self_managed_certs",
+  "verification_method": "txt"
+}
+```
+
+For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2#!/Custom_Domains).
+
 ## NetworkACL
 
 Tenant Network Access Control Lists (NetworkACLs) allow you to configure rules that control access to your Auth0 tenant based on IP addresses, geographical locations, and other network criteria. The Deploy CLI supports managing NetworkACLs in both directory and YAML modes.Refer [more](https://auth0.com/docs/secure/tenant-access-control-list/configure-rules) on this.
@@ -508,11 +1037,13 @@ NetworkACLs have the following key properties:
 
 - `description`: A descriptive name for the rule
 - `active`: Boolean indicating if the rule is active
-- `priority`: Number between 1-10 determining the order of rule evaluation (lower numbers have higher priority)
+- `priority`: Number (minimum 1) determining the order of rule evaluation (lower numbers have higher priority)
 - `rule`: The rule configuration containing:
   - `action`: The action to take (block, allow, log, or redirect)
   - `scope`: The scope of the rule ('management', 'authentication', or 'tenant')
   - `match` or `not_match`: Criteria for matching requests
+
+The `match` and `not_match` criteria also support an `auth0_managed` array for matching Auth0-managed IP ranges (e.g. `auth0.icloud_relay_proxy`, `auth0.low_reputation`). Each value must follow the pattern `^auth0\.[^.\s]+$`. This is an Early Access feature gated behind the `tenant_acl_curated_blocklists` feature flag and requires the `advanced-breached-password-detection` entitlement; the API rejects rules using `auth0_managed` with an HTTP 403 if the tenant is not entitled.
 
 **YAML Example**
 
@@ -537,6 +1068,15 @@ networkACLs:
       scope: 'management'
       not_match:
         user_agents: ['BadBot/1.0']
+  - description: 'Block iCloud Private Relay Exits'
+    active: true
+    priority: 4
+    rule:
+      action:
+        block: true
+      scope: 'tenant'
+      match:
+        auth0_managed: ['auth0.icloud_relay_proxy']
 ```
 
 **Directory Example**
@@ -547,6 +1087,7 @@ Folder structure when in directory mode.
 ./networkACLs/
     ./Allow Specific Countries-p-2.json
     ./Redirect Specific User Agents-p-3.json
+    ./Block iCloud Private Relay Exits-p-4.json
 ```
 
 Contents of `Allow Specific Countries-p-2.json`:
@@ -586,6 +1127,74 @@ Contents of `Redirect Specific User Agents-p-3.json`:
   }
 }
 ```
+
+Contents of `Block iCloud Private Relay Exits-p-4.json`:
+
+```json
+{
+  "description": "Block iCloud Private Relay Exits",
+  "active": true,
+  "priority": 4,
+  "rule": {
+    "action": {
+      "block": true
+    },
+    "scope": "tenant",
+    "match": {
+      "auth0_managed": ["auth0.icloud_relay_proxy"]
+    }
+  }
+}
+```
+
+## Organizations
+
+The deploy CLI supports managing organizations, including their connections, client grants, discovery domains, and org-to-app entitlement settings.
+
+### Org-to-App Entitlement (`is_app_entitlement_active` / `clients`)
+
+> **Note:** Requires the `org_to_app_entitlement_enabled` feature flag to be enabled on the tenant.
+
+`is_app_entitlement_active` controls whether org-to-app entitlement is active for an organization. When active, the `clients` array specifies which client applications org members are entitled to use for login.
+
+Each entry in `clients` has:
+
+- `client_id` — the **name** of the client application (resolved to the actual ID at deploy time)
+- `use_for_member_access` — when `true`, org members can use this client to log in
+
+**YAML Example**
+
+```yaml
+organizations:
+  - name: my-organization
+    display_name: My Organization
+    is_app_entitlement_active: true
+    clients:
+      - client_id: My App
+        use_for_member_access: true
+```
+
+**Directory Example**
+
+```
+./organizations/my-organization.json
+```
+
+```json
+{
+  "name": "my-organization",
+  "display_name": "My Organization",
+  "is_app_entitlement_active": true,
+  "clients": [
+    {
+      "client_id": "My App",
+      "use_for_member_access": true
+    }
+  ]
+}
+```
+
+> **Note:** When exporting, `client_id` values are resolved to client **names** for portability across environments. On deploy, names are resolved back to IDs. The M2M application used by the deploy CLI requires the `read:organization_clients`, `create:organization_clients`, `update:organization_clients`, and `delete:organization_clients` scopes.
 
 ## PhoneProviders
 
@@ -761,6 +1370,105 @@ clients:
         - client_id: 'client_id_of_mobile_app'
 ```
 
+For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2/self-service-profiles/get-self-service-profiles).
+
+## Self-Service Profiles
+
+Self-Service Profiles enable organizations to configure self-service SSO flows for their users. These profiles define the user attributes to collect, branding customization, and which identity provider strategies are allowed during the self-service setup process.
+
+**Note**: You cannot specify both `user_attribute_profile_id` and `user_attributes` in the same profile. Use `user_attribute_profile_id` to reference an existing User Attribute Profile, or define `user_attributes` inline.
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+selfServiceProfiles:
+  - name: 'Enterprise SSO Profile'
+    description: 'Self-service SSO for enterprise customers'
+    allowed_strategies:
+      - oidc
+      - samlp
+      - okta
+    user_attributes:
+      - name: email
+        description: Email of the User
+        is_optional: false
+      - name: name
+        description: Name of the User
+        is_optional: true
+    branding:
+      logo_url: 'https://example.com/logo.png'
+      colors:
+        primary: '#19aecc'
+    customText:
+      en:
+        get-started:
+          introduction: 'Welcome! With <p>only a few steps</p> you will be able to setup your new connection.'
+
+  - name: 'Simple SSO Profile'
+    description: 'Basic SSO profile'
+    user_attribute_profile_id: 'My User Attribute Profile'
+    allowed_strategies:
+      - google-apps
+      - adfs
+```
+
+### Directory Example
+
+```
+Folder structure when in directory mode.
+
+./self-service-profiles/
+    ./Enterprise SSO Profile.json
+    ./Simple SSO Profile.json
+```
+
+Contents of `Enterprise SSO Profile.json`:
+
+```json
+{
+  "name": "Enterprise SSO Profile",
+  "description": "Self-service SSO for enterprise customers",
+  "allowed_strategies": ["oidc", "samlp", "okta"],
+  "user_attributes": [
+    {
+      "name": "email",
+      "description": "Email of the User",
+      "is_optional": false
+    },
+    {
+      "name": "name",
+      "description": "Name of the User",
+      "is_optional": true
+    }
+  ],
+  "branding": {
+    "logo_url": "https://example.com/logo.png",
+    "colors": {
+      "primary": "#19aecc"
+    }
+  },
+  "customText": {
+    "en": {
+      "get-started": {
+        "introduction": "Welcome! With <p>only a few steps</p> you will be able to setup your new connection."
+      }
+    }
+  }
+}
+```
+
+Contents of `Simple SSO Profile.json`:
+
+```json
+{
+  "name": "Simple SSO Profile",
+  "description": "Basic SSO profile",
+  "user_attribute_profile_id": "My User Attribute Profile",
+  "allowed_strategies": ["google-apps", "adfs"]
+}
+```
+
 For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2).
 
 ## Risk Assessments
@@ -799,3 +1507,480 @@ File: `./risk-assessment/settings.json`
 ```
 
 For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2#!/Risk_Assessments/get_settings).
+
+## Action Modules
+
+Action modules are reusable code modules that can be shared across multiple Auth0 actions. They allow you to create common utility functions, helpers, and libraries that can be imported and used by any action in your tenant.
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+actionModules:
+  - name: auth-helper
+    code: ./action-modules/auth-helper/code.js
+    dependencies:
+      - name: axios
+        version: 1.6.0
+      - name: jsonwebtoken
+        version: 9.0.0
+    secrets:
+      - name: JWT_SECRET
+        value: ##JWT_SECRET##
+
+  - name: notification-helper
+    code: ./action-modules/notification-helper/code.js
+    dependencies:
+      - name: uuid
+        version: 9.0.0
+    secrets: []
+```
+
+Folder structure when in YAML mode:
+
+```
+./action-modules/
+    /auth-helper/
+        /code.js
+    /notification-helper/
+        /code.js
+./tenant.yaml
+```
+
+### Directory Example
+
+Folder structure when in directory mode:
+
+```
+./action-modules/
+    ./auth-helper.json
+    ./auth-helper/
+        ./code.js
+    ./notification-helper.json
+    ./notification-helper/
+        ./code.js
+```
+
+Contents of `auth-helper.json`:
+
+```json
+{
+  "name": "auth-helper",
+  "code": "./action-modules/auth-helper/code.js",
+  "dependencies": [
+    {
+      "name": "axios",
+      "version": "1.6.0"
+    },
+    {
+      "name": "jsonwebtoken",
+      "version": "9.0.0"
+    }
+  ],
+  "secrets": [
+    {
+      "name": "JWT_SECRET",
+      "value": "##JWT_SECRET##"
+    }
+  ]
+}
+```
+
+Contents of `auth-helper/code.js`:
+
+```javascript
+const jwt = require('jsonwebtoken');
+const axios = require('axios');
+
+/**
+ * Auth Helper Module
+ * Provides JWT validation and token refresh utilities
+ */
+module.exports = {
+  async validateToken(token) {
+    const secret = actions.secrets.JWT_SECRET;
+    try {
+      return jwt.verify(token, secret);
+    } catch (error) {
+      throw new Error('Invalid token: ' + error.message);
+    }
+  },
+
+  async fetchUserData(userId) {
+    const response = await axios.get(`https://api.example.com/users/${userId}`);
+    return response.data;
+  },
+};
+```
+
+### Using Action Modules in Actions
+
+Actions can reference action modules in their configuration:
+
+**YAML Example:**
+
+```yaml
+actions:
+  - name: send-phone-message
+    code: ./actions/send-phone-message/code.js
+    supported_triggers:
+      - id: send-phone-message
+        version: v1
+    modules:
+      - module_name: notification-helper
+        module_version_number: 1
+```
+
+**Directory Example:**
+
+Contents of `actions/send-phone-message.json`:
+
+```json
+{
+  "name": "send-phone-message",
+  "code": "./actions/send-phone-message/code.js",
+  "supported_triggers": [
+    {
+      "id": "send-phone-message",
+      "version": "v1"
+    }
+  ],
+  "modules": [
+    {
+      "module_name": "notification-helper",
+      "module_version_number": 1
+    }
+  ]
+}
+```
+
+The action can then import and use the module in its code:
+
+```javascript
+const notificationHelper = require('actions:notification-helper');
+
+exports.onExecuteSendPhoneMessage = async (event) => {
+  const message = notificationHelper.formatMessage(
+    event.user.phone_number,
+    'Your verification code'
+  );
+};
+```
+
+## Supplemental Signals
+
+Supplemental signals configuration allows you to enable third-party integrations for enhanced security and risk assessment.
+
+- `akamai_enabled` (boolean): Enable processing of incoming Akamai headers for supplemental security signals
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+supplementalSignals:
+  akamai_enabled: true
+```
+
+### Directory Example
+
+Folder: `./supplemental-signals.json`
+
+```json
+{
+  "akamai_enabled": true
+}
+```
+
+For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2#!/Supplemental_Signals).
+
+## Event Streams
+
+Event Streams allow you to subscribe to Auth0 tenant events and forward them to external destinations (webhook, AWS EventBridge, or an Auth0 Action).
+
+### Schema Properties
+
+- `name` (string, required): Display name for the event stream.
+- `status` (string): `enabled` or `disabled`.
+- `subscriptions` (array): List of event types to subscribe to. Each entry has an `event_type` string (e.g. `user.created`, `organization.member.added`). If omitted, no events are forwarded.
+- `destination` (object, required): Destination configuration.
+  - `type` (string): `webhook`, `eventbridge`, or `action`.
+  - `configuration` (object): Destination-specific settings.
+
+#### Webhook destination
+
+```json
+{
+  "type": "webhook",
+  "configuration": {
+    "webhook_endpoint": "https://example.com/events",
+    "webhook_authorization": {
+      "method": "bearer"
+    }
+  }
+}
+```
+
+Supported `webhook_authorization` methods: `basic` (username only returned), `bearer`, `custom_header`. Secrets are masked on export unless `AUTH0_EXPORT_SECRETS: true`.
+
+#### AWS EventBridge destination
+
+```json
+{
+  "type": "eventbridge",
+  "configuration": {
+    "aws_account_id": "123456789012",
+    "aws_region": "us-east-1"
+  }
+}
+```
+
+Note: EventBridge streams cannot have their `destination` updated after creation. Only `name`, `subscriptions`, and `status` can be patched.
+
+#### Action destination
+
+```json
+{
+  "type": "action",
+  "configuration": {
+    "action_id": "act_abc123"
+  }
+}
+```
+
+Note: like EventBridge, Action streams cannot have their `destination` updated after creation. Only `name`, `subscriptions`, and `status` can be patched — the `destination` is stripped from update payloads (an info message is logged when this happens).
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+eventStreams:
+  - name: My Webhook Stream
+    status: enabled
+    subscriptions:
+      - event_type: user.created
+      - event_type: user.deleted
+    destination:
+      type: webhook
+      configuration:
+        webhook_endpoint: https://example.com/events
+        webhook_authorization:
+          method: bearer
+```
+
+### Directory Example
+
+Folder: `./event-streams/`
+
+Each event stream is stored as a separate JSON file named after the stream (e.g. `my-webhook-stream.json`):
+
+```json
+{
+  "name": "My Webhook Stream",
+  "status": "enabled",
+  "subscriptions": [{ "event_type": "user.created" }],
+  "destination": {
+    "type": "webhook",
+    "configuration": {
+      "webhook_endpoint": "https://example.com/events",
+      "webhook_authorization": {
+        "method": "bearer"
+      }
+    }
+  }
+}
+```
+
+For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2/event-streams/get-event-streams).
+
+## Rate Limit Policies
+
+Rate Limit Policies allow you to control the rate at which clients can make authentication requests to the OAuth authentication API. Each policy targets a specific consumer selector (e.g. a specific client, all third-party clients, or a default fallback) and defines the action to take when the limit is exceeded.
+
+### Schema Properties
+
+| Property                     | Type     | Required                                | Description                                                                                                                                                                                                                                                      |
+| ---------------------------- | -------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `resource`                   | `string` | Yes                                     | The API protected by the policy. Currently only `oauth_authentication_api` is supported.                                                                                                                                                                         |
+| `consumer`                   | `string` | Yes                                     | The consumer type. Currently only `client` is supported.                                                                                                                                                                                                         |
+| `consumer_selector`          | `string` | Yes                                     | Identifies the target within the consumer. Supported values: `client_id:<client_id>` to target a specific client, `cimd_clients` for all CIMD clients, `third_party_clients` for all third-party clients, or `default` as a fallback for any unmatched consumer. |
+| `configuration.action`       | `string` | Yes                                     | The action to take when the rate limit is exceeded. One of: `allow`, `block`, `log`, `redirect`.                                                                                                                                                                 |
+| `configuration.limit`        | `number` | Required for `block`, `log`, `redirect` | Maximum number of requests allowed in a refresh window.                                                                                                                                                                                                          |
+| `configuration.redirect_uri` | `string` | Required for `redirect`                 | The HTTPS URI to redirect to when the rate limit is exceeded.                                                                                                                                                                                                    |
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+rateLimitPolicies:
+  - resource: oauth_authentication_api
+    consumer: client
+    consumer_selector: default
+    configuration:
+      action: block
+      limit: 100
+
+  - resource: oauth_authentication_api
+    consumer: client
+    consumer_selector: third_party_clients
+    configuration:
+      action: log
+      limit: 50
+
+  - resource: oauth_authentication_api
+    consumer: client
+    consumer_selector: client_id:some-client-id
+    configuration:
+      action: redirect
+      limit: 10
+      redirect_uri: https://example.com/rate-limited
+```
+
+### Directory Example
+
+Folder: `./rate-limit-policies/`
+
+Each rate limit policy is stored as a separate JSON file named after its `consumer_selector` (e.g. `default.json`):
+
+```json
+{
+  "resource": "oauth_authentication_api",
+  "consumer": "client",
+  "consumer_selector": "default",
+  "configuration": {
+    "action": "block",
+    "limit": 100
+  }
+}
+```
+
+For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2/rate-limit-policies/get-rate-limit-policies).
+
+## Client Credentials (Private Key JWT / mTLS)
+
+The Deploy CLI supports managing client authentication credentials for Private Key JWT and mTLS. Credentials are child resources of clients, managed via the `/clients/{id}/credentials` API.
+
+### How it works
+
+**Export**: `client_authentication_methods` is exported with credential stubs containing only `name` and `credential_type`. The `pem` field is never exported — Auth0 does not return it after creation. If no named credentials exist for a client, `client_authentication_methods` is omitted entirely from the export.
+
+**Deploy**: Credential reconciliation only activates when at least one credential in the config contains a `pem` field. This means a plain export→deploy will never delete existing credentials — `pem` is the explicit opt-in signal.
+
+- Creates credentials present in config but missing in Auth0
+- Deletes credentials removed from config (requires `AUTH0_ALLOW_DELETE=true`)
+- Creates always run before deletes — Auth0 allows max 2 credentials per client, so both exist simultaneously during the rotation window
+- Re-wires `client_authentication_methods` with resolved credential IDs after reconciliation
+- If `client_authentication_methods` is **absent** from the client config entirely, it is treated as intentional deletion — all existing credentials are removed (requires `AUTH0_ALLOW_DELETE=true`)
+
+### Supported credential types
+
+| `credential_type` | Auth method key               | Use case                          |
+| ----------------- | ----------------------------- | --------------------------------- |
+| `public_key`      | `private_key_jwt`             | Private Key JWT                   |
+| `x509_cert`       | `self_signed_tls_client_auth` | mTLS (self-signed cert)           |
+| `cert_subject_dn` | `tls_client_auth`             | mTLS (CA-signed cert, subject DN) |
+
+### Workflow
+
+To add or rotate a credential:
+
+1. Generate a key pair:
+
+   ```bash
+   openssl genrsa -out private.key 2048
+   openssl rsa -in private.key -pubout -out public.pem
+   ```
+
+2. Add the credential to your client config with the public key `pem`:
+
+   ```yaml
+   clients:
+     - name: My API Client
+       client_authentication_methods:
+         private_key_jwt:
+           credentials:
+             - name: my-key-v2
+               credential_type: public_key
+               pem: |
+                 -----BEGIN PUBLIC KEY-----
+                 MIIBIjANBgkq...
+                 -----END PUBLIC KEY-----
+   ```
+
+3. Deploy — the credential is created in Auth0 and `client_authentication_methods` is updated.
+
+4. To rotate: add the new key alongside the old one (both exist simultaneously), then remove the old one in a subsequent deploy.
+
+### Export shape (name and credential_type only)
+
+```yaml
+clients:
+  - name: My API Client
+    client_authentication_methods:
+      private_key_jwt:
+        credentials:
+          - name: my-key-v2
+            credential_type: public_key
+```
+
+If no credentials exist for the client, `client_authentication_methods` is omitted entirely — not exported as an empty object.
+
+### Directory Example
+
+```
+./clients/
+    ./My API Client.json
+```
+
+Contents of `My API Client.json` (deploy-time, with pem):
+
+```json
+{
+  "name": "My API Client",
+  "client_authentication_methods": {
+    "private_key_jwt": {
+      "credentials": [
+        {
+          "name": "my-key-v2",
+          "credential_type": "public_key",
+          "pem": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkq...\n-----END PUBLIC KEY-----\n"
+        }
+      ]
+    }
+  }
+}
+```
+
+> **Note:** The `pem` field must be supplied manually from your key generation step. Never commit private keys — only the public key PEM goes in the config.
+
+## Token Vault Privileged Access
+
+> **Early Access:** `token_vault_privileged_access` requires the `token_vault_subject_type_jwt_ea_rollout` feature flag to be enabled on the tenant, and writes additionally require the `create:client_token_vault_privileged_access` / `update:client_token_vault_privileged_access` scopes. This field is export-only in the Deploy CLI (see below), so these requirements affect only manual configuration on the tenant, not the CLI.
+
+The Deploy CLI exports the `token_vault_privileged_access` property on clients, which hardens a privileged Token Vault worker by restricting the caller IPs, connections, and scopes it may use at runtime.
+
+> **Export-only field:** `token_vault_privileged_access` is exported for visibility but **is not deployed** by the Deploy CLI — it is stripped from create/update payloads. The Management API requires a `credentials` array (tenant-specific credential `id` references) whenever the object is sent, and those ids are never persisted by the CLI because they are not portable across tenants. Sending the object without them fails validation, and sending exported ids would re-send stale references on a cross-tenant deploy. Manage `token_vault_privileged_access` directly on the tenant.
+
+| Field          | Type             | Description                                                                                                                |
+| -------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `ip_allowlist` | array of strings | IPv4/IPv6 addresses or CIDR ranges permitted to call token exchange on behalf of this client.                              |
+| `grants`       | array of objects | Connection/scope pin objects. Each has a `connection` (name) and `scopes` (array). Max 5 connections; max 20 scopes total. |
+
+Exported shape (`credentials` is stripped; `ip_allowlist` and `grants` are kept for visibility):
+
+```yaml
+clients:
+  - name: My Token Vault Privileged App
+    app_type: non_interactive
+    token_vault_privileged_access:
+      ip_allowlist:
+        - '192.168.1.0/24'
+        - '10.0.0.1'
+      grants:
+        - connection: google-oauth2
+          scopes:
+            - 'https://www.googleapis.com/auth/calendar.readonly'
+        - connection: slack
+          scopes:
+            - 'chat:write'
+            - 'channels:read'
+```

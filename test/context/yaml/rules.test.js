@@ -120,4 +120,24 @@ describe('#YAML context rules', () => {
       scriptValidation
     );
   });
+
+  it('should not dump excluded rules', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'rulesDumpExclude');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') },
+      mockMgmtClient()
+    );
+
+    context.assets.rules = [
+      { name: 'includedRule', script: 'function includedRule() {}', enabled: true, order: 1 },
+      { name: 'excludedRule', script: 'function excludedRule() {}', enabled: true, order: 2 },
+    ];
+    context.assets.exclude = { rules: ['excludedRule'] };
+
+    const dumped = await handler.dump(context);
+
+    expect(dumped.rules).to.have.length(1);
+    expect(dumped.rules[0].name).to.equal('includedRule');
+  });
 });

@@ -22,6 +22,7 @@ describe('#YAML context connections', () => {
           domain: somedomain.com
           waad_protocol: "openid-connect"
           api_enable_users: true
+          api_enable_groups: true
           basic_profile: true
           ext_profile: true
           ext_groups: true
@@ -46,6 +47,7 @@ describe('#YAML context connections', () => {
       {
         name: 'test-waad',
         options: {
+          api_enable_groups: true,
           api_enable_users: true,
           basic_profile: true,
           client_id: 'my_client_id',
@@ -253,5 +255,25 @@ describe('#YAML context connections', () => {
     expect(fs.readFileSync(path.join(templatesFolder, 'email.html'), 'utf8')).to.deep.equal(
       'html code'
     );
+  });
+
+  it('should not dump excluded connections', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'connectionsDumpExclude');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, 'tenant.yaml') },
+      mockMgmtClient()
+    );
+
+    context.assets.connections = [
+      { name: 'includedConnection', strategy: 'waad' },
+      { name: 'excludedConnection', strategy: 'waad' },
+    ];
+    context.assets.exclude = { connections: ['excludedConnection'] };
+
+    const dumped = await handler.dump(context);
+
+    expect(dumped.connections).to.have.length(1);
+    expect(dumped.connections[0].name).to.equal('includedConnection');
   });
 });

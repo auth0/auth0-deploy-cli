@@ -1,8 +1,9 @@
 import { isEmpty } from 'lodash';
 import { Management } from 'auth0';
-import DefaultHandler from './default';
+import DefaultHandler, { order } from './default';
 import { Assets, Language, languages } from '../../../types';
 import log from '../../../logger';
+import { isDryRun } from '../../utils';
 import { paginate } from '../client';
 
 const promptTypes = [
@@ -101,6 +102,7 @@ const screenTypes = [
   'email-otp-challenge',
   'redeem-ticket',
   'organization-selection',
+  'pre-login-organization-picker',
   'accept-invitation',
   'login-passwordless-email-code',
   'login-passwordless-email-link',
@@ -122,7 +124,11 @@ const customPartialsPromptTypes = [
   'signup',
   'signup-id',
   'signup-password',
+  'passkeys',
 ];
+
+// Prompts that may not be available on all tenants (early access features)
+const optionalPartialsPromptTypes = ['passkeys'];
 
 export type CustomPartialsPromptTypes = (typeof customPartialsPromptTypes)[number];
 
@@ -135,6 +141,8 @@ const customPartialsScreenTypes = [
   'signup-password',
   'login-passwordless-sms-otp',
   'login-passwordless-email-code',
+  'passkeys-enrollment',
+  'passkeys-enrollment-local',
 ] as const;
 
 export type CustomPartialsScreenTypes = (typeof customPartialsPromptTypes)[number];
@@ -303,7 +311,7 @@ export type AllPromptsByLanguage = Partial<{
   [key in Language]: Partial<PromptsCustomText>;
 }>;
 
-export type ScreenRenderer = Management.AculResponseContent;
+export type ScreenRenderer = Management.GetAculResponseContent;
 
 export type Prompts = Partial<
   PromptSettings & {
@@ -429,6 +437,27 @@ export default class PromptsHandler extends DefaultHandler {
         return null;
       }
 
+      // Handle 400 errors for prompt types not available on all tenants (early access features)
+      // Error format: "Path validation error: 'Invalid value \"passkeys\"' on property prompt (Name of the prompt)."
+      if (
+        error &&
+        error?.statusCode === 400 &&
+        error.message?.includes('Path validation error') &&
+        error.message?.includes('on property prompt')
+      ) {
+        // Check if the error message contains any of the optional prompt types
+        const unavailablePrompt = optionalPartialsPromptTypes.find((promptType) =>
+          error.message?.includes(promptType)
+        );
+
+        if (unavailablePrompt) {
+          log.warn(
+            `Skipping partials for prompt type '${unavailablePrompt}' because it is not available on this tenant.`
+          );
+          return null;
+        }
+      }
+
       if (error && error.statusCode === 429) {
         log.error(
           `The global rate limit has been exceeded, resulting in a ${error.statusCode} error. ${error.message}. Although this is an error, it is not blocking the pipeline.`
@@ -478,10 +507,19 @@ export default class PromptsHandler extends DefaultHandler {
     );
   }
 
+  @order('80')
   async processChanges(assets: Assets): Promise<void> {
     const { prompts } = assets;
 
     if (!prompts) return;
+
+    if (isDryRun(this.config)) {
+      const { del, update, create } = await this.calcChanges(assets);
+
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        return;
+      }
+    }
 
     const { partials, customText, screenRenderers, ...promptSettings } = prompts;
 
@@ -572,7 +610,7 @@ export default class PromptsHandler extends DefaultHandler {
       updatePayload = {
         ...updatePrams,
         rendering_mode: Management.AculRenderingModeEnum.Advanced,
-        default_head_tags_disabled: screenRenderer.default_head_tags_disabled || undefined,
+        default_head_tags_disabled: screenRenderer.default_head_tags_disabled ?? undefined,
         head_tags: screenRenderer.head_tags as Management.AculHeadTag[],
       };
     }

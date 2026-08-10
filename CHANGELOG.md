@@ -7,6 +7,229 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.42.0] - 2026-07-30
+
+### Added
+
+- Add UL identifier input support for themes and tenant settings. [#1433]
+- Add `token_vault_privileged_access` support for clients. [#1430]
+- Add `auth0_managed` field support for network ACLs (Curated Blocklists - EA). [#1435]
+- Add Cross App Access (XAA) resource app support for connections and clients. [#1431]
+- Add `cross_app_access_requesting_app` support for connections (EA). [#1422]
+
+### Fixed
+
+- Prevent dry-run crash on `clientAuthCredentials` handler. [#1438]
+- Resolve spurious dry-run diffs for rules, themes, and hooks. [#1437]
+- Strip unresolved placeholders on deploy instead of throwing. [#1436]
+- Handle 403 entitlement errors for bot detection and captcha on export. [#1434]
+- Warn and skip deprecated guardian phone provider on 403 during import. [#1429]
+- Add `use_scope_descriptions_for_consent` to allowed tenant flags. [#1428]
+
+## [8.41.0] - 2026-07-16
+
+### Added
+
+- Add `third_party_client_access` support for organizations. [#1421]
+
+## [8.40.0] - 2026-07-09
+
+### Added
+
+- Add client credential lifecycle management for Private Key JWT and mTLS authentication methods. [#1417]
+- Add Rate Limit Policies (EA) support. [#1395]
+
+### Fixed
+
+- Preserve `false` value for `default_head_tags_disabled` in screen renderer update. [#1416]
+- Skip destination update for action event streams as the destination type cannot be changed after creation. [#1425]
+
+## [8.39.0] - 2026-06-30
+
+### Added
+
+- Add `eventStreams` support. [#1412]
+- Add `id_token_session_expiry_supported` validation for enterprise connections. [#1411]
+
+## [8.38.0] - 2026-06-25
+
+### Added
+
+- Add `session_transfer` delegation config support for CTE impersonation on the Client entity. [#1406]
+- Add `fedcm_login` support for Google One Tap / FedCM in Universal Login on the Client entity. [#1407]
+- Add `login-post-identifier` and `signup-post-identifier` as supported action triggers. [#1409]
+- Add `allow_online_access` and `allow_online_access_with_ephemeral_sessions` fields to resource server. [#1398]
+
+### Fixed
+
+- Fix keyword placeholder validation to allow lowercase Auth0 template variables (e.g. `@@password@@`). [#1408]
+- Re-apply prompt settings after branding update to prevent Authentication Profile reset. [#1404]
+
+## [8.37.0] - 2026-06-17
+
+### Added
+
+- Add `invitation_landing_client_id` support to `my_organization_configuration` on the Client entity, with client ID-to-name resolution on export and name-to-ID resolution on import. [#1400]
+
+### Fixed
+
+- Remove `enable_custom_domain_in_emails` from managed tenant flags to prevent import failures on tenants without a ready custom domain. [#1401]
+- Remove incorrect `maximum: 10` constraint on Network ACL `priority` field in schema validation. [#1403]
+
+## [8.36.0] - 2026-06-05
+
+### Added
+
+- Add optional flag to skip secret masking during export. [#1396]
+
+### Fixed
+
+- Remove stale connection files from directory export when connections are deleted. [#1389]
+
+## [8.35.0] - 2026-05-22
+
+### Added
+
+- Add `AUTH0_IGNORE_DRY_RUN_FIELDS` config option to exclude specified fields from `--dry-run` diff output per handler type. [#1385]
+- Add hostnames and CIDR fields to network ACL match schema. [#1386]
+- Add `ES384` and `ES512` as valid `dpop_signing_alg` values for OIDC and Okta enterprise connections (GA). [#1391]
+
+### Deprecated
+
+- Deprecate absolute and external file path references in config handlers; a warning is emitted when detected. Support will be removed in a future major version. [#1392]
+
+### Fixed
+
+- Fix keyword markers in themes not being preserved during default export configuration. [#1387]
+
+## [8.34.0] - 2026-05-11
+
+### Added
+
+- Add support for `authorization_policy` on the Auth0 My Account API resource server, enabling ACR (Authentication Context Class Reference) policy configuration via Deploy CLI. [#1381]
+- Add Google Workspace inbound group sync support to directory provisioning configuration. [#1380]
+
+### Fixed
+
+- Fix keyword replacement mappings (e.g. `##ENV##`) not being applied to `theme.json` during import. [#1379]
+
+## [8.33.0] - 2026-05-05
+
+### Added
+
+- Add support for Third Party Apps CORE EA Release 1 properties, including updated `clientGrants` matching and `clients` schema handling. [#1372]
+- Add support for additional signing algorithms (`token_endpoint_auth_signing_alg`, `id_token_signed_response_algs`) in OIDC and Okta enterprise connections. [#1375]
+
+### Fixed
+
+- Fix Deploy CLI hanging indefinitely when importing 3 or more actions that reference action modules, caused by a deadlock in the shared rate-limiting pool. [#1374]
+
+## [8.32.0] - 2026-04-23
+
+### Added
+
+- Add support for CIMD client registration via `external_client_id`, allowing clients to be registered from an OAuth 2.0 Client ID Metadata Document. [#1369]
+- Add `on_behalf_of_token_exchange` to supported `token_exchange.allow_any_profile_of_type` values for clients. [#1366]
+- Add Flexible Password Policy support for database connections. [#1362]
+- Add `My Org` client references support and expand organization connection sync. [#1367]
+- Add dry-run mode (GA) with `--dry-run`, `--dry-run --interactive`, and `--dry-run --apply` flags. [#1336]
+
+### Fixed
+
+- Fix silent process exit when deploying 3+ organizations with discovery domains. [#1354]
+- Fix organization creation response handling and add ID validation. [#1365]
+- Fix undefined `enabled_clients` handling in `getEnabledClients`. [#1364]
+- Fix unresolved keyword placeholders being sent in API payloads before deploy. [#1360]
+
+## [8.31.0] - 2026-04-10
+
+### Added
+
+- Add support for `is_default` on `customDomains`. [#1330]
+- Add `AUTH0_EXPORT_ORDERED` config property and `--export_ordered` flag for stable exports. [#1335]
+
+### Fixed
+
+- Fix `clientGrants` matching when multiple grants share the same `client_id` and `audience`. [#1341]
+
+## [8.30.0] - 2026-04-02
+
+### Added
+
+- Add support for passkey enrollment in `prompts` partials. [#1328]
+- Add support for `dpop_signing_alg` validation in OIDC and Okta `connections`. [#1343]
+
+### Fixed
+
+- Fix action module fetching logic to resolve correct module IDs. [#1340]
+- Fix `AUTH0_EXCLUDED_*` options not respected during export. [#1342]
+
+## [8.29.3] - 2026-03-25
+
+### Fixed
+
+- Fix Universal Login Authentication Profile reverting to Identifier+Password after import when branding is included. [#1333]
+- Fix efficiency and reliability of fetching `enabled_clients` for `connections`. [#1334]
+
+## [8.29.2] - 2026-03-17
+
+### Fixed
+
+- Fix false-positive deprecation warning for `cross_origin_auth` when `cross_origin_authentication` is correctly used in config. [#1322]
+
+## [8.29.1] - 2026-03-12
+
+### Fixed
+
+- Fix bad request error when no `emailProvider` is configured. [#1321]
+- Fix `enabled_clients` pagination for `connections`. [#1320]
+
+## [8.29.0] - 2026-03-03
+
+### Added
+
+- Add DPoP support for proof-of-possession mechanism in `resourceServers` (GA) [#1311]
+- Add `supplemental signals` configuration for Akamai integration.(EA) [#1310]
+
+## [8.28.0] - 2026-02-20
+
+### Added
+
+- Add support for managing `action-modules`.(EA) [#1302]
+- Add support for managing `modules` in `actions`.(EA) [#1302]
+
+## [8.27.0] - 2026-02-13
+
+### Added
+
+- Add support for `custom_password_hash.action_id` in `databases` (Universal Custom Password Hash EA). [#1288]
+- Add support for `allowed_strategies` in `selfServiceProfiles`. [#1298]
+
+### Fixed
+
+- Fix validation handling for `authentication_methods.password.enabled` and `disable_self_service_change_password` in `databases`. [#1297]
+- Fix stripping deprecated `enabled_clients` for `connections` with enhanced client management. [#1294]
+- Fix exclude third-party `clientGrants` when `AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS` is enabled. [#1289]
+
+## [8.26.0] - 2026-01-30
+
+### Added
+
+- Add support for `use_for_organization_discovery` in organizations `discovery-domains`. [#1283]
+- Add support for passwordless authentication methods (`email_otp` and `phone_otp`) in `databases`. [#1282]
+- Add support for `relying_party_identifier` in `customDomains`. [#1280]
+- Add support for `allow_all_scopes` property in `clientGrants`. [#1278]
+- Add OIDC logout configuration support with session metadata in `clients`. [#1263]
+
+### Changed
+
+- Optimize directory provisioning configuration fetching for `connections`. [#1284]
+
+### Fixed
+
+- Fix exclude read-only `is_default` from `customDomains`. [#1279]
+- Fix pagination skipping last page. [#1277]
+
 ## [8.25.0] - 2026-01-08
 
 ### Added
@@ -1606,7 +1829,105 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1244]: https://github.com/auth0/auth0-deploy-cli/issues/1244
 [#1246]: https://github.com/auth0/auth0-deploy-cli/issues/1246
 [#1253]: https://github.com/auth0/auth0-deploy-cli/issues/1253
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.25.0...HEAD
+[#1261]: https://github.com/auth0/auth0-deploy-cli/issues/1261
+[#1263]: https://github.com/auth0/auth0-deploy-cli/issues/1263
+[#1277]: https://github.com/auth0/auth0-deploy-cli/issues/1277
+[#1278]: https://github.com/auth0/auth0-deploy-cli/issues/1278
+[#1279]: https://github.com/auth0/auth0-deploy-cli/issues/1279
+[#1280]: https://github.com/auth0/auth0-deploy-cli/issues/1280
+[#1282]: https://github.com/auth0/auth0-deploy-cli/issues/1282
+[#1283]: https://github.com/auth0/auth0-deploy-cli/issues/1283
+[#1284]: https://github.com/auth0/auth0-deploy-cli/issues/1284
+[#1288]: https://github.com/auth0/auth0-deploy-cli/issues/1288
+[#1289]: https://github.com/auth0/auth0-deploy-cli/issues/1289
+[#1294]: https://github.com/auth0/auth0-deploy-cli/issues/1294
+[#1297]: https://github.com/auth0/auth0-deploy-cli/issues/1297
+[#1298]: https://github.com/auth0/auth0-deploy-cli/issues/1298
+[#1302]: https://github.com/auth0/auth0-deploy-cli/issues/1302
+[#1310]: https://github.com/auth0/auth0-deploy-cli/issues/1310
+[#1311]: https://github.com/auth0/auth0-deploy-cli/issues/1311
+[#1320]: https://github.com/auth0/auth0-deploy-cli/issues/1320
+[#1321]: https://github.com/auth0/auth0-deploy-cli/issues/1321
+[#1322]: https://github.com/auth0/auth0-deploy-cli/issues/1322
+[#1328]: https://github.com/auth0/auth0-deploy-cli/issues/1328
+[#1330]: https://github.com/auth0/auth0-deploy-cli/issues/1330
+[#1333]: https://github.com/auth0/auth0-deploy-cli/issues/1333
+[#1334]: https://github.com/auth0/auth0-deploy-cli/issues/1334
+[#1335]: https://github.com/auth0/auth0-deploy-cli/issues/1335
+[#1336]: https://github.com/auth0/auth0-deploy-cli/issues/1336
+[#1340]: https://github.com/auth0/auth0-deploy-cli/issues/1340
+[#1341]: https://github.com/auth0/auth0-deploy-cli/issues/1341
+[#1342]: https://github.com/auth0/auth0-deploy-cli/issues/1342
+[#1343]: https://github.com/auth0/auth0-deploy-cli/issues/1343
+[#1354]: https://github.com/auth0/auth0-deploy-cli/issues/1354
+[#1360]: https://github.com/auth0/auth0-deploy-cli/issues/1360
+[#1362]: https://github.com/auth0/auth0-deploy-cli/issues/1362
+[#1364]: https://github.com/auth0/auth0-deploy-cli/issues/1364
+[#1365]: https://github.com/auth0/auth0-deploy-cli/issues/1365
+[#1366]: https://github.com/auth0/auth0-deploy-cli/issues/1366
+[#1367]: https://github.com/auth0/auth0-deploy-cli/issues/1367
+[#1369]: https://github.com/auth0/auth0-deploy-cli/issues/1369
+[#1372]: https://github.com/auth0/auth0-deploy-cli/issues/1372
+[#1374]: https://github.com/auth0/auth0-deploy-cli/issues/1374
+[#1375]: https://github.com/auth0/auth0-deploy-cli/issues/1375
+[#1379]: https://github.com/auth0/auth0-deploy-cli/issues/1379
+[#1380]: https://github.com/auth0/auth0-deploy-cli/issues/1380
+[#1381]: https://github.com/auth0/auth0-deploy-cli/issues/1381
+[#1385]: https://github.com/auth0/auth0-deploy-cli/issues/1385
+[#1386]: https://github.com/auth0/auth0-deploy-cli/issues/1386
+[#1387]: https://github.com/auth0/auth0-deploy-cli/issues/1387
+[#1389]: https://github.com/auth0/auth0-deploy-cli/issues/1389
+[#1391]: https://github.com/auth0/auth0-deploy-cli/issues/1391
+[#1392]: https://github.com/auth0/auth0-deploy-cli/issues/1392
+[#1395]: https://github.com/auth0/auth0-deploy-cli/issues/1395
+[#1396]: https://github.com/auth0/auth0-deploy-cli/issues/1396
+[#1398]: https://github.com/auth0/auth0-deploy-cli/issues/1398
+[#1400]: https://github.com/auth0/auth0-deploy-cli/issues/1400
+[#1401]: https://github.com/auth0/auth0-deploy-cli/issues/1401
+[#1403]: https://github.com/auth0/auth0-deploy-cli/issues/1403
+[#1404]: https://github.com/auth0/auth0-deploy-cli/issues/1404
+[#1406]: https://github.com/auth0/auth0-deploy-cli/issues/1406
+[#1407]: https://github.com/auth0/auth0-deploy-cli/issues/1407
+[#1408]: https://github.com/auth0/auth0-deploy-cli/issues/1408
+[#1409]: https://github.com/auth0/auth0-deploy-cli/issues/1409
+[#1411]: https://github.com/auth0/auth0-deploy-cli/issues/1411
+[#1412]: https://github.com/auth0/auth0-deploy-cli/issues/1412
+[#1416]: https://github.com/auth0/auth0-deploy-cli/issues/1416
+[#1417]: https://github.com/auth0/auth0-deploy-cli/issues/1417
+[#1421]: https://github.com/auth0/auth0-deploy-cli/issues/1421
+[#1422]: https://github.com/auth0/auth0-deploy-cli/issues/1422
+[#1425]: https://github.com/auth0/auth0-deploy-cli/issues/1425
+[#1428]: https://github.com/auth0/auth0-deploy-cli/issues/1428
+[#1429]: https://github.com/auth0/auth0-deploy-cli/issues/1429
+[#1430]: https://github.com/auth0/auth0-deploy-cli/issues/1430
+[#1431]: https://github.com/auth0/auth0-deploy-cli/issues/1431
+[#1433]: https://github.com/auth0/auth0-deploy-cli/issues/1433
+[#1434]: https://github.com/auth0/auth0-deploy-cli/issues/1434
+[#1435]: https://github.com/auth0/auth0-deploy-cli/issues/1435
+[#1436]: https://github.com/auth0/auth0-deploy-cli/issues/1436
+[#1437]: https://github.com/auth0/auth0-deploy-cli/issues/1437
+[#1438]: https://github.com/auth0/auth0-deploy-cli/issues/1438
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.42.0...HEAD
+[8.42.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.41.0...v8.42.0
+[8.41.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.40.0...v8.41.0
+[8.40.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.39.0...v8.40.0
+[8.39.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.38.0...v8.39.0
+[8.38.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.37.0...v8.38.0
+[8.37.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.36.0...v8.37.0
+[8.36.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.35.0...v8.36.0
+[8.35.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.34.0...v8.35.0
+[8.34.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.33.0...v8.34.0
+[8.33.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.32.0...v8.33.0
+[8.32.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.31.0...v8.32.0
+[8.31.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.30.0...v8.31.0
+[8.30.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.3...v8.30.0
+[8.29.3]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.2...v8.29.3
+[8.29.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.1...v8.29.2
+[8.29.1]: https://github.com/auth0/auth0-deploy-cli/compare/v8.29.0...v8.29.1
+[8.29.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.28.0...v8.29.0
+[8.28.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.27.0...v8.28.0
+[8.27.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.26.0...v8.27.0
+[8.26.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.25.0...v8.26.0
 [8.25.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.24.0...v8.25.0
 [8.24.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.2...v8.24.0
 [8.23.2]: https://github.com/auth0/auth0-deploy-cli/compare/v8.23.1...v8.23.2

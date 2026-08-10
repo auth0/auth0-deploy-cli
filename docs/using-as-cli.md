@@ -6,6 +6,9 @@ The Deploy CLI can be used as a standalone command line utility. Doing so provid
 
 Fetching configurations from Auth0 tenant to the local machine.
 
+> **Note**
+> Marketplace Actions (including Auth0-owned marketplace Actions) are not exported. If your tenant uses marketplace Actions, their installation and configuration must be handled manually.
+
 ### `--output_folder`, `-o`
 
 Path. Specifies the target directory for configuration files to be written to.
@@ -21,6 +24,14 @@ Options: yaml or directory. Determines the file format of the exported resource 
 ### `--export_ids`, `-e`
 
 Boolean. When enabled, will export the identifier fields for each resource. Default: `false`.
+
+### `--export_ordered`, `-s`
+
+Boolean. When enabled, exports resource configuration files with keys sorted alphabetically, producing stable and deterministic output. Useful for reducing noise in diffs. Default: `false`.
+
+### `--export_secrets`
+
+Boolean. When enabled, exports actual secret values instead of replacing them with placeholder markers (e.g. `##SMTP_PASS##`). Useful for backup and restore scenarios. **Warning:** real credentials will be written to exported files. Default: `false`.
 
 ### `--env`
 
@@ -49,11 +60,17 @@ a0deploy export -c=config.json --format=directory --output_folder=local
 
 # Fetching Auth0 tenant configurations with IDs of all assets
 a0deploy export -c=config.json --format=yaml --output_folder=local --export_ids=true
+
+# Fetching Auth0 tenant configurations including real secret values
+a0deploy export -c=config.json --format=directory --output_folder=local --export_secrets
 ```
 
 ## `import` command
 
 Applying configurations from local machine to Auth0 tenant.
+
+> **Note**
+> Marketplace Actions cannot be installed by the Deploy CLI. If your configuration references marketplace Actions, install them manually in the target tenant before running `import`.
 
 ### `--input_file`, `-i`
 

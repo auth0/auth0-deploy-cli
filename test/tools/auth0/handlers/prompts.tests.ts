@@ -162,6 +162,7 @@ describe('#prompts handler', () => {
       getCustomPartial.withArgs({ prompt: 'signup' }).resolves(signupPartial);
       // Stub new prompts to return empty for retrieval test
       getCustomPartial.withArgs({ prompt: 'brute-force-protection' }).resolves({});
+      getCustomPartial.withArgs({ prompt: 'passkeys' }).resolves({});
 
       const data = await handler.getType();
       expect(data).to.deep.equal({
@@ -439,8 +440,13 @@ describe('#prompts handler', () => {
             return Promise.resolve({ data });
           },
           rendering: {
-            update: () => {
+            update: (
+              _prompt: string,
+              _screen: string,
+              payload: { default_head_tags_disabled?: boolean | null }
+            ) => {
               didCallUpdateScreenRenderer = true;
+              expect(payload).to.have.property('default_head_tags_disabled', false);
               return Promise.resolve({ data: {} });
             },
           },
@@ -638,6 +644,7 @@ describe('#prompts handler', () => {
       getCustomPartial.withArgs({ prompt: 'signup-id' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'signup' }).resolves({});
       getCustomPartial.withArgs({ prompt: 'brute-force-protection' }).resolves({});
+      getCustomPartial.withArgs({ prompt: 'passkeys' }).resolves({});
 
       const data = await handler.getType();
       expect(data).to.deep.equal({
@@ -647,6 +654,39 @@ describe('#prompts handler', () => {
         screenRenderers: [],
       });
       sinon.restore();
+    });
+
+    it('should send default_head_tags_disabled: false to the API (not drop it as undefined)', async () => {
+      let capturedPayload: any = null;
+
+      const auth0 = {
+        prompts: {
+          rendering: {
+            update: (_prompt: string, _screen: string, payload: any) => {
+              capturedPayload = payload;
+              return Promise.resolve({ data: {} });
+            },
+          },
+        },
+        pool: new PromisePoolExecutor({
+          concurrencyLimit: 3,
+          frequencyLimit: 1000,
+          frequencyWindow: 1000,
+        }),
+      };
+
+      const handler = new promptsHandler({ client: auth0, config: config });
+
+      await handler.updateScreenRenderer({
+        prompt: 'login',
+        screen: 'login',
+        rendering_mode: 'advanced',
+        default_head_tags_disabled: false,
+        head_tags: [],
+      });
+
+      expect(capturedPayload).to.not.equal(null);
+      expect(capturedPayload).to.have.property('default_head_tags_disabled', false);
     });
   });
   describe('withErrorHandling', () => {
@@ -711,6 +751,25 @@ describe('#prompts handler', () => {
       expect(
         logWarn.calledWith(
           'Partial Prompts feature requires at least one custom domain to be configured for the tenant'
+        )
+      ).to.be.true;
+    });
+
+    it('should handle 400 path validation error for passkeys prompt and return null', async () => {
+      const error = {
+        statusCode: 400,
+        message:
+          'Path validation error: \'Invalid value "passkeys"\' on property prompt (Name of the prompt).',
+      };
+      const callback = sandbox.stub().rejects(error);
+      const logWarn = sandbox.stub(log, 'warn');
+
+      const result = await handler.withErrorHandling(callback);
+      expect(result).to.be.null;
+      expect(handler.IsFeatureSupported).to.be.true;
+      expect(
+        logWarn.calledWith(
+          "Skipping partials for prompt type 'passkeys' because it is not available on this tenant."
         )
       ).to.be.true;
     });

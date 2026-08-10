@@ -14,7 +14,45 @@ import { ConfigFunction } from '../../../configFactory';
 import { paginate } from '../client';
 import ScimHandler from './scimHandler';
 import log from '../../../logger';
+import ValidationError from '../../validationError';
 import { Client } from './clients';
+
+const connectionOptionsSchema = {
+  type: 'object',
+  additionalProperties: true,
+  properties: {
+    api_enable_groups: {
+      type: 'boolean',
+    },
+    dpop_signing_alg: {
+      type: 'string',
+      enum: ['ES256', 'ES384', 'ES512', 'Ed25519'],
+    },
+    token_endpoint_auth_signing_alg: {
+      type: 'string',
+      enum: Object.values(Management.ConnectionTokenEndpointAuthSigningAlgEnum),
+    },
+    id_token_signed_response_algs: {
+      type: 'array',
+      items: {
+        type: 'string',
+        enum: Object.values(Management.ConnectionIdTokenSignedResponseAlgEnum),
+      },
+    },
+    token_endpoint_jwtca_aud_format: {
+      type: 'string',
+      enum: Object.values(Management.ConnectionTokenEndpointJwtcaAudFormatEnumOidc),
+    },
+  },
+};
+
+const oidcOktaStrategies = new Set(['oidc', 'okta']);
+const oidcOktaOnlyConnectionOptionFields = [
+  'token_endpoint_auth_signing_alg',
+  'id_token_signed_response_algs',
+  'token_endpoint_jwtca_aud_format',
+  'id_token_session_expiry_supported',
+];
 
 export const schema = {
   type: 'array',
@@ -23,7 +61,7 @@ export const schema = {
     properties: {
       name: { type: 'string' },
       strategy: { type: 'string' },
-      options: { type: 'object' },
+      options: connectionOptionsSchema,
       enabled_clients: { type: 'array', items: { type: 'string' } },
       realms: { type: 'array', items: { type: 'string' } },
       metadata: { type: 'object' },
@@ -58,6 +96,22 @@ export const schema = {
         required: ['active'],
         additionalProperties: false,
       },
+      cross_app_access_requesting_app: {
+        type: 'object',
+        properties: {
+          active: { type: 'boolean' },
+        },
+        required: ['active'],
+        additionalProperties: false,
+      },
+      cross_app_access_resource_app: {
+        type: 'object',
+        properties: {
+          status: { type: 'string', enum: ['enabled', 'disabled'] },
+        },
+        required: ['status'],
+        additionalProperties: false,
+      },
       directory_provisioning_configuration: {
         type: 'object',
         properties: {
@@ -75,6 +129,23 @@ export const schema = {
             type: 'boolean',
             description: 'The field whether periodic automatic synchronization is enabled',
           },
+          synchronize_groups: {
+            type: 'string',
+            enum: Object.values(Management.SynchronizeGroupsEnum),
+          },
+          synchronized_groups: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                name: { type: 'string' },
+                email: { type: 'string' },
+                direct_members_count: { type: 'number' },
+              },
+              required: ['id'],
+            },
+          },
         },
       },
     },
@@ -82,11 +153,16 @@ export const schema = {
   },
 };
 
-type DirectoryProvisioningConfig = Management.GetDirectoryProvisioningResponseContent;
+type DirectoryProvisioningConfig = Management.DirectoryProvisioning;
 
 export type Connection = Management.ConnectionForList & {
   enabled_clients?: string[];
-  directory_provisioning_configuration?: DirectoryProvisioningConfig;
+  directory_provisioning_configuration?: Pick<
+    DirectoryProvisioningConfig,
+    'mapping' | 'synchronize_automatically' | 'synchronize_groups'
+  > & {
+    synchronized_groups?: Management.SynchronizedGroupPayload[];
+  };
 };
 
 // addExcludedConnectionPropertiesToChanges superimposes excluded properties on the `options` object. The Auth0 API
@@ -158,24 +234,23 @@ export const getConnectionEnabledClients = async (
   if (!connectionId) return null;
 
   try {
-    const enabledClientsFormatted: string[] = [];
+    log.debug(`Getting enabled clients for connection ${connectionId}`);
 
-    let enabledClients = await auth0Client.connections.clients.get(connectionId);
+    const enabledClients: Management.ConnectionEnabledClient[] = [];
+    let page = await auth0Client.connections.clients.get(connectionId, { take: 100 });
 
-    do {
-      if (enabledClients && enabledClients.data?.length > 0) {
-        enabledClients.data.forEach((client) => {
-          if (client?.client_id) {
-            enabledClientsFormatted.push(client.client_id);
-          }
-        });
-      }
+    enabledClients.push(...(page.data || []));
 
-      enabledClients = await enabledClients.getNextPage();
-    } while (enabledClients.hasNextPage());
+    while (page.hasNextPage && page.hasNextPage()) {
+      page = await page.getNextPage();
+      enabledClients.push(...(page.data || []));
+    }
 
-    return enabledClientsFormatted;
+    return enabledClients.filter((client) => !!client?.client_id).map((client) => client.client_id);
   } catch (error) {
+    log.warn(
+      `Unable to retrieve enabled clients for connection ${connectionId}: ${error?.message}`
+    );
     return null;
   }
 };
@@ -194,15 +269,48 @@ export const updateConnectionEnabledClients = async (
   auth0Client: Auth0APIClient,
   typeName: string,
   connectionId: string,
-  enabledClientIds: string[]
+  enabledClientIds: string[],
+  existingConnections: Asset[] | Asset | null
 ): Promise<boolean> => {
   if (!connectionId || !Array.isArray(enabledClientIds) || !enabledClientIds.length) return false;
 
+  let existingEnabledClients: string[] = [];
+  if (Array.isArray(existingConnections)) {
+    const existingConnection = existingConnections.find((con) => con.id === connectionId);
+
+    existingEnabledClients = existingConnection?.enabled_clients ?? [];
+  }
+
+  // Determine which clients to enable vs. disable by comparing the incoming `enabledClientIds` with the `existingEnabledClients`.
+  const enabledClientIdSet = new Set(enabledClientIds);
+  const existingClientIdSet = new Set(existingEnabledClients);
+
+  // If both sets are identical, skip the update entirely.
+  if (
+    enabledClientIdSet.size === existingClientIdSet.size &&
+    [...enabledClientIdSet].every((id) => existingClientIdSet.has(id))
+  ) {
+    log.debug(`Enabled clients for ${typeName}: ${connectionId} are unchanged, skipping update`);
+    return true;
+  }
+
+  const clientsToEnable = enabledClientIds;
+  // Any client that exists on the tenant but not in the provided `enabledClientIds` should be disabled.
+  const clientsToDisable = existingEnabledClients.filter(
+    (clientId: string) => !enabledClientIdSet.has(clientId)
+  );
+
   const enabledClientUpdatePayloads: Management.UpdateEnabledClientConnectionsRequestContentItem[] =
-    enabledClientIds.map((clientId) => ({
-      client_id: clientId,
-      status: true,
-    }));
+    [
+      ...clientsToEnable.map((clientId) => ({
+        client_id: clientId,
+        status: true,
+      })),
+      ...clientsToDisable.map((clientId) => ({
+        client_id: clientId,
+        status: false,
+      })),
+    ];
 
   const payloadChunks = chunk(enabledClientUpdatePayloads, 50);
 
@@ -232,6 +340,7 @@ export const updateConnectionEnabledClients = async (
 export const processConnectionEnabledClients = async (
   auth0Client: Auth0APIClient,
   typeName: string,
+  existingConnections: Asset[] | null,
   changes: CalculatedChanges,
   delayMs: number = 2500 // Default delay is 2.5 seconds
 ) => {
@@ -278,13 +387,31 @@ export const processConnectionEnabledClients = async (
   // Delete is handled by the `processChanges` method, removed connection completely
   await Promise.all([
     ...createWithId.map((conn) =>
-      updateConnectionEnabledClients(auth0Client, typeName, conn.id, conn.enabled_clients)
+      updateConnectionEnabledClients(
+        auth0Client,
+        typeName,
+        conn.id,
+        conn.enabled_clients,
+        existingConnections
+      )
     ),
     ...update.map((conn) =>
-      updateConnectionEnabledClients(auth0Client, typeName, conn.id, conn.enabled_clients)
+      updateConnectionEnabledClients(
+        auth0Client,
+        typeName,
+        conn.id,
+        conn.enabled_clients,
+        existingConnections
+      )
     ),
     ...conflicts.map((conn) =>
-      updateConnectionEnabledClients(auth0Client, typeName, conn.id, conn.enabled_clients)
+      updateConnectionEnabledClients(
+        auth0Client,
+        typeName,
+        conn.id,
+        conn.enabled_clients,
+        existingConnections
+      )
     ),
   ]);
 };
@@ -335,52 +462,56 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     }
   }
 
-  /**
-   * Retrieves directory provisioning configuration for a specific Auth0 connection.
-   * @param connectionId - The unique identifier of the connection
-   * @returns A promise that resolves to the configuration object, or null if not configured/supported
-   */
-  async getConnectionDirectoryProvisioning(
-    connectionId: string
-  ): Promise<DirectoryProvisioningConfig | null> {
-    if (!connectionId) return null;
+  async validate(assets: Assets): Promise<void> {
+    const { connections } = assets;
 
-    const creates = [connectionId];
-    let config: DirectoryProvisioningConfig | null = null;
+    if (!connections) {
+      await super.validate(assets);
+      return;
+    }
+
+    connections.forEach((connection) => {
+      if (!connection?.options) return;
+
+      const strategy = connection?.strategy ?? 'unknown';
+      if (oidcOktaStrategies.has(strategy)) return;
+
+      const unsupportedFields = oidcOktaOnlyConnectionOptionFields.filter(
+        (field) => field in connection.options
+      );
+
+      if (unsupportedFields.length > 0) {
+        throw new ValidationError(
+          `Connection "${connection.name}": option(s) ${unsupportedFields
+            .map((field) => `"${field}"`)
+            .join(
+              ', '
+            )} are only supported for strategies "oidc" and "okta". Found strategy "${strategy}".`
+        );
+      }
+    });
+
+    await super.validate(assets);
+  }
+
+  /**
+   * Retrieves all directory provisioning configurations for all connections.
+   * @returns A promise that resolves to the configurations object, or null if not configured/supported
+   */
+  async getConnectionDirectoryProvisionings(): Promise<DirectoryProvisioningConfig[] | null> {
+    let directoryProvisioningConfigs: DirectoryProvisioningConfig[];
 
     try {
-      await this.client.pool
-        .addEachTask({
-          data: creates || [],
-          generator: async (id: string) =>
-            this.client.connections.directoryProvisioning
-              .get(id)
-              .then((resp) => {
-                config = resp;
-              })
-              .catch((err) => {
-                throw new ManagementError(err);
-              }),
-        })
-        .promise();
-
-      const stripKeysFromOutput = [
-        'connection_id',
-        'connection_name',
-        'strategy',
-        'created_at',
-        'updated_at',
-      ];
-
-      stripKeysFromOutput.forEach((key) => {
-        if (config && key in config) {
-          delete (config as Partial<DirectoryProvisioningConfig>)[key];
+      directoryProvisioningConfigs = await paginate<DirectoryProvisioningConfig>(
+        this.client.connections.directoryProvisioning.list,
+        {
+          checkpoint: true,
         }
-      });
+      );
 
-      return config;
+      return directoryProvisioningConfigs;
     } catch (error) {
-      const errLog = `Unable to fetch directory provisioning for connection '${connectionId}'. `;
+      const errLog = `Unable to fetch directory provisioning for connections. `;
       if (error instanceof ManagementError) {
         const bodyMessage = (error.body as any)?.message;
         log.warn(errLog + bodyMessage);
@@ -404,6 +535,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     const createPayload: Management.CreateDirectoryProvisioningRequestContent = {
       mapping: payload.mapping,
       synchronize_automatically: payload.synchronize_automatically,
+      ...(payload.synchronize_groups && { synchronize_groups: payload.synchronize_groups }),
     };
     await this.client.connections.directoryProvisioning.create(connectionId, createPayload);
     log.debug(`Created directory provisioning for connection '${connectionId}'`);
@@ -423,6 +555,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     const updatePayload: Management.UpdateDirectoryProvisioningRequestContent = {
       mapping: payload.mapping,
       synchronize_automatically: payload.synchronize_automatically,
+      ...(payload.synchronize_groups && { synchronize_groups: payload.synchronize_groups }),
     };
 
     await this.client.connections.directoryProvisioning.update(connectionId, updatePayload);
@@ -438,6 +571,66 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     }
     await this.client.connections.directoryProvisioning.delete(connectionId);
     log.debug(`Deleted directory provisioning for connection '${connectionId}'`);
+  }
+
+  /**
+   * Retrieves all synchronized groups for a connection using checkpoint pagination.
+   */
+  async getConnectionSynchronizedGroups(
+    connectionId: string
+  ): Promise<Management.SynchronizedGroupPayload[] | null> {
+    try {
+      const groups: Management.SynchronizedGroupPayload[] = [];
+      let page = await this.client.connections.directoryProvisioning.listSynchronizedGroups(
+        connectionId,
+        {}
+      );
+      for (const g of page.data ?? []) {
+        groups.push({
+          id: g.id,
+          ...(g.name !== undefined && { name: g.name }),
+          ...(g.email !== undefined && { email: g.email }),
+          ...(g.direct_members_count !== undefined && {
+            direct_members_count: g.direct_members_count,
+          }),
+        });
+      }
+      while (page.hasNextPage?.()) {
+        page = await page.getNextPage();
+        for (const g of page.data ?? []) {
+          groups.push({
+            id: g.id,
+            ...(g.name !== undefined && { name: g.name }),
+            ...(g.email !== undefined && { email: g.email }),
+            ...(g.direct_members_count !== undefined && {
+              direct_members_count: g.direct_members_count,
+            }),
+          });
+        }
+      }
+      return groups;
+    } catch (error) {
+      const errLog = `Unable to fetch synchronized groups for connection '${connectionId}'. `;
+      const statusCode = (error as any)?.statusCode;
+      if (statusCode != null && [403, 404, 501].includes(statusCode)) {
+        const bodyMessage =
+          error instanceof ManagementError ? (error.body as any)?.message : error.message;
+        log.warn(errLog + bodyMessage);
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Replaces the synchronized groups for a connection (PUT replace-all semantics).
+   */
+  private async updateConnectionSynchronizedGroups(
+    connectionId: string,
+    groups: Management.SynchronizedGroupPayload[]
+  ): Promise<void> {
+    await this.client.connections.directoryProvisioning.set(connectionId, { groups });
+    log.debug(`Updated synchronized groups for connection '${connectionId}'`);
   }
 
   /**
@@ -540,15 +733,42 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
           .join('\n')}`
       );
     }
+
+    // Process synchronized groups for connections where synchronize_groups === 'selected'
+    const connectionsToSyncGroups = [
+      ...directoryConnectionsToCreate,
+      ...directoryConnectionsToUpdate,
+    ].filter(
+      (conn) =>
+        conn.directory_provisioning_configuration?.synchronize_groups === 'selected' &&
+        conn.directory_provisioning_configuration?.synchronized_groups !== undefined
+    );
+
+    await this.client.pool
+      .addEachTask({
+        data: connectionsToSyncGroups,
+        generator: (conn) =>
+          this.updateConnectionSynchronizedGroups(
+            conn.id!,
+            conn.directory_provisioning_configuration!.synchronized_groups!
+          ).catch((err) => {
+            throw new Error(
+              `Failed to update synchronized groups for connection '${conn.id}':\n${err}`
+            );
+          }),
+      })
+      .promise();
   }
 
   async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
 
-    const connections = await paginate<Connection>(this.client.connections.list, {
-      checkpoint: true,
-    });
-
+    const [connections, directoryProvisioningConfigs] = await Promise.all([
+      paginate<Connection>(this.client.connections.list, {
+        checkpoint: true,
+      }),
+      this.getConnectionDirectoryProvisionings(),
+    ]);
     // Filter out database connections as we have separate handler for it
     const filteredConnections = connections.filter((c) => c.strategy !== 'auth0');
 
@@ -565,30 +785,56 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     this.existing = filteredConnections;
     if (this.existing === null) return [];
 
-    const connectionsWithEnabledClients = await Promise.all(
-      filteredConnections.map(async (con) => {
-        if (!con?.id) return con;
-        const enabledClients = await getConnectionEnabledClients(this.client, con.id);
+    const connectionTasks = filteredConnections.map((con, index) => ({ con, index }));
 
-        // Cast to Asset to allow adding properties
-        let connection: Connection = { ...con };
-
-        if (enabledClients && enabledClients?.length) {
-          connection.enabled_clients = enabledClients;
-        }
-
-        if (connection.strategy === 'google-apps') {
-          const dirProvConfig = await this.getConnectionDirectoryProvisioning(con.id);
-          if (dirProvConfig) {
-            connection.directory_provisioning_configuration = dirProvConfig;
+    const connectionsWithEnabledClients = await this.client.pool
+      .addEachTask({
+        data: connectionTasks,
+        generator: async ({ con, index }) => {
+          if (!con?.id) {
+            return { index, connection: con as Connection };
           }
-        }
 
-        return connection;
+          const enabledClients = await getConnectionEnabledClients(this.client, con.id);
+
+          let connection: Connection = { ...con };
+
+          if (enabledClients?.length) {
+            connection.enabled_clients = enabledClients;
+          }
+
+          if (connection.strategy === 'google-apps' && directoryProvisioningConfigs) {
+            const dirProvConfig = directoryProvisioningConfigs.find(
+              (configCon) => configCon.connection_id === con.id
+            );
+
+            if (dirProvConfig) {
+              connection.directory_provisioning_configuration = {
+                mapping: dirProvConfig.mapping,
+                synchronize_automatically: dirProvConfig.synchronize_automatically,
+                ...(dirProvConfig.synchronize_groups && {
+                  synchronize_groups: dirProvConfig.synchronize_groups,
+                }),
+              };
+
+              if (dirProvConfig.synchronize_groups === 'selected') {
+                const syncedGroups = await this.getConnectionSynchronizedGroups(con.id);
+                if (syncedGroups?.length) {
+                  connection.directory_provisioning_configuration.synchronized_groups =
+                    syncedGroups;
+                }
+              }
+            }
+          }
+
+          return { index, connection };
+        },
       })
-    );
+      .promise();
 
-    this.existing = connectionsWithEnabledClients;
+    this.existing = connectionsWithEnabledClients
+      .sort((a, b) => a.index - b.index)
+      .map(({ connection }) => connection);
 
     // Apply `scim_configuration` to all the relevant `SCIM` connections. This method mutates `this.existing`.
     await this.scimHandler.applyScimConfiguration(this.existing);
@@ -622,11 +868,15 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     // Prepare an id map. We'll use this map later to get the `strategy` and SCIM enable status of the connections.
     await this.scimHandler.createIdMap(existingConnections);
 
-    const formatted = connections.map((connection) => ({
-      ...connection,
-      ...this.getFormattedOptions(connection, clients),
-      enabled_clients: getEnabledClients(assets, connection, existingConnections, clients),
-    }));
+    const formatted = connections.map((connection) => {
+      const enabledClients = getEnabledClients(assets, connection, existingConnections, clients);
+
+      return {
+        ...connection,
+        ...this.getFormattedOptions(connection, clients),
+        ...(enabledClients !== undefined && { enabled_clients: enabledClients }),
+      };
+    });
 
     const proposedChanges = await super.calcChanges({ ...assets, connections: formatted });
 
@@ -637,6 +887,49 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     });
 
     return proposedChangesWithExcludedProperties;
+  }
+
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    const { connections } = assets;
+
+    if (!connections) {
+      return {
+        del: [],
+        create: [],
+        update: [],
+        conflicts: [],
+      };
+    }
+
+    const clients = await paginate<Client>(this.client.clients.list, {
+      paginate: true,
+      include_totals: true,
+    });
+
+    const existingConnections = await paginate<Connection>(this.client.connections.list, {
+      checkpoint: true,
+      include_totals: true,
+    });
+
+    await this.scimHandler.createIdMap(existingConnections);
+
+    const formatted = connections.map((connection) => {
+      const enabledClients = getEnabledClients(assets, connection, existingConnections, clients);
+
+      return {
+        ...connection,
+        ...this.getFormattedOptions(connection, clients),
+        ...(enabledClients !== undefined && { enabled_clients: enabledClients }),
+      };
+    });
+
+    const proposedChanges = await super.dryRunChanges({ ...assets, connections: formatted });
+
+    return addExcludedConnectionPropertiesToChanges({
+      proposedChanges,
+      existingConnections,
+      config: this.config,
+    });
   }
 
   // Run after clients are updated so we can convert all the enabled_clients names to id's
@@ -666,7 +959,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     await super.processChanges(assets, changes);
 
     // process enabled clients
-    await processConnectionEnabledClients(this.client, this.type, changes);
+    await processConnectionEnabledClients(this.client, this.type, await this.existing, changes);
 
     // process directory provisioning
     await this.processConnectionDirectoryProvisioning(changes);

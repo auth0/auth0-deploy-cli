@@ -137,4 +137,19 @@ describe('#YAML context resource servers', () => {
     expect(dumped.resourceServers[0].name).to.equal('API with Client');
     expect(dumped.resourceServers[0].identifier).to.equal('http://api.example.com');
   });
+
+  it('should not dump excluded resource servers', async () => {
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+
+    context.assets.resourceServers = [
+      { name: 'includedAPI', identifier: 'https://included.example.com/', scopes: [] },
+      { name: 'excludedAPI', identifier: 'https://excluded.example.com/', scopes: [] },
+    ];
+    context.assets.exclude = { resourceServers: ['excludedAPI'] };
+
+    const dumped = await handler.dump(context);
+
+    expect(dumped.resourceServers).to.have.length(1);
+    expect(dumped.resourceServers[0].name).to.equal('includedAPI');
+  });
 });

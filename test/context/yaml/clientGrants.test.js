@@ -73,6 +73,32 @@ describe('#YAML context client grants', () => {
     expect(dumped).to.deep.equal(expected);
   });
 
+  it('should not dump grants for excluded clients', async () => {
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+    context.assets.clientGrants = [
+      {
+        audience: 'https://test.myapp.com/api/v1',
+        client_id: 'client-id-1',
+        scope: ['read:data'],
+      },
+      {
+        audience: 'https://test.myapp.com/api/v1',
+        client_id: 'client-id-2',
+        scope: ['write:data'],
+      },
+    ];
+    context.assets.clients = [
+      { client_id: 'client-id-1', name: 'IncludedClient' },
+      { client_id: 'client-id-2', name: 'ExcludedClient' },
+    ];
+    context.assets.exclude = { clients: ['ExcludedClient'] };
+
+    const dumped = await handler.dump(context);
+
+    expect(dumped.clientGrants).to.have.length(1);
+    expect(dumped.clientGrants[0].client_id).to.equal('IncludedClient');
+  });
+
   it('should dump client grants and replace client ID with client name even if clients not in assets', async () => {
     const mockMgmt = mockMgmtClient();
 

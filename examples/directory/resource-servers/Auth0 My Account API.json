@@ -1,0 +1,9 @@
+{
+  "name": "Auth0 My Account API",
+  "identifier": "https://##AUTH0_DOMAIN##/me/",
+  "token_lifetime": 86400,
+  "skip_consent_for_verifiable_first_party_clients": true,
+  "authorization_policy": {
+    "policy_id": "019b76da-a800-73c9-b656-b349ae415c17"
+  }
+}

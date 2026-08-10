@@ -46,6 +46,12 @@ async function dump(context: YAMLContext): Promise<ParsedClients> {
 
   if (!clients) return { clients: null };
 
+  // Filter excluded clients
+  const excludedClients = (context.assets.exclude && context.assets.exclude.clients) || [];
+  if (excludedClients.length) {
+    clients = clients.filter((client) => !excludedClients.includes(client.name ?? ''));
+  }
+
   // map ids to names for user attribute profiles and connection profiles
   clients = clients.map((client) => {
     const userAttributeProfileId = client?.express_configuration?.user_attribute_profile_id;
@@ -64,6 +70,32 @@ async function dump(context: YAMLContext): Promise<ParsedClients> {
     if (client.express_configuration && oktaOinClientId) {
       const o = clients?.find((uap) => uap.client_id === oktaOinClientId);
       client.express_configuration.okta_oin_client_id = o?.name || oktaOinClientId;
+    }
+
+    const myOrganizationUserAttributeProfileId =
+      client?.my_organization_configuration?.user_attribute_profile_id;
+    if (client.my_organization_configuration && myOrganizationUserAttributeProfileId) {
+      const p = userAttributeProfiles?.find(
+        (uap) => uap.id === myOrganizationUserAttributeProfileId
+      );
+      client.my_organization_configuration.user_attribute_profile_id =
+        p?.name || myOrganizationUserAttributeProfileId;
+    }
+
+    const myOrganizationConnectionProfileId =
+      client?.my_organization_configuration?.connection_profile_id;
+    if (client.my_organization_configuration && myOrganizationConnectionProfileId) {
+      const c = connectionProfiles?.find((cp) => cp.id === myOrganizationConnectionProfileId);
+      client.my_organization_configuration.connection_profile_id =
+        c?.name || myOrganizationConnectionProfileId;
+    }
+
+    const invitationLandingClientId =
+      client?.my_organization_configuration?.invitation_landing_client_id;
+    if (client.my_organization_configuration && invitationLandingClientId) {
+      const c = clients?.find((cl) => cl.client_id === invitationLandingClientId);
+      client.my_organization_configuration.invitation_landing_client_id =
+        c?.name || invitationLandingClientId;
     }
 
     return client;
@@ -92,6 +124,22 @@ async function dump(context: YAMLContext): Promise<ParsedClients> {
             client_authentication_methods: client.client_authentication_methods,
             organization_require_behavior: client.organization_require_behavior,
           } as Client;
+        } else {
+          // strip id-only credentials and remove client_authentication_methods entirely
+          // if no named credentials remain — an absent field is treated as deletion on deploy
+          if (client.client_authentication_methods) {
+            Object.values(client.client_authentication_methods).forEach((method: any) => {
+              if (method?.credentials) {
+                method.credentials = method.credentials.filter((c: any) => c.name);
+              }
+            });
+            const hasAnyCredentials = Object.values(
+              client.client_authentication_methods as Record<string, any>
+            ).some((method: any) => method?.credentials?.length > 0);
+            if (!hasAnyCredentials) {
+              delete client.client_authentication_methods;
+            }
+          }
         }
 
         return clearClientArrays(client) as Client;

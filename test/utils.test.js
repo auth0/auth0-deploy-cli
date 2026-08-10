@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
+import nconf from 'nconf';
 import { expect } from 'chai';
 import { Auth0 } from '../src/tools';
 
@@ -223,6 +224,43 @@ describe('#utils', function () {
       expect(() => {
         dumpJSON('http://notavalidfilepath', testObject);
       }).throws(/Error writing JSON.*/);
+    });
+
+    describe('with AUTH0_EXPORT_ORDERED=true', () => {
+      const unsortedObject = {
+        zebra: 'z',
+        apple: 'a',
+        mango: { banana: 'b', avocado: 'av' },
+      };
+      const sortedFile = path.join(dir, 'test_sorted.json');
+
+      before(() => {
+        nconf.overrides({ AUTH0_EXPORT_ORDERED: true });
+        dumpJSON(sortedFile, unsortedObject);
+        nconf.overrides({});
+      });
+
+      it('should sort top-level keys alphabetically', () => {
+        const contents = fs.readFileSync(sortedFile, { encoding: 'utf8' });
+        const keys = Object.keys(JSON.parse(contents));
+        expect(keys).to.deep.equal([...keys].sort());
+      });
+
+      it('should sort nested object keys alphabetically', () => {
+        const parsed = JSON.parse(fs.readFileSync(sortedFile, { encoding: 'utf8' }));
+        const nestedKeys = Object.keys(parsed.mango);
+        expect(nestedKeys).to.deep.equal([...nestedKeys].sort());
+      });
+
+      it('should preserve all values', () => {
+        const parsed = JSON.parse(fs.readFileSync(sortedFile, { encoding: 'utf8' }));
+        expect(parsed).to.deep.equal(unsortedObject);
+      });
+
+      it('should still end with a trailing newline', () => {
+        const contents = fs.readFileSync(sortedFile, { encoding: 'utf8' });
+        expect(contents).to.match(/\n$/g);
+      });
     });
   });
 

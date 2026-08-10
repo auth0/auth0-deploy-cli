@@ -123,6 +123,26 @@ describe('#YAML context clients', () => {
     ).to.deep.equal('html code');
   });
 
+  it('should not dump excluded clients', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'clientsDumpExclude');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: path.join(dir, './test.yml') },
+      mockMgmtClient()
+    );
+
+    context.assets.clients = [
+      { name: 'includedClient', app_type: 'spa' },
+      { name: 'excludedClient', app_type: 'spa' },
+    ];
+    context.assets.exclude = { clients: ['excludedClient'] };
+
+    const dumped = await handler.dump(context);
+
+    expect(dumped.clients).to.have.length(1);
+    expect(dumped.clients[0].name).to.equal('includedClient');
+  });
+
   it('should process clients with async_approval_notification_channels', async () => {
     const dir = path.join(testDataDir, 'yaml', 'clientsWithChannels');
     cleanThenMkdir(dir);
@@ -240,6 +260,58 @@ describe('#YAML context clients', () => {
     });
   });
 
+  it('should dump clients with my_organization_configuration', async () => {
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+
+    context.assets.clients = [
+      {
+        name: 'someClient',
+        app_type: 'regular_web',
+        my_organization_configuration: {
+          user_attribute_profile_id: 'uap_123',
+          connection_profile_id: 'cp_123',
+          invitation_landing_client_id: 'cli_abc',
+          allowed_strategies: ['okta', 'samlp'],
+          connection_deletion_behavior: 'allow_if_empty',
+        },
+      },
+      {
+        name: 'someClientUnknownInvitation',
+        app_type: 'regular_web',
+        my_organization_configuration: {
+          invitation_landing_client_id: 'cli_unknown',
+          allowed_strategies: ['okta'],
+          connection_deletion_behavior: 'allow_if_empty',
+        },
+      },
+      {
+        client_id: 'cli_abc',
+        name: 'My Invitation Landing Client',
+      },
+    ];
+
+    context.assets.userAttributeProfiles = [{ id: 'uap_123', name: 'My User Attribute Profile' }];
+    context.assets.connectionProfiles = [{ id: 'cp_123', name: 'My Connection Profile' }];
+
+    const dumped = await handler.dump(context);
+
+    expect(dumped.clients[0]).to.deep.equal({
+      name: 'someClient',
+      app_type: 'regular_web',
+      my_organization_configuration: {
+        user_attribute_profile_id: 'My User Attribute Profile',
+        connection_profile_id: 'My Connection Profile',
+        invitation_landing_client_id: 'My Invitation Landing Client',
+        allowed_strategies: ['okta', 'samlp'],
+        connection_deletion_behavior: 'allow_if_empty',
+      },
+    });
+
+    expect(dumped.clients[1].my_organization_configuration.invitation_landing_client_id).to.equal(
+      'cli_unknown'
+    );
+  });
+
   it('should dump clients with app_type express_configuration and filter fields', async () => {
     const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
 
@@ -290,6 +362,60 @@ describe('#YAML context clients', () => {
       {
         name: 'regularClient',
         app_type: 'native',
+      },
+    ];
+
+    const yamlFile = path.join(dir, 'clients.yaml');
+    fs.writeFileSync(yamlFile, yaml);
+
+    const config = {
+      AUTH0_INPUT_FILE: yamlFile,
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.clients).to.deep.equal(target);
+  });
+
+  it('should process clients with oidc_logout', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'clientsWithOidcLogout');
+    cleanThenMkdir(dir);
+
+    const yaml = `
+    clients:
+      -
+        name: "oidcLogoutClient"
+        app_type: "regular_web"
+        oidc_logout:
+          backchannel_logout_urls: ['https://example.com/logout']
+          backchannel_logout_initiators:
+            mode: 'custom'
+            selected_initiators: ['rp-logout', 'idp-logout']
+          backchannel_logout_session_metadata:
+            include: true
+      -
+        name: "simpleClient"
+        app_type: "spa"
+    `;
+
+    const target = [
+      {
+        name: 'oidcLogoutClient',
+        app_type: 'regular_web',
+        oidc_logout: {
+          backchannel_logout_urls: ['https://example.com/logout'],
+          backchannel_logout_initiators: {
+            mode: 'custom',
+            selected_initiators: ['rp-logout', 'idp-logout'],
+          },
+          backchannel_logout_session_metadata: {
+            include: true,
+          },
+        },
+      },
+      {
+        name: 'simpleClient',
+        app_type: 'spa',
       },
     ];
 

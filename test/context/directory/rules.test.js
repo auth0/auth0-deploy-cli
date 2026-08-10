@@ -127,4 +127,22 @@ describe('#directory context rules', () => {
       scriptValidation
     );
   });
+
+  it('should not dump excluded rules', async () => {
+    const dir = path.join(testDataDir, 'directory', 'rulesDumpExclude');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.rules = [
+      { name: 'includedRule', script: 'function includedRule() {}', enabled: true, order: 1 },
+      { name: 'excludedRule', script: 'function excludedRule() {}', enabled: true, order: 2 },
+    ];
+    context.assets.exclude = { rules: ['excludedRule'] };
+
+    await handler.dump(context);
+    const rulesFolder = path.join(dir, constants.RULES_DIRECTORY);
+
+    expect(fs.existsSync(path.join(rulesFolder, 'includedRule.json'))).to.equal(true);
+    expect(fs.existsSync(path.join(rulesFolder, 'excludedRule.json'))).to.equal(false);
+  });
 });

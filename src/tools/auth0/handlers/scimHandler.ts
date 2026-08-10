@@ -1,3 +1,4 @@
+import nconf from 'nconf';
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { Management } from 'auth0';
 import { Asset, Auth0APIClient } from '../../../types';
@@ -78,7 +79,12 @@ export default class ScimHandler {
    */
   async createIdMap(connections: Asset[]) {
     this.idMap.clear();
-    log.info('Reviewing connections for SCIM support. This may take a while...');
+    const logMsg = 'Reviewing connections for SCIM support. This may take a while...';
+    if (nconf.get('AUTH0_DRY_RUN')) {
+      log.debug(logMsg);
+    } else {
+      log.info(logMsg);
+    }
 
     await this.poolClient
       .addEachTask({
@@ -283,6 +289,8 @@ export default class ScimHandler {
     const { scim_configuration: scimBodyParams } = bodyParams;
     delete bodyParams.scim_configuration;
     delete bodyParams.directory_provisioning_configuration;
+    // Remove deprecated enabled_clients field
+    if ('enabled_clients' in bodyParams) delete bodyParams.enabled_clients;
 
     // First, update `connections`.
     const updated = await this.connectionsManager.update(connectionId, bodyParams);
@@ -321,6 +329,8 @@ export default class ScimHandler {
     const { scim_configuration: scimBodyParams } = bodyParams;
     delete bodyParams.scim_configuration;
     delete bodyParams.directory_provisioning_configuration;
+    // Remove deprecated enabled_clients field
+    if ('enabled_clients' in bodyParams) delete bodyParams.enabled_clients;
 
     // First, create the new `connection`.
     const data = await this.connectionsManager.create(

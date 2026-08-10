@@ -130,14 +130,28 @@ describe('#schema validation tests', () => {
   });
 
   describe('#clientGrants validate', () => {
-    it('should fail validation if no "client_id" provided', (done) => {
+    it('should fail validation if neither "client_id" nor "default_for" provided', (done) => {
       const data = [
         {
-          name: 'name',
+          audience: 'https://example.com/api',
         },
       ];
 
-      checkRequired('client_id', { clientGrants: data }, done);
+      const auth0 = new Auth0(
+        {
+          prompts: {
+            _getRestClient: (endpoint) => ({
+              get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            }),
+          },
+        },
+        { clientGrants: data },
+        mockConfigFn
+      );
+
+      auth0
+        .validate()
+        .then(failedCb(done), passedCb(done, 'One of "client_id" or "default_for" is required'));
     });
 
     it('should fail validation if no "audience" provided', (done) => {
@@ -735,6 +749,53 @@ describe('#schema validation tests', () => {
       auth0.validate().then(failedCb(done), (err) => {
         expect(err.message).to.contain('enum');
         expect(err.message).to.contain('mechanism');
+        done();
+      });
+    });
+
+    it('should pass validation with valid proof_of_possession including required_for', (done) => {
+      const data = [
+        {
+          name: 'name',
+          identifier: 'identifier',
+          proof_of_possession: {
+            mechanism: 'dpop',
+            required: true,
+            required_for: 'public_clients',
+          },
+        },
+      ];
+
+      checkPassed({ resourceServers: data }, done);
+    });
+
+    it('should fail validation if proof_of_possession has invalid required_for', (done) => {
+      const data = [
+        {
+          name: 'name',
+          identifier: 'identifier',
+          proof_of_possession: {
+            mechanism: 'dpop',
+            required: true,
+            required_for: 'invalid_value',
+          },
+        },
+      ];
+
+      const auth0 = new Auth0(
+        {
+          ...client,
+          resourceServers: {
+            getAll: async (params) => mockPagedData(params, 'resource_servers', []),
+          },
+        },
+        { resourceServers: data },
+        mockConfigFn
+      );
+
+      auth0.validate().then(failedCb(done), (err) => {
+        expect(err.message).to.contain('enum');
+        expect(err.message).to.contain('required_for');
         done();
       });
     });

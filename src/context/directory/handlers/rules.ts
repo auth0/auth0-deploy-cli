@@ -36,9 +36,15 @@ function parse(context: DirectoryContext): ParsedRules {
 }
 
 async function dump(context: DirectoryContext): Promise<void> {
-  const { rules } = context.assets;
+  let { rules } = context.assets;
 
   if (!rules) return; // Skip, nothing to dump
+
+  // Filter excluded rules
+  const excludedRules = (context.assets.exclude && context.assets.exclude.rules) || [];
+  if (excludedRules.length) {
+    rules = rules.filter((rule) => !excludedRules.includes(rule.name));
+  }
 
   // Create Rules folder
   const rulesFolder = path.join(context.filePath, constants.RULES_DIRECTORY);

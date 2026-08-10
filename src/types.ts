@@ -1,6 +1,7 @@
 import { Management, ManagementClient } from 'auth0';
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { Action } from './tools/auth0/handlers/actions';
+import { ActionModule } from './tools/auth0/handlers/actionModules';
 import { Prompts } from './tools/auth0/handlers/prompts';
 import { Tenant } from './tools/auth0/handlers/tenant';
 import { Page } from './tools/auth0/handlers/pages';
@@ -19,6 +20,9 @@ import { UserAttributeProfile } from './tools/auth0/handlers/userAttributeProfil
 import { AttackProtection } from './tools/auth0/handlers/attackProtection';
 import { TokenExchangeProfile } from './tools/auth0/handlers/tokenExchangeProfiles';
 import { RiskAssessment } from './tools/auth0/handlers/riskAssessment';
+import { SupplementalSignals } from './tools/auth0/handlers/supplementalSignals';
+import { RateLimitPolicy } from './tools/auth0/handlers/rateLimitPolicies';
+import { EventStream } from './tools/auth0/handlers/eventStreams';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -28,6 +32,7 @@ type SharedPaginationParams = {
   include_totals?: boolean;
   id?: string;
   strategy?: Management.ConnectionStrategyEnum[];
+  type?: Management.RoleTypeEnum;
 };
 
 export type CheckpointPaginationParams = SharedPaginationParams & {
@@ -75,7 +80,15 @@ export type Config = {
   AUTH0_RETRY_MAX_DELAY_MS?: number;
   AUTH0_KEYWORD_REPLACE_MAPPINGS?: KeywordMappings;
   AUTH0_EXPORT_IDENTIFIERS?: boolean;
+  AUTH0_EXPORT_ORDERED?: boolean;
+  AUTH0_EXPORT_SECRETS?: boolean;
   AUTH0_CONNECTIONS_DIRECTORY?: string;
+  AUTH0_DRY_RUN?: boolean | 'preview';
+  AUTH0_DRY_RUN_INTERACTIVE?: boolean;
+  AUTH0_DRY_RUN_APPLY?: boolean;
+  AUTH0_IGNORE_DRY_RUN_FIELDS?: {
+    [handlerType: string]: string[];
+  };
   EXCLUDED_PROPS?: {
     [key: string]: string[];
   };
@@ -98,6 +111,7 @@ export type Asset = { [key: string]: any };
 
 export type Assets = Partial<{
   actions: Action[] | null;
+  actionModules: ActionModule[] | null;
   attackProtection: AttackProtection | null;
   riskAssessment: RiskAssessment | null;
   branding:
@@ -135,6 +149,7 @@ export type Assets = Partial<{
   rulesConfigs: Asset[] | null;
   tenant: Tenant | null;
   triggers: Asset[] | null;
+  supplementalSignals: SupplementalSignals | null;
   // non-resource types
   exclude?: {
     [key: string]: string[];
@@ -153,6 +168,8 @@ export type Assets = Partial<{
   userAttributeProfilesWithId: UserAttributeProfile[] | null;
   connectionProfiles: Asset[] | null;
   tokenExchangeProfiles: TokenExchangeProfile[] | null;
+  rateLimitPolicies: RateLimitPolicy[] | null;
+  eventStreams: EventStream[] | null;
 }>;
 
 export type CalculatedChanges = {
@@ -160,6 +177,21 @@ export type CalculatedChanges = {
   update: Asset[];
   conflicts: Asset[];
   create: Asset[];
+};
+
+export type DetailedDryRunChange = {
+  action: 'CREATE' | 'UPDATE' | 'DELETE';
+  identifier: string;
+  details?: any;
+};
+
+export type DetailedDryRunChanges = {
+  [key: string]: {
+    created: number;
+    updated: number;
+    deleted: number;
+    changes: DetailedDryRunChange[];
+  };
 };
 
 export type AssetTypes =
@@ -183,6 +215,7 @@ export type AssetTypes =
   | 'guardianPolicies'
   | 'roles'
   | 'actions'
+  | 'actionModules'
   | 'organizations'
   | 'triggers'
   | 'attackProtection'
@@ -201,7 +234,11 @@ export type AssetTypes =
   | 'networkACLs'
   | 'userAttributeProfiles'
   | 'connectionProfiles'
-  | 'tokenExchangeProfiles';
+  | 'tokenExchangeProfiles'
+  | 'supplementalSignals'
+  | 'rateLimitPolicies'
+  | 'eventStreams'
+  | 'clientAuthCredentials';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 

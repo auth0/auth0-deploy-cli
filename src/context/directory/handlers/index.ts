@@ -15,6 +15,7 @@ import guardianPhoneFactorSelectedProvider from './guardianPhoneFactorSelectedPr
 import guardianPolicies from './guardianPolicies';
 import roles from './roles';
 import actions from './actions';
+import actionModules from './actionModules';
 import organizations from './organizations';
 import triggers from './triggers';
 import attackProtection from './attackProtection';
@@ -36,6 +37,10 @@ import networkACLs from './networkACLs';
 import userAttributeProfiles from './userAttributeProfiles';
 import connectionProfiles from './connectionProfiles';
 import tokenExchangeProfiles from './tokenExchangeProfiles';
+import supplementalSignals from './supplementalSignals';
+import rateLimitPolicies from './rateLimitPolicies';
+import eventStreams from './eventStreams';
+import clientAuthCredentials from './clientAuthCredentials';
 
 import DirectoryContext from '..';
 import { AssetTypes, Asset } from '../../../types';
@@ -69,6 +74,7 @@ const directoryHandlers: {
   guardianPolicies,
   roles,
   actions,
+  actionModules,
   organizations,
   triggers,
   attackProtection,
@@ -88,6 +94,10 @@ const directoryHandlers: {
   userAttributeProfiles,
   connectionProfiles,
   tokenExchangeProfiles,
+  supplementalSignals,
+  rateLimitPolicies,
+  eventStreams,
+  clientAuthCredentials,
 };
 
 export default directoryHandlers;

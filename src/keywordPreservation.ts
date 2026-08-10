@@ -66,10 +66,10 @@ export const getPreservableFieldsFromAssets = (
         const specificAddress = resourceIdentifiers.reduce(
           (aggregateAddress, resourceIdentifier) => {
             resourceSpecificIdentifiers[address];
-            if (resourceIdentifier === undefined) return ''; // See if this specific resource type has an identifier
+            if (resourceIdentifier === undefined) return aggregateAddress; // See if this specific resource type has an identifier
 
             const identifierFieldValue = arrayItem[resourceIdentifier];
-            if (identifierFieldValue === undefined) return ''; // See if this specific array item possess the resource-specific identifier
+            if (identifierFieldValue === undefined) return aggregateAddress; // See if this specific array item possess the resource-specific identifier
 
             if (aggregateAddress === '') {
               return `${resourceIdentifier}=${identifierFieldValue}`;
@@ -81,7 +81,17 @@ export const getPreservableFieldsFromAssets = (
         );
 
         if (specificAddress.length === 0) {
-          return [];
+          // No identifiers registered: skip. Identifiers registered but absent from item: fall back to positional index.
+          if (resourceIdentifiers.length === 0) {
+            return [];
+          }
+          const arrayIndex = (asset as any[]).indexOf(arrayItem);
+          return getPreservableFieldsFromAssets(
+            arrayItem,
+            keywordMappings,
+            resourceSpecificIdentifiers,
+            `${address}${shouldRenderDot ? '.' : ''}${arrayIndex}`
+          );
         }
 
         return getPreservableFieldsFromAssets(

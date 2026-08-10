@@ -3,8 +3,7 @@ import ValidationError from '../../validationError';
 
 import constants from '../../constants';
 import DefaultHandler from './default';
-import { calculateChanges } from '../../calculateChanges';
-import { Assets, CalculatedChanges } from '../../../types';
+import { Assets } from '../../../types';
 import { paginate } from '../client';
 
 export const excludeSchema = {
@@ -31,6 +30,8 @@ export const schema = {
           },
         },
       },
+      allow_online_access: { type: 'boolean' },
+      allow_online_access_with_ephemeral_sessions: { type: 'boolean' },
       enforce_policies: { type: 'boolean' },
       token_dialect: { type: 'string' },
       proof_of_possession: {
@@ -41,6 +42,10 @@ export const schema = {
             enum: Object.values(Management.ResourceServerProofOfPossessionMechanismEnum),
           },
           required: { type: 'boolean' },
+          required_for: {
+            type: 'string',
+            enum: Object.values(Management.ResourceServerProofOfPossessionRequiredForEnum),
+          },
         },
         required: ['mechanism', 'required'],
       },
@@ -129,6 +134,7 @@ export default class ResourceServersHandler extends DefaultHandler {
             'identifier',
             'id',
             'is_system',
+            'authorization_policy',
           ];
           const sanitized: any = {};
           allowedKeys.forEach((key) => {
@@ -145,35 +151,6 @@ export default class ResourceServersHandler extends DefaultHandler {
     this.existing = sanitizeResourceServersFields(resourceServers);
 
     return this.existing;
-  }
-
-  async calcChanges(assets: Assets): Promise<CalculatedChanges> {
-    let { resourceServers } = assets;
-
-    // Do nothing if not set
-    if (!resourceServers)
-      return {
-        del: [],
-        create: [],
-        conflicts: [],
-        update: [],
-      };
-
-    const excluded = (assets.exclude && assets.exclude.resourceServers) || [];
-
-    let existing = await this.getType();
-
-    // Filter excluded
-    resourceServers = resourceServers.filter((r) => r.name && !excluded.includes(r.name));
-    existing = existing.filter((r) => r.name && !excluded.includes(r.name));
-
-    return calculateChanges({
-      handler: this,
-      assets: resourceServers,
-      existing,
-      identifiers: this.identifiers,
-      allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
-    });
   }
 
   async validate(assets: Assets): Promise<void> {
@@ -200,7 +177,18 @@ export default class ResourceServersHandler extends DefaultHandler {
     // Do nothing if not set
     if (!resourceServers) return;
 
-    const changes = await this.calcChanges(assets);
+    const excluded = (assets.exclude && assets.exclude.resourceServers) || [];
+
+    const filterResourceServer = (items) => items.filter((r) => !excluded.includes(r.name));
+
+    const { del, update, create, conflicts } = await this.calcChanges(assets);
+
+    const changes = {
+      del: filterResourceServer(del),
+      update: filterResourceServer(update),
+      create: filterResourceServer(create),
+      conflicts: filterResourceServer(conflicts),
+    };
 
     await super.processChanges(assets, {
       ...changes,
@@ -219,6 +207,7 @@ export default class ResourceServersHandler extends DefaultHandler {
         skip_consent_for_verifiable_first_party_clients:
           update.skip_consent_for_verifiable_first_party_clients,
         subject_type_authorization: update.subject_type_authorization,
+        authorization_policy: update.authorization_policy,
       };
 
       return this.client.resourceServers.update(id, updateFields);

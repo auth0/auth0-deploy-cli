@@ -182,7 +182,7 @@ export default class HooksHandler extends DefaultHandler {
             .then((hookWithCode) =>
               this.client.hooks.secrets
                 .get(hook.id)
-                .then(({ data: secrets }) => ({ ...hookWithCode, secrets }))
+                .then((secrets) => ({ ...hookWithCode, secrets }))
             )
         )
       );
@@ -203,6 +203,19 @@ export default class HooksHandler extends DefaultHandler {
     const { del, update, create, conflicts } = await super.calcChanges(assets);
 
     // strip secrets before hooks creating/updating, secrets have to be handled separately
+    const stripSecrets = (list) => list.map((item) => ({ ...item, secrets: undefined }));
+
+    return {
+      del,
+      update: stripSecrets(update),
+      create: stripSecrets(create),
+      conflicts: stripSecrets(conflicts),
+    };
+  }
+
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    const { del, update, create, conflicts } = await super.dryRunChanges(assets);
+
     const stripSecrets = (list) => list.map((item) => ({ ...item, secrets: undefined }));
 
     return {

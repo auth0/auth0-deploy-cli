@@ -7,10 +7,12 @@ import {
   duplicateItems,
   obfuscateSensitiveValues,
   stripObfuscatedFieldsFromPayload,
+  stripUnresolvedPlaceholders,
   detectInsufficientScopeError,
 } from '../../utils';
 import log from '../../../logger';
 import { calculateChanges } from '../../calculateChanges';
+import { calculateDryRunChanges } from '../../calculateDryRunChanges';
 import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
 
@@ -122,6 +124,7 @@ export default class APIHandler {
     create: ApiMethodOverride;
     delete: ApiMethodOverride;
   };
+  ignoreDryRunFields: string[];
 
   constructor(options: {
     id?: APIHandler['id'];
@@ -139,6 +142,7 @@ export default class APIHandler {
       create?: ApiMethodOverride;
       delete?: ApiMethodOverride;
     };
+    ignoreDryRunFields: APIHandler['ignoreDryRunFields'];
   }) {
     this.config = options.config;
     this.type = options.type;
@@ -150,6 +154,9 @@ export default class APIHandler {
     this.stripUpdateFields = [...(options.stripUpdateFields || []), this.id];
     this.sensitiveFieldsToObfuscate = options.sensitiveFieldsToObfuscate || [];
     this.stripCreateFields = options.stripCreateFields || [];
+    this.ignoreDryRunFields = [...(options.ignoreDryRunFields || [])].filter(
+      (field, index, allFields) => allFields.indexOf(field) === index
+    );
 
     this.functions = {
       list: 'list',
@@ -162,6 +169,29 @@ export default class APIHandler {
     this.updated = 0;
     this.created = 0;
     this.deleted = 0;
+  }
+
+  /**
+   * Returns the effective `ignoreDryRunFields` for this handler, merging the
+   * handler's hardcoded defaults with any user-supplied entries from the
+   * `AUTH0_IGNORE_DRY_RUN_FIELDS[<type>]` config key. Read lazily so that the
+   * constructor remains free of config-provider invocations.
+   */
+  getEffectiveIgnoreDryRunFields(): string[] {
+    let configured: string[] = [];
+    try {
+      const map = this.config('AUTH0_IGNORE_DRY_RUN_FIELDS') as
+        | { [handlerType: string]: string[] }
+        | undefined;
+      if (map && Array.isArray(map[this.type])) {
+        configured = map[this.type];
+      }
+    } catch {
+      configured = [];
+    }
+    return [...this.ignoreDryRunFields, ...configured].filter(
+      (field, index, allFields) => allFields.indexOf(field) === index
+    );
   }
 
   getClientFN(fn: ApiMethodOverride): Function {
@@ -194,6 +224,45 @@ export default class APIHandler {
 
   objString(item: Asset): string {
     return convertJsonToString(item);
+  }
+
+  getResourceName(item: Asset): string {
+    // Get a human-readable identifier for the resource
+    if (item.name) return item.name;
+    if (item.display_name) return item.display_name;
+    if (item.template) return item.template;
+    if (item.email) return item.email;
+
+    // For some resources, create a descriptive name
+    if (this.type === 'clientGrants') {
+      const clientLabel = (item._clientName as string) || item.client_id;
+      return `${clientLabel} -> ${item.audience}`;
+    }
+    if (this.type === 'guardianFactors') {
+      return item.name || item.type || 'unknown factor';
+    }
+    if (this.type === 'emailTemplates') {
+      return item.template || 'unknown template';
+    }
+    if (this.type === 'networkACLs') {
+      return item.description || `priority:${item.priority}`;
+    }
+    if (this.type === 'customDomains') {
+      return item.domain || 'unnamed custom domain';
+    }
+    if (
+      this.type === 'tenant' ||
+      this.type === 'attackProtection' ||
+      this.type === 'branding' ||
+      this.type === 'emailProvider' ||
+      this.type === 'guardianPhoneFactorSelectedProvider' ||
+      this.type === 'guardianPolicies' ||
+      this.type === 'riskAssessment'
+    ) {
+      return `${this.type} settings`;
+    }
+
+    return 'unnamed resource';
   }
 
   async getType(): Promise<Asset | Asset[] | null> {
@@ -235,14 +304,54 @@ export default class APIHandler {
 
     const existing = await this.getType();
 
+    // if we are in dry run mode, calculate the changes
+    // Figure out what needs to be updated vs created
+    if (this.config('AUTH0_DRY_RUN') === true || this.config('AUTH0_DRY_RUN') === 'true') {
+      return calculateDryRunChanges({
+        type: this.type,
+        assets: typeAssets,
+        // @ts-ignore TODO: investigate what happens when `existing` is null
+        existing,
+        identifiers: this.identifiers,
+        ignoreDryRunFields: this.getEffectiveIgnoreDryRunFields(),
+      });
+    }
+
+    // if we are not in dry run mode, calculate the changes
     // Figure out what needs to be updated vs created
     return calculateChanges({
       handler: this,
       assets: typeAssets,
       allowDelete: !!this.config('AUTH0_ALLOW_DELETE'),
-      //@ts-ignore TODO: investigate what happens when `existing` is null
+      // @ts-ignore TODO: investigate what happens when `existing` is null
       existing,
       identifiers: this.identifiers,
+    });
+  }
+
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    const typeAssets = assets[this.type];
+
+    // Do nothing if not set
+    if (!typeAssets) {
+      return {
+        del: [],
+        create: [],
+        conflicts: [],
+        update: [],
+      };
+    }
+
+    const existing = await this.getType();
+
+    // Figure out what needs to be created, updated or deleted
+    return calculateDryRunChanges({
+      type: this.type,
+      assets: typeAssets,
+      // @ts-ignore TODO: investigate what happens when `existing` is null
+      existing,
+      identifiers: this.identifiers,
+      ignoreDryRunFields: this.getEffectiveIgnoreDryRunFields(),
     });
   }
 
@@ -348,7 +457,15 @@ export default class APIHandler {
             const updateFN = this.getClientFN(this.functions.update);
             const updatePayload = (() => {
               const data = stripFields({ ...updateItem }, this.stripUpdateFields);
-              return stripObfuscatedFieldsFromPayload(data, this.sensitiveFieldsToObfuscate);
+              const obfuscatedStripped = stripObfuscatedFieldsFromPayload(
+                data,
+                this.sensitiveFieldsToObfuscate
+              );
+              return stripUnresolvedPlaceholders(
+                obfuscatedStripped as Asset,
+                this.type,
+                this.objString(updateItem)
+              );
             })();
 
             return updateFN(updateItem[this.id], updatePayload);
@@ -371,9 +488,14 @@ export default class APIHandler {
             const createFunction = this.getClientFN(this.functions.create);
             const createPayload = (() => {
               const strippedPayload = stripFields(createItem, this.stripCreateFields);
-              return stripObfuscatedFieldsFromPayload(
+              const obfuscatedStripped = stripObfuscatedFieldsFromPayload(
                 strippedPayload,
                 this.sensitiveFieldsToObfuscate
+              );
+              return stripUnresolvedPlaceholders(
+                obfuscatedStripped as Asset,
+                this.type,
+                this.objString(createItem)
               );
             })();
             return createFunction(createPayload);
@@ -399,7 +521,15 @@ export default class APIHandler {
             const updateFN = this.getClientFN(this.functions.update);
             const updatePayload = (() => {
               const data = stripFields({ ...updateItem }, this.stripUpdateFields);
-              return stripObfuscatedFieldsFromPayload(data, this.sensitiveFieldsToObfuscate);
+              const obfuscatedStripped = stripObfuscatedFieldsFromPayload(
+                data,
+                this.sensitiveFieldsToObfuscate
+              );
+              return stripUnresolvedPlaceholders(
+                obfuscatedStripped as Asset,
+                this.type,
+                this.objString(updateItem)
+              );
             })();
 
             return updateFN(updateItem[this.id], updatePayload);

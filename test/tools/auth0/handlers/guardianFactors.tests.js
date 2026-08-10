@@ -97,7 +97,16 @@ describe('#guardianFactors handler', () => {
 
       const handler = new guardianFactorsTests.default({ client: auth0, config });
       const data = await handler.getType();
-      expect(data).to.deep.equal(factors);
+      expect(data).to.deep.equal([
+        { name: 'duo', enabled: false },
+        { name: 'email', enabled: true },
+        { name: 'otp', enabled: true },
+        { name: 'push-notification', enabled: true },
+        { name: 'recovery-code', enabled: false },
+        { name: 'sms', enabled: true },
+        { name: 'webauthn-platform', enabled: false },
+        { name: 'webauthn-roaming', enabled: false },
+      ]);
     });
 
     it('should update factors', async () => {

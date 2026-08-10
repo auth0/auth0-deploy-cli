@@ -5,6 +5,7 @@ import DefaultHandler, { order } from './default';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
+import { isDryRun } from '../../utils';
 import { findKeyPathWithValue } from '../../../utils';
 import { getAllFlowConnections } from './flowVaultConnections';
 
@@ -92,6 +93,19 @@ export default class FlowHandler extends DefaultHandler {
     // Do nothing if not set
     if (!flows) return;
 
+    const { del, update, create, conflicts } = await this.calcChanges(assets);
+
+    if (isDryRun(this.config)) {
+      if (
+        create.length === 0 &&
+        update.length === 0 &&
+        del.length === 0 &&
+        conflicts.length === 0
+      ) {
+        return;
+      }
+    }
+
     const allFlowConnections = await getAllFlowConnections(this.client);
 
     // create a map for name to id from allFlowConnections
@@ -101,8 +115,6 @@ export default class FlowHandler extends DefaultHandler {
     });
 
     assets.flows = await this.pargeFlowConnectionName(flows, connectionNameMap);
-
-    const { del, update, create, conflicts } = await this.calcChanges(assets);
 
     const changes: CalculatedChanges = {
       del: del,

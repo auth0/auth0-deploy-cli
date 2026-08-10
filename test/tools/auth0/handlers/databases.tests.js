@@ -77,6 +77,275 @@ describe('#databases handler', () => {
 
       await stageFn.apply(handler, [{ databases: data }]);
     });
+
+    it('should validate new passwordless properties', async () => {
+      const handler = new databases.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+
+      const data = [
+        {
+          name: 'testDatabase',
+          options: {
+            authentication_methods: {
+              password: { enabled: false },
+              email_otp: { enabled: true },
+              phone_otp: { enabled: true },
+            },
+            disable_self_service_change_password: true,
+            attributes: {
+              email: { identifier: { active: true, default_method: 'email_otp' } },
+              phone_number: { identifier: { active: true, default_method: 'phone_otp' } },
+            },
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ databases: data }]);
+    });
+
+    describe('#validatePasswordOptions', () => {
+      it('should pass validation for a valid password_options payload', async () => {
+        const handler = new databases.default({ client: {}, config });
+        const stageFn = Object.getPrototypeOf(handler).validate;
+
+        await stageFn.apply(handler, [
+          {
+            databases: [
+              {
+                name: 'testDatabase',
+                options: {
+                  password_options: {
+                    complexity: {
+                      min_length: 12,
+                      character_types: ['uppercase', 'lowercase', 'number', 'special'],
+                      character_type_rule: 'all',
+                      identical_characters: 'block',
+                      sequential_characters: 'block',
+                      max_length_exceeded: 'error',
+                    },
+                    profile_data: { active: true, blocked_fields: ['name', 'email'] },
+                    history: { active: true, size: 5 },
+                    dictionary: { active: true, default: 'en_100k', custom: ['password123'] },
+                  },
+                },
+              },
+            ],
+          },
+        ]);
+      });
+
+      it('should throw when password_options and legacy passwordPolicy are both set', async () => {
+        const handler = new databases.default({ client: {}, config });
+        const stageFn = Object.getPrototypeOf(handler).validate;
+
+        try {
+          await stageFn.apply(handler, [
+            {
+              databases: [
+                {
+                  name: 'testDatabase',
+                  options: {
+                    passwordPolicy: 'good',
+                    password_options: { complexity: { min_length: 10 } },
+                  },
+                },
+              ],
+            },
+          ]);
+          expect.fail('should have thrown');
+        } catch (err) {
+          expect(err.message).to.include('testDatabase');
+          expect(err.message).to.include('passwordPolicy');
+          expect(err.message).to.include('password_options');
+        }
+      });
+
+      it('should throw when password_options and legacy password_complexity_options are both set', async () => {
+        const handler = new databases.default({ client: {}, config });
+        const stageFn = Object.getPrototypeOf(handler).validate;
+
+        try {
+          await stageFn.apply(handler, [
+            {
+              databases: [
+                {
+                  name: 'testDatabase',
+                  options: {
+                    password_complexity_options: { min_length: 8 },
+                    password_options: { complexity: { min_length: 10 } },
+                  },
+                },
+              ],
+            },
+          ]);
+          expect.fail('should have thrown');
+        } catch (err) {
+          expect(err.message).to.include('testDatabase');
+          expect(err.message).to.include('password_complexity_options');
+        }
+      });
+
+      it('should throw when character_type_rule is three_of_four but not all four types are specified', async () => {
+        const handler = new databases.default({ client: {}, config });
+        const stageFn = Object.getPrototypeOf(handler).validate;
+
+        try {
+          await stageFn.apply(handler, [
+            {
+              databases: [
+                {
+                  name: 'testDatabase',
+                  options: {
+                    password_options: {
+                      complexity: {
+                        character_types: ['uppercase', 'lowercase'],
+                        character_type_rule: 'three_of_four',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          ]);
+          expect.fail('should have thrown');
+        } catch (err) {
+          expect(err.message).to.include('testDatabase');
+          expect(err.message).to.include('three_of_four');
+        }
+      });
+
+      it('should pass when character_type_rule is three_of_four and all four types are specified', async () => {
+        const handler = new databases.default({ client: {}, config });
+        const stageFn = Object.getPrototypeOf(handler).validate;
+
+        await stageFn.apply(handler, [
+          {
+            databases: [
+              {
+                name: 'testDatabase',
+                options: {
+                  password_options: {
+                    complexity: {
+                      character_types: ['uppercase', 'lowercase', 'number', 'special'],
+                      character_type_rule: 'three_of_four',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ]);
+      });
+
+      it('should throw when profile_data.blocked_fields exceeds 12 items', async () => {
+        const handler = new databases.default({ client: {}, config });
+        const stageFn = Object.getPrototypeOf(handler).validate;
+
+        try {
+          await stageFn.apply(handler, [
+            {
+              databases: [
+                {
+                  name: 'testDatabase',
+                  options: {
+                    password_options: {
+                      profile_data: {
+                        active: true,
+                        blocked_fields: [
+                          'f1',
+                          'f2',
+                          'f3',
+                          'f4',
+                          'f5',
+                          'f6',
+                          'f7',
+                          'f8',
+                          'f9',
+                          'f10',
+                          'f11',
+                          'f12',
+                          'f13',
+                        ],
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          ]);
+          expect.fail('should have thrown');
+        } catch (err) {
+          expect(err.message).to.include('testDatabase');
+          expect(err.message).to.include('blocked_fields');
+          expect(err.message).to.include('12');
+        }
+      });
+
+      it('should throw when a profile_data.blocked_fields item exceeds 100 characters', async () => {
+        const handler = new databases.default({ client: {}, config });
+        const stageFn = Object.getPrototypeOf(handler).validate;
+
+        try {
+          await stageFn.apply(handler, [
+            {
+              databases: [
+                {
+                  name: 'testDatabase',
+                  options: {
+                    password_options: {
+                      profile_data: {
+                        active: true,
+                        blocked_fields: ['a'.repeat(101)],
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          ]);
+          expect.fail('should have thrown');
+        } catch (err) {
+          expect(err.message).to.include('testDatabase');
+          expect(err.message).to.include('100 characters');
+        }
+      });
+
+      it('should pass when profile_data.blocked_fields has exactly 12 items each under 100 chars', async () => {
+        const handler = new databases.default({ client: {}, config });
+        const stageFn = Object.getPrototypeOf(handler).validate;
+
+        await stageFn.apply(handler, [
+          {
+            databases: [
+              {
+                name: 'testDatabase',
+                options: {
+                  password_options: {
+                    profile_data: {
+                      active: true,
+                      blocked_fields: [
+                        'f1',
+                        'f2',
+                        'f3',
+                        'f4',
+                        'f5',
+                        'f6',
+                        'f7',
+                        'f8',
+                        'f9',
+                        'f10',
+                        'f11',
+                        'f12',
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ]);
+      });
+    });
   });
 
   describe('#databases process', () => {
@@ -87,14 +356,42 @@ describe('#databases handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(data).to.be.an('object');
             expect(data.name).to.equal('someDatabase');
-            return Promise.resolve({ data });
+            // Verify enabled_clients is NOT in the API payload (it's deprecated)
+            expect(data).to.not.have.property('enabled_clients');
+            return Promise.resolve({ data: { ...data, id: 'con_123' } });
           },
+          get: () =>
+            Promise.resolve({
+              id: 'con_123',
+              name: 'someDatabase',
+              strategy: 'auth0',
+              options: {},
+            }),
           update: () => Promise.resolve({ data: [] }),
           delete: () => Promise.resolve({ data: [] }),
-          list: (params) => mockPagedData(params, 'connections', []),
+          list: (params) => {
+            // Return the newly created database when listing by name
+            if (params.name === 'someDatabase') {
+              return mockPagedData(params, 'connections', [
+                { id: 'con_123', name: 'someDatabase', strategy: 'auth0', options: {} },
+              ]);
+            }
+            return mockPagedData(params, 'connections', []);
+          },
+          clients: {
+            get: () => Promise.resolve({ data: [] }),
+            update: (connectionId) => {
+              expect(connectionId).to.equal('con_123');
+              return Promise.resolve({ data: [] });
+            },
+          },
         },
         clients: {
-          list: (params) => mockPagedData(params, 'clients', []),
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ name: 'client1', client_id: 'client_id_1' }]),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -102,7 +399,145 @@ describe('#databases handler', () => {
       const handler = new databases.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      await stageFn.apply(handler, [{ databases: [{ name: 'someDatabase' }] }]);
+      await stageFn.apply(handler, [
+        { databases: [{ name: 'someDatabase', enabled_clients: ['client1'] }] },
+      ]);
+    });
+
+    it('should convert action name to ID in custom_password_hash.action_id', async () => {
+      const auth0 = {
+        connections: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            // Verify enabled_clients is NOT in the API payload (it's deprecated)
+            expect(data).to.not.have.property('enabled_clients');
+            expect(data).to.deep.equal({
+              name: 'PasswordHashConn',
+              strategy: 'auth0',
+              options: {
+                custom_password_hash: {
+                  action_id: 'action-id-123',
+                  hash_algorithm: 'bcrypt',
+                },
+              },
+            });
+            return Promise.resolve({ data: { ...data, id: 'con_new1' } });
+          },
+          get: function (id) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(id).to.be.a('string');
+            if (id === 'con1') {
+              return Promise.resolve({
+                id: 'con1',
+                name: 'ExistingPasswordHashConn',
+                strategy: 'auth0',
+                options: {},
+              });
+            } else if (id === 'con_new1') {
+              return Promise.resolve({
+                id: 'con_new1',
+                name: 'PasswordHashConn',
+                strategy: 'auth0',
+                options: {
+                  custom_password_hash: {
+                    action_id: 'action-id-123',
+                    hash_algorithm: 'bcrypt',
+                  },
+                },
+              });
+            }
+          },
+          update: function (id, data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(id).to.be.a('string');
+            expect(id).to.equal('con1');
+            // Verify enabled_clients is NOT in the update payload (it's deprecated on this endpoint)
+            expect(data).to.not.have.property('enabled_clients');
+            expect(data).to.deep.equal({
+              options: {
+                custom_password_hash: {
+                  action_id: 'action-id-456',
+                  hash_algorithm: 'md5',
+                },
+              },
+            });
+
+            return Promise.resolve({ ...data, id });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => {
+            // Return appropriate connections based on the query
+            if (params.name === 'PasswordHashConn') {
+              return mockPagedData(params, 'connections', [
+                {
+                  id: 'con_new1',
+                  name: 'PasswordHashConn',
+                  strategy: 'auth0',
+                  options: {
+                    custom_password_hash: {
+                      action_id: 'action-id-123',
+                      hash_algorithm: 'bcrypt',
+                    },
+                  },
+                },
+              ]);
+            }
+            return mockPagedData(params, 'connections', [
+              { name: 'ExistingPasswordHashConn', id: 'con1', strategy: 'auth0' },
+            ]);
+          },
+          clients: {
+            get: () => Promise.resolve({ data: [] }),
+            update: (connectionId, _payload) => {
+              expect(['con_new1', 'con1']).to.include(connectionId);
+              return Promise.resolve([]);
+            },
+          },
+        },
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
+            ]),
+        },
+        actions: {
+          list: (params) =>
+            mockPagedData(params, 'actions', [
+              { name: 'PasswordHashAction', id: 'action-id-123' },
+              { name: 'UpdatePasswordHashAction', id: 'action-id-456' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          name: 'ExistingPasswordHashConn',
+          strategy: 'auth0',
+          enabled_clients: ['client1'],
+          options: {
+            custom_password_hash: {
+              action_id: 'UpdatePasswordHashAction',
+              hash_algorithm: 'md5',
+            },
+          },
+        },
+        {
+          name: 'PasswordHashConn',
+          strategy: 'auth0',
+          enabled_clients: ['client1'],
+          options: {
+            custom_password_hash: {
+              action_id: 'PasswordHashAction',
+              hash_algorithm: 'bcrypt',
+            },
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ databases: data }]);
     });
 
     it('should throw error when creating database with email.unique false and email.identifier.active true', async () => {
@@ -149,6 +584,9 @@ describe('#databases handler', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -190,6 +628,9 @@ describe('#databases handler', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -237,6 +678,9 @@ describe('#databases handler', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -320,6 +764,9 @@ describe('#databases handler', () => {
             return mockPagedData(params, 'clients', [{ name: 'test client', client_id: clientId }]);
           },
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -329,6 +776,178 @@ describe('#databases handler', () => {
         { id: 'con1', strategy: 'auth0', name: 'db', enabled_clients: [clientId] },
       ]);
       expect(getEnabledClientsCalledOnce).to.equal(true);
+    });
+
+    it('should convert action ID to action name when dumping databases', async () => {
+      const clientId = 'client-id-123';
+      const auth0 = {
+        connections: {
+          list: function (params) {
+            (() => expect(this).to.not.be.undefined)();
+            return mockPagedData(params, 'connections', [
+              {
+                id: 'con1',
+                strategy: 'auth0',
+                name: 'PasswordHashDB',
+                options: {
+                  custom_password_hash: {
+                    action_id: 'action-id-456',
+                    hash_algorithm: 'bcrypt',
+                  },
+                },
+              },
+            ]);
+          },
+          clients: {
+            get: () => {
+              return Promise.resolve(mockPagedData({}, 'clients', [{ client_id: clientId }]));
+            },
+          },
+        },
+        clients: {
+          list: function (params) {
+            (() => expect(this).to.not.be.undefined)();
+            return mockPagedData(params, 'clients', []);
+          },
+        },
+        actions: {
+          list: function (params) {
+            (() => expect(this).to.not.be.undefined)();
+            return mockPagedData(params, 'actions', [
+              { id: 'action-id-456', name: 'MyPasswordHashAction' },
+              { id: 'action-id-789', name: 'AnotherAction' },
+            ]);
+          },
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const data = await handler.getType();
+
+      // Verify that action ID was converted to action name
+      expect(data).to.deep.equal([
+        {
+          id: 'con1',
+          strategy: 'auth0',
+          name: 'PasswordHashDB',
+          enabled_clients: [clientId],
+          options: {
+            custom_password_hash: {
+              action_id: 'MyPasswordHashAction', // Should be action name, not ID
+              hash_algorithm: 'bcrypt',
+            },
+          },
+        },
+      ]);
+    });
+
+    it('should strip legacy password fields on export when password_options is present', async () => {
+      const auth0 = {
+        connections: {
+          list: function (params) {
+            (() => expect(this).to.not.be.undefined)();
+            return mockPagedData(params, 'connections', [
+              {
+                id: 'con1',
+                strategy: 'auth0',
+                name: 'Username-Password-Authentication',
+                options: {
+                  password_options: { complexity: { min_length: 10 } },
+                  passwordPolicy: 'good',
+                  password_complexity_options: { min_length: 8 },
+                  password_history: { enable: true, size: 5 },
+                  password_no_personal_info: { enable: true },
+                  password_dictionary: { enable: true, dictionary: [] },
+                  brute_force_protection: true,
+                },
+              },
+            ]);
+          },
+          clients: {
+            get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
+          },
+        },
+        clients: {
+          list: function (params) {
+            (() => expect(this).to.not.be.undefined)();
+            return mockPagedData(params, 'clients', []);
+          },
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const data = await handler.getType();
+
+      // Legacy password fields must be stripped when password_options is present,
+      // leaving password_options and unrelated options intact so the export stays deployable.
+      expect(data).to.deep.equal([
+        {
+          id: 'con1',
+          strategy: 'auth0',
+          name: 'Username-Password-Authentication',
+          options: {
+            password_options: { complexity: { min_length: 10 } },
+            brute_force_protection: true,
+          },
+        },
+      ]);
+    });
+
+    it('should preserve legacy password fields on export when password_options is absent', async () => {
+      const auth0 = {
+        connections: {
+          list: function (params) {
+            (() => expect(this).to.not.be.undefined)();
+            return mockPagedData(params, 'connections', [
+              {
+                id: 'con1',
+                strategy: 'auth0',
+                name: 'Username-Password-Authentication',
+                options: {
+                  passwordPolicy: 'good',
+                  password_history: { enable: true, size: 5 },
+                  brute_force_protection: true,
+                },
+              },
+            ]);
+          },
+          clients: {
+            get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
+          },
+        },
+        clients: {
+          list: function (params) {
+            (() => expect(this).to.not.be.undefined)();
+            return mockPagedData(params, 'clients', []);
+          },
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const data = await handler.getType();
+
+      // A legacy-only connection must be untouched.
+      expect(data).to.deep.equal([
+        {
+          id: 'con1',
+          strategy: 'auth0',
+          name: 'Username-Password-Authentication',
+          options: {
+            passwordPolicy: 'good',
+            password_history: { enable: true, size: 5 },
+            brute_force_protection: true,
+          },
+        },
+      ]);
     });
 
     it('should update database', async () => {
@@ -349,8 +968,9 @@ describe('#databases handler', () => {
             (() => expect(this).to.not.be.undefined)();
             expect(id).to.be.a('string');
             expect(id).to.equal('con1');
+            // Verify enabled_clients is NOT in the update payload (it's deprecated on this endpoint)
+            expect(data).to.not.have.property('enabled_clients');
             expect(data).to.deep.equal({
-              enabled_clients: ['YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec'],
               options: { passwordPolicy: 'testPolicy', someOldOption: true },
             });
 
@@ -375,6 +995,9 @@ describe('#databases handler', () => {
               { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
             ]),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -390,6 +1013,216 @@ describe('#databases handler', () => {
       ];
 
       await stageFn.apply(handler, [{ databases: data }]);
+    });
+
+    it('should strip legacy password fields from existing state when switching to password_options', async () => {
+      let updatePayload;
+      const auth0 = {
+        connections: {
+          get: () =>
+            Promise.resolve({
+              options: {
+                passwordPolicy: 'good',
+                password_complexity_options: { min_length: 8 },
+                password_history: { enable: true, size: 3 },
+                password_no_personal_info: { enable: true },
+                password_dictionary: { enable: false },
+                someOtherOption: true,
+              },
+            }),
+          update: (id, data) => {
+            updatePayload = data;
+            return Promise.resolve({ ...data, id });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someDatabase', id: 'con1', strategy: 'auth0' },
+            ]),
+          clients: {
+            get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
+            update: () => Promise.resolve({}),
+          },
+        },
+        clients: { list: (params) => mockPagedData(params, 'clients', []) },
+        actions: { list: (params) => mockPagedData(params, 'actions', []) },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          databases: [
+            {
+              name: 'someDatabase',
+              strategy: 'auth0',
+              options: { password_options: { complexity: { min_length: 16 } } },
+            },
+          ],
+        },
+      ]);
+
+      expect(updatePayload.options).to.have.property('password_options');
+      expect(updatePayload.options).to.have.property('someOtherOption');
+      expect(updatePayload.options).to.not.have.property('passwordPolicy');
+      expect(updatePayload.options).to.not.have.property('password_complexity_options');
+      expect(updatePayload.options).to.not.have.property('password_history');
+      expect(updatePayload.options).to.not.have.property('password_no_personal_info');
+      expect(updatePayload.options).to.not.have.property('password_dictionary');
+    });
+
+    it('should strip password_options from existing state when switching to legacy password fields', async () => {
+      let updatePayload;
+      const auth0 = {
+        connections: {
+          get: () =>
+            Promise.resolve({
+              options: {
+                password_options: { complexity: { min_length: 16 } },
+                someOtherOption: true,
+              },
+            }),
+          update: (id, data) => {
+            updatePayload = data;
+            return Promise.resolve({ ...data, id });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someDatabase', id: 'con1', strategy: 'auth0' },
+            ]),
+          clients: {
+            get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
+            update: () => Promise.resolve({}),
+          },
+        },
+        clients: { list: (params) => mockPagedData(params, 'clients', []) },
+        actions: { list: (params) => mockPagedData(params, 'actions', []) },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          databases: [
+            {
+              name: 'someDatabase',
+              strategy: 'auth0',
+              options: { passwordPolicy: 'good' },
+            },
+          ],
+        },
+      ]);
+
+      expect(updatePayload.options).to.have.property('passwordPolicy');
+      expect(updatePayload.options).to.have.property('someOtherOption');
+      expect(updatePayload.options).to.not.have.property('password_options');
+    });
+
+    it('should throw when signup_behavior is block but existing tenant has api_behavior required', async () => {
+      const auth0 = {
+        connections: {
+          get: () =>
+            Promise.resolve({
+              options: {
+                authentication_methods: {
+                  password: { enabled: true, api_behavior: 'required' },
+                },
+              },
+            }),
+          update: () => Promise.resolve({}),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someDatabase', id: 'con1', strategy: 'auth0' },
+            ]),
+          clients: {
+            get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
+            update: () => Promise.resolve({}),
+          },
+        },
+        clients: { list: (params) => mockPagedData(params, 'clients', []) },
+        actions: { list: (params) => mockPagedData(params, 'actions', []) },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      try {
+        await stageFn.apply(handler, [
+          {
+            databases: [
+              {
+                name: 'someDatabase',
+                strategy: 'auth0',
+                options: {
+                  authentication_methods: {
+                    password: { signup_behavior: 'block' },
+                  },
+                },
+              },
+            ],
+          },
+        ]);
+        expect.fail('should have thrown');
+      } catch (err) {
+        expect(err.message).to.include('someDatabase');
+        expect(err.message).to.include('signup_behavior');
+        expect(err.message).to.include('api_behavior');
+        expect(err.message).to.include('optional');
+      }
+    });
+
+    it('should not throw when signup_behavior is block and api_behavior is set to optional in the payload', async () => {
+      const auth0 = {
+        connections: {
+          get: () =>
+            Promise.resolve({
+              options: {
+                authentication_methods: {
+                  password: { enabled: true, api_behavior: 'required' },
+                },
+              },
+            }),
+          update: () => Promise.resolve({}),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someDatabase', id: 'con1', strategy: 'auth0' },
+            ]),
+          clients: {
+            get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
+            update: () => Promise.resolve({}),
+          },
+        },
+        clients: { list: (params) => mockPagedData(params, 'clients', []) },
+        actions: { list: (params) => mockPagedData(params, 'actions', []) },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          databases: [
+            {
+              name: 'someDatabase',
+              strategy: 'auth0',
+              options: {
+                authentication_methods: {
+                  password: { api_behavior: 'optional', signup_behavior: 'block' },
+                },
+              },
+            },
+          ],
+        },
+      ]);
     });
 
     // If client is excluded and in the existing connection this client is enabled, it should keep enabled
@@ -412,7 +1245,6 @@ describe('#databases handler', () => {
             expect(id).to.be.a('string');
             expect(id).to.equal('con1');
             expect(data).to.deep.equal({
-              enabled_clients: ['client1-id', 'excluded-one-id'],
               options: { passwordPolicy: 'testPolicy', someOldOption: true },
             });
 
@@ -443,6 +1275,9 @@ describe('#databases handler', () => {
               { name: 'excluded-one', client_id: 'excluded-one-id' },
               { name: 'excluded-two', client_id: 'excluded-two-id' },
             ]),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -505,6 +1340,9 @@ describe('#databases handler', () => {
               { name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' },
             ]),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -546,6 +1384,9 @@ describe('#databases handler', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -582,6 +1423,9 @@ describe('#databases handler', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -610,6 +1454,9 @@ describe('#databases handler', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -647,6 +1494,9 @@ describe('#databases handler', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -682,6 +1532,9 @@ describe('#databases handler', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -759,6 +1612,9 @@ describe('#databases handler', () => {
         },
         clients: {
           list: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
+        },
+        actions: {
+          list: () => [],
         },
         pool,
       };
@@ -845,6 +1701,9 @@ describe('#databases handler', () => {
         clients: {
           list: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
         },
+        actions: {
+          list: () => [],
+        },
         pool,
       };
 
@@ -899,6 +1758,9 @@ describe('#databases handler', () => {
           list: sinon
             .stub()
             .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        actions: {
+          list: sinon.stub().resolves([]),
         },
         pool: pool,
       };
@@ -1038,6 +1900,9 @@ describe('#databases handler', () => {
           list: sinon
             .stub()
             .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        actions: {
+          list: sinon.stub().resolves([]),
         },
         pool: pool,
       };
@@ -1219,6 +2084,9 @@ describe('#databases handler', () => {
           list: sinon
             .stub()
             .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        actions: {
+          list: sinon.stub().resolves([]),
         },
         pool: pool,
       };
@@ -1350,6 +2218,9 @@ describe('#databases handler', () => {
         clients: {
           list: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
         },
+        actions: {
+          list: () => [],
+        },
         pool,
       };
 
@@ -1435,6 +2306,9 @@ describe('#databases handler', () => {
         clients: {
           list: () => [{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }],
         },
+        actions: {
+          list: () => [],
+        },
         pool,
       };
 
@@ -1489,6 +2363,9 @@ describe('#databases handler', () => {
           list: sinon
             .stub()
             .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        actions: {
+          list: sinon.stub().resolves([]),
         },
         pool: pool,
       };
@@ -1629,6 +2506,9 @@ describe('#databases handler', () => {
           list: sinon
             .stub()
             .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        actions: {
+          list: sinon.stub().resolves([]),
         },
         pool: pool,
       };
@@ -1810,6 +2690,9 @@ describe('#databases handler', () => {
           list: sinon
             .stub()
             .resolves([{ name: 'client1', client_id: 'YwqVtt8W3pw5AuEz3B2Kse9l2Ruy7Tec' }]),
+        },
+        actions: {
+          list: sinon.stub().resolves([]),
         },
         pool: pool,
       };
@@ -1912,16 +2795,19 @@ describe('#databases handler with enabled clients integration', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
-      // Mock enabled clients responses
+      // Mock enabled clients responses — SDK v5 .get() returns a PagedResponse, not a flat array
       getEnabledClientsStub
-        .withArgs('con_1')
+        .withArgs('con_1', { take: 100 })
         .resolves(
           mockPagedData({}, 'clients', [{ client_id: 'client_1' }, { client_id: 'client_2' }])
         )
-        .withArgs('con_2')
+        .withArgs('con_2', { take: 100 })
         .resolves(mockPagedData({}, 'clients', [{ client_id: 'client_3' }]));
 
       const handler = new databases.default({ client: pageClient(auth0), config });
@@ -1957,6 +2843,9 @@ describe('#databases handler with enabled clients integration', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -1986,6 +2875,9 @@ describe('#databases handler with enabled clients integration', () => {
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
         },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
         pool,
       };
 
@@ -2000,6 +2892,10 @@ describe('#databases handler with enabled clients integration', () => {
       sinon.assert.calledOnce(processConnectionEnabledClientsStub);
       expect(processConnectionEnabledClientsStub.firstCall.args[0]).to.equal(handler.client);
       expect(processConnectionEnabledClientsStub.firstCall.args[1]).to.equal(handler.type);
+      // Verify existingConnections parameter is passed
+      expect(processConnectionEnabledClientsStub.firstCall.args[2]).to.be.an('array');
+      // Verify changes parameter is passed
+      expect(processConnectionEnabledClientsStub.firstCall.args[3]).to.be.an('object');
 
       processConnectionEnabledClientsStub.restore();
     });
@@ -2019,6 +2915,9 @@ describe('#databases handler with enabled clients integration', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -2040,7 +2939,7 @@ describe('#databases handler with enabled clients integration', () => {
       sinon.assert.calledOnce(processConnectionEnabledClientsStub);
 
       // Verify that excluded databases are filtered out
-      const passedChanges = processConnectionEnabledClientsStub.firstCall.args[2];
+      const passedChanges = processConnectionEnabledClientsStub.firstCall.args[3];
       expect(passedChanges.create).to.be.an('array');
       expect(passedChanges.update).to.be.an('array');
       expect(passedChanges.conflicts).to.be.an('array');
@@ -2063,6 +2962,9 @@ describe('#databases handler with enabled clients integration', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };
@@ -2096,6 +2998,9 @@ describe('#databases handler with enabled clients integration', () => {
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', []),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
         },
         pool,
       };

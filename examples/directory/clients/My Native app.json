@@ -42,12 +42,18 @@
   "token_endpoint_auth_method": "none",
   "custom_login_page_on": true,
   "oidc_logout": {
+    "backchannel_logout_urls": [
+      "https://example.com/logout"
+    ],
     "backchannel_logout_initiators": {
       "mode": "custom",
       "selected_initiators": [
         "rp-logout",
         "idp-logout"
       ]
+    },
+    "backchannel_logout_session_metadata": {
+      "include": true
     }
   }
 }

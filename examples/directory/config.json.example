@@ -10,7 +10,8 @@
       "client_secret": "<add M2M client_secret>",
       "domain": "<add M2M domain>",
       "type": "OAUTH_APP"
-    }
+    },
+    "JWT_SECRET": "<your-jwt-secret-key>"
   },
   "AUTH0_ALLOW_DELETE": false,
   "INCLUDED_PROPS": {

@@ -463,5 +463,365 @@ describe('#actions handler', () => {
 
       expect(wasDeleteCalled).to.equal(false);
     });
+
+    it('should enrich actions with module IDs and version IDs', async () => {
+      const actionId = 'action-with-modules-id';
+      const moduleId = 'module-id-1';
+      const moduleVersionId = 'version-id-1';
+
+      const action = {
+        name: 'action-with-modules',
+        supported_triggers: [
+          {
+            id: 'post-login',
+            version: 'v1',
+          },
+        ],
+        modules: [
+          {
+            module_name: 'test-module',
+            module_version_number: 1,
+          },
+        ],
+      };
+
+      const auth0 = {
+        actions: {
+          get: () => Promise.resolve({ data: { ...action, id: actionId } }),
+          create: (data) => Promise.resolve({ data: { ...data, id: actionId } }),
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: () => {
+            if (!auth0.listCalled) {
+              auth0.listCalled = true;
+              return mockPagedData({ include_totals: true }, 'actions', []);
+            }
+            return mockPagedData({ include_totals: true }, 'actions', [
+              {
+                name: action.name,
+                supported_triggers: action.supported_triggers,
+                id: actionId,
+              },
+            ]);
+          },
+          createVersion: () =>
+            Promise.resolve({
+              data: {
+                code: 'action-code',
+                dependencies: [],
+                id: 'version-id',
+                runtime: 'node12',
+                secrets: [],
+              },
+            }),
+          modules: {
+            list: () =>
+              mockPagedData({ paginate: true }, 'modules', [
+                {
+                  id: moduleId,
+                  name: 'test-module',
+                  code: 'module.exports = {};',
+                },
+              ]),
+            versions: {
+              list: () =>
+                Promise.resolve(
+                  mockPagedData({ paginate: true }, 'versions', [
+                    {
+                      id: moduleVersionId,
+                      version_number: 1,
+                    },
+                  ])
+                ),
+            },
+          },
+        },
+        pool: {
+          addEachTask: (data) => {
+            const results = data.data.map(data.generator);
+            return { promise: () => Promise.all(results) };
+          },
+        },
+        listCalled: false,
+      };
+
+      const handler = new actions.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ actions: [action] }]);
+    });
+
+    it('should fetch modules from API even when actionModules are provided in assets', async () => {
+      const actionId = 'action-with-modules-id';
+      const moduleId = 'module-id-from-api';
+      const moduleVersionId = 'version-uuid-from-api';
+
+      const action = {
+        name: 'action-with-modules',
+        supported_triggers: [{ id: 'post-login', version: 'v1' }],
+        modules: [{ module_name: 'test-module', module_version_number: 1 }],
+      };
+
+      // Local config module — has no `id` field (desired state only)
+      const localConfigModule = { name: 'test-module', code: 'module.exports = {};' };
+
+      let modulesListCalled = false;
+      let createCalledWith = null;
+
+      const auth0 = {
+        actions: {
+          get: () => Promise.resolve({ data: { ...action, id: actionId } }),
+          create: (data) => {
+            createCalledWith = data;
+            return Promise.resolve({ data: { ...data, id: actionId } });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: () => {
+            if (!auth0.listCalled) {
+              auth0.listCalled = true;
+              return mockPagedData({ include_totals: true }, 'actions', []);
+            }
+            return mockPagedData({ include_totals: true }, 'actions', [
+              { name: action.name, supported_triggers: action.supported_triggers, id: actionId },
+            ]);
+          },
+          createVersion: () =>
+            Promise.resolve({
+              data: {
+                code: 'action-code',
+                dependencies: [],
+                id: 'version-id',
+                runtime: 'node12',
+                secrets: [],
+              },
+            }),
+          modules: {
+            list: () => {
+              modulesListCalled = true;
+              return mockPagedData({ paginate: true }, 'modules', [
+                { id: moduleId, name: 'test-module', code: 'module.exports = {};' },
+              ]);
+            },
+            versions: {
+              list: () =>
+                Promise.resolve(
+                  mockPagedData({ paginate: true }, 'versions', [
+                    { id: moduleVersionId, version_number: 1 },
+                  ])
+                ),
+            },
+          },
+        },
+        pool: {
+          addEachTask: (data) => {
+            const results = data.data.map(data.generator);
+            return { promise: () => Promise.all(results) };
+          },
+        },
+        listCalled: false,
+      };
+
+      const handler = new actions.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Pass both actions and actionModules in assets (the bug scenario)
+      await stageFn.apply(handler, [{ actions: [action], actionModules: [localConfigModule] }]);
+
+      // API must have been called to resolve module IDs — not the local config shortcut
+      expect(modulesListCalled).to.equal(true);
+
+      // The created action must have a valid module_version_id, not undefined or ''
+      expect(createCalledWith.modules[0].module_version_id).to.equal(moduleVersionId);
+      expect(createCalledWith.modules[0].module_id).to.equal(moduleId);
+    });
+
+    it('should throw an error when the requested module version number is not found in API', async () => {
+      const actionId = 'action-missing-version-id';
+      const moduleId = 'module-id-from-api';
+
+      const action = {
+        name: 'action-missing-version',
+        supported_triggers: [{ id: 'post-login', version: 'v1' }],
+        // references version 99 which does not exist in the API
+        modules: [{ module_name: 'test-module', module_version_number: 99 }],
+      };
+
+      const auth0 = {
+        actions: {
+          get: () => Promise.resolve({ data: { ...action, id: actionId } }),
+          create: (data) => Promise.resolve({ data: { ...data, id: actionId } }),
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: () => {
+            if (!auth0.listCalled) {
+              auth0.listCalled = true;
+              return mockPagedData({ include_totals: true }, 'actions', []);
+            }
+            return mockPagedData({ include_totals: true }, 'actions', [
+              { name: action.name, supported_triggers: action.supported_triggers, id: actionId },
+            ]);
+          },
+          createVersion: () =>
+            Promise.resolve({
+              data: {
+                code: 'action-code',
+                dependencies: [],
+                id: 'version-id',
+                runtime: 'node12',
+                secrets: [],
+              },
+            }),
+          modules: {
+            list: () =>
+              mockPagedData({ paginate: true }, 'modules', [
+                { id: moduleId, name: 'test-module', code: 'module.exports = {};' },
+              ]),
+            versions: {
+              list: () =>
+                Promise.resolve(
+                  // Only version 1 exists — version 99 is absent
+                  mockPagedData({ paginate: true }, 'versions', [
+                    { id: 'v1-uuid', version_number: 1 },
+                  ])
+                ),
+            },
+          },
+        },
+        pool: {
+          addEachTask: (data) => {
+            const results = data.data.map(data.generator);
+            return { promise: () => Promise.all(results) };
+          },
+        },
+        listCalled: false,
+      };
+
+      const handler = new actions.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await expect(stageFn.apply(handler, [{ actions: [action] }])).to.be.rejectedWith(
+        /Could not find action module version id for module 'test-module' version '99'/
+      );
+    });
+
+    it('should successfully process three or more actions that each have modules (regression: pool deadlock)', async () => {
+      const moduleId = 'module-id-1';
+      const moduleVersionId = 'version-id-1';
+
+      const makeAction = (n) => ({
+        name: `action-with-modules-${n}`,
+        supported_triggers: [{ id: 'post-login', version: 'v1' }],
+        modules: [{ module_name: 'test-module', module_version_number: 1 }],
+      });
+
+      const actions3 = [makeAction(1), makeAction(2), makeAction(3)];
+
+      let listCallCount = 0;
+      const auth0 = {
+        actions: {
+          get: (params) => Promise.resolve({ data: { id: params.id } }),
+          create: (data) => Promise.resolve({ data: { ...data, id: `${data.name}-id` } }),
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: () => {
+            listCallCount += 1;
+            if (listCallCount === 1) {
+              return mockPagedData({ include_totals: true }, 'actions', []);
+            }
+            return mockPagedData(
+              { include_totals: true },
+              'actions',
+              actions3.map((a) => ({
+                name: a.name,
+                supported_triggers: a.supported_triggers,
+                id: `${a.name}-id`,
+              }))
+            );
+          },
+          modules: {
+            list: () =>
+              mockPagedData({ paginate: true }, 'modules', [
+                { id: moduleId, name: 'test-module', code: 'module.exports = {};' },
+              ]),
+            versions: {
+              list: () =>
+                Promise.resolve(
+                  mockPagedData({ paginate: true }, 'versions', [
+                    { id: moduleVersionId, version_number: 1 },
+                  ])
+                ),
+            },
+          },
+        },
+      };
+
+      // Use real pool via pageClient — this is the scenario that deadlocked before the fix.
+      const handler = new actions.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Before the fix this would hang indefinitely; now it should resolve.
+      await stageFn.apply(handler, [{ actions: actions3 }]);
+    });
+
+    it('should handle actions without modules', async () => {
+      const actionId = 'action-no-modules-id';
+      const action = {
+        name: 'action-no-modules',
+        supported_triggers: [
+          {
+            id: 'post-login',
+            version: 'v1',
+          },
+        ],
+      };
+
+      const auth0 = {
+        actions: {
+          get: () => Promise.resolve({ data: { ...action, id: actionId } }),
+          create: (data) => Promise.resolve({ data: { ...data, id: actionId } }),
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: () => {
+            if (!auth0.listCalled) {
+              auth0.listCalled = true;
+              return mockPagedData({ include_totals: true }, 'actions', []);
+            }
+            return mockPagedData({ include_totals: true }, 'actions', [
+              {
+                name: action.name,
+                supported_triggers: action.supported_triggers,
+                id: actionId,
+              },
+            ]);
+          },
+          createVersion: () =>
+            Promise.resolve({
+              data: {
+                code: 'action-code',
+                dependencies: [],
+                id: 'version-id',
+                runtime: 'node12',
+                secrets: [],
+              },
+            }),
+          modules: {
+            list: () => mockPagedData({ paginate: true }, 'modules', []),
+          },
+        },
+        pool: {
+          addEachTask: (data) => {
+            const results = data.data.map(data.generator);
+            return { promise: () => Promise.all(results) };
+          },
+        },
+        listCalled: false,
+      };
+
+      const handler = new actions.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ actions: [action] }]);
+    });
   });
 });

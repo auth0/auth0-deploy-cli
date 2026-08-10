@@ -66,4 +66,8 @@ export default class RulesConfigsHandler extends DefaultHandler {
       conflicts: [],
     };
   }
+
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    return this.calcChanges(assets);
+  }
 }

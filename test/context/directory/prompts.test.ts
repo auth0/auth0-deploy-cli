@@ -80,6 +80,22 @@ describe('#directory context prompts', () => {
               ],
             },
           ],
+          passkeys: [
+            {
+              'passkeys-enrollment': [
+                {
+                  name: 'form-content-start',
+                  template: 'partials/passkeys/passkeys-enrollment/form-content-start.liquid',
+                },
+              ],
+              'passkeys-enrollment-local': [
+                {
+                  name: 'form-footer-end',
+                  template: 'partials/passkeys/passkeys-enrollment-local/form-footer-end.liquid',
+                },
+              ],
+            },
+          ],
         }),
       },
     };
@@ -174,6 +190,14 @@ describe('#directory context prompts', () => {
           'form-content-end.liquid': '<div>TEST AGAIN</div>',
         },
       },
+      passkeys: {
+        'passkeys-enrollment': {
+          'form-content-start.liquid': '<div>PASSKEY ENROLLMENT TEST</div>',
+        },
+        'passkeys-enrollment-local': {
+          'form-footer-end.liquid': '<div>PASSKEY LOCAL TEST</div>',
+        },
+      },
     };
 
     createDirWithNestedDir(partialsDir, partialsFiles);
@@ -216,6 +240,14 @@ describe('#directory context prompts', () => {
         signup: {
           signup: {
             'form-content-end': '<div>TEST AGAIN</div>',
+          },
+        },
+        passkeys: {
+          'passkeys-enrollment': {
+            'form-content-start': '<div>PASSKEY ENROLLMENT TEST</div>',
+          },
+          'passkeys-enrollment-local': {
+            'form-footer-end': '<div>PASSKEY LOCAL TEST</div>',
           },
         },
       },
@@ -529,6 +561,14 @@ describe('#directory context prompts', () => {
             'form-content-end': '<div>TEST AGAIN</div>',
           },
         },
+        passkeys: {
+          'passkeys-enrollment': {
+            'form-content-start': '<div>PASSKEY ENROLLMENT TEST</div>',
+          },
+          'passkeys-enrollment-local': {
+            'form-footer-end': '<div>PASSKEY LOCAL TEST</div>',
+          },
+        },
       },
       screenRenderers: [
         {
@@ -607,6 +647,22 @@ describe('#directory context prompts', () => {
             {
               name: 'form-content-end',
               template: 'partials/signup/signup/form-content-end.liquid',
+            },
+          ],
+        },
+      ],
+      passkeys: [
+        {
+          'passkeys-enrollment': [
+            {
+              name: 'form-content-start',
+              template: 'partials/passkeys/passkeys-enrollment/form-content-start.liquid',
+            },
+          ],
+          'passkeys-enrollment-local': [
+            {
+              name: 'form-footer-end',
+              template: 'partials/passkeys/passkeys-enrollment-local/form-footer-end.liquid',
             },
           ],
         },

@@ -1,0 +1,10 @@
+{
+  "name": "My CIMD Client",
+  "external_client_id": "https://mcpserver.example.com/.well-known/client.json",
+  "app_type": "regular_web",
+  "grant_types": [
+    "authorization_code",
+    "refresh_token"
+  ],
+  "oidc_conformant": true
+}

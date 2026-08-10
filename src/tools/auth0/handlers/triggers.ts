@@ -4,7 +4,7 @@ import DefaultHandler, { order } from './default';
 import constants from '../../constants';
 import log from '../../../logger';
 import { Assets } from '../../../types';
-import { sleep } from '../../utils';
+import { isDryRun, sleep } from '../../utils';
 
 export const schema = {
   type: 'object',
@@ -61,7 +61,9 @@ export default class TriggersHandler extends DefaultHandler {
         const triggerId = triggers[i];
         let bindings;
         try {
-          const { data } = await this.client.actions.triggers.bindings.list(triggerId);
+          const { data } = await this.client.actions.triggers.bindings.list(
+            triggerId as Management.ActionTriggerTypeEnum
+          );
 
           bindings = data;
         } catch (err) {
@@ -102,6 +104,14 @@ export default class TriggersHandler extends DefaultHandler {
     // Do nothing if not set
     if (!triggers) return;
 
+    if (isDryRun(this.config)) {
+      const { update } = await this.calcChanges(assets);
+
+      if (update.length === 0) {
+        return;
+      }
+    }
+
     await sleep(2000); // Delay to allow newly-deployed actions to register in backend
 
     await Promise.all(
@@ -114,7 +124,10 @@ export default class TriggersHandler extends DefaultHandler {
           display_name: binding.display_name,
         }));
 
-        await this.client.actions.triggers.bindings.updateMany(name, { bindings });
+        await this.client.actions.triggers.bindings.updateMany(
+          name as Management.ActionTriggerTypeEnum,
+          { bindings }
+        );
         this.didUpdate({ trigger_id: name });
         this.updated += 1;
       })

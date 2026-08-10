@@ -1,10 +1,13 @@
 import { Management } from 'auth0';
+import { isEmpty, omit } from 'lodash';
+import nconf from 'nconf';
 import ValidationError from '../../validationError';
 import DefaultHandler, { order } from './default';
 import { supportedPages, pageNameMap } from './pages';
-import { convertJsonToString } from '../../utils';
+import { convertJsonToString, isDryRun } from '../../utils';
 import { Asset, Assets } from '../../../types';
 import log from '../../../logger';
+import sessionDurationsToMinutes from '../../../sessionDurationsToMinutes';
 
 const tokenQuotaConfigurationSchema = {
   type: 'object',
@@ -35,6 +38,11 @@ const tokenQuotaConfigurationSchema = {
 export const schema = {
   type: 'object',
   properties: {
+    client_id_metadata_document_supported: {
+      type: 'boolean',
+      description:
+        'Whether the authorization server supports retrieving client metadata from a client_id URL.',
+    },
     default_token_quota: {
       type: 'object',
       properties: {
@@ -48,12 +56,51 @@ export const schema = {
       type: ['boolean', 'null'],
       description: 'Whether to skip the confirmation prompt for non-verifiable callback URIs',
     },
+    resource_parameter_profile: {
+      type: 'string',
+      enum: ['audience', 'compatibility'],
+      description:
+        'OAuth resource parameter compatibility mode for specifying the protected resource.',
+    },
+    dynamic_client_registration_security_mode: {
+      type: 'string',
+      enum: ['strict', 'permissive'],
+      description:
+        'Indicates the security mode for new clients created through the Dynamic Client Registration endpoint.',
+    },
+    country_codes: {
+      type: ['object', 'null'],
+      description:
+        'Phone country code configuration for identifier input. Set to `null` to remove filtering (allow all countries). Requires the `tenant_country_codes_filtering` feature flag to be enabled on the tenant.',
+      properties: {
+        list: {
+          type: 'array',
+          description: 'ISO 3166-1 alpha-2 country codes (e.g. `US`, `GB`).',
+          items: {
+            type: 'string',
+            pattern: '^[A-Z]{2}$',
+          },
+          minItems: 1,
+          uniqueItems: true,
+        },
+        mode: {
+          type: 'string',
+          enum: ['allow', 'deny'],
+          description: 'Whether the list is an allowlist or denylist.',
+        },
+      },
+      required: ['list', 'mode'],
+      additionalProperties: false,
+    },
   },
 };
 
 // export type Tenant = TenantSettings;
 
-export type Tenant = Management.GetTenantSettingsResponseContent;
+export interface Tenant extends Management.GetTenantSettingsResponseContent {
+  client_id_metadata_document_supported?: boolean;
+  resource_parameter_profile?: Management.TenantSettingsResourceParameterProfile;
+}
 type TenantSettingsFlags = Management.TenantSettingsFlags;
 
 const blockPageKeys = [
@@ -76,7 +123,6 @@ export const allowedTenantFlags = [
   'enable_apis_section',
   'enable_pipeline2',
   'enable_dynamic_client_registration',
-  'enable_custom_domain_in_emails',
   'allow_legacy_tokeninfo_endpoint',
   'enable_legacy_profile',
   'enable_idtoken_api2',
@@ -97,6 +143,7 @@ export const allowedTenantFlags = [
   'require_pushed_authorization_requests',
   'mfa_show_factor_list_on_enrollment',
   'improved_signup_bot_detection_in_classic',
+  'use_scope_descriptions_for_consent',
 ];
 
 export const removeUnallowedTenantFlags = (
@@ -121,14 +168,17 @@ export const removeUnallowedTenantFlags = (
   );
 
   if (removedFlags.length > 0) {
-    log.warn(
-      `The following tenant flag${
-        removedFlags.length > 1 ? 's have not been' : ' has not been'
-      } updated because deemed incompatible with the target tenant: ${removedFlags.join(', ')}
+    const logMsg = `The following tenant flag${
+      removedFlags.length > 1 ? 's have not been' : ' has not been'
+    } updated because deemed incompatible with the target tenant: ${removedFlags.join(', ')}
       ${
         removedFlags.length > 1 ? 'These flags' : 'This flag'
-      } can likely be removed from the tenant definition file. If you believe this removal is an error, please report via a Github issue.`
-    );
+      } can likely be removed from the tenant definition file. If you believe this removal is an error, please report via a Github issue.`;
+    if (nconf.get('AUTH0_DRY_RUN')) {
+      log.debug(logMsg);
+    } else {
+      log.warn(logMsg);
+    }
   }
 
   return filteredFlags;
@@ -177,12 +227,34 @@ export default class TenantHandler extends DefaultHandler {
   // Run after other updates so objected can be referenced such as default directory
   @order('100')
   async processChanges(assets: Assets): Promise<void> {
-    const { tenant } = assets;
+    let { tenant } = assets;
 
     // Do nothing if not set
     if (!tenant) return;
 
-    const updatedTenant: Management.UpdateTenantSettingsRequestContent = {
+    if (isDryRun(this.config)) {
+      const { update } = await this.calcChanges(assets);
+
+      if (update.length === 0) {
+        return;
+      }
+    }
+
+    if ((tenant.flags as Record<string, unknown>)?.enable_custom_domain_in_emails !== undefined) {
+      log.warn(
+        'The "enable_custom_domain_in_emails" tenant flag is deprecated and has been removed from management. ' +
+          'It will not be applied during import. ' +
+          'Use the "is_default" field on customDomains to configure the default domain instead.'
+      );
+      tenant = {
+        ...tenant,
+        flags: omit(tenant.flags, 'enable_custom_domain_in_emails') as TenantSettingsFlags,
+      };
+    }
+
+    const updatedTenant: Management.UpdateTenantSettingsRequestContent & {
+      client_id_metadata_document_supported?: boolean;
+    } = {
       ...tenant,
       flags: tenant.flags
         ? (removeUnallowedTenantFlags(tenant.flags) as TenantSettingsFlags)
@@ -196,9 +268,27 @@ export default class TenantHandler extends DefaultHandler {
     }
 
     if (updatedTenant && Object.keys(updatedTenant).length > 0) {
-      await this.client.tenants.settings.update(updatedTenant);
+      const sessionDurations = sessionDurationsToMinutes({
+        session_lifetime: updatedTenant?.session_lifetime,
+        idle_session_lifetime: updatedTenant?.idle_session_lifetime,
+        ephemeral_session_lifetime: updatedTenant?.ephemeral_session_lifetime,
+        idle_ephemeral_session_lifetime: updatedTenant?.idle_ephemeral_session_lifetime,
+      });
+
+      let updateTenantPayload = updatedTenant;
+      if (!isEmpty(sessionDurations)) {
+        updateTenantPayload = { ...updateTenantPayload, ...sessionDurations };
+
+        // context: https://github.com/auth0/auth0-deploy-cli/pull/471
+        delete updateTenantPayload.session_lifetime;
+        delete updateTenantPayload.idle_session_lifetime;
+        delete updateTenantPayload.ephemeral_session_lifetime;
+        delete updateTenantPayload.idle_ephemeral_session_lifetime;
+      }
+
+      await this.client.tenants.settings.update(updateTenantPayload);
       this.updated += 1;
-      this.didUpdate(updatedTenant);
+      this.didUpdate(updateTenantPayload);
     }
   }
 }

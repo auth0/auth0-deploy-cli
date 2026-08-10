@@ -49,6 +49,9 @@ export function mockMgmtClient() {
     hooks: { list: (params) => mockPagedData(params, 'hooks', []) },
     actions: {
       list: () => mockPagedData({ include_totals: true }, 'actions', []),
+      modules: {
+        list: (params) => mockPagedData(params, 'modules', []),
+      },
       triggers: {
         list: () => {},
         bindings: {
@@ -146,10 +149,16 @@ export function mockMgmtClient() {
       getCustomTextByLanguage: () => Promise.resolve({}),
     },
     attackProtection: {
+      botDetection: {
+        get: () => ({}),
+      },
       breachedPasswordDetection: {
         get: () => ({}),
       },
       bruteForceProtection: {
+        get: () => ({}),
+      },
+      captcha: {
         get: () => ({}),
       },
       suspiciousIpThrottling: {
@@ -239,6 +248,20 @@ export function mockMgmtClient() {
           get: () => Promise.resolve({ remember_for: 30 }),
         },
       },
+    },
+    supplementalSignals: {
+      get: () => Promise.resolve({ akamai_enabled: false }),
+    },
+    rateLimitPolicies: {
+      list: (params) => mockPagedData(params, 'rate_limit_policies', []),
+    },
+    eventStreams: {
+      list: () =>
+        Promise.resolve({
+          data: [],
+          hasNextPage: () => false,
+          getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+        }),
     },
   };
 }

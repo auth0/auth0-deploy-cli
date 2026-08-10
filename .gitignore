@@ -11,10 +11,14 @@ config*.json
 yarn-error.log
 *.pem
 *.pub
+dry-run-diff-log*.json
 Makefile
 .vscode/*
+.claude/*
 .github/copilot-instructions.md
 .github/chatmodes/*
 .github/prompts/*
 .github/agents/*
 .github/skills/*
+package-lock.json
+.github/hooks/*

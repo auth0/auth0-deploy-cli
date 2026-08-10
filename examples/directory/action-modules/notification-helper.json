@@ -1,0 +1,11 @@
+{
+  "name": "notification-helper",
+  "code": "./action-modules/notification-helper/code.js",
+  "dependencies": [
+    {
+      "name": "uuid",
+      "version": "9.0.0"
+    }
+  ],
+  "secrets": []
+}

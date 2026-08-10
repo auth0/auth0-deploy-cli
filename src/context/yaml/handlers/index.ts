@@ -16,6 +16,7 @@ import guardianPolicies from './guardianPolicies';
 import roles from './roles';
 import organizations from './organizations';
 import actions from './actions';
+import actionModules from './actionModules';
 import triggers from './triggers';
 import attackProtection from './attackProtection';
 import riskAssessment from './riskAssessment';
@@ -36,6 +37,10 @@ import networkACLs from './networkACLs';
 import userAttributeProfiles from './userAttributeProfiles';
 import connectionProfiles from './connectionProfiles';
 import tokenExchangeProfiles from './tokenExchangeProfiles';
+import supplementalSignals from './supplementalSignals';
+import rateLimitPolicies from './rateLimitPolicies';
+import eventStreams from './eventStreams';
+import clientAuthCredentials from './clientAuthCredentials';
 
 import YAMLContext from '..';
 import { AssetTypes } from '../../../types';
@@ -67,6 +72,7 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   guardianPhoneFactorSelectedProvider,
   guardianPolicies,
   actions,
+  actionModules,
   organizations,
   triggers,
   attackProtection,
@@ -86,6 +92,10 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   userAttributeProfiles,
   connectionProfiles,
   tokenExchangeProfiles,
+  supplementalSignals,
+  rateLimitPolicies,
+  eventStreams,
+  clientAuthCredentials,
 };
 
 export default yamlHandlers;

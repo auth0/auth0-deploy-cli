@@ -4,6 +4,7 @@ import { calculateChanges } from '../../calculateChanges';
 import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
+import { isDryRun } from '../../utils';
 
 export const schema = {
   type: 'array',
@@ -13,6 +14,7 @@ export const schema = {
       name: { type: 'string' },
       id: { type: 'string' },
       description: { type: 'string' },
+      type: { type: 'string', enum: ['tenant', 'organization'] },
       permissions: {
         type: 'array',
         items: {
@@ -43,6 +45,9 @@ export default class RolesHandler extends DefaultHandler {
   async createRole(data): Promise<Asset> {
     const role = { ...data };
     delete role.permissions;
+    // deploy-cli only manages tenant-level roles, so `type` is stripped on write; it
+    // defaults to `tenant` on create. This keeps exports (which carry `type`) round-trippable.
+    delete role.type;
 
     const created = await this.client.roles.create(role);
 
@@ -109,6 +114,9 @@ export default class RolesHandler extends DefaultHandler {
 
     delete data.permissions;
     delete data.id;
+    // deploy-cli only manages tenant-level roles, so `type` is stripped on write; this
+    // lets files that already carry it (from a prior export) be imported cleanly.
+    delete data.type;
 
     await this.client.roles.update(params.id, data);
 
@@ -148,9 +156,12 @@ export default class RolesHandler extends DefaultHandler {
     }
 
     try {
+      // Only manage tenant-level roles; exclude org-scoped roles surfaced when
+      // the api2_org_level_roles_ea flag is enabled.
       const roles = await paginate<Role>(this.client.roles.list, {
         paginate: true,
         include_totals: true,
+        type: 'tenant',
       });
 
       for (let index = 0; index < roles.length; index++) {
@@ -181,10 +192,15 @@ export default class RolesHandler extends DefaultHandler {
 
         const rolesId = roles[index].id as string;
         let permissions = await this.client.roles.permissions.list(rolesId, { per_page: 100 });
-        do {
-          allPermission.push(...permissions.data);
+
+        // Process first page
+        allPermission.push(...permissions.data);
+
+        // Fetch remaining pages
+        while (permissions.hasNextPage()) {
           permissions = await permissions.getNextPage();
-        } while (permissions.hasNextPage());
+          allPermission.push(...permissions.data);
+        }
 
         const strippedPerms = await Promise.all(
           allPermission.map(async (permission) => {
@@ -211,6 +227,14 @@ export default class RolesHandler extends DefaultHandler {
     const { roles } = assets;
     // Do nothing if not set
     if (!roles) return;
+
+    if (isDryRun(this.config)) {
+      const { del, update, create } = await this.calcChanges(assets);
+
+      if (create.length === 0 && update.length === 0 && del.length === 0) {
+        return;
+      }
+    }
     // Gets roles from destination tenant
     const existing = await this.getType();
 
