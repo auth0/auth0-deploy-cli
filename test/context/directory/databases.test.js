@@ -167,7 +167,9 @@ describe('#directory context databases', () => {
 
   it('should throw error when customScript path resolves outside the config directory', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'databases-path-traversal');
-    const outsideFile = path.join(testDataDir, 'directory', 'outside-login.js');
+    // Scripts are resolved relative to the connection subfolder (database-connections/users/),
+    // so ../../../ is needed to escape the config root.
+    const outsideFile = path.join(testDataDir, 'outside-login.js');
     cleanThenMkdir(repoDir);
     fs.writeFileSync(outsideFile, 'function login() {}');
     createDir(path.join(repoDir, constants.DATABASE_CONNECTIONS_DIRECTORY), {
@@ -177,7 +179,7 @@ describe('#directory context databases', () => {
           options: {
             enabledDatabaseCustomization: true,
             customScripts: {
-              login: '../outside-login.js',
+              login: '../../../outside-login.js',
             },
           },
         }),
