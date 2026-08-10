@@ -266,6 +266,47 @@ describe('#phoneTemplates handler', () => {
       expect(createCalled).to.equal(true);
     });
 
+    it('should strip read-only fields from the create payload', async () => {
+      let createPayload;
+      const auth0 = {
+        branding: {
+          phone: {
+            templates: {
+              list: () => Promise.resolve({ templates: [] }),
+              create: (data) => {
+                createPayload = data;
+                return Promise.resolve({ id: 'pntm_new', ...data });
+              },
+            },
+          },
+        },
+        pool: mockPool,
+      };
+
+      const handler = new phoneTemplatesHandler({ client: auth0, config: () => false });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      const newTemplate = {
+        type: 'otp_verify',
+        disabled: false,
+        channel: 'sms',
+        customizable: true,
+        tenant: 'test-tenant',
+        content: {
+          syntax: 'liquid',
+          from: '+15551234567',
+          body: { text: 'Some text' },
+        },
+      };
+
+      await stageFn.apply(handler, [{ phoneTemplates: [newTemplate] }]);
+      expect(createPayload).to.not.have.property('channel');
+      expect(createPayload).to.not.have.property('customizable');
+      expect(createPayload).to.not.have.property('tenant');
+      expect(createPayload.type).to.equal('otp_verify');
+      expect(createPayload.content.body.text).to.equal('Some text');
+    });
+
     it('should fall back to update when create returns 409 conflict', async () => {
       // If the template already exists (created between list and create, or its
       // ID wasn't surfaced by list), create returns 409 and we re-fetch + update.

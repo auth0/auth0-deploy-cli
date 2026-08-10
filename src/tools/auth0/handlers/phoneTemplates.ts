@@ -1,6 +1,7 @@
 import { Management } from 'auth0';
 import DefaultHandler, { order } from './default';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
+import { stripFields } from '../../utils';
 import log from '../../../logger';
 
 export type PhoneTemplate = Management.PhoneTemplate;
@@ -124,17 +125,19 @@ export default class PhoneTemplatesHandler extends DefaultHandler {
   }
 
   async createPhoneTemplate(template): Promise<Asset> {
+    // The create endpoint only accepts type/disabled/content. Strip the
+    // read-only fields (channel, customizable, tenant) the base handler would
+    // normally remove, since processChanges is overridden here.
+    const createPayload = stripFields(template, this.stripCreateFields);
     try {
-      const created = await this.client.branding.phone.templates.create(template);
+      const created = await this.client.branding.phone.templates.create(createPayload);
       return created;
     } catch (err) {
       // A 409 means the template already exists on the tenant (it was created
       // between our list call and this create, or the list endpoint didn't
       // surface its ID). Re-fetch to pick up the ID and fall back to an update.
       if (err.statusCode === 409) {
-        log.debug(
-          `Phone template type '${template.type}' already exists, falling back to update`
-        );
+        log.debug(`Phone template type '${template.type}' already exists, falling back to update`);
         const response = await this.client.branding.phone.templates.list();
         this.existing = response.templates ?? [];
         return this.updatePhoneTemplate(template);
