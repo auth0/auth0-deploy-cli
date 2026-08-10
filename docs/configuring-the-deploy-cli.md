@@ -185,35 +185,6 @@ Boolean. When enabled, exports actual secret values (e.g. connection `client_sec
 
 > **Warning:** Enabling this option will write real credentials to exported files. Use with caution in shared or version-controlled environments.
 
-### `AUTH0_ALLOW_EXTERNAL_CODE_PATHS`
-
-Boolean. When enabled, allows code files referenced in resource configurations (such as action code, hook scripts, rule scripts, and database custom scripts) to be loaded from paths outside the config root directory. Default: `false`.
-
-**Background:** The Deploy CLI enforces that all file path references in resource configurations must resolve within the config root directory as a security measure to prevent unintended file access. When a path resolves outside the config root, a deprecation warning is emitted and the file is still loaded. **In the next major release this will become a hard error.** If you see this warning, move the referenced file inside your config directory before upgrading.
-
-**Monorepo use case:** In some project structures — particularly monorepos — action code or scripts are intentionally stored in a shared directory that sits above the config root. For example:
-
-```
-my-monorepo/
-├── shared/
-│   └── action-code.js      # shared code, lives outside the config root
-└── auth0-config/           # AUTH0_INPUT_FILE points here
-    └── actions/
-        └── my-action.json  # references "../../shared/action-code.js"
-```
-
-In this case the path check would emit a deprecation warning (and will block deployment in the next major release). Setting `AUTH0_ALLOW_EXTERNAL_CODE_PATHS=true` explicitly opts out of the enforcement, suppressing the warning and allowing these cross-directory references to load successfully.
-
-> **Security notice:** This flag bypasses a security boundary introduced to prevent path traversal. Only enable it if your project structure genuinely requires loading files from outside the config directory, and ensure you trust all config files being processed. **Do not enable this flag in environments where config files are sourced from untrusted or unreviewed input.**
-
-#### Example
-
-```json
-{
-  "AUTH0_ALLOW_EXTERNAL_CODE_PATHS": true
-}
-```
-
 ### `EXCLUDED_PROPS`
 
 Provides ability to exclude any unwanted properties from management.

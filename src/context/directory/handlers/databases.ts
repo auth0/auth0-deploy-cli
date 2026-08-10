@@ -34,8 +34,7 @@ type DatabaseMetadata = {
 function getDatabase(
   folder: string,
   configRoot: string,
-  mappingOpts: { mappings: KeywordMappings; disableKeywordReplacement: boolean },
-  allowExternalPaths?: boolean
+  mappingOpts: { mappings: KeywordMappings; disableKeywordReplacement: boolean }
 ): {} {
   const metaFile = path.join(folder, 'database.json');
 
@@ -73,17 +72,11 @@ function getDatabase(
         const resolvedBase = path.resolve(configRoot);
         const toLoad = path.resolve(folder, script.replace(/\\/g, '/'));
         if (!toLoad.startsWith(resolvedBase + path.sep)) {
-          if (allowExternalPaths) {
-            log.debug(
-              `Loading file outside config directory (AUTH0_ALLOW_EXTERNAL_CODE_PATHS enabled): "${script}"`
-            );
-          } else {
-            log.warn(
-              `Path "${script}" resolves to "${toLoad}" which is outside the config directory "${resolvedBase}". ` +
-                `This will be blocked as an error in the next major release. ` +
-                `Move the file inside your config directory or set AUTH0_ALLOW_EXTERNAL_CODE_PATHS=true to allow it.`
-            );
-          }
+          log.warn(
+            `Path "${script}" resolves to "${toLoad}" which is outside the config directory "${resolvedBase}". ` +
+              `This will be blocked as an error in the next major release. ` +
+              `Move the file inside your config directory.`
+          );
         }
         database.options.customScripts[name] = loadFileAndReplaceKeywords(toLoad, mappingOpts);
       }
@@ -104,15 +97,10 @@ function parse(context: DirectoryContext): ParsedDatabases {
 
   const databases = folders
     .map((f) =>
-      getDatabase(
-        f,
-        context.filePath,
-        {
-          mappings: context.mappings,
-          disableKeywordReplacement: context.disableKeywordReplacement,
-        },
-        context.config.AUTH0_ALLOW_EXTERNAL_CODE_PATHS
-      )
+      getDatabase(f, context.filePath, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      })
     )
     .filter((p) => Object.keys(p).length > 1);
 
