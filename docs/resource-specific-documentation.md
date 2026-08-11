@@ -213,7 +213,7 @@ The Deploy CLI supports managing the `directory_provisioning_configuration` for 
 
 The `mapping` array pairs Auth0 user fields with IdP fields, and `synchronize_automatically` controls whether Auth0 runs scheduled sync jobs for the connection.
 
-The `synchronize_groups` field controls group provisioning.
+The `synchronize_groups` field controls group provisioning. Accepted values are `off`, `all`, and `selected`. When set to `selected`, the `synchronized_groups` array specifies which Google Workspace groups to sync. Each group object contains `id` (required) and optional metadata fields `name`, `email`, and `direct_members_count` populated by the API.
 
 **YAML Example**
 
@@ -238,7 +238,13 @@ connections:
       synchronize_groups: selected
       synchronized_groups:
         - id: 'group-id-1'
+          name: 'Engineering'
+          email: 'engineering@example.com'
+          direct_members_count: 42
         - id: 'group-id-2'
+          name: 'Design'
+          email: 'design@example.com'
+          direct_members_count: 10
 ```
 
 **Directory Example**
@@ -267,7 +273,20 @@ connections:
     ],
     "synchronize_automatically": false,
     "synchronize_groups": "selected",
-    "synchronized_groups": [{ "id": "group-id-1" }, { "id": "group-id-2" }]
+    "synchronized_groups": [
+      {
+        "id": "group-id-1",
+        "name": "Engineering",
+        "email": "engineering@example.com",
+        "direct_members_count": 42
+      },
+      {
+        "id": "group-id-2",
+        "name": "Design",
+        "email": "design@example.com",
+        "direct_members_count": 10
+      }
+    ]
   }
 }
 ```

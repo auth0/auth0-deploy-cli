@@ -169,6 +169,12 @@ connections:
         - auth0: "name"
           idp: "displayName"
       synchronize_automatically: false
+      synchronize_groups: "selected"
+      synchronized_groups:
+        - id: "some_google_group_id"
+          name: "Engineering"
+          email: "engineering@example.com"
+          direct_members_count: 42
 
   - name: "enterprise-oidc"
     strategy: "oidc"
