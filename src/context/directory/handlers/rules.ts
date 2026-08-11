@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { constants } from '../../../tools';
+import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
 import log from '../../../logger';
 import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
@@ -25,7 +25,23 @@ function parse(context: DirectoryContext): ParsedRules {
       }),
     };
     if (rule.script) {
-      rule.script = context.loadFile(rule.script, constants.RULES_DIRECTORY);
+      const normalizedScript = rule.script.replace(/\\/g, '/');
+      const configRoot = path.resolve(context.filePath);
+      const resolvedPath = path.resolve(
+        context.filePath,
+        constants.RULES_DIRECTORY,
+        normalizedScript
+      );
+      if (!resolvedPath.startsWith(configRoot + path.sep)) {
+        throw new Error(
+          `Path "${rule.script}" resolves to "${resolvedPath}" which is outside the config directory "${configRoot}". ` +
+            `Move the file inside your config directory.`
+        );
+      }
+      rule.script = loadFileAndReplaceKeywords(resolvedPath, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      });
     }
     return rule;
   });

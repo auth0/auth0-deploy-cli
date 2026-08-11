@@ -165,6 +165,38 @@ describe('#directory context databases', () => {
     ]);
   });
 
+  it('should throw error when customScript path resolves outside the config directory', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'databases-path-traversal');
+    // Scripts are resolved relative to the connection subfolder (database-connections/users/),
+    // so ../../../ is needed to escape the config root.
+    const outsideFile = path.join(testDataDir, 'outside-login.js');
+    cleanThenMkdir(repoDir);
+    fs.writeFileSync(outsideFile, 'function login() {}');
+    createDir(path.join(repoDir, constants.DATABASE_CONNECTIONS_DIRECTORY), {
+      users: {
+        'database.json': JSON.stringify({
+          name: 'users',
+          options: {
+            enabledDatabaseCustomization: true,
+            customScripts: {
+              login: '../../../outside-login.js',
+            },
+          },
+        }),
+      },
+    });
+
+    const context = new Context({ AUTH0_INPUT_FILE: repoDir }, mockMgmtClient());
+    try {
+      await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(
+        Error,
+        'is outside the config directory'
+      );
+    } finally {
+      fs.removeSync(outsideFile);
+    }
+  });
+
   const dbDumpDir = path.join(testDataDir, 'directory', 'databasesDump');
 
   it('should dump normal databases', async () => {

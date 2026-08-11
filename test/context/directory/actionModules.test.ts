@@ -94,6 +94,33 @@ describe('#directory context actionModules', () => {
       .and.have.property('message', errorMessage);
   });
 
+  it('should throw error when module code path resolves outside the config directory', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'actionModules-path-traversal');
+    const outsideFile = path.join(testDataDir, 'directory', 'outside-module-code.js');
+    fs.ensureDirSync(path.join(repoDir, constants.ACTION_MODULES_DIRECTORY));
+    fs.writeFileSync(outsideFile, 'module.exports = {};');
+    createDir(repoDir, {
+      [constants.ACTION_MODULES_DIRECTORY]: {
+        'module-one.json': JSON.stringify({
+          name: 'module-one',
+          code: '../outside-module-code.js',
+          dependencies: [],
+          secrets: [],
+        }),
+      },
+    });
+
+    const context = new Context({ AUTH0_INPUT_FILE: repoDir }, mockMgmtClient());
+    try {
+      await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(
+        Error,
+        'is outside the config directory'
+      );
+    } finally {
+      fs.removeSync(outsideFile);
+    }
+  });
+
   it('should dump action modules', async () => {
     const moduleName = 'module-one';
     const dir = path.join(testDataDir, 'directory', 'actionModules4');

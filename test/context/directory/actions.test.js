@@ -150,13 +150,16 @@ describe('#directory context actions', () => {
     expect(context.assets.actions).to.deep.equal(actionsTarget);
   });
 
-  it('should reject action code with a path outside the config directory', async () => {
+  it('should throw error when action code path resolves outside the config directory', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'test-path-traversal');
+    const outsideFile = path.join(testDataDir, 'directory', 'absolute-outside-code.js');
+    fs.ensureDirSync(path.join(repoDir, constants.ACTIONS_DIRECTORY));
+    fs.writeFileSync(outsideFile, 'module.exports = () => {};');
     createDir(repoDir, {
       [constants.ACTIONS_DIRECTORY]: {
         'action-one.json': JSON.stringify({
           name: 'action-one',
-          code: '/absolute/path/outside/config/code.js',
+          code: '../absolute-outside-code.js',
           runtime: 'node12',
           dependencies: [],
           secrets: [],
@@ -166,10 +169,14 @@ describe('#directory context actions', () => {
       },
     });
     const context = new Context({ AUTH0_INPUT_FILE: repoDir }, mockMgmtClient());
-    await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(
-      Error,
-      'must be relative to the config directory'
-    );
+    try {
+      await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(
+        Error,
+        'is outside the config directory'
+      );
+    } finally {
+      fs.removeSync(outsideFile);
+    }
   });
 
   it('should accept action code with a path relative to the config directory', async () => {
@@ -383,6 +390,61 @@ describe('#directory context actions', () => {
     const context = new Context(config, mockMgmtClient());
     await context.loadAssetsFromLocal();
     expect(context.assets.actions).to.deep.equal(target);
+  });
+
+  it('should not throw error when action code path is relative and inside the config root', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'test-no-warn');
+    const files = {
+      [constants.ACTIONS_DIRECTORY]: {
+        'code.js': 'module.exports = () => {};',
+        'action-one.json': `{
+          "name": "action-one",
+          "code": "./actions/code.js",
+          "runtime": "node18",
+          "dependencies": [],
+          "secrets": [],
+          "status": "built",
+          "supported_triggers": [{ "id": "post-login", "version": "v3" }],
+          "deployed": true
+        }`,
+      },
+    };
+    createDir(repoDir, files);
+    const config = { AUTH0_INPUT_FILE: repoDir };
+    const context = new Context(config, mockMgmtClient());
+    await expect(context.loadAssetsFromLocal()).to.not.be.rejected;
+  });
+
+  it('should throw error when action code path resolves outside the config root', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'test-traversal-warn');
+    const outsideFile = path.join(testDataDir, 'directory', 'outside-action-code.js');
+    fs.ensureDirSync(path.join(repoDir, constants.ACTIONS_DIRECTORY));
+    fs.writeFileSync(outsideFile, 'module.exports = () => {};');
+    const files = {
+      [constants.ACTIONS_DIRECTORY]: {
+        'action-one.json': `{
+          "name": "action-one",
+          "code": "../outside-action-code.js",
+          "runtime": "node18",
+          "dependencies": [],
+          "secrets": [],
+          "status": "built",
+          "supported_triggers": [{ "id": "post-login", "version": "v3" }],
+          "deployed": true
+        }`,
+      },
+    };
+    createDir(repoDir, files);
+    const config = { AUTH0_INPUT_FILE: repoDir };
+    const context = new Context(config, mockMgmtClient());
+    try {
+      await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(
+        Error,
+        'is outside the config directory'
+      );
+    } finally {
+      fs.removeSync(outsideFile);
+    }
   });
 
   it('should dump actions with modules', async () => {

@@ -70,10 +70,11 @@ function getDatabase(
         log.warn('Skipping invalid database configuration: ' + name);
       } else {
         const resolvedBase = path.resolve(configRoot);
-        const toLoad = path.resolve(folder, script);
+        const toLoad = path.resolve(folder, script.replace(/\\/g, '/'));
         if (!toLoad.startsWith(resolvedBase + path.sep)) {
           throw new Error(
-            `File reference "${script}" in database custom script "${name}" must be relative to the config directory. Absolute paths and paths outside the config root are not supported.`
+            `Path "${script}" resolves to "${toLoad}" which is outside the config directory "${resolvedBase}". ` +
+              `Move the file inside your config directory.`
           );
         }
         database.options.customScripts[name] = loadFileAndReplaceKeywords(toLoad, mappingOpts);
