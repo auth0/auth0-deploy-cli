@@ -76,6 +76,7 @@ describe('#YAML context organizations', () => {
           },
         ],
         client_grants: [],
+        clients: [],
         discovery_domains: [
           {
             domain: 'login.acme.com',
@@ -102,6 +103,7 @@ describe('#YAML context organizations', () => {
           },
         ],
         client_grants: [],
+        clients: [],
       },
       {
         name: 'org-snow',
@@ -125,6 +127,7 @@ describe('#YAML context organizations', () => {
             client_id: 'Org Snow app',
           },
         ],
+        clients: [],
       },
     ];
 

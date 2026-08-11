@@ -213,7 +213,7 @@ The Deploy CLI supports managing the `directory_provisioning_configuration` for 
 
 The `mapping` array pairs Auth0 user fields with IdP fields, and `synchronize_automatically` controls whether Auth0 runs scheduled sync jobs for the connection.
 
-The `synchronize_groups` field controls group provisioning.
+The `synchronize_groups` field controls group provisioning. Accepted values are `off`, `all`, and `selected`. When set to `selected`, the `synchronized_groups` array specifies which Google Workspace groups to sync. Each group object contains `id` (required) and optional metadata fields `name`, `email`, and `direct_members_count` populated by the API.
 
 **YAML Example**
 
@@ -238,7 +238,13 @@ connections:
       synchronize_groups: selected
       synchronized_groups:
         - id: 'group-id-1'
+          name: 'Engineering'
+          email: 'engineering@example.com'
+          direct_members_count: 42
         - id: 'group-id-2'
+          name: 'Design'
+          email: 'design@example.com'
+          direct_members_count: 10
 ```
 
 **Directory Example**
@@ -267,7 +273,20 @@ connections:
     ],
     "synchronize_automatically": false,
     "synchronize_groups": "selected",
-    "synchronized_groups": [{ "id": "group-id-1" }, { "id": "group-id-2" }]
+    "synchronized_groups": [
+      {
+        "id": "group-id-1",
+        "name": "Engineering",
+        "email": "engineering@example.com",
+        "direct_members_count": 42
+      },
+      {
+        "id": "group-id-2",
+        "name": "Design",
+        "email": "design@example.com",
+        "direct_members_count": 10
+      }
+    ]
   }
 }
 ```
@@ -1127,6 +1146,55 @@ Contents of `Block iCloud Private Relay Exits-p-4.json`:
   }
 }
 ```
+
+## Organizations
+
+The deploy CLI supports managing organizations, including their connections, client grants, discovery domains, and org-to-app entitlement settings.
+
+### Org-to-App Entitlement (`is_app_entitlement_active` / `clients`)
+
+> **Note:** Requires the `org_to_app_entitlement_enabled` feature flag to be enabled on the tenant.
+
+`is_app_entitlement_active` controls whether org-to-app entitlement is active for an organization. When active, the `clients` array specifies which client applications org members are entitled to use for login.
+
+Each entry in `clients` has:
+
+- `client_id` — the **name** of the client application (resolved to the actual ID at deploy time)
+- `use_for_member_access` — when `true`, org members can use this client to log in
+
+**YAML Example**
+
+```yaml
+organizations:
+  - name: my-organization
+    display_name: My Organization
+    is_app_entitlement_active: true
+    clients:
+      - client_id: My App
+        use_for_member_access: true
+```
+
+**Directory Example**
+
+```
+./organizations/my-organization.json
+```
+
+```json
+{
+  "name": "my-organization",
+  "display_name": "My Organization",
+  "is_app_entitlement_active": true,
+  "clients": [
+    {
+      "client_id": "My App",
+      "use_for_member_access": true
+    }
+  ]
+}
+```
+
+> **Note:** When exporting, `client_id` values are resolved to client **names** for portability across environments. On deploy, names are resolved back to IDs. The M2M application used by the deploy CLI requires the `read:organization_clients`, `create:organization_clients`, `update:organization_clients`, and `delete:organization_clients` scopes.
 
 ## PhoneProviders
 
