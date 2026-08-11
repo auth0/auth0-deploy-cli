@@ -307,6 +307,75 @@ describe('#phoneTemplates handler', () => {
       expect(createPayload.content.body.text).to.equal('Some text');
     });
 
+    it('should omit empty content.from from the create payload', async () => {
+      // Fresh tenants export templates with `from: ''`, but the create API
+      // rejects an empty string. It must be dropped rather than sent.
+      let createPayload;
+      const auth0 = {
+        branding: {
+          phone: {
+            templates: {
+              list: () => Promise.resolve({ templates: [] }),
+              create: (data) => {
+                createPayload = data;
+                return Promise.resolve({ id: 'pntm_new', ...data });
+              },
+            },
+          },
+        },
+        pool: mockPool,
+      };
+
+      const handler = new phoneTemplatesHandler({ client: auth0, config: () => false });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      const newTemplate = {
+        type: 'otp_verify',
+        disabled: false,
+        content: { syntax: 'liquid', from: '', body: { text: 'Some text' } },
+      };
+
+      await stageFn.apply(handler, [{ phoneTemplates: [newTemplate] }]);
+      expect(createPayload.content).to.not.have.property('from');
+    });
+
+    it('should omit empty content.from from the update payload', async () => {
+      let updatePayload;
+      const existingTemplate = {
+        id: 'pntm_1234567890',
+        type: 'otp_verify',
+        disabled: false,
+        content: { syntax: 'liquid', from: '', body: { text: 'Some text' } },
+      };
+      const auth0 = {
+        branding: {
+          phone: {
+            templates: {
+              list: () => Promise.resolve({ templates: [existingTemplate] }),
+              update: (id, payload) => {
+                updatePayload = payload;
+                return Promise.resolve({ id, ...payload });
+              },
+            },
+          },
+        },
+        pool: mockPool,
+      };
+
+      const handler = new phoneTemplatesHandler({ client: auth0, config: () => false });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      const updatedTemplate = {
+        type: 'otp_verify',
+        disabled: false,
+        content: { syntax: 'liquid', from: '', body: { text: 'Updated text' } },
+      };
+
+      await stageFn.apply(handler, [{ phoneTemplates: [updatedTemplate] }]);
+      expect(updatePayload.content).to.not.have.property('from');
+      expect(updatePayload.content.body.text).to.equal('Updated text');
+    });
+
     it('should fall back to update when create returns 409 conflict', async () => {
       // If the template already exists (created between list and create, or its
       // ID wasn't surfaced by list), create returns 409 and we re-fetch + update.

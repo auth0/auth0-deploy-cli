@@ -125,10 +125,14 @@ export default class PhoneTemplatesHandler extends DefaultHandler {
   }
 
   async createPhoneTemplate(template): Promise<Asset> {
-    // The create endpoint only accepts type/disabled/content. Strip the
-    // read-only fields (channel, customizable, tenant) the base handler would
-    // normally remove, since processChanges is overridden here.
+    // The create endpoint only accepts type/disabled/content; strip read-only
+    // fields (channel, customizable, tenant) that the API would reject.
     const createPayload = stripFields(template, this.stripCreateFields);
+    // `content.from` is optional but the API rejects an empty string. Fresh
+    // tenants export it as '', so drop it when blank to let the create succeed.
+    if (createPayload.content && !createPayload.content.from) {
+      delete createPayload.content.from;
+    }
     try {
       const created = await this.client.branding.phone.templates.create(createPayload);
       return created;
@@ -181,7 +185,6 @@ export default class PhoneTemplatesHandler extends DefaultHandler {
 
     const updatePayload: Management.UpdatePhoneTemplateRequestContent = {
       content: {
-        from: template.content?.from,
         body: {
           text: template.content?.body?.text,
           voice: template.content?.body?.voice,
@@ -189,6 +192,12 @@ export default class PhoneTemplatesHandler extends DefaultHandler {
       },
       disabled: template.disabled,
     };
+
+    // `content.from` is optional but the API rejects an empty string, which is
+    // what fresh tenants export. Only include it when it has a value.
+    if (template.content?.from) {
+      updatePayload.content!.from = template.content.from;
+    }
 
     const updated = await this.client.branding.phone.templates.update(existing.id, updatePayload);
     return updated;
