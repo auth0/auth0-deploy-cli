@@ -124,27 +124,33 @@ export default class PhoneTemplatesHandler extends DefaultHandler {
     }
   }
 
-  async createPhoneTemplate(template): Promise<Asset> {
+  async createPhoneTemplate(template): Promise<{ asset: Asset; action: 'create' | 'update' }> {
     // The create endpoint only accepts type/disabled/content; strip read-only
     // fields (channel, customizable, tenant) that the API would reject.
     const createPayload = stripFields(template, this.stripCreateFields);
-    // `content.from` is optional but the API rejects an empty string. Fresh
-    // tenants export it as '', so drop it when blank to let the create succeed.
+    // The API rejects an empty `content.from`, which is what fresh tenants
+    // export. Drop it when blank (cloning `content`, which stripFields only
+    // shallow-copied, so the caller's original asset isn't mutated).
     if (createPayload.content && !createPayload.content.from) {
+      createPayload.content = { ...createPayload.content };
       delete createPayload.content.from;
     }
     try {
       const created = await this.client.branding.phone.templates.create(createPayload);
-      return created;
+      return { asset: created, action: 'create' };
     } catch (err) {
       // A 409 means the template already exists on the tenant (it was created
       // between our list call and this create, or the list endpoint didn't
       // surface its ID). Re-fetch to pick up the ID and fall back to an update.
       if (err.statusCode === 409) {
         log.debug(`Phone template type '${template.type}' already exists, falling back to update`);
+        // Reassigns the shared `this.existing`; safe under concurrency since
+        // every re-fetch returns the same consistent list. If it still lacks an
+        // ID, updatePhoneTemplate warns and skips.
         const response = await this.client.branding.phone.templates.list();
         this.existing = response.templates ?? [];
-        return this.updatePhoneTemplate(template);
+        const updated = await this.updatePhoneTemplate(template);
+        return { asset: updated, action: 'update' };
       }
       throw err;
     }
@@ -156,9 +162,16 @@ export default class PhoneTemplatesHandler extends DefaultHandler {
         data: creates || [],
         generator: (item) =>
           this.createPhoneTemplate(item)
-            .then((data) => {
-              this.didCreate(data);
-              this.created += 1;
+            .then(({ asset, action }) => {
+              // A 409 fallback actually performed an update; count it as such so
+              // the import summary doesn't report a phantom "create".
+              if (action === 'update') {
+                this.didUpdate(asset);
+                this.updated += 1;
+              } else {
+                this.didCreate(asset);
+                this.created += 1;
+              }
             })
             .catch((err) => {
               throw new Error(`Problem creating ${this.type} ${this.objString(item)}\n${err}`);

@@ -337,6 +337,8 @@ describe('#phoneTemplates handler', () => {
 
       await stageFn.apply(handler, [{ phoneTemplates: [newTemplate] }]);
       expect(createPayload.content).to.not.have.property('from');
+      // Dropping the blank `from` must not mutate the caller's original asset.
+      expect(newTemplate.content).to.have.property('from', '');
     });
 
     it('should omit empty content.from from the update payload', async () => {
@@ -426,6 +428,10 @@ describe('#phoneTemplates handler', () => {
 
       await stageFn.apply(handler, [{ phoneTemplates: [updatedTemplate] }]);
       expect(updateCalled).to.equal(true);
+      // The 409 fallback performed an update, so it must be counted as an
+      // update rather than a phantom create in the import summary.
+      expect(handler.updated).to.equal(1);
+      expect(handler.created).to.equal(0);
     });
 
     it('should delete phone template when AUTH0_ALLOW_DELETE is true', async () => {
