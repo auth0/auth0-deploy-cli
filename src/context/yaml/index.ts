@@ -11,7 +11,7 @@ import {
 import pagedClient from '../../tools/auth0/client';
 
 import log from '../../logger';
-import { isFile, toConfigFn, stripIdentifiers, formatResults, recordsSorter } from '../../utils';
+import { toConfigFn, stripIdentifiers, formatResults, recordsSorter } from '../../utils';
 import handlers, { YAMLHandler } from './handlers';
 import cleanAssets from '../../readonly';
 import { Assets, Config, Auth0APIClient, AssetTypes, KeywordMappings } from '../../types';
@@ -58,17 +58,16 @@ export default class YAMLContext {
   }
 
   loadFile(f) {
-    let toLoad = path.join(this.basePath, f);
-    if (!isFile(toLoad)) {
-      // try load not relative to yaml file
-      toLoad = f;
+    const configRoot = path.resolve(this.basePath);
+    const toLoad = path.resolve(this.basePath, f.replace(/\\/g, '/'));
+    if (!toLoad.startsWith(configRoot + path.sep)) {
       log.warn(
-        `Support for absolute paths and paths outside the config root will be deprecated in a future version to improve the security of the tool. ` +
-          `Please update your configuration to use paths relative to the config directory. ` +
-          `Current absolute path used: ["${f}"]`
+        `Path "${f}" resolves to "${toLoad}" which is outside the config directory "${configRoot}". ` +
+          `This will be blocked as an error in the next major release. ` +
+          `Move the file inside your config directory.`
       );
     }
-    return loadFileAndReplaceKeywords(path.resolve(toLoad), {
+    return loadFileAndReplaceKeywords(toLoad, {
       mappings: this.mappings,
       disableKeywordReplacement: this.disableKeywordReplacement,
     });
