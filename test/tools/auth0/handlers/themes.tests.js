@@ -262,6 +262,74 @@ describe('#themes handler', () => {
       expect(auth0.branding.themes.create.called).to.equal(false);
       expect(auth0.branding.themes.delete.called).to.equal(false);
     });
+
+    it('should create the theme with identifiers when default theme does not exist', async () => {
+      const theme = mockTheme();
+      theme.identifiers = {
+        login_display: 'unified',
+        otp_autocomplete: true,
+        phone_display: {
+          masking: 'mask_digits',
+          formatting: 'international',
+        },
+      };
+
+      const auth0 = {
+        branding: {
+          themes: {
+            getDefault: stub().returns(Promise.reject(errorWithStatusCode(404))),
+            create: stub().returns(Promise.resolve(theme)),
+            update: stub().returns(Promise.reject(new Error('update should not have been called'))),
+            delete: stub().returns(Promise.reject(new Error('delete should not have been called'))),
+          },
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0 });
+      const assets = { themes: [theme] };
+
+      await handler.processChanges(assets);
+
+      expect(auth0.branding.themes.create.called).to.equal(true);
+      expect(auth0.branding.themes.create.callCount).to.equal(1);
+      expect(auth0.branding.themes.create.calledWith(theme)).to.equal(true);
+      expect(auth0.branding.themes.update.called).to.equal(false);
+    });
+
+    it('should update the theme with identifiers when default exists', async () => {
+      const theme = mockTheme({ withThemeId: 'myThemeId' });
+      theme.identifiers = {
+        login_display: 'separate',
+        otp_autocomplete: false,
+        phone_display: {
+          masking: 'show_all',
+          formatting: 'regional',
+        },
+      };
+
+      const auth0 = {
+        branding: {
+          themes: {
+            getDefault: stub().returns(theme),
+            create: stub().returns(Promise.reject(new Error('create should not have been called'))),
+            update: stub().returns(Promise.resolve(theme)),
+            delete: stub().returns(Promise.reject(new Error('delete should not have been called'))),
+          },
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0 });
+      const assets = { themes: [omit(theme, 'themeId')] };
+
+      await handler.processChanges(assets);
+
+      expect(auth0.branding.themes.update.called).to.equal(true);
+      expect(auth0.branding.themes.update.callCount).to.equal(1);
+      expect(
+        auth0.branding.themes.update.calledWith('myThemeId', omit(theme, 'themeId'))
+      ).to.deep.equal(true);
+      expect(auth0.branding.themes.create.called).to.equal(false);
+    });
   });
 
   it('should delete the theme when default theme exists and AUTH0_ALLOW_DELETE: true', async () => {
@@ -321,6 +389,122 @@ describe('#themes handler', () => {
     expect(auth0.branding.themes.delete.called).to.equal(false);
     expect(auth0.branding.themes.update.called).to.equal(false);
     expect(auth0.branding.themes.create.called).to.equal(false);
+  });
+
+  describe('#themes dryRunChanges', () => {
+    it('should produce no create/delete when local theme lacks themeId (exported without --export_ids)', async () => {
+      const remoteTheme = mockTheme({ withThemeId: 'remote-theme-id' });
+      const localTheme = omit(cloneDeep(remoteTheme), 'themeId');
+
+      const auth0 = {
+        branding: {
+          themes: {
+            getDefault: stub().returns(Promise.resolve(remoteTheme)),
+          },
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0 });
+      const changes = await handler.dryRunChanges({ themes: [localTheme] });
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+    });
+
+    it('should produce no update when local theme lacks themeId and content is identical', async () => {
+      const remoteTheme = mockTheme({ withThemeId: 'remote-theme-id' });
+      const localTheme = omit(cloneDeep(remoteTheme), 'themeId');
+
+      const auth0 = {
+        branding: {
+          themes: {
+            getDefault: stub().returns(Promise.resolve(remoteTheme)),
+          },
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0 });
+      const changes = await handler.dryRunChanges({ themes: [localTheme] });
+
+      expect(changes.update).to.have.length(0);
+    });
+
+    it('should propose update (not create/delete) when content differs and local theme lacks themeId', async () => {
+      const remoteTheme = mockTheme({ withThemeId: 'remote-theme-id' });
+      const localTheme = {
+        ...omit(cloneDeep(remoteTheme), 'themeId'),
+        colors: { ...remoteTheme.colors, primary_button: '#aabbcc' },
+      };
+
+      const auth0 = {
+        branding: {
+          themes: {
+            getDefault: stub().returns(Promise.resolve(remoteTheme)),
+          },
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0 });
+      const changes = await handler.dryRunChanges({ themes: [localTheme] });
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.update).to.have.length(1);
+    });
+
+    it('should produce no changes when local theme already has themeId and content matches', async () => {
+      const remoteTheme = mockTheme({ withThemeId: 'remote-theme-id' });
+
+      const auth0 = {
+        branding: {
+          themes: {
+            getDefault: stub().returns(Promise.resolve(remoteTheme)),
+          },
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0 });
+      const changes = await handler.dryRunChanges({ themes: [cloneDeep(remoteTheme)] });
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+    });
+
+    it('should return empty changes when themes is not present in assets', async () => {
+      const handler = new ThemesHandler({ client: {} });
+      const changes = await handler.dryRunChanges({});
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
+
+    it('should return empty changes when getType returns null (no-code not enabled on tenant)', async () => {
+      const auth0 = {
+        branding: {
+          themes: {
+            getDefault: stub().returns(
+              Promise.reject(
+                errorWithStatusCode(
+                  400,
+                  'Your account does not have universal login customizations enabled'
+                )
+              )
+            ),
+          },
+        },
+      };
+
+      const handler = new ThemesHandler({ client: auth0 });
+      const changes = await handler.dryRunChanges({ themes: [{ displayName: 'Default Theme' }] });
+
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.conflicts).to.have.length(0);
+    });
   });
 });
 

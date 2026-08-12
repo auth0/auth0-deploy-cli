@@ -66,6 +66,7 @@ describe('#roles handler', () => {
             expect(data).to.be.an('object');
             expect(data.name).to.equal('myRole');
             expect(data.description).to.equal('myDescription');
+            expect(data).to.not.have.property('type');
             return Promise.resolve(data);
           },
           update: () => Promise.resolve([]),
@@ -97,6 +98,7 @@ describe('#roles handler', () => {
               name: 'myRole',
               id: 'myRoleId',
               description: 'myDescription',
+              type: 'tenant',
               permissions: [],
             },
           ],
@@ -110,16 +112,20 @@ describe('#roles handler', () => {
         resource_server_identifier: 'organise',
       });
 
+      let listParams;
       const auth0 = {
         roles: {
-          list: (params) =>
-            mockPagedData({ ...params, include_totals: true }, 'roles', [
+          list: (params) => {
+            listParams = params;
+            return mockPagedData({ ...params, include_totals: true }, 'roles', [
               {
                 name: 'myRole',
                 id: 'myRoleId',
                 description: 'myDescription',
+                type: 'tenant',
               },
-            ]),
+            ]);
+          },
           permissions: {
             list: (roleId, params) =>
               mockPagedData({ ...params, include_totals: true }, 'permissions', permissions),
@@ -130,11 +136,15 @@ describe('#roles handler', () => {
 
       const handler = new roles.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
+      // org-scoped roles must be excluded from the tenant baseline
+      expect(listParams.type).to.equal('tenant');
+      // the type field is preserved on the exported role shape
       expect(data).to.deep.equal([
         {
           name: 'myRole',
           id: 'myRoleId',
           description: 'myDescription',
+          type: 'tenant',
           permissions: new Array(150).fill({
             permission_name: 'Create:cal_entry',
             resource_server_identifier: 'organise',
@@ -261,6 +271,7 @@ describe('#roles handler', () => {
             expect(data).to.be.an('object');
             expect(data.name).to.equal('myRole');
             expect(data.description).to.equal('myDescription');
+            expect(data).to.not.have.property('type');
 
             return Promise.resolve(data);
           },
@@ -306,6 +317,7 @@ describe('#roles handler', () => {
               name: 'myRole',
               id: 'myRoleId',
               description: 'myDescription',
+              type: 'tenant',
               permissions: [
                 {
                   permission_name: 'Create:cal_entry',

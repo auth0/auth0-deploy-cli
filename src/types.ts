@@ -32,6 +32,7 @@ type SharedPaginationParams = {
   include_totals?: boolean;
   id?: string;
   strategy?: Management.ConnectionStrategyEnum[];
+  type?: Management.RoleTypeEnum;
 };
 
 export type CheckpointPaginationParams = SharedPaginationParams & {

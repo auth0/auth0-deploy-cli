@@ -21,6 +21,7 @@ import { ConfigFunction } from '../../configFactory';
 import { dryRunFormatAssets, exportDiffLog } from '../calculateDryRunChanges';
 import { isTruthy } from '../../utils';
 import { printCLIMessage } from '../utils';
+import log from '../../logger';
 
 export type Stage = 'load' | 'validate' | 'processChanges';
 
@@ -185,6 +186,17 @@ export default class Auth0 {
         generator: (handler) =>
           (async () => {
             try {
+              // Every handler in the dry-run loop is expected to implement dryRunChanges.
+              // Guard against non-conforming handlers (e.g. deploy-only handlers that don't
+              // extend the base APIHandler) so a missing method skips the handler instead of
+              // crashing the whole dry run. Logged loudly so an omitted preview is visible.
+              if (typeof handler.dryRunChanges !== 'function') {
+                log.warn(
+                  `Handler "${handler.type}" does not implement dryRunChanges; skipping it in the dry-run preview. Changes for this resource will still be applied during a real import.`
+                );
+                return;
+              }
+
               const detailedChanges: DetailedDryRunChange[] = [];
               let created = 0;
               let updated = 0;

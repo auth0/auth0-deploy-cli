@@ -842,6 +842,114 @@ describe('#databases handler', () => {
       ]);
     });
 
+    it('should strip legacy password fields on export when password_options is present', async () => {
+      const auth0 = {
+        connections: {
+          list: function (params) {
+            (() => expect(this).to.not.be.undefined)();
+            return mockPagedData(params, 'connections', [
+              {
+                id: 'con1',
+                strategy: 'auth0',
+                name: 'Username-Password-Authentication',
+                options: {
+                  password_options: { complexity: { min_length: 10 } },
+                  passwordPolicy: 'good',
+                  password_complexity_options: { min_length: 8 },
+                  password_history: { enable: true, size: 5 },
+                  password_no_personal_info: { enable: true },
+                  password_dictionary: { enable: true, dictionary: [] },
+                  brute_force_protection: true,
+                },
+              },
+            ]);
+          },
+          clients: {
+            get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
+          },
+        },
+        clients: {
+          list: function (params) {
+            (() => expect(this).to.not.be.undefined)();
+            return mockPagedData(params, 'clients', []);
+          },
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const data = await handler.getType();
+
+      // Legacy password fields must be stripped when password_options is present,
+      // leaving password_options and unrelated options intact so the export stays deployable.
+      expect(data).to.deep.equal([
+        {
+          id: 'con1',
+          strategy: 'auth0',
+          name: 'Username-Password-Authentication',
+          options: {
+            password_options: { complexity: { min_length: 10 } },
+            brute_force_protection: true,
+          },
+        },
+      ]);
+    });
+
+    it('should preserve legacy password fields on export when password_options is absent', async () => {
+      const auth0 = {
+        connections: {
+          list: function (params) {
+            (() => expect(this).to.not.be.undefined)();
+            return mockPagedData(params, 'connections', [
+              {
+                id: 'con1',
+                strategy: 'auth0',
+                name: 'Username-Password-Authentication',
+                options: {
+                  passwordPolicy: 'good',
+                  password_history: { enable: true, size: 5 },
+                  brute_force_protection: true,
+                },
+              },
+            ]);
+          },
+          clients: {
+            get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
+          },
+        },
+        clients: {
+          list: function (params) {
+            (() => expect(this).to.not.be.undefined)();
+            return mockPagedData(params, 'clients', []);
+          },
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const data = await handler.getType();
+
+      // A legacy-only connection must be untouched.
+      expect(data).to.deep.equal([
+        {
+          id: 'con1',
+          strategy: 'auth0',
+          name: 'Username-Password-Authentication',
+          options: {
+            passwordPolicy: 'good',
+            password_history: { enable: true, size: 5 },
+            brute_force_protection: true,
+          },
+        },
+      ]);
+    });
+
     it('should update database', async () => {
       const auth0 = {
         connections: {
