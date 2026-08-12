@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add org-to-app entitlement (EA) support for organizations. [#1454]
+- Support full group metadata for Google Workspace directory sync (GA). [#1456]
+
+### Fixed
+
+- Create phone templates on import instead of skipping when they have no ID. [#1457]
+- Address path traversal vulnerability and false warnings in config file handlers. [#1449]
+- Exclude org-scoped roles from tenant export by filtering `type='tenant'`. [#1453]
+- Strip read-only field from roles to fix export/import round-trip. [#1445]
+
 ## [8.42.0] - 2026-07-30
 
 ### Added
@@ -1907,6 +1919,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1436]: https://github.com/auth0/auth0-deploy-cli/issues/1436
 [#1437]: https://github.com/auth0/auth0-deploy-cli/issues/1437
 [#1438]: https://github.com/auth0/auth0-deploy-cli/issues/1438
+[#1445]: https://github.com/auth0/auth0-deploy-cli/issues/1445
+[#1449]: https://github.com/auth0/auth0-deploy-cli/issues/1449
+[#1453]: https://github.com/auth0/auth0-deploy-cli/issues/1453
+[#1454]: https://github.com/auth0/auth0-deploy-cli/issues/1454
+[#1456]: https://github.com/auth0/auth0-deploy-cli/issues/1456
+[#1457]: https://github.com/auth0/auth0-deploy-cli/issues/1457
 [Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.42.0...HEAD
 [8.42.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.41.0...v8.42.0
 [8.41.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.40.0...v8.41.0
