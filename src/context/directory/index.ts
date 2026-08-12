@@ -47,17 +47,17 @@ export default class DirectoryContext {
   }
 
   loadFile(f: string, folder: string) {
-    const basePath = path.join(this.filePath, folder);
-    let toLoad = path.join(basePath, f);
-    if (!isFile(toLoad)) {
-      // try load not relative to yaml file
-      toLoad = f;
-      log.warn(
-        `Support for absolute paths and paths outside the config root will be deprecated in a future version to improve the security of the tool. ` +
-          `Please update your configuration to use paths relative to the config directory. ` +
-          `Current absolute path used: ["${f}"]`
+    const resolvedBase = path.resolve(this.filePath);
+    const inSubfolder = path.resolve(this.filePath, folder, f);
+    const inRoot = path.resolve(this.filePath, f);
+    const toLoad = isFile(inSubfolder) ? inSubfolder : inRoot;
+
+    if (!toLoad.startsWith(resolvedBase + path.sep)) {
+      throw new Error(
+        `File reference "${f}" must be relative to the config directory. Absolute paths and paths outside the config root are not supported.`
       );
     }
+
     return loadFileAndReplaceKeywords(toLoad, {
       mappings: this.mappings,
       disableKeywordReplacement: this.disableKeywordReplacement,
