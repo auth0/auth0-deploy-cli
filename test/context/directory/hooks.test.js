@@ -1,7 +1,9 @@
 import path from 'path';
 import fs from 'fs-extra';
+import sinon from 'sinon';
 import { expect } from 'chai';
 import { constants } from '../../../src/tools';
+import log from '../../../src/logger';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/hooks';
@@ -73,6 +75,32 @@ describe('#directory context hooks', () => {
     await expect(context.loadAssetsFromLocal())
       .to.be.eventually.rejectedWith(Error)
       .and.have.property('message', errorMessage);
+  });
+
+  it('should warn when hook script path resolves outside the config root', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'hooks-traversal-warn');
+    const outsideFile = path.join(testDataDir, 'directory', 'outside-hook.js');
+    fs.ensureDirSync(path.join(repoDir, constants.HOOKS_DIRECTORY));
+    fs.writeFileSync(outsideFile, 'function outside() {}');
+    const traversalHooks = {
+      'some-hook.json':
+        '{ "name": "Some Hook", "enabled": true, "script": "../../outside-hook.js", "triggerId": "credentials-exchange" }',
+    };
+    createDir(repoDir, { [constants.HOOKS_DIRECTORY]: traversalHooks });
+    const config = { AUTH0_INPUT_FILE: repoDir };
+    const context = new Context(config, mockMgmtClient());
+    if (log.warn.restore) log.warn.restore();
+    const warnSpy = sinon.spy(log, 'warn');
+    try {
+      await context.loadAssetsFromLocal();
+      const deprecationWarned = warnSpy.args.some(([msg]) =>
+        msg.includes('will be blocked as an error')
+      );
+      expect(deprecationWarned).to.be.true;
+    } finally {
+      warnSpy.restore();
+      fs.removeSync(outsideFile);
+    }
   });
 
   it('should dump hooks', async () => {
