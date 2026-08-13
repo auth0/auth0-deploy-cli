@@ -217,9 +217,10 @@ export function eventStreamDefaults(
 }
 
 /**
- * Recursively sorts primitive arrays (e.g. `shields`, `admin_notification_frequency`)
- * within the attackProtection subtree so repeated exports produce deterministic output.
- * These are unordered enum-like sets, so ordering is cosmetic. Object arrays are left as-is.
+ * Sorts primitive arrays (e.g. `shields`, `admin_notification_frequency`) within the
+ * attackProtection subtree in place, so repeated exports produce deterministic output.
+ * These are unordered, string-typed enum sets — ordering is cosmetic. Object arrays are
+ * left as-is.
  */
 export function sortAttackProtectionArrays(attackProtection: AttackProtection): AttackProtection {
   const sortArraysDeep = (value: unknown): void => {
