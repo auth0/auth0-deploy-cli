@@ -2052,7 +2052,7 @@ describe('#organizations handler', () => {
           orgUpdateCalled = true;
           return Promise.resolve({});
         },
-        onConnectionUpdate: (orgId, connectionId, data) => {
+        onConnectionUpdate: (_orgId, _connectionId, _data) => {
           connectionUpdateCalled = true;
           return Promise.resolve({});
         },
