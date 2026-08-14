@@ -209,6 +209,231 @@ describe('#phoneTemplates handler', () => {
       expect(updateCalled).to.equal(true);
     });
 
+    it('should create phone template when existing template has no id (new tenant)', async () => {
+      // On a newly created tenant the API returns default templates without an id
+      // until they are explicitly created. The CLI must POST rather than PATCH.
+      let createCalled = false;
+      const existingTemplateWithoutId = {
+        type: 'otp_verify',
+        disabled: false,
+        content: {
+          syntax: 'liquid',
+          from: '',
+          body: {
+            text: 'Default text',
+            voice: 'Default voice',
+          },
+        },
+      };
+
+      const auth0 = {
+        branding: {
+          phone: {
+            templates: {
+              list: () => Promise.resolve({ templates: [existingTemplateWithoutId] }),
+              create: (data) => {
+                createCalled = true;
+                expect(data.type).to.equal('otp_verify');
+                expect(data.content.body.text).to.equal('Updated text');
+                return Promise.resolve({ id: 'pntm_new', ...data });
+              },
+              update: () => {
+                throw new Error('was not expecting update to be called');
+              },
+            },
+          },
+        },
+        pool: mockPool,
+      };
+
+      const handler = new phoneTemplatesHandler({ client: auth0, config: () => false });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      const updatedTemplate = {
+        type: 'otp_verify',
+        disabled: false,
+        content: {
+          syntax: 'liquid',
+          from: '',
+          body: {
+            text: 'Updated text',
+            voice: 'Default voice',
+          },
+        },
+      };
+
+      await stageFn.apply(handler, [{ phoneTemplates: [updatedTemplate] }]);
+      expect(createCalled).to.equal(true);
+    });
+
+    it('should strip read-only fields from the create payload', async () => {
+      let createPayload;
+      const auth0 = {
+        branding: {
+          phone: {
+            templates: {
+              list: () => Promise.resolve({ templates: [] }),
+              create: (data) => {
+                createPayload = data;
+                return Promise.resolve({ id: 'pntm_new', ...data });
+              },
+            },
+          },
+        },
+        pool: mockPool,
+      };
+
+      const handler = new phoneTemplatesHandler({ client: auth0, config: () => false });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      const newTemplate = {
+        type: 'otp_verify',
+        disabled: false,
+        channel: 'sms',
+        customizable: true,
+        tenant: 'test-tenant',
+        content: {
+          syntax: 'liquid',
+          from: '+15551234567',
+          body: { text: 'Some text' },
+        },
+      };
+
+      await stageFn.apply(handler, [{ phoneTemplates: [newTemplate] }]);
+      expect(createPayload).to.not.have.property('channel');
+      expect(createPayload).to.not.have.property('customizable');
+      expect(createPayload).to.not.have.property('tenant');
+      expect(createPayload.type).to.equal('otp_verify');
+      expect(createPayload.content.body.text).to.equal('Some text');
+    });
+
+    it('should omit empty content.from from the create payload', async () => {
+      // Fresh tenants export templates with `from: ''`, but the create API
+      // rejects an empty string. It must be dropped rather than sent.
+      let createPayload;
+      const auth0 = {
+        branding: {
+          phone: {
+            templates: {
+              list: () => Promise.resolve({ templates: [] }),
+              create: (data) => {
+                createPayload = data;
+                return Promise.resolve({ id: 'pntm_new', ...data });
+              },
+            },
+          },
+        },
+        pool: mockPool,
+      };
+
+      const handler = new phoneTemplatesHandler({ client: auth0, config: () => false });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      const newTemplate = {
+        type: 'otp_verify',
+        disabled: false,
+        content: { syntax: 'liquid', from: '', body: { text: 'Some text' } },
+      };
+
+      await stageFn.apply(handler, [{ phoneTemplates: [newTemplate] }]);
+      expect(createPayload.content).to.not.have.property('from');
+      // Dropping the blank `from` must not mutate the caller's original asset.
+      expect(newTemplate.content).to.have.property('from', '');
+    });
+
+    it('should omit empty content.from from the update payload', async () => {
+      let updatePayload;
+      const existingTemplate = {
+        id: 'pntm_1234567890',
+        type: 'otp_verify',
+        disabled: false,
+        content: { syntax: 'liquid', from: '', body: { text: 'Some text' } },
+      };
+      const auth0 = {
+        branding: {
+          phone: {
+            templates: {
+              list: () => Promise.resolve({ templates: [existingTemplate] }),
+              update: (id, payload) => {
+                updatePayload = payload;
+                return Promise.resolve({ id, ...payload });
+              },
+            },
+          },
+        },
+        pool: mockPool,
+      };
+
+      const handler = new phoneTemplatesHandler({ client: auth0, config: () => false });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      const updatedTemplate = {
+        type: 'otp_verify',
+        disabled: false,
+        content: { syntax: 'liquid', from: '', body: { text: 'Updated text' } },
+      };
+
+      await stageFn.apply(handler, [{ phoneTemplates: [updatedTemplate] }]);
+      expect(updatePayload.content).to.not.have.property('from');
+      expect(updatePayload.content.body.text).to.equal('Updated text');
+    });
+
+    it('should fall back to update when create returns 409 conflict', async () => {
+      // If the template already exists (created between list and create, or its
+      // ID wasn't surfaced by list), create returns 409 and we re-fetch + update.
+      let updateCalled = false;
+      let listCalls = 0;
+      const auth0 = {
+        branding: {
+          phone: {
+            templates: {
+              list: () => {
+                listCalls += 1;
+                // First list (getType): no ID. Second list (after 409): has ID.
+                const template = {
+                  type: 'otp_verify',
+                  disabled: false,
+                  content: { syntax: 'liquid', from: '', body: { text: 'x', voice: 'y' } },
+                };
+                if (listCalls > 1) {
+                  return Promise.resolve({ templates: [{ id: 'pntm_existing', ...template }] });
+                }
+                return Promise.resolve({ templates: [template] });
+              },
+              create: () => {
+                const err = new Error('Conflict');
+                (err as any).statusCode = 409;
+                return Promise.reject(err);
+              },
+              update: (id, updatePayload) => {
+                updateCalled = true;
+                expect(id).to.equal('pntm_existing');
+                expect(updatePayload.content.body.text).to.equal('Updated text');
+                return Promise.resolve({ id, ...updatePayload });
+              },
+            },
+          },
+        },
+        pool: mockPool,
+      };
+
+      const handler = new phoneTemplatesHandler({ client: auth0, config: () => false });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      const updatedTemplate = {
+        type: 'otp_verify',
+        disabled: false,
+        content: { syntax: 'liquid', from: '', body: { text: 'Updated text', voice: 'y' } },
+      };
+
+      await stageFn.apply(handler, [{ phoneTemplates: [updatedTemplate] }]);
+      expect(updateCalled).to.equal(true);
+      // The 409 fallback performed an update, so it must be counted as an
+      // update rather than a phantom create in the import summary.
+      expect(handler.updated).to.equal(1);
+      expect(handler.created).to.equal(0);
+    });
+
     it('should delete phone template when AUTH0_ALLOW_DELETE is true', async () => {
       let deleteCalled = false;
       const AUTH0_ALLOW_DELETE = true;

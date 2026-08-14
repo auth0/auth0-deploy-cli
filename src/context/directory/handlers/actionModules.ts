@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { constants } from '../../../tools';
+import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
 import { getFiles, existsMustBeDir, loadJSON, sanitize, dumpJSON } from '../../../utils';
 import log from '../../../logger';
@@ -24,22 +24,21 @@ function parse(context: DirectoryContext): ParsedActionModules {
         disableKeywordReplacement: context.disableKeywordReplacement,
       }),
     };
-    const moduleFolder = path.join(constants.ACTION_MODULES_DIRECTORY, `${module.name}`);
-
     if (module.code) {
-      // The `module.code` can be a file path. It needs to be loaded.
-      // It can be a relative path, so we need to handle both cases.
-      const unixPath = module.code.replace(/[\\/]+/g, '/').replace(/^([a-zA-Z]+:|\.\/)/, '');
-      if (fs.existsSync(unixPath)) {
+      const normalizedCode = module.code.replace(/\\/g, '/');
+      const configRoot = path.resolve(context.filePath);
+      const resolvedPath = path.resolve(context.filePath, normalizedCode);
+      if (!resolvedPath.startsWith(configRoot + path.sep)) {
         log.warn(
-          `Support for absolute paths and paths outside the config root will be deprecated in a future version to improve the security of the tool. ` +
-            `Please update your configuration to use paths relative to the config directory. ` +
-            `Current absolute path used: ["${module.code}"]`
+          `Path "${module.code}" resolves to "${resolvedPath}" which is outside the config directory "${configRoot}". ` +
+            `This will be blocked as an error in the next major release. ` +
+            `Move the file inside your config directory.`
         );
-        module.code = context.loadFile(unixPath, moduleFolder);
-      } else {
-        module.code = context.loadFile(path.join(context.filePath, module.code), moduleFolder);
       }
+      module.code = loadFileAndReplaceKeywords(resolvedPath, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      });
     }
 
     return module;

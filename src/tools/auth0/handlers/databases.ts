@@ -497,8 +497,25 @@ export default class DatabaseHandler extends DefaultAPIHandler {
       return connection;
     });
 
+    // A connection can return both legacy password fields and `password_options` on read, but
+    // they're mutually exclusive on write. Strip the legacy fields to keep the export deployable.
+    const dbConnectionsNormalized = dbConnectionsWithActionNames.map((connection) => {
+      if (connection.options && 'password_options' in connection.options) {
+        const {
+          passwordPolicy,
+          password_complexity_options,
+          password_history,
+          password_no_personal_info,
+          password_dictionary,
+          ...options
+        } = connection.options as Record<string, unknown>;
+        return { ...connection, options };
+      }
+      return connection;
+    });
+
     // If options option is empty for all connection, log the missing options scope.
-    const isOptionExists = dbConnectionsWithActionNames.every(
+    const isOptionExists = dbConnectionsNormalized.every(
       (c) => c.options && Object.keys(c.options).length > 0
     );
     if (!isOptionExists) {
@@ -507,7 +524,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
       );
     }
 
-    this.existing = dbConnectionsWithActionNames;
+    this.existing = dbConnectionsNormalized;
 
     return this.existing;
   }
