@@ -133,6 +133,10 @@ export const exportDiffLog = async (fileName: string, resourceTypeName?: string)
   }
 };
 
+function formatDiffValue(value: unknown): string {
+  return typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value);
+}
+
 /**
  * Compares two objects and returns an array of human-readable difference strings.
  * Only considers keys present in `localObj` — extra keys in `remoteObj` are ignored.
@@ -232,7 +236,9 @@ export function getObjectDifferences(
             );
             differences.push(...nestedDifferences);
           } else if (item !== normalizedRemoteValue[index]) {
-            const message = `Array item difference at [${currentPath}[${index}]]: local:${item} vs remote:${normalizedRemoteValue[index]}`;
+            const message = `Array item difference at [${currentPath}[${index}]]: local:${formatDiffValue(
+              item
+            )} vs remote:${formatDiffValue(normalizedRemoteValue[index])}`;
             differences.push(message);
           }
         });
@@ -273,13 +279,10 @@ export function getObjectDifferences(
       return;
     }
 
-    // Compare primitive values — omit array indices from path to reduce log noise
+    // Compare primitive values
     if (localValue !== remoteValue) {
-      let arrayPathRegex = new RegExp(/\[\d+\]/g);
-      if (!arrayPathRegex.test(currentPath)) {
-        const message = `Value difference for [${currentPath}]: local:${localValue} vs remote:${remoteValue}`;
-        differences.push(message);
-      }
+      const message = `Value difference for [${currentPath}]: local:${localValue} vs remote:${remoteValue}`;
+      differences.push(message);
     }
   });
 
@@ -341,9 +344,9 @@ export function calculateDryRunChanges({
   const localAssets: Asset[] = (Array.isArray(assets) ? [...assets] : [assets]).map((asset) =>
     type === 'tenant' ? normalizeTenantForDryRun(asset) : asset
   );
-  const remoteAssets: Asset[] = (Array.isArray(existing) ? [...existing] : [existing]).map(
-    (asset) => (type === 'tenant' ? normalizeTenantForDryRun(asset) : asset)
-  );
+  const remoteAssets: Asset[] = (
+    Array.isArray(existing) ? [...existing] : existing ? [existing] : []
+  ).map((asset) => (type === 'tenant' ? normalizeTenantForDryRun(asset) : asset));
 
   // Helper: returns true if a local and remote asset share at least one identifier value
   const assetsMatch = (localAsset: Asset, remoteAsset: Asset) =>
