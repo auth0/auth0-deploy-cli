@@ -122,5 +122,38 @@ describe('#guardianFactorTemplates handler', () => {
 
       await stageFn.apply(handler, [{ guardianFactorTemplates: data }]);
     });
+
+    it('should warn and skip when the legacy feature is not allowed on the tenant', async () => {
+      const auth0 = {
+        guardian: {
+          factors: {
+            sms: {
+              setTemplates: () => {
+                const err = new Error(
+                  'Insufficient privileges to use this deprecated feature. To handle Phone Provider/Templates refer to Tenant Phone Settings'
+                );
+                err.statusCode = 403;
+                err.errorCode = 'legacy_mfa_phone_provider_not_allowed';
+                return Promise.reject(err);
+              },
+            },
+          },
+        },
+        pool,
+      };
+
+      const handler = new guardianFactorTemplatesTests.default({ client: auth0, config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          name: 'sms',
+          enrollment_message: 'test',
+        },
+      ];
+
+      // Should resolve (not throw) even though the API rejects with a 403.
+      await stageFn.apply(handler, [{ guardianFactorTemplates: data }]);
+      expect(handler.updated).to.equal(0);
+    });
   });
 });

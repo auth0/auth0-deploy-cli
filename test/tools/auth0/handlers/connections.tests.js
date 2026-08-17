@@ -70,6 +70,153 @@ describe('#connections handler', () => {
             dpop_signing_alg: 'Ed25519',
           },
         },
+        {
+          name: 'samlp-connection',
+          strategy: 'samlp',
+          options: {
+            discovery_url: 'https://example-idp.com/.well-known/openid-configuration',
+            oidc_metadata: { issuer: 'https://example-idp.com' },
+          },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should allow cross_app_access_requesting_app with active boolean', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'oidc-connection',
+          strategy: 'oidc',
+          cross_app_access_requesting_app: { active: true },
+        },
+        {
+          name: 'okta-connection',
+          strategy: 'okta',
+          cross_app_access_requesting_app: { active: false },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should reject cross_app_access_requesting_app without active field', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'oidc-connection',
+          strategy: 'oidc',
+          cross_app_access_requesting_app: {},
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(false);
+      expect(ajv.errors).to.not.be.null;
+    });
+
+    it('should reject cross_app_access_requesting_app with unknown properties', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'oidc-connection',
+          strategy: 'oidc',
+          cross_app_access_requesting_app: { active: true, unknown_field: 'value' },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(false);
+      expect(ajv.errors).to.not.be.null;
+    });
+
+    it('should allow cross_app_access_resource_app with status enum', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'samlp-connection',
+          strategy: 'samlp',
+          cross_app_access_resource_app: { status: 'enabled' },
+        },
+        {
+          name: 'oidc-connection',
+          strategy: 'oidc',
+          cross_app_access_resource_app: { status: 'disabled' },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should reject cross_app_access_resource_app with invalid status', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'samlp-connection',
+          strategy: 'samlp',
+          cross_app_access_resource_app: { status: 'on' },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(false);
+      expect(ajv.errors).to.not.be.null;
+    });
+
+    it('should allow synchronized_groups items with full GA metadata (id, name, email, direct_members_count)', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'google-workspace',
+          strategy: 'google-apps',
+          directory_provisioning_configuration: {
+            mapping: [{ auth0: 'email', idp: 'mail' }],
+            synchronize_automatically: false,
+            synchronize_groups: 'selected',
+            synchronized_groups: [
+              {
+                id: 'group1',
+                name: 'Engineering',
+                email: 'engineering@example.com',
+                direct_members_count: 42,
+              },
+            ],
+          },
+        },
+      ];
+
+      const valid = ajv.validate(connections.schema, assets);
+
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should allow synchronized_groups items with only id (backward compatibility)', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const assets = [
+        {
+          name: 'google-workspace',
+          strategy: 'google-apps',
+          directory_provisioning_configuration: {
+            mapping: [],
+            synchronize_automatically: false,
+            synchronize_groups: 'selected',
+            synchronized_groups: [{ id: 'group1' }, { id: 'group2' }],
+          },
+        },
       ];
 
       const valid = ajv.validate(connections.schema, assets);
@@ -439,6 +586,45 @@ describe('#connections handler', () => {
         });
     });
 
+    it('should export full group metadata (name, email, direct_members_count) when present in synchronized_groups', async () => {
+      const auth0 = {
+        connections: {
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con1', strategy: 'google-apps', name: 'gsuite', options: {} },
+            ]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      sinon.stub(connections, 'getConnectionEnabledClients').resolves(undefined);
+      const dirProvConfigs = [
+        {
+          connection_id: 'con1',
+          mapping: [{ auth0: 'email', idp: 'mail' }],
+          synchronize_automatically: false,
+          synchronize_groups: 'selected',
+        },
+      ];
+      const syncedGroupsWithMetadata = [
+        { id: 'group1', name: 'Engineering', email: 'eng@example.com', direct_members_count: 10 },
+        { id: 'group2', name: 'Design', email: 'design@example.com', direct_members_count: 5 },
+      ];
+      sinon.stub(handler, 'getConnectionDirectoryProvisionings').resolves(dirProvConfigs);
+      sinon.stub(handler, 'getConnectionSynchronizedGroups').resolves(syncedGroupsWithMetadata);
+      handler.scimHandler.applyScimConfiguration = sinon.stub().resolves();
+
+      const data = await handler.getType();
+
+      expect(data[0].directory_provisioning_configuration.synchronized_groups).to.deep.equal(
+        syncedGroupsWithMetadata
+      );
+    });
+
     it('should update connection', async () => {
       const auth0 = {
         connections: {
@@ -499,6 +685,84 @@ describe('#connections handler', () => {
           connected_accounts: {
             active: false,
           },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ connections: data }]);
+    });
+
+    it('should pass cross_app_access_requesting_app through in the update payload', async () => {
+      const auth0 = {
+        connections: {
+          create: () => Promise.resolve({ data: {} }),
+          update: function (id, data) {
+            expect(id).to.equal('con1');
+            expect(data).to.have.deep.property('cross_app_access_requesting_app', { active: true });
+            return Promise.resolve({ ...data, id });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someConnection', id: 'con1', strategy: 'custom' },
+            ]),
+          _getRestClient: () => ({}),
+          clients: {
+            update: () => Promise.resolve({}),
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          name: 'someConnection',
+          strategy: 'custom',
+          cross_app_access_requesting_app: { active: true },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ connections: data }]);
+    });
+
+    it('should pass cross_app_access_resource_app through in the update payload', async () => {
+      const auth0 = {
+        connections: {
+          create: () => Promise.resolve({ data: {} }),
+          update: function (id, data) {
+            expect(id).to.equal('con1');
+            expect(data).to.have.deep.property('cross_app_access_resource_app', {
+              status: 'enabled',
+            });
+            return Promise.resolve({ ...data, id });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someConnection', id: 'con1', strategy: 'custom' },
+            ]),
+          _getRestClient: () => ({}),
+          clients: {
+            update: () => Promise.resolve({}),
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          name: 'someConnection',
+          strategy: 'custom',
+          cross_app_access_resource_app: { status: 'enabled' },
         },
       ];
 
@@ -860,6 +1124,67 @@ describe('#connections handler', () => {
         expect(result).to.deep.equal([{ id: 'group1' }, { id: 'group2' }, { id: 'group3' }]);
       });
 
+      it('should preserve full group metadata (name, email, direct_members_count) across pages', async () => {
+        const page1 = {
+          data: [
+            {
+              id: 'group1',
+              name: 'Engineering',
+              email: 'eng@example.com',
+              direct_members_count: 10,
+            },
+            { id: 'group2', name: 'Design', email: 'design@example.com', direct_members_count: 5 },
+          ],
+          hasNextPage: sinon.stub().onFirstCall().returns(true).onSecondCall().returns(false),
+        };
+        page1.getNextPage = sinon.stub().resolves({
+          data: [{ id: 'group3', name: 'Ops', email: 'ops@example.com', direct_members_count: 3 }],
+          hasNextPage: sinon.stub().returns(false),
+        });
+
+        const auth0 = {
+          connections: {
+            directoryProvisioning: {
+              listSynchronizedGroups: sinon.stub().resolves(page1),
+            },
+          },
+          pool,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        const result = await handler.getConnectionSynchronizedGroups('con1');
+
+        expect(result).to.deep.equal([
+          { id: 'group1', name: 'Engineering', email: 'eng@example.com', direct_members_count: 10 },
+          { id: 'group2', name: 'Design', email: 'design@example.com', direct_members_count: 5 },
+          { id: 'group3', name: 'Ops', email: 'ops@example.com', direct_members_count: 3 },
+        ]);
+      });
+
+      it('should omit undefined metadata fields and only include id when metadata is absent', async () => {
+        const page1 = {
+          data: [{ id: 'group1' }, { id: 'group2' }],
+          hasNextPage: sinon.stub().returns(false),
+        };
+
+        const auth0 = {
+          connections: {
+            directoryProvisioning: {
+              listSynchronizedGroups: sinon.stub().resolves(page1),
+            },
+          },
+          pool,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        const result = await handler.getConnectionSynchronizedGroups('con1');
+
+        expect(result).to.deep.equal([{ id: 'group1' }, { id: 'group2' }]);
+        expect(result[0]).to.not.have.property('name');
+        expect(result[0]).to.not.have.property('email');
+        expect(result[0]).to.not.have.property('direct_members_count');
+      });
+
       it('should return null and log warning when listSynchronizedGroups returns 403', async () => {
         const err = new Error('Forbidden');
         err.statusCode = 403;
@@ -898,6 +1223,24 @@ describe('#connections handler', () => {
             groups: [{ id: 'group1' }, { id: 'group2' }],
           })
         ).to.be.true;
+      });
+
+      it('should pass full group objects (name, email, direct_members_count) to set()', async () => {
+        const setStub = sinon.stub().resolves();
+        const auth0 = {
+          connections: { directoryProvisioning: { set: setStub } },
+          pool,
+        };
+
+        const fullGroups = [
+          { id: 'group1', name: 'Engineering', email: 'eng@example.com', direct_members_count: 10 },
+          { id: 'group2', name: 'Design', email: 'design@example.com', direct_members_count: 5 },
+        ];
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        await handler.updateConnectionSynchronizedGroups('con1', fullGroups);
+
+        expect(setStub.calledOnceWith('con1', { groups: fullGroups })).to.be.true;
       });
 
       it('should call set() for connections with synchronize_groups === selected in processConnectionDirectoryProvisioning', async () => {
@@ -943,6 +1286,55 @@ describe('#connections handler', () => {
 
         expect(createStub.calledOnce).to.be.true;
         expect(setSyncGroupsStub.calledOnceWith('con1', [{ id: 'group1' }])).to.be.true;
+      });
+
+      it('should pass full group objects to updateConnectionSynchronizedGroups when synchronize_groups is selected', async () => {
+        const poolExecutor = {
+          addEachTask: ({ data, generator }) => ({
+            promise: async () => {
+              for (const item of data || []) await generator(item);
+            },
+          }),
+        };
+
+        const auth0 = {
+          connections: { directoryProvisioning: {} },
+          clients: { list: (params) => mockPagedData(params, 'clients', []) },
+          pool: poolExecutor,
+        };
+
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        handler.existing = [];
+
+        const setSyncGroupsStub = sinon
+          .stub(handler, 'updateConnectionSynchronizedGroups')
+          .resolves();
+        sinon.stub(handler, 'createConnectionDirectoryProvisioning').resolves();
+
+        const fullGroups = [
+          { id: 'group1', name: 'Engineering', email: 'eng@example.com', direct_members_count: 10 },
+          { id: 'group2', name: 'Design', email: 'design@example.com', direct_members_count: 5 },
+        ];
+
+        await handler.processConnectionDirectoryProvisioning({
+          create: [
+            {
+              id: 'con1',
+              name: 'gsuite-new',
+              strategy: 'google-apps',
+              directory_provisioning_configuration: {
+                mapping: sampleMapping,
+                synchronize_groups: 'selected',
+                synchronized_groups: fullGroups,
+              },
+            },
+          ],
+          update: [],
+          conflicts: [],
+          del: [],
+        });
+
+        expect(setSyncGroupsStub.calledOnceWith('con1', fullGroups)).to.be.true;
       });
 
       it('should not call set() when synchronize_groups is not selected', async () => {

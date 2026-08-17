@@ -79,6 +79,24 @@ clients:
         - "custom_authentication"
         - "on_behalf_of_token_exchange"
   -
+    name: "My Token Vault Privileged App"
+    app_type: "non_interactive"
+    # Export-only: token_vault_privileged_access is exported for visibility but is NOT
+    # deployed by the CLI (it is stripped from import). Manage it directly on the tenant.
+    # See docs/resource-specific-documentation.md#token-vault-privileged-access.
+    token_vault_privileged_access:
+      ip_allowlist:
+        - "192.168.1.0/24"
+        - "10.0.0.1"
+      grants:
+        - connection: "google-oauth2"
+          scopes:
+            - "https://www.googleapis.com/auth/calendar.readonly"
+        - connection: "slack"
+          scopes:
+            - "chat:write"
+            - "channels:read"
+  -
     name: "My CIMD Client"
     external_client_id: "https://mcpserver.example.com/.well-known/client.json"
     app_type: "regular_web"
@@ -151,6 +169,12 @@ connections:
         - auth0: "name"
           idp: "displayName"
       synchronize_automatically: false
+      synchronize_groups: "selected"
+      synchronized_groups:
+        - id: "some_google_group_id"
+          name: "Engineering"
+          email: "engineering@example.com"
+          direct_members_count: 42
 
   - name: "enterprise-oidc"
     strategy: "oidc"
@@ -624,3 +648,41 @@ eventStreams:
       type: action
       configuration:
         action_id: "action-name"
+rateLimitPolicies:
+  - resource: oauth_authentication_api
+    consumer: client
+    consumer_selector: default
+    configuration:
+      action: block
+      limit: 100
+  - resource: oauth_authentication_api
+    consumer: client
+    consumer_selector: third_party_clients
+    configuration:
+      action: log
+      limit: 50
+  - resource: oauth_authentication_api
+    consumer: client
+    consumer_selector: "client_id:##MY_CLIENT_ID##"
+    configuration:
+      action: redirect
+      limit: 10
+      redirect_uri: https://example.com/rate-limited
+
+organizations:
+  - name: my-organization
+    display_name: My Organization
+    # Controls whether third-party clients can perform standard user flows (e.g. Authorization Code,
+    # Refresh Token exchange) within the context of this organization.
+    # Requires the organizations_third_party_client_support feature flag to be enabled on the tenant.
+    # Allowed values: allow, block (defaults to block)
+    third_party_client_access: block
+    # Controls whether org-to-app entitlement is active for this organization.
+    # Requires the org_to_app_entitlement_enabled feature flag to be enabled on the tenant.
+    is_app_entitlement_active: false
+    # List of client applications that org members are entitled to use for login.
+    # Only relevant when is_app_entitlement_active is true.
+    # use_for_member_access: when true, org members can use this client to log in.
+    clients:
+      - client_id: My App
+        use_for_member_access: true

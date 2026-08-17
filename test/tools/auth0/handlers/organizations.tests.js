@@ -289,6 +289,9 @@ describe('#organizations handler', () => {
           discoveryDomains: {
             list: () => mockPagedData({}, 'discovery_domains', []),
           },
+          clients: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
         },
         connections: {
           list: (params) => mockPagedData(params, 'connections', []),
@@ -308,6 +311,56 @@ describe('#organizations handler', () => {
       expect(wasCreateCalled).to.be.true;
     });
 
+    it('should allow valid third_party_client_access property in organization', async () => {
+      for (const value of ['allow', 'block']) {
+        const orgWithTpa = {
+          name: `org-tpa-${value}`,
+          third_party_client_access: value,
+        };
+        let wasCreateCalled = false;
+        const auth0 = {
+          organizations: {
+            create: function (data) {
+              wasCreateCalled = true;
+              expect(data.third_party_client_access).to.equal(value);
+              data.id = 'fake';
+              return Promise.resolve(data);
+            },
+            update: () => Promise.resolve({ data: [] }),
+            delete: () => Promise.resolve({ data: [] }),
+            list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+            connections: {
+              list: () => mockPagedData({}, 'connections', []),
+            },
+            clientGrants: {
+              list: () => mockPagedData({}, 'client_grants', []),
+            },
+            discoveryDomains: {
+              list: () => mockPagedData({}, 'discovery_domains', []),
+            },
+            clients: {
+              list: () => ({ data: [], hasNextPage: () => false }),
+            },
+          },
+          connections: {
+            list: (params) => mockPagedData(params, 'connections', []),
+          },
+          clients: {
+            list: (params) => mockPagedData(params, 'clients', sampleClients),
+          },
+          clientGrants: {
+            list: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+          },
+          pool,
+        };
+        const handler = new organizations.default({ client: pageClient(auth0), config });
+        const stageFn = Object.getPrototypeOf(handler).processChanges;
+        await stageFn.apply(handler, [{ organizations: [orgWithTpa] }]);
+        // eslint-disable-next-line no-unused-expressions
+        expect(wasCreateCalled).to.be.true;
+      }
+    });
+
     it('should get organizations', async () => {
       const auth0 = {
         organizations: {
@@ -320,6 +373,9 @@ describe('#organizations handler', () => {
           },
           discoveryDomains: {
             list: () => mockPagedData({}, 'discovery_domains', [sampleDiscoveryDomain]),
+          },
+          clients: {
+            list: () => ({ data: [], hasNextPage: () => false }),
           },
         },
         clients: {
@@ -366,6 +422,9 @@ describe('#organizations handler', () => {
           },
           discoveryDomains: {
             list: () => mockPagedData({}, 'discovery_domains', []),
+          },
+          clients: {
+            list: () => ({ data: [], hasNextPage: () => false }),
           },
         },
         clients: {
@@ -414,6 +473,9 @@ describe('#organizations handler', () => {
           },
           discoveryDomains: {
             list: () => mockPagedData({}, 'discovery_domains', []),
+          },
+          clients: {
+            list: () => ({ data: [], hasNextPage: () => false }),
           },
         },
         clients: {
@@ -531,6 +593,9 @@ describe('#organizations handler', () => {
           discoveryDomains: {
             list: () => mockPagedData({}, 'discovery_domains', []),
           },
+          clients: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
         },
         clients: {
           list: (params) => mockPagedData(params, 'clients', sampleClients),
@@ -608,6 +673,9 @@ describe('#organizations handler', () => {
           },
           discoveryDomains: {
             list: () => mockPagedData({}, 'discovery_domains', []),
+          },
+          clients: {
+            list: () => ({ data: [], hasNextPage: () => false }),
           },
         },
         connections: {
@@ -699,6 +767,9 @@ describe('#organizations handler', () => {
           discoveryDomains: {
             list: () => mockPagedData({}, 'discovery_domains', []),
           },
+          clients: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
         },
         connections: {
           list: (params) =>
@@ -784,6 +855,9 @@ describe('#organizations handler', () => {
           discoveryDomains: {
             list: () => mockPagedData({}, 'discovery_domains', []),
           },
+          clients: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
         },
         connections: {
           list: (params) =>
@@ -846,6 +920,9 @@ describe('#organizations handler', () => {
           },
           discoveryDomains: {
             list: () => mockPagedData({}, 'discovery_domains', []),
+          },
+          clients: {
+            list: () => ({ data: [], hasNextPage: () => false }),
           },
         },
         connections: {
@@ -910,6 +987,9 @@ describe('#organizations handler', () => {
           },
           discoveryDomains: {
             list: () => mockPagedData({}, 'discovery_domains', []),
+          },
+          clients: {
+            list: () => ({ data: [], hasNextPage: () => false }),
           },
         },
         connections: {
@@ -1032,6 +1112,9 @@ describe('#organizations handler', () => {
               return Promise.resolve({ data: {} });
             },
           },
+          clients: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
         },
         connections: {
           list: (params) => mockPagedData(params, 'connections', []),
@@ -1114,6 +1197,9 @@ describe('#organizations handler', () => {
               return Promise.resolve({ data: {} });
             },
           },
+          clients: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
         },
         connections: {
           list: (params) => mockPagedData(params, 'connections', []),
@@ -1192,6 +1278,9 @@ describe('#organizations handler', () => {
             delete: () => {
               throw new Error('deleteDiscoveryDomain should not be called when delete is disabled');
             },
+          },
+          clients: {
+            list: () => ({ data: [], hasNextPage: () => false }),
           },
         },
         connections: {
@@ -1289,6 +1378,368 @@ describe('#organizations handler', () => {
       ]);
 
       expect(createdDomains).to.have.lengthOf(3);
+    });
+
+    it('should export org-client associations with client name instead of ID', async () => {
+      const sampleOrgClientFromApi = {
+        client_id: 'abc_123',
+        use_for_member_access: true,
+        client: {
+          name: 'test client',
+          app_type: 'regular_web',
+          is_first_party: true,
+          grant_types: [],
+          organization_usage: 'allow',
+        },
+      };
+
+      const auth0 = {
+        organizations: {
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          connections: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          clientGrants: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          discoveryDomains: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          clients: {
+            list: () => ({ data: [sampleOrgClientFromApi], hasNextPage: () => false }),
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({ client: pageClient(auth0), config });
+      const data = await handler.getType();
+
+      expect(data[0].clients).to.deep.equal([
+        { client_id: 'test client', use_for_member_access: true },
+      ]);
+    });
+
+    it('should create organization with org-client associations', async () => {
+      let createdClients = null;
+
+      const auth0 = {
+        organizations: {
+          create: (data) => {
+            data.id = 'fake';
+            return Promise.resolve(data);
+          },
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [])),
+          connections: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          clientGrants: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          clients: {
+            create: (orgId, body) => {
+              expect(orgId).to.equal('fake');
+              createdClients = body.clients;
+              return Promise.resolve(body.clients);
+            },
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+        },
+        connections: {
+          list: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        clientGrants: {
+          list: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          organizations: [
+            {
+              name: 'acme',
+              display_name: 'Acme',
+              clients: [{ client_id: 'test client', use_for_member_access: true }],
+            },
+          ],
+        },
+      ]);
+
+      expect(createdClients).to.deep.equal([{ client_id: 'abc_123', use_for_member_access: true }]);
+    });
+
+    it('should add, update, and remove org-client associations on update', async () => {
+      const existingOrgClientFromApi = {
+        client_id: 'xyz_123',
+        use_for_member_access: false,
+        client: {
+          name: 'deploy client',
+          app_type: 'regular_web',
+          is_first_party: true,
+          grant_types: [],
+          organization_usage: 'allow',
+        },
+      };
+
+      let addedClients = null;
+      let removedClientIds = null;
+      let updatedClientId = null;
+      let updatedBody = null;
+
+      const auth0 = {
+        organizations: {
+          create: () => Promise.resolve([]),
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          connections: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          clientGrants: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          discoveryDomains: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          clients: {
+            list: () => ({ data: [existingOrgClientFromApi], hasNextPage: () => false }),
+            create: (orgId, body) => {
+              addedClients = body.clients;
+              return Promise.resolve(body.clients);
+            },
+            delete: (orgId, body) => {
+              removedClientIds = body.clients;
+              return Promise.resolve();
+            },
+            update: (orgId, clientId, body) => {
+              updatedClientId = clientId;
+              updatedBody = body;
+              return Promise.resolve({});
+            },
+          },
+        },
+        connections: {
+          list: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        clientGrants: {
+          list: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          organizations: [
+            {
+              id: '123',
+              name: 'acme',
+              display_name: 'Acme Inc',
+              // remove 'deploy client', add 'test client', update deploy client's use_for_member_access
+              clients: [
+                { client_id: 'test client', use_for_member_access: true },
+                { client_id: 'deploy client', use_for_member_access: true },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      // 'test client' is new → added
+      expect(addedClients).to.deep.equal([{ client_id: 'abc_123', use_for_member_access: true }]);
+      // 'deploy client' use_for_member_access changed false → true → updated
+      expect(updatedClientId).to.equal('xyz_123');
+      expect(updatedBody).to.deep.equal({ use_for_member_access: true });
+      // nothing removed
+      expect(removedClientIds).to.be.null;
+    });
+
+    it('should remove org-client associations when not in config', async () => {
+      const existingOrgClientFromApi = {
+        client_id: 'abc_123',
+        use_for_member_access: true,
+        client: {
+          name: 'test client',
+          app_type: 'regular_web',
+          is_first_party: true,
+          grant_types: [],
+          organization_usage: 'allow',
+        },
+      };
+
+      let removedClientIds = null;
+
+      const auth0 = {
+        organizations: {
+          create: () => Promise.resolve([]),
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          connections: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          clientGrants: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          discoveryDomains: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          clients: {
+            list: () => ({ data: [existingOrgClientFromApi], hasNextPage: () => false }),
+            delete: (orgId, body) => {
+              removedClientIds = body.clients;
+              return Promise.resolve();
+            },
+          },
+        },
+        connections: {
+          list: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        clientGrants: {
+          list: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          organizations: [{ id: '123', name: 'acme', display_name: 'Acme Inc', clients: [] }],
+        },
+      ]);
+
+      expect(removedClientIds).to.deep.equal(['abc_123']);
+    });
+
+    it('should not remove org-client associations when AUTH0_ALLOW_DELETE is false', async () => {
+      const configNoDelete = function (key) {
+        return configNoDelete.data && configNoDelete.data[key];
+      };
+      configNoDelete.data = { AUTH0_ALLOW_DELETE: false };
+
+      const existingOrgClientFromApi = {
+        client_id: 'abc_123',
+        use_for_member_access: true,
+        client: {
+          name: 'test client',
+          app_type: 'regular_web',
+          is_first_party: true,
+          grant_types: [],
+          organization_usage: 'allow',
+        },
+      };
+
+      const auth0 = {
+        organizations: {
+          create: () => Promise.resolve([]),
+          update: () => Promise.resolve([]),
+          delete: () => Promise.resolve([]),
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          connections: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          clientGrants: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          discoveryDomains: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          clients: {
+            list: () => ({ data: [existingOrgClientFromApi], hasNextPage: () => false }),
+            delete: () => {
+              throw new Error(
+                'deleteOrganizationClients should not be called when AUTH0_ALLOW_DELETE is false'
+              );
+            },
+          },
+        },
+        connections: {
+          list: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        clientGrants: {
+          list: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({
+        client: pageClient(auth0),
+        config: configNoDelete,
+      });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Should not throw — delete is skipped and a warning is emitted instead
+      await stageFn.apply(handler, [
+        {
+          organizations: [{ id: '123', name: 'acme', display_name: 'Acme Inc', clients: [] }],
+        },
+      ]);
+    });
+
+    it('should gracefully handle when org-clients feature is not enabled (403)', async () => {
+      const freshOrg = {
+        id: '999',
+        name: 'fresh-org',
+        display_name: 'Fresh Org',
+        client_grants: [],
+      };
+      const auth0 = {
+        organizations: {
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [freshOrg])),
+          connections: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          clientGrants: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          discoveryDomains: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          clients: {
+            list: () => {
+              const err = new Error('feature_not_enabled');
+              err.statusCode = 403;
+              err.errorCode = 'feature_not_enabled';
+              throw err;
+            },
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({ client: pageClient(auth0), config });
+      const data = await handler.getType();
+
+      // clients property should not be set when feature is unavailable
+      expect(data[0].clients).to.be.undefined;
     });
   });
 });

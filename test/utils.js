@@ -149,10 +149,16 @@ export function mockMgmtClient() {
       getCustomTextByLanguage: () => Promise.resolve({}),
     },
     attackProtection: {
+      botDetection: {
+        get: () => ({}),
+      },
       breachedPasswordDetection: {
         get: () => ({}),
       },
       bruteForceProtection: {
+        get: () => ({}),
+      },
+      captcha: {
         get: () => ({}),
       },
       suspiciousIpThrottling: {
@@ -245,6 +251,9 @@ export function mockMgmtClient() {
     },
     supplementalSignals: {
       get: () => Promise.resolve({ akamai_enabled: false }),
+    },
+    rateLimitPolicies: {
+      list: (params) => mockPagedData(params, 'rate_limit_policies', []),
     },
     eventStreams: {
       list: () =>

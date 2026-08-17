@@ -21,6 +21,7 @@ import { AttackProtection } from './tools/auth0/handlers/attackProtection';
 import { TokenExchangeProfile } from './tools/auth0/handlers/tokenExchangeProfiles';
 import { RiskAssessment } from './tools/auth0/handlers/riskAssessment';
 import { SupplementalSignals } from './tools/auth0/handlers/supplementalSignals';
+import { RateLimitPolicy } from './tools/auth0/handlers/rateLimitPolicies';
 import { EventStream } from './tools/auth0/handlers/eventStreams';
 
 type SharedPaginationParams = {
@@ -31,6 +32,7 @@ type SharedPaginationParams = {
   include_totals?: boolean;
   id?: string;
   strategy?: Management.ConnectionStrategyEnum[];
+  type?: Management.RoleTypeEnum;
 };
 
 export type CheckpointPaginationParams = SharedPaginationParams & {
@@ -166,6 +168,7 @@ export type Assets = Partial<{
   userAttributeProfilesWithId: UserAttributeProfile[] | null;
   connectionProfiles: Asset[] | null;
   tokenExchangeProfiles: TokenExchangeProfile[] | null;
+  rateLimitPolicies: RateLimitPolicy[] | null;
   eventStreams: EventStream[] | null;
 }>;
 
@@ -233,7 +236,9 @@ export type AssetTypes =
   | 'connectionProfiles'
   | 'tokenExchangeProfiles'
   | 'supplementalSignals'
-  | 'eventStreams';
+  | 'rateLimitPolicies'
+  | 'eventStreams'
+  | 'clientAuthCredentials';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 

@@ -96,6 +96,22 @@ export const schema = {
         required: ['active'],
         additionalProperties: false,
       },
+      cross_app_access_requesting_app: {
+        type: 'object',
+        properties: {
+          active: { type: 'boolean' },
+        },
+        required: ['active'],
+        additionalProperties: false,
+      },
+      cross_app_access_resource_app: {
+        type: 'object',
+        properties: {
+          status: { type: 'string', enum: ['enabled', 'disabled'] },
+        },
+        required: ['status'],
+        additionalProperties: false,
+      },
       directory_provisioning_configuration: {
         type: 'object',
         properties: {
@@ -123,6 +139,9 @@ export const schema = {
               type: 'object',
               properties: {
                 id: { type: 'string' },
+                name: { type: 'string' },
+                email: { type: 'string' },
+                direct_members_count: { type: 'number' },
               },
               required: ['id'],
             },
@@ -142,7 +161,7 @@ export type Connection = Management.ConnectionForList & {
     DirectoryProvisioningConfig,
     'mapping' | 'synchronize_automatically' | 'synchronize_groups'
   > & {
-    synchronized_groups?: Array<{ id: string }>;
+    synchronized_groups?: Management.SynchronizedGroupPayload[];
   };
 };
 
@@ -559,17 +578,35 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
    */
   async getConnectionSynchronizedGroups(
     connectionId: string
-  ): Promise<Array<{ id: string }> | null> {
+  ): Promise<Management.SynchronizedGroupPayload[] | null> {
     try {
-      const groups: Array<{ id: string }> = [];
+      const groups: Management.SynchronizedGroupPayload[] = [];
       let page = await this.client.connections.directoryProvisioning.listSynchronizedGroups(
         connectionId,
         {}
       );
-      for (const g of page.data ?? []) groups.push({ id: g.id });
+      for (const g of page.data ?? []) {
+        groups.push({
+          id: g.id,
+          ...(g.name !== undefined && { name: g.name }),
+          ...(g.email !== undefined && { email: g.email }),
+          ...(g.direct_members_count !== undefined && {
+            direct_members_count: g.direct_members_count,
+          }),
+        });
+      }
       while (page.hasNextPage?.()) {
         page = await page.getNextPage();
-        for (const g of page.data ?? []) groups.push({ id: g.id });
+        for (const g of page.data ?? []) {
+          groups.push({
+            id: g.id,
+            ...(g.name !== undefined && { name: g.name }),
+            ...(g.email !== undefined && { email: g.email }),
+            ...(g.direct_members_count !== undefined && {
+              direct_members_count: g.direct_members_count,
+            }),
+          });
+        }
       }
       return groups;
     } catch (error) {
@@ -590,7 +627,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
    */
   private async updateConnectionSynchronizedGroups(
     connectionId: string,
-    groups: Array<{ id: string }>
+    groups: Management.SynchronizedGroupPayload[]
   ): Promise<void> {
     await this.client.connections.directoryProvisioning.set(connectionId, { groups });
     log.debug(`Updated synchronized groups for connection '${connectionId}'`);

@@ -7,7 +7,7 @@ import {
   duplicateItems,
   obfuscateSensitiveValues,
   stripObfuscatedFieldsFromPayload,
-  validateNoUnresolvedPlaceholders,
+  stripUnresolvedPlaceholders,
   detectInsufficientScopeError,
 } from '../../utils';
 import log from '../../../logger';
@@ -457,12 +457,12 @@ export default class APIHandler {
             const updateFN = this.getClientFN(this.functions.update);
             const updatePayload = (() => {
               const data = stripFields({ ...updateItem }, this.stripUpdateFields);
-              const stripped = stripObfuscatedFieldsFromPayload(
+              const obfuscatedStripped = stripObfuscatedFieldsFromPayload(
                 data,
                 this.sensitiveFieldsToObfuscate
               );
-              return validateNoUnresolvedPlaceholders(
-                stripped as Asset,
+              return stripUnresolvedPlaceholders(
+                obfuscatedStripped as Asset,
                 this.type,
                 this.objString(updateItem)
               );
@@ -488,12 +488,12 @@ export default class APIHandler {
             const createFunction = this.getClientFN(this.functions.create);
             const createPayload = (() => {
               const strippedPayload = stripFields(createItem, this.stripCreateFields);
-              const stripped = stripObfuscatedFieldsFromPayload(
+              const obfuscatedStripped = stripObfuscatedFieldsFromPayload(
                 strippedPayload,
                 this.sensitiveFieldsToObfuscate
               );
-              return validateNoUnresolvedPlaceholders(
-                stripped as Asset,
+              return stripUnresolvedPlaceholders(
+                obfuscatedStripped as Asset,
                 this.type,
                 this.objString(createItem)
               );
@@ -521,12 +521,12 @@ export default class APIHandler {
             const updateFN = this.getClientFN(this.functions.update);
             const updatePayload = (() => {
               const data = stripFields({ ...updateItem }, this.stripUpdateFields);
-              const stripped = stripObfuscatedFieldsFromPayload(
+              const obfuscatedStripped = stripObfuscatedFieldsFromPayload(
                 data,
                 this.sensitiveFieldsToObfuscate
               );
-              return validateNoUnresolvedPlaceholders(
-                stripped as Asset,
+              return stripUnresolvedPlaceholders(
+                obfuscatedStripped as Asset,
                 this.type,
                 this.objString(updateItem)
               );

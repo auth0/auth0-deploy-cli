@@ -327,7 +327,7 @@ describe('#eventStreams handler', () => {
       expect(created.destination.configuration.action_id).to.equal('act_abc123');
     });
 
-    it('should resolve action name to ID when updating action-destination stream', async () => {
+    it('should strip destination from update payload for action streams', async () => {
       let updatedData: any = null;
       const existing = { ...sampleActionStreamConfig, status: 'disabled' };
 
@@ -347,7 +347,10 @@ describe('#eventStreams handler', () => {
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
       await stageFn.apply(handler, [{ eventStreams: [sampleActionStreamConfig] }]);
-      expect(updatedData.destination.configuration.action_id).to.equal('act_abc123');
+      // action destinations cannot be changed after creation, so destination is stripped
+      expect(updatedData).to.not.have.property('destination');
+      // other mutable fields still applied
+      expect(updatedData.status).to.equal('enabled');
     });
 
     it('should throw when action-destination references unknown action name', async () => {

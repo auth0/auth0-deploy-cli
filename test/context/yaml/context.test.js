@@ -321,8 +321,10 @@ describe('#YAML context validation', () => {
         enabled_locales: ['en'],
       },
       attackProtection: {
+        botDetection: {},
         breachedPasswordDetection: {},
         bruteForceProtection: {},
+        captcha: {},
         suspiciousIpThrottling: {},
       },
       logStreams: [],
@@ -341,6 +343,7 @@ describe('#YAML context validation', () => {
       supplementalSignals: {
         akamai_enabled: false,
       },
+      rateLimitPolicies: [],
       tokenExchangeProfiles: [],
       userAttributeProfiles: [],
       phoneTemplates: [],
@@ -465,8 +468,10 @@ describe('#YAML context validation', () => {
         enabled_locales: ['en'],
       },
       attackProtection: {
+        botDetection: {},
         breachedPasswordDetection: {},
         bruteForceProtection: {},
+        captcha: {},
         suspiciousIpThrottling: {},
       },
       logStreams: [],
@@ -485,6 +490,7 @@ describe('#YAML context validation', () => {
       supplementalSignals: {
         akamai_enabled: false,
       },
+      rateLimitPolicies: [],
       tokenExchangeProfiles: [],
       userAttributeProfiles: [],
       phoneTemplates: [],
@@ -610,8 +616,10 @@ describe('#YAML context validation', () => {
         enabled_locales: ['en'],
       },
       attackProtection: {
+        botDetection: {},
         breachedPasswordDetection: {},
         bruteForceProtection: {},
+        captcha: {},
         suspiciousIpThrottling: {},
       },
       prompts: {
@@ -630,6 +638,7 @@ describe('#YAML context validation', () => {
       supplementalSignals: {
         akamai_enabled: false,
       },
+      rateLimitPolicies: [],
       tokenExchangeProfiles: [],
       userAttributeProfiles: [],
       phoneTemplates: [],

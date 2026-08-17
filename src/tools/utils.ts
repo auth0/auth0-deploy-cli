@@ -316,6 +316,33 @@ export const stripObfuscatedFieldsFromPayload = (
   return newAsset;
 };
 
+// Strips unresolved ##...## / @@...@@ placeholders before sending to Auth0.
+// Keyword replacement runs first; any remaining placeholder means no mapping was
+// provided. The field is dropped so Auth0 preserves its existing value.
+export const stripUnresolvedPlaceholders = (
+  data: Asset | null,
+  resourceType: string,
+  resourceName: string
+): Asset | null => {
+  if (data === null) return data;
+
+  const unresolved = collectUnresolvedPlaceholders(data);
+  if (unresolved.length === 0) return data;
+
+  const newAsset = { ...data };
+  unresolved.forEach(({ path, value }) => {
+    log.warn(
+      `Stripping unresolved placeholder for ${resourceType} "${resourceName}" field "${path}": ${value}. ` +
+        `To use this value, define ${value.replace(
+          /^##|##$|^@@|@@$/g,
+          ''
+        )} in AUTH0_KEYWORD_REPLACE_MAPPINGS. The existing value on Auth0 will be preserved.`
+    );
+    dotProp.delete(newAsset, path);
+  });
+  return newAsset;
+};
+
 export const detectInsufficientScopeError = async <T>(
   fn: Function
 ): Promise<
@@ -357,7 +384,12 @@ export const isDeprecatedError = (err: { message: string; statusCode: number }):
 
 export const isForbiddenFeatureError = (err, type): boolean => {
   if (err.statusCode === 403) {
-    log.warn(`${err.message};${err.errorCode ?? ''} - Skipping ${type}`);
+    // The SDK error's top-level `message` is the full serialized response body; the clean,
+    // human-readable message and errorCode live on the response body itself.
+    const body = err.originalError?.response?.body ?? {};
+    const message = body.message ?? err.message;
+    const errorCode = body.errorCode ?? err.errorCode ?? '';
+    log.warn(`${message}${errorCode ? ` (${errorCode})` : ''} - Skipping ${type}`);
     return true;
   }
   return false;

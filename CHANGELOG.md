@@ -7,6 +7,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.43.0] - 2026-08-12
+
+### Added
+
+- Add org-to-app entitlement (EA) support for organizations. [#1454]
+- Support full group metadata for Google Workspace directory sync (GA). [#1456]
+
+### Fixed
+
+- Create phone templates on import instead of skipping when they have no ID. [#1457]
+- Address path traversal vulnerability and false warnings in config file handlers. [#1449]
+- Exclude org-scoped roles from tenant export by filtering `type='tenant'`. [#1453]
+- Strip read-only field from roles to fix export/import round-trip. [#1445]
+
+## [8.42.0] - 2026-07-30
+
+### Added
+
+- Add UL identifier input support for themes and tenant settings. [#1433]
+- Add `token_vault_privileged_access` support for clients. [#1430]
+- Add `auth0_managed` field support for network ACLs (Curated Blocklists - EA). [#1435]
+- Add Cross App Access (XAA) resource app support for connections and clients. [#1431]
+- Add `cross_app_access_requesting_app` support for connections (EA). [#1422]
+
+### Fixed
+
+- Prevent dry-run crash on `clientAuthCredentials` handler. [#1438]
+- Resolve spurious dry-run diffs for rules, themes, and hooks. [#1437]
+- Strip unresolved placeholders on deploy instead of throwing. [#1436]
+- Handle 403 entitlement errors for bot detection and captcha on export. [#1434]
+- Warn and skip deprecated guardian phone provider on 403 during import. [#1429]
+- Add `use_scope_descriptions_for_consent` to allowed tenant flags. [#1428]
+
+## [8.41.0] - 2026-07-16
+
+### Added
+
+- Add `third_party_client_access` support for organizations. [#1421]
+
+## [8.40.0] - 2026-07-09
+
+### Added
+
+- Add client credential lifecycle management for Private Key JWT and mTLS authentication methods. [#1417]
+- Add Rate Limit Policies (EA) support. [#1395]
+
+### Fixed
+
+- Preserve `false` value for `default_head_tags_disabled` in screen renderer update. [#1416]
+- Skip destination update for action event streams as the destination type cannot be changed after creation. [#1425]
+
+## [8.39.0] - 2026-06-30
+
+### Added
+
+- Add `eventStreams` support. [#1412]
+- Add `id_token_session_expiry_supported` validation for enterprise connections. [#1411]
+
 ## [8.38.0] - 2026-06-25
 
 ### Added
@@ -1835,6 +1893,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1389]: https://github.com/auth0/auth0-deploy-cli/issues/1389
 [#1391]: https://github.com/auth0/auth0-deploy-cli/issues/1391
 [#1392]: https://github.com/auth0/auth0-deploy-cli/issues/1392
+[#1395]: https://github.com/auth0/auth0-deploy-cli/issues/1395
 [#1396]: https://github.com/auth0/auth0-deploy-cli/issues/1396
 [#1398]: https://github.com/auth0/auth0-deploy-cli/issues/1398
 [#1400]: https://github.com/auth0/auth0-deploy-cli/issues/1400
@@ -1845,7 +1904,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1407]: https://github.com/auth0/auth0-deploy-cli/issues/1407
 [#1408]: https://github.com/auth0/auth0-deploy-cli/issues/1408
 [#1409]: https://github.com/auth0/auth0-deploy-cli/issues/1409
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.38.0...HEAD
+[#1411]: https://github.com/auth0/auth0-deploy-cli/issues/1411
+[#1412]: https://github.com/auth0/auth0-deploy-cli/issues/1412
+[#1416]: https://github.com/auth0/auth0-deploy-cli/issues/1416
+[#1417]: https://github.com/auth0/auth0-deploy-cli/issues/1417
+[#1421]: https://github.com/auth0/auth0-deploy-cli/issues/1421
+[#1422]: https://github.com/auth0/auth0-deploy-cli/issues/1422
+[#1425]: https://github.com/auth0/auth0-deploy-cli/issues/1425
+[#1428]: https://github.com/auth0/auth0-deploy-cli/issues/1428
+[#1429]: https://github.com/auth0/auth0-deploy-cli/issues/1429
+[#1430]: https://github.com/auth0/auth0-deploy-cli/issues/1430
+[#1431]: https://github.com/auth0/auth0-deploy-cli/issues/1431
+[#1433]: https://github.com/auth0/auth0-deploy-cli/issues/1433
+[#1434]: https://github.com/auth0/auth0-deploy-cli/issues/1434
+[#1435]: https://github.com/auth0/auth0-deploy-cli/issues/1435
+[#1436]: https://github.com/auth0/auth0-deploy-cli/issues/1436
+[#1437]: https://github.com/auth0/auth0-deploy-cli/issues/1437
+[#1438]: https://github.com/auth0/auth0-deploy-cli/issues/1438
+[#1445]: https://github.com/auth0/auth0-deploy-cli/issues/1445
+[#1449]: https://github.com/auth0/auth0-deploy-cli/issues/1449
+[#1453]: https://github.com/auth0/auth0-deploy-cli/issues/1453
+[#1454]: https://github.com/auth0/auth0-deploy-cli/issues/1454
+[#1456]: https://github.com/auth0/auth0-deploy-cli/issues/1456
+[#1457]: https://github.com/auth0/auth0-deploy-cli/issues/1457
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.43.0...HEAD
+[8.43.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.42.0...v8.43.0
+[8.42.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.41.0...v8.42.0
+[8.41.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.40.0...v8.41.0
+[8.40.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.39.0...v8.40.0
+[8.39.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.38.0...v8.39.0
 [8.38.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.37.0...v8.38.0
 [8.37.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.36.0...v8.37.0
 [8.36.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.35.0...v8.36.0

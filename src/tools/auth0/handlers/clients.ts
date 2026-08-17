@@ -66,6 +66,45 @@ const myOrganizationConfigurationSchema = {
   required: ['allowed_strategies', 'connection_deletion_behavior'],
 };
 
+const tokenVaultPrivilegedAccessSchema = {
+  type: ['object', 'null'],
+  description:
+    'Settings for Token Vault Privileged Access, hardening a privileged client by restricting the caller IPs, connections, and scopes it may use at runtime. Early Access, gated by the token_vault_subject_type_jwt_ea_rollout feature flag. Export-only: this object is exported for visibility but is not deployed by the Deploy CLI (it is stripped from create/update payloads because the required credentials are tenant-specific ids). Manage it directly on the tenant.',
+  properties: {
+    ip_allowlist: {
+      type: 'array',
+      description:
+        'IPv4/IPv6 addresses or CIDR ranges permitted to call token exchange on behalf of this privileged client. When the EA flag is on, this is required (non-empty) on create if token_vault_privileged_access is being set.',
+      items: {
+        type: 'string',
+      },
+    },
+    grants: {
+      type: 'array',
+      description:
+        'Connection/scope pin objects restricting which federated connections and OAuth scopes the privileged client may use at runtime. Maximum 5 connections; maximum 20 scopes in total across all connections.',
+      items: {
+        type: 'object',
+        properties: {
+          connection: {
+            type: 'string',
+            description:
+              'The connection name (e.g. google-oauth2). Validated at runtime; the connection need not exist at configuration time.',
+          },
+          scopes: {
+            type: 'array',
+            description: 'The OAuth scopes permitted for that connection.',
+            items: {
+              type: 'string',
+            },
+          },
+        },
+        required: ['connection', 'scopes'],
+      },
+    },
+  },
+};
+
 export const schema = {
   type: 'array',
   items: {
@@ -232,6 +271,20 @@ export const schema = {
         },
         additionalProperties: true,
       },
+      identity_assertion_authorization_grant: {
+        type: 'object',
+        description:
+          'Settings for Cross App Access (ID-JAG) token exchange. Early Access. Enables the client to request identity assertion authorization grants.',
+        properties: {
+          active: {
+            type: 'boolean',
+            description:
+              'Indicates whether the client can request an identity assertion authorization grant (ID-JAG) via token exchange.',
+          },
+        },
+        required: ['active'],
+        additionalProperties: false,
+      },
       app_type: {
         type: 'string',
         description: 'The type of application this client represents',
@@ -352,6 +405,7 @@ export const schema = {
           },
         },
       },
+      token_vault_privileged_access: tokenVaultPrivilegedAccessSchema,
       third_party_security_mode: {
         type: 'string',
         enum: ['strict', 'permissive'],
@@ -520,6 +574,45 @@ const createClientSanitizer = (clients: Client[]): ClientSanitizerChain => {
   };
 };
 
+/**
+ * On export, remove `credentials` from `token_vault_privileged_access`.
+ *
+ * Auth0 returns these as tenant-specific credential references (`{ id }`) — never
+ * names or key material — so they are not portable across tenants and must never be
+ * written to disk. `ip_allowlist` and `grants` are kept for visibility. Mutates and
+ * returns the same client.
+ */
+const stripTokenVaultCredentialsOnExport = (client: Client): Client => {
+  const tvpa = (client as { token_vault_privileged_access?: { credentials?: unknown } })
+    .token_vault_privileged_access;
+
+  if (tvpa && 'credentials' in tvpa) {
+    delete tvpa.credentials;
+  }
+
+  return client;
+};
+
+/**
+ * On write (create/update), remove the entire `token_vault_privileged_access` object.
+ *
+ * The Management API requires `credentials` whenever `token_vault_privileged_access`
+ * is present in the payload, but those credentials are tenant-specific ids that the
+ * Deploy CLI intentionally never persists (see stripTokenVaultCredentialsOnExport).
+ * Sending the object without `credentials` fails validation ("Missing required
+ * property: credentials"); sending it with exported ids would re-send stale ids on a
+ * cross-tenant deploy. The Deploy CLI therefore does not manage this field — it is
+ * export-only. Manage `token_vault_privileged_access` directly on the tenant.
+ * Mutates and returns the same client.
+ */
+const stripTokenVaultPrivilegedAccessOnWrite = (client: Client): Client => {
+  if ('token_vault_privileged_access' in client) {
+    delete (client as { token_vault_privileged_access?: unknown }).token_vault_privileged_access;
+  }
+
+  return client;
+};
+
 export default class ClientHandler extends DefaultAPIHandler {
   existing: Client[];
 
@@ -649,6 +742,24 @@ export default class ClientHandler extends DefaultAPIHandler {
             delete item.refresh_token;
           }
         }
+
+        // Strip client_authentication_methods — the clientAuthCredentials handler (order 70)
+        // owns this field entirely. Auth0 rejects credential objects with name/credential_type in PATCH.
+        // Strip token_endpoint_auth_method only when client_authentication_methods is present in config:
+        // Auth0 rejects it in PATCH while a client has active credentials. For these clients the
+        // clientAuthCredentials handler (order 70) owns token_endpoint_auth_method too.
+        // For clients without client_authentication_methods, credentials were already cleared by
+        // clientAuthCredentialsPre (order 40), so token_endpoint_auth_method passes through safely.
+        if (item.client_authentication_methods) {
+          delete item.token_endpoint_auth_method;
+        }
+        delete item.client_authentication_methods;
+
+        // token_vault_privileged_access requires tenant-specific credential ids that
+        // the Deploy CLI never persists. Strip the whole object on write so we neither
+        // re-send stale ids nor fail validation for the missing credentials property.
+        stripTokenVaultPrivilegedAccessOnWrite(item);
+
         return item;
       });
     };
@@ -674,7 +785,39 @@ export default class ClientHandler extends DefaultAPIHandler {
       ...(shouldExcludeThirdPartyClients(this.config) && { is_first_party: true }),
     });
 
-    this.existing = createClientSanitizer(clients).sanitizeCrossOriginAuth(false).get();
+    const sanitized = createClientSanitizer(clients)
+      .sanitizeCrossOriginAuth(false)
+      .get()
+      // token_vault_privileged_access.credentials are returned as tenant-specific
+      // ids — strip them so they are never exported to disk.
+      .map(stripTokenVaultCredentialsOnExport);
+
+    // Enrich credential stubs with name and credential_type for export.
+    // Auth0 does not return pem on read — it is never exported.
+    await Promise.all(
+      sanitized.map(async (client) => {
+        if (!client.client_authentication_methods) return;
+        try {
+          const creds = await this.client.clients.credentials.list(client.client_id as string);
+          const credMap = new Map((creds as any[]).map((c) => [c.id, c]));
+          Object.values(client.client_authentication_methods).forEach((method: any) => {
+            if (method?.credentials) {
+              method.credentials = method.credentials
+                .map((stub: any) => {
+                  const full = credMap.get(stub.id);
+                  if (!full?.name) return null;
+                  return { name: full.name, credential_type: full.credential_type };
+                })
+                .filter(Boolean);
+            }
+          });
+        } catch (_) {
+          // leave stubs as-is if the credentials API call fails
+        }
+      })
+    );
+
+    this.existing = sanitized;
     return this.existing;
   }
 
