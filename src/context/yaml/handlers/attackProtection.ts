@@ -2,7 +2,7 @@ import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { AttackProtection } from '../../../tools/auth0/handlers/attackProtection';
 import { ParsedAsset } from '../../../types';
-import { attackProtectionDefaults } from '../../defaults';
+import { attackProtectionDefaults, sortAttackProtectionArrays } from '../../defaults';
 
 type ParsedAttackProtection = ParsedAsset<'attackProtection', AttackProtection>;
 
@@ -46,7 +46,7 @@ async function dump(context: YAMLContext): Promise<ParsedAttackProtection> {
   const maskedAttackProtection = attackProtectionDefaults(attackProtectionConfig, context.config);
 
   return {
-    attackProtection: maskedAttackProtection,
+    attackProtection: sortAttackProtectionArrays(maskedAttackProtection),
   };
 }
 

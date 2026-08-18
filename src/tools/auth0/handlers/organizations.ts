@@ -1,4 +1,4 @@
-import { omit } from 'lodash';
+import { omit, isEqual, pick } from 'lodash';
 import { Management } from 'auth0';
 import DefaultHandler, { order, retryWithExponentialBackoff } from './default';
 import { calculateChanges } from '../../calculateChanges';
@@ -268,12 +268,13 @@ export default class OrganizationsHandler extends DefaultHandler {
   }
 
   async updateOrganization(org, organizations) {
+    const existingOrg = organizations.find((orgToUpdate) => orgToUpdate.name === org.name);
     const {
       connections: existingConnections,
       client_grants: existingClientGrants,
       discovery_domains: existingDiscoveryDomains,
       clients: existingOrgClients = [],
-    } = await organizations.find((orgToUpdate) => orgToUpdate.name === org.name);
+    } = existingOrg;
 
     const params = { id: org.id };
     const {
@@ -290,7 +291,14 @@ export default class OrganizationsHandler extends DefaultHandler {
     delete org.discovery_domains;
     delete org.clients;
 
-    await this.client.organizations.update(params.id, org);
+    // Only PATCH if top-level properties actually differ from the existing state.
+    // Compare only the keys present in the desired config against those same keys
+    // on the remote org, so that fields the user didn't specify are not considered.
+    let changed = false;
+    if (!isEqual(org, pick(existingOrg, Object.keys(org)))) {
+      await this.client.organizations.update(params.id, org);
+      changed = true;
+    }
 
     // organization connections
     const connectionsToRemove = existingConnections.filter(
@@ -311,6 +319,14 @@ export default class OrganizationsHandler extends DefaultHandler {
             x.is_enabled !== (c.is_enabled ?? true))
       )
     );
+
+    if (
+      connectionsToUpdate.length > 0 ||
+      connectionsToAdd.length > 0 ||
+      connectionsToRemove.length > 0
+    ) {
+      changed = true;
+    }
 
     const retryConfig = this.getRetryConfig();
 
@@ -385,6 +401,10 @@ export default class OrganizationsHandler extends DefaultHandler {
           grant_id: this.getClientGrantIDByClientName(clientGrant.client_id),
         })) || [];
 
+    if (orgClientGrantsToAdd.length > 0 || orgClientGrantsToRemove.length > 0) {
+      changed = true;
+    }
+
     // Handle updates first
     await Promise.all(
       orgClientGrantsToAdd.map((orgClientGrant) =>
@@ -433,6 +453,10 @@ export default class OrganizationsHandler extends DefaultHandler {
         })
         .filter(Boolean) || [];
 
+    if (orgDiscoveryDomainsToUpdate.length > 0 || orgDiscoveryDomainsToAdd.length > 0) {
+      changed = true;
+    }
+
     for (const { id, domain, ...updateParams } of orgDiscoveryDomainsToUpdate) {
       try {
         await this.updateOrganizationDiscoveryDomain(params.id, id, domain, updateParams);
@@ -462,6 +486,7 @@ export default class OrganizationsHandler extends DefaultHandler {
         this.config('AUTH0_ALLOW_DELETE') === 'true' ||
         this.config('AUTH0_ALLOW_DELETE') === true
       ) {
+        changed = true;
         for (const domain of orgDiscoveryDomainsToRemove) {
           try {
             await this.deleteOrganizationDiscoveryDomain(params.id, domain.domain, domain.id);
@@ -513,6 +538,7 @@ export default class OrganizationsHandler extends DefaultHandler {
       .filter((oc) => !!oc.client_id);
 
     if (orgClientsToAdd.length > 0) {
+      changed = true;
       await this.createOrganizationClients(params.id, orgClientsToAdd).catch((err) => {
         throw new Error(`Problem adding org clients for organization ${params.id}\n${err}`);
       });
@@ -523,6 +549,7 @@ export default class OrganizationsHandler extends DefaultHandler {
         this.config('AUTH0_ALLOW_DELETE') === 'true' ||
         this.config('AUTH0_ALLOW_DELETE') === true
       ) {
+        changed = true;
         await this.deleteOrganizationClients(params.id, orgClientsToRemove).catch((err) => {
           throw new Error(`Problem removing org clients for organization ${params.id}\n${err}`);
         });
@@ -535,6 +562,9 @@ export default class OrganizationsHandler extends DefaultHandler {
       }
     }
 
+    if (orgClientsToUpdate.length > 0) {
+      changed = true;
+    }
     await Promise.all(
       orgClientsToUpdate.map((oc) =>
         this.client.organizations.clients
@@ -549,7 +579,7 @@ export default class OrganizationsHandler extends DefaultHandler {
       )
     );
 
-    return params;
+    return changed ? params : null;
   }
 
   getClientGrantIDByClientName(clientsName: string): string {
@@ -594,8 +624,10 @@ export default class OrganizationsHandler extends DefaultHandler {
         generator: (item) =>
           this.updateOrganization(item, orgs)
             .then((data) => {
-              this.didUpdate(data);
-              this.updated += 1;
+              if (data) {
+                this.didUpdate(data);
+                this.updated += 1;
+              }
             })
             .catch((err) => {
               throw new Error(`Problem updating ${this.type} ${this.objString(item)}\n${err}`);

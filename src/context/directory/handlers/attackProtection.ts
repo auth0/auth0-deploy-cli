@@ -5,7 +5,7 @@ import { dumpJSON, existsMustBeDir, isFile, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { ParsedAsset } from '../../../types';
-import { attackProtectionDefaults } from '../../defaults';
+import { attackProtectionDefaults, sortAttackProtectionArrays } from '../../defaults';
 import { AttackProtection } from '../../../tools/auth0/handlers/attackProtection';
 
 type ParsedAttackProtection = ParsedAsset<'attackProtection', AttackProtection>;
@@ -85,7 +85,9 @@ async function dump(context: DirectoryContext): Promise<void> {
   const files = attackProtectionFiles(context.filePath);
   fs.ensureDirSync(files.directory);
 
-  const maskedAttackProtection = attackProtectionDefaults(attackProtection, context.config);
+  const maskedAttackProtection = sortAttackProtectionArrays(
+    attackProtectionDefaults(attackProtection, context.config)
+  );
 
   if (maskedAttackProtection.botDetection) {
     dumpJSON(files.botDetection, maskedAttackProtection.botDetection);
