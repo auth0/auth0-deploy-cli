@@ -605,6 +605,45 @@ describe('#utils calculateDryRunChanges', () => {
     const updatedGrant = changes.update[0] as any;
     expect(updatedGrant._clientName).to.equal('My M2M App');
   });
+
+  it('should classify asset as update when a field inside an array item changes', () => {
+    // Regression test for #1451: array index path guard was suppressing diffs for
+    // paths containing "[N]", causing field changes inside array items to go undetected.
+    const changes = calculateDryRunChanges({
+      type: 'organizations',
+      assets: [
+        {
+          name: 'acme',
+          connections: [{ connection_id: 'con_abc', assign_membership_on_login: true }],
+        },
+      ],
+      existing: [
+        {
+          name: 'acme',
+          connections: [{ connection_id: 'con_abc', assign_membership_on_login: false }],
+        },
+      ],
+      identifiers: ['id', 'name'],
+      ignoreDryRunFields: [],
+    });
+    expect(changes.update).to.have.length(1);
+    expect(changes.update[0].name).to.equal('acme');
+  });
+
+  it('should treat null existing as empty and classify all local assets as creates', () => {
+    // Regression test for null crash: when getType() returns null (e.g. 403 or empty tenant),
+    // existing is null — must not crash and must classify all local assets as creates.
+    const changes = calculateDryRunChanges({
+      type: 'clients',
+      assets: [{ name: 'My App', app_type: 'spa' }],
+      existing: null,
+      identifiers: ['client_id', 'name'],
+      ignoreDryRunFields: [],
+    });
+    expect(changes.create).to.have.length(1);
+    expect(changes.update).to.have.length(0);
+    expect(changes.del).to.have.length(0);
+  });
 });
 
 describe('#getObjectDifferences', () => {

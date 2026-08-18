@@ -121,6 +121,14 @@ function normalizeArrayValues(values: any[]): any[] {
 }
 
 /**
+ * Serializes a value to a human-readable string for use in diff messages.
+ * Objects and arrays are JSON-stringified to avoid "[object Object]" output.
+ */
+function formatDiffValue(value: unknown): string {
+  return typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value);
+}
+
+/**
  * Writes the accumulated diff log to a JSON file on disk.
  * Useful for CI pipelines that want a machine-readable dry-run report.
  */
@@ -132,10 +140,6 @@ export const exportDiffLog = async (fileName: string, resourceTypeName?: string)
     log.error(`Failed to export diff log: ${String(error)}`);
   }
 };
-
-function formatDiffValue(value: unknown): string {
-  return typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value);
-}
 
 /**
  * Compares two objects and returns an array of human-readable difference strings.
