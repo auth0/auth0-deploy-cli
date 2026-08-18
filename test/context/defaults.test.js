@@ -5,6 +5,7 @@ import {
   connectionDefaults,
   logStreamDefaults,
   attackProtectionDefaults,
+  sortAttackProtectionArrays,
 } from '../../src/context/defaults';
 
 describe('#context defaults', () => {
@@ -437,6 +438,71 @@ describe('#context defaults', () => {
       const result = attackProtectionDefaults(attackProtection, { AUTH0_EXPORT_SECRETS: true });
 
       expect(result.captcha.hcaptcha.secret).to.equal('real-hcaptcha-secret');
+    });
+  });
+
+  describe('sortAttackProtectionArrays', () => {
+    it('should sort primitive arrays across the attackProtection subtree deterministically', () => {
+      const attackProtection = {
+        breachedPasswordDetection: {
+          enabled: true,
+          shields: ['user_notification', 'block', 'admin_notification'],
+          admin_notification_frequency: ['weekly', 'immediately', 'monthly', 'daily'],
+        },
+        suspiciousIpThrottling: {
+          enabled: true,
+          shields: ['admin_notification', 'block'],
+        },
+        bruteForceProtection: {
+          enabled: true,
+          shields: ['block', 'user_notification'],
+          allowlist: ['192.168.1.2', '10.0.0.1'],
+        },
+      };
+
+      const result = sortAttackProtectionArrays(attackProtection);
+
+      expect(result.breachedPasswordDetection.shields).to.deep.equal([
+        'admin_notification',
+        'block',
+        'user_notification',
+      ]);
+      expect(result.breachedPasswordDetection.admin_notification_frequency).to.deep.equal([
+        'daily',
+        'immediately',
+        'monthly',
+        'weekly',
+      ]);
+      expect(result.suspiciousIpThrottling.shields).to.deep.equal(['admin_notification', 'block']);
+      expect(result.bruteForceProtection.shields).to.deep.equal(['block', 'user_notification']);
+      expect(result.bruteForceProtection.allowlist).to.deep.equal(['10.0.0.1', '192.168.1.2']);
+    });
+
+    it('should produce identical output regardless of input array order', () => {
+      const orderA = {
+        breachedPasswordDetection: {
+          shields: ['block', 'admin_notification', 'user_notification'],
+        },
+      };
+      const orderB = {
+        breachedPasswordDetection: {
+          shields: ['user_notification', 'block', 'admin_notification'],
+        },
+      };
+
+      expect(sortAttackProtectionArrays(orderA)).to.deep.equal(sortAttackProtectionArrays(orderB));
+    });
+
+    it('should not reorder arrays that contain objects', () => {
+      const attackProtection = {
+        captcha: {
+          providers: [{ name: 'zeta' }, { name: 'alpha' }],
+        },
+      };
+
+      const result = sortAttackProtectionArrays(attackProtection);
+
+      expect(result.captcha.providers).to.deep.equal([{ name: 'zeta' }, { name: 'alpha' }]);
     });
   });
 });

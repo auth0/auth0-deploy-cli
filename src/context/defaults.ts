@@ -216,6 +216,34 @@ export function eventStreamDefaults(
   });
 }
 
+/**
+ * Sorts primitive arrays (e.g. `shields`, `admin_notification_frequency`) within the
+ * attackProtection subtree in place, so repeated exports produce deterministic output.
+ * These are unordered, string-typed enum sets — ordering is cosmetic. Object arrays are
+ * left as-is.
+ */
+export function sortAttackProtectionArrays(attackProtection: AttackProtection): AttackProtection {
+  const sortArraysDeep = (value: unknown): void => {
+    if (Array.isArray(value)) {
+      const isPrimitiveArray = value.every((item) => item === null || typeof item !== 'object');
+      if (isPrimitiveArray) {
+        value.sort();
+      } else {
+        value.forEach(sortArraysDeep);
+      }
+      return;
+    }
+
+    if (value && typeof value === 'object') {
+      Object.values(value).forEach(sortArraysDeep);
+    }
+  };
+
+  sortArraysDeep(attackProtection);
+
+  return attackProtection;
+}
+
 export function attackProtectionDefaults(
   attackProtection: AttackProtection,
   config?: Pick<Config, 'AUTH0_EXPORT_SECRETS'>
