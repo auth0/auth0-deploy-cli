@@ -154,6 +154,31 @@ describe('#directory context connections', () => {
     );
   });
 
+  it('should dump samlp connection with idpinitiated login disabled', async () => {
+    const dir = path.join(testDataDir, 'directory', 'connectionsDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.connections = [
+      {
+        name: 'someSamlConnectionIdpInitiatedDisabled',
+        strategy: 'samlp',
+        enabled_clients: [],
+        options: {
+          passwordPolicy: 'testPolicy',
+          idpinitiated: { enabled: false },
+        },
+      },
+    ];
+
+    await handler.dump(context);
+    const connectionsFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
+    expect(
+      loadJSON(path.join(connectionsFolder, 'someSamlConnectionIdpInitiatedDisabled.json')).options
+        .idpinitiated
+    ).to.deep.equal({ enabled: false });
+  });
+
   it('should dump connections sanitized', async () => {
     const dir = path.join(testDataDir, 'directory', 'connectionsDump');
     cleanThenMkdir(dir);
