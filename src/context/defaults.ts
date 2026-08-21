@@ -32,17 +32,21 @@ export function emailProviderDefaults(
   }
 
   if (name === 'smtp') {
-    // This is to mask smtp_user to '##SMTP_USER##'
-    if (updated.credentials && 'smtp_user' in updated.credentials) {
-      delete updated.credentials.smtp_user;
+    // If credentials is a keyword placeholder string (e.g. @@SMTP_CREDENTIALS@@), preserve it as-is.
+    // The `in` operator requires an object and would throw a TypeError on a string.
+    if (typeof updated.credentials !== 'string') {
+      // This is to mask smtp_user to '##SMTP_USER##'
+      if (updated.credentials && 'smtp_user' in updated.credentials) {
+        delete updated.credentials.smtp_user;
+      }
+      updated.credentials = {
+        smtp_host: '##SMTP_HOSTNAME##',
+        smtp_port: '##SMTP_PORT##',
+        smtp_user: '##SMTP_USER##',
+        smtp_pass: '##SMTP_PASS##',
+        ...(updated.credentials || {}),
+      };
     }
-    updated.credentials = {
-      smtp_host: '##SMTP_HOSTNAME##',
-      smtp_port: '##SMTP_PORT##',
-      smtp_user: '##SMTP_USER##',
-      smtp_pass: '##SMTP_PASS##',
-      ...(updated.credentials || {}),
-    };
   }
 
   if (name === 'ses') {

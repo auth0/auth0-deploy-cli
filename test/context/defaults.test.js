@@ -22,6 +22,20 @@ describe('#context defaults', () => {
       });
     });
 
+    it('should preserve smtp credentials when it is a keyword placeholder string', async () => {
+      const emailProvider = {
+        name: 'smtp',
+        credentials: '@@SMTP_CREDENTIALS@@',
+      };
+
+      const result = emailProviderDefaults(emailProvider);
+
+      expect(result).to.deep.equal({
+        name: 'smtp',
+        credentials: '@@SMTP_CREDENTIALS@@',
+      });
+    });
+
     it('should set emailProvider defaults for smtp and remove existing smtp_user', async () => {
       const emailProvider = {
         name: 'smtp',
