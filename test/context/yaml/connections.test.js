@@ -189,6 +189,17 @@ describe('#YAML context connections', () => {
           },
         },
       },
+      {
+        name: 'someSamlConnectionIdpInitiatedDisabled',
+        strategy: 'samlp',
+        enabled_clients: [],
+        options: {
+          passwordPolicy: 'testPolicy',
+          idpinitiated: {
+            enabled: false,
+          },
+        },
+      },
     ];
 
     const target = [
@@ -235,6 +246,17 @@ describe('#YAML context connections', () => {
             client_id: 'client-idp-three-id',
             client_protocol: 'samlp',
             client_authorizequery: '',
+          },
+        },
+      },
+      {
+        name: 'someSamlConnectionIdpInitiatedDisabled',
+        strategy: 'samlp',
+        enabled_clients: [],
+        options: {
+          passwordPolicy: 'testPolicy',
+          idpinitiated: {
+            enabled: false,
           },
         },
       },

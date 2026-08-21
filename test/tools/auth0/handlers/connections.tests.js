@@ -1476,6 +1476,22 @@ describe('#connections handler', () => {
       await stageFn.apply(handler, [{ connections: data }]);
     });
 
+    it('should not add a client_id to idpinitiated when login is disabled', () => {
+      const handler = new connections.default({ client: pageClient({ pool }), config });
+      const connection = {
+        options: {
+          passwordPolicy: 'testPolicy',
+          idpinitiated: { enabled: false },
+        },
+      };
+
+      const formatted = handler.getFormattedOptions(connection, [
+        { name: 'client1', client_id: 'client1-id' },
+      ]);
+
+      expect(formatted.options.idpinitiated).to.deep.equal({ enabled: false });
+    });
+
     // If client is excluded and in the existing connection this client is enabled, it should keep enabled
     // If client is excluded and in the existing connection this client is disabled, it should keep disabled
     it('should handle excluded clients properly', async () => {
