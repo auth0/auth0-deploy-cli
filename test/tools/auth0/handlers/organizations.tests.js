@@ -967,6 +967,105 @@ describe('#organizations handler', () => {
       ]);
     });
 
+    it('should retry an enabled connection create when a 429 rate-limit error occurs', async () => {
+      // Config with a tiny retry delay so the exponential backoff resolves fast in tests.
+      const retryConfig = function (key) {
+        return retryConfig.data && retryConfig.data[key];
+      };
+      retryConfig.data = {
+        AUTH0_ALLOW_DELETE: true,
+        AUTH0_RETRY_INITIAL_DELAY_MS: 1,
+        AUTH0_RETRY_MAX_DELAY_MS: 5,
+      };
+
+      let createCallCount = 0;
+
+      const auth0 = {
+        organizations: {
+          create: () => Promise.resolve([]),
+          update: (id, data) => Promise.resolve(data),
+          delete: () => Promise.resolve([]),
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [sampleOrg])),
+          connections: {
+            list: () => ({
+              data: [],
+              hasNextPage: () => false,
+              getNextPage: () =>
+                Promise.resolve({
+                  data: [],
+                  hasNextPage: () => false,
+                  getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+                }),
+            }),
+            create: (orgId, data) => {
+              createCallCount += 1;
+              // Fail the first attempt with a 429, then succeed on the retry.
+              if (createCallCount === 1) {
+                const err = new Error('Too Many Requests');
+                err.statusCode = 429;
+                return Promise.reject(err);
+              }
+              expect(orgId).to.equal('123');
+              expect(data.connection_id).to.equal('con_123');
+              return Promise.resolve(data);
+            },
+          },
+          clientGrants: {
+            list: () => mockPagedData({}, 'client_grants', []),
+          },
+          discoveryDomains: {
+            list: () => mockPagedData({}, 'discovery_domains', []),
+          },
+          clients: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+        },
+        connections: {
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              {
+                id: sampleEnabledConnection.connection_id,
+                name: sampleEnabledConnection.connection.name,
+                options: {},
+              },
+            ]),
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        clientGrants: {
+          list: (params) => mockPagedData(params, 'client_grants', [sampleClientGrant]),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({ client: pageClient(auth0), config: retryConfig });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          organizations: [
+            {
+              id: '123',
+              name: 'acme',
+              display_name: 'Acme 2',
+              connections: [
+                {
+                  name: 'Username-Password-Login',
+                  assign_membership_on_login: false,
+                  show_as_button: false,
+                  is_signup_enabled: false,
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      // The first call hit a 429 and the wrapper retried, so create is called twice.
+      expect(createCallCount).to.equal(2);
+    });
+
     it('should delete organizations', async () => {
       const auth0 = {
         organizations: {

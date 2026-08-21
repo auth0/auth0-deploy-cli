@@ -1,6 +1,6 @@
 import { omit, isEqual, pick } from 'lodash';
 import { Management } from 'auth0';
-import DefaultHandler, { order } from './default';
+import DefaultHandler, { order, retryWithExponentialBackoff } from './default';
 import { calculateChanges } from '../../calculateChanges';
 import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
@@ -187,12 +187,18 @@ export default class OrganizationsHandler extends DefaultHandler {
 
     const createdId = created.id;
 
+    const retryConfig = this.getRetryConfig();
+
     if (typeof org.connections !== 'undefined' && org.connections.length > 0) {
       await Promise.all(
         org.connections.map((conn) =>
-          this.client.organizations.connections.create(
-            createdId,
-            conn as Management.CreateOrganizationAllConnectionRequestParameters
+          retryWithExponentialBackoff(
+            () =>
+              this.client.organizations.connections.create(
+                createdId,
+                conn as Management.CreateOrganizationAllConnectionRequestParameters
+              ),
+            retryConfig
           )
         )
       );
@@ -322,53 +328,61 @@ export default class OrganizationsHandler extends DefaultHandler {
       changed = true;
     }
 
+    const retryConfig = this.getRetryConfig();
+
     // Handle updates first
     await Promise.all(
       connectionsToUpdate.map((conn: Management.CreateOrganizationAllConnectionRequestParameters) =>
-        this.client.organizations.connections
-          .update(params.id, conn.connection_id, {
-            organization_connection_name: conn.organization_connection_name,
-            assign_membership_on_login: conn.assign_membership_on_login,
-            show_as_button: conn.show_as_button,
-            is_signup_enabled: conn.is_signup_enabled,
-            is_enabled: conn.is_enabled,
-            organization_access_level: conn.organization_access_level,
-          })
-          .catch(() => {
-            throw new Error(
-              `Problem updating Enabled Connection ${conn.connection_id} for organizations ${params.id}`
-            );
-          })
+        retryWithExponentialBackoff(
+          () =>
+            this.client.organizations.connections.update(params.id, conn.connection_id, {
+              organization_connection_name: conn.organization_connection_name,
+              assign_membership_on_login: conn.assign_membership_on_login,
+              show_as_button: conn.show_as_button,
+              is_signup_enabled: conn.is_signup_enabled,
+              is_enabled: conn.is_enabled,
+              organization_access_level: conn.organization_access_level,
+            }),
+          retryConfig
+        ).catch(() => {
+          throw new Error(
+            `Problem updating Enabled Connection ${conn.connection_id} for organizations ${params.id}`
+          );
+        })
       )
     );
 
     await Promise.all(
       connectionsToAdd.map((conn: Management.CreateOrganizationAllConnectionRequestParameters) =>
-        this.client.organizations.connections
-          .create(
-            params.id,
-            omit<Management.OrganizationConnection>(
-              conn,
-              'connection'
-            ) as Management.AddOrganizationConnectionRequestContent
-          )
-          .catch(() => {
-            throw new Error(
-              `Problem adding Enabled Connection ${conn.connection_id} for organizations ${params.id}`
-            );
-          })
+        retryWithExponentialBackoff(
+          () =>
+            this.client.organizations.connections.create(
+              params.id,
+              omit<Management.OrganizationConnection>(
+                conn,
+                'connection'
+              ) as Management.AddOrganizationConnectionRequestContent
+            ),
+          retryConfig
+        ).catch(() => {
+          throw new Error(
+            `Problem adding Enabled Connection ${conn.connection_id} for organizations ${params.id}`
+          );
+        })
       )
     );
 
     await Promise.all(
       connectionsToRemove.map((conn: Management.OrganizationConnection) =>
-        this.client.organizations.connections
-          .delete(params.id, conn.connection_id as string)
-          .catch(() => {
-            throw new Error(
-              `Problem removing Enabled Connection ${conn.connection_id} for organizations ${params.id}`
-            );
-          })
+        retryWithExponentialBackoff(
+          () =>
+            this.client.organizations.connections.delete(params.id, conn.connection_id as string),
+          retryConfig
+        ).catch(() => {
+          throw new Error(
+            `Problem removing Enabled Connection ${conn.connection_id} for organizations ${params.id}`
+          );
+        })
       )
     );
 
