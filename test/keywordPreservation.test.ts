@@ -10,6 +10,8 @@ import {
 } from '../src/keywordPreservation';
 import { cloneDeep } from 'lodash';
 import log from '../src/logger';
+import Auth0 from '../src/tools/auth0';
+import { Assets, Auth0APIClient } from '../src/types';
 
 describe('#Keyword Preservation', () => {
   describe('doesHaveKeywordMarker', () => {
@@ -1074,5 +1076,76 @@ describe('preserveKeywords', () => {
     );
 
     log.debug = originalLogDebug;
+  });
+});
+
+describe('preserveKeywords with handlers that do not define identifiers', () => {
+  // Regression test for a crash during export with AUTH0_PRESERVE_KEYWORDS enabled:
+  // `TypeError: Cannot read properties of undefined (reading 'flat')`.
+  // Handlers that do not extend the default APIHandler (ex: clientAuthCredentials)
+  // never receive the `['id', 'name']` identifiers default, so `handler.identifiers`
+  // is undefined when preserveKeywords builds its identifier map.
+  it('should not crash when a handler is missing the identifiers property', () => {
+    const mockLocalAssets = {
+      tenant: {
+        friendly_name: '##COMPANY_NAME## Tenant',
+      },
+    };
+
+    const mockRemoteAssets = {
+      tenant: {
+        friendly_name: 'Travel0 Tenant',
+      },
+    };
+
+    const preservedAssets = preserveKeywords({
+      localAssets: mockLocalAssets,
+      remoteAssets: mockRemoteAssets,
+      keywordMappings: {
+        COMPANY_NAME: 'Travel0',
+      },
+      auth0Handlers: [
+        { id: 'id', identifiers: ['id', 'name'], type: 'clients' },
+        //@ts-expect-error because handlers not extending the default APIHandler lack identifiers
+        { id: 'id', type: 'clientAuthCredentials' },
+      ],
+    });
+
+    expect(preservedAssets).to.deep.equal({
+      tenant: {
+        friendly_name: '##COMPANY_NAME## Tenant',
+      },
+    });
+  });
+
+  it('should not crash when passed the actual set of Auth0 handlers', () => {
+    const auth0 = new Auth0({} as Auth0APIClient, {} as Assets, () => undefined);
+
+    const mockLocalAssets = {
+      tenant: {
+        friendly_name: '##COMPANY_NAME## Tenant',
+      },
+    };
+
+    const mockRemoteAssets = {
+      tenant: {
+        friendly_name: 'Travel0 Tenant',
+      },
+    };
+
+    const preservedAssets = preserveKeywords({
+      localAssets: mockLocalAssets,
+      remoteAssets: mockRemoteAssets,
+      keywordMappings: {
+        COMPANY_NAME: 'Travel0',
+      },
+      auth0Handlers: auth0.handlers as Parameters<typeof preserveKeywords>[0]['auth0Handlers'],
+    });
+
+    expect(preservedAssets).to.deep.equal({
+      tenant: {
+        friendly_name: '##COMPANY_NAME## Tenant',
+      },
+    });
   });
 });

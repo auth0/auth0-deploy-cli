@@ -254,6 +254,7 @@ export const preserveKeywords = ({
 
   const resourceSpecificIdentifiers: Partial<Record<AssetTypes, string[]>> = auth0Handlers.reduce(
     (acc, handler) => {
+      if (handler.identifiers === undefined) return acc;
       acc[handler.type] = handler.identifiers.flat();
       return acc;
     },
