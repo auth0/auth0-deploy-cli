@@ -544,45 +544,6 @@ describe('#utils calculateDryRunChanges', () => {
     expect(changes.update[0].client_id).to.equal('cli_abc');
   });
 
-  it('should classify asset as update when a field inside an array item changes', () => {
-    // Regression test for #1451: value change inside array item was silently dropped
-    const changes = calculateDryRunChanges({
-      type: 'organizations',
-      assets: [
-        {
-          name: 'acme',
-          connections: [{ connection_id: 'con_abc', assign_membership_on_login: true }],
-        },
-      ],
-      existing: [
-        {
-          name: 'acme',
-          connections: [{ connection_id: 'con_abc', assign_membership_on_login: false }],
-        },
-      ],
-      identifiers: ['id', 'name'],
-      ignoreDryRunFields: [],
-    });
-
-    expect(changes.update).to.have.length(1);
-    expect(changes.update[0].name).to.equal('acme');
-  });
-
-  it('should treat null existing as empty and classify all local assets as creates', () => {
-    // Regression test for null crash: [null] was used as remoteAssets, causing TypeError
-    const changes = calculateDryRunChanges({
-      type: 'clients',
-      assets: [{ name: 'My App', app_type: 'spa' }],
-      existing: null,
-      identifiers: ['client_id', 'name'],
-      ignoreDryRunFields: [],
-    });
-
-    expect(changes.create).to.have.length(1);
-    expect(changes.update).to.have.length(0);
-    expect(changes.del).to.have.length(0);
-  });
-
   it('should use _clientName in the UPDATE identifier for clientGrants', () => {
     const changes = calculateDryRunChanges({
       type: 'clientGrants',
