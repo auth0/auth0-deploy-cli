@@ -448,12 +448,15 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
 
   getFormattedOptions(connection, clients) {
     try {
+      const { idpinitiated } = connection.options;
       return {
         options: {
           ...connection.options,
           idpinitiated: {
-            ...connection.options.idpinitiated,
-            client_id: convertClientNameToId(connection.options.idpinitiated.client_id, clients),
+            ...idpinitiated,
+            ...(idpinitiated.client_id && {
+              client_id: convertClientNameToId(idpinitiated.client_id, clients),
+            }),
           },
         },
       };
