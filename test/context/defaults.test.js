@@ -22,6 +22,46 @@ describe('#context defaults', () => {
       });
     });
 
+    it('should preserve smtp credentials when it is a keyword placeholder string', async () => {
+      const emailProvider = {
+        name: 'smtp',
+        credentials: '@@SMTP_CREDENTIALS@@',
+      };
+
+      const result = emailProviderDefaults(emailProvider);
+
+      expect(result).to.deep.equal({
+        name: 'smtp',
+        credentials: '@@SMTP_CREDENTIALS@@',
+      });
+    });
+
+    it('should preserve ses credentials when it is a keyword placeholder string', async () => {
+      const result = emailProviderDefaults({ name: 'ses', credentials: '@@SES_CREDENTIALS@@' });
+      expect(result).to.deep.equal({ name: 'ses', credentials: '@@SES_CREDENTIALS@@' });
+    });
+
+    it('should preserve mailgun credentials when it is a keyword placeholder string', async () => {
+      const result = emailProviderDefaults({
+        name: 'mailgun',
+        credentials: '@@MAILGUN_CREDENTIALS@@',
+      });
+      expect(result).to.deep.equal({ name: 'mailgun', credentials: '@@MAILGUN_CREDENTIALS@@' });
+    });
+
+    it('should preserve azure_cs credentials when it is a keyword placeholder string', async () => {
+      const result = emailProviderDefaults({
+        name: 'azure_cs',
+        credentials: '@@AZURE_CREDENTIALS@@',
+      });
+      expect(result).to.deep.equal({ name: 'azure_cs', credentials: '@@AZURE_CREDENTIALS@@' });
+    });
+
+    it('should preserve ms365 credentials when it is a keyword placeholder string', async () => {
+      const result = emailProviderDefaults({ name: 'ms365', credentials: '@@MS365_CREDENTIALS@@' });
+      expect(result).to.deep.equal({ name: 'ms365', credentials: '@@MS365_CREDENTIALS@@' });
+    });
+
     it('should set emailProvider defaults for smtp and remove existing smtp_user', async () => {
       const emailProvider = {
         name: 'smtp',
