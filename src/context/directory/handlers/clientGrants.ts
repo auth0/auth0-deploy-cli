@@ -66,26 +66,22 @@ async function dump(context: DirectoryContext): Promise<void> {
     include_totals: true,
   });
 
-  // Filter out grants for excluded clients
-  if (excludedClientsByNames.length) {
-    const excludedClientIds = new Set(
-      allClients
-        .filter((c) => c.name !== undefined && excludedClientsByNames.includes(c.name))
-        .map((c) => c.client_id)
+  // Convert audience to the API name for readability
+  const apiName = (grantAudience: string | undefined) => {
+    if (!grantAudience) return grantAudience;
+
+    const associatedAPI = allResourceServers.find(
+      (resourceServer) => resourceServer.identifier === grantAudience
     );
-    clientGrants = clientGrants.filter(
-      (grant: ClientGrant) => !excludedClientIds.has(grant.client_id)
-    );
-  }
 
-  // Convert client_id to the client name for readability
-  clientGrants.forEach((grant: ClientGrant) => {
-    const dumpGrant = { ...grant };
+    if (associatedAPI === undefined) return grantAudience; // Use the audience if the API is not found
 
-    if (context.assets.clientsOrig) {
-      dumpGrant.client_id = convertClientIdToName(dumpGrant.client_id, context.assets.clientsOrig);
-    }
+    return associatedAPI.name; // Use the name of the API
+  };
 
+  // Derive the filename for a grant. Shared by the cleanup pass below, which needs the names of
+  // excluded grants before they are filtered out.
+  const nameFor = (grant: ClientGrant) => {
     const clientName = (() => {
       const associatedClient = allClients.find((client) => client.client_id === grant.client_id);
 
@@ -93,19 +89,6 @@ async function dump(context: DirectoryContext): Promise<void> {
 
       return associatedClient.name;
     })();
-
-    // Convert audience to the API name for readability
-    const apiName = (grantAudience: string | undefined) => {
-      if (!grantAudience) return grantAudience;
-
-      const associatedAPI = allResourceServers.find(
-        (resourceServer) => resourceServer.identifier === grantAudience
-      );
-
-      if (associatedAPI === undefined) return grantAudience; // Use the audience if the API is not found
-
-      return associatedAPI.name; // Use the name of the API
-    };
 
     // Replace keyword markers if necessary
     const clientNameNonMarker = doesHaveKeywordMarker(clientName, context.mappings)
@@ -120,7 +103,40 @@ async function dump(context: DirectoryContext): Promise<void> {
     // without it, grants differing only by subject type (e.g. `client` vs `user` on the same
     // client and audience) resolve to the same filename and silently overwrite each other.
     const baseName = `${clientNameNonMarker}-${apiName(apiAudienceNonMarker)}`;
-    const name = sanitize(grant.subject_type ? `${baseName}-${grant.subject_type}` : baseName);
+
+    return sanitize(grant.subject_type ? `${baseName}-${grant.subject_type}` : baseName);
+  };
+
+  // Track files that should remain after the dump (written + excluded).
+  const expectedFiles = new Set<string>();
+
+  // Filter out grants for excluded clients
+  if (excludedClientsByNames.length) {
+    const excludedClientIds = new Set(
+      allClients
+        .filter((c) => c.name !== undefined && excludedClientsByNames.includes(c.name))
+        .map((c) => c.client_id)
+    );
+    // Excluded grants are never written, so record their filenames up front to stop the cleanup
+    // pass below from removing files for clients the user deliberately excluded.
+    clientGrants
+      .filter((grant: ClientGrant) => excludedClientIds.has(grant.client_id))
+      .forEach((grant: ClientGrant) => expectedFiles.add(`${nameFor(grant)}.json`));
+
+    clientGrants = clientGrants.filter(
+      (grant: ClientGrant) => !excludedClientIds.has(grant.client_id)
+    );
+  }
+
+  // Convert client_id to the client name for readability
+  clientGrants.forEach((grant: ClientGrant) => {
+    const dumpGrant = { ...grant };
+
+    if (context.assets.clientsOrig) {
+      dumpGrant.client_id = convertClientIdToName(dumpGrant.client_id, context.assets.clientsOrig);
+    }
+
+    const name = nameFor(grant);
 
     // Ensure the name is not empty or invalid
     if (!name || name.trim().length === 0) {
@@ -129,7 +145,18 @@ async function dump(context: DirectoryContext): Promise<void> {
 
     const grantFile = path.join(grantsFolder, `${name}.json`);
     dumpJSON(grantFile, dumpGrant);
+    expectedFiles.add(`${name}.json`);
   });
+
+  // Remove files that belong to grants no longer present (and not excluded). Without this, a grant
+  // whose filename changes is left behind under its old name and parsed back as a duplicate on the
+  // next import, and grants deleted from the tenant are silently recreated.
+  for (const existing of fs.readdirSync(grantsFolder)) {
+    const fullPath = path.join(grantsFolder, existing);
+    if (fs.statSync(fullPath).isFile() && !expectedFiles.has(existing)) {
+      fs.removeSync(fullPath);
+    }
+  }
 }
 
 const clientGrantsHandler: DirectoryHandler<ParsedClientGrants> = {
