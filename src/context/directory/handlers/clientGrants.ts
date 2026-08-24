@@ -115,8 +115,12 @@ async function dump(context: DirectoryContext): Promise<void> {
       ? keywordReplace(grant.audience, context.mappings)
       : grant.audience;
 
-    // Construct the name using non-marker names
-    const name = sanitize(`${clientNameNonMarker}-${apiName(apiAudienceNonMarker)}`);
+    // Construct the name using non-marker names. `subject_type` is part of a grant's identity
+    // (see `identifiers` in src/tools/auth0/handlers/clientGrants.ts), so it must be included:
+    // without it, grants differing only by subject type (e.g. `client` vs `user` on the same
+    // client and audience) resolve to the same filename and silently overwrite each other.
+    const baseName = `${clientNameNonMarker}-${apiName(apiAudienceNonMarker)}`;
+    const name = sanitize(grant.subject_type ? `${baseName}-${grant.subject_type}` : baseName);
 
     // Ensure the name is not empty or invalid
     if (!name || name.trim().length === 0) {

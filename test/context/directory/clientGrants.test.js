@@ -195,6 +195,106 @@ describe('#directory context clientGrants', () => {
     ).to.deep.equal(context.assets.clientGrants[2]);
   });
 
+  it('should dump grants differing only by subject_type to separate files', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientGrantsDumpSubjectType');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: dir },
+      {
+        ...mockMgmtClient(),
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ client_id: 'client-id-1', name: 'Primary M2M' }]),
+        },
+        resourceServers: {
+          list: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              {
+                id: 'resource-server-1',
+                name: 'Payments Service',
+                identifier: 'https://payments.travel0.com/api',
+              },
+            ]),
+        },
+      }
+    );
+
+    context.assets.clientGrants = [
+      {
+        audience: 'https://payments.travel0.com/api',
+        client_id: 'client-id-1',
+        scope: ['read:card'],
+        subject_type: 'client',
+      },
+      {
+        audience: 'https://payments.travel0.com/api',
+        client_id: 'client-id-1',
+        scope: ['update:card'],
+        subject_type: 'user',
+      },
+    ];
+
+    await handler.dump(context);
+    const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
+
+    const files = getFiles(clientGrantsFolder, ['.json']);
+
+    // Both grants must survive the dump; previously the second overwrote the first.
+    expect(files).to.have.length(2);
+    expect(files).to.have.members([
+      path.join(clientGrantsFolder, 'Primary M2M-Payments Service-client.json'),
+      path.join(clientGrantsFolder, 'Primary M2M-Payments Service-user.json'),
+    ]);
+
+    expect(
+      loadJSON(path.join(clientGrantsFolder, 'Primary M2M-Payments Service-client.json'))
+    ).to.deep.equal(context.assets.clientGrants[0]);
+    expect(
+      loadJSON(path.join(clientGrantsFolder, 'Primary M2M-Payments Service-user.json'))
+    ).to.deep.equal(context.assets.clientGrants[1]);
+  });
+
+  it('should keep the legacy filename when subject_type is absent', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientGrantsDumpNoSubjectType');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: dir },
+      {
+        ...mockMgmtClient(),
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ client_id: 'client-id-1', name: 'Primary M2M' }]),
+        },
+        resourceServers: {
+          list: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              {
+                id: 'resource-server-1',
+                name: 'Payments Service',
+                identifier: 'https://payments.travel0.com/api',
+              },
+            ]),
+        },
+      }
+    );
+
+    context.assets.clientGrants = [
+      {
+        audience: 'https://payments.travel0.com/api',
+        client_id: 'client-id-1',
+        scope: ['read:card'],
+      },
+    ];
+
+    await handler.dump(context);
+    const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
+
+    const files = getFiles(clientGrantsFolder, ['.json']);
+
+    expect(files).to.have.length(1);
+    expect(files[0]).to.equal(path.join(clientGrantsFolder, 'Primary M2M-Payments Service.json'));
+  });
+
   it('should not dump grants for excluded clients', async () => {
     const dir = path.join(testDataDir, 'directory', 'clientGrantsDumpExclude');
     cleanThenMkdir(dir);
