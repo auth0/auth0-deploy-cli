@@ -2852,3 +2852,67 @@ describe('#addExcludedConnectionPropertiesToChanges', () => {
     }); // Expect no change
   });
 });
+
+describe('#connections dryRunChanges', () => {
+  // Regression tests for INCLUDED_CONNECTIONS dry-run bug:
+  // dryRunChanges was not applying filterIncluded, causing phantom DELETEs for
+  // connections outside AUTH0_INCLUDED_CONNECTIONS.
+
+  const config = (key) => ({ AUTH0_CLIENT_ID: 'client_id' }[key]);
+
+  it('should not report phantom deletes for connections outside AUTH0_INCLUDED_CONNECTIONS', async () => {
+    const auth0 = {
+      connections: {
+        list: (params) =>
+          mockPagedData(params, 'connections', [
+            { id: 'con_google', name: 'google-oauth2', strategy: 'google-oauth2' },
+            { id: 'con_email', name: 'email', strategy: 'email' },
+          ]),
+      },
+      clients: {
+        list: (params) => mockPagedData(params, 'clients', []),
+      },
+    };
+
+    const handler = new connections.default({ client: pageClient(auth0), config });
+
+    // Local config only manages google-oauth2; include list restricts to it
+    const assets = {
+      connections: [{ name: 'google-oauth2', strategy: 'google-oauth2' }],
+      include: { connections: ['google-oauth2'] },
+    };
+
+    const changes = await handler.dryRunChanges(assets);
+
+    // 'email' exists on the tenant but is outside the include list —
+    // it must not appear as a DELETE in dry-run
+    expect(changes.del).to.have.length(0);
+  });
+
+  it('should report deletes normally when no include list is configured', async () => {
+    const auth0 = {
+      connections: {
+        list: (params) =>
+          mockPagedData(params, 'connections', [
+            { id: 'con_google', name: 'google-oauth2', strategy: 'google-oauth2' },
+            { id: 'con_email', name: 'email', strategy: 'email' },
+          ]),
+      },
+      clients: {
+        list: (params) => mockPagedData(params, 'clients', []),
+      },
+    };
+
+    const handler = new connections.default({ client: pageClient(auth0), config });
+
+    // No include filter — all connections are in scope
+    const assets = {
+      connections: [{ name: 'google-oauth2', strategy: 'google-oauth2' }],
+    };
+
+    const changes = await handler.dryRunChanges(assets);
+
+    // 'email' is in scope and not in local config — should appear as DELETE
+    expect(changes.del.some((c) => c.name === 'email')).to.be.true;
+  });
+});
