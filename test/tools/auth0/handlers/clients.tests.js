@@ -93,6 +93,40 @@ describe('#clients handler', () => {
       ]);
       expect(valid).to.equal(false);
     });
+
+    it('should pass validation with my_organization_configuration.third_party_client_access', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someMyOrgClient',
+          my_organization_configuration: {
+            allowed_strategies: ['oidc'],
+            connection_deletion_behavior: 'allow',
+            third_party_client_access: {
+              default_value: 'block',
+              allowed_values: ['allow', 'block'],
+            },
+          },
+        },
+      ]);
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should fail validation with third_party_client_access missing allowed_values', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someMyOrgClient',
+          my_organization_configuration: {
+            allowed_strategies: ['oidc'],
+            connection_deletion_behavior: 'allow',
+            third_party_client_access: {
+              default_value: 'block',
+            },
+          },
+        },
+      ]);
+      expect(valid).to.equal(false);
+    });
   });
 
   describe('#clients validate', () => {

@@ -53,6 +53,24 @@ describe('#connectionProfiles handler', () => {
 
       await stageFn.apply(handler, [{ connectionProfiles: data }]);
     });
+
+    it('should pass validation with cross_app_access_resource_app', async () => {
+      const handler = new connectionProfiles.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        {
+          name: 'someProfile',
+          cross_app_access_resource_app: {
+            status: {
+              default_value: 'enabled',
+              allowed_values: ['enabled', 'disabled'],
+            },
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ connectionProfiles: data }]);
+    });
   });
 
   describe('#connectionProfiles process', () => {
