@@ -3022,3 +3022,113 @@ describe('#databases handler with enabled clients integration', () => {
     });
   });
 });
+
+describe('#databases dryRunChanges', () => {
+  // Regression tests for #1450: AUTH0_IGNORE_DRY_RUN_FIELDS was silently a no-op
+  // for databases because dryRunChanges used this.ignoreDryRunFields (constructor
+  // defaults only) instead of this.getEffectiveIgnoreDryRunFields() (which merges
+  // in the AUTH0_IGNORE_DRY_RUN_FIELDS config value).
+
+  const pool = {
+    addEachTask: (data) => {
+      if (data.data && data.data.length) data.generator(data.data[0]);
+      return { promise: () => null };
+    },
+    addSingleTask: (task) => {
+      const result = task.generator(task.data);
+      return { promise: () => Promise.resolve(result) };
+    },
+  };
+
+  it('should suppress diffs for fields listed in AUTH0_IGNORE_DRY_RUN_FIELDS', async () => {
+    const auth0 = {
+      connections: {
+        // Remote includes options: {} so getFormattedOptions doesn't produce a spurious diff
+        list: (params) =>
+          mockPagedData(params, 'connections', [
+            {
+              id: 'con_1',
+              name: 'test-db',
+              strategy: 'auth0',
+              options: {},
+              noisy_field: 'remote_value',
+            },
+          ]),
+      },
+      clients: {
+        list: (params) => mockPagedData(params, 'clients', []),
+      },
+      actions: {
+        list: (params) => mockPagedData(params, 'actions', []),
+      },
+      pool,
+    };
+
+    const config = (key) => {
+      if (key === 'AUTH0_IGNORE_DRY_RUN_FIELDS') return { databases: ['noisy_field'] };
+      if (key === 'AUTH0_CLIENT_ID') return 'client_id';
+    };
+
+    const handler = new databases.default({ client: pageClient(auth0), config });
+
+    const assets = {
+      databases: [
+        {
+          name: 'test-db',
+          strategy: 'auth0',
+          options: {},
+          noisy_field: 'local_value', // differs from remote — but must be ignored
+        },
+      ],
+    };
+
+    const changes = await handler.dryRunChanges(assets);
+
+    // noisy_field is configured to be ignored — no update should be reported
+    expect(changes.update).to.have.length(0);
+  });
+
+  it('should report diffs for fields not in AUTH0_IGNORE_DRY_RUN_FIELDS', async () => {
+    const auth0 = {
+      connections: {
+        list: (params) =>
+          mockPagedData(params, 'connections', [
+            {
+              id: 'con_1',
+              name: 'test-db',
+              strategy: 'auth0',
+              options: {},
+              tracked_field: 'remote_value',
+            },
+          ]),
+      },
+      clients: {
+        list: (params) => mockPagedData(params, 'clients', []),
+      },
+      actions: {
+        list: (params) => mockPagedData(params, 'actions', []),
+      },
+      pool,
+    };
+
+    // No AUTH0_IGNORE_DRY_RUN_FIELDS configured
+    const config = (key) => ({ AUTH0_CLIENT_ID: 'client_id' }[key]);
+
+    const handler = new databases.default({ client: pageClient(auth0), config });
+
+    const assets = {
+      databases: [
+        {
+          name: 'test-db',
+          strategy: 'auth0',
+          options: {},
+          tracked_field: 'local_value', // differs from remote — should be detected
+        },
+      ],
+    };
+
+    const changes = await handler.dryRunChanges(assets);
+
+    expect(changes.update).to.have.length(1);
+  });
+});
