@@ -1,3 +1,4 @@
+const Ajv = require('ajv');
 const { expect } = require('chai');
 const connectionProfiles = require('../../../../src/tools/auth0/handlers/connectionProfiles');
 const { mockPagedData } = require('../../../utils');
@@ -20,6 +21,65 @@ describe('#connectionProfiles handler', () => {
   config.data = {
     AUTH0_ALLOW_DELETE: true,
   };
+
+  describe('#connectionProfiles schema', () => {
+    const ajv = new Ajv({ useDefaults: true, nullable: true });
+
+    it('should pass validation with cross_app_access_resource_app', () => {
+      const valid = ajv.validate(connectionProfiles.schema, [
+        {
+          name: 'someProfile',
+          cross_app_access_resource_app: {
+            status: {
+              default_value: 'enabled',
+              allowed_values: ['enabled', 'disabled'],
+            },
+          },
+        },
+      ]);
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should pass validation with cross_app_access_resource_app omitting optional allowed_values', () => {
+      const valid = ajv.validate(connectionProfiles.schema, [
+        {
+          name: 'someProfile',
+          cross_app_access_resource_app: {
+            status: {
+              default_value: 'disabled',
+            },
+          },
+        },
+      ]);
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should fail validation with cross_app_access_resource_app.status missing default_value', () => {
+      const valid = ajv.validate(connectionProfiles.schema, [
+        {
+          name: 'someProfile',
+          cross_app_access_resource_app: {
+            status: {
+              allowed_values: ['enabled', 'disabled'],
+            },
+          },
+        },
+      ]);
+      expect(valid).to.equal(false);
+    });
+
+    it('should fail validation with cross_app_access_resource_app missing status', () => {
+      const valid = ajv.validate(connectionProfiles.schema, [
+        {
+          name: 'someProfile',
+          cross_app_access_resource_app: {},
+        },
+      ]);
+      expect(valid).to.equal(false);
+    });
+  });
 
   describe('#connectionProfiles validate', () => {
     it('should not allow same names', async () => {

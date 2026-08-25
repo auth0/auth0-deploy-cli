@@ -1297,6 +1297,11 @@ Example `phone-templates/otp_verify.json`:
 
 Application specific configuration for use with the OIN Express Configuration feature
 
+The `cross_app_access_resource_app` field controls whether organization admins may enable Cross App Access (XAA) on their Identity Providers:
+
+- `cross_app_access_resource_app.status.default_value` (`"enabled"` | `"disabled"`): The default Cross App Access resource app status.
+- `cross_app_access_resource_app.status.allowed_values` (array of `"enabled"` | `"disabled"`): The allowed status values.
+
 ### YAML Example
 
 ```yaml
@@ -1310,6 +1315,12 @@ connectionProfiles:
     enabled_features:
       - scim
       - universal_logout
+    cross_app_access_resource_app:
+      status:
+        default_value: 'enabled'
+        allowed_values:
+          - enabled
+          - disabled
     strategy_overrides:
       samlp:
         enabled_features:
@@ -1339,6 +1350,12 @@ File: `./connection-profiles/Enterprise SSO Profile.json`
   },
   "connection_name_prefix_template": "org-{organization_name}",
   "enabled_features": ["scim", "universal_logout"],
+  "cross_app_access_resource_app": {
+    "status": {
+      "default_value": "enabled",
+      "allowed_values": ["enabled", "disabled"]
+    }
+  },
   "strategy_overrides": {
     "samlp": {
       "enabled_features": ["universal_logout"]

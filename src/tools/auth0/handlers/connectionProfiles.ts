@@ -39,6 +39,40 @@ export const schema = {
       connection_config: {
         type: ['object', 'null'],
       },
+      cross_app_access_resource_app: {
+        type: 'object',
+        description:
+          'Controls whether organization admins may enable Cross App Access (XAA) on their Identity Providers.',
+        properties: {
+          status: {
+            type: 'object',
+            properties: {
+              default_value: {
+                type: 'string',
+                enum: Object.values(
+                  Management.ConnectionProfileCrossAppAccessResourceAppStatusDefaultValueEnum
+                ),
+                description: 'The default Cross App Access resource app status.',
+              },
+              allowed_values: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                  enum: Object.values(
+                    Management.ConnectionProfileCrossAppAccessResourceAppStatusValueEnum
+                  ),
+                },
+                uniqueItems: true,
+                description: 'The allowed Cross App Access resource app status values.',
+              },
+            },
+            // allowed_values is optional per the SDK type (unlike the client's
+            // third_party_client_access, which requires both fields).
+            required: ['default_value'],
+          },
+        },
+        required: ['status'],
+      },
       strategy_overrides: {
         type: ['object', 'null'],
         properties: {
