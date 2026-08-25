@@ -80,4 +80,32 @@ phoneProviders:
       ],
     });
   });
+
+  it('should dump custom phone provider with empty credentials', async () => {
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+    context.assets.phoneProviders = [
+      {
+        id: 'pro_5nbdb4pWifFdA1rV6pW6BE',
+        disabled: false,
+        name: 'custom',
+        configuration: {
+          delivery_methods: ['text', 'voice'],
+        },
+      },
+    ];
+
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({
+      phoneProviders: [
+        {
+          disabled: false,
+          name: 'custom',
+          configuration: {
+            delivery_methods: ['text', 'voice'],
+          },
+          credentials: {},
+        },
+      ],
+    });
+  });
 });

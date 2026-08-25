@@ -99,6 +99,11 @@ export function phoneProviderDefaults(phoneProvider) {
     updated.credentials = {
       auth_token: `##${name.toUpperCase()}_AUTH_TOKEN##`,
     };
+  } else if (name === 'custom') {
+    // The `custom` provider has no exportable secrets, but the API requires a
+    // `credentials` object on import even when empty. Emit an empty object so
+    // exported configs round-trip cleanly.
+    updated.credentials = {};
   }
   return updated;
 }

@@ -192,6 +192,18 @@ export default class PhoneProviderHandler extends DefaultHandler {
         delete payload.id;
       }
 
+      // The `custom` provider requires a `credentials` object in the payload even
+      // when it is empty. Exported configs omit credentials, so inject an empty
+      // object here to avoid a "Missing required property: credentials" 400 error.
+      const payloadWithCreds = payload as PhoneProvider & { credentials?: object };
+      if (
+        payloadWithCreds &&
+        payloadWithCreds.name === 'custom' &&
+        payloadWithCreds.credentials == null
+      ) {
+        payloadWithCreds.credentials = {};
+      }
+
       return payload;
     })();
 
