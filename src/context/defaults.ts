@@ -25,49 +25,61 @@ export function emailProviderDefaults(
   const { name } = updated;
 
   if (apiKeyProviders.includes(name)) {
-    updated.credentials = {
-      api_key: `##${name.toUpperCase()}_API_KEY##`,
-      ...(updated.credentials || {}),
-    };
+    if (typeof updated.credentials !== 'string') {
+      updated.credentials = {
+        api_key: `##${name.toUpperCase()}_API_KEY##`,
+        ...(updated.credentials || {}),
+      };
+    }
   }
 
   if (name === 'smtp') {
-    // This is to mask smtp_user to '##SMTP_USER##'
-    if (updated.credentials && 'smtp_user' in updated.credentials) {
-      delete updated.credentials.smtp_user;
+    // If credentials is a keyword placeholder string (e.g. @@SMTP_CREDENTIALS@@), preserve it as-is.
+    // The `in` operator requires an object and would throw a TypeError on a string.
+    if (typeof updated.credentials !== 'string') {
+      // This is to mask smtp_user to '##SMTP_USER##'
+      if (updated.credentials && 'smtp_user' in updated.credentials) {
+        delete updated.credentials.smtp_user;
+      }
+      updated.credentials = {
+        smtp_host: '##SMTP_HOSTNAME##',
+        smtp_port: '##SMTP_PORT##',
+        smtp_user: '##SMTP_USER##',
+        smtp_pass: '##SMTP_PASS##',
+        ...(updated.credentials || {}),
+      };
     }
-    updated.credentials = {
-      smtp_host: '##SMTP_HOSTNAME##',
-      smtp_port: '##SMTP_PORT##',
-      smtp_user: '##SMTP_USER##',
-      smtp_pass: '##SMTP_PASS##',
-      ...(updated.credentials || {}),
-    };
   }
 
   if (name === 'ses') {
-    updated.credentials = {
-      accessKeyId: '##SES_ACCESS_KEY_ID##',
-      secretAccessKey: '##SES_ACCESS_SECRET_KEY##',
-      region: '##SES_AWS_REGION##',
-      ...(updated.credentials || {}),
-    };
+    if (typeof updated.credentials !== 'string') {
+      updated.credentials = {
+        accessKeyId: '##SES_ACCESS_KEY_ID##',
+        secretAccessKey: '##SES_ACCESS_SECRET_KEY##',
+        region: '##SES_AWS_REGION##',
+        ...(updated.credentials || {}),
+      };
+    }
   }
 
   if (name === 'azure_cs') {
-    updated.credentials = {
-      connectionString: '##AZURE_CS_CONNECTION_KEY##',
-      ...(updated.credentials || {}),
-    };
+    if (typeof updated.credentials !== 'string') {
+      updated.credentials = {
+        connectionString: '##AZURE_CS_CONNECTION_KEY##',
+        ...(updated.credentials || {}),
+      };
+    }
   }
 
   if (name === 'ms365') {
-    updated.credentials = {
-      tenantId: '##MS365_TENANT_ID##',
-      clientId: '##MS365_CLIENT_ID##',
-      clientSecret: '##MS365_CLIENT_SECRET##',
-      ...(updated.credentials || {}),
-    };
+    if (typeof updated.credentials !== 'string') {
+      updated.credentials = {
+        tenantId: '##MS365_TENANT_ID##',
+        clientId: '##MS365_CLIENT_ID##',
+        clientSecret: '##MS365_CLIENT_SECRET##',
+        ...(updated.credentials || {}),
+      };
+    }
   }
 
   return updated;
