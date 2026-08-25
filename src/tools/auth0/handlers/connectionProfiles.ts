@@ -66,6 +66,8 @@ export const schema = {
                 description: 'The allowed Cross App Access resource app status values.',
               },
             },
+            // allowed_values is optional per the SDK type (unlike the client's
+            // third_party_client_access, which requires both fields).
             required: ['default_value'],
           },
         },
