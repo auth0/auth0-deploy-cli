@@ -148,38 +148,39 @@ describe('#directory context attack-protection', () => {
     expect(context.assets.attackProtection).to.deep.equal(target);
   });
 
-  it('should dump attack-protection', async () => {
+  it('should dump attack-protection with primitive arrays sorted deterministically', async () => {
     const dir = path.join(testDataDir, 'directory', 'attackProtectionDump');
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
 
+    // Deliberately unsorted input arrays — the dump handler must reorder them.
     context.assets.attackProtection = {
       botDetection: {
-        allowlist: ['10.0.0.1'],
+        allowlist: ['10.0.0.2', '10.0.0.1'],
         bot_detection_level: 'medium',
         monitoring_mode_enabled: false,
       },
       breachedPasswordDetection: {
-        admin_notification_frequency: [],
+        admin_notification_frequency: ['weekly', 'daily', 'immediately'],
         enabled: true,
         method: 'standard',
-        shields: [],
+        shields: ['user_notification', 'block', 'admin_notification'],
       },
       bruteForceProtection: {
         allowlist: [],
         enabled: true,
         max_attempts: 10,
         mode: 'count_per_identifier_and_ip',
-        shields: ['block', 'user_notification'],
+        shields: ['user_notification', 'block'],
       },
       captcha: {
         policy: 'always',
         selected: 'friendly_captcha',
       },
       suspiciousIpThrottling: {
-        allowlist: ['127.0.0.1'],
+        allowlist: ['127.0.0.2', '127.0.0.1'],
         enabled: true,
-        shields: ['block', 'admin_notification'],
+        shields: ['user_notification', 'admin_notification', 'block'],
         stage: {
           'pre-login': {
             max_attempts: 100,
@@ -196,20 +197,49 @@ describe('#directory context attack-protection', () => {
     await handler.dump(context);
     const attackProtectionFolder = path.join(dir, 'attack-protection');
 
-    expect(loadJSON(path.join(attackProtectionFolder, 'bot-detection.json'))).to.deep.equal(
-      context.assets.attackProtection.botDetection
-    );
+    // Concrete expected output on disk, independent of the (mutated) input reference.
+    expect(loadJSON(path.join(attackProtectionFolder, 'bot-detection.json'))).to.deep.equal({
+      allowlist: ['10.0.0.1', '10.0.0.2'],
+      bot_detection_level: 'medium',
+      monitoring_mode_enabled: false,
+    });
     expect(
       loadJSON(path.join(attackProtectionFolder, 'breached-password-detection.json'))
-    ).to.deep.equal(context.assets.attackProtection.breachedPasswordDetection);
+    ).to.deep.equal({
+      admin_notification_frequency: ['daily', 'immediately', 'weekly'],
+      enabled: true,
+      method: 'standard',
+      shields: ['admin_notification', 'block', 'user_notification'],
+    });
     expect(
       loadJSON(path.join(attackProtectionFolder, 'brute-force-protection.json'))
-    ).to.deep.equal(context.assets.attackProtection.bruteForceProtection);
-    expect(loadJSON(path.join(attackProtectionFolder, 'captcha.json'))).to.deep.equal(
-      context.assets.attackProtection.captcha
-    );
+    ).to.deep.equal({
+      allowlist: [],
+      enabled: true,
+      max_attempts: 10,
+      mode: 'count_per_identifier_and_ip',
+      shields: ['block', 'user_notification'],
+    });
+    expect(loadJSON(path.join(attackProtectionFolder, 'captcha.json'))).to.deep.equal({
+      policy: 'always',
+      selected: 'friendly_captcha',
+    });
     expect(
       loadJSON(path.join(attackProtectionFolder, 'suspicious-ip-throttling.json'))
-    ).to.deep.equal(context.assets.attackProtection.suspiciousIpThrottling);
+    ).to.deep.equal({
+      allowlist: ['127.0.0.1', '127.0.0.2'],
+      enabled: true,
+      shields: ['admin_notification', 'block', 'user_notification'],
+      stage: {
+        'pre-login': {
+          max_attempts: 100,
+          rate: 864000,
+        },
+        'pre-user-registration': {
+          max_attempts: 50,
+          rate: 1200,
+        },
+      },
+    });
   });
 });

@@ -5,6 +5,7 @@ import {
   connectionDefaults,
   logStreamDefaults,
   attackProtectionDefaults,
+  sortAttackProtectionArrays,
 } from '../../src/context/defaults';
 
 describe('#context defaults', () => {
@@ -19,6 +20,46 @@ describe('#context defaults', () => {
         },
         name: 'smtp',
       });
+    });
+
+    it('should preserve smtp credentials when it is a keyword placeholder string', async () => {
+      const emailProvider = {
+        name: 'smtp',
+        credentials: '@@SMTP_CREDENTIALS@@',
+      };
+
+      const result = emailProviderDefaults(emailProvider);
+
+      expect(result).to.deep.equal({
+        name: 'smtp',
+        credentials: '@@SMTP_CREDENTIALS@@',
+      });
+    });
+
+    it('should preserve ses credentials when it is a keyword placeholder string', async () => {
+      const result = emailProviderDefaults({ name: 'ses', credentials: '@@SES_CREDENTIALS@@' });
+      expect(result).to.deep.equal({ name: 'ses', credentials: '@@SES_CREDENTIALS@@' });
+    });
+
+    it('should preserve mailgun credentials when it is a keyword placeholder string', async () => {
+      const result = emailProviderDefaults({
+        name: 'mailgun',
+        credentials: '@@MAILGUN_CREDENTIALS@@',
+      });
+      expect(result).to.deep.equal({ name: 'mailgun', credentials: '@@MAILGUN_CREDENTIALS@@' });
+    });
+
+    it('should preserve azure_cs credentials when it is a keyword placeholder string', async () => {
+      const result = emailProviderDefaults({
+        name: 'azure_cs',
+        credentials: '@@AZURE_CREDENTIALS@@',
+      });
+      expect(result).to.deep.equal({ name: 'azure_cs', credentials: '@@AZURE_CREDENTIALS@@' });
+    });
+
+    it('should preserve ms365 credentials when it is a keyword placeholder string', async () => {
+      const result = emailProviderDefaults({ name: 'ms365', credentials: '@@MS365_CREDENTIALS@@' });
+      expect(result).to.deep.equal({ name: 'ms365', credentials: '@@MS365_CREDENTIALS@@' });
     });
 
     it('should set emailProvider defaults for smtp and remove existing smtp_user', async () => {
@@ -437,6 +478,71 @@ describe('#context defaults', () => {
       const result = attackProtectionDefaults(attackProtection, { AUTH0_EXPORT_SECRETS: true });
 
       expect(result.captcha.hcaptcha.secret).to.equal('real-hcaptcha-secret');
+    });
+  });
+
+  describe('sortAttackProtectionArrays', () => {
+    it('should sort primitive arrays across the attackProtection subtree deterministically', () => {
+      const attackProtection = {
+        breachedPasswordDetection: {
+          enabled: true,
+          shields: ['user_notification', 'block', 'admin_notification'],
+          admin_notification_frequency: ['weekly', 'immediately', 'monthly', 'daily'],
+        },
+        suspiciousIpThrottling: {
+          enabled: true,
+          shields: ['admin_notification', 'block'],
+        },
+        bruteForceProtection: {
+          enabled: true,
+          shields: ['block', 'user_notification'],
+          allowlist: ['192.168.1.2', '10.0.0.1'],
+        },
+      };
+
+      const result = sortAttackProtectionArrays(attackProtection);
+
+      expect(result.breachedPasswordDetection.shields).to.deep.equal([
+        'admin_notification',
+        'block',
+        'user_notification',
+      ]);
+      expect(result.breachedPasswordDetection.admin_notification_frequency).to.deep.equal([
+        'daily',
+        'immediately',
+        'monthly',
+        'weekly',
+      ]);
+      expect(result.suspiciousIpThrottling.shields).to.deep.equal(['admin_notification', 'block']);
+      expect(result.bruteForceProtection.shields).to.deep.equal(['block', 'user_notification']);
+      expect(result.bruteForceProtection.allowlist).to.deep.equal(['10.0.0.1', '192.168.1.2']);
+    });
+
+    it('should produce identical output regardless of input array order', () => {
+      const orderA = {
+        breachedPasswordDetection: {
+          shields: ['block', 'admin_notification', 'user_notification'],
+        },
+      };
+      const orderB = {
+        breachedPasswordDetection: {
+          shields: ['user_notification', 'block', 'admin_notification'],
+        },
+      };
+
+      expect(sortAttackProtectionArrays(orderA)).to.deep.equal(sortAttackProtectionArrays(orderB));
+    });
+
+    it('should not reorder arrays that contain objects', () => {
+      const attackProtection = {
+        captcha: {
+          providers: [{ name: 'zeta' }, { name: 'alpha' }],
+        },
+      };
+
+      const result = sortAttackProtectionArrays(attackProtection);
+
+      expect(result.captcha.providers).to.deep.equal([{ name: 'zeta' }, { name: 'alpha' }]);
     });
   });
 });
