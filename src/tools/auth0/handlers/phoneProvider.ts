@@ -184,12 +184,21 @@ export default class PhoneProviderHandler extends DefaultHandler {
     const currentProviders = await this.getPhoneProviders();
 
     const providerReqPayload = ((): Omit<PhoneProvider, 'id'> => {
+      // Work on a shallow copy so we don't mutate the caller's asset (phoneProviders[0]).
+      // The SDK response type doesn't declare `credentials`, so widen it here.
+      const payload = { ...phoneProviders[0] } as PhoneProvider & { credentials?: object };
+
       // Removing id from update and create payloads, otherwise API will error
       // id may be required to handle if `--export_ids=true`
-      const payload = phoneProviders[0];
-
-      if (payload && 'id' in payload) {
+      if ('id' in payload) {
         delete payload.id;
+      }
+
+      // The `custom` provider requires a `credentials` object in the payload even
+      // when it is empty. Exported configs omit credentials, so inject an empty
+      // object here to avoid a "Missing required property: credentials" 400 error.
+      if (payload.name === 'custom' && payload.credentials == null) {
+        payload.credentials = {};
       }
 
       return payload;
