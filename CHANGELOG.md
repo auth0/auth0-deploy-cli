@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support `third_party_client_access` and `cross_app_access_resource_app` on clients and connections. [#1471]
+
+### Fixed
+
+- Warn on path traversal in file references and fix double-path resolution in YAML connections handler. [#1477]
+- Strip `form_submission_mode` and `form_submission_behavior` from `bruteForceProtection` on export and import. [#1476]
+- Include empty credentials for custom phone provider on import and export to prevent 400 errors. [#1474]
+- Preserve keyword placeholder strings for all email provider credentials. [#1470]
+- Preserve `idpinitiated.enabled:false` on SAML connection export instead of emitting `undefined_clientId`. [#1465]
+- Apply 429 backoff to organization connection writes to prevent rate-limit failures. [#1464]
+- Resolve dry-run reporting bugs across multiple asset types. [#1462]
+- Skip organization PATCH when no top-level properties have changed. [#1461]
+- Sort `attackProtection` arrays on export to prevent spurious diffs. [#1460]
+
 ## [8.43.0] - 2026-08-12
 
 ### Added
