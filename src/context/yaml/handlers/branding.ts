@@ -35,9 +35,18 @@ async function parse(context: YAMLContext): Promise<ParsedBranding> {
     (templateDefinition: BrandingTemplate): BrandingTemplate => {
       const normalizedPathArray = nomalizedYAMLPath(templateDefinition.body);
       const markupFile = path.join(context.basePath, ...normalizedPathArray);
+      const configRoot = path.resolve(context.basePath);
+      const resolvedMarkupFile = path.resolve(markupFile);
+      if (!resolvedMarkupFile.startsWith(configRoot + path.sep)) {
+        log.warn(
+          `Branding template body path "${templateDefinition.body}" resolves to "${resolvedMarkupFile}" which is outside the config directory "${configRoot}". ` +
+            `This will be blocked as an error in the next major release. ` +
+            `Move the file inside your config directory.`
+        );
+      }
       return {
         template: templateDefinition.template,
-        body: loadFileAndReplaceKeywords(markupFile, {
+        body: loadFileAndReplaceKeywords(resolvedMarkupFile, {
           mappings: context.mappings,
           disableKeywordReplacement: context.disableKeywordReplacement,
         }),

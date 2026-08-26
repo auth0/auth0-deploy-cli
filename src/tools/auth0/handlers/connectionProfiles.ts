@@ -49,18 +49,14 @@ export const schema = {
             properties: {
               default_value: {
                 type: 'string',
-                enum: Object.values(
-                  Management.ConnectionProfileCrossAppAccessResourceAppStatusDefaultValueEnum
-                ),
+                enum: Object.values(Management.ConnectionCrossAppAccessResourceAppStatusEnum),
                 description: 'The default Cross App Access resource app status.',
               },
               allowed_values: {
                 type: 'array',
                 items: {
                   type: 'string',
-                  enum: Object.values(
-                    Management.ConnectionProfileCrossAppAccessResourceAppStatusValueEnum
-                  ),
+                  enum: Object.values(Management.ConnectionCrossAppAccessResourceAppStatusEnum),
                 },
                 uniqueItems: true,
                 description: 'The allowed Cross App Access resource app status values.',

@@ -64,18 +64,14 @@ const myOrganizationConfigurationSchema = {
       properties: {
         default_value: {
           type: 'string',
-          enum: Object.values(
-            Management.ClientMyOrganizationConfigurationThirdPartyClientAccessDefaultValueEnum
-          ),
+          enum: Object.values(Management.OrganizationThirdPartyClientAccessEnum),
           description: 'The default third-party client access value.',
         },
         allowed_values: {
           type: 'array',
           items: {
             type: 'string',
-            enum: Object.values(
-              Management.ClientMyOrganizationConfigurationThirdPartyClientAccessAllowedValuesEnum
-            ),
+            enum: Object.values(Management.OrganizationThirdPartyClientAccessEnum),
           },
           uniqueItems: true,
           description: 'The allowed third-party client access values.',
