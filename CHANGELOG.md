@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.44.0] - 2026-08-26
+
 ### Added
 
 - Support `third_party_client_access` and `cross_app_access_resource_app` on clients and connections. [#1471]
@@ -1943,7 +1945,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1454]: https://github.com/auth0/auth0-deploy-cli/issues/1454
 [#1456]: https://github.com/auth0/auth0-deploy-cli/issues/1456
 [#1457]: https://github.com/auth0/auth0-deploy-cli/issues/1457
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.43.0...HEAD
+[#1460]: https://github.com/auth0/auth0-deploy-cli/issues/1460
+[#1461]: https://github.com/auth0/auth0-deploy-cli/issues/1461
+[#1462]: https://github.com/auth0/auth0-deploy-cli/issues/1462
+[#1464]: https://github.com/auth0/auth0-deploy-cli/issues/1464
+[#1465]: https://github.com/auth0/auth0-deploy-cli/issues/1465
+[#1470]: https://github.com/auth0/auth0-deploy-cli/issues/1470
+[#1471]: https://github.com/auth0/auth0-deploy-cli/issues/1471
+[#1474]: https://github.com/auth0/auth0-deploy-cli/issues/1474
+[#1476]: https://github.com/auth0/auth0-deploy-cli/issues/1476
+[#1477]: https://github.com/auth0/auth0-deploy-cli/issues/1477
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.44.0...HEAD
+[8.44.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.43.0...v8.44.0
 [8.43.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.42.0...v8.43.0
 [8.42.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.41.0...v8.42.0
 [8.41.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.40.0...v8.41.0
