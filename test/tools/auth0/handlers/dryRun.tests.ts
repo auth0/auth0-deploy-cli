@@ -141,6 +141,50 @@ describe('#handler dryRunChanges', () => {
     expect(changes.update).to.have.length(0);
   });
 
+  it('databases should not report enabled_clients diff when remote clients match', async () => {
+    const auth0 = {
+      connections: {
+        list: (params: any) =>
+          mockPagedData(params, 'connections', [
+            {
+              id: 'con1',
+              name: 'db-one',
+              strategy: 'auth0',
+              options: {},
+            },
+          ]),
+        clients: {
+          // enabled_clients only comes from this dedicated endpoint, not from connections.list
+          get: (_connectionId: any, params: any) =>
+            mockPagedData(params, 'connections', [{ client_id: 'client-id-1' }]),
+        },
+      },
+      clients: {
+        list: (params: any) =>
+          mockPagedData(params, 'clients', [{ name: 'app-one', client_id: 'client-id-1' }]),
+      },
+      actions: {
+        list: (params: any) => mockPagedData(params, 'actions', []),
+      },
+      pool,
+    };
+
+    const handler = new DatabasesHandler({ client: pageClient(auth0 as any), config } as any);
+
+    const changes = await handler.dryRunChanges({
+      databases: [
+        {
+          name: 'db-one',
+          options: {},
+          enabled_clients: ['app-one'],
+        },
+      ],
+    } as any);
+
+    expect(changes.update).to.have.length(0);
+    expect(changes.create).to.have.length(0);
+  });
+
   it('actions should enrich module IDs during dry run', async () => {
     const auth0 = {
       actions: {

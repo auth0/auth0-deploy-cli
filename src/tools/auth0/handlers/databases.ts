@@ -605,6 +605,22 @@ export default class DatabaseHandler extends DefaultAPIHandler {
       }),
     ]);
 
+    // `enabled_clients` is no longer returned by connections.list; it must be fetched from the
+    // dedicated enabled-clients endpoint. Without this enrichment the remote connection lacks the
+    // field entirely, so the dry-run diff reports a false "found in localObj but not in remoteObj".
+    const existingWithEnabledClients = await Promise.all(
+      existingDatabasesConnections.map(async (con) => {
+        if (!con?.id) return con;
+
+        const enabledClients = await getConnectionEnabledClients(this.client, con.id);
+        if (enabledClients && enabledClients.length) {
+          return { ...con, enabled_clients: enabledClients };
+        }
+
+        return con;
+      })
+    );
+
     const formatted = databases.map((db) => {
       const { options, ...rest } = db;
       const formattedOptions = this.getFormattedOptions(options, actions);
@@ -614,7 +630,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
         formattedDb.enabled_clients = getEnabledClients(
           assets,
           db,
-          existingDatabasesConnections,
+          existingWithEnabledClients,
           clients
         );
       }
@@ -625,7 +641,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     return calculateDryRunChanges({
       type: this.type,
       assets: formatted,
-      existing: existingDatabasesConnections,
+      existing: existingWithEnabledClients,
       identifiers: this.identifiers,
       ignoreDryRunFields: this.getEffectiveIgnoreDryRunFields(),
     });
