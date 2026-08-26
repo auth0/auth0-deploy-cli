@@ -57,6 +57,32 @@ const myOrganizationConfigurationSchema = {
       enum: Object.values(Management.ClientMyOrganizationDeletionBehaviorEnum),
       description: 'The deletion behavior for My Organization connections created by this client',
     },
+    third_party_client_access: {
+      type: 'object',
+      description:
+        'Controls whether third-party clients can access the organization via the My Organization API.',
+      properties: {
+        default_value: {
+          type: 'string',
+          enum: Object.values(
+            Management.ClientMyOrganizationConfigurationThirdPartyClientAccessDefaultValueEnum
+          ),
+          description: 'The default third-party client access value.',
+        },
+        allowed_values: {
+          type: 'array',
+          items: {
+            type: 'string',
+            enum: Object.values(
+              Management.ClientMyOrganizationConfigurationThirdPartyClientAccessAllowedValuesEnum
+            ),
+          },
+          uniqueItems: true,
+          description: 'The allowed third-party client access values.',
+        },
+      },
+      required: ['default_value', 'allowed_values'],
+    },
     invitation_landing_client_id: {
       type: 'string',
       description:

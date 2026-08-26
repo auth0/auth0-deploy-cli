@@ -334,12 +334,15 @@ export const decodeBase64ToCertString = (base64Cert: string) => {
 // Format connection options by converting client IDs to client names for SAML connections
 export const getFormattedOptions = (connection, clients) => {
   try {
+    const { idpinitiated } = connection.options;
     return {
       options: {
         ...connection.options,
         idpinitiated: {
-          ...connection.options.idpinitiated,
-          client_id: convertClientIdToName(connection.options.idpinitiated.client_id, clients),
+          ...idpinitiated,
+          ...(idpinitiated.client_id && {
+            client_id: convertClientIdToName(idpinitiated.client_id, clients),
+          }),
         },
       },
     };

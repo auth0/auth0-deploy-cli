@@ -334,7 +334,6 @@ export default class APIHandler {
       return calculateDryRunChanges({
         type: this.type,
         assets: typeAssets,
-        // @ts-ignore TODO: investigate what happens when `existing` is null
         existing,
         identifiers: this.identifiers,
         ignoreDryRunFields: this.getEffectiveIgnoreDryRunFields(),
@@ -372,7 +371,6 @@ export default class APIHandler {
     return calculateDryRunChanges({
       type: this.type,
       assets: typeAssets,
-      // @ts-ignore TODO: investigate what happens when `existing` is null
       existing,
       identifiers: this.identifiers,
       ignoreDryRunFields: this.getEffectiveIgnoreDryRunFields(),

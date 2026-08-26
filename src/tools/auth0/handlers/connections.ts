@@ -448,12 +448,15 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
 
   getFormattedOptions(connection, clients) {
     try {
+      const { idpinitiated } = connection.options;
       return {
         options: {
           ...connection.options,
           idpinitiated: {
-            ...connection.options.idpinitiated,
-            client_id: convertClientNameToId(connection.options.idpinitiated.client_id, clients),
+            ...idpinitiated,
+            ...(idpinitiated.client_id && {
+              client_id: convertClientNameToId(idpinitiated.client_id, clients),
+            }),
           },
         },
       };
@@ -923,7 +926,12 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       };
     });
 
-    const proposedChanges = await super.dryRunChanges({ ...assets, connections: formatted });
+    let proposedChanges = await super.dryRunChanges({ ...assets, connections: formatted });
+
+    const includedConnections = (assets.include && assets.include.connections) || [];
+    const excludedConnections = (assets.exclude && assets.exclude.connections) || [];
+    proposedChanges = filterExcluded(proposedChanges, excludedConnections);
+    proposedChanges = filterIncluded(proposedChanges, includedConnections);
 
     return addExcludedConnectionPropertiesToChanges({
       proposedChanges,
