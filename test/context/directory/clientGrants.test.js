@@ -445,6 +445,65 @@ describe('#directory context clientGrants', () => {
     expect(parseContext.assets.clientGrants).to.have.length(1);
   });
 
+  it('should not remove non-JSON files when removing stale files', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientGrantsDumpPruneNonJson');
+    cleanThenMkdir(dir);
+    const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
+    fs.ensureDirSync(clientGrantsFolder);
+
+    // Files `parse` never reads back as grants. They are not stale state, so the cleanup pass
+    // must leave them alone.
+    fs.writeFileSync(path.join(clientGrantsFolder, 'README.md'), '# Grants');
+    fs.writeFileSync(path.join(clientGrantsFolder, 'notes.txt'), 'why these grants exist');
+
+    // A genuinely stale grant file, to prove cleanup still runs.
+    fs.writeFileSync(
+      path.join(clientGrantsFolder, 'Primary M2M-Removed Service.json'),
+      JSON.stringify({
+        audience: 'https://removed.travel0.com/api',
+        client_id: 'client-id-1',
+        scope: [],
+      })
+    );
+
+    const context = new Context(
+      { AUTH0_INPUT_FILE: dir },
+      {
+        ...mockMgmtClient(),
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ client_id: 'client-id-1', name: 'Primary M2M' }]),
+        },
+        resourceServers: {
+          list: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              {
+                id: 'resource-server-1',
+                name: 'Payments Service',
+                identifier: 'https://payments.travel0.com/api',
+              },
+            ]),
+        },
+      }
+    );
+
+    context.assets.clientGrants = [
+      {
+        audience: 'https://payments.travel0.com/api',
+        client_id: 'client-id-1',
+        scope: ['read:card'],
+      },
+    ];
+
+    await handler.dump(context);
+
+    expect(fs.readdirSync(clientGrantsFolder).sort()).to.deep.equal([
+      'Primary M2M-Payments Service.json',
+      'README.md',
+      'notes.txt',
+    ]);
+  });
+
   it('should preserve files for excluded clients when removing stale files', async () => {
     const dir = path.join(testDataDir, 'directory', 'clientGrantsDumpPruneExclude');
     cleanThenMkdir(dir);

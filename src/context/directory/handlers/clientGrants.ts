@@ -151,12 +151,12 @@ async function dump(context: DirectoryContext): Promise<void> {
   // Remove files that belong to grants no longer present (and not excluded). Without this, a grant
   // whose filename changes is left behind under its old name and parsed back as a duplicate on the
   // next import, and grants deleted from the tenant are silently recreated.
-  for (const existing of fs.readdirSync(grantsFolder)) {
-    const fullPath = path.join(grantsFolder, existing);
-    if (fs.statSync(fullPath).isFile() && !expectedFiles.has(existing)) {
-      fs.removeSync(fullPath);
-    }
-  }
+  //
+  // Restricted to the `.json` files `parse` reads: anything else in the folder (a README, notes)
+  // can never come back as a grant, so it is not stale state and must not be deleted.
+  getFiles(grantsFolder, ['.json'])
+    .filter((file) => !expectedFiles.has(path.basename(file)))
+    .forEach((file) => fs.removeSync(file));
 }
 
 const clientGrantsHandler: DirectoryHandler<ParsedClientGrants> = {
