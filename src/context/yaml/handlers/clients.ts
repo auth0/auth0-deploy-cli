@@ -27,7 +27,12 @@ async function parse(context: YAMLContext): Promise<ParsedClients> {
           const htmlFileName = path.join(clientsFolder, client.custom_login_page);
 
           if (isFile(htmlFileName)) {
-            client.custom_login_page = context.loadFile(htmlFileName);
+            // Pass a path relative to basePath so context.loadFile() resolves it correctly.
+            // Passing htmlFileName (which already includes basePath) would cause double resolution
+            // when basePath is a relative path (e.g. when AUTH0_INPUT_FILE is a relative path).
+            client.custom_login_page = context.loadFile(
+              path.join(constants.CLIENTS_DIRECTORY, client.custom_login_page)
+            );
           }
         }
 

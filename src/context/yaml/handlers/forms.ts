@@ -18,6 +18,15 @@ async function parse(context: YAMLContext): Promise<ParsedForms> {
 
   const parsedForms = forms.map((form: Form) => {
     const formFile = path.join(context.basePath, form.body);
+    const configRoot = path.resolve(context.basePath);
+    const resolvedFormFile = path.resolve(formFile);
+    if (!resolvedFormFile.startsWith(configRoot + path.sep)) {
+      log.warn(
+        `Form body file "${form.body}" resolves to "${resolvedFormFile}" which is outside the config directory "${configRoot}". ` +
+          `This will be blocked as an error in the next major release. ` +
+          `Move the file inside your config directory.`
+      );
+    }
 
     const parsedFormBody = loadJSON(formFile, {
       mappings: context.mappings,

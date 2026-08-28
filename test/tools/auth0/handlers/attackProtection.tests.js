@@ -223,6 +223,66 @@ describe('#attackProtection handler', () => {
       ]);
     });
 
+    it('should strip form_submission_mode and form_submission_behavior from bruteForceProtection before update', async () => {
+      let capturedPayload;
+      const auth0 = {
+        attackProtection: {
+          botDetection: { update: (data) => Promise.resolve(data) },
+          breachedPasswordDetection: { update: (data) => Promise.resolve(data) },
+          captcha: { update: (data) => Promise.resolve(data) },
+          suspiciousIpThrottling: { update: (data) => Promise.resolve(data) },
+          bruteForceProtection: {
+            update: (data) => {
+              capturedPayload = data;
+              return Promise.resolve(data);
+            },
+          },
+        },
+      };
+
+      const handler = new attackProtection.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          attackProtection: {
+            botDetection: {
+              bot_detection_level: 'medium',
+              monitoring_mode_enabled: false,
+              allowlist: [],
+            },
+            breachedPasswordDetection: {
+              admin_notification_frequency: [],
+              enabled: true,
+              method: 'standard',
+              shields: [],
+            },
+            captcha: { selected: 'friendly_captcha', policy: 'always' },
+            suspiciousIpThrottling: { allowlist: [], enabled: true, shields: [], stage: {} },
+            bruteForceProtection: {
+              allowlist: [],
+              enabled: true,
+              max_attempts: 10,
+              mode: 'count_per_identifier_and_ip',
+              shields: ['block', 'user_notification'],
+              form_submission_mode: 'auto',
+              form_submission_behavior: 'auto_submit',
+            },
+          },
+        },
+      ]);
+
+      expect(capturedPayload).to.deep.equal({
+        allowlist: [],
+        enabled: true,
+        max_attempts: 10,
+        mode: 'count_per_identifier_and_ip',
+        shields: ['block', 'user_notification'],
+      });
+      expect(capturedPayload).to.not.have.property('form_submission_mode');
+      expect(capturedPayload).to.not.have.property('form_submission_behavior');
+    });
+
     it('should handle 403 error when fetching bot detection and preserve captcha data', async () => {
       const auth0 = {
         attackProtection: {

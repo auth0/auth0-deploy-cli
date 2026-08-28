@@ -1,10 +1,12 @@
 import path from 'path';
 import { expect } from 'chai';
 import fs from 'fs-extra';
+import sinon from 'sinon';
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/branding';
 import { constants } from '../../../src/tools';
 import { loadJSON } from '../../../src/utils';
+import log from '../../../src/logger';
 import { cleanThenMkdir, mockMgmtClient, testDataDir } from '../../utils';
 
 const html = '<html>##foo##</html>';
@@ -91,6 +93,39 @@ describe('#directory context branding', () => {
     await context.loadAssetsFromLocal();
 
     expect(context.assets.branding).to.deep.equal(JSON.parse(brandingSettings));
+  });
+
+  it('should warn when branding template body path resolves outside the config directory', async () => {
+    const dir = path.join(testDataDir, 'directory', 'branding-traversal-warn');
+    cleanThenMkdir(dir);
+    const brandingDir = path.join(dir, constants.BRANDING_DIRECTORY);
+    cleanThenMkdir(brandingDir);
+    const brandingTemplatesDir = path.join(brandingDir, constants.BRANDING_TEMPLATES_DIRECTORY);
+    cleanThenMkdir(brandingTemplatesDir);
+
+    // "../../../outside-branding.html" from inside branding/templates/ escapes the config root.
+    const outsideFile = path.join(testDataDir, 'directory', 'outside-branding.html');
+    fs.writeFileSync(outsideFile, 'outside content');
+
+    fs.writeFileSync(
+      path.join(brandingTemplatesDir, 'universal_login.json'),
+      JSON.stringify({ template: 'universal_login', body: '../../../outside-branding.html' })
+    );
+
+    const config = { AUTH0_INPUT_FILE: dir };
+    const context = new Context(config, mockMgmtClient());
+    if (log.warn.restore) log.warn.restore();
+    const warnSpy = sinon.spy(log, 'warn');
+    try {
+      await context.loadAssetsFromLocal();
+      const traversalWarned = warnSpy.args.some(([msg]) =>
+        msg.includes('will be blocked as an error')
+      );
+      expect(traversalWarned).to.be.true;
+    } finally {
+      warnSpy.restore();
+      fs.removeSync(outsideFile);
+    }
   });
 
   it('should dump branding settings, including templates', async () => {
