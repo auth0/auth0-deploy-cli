@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import { constants, keywordReplace } from '../../../tools';
 
+import log from '../../../logger';
 import {
   getFiles,
   existsMustBeDir,
@@ -79,8 +80,7 @@ async function dump(context: DirectoryContext): Promise<void> {
     return associatedAPI.name; // Use the name of the API
   };
 
-  // Derive the filename for a grant. Shared by the cleanup pass below, which needs the names of
-  // excluded grants before they are filtered out.
+  // Derive the filename for a grant.
   const nameFor = (grant: ClientGrant) => {
     const clientName = (() => {
       const associatedClient = allClients.find((client) => client.client_id === grant.client_id);
@@ -107,22 +107,49 @@ async function dump(context: DirectoryContext): Promise<void> {
     return sanitize(grant.subject_type ? `${baseName}-${grant.subject_type}` : baseName);
   };
 
-  // Track files that should remain after the dump (written + excluded).
+  const excludedClients = allClients.filter(
+    (c) => c.name !== undefined && excludedClientsByNames.includes(c.name)
+  );
+
+  // Values that can stand for an excluded client in the `client_id` field of a dumped file: the
+  // client name when `clientsOrig` was available at dump time (see `convertClientIdToName` below),
+  // the raw client_id otherwise. Names come from the exclude list rather than from `allClients` so
+  // that excluding a client absent from the tenant still protects its file.
+  const excludedClientIdentities = new Set<string>([
+    ...excludedClientsByNames,
+    ...excludedClients.map((c) => c.client_id).filter((id): id is string => !!id),
+  ]);
+
+  // Whether a file this dump did not write must nonetheless survive the cleanup pass. Its name
+  // cannot answer that: the name is derived from the client name, the API name, the grant's
+  // subject_type and the current naming format, so a file written by an earlier version — or
+  // before its API was renamed — no longer matches the name `nameFor` produces today. Read the
+  // file instead, because the client identity recorded inside it does not drift.
+  const mustPreserve = (file: string): boolean => {
+    if (excludedClientIdentities.size === 0) return false;
+
+    let grant;
+    try {
+      grant = loadJSON(file, {
+        mappings: context.mappings,
+        disableKeywordReplacement: context.disableKeywordReplacement,
+      });
+    } catch (err) {
+      // Deleting a file it cannot read is not the export's call to make, and one bad file must not
+      // fail the whole export. Keep it and let `parse` report the problem on the next import.
+      log.warn(`Keeping ${file}, it could not be read while cleaning up client grants: ${err}`);
+      return true;
+    }
+
+    return excludedClientIdentities.has(grant?.client_id);
+  };
+
+  // Track files written by this dump; everything else in the folder is a cleanup candidate.
   const expectedFiles = new Set<string>();
 
   // Filter out grants for excluded clients
   if (excludedClientsByNames.length) {
-    const excludedClientIds = new Set(
-      allClients
-        .filter((c) => c.name !== undefined && excludedClientsByNames.includes(c.name))
-        .map((c) => c.client_id)
-    );
-    // Excluded grants are never written, so record their filenames up front to stop the cleanup
-    // pass below from removing files for clients the user deliberately excluded.
-    clientGrants
-      .filter((grant: ClientGrant) => excludedClientIds.has(grant.client_id))
-      .forEach((grant: ClientGrant) => expectedFiles.add(`${nameFor(grant)}.json`));
-
+    const excludedClientIds = new Set(excludedClients.map((c) => c.client_id));
     clientGrants = clientGrants.filter(
       (grant: ClientGrant) => !excludedClientIds.has(grant.client_id)
     );
@@ -155,8 +182,11 @@ async function dump(context: DirectoryContext): Promise<void> {
   // Restricted to the `.json` files `parse` reads: anything else in the folder (a README, notes)
   // can never come back as a grant, so it is not stale state and must not be deleted.
   getFiles(grantsFolder, ['.json'])
-    .filter((file) => !expectedFiles.has(path.basename(file)))
-    .forEach((file) => fs.removeSync(file));
+    .filter((file) => !expectedFiles.has(path.basename(file)) && !mustPreserve(file))
+    .forEach((file) => {
+      log.info(`Removing ${file}`);
+      fs.removeSync(file);
+    });
 }
 
 const clientGrantsHandler: DirectoryHandler<ParsedClientGrants> = {
