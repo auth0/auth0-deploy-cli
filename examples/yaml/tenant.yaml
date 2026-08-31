@@ -503,6 +503,13 @@ selfServiceProfiles:
         description: Name of the User
         is_optional: true
 
+networkACLKeys:
+  - name: my-hmac-key-v1
+    alg: hmac-sha256
+    # value is write-only and never exported. Supply at deploy time via keyword replacement:
+    # value: ##HMAC_KEY_VALUE##
+    fingerprint: ee66b47a0b3e356a0d7c587bd1e2ed3790b46fdbd657dbeb409f30de76a14cc3
+
 networkACLs:
   - description: 'Allow Specific Countries'
     active: true

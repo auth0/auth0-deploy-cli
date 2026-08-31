@@ -1,5 +1,5 @@
 import { Management } from 'auth0';
-import DefaultAPIHandler from './default';
+import DefaultAPIHandler, { order } from './default';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
@@ -159,6 +159,28 @@ const MatchSchema = {
       },
       uniqueItems: true,
     },
+    // TODO: remove `as any` casts in handler once node-auth0 adds http_message_signature to NetworkAclMatch
+    http_message_signature: {
+      type: 'object',
+      properties: {
+        keys: {
+          type: 'array',
+          minItems: 1,
+          maxItems: 10,
+          uniqueItems: true,
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+            },
+            required: ['id'],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ['keys'],
+      additionalProperties: false,
+    },
   },
   additionalProperties: false,
 };
@@ -272,6 +294,7 @@ export default class NetworkACLsHandler extends DefaultAPIHandler {
     }
   }
 
+  @order(65)
   async processChanges(assets: Assets): Promise<void> {
     const { networkACLs } = assets;
 

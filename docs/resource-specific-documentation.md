@@ -1147,6 +1147,89 @@ Contents of `Block iCloud Private Relay Exits-p-4.json`:
 }
 ```
 
+## NetworkACL Keys
+
+Network ACL Keys are HMAC signing keys used for [HTTP message signature verification](https://auth0.com/docs/secure/tenant-access-control-list) in Network ACL rules. Each key has a name, an algorithm (`hmac-sha256`), and a server-computed fingerprint. The Deploy CLI supports creating and deleting NetworkACL keys.
+
+> **Note:** This feature requires the `tenant_acl_hmac_signature` and `tenant_acl_management_api` feature flags plus the `tenant-access-control` entitlement. Contact Auth0 support if the feature is not available on your tenant.
+
+NetworkACL keys have the following properties:
+
+- `name`: Unique name for the key (max 255 characters)
+- `alg`: Signing algorithm — currently only `hmac-sha256`
+- `value`: The raw key material (**write-only** — never returned by the API, not exported). Supply via keyword replacement (e.g. `##HMAC_KEY_VALUE##`) mapped from an environment variable or CI secret.
+- `fingerprint`: SHA-256 fingerprint of the key (read-only, set by the API, exported for reference)
+
+Keys are **immutable** after creation. To rotate a key, delete the old one and create a new one with a different name.
+
+> **Warning:** Deleting a key that is still referenced by an ACL rule will return HTTP 409. Remove all rule references first.
+
+### Supplying the key value
+
+The `value` field is write-only and is never returned by the API. At deploy time, supply it using keyword replacement:
+
+```yaml
+# config.json (or environment variables)
+# HMAC_KEY_VALUE=<your-secret-key-material>
+
+# tenant.yaml
+networkACLKeys:
+  - name: my-hmac-key-v1
+    alg: hmac-sha256
+    value: ##HMAC_KEY_VALUE##
+```
+
+If `value` is omitted from the config, the Deploy CLI will log a warning and skip creating that key. This is useful for tracking existing keys (by name and fingerprint) without re-supplying the secret.
+
+**YAML Example**
+
+```yaml
+# Contents of ./tenant.yaml
+networkACLKeys:
+  - name: my-hmac-key-v1
+    alg: hmac-sha256
+    value: ##HMAC_KEY_VALUE##    # omitted on export; supply at deploy time
+    fingerprint: ee66b47a0b3e356a0d7c587bd1e2ed3790b46fdbd657dbeb409f30de76a14cc3
+```
+
+**Directory Example**
+
+```
+Folder structure when in directory mode.
+
+./network-acl-keys/
+    ./my-hmac-key-v1.json
+```
+
+Contents of `my-hmac-key-v1.json`:
+
+```json
+{
+  "name": "my-hmac-key-v1",
+  "alg": "hmac-sha256",
+  "fingerprint": "ee66b47a0b3e356a0d7c587bd1e2ed3790b46fdbd657dbeb409f30de76a14cc3"
+}
+```
+
+### Using a key in a NetworkACL rule
+
+Once a key is deployed, reference it by `id` in an ACL rule's `http_message_signature` signal:
+
+```yaml
+networkACLs:
+  - description: 'Require HMAC signature'
+    active: true
+    priority: 1
+    rule:
+      action:
+        allow: true
+      scope: 'authentication'
+      match:
+        http_message_signature:
+          keys:
+            - id: <key-id> # the id returned by the API after key creation
+```
+
 ## Organizations
 
 The deploy CLI supports managing organizations, including their connections, client grants, discovery domains, and org-to-app entitlement settings.
