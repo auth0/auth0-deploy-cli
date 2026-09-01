@@ -185,6 +185,50 @@ describe('#handler dryRunChanges', () => {
     expect(changes.create).to.have.length(0);
   });
 
+  it('databases should not enrich enabled_clients when the connection has none enabled', async () => {
+    const auth0 = {
+      connections: {
+        list: (params: any) =>
+          mockPagedData(params, 'connections', [
+            {
+              id: 'con1',
+              name: 'db-one',
+              strategy: 'auth0',
+              options: {},
+            },
+          ]),
+        clients: {
+          // dedicated endpoint reports no enabled clients, so the remote stays un-enriched
+          get: (_connectionId: any, params: any) => mockPagedData(params, 'connections', []),
+        },
+      },
+      clients: {
+        list: (params: any) =>
+          mockPagedData(params, 'clients', [{ name: 'app-one', client_id: 'client-id-1' }]),
+      },
+      actions: {
+        list: (params: any) => mockPagedData(params, 'actions', []),
+      },
+      pool,
+    };
+
+    const handler = new DatabasesHandler({ client: pageClient(auth0 as any), config } as any);
+
+    const changes = await handler.dryRunChanges({
+      databases: [
+        {
+          name: 'db-one',
+          options: {},
+          // local wants a client enabled that the remote does not have -> genuine update
+          enabled_clients: ['app-one'],
+        },
+      ],
+    } as any);
+
+    expect(changes.create).to.have.length(0);
+    expect(changes.update).to.have.length(1);
+  });
+
   it('actions should enrich module IDs during dry run', async () => {
     const auth0 = {
       actions: {
