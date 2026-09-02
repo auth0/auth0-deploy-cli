@@ -33,10 +33,18 @@ function parse(context: DirectoryContext): ParsedClients {
       });
 
       if (client.custom_login_page) {
-        const htmlFileName = path.join(clientsFolder, client.custom_login_page);
+        const configRoot = path.resolve(context.filePath);
+        const resolvedLoginPage = path.resolve(clientsFolder, client.custom_login_page);
 
-        if (isFile(htmlFileName)) {
-          client.custom_login_page = loadFileAndReplaceKeywords(htmlFileName, {
+        if (isFile(resolvedLoginPage)) {
+          if (!resolvedLoginPage.startsWith(configRoot + path.sep)) {
+            log.warn(
+              `Path "${client.custom_login_page}" resolves to "${resolvedLoginPage}" which is outside the config directory "${configRoot}". ` +
+                `This will be blocked as an error in the next major release. ` +
+                `Move the file inside your config directory.`
+            );
+          }
+          client.custom_login_page = loadFileAndReplaceKeywords(resolvedLoginPage, {
             mappings: context.mappings,
             disableKeywordReplacement: context.disableKeywordReplacement,
           });

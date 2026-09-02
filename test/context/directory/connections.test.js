@@ -1,8 +1,10 @@
 import path from 'path';
 import fs from 'fs-extra';
+import sinon from 'sinon';
 
 import { expect } from 'chai';
 import { constants } from '../../../src/tools';
+import log from '../../../src/logger';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/connections';
@@ -249,6 +251,36 @@ describe('#directory context connections', () => {
         'email.html'
       )} does not exist for connection. Ensure the existence of this file to proceed with deployment.`
     );
+  });
+
+  it('should warn when email body path resolves outside the config directory', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'connections-traversal-warn');
+    // "../../outside-email.html" from inside connections/ escapes the config root.
+    const outsideFile = path.join(testDataDir, 'directory', 'outside-email.html');
+    fs.writeFileSync(outsideFile, 'outside content');
+
+    const files = {
+      [constants.CONNECTIONS_DIRECTORY]: {
+        'email.json':
+          '{ "name": "email", "strategy": "email", "options": { "email": { "body": "../../outside-email.html" } } }',
+      },
+    };
+    createDir(repoDir, files);
+
+    const config = { AUTH0_INPUT_FILE: repoDir };
+    const context = new Context(config, mockMgmtClient());
+    if (log.warn.restore) log.warn.restore();
+    const warnSpy = sinon.spy(log, 'warn');
+    try {
+      await context.loadAssetsFromLocal();
+      const traversalWarned = warnSpy.args.some(([msg]) =>
+        msg.includes('will be blocked as an error')
+      );
+      expect(traversalWarned).to.be.true;
+    } finally {
+      warnSpy.restore();
+      fs.removeSync(outsideFile);
+    }
   });
 
   it('should not dump excluded connections', async () => {

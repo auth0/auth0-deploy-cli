@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
+import log from '../../../logger';
 import {
   dumpJSON,
   existsMustBeDir,
@@ -47,13 +48,19 @@ function parse(context: DirectoryContext): ParsedBranding {
     });
 
     const normalizedPathArray = nomalizedYAMLPath(definition.body);
-    definition.body = loadFileAndReplaceKeywords(
-      path.join(brandingTemplatesFolder, ...normalizedPathArray),
-      {
-        mappings: context.mappings,
-        disableKeywordReplacement: context.disableKeywordReplacement,
-      }
-    );
+    const resolvedBodyFile = path.resolve(brandingTemplatesFolder, ...normalizedPathArray);
+    const configRoot = path.resolve(context.filePath);
+    if (!resolvedBodyFile.startsWith(configRoot + path.sep)) {
+      log.warn(
+        `Branding template body path "${definition.body}" resolves to "${resolvedBodyFile}" which is outside the config directory "${configRoot}". ` +
+          `This will be blocked as an error in the next major release. ` +
+          `Move the file inside your config directory.`
+      );
+    }
+    definition.body = loadFileAndReplaceKeywords(resolvedBodyFile, {
+      mappings: context.mappings,
+      disableKeywordReplacement: context.disableKeywordReplacement,
+    });
     return definition;
   }, {});
 

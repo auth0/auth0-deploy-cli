@@ -1,9 +1,11 @@
 import path from 'path';
 import fs from 'fs-extra';
+import sinon from 'sinon';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/connections';
+import log from '../../../src/logger';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
 describe('#YAML context connections', () => {
@@ -277,6 +279,76 @@ describe('#YAML context connections', () => {
     expect(fs.readFileSync(path.join(templatesFolder, 'email.html'), 'utf8')).to.deep.equal(
       'html code'
     );
+  });
+
+  it('should correctly load email body when AUTH0_INPUT_FILE is a relative path (regression #1475)', async () => {
+    // Reproduces the bug where context.loadFile() double-resolved the path when
+    // basePath was relative, causing ENOENT on "basePath/basePath/connections/email.html".
+    const dir = path.join(testDataDir, 'yaml', 'connections-relative-path');
+    cleanThenMkdir(dir);
+
+    const yaml = `
+    connections:
+      - name: "email"
+        strategy: "email"
+        options:
+          email:
+            body: "./email.html"
+    `;
+
+    const yamlFile = path.join(dir, 'tenant.yaml');
+    const connectionsPath = path.join(dir, 'connections');
+    fs.writeFileSync(yamlFile, yaml);
+    fs.ensureDirSync(connectionsPath);
+    fs.writeFileSync(path.join(connectionsPath, 'email.html'), 'html body content');
+
+    // Use a relative path for AUTH0_INPUT_FILE — this is exactly the scenario that
+    // triggered the regression. path.dirname of a relative file is itself relative,
+    // and the old code would then path.resolve(relativeBasePath, alreadyRelativeFullPath).
+    const relativeYamlFile = path.relative(process.cwd(), yamlFile);
+    const config = { AUTH0_INPUT_FILE: relativeYamlFile };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.connections[0].options.email.body).to.equal('html body content');
+  });
+
+  it('should warn when email body path resolves outside the config directory', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'connections-traversal-warn');
+    cleanThenMkdir(dir);
+
+    // Place the target file one level above the config root so the traversal path
+    // "../../outside-email.html" (from inside connections/) escapes the config dir.
+    const outsideFile = path.join(testDataDir, 'yaml', 'outside-email.html');
+    fs.writeFileSync(outsideFile, 'outside content');
+
+    const yaml = `
+    connections:
+      - name: "email"
+        strategy: "email"
+        options:
+          email:
+            body: "../../outside-email.html"
+    `;
+
+    const yamlFile = path.join(dir, 'tenant.yaml');
+    fs.writeFileSync(yamlFile, yaml);
+    fs.ensureDirSync(path.join(dir, 'connections'));
+
+    const config = { AUTH0_INPUT_FILE: yamlFile };
+    const context = new Context(config, mockMgmtClient());
+    if (log.warn.restore) log.warn.restore();
+    const warnSpy = sinon.spy(log, 'warn');
+    try {
+      await context.loadAssetsFromLocal();
+      const traversalWarned = warnSpy.args.some(([msg]) =>
+        msg.includes('will be blocked as an error')
+      );
+      expect(traversalWarned).to.be.true;
+    } finally {
+      warnSpy.restore();
+      fs.removeSync(outsideFile);
+    }
   });
 
   it('should not dump excluded connections', async () => {

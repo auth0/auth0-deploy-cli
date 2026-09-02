@@ -44,6 +44,18 @@ function parse(context: DirectoryContext): ParsedEmailTemplates {
       return [];
     }
 
+    if (meta.body !== undefined) {
+      const configRoot = path.resolve(context.filePath);
+      const resolvedTemplatePath = path.resolve(templateFilePath);
+      if (!resolvedTemplatePath.startsWith(configRoot + path.sep)) {
+        log.warn(
+          `Email template body path "${meta.body}" resolves to "${resolvedTemplatePath}" which is outside the config directory "${configRoot}". ` +
+            `This will be blocked as an error in the next major release. ` +
+            `Move the file inside your config directory.`
+        );
+      }
+    }
+
     return {
       ...meta,
       body: loadFileAndReplaceKeywords(templateFilePath, {
