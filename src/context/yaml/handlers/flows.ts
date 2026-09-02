@@ -18,6 +18,15 @@ async function parse(context: YAMLContext): Promise<ParsedFlows> {
 
   const parsedFlows = flows.map((flow: Flow) => {
     const flowFile = path.join(context.basePath, flow.body);
+    const configRoot = path.resolve(context.basePath);
+    const resolvedFlowFile = path.resolve(flowFile);
+    if (!resolvedFlowFile.startsWith(configRoot + path.sep)) {
+      log.warn(
+        `Flow body file "${flow.body}" resolves to "${resolvedFlowFile}" which is outside the config directory "${configRoot}". ` +
+          `This will be blocked as an error in the next major release. ` +
+          `Move the file inside your config directory.`
+      );
+    }
 
     const parsedFlowBody = loadJSON(flowFile, {
       mappings: context.mappings,

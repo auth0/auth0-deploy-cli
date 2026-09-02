@@ -627,7 +627,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
       assets: formatted,
       existing: existingDatabasesConnections,
       identifiers: this.identifiers,
-      ignoreDryRunFields: this.ignoreDryRunFields,
+      ignoreDryRunFields: this.getEffectiveIgnoreDryRunFields(),
     });
   }
 

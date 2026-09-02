@@ -353,11 +353,10 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
     }
 
     if (attackProtection.bruteForceProtection) {
-      updates.push(
-        this.client.attackProtection.bruteForceProtection.update(
-          attackProtection.bruteForceProtection
-        )
-      );
+      // Strip fields returned by GET but rejected by PATCH
+      const { form_submission_mode, form_submission_behavior, ...bruteForcePayload } =
+        attackProtection.bruteForceProtection as any;
+      updates.push(this.client.attackProtection.bruteForceProtection.update(bruteForcePayload));
     }
 
     if (attackProtection.suspiciousIpThrottling) {

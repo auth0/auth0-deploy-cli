@@ -25,49 +25,61 @@ export function emailProviderDefaults(
   const { name } = updated;
 
   if (apiKeyProviders.includes(name)) {
-    updated.credentials = {
-      api_key: `##${name.toUpperCase()}_API_KEY##`,
-      ...(updated.credentials || {}),
-    };
+    if (typeof updated.credentials !== 'string') {
+      updated.credentials = {
+        api_key: `##${name.toUpperCase()}_API_KEY##`,
+        ...(updated.credentials || {}),
+      };
+    }
   }
 
   if (name === 'smtp') {
-    // This is to mask smtp_user to '##SMTP_USER##'
-    if (updated.credentials && 'smtp_user' in updated.credentials) {
-      delete updated.credentials.smtp_user;
+    // If credentials is a keyword placeholder string (e.g. @@SMTP_CREDENTIALS@@), preserve it as-is.
+    // The `in` operator requires an object and would throw a TypeError on a string.
+    if (typeof updated.credentials !== 'string') {
+      // This is to mask smtp_user to '##SMTP_USER##'
+      if (updated.credentials && 'smtp_user' in updated.credentials) {
+        delete updated.credentials.smtp_user;
+      }
+      updated.credentials = {
+        smtp_host: '##SMTP_HOSTNAME##',
+        smtp_port: '##SMTP_PORT##',
+        smtp_user: '##SMTP_USER##',
+        smtp_pass: '##SMTP_PASS##',
+        ...(updated.credentials || {}),
+      };
     }
-    updated.credentials = {
-      smtp_host: '##SMTP_HOSTNAME##',
-      smtp_port: '##SMTP_PORT##',
-      smtp_user: '##SMTP_USER##',
-      smtp_pass: '##SMTP_PASS##',
-      ...(updated.credentials || {}),
-    };
   }
 
   if (name === 'ses') {
-    updated.credentials = {
-      accessKeyId: '##SES_ACCESS_KEY_ID##',
-      secretAccessKey: '##SES_ACCESS_SECRET_KEY##',
-      region: '##SES_AWS_REGION##',
-      ...(updated.credentials || {}),
-    };
+    if (typeof updated.credentials !== 'string') {
+      updated.credentials = {
+        accessKeyId: '##SES_ACCESS_KEY_ID##',
+        secretAccessKey: '##SES_ACCESS_SECRET_KEY##',
+        region: '##SES_AWS_REGION##',
+        ...(updated.credentials || {}),
+      };
+    }
   }
 
   if (name === 'azure_cs') {
-    updated.credentials = {
-      connectionString: '##AZURE_CS_CONNECTION_KEY##',
-      ...(updated.credentials || {}),
-    };
+    if (typeof updated.credentials !== 'string') {
+      updated.credentials = {
+        connectionString: '##AZURE_CS_CONNECTION_KEY##',
+        ...(updated.credentials || {}),
+      };
+    }
   }
 
   if (name === 'ms365') {
-    updated.credentials = {
-      tenantId: '##MS365_TENANT_ID##',
-      clientId: '##MS365_CLIENT_ID##',
-      clientSecret: '##MS365_CLIENT_SECRET##',
-      ...(updated.credentials || {}),
-    };
+    if (typeof updated.credentials !== 'string') {
+      updated.credentials = {
+        tenantId: '##MS365_TENANT_ID##',
+        clientId: '##MS365_CLIENT_ID##',
+        clientSecret: '##MS365_CLIENT_SECRET##',
+        ...(updated.credentials || {}),
+      };
+    }
   }
 
   return updated;
@@ -99,6 +111,11 @@ export function phoneProviderDefaults(phoneProvider) {
     updated.credentials = {
       auth_token: `##${name.toUpperCase()}_AUTH_TOKEN##`,
     };
+  } else if (name === 'custom') {
+    // The `custom` provider has no exportable secrets, but the API requires a
+    // `credentials` object on import even when empty. Emit an empty object so
+    // exported configs round-trip cleanly.
+    updated.credentials = {};
   }
   return updated;
 }
@@ -214,6 +231,34 @@ export function eventStreamDefaults(
       },
     };
   });
+}
+
+/**
+ * Sorts primitive arrays (e.g. `shields`, `admin_notification_frequency`) within the
+ * attackProtection subtree in place, so repeated exports produce deterministic output.
+ * These are unordered, string-typed enum sets — ordering is cosmetic. Object arrays are
+ * left as-is.
+ */
+export function sortAttackProtectionArrays(attackProtection: AttackProtection): AttackProtection {
+  const sortArraysDeep = (value: unknown): void => {
+    if (Array.isArray(value)) {
+      const isPrimitiveArray = value.every((item) => item === null || typeof item !== 'object');
+      if (isPrimitiveArray) {
+        value.sort();
+      } else {
+        value.forEach(sortArraysDeep);
+      }
+      return;
+    }
+
+    if (value && typeof value === 'object') {
+      Object.values(value).forEach(sortArraysDeep);
+    }
+  };
+
+  sortArraysDeep(attackProtection);
+
+  return attackProtection;
 }
 
 export function attackProtectionDefaults(

@@ -1,12 +1,18 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { expect } from 'chai';
+import sinon from 'sinon';
 
 import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/flows';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
+import log from '../../../src/logger';
 
 describe('#YAML context flows', () => {
+  afterEach(() => {
+    sinon.restore();
+  });
+
   it('should process flows', async () => {
     const dir = path.join(testDataDir, 'yaml', 'flows');
     cleanThenMkdir(dir);
@@ -37,6 +43,36 @@ describe('#YAML context flows', () => {
     await context.loadAssetsFromLocal();
 
     expect(context.assets.flows).to.deep.equal(target);
+  });
+
+  it('should warn when flow body path resolves outside the config directory', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'flows');
+    cleanThenMkdir(dir);
+
+    const outsideFile = path.join(testDataDir, 'outside-flow.json');
+    fs.writeFileSync(outsideFile, '{"name": "outside flow"}');
+
+    const yaml = `
+    flows:
+      -
+        name: "Outside Flow"
+        body: ../../outside-flow.json
+    `;
+
+    const yamlFile = path.join(dir, 'flows.yaml');
+    fs.writeFileSync(yamlFile, yaml);
+
+    const config = { AUTH0_INPUT_FILE: yamlFile };
+    const context = new Context(config, mockMgmtClient());
+
+    const warnSpy = sinon.spy(log, 'warn');
+    await context.loadAssetsFromLocal();
+
+    expect(warnSpy.args.some(([msg]) => msg.includes('will be blocked as an error'))).to.equal(
+      true
+    );
+
+    fs.removeSync(outsideFile);
   });
 
   it('should dump flows', async () => {
