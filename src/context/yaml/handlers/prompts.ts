@@ -36,7 +36,15 @@ const loadScreenRenderers = (
       const filePath = fileName;
 
       try {
-        const rendererFile = path.join(context.basePath, filePath);
+        const configRoot = path.resolve(context.basePath);
+        const rendererFile = path.resolve(context.basePath, filePath);
+        if (!rendererFile.startsWith(configRoot + path.sep)) {
+          log.warn(
+            `Screen renderer file "${filePath}" resolves to "${rendererFile}" which is outside the config directory "${configRoot}". ` +
+              `This will be blocked as an error in the next major release. ` +
+              `Move the file inside your config directory.`
+          );
+        }
 
         const rendererData = loadJSON(rendererFile, {
           mappings: context.mappings,

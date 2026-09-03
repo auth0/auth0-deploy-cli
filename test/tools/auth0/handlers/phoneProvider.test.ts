@@ -129,6 +129,110 @@ describe('#phoneProviders handler', () => {
       await stageFn.apply(handler, [{ phoneProviders: data }]);
     });
 
+    it('should inject empty credentials when creating a custom provider without credentials', async () => {
+      let createPayload;
+      const auth0 = {
+        branding: {
+          phone: {
+            providers: {
+              list: () => Promise.resolve({ providers: [] }),
+              create: (data) => {
+                createPayload = data;
+                return Promise.resolve(data);
+              },
+            },
+          },
+        },
+      };
+
+      const handler = new phoneProviderHandler({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          name: 'custom',
+          disabled: false,
+          configuration: {
+            delivery_methods: ['text', 'voice'],
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ phoneProviders: data }]);
+
+      expect(createPayload.name).to.equal('custom');
+      expect(createPayload.credentials).to.deep.equal({});
+    });
+
+    it('should inject empty credentials when updating a custom provider without credentials', async () => {
+      let updatePayload;
+      const auth0 = {
+        branding: {
+          phone: {
+            providers: {
+              list: () =>
+                Promise.resolve({
+                  providers: [{ id: 'pro_5nbdb4pWifFdA1rV6pW6BE' }],
+                }),
+              update: (id, data) => {
+                updatePayload = data;
+                return Promise.resolve({ ...data, id });
+              },
+            },
+          },
+        },
+      };
+
+      const handler = new phoneProviderHandler({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          name: 'custom',
+          disabled: false,
+          configuration: {
+            delivery_methods: ['text', 'voice'],
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ phoneProviders: data }]);
+
+      expect(updatePayload.credentials).to.deep.equal({});
+    });
+
+    it('should not overwrite existing custom provider credentials', async () => {
+      let createPayload;
+      const auth0 = {
+        branding: {
+          phone: {
+            providers: {
+              list: () => Promise.resolve({ providers: [] }),
+              create: (data) => {
+                createPayload = data;
+                return Promise.resolve(data);
+              },
+            },
+          },
+        },
+      };
+
+      const handler = new phoneProviderHandler({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = [
+        {
+          name: 'custom',
+          disabled: false,
+          configuration: {
+            delivery_methods: ['text'],
+          },
+          credentials: { some_key: 'some_value' },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ phoneProviders: data }]);
+
+      expect(createPayload.credentials).to.deep.equal({ some_key: 'some_value' });
+    });
+
     it('should delete the phone provider when provider exists and AUTH0_ALLOW_DELETE is true', async () => {
       const AUTH0_ALLOW_DELETE = true;
 

@@ -80,4 +80,62 @@ phoneProviders:
       ],
     });
   });
+
+  it('should dump custom phone provider with empty credentials', async () => {
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+    context.assets.phoneProviders = [
+      {
+        id: 'pro_5nbdb4pWifFdA1rV6pW6BE',
+        disabled: false,
+        name: 'custom',
+        configuration: {
+          delivery_methods: ['text', 'voice'],
+        },
+      },
+    ];
+
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({
+      phoneProviders: [
+        {
+          disabled: false,
+          name: 'custom',
+          configuration: {
+            delivery_methods: ['text', 'voice'],
+          },
+          credentials: {},
+        },
+      ],
+    });
+  });
+
+  it('should reset custom phone provider credentials to empty on dump', async () => {
+    // Custom credentials are never exportable, so any incoming credentials are
+    // stripped and replaced with an empty object on export.
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+    context.assets.phoneProviders = [
+      {
+        disabled: false,
+        name: 'custom',
+        configuration: {
+          delivery_methods: ['text', 'voice'],
+        },
+        credentials: { some_key: 'some_value' },
+      },
+    ];
+
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({
+      phoneProviders: [
+        {
+          disabled: false,
+          name: 'custom',
+          configuration: {
+            delivery_methods: ['text', 'voice'],
+          },
+          credentials: {},
+        },
+      ],
+    });
+  });
 });

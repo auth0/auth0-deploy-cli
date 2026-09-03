@@ -1,6 +1,7 @@
 import path from 'path';
 import { ensureDirSync, writeFileSync } from 'fs-extra';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
+import log from '../../../logger';
 import { getFiles, dumpJSON, existsMustBeDir, isFile, loadJSON } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
@@ -69,9 +70,20 @@ function parse(context: DirectoryContext): ParsedPrompts {
         (screenAcc, [screenName, items]) => {
           screenAcc[screenName as CustomPartialsScreenTypes] = items.reduce(
             (insertionAcc, { name, template }) => {
-              const templateFilePath = path.join(promptsDirectory, template);
-              insertionAcc[name] = isFile(templateFilePath)
-                ? loadFileAndReplaceKeywords(templateFilePath, {
+              const configRoot = path.resolve(context.filePath);
+              const resolvedTemplatePath = path.resolve(promptsDirectory, template);
+              if (
+                isFile(resolvedTemplatePath) &&
+                !resolvedTemplatePath.startsWith(configRoot + path.sep)
+              ) {
+                log.warn(
+                  `Prompt partial template "${template}" resolves to "${resolvedTemplatePath}" which is outside the config directory "${configRoot}". ` +
+                    `This will be blocked as an error in the next major release. ` +
+                    `Move the file inside your config directory.`
+                );
+              }
+              insertionAcc[name] = isFile(resolvedTemplatePath)
+                ? loadFileAndReplaceKeywords(resolvedTemplatePath, {
                     mappings: context.mappings,
                     disableKeywordReplacement: context.disableKeywordReplacement,
                   }).trim()

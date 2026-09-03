@@ -24,6 +24,11 @@ const readOnlyFields: Partial<Record<AssetTypes, string[]>> = {
     'config_route',
     'owners',
   ],
+  attackProtection: [
+    // Returned by GET but rejected by PATCH with "Additional properties not allowed"
+    'bruteForceProtection.form_submission_mode',
+    'bruteForceProtection.form_submission_behavior',
+  ],
 };
 
 function getExcludedFields(config: Config) {

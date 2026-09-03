@@ -39,14 +39,22 @@ function parse(context: DirectoryContext): ParsedConnections {
 
       if (connection.strategy === 'email') {
         ensureProp(connection, 'options.email.body');
-        const htmlFileName = path.join(connectionsFolder, connection.options.email.body);
+        const configRoot = path.resolve(context.filePath);
+        const resolvedHtmlFile = path.resolve(connectionsFolder, connection.options.email.body);
 
-        if (!isFile(htmlFileName)) {
+        if (!isFile(resolvedHtmlFile)) {
           throw new Error(
-            `Passwordless email template purportedly located at ${htmlFileName} does not exist for connection. Ensure the existence of this file to proceed with deployment.`
+            `Passwordless email template purportedly located at ${resolvedHtmlFile} does not exist for connection. Ensure the existence of this file to proceed with deployment.`
           );
         }
-        connection.options.email.body = loadFileAndReplaceKeywords(htmlFileName, {
+        if (!resolvedHtmlFile.startsWith(configRoot + path.sep)) {
+          log.warn(
+            `Path "${connection.options.email.body}" resolves to "${resolvedHtmlFile}" which is outside the config directory "${configRoot}". ` +
+              `This will be blocked as an error in the next major release. ` +
+              `Move the file inside your config directory.`
+          );
+        }
+        connection.options.email.body = loadFileAndReplaceKeywords(resolvedHtmlFile, {
           mappings: context.mappings,
           disableKeywordReplacement: context.disableKeywordReplacement,
         });
