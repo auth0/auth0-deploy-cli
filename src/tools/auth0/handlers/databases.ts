@@ -447,6 +447,28 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     return this.client.connections[fn].bind(this.client.connections);
   }
 
+  // `enabled_clients` is no longer returned by connections.list; it must be fetched from the
+  // dedicated enabled-clients endpoint. Enriching the remote connections keeps the diff and the
+  // excluded-client preservation in `getEnabledClients` correct. Without it the dry-run diff
+  // reports a false "found in localObj but not in remoteObj" and a real import can silently
+  // disable an excluded-but-enabled client.
+  private async enrichConnectionsWithEnabledClients(
+    connections: Connection[]
+  ): Promise<Connection[]> {
+    return Promise.all(
+      connections.map(async (con) => {
+        if (!con?.id) return con;
+
+        const enabledClients = await getConnectionEnabledClients(this.client, con.id);
+        if (enabledClients?.length) {
+          return { ...con, enabled_clients: enabledClients };
+        }
+
+        return con;
+      })
+    );
+  }
+
   async getType() {
     if (this.existing) return this.existing;
 
@@ -462,19 +484,8 @@ export default class DatabaseHandler extends DefaultAPIHandler {
       }),
     ]);
 
-    const dbConnectionsWithEnabledClients = await Promise.all(
-      connections.map(async (con) => {
-        if (!con?.id) return con;
-
-        const enabledClients = await getConnectionEnabledClients(this.client, con.id);
-        const connection = { ...con };
-
-        if (enabledClients && enabledClients?.length) {
-          connection.enabled_clients = enabledClients;
-        }
-
-        return connection;
-      })
+    const dbConnectionsWithEnabledClients = await this.enrichConnectionsWithEnabledClients(
+      connections
     );
 
     // Convert action ID back to action name for export
@@ -541,22 +552,21 @@ export default class DatabaseHandler extends DefaultAPIHandler {
         conflicts: [],
       };
 
-    // Convert enabled_clients by name to the id
-    // Fetch clients, connections, and actions concurrently
-    const [clients, existingDatabasesConnections, actions] = await Promise.all([
+    // Convert enabled_clients by name to the id. `getType()` fetches and enriches the existing
+    // connections with `enabled_clients` and caches the result in `this.existing`, so the
+    // `super.calcChanges()` call below reuses it instead of fetching again.
+    const [clients, actions, existingWithEnabledClients] = await Promise.all([
       paginate<Client>(this.client.clients.list, {
         paginate: true,
-      }),
-      paginate<Connection>(this.client.connections.list, {
-        strategy: [Management.ConnectionStrategyEnum.Auth0],
-        checkpoint: true,
-        include_totals: true,
       }),
       paginate<Action>(this.client.actions.list, {
         paginate: true,
         include_totals: true,
       }),
+      this.getType(),
     ]);
+
+    const existingConnections = (existingWithEnabledClients as Connection[]) || [];
 
     const formatted = databases.map((db) => {
       const { options, ...rest } = db;
@@ -564,12 +574,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
       const formattedDb: any = { ...rest, options: formattedOptions };
 
       if (db.enabled_clients) {
-        formattedDb.enabled_clients = getEnabledClients(
-          assets,
-          db,
-          existingDatabasesConnections,
-          clients
-        );
+        formattedDb.enabled_clients = getEnabledClients(assets, db, existingConnections, clients);
       }
 
       return formattedDb;
@@ -605,6 +610,10 @@ export default class DatabaseHandler extends DefaultAPIHandler {
       }),
     ]);
 
+    const existingWithEnabledClients = await this.enrichConnectionsWithEnabledClients(
+      existingDatabasesConnections
+    );
+
     const formatted = databases.map((db) => {
       const { options, ...rest } = db;
       const formattedOptions = this.getFormattedOptions(options, actions);
@@ -614,7 +623,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
         formattedDb.enabled_clients = getEnabledClients(
           assets,
           db,
-          existingDatabasesConnections,
+          existingWithEnabledClients,
           clients
         );
       }
@@ -625,7 +634,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
     return calculateDryRunChanges({
       type: this.type,
       assets: formatted,
-      existing: existingDatabasesConnections,
+      existing: existingWithEnabledClients,
       identifiers: this.identifiers,
       ignoreDryRunFields: this.getEffectiveIgnoreDryRunFields(),
     });
