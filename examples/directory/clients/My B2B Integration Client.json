@@ -1,0 +1,7 @@
+{
+  "name": "My B2B Integration Client",
+  "app_type": "spa",
+  "b2b_integration_configuration": {
+    "integration_type": "custom_auth_server"
+  }
+}
