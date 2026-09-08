@@ -647,6 +647,27 @@ describe('preserveKeywords', () => {
     expect(preservedAssets).to.deep.equal(mockRemoteAssets);
   });
 
+  it('should not crash when a handler has no identifiers', () => {
+    // Regression test for https://github.com/auth0/auth0-deploy-cli/issues/1446
+    const handlersWithMissingIdentifiers = [
+      ...auth0Handlers,
+      //@ts-ignore intentionally omitting `identifiers` to mirror standalone handlers
+      { id: 'id', type: 'clientAuthCredentials' },
+    ];
+
+    expect(() =>
+      preserveKeywords({
+        localAssets: mockLocalAssets,
+        remoteAssets: mockRemoteAssets,
+        keywordMappings: {
+          COMPANY_NAME: 'Travel0',
+          ENV: 'Production',
+        },
+        auth0Handlers: handlersWithMissingIdentifiers,
+      })
+    ).to.not.throw();
+  });
+
   it('should preserve keywords in identifier fields', () => {
     const mockLocalAssets = {
       connections: [

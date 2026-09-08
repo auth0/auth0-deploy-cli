@@ -254,7 +254,9 @@ export const preserveKeywords = ({
 
   const resourceSpecificIdentifiers: Partial<Record<AssetTypes, string[]>> = auth0Handlers.reduce(
     (acc, handler) => {
-      acc[handler.type] = handler.identifiers.flat();
+      // Standalone handlers (e.g. clientAuthCredentials) don't extend APIHandler, so they
+      // have no `identifiers`; fall back to [] instead of crashing.
+      acc[handler.type] = (handler.identifiers || []).flat();
       return acc;
     },
     {}
