@@ -121,8 +121,7 @@ export default class NetworkACLKeysHandler extends DefaultAPIHandler {
     if (!key.id) {
       throw new Error(`Missing id for ${this.type} ${this.objString(key)}`);
     }
-    // TODO: remove `as any` cast when node-auth0 adds delete() to NetworkAclsClient
-    await (this.client.keys.networkAcls as any).delete(key.id);
+    await this.client.keys.networkAcls.delete(key.id);
   }
 
   async deleteNetworkACLKeys(data: Asset[]): Promise<void> {

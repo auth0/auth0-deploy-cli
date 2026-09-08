@@ -159,7 +159,6 @@ const MatchSchema = {
       },
       uniqueItems: true,
     },
-    // TODO: remove `as any` casts in handler once node-auth0 adds http_message_signature to NetworkAclMatch
     http_message_signature: {
       type: 'object',
       properties: {
