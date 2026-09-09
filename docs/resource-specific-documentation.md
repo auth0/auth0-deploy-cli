@@ -1395,6 +1395,33 @@ File: `./connection-profiles/Enterprise SSO Profile.json`
 }
 ```
 
+### B2B Integration Configuration on Clients
+
+> **Early Access** — requires the `enterprise_connect_entitled` entitlement on your tenant.
+
+The `b2b_integration_configuration` object enables Enterprise Connect functionality on a client. It can be set at **creation time** regardless of `app_type`. Once set, it can be updated via deploy as normal.
+
+> **Important:** `b2b_integration_configuration` cannot be added to an **existing** client via PATCH. If you need to add it to a client that was created without it, re-create the client. The deploy-cli will warn and skip the field if this constraint is violated.
+
+The `integration_type` field accepts one of: `custom_auth_server`, `third_party`, `application`.
+
+```yaml
+clients:
+  - name: 'My B2B Integration Client'
+    app_type: 'spa'
+    b2b_integration_configuration:
+      integration_type: 'custom_auth_server'
+```
+
+To clear `b2b_integration_configuration`, set it to `null`:
+
+```yaml
+clients:
+  - name: 'My B2B Integration Client'
+    app_type: 'spa'
+    b2b_integration_configuration: null
+```
+
 ### Express Configuration on Clients
 
 Connection profiles are used in conjunction with the `express_configuration` property on client applications: (In order to use express_configuration app_type should not be 'express_configuration')
