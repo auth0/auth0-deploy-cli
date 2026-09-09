@@ -97,6 +97,14 @@ clients:
             - "chat:write"
             - "channels:read"
   -
+    name: "My B2B Integration Client"
+    app_type: "spa"
+    # Enterprise Connect EA. Requires enterprise_connect_entitled on the tenant.
+    # b2b_integration_configuration can be set at creation time.
+    # To update it via deploy, the client must already have this object (re-create otherwise).
+    b2b_integration_configuration:
+      integration_type: "custom_auth_server"  # one of: custom_auth_server, third_party, application
+  -
     name: "My CIMD Client"
     external_client_id: "https://mcpserver.example.com/.well-known/client.json"
     app_type: "regular_web"
