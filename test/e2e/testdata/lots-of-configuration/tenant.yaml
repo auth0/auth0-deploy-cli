@@ -791,6 +791,10 @@ selfServiceProfiles:
       - name: name
         description: Name of the User
         is_optional: true
+networkACLKeys:
+  - name: e2e-test-hmac-key
+    alg: hmac-sha256
+    # value intentionally omitted — tests graceful skip when value is absent (out-of-band management)
 networkACLs:
   - description: "Allow Specific Countries"
     active: false
