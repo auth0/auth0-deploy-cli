@@ -11,10 +11,10 @@ import { Client } from './clients';
 import { Connection } from './connections';
 import { ClientGrant } from './clientGrants';
 
-// The auth0 SDK's ManagementError exposes the API error code on `err.body.errorCode`,
-// not `err.errorCode`. Some tenants also surface `feature_not_enabled` as a 400 rather
-// than a 403, so we match on the error code regardless of the HTTP status.
-function isFeatureNotEnabled(err): boolean {
+// Org sub-resources are skipped when the tenant can't read them: the EA feature is off
+// (feature_not_enabled, returned as 400 or 403) or the token lacks scope (403). The SDK
+// puts the API code on `err.body.errorCode`, not `err.errorCode`.
+function isOrgSubresourceUnavailable(err: any): boolean {
   return err?.statusCode === 403 || err?.body?.errorCode === 'feature_not_enabled';
 }
 
@@ -849,9 +849,9 @@ export default class OrganizationsHandler extends DefaultHandler {
       if (err.statusCode === 404 || err.statusCode === 501) {
         return null;
       }
-      if (isFeatureNotEnabled(err)) {
+      if (isOrgSubresourceUnavailable(err)) {
         log.debug(
-          'Organization Discovery domains are not enabled for this tenant. Please verify `scope` or contact Auth0 support to enable this feature.'
+          `Skipping organization discovery domains (${err?.body?.errorCode ?? err.statusCode}). Verify the token scope or feature entitlement.`
         );
         return null;
       }
@@ -940,9 +940,9 @@ export default class OrganizationsHandler extends DefaultHandler {
       if (err.statusCode === 404 || err.statusCode === 501) {
         return null;
       }
-      if (isFeatureNotEnabled(err)) {
+      if (isOrgSubresourceUnavailable(err)) {
         log.debug(
-          'Org-to-app entitlement is not enabled for this tenant. Skipping org-client associations.'
+          `Skipping org-client associations (${err?.body?.errorCode ?? err.statusCode}). Verify the token scope or org-to-app entitlement.`
         );
         return null;
       }

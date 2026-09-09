@@ -1823,7 +1823,7 @@ describe('#organizations handler', () => {
             list: () => {
               const err = new Error('feature_not_enabled');
               err.statusCode = 403;
-              err.errorCode = 'feature_not_enabled';
+              err.body = { errorCode: 'feature_not_enabled' };
               throw err;
             },
           },
