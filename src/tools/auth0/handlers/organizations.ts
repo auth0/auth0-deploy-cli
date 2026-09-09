@@ -851,7 +851,7 @@ export default class OrganizationsHandler extends DefaultHandler {
       }
       if (isOrgSubresourceUnavailable(err)) {
         log.debug(
-          `Skipping organization discovery domains (${err?.body?.errorCode ?? err.statusCode}). Verify the token scope or feature entitlement.`
+          `Skipping organization discovery domains (${err?.body?.errorCode ?? err.statusCode}).`
         );
         return null;
       }
@@ -941,9 +941,7 @@ export default class OrganizationsHandler extends DefaultHandler {
         return null;
       }
       if (isOrgSubresourceUnavailable(err)) {
-        log.debug(
-          `Skipping org-client associations (${err?.body?.errorCode ?? err.statusCode}). Verify the token scope or org-to-app entitlement.`
-        );
+        log.debug(`Skipping org-client associations (${err?.body?.errorCode ?? err.statusCode}).`);
         return null;
       }
       throw err;
