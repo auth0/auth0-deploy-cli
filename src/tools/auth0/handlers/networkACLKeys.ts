@@ -34,8 +34,10 @@ export default class NetworkACLKeysHandler extends DefaultAPIHandler {
       type: 'networkACLKeys',
       id: 'id',
       identifiers: ['name'],
-      stripCreateFields: ['id', 'fingerprint', 'created_at', 'updated_at', 'value'],
-      stripUpdateFields: ['id', 'fingerprint', 'created_at', 'updated_at', 'value'],
+      // value is write-only (never returned by API) and fingerprint/timestamps are
+      // API-generated — ignore all of them when computing dry-run diffs so keys
+      // with a local `value` don't show phantom UPDATEs.
+      ignoreDryRunFields: ['value', 'fingerprint', 'created_at', 'updated_at'],
     });
   }
 
@@ -98,6 +100,8 @@ export default class NetworkACLKeysHandler extends DefaultAPIHandler {
       alg: key.alg as Management.NetworkAclKeyAlgorithmEnum,
       value: key.value,
     });
+    this.didCreate(key);
+    this.created += 1;
   }
 
   async createNetworkACLKeys(creates: CalculatedChanges['create']): Promise<void> {
@@ -105,14 +109,9 @@ export default class NetworkACLKeysHandler extends DefaultAPIHandler {
       .addEachTask({
         data: creates || [],
         generator: (item: NetworkAclKey) =>
-          this.createNetworkACLKey(item)
-            .then(() => {
-              this.didCreate(item);
-              this.created += 1;
-            })
-            .catch((err) => {
-              throw new Error(`Problem creating ${this.type} ${this.objString(item)}\n${err}`);
-            }),
+          this.createNetworkACLKey(item).catch((err) => {
+            throw new Error(`Problem creating ${this.type} ${this.objString(item)}\n${err}`);
+          }),
       })
       .promise();
   }
