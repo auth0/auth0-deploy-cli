@@ -1041,9 +1041,11 @@ NetworkACLs have the following key properties:
 - `rule`: The rule configuration containing:
   - `action`: The action to take (block, allow, log, or redirect)
   - `scope`: The scope of the rule ('management', 'authentication', or 'tenant')
-  - `match` or `not_match`: Criteria for matching requests
+  - `match`, `not_match`, or `match_all`: Criteria for matching requests
 
 The `match` and `not_match` criteria also support an `auth0_managed` array for matching Auth0-managed IP ranges (e.g. `auth0.icloud_relay_proxy`, `auth0.low_reputation`). Each value must follow the pattern `^auth0\.[^.\s]+$`. This is an Early Access feature gated behind the `tenant_acl_curated_blocklists` feature flag and requires the `advanced-breached-password-detection` entitlement; the API rejects rules using `auth0_managed` with an HTTP 403 if the tenant is not entitled.
+
+Set `match_all: true` for a rule that unconditionally matches all traffic (e.g. block or allow everything within a scope), with no other signal required. `match_all` is mutually exclusive with `match` and `not_match` — a rule may use only one of the three, and combining them is rejected. Only `true` is valid; omit the property rather than setting it to `false`. `match_all` is gated behind the `tenant_acl_match_all` feature flag, and the API rejects rules using it with an HTTP 400 if the tenant does not have the flag enabled.
 
 **YAML Example**
 
@@ -1077,6 +1079,14 @@ networkACLs:
       scope: 'tenant'
       match:
         auth0_managed: ['auth0.icloud_relay_proxy']
+  - description: 'Block All Tenant Traffic'
+    active: true
+    priority: 99
+    rule:
+      action:
+        block: true
+      scope: 'tenant'
+      match_all: true
 ```
 
 **Directory Example**
@@ -1088,6 +1098,7 @@ Folder structure when in directory mode.
     ./Allow Specific Countries-p-2.json
     ./Redirect Specific User Agents-p-3.json
     ./Block iCloud Private Relay Exits-p-4.json
+    ./Block All Tenant Traffic-p-99.json
 ```
 
 Contents of `Allow Specific Countries-p-2.json`:
@@ -1143,6 +1154,23 @@ Contents of `Block iCloud Private Relay Exits-p-4.json`:
     "match": {
       "auth0_managed": ["auth0.icloud_relay_proxy"]
     }
+  }
+}
+```
+
+Contents of `Block All Tenant Traffic-p-99.json`:
+
+```json
+{
+  "description": "Block All Tenant Traffic",
+  "active": true,
+  "priority": 99,
+  "rule": {
+    "action": {
+      "block": true
+    },
+    "scope": "tenant",
+    "match_all": true
   }
 }
 ```
