@@ -1,5 +1,5 @@
 import { Management } from 'auth0';
-import DefaultAPIHandler from './default';
+import DefaultAPIHandler, { order } from './default';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
@@ -59,6 +59,17 @@ const RedirectAction = {
     },
   },
   additionalProperties: false,
+};
+
+// Shared sub-schemas reused across every rule branch below.
+const ActionSchema = {
+  type: 'object',
+  anyOf: [BlockAction, AllowAction, LogAction, RedirectAction],
+};
+
+const ScopeSchema = {
+  enum: ['management', 'authentication', 'tenant'],
+  type: 'string',
 };
 
 // Define MatchSchema
@@ -159,6 +170,27 @@ const MatchSchema = {
       },
       uniqueItems: true,
     },
+    http_message_signature: {
+      type: 'object',
+      properties: {
+        keys: {
+          type: 'array',
+          minItems: 1,
+          maxItems: 10,
+          uniqueItems: true,
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+            },
+            required: ['id'],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ['keys'],
+      additionalProperties: false,
+    },
   },
   additionalProperties: false,
 };
@@ -187,16 +219,10 @@ export const schema = {
             type: 'object',
             required: ['action', 'scope', 'match'],
             properties: {
-              action: {
-                type: 'object',
-                anyOf: [BlockAction, AllowAction, LogAction, RedirectAction],
-              },
+              action: ActionSchema,
               match: MatchSchema,
               not_match: MatchSchema,
-              scope: {
-                enum: ['management', 'authentication', 'tenant'],
-                type: 'string',
-              },
+              scope: ScopeSchema,
             },
             additionalProperties: false,
           },
@@ -204,16 +230,25 @@ export const schema = {
             type: 'object',
             required: ['action', 'scope', 'not_match'],
             properties: {
-              action: {
-                type: 'object',
-                anyOf: [BlockAction, AllowAction, LogAction, RedirectAction],
-              },
+              action: ActionSchema,
               not_match: MatchSchema,
               match: MatchSchema,
-              scope: {
-                enum: ['management', 'authentication', 'tenant'],
-                type: 'string',
+              scope: ScopeSchema,
+            },
+            additionalProperties: false,
+          },
+          {
+            // Unconditional match: `match_all` is mutually exclusive with `match`/`not_match`.
+            type: 'object',
+            required: ['action', 'scope', 'match_all'],
+            properties: {
+              action: ActionSchema,
+              match_all: {
+                // Schema only permits `true`; omit the property instead of sending `false`.
+                type: 'boolean',
+                enum: [true],
               },
+              scope: ScopeSchema,
             },
             additionalProperties: false,
           },
@@ -272,6 +307,7 @@ export default class NetworkACLsHandler extends DefaultAPIHandler {
     }
   }
 
+  @order(65)
   async processChanges(assets: Assets): Promise<void> {
     const { networkACLs } = assets;
 
