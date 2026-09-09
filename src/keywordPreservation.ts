@@ -247,16 +247,15 @@ export const preserveKeywords = ({
   remoteAssets: object;
   keywordMappings: KeywordMappings;
   auth0Handlers: (Pick<APIHandler, 'id' | 'type'> & {
-    identifiers: (string | string[])[];
+    identifiers?: (string | string[])[];
   })[];
 }): object => {
   if (Object.keys(keywordMappings).length === 0) return remoteAssets;
 
   const resourceSpecificIdentifiers: Partial<Record<AssetTypes, string[]>> = auth0Handlers.reduce(
     (acc, handler) => {
-      // Standalone handlers (e.g. clientAuthCredentials) don't extend APIHandler, so they
-      // have no `identifiers`; fall back to [] instead of crashing.
-      acc[handler.type] = (handler.identifiers || []).flat();
+      // Standalone handlers (e.g. clientAuthCredentials) don't extend APIHandler and have no identifiers.
+      acc[handler.type] = (handler.identifiers ?? []).flat();
       return acc;
     },
     {}
