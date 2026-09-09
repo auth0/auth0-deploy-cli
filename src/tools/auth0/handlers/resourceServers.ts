@@ -199,8 +199,13 @@ export default class ResourceServersHandler extends DefaultHandler {
     id: string,
     update: ResourceServer
   ): Promise<Management.UpdateResourceServerResponseContent> {
-    // Exclude name from update as it cannot be modified for system resource servers like Auth0 My Account API
-    if (update.is_system === true || update.name === 'Auth0 My Account API') {
+    // Exclude name from update as it cannot be modified for system resource servers like the
+    // Auth0 My Account API or the Auth0 My Organization API. `is_system` is listed in
+    // `stripUpdateFields`, so it has already been removed from `update` by the time this runs -
+    // read it off the existing resource server instead, which `getType()` retains it on.
+    const existing = this.existing?.find((resourceServer) => resourceServer.id === id);
+
+    if (existing?.is_system === true) {
       const updateFields: Management.UpdateResourceServerRequestContent = {
         token_lifetime: update.token_lifetime,
         proof_of_possession: update.proof_of_possession,
