@@ -152,11 +152,8 @@ export default class ClientAuthCredentialsHandler {
       const createdIdByName = new Map<string, string>();
       for (const cred of toCreate) {
         try {
-          // Forward all API-accepted fields; drop null/undefined ones so we never send
-          // nulls the Management API rejects (an empty YAML value such as `kid:` parses to
-          // null). kid/alg/expires_at/parse_expiry_from_cert are optional — if omitted,
-          // Auth0 defaults them (e.g. auto-generates a kid). Loose `!= null` is intentional:
-          // it drops null and undefined but keeps an explicit `false`.
+          // Forward all API-accepted fields. `!= null` drops unset (undefined) and empty
+          // (YAML `kid:` → null) values the API rejects, while keeping an explicit `false`.
           const createPayload = Object.fromEntries(
             Object.entries({
               name: cred.name,
