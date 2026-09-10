@@ -80,7 +80,17 @@ export default class ClientAuthCredentialsHandler {
       const clientName = client.name || clientId;
 
       // Collect all desired credentials across all auth methods (only pem-bearing entries)
-      const desired: { name: string; pem?: string; credential_type: string; method: string }[] = [];
+      const desired: {
+        name: string;
+        pem?: string;
+        credential_type: string;
+        method: string;
+        kid?: string;
+        alg?: string;
+        expires_at?: string;
+        parse_expiry_from_cert?: boolean;
+        subject_dn?: string;
+      }[] = [];
 
       if (client.client_authentication_methods) {
         for (const [methodKey, methodVal] of Object.entries(
@@ -94,6 +104,11 @@ export default class ClientAuthCredentialsHandler {
               pem: cred.pem,
               credential_type: cred.credential_type || this.inferCredentialType(methodKey),
               method: methodKey,
+              kid: cred.kid,
+              alg: cred.alg,
+              expires_at: cred.expires_at,
+              parse_expiry_from_cert: cred.parse_expiry_from_cert,
+              subject_dn: cred.subject_dn,
             });
           }
         }
@@ -139,11 +154,26 @@ export default class ClientAuthCredentialsHandler {
       const createdIdByName = new Map<string, string>();
       for (const cred of toCreate) {
         try {
-          const created = await (this.client.clients.credentials.create as Function)(clientId, {
-            name: cred.name,
-            pem: cred.pem,
-            credential_type: cred.credential_type,
-          });
+          // Forward all API-accepted fields; drop undefined ones so we never send
+          // nulls the Management API rejects. kid/alg/expires_at/parse_expiry_from_cert/
+          // subject_dn are optional per credential_type — if omitted, Auth0 defaults them
+          // (e.g. auto-generates a kid).
+          const createPayload = Object.fromEntries(
+            Object.entries({
+              name: cred.name,
+              pem: cred.pem,
+              credential_type: cred.credential_type,
+              kid: cred.kid,
+              alg: cred.alg,
+              expires_at: cred.expires_at,
+              parse_expiry_from_cert: cred.parse_expiry_from_cert,
+              subject_dn: cred.subject_dn,
+            }).filter(([, v]) => v !== undefined)
+          );
+          const created = await (this.client.clients.credentials.create as Function)(
+            clientId,
+            createPayload
+          );
           log.info(
             `clientAuthCredentials: created credential "${cred.name}" on client "${clientName}"`
           );

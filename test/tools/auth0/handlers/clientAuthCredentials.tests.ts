@@ -200,6 +200,64 @@ describe('#clientAuthCredentials handler', () => {
       ).to.deep.equal([{ id: 'cred_new123' }]);
     });
 
+    it('should forward kid and other optional fields to create, omitting undefined ones', async () => {
+      const createCalls: any[] = [];
+
+      const client = makeClient({
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ client_id: 'client1', name: 'My App' }]),
+          update: () => Promise.resolve({ data: {} }),
+          credentials: {
+            list: () => Promise.resolve([]),
+            create: (clientId, data) => {
+              createCalls.push({ clientId, data });
+              return Promise.resolve({ id: 'cred_new123', name: data.name });
+            },
+            delete: () => Promise.resolve({}),
+          },
+        },
+      });
+
+      const handler = new clientAuthCredentials({ client, config: makeConfig() });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              client_id: 'client1',
+              name: 'My App',
+              client_authentication_methods: {
+                private_key_jwt: {
+                  credentials: [
+                    {
+                      name: 'new-key',
+                      pem: '-----BEGIN PUBLIC KEY-----\nabc\n-----END PUBLIC KEY-----\n',
+                      credential_type: 'public_key',
+                      kid: 'MY_CUSTOM_KID_VALUE',
+                      alg: 'RS256',
+                      // explicit false must be forwarded, not dropped as falsy
+                      parse_expiry_from_cert: false,
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      ]);
+
+      expect(createCalls).to.have.lengthOf(1);
+      const { data } = createCalls[0];
+      expect(data.kid).to.equal('MY_CUSTOM_KID_VALUE');
+      expect(data.alg).to.equal('RS256');
+      // explicit false is a valid value and must be sent, not filtered out
+      expect(data).to.have.property('parse_expiry_from_cert', false);
+      // undefined optional fields must not be sent (Auth0 rejects nulls)
+      expect(data).to.not.have.property('expires_at');
+      expect(data).to.not.have.property('subject_dn');
+    });
+
     it('should resolve client_id by name when client_id is null (directory mode)', async () => {
       const createCalls: any[] = [];
 
