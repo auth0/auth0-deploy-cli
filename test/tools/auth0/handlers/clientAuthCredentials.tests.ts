@@ -200,7 +200,7 @@ describe('#clientAuthCredentials handler', () => {
       ).to.deep.equal([{ id: 'cred_new123' }]);
     });
 
-    it('should forward kid and other optional fields to create, omitting undefined ones', async () => {
+    it('should forward kid and other optional fields to create, omitting null/undefined ones', async () => {
       const createCalls: any[] = [];
 
       const client = makeClient({
@@ -238,6 +238,8 @@ describe('#clientAuthCredentials handler', () => {
                       alg: 'RS256',
                       // explicit false must be forwarded, not dropped as falsy
                       parse_expiry_from_cert: false,
+                      // null (e.g. an empty `expires_at:` in YAML) must be dropped, not sent
+                      expires_at: null,
                     },
                   ],
                 },
@@ -253,9 +255,8 @@ describe('#clientAuthCredentials handler', () => {
       expect(data.alg).to.equal('RS256');
       // explicit false is a valid value and must be sent, not filtered out
       expect(data).to.have.property('parse_expiry_from_cert', false);
-      // undefined optional fields must not be sent (Auth0 rejects nulls)
+      // null and undefined optional fields must not be sent (Auth0 rejects nulls)
       expect(data).to.not.have.property('expires_at');
-      expect(data).to.not.have.property('subject_dn');
     });
 
     it('should resolve client_id by name when client_id is null (directory mode)', async () => {

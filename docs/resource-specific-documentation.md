@@ -2036,15 +2036,14 @@ The Deploy CLI supports managing client authentication credentials for Private K
 
 ### Optional credential fields
 
-Beyond `name`, `credential_type`, and `pem`, the following optional fields are forwarded to Auth0 when a credential is created (each applies only to certain credential types — see the [Management API docs](https://auth0.com/docs/api/management/v2/clients/post-credentials)):
+Beyond `name`, `credential_type`, and `pem`, the following optional fields are forwarded to Auth0 when a `public_key` (`private_key_jwt`) credential is created (see the [Management API docs](https://auth0.com/docs/api/management/v2/clients/post-credentials)):
 
-| Field                    | Applies to        | Notes                                                                        |
-| ------------------------ | ----------------- | ---------------------------------------------------------------------------- |
-| `kid`                    | `public_key`      | Key ID. If omitted, Auth0 auto-generates one. Format: `[0-9a-zA-Z-_]{10,64}` |
-| `alg`                    | `public_key`      | Signing algorithm: `RS256`, `RS384`, or `PS256`                              |
-| `expires_at`             | `public_key`      | ISO 8601 expiry. If omitted, the credential never expires                    |
-| `parse_expiry_from_cert` | `public_key`      | Parse expiry from the provided X509 PEM                                      |
-| `subject_dn`             | `cert_subject_dn` | Subject Distinguished Name. Mutually exclusive with `pem`                    |
+| Field                    | Notes                                                                        |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| `kid`                    | Key ID. If omitted, Auth0 auto-generates one. Format: `[0-9a-zA-Z-_]{10,64}` |
+| `alg`                    | Signing algorithm: `RS256`, `RS384`, or `PS256`                              |
+| `expires_at`             | ISO 8601 expiry. If omitted, the credential never expires                    |
+| `parse_expiry_from_cert` | Parse the expiry from the X509 certificate supplied in `pem`                 |
 
 > **Note:** These fields are honored **only when the credential is created** (matching is by `name`). Changing a field such as `kid` on an existing credential with the same `name` is a no-op — rotate by adding a new credential under a new `name` and removing the old one. `kid` is not exported (Auth0 returns only `name` and `credential_type` on read).
 

@@ -89,7 +89,6 @@ export default class ClientAuthCredentialsHandler {
         alg?: string;
         expires_at?: string;
         parse_expiry_from_cert?: boolean;
-        subject_dn?: string;
       }[] = [];
 
       if (client.client_authentication_methods) {
@@ -108,7 +107,6 @@ export default class ClientAuthCredentialsHandler {
               alg: cred.alg,
               expires_at: cred.expires_at,
               parse_expiry_from_cert: cred.parse_expiry_from_cert,
-              subject_dn: cred.subject_dn,
             });
           }
         }
@@ -154,10 +152,11 @@ export default class ClientAuthCredentialsHandler {
       const createdIdByName = new Map<string, string>();
       for (const cred of toCreate) {
         try {
-          // Forward all API-accepted fields; drop undefined ones so we never send
-          // nulls the Management API rejects. kid/alg/expires_at/parse_expiry_from_cert/
-          // subject_dn are optional per credential_type — if omitted, Auth0 defaults them
-          // (e.g. auto-generates a kid).
+          // Forward all API-accepted fields; drop null/undefined ones so we never send
+          // nulls the Management API rejects (an empty YAML value such as `kid:` parses to
+          // null). kid/alg/expires_at/parse_expiry_from_cert are optional — if omitted,
+          // Auth0 defaults them (e.g. auto-generates a kid). Loose `!= null` is intentional:
+          // it drops null and undefined but keeps an explicit `false`.
           const createPayload = Object.fromEntries(
             Object.entries({
               name: cred.name,
@@ -167,8 +166,7 @@ export default class ClientAuthCredentialsHandler {
               alg: cred.alg,
               expires_at: cred.expires_at,
               parse_expiry_from_cert: cred.parse_expiry_from_cert,
-              subject_dn: cred.subject_dn,
-            }).filter(([, v]) => v !== undefined)
+            }).filter(([, v]) => v != null)
           );
           const created = await (this.client.clients.credentials.create as Function)(
             clientId,
