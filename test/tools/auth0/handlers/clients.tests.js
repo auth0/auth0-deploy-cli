@@ -127,6 +127,35 @@ describe('#clients handler', () => {
       ]);
       expect(valid).to.equal(false);
     });
+
+    it('should pass validation with b2b_integration_configuration', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someB2BClient',
+          b2b_integration_configuration: { integration_type: 'custom_auth_server' },
+        },
+      ]);
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should pass validation with b2b_integration_configuration set to null', () => {
+      const valid = ajv.validate(clients.schema, [
+        { name: 'someB2BClient', b2b_integration_configuration: null },
+      ]);
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should fail validation with b2b_integration_configuration.integration_type invalid value', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someB2BClient',
+          b2b_integration_configuration: { integration_type: 'b2b_integration' },
+        },
+      ]);
+      expect(valid).to.equal(false);
+    });
   });
 
   describe('#clients validate', () => {
@@ -2107,6 +2136,130 @@ describe('#clients handler', () => {
       // The whole object is therefore stripped on write — the field is export-only.
       expect(updatePayloads['client1']).to.not.have.property('token_vault_privileged_access');
       expect(createPayloads[0]).to.not.have.property('token_vault_privileged_access');
+    });
+
+    it('should strip b2b_integration_configuration from PATCH when existing client lacks it', async () => {
+      const updatePayloads = {};
+      const auth0 = {
+        clients: {
+          create: (data) => Promise.resolve({ data }),
+          update: (clientId, data) => {
+            updatePayloads[clientId] = data;
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: {} }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ client_id: 'client1', name: 'Existing Client' }]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              client_id: 'client1',
+              name: 'Existing Client',
+              b2b_integration_configuration: { integration_type: 'custom_auth_server' },
+            },
+          ],
+        },
+      ]);
+
+      expect(updatePayloads['client1']).to.not.have.property('b2b_integration_configuration');
+    });
+
+    it('should strip null b2b_integration_configuration from PATCH when existing client lacks it', async () => {
+      const updatePayloads = {};
+      const auth0 = {
+        clients: {
+          create: (data) => Promise.resolve({ data }),
+          update: (clientId, data) => {
+            updatePayloads[clientId] = data;
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: {} }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ client_id: 'client1', name: 'Existing Client' }]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              client_id: 'client1',
+              name: 'Existing Client',
+              b2b_integration_configuration: null,
+            },
+          ],
+        },
+      ]);
+
+      // null for a client that never had the field is a no-op — strip silently, no API error.
+      expect(updatePayloads['client1']).to.not.have.property('b2b_integration_configuration');
+    });
+
+    it('should pass b2b_integration_configuration in PATCH when existing client already has it', async () => {
+      const updatePayloads = {};
+      const auth0 = {
+        clients: {
+          create: (data) => Promise.resolve({ data }),
+          update: (clientId, data) => {
+            updatePayloads[clientId] = data;
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: {} }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'client1',
+                name: 'Existing B2B Client',
+                b2b_integration_configuration: { integration_type: 'custom_auth_server' },
+              },
+            ]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              client_id: 'client1',
+              name: 'Existing B2B Client',
+              b2b_integration_configuration: { integration_type: 'third_party' },
+            },
+          ],
+        },
+      ]);
+
+      expect(updatePayloads['client1']).to.have.property('b2b_integration_configuration');
+      expect(updatePayloads['client1'].b2b_integration_configuration).to.deep.equal({
+        integration_type: 'third_party',
+      });
     });
   });
 

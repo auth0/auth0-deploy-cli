@@ -33,6 +33,7 @@ import rulesConfigs from './rulesConfigs';
 import forms from './forms';
 import flows from './flows';
 import flowVaultConnections from './flowVaultConnections';
+import networkACLKeys from './networkACLKeys';
 import networkACLs from './networkACLs';
 import userAttributeProfiles from './userAttributeProfiles';
 import connectionProfiles from './connectionProfiles';
@@ -90,6 +91,7 @@ const directoryHandlers: {
   flows,
   flowVaultConnections,
   selfServiceProfiles,
+  networkACLKeys,
   networkACLs,
   userAttributeProfiles,
   connectionProfiles,

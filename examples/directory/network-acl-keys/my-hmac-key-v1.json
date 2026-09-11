@@ -1,0 +1,5 @@
+{
+  "name": "my-hmac-key-v1",
+  "alg": "hmac-sha256",
+  "fingerprint": "ee66b47a0b3e356a0d7c587bd1e2ed3790b46fdbd657dbeb409f30de76a14cc3"
+}
