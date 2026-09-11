@@ -88,6 +88,16 @@ const myOrganizationConfigurationSchema = {
       description:
         'The client ID of the invitation landing client for the My Organization configuration',
     },
+    enforce_permission_ceiling: {
+      type: 'boolean',
+      description:
+        'When true, limits the permissions that organization admins can assign to members to only those held by the admin themselves. Early Access, gated by the my_org_member_management_ea feature flag.',
+    },
+    enforce_self_assignment_restriction: {
+      type: 'boolean',
+      description:
+        'When true, prevents organization admins from assigning permissions to themselves. Early Access, gated by the my_org_member_management_ea feature flag.',
+    },
   },
   required: ['allowed_strategies', 'connection_deletion_behavior'],
 };
