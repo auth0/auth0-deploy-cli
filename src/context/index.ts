@@ -188,12 +188,12 @@ export const setupContext = async (
   // ManagementClient auto-refreshes during long-running operations, and eagerly
   // call it once below to preserve the previous fail-fast behaviour (a bad
   // secret/signing key surfaces at startup, not mid-operation).
-  const audience = config.AUTH0_AUDIENCE
-    ? config.AUTH0_AUDIENCE
-    : `https://${AUTH0_DOMAIN}/api/v2/`;
-
   const tokenSupplier = await (async (): Promise<string | (() => Promise<string>)> => {
     if (!!AUTH0_ACCESS_TOKEN) return AUTH0_ACCESS_TOKEN;
+
+    const audience = config.AUTH0_AUDIENCE
+      ? config.AUTH0_AUDIENCE
+      : `https://${AUTH0_DOMAIN}/api/v2/`;
 
     const credentials = !!AUTH0_CLIENT_SECRET
       ? {
