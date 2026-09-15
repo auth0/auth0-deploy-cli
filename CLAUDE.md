@@ -39,11 +39,11 @@ Follow these steps **in order** when implementing any new feature, handler, or A
 
 No exceptions. Every handler must have:
 
-| Method             | Purpose                                                |
-| ------------------ | ------------------------------------------------------ |
-| `getType()`        | Fetch current state from Auth0 API                     |
-| `calcChanges()`    | Determine which resources to create, update, or delete |
-| `processChanges()` | Execute CRUD operations against the API                |
+| Method             | Purpose                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| `getType()`        | Fetch current state from Auth0 API                                                   |
+| `calcChanges()`    | Determine which resources to create, update, or delete                               |
+| `processChanges()` | Execute CRUD operations against the API                                              |
 | `validate()`       | Validate assets before processing; base class provides a default, override if needed |
 
 > Note: export formatting (`dump`) is handled by `YAMLContext` and `DirectoryContext`, not by handlers.
@@ -97,16 +97,16 @@ npm run lint
 
 These rules apply to **every change** that touches a handler or context parser. They are not optional review items — treat them as constraints.
 
-| Invariant                         | What to verify                                                                                                     |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **Both formats work**             | YAML and directory paths both produce correct behavior                                                             |
-| **Dry-run is non-mutating**       | `isDryRun` flag is respected on every affected code path                                                           |
-| **Keyword replacement preserved** | New fields that may contain keywords pass through `@@KEY@@` (JSON-stringified) and `##KEY##` (literal) replacement |
-| **Write-only fields stripped**    | Secrets, `value`, key material are never written to disk during export                                             |
-| **Read-only fields excluded**     | `created_at`, `updated_at`, `id`, `fingerprint` are stripped on export and excluded from create/update payloads    |
+| Invariant                         | What to verify                                                                                                                                                                   |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Both formats work**             | YAML and directory paths both produce correct behavior                                                                                                                           |
+| **Dry-run is non-mutating**       | `isDryRun` flag is respected on every affected code path                                                                                                                         |
+| **Keyword replacement preserved** | New fields that may contain keywords pass through `@@KEY@@` (JSON-stringified) and `##KEY##` (literal) replacement                                                               |
+| **Write-only fields stripped**    | Secrets, `value`, key material are never written to disk during export                                                                                                           |
+| **Read-only fields excluded**     | `created_at`, `updated_at`, `id`, `fingerprint` are stripped on export and excluded from create/update payloads                                                                  |
 | **Match by name, not auto-id**    | `identifiers` array must include `name` (or a stable name-like field) as the primary matching key — never rely solely on an auto-generated UUID `id` for cross-tenant roundtrips |
-| **Handler ordering correct**      | `@order()` places this handler correctly relative to handlers it depends on or that depend on it                   |
-| **Schema is complete**            | JSON schema allows all valid API shapes without being so permissive it passes invalid configs                      |
+| **Handler ordering correct**      | `@order()` places this handler correctly relative to handlers it depends on or that depend on it                                                                                 |
+| **Schema is complete**            | JSON schema allows all valid API shapes without being so permissive it passes invalid configs                                                                                    |
 
 ---
 
