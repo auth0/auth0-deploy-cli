@@ -118,11 +118,28 @@ describe('#tokenExchangeProfiles handler', () => {
       expect(data[0].action_id).to.be.undefined; // Should be mapped to action name
     });
 
-    it('should return an empty array for 403 status code', async () => {
+    it('should return an empty array and warn for 403 status code', async () => {
       const auth0 = {
         tokenExchangeProfiles: {
           list: () => {
-            const error = new Error('Feature not enabled');
+            const error = new Error('Insufficient scope');
+            error.statusCode = 403;
+            throw error;
+          },
+        },
+        pool,
+      };
+
+      const handler = new tokenExchangeProfiles.default({ client: pageClient(auth0), config });
+      const data = await handler.getType();
+      expect(data).to.deep.equal([]);
+    });
+
+    it('should return an empty array and warn for 403 with non-scope message', async () => {
+      const auth0 = {
+        tokenExchangeProfiles: {
+          list: () => {
+            const error = new Error('This feature is not available on your plan.');
             error.statusCode = 403;
             throw error;
           },
