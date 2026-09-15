@@ -1,6 +1,6 @@
 import { lstatSync, readdirSync, readFileSync, existsSync } from 'fs';
 import path from 'path';
-import { AuthenticationClient, ManagementClient } from 'auth0';
+import { createManagementAuth, ManagementClient } from 'auth0';
 import YAMLContext from './yaml';
 import DirectoryContext from './directory';
 
@@ -167,57 +167,58 @@ export const setupContext = async (
     }
   })(config);
 
-  const accessToken = await (async (): Promise<string> => {
-    const {
-      AUTH0_DOMAIN,
-      AUTH0_CLIENT_ID,
-      AUTH0_ACCESS_TOKEN,
-      AUTH0_CLIENT_SECRET,
-      AUTH0_CLIENT_SIGNING_KEY_PATH,
-      AUTH0_CLIENT_SIGNING_ALGORITHM,
-    } = config;
+  const {
+    AUTH0_DOMAIN,
+    AUTH0_CLIENT_ID,
+    AUTH0_ACCESS_TOKEN,
+    AUTH0_CLIENT_SECRET,
+    AUTH0_CLIENT_SIGNING_KEY_PATH,
+    AUTH0_CLIENT_SIGNING_ALGORITHM,
+  } = config;
 
+  if (!AUTH0_ACCESS_TOKEN && !AUTH0_CLIENT_SECRET && !AUTH0_CLIENT_SIGNING_KEY_PATH) {
+    throw new Error(
+      'need to supply either `AUTH0_ACCESS_TOKEN`, `AUTH0_CLIENT_SECRET` or `AUTH0_CLIENT_SIGNING_KEY_PATH`'
+    );
+  }
+
+  // node-auth0 v7 removed the AuthenticationClient. `createManagementAuth`
+  // performs the client-credentials grant on our behalf and caches/refreshes
+  // the resulting token. We resolve a token supplier here so the
+  // ManagementClient auto-refreshes during long-running operations, and eagerly
+  // call it once below to preserve the previous fail-fast behaviour (a bad
+  // secret/signing key surfaces at startup, not mid-operation).
+  const audience = config.AUTH0_AUDIENCE
+    ? config.AUTH0_AUDIENCE
+    : `https://${AUTH0_DOMAIN}/api/v2/`;
+
+  const tokenSupplier = await (async (): Promise<string | (() => Promise<string>)> => {
     if (!!AUTH0_ACCESS_TOKEN) return AUTH0_ACCESS_TOKEN;
-    if (!AUTH0_CLIENT_SECRET && !AUTH0_CLIENT_SIGNING_KEY_PATH) {
-      throw new Error(
-        'need to supply either `AUTH0_ACCESS_TOKEN`, `AUTH0_CLIENT_SECRET` or `AUTH0_CLIENT_SIGNING_KEY_PATH`'
-      );
-    }
 
-    const authClient: AuthenticationClient = (() => {
-      if (!!AUTH0_CLIENT_SECRET) {
-        return new AuthenticationClient({
-          domain: AUTH0_DOMAIN,
+    const credentials = !!AUTH0_CLIENT_SECRET
+      ? {
           clientId: AUTH0_CLIENT_ID,
           clientSecret: AUTH0_CLIENT_SECRET,
-        });
-      }
+          audience,
+        }
+      : {
+          clientId: AUTH0_CLIENT_ID,
+          clientAssertionSigningKey: readFileSync(AUTH0_CLIENT_SIGNING_KEY_PATH, 'utf8'),
+          ...(!!AUTH0_CLIENT_SIGNING_ALGORITHM
+            ? { clientAssertionSigningAlg: AUTH0_CLIENT_SIGNING_ALGORITHM }
+            : {}),
+          audience,
+        };
 
-      return new AuthenticationClient({
-        domain: AUTH0_DOMAIN,
-        clientId: AUTH0_CLIENT_ID,
-        clientAssertionSigningKey: readFileSync(AUTH0_CLIENT_SIGNING_KEY_PATH, 'utf8'),
-        clientAssertionSigningAlg: !!AUTH0_CLIENT_SIGNING_ALGORITHM
-          ? AUTH0_CLIENT_SIGNING_ALGORITHM
-          : undefined,
-      });
-    })();
-
-    const clientCredentials = await authClient.oauth.clientCredentialsGrant({
-      audience: config.AUTH0_AUDIENCE
-        ? config.AUTH0_AUDIENCE
-        : `https://${config.AUTH0_DOMAIN}/api/v2/`,
-    });
-    const clientAccessToken = clientCredentials.data?.access_token;
-    if (!clientAccessToken) {
-      throw new Error('Failed to retrieve access token.');
-    }
-    return clientAccessToken;
+    const auth = createManagementAuth({ domain: AUTH0_DOMAIN, ...credentials });
+    // Fail fast: validates credentials (and the signing key) up-front.
+    await auth.getToken();
+    return () => auth.getToken();
   })();
 
   const mgmtClient = new ManagementClient({
-    domain: config.AUTH0_DOMAIN,
-    token: accessToken,
+    domain: AUTH0_DOMAIN,
+    token: tokenSupplier,
     headers: {
       'User-agent': `deploy-cli/${packageVersion} (node.js/${process.version.replace('v', '')})`,
       ...(isTruthy(config.AUTH0_DRY_RUN)
