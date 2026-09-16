@@ -341,6 +341,7 @@ guardianPhoneFactorSelectedProvider:
 guardianPolicies:
   policies:
     - all-applications
+    # - confidence-score  # Requires Adaptive MFA entitlement (Enterprise add-on)
 
 roles:
   - name: Admin
