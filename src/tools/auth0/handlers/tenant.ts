@@ -109,7 +109,9 @@ export const schema = {
               description: 'Whether to activate the anonymous session cookie.',
             },
           },
-          additionalProperties: false,
+          // Permissive to match the parent `sessions` object so new Management API
+          // session fields round-trip through export/import without validation failure.
+          additionalProperties: true,
         },
       },
       additionalProperties: true,
