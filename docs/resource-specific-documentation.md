@@ -2139,3 +2139,66 @@ clients:
             - 'chat:write'
             - 'channels:read'
 ```
+
+## MFA Advanced Factor Configuration
+
+The Deploy CLI manages the MFA (Guardian) advanced factor settings through three separate resources. Each is a single object rather than a set, so it cannot be deleted; an empty or omitted value is skipped rather than treated as a deletion. If the feature is unavailable on the tenant, the resource is skipped gracefully.
+
+- `guardianPhoneFactorSettings`: one-time password settings for the phone factor.
+  - `otp_length` (number): number of digits in the OTP code.
+  - `otp_expiration_time` (number): OTP validity window, in seconds.
+- `guardianEmailFactorSettings`: one-time password settings for the email factor, with the same fields as the phone factor.
+- `guardianSettings`: MFA session and "Remember Me" behavior.
+  - `display_remember_me_checkbox` (boolean): whether to show the "Remember Me" checkbox on the MFA prompt in Universal Login.
+  - `remember_me_default_value` (boolean): default state of that checkbox.
+  - `mfa_session_inactivity_timeout` (number): inactivity duration, in seconds, after which the user is prompted for MFA. Cannot exceed the overall timeout.
+  - `mfa_session_overall_timeout` (number): maximum duration, in seconds, after which the user is prompted for MFA regardless of activity.
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+guardianPhoneFactorSettings:
+  otp_length: 6
+  otp_expiration_time: 300
+guardianEmailFactorSettings:
+  otp_length: 6
+  otp_expiration_time: 300
+guardianSettings:
+  display_remember_me_checkbox: true
+  remember_me_default_value: false
+  mfa_session_inactivity_timeout: 604800
+  mfa_session_overall_timeout: 2592000
+```
+
+### Directory Example
+
+Each resource is a JSON file inside the `guardian` folder:
+
+```json
+// Contents of ./guardian/phoneFactorSettings.json
+{
+  "otp_length": 6,
+  "otp_expiration_time": 300
+}
+```
+
+```json
+// Contents of ./guardian/emailFactorSettings.json
+{
+  "otp_length": 6,
+  "otp_expiration_time": 300
+}
+```
+
+```json
+// Contents of ./guardian/settings.json
+{
+  "display_remember_me_checkbox": true,
+  "remember_me_default_value": false,
+  "mfa_session_inactivity_timeout": 604800,
+  "mfa_session_overall_timeout": 2592000
+}
+```
+
+For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2#!/Guardian).
