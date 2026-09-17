@@ -92,6 +92,28 @@ export const schema = {
       required: ['list', 'mode'],
       additionalProperties: false,
     },
+    sessions: {
+      type: 'object',
+      description: 'Sessions related settings for the tenant.',
+      properties: {
+        anonymous: {
+          type: 'object',
+          description: 'Anonymous session settings for the tenant.',
+          properties: {
+            lifetime_in_minutes: {
+              type: 'integer',
+              description: 'The lifetime of an anonymous session, in minutes.',
+            },
+            activate_cookie: {
+              type: 'boolean',
+              description: 'Whether to activate the anonymous session cookie.',
+            },
+          },
+          additionalProperties: false,
+        },
+      },
+      additionalProperties: true,
+    },
   },
 };
 

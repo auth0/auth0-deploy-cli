@@ -311,6 +311,18 @@ export const schema = {
         required: ['active'],
         additionalProperties: false,
       },
+      anonymous_sessions: {
+        type: 'object',
+        description: 'Configuration for anonymous sessions for this client.',
+        properties: {
+          active: {
+            type: 'boolean',
+            description: 'Whether anonymous sessions are enabled for this client.',
+          },
+        },
+        required: ['active'],
+        additionalProperties: false,
+      },
       app_type: {
         type: 'string',
         description: 'The type of application this client represents',

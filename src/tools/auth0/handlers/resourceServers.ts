@@ -76,8 +76,56 @@ export const schema = {
               },
             },
           },
+          anonymous_user: {
+            type: 'object',
+            description: 'Access Permissions for anonymous user flows',
+            properties: {
+              policy: {
+                type: 'string',
+                enum: Object.values(
+                  Management.ResourceServerSubjectTypeAuthorizationAnonymousUserPolicyEnum
+                ),
+              },
+            },
+          },
         },
         additionalProperties: false,
+      },
+      token_lifetime_for_anonymous_access_tokens: {
+        type: 'number',
+        description: 'Expiration value (in seconds) for anonymous-session access tokens issued for this API.',
+      },
+      access_token: {
+        type: ['object', 'null'],
+        description: 'Custom configuration for access tokens.',
+        properties: {
+          claims_mapping: {
+            type: 'object',
+            description: 'Custom configuration for claims in access tokens.',
+            properties: {
+              custom_claims: {
+                type: 'array',
+                description:
+                  'Custom claims to emit in anonymous-session access tokens. Each rule maps a value from the anonymous-session context onto a named access-token claim.',
+                items: {
+                  type: 'object',
+                  properties: {
+                    name: {
+                      type: 'string',
+                      description: 'The access-token claim name to emit.',
+                    },
+                    expression: {
+                      type: 'string',
+                      description:
+                        'Restricted dot-path expression read from the anonymous-session context.',
+                    },
+                  },
+                  required: ['name', 'expression'],
+                },
+              },
+            },
+          },
+        },
       },
       client_id: {
         type: 'string',
