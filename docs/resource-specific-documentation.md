@@ -1518,6 +1518,10 @@ Two boolean fields control member management behaviour for the My Organization A
 
 **FF gating behaviour:** When the feature flag is off, the API strips both fields from `GET` responses (export produces no fields) and returns `403 UNSUPPORTED_OPERATION` if either field is included in a `PATCH`/`POST` payload — even when set to `false`. The deploy-cli surfaces this error to the user.
 
+**Export behaviour for `false` values:** The API omits these fields from `GET` responses when their value is `false`. As a result, exported YAML will only contain `enforce_permission_ceiling` or `enforce_self_assignment_restriction` when they are `true`. This is expected — a missing field in the export means the value is `false`.
+
+**Omitting a field resets it to `false`:** If you include `my_organization_configuration` in your config but omit one of the enforce fields, the API treats the omitted field as `false` on the next deploy. To preserve an existing `true` value you must explicitly include the field.
+
 ```yaml
 clients:
   - name: 'My Organization App'
@@ -1530,7 +1534,7 @@ clients:
       enforce_self_assignment_restriction: true
 ```
 
-To clear the fields, omit them or set them to `false`:
+To disable the restrictions, either omit the fields or set them explicitly to `false`:
 
 ```yaml
 clients:
