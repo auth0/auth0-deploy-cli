@@ -1,4 +1,3 @@
-import { JSONApiResponse } from 'auth0';
 import ValidationError from '../../validationError';
 
 import {
@@ -28,6 +27,22 @@ export function order(value) {
     descriptor.value.order = numericValue;
     return descriptor;
   };
+}
+
+/**
+ * node-auth0 v7 removed the exported `JSONApiResponse` class, so we can no
+ * longer use `instanceof` to tell an SDK response envelope apart from a plain
+ * asset. Duck-type the `ApiResponse<T>` shape ({ data, status, headers })
+ * instead.
+ */
+function isApiResponseEnvelope(item: unknown): item is { data: Asset } {
+  return (
+    typeof item === 'object' &&
+    item !== null &&
+    'data' in item &&
+    'status' in item &&
+    'headers' in item
+  );
 }
 
 // Retry configuration constants
@@ -231,19 +246,13 @@ export default class APIHandler {
   }
 
   didCreate(item: Asset): void {
-    if (typeof item === 'object' && item instanceof JSONApiResponse) {
-      log.info(`Created [${this.type}]: ${this.objString(item?.data)}`);
-    } else {
-      log.info(`Created [${this.type}]: ${this.objString(item)}`);
-    }
+    const payload = isApiResponseEnvelope(item) ? item.data : item;
+    log.info(`Created [${this.type}]: ${this.objString(payload)}`);
   }
 
   didUpdate(item: Asset): void {
-    if (typeof item === 'object' && item instanceof JSONApiResponse) {
-      log.info(`Updated [${this.type}]: ${this.objString(item?.data)}`);
-    } else {
-      log.info(`Updated [${this.type}]: ${this.objString(item)}`);
-    }
+    const payload = isApiResponseEnvelope(item) ? item.data : item;
+    log.info(`Updated [${this.type}]: ${this.objString(payload)}`);
   }
 
   objString(item: Asset): string {
