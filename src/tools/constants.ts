@@ -72,6 +72,7 @@ const constants = {
     'custom-token-exchange',
     'login-post-identifier',
     'signup-post-identifier',
+    'post-credential-validation',
   ],
   EMAIL_TEMPLATES_DIRECTORY: 'emails',
   EMAIL_VERIFY,

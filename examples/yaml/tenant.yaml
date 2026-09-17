@@ -410,6 +410,7 @@ triggers:
   send-phone-message: []
   login-post-identifier: []
   signup-post-identifier: []
+  post-credential-validation: []
 
 prompts:
   customText:
