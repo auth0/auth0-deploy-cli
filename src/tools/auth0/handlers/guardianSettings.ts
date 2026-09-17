@@ -87,7 +87,9 @@ export default class GuardianSettingsHandler extends DefaultHandler {
     }
 
     try {
-      await this.client.guardian.set(guardianSettings as Management.SetGuardianSettingsRequestContent);
+      await this.client.guardian.set(
+        guardianSettings as Management.SetGuardianSettingsRequestContent
+      );
     } catch (err) {
       if (isFeatureUnavailableError(err) || isForbiddenFeatureError(err, this.type)) {
         // Feature is deprecated/disabled on this tenant; warn and skip instead of failing the import.
