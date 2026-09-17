@@ -1,7 +1,7 @@
 import { Management } from 'auth0';
 import DefaultHandler from './default';
 import { Asset, Assets } from '../../../types';
-import { isDryRun, isForbiddenFeatureError } from '../../utils';
+import { isDryRun, isFeatureUnavailableError, isForbiddenFeatureError } from '../../utils';
 
 export const schema = {
   type: 'object',
@@ -16,15 +16,6 @@ export const schema = {
     },
   },
   additionalProperties: false,
-};
-
-const isFeatureUnavailableError = (err): boolean => {
-  if (err.statusCode === 404) {
-    // Older Management API version where the endpoint is not available.
-    return true;
-  }
-  // 403s (feature explicitly disabled) are handled by isForbiddenFeatureError.
-  return false;
 };
 
 export default class GuardianPhoneFactorSettingsHandler extends DefaultHandler {
@@ -80,7 +71,8 @@ export default class GuardianPhoneFactorSettingsHandler extends DefaultHandler {
       );
     } catch (err) {
       if (isFeatureUnavailableError(err) || isForbiddenFeatureError(err, this.type)) {
-        // Feature is deprecated/disabled on this tenant; warn and skip instead of failing the import.
+        // Feature is unavailable (404) or disabled (403) on this tenant; skip instead of failing
+        // the import. The 403 path logs a warning via isForbiddenFeatureError; the 404 path is silent.
         return;
       }
       throw err;

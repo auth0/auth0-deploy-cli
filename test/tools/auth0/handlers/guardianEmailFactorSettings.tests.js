@@ -154,5 +154,57 @@ describe('#guardianEmailFactorSettings handler', () => {
       ]);
       expect(handler.updated).to.equal(0);
     });
+
+    it('should not write when in dry-run mode and there are no changes', async () => {
+      const auth0 = {
+        guardian: {
+          factors: {
+            email: {
+              get: () => Promise.resolve({ otp_length: 6, otp_expiration_time: 300 }),
+              set: () => Promise.reject(new Error('set() should not be called during dry-run')),
+            },
+          },
+        },
+      };
+
+      const config = (key) => (key === 'AUTH0_DRY_RUN' ? true : null);
+      const handler = new guardianEmailFactorSettings.default({ client: auth0, config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        { guardianEmailFactorSettings: { otp_length: 6, otp_expiration_time: 300 } },
+      ]);
+      expect(handler.updated).to.equal(0);
+    });
+
+    it('should rethrow errors that are not feature-unavailable/forbidden', async () => {
+      const auth0 = {
+        guardian: {
+          factors: {
+            email: {
+              set: () => {
+                const err = new Error('Internal Server Error');
+                err.statusCode = 500;
+                return Promise.reject(err);
+              },
+            },
+          },
+        },
+      };
+
+      const handler = new guardianEmailFactorSettings.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      try {
+        await stageFn.apply(handler, [
+          { guardianEmailFactorSettings: { otp_length: 6, otp_expiration_time: 300 } },
+        ]);
+        throw new Error('Expected processChanges to throw');
+      } catch (error) {
+        expect(error).to.be.an.instanceOf(Error);
+        expect(error.statusCode).to.equal(500);
+      }
+      expect(handler.updated).to.equal(0);
+    });
   });
 });

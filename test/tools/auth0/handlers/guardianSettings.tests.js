@@ -129,5 +129,45 @@ describe('#guardianSettings handler', () => {
       await stageFn.apply(handler, [{ guardianSettings: { ...SETTINGS } }]);
       expect(handler.updated).to.equal(0);
     });
+
+    it('should not write when in dry-run mode and there are no changes', async () => {
+      const auth0 = {
+        guardian: {
+          get: () => Promise.resolve({ ...SETTINGS }),
+          set: () => Promise.reject(new Error('set() should not be called during dry-run')),
+        },
+      };
+
+      const config = (key) => (key === 'AUTH0_DRY_RUN' ? true : null);
+      const handler = new guardianSettings.default({ client: auth0, config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ guardianSettings: { ...SETTINGS } }]);
+      expect(handler.updated).to.equal(0);
+    });
+
+    it('should rethrow errors that are not feature-unavailable/forbidden', async () => {
+      const auth0 = {
+        guardian: {
+          set: () => {
+            const err = new Error('Internal Server Error');
+            err.statusCode = 500;
+            return Promise.reject(err);
+          },
+        },
+      };
+
+      const handler = new guardianSettings.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      try {
+        await stageFn.apply(handler, [{ guardianSettings: { ...SETTINGS } }]);
+        throw new Error('Expected processChanges to throw');
+      } catch (error) {
+        expect(error).to.be.an.instanceOf(Error);
+        expect(error.statusCode).to.equal(500);
+      }
+      expect(handler.updated).to.equal(0);
+    });
   });
 });
