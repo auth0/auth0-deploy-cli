@@ -93,7 +93,8 @@ export const schema = {
       },
       token_lifetime_for_anonymous_access_tokens: {
         type: 'number',
-        description: 'Expiration value (in seconds) for anonymous-session access tokens issued for this API.',
+        description:
+          'Expiration value (in seconds) for anonymous-session access tokens issued for this API.',
       },
       access_token: {
         type: ['object', 'null'],
